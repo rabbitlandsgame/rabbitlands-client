@@ -333,7 +333,7 @@ func _build() -> void:
 	var adventures := Button.new()
 	adventures.name = "PracticeAdventures"
 	adventures.text = "Ask about watch work"
-	adventures.tooltip_text = "Speak with Ilyon, Nesh, or Hemmen. A nearby conversation opens here; otherwise their post is marked on the map."
+	adventures.tooltip_text = "Speak with Ilyon, Nash, or Hemmen. A nearby conversation opens here; otherwise their post is marked on the map."
 	adventures.pressed.connect(func():
 		if AppState.authenticated:
 			Network.send_chat("#tutorial lines")

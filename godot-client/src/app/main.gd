@@ -4415,6 +4415,8 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_counters()
 		&"actor_titles":
 			_sync_actor_titles()
+		&"quest_offers":
+			_sync_quest_offers()
 		&"actor_occupations":
 			_sync_actor_occupations()
 			# The dialogue header names what its person does, and the packet
@@ -5009,6 +5011,7 @@ func _spawn_actor(id: Variant) -> void:
 	node.set_nameplate_visible(_nameplate_visible_for(int(id)))
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
+	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	if int(id) == AppState.local_actor_id:
 		_sync_harvest_sparkle()
@@ -5019,6 +5022,12 @@ func _spawn_actor(id: Variant) -> void:
 ## name, which packs a colour byte, the name and the guild tag into one string
 ## that the decoder already unpicks by hand. So it is applied here, and on
 ## spawn, for whoever is on screen when it lands.
+func _sync_quest_offers() -> void:
+	for id: Variant in actor_nodes:
+		var node := actor_nodes[id] as ReplicatedActor3D
+		if is_instance_valid(node):
+			node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
+
 func _sync_actor_titles() -> void:
 	for id: Variant in actor_nodes:
 		var node_value: Variant = actor_nodes[id]

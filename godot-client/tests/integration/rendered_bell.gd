@@ -42,7 +42,7 @@ func go(tile: Vector2i) -> void:
 
 func nesh(response: int) -> void:
 	await go(Vector2i(68,76))
-	var id:=actor_id("Wayfinder Nesh")
+	var id:=actor_id("Nash")
 	net.touch_actor(id)
 	await create_timer(.4).timeout
 	main._on_dialogue_option(id,response)

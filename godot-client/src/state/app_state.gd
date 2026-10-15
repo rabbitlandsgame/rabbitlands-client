@@ -153,6 +153,8 @@ var actor_titles: Dictionary = {}
 ## actor is removed, and a seamless land crossing that keeps the actors keeps
 ## their rows too.
 var actor_occupations: Dictionary = {}
+## NPCs with a new quest this player can accept, stated by the server.
+var quest_offer_actors: Dictionary = {}
 ## True lifetime experience per skill, keyed by skill name, and what it has
 ## bought past the level ceiling. Held separately from `stats` because the
 ## legacy stats packet carries the same numbers through a 32-bit window and
@@ -436,6 +438,7 @@ func _on_connection_state_changed(value: String) -> void:
 		achievements_catalog = {"worn_title": "", "entries": []}
 		actor_titles.clear()
 		actor_occupations.clear()
+		quest_offer_actors.clear()
 		experience64.clear()
 		# Per profile rather than per character, but a different server may
 		# size its creatures differently, so it is cleared with the rest.
@@ -617,6 +620,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				var removed_actor_id: int = int(removed_actor_value)
 				actors.erase(removed_actor_id)
 				actor_occupations.erase(removed_actor_id)
+				quest_offer_actors.erase(removed_actor_id)
 				if selected_actor_id == removed_actor_id:
 					selected_actor_id = -1
 					state_changed.emit(&"selection")
@@ -625,6 +629,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			Network.coordinate_route_cancelled.emit()
 			actors.clear()
 			actor_occupations.clear()
+			quest_offer_actors.clear()
 			state_changed.emit(&"actors")
 		"actor_commands":
 			for raw_command_event: Variant in event.commands:
@@ -1159,6 +1164,11 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				else:
 					actor_occupations[occupied_id] = occupation
 			state_changed.emit(&"actor_occupations")
+		"quest_offers":
+			quest_offer_actors.clear()
+			for offered_id: int in event.actor_ids:
+				quest_offer_actors[offered_id] = true
+			state_changed.emit(&"quest_offers")
 		"map_digest":
 			# Which package the server was built against. Recorded rather than
 			# acted on: the map cache is keyed on the package this machine

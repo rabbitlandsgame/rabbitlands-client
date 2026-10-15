@@ -62,7 +62,7 @@ func configure(owner_ui: Control) -> void:
 	skip.pressed.connect(func(): Network.tutorial_ui(2))
 	buttons.add_child(skip)
 	help = Button.new()
-	help.text = "Ask Nesh"
+	help.text = "Ask Nash"
 	help.pressed.connect(func(): Network.tutorial_ui(6))
 	buttons.add_child(help)
 	hide()
@@ -78,12 +78,12 @@ func _refresh() -> void:
 	var road := str(state.get("tutorial", "")) == "followup"
 	var sky := str(state.get("tutorial", "")) == "borrowed_sky"
 	var second_bell := str(state.get("tutorial", "")) == "second_bell"
-	# Signed Ashore is guided by Wayfinder Nesh, so the card offers "Ask Nesh";
+	# Signed Ashore is guided by Nash, so the card offers "Ask Nash";
 	# it runs on the live isle rather than a practice copy, so leaving is a skip.
 	var signed_ashore := str(state.get("tutorial", "")) == "signed_ashore"
 	var watchpost := str(state.get("tutorial", "")) == "watchpost"
 	help.visible = second_bell or sky or road or signed_ashore or watchpost
-	help.text = "Quest help" if watchpost else "Ask " + str(state.get("guide", "Guide")) if road else "Ask Sera" if sky else "Ask Nesh"
+	help.text = "Quest help" if watchpost else "Ask " + str(state.get("guide", "Guide")) if road else "Ask Sera" if sky else "Ask Nash"
 	skip.text = "Leave tutorial…" if second_bell or sky or road else "Skip tutorial…"
 	chapter.text = ("HELP FOR THE WATCHPOST" if watchpost else str(state.get("adventure", "PRACTICE")).to_upper() if road else "THE BORROWED SKY" if sky else "THE SECOND BELL" if second_bell else str(state.get("chapter", "SIGNED ASHORE")) if signed_ashore else "THE LAST LANTERN") + "  ·  %d / %d" % [int(state.get("stage", 1)), int(state.get("total", 28))]
 	heading.text = str(state.get("title", ""))

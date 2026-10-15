@@ -33,6 +33,7 @@ func _init() -> void:
 		"borrowed_sky_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"followup_tutorials_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"signed_ashore_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
+		"landfall_underground_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
 		"tutorial_rewards_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"spell_ring_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"magic_book_v2": EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE,
@@ -58,6 +59,7 @@ func _init() -> void:
 		"achievements_catalog_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACHIEVEMENTS_CATALOG,
 		"actor_titles_v1": EloriaProtocol.ServerMessage.ELORIA_ACTOR_TITLES,
+		"quest_offers_v1": EloriaProtocol.ServerMessage.ELORIA_QUEST_OFFERS,
 		"actor_occupations_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACTOR_OCCUPATIONS,
 		"adjacent_actors_v1": EloriaProtocol.ServerMessage.ELORIA_ADJACENT_MAPS,
@@ -145,6 +147,7 @@ func _init() -> void:
 		# One NPC on the map, with what they do.
 		EloriaProtocol.ServerMessage.ELORIA_ACTOR_OCCUPATIONS:
 			"01005b00" + "47726f76652d4b6565706572" + "00",
+		EloriaProtocol.ServerMessage.ELORIA_QUEST_OFFERS: "01005b00",
 		EloriaProtocol.ServerMessage.ELORIA_EXPERIENCE_STATE: "0000",
 		# No creature larger than one tile in this profile: a real
 		# answer, and the one an unchanged content pack still gives.
@@ -183,7 +186,7 @@ func _init() -> void:
 		"spell_ring_v1": '{"version":1,"active":false,"ring_training":true}'.to_utf8_buffer().hex_encode(),
 		"signed_ashore_v1": ('{"version":1,"active":true,"tutorial":"signed_ashore",'
 			+ '"chapter":"SIGNED ASHORE","stage":1,"total":10,"scene":1,"key":"signed_in",'
-			+ '"title":"Follow Nesh\'s lantern","hint":"Click Wayfinder Nesh to talk.",'
+			+ '"title":"Follow Nash\'s lantern","hint":"Click Nash to talk.",'
 			+ '"control":"world","item":"","map":"landfall","target_id":"wayfinder_nesh",'
 			+ '"target":[142,225],"count":0,"required":1,'
 			+ '"flags":{"grove":false,"temple":false,"gate":false,"light":false}}'

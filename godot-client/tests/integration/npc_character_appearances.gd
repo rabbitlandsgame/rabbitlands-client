@@ -6,7 +6,7 @@ extends SceneTree
 const SHOWCASE := ["Aven", "Mara Venn", "Sella", "Brannic", "Rowan Vale", "Ilyra",
 	"Captain Tor", "Pell", "Tamsin Quill", "Vestra", "Lens-Master Corvine Ast",
 	"Orrery Keeper Sabel Roon", "Quarry Foreman Hesk", "Salvage Mistress Gero Lund",
-	"Sunken Court Diver Teth-Sa", "Gate Warden Ilyon", "Wayfinder Nesh", "Register Clerk Hemmen",
+	"Sunken Court Diver Teth-Sa", "Gate Warden Ilyon", "Nash", "Register Clerk Hemmen",
 	"Bettany Orl", "Banner-Rider Ashaia", "Snowline Ranger Kestrel Vane", "Ione Brass",
 	"Caravan Doctor Nesrin", "Motherroot Voice Sillow", "Canopy Rigger",
 	"Bog-Iron Smith Nella Doust", "Captain Iven", "Tessara", "Hatchery Keeper Nuu-Sesh",

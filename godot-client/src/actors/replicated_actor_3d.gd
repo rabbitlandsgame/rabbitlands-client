@@ -272,6 +272,8 @@ var _title_line: Label3D
 ## without its brackets. Built on first use, like the title line.
 var _occupation_line: Label3D
 var _occupation := ""
+var _quest_marker: Label3D
+var _quest_marker_tween: Tween
 var _speech_bubble: Label3D
 var _speech_bubble_expiry_msec := 0
 var _health_bar_background: MeshInstance3D
@@ -1283,6 +1285,9 @@ func overhead_fade() -> float:
 	return _overhead_fade
 
 func _refresh_overhead() -> void:
+	if is_instance_valid(_quest_marker):
+		# Quest offers remain visible when nameplates are disabled or crowded.
+		_quest_marker.visible = _drawn and _overhead_fade > 0.0 and not _quest_marker.text.is_empty()
 	if is_instance_valid(_nameplate):
 		_nameplate.visible = _overhead_shown()
 		_fade_label(_nameplate)
@@ -1340,6 +1345,37 @@ func set_title(title: String) -> void:
 ## piece, so a second line inside the nameplate would take the name's colour
 ## and size. It fades, hides and declutters with the rest of the block, and
 ## the translucent backing grows to hold it.
+func set_quest_available(available: bool) -> void:
+	if not available:
+		if is_instance_valid(_quest_marker):
+			_quest_marker.text = ""
+			_quest_marker.hide()
+		if is_instance_valid(_quest_marker_tween):
+			_quest_marker_tween.kill()
+		return
+	if is_instance_valid(_quest_marker) and not _quest_marker.text.is_empty():
+		return
+	if not is_instance_valid(_quest_marker):
+		_quest_marker = Label3D.new()
+		_quest_marker.name = "QuestOfferMarker"
+		_quest_marker.position.y = _nameplate.position.y if is_instance_valid(_nameplate) else NAMEPLATE_HEIGHT
+		_quest_marker.offset = Vector2(0.0, 36.0)
+		_quest_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_quest_marker.no_depth_test = true
+		_quest_marker.fixed_size = true
+		_quest_marker.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		WORLD_LABEL_STYLE.apply(_quest_marker, 30, OVERHEAD_PIXEL, 2)
+		_quest_marker.outline_modulate = Color(0.28, 0.13, 0.01)
+		add_child(_quest_marker)
+	_quest_marker.text = "!"
+	_quest_marker.modulate = Color(1.0, 0.73, 0.13)
+	_quest_marker_tween = create_tween().set_loops()
+	_quest_marker_tween.tween_property(_quest_marker, "modulate", Color(1.5, 1.25, 0.5), 0.8)
+	_quest_marker_tween.parallel().tween_property(_quest_marker, "offset:y", 42.0 * WORLD_LABEL_STYLE.RASTER_SCALE, 0.8).set_trans(Tween.TRANS_SINE)
+	_quest_marker_tween.tween_property(_quest_marker, "modulate", Color(1.0, 0.73, 0.13), 0.8)
+	_quest_marker_tween.parallel().tween_property(_quest_marker, "offset:y", 36.0 * WORLD_LABEL_STYLE.RASTER_SCALE, 0.8).set_trans(Tween.TRANS_SINE)
+	_refresh_overhead()
+
 func set_occupation(occupation: String) -> void:
 	var text: String = occupation.strip_edges()
 	if text == _occupation and (text.is_empty() or is_instance_valid(_occupation_line)):
@@ -1460,7 +1496,7 @@ func _lift_overhead(factor: float) -> void:
 	# One height for the lot: the bar, the numbers and the bubble sit above or
 	# below the name inside the block rather than at world heights of their
 	# own, so the gaps between them hold their size along with the text.
-	for node_name: String in ["Nameplate", "TitleLine", "OccupationLine",
+	for node_name: String in ["Nameplate", "TitleLine", "OccupationLine", "QuestOfferMarker",
 			"HealthBarBackground", "HealthBarFill", "HealthNumbers", "SpeechBubble",
 			"OverheadBackground"]:
 		var node := get_node_or_null(node_name) as Node3D
