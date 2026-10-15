@@ -1,0 +1,68 @@
+{
+  "server": {
+    "passed": 1803,
+    "subtestsPassed": 546
+  },
+  "client": {
+    "passed": 194,
+    "preExistingFailures": 88,
+    "subtestsPassed": 9284,
+    "failureIdentitiesUnchanged": true
+  },
+  "gltf": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "coplanarOverlapSquareMetres": 0,
+  "grounding": {
+    "walkableTiles": 3686,
+    "groundingMisses": 0,
+    "coverage": "Every walkable server tile checked against the exported GLB"
+  },
+  "runtime": {
+    "errors": 0,
+    "warnings": [
+      "GROUNDING_RAY_MISS"
+    ],
+    "warningContext": "The sampler includes the blocked void around the interior rooms."
+  },
+  "determinism": {
+    "world.glb": {
+      "identical": true,
+      "sha256": "350025a3ddbf0be220d542f9f7f1a0d69fbc42e23e3d219aa36e41c0d872c01f"
+    },
+    "world.json": {
+      "identical": true,
+      "sha256": "b14f010e9e6a6c7be3bbecdaec1339cfa3aada05c824502f1e4d6e21a9ef06cb"
+    },
+    "collision.bin": {
+      "identical": true,
+      "sha256": "7483c1baea53740a441632bd34739010c181335ef3977086b032d3b767562df3"
+    },
+    "server-collision.bin": {
+      "identical": true,
+      "sha256": "50cd73d5455b5af7a227b6dd5b6b2fcb1955e8d0fde6f1deb7d57bb4758d1f74"
+    }
+  },
+  "performance": {
+    "nodes": 288,
+    "meshes": 258,
+    "materials": 14,
+    "uniqueTriangles": 79200,
+    "uniqueVertices": 68655,
+    "glbBytes": 6661808
+  },
+  "captures": {
+    "count": 20,
+    "renderingMethod": "gl_compatibility",
+    "driver": "opengl3",
+    "environment": "manifest",
+    "declaredPointLights": 46
+  },
+  "layoutSync": {
+    "secondRunChangedFiles": 0,
+    "publishedRulesAndRosterPreserved": true,
+    "otherRoutesUnchanged": true
+  },
+  "cpuAffinityMask": 15
+}

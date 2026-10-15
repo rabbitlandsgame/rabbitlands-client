@@ -1,0 +1,342 @@
+[gd_scene load_steps=42 format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/map_authoring_pilot.gd" id="1_pilot"]
+[ext_resource type="Resource" path="res://src/dev/map_authoring_pilot/style/last_lantern_style.tres" id="2_style"]
+[ext_resource type="PackedScene" path="res://src/dev/map_authoring_pilot/scenery/last_lantern_scenery.tscn" id="3_scenery"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/terrain_height_handle.gd" id="4_height"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/bridge_control.gd" id="5_bridge"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/width_path.gd" id="6_width"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="7_surface"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/building_control.gd" id="8_building"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/ground_control.gd" id="9_ground"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png" id="10_ground_color"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-normal.png" id="11_ground_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-orm.png" id="12_ground_orm"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-basecolor.png" id="13_timber_color"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-normal.png" id="14_timber_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-orm.png" id="15_timber_orm"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-basecolor.png" id="16_stone_color"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-normal.png" id="17_stone_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-orm.png" id="18_stone_orm"]
+[ext_resource type="Shader" path="res://src/dev/map_authoring_pilot/style/worn_path.gdshader" id="19_path_shader"]
+[ext_resource type="Shader" path="res://src/dev/map_authoring_pilot/style/water.gdshader" id="20_water_shader"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/ground_region.gd" id="21_region"]
+
+[sub_resource type="ORMMaterial3D" id="Material_terrain"]
+albedo_color = Color(0.78, 0.86, 0.72, 1)
+albedo_texture = ExtResource("10_ground_color")
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.75
+normal_texture = ExtResource("11_ground_normal")
+orm_texture = ExtResource("12_ground_orm")
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="ShaderMaterial" id="Material_road"]
+render_priority = 1
+shader = ExtResource("19_path_shader")
+shader_parameter/ground_albedo = ExtResource("10_ground_color")
+shader_parameter/ground_normal = ExtResource("11_ground_normal")
+shader_parameter/ground_orm = ExtResource("12_ground_orm")
+shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
+shader_parameter/texture_scale = 1.0
+shader_parameter/roughness_multiplier = 1.0
+shader_parameter/normal_strength = 0.72
+shader_parameter/edge_feather = 0.16
+
+[sub_resource type="ORMMaterial3D" id="Material_timber"]
+albedo_color = Color(0.65, 0.64, 0.59, 1)
+albedo_texture = ExtResource("13_timber_color")
+roughness = 0.86
+normal_enabled = true
+normal_scale = 0.8
+normal_texture = ExtResource("14_timber_normal")
+orm_texture = ExtResource("15_timber_orm")
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="ORMMaterial3D" id="Material_stone"]
+albedo_color = Color(0.48, 0.56, 0.56, 1)
+albedo_texture = ExtResource("16_stone_color")
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.72
+normal_texture = ExtResource("17_stone_normal")
+orm_texture = ExtResource("18_stone_orm")
+uv1_scale = Vector3(0.8, 0.8, 0.8)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Material_slate"]
+albedo_color = Color(0.095, 0.17, 0.2, 1)
+roughness = 0.55
+uv1_scale = Vector3(0.8, 0.8, 0.8)
+uv1_triplanar = true
+uv1_world_triplanar = true
+cull_mode = 2
+
+[sub_resource type="ShaderMaterial" id="Material_water"]
+render_priority = 0
+shader = ExtResource("20_water_shader")
+shader_parameter/deep_color = Color(0.045, 0.15, 0.2, 0.9)
+shader_parameter/shallow_color = Color(0.12, 0.29, 0.28, 0.86)
+shader_parameter/foam_color = Color(0.38, 0.56, 0.54, 1)
+shader_parameter/river_half_width = 3.0
+
+[sub_resource type="Resource" id="Surface_ground"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+texture_preset = "Grass"
+source_material = SubResource("Material_terrain")
+
+[sub_resource type="ORMMaterial3D" id="Material_soil_region"]
+albedo_color = Color(0.43, 0.3, 0.18, 1)
+albedo_texture = ExtResource("10_ground_color")
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.72
+normal_texture = ExtResource("11_ground_normal")
+orm_texture = ExtResource("12_ground_orm")
+uv1_scale = Vector3(0.24, 0.24, 0.24)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="Resource" id="Surface_soil_region"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+texture_preset = "Soil"
+source_material = SubResource("Material_soil_region")
+
+[sub_resource type="ORMMaterial3D" id="Material_sand_region"]
+albedo_color = Color(0.86, 0.72, 0.47, 1)
+albedo_texture = ExtResource("10_ground_color")
+roughness = 0.96
+normal_enabled = true
+normal_scale = 0.48
+normal_texture = ExtResource("11_ground_normal")
+orm_texture = ExtResource("12_ground_orm")
+uv1_scale = Vector3(0.2, 0.2, 0.2)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="Resource" id="Surface_sand_region"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+texture_preset = "Sand"
+source_material = SubResource("Material_sand_region")
+
+[sub_resource type="Resource" id="Surface_road"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+material_mode = 1
+texture_preset = "Worn earth"
+source_material = SubResource("Material_road")
+
+[sub_resource type="Resource" id="Surface_river"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+source_material = SubResource("Material_water")
+
+[sub_resource type="Resource" id="Surface_bridge_deck"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+texture_preset = "Timber"
+source_material = SubResource("Material_timber")
+
+[sub_resource type="Resource" id="Surface_bridge_support"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+texture_preset = "Stone"
+source_material = SubResource("Material_stone")
+
+[sub_resource type="Resource" id="Surface_building_wall"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+texture_preset = "Timber"
+source_material = SubResource("Material_timber")
+
+[sub_resource type="Resource" id="Surface_building_roof"]
+resource_local_to_scene = true
+script = ExtResource("7_surface")
+texture_preset = "Slate"
+source_material = SubResource("Material_slate")
+
+[sub_resource type="Curve3D" id="Curve3D_road"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -20, 0, -8, 0, 0, 0, 0, 0, 0, -7, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 7),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
+}
+point_count = 4
+
+[sub_resource type="Curve3D" id="Curve3D_river"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, -8, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 24),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
+}
+point_count = 4
+
+[sub_resource type="Environment" id="Environment_pilot"]
+background_mode = 1
+background_color = Color(0.24, 0.32, 0.39, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.48, 0.61, 0.72, 1)
+ambient_light_energy = 0.58
+tonemap_mode = 2
+
+[node name="MapAuthoringPilot" type="Node3D"]
+script = ExtResource("1_pilot")
+visual_style = ExtResource("2_style")
+
+[node name="AuthoredControls" type="Node3D" parent="."]
+
+[node name="Ground" type="Node3D" parent="AuthoredControls"]
+script = ExtResource("9_ground")
+base_surface = SubResource("Surface_ground")
+
+[node name="Regions" type="Node3D" parent="AuthoredControls/Ground"]
+
+[node name="SoilArea" type="Marker3D" parent="AuthoredControls/Ground/Regions"]
+position = Vector3(-12, 0, 12)
+gizmo_extents = 0.7
+script = ExtResource("21_region")
+size = Vector2(14, 10)
+surface = SubResource("Surface_soil_region")
+
+[node name="SandArea" type="Marker3D" parent="AuthoredControls/Ground/Regions"]
+position = Vector3(12, 0, 10)
+rotation = Vector3(0, 0.349066, 0)
+gizmo_extents = 0.7
+script = ExtResource("21_region")
+shape = 1
+size = Vector2(12, 8)
+surface = SubResource("Surface_sand_region")
+
+[node name="Road" type="Path3D" parent="AuthoredControls"]
+curve = SubResource("Curve3D_road")
+script = ExtResource("6_width")
+surface = SubResource("Surface_road")
+
+[node name="River" type="Path3D" parent="AuthoredControls"]
+curve = SubResource("Curve3D_river")
+script = ExtResource("6_width")
+default_width = 6.0
+surface = SubResource("Surface_river")
+
+[node name="TerrainHeights" type="Node3D" parent="AuthoredControls"]
+
+[node name="WestHeight" type="Marker3D" parent="AuthoredControls/TerrainHeights"]
+position = Vector3(-14, 1.8, -14)
+gizmo_extents = 1.5
+script = ExtResource("4_height")
+neutral_y = 1.8
+
+[node name="EastHeight" type="Marker3D" parent="AuthoredControls/TerrainHeights"]
+position = Vector3(14, 2, -12)
+gizmo_extents = 1.5
+script = ExtResource("4_height")
+neutral_y = 2.0
+
+[node name="NorthHeight" type="Marker3D" parent="AuthoredControls/TerrainHeights"]
+position = Vector3(14, 2, 14)
+gizmo_extents = 1.5
+script = ExtResource("4_height")
+neutral_y = 2.0
+
+[node name="Bridges" type="Node3D" parent="AuthoredControls"]
+
+[node name="Bridge" type="Node3D" parent="AuthoredControls/Bridges"]
+script = ExtResource("5_bridge")
+deck_surface = SubResource("Surface_bridge_deck")
+support_surface = SubResource("Surface_bridge_support")
+
+[node name="Start" type="Marker3D" parent="AuthoredControls/Bridges/Bridge"]
+position = Vector3(-4, 0, 0)
+gizmo_extents = 1.5
+
+[node name="End" type="Marker3D" parent="AuthoredControls/Bridges/Bridge"]
+position = Vector3(4, 0, 0)
+gizmo_extents = 1.5
+
+[node name="Building" type="Node3D" parent="AuthoredControls"]
+position = Vector3(20, 0, 7)
+script = ExtResource("8_building")
+wall_surface = SubResource("Surface_building_wall")
+roof_surface = SubResource("Surface_building_roof")
+
+[node name="Entrance" type="Marker3D" parent="AuthoredControls/Building"]
+position = Vector3(-3.7, 0, 0)
+gizmo_extents = 1.5
+
+[node name="Spawn" type="Marker3D" parent="AuthoredControls"]
+position = Vector3(-20, 0, -8)
+gizmo_extents = 1.5
+
+[node name="AuthoredScenery" parent="." instance=ExtResource("3_scenery")]
+
+[editable path="AuthoredScenery"]
+
+[node name="AuthoredAssets" type="Node3D" parent="."]
+
+[node name="GeneratedPreview" type="Node3D" parent="."]
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-49, -34, 0)
+light_color = Color(0.75, 0.83, 0.92, 1)
+light_energy = 0.72
+shadow_enabled = true
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_pilot")
+
+[node name="Camera" type="Camera3D" parent="."]
+position = Vector3(-38, 38, 32)
+rotation_degrees = Vector3(-38, -50, 0)
+current = true
+projection = 1
+size = 58.0
+far = 300.0
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Margin" type="MarginContainer" parent="UI"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 590.0
+offset_bottom = 154.0
+
+[node name="Panel" type="PanelContainer" parent="UI/Margin"]
+
+[node name="VBox" type="VBoxContainer" parent="UI/Margin/Panel"]
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="UI/Margin/Panel/VBox"]
+text = "MAP AUTHORING PILOT — local preview"
+
+[node name="Status" type="Label" parent="UI/Margin/Panel/VBox"]
+text = "Preparing shared walk grid…"
+
+[node name="Buttons" type="HBoxContainer" parent="UI/Margin/Panel/VBox"]
+
+[node name="Start" type="Button" parent="UI/Margin/Panel/VBox/Buttons"]
+text = "Start walk"
+
+[node name="Reset" type="Button" parent="UI/Margin/Panel/VBox/Buttons"]
+text = "Reset"
+
+[node name="Overlay" type="Button" parent="UI/Margin/Panel/VBox/Buttons"]
+text = "Toggle walkability"
+
+[node name="Notice" type="Label" parent="UI/Margin/Panel/VBox"]
+text = "Green = reachable · Red = blocked or unreachable · Offline sample"

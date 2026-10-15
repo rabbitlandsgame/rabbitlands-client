@@ -1,0 +1,330 @@
+{
+ "schema": "eloria-continent-v2-colour-grade-v1",
+ "tool": "work-output/lv/tools/regrade_ground.py + apply_regrade.py",
+ "pass": "lv-2026-10-14",
+ "about": "Ground-colour grade over the frozen Meshy vertex colours. The frozen crop base-colors.rgba8 is unchanged; the scene's Terrain reads this graded copy.",
+ "parentFrozenCrop": {
+  "path": "base-colors.rgba8",
+  "sha256": "cb965db38924df1ed28e5a4ccbde1835b45c1ed7d40309578989f136db52eb16"
+ },
+ "graded": {
+  "path": "base-colors-graded.rgba8",
+  "sha256": "2f2111e989d1dba4b667e3d742a2c36f6417321a78ce8024abf282cbbd3e83ba",
+  "changedVertices": 36044
+ },
+ "gradeOnly": null,
+ "targets": {
+  "_about": "Regrade targets (display sRGB 0..1). ground/accent from the 2026-10-14 diversity proposal (judgement); rock = per-map rock tint (null = unchanged). displayReference = today's typical display colour of vegetated ground (minimap mean hue 65, sat .43, val .62). Ratios lin(target)/lin(reference) are applied to the base vertex colours. canopySmooth = how much of the Meshy painted-canopy speckle to low-pass away (0 keep, 1 remove) where trees are cleared. ecotone = neutral meadow margin that border zones shift toward, so two strong palettes meet through grassland rather than a muddy mix.",
+  "displayReference": [
+   0.59,
+   0.62,
+   0.35
+  ],
+  "rockReference": [
+   0.55,
+   0.55,
+   0.5
+  ],
+  "featherMetres": 130,
+  "accentNoiseMetres": 18,
+  "strength": 0.9,
+  "maps": {
+   "landfall": {
+    "biome": "palace garden town",
+    "ground": [
+     0.47,
+     0.63,
+     0.31
+    ],
+    "accent": [
+     0.86,
+     0.83,
+     0.74
+    ],
+    "accentShare": 0.22,
+    "rock": null,
+    "canopySmooth": 0.2
+   },
+   "warrenmead": {
+    "biome": "chalk downs & warrens",
+    "ground": [
+     0.62,
+     0.75,
+     0.38
+    ],
+    "accent": [
+     0.92,
+     0.91,
+     0.84
+    ],
+    "accentShare": 0.18,
+    "rock": [
+     0.86,
+     0.85,
+     0.78
+    ],
+    "canopySmooth": 0.75
+   },
+   "twinbrook": {
+    "biome": "mossy brookwood",
+    "ground": [
+     0.24,
+     0.4,
+     0.2
+    ],
+    "accent": [
+     0.45,
+     0.5,
+     0.46
+    ],
+    "accentShare": 0.15,
+    "rock": [
+     0.42,
+     0.46,
+     0.4
+    ],
+    "canopySmooth": 0.0
+   },
+   "reedfall": {
+    "biome": "reed lake & falls",
+    "ground": [
+     0.44,
+     0.55,
+     0.42
+    ],
+    "accent": [
+     0.74,
+     0.68,
+     0.43
+    ],
+    "accentShare": 0.3,
+    "rock": null,
+    "canopySmooth": 0.45
+   },
+   "brambleshaw": {
+    "biome": "bramble & hazel thicket",
+    "ground": [
+     0.3,
+     0.35,
+     0.2
+    ],
+    "accent": [
+     0.46,
+     0.22,
+     0.32
+    ],
+    "accentShare": 0.14,
+    "rock": [
+     0.46,
+     0.45,
+     0.42
+    ],
+    "canopySmooth": 0.0
+   },
+   "pinebrow": {
+    "biome": "pine ridge",
+    "ground": [
+     0.55,
+     0.41,
+     0.26
+    ],
+    "accent": [
+     0.17,
+     0.29,
+     0.17
+    ],
+    "accentShare": 0.35,
+    "rock": [
+     0.62,
+     0.55,
+     0.52
+    ],
+    "canopySmooth": 0.0
+   },
+   "stagheath": {
+    "biome": "heather & gorse heath",
+    "ground": [
+     0.5,
+     0.37,
+     0.47
+    ],
+    "accent": [
+     0.84,
+     0.7,
+     0.24
+    ],
+    "accentShare": 0.2,
+    "rock": [
+     0.58,
+     0.57,
+     0.55
+    ],
+    "canopySmooth": 0.75
+   },
+   "saltsound": {
+    "biome": "salt marsh & sound",
+    "ground": [
+     0.57,
+     0.61,
+     0.47
+    ],
+    "accent": [
+     0.58,
+     0.52,
+     0.43
+    ],
+    "accentShare": 0.35,
+    "rock": null,
+    "canopySmooth": 0.6
+   },
+   "hearthcroft": {
+    "biome": "crofts & barley strips",
+    "ground": [
+     0.76,
+     0.67,
+     0.4
+    ],
+    "accent": [
+     0.47,
+     0.61,
+     0.29
+    ],
+    "accentShare": 0.4,
+    "rock": null,
+    "canopySmooth": 0.6
+   },
+   "ravenhead": {
+    "biome": "dark basalt headland",
+    "ground": [
+     0.29,
+     0.28,
+     0.3
+    ],
+    "accent": [
+     0.56,
+     0.51,
+     0.37
+    ],
+    "accentShare": 0.3,
+    "rock": [
+     0.27,
+     0.27,
+     0.3
+    ],
+    "canopySmooth": 0.5
+   },
+   "boarsend": {
+    "biome": "oak & chestnut wildwood",
+    "ground": [
+     0.52,
+     0.42,
+     0.23
+    ],
+    "accent": [
+     0.33,
+     0.43,
+     0.21
+    ],
+    "accentShare": 0.3,
+    "rock": [
+     0.5,
+     0.47,
+     0.42
+    ],
+    "canopySmooth": 0.0
+   },
+   "greenlight": {
+    "biome": "tide pools & causeways",
+    "ground": [
+     0.83,
+     0.8,
+     0.71
+    ],
+    "accent": [
+     0.43,
+     0.39,
+     0.22
+    ],
+    "accentShare": 0.25,
+    "rock": [
+     0.8,
+     0.77,
+     0.68
+    ],
+    "canopySmooth": 0.3
+   },
+   "ringholm": {
+    "biome": "machair & stone ring",
+    "ground": [
+     0.45,
+     0.68,
+     0.33
+    ],
+    "accent": [
+     0.93,
+     0.91,
+     0.72
+    ],
+    "accentShare": 0.2,
+    "rock": [
+     0.6,
+     0.6,
+     0.58
+    ],
+    "canopySmooth": 0.85
+   },
+   "spindle_hill": {
+    "biome": "garrigue beacon hill",
+    "ground": [
+     0.61,
+     0.62,
+     0.47
+    ],
+    "accent": [
+     0.55,
+     0.46,
+     0.7
+    ],
+    "accentShare": 0.15,
+    "rock": [
+     0.8,
+     0.77,
+     0.66
+    ],
+    "canopySmooth": 0.45
+   },
+   "tollholm": {
+    "biome": "vineyard toll village",
+    "ground": [
+     0.67,
+     0.5,
+     0.34
+    ],
+    "accent": [
+     0.44,
+     0.55,
+     0.25
+    ],
+    "accentShare": 0.35,
+    "rock": [
+     0.74,
+     0.66,
+     0.55
+    ],
+    "canopySmooth": 0.3
+   }
+  },
+  "canopySmoothMetres": 7,
+  "borderWarpMetres": 60,
+  "borderWarpScaleMetres": 80,
+  "ramp": "linear",
+  "ecotone": {
+   "ground": [
+    0.56,
+    0.62,
+    0.37
+   ],
+   "strength": 0.55
+  }
+ }
+}

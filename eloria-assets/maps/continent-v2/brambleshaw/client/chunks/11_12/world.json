@@ -1,0 +1,435 @@
+{
+ "schemaVersion": "1.0.0",
+ "assetVersion": "1.0.0",
+ "asset": {
+  "id": "brambleshaw__chunk_11_12",
+  "name": "Brambleshaw",
+  "glb": "world.glb",
+  "units": "meters",
+  "coordinateSystem": {
+   "handedness": "right",
+   "upAxis": "Y",
+   "northAxis": "-Z"
+  },
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "bounds": {
+   "min": [
+    105.0,
+    1.0050451755523682,
+    139.0
+   ],
+   "max": [
+    203.0,
+    120.7464370727539,
+    169.0
+   ]
+  },
+  "playableBounds": {
+   "min": [
+    -273.0,
+    -11.547078132629395,
+    -173.0
+   ],
+   "max": [
+    273.0,
+    167.1330523788929,
+    173.0
+   ]
+  },
+  "mapBounds": {
+   "min": [
+    -273.0,
+    -11.547078132629395,
+    -173.0
+   ],
+   "max": [
+    273.0,
+    167.1330523788929,
+    173.0
+   ]
+  },
+  "seaLevel": 0.0,
+  "serverCells": 558
+ },
+ "coordinateTransform": {
+  "metresPerTile": 1.0,
+  "serverOrigin": [
+   277,
+   177
+  ],
+  "serverCells": [
+   558,
+   558
+  ],
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "walkingHeight": 84.75,
+  "invertServerY": true,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "addressableWorldBounds": {
+   "min": [
+    -277,
+    -381
+   ],
+   "max": [
+    281,
+    177
+   ]
+  }
+ },
+ "collision": {
+  "nodeNames": [],
+  "format": "EWCG-v2",
+  "formatVersion": 2,
+  "version": 2,
+  "width": 1116,
+  "height": 1116,
+  "cellMetres": 0.5,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "serverCells": [
+   558,
+   558
+  ],
+  "originMetres": [
+   -277.0,
+   177.0
+  ],
+  "gridAlignment": "tile-centres-v1",
+  "authoredSurfaceExport": true,
+  "maxTerrainGrade": 0.65,
+  "maximumWadingDepth": 0.35,
+  "actorVolume": {
+   "floorClearance": 0.06,
+   "height": 2.1,
+   "halfCellWidth": 0.5
+  },
+  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
+ },
+ "navigation": {
+  "surfaceNodePrefixes": [
+   "Terrain_",
+   "Walk_"
+  ],
+  "terrainConforming": true,
+  "authority": "server",
+  "defaultSpawn": "generated-arrival-brambleshaw"
+ },
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.16,
+    0.42,
+    0.72
+   ],
+   "horizon": [
+    0.72,
+    0.87,
+    0.92
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.42,
+    0.62,
+    0.66
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    1.0,
+    0.94,
+    0.83
+   ],
+   "energy": 1.1
+  },
+  "ambient": {
+   "color": [
+    0.6,
+    0.67,
+    0.72
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.1,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.62,
+    0.66,
+    0.6
+   ],
+   "density": 0.0006,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  }
+ },
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   1402.0,
+   0.0,
+   7768.0
+  ],
+  "ownershipPolygon": [
+   [
+    1129.0,
+    7911.0
+   ],
+   [
+    1299.0,
+    7921.0
+   ],
+   [
+    1675.0,
+    7941.0
+   ],
+   [
+    1629.0,
+    7701.0
+   ],
+   [
+    1575.0,
+    7655.0
+   ],
+   [
+    1499.0,
+    7667.0
+   ],
+   [
+    1379.0,
+    7651.0
+   ],
+   [
+    1341.0,
+    7621.0
+   ],
+   [
+    1263.0,
+    7601.0
+   ],
+   [
+    1159.0,
+    7597.0
+   ],
+   [
+    1139.0,
+    7595.0
+   ],
+   [
+    1139.0,
+    7721.0
+   ],
+   [
+    1129.0,
+    7821.0
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     1129.0,
+     7911.0
+    ],
+    [
+     1299.0,
+     7921.0
+    ],
+    [
+     1675.0,
+     7941.0
+    ],
+    [
+     1629.0,
+     7701.0
+    ],
+    [
+     1575.0,
+     7655.0
+    ],
+    [
+     1499.0,
+     7667.0
+    ],
+    [
+     1379.0,
+     7651.0
+    ],
+    [
+     1341.0,
+     7621.0
+    ],
+    [
+     1263.0,
+     7601.0
+    ],
+    [
+     1159.0,
+     7597.0
+    ],
+    [
+     1139.0,
+     7595.0
+    ],
+    [
+     1139.0,
+     7721.0
+    ],
+    [
+     1129.0,
+     7821.0
+    ]
+   ]
+  ],
+  "geometryMode": "continent-chunks-v1"
+ },
+ "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
+ "knownLimitations": [
+  "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
+  "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
+  "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
+ ],
+ "provenance": {
+  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
+  "snapshotSha256": "26ed6f0f8a57c1819c2ac5ae1f5a0d86867d9160fbd840a867c025d207e61452",
+  "sceneSha256": "44e810a505862c3dc19ee4354b2cbbdf82d3d9b8fc7d906f09c62dabae280878"
+ },
+ "externalResources": {
+  "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+  "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+  "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
+  "../../../../_continent_v2/shared-assets/48ab14d6fae0b71e0b8897d32d2821eb510919bd0225a34e02777b819fab06f1.jpg": "48ab14d6fae0b71e0b8897d32d2821eb510919bd0225a34e02777b819fab06f1",
+  "../../../../_continent_v2/shared-assets/aa0f739c554fbe2fb20e9dd9f4dbd6b2220bf7592573c83b95d321c62f304896.jpg": "aa0f739c554fbe2fb20e9dd9f4dbd6b2220bf7592573c83b95d321c62f304896",
+  "../../../../_continent_v2/shared-assets/cbf355ebcd143f751e4d3315034ef15f4467d1bbbf64030efc6114da8c5992d2.jpg": "cbf355ebcd143f751e4d3315034ef15f4467d1bbbf64030efc6114da8c5992d2",
+  "../../../../_continent_v2/shared-assets/e062e932e5a21ac75bebfc7b6a46a7bf682aa8a7cda9597f503f47dd40e4be50.jpg": "e062e932e5a21ac75bebfc7b6a46a7bf682aa8a7cda9597f503f47dd40e4be50",
+  "../../../../_continent_v2/shared-assets/55ce4a2dbcd1536d26e0994d0964a8aa25b5abd0e4be9f3b44b4403d08ab39bb.jpg": "55ce4a2dbcd1536d26e0994d0964a8aa25b5abd0e4be9f3b44b4403d08ab39bb",
+  "../../../../_continent_v2/shared-assets/695c4ea791eeb4305df304425d66cb5a77edbd87062f19ea68f78ec652cbb9d8.jpg": "695c4ea791eeb4305df304425d66cb5a77edbd87062f19ea68f78ec652cbb9d8",
+  "../../../../_continent_v2/shared-assets/507d517e2e16b451d4feea03de1655e98492f8d3675c452ec64d30bfe868661a.jpg": "507d517e2e16b451d4feea03de1655e98492f8d3675c452ec64d30bfe868661a",
+  "../../../../_continent_v2/shared-assets/29e5aaef8b2f2e7b472467dbbccb197d0aa569640ac3413be717a9078d5b54ea.jpg": "29e5aaef8b2f2e7b472467dbbccb197d0aa569640ac3413be717a9078d5b54ea",
+  "../../../../_continent_v2/shared-assets/43760864ecb8d745aca0fcfd0b4185980b00720359a3e495fe02dd29bf968a50.jpg": "43760864ecb8d745aca0fcfd0b4185980b00720359a3e495fe02dd29bf968a50",
+  "../../../../_continent_v2/shared-assets/87cc6a49767d70e0e299e854bb5aa3359b792bb717704a1b4349f9bccb9267ae.jpg": "87cc6a49767d70e0e299e854bb5aa3359b792bb717704a1b4349f9bccb9267ae",
+  "../../../../_continent_v2/shared-assets/cd220f59294758b435a006b338604c5cc487c4be909497faa86789792647943d.jpg": "cd220f59294758b435a006b338604c5cc487c4be909497faa86789792647943d",
+  "../../../../_continent_v2/shared-assets/aa6ea389590adc4768b2c3ac2dcf6e5656b9a82ab84cad0e33bb91600983435b.jpg": "aa6ea389590adc4768b2c3ac2dcf6e5656b9a82ab84cad0e33bb91600983435b"
+ },
+ "bounds": {
+  "min": [
+   105.0,
+   1.0050451755523682,
+   139.0
+  ],
+  "max": [
+   203.0,
+   120.7464370727539,
+   169.0
+  ]
+ },
+ "performance": {
+  "glbBytes": 614900,
+  "nodes": 30,
+  "meshes": 6,
+  "externalResources": {
+   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+   "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+   "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
+   "../../../../_continent_v2/shared-assets/48ab14d6fae0b71e0b8897d32d2821eb510919bd0225a34e02777b819fab06f1.jpg": "48ab14d6fae0b71e0b8897d32d2821eb510919bd0225a34e02777b819fab06f1",
+   "../../../../_continent_v2/shared-assets/aa0f739c554fbe2fb20e9dd9f4dbd6b2220bf7592573c83b95d321c62f304896.jpg": "aa0f739c554fbe2fb20e9dd9f4dbd6b2220bf7592573c83b95d321c62f304896",
+   "../../../../_continent_v2/shared-assets/cbf355ebcd143f751e4d3315034ef15f4467d1bbbf64030efc6114da8c5992d2.jpg": "cbf355ebcd143f751e4d3315034ef15f4467d1bbbf64030efc6114da8c5992d2",
+   "../../../../_continent_v2/shared-assets/e062e932e5a21ac75bebfc7b6a46a7bf682aa8a7cda9597f503f47dd40e4be50.jpg": "e062e932e5a21ac75bebfc7b6a46a7bf682aa8a7cda9597f503f47dd40e4be50",
+   "../../../../_continent_v2/shared-assets/55ce4a2dbcd1536d26e0994d0964a8aa25b5abd0e4be9f3b44b4403d08ab39bb.jpg": "55ce4a2dbcd1536d26e0994d0964a8aa25b5abd0e4be9f3b44b4403d08ab39bb",
+   "../../../../_continent_v2/shared-assets/695c4ea791eeb4305df304425d66cb5a77edbd87062f19ea68f78ec652cbb9d8.jpg": "695c4ea791eeb4305df304425d66cb5a77edbd87062f19ea68f78ec652cbb9d8",
+   "../../../../_continent_v2/shared-assets/507d517e2e16b451d4feea03de1655e98492f8d3675c452ec64d30bfe868661a.jpg": "507d517e2e16b451d4feea03de1655e98492f8d3675c452ec64d30bfe868661a",
+   "../../../../_continent_v2/shared-assets/29e5aaef8b2f2e7b472467dbbccb197d0aa569640ac3413be717a9078d5b54ea.jpg": "29e5aaef8b2f2e7b472467dbbccb197d0aa569640ac3413be717a9078d5b54ea",
+   "../../../../_continent_v2/shared-assets/43760864ecb8d745aca0fcfd0b4185980b00720359a3e495fe02dd29bf968a50.jpg": "43760864ecb8d745aca0fcfd0b4185980b00720359a3e495fe02dd29bf968a50",
+   "../../../../_continent_v2/shared-assets/87cc6a49767d70e0e299e854bb5aa3359b792bb717704a1b4349f9bccb9267ae.jpg": "87cc6a49767d70e0e299e854bb5aa3359b792bb717704a1b4349f9bccb9267ae",
+   "../../../../_continent_v2/shared-assets/cd220f59294758b435a006b338604c5cc487c4be909497faa86789792647943d.jpg": "cd220f59294758b435a006b338604c5cc487c4be909497faa86789792647943d",
+   "../../../../_continent_v2/shared-assets/aa6ea389590adc4768b2c3ac2dcf6e5656b9a82ab84cad0e33bb91600983435b.jpg": "aa6ea389590adc4768b2c3ac2dcf6e5656b9a82ab84cad0e33bb91600983435b"
+  },
+  "sharedResourceResidentBytes": {
+   "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+   "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+   "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+   "48ab14d6fae0b71e0b8897d32d2821eb510919bd0225a34e02777b819fab06f1": 1398102,
+   "aa0f739c554fbe2fb20e9dd9f4dbd6b2220bf7592573c83b95d321c62f304896": 1398102,
+   "cbf355ebcd143f751e4d3315034ef15f4467d1bbbf64030efc6114da8c5992d2": 1398102,
+   "e062e932e5a21ac75bebfc7b6a46a7bf682aa8a7cda9597f503f47dd40e4be50": 5592406,
+   "55ce4a2dbcd1536d26e0994d0964a8aa25b5abd0e4be9f3b44b4403d08ab39bb": 5592406,
+   "695c4ea791eeb4305df304425d66cb5a77edbd87062f19ea68f78ec652cbb9d8": 5592406,
+   "507d517e2e16b451d4feea03de1655e98492f8d3675c452ec64d30bfe868661a": 1398102,
+   "29e5aaef8b2f2e7b472467dbbccb197d0aa569640ac3413be717a9078d5b54ea": 1398102,
+   "43760864ecb8d745aca0fcfd0b4185980b00720359a3e495fe02dd29bf968a50": 1398102,
+   "87cc6a49767d70e0e299e854bb5aa3359b792bb717704a1b4349f9bccb9267ae": 1398102,
+   "cd220f59294758b435a006b338604c5cc487c4be909497faa86789792647943d": 1398102,
+   "aa6ea389590adc4768b2c3ac2dcf6e5656b9a82ab84cad0e33bb91600983435b": 1398102
+  }
+ },
+ "biomeBlend": null,
+ "objectMaterialOverrides": {
+  "schema": "eloria-object-material-overrides-v1",
+  "entries": []
+ }
+}

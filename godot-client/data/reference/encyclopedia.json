@@ -1,0 +1,2660 @@
+{
+  "schema": "eloria.encyclopedia/2",
+  "title": "The Rabbit Lands Encyclopedia",
+  "note": "IN DEVELOPMENT! Every page here is either original Rabbit Lands reference text or is built from the client's own catalogues, so a recipe, spell or book that changes in the data changes here too. Report corrections through the Rabbit Lands project issue tracker.",
+  "skillNotes": {
+    "attack": "How hard you hit and how often you connect. The server rolls it; the client only shows what it said happened.",
+    "defense": "How often a blow misses you, and how much of one your armour is allowed to soak.",
+    "harvesting": "How quickly you take from a resource node, and which nodes the server will let you start on at all.",
+    "alchemy": "Essences, bars, and the ingredients the rest of the trades are built out of.",
+    "magic": "The ceiling on which spells you may cast, and on the power you may ask for.",
+    "potion": "Everything that ends up in a vial, from the plain healing draught upwards.",
+    "summoning": "Calling a creature to fight beside you, and the stones and flesh it costs.",
+    "manufacturing": "Metal work: armour, weapons, and the plates and rings they are made from.",
+    "crafting": "Rings, medallions and the small worked goods that need a mould.",
+    "engineering": "Devices and traps, and the tools that build them.",
+    "tailoring": "Thread, cloth, dye, and every garment made from them.",
+    "ranging": "Shooting at distance. The server refuses a shot at a target standing too close.",
+    "overall": "Not a trade of its own. It is the sum the server keeps across all the others."
+  },
+  "categories": [
+    {
+      "id": "world",
+      "title": "The World",
+      "summary": "Nymara, its hours and its weather",
+      "intro": "Eloria is played on Nymara. The server owns the world and the clock; this client draws what it is told and asks for the rest.",
+      "entries": [
+        {
+          "id": "authority",
+          "title": "What the server decides",
+          "summary": "Why nothing here is a guess",
+          "body": "Every fact in this client came from the server: where you stand, what you carry, what you hit and what hit you. The client picks the artwork and the camera, and nothing else.\n\nThat is worth knowing when a click seems to do nothing. Asking to walk somewhere, to attack someone, or to take from a node is a request. The server answers it, and the answer may be no. What you see on screen is the answer, not the request."
+        },
+        {
+          "id": "time",
+          "title": "Day and night",
+          "summary": "Six real hours to a Nymaran day",
+          "body": "A full day is 360 game minutes and one game minute is one real minute, so the world turns through dawn, noon, dusk and night over six hours.\n\nThe light you see follows the same curve the server uses to decide how far creatures can be seen, so a dark night is dark for both of you.",
+          "facts": [
+            [
+              "Length of a day",
+              "360 game minutes"
+            ],
+            [
+              "In real time",
+              "6 hours"
+            ],
+            [
+              "Where to see it",
+              "The clock face on the lower HUD"
+            ]
+          ]
+        },
+        {
+          "id": "markers",
+          "title": "Marks and waypoints",
+          "summary": "The server's marks and your own",
+          "body": "A waypoint is the server's: it appears on your map and reports the distance as you move.\n\nA mark is your own. It never leaves this client, and it is drawn in a different colour so you can tell your own note from something the world told you."
+        },
+        {
+          "id": "weather",
+          "title": "Weather and light",
+          "summary": "Rain, cloud, and the sky over each map",
+          "body": "Weather belongs to the map you are standing on. The server states it, the client renders it, and it changes the light rather than only the picture.\n\nAn interior does not take the sky's weather. Walking indoors changes what lights you and what you can hear, which is why a doorway can feel like a different time of day."
+        },
+        {
+          "id": "world-weather-todo",
+          "title": "Weather and night do nothing yet",
+          "summary": "TODO - not written yet",
+          "sections": [
+            {
+              "title": "Not written yet",
+              "kind": "prose",
+              "text": "A page describing what weather and nightfall do to play would be describing nothing. Weather is a wet chance, a storm chance and an intensity, sent so the client can draw rain; the day and night cycle has no server-side effect at all. The axis has to exist before a page can explain it."
+            },
+            {
+              "title": "What it needs",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Have",
+                  "Rain drawn from a per-map climate"
+                ],
+                [
+                  "Need",
+                  "Weather and night that change play"
+                ],
+                [
+                  "Where",
+                  "dev-server/eloria/weather.py"
+                ]
+              ]
+            }
+          ],
+          "body": "TODO. A page describing what weather and nightfall do to play would be describing nothing. Weather is a wet chance, a storm chance and an intensity, sent so the client can draw rain; the day and night cycle has no server-side effect at all. The axis has to exist before a page can explain it.",
+          "facts": [
+            [
+              "Have",
+              "Rain drawn from a per-map climate"
+            ],
+            [
+              "Need",
+              "Weather and night that change play"
+            ],
+            [
+              "Where",
+              "dev-server/eloria/weather.py"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skills",
+      "title": "Skills",
+      "summary": "The thirteen the server keeps for you",
+      "intro": "The server keeps a level and an experience total for each of these. The Statistics window shows all of them at once; the lower HUD shows the one you asked it to follow.",
+      "generate": "skills",
+      "entries": [
+        {
+          "id": "skills-todo",
+          "title": "Skill pages are one line deep",
+          "summary": "TODO - not written yet",
+          "sections": [
+            {
+              "title": "Not written yet",
+              "kind": "prose",
+              "text": "Every skill has a page, and each says what the server reports and little else. What a skill affects and how it is trained are not recorded anywhere - they are design knowledge that has never been written down, so there is nothing to generate them from."
+            },
+            {
+              "title": "What it needs",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Have",
+                  "A level, an experience total, and a one-line note"
+                ],
+                [
+                  "Need",
+                  "What each skill affects, and how it is trained"
+                ],
+                [
+                  "Where",
+                  "skillNotes in this document"
+                ]
+              ]
+            }
+          ],
+          "body": "TODO. Every skill has a page, and each says what the server reports and little else. What a skill affects and how it is trained are not recorded anywhere - they are design knowledge that has never been written down, so there is nothing to generate them from.",
+          "facts": [
+            [
+              "Have",
+              "A level, an experience total, and a one-line note"
+            ],
+            [
+              "Need",
+              "What each skill affects, and how it is trained"
+            ],
+            [
+              "Where",
+              "skillNotes in this document"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "combat",
+      "title": "Combat",
+      "summary": "Attacking, ranging, and being hit",
+      "intro": "Combat is entirely the server's. This client asks it to start a fight and then reports what came back.",
+      "entries": [
+        {
+          "id": "attacking",
+          "title": "Attacking",
+          "summary": "Three ways to start a fight",
+          "body": "There are three ways to ask for a fight, and all three send the same request.\n\nHold Alt and click a living creature or player. The move icon on the lower HUD turns into the attack icon while Alt is held, so you can see what a click will do before you make it; let Alt go and it turns back.\n\nOr click the attack icon on the HUD. That latches: the icon stays lit and every click attacks until you choose the move icon again, and holding or releasing Alt does not undo it.\n\nOr select a target and press the attack key.\n\nWhatever you choose, the server walks you into reach, decides whether the fight may start, and refuses the ones that may not.",
+          "facts": [
+            [
+              "Hold Alt and click",
+              "attacks without changing mode"
+            ],
+            [
+              "Attack icon",
+              "stays on until you pick the move icon"
+            ],
+            [
+              "Attack key",
+              "attacks the selected target"
+            ]
+          ]
+        },
+        {
+          "id": "ranging",
+          "title": "Ranging",
+          "summary": "Bows, arrows and distance",
+          "body": "A bow and matching ammunition let you attack from a distance. The server refuses a shot at a target standing too close - move away and try again.\n\nEach shot is announced twice: once as an aim, once as the arrow leaving. The damage is resolved by the server and arrives separately."
+        },
+        {
+          "id": "armour",
+          "title": "Armour and damage",
+          "summary": "What a suit is allowed to soak",
+          "body": "Armour is worn in pieces - helm, torso, legs, boots and a shield - and each piece carries its own absorption and its own penalties. A heavy suit soaks more, and costs you accuracy and movement to wear.\n\nWhat a piece absorbs is what the server allows it to take off a blow, not what it will take off every blow. The roll is still the server's."
+        }
+      ]
+    },
+    {
+      "id": "perks",
+      "title": "Perks",
+      "entries": [
+        {
+          "id": "perks-overview",
+          "title": "How perks work",
+          "summary": "Pick points, tiers, exclusions and gear",
+          "body": "A perk is bought with pick points, and most of them are bought more than once. There are 32 perks on the shelf and 32 of them come in tiers.\n\nPick points come from overall levels: two for each, spent on attributes, nexus or perks, and never spent twice. Every tier of a perk costs 3 pick points, so owning one outright is 9; what climbs from tier to tier is the gold.\n\nSome perks cannot be held together - Lucky Hitter and Lucky Dodger answer the same question from opposite sides, and so do Mirror and Life Stealing. The page for each perk says what it clashes with.\n\nWorn gear can carry a perk. A cape does not simply grant one: it adds a tier, which means it is worth the same to a player who has bought all three as to one who has bought none - and it is the only way to reach the tiers above the third.\n\nA removal stone takes back one tier and returns what that tier cost. At its highest tier a perk that says so can be switched off with the #perk command, which hands back the effect and not the pick points.\n\n#list_perks names everything you hold, the tier you are at, and what that tier does.",
+          "facts": [
+            [
+              "Perks",
+              "32"
+            ],
+            [
+              "Tiered",
+              "32"
+            ],
+            [
+              "Tiers each",
+              "3"
+            ],
+            [
+              "A tier costs",
+              "3 pick points"
+            ],
+            [
+              "Highest with gear",
+              "5"
+            ]
+          ]
+        },
+        {
+          "id": "perk-armor-piercing",
+          "title": "Armor Piercing",
+          "summary": "Fighting - Three fifths of a target's armour is ignored.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 100 gold. A fifth of a target's armour is ignored, in melee and at range."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 4,000 gold. Two fifths of a target's armour is ignored."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 20,000 gold. Three fifths of a target's armour is ignored."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "Body Piercing Cloak"
+                ],
+                [
+                  "Tier 4",
+                  "Three quarters of a target's armour is ignored."
+                ],
+                [
+                  "Tier 5",
+                  "Nine tenths of a target's armour is ignored."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Armor Piercing Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 100 gold. A fifth of a target's armour is ignored, in melee and at range.\nTier 2 - 3 pick points, 4,000 gold. Two fifths of a target's armour is ignored.\nTier 3 - 3 pick points, 20,000 gold. Three fifths of a target's armour is ignored.\n\nWorn gear adds tiers on top of what pick points buy, so this perk goes further than tier 3 for anybody who owns the right piece:\nTier 4 - Three quarters of a target's armour is ignored.\nTier 5 - Nine tenths of a target's armour is ignored.\n\nCarried by: Body Piercing Cloak.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "24,100 gold"
+            ],
+            [
+              "Gear",
+              "Body Piercing Cloak"
+            ],
+            [
+              "Taken back by",
+              "Armor Piercing Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-berserker",
+          "title": "Berserker",
+          "summary": "Fighting - Twenty more damage on every blow, and twenty defense lost.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 400 gold. Five more damage on every blow you land, and five defense lost."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. Ten more damage on every blow, and ten defense lost."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. Twenty more damage on every blow, and twenty defense lost."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Berserker Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 400 gold. Five more damage on every blow you land, and five defense lost.\nTier 2 - 3 pick points, 3,000 gold. Ten more damage on every blow, and ten defense lost.\nTier 3 - 3 pick points, 15,000 gold. Twenty more damage on every blow, and twenty defense lost.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,400 gold"
+            ],
+            [
+              "Taken back by",
+              "Berserker Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-closer",
+          "title": "Closer",
+          "summary": "Fighting - It holds three tiles nearer.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 400 gold. A creature with reach holds one tile nearer to you than it would to anyone else."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. It holds two tiles nearer."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. It holds three tiles nearer."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Closer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 400 gold. A creature with reach holds one tile nearer to you than it would to anyone else.\nTier 2 - 3 pick points, 3,000 gold. It holds two tiles nearer.\nTier 3 - 3 pick points, 15,000 gold. It holds three tiles nearer.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,400 gold"
+            ],
+            [
+              "Taken back by",
+              "Closer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-dancing",
+          "title": "Dancing",
+          "summary": "Fighting - One defense lost for each extra opponent.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. Three defense lost for each extra opponent instead of five."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,000 gold. Two defense lost for each extra opponent."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. One defense lost for each extra opponent."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "Echo Practice Cape"
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Cannot be held with",
+                  "There is no Fork, I can't dance"
+                ],
+                [
+                  "Taken back by",
+                  "Dancing Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. Three defense lost for each extra opponent instead of five.\nTier 2 - 3 pick points, 2,000 gold. Two defense lost for each extra opponent.\nTier 3 - 3 pick points, 12,000 gold. One defense lost for each extra opponent.\n\nWorn gear carries this perk, and adds a tier to it for anybody who has already bought one.\n\nCarried by: Echo Practice Cape.\n\nCannot be held with There is no Fork, I can't dance.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "14,300 gold"
+            ],
+            [
+              "Gear",
+              "Echo Practice Cape"
+            ],
+            [
+              "Excludes",
+              "There is no Fork, I can't dance"
+            ],
+            [
+              "Taken back by",
+              "Dancing Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-durability",
+          "title": "Durability",
+          "summary": "Fighting - Combat equipment wears a quarter as fast.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 1,000 gold. Combat equipment wears a quarter more slowly."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 20,000 gold. Combat equipment wears half as fast."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 100,000 gold. Combat equipment wears a quarter as fast."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "Cape Of No More Warlock, No More Tears Cape"
+                ],
+                [
+                  "Tier 4",
+                  "Combat equipment wears at a sixth of its usual rate."
+                ],
+                [
+                  "Tier 5",
+                  "Combat equipment wears a tenth as fast."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Durability Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 1,000 gold. Combat equipment wears a quarter more slowly.\nTier 2 - 3 pick points, 20,000 gold. Combat equipment wears half as fast.\nTier 3 - 3 pick points, 100,000 gold. Combat equipment wears a quarter as fast.\n\nWorn gear adds tiers on top of what pick points buy, so this perk goes further than tier 3 for anybody who owns the right piece:\nTier 4 - Combat equipment wears at a sixth of its usual rate.\nTier 5 - Combat equipment wears a tenth as fast.\n\nCarried by: Cape Of No More Warlock, No More Tears Cape.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "121,000 gold"
+            ],
+            [
+              "Gear",
+              "Cape Of No More Warlock, No More Tears Cape"
+            ],
+            [
+              "Taken back by",
+              "Durability Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-flanker",
+          "title": "Flanker",
+          "summary": "Fighting - Three tenths more damage from the side or back.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 500 gold. A tenth more damage when you strike from a target's side or back."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 4,000 gold. A fifth more damage from the side or back."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 20,000 gold. Three tenths more damage from the side or back."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Flanker Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 500 gold. A tenth more damage when you strike from a target's side or back.\nTier 2 - 3 pick points, 4,000 gold. A fifth more damage from the side or back.\nTier 3 - 3 pick points, 20,000 gold. Three tenths more damage from the side or back.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "24,500 gold"
+            ],
+            [
+              "Taken back by",
+              "Flanker Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-giantslayer",
+          "title": "Giantslayer",
+          "summary": "Fighting - A fifth more damage against anything standing on four tiles or more.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 500 gold. A tenth more damage against anything standing on sixteen tiles or more."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. A seventh more damage against anything standing on nine tiles or more."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. A fifth more damage against anything standing on four tiles or more."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Giantslayer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 500 gold. A tenth more damage against anything standing on sixteen tiles or more.\nTier 2 - 3 pick points, 3,000 gold. A seventh more damage against anything standing on nine tiles or more.\nTier 3 - 3 pick points, 15,000 gold. A fifth more damage against anything standing on four tiles or more.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,500 gold"
+            ],
+            [
+              "Taken back by",
+              "Giantslayer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-life-stealing",
+          "title": "Life Stealing",
+          "summary": "Fighting - Each blow you land in melee returns three health to you.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 600 gold. Each blow you land in melee returns one health to you."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 5,000 gold. Each blow you land in melee returns two health to you."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 25,000 gold. Each blow you land in melee returns three health to you."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Cannot be held with",
+                  "Mirror"
+                ],
+                [
+                  "Taken back by",
+                  "Life Stealing Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [
+            "perk-mirror"
+          ],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 600 gold. Each blow you land in melee returns one health to you.\nTier 2 - 3 pick points, 5,000 gold. Each blow you land in melee returns two health to you.\nTier 3 - 3 pick points, 25,000 gold. Each blow you land in melee returns three health to you.\n\nCannot be held with Mirror.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "30,600 gold"
+            ],
+            [
+              "Excludes",
+              "Mirror"
+            ],
+            [
+              "Taken back by",
+              "Life Stealing Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-lucky-dodger",
+          "title": "Lucky Dodger",
+          "summary": "Fighting - Three tenths more of your dodges succeed.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 500 gold. A tenth more of your dodges succeed, whatever your combat stats say."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. A fifth more of your dodges succeed."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. Three tenths more of your dodges succeed."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Cannot be held with",
+                  "Lucky Hitter"
+                ],
+                [
+                  "Can be switched off",
+                  "At tier 3, with #perk lucky dodger"
+                ],
+                [
+                  "Taken back by",
+                  "Lucky Dodger Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [
+            "perk-lucky-hitter"
+          ],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 500 gold. A tenth more of your dodges succeed, whatever your combat stats say.\nTier 2 - 3 pick points, 3,000 gold. A fifth more of your dodges succeed.\nTier 3 - 3 pick points, 15,000 gold. Three tenths more of your dodges succeed.\n\nCannot be held with Lucky Hitter.\n\nAt its highest tier it can be switched off and on again with #perk lucky dodger.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,500 gold"
+            ],
+            [
+              "Excludes",
+              "Lucky Hitter"
+            ],
+            [
+              "Taken back by",
+              "Lucky Dodger Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-lucky-hitter",
+          "title": "Lucky Hitter",
+          "summary": "Fighting - Three tenths more of your blows land.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 500 gold. A tenth more of your blows land, whatever your combat stats say."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. A fifth more of your blows land."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. Three tenths more of your blows land."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Cannot be held with",
+                  "Lucky Dodger"
+                ],
+                [
+                  "Taken back by",
+                  "Lucky Hitter Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [
+            "perk-lucky-dodger"
+          ],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 500 gold. A tenth more of your blows land, whatever your combat stats say.\nTier 2 - 3 pick points, 3,000 gold. A fifth more of your blows land.\nTier 3 - 3 pick points, 15,000 gold. Three tenths more of your blows land.\n\nCannot be held with Lucky Dodger.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,500 gold"
+            ],
+            [
+              "Excludes",
+              "Lucky Dodger"
+            ],
+            [
+              "Taken back by",
+              "Lucky Hitter Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-mirror",
+          "title": "Mirror",
+          "summary": "Fighting - Three tenths of the damage dealt to you is dealt back.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 500 gold. A tenth of the damage dealt to you is dealt back, never less than one. You still take the blow in full."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 4,000 gold. A fifth of the damage dealt to you is dealt back."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 20,000 gold. Three tenths of the damage dealt to you is dealt back."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "Mirror Cloak"
+                ],
+                [
+                  "Tier 4",
+                  "Two fifths of the damage dealt to you is dealt back."
+                ],
+                [
+                  "Tier 5",
+                  "Half the damage dealt to you is dealt back."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Cannot be held with",
+                  "Life Stealing"
+                ],
+                [
+                  "Taken back by",
+                  "Mirror Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [
+            "perk-life-stealing"
+          ],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 500 gold. A tenth of the damage dealt to you is dealt back, never less than one. You still take the blow in full.\nTier 2 - 3 pick points, 4,000 gold. A fifth of the damage dealt to you is dealt back.\nTier 3 - 3 pick points, 20,000 gold. Three tenths of the damage dealt to you is dealt back.\n\nWorn gear adds tiers on top of what pick points buy, so this perk goes further than tier 3 for anybody who owns the right piece:\nTier 4 - Two fifths of the damage dealt to you is dealt back.\nTier 5 - Half the damage dealt to you is dealt back.\n\nCarried by: Mirror Cloak.\n\nCannot be held with Life Stealing.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "24,500 gold"
+            ],
+            [
+              "Gear",
+              "Mirror Cloak"
+            ],
+            [
+              "Excludes",
+              "Life Stealing"
+            ],
+            [
+              "Taken back by",
+              "Mirror Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-standard-bearer",
+          "title": "Standard Bearer",
+          "summary": "Fighting - Party members within eight tiles of you gain twelve armour.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 600 gold. Party members within three tiles of you gain four armour. On your own it does nothing at all."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 4,000 gold. Party members within five tiles of you gain eight armour."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 20,000 gold. Party members within eight tiles of you gain twelve armour."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Standard Bearer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 600 gold. Party members within three tiles of you gain four armour. On your own it does nothing at all.\nTier 2 - 3 pick points, 4,000 gold. Party members within five tiles of you gain eight armour.\nTier 3 - 3 pick points, 20,000 gold. Party members within eight tiles of you gain twelve armour.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "24,600 gold"
+            ],
+            [
+              "Taken back by",
+              "Standard Bearer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-trophy-hunter",
+          "title": "Trophy Hunter",
+          "summary": "Fighting - Three tenths more damage against a boss, scaled by its roll.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 600 gold. A tenth more damage against a boss, and more again the stronger it rolled."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 5,000 gold. A fifth more damage against a boss, scaled by its roll."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 25,000 gold. Three tenths more damage against a boss, scaled by its roll."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Trophy Hunter Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 600 gold. A tenth more damage against a boss, and more again the stronger it rolled.\nTier 2 - 3 pick points, 5,000 gold. A fifth more damage against a boss, scaled by its roll.\nTier 3 - 3 pick points, 25,000 gold. Three tenths more damage against a boss, scaled by its roll.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "30,600 gold"
+            ],
+            [
+              "Taken back by",
+              "Trophy Hunter Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-two-handed-wielding",
+          "title": "Two Handed Wielding",
+          "summary": "Fighting - A two-handed weapon hits three fifths harder, and a weapon in each hand costs only fifteen defense.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 800 gold. A two-handed weapon hits a quarter harder."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 6,000 gold. A two-handed weapon hits two fifths harder, and you may hold a weapon in each hand instead of a shield at a cost of twenty-five defense."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 30,000 gold. A two-handed weapon hits three fifths harder, and a weapon in each hand costs only fifteen defense."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Two Handed Wielding Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 800 gold. A two-handed weapon hits a quarter harder.\nTier 2 - 3 pick points, 6,000 gold. A two-handed weapon hits two fifths harder, and you may hold a weapon in each hand instead of a shield at a cost of twenty-five defense.\nTier 3 - 3 pick points, 30,000 gold. A two-handed weapon hits three fifths harder, and a weapon in each hand costs only fifteen defense.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "36,800 gold"
+            ],
+            [
+              "Taken back by",
+              "Two Handed Wielding Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-eagle-eye",
+          "title": "Eagle Eye",
+          "summary": "Ranging - Three tenths more of your shots land.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. A tenth more of your shots land."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,500 gold. A fifth more of your shots land."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. Three tenths more of your shots land."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Eagle Eye Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. A tenth more of your shots land.\nTier 2 - 3 pick points, 2,500 gold. A fifth more of your shots land.\nTier 3 - 3 pick points, 12,000 gold. Three tenths more of your shots land.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "14,800 gold"
+            ],
+            [
+              "Taken back by",
+              "Eagle Eye Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-lucky-archer",
+          "title": "Lucky Archer",
+          "summary": "Ranging - Ten percent of your shots are guaranteed hits.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. Three percent of your shots are guaranteed hits."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,500 gold. Six percent of your shots are guaranteed hits."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. Ten percent of your shots are guaranteed hits."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Lucky Archer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. Three percent of your shots are guaranteed hits.\nTier 2 - 3 pick points, 2,500 gold. Six percent of your shots are guaranteed hits.\nTier 3 - 3 pick points, 12,000 gold. Ten percent of your shots are guaranteed hits.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "14,800 gold"
+            ],
+            [
+              "Taken back by",
+              "Lucky Archer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-conjurer",
+          "title": "Conjurer",
+          "summary": "Magic and summoning - Summoning costs a quarter of the normal ethereal points.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 200 gold. Summoning costs three quarters of the normal ethereal points."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. Summoning costs half the normal ethereal points."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. Summoning costs a quarter of the normal ethereal points."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "Conjurer Cloak"
+                ],
+                [
+                  "Tier 4",
+                  "Summoning costs a seventh of the normal ethereal points."
+                ],
+                [
+                  "Tier 5",
+                  "Summoning costs a tenth of the normal ethereal points."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Conjurer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 200 gold. Summoning costs three quarters of the normal ethereal points.\nTier 2 - 3 pick points, 3,000 gold. Summoning costs half the normal ethereal points.\nTier 3 - 3 pick points, 15,000 gold. Summoning costs a quarter of the normal ethereal points.\n\nWorn gear adds tiers on top of what pick points buy, so this perk goes further than tier 3 for anybody who owns the right piece:\nTier 4 - Summoning costs a seventh of the normal ethereal points.\nTier 5 - Summoning costs a tenth of the normal ethereal points.\n\nCarried by: Conjurer Cloak.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,200 gold"
+            ],
+            [
+              "Gear",
+              "Conjurer Cloak"
+            ],
+            [
+              "Taken back by",
+              "Conjurer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-defensive-mage",
+          "title": "Defensive Mage",
+          "summary": "Magic and summoning - As though your Magic Defense were six higher.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 400 gold. Spells cast at you resist as though your Magic Defense were two higher."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. As though your Magic Defense were four higher."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. As though your Magic Defense were six higher."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Defensive Mage Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 400 gold. Spells cast at you resist as though your Magic Defense were two higher.\nTier 2 - 3 pick points, 3,000 gold. As though your Magic Defense were four higher.\nTier 3 - 3 pick points, 15,000 gold. As though your Magic Defense were six higher.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,400 gold"
+            ],
+            [
+              "Taken back by",
+              "Defensive Mage Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-efficient-mage",
+          "title": "Efficient Mage",
+          "summary": "Magic and summoning - Your spells cost three tenths less ethereal power.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 400 gold. Your spells cost a tenth less ethereal power."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. Your spells cost a fifth less ethereal power."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. Your spells cost three tenths less ethereal power."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Efficient Mage Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 400 gold. Your spells cost a tenth less ethereal power.\nTier 2 - 3 pick points, 3,000 gold. Your spells cost a fifth less ethereal power.\nTier 3 - 3 pick points, 15,000 gold. Your spells cost three tenths less ethereal power.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,400 gold"
+            ],
+            [
+              "Taken back by",
+              "Efficient Mage Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-lifebinder",
+          "title": "Lifebinder",
+          "summary": "Magic and summoning - What you summon has twice the health.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 400 gold. What you summon has a quarter more health."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. What you summon has half again as much health."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. What you summon has twice the health."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Lifebinder Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 400 gold. What you summon has a quarter more health.\nTier 2 - 3 pick points, 3,000 gold. What you summon has half again as much health.\nTier 3 - 3 pick points, 15,000 gold. What you summon has twice the health.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,400 gold"
+            ],
+            [
+              "Taken back by",
+              "Lifebinder Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-offensive-mage",
+          "title": "Offensive Mage",
+          "summary": "Magic and summoning - As though your Magic Offense were six higher.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 400 gold. Your attack spells land as though your Magic Offense were two higher."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. As though your Magic Offense were four higher."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. As though your Magic Offense were six higher."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Offensive Mage Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 400 gold. Your attack spells land as though your Magic Offense were two higher.\nTier 2 - 3 pick points, 3,000 gold. As though your Magic Offense were four higher.\nTier 3 - 3 pick points, 15,000 gold. As though your Magic Offense were six higher.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,400 gold"
+            ],
+            [
+              "Taken back by",
+              "Offensive Mage Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-summoner",
+          "title": "Summoner",
+          "summary": "Magic and summoning - Summoned creatures gain three tenths more attack and defense.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 200 gold. Summoned creatures gain a tenth more attack and defense."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. Summoned creatures gain a fifth more attack and defense."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. Summoned creatures gain three tenths more attack and defense."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "The Summoner Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 200 gold. Summoned creatures gain a tenth more attack and defense.\nTier 2 - 3 pick points, 3,000 gold. Summoned creatures gain a fifth more attack and defense.\nTier 3 - 3 pick points, 15,000 gold. Summoned creatures gain three tenths more attack and defense.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,200 gold"
+            ],
+            [
+              "Taken back by",
+              "The Summoner Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-artificer",
+          "title": "Artificer",
+          "summary": "Mixing - Two and a half times as many rare mixes.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 6,000 gold. Half again as many rare mixes."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 30,000 gold. Twice as many rare mixes."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 60,000 gold. Two and a half times as many rare mixes."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "The Artificer Cape"
+                ],
+                [
+                  "Tier 4",
+                  "Three times as many rare mixes."
+                ],
+                [
+                  "Tier 5",
+                  "Three and a half times as many rare mixes."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Artificer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 6,000 gold. Half again as many rare mixes.\nTier 2 - 3 pick points, 30,000 gold. Twice as many rare mixes.\nTier 3 - 3 pick points, 60,000 gold. Two and a half times as many rare mixes.\n\nWorn gear adds tiers on top of what pick points buy, so this perk goes further than tier 3 for anybody who owns the right piece:\nTier 4 - Three times as many rare mixes.\nTier 5 - Three and a half times as many rare mixes.\n\nCarried by: The Artificer Cape.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "96,000 gold"
+            ],
+            [
+              "Gear",
+              "The Artificer Cape"
+            ],
+            [
+              "Taken back by",
+              "Artificer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-careful-mixer",
+          "title": "Careful Mixer",
+          "summary": "Mixing - Three tenths of ruined mixes leave their ingredients behind.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. A tenth of ruined mixes leave their ingredients behind."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,500 gold. A fifth of ruined mixes leave their ingredients behind."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. Three tenths of ruined mixes leave their ingredients behind."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Careful Mixer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. A tenth of ruined mixes leave their ingredients behind.\nTier 2 - 3 pick points, 2,500 gold. A fifth of ruined mixes leave their ingredients behind.\nTier 3 - 3 pick points, 12,000 gold. Three tenths of ruined mixes leave their ingredients behind.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "14,800 gold"
+            ],
+            [
+              "Taken back by",
+              "Careful Mixer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-frugal-mixer",
+          "title": "Frugal Mixer",
+          "summary": "Mixing - Mixing costs a quarter of the food.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. Mixing costs a quarter less food."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,500 gold. Mixing costs half as much food."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. Mixing costs a quarter of the food."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Frugal Mixer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. Mixing costs a quarter less food.\nTier 2 - 3 pick points, 2,500 gold. Mixing costs half as much food.\nTier 3 - 3 pick points, 12,000 gold. Mixing costs a quarter of the food.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "14,800 gold"
+            ],
+            [
+              "Taken back by",
+              "Frugal Mixer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-recycler",
+          "title": "Recycler",
+          "summary": "Mixing - Four mixes in a hundred keep their ingredients.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. One mix in a hundred keeps its ingredients as well as its result."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,500 gold. Two mixes in a hundred keep their ingredients."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. Four mixes in a hundred keep their ingredients."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Recycler Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. One mix in a hundred keeps its ingredients as well as its result.\nTier 2 - 3 pick points, 2,500 gold. Two mixes in a hundred keep their ingredients.\nTier 3 - 3 pick points, 12,000 gold. Four mixes in a hundred keep their ingredients.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "14,800 gold"
+            ],
+            [
+              "Taken back by",
+              "Recycler Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-gatherer",
+          "title": "Gatherer",
+          "summary": "Harvesting - One harvest in two yields a second item.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. One harvest in five yields a second item."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,500 gold. One harvest in three yields a second item."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. One harvest in two yields a second item."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "Excavator Cape"
+                ],
+                [
+                  "Tier 4",
+                  "Two harvests in three yield a second item."
+                ],
+                [
+                  "Tier 5",
+                  "Four harvests in five yield a second item."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Gatherer Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. One harvest in five yields a second item.\nTier 2 - 3 pick points, 2,500 gold. One harvest in three yields a second item.\nTier 3 - 3 pick points, 12,000 gold. One harvest in two yields a second item.\n\nWorn gear adds tiers on top of what pick points buy, so this perk goes further than tier 3 for anybody who owns the right piece:\nTier 4 - Two harvests in three yield a second item.\nTier 5 - Four harvests in five yield a second item.\n\nCarried by: Excavator Cape.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "14,800 gold"
+            ],
+            [
+              "Gear",
+              "Excavator Cape"
+            ],
+            [
+              "Taken back by",
+              "Gatherer Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-lucky-harvester",
+          "title": "Lucky Harvester",
+          "summary": "Harvesting - Three tenths more lucky finds.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. A tenth more of the lucky finds a harvest can turn up."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,500 gold. A fifth more lucky finds."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. Three tenths more lucky finds."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Lucky Harvester Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. A tenth more of the lucky finds a harvest can turn up.\nTier 2 - 3 pick points, 2,500 gold. A fifth more lucky finds.\nTier 3 - 3 pick points, 12,000 gold. Three tenths more lucky finds.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "14,800 gold"
+            ],
+            [
+              "Taken back by",
+              "Lucky Harvester Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-bone-eater",
+          "title": "Bone Eater",
+          "summary": "Keeping going - Bones as fast as you can eat them, and no risk.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 500 gold. Bones are worth thirty food, eaten no oftener than every four seconds, and one meal in twenty-five empties you instead."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 4,000 gold. Bones every two seconds, and one meal in fifty empties you instead."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 20,000 gold. Bones as fast as you can eat them, and no risk."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Cannot be held with",
+                  "I Eat Dead People"
+                ],
+                [
+                  "Taken back by",
+                  "Bone Eater Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 500 gold. Bones are worth thirty food, eaten no oftener than every four seconds, and one meal in twenty-five empties you instead.\nTier 2 - 3 pick points, 4,000 gold. Bones every two seconds, and one meal in fifty empties you instead.\nTier 3 - 3 pick points, 20,000 gold. Bones as fast as you can eat them, and no risk.\n\nCannot be held with I Eat Dead People.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "24,500 gold"
+            ],
+            [
+              "Excludes",
+              "I Eat Dead People"
+            ],
+            [
+              "Taken back by",
+              "Bone Eater Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-cooldown-reduction",
+          "title": "Cooldown Reduction",
+          "summary": "Keeping going - Just over a third sooner.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 600 gold. Everything you wait on comes back a tenth sooner."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 5,000 gold. A fifth sooner."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 25,000 gold. Just over a third sooner."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Cooldown Reduction Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 600 gold. Everything you wait on comes back a tenth sooner.\nTier 2 - 3 pick points, 5,000 gold. A fifth sooner.\nTier 3 - 3 pick points, 25,000 gold. Just over a third sooner.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "30,600 gold"
+            ],
+            [
+              "Taken back by",
+              "Cooldown Reduction Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-fast-regeneration",
+          "title": "Fast Regeneration",
+          "summary": "Keeping going - Health and ether return three times as fast.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 200 gold. Health and ether return half again as fast."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,000 gold. Health and ether return twice as fast."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 10,000 gold. Health and ether return three times as fast."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "Fast Regeneration Cape"
+                ],
+                [
+                  "Tier 4",
+                  "Health and ether return four times as fast."
+                ],
+                [
+                  "Tier 5",
+                  "Health and ether return five times as fast."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Fast Regeneration Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 200 gold. Health and ether return half again as fast.\nTier 2 - 3 pick points, 2,000 gold. Health and ether return twice as fast.\nTier 3 - 3 pick points, 10,000 gold. Health and ether return three times as fast.\n\nWorn gear adds tiers on top of what pick points buy, so this perk goes further than tier 3 for anybody who owns the right piece:\nTier 4 - Health and ether return four times as fast.\nTier 5 - Health and ether return five times as fast.\n\nCarried by: Fast Regeneration Cape.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "12,200 gold"
+            ],
+            [
+              "Gear",
+              "Fast Regeneration Cape"
+            ],
+            [
+              "Taken back by",
+              "Fast Regeneration Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-much-nomz-wow",
+          "title": "Much Nomz wow",
+          "summary": "Keeping going - You can hold eighty more food.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 3 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 400 gold. You can hold twenty more food."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 3,000 gold. You can hold forty more food."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 15,000 gold. You can hold eighty more food."
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Much Nomz Wow Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 3 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 400 gold. You can hold twenty more food.\nTier 2 - 3 pick points, 3,000 gold. You can hold forty more food.\nTier 3 - 3 pick points, 15,000 gold. You can hold eighty more food.",
+          "facts": [
+            [
+              "Tiers",
+              "3"
+            ],
+            [
+              "All tiers",
+              "9 pick points"
+            ],
+            [
+              "Gold",
+              "18,400 gold"
+            ],
+            [
+              "Taken back by",
+              "Much Nomz Wow Removal"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gathering",
+      "title": "Harvesting",
+      "summary": "Taking things out of the ground",
+      "intro": "Everything the trades below are made from starts here.",
+      "entries": [
+        {
+          "id": "harvesting",
+          "title": "Harvesting",
+          "summary": "Nodes, levels, and why you stopped",
+          "body": "Resource nodes belong to the server, not to the scenery. It tells the client which objects on the map can be gathered, what each one yields and what level it needs, so a node you can see is a node the server knows about.\n\nClick a node to start. The server reports that harvesting has begun and reports again when it stops - because you moved, because your backpack filled, or because something interrupted you. The client never decides that you have stopped.",
+          "facts": [
+            [
+              "Started by",
+              "clicking a node the server has described"
+            ],
+            [
+              "Stopped by",
+              "moving, a full backpack, or the server"
+            ]
+          ]
+        },
+        {
+          "id": "bags",
+          "title": "Bags on the ground",
+          "summary": "What is dropped, and who may take it",
+          "body": "Anything dropped becomes a bag standing on the ground where it fell. Opening one asks the server to describe it; what comes back is its contents at that moment and nothing older.\n\nA bag is not yours. Another player standing over it sees the same bag and can take from it, and the server settles who got what."
+        },
+        {
+          "id": "storage",
+          "title": "Storage",
+          "summary": "What a storage keeper holds for you",
+          "body": "Storage is held by the server, one set of shelves per character, reachable from a storage keeper. Deposits and withdrawals are its decision; the window shows the shelves as they were when it last described them.\n\nCarrying capacity applies on the way out. A withdrawal that would overload you is refused, and the goods stay where they were."
+        },
+        {
+          "id": "harvesting-todo",
+          "title": "There is no page per resource",
+          "summary": "TODO - not written yet",
+          "sections": [
+            {
+              "title": "Not written yet",
+              "kind": "prose",
+              "text": "Harvesting has written pages about how gathering works, but not one page per resource. The server knows where a resource stands and what it yields; it does not record a harvest level, a respawn time or what the thing is used for afterwards."
+            },
+            {
+              "title": "What it needs",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Have",
+                  "Resource placement and yields, server-side"
+                ],
+                [
+                  "Need",
+                  "Harvest level, respawn, and uses per resource"
+                ],
+                [
+                  "Where",
+                  "config/eloria/harvesting.txt"
+                ]
+              ]
+            }
+          ],
+          "body": "TODO. Harvesting has written pages about how gathering works, but not one page per resource. The server knows where a resource stands and what it yields; it does not record a harvest level, a respawn time or what the thing is used for afterwards.",
+          "facts": [
+            [
+              "Have",
+              "Resource placement and yields, server-side"
+            ],
+            [
+              "Need",
+              "Harvest level, respawn, and uses per resource"
+            ],
+            [
+              "Where",
+              "config/eloria/harvesting.txt"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "commerce",
+      "title": "Trade",
+      "summary": "Dealing with players and with the exchange",
+      "intro": "Two ways to move goods between people, both settled by the server.",
+      "entries": [
+        {
+          "id": "trade",
+          "title": "Trading and the exchange",
+          "summary": "Direct trades and the Nymara Exchange",
+          "body": "A direct trade is between two players, and both must accept before anything moves. The server owns every step; the window shows what it has confirmed.\n\nThe Nymara Exchange takes listings and holds both goods and proceeds in escrow until they are collected."
+        },
+        {
+          "id": "prices",
+          "title": "What a thing is worth",
+          "summary": "There is no fixed price list",
+          "body": "Nothing in this encyclopedia states a price. The client is not told one, and a made-up figure would be worse than none.\n\nWhat the pages below do state is what a thing costs to make: its materials, the level it wants, and the food it burns. That is the floor under any price, and it comes from the server's own recipe table."
+        }
+      ]
+    },
+    {
+      "id": "alchemy",
+      "title": "Alchemy",
+      "summary": "Essences, bars and raw materials",
+      "intro": "Alchemy turns what is harvested into the essences and bars the other trades consume.",
+      "generate": "recipes:alchemy",
+      "entries": []
+    },
+    {
+      "id": "manufacturing",
+      "title": "Manufacturing",
+      "summary": "Armour, weapons and metalwork",
+      "intro": "Metal work. Armour is made in pieces - helm, torso, legs, boots and shield - and the same bars go into the weapons that beat them.",
+      "generate": "recipes:manufacturing",
+      "entries": []
+    },
+    {
+      "id": "crafting",
+      "title": "Crafting",
+      "summary": "Rings, medallions and worked goods",
+      "intro": "Crafting wants a mould more often than it wants a fire.",
+      "generate": "recipes:crafting",
+      "entries": []
+    },
+    {
+      "id": "engineering",
+      "title": "Engineering",
+      "summary": "Devices, traps and tools",
+      "intro": "Things that are built rather than forged.",
+      "generate": "recipes:engineering",
+      "entries": []
+    },
+    {
+      "id": "potions",
+      "title": "Potions",
+      "summary": "Everything that fills a vial",
+      "intro": "A potion is mixed once and drunk once. What it does is the server's to apply.",
+      "generate": "recipes:potion",
+      "entries": []
+    },
+    {
+      "id": "tailoring",
+      "title": "Tailoring",
+      "summary": "Thread, cloth, dye and clothing",
+      "intro": "The longest recipe list in the client, and the one that most often wants a book first.",
+      "generate": "recipes:tailoring",
+      "entries": []
+    },
+    {
+      "id": "summoning",
+      "title": "Summoning",
+      "summary": "Calling a creature to your side",
+      "intro": "A summoning is paid for in stones and flesh, and the creature that arrives is the server's, not yours.",
+      "generate": "recipes:summoning",
+      "entries": []
+    },
+    {
+      "id": "spells",
+      "title": "Magic",
+      "summary": "Sigils, spells and the effects they leave",
+      "intro": "Choose a spell family, targeting mode and Power 1–10. Higher power replaces separate greater spells.",
+      "generate": "spells",
+      "entries": [
+        {
+          "id": "magic",
+          "title": "Casting and power",
+          "summary": "One effect, ten power levels",
+          "body": "Own every listed sigil, carry the reagents and choose a power your Magic level and nexus support. Higher power increases healing, damage, protection or duration and costs more ether and reagents. Heal and Poison have no separate Greater versions. The spell window can be searched and filtered by targeting mode."
+        },
+        {
+          "id": "spell-targets",
+          "title": "Self, Target, Allies and Burst",
+          "summary": "Choose who receives a spell",
+          "body": "A base name such as Heal affects you. Target selects one actor within 15 tiles; Bolt also means one target. Allies affects you and party or guild members within four tiles. Burst selects a location within 15 tiles and affects eligible actors within four tiles of it. Hostile spells respect party, guild and PK restrictions. Escape cancels target selection without spending resources."
+        },
+        {
+          "id": "wards-and-damage",
+          "title": "Damage, wards and Dispel",
+          "summary": "Match protection to the damage type",
+          "body": "Magic Bolt deals magic damage; Fire Bolt heat; Frost Bolt cold; Radiation Bolt radiation. Each has a Burst form and a matching ward. Elemental Ward combines heat, cold and radiation protection. Shield improves physical protection. Dispel removes poison, cripple, resistance reductions and drained stats. Magic Immunity temporarily blocks hostile spells."
+        },
+        {
+          "id": "transmute",
+          "title": "Transmute",
+          "summary": "Selected inventory items become gold",
+          "body": "Choose an inventory item and quantity. Review the required power and exact gold return before casting. Common items need Power 1, Uncommon 3, Rare 5, Epic 7 and Legendary 9. Their gold multipliers are 1, 2, 4, 8 and 16 times the item base transmutation value. Only the selected quantity is consumed. Gold Coins and quest items cannot be transmuted."
+        },
+        {
+          "id": "recall-portals",
+          "title": "Recall and portal destinations",
+          "summary": "Higher power opens destination selection",
+          "body": "Recall at Power 1–4 returns you to Four Gates. At Power 5–10 choose a map with a portal entrance and the entrance where you will arrive. Maps with several entrances list each location. Blink remains a short teleport to a walkable place within 15 tiles."
+        }
+      ]
+    },
+    {
+      "id": "books",
+      "title": "Books",
+      "summary": "What must be read before it can be made",
+      "intro": "A book is read once. Until the server records that you have read it, the recipes it teaches are refused however high your level is.",
+      "generate": "books",
+      "entries": []
+    },
+    {
+      "id": "maps",
+      "title": "Maps",
+      "summary": "The regions of Nymara",
+      "intro": "Each region is its own map on the server. Crossing between them is a change of map, not a walk across a seam.",
+      "generate": "maps",
+      "entries": []
+    },
+    {
+      "id": "commands",
+      "title": "Commands",
+      "entries": [
+        {
+          "id": "commands-todo",
+          "title": "Chat commands",
+          "summary": "TODO - not written yet",
+          "sections": [
+            {
+              "title": "Not written yet",
+              "kind": "prose",
+              "text": "The server keeps a one-line description of every chat command and answers #help with it. That line is all there is: nothing records a command's syntax, what it costs, where it cannot be used, or what it does on success, so a page per command cannot be generated from anything yet."
+            },
+            {
+              "title": "What it needs",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Have",
+                  "One help line per command, server-side"
+                ],
+                [
+                  "Need",
+                  "Syntax, requirements and result per command"
+                ],
+                [
+                  "Where",
+                  "COMMAND_HELP in dev-server/eloria/server.py"
+                ],
+                [
+                  "Then",
+                  "A generator like tools/generate_perk_reference.py"
+                ]
+              ]
+            }
+          ],
+          "body": "TODO. The server keeps a one-line description of every chat command and answers #help with it. That line is all there is: nothing records a command's syntax, what it costs, where it cannot be used, or what it does on success, so a page per command cannot be generated from anything yet.",
+          "facts": [
+            [
+              "Have",
+              "One help line per command, server-side"
+            ],
+            [
+              "Need",
+              "Syntax, requirements and result per command"
+            ],
+            [
+              "Where",
+              "COMMAND_HELP in dev-server/eloria/server.py"
+            ],
+            [
+              "Then",
+              "A generator like tools/generate_perk_reference.py"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

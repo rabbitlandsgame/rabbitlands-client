@@ -1,0 +1,1943 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "crownwater_insides",
+    "name": "Crownwater Insides",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        9.45,
+        -10.13,
+        5.65
+      ],
+      "max": [
+        354.55,
+        27.17,
+        339.4
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        9.45,
+        -8.4,
+        53.45
+      ],
+      "max": [
+        354.55,
+        26.0,
+        334.55
+      ]
+    },
+    "interiorClass": "insides",
+    "parentRegion": "amberwood",
+    "serverCells": 348
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      -7.0,
+      337.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        50.0,
+        0.05,
+        60.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "drowned_crown"
+    },
+    {
+      "id": "basilica-undercroft",
+      "position": [
+        50.0,
+        0.05,
+        60.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "drowned_crown"
+    },
+    {
+      "id": "cistern-stair",
+      "position": [
+        260.0,
+        0.05,
+        60.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "tide_cistern"
+    },
+    {
+      "id": "customs-door",
+      "position": [
+        250.0,
+        0.05,
+        261.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "customs_hall"
+    },
+    {
+      "id": "campanile-door",
+      "position": [
+        60.0,
+        0.05,
+        300.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "tide_campanile"
+    },
+    {
+      "id": "eleventh-bell-door",
+      "position": [
+        338.0,
+        0.05,
+        60.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "eleventh_bell"
+    },
+    {
+      "id": "case-room-door",
+      "position": [
+        338.0,
+        0.05,
+        121.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "case_room"
+    },
+    {
+      "id": "grating-mouth",
+      "position": [
+        338.0,
+        0.05,
+        180.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "the_grating"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 696,
+    "height": 570,
+    "cellMetres": 0.5,
+    "originMetres": [
+      7.0,
+      337.0
+    ],
+    "heightEncoding": {
+      "origin": -8.557,
+      "step": 0.5574,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 46872,
+    "blockedCells": 349848,
+    "walkableFraction": 0.1181,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_crownwater_insides",
+      "Roof_crownwater_insides_ashlar",
+      "Roof_crownwater_insides_crownwater_marble",
+      "Roof_crownwater_insides_rubble_stone",
+      "Roof_crownwater_insides_timber_dark",
+      "Build_crownwater_insides_amber_resin",
+      "Build_crownwater_insides_ashlar",
+      "Build_crownwater_insides_canvas_awning",
+      "Build_crownwater_insides_carved_wood",
+      "Build_crownwater_insides_crownwater_gilt",
+      "Build_crownwater_insides_crownwater_marble",
+      "Build_crownwater_insides_crownwater_mosaic",
+      "Build_crownwater_insides_crownwater_verdigris",
+      "Build_crownwater_insides_dark_iron",
+      "Build_crownwater_insides_lime_plaster",
+      "Build_crownwater_insides_pale_ashlar",
+      "Build_crownwater_insides_rubble_stone",
+      "Build_crownwater_insides_timber_dark",
+      "Build_crownwater_insides_timber_grey",
+      "Build_crownwater_insides_timber_warm",
+      "Build_crownwater_insides_water_deep",
+      "Build_crownwater_insides_water_pool",
+      "Build_crownwater_insides_woven_cloth"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_crownwater_insides_ashlar",
+      "Roof_crownwater_insides_crownwater_marble",
+      "Roof_crownwater_insides_rubble_stone",
+      "Roof_crownwater_insides_timber_dark"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-basilica-undercroft",
+      "name": "Return to Crownwater (The Drowned Crown)",
+      "type": "map-transition",
+      "position": [
+        50.0,
+        0.05,
+        60.0
+      ],
+      "destinationMap": "crownwater",
+      "destinationSpawn": "default",
+      "radius": 2.5,
+      "section": "drowned_crown",
+      "authority": "server"
+    },
+    {
+      "id": "exit-cistern-stair",
+      "name": "Return to Crownwater (The Tide Cistern)",
+      "type": "map-transition",
+      "position": [
+        260.0,
+        0.05,
+        60.0
+      ],
+      "destinationMap": "crownwater",
+      "destinationSpawn": "default",
+      "radius": 2.5,
+      "section": "tide_cistern",
+      "authority": "server"
+    },
+    {
+      "id": "exit-customs-door",
+      "name": "Return to Crownwater (The Harbour Customs Hall)",
+      "type": "map-transition",
+      "position": [
+        250.0,
+        0.05,
+        261.0
+      ],
+      "destinationMap": "crownwater",
+      "destinationSpawn": "default",
+      "radius": 2.5,
+      "section": "customs_hall",
+      "authority": "server"
+    },
+    {
+      "id": "exit-campanile-door",
+      "name": "Return to Crownwater (The Tide Campanile)",
+      "type": "map-transition",
+      "position": [
+        60.0,
+        0.05,
+        300.0
+      ],
+      "destinationMap": "crownwater",
+      "destinationSpawn": "default",
+      "radius": 2.5,
+      "section": "tide_campanile",
+      "authority": "server"
+    },
+    {
+      "id": "exit-eleventh-bell-door",
+      "name": "Return to Crownwater (The Eleventh Bell)",
+      "type": "map-transition",
+      "position": [
+        338.0,
+        0.05,
+        60.0
+      ],
+      "destinationMap": "crownwater",
+      "destinationSpawn": "default",
+      "radius": 2.5,
+      "section": "eleventh_bell",
+      "authority": "server"
+    },
+    {
+      "id": "exit-case-room-door",
+      "name": "Return to Crownwater (The Case Room)",
+      "type": "map-transition",
+      "position": [
+        338.0,
+        0.05,
+        121.0
+      ],
+      "destinationMap": "crownwater",
+      "destinationSpawn": "default",
+      "radius": 2.5,
+      "section": "case_room",
+      "authority": "server"
+    },
+    {
+      "id": "exit-grating-mouth",
+      "name": "Return to Crownwater (The Grating)",
+      "type": "map-transition",
+      "position": [
+        338.0,
+        0.05,
+        180.0
+      ],
+      "destinationMap": "crownwater",
+      "destinationSpawn": "default",
+      "radius": 2.5,
+      "section": "the_grating",
+      "authority": "server"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "drowned_crown-drowned-crown-throne",
+      "name": "The Drowned Throne",
+      "space": "drowned_crown.crown_hall",
+      "position": [
+        86.0,
+        -6.2,
+        165.0
+      ]
+    },
+    {
+      "id": "drowned_crown-drowned-crown-altar",
+      "name": "The Shell Altar",
+      "space": "drowned_crown.shell_altar",
+      "position": [
+        47.0,
+        -6.6,
+        126.0
+      ]
+    },
+    {
+      "id": "drowned_crown-drowned-crown-oculus",
+      "name": "The Fallen Dome",
+      "space": "drowned_crown.collapsed_dome",
+      "position": [
+        21.0,
+        -6.0,
+        126.0
+      ]
+    },
+    {
+      "id": "tide_cistern-cistern-sluice",
+      "name": "The Sluice Gear",
+      "space": "tide_cistern.sluice_room",
+      "position": [
+        297.0,
+        -2.8,
+        99.0
+      ]
+    },
+    {
+      "id": "tide_cistern-cistern-basin",
+      "name": "The Tide Basin",
+      "space": "tide_cistern.basin",
+      "position": [
+        260.0,
+        -2.2,
+        99.0
+      ]
+    },
+    {
+      "id": "customs_hall-customs-ledger",
+      "name": "The Ledger Hall",
+      "space": "customs_hall.ledger_hall",
+      "position": [
+        250.0,
+        1.4,
+        261.0
+      ]
+    },
+    {
+      "id": "customs_hall-customs-strongroom",
+      "name": "The Bonded Strongroom",
+      "space": "customs_hall.strongroom",
+      "position": [
+        276.0,
+        0.4,
+        293.0
+      ]
+    },
+    {
+      "id": "customs_hall-customs-water-gate",
+      "name": "The Water Gate",
+      "space": "customs_hall.water_gate",
+      "position": [
+        250.0,
+        -1.0,
+        323.0
+      ]
+    },
+    {
+      "id": "tide_campanile-campanile-bell",
+      "name": "The Tide Bell",
+      "space": "tide_campanile.shaft",
+      "position": [
+        60.0,
+        22.0,
+        300.0
+      ]
+    },
+    {
+      "id": "eleventh_bell-crownwater_eleventh_bell-sanctuary",
+      "name": "The Eleventh Bell",
+      "space": "eleventh_bell.nave",
+      "position": [
+        338.0,
+        0.4,
+        82.0
+      ]
+    },
+    {
+      "id": "case_room-crownwater_case_room-hearth",
+      "name": "The Case Room",
+      "space": "case_room.hall",
+      "position": [
+        338.0,
+        1.4,
+        121.0
+      ]
+    },
+    {
+      "id": "the_grating-crownwater_grating-chamber",
+      "name": "The Grating",
+      "space": "the_grating.chamber",
+      "position": [
+        338.0,
+        -4.0,
+        231.0
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "drowned-crown-shell-altar",
+      "name": "Shell Altar",
+      "type": "altar",
+      "position": [
+        47.0,
+        -6.6,
+        126.0
+      ],
+      "authority": "server",
+      "section": "drowned_crown"
+    },
+    {
+      "id": "drowned-crown-sluice",
+      "name": "Palace Sluice",
+      "type": "mechanism",
+      "position": [
+        85.0,
+        -6.4,
+        107.0
+      ],
+      "authority": "server",
+      "section": "drowned_crown"
+    },
+    {
+      "id": "cistern-sluice-wheel",
+      "name": "Sluice Wheel",
+      "type": "mechanism",
+      "position": [
+        297.0,
+        -1.4,
+        99.0
+      ],
+      "authority": "server",
+      "section": "tide_cistern"
+    },
+    {
+      "id": "customs-ledger-desk",
+      "name": "Customs Ledger",
+      "type": "desk",
+      "position": [
+        245.0,
+        1.2,
+        260.0
+      ],
+      "authority": "server",
+      "section": "customs_hall"
+    },
+    {
+      "id": "customs-strongroom-door",
+      "name": "Strongroom Door",
+      "type": "door",
+      "position": [
+        270.3,
+        0.6,
+        293.0
+      ],
+      "authority": "server",
+      "section": "customs_hall"
+    },
+    {
+      "id": "campanile-bell-rope",
+      "name": "Bell Rope",
+      "type": "mechanism",
+      "position": [
+        61.6,
+        1.4,
+        300.0
+      ],
+      "authority": "server",
+      "section": "tide_campanile"
+    },
+    {
+      "id": "secret-crown-customs-cache",
+      "kind": "secret",
+      "secret": "crown-customs-cache",
+      "name": "The Customs Cache",
+      "label": "An iron drain grate, its bolts drawn.",
+      "prop": "drain_grate",
+      "key": "",
+      "destinationMap": "crownwater_secrets",
+      "destinationSpawn": "crown-customs-cache",
+      "position": [
+        252.5,
+        -0.8,
+        295.5
+      ],
+      "space": "customs_hall.bonded_store",
+      "authority": "server"
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "customs-officer",
+      "name": "Customs Officer",
+      "type": "npc",
+      "position": [
+        245.0,
+        0.0,
+        264.0
+      ],
+      "authority": "server",
+      "section": "customs_hall"
+    },
+    {
+      "id": "customs-lighterman",
+      "name": "Lighterman",
+      "type": "npc",
+      "position": [
+        260.0,
+        -1.6,
+        320.0
+      ],
+      "authority": "server",
+      "section": "customs_hall"
+    },
+    {
+      "id": "crownwater_grating-den",
+      "name": "Abyssal Armoured Fish",
+      "kind": "creature-zone",
+      "position": [
+        338.0,
+        -6.0,
+        231.0
+      ],
+      "radius": 12.0,
+      "section": "the_grating"
+    }
+  ],
+  "harvestables": [
+    {
+      "id": "cistern-freshwater",
+      "resource": "freshwater",
+      "position": [
+        260.0,
+        -3.35,
+        99.0
+      ],
+      "authority": "server",
+      "section": "tide_cistern"
+    }
+  ],
+  "environment": {
+    "sky": {
+      "type": "gradient",
+      "zenith": [
+        0.1,
+        0.2,
+        0.26
+      ],
+      "horizon": [
+        0.24,
+        0.36,
+        0.4
+      ]
+    },
+    "sun": {
+      "enabled": true,
+      "direction": [
+        -0.14,
+        -0.94,
+        0.31
+      ],
+      "color": [
+        0.92,
+        0.96,
+        0.96
+      ],
+      "energy": 0.95
+    },
+    "ambient": {
+      "color": [
+        0.34,
+        0.44,
+        0.48
+      ],
+      "energy": 0.88,
+      "skyContribution": 0.35
+    },
+    "fog": {
+      "enabled": true,
+      "color": [
+        0.2,
+        0.3,
+        0.34
+      ],
+      "density": 0.009
+    },
+    "openToSky": [
+      "drowned_crown.collapsed_dome"
+    ],
+    "lights": [
+      {
+        "id": "lantern-00",
+        "kind": "point",
+        "position": [
+          50.0,
+          2.98,
+          60.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-01",
+        "kind": "point",
+        "position": [
+          50.0,
+          -3.62,
+          87.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-02",
+        "kind": "point",
+        "position": [
+          85.0,
+          -4.22,
+          88.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-03",
+        "kind": "point",
+        "position": [
+          86.0,
+          -4.22,
+          126.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-04",
+        "kind": "point",
+        "position": [
+          47.0,
+          -5.02,
+          126.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-05",
+        "kind": "point",
+        "position": [
+          21.0,
+          -2.42,
+          97.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-06",
+        "kind": "point",
+        "position": [
+          86.0,
+          -4.62,
+          165.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-07",
+        "kind": "point",
+        "position": [
+          249.0,
+          3.0,
+          87.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-08",
+        "kind": "point",
+        "position": [
+          271.0,
+          3.0,
+          99.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-09",
+        "kind": "point",
+        "position": [
+          249.0,
+          3.0,
+          111.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-10",
+        "kind": "point",
+        "position": [
+          260.0,
+          -2.02,
+          82.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-11",
+        "kind": "point",
+        "position": [
+          260.0,
+          -2.02,
+          99.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-12",
+        "kind": "point",
+        "position": [
+          260.0,
+          -2.02,
+          116.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-13",
+        "kind": "point",
+        "position": [
+          297.0,
+          -2.22,
+          99.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-14",
+        "kind": "point",
+        "position": [
+          250.0,
+          3.98,
+          260.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-15",
+        "kind": "point",
+        "position": [
+          256.5,
+          4.78,
+          264.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-16",
+        "kind": "point",
+        "position": [
+          250.0,
+          4.18,
+          292.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-17",
+        "kind": "point",
+        "position": [
+          250.0,
+          3.58,
+          323.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-18",
+        "kind": "point",
+        "position": [
+          261.0,
+          2.58,
+          318.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-19",
+        "kind": "point",
+        "position": [
+          60.0,
+          8.08,
+          300.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-20",
+        "kind": "point",
+        "position": [
+          60.0,
+          17.83,
+          300.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-21",
+        "kind": "point",
+        "position": [
+          60.0,
+          21.28,
+          300.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-22",
+        "kind": "point",
+        "position": [
+          338.0,
+          2.78,
+          60.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-23",
+        "kind": "point",
+        "position": [
+          333.0,
+          2.98,
+          76.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-24",
+        "kind": "point",
+        "position": [
+          343.0,
+          2.98,
+          82.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-25",
+        "kind": "point",
+        "position": [
+          338.0,
+          3.38,
+          89.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-26",
+        "kind": "point",
+        "position": [
+          338.0,
+          2.28,
+          121.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-27",
+        "kind": "point",
+        "position": [
+          339.0,
+          1.98,
+          129.28
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-28",
+        "kind": "point",
+        "position": [
+          338.0,
+          2.58,
+          178.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-29",
+        "kind": "point",
+        "position": [
+          338.0,
+          -0.82,
+          201.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-30",
+        "kind": "point",
+        "position": [
+          330.0,
+          -2.42,
+          231.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lantern-31",
+        "kind": "point",
+        "position": [
+          346.0,
+          -2.42,
+          231.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 15.0,
+        "energy": 3.4,
+        "attenuation": 1.2
+      }
+    ]
+  },
+  "spaces": {
+    "drowned_crown.stairhead": {
+      "x0": 44.0,
+      "z0": 54.0,
+      "x1": 56.0,
+      "z1": 66.0,
+      "floor": 0.0,
+      "height": 5.0
+    },
+    "drowned_crown.flooded_vestibule": {
+      "x0": 40.0,
+      "z0": 78.0,
+      "x1": 60.0,
+      "z1": 96.0,
+      "floor": -6.5,
+      "height": 6.0
+    },
+    "drowned_crown.water_gallery": {
+      "x0": 74.0,
+      "z0": 76.0,
+      "x1": 96.0,
+      "z1": 100.0,
+      "floor": -7.2,
+      "height": 7.0
+    },
+    "drowned_crown.statue_court": {
+      "x0": 72.0,
+      "z0": 114.0,
+      "x1": 100.0,
+      "z1": 138.0,
+      "floor": -7.2,
+      "height": 8.5
+    },
+    "drowned_crown.shell_altar": {
+      "x0": 38.0,
+      "z0": 116.0,
+      "x1": 56.0,
+      "z1": 136.0,
+      "floor": -8.0,
+      "height": 6.5
+    },
+    "drowned_crown.collapsed_dome": {
+      "x0": 10.0,
+      "z0": 114.0,
+      "x1": 32.0,
+      "z1": 138.0,
+      "floor": -8.0,
+      "height": 13.0
+    },
+    "drowned_crown.air_pocket": {
+      "x0": 15.0,
+      "z0": 90.0,
+      "x1": 27.0,
+      "z1": 104.0,
+      "floor": -5.2,
+      "height": 4.4
+    },
+    "drowned_crown.crown_hall": {
+      "x0": 70.0,
+      "z0": 152.0,
+      "x1": 102.0,
+      "z1": 178.0,
+      "floor": -7.8,
+      "height": 10.0
+    },
+    "drowned_crown.descent": {
+      "x0": 47.8,
+      "z0": 63.8,
+      "x1": 52.2,
+      "z1": 80.2,
+      "floor": -6.5,
+      "height": 4.4
+    },
+    "drowned_crown.gallery_run": {
+      "x0": 57.9,
+      "z0": 84.9,
+      "x1": 76.1,
+      "z1": 89.1,
+      "floor": -7.2,
+      "height": 4.2
+    },
+    "drowned_crown.submerged_arch": {
+      "x0": 82.7,
+      "z0": 97.7,
+      "x1": 87.3,
+      "z1": 116.3,
+      "floor": -7.2,
+      "height": 4.6
+    },
+    "drowned_crown.altar_run": {
+      "x0": 54.0,
+      "z0": 124.0,
+      "x1": 74.0,
+      "z1": 128.0,
+      "floor": -8.0,
+      "height": 4.0
+    },
+    "drowned_crown.dome_run": {
+      "x0": 29.7,
+      "z0": 123.7,
+      "x1": 40.3,
+      "z1": 128.3,
+      "floor": -8.0,
+      "height": 4.4
+    },
+    "drowned_crown.air_stair": {
+      "x0": 19.0,
+      "z0": 102.0,
+      "x1": 23.0,
+      "z1": 116.0,
+      "floor": -8.0,
+      "height": 4.0
+    },
+    "drowned_crown.hall_run": {
+      "x0": 83.6,
+      "z0": 135.6,
+      "x1": 88.4,
+      "z1": 154.4,
+      "floor": -7.8,
+      "height": 5.0
+    },
+    "tide_cistern.wellhouse": {
+      "x0": 255.0,
+      "z0": 55.0,
+      "x1": 265.0,
+      "z1": 65.0,
+      "floor": 0.0,
+      "height": 4.4
+    },
+    "tide_cistern.basin": {
+      "x0": 234.0,
+      "z0": 76.0,
+      "x1": 286.0,
+      "z1": 122.0,
+      "floor": -4.0,
+      "height": 7.5
+    },
+    "tide_cistern.sluice_room": {
+      "x0": 290.0,
+      "z0": 90.0,
+      "x1": 304.0,
+      "z1": 108.0,
+      "floor": -4.0,
+      "height": 5.4
+    },
+    "tide_cistern.cistern_stair": {
+      "x0": 258.2,
+      "z0": 63.2,
+      "x1": 261.8,
+      "z1": 77.8,
+      "floor": -4.0,
+      "height": 3.6
+    },
+    "tide_cistern.sluice_run": {
+      "x0": 284.3,
+      "z0": 97.3,
+      "x1": 291.7,
+      "z1": 100.7,
+      "floor": -4.0,
+      "height": 3.4
+    },
+    "customs_hall.ledger_hall": {
+      "x0": 238.0,
+      "z0": 251.0,
+      "x1": 262.0,
+      "z1": 271.0,
+      "floor": 0.0,
+      "height": 6.4
+    },
+    "customs_hall.bonded_store": {
+      "x0": 236.0,
+      "z0": 280.0,
+      "x1": 264.0,
+      "z1": 306.0,
+      "floor": -0.8,
+      "height": 7.2
+    },
+    "customs_hall.strongroom": {
+      "x0": 270.0,
+      "z0": 286.0,
+      "x1": 282.0,
+      "z1": 300.0,
+      "floor": -0.8,
+      "height": 4.4
+    },
+    "customs_hall.water_gate": {
+      "x0": 234.0,
+      "z0": 312.0,
+      "x1": 266.0,
+      "z1": 334.0,
+      "floor": -2.6,
+      "height": 8.0
+    },
+    "customs_hall.store_run": {
+      "x0": 252.4,
+      "z0": 269.4,
+      "x1": 255.6,
+      "z1": 281.6,
+      "floor": -0.8,
+      "height": 3.6
+    },
+    "customs_hall.strong_run": {
+      "x0": 262.6,
+      "z0": 291.6,
+      "x1": 271.4,
+      "z1": 294.4,
+      "floor": -0.8,
+      "height": 3.0
+    },
+    "customs_hall.gate_run": {
+      "x0": 247.5,
+      "z0": 303.5,
+      "x1": 252.5,
+      "z1": 314.5,
+      "floor": -2.6,
+      "height": 4.6
+    },
+    "tide_campanile.shaft": {
+      "x0": 55.0,
+      "z0": 295.0,
+      "x1": 65.0,
+      "z1": 305.0,
+      "floor": 0.0,
+      "height": 26.0
+    },
+    "eleventh_bell.porch": {
+      "x0": 334.0,
+      "z0": 56.0,
+      "x1": 342.0,
+      "z1": 64.0,
+      "floor": 0.0,
+      "height": 4.2
+    },
+    "eleventh_bell.nave": {
+      "x0": 330.0,
+      "z0": 72.0,
+      "x1": 346.0,
+      "z1": 92.0,
+      "floor": -1.2,
+      "height": 7.0
+    },
+    "eleventh_bell.aisle": {
+      "x0": 336.4,
+      "z0": 62.4,
+      "x1": 339.6,
+      "z1": 73.6,
+      "floor": -1.2,
+      "height": 3.6
+    },
+    "case_room.hall": {
+      "x0": 333.0,
+      "z0": 116.0,
+      "x1": 343.0,
+      "z1": 126.0,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "case_room.back": {
+      "x0": 335.0,
+      "z0": 126.55,
+      "x1": 343.0,
+      "z1": 132.0,
+      "floor": 0.0,
+      "height": 3.0
+    },
+    "the_grating.mouth": {
+      "x0": 332.0,
+      "z0": 174.0,
+      "x1": 344.0,
+      "z1": 186.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "the_grating.throat": {
+      "x0": 333.0,
+      "z0": 196.0,
+      "x1": 343.0,
+      "z1": 206.0,
+      "floor": -3.6,
+      "height": 5.6
+    },
+    "the_grating.chamber": {
+      "x0": 322.0,
+      "z0": 216.0,
+      "x1": 354.0,
+      "z1": 246.0,
+      "floor": -6.0,
+      "height": 11.0
+    },
+    "the_grating.descent": {
+      "x0": 335.6,
+      "z0": 183.6,
+      "x1": 340.4,
+      "z1": 198.4,
+      "floor": -3.6,
+      "height": 4.4
+    },
+    "the_grating.gullet": {
+      "x0": 335.7,
+      "z0": 203.7,
+      "x1": 340.3,
+      "z1": 218.3,
+      "floor": -6.0,
+      "height": 4.4
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../../crownwater/references/00-concept-detail-board.png",
+    "role": "parent-region board; only drowned_crown has its own concept",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "drowned_crown.flooded_vestibule",
+      "drowned_crown.water_gallery",
+      "drowned_crown.submerged_arch",
+      "drowned_crown.shell_altar",
+      "drowned_crown.statue_court",
+      "drowned_crown.gallery_run",
+      "drowned_crown.collapsed_dome",
+      "drowned_crown.air_pocket",
+      "drowned_crown.crown_hall",
+      "drowned_crown.shell_altar",
+      "tide_cistern.basin",
+      "tide_cistern.basin",
+      "tide_cistern.basin",
+      "tide_cistern.sluice_room",
+      "customs_hall.ledger_hall",
+      "customs_hall.bonded_store",
+      "customs_hall.strongroom",
+      "customs_hall.water_gate",
+      "tide_campanile.shaft",
+      "tide_campanile.shaft",
+      "tide_campanile.shaft",
+      "eleventh_bell.the porch",
+      "eleventh_bell.the nave",
+      "eleventh_bell.the sanctuary",
+      "case_room.the hall and hearth",
+      "case_room.the chandlery",
+      "the_grating.cave mouth from within",
+      "the_grating.the descent",
+      "the_grating.the chamber"
+    ]
+  },
+  "performance": {
+    "nodes": 30,
+    "meshes": 29,
+    "materials": 21,
+    "images": 58,
+    "textures": 58,
+    "accessors": 145,
+    "bufferViews": 203,
+    "uniqueTriangles": 85780,
+    "uniqueVertices": 86465,
+    "glbBytes": 11403824,
+    "nodeNames": [
+      "Interior_crownwater_insides",
+      "Roof_crownwater_insides_ashlar",
+      "Roof_crownwater_insides_crownwater_marble",
+      "Roof_crownwater_insides_rubble_stone",
+      "Roof_crownwater_insides_timber_dark",
+      "Build_crownwater_insides_amber_resin",
+      "Build_crownwater_insides_ashlar",
+      "Build_crownwater_insides_canvas_awning",
+      "Build_crownwater_insides_carved_wood",
+      "Build_crownwater_insides_crownwater_gilt",
+      "Build_crownwater_insides_crownwater_marble",
+      "Build_crownwater_insides_crownwater_mosaic",
+      "Build_crownwater_insides_crownwater_verdigris",
+      "Build_crownwater_insides_dark_iron",
+      "Build_crownwater_insides_lime_plaster",
+      "Build_crownwater_insides_pale_ashlar",
+      "Build_crownwater_insides_rubble_stone",
+      "Build_crownwater_insides_timber_dark",
+      "Build_crownwater_insides_timber_grey",
+      "Build_crownwater_insides_timber_warm",
+      "Build_crownwater_insides_water_deep",
+      "Build_crownwater_insides_water_pool",
+      "Build_crownwater_insides_woven_cloth",
+      "Walk_cobble_paving",
+      "Walk_crownwater_marble",
+      "Walk_crownwater_mosaic",
+      "Walk_crownwater_sand",
+      "Walk_packed_earth",
+      "Walk_rubble_stone",
+      "Walk_timber_warm"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260901
+    },
+    {
+      "id": "anchor",
+      "landmark": "crownwater-cathedral",
+      "position": [
+        114.0,
+        18.09,
+        -132.0
+      ],
+      "role": "surface entrance on the Crownwater region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the Crownwater region kit over the shared toolkit; no scattered placement",
+    "textures": "procedural, from amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "[drowned_crown] Water level is held at y = -6.05 throughout; rooms step down beneath it rather than the water rising to meet them.",
+    "[tide_campanile] Modelled as one 26 m shaft with flights and landings added as walk geometry, not as stacked chambers.",
+    "[tide_campanile] The ringing floor and belfry gallery are annular. The client places an actor on the first surface a downward ray meets, so a full-footprint deck would ground every placement in the tower on the topmost floor. A player can still WALK the stair normally - only placement is single-layer - but no spawn or portal may sit beneath a deck.",
+    "[eleventh_bell] Built from the shared small-room kit: a cut sanctuary in the lantern manner.",
+    "[case_room] Built from the shared small-room kit: a hall with a hearth and a back room for its trade (chandlery).",
+    "[the_grating] Built from the shared small-room kit: mouth, throat and chamber, dressed for the region above it.",
+    "Four insides on one map with blackspace between them, following amethyst_barrens_insides. Cells between sections are zero in collision.bin because no Walk_ surface covers them - the void is not drawn, it is simply the absence of floor."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Not opened in Godot: no client is installable in the build environment, so collision response, navmesh generation, portal transition, LOD and transparency sorting are unverified.",
+    "eloria-server has not registered these map keys.",
+    "One environment block serves four sections of different character; the per-section lamps carry most of the lighting difference."
+  ],
+  "sections": [
+    {
+      "id": "drowned_crown",
+      "name": "The Drowned Crown",
+      "class": "dungeon",
+      "spawn": "basilica-undercroft",
+      "entrance": "drowned_crown.stairhead",
+      "offset": [
+        50.0,
+        60.0
+      ],
+      "arrival": [
+        50.0,
+        0.05,
+        60.0
+      ],
+      "bounds": {
+        "min": [
+          10.0,
+          54.0
+        ],
+        "max": [
+          102.0,
+          178.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          44.0,
+          54.0
+        ],
+        "max": [
+          56.0,
+          66.0
+        ]
+      },
+      "surfaceLandmark": "crownwater-cathedral"
+    },
+    {
+      "id": "tide_cistern",
+      "name": "The Tide Cistern",
+      "class": "utility",
+      "spawn": "cistern-stair",
+      "entrance": "tide_cistern.wellhouse",
+      "offset": [
+        260.0,
+        60.0
+      ],
+      "arrival": [
+        260.0,
+        0.05,
+        60.0
+      ],
+      "bounds": {
+        "min": [
+          234.0,
+          55.0
+        ],
+        "max": [
+          304.0,
+          122.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          255.0,
+          55.0
+        ],
+        "max": [
+          265.0,
+          65.0
+        ]
+      },
+      "surfaceLandmark": "crownwater-pavilion-pavilion_west"
+    },
+    {
+      "id": "customs_hall",
+      "name": "The Harbour Customs Hall",
+      "class": "settlement",
+      "spawn": "customs-door",
+      "entrance": "customs_hall.ledger_hall",
+      "offset": [
+        250.0,
+        260.0
+      ],
+      "arrival": [
+        250.0,
+        0.05,
+        261.0
+      ],
+      "bounds": {
+        "min": [
+          234.0,
+          251.0
+        ],
+        "max": [
+          282.0,
+          334.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          238.0,
+          251.0
+        ],
+        "max": [
+          262.0,
+          271.0
+        ]
+      },
+      "surfaceLandmark": "crownwater-customs-hall"
+    },
+    {
+      "id": "tide_campanile",
+      "name": "The Tide Campanile",
+      "class": "tower",
+      "spawn": "campanile-door",
+      "entrance": "tide_campanile.shaft",
+      "offset": [
+        60.0,
+        300.0
+      ],
+      "arrival": [
+        60.0,
+        0.05,
+        300.0
+      ],
+      "bounds": {
+        "min": [
+          55.0,
+          295.0
+        ],
+        "max": [
+          65.0,
+          305.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          55.0,
+          295.0
+        ],
+        "max": [
+          65.0,
+          305.0
+        ]
+      },
+      "surfaceLandmark": "crownwater-campanile"
+    },
+    {
+      "id": "eleventh_bell",
+      "name": "The Eleventh Bell",
+      "class": "shrine",
+      "spawn": "eleventh-bell-door",
+      "entrance": "eleventh_bell.porch",
+      "offset": [
+        338.0,
+        60.0
+      ],
+      "arrival": [
+        338.0,
+        0.05,
+        60.0
+      ],
+      "bounds": {
+        "min": [
+          330.0,
+          56.0
+        ],
+        "max": [
+          346.0,
+          92.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          334.0,
+          56.0
+        ],
+        "max": [
+          342.0,
+          64.0
+        ]
+      },
+      "surfaceLandmark": "crownwater-pavilion-pavilion_northeast"
+    },
+    {
+      "id": "case_room",
+      "name": "The Case Room",
+      "class": "dwelling",
+      "spawn": "case-room-door",
+      "entrance": "case_room.hall",
+      "offset": [
+        338.0,
+        120.0
+      ],
+      "arrival": [
+        338.0,
+        0.05,
+        121.0
+      ],
+      "bounds": {
+        "min": [
+          333.0,
+          116.0
+        ],
+        "max": [
+          343.0,
+          132.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          333.0,
+          116.0
+        ],
+        "max": [
+          343.0,
+          126.0
+        ]
+      },
+      "surfaceLandmark": "crownwater-pavilion-pavilion_east"
+    },
+    {
+      "id": "the_grating",
+      "name": "The Grating",
+      "class": "cave",
+      "spawn": "grating-mouth",
+      "entrance": "the_grating.mouth",
+      "offset": [
+        338.0,
+        180.0
+      ],
+      "arrival": [
+        338.0,
+        0.05,
+        180.0
+      ],
+      "bounds": {
+        "min": [
+          322.0,
+          174.0
+        ],
+        "max": [
+          354.0,
+          246.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          332.0,
+          174.0
+        ],
+        "max": [
+          344.0,
+          186.0
+        ]
+      },
+      "surfaceLandmark": "crownwater-pavilion-pavilion_south"
+    }
+  ],
+  "externalResources": {
+    "../../../_shared/images/018671435a95b7c86b0d29b83763ea7fa04f36d1850ba3cbaf9c625ab6730aab.png": "018671435a95b7c86b0d29b83763ea7fa04f36d1850ba3cbaf9c625ab6730aab",
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d.png": "06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d",
+    "../../../_shared/images/0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0.png": "0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0",
+    "../../../_shared/images/0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f.png": "0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f",
+    "../../../_shared/images/12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1.png": "12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1",
+    "../../../_shared/images/147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed.png": "147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621.png": "1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621",
+    "../../../_shared/images/1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f.png": "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f",
+    "../../../_shared/images/222923069c53612b70a30a0645d409a9d0459377f63c85ef6beef7c210313482.png": "222923069c53612b70a30a0645d409a9d0459377f63c85ef6beef7c210313482",
+    "../../../_shared/images/2334276da8ac075a59e7126393b9e7f2792eaaec3ac702872753edcc9847ad2e.png": "2334276da8ac075a59e7126393b9e7f2792eaaec3ac702872753edcc9847ad2e",
+    "../../../_shared/images/29cf3e77438a371afb144e2cb4340e21be201241893f412c38d075b268774535.png": "29cf3e77438a371afb144e2cb4340e21be201241893f412c38d075b268774535",
+    "../../../_shared/images/2c6bbced40ac480a1c162af7c96741aad40da8bbf7012b8fc213482a967432c3.png": "2c6bbced40ac480a1c162af7c96741aad40da8bbf7012b8fc213482a967432c3",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0.png": "303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0",
+    "../../../_shared/images/325ed686de27437c35eddc9d8928a7d68cc5d249c555a1cefeeac613fff7d2dd.png": "325ed686de27437c35eddc9d8928a7d68cc5d249c555a1cefeeac613fff7d2dd",
+    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348.png": "44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348",
+    "../../../_shared/images/4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4.png": "4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4",
+    "../../../_shared/images/4e6e10185da2279e2d47a45f3fa8e145e44ccb1a200cea4f8368c026c3a6c184.png": "4e6e10185da2279e2d47a45f3fa8e145e44ccb1a200cea4f8368c026c3a6c184",
+    "../../../_shared/images/4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22.png": "4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22",
+    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
+    "../../../_shared/images/579f02c4192b9fbf78d17a1070b250350c6493698a7d130d4598298531ad864e.png": "579f02c4192b9fbf78d17a1070b250350c6493698a7d130d4598298531ad864e",
+    "../../../_shared/images/5b7a93a3f5763c18543cee2f6e29aebda01531d85331e6e5be14e019401d05c3.png": "5b7a93a3f5763c18543cee2f6e29aebda01531d85331e6e5be14e019401d05c3",
+    "../../../_shared/images/5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843.png": "5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843",
+    "../../../_shared/images/71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac.png": "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac",
+    "../../../_shared/images/7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23.png": "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/80525d639f92fecd074943c8b4583049677f5eb3deda1e27deac54283a16fbf2.png": "80525d639f92fecd074943c8b4583049677f5eb3deda1e27deac54283a16fbf2",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/8866a23ceb1476153132c00a6618040e3c9371397a7ceb5be993bdd46746b6ef.png": "8866a23ceb1476153132c00a6618040e3c9371397a7ceb5be993bdd46746b6ef",
+    "../../../_shared/images/8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c.png": "8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c",
+    "../../../_shared/images/90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a.png": "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a",
+    "../../../_shared/images/95436cf72c368fc61d29bedeca68007496b6a6651fcf40ffddd9fc1e0e64fc08.png": "95436cf72c368fc61d29bedeca68007496b6a6651fcf40ffddd9fc1e0e64fc08",
+    "../../../_shared/images/9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be.png": "9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be",
+    "../../../_shared/images/a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e.png": "a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e",
+    "../../../_shared/images/a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0.png": "a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0",
+    "../../../_shared/images/a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c.png": "a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e.png": "ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e",
+    "../../../_shared/images/af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2.png": "af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2",
+    "../../../_shared/images/b31299f9fe199ad5d52a01c25ba8246dcf399a22459e800b894c74ab6c65a92f.png": "b31299f9fe199ad5d52a01c25ba8246dcf399a22459e800b894c74ab6c65a92f",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/c5c809b7a098674301b6c06bdd9de9d86728387d86ae86a1997631c536c228af.png": "c5c809b7a098674301b6c06bdd9de9d86728387d86ae86a1997631c536c228af",
+    "../../../_shared/images/c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd.png": "c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd",
+    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/cdb8129af7e653be1fc0e989c598d7064a068e6898fc742984f6f8b378ade2d3.png": "cdb8129af7e653be1fc0e989c598d7064a068e6898fc742984f6f8b378ade2d3",
+    "../../../_shared/images/cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae.png": "cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae",
+    "../../../_shared/images/d4f7f86d98cf2675ebcd2bc4ce47553a18dccb278f54b6aeb835adfefe5169d3.png": "d4f7f86d98cf2675ebcd2bc4ce47553a18dccb278f54b6aeb835adfefe5169d3",
+    "../../../_shared/images/d6eaed8cf04e59d32779c2f49f64fd1b8ab69f0cb2e1226cbe2f78a8d6e057a4.png": "d6eaed8cf04e59d32779c2f49f64fd1b8ab69f0cb2e1226cbe2f78a8d6e057a4",
+    "../../../_shared/images/da444272386373a231b47c6ab1d2105130aac3bfc2c84db78f3ebf4347b7ac99.png": "da444272386373a231b47c6ab1d2105130aac3bfc2c84db78f3ebf4347b7ac99",
+    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
+    "../../../_shared/images/f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c.png": "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c",
+    "../../../_shared/images/ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65.png": "ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65"
+  }
+}

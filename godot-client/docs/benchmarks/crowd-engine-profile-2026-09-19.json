@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-19",
+  "diagnosticOnly": true,
+  "fixture": {
+    "cell": "acceptance-mixed300",
+    "actors": 300,
+    "nativeBackend": "gdscript",
+    "nativePresentation": "All",
+    "benchmarkCommit": "359028002a081d4c66520d08047a9db7633baf2f",
+    "benchmarkSourceHash": "978b9a7d2233514a71e4a2e33f3ce6ce2887504c152beb14530ff979d05be1e4",
+    "candidateCommit": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+    "candidateSourceHash": "878a0bcc850ff29fdd55ba94d7e1fb58387a420ab99852fe00bf88f57d017723"
+  },
+  "engine": {
+    "officialRuntimeVersion": "4.7.2.stable.official.ed1daf0bf",
+    "sourceCommit": "ed1daf0bf001b61586d9930840f2f1394092c079",
+    "sourceArchiveSha256": "a18ce0ccec3ecc40b0dd6c4f5132ca934e9fb7c2979717940ff32aee1eb35481",
+    "profileRuntimeVersion": "4.7.2.stable.custom_build.ed1daf0bf",
+    "profileRuntimeSha256": "0e8401142bfafcd268d68ea382116741dc7341a4d95fa871b71044e86821ab32",
+    "target": "template_release",
+    "production": true,
+    "debugSymbols": "embedded DWARF",
+    "tracy": "0.13.0",
+    "callstackSampling": false,
+    "systemTracing": false,
+    "retainedRenderers": ["gl_compatibility", "forward_plus"],
+    "disabledRenderers": ["d3d12", "angle"]
+  },
+  "host": {
+    "os": "Windows 11 Pro 10.0.26100 build 26100",
+    "cpu": "Intel Core Ultra 9 275HX",
+    "physicalCores": 24,
+    "logicalProcessors": 24,
+    "affinityMask": 15,
+    "affinityLogicalProcessors": [0, 1, 2, 3],
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "gpuDriver": "32.0.15.9191",
+    "interference": "shared host; unrelated Godot jobs authorized; activity not continuously monitored"
+  },
+  "timingSemantics": "Zone values are wall-clock spans clipped to trace-native sample markers, so they can include scheduling, preemption and waits and are not CPU-cycle accounting. Inclusive values overlap when zones are nested and must not be added. Default Tracy CSV exec_time_ns is inclusive; in -e exports it is exclusive duration. Self time excludes boundary-crossing events because that exclusive duration is not a contiguous interval. Results use the production scheduling fixture but a custom optimized profiling engine, so they are diagnostic and are not official-runtime acceptance measurements.",
+  "sessions": {
+    "headless": {
+      "renderer": "gl_compatibility",
+      "traceSession": "test-artifacts/engine-profile/captures/20260919T174250149Z-headless-gl_compatibility",
+      "traceFile": "crowd-primary-headless-gl_compatibility.tracy",
+      "traceBytes": 94314721,
+      "traceSha256": "98cc339dd4b21c59c5de4b1f4392e93bcbb81cd7b844de565cbd9d7bb9cd8fa3",
+      "disconnectedReport": "test-artifacts/native-crowd/engine-tracy-headless-all-v2-disconnected-primary-gdscript-gl_compatibility-headless-trial1-20260919T173828181Z.json",
+      "capturedReport": "test-artifacts/native-crowd/engine-tracy-headless-all-v4-captured-primary-gdscript-gl_compatibility-headless-trial1-20260919T174252313Z.json",
+      "disconnectedWallMilliseconds": {
+        "frames": 543,
+        "mean": 18.348,
+        "p50": 16.703,
+        "p95": 30.113,
+        "p99": 41.185,
+        "max": 45.767
+      },
+      "capturedWallMilliseconds": {
+        "frames": 522,
+        "mean": 19.091,
+        "p50": 17.564,
+        "p95": 30.385,
+        "p99": 42.093,
+        "max": 44.666
+      },
+      "markerWindow": {
+        "traceMilliseconds": 10011.475637,
+        "processFrames": 522,
+        "startProcessFrame": 14352,
+        "endProcessFrame": 14874
+      },
+      "zonesMillisecondsPerProcessFrame": [
+        {"name": "Main::iteration", "count": 523, "inclusive": 19.177069, "self": 0.001153},
+        {"name": "SceneTree::_process", "count": 1125, "inclusive": 16.767478, "self": 0.001618},
+        {"name": "SceneTree::_process_group", "count": 1125, "inclusive": 16.76586, "self": 0.28552},
+        {"name": "AnimationMixer::_process_animation", "count": 78300, "inclusive": 3.727162, "self": 0.920469},
+        {"name": "AnimationMixer::_blend_process", "count": 78300, "inclusive": 2.181961, "self": 2.181961},
+        {"name": "AnimationMixer::_blend_apply", "count": 78300, "inclusive": 0.621776, "self": 0.621776},
+        {"name": "Skeleton3D::NOTIFICATION_UPDATE_SKELETON", "count": 156600, "inclusive": 7.956355, "self": 0.567425},
+        {"name": "Skeleton3D::_process_modifiers", "count": 156600, "inclusive": 3.237962, "self": 0.298187},
+        {"name": "Skeleton3D::emit_skeleton_updated", "count": 78300, "inclusive": 2.297619, "self": 0.297284},
+        {"name": "Skeleton3D::_force_update_all_bone_transforms", "count": 123714, "inclusive": 0.992541, "self": 0.992541},
+        {"name": "Skeleton3D::update_skins", "count": 78300, "inclusive": 0.9185, "self": 0.9185},
+        {"name": "_process_modification_with_delta", "sourceFile": "res://src/actors/cape_cloth.gd", "count": 39150, "inclusive": 2.76915, "self": 0.175299},
+        {"name": "_process_modification_with_delta", "sourceFile": "res://src/actors/weapon_carry_pose.gd", "count": 19836, "inclusive": 0.112934, "self": 0.09387},
+        {"name": "update_pose", "sourceFile": "res://src/actors/combat_presentation_3d.gd", "count": 47455, "inclusive": 2.090929, "self": 0.570818},
+        {"name": "update_pose", "sourceFile": "res://src/actors/replicated_actor_3d.gd", "count": 375, "inclusive": 0.041861, "self": 0.000138},
+        {"name": "RenderingServer::draw", "count": 522, "inclusive": 0.001815, "self": 0.001815},
+        {"name": "RenderingServer::sync", "count": 522, "inclusive": 0.000742, "self": 0.000742},
+        {"name": "OS::add_frame_delay", "count": 522, "inclusive": 0.001317, "self": 0.001317}
+      ]
+    },
+    "forwardPlus": {
+      "renderer": "forward_plus",
+      "renderingDevice": "NVIDIA GeForce RTX 5080 Laptop GPU",
+      "traceSession": "test-artifacts/engine-profile/captures/20260919T174812814Z-windowed-forward_plus",
+      "traceFile": "crowd-primary-windowed-forward_plus.tracy",
+      "traceBytes": 49957148,
+      "traceSha256": "a4767d5e774754171388908367460bc6c6a3e2c8ede38d9180452e5f2d67ff1a",
+      "disconnectedReport": "test-artifacts/native-crowd/engine-tracy-forward-all-disconnected-primary-gdscript-forward_plus-windowed-trial1-20260919T174814451Z.json",
+      "capturedReport": "test-artifacts/native-crowd/engine-tracy-forward-all-captured-primary-gdscript-forward_plus-windowed-trial1-20260919T174854646Z.json",
+      "disconnectedWallMilliseconds": {
+        "frames": 232,
+        "mean": 43.064,
+        "p50": 40.328,
+        "p95": 71.299,
+        "p99": 88.904,
+        "max": 95.942
+      },
+      "capturedWallMilliseconds": {
+        "frames": 220,
+        "mean": 45.403,
+        "p50": 43.049,
+        "p95": 70.23,
+        "p99": 81.812,
+        "max": 86.208
+      },
+      "markerWindow": {
+        "traceMilliseconds": 10015.483368,
+        "processFrames": 220,
+        "startProcessFrame": 481,
+        "endProcessFrame": 701
+      },
+      "zonesMillisecondsPerProcessFrame": [
+        {"name": "Main::iteration", "count": 221, "inclusive": 45.51168, "self": 0.001107},
+        {"name": "SceneTree::_process", "count": 825, "inclusive": 26.138435, "self": 0.00288},
+        {"name": "SceneTree::_process_group", "count": 825, "inclusive": 26.135555, "self": 0.377762},
+        {"name": "AnimationMixer::_process_animation", "count": 33000, "inclusive": 4.834622, "self": 1.787682},
+        {"name": "AnimationMixer::_blend_process", "count": 33000, "inclusive": 2.40727, "self": 2.40727},
+        {"name": "AnimationMixer::_blend_apply", "count": 33000, "inclusive": 0.632046, "self": 0.632046},
+        {"name": "Skeleton3D::NOTIFICATION_UPDATE_SKELETON", "count": 66000, "inclusive": 9.332075, "self": 0.610897},
+        {"name": "Skeleton3D::_process_modifiers", "count": 66000, "inclusive": 3.613375, "self": 0.304155},
+        {"name": "Skeleton3D::emit_skeleton_updated", "count": 33000, "inclusive": 2.848612, "self": 0.309745},
+        {"name": "Skeleton3D::_force_update_all_bone_transforms", "count": 52140, "inclusive": 1.025354, "self": 1.025354},
+        {"name": "Skeleton3D::update_skins", "count": 33000, "inclusive": 1.298716, "self": 1.298716},
+        {"name": "RenderingServer::draw", "count": 220, "inclusive": 13.12629, "self": 0.0043},
+        {"name": "driver->fence_wait", "count": 766, "inclusive": 3.672052, "self": 3.672052},
+        {"name": "_stall_for_frame", "count": 766, "inclusive": 0.859773, "self": 0.000936},
+        {"name": "RenderingServer::sync", "count": 220, "inclusive": 0.000787, "self": 0.000787},
+        {"name": "OS::add_frame_delay", "count": 220, "inclusive": 0.001887, "self": 0.001887}
+      ]
+    }
+  },
+  "skinInterningCandidate": {
+    "commit": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+    "sourceHash": "878a0bcc850ff29fdd55ba94d7e1fb58387a420ab99852fe00bf88f57d017723",
+    "headless": {
+      "traceSession": "test-artifacts/engine-profile/captures/20260919T180754135Z-headless-gl_compatibility",
+      "traceFile": "crowd-primary-headless-gl_compatibility.tracy",
+      "traceBytes": 91438656,
+      "traceSha256": "3c5670a54b1d6b2e3eac9f11d464bade247d76efaf4be7a908fa51cd0becfaa5",
+      "capturedReport": "test-artifacts/native-crowd/engine-tracy-skin-intern-candidate-captured-primary-gdscript-gl_compatibility-headless-trial1-20260919T180756803Z.json",
+      "processId": 4208,
+      "cleanExit": true,
+      "reportValid": true,
+      "wallMilliseconds": {"frames": 541, "mean": 18.433, "p50": 16.823, "p95": 28.78, "p99": 42.97, "max": 53.985},
+      "markerWindow": {"traceMilliseconds": 10019.805561, "processFrames": 541, "startProcessFrame": 11949, "endProcessFrame": 12490},
+      "zonesMillisecondsPerProcessFrame": [
+        {"name": "Main::iteration", "count": 542, "inclusive": 18.519016, "self": 0.001051},
+        {"name": "SceneTree::_process", "count": 1144, "inclusive": 16.174965, "self": 0.001649},
+        {"name": "AnimationMixer::_process_animation", "count": 81150, "inclusive": 3.762662, "self": 0.929708},
+        {"name": "Skeleton3D::NOTIFICATION_UPDATE_SKELETON", "count": 162300, "inclusive": 7.326013, "self": 0.568801},
+        {"name": "Skeleton3D::_process_modifiers", "count": 162300, "inclusive": 3.166792, "self": 0.286643},
+        {"name": "Skeleton3D::emit_skeleton_updated", "count": 81150, "inclusive": 2.282253, "self": 0.293748},
+        {"name": "Skeleton3D::_force_update_all_bone_transforms", "count": 128217, "inclusive": 0.964227, "self": 0.964227},
+        {"name": "Skeleton3D::update_skins", "count": 81150, "inclusive": 0.402563, "self": 0.402563},
+        {"name": "RenderingServer::draw", "count": 541, "inclusive": 0.001693, "self": 0.001693}
+      ]
+    },
+    "forwardPlus": {
+      "traceSession": "test-artifacts/engine-profile/captures/20260919T180930579Z-windowed-forward_plus",
+      "traceFile": "crowd-primary-windowed-forward_plus.tracy",
+      "traceBytes": 52141647,
+      "traceSha256": "a523adf93bb9f4e7809c9bdb4e2790e1fba5768dc48868067ad5e45271d9a19a",
+      "capturedReport": "test-artifacts/native-crowd/engine-tracy-skin-intern-candidate-captured-primary-gdscript-forward_plus-windowed-trial1-20260919T180933268Z.json",
+      "processId": 23556,
+      "cleanExit": true,
+      "reportValid": true,
+      "wallMilliseconds": {"frames": 259, "mean": 38.585, "p50": 36.61, "p95": 62.348, "p99": 67.926, "max": 70.495},
+      "markerWindow": {"traceMilliseconds": 10023.751824, "processFrames": 259, "startProcessFrame": 487, "endProcessFrame": 746},
+      "zonesMillisecondsPerProcessFrame": [
+        {"name": "Main::iteration", "count": 260, "inclusive": 38.689236, "self": 0.001252},
+        {"name": "SceneTree::_process", "count": 863, "inclusive": 22.087274, "self": 0.002674},
+        {"name": "AnimationMixer::_process_animation", "count": 38850, "inclusive": 4.124957, "self": 1.413587},
+        {"name": "Skeleton3D::NOTIFICATION_UPDATE_SKELETON", "count": 77700, "inclusive": 7.776159, "self": 0.577259},
+        {"name": "Skeleton3D::_process_modifiers", "count": 77700, "inclusive": 3.177735, "self": 0.295285},
+        {"name": "Skeleton3D::emit_skeleton_updated", "count": 38850, "inclusive": 2.59131, "self": 0.298713},
+        {"name": "Skeleton3D::_force_update_all_bone_transforms", "count": 61383, "inclusive": 0.959325, "self": 0.959325},
+        {"name": "Skeleton3D::update_skins", "count": 38850, "inclusive": 0.528862, "self": 0.528862},
+        {"name": "RenderingServer::draw", "count": 259, "inclusive": 11.682105, "self": 0.004241},
+        {"name": "driver->fence_wait", "count": 839, "inclusive": 2.9013, "self": 2.9013}
+      ]
+    },
+    "componentDeltasMillisecondsPerProcessFrame": {
+      "headless": {
+        "updateSkins": {"baseline": 0.9185, "candidate": 0.402563, "delta": -0.515937, "percent": -56.17},
+        "skeletonNotification": {"baseline": 7.956355, "candidate": 7.326013, "delta": -0.630342, "percent": -7.92},
+        "mainIteration": {"baseline": 19.177069, "candidate": 18.519016, "delta": -0.658053, "percent": -3.43}
+      },
+      "forwardPlus": {
+        "updateSkins": {"baseline": 1.298716, "candidate": 0.528862, "delta": -0.769854, "percent": -59.28},
+        "skeletonNotification": {"baseline": 9.332075, "candidate": 7.776159, "delta": -1.555915, "percent": -16.67},
+        "mainIteration": {"baseline": 45.51168, "candidate": 38.689236, "delta": -6.822445, "percent": -14.99}
+      }
+    },
+    "interpretation": "The direct update_skins span falls by 56-59% with identical 150-call/frame cadence in both renderers. Broader Forward+ changes also contain run and shared-host variation, as shown by simultaneous changes in animation, renderer draw and fence waits."
+  },
+  "skinCensus": {
+    "baseline": {"meshInstances": 1500, "sumActorDistinctSkins": 1500, "sumActorDistinctSkinContents": 450, "globalDistinctSkinContents": 3, "sumActorDeduplicatedBindCount": 115500, "sumActorDeduplicatedContentBindCount": 34650},
+    "candidate": {"meshInstances": 1500, "sumActorDistinctSkins": 450, "sumActorDistinctSkinContents": 450, "globalDistinctSkinContents": 3, "sumActorDeduplicatedBindCount": 34650, "sumActorDeduplicatedContentBindCount": 34650},
+    "interpretation": "Exact-content interning removes redundant Skin identities and bind arrays while preserving the measured content groups. Its direct zone reduction is meaningful but remains only part of the 60 FPS gap."
+  },
+  "tools": {
+    "csvExporterSha256": "345f15cdeeadee9aeba5681c72af1af1129a611204971db1ee52e35bba93c519",
+    "analyzerSha256": "f082f9e05804eb38a911119b262b03afd9bcdec97bd6412dc0cc2353698c9d0c",
+    "finalizerSha256": "df7de779b789c727d40d75014e526b263f32de8e71a124055fcfc41682f432a7",
+    "runnerSha256": "7cea31033b8a065bd1a4f7190694da8d5d2e51e6a60806adaad28ddc84e729a8",
+    "buildConfigSha256": "652ab8cda6cc037e51efe7c132c324c883d661d8578edcb8fb3cef2c27a0a138",
+    "enginePatchSha256": "fcc562da8318f8962759d8bc5f8e6f9bdabed8457295f636b34cea25bd7f716b",
+    "tracySleepPatchSha256": "f0d1653b88eb6b00d00f9a1eeadcb1dd7289954648fc9796985dbc5edede9ba7"
+  },
+  "limitations": [
+    "This custom production template is optimized differently from the checked-in official editor/debug-enabled executable; cross-engine wall-time differences are not optimization evidence.",
+    "The captured/disconnected gaps combine potential Tracy recording overhead with shared-host variation and do not isolate either effect.",
+    "Named-zone wall-clock timing is available; sampled call stacks and system tracing are disabled after a reproducible MinGW/Tracy worker failure.",
+    "Forward+ draw and fence waits overlap nested engine work and must remain separate from CPU-stage totals.",
+    "Skin update duration is an upper bound on exact-content pooling benefit; resource sharing cannot remove all work inside that zone.",
+    "The candidate has one captured window per renderer and no same-source disconnected candidate run. Earlier disconnected reports belong to the baseline source and provide historical custom-engine context only.",
+    "Whole-trace aggregates include startup and teardown and are not used for hotspot claims."
+  ]
+}

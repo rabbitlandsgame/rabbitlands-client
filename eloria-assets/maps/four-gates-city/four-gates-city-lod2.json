@@ -1,0 +1,1718 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "0.9.0-lod2",
+  "asset": {
+    "id": "four-gates-city",
+    "name": "Four Gates City",
+    "glb": "four-gates-city-lod2.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -750,
+        -40,
+        -820
+      ],
+      "max": [
+        750,
+        195,
+        750
+      ]
+    },
+    "cityDiameterMeters": 720,
+    "lowestUsefulTerrainElevation": -40
+  },
+  "landmarks": [
+    {
+      "id": "south-outer-gate",
+      "name": "Southern Outer Gate",
+      "node": "Gate_South_Outer",
+      "type": "gate",
+      "position": [
+        0,
+        30,
+        570
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          25,
+          510
+        ],
+        "max": [
+          60,
+          170,
+          630
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "south-inner-gate",
+      "name": "Southern Inner Gate",
+      "node": "Gate_South_Inner",
+      "type": "gate",
+      "position": [
+        0,
+        30,
+        345
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          25,
+          285
+        ],
+        "max": [
+          60,
+          170,
+          405
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "east-gate",
+      "name": "Eastern Gate",
+      "node": "Gate_East",
+      "type": "gate",
+      "position": [
+        345,
+        30,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          285,
+          25,
+          -60
+        ],
+        "max": [
+          405,
+          170,
+          60
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "west-gate",
+      "name": "Western Gate",
+      "node": "Gate_West",
+      "type": "gate",
+      "position": [
+        -345,
+        30,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -405,
+          25,
+          -60
+        ],
+        "max": [
+          -285,
+          170,
+          60
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "north-gate",
+      "name": "Northern Gate",
+      "node": "Gate_North",
+      "type": "gate",
+      "position": [
+        0,
+        30,
+        -345
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          25,
+          -405
+        ],
+        "max": [
+          60,
+          170,
+          -285
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "central-plaza",
+      "name": "Central Plaza",
+      "node": "Central_Plaza",
+      "type": "plaza",
+      "position": [
+        0,
+        30,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          25,
+          -60
+        ],
+        "max": [
+          60,
+          170,
+          60
+        ]
+      },
+      "tags": [
+        "landmark",
+        "plaza"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "northern-sanctuary",
+      "name": "Northern Sanctuary",
+      "node": "Northern_Sanctuary",
+      "type": "sanctuary",
+      "position": [
+        0,
+        50,
+        -730
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          45,
+          -790
+        ],
+        "max": [
+          60,
+          190,
+          -670
+        ]
+      },
+      "tags": [
+        "landmark",
+        "sanctuary"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    }
+  ],
+  "districts": [
+    {
+      "id": "residential",
+      "node": "District_Residential"
+    },
+    {
+      "id": "civic",
+      "node": "District_Civic"
+    },
+    {
+      "id": "agricultural",
+      "node": "District_Agricultural"
+    },
+    {
+      "id": "service",
+      "node": "District_Service"
+    }
+  ],
+  "gates": [
+    {
+      "id": "south-outer",
+      "node": "Gate_South_Outer",
+      "exteriorApproach": [
+        0,
+        32,
+        645
+      ],
+      "interiorApproach": [
+        0,
+        32,
+        515
+      ],
+      "portcullisNode": "Gate_South_Outer_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "service",
+      "connectedBridgeId": "south",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_South_Outer"
+      ],
+      "interactionId": "interact-south-outer"
+    },
+    {
+      "id": "south-inner",
+      "node": "Gate_South_Inner",
+      "exteriorApproach": [
+        0,
+        32,
+        420
+      ],
+      "interiorApproach": [
+        0,
+        32,
+        290
+      ],
+      "portcullisNode": "Gate_South_Inner_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "agricultural",
+      "connectedBridgeId": "south",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_South_Inner"
+      ],
+      "interactionId": "interact-south-inner"
+    },
+    {
+      "id": "east",
+      "node": "Gate_East",
+      "exteriorApproach": [
+        420,
+        32,
+        0
+      ],
+      "interiorApproach": [
+        290,
+        32,
+        0
+      ],
+      "portcullisNode": "Gate_East_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "residential",
+      "connectedBridgeId": "east",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_East"
+      ],
+      "interactionId": "interact-east"
+    },
+    {
+      "id": "west",
+      "node": "Gate_West",
+      "exteriorApproach": [
+        -270,
+        32,
+        0
+      ],
+      "interiorApproach": [
+        -400,
+        32,
+        0
+      ],
+      "portcullisNode": "Gate_West_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "civic",
+      "connectedBridgeId": "west",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_West"
+      ],
+      "interactionId": "interact-west"
+    },
+    {
+      "id": "north",
+      "node": "Gate_North",
+      "exteriorApproach": [
+        0,
+        32,
+        -270
+      ],
+      "interiorApproach": [
+        0,
+        32,
+        -400
+      ],
+      "portcullisNode": "Gate_North_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "residential",
+      "connectedBridgeId": "north",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_North"
+      ],
+      "interactionId": "interact-north"
+    }
+  ],
+  "bridges": [
+    {
+      "id": "south",
+      "node": "Bridge_South",
+      "connects": [
+        "city",
+        "south-approach"
+      ],
+      "walkable": true
+    },
+    {
+      "id": "east",
+      "node": "Bridge_East",
+      "connects": [
+        "city",
+        "east-approach"
+      ],
+      "walkable": true
+    },
+    {
+      "id": "west",
+      "node": "Bridge_West",
+      "connects": [
+        "city",
+        "west-approach"
+      ],
+      "walkable": true
+    },
+    {
+      "id": "north",
+      "node": "Bridge_North",
+      "connects": [
+        "city",
+        "north-approach"
+      ],
+      "walkable": true
+    }
+  ],
+  "spawnPoints": [
+    {
+      "id": "player-south",
+      "node": "Spawn_Player_South",
+      "position": [
+        0,
+        32,
+        310
+      ],
+      "facing": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "player-central",
+      "node": "Spawn_Player_Central",
+      "position": [
+        0,
+        32,
+        55
+      ],
+      "facing": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "cameraPoints": [
+    {
+      "id": "camera-south-outer-exterior",
+      "position": [
+        0,
+        95,
+        690
+      ],
+      "lookTarget": [
+        0,
+        50,
+        570
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-south-outer-exterior",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-south-outer-interior",
+      "position": [
+        0,
+        70,
+        520
+      ],
+      "lookTarget": [
+        0,
+        60,
+        345
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-south-outer-interior",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-south-inner-exterior",
+      "position": [
+        0,
+        100,
+        455
+      ],
+      "lookTarget": [
+        0,
+        65,
+        345
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-south-inner-exterior",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-south-inner-city-side",
+      "position": [
+        0,
+        85,
+        255
+      ],
+      "lookTarget": [
+        0,
+        65,
+        345
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-south-inner-city-side",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-west-gate",
+      "position": [
+        -540,
+        100,
+        120
+      ],
+      "lookTarget": [
+        -345,
+        55,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-west-gate",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-east-gate",
+      "position": [
+        540,
+        100,
+        -120
+      ],
+      "lookTarget": [
+        345,
+        55,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-east-gate",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-north-gate",
+      "position": [
+        0,
+        100,
+        -455
+      ],
+      "lookTarget": [
+        0,
+        60,
+        -345
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-north-gate",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-north-axial-bridge",
+      "position": [
+        145,
+        120,
+        -520
+      ],
+      "lookTarget": [
+        0,
+        35,
+        -520
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-north-axial-bridge",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-mountain-sanctuary",
+      "position": [
+        190,
+        150,
+        -820
+      ],
+      "lookTarget": [
+        0,
+        90,
+        -700
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-mountain-sanctuary",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-central-plaza",
+      "position": [
+        180,
+        145,
+        190
+      ],
+      "lookTarget": [
+        0,
+        50,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-central-plaza",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-residential-district",
+      "position": [
+        330,
+        115,
+        270
+      ],
+      "lookTarget": [
+        210,
+        45,
+        190
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-residential-district",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-market-civic-district",
+      "position": [
+        -260,
+        105,
+        130
+      ],
+      "lookTarget": [
+        -145,
+        45,
+        70
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-market-civic-district",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-agricultural-district",
+      "position": [
+        230,
+        105,
+        390
+      ],
+      "lookTarget": [
+        100,
+        35,
+        245
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-agricultural-district",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-curtain-wall",
+      "position": [
+        510,
+        100,
+        260
+      ],
+      "lookTarget": [
+        320,
+        48,
+        180
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-curtain-wall",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-bridge-detail",
+      "position": [
+        110,
+        65,
+        505
+      ],
+      "lookTarget": [
+        0,
+        28,
+        465
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-bridge-detail",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-cliff-waterfall",
+      "position": [
+        450,
+        70,
+        430
+      ],
+      "lookTarget": [
+        300,
+        0,
+        270
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-cliff-waterfall",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-water-level",
+      "position": [
+        520,
+        5,
+        520
+      ],
+      "lookTarget": [
+        230,
+        40,
+        230
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-water-level",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-rooftop-skyline",
+      "position": [
+        -400,
+        170,
+        350
+      ],
+      "lookTarget": [
+        0,
+        70,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-rooftop-skyline",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-main-avenue",
+      "position": [
+        0,
+        55,
+        250
+      ],
+      "lookTarget": [
+        0,
+        45,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-main-avenue",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-secondary-alley",
+      "position": [
+        250,
+        58,
+        140
+      ],
+      "lookTarget": [
+        175,
+        40,
+        90
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-secondary-alley",
+      "nearClip": 0.1,
+      "farClip": 2200
+    }
+  ],
+  "pointsOfInterest": [
+    {
+      "id": "sanctuary",
+      "node": "POI_Sanctuary",
+      "position": [
+        0,
+        65,
+        -730
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "id": "south-central-axis",
+      "waypoints": [
+        [
+          0,
+          32,
+          620
+        ],
+        [
+          0,
+          32,
+          570
+        ],
+        [
+          0,
+          32,
+          345
+        ],
+        [
+          0,
+          32,
+          0
+        ]
+      ],
+      "width": 26,
+      "directionality": "both",
+      "traversalType": "walk",
+      "connects": [
+        "south-outer-gate",
+        "south-inner-gate",
+        "central-plaza"
+      ],
+      "approximateMaxSlopeDegrees": 3,
+      "accessibilityRestrictions": [],
+      "crosses": [
+        "bridge",
+        "gate"
+      ]
+    },
+    {
+      "id": "north-sanctuary-axis",
+      "waypoints": [
+        [
+          0,
+          32,
+          0
+        ],
+        [
+          0,
+          32,
+          -345
+        ],
+        [
+          0,
+          34,
+          -510
+        ],
+        [
+          0,
+          55,
+          -690
+        ]
+      ],
+      "width": 28,
+      "directionality": "both",
+      "traversalType": "walk",
+      "connects": [
+        "central-plaza",
+        "north-gate",
+        "northern-sanctuary"
+      ],
+      "approximateMaxSlopeDegrees": 6,
+      "accessibilityRestrictions": [],
+      "crosses": [
+        "gate",
+        "bridge"
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "interact-south-outer",
+      "node": "Gate_South_Outer_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    },
+    {
+      "id": "interact-south-inner",
+      "node": "Gate_South_Inner_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    },
+    {
+      "id": "interact-east",
+      "node": "Gate_East_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    },
+    {
+      "id": "interact-west",
+      "node": "Gate_West_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    },
+    {
+      "id": "interact-north",
+      "node": "Gate_North_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    }
+  ],
+  "effects": [
+    {
+      "id": "water",
+      "type": "water-pbr",
+      "node": "Water_Turquoise_Basin",
+      "color": [
+        0.02,
+        0.55,
+        0.68,
+        0.72
+      ]
+    },
+    {
+      "id": "falls",
+      "type": "waterfall-sheet",
+      "nodePrefix": "Waterfall_",
+      "customShaderRecommended": true
+    },
+    {
+      "id": "blue-energy",
+      "type": "emissive-pulse",
+      "nodeSuffix": [
+        "Crystal",
+        "Beacon",
+        "Portal"
+      ],
+      "color": [
+        0.05,
+        0.3,
+        1,
+        1
+      ]
+    }
+  ],
+  "collision": {
+    "nodeNames": [
+      "COLLISION_Gate_South_Inner",
+      "COLLISION_Gate_South_Outer",
+      "COLLISION_Gate_North",
+      "COLLISION_Gate_East",
+      "COLLISION_Gate_West",
+      "COLLISION_Bridge_South",
+      "COLLISION_Bridge_North",
+      "COLLISION_Bridge_East",
+      "COLLISION_Bridge_West",
+      "COLLISION_Sanctuary_Entrance"
+    ]
+  },
+  "navigation": {
+    "nodeNames": [
+      "Navigation"
+    ],
+    "walkableAreas": [
+      "radial-roads",
+      "ring-roads",
+      "bridges",
+      "plaza"
+    ],
+    "navmesh": {
+      "format": "inline-convex-polygons-v1",
+      "coordinateSystem": "asset",
+      "agentRadius": 0.6,
+      "agentHeight": 2.0,
+      "maxSlopeDegrees": 35,
+      "polygons": [
+        {
+          "id": "plaza",
+          "vertices": [
+            [
+              -72,
+              31,
+              -72
+            ],
+            [
+              72,
+              31,
+              -72
+            ],
+            [
+              72,
+              31,
+              72
+            ],
+            [
+              -72,
+              31,
+              72
+            ]
+          ]
+        },
+        {
+          "id": "south-axis",
+          "vertices": [
+            [
+              -13,
+              31,
+              0
+            ],
+            [
+              13,
+              31,
+              0
+            ],
+            [
+              13,
+              31,
+              620
+            ],
+            [
+              -13,
+              31,
+              620
+            ]
+          ]
+        },
+        {
+          "id": "north-axis",
+          "vertices": [
+            [
+              -14,
+              31,
+              -690
+            ],
+            [
+              14,
+              31,
+              -690
+            ],
+            [
+              14,
+              31,
+              0
+            ],
+            [
+              -14,
+              31,
+              0
+            ]
+          ]
+        },
+        {
+          "id": "east-axis",
+          "vertices": [
+            [
+              0,
+              31,
+              -13
+            ],
+            [
+              620,
+              31,
+              -13
+            ],
+            [
+              620,
+              31,
+              13
+            ],
+            [
+              0,
+              31,
+              13
+            ]
+          ]
+        },
+        {
+          "id": "west-axis",
+          "vertices": [
+            [
+              -620,
+              31,
+              -13
+            ],
+            [
+              0,
+              31,
+              -13
+            ],
+            [
+              0,
+              31,
+              13
+            ],
+            [
+              -620,
+              31,
+              13
+            ]
+          ]
+        },
+        {
+          "id": "district-walkable-0",
+          "vertices": [
+            [
+              -330,
+              31,
+              -330
+            ],
+            [
+              -35,
+              31,
+              -330
+            ],
+            [
+              -35,
+              31,
+              -35
+            ],
+            [
+              -330,
+              31,
+              -35
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        },
+        {
+          "id": "district-walkable-1",
+          "vertices": [
+            [
+              35,
+              31,
+              -330
+            ],
+            [
+              330,
+              31,
+              -330
+            ],
+            [
+              330,
+              31,
+              -35
+            ],
+            [
+              35,
+              31,
+              -35
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        },
+        {
+          "id": "district-walkable-2",
+          "vertices": [
+            [
+              -330,
+              31,
+              35
+            ],
+            [
+              -35,
+              31,
+              35
+            ],
+            [
+              -35,
+              31,
+              330
+            ],
+            [
+              -330,
+              31,
+              330
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        },
+        {
+          "id": "district-walkable-3",
+          "vertices": [
+            [
+              35,
+              31,
+              35
+            ],
+            [
+              330,
+              31,
+              35
+            ],
+            [
+              330,
+              31,
+              330
+            ],
+            [
+              35,
+              31,
+              330
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        },
+        {
+          "id": "district-walkable-4",
+          "vertices": [
+            [
+              -300,
+              31,
+              205
+            ],
+            [
+              300,
+              31,
+              205
+            ],
+            [
+              300,
+              31,
+              315
+            ],
+            [
+              -300,
+              31,
+              315
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        }
+      ],
+      "offMeshLinks": [
+        {
+          "id": "sanctuary-rise",
+          "start": [
+            0,
+            34,
+            -620
+          ],
+          "end": [
+            0,
+            55,
+            -690
+          ],
+          "bidirectional": true,
+          "type": "ramp"
+        }
+      ],
+      "exclusions": [
+        {
+          "id": "central-monument",
+          "shape": "cylinder",
+          "center": [
+            0,
+            31,
+            0
+          ],
+          "radius": 18
+        },
+        {
+          "id": "city-wall",
+          "shape": "outside-circle",
+          "center": [
+            0,
+            31,
+            0
+          ],
+          "radius": 350
+        }
+      ],
+      "obstacles": []
+    }
+  },
+  "streamingGroups": [
+    {
+      "id": "core",
+      "nodes": [
+        "Central_Plaza",
+        "District_Civic"
+      ]
+    },
+    {
+      "id": "south",
+      "nodes": [
+        "Gate_South_Outer",
+        "Gate_South_Inner",
+        "Bridge_South"
+      ]
+    },
+    {
+      "id": "north",
+      "nodes": [
+        "Gate_North",
+        "Bridge_North",
+        "Northern_Sanctuary"
+      ]
+    },
+    {
+      "id": "east-west",
+      "nodes": [
+        "Gate_East",
+        "Gate_West",
+        "Bridge_East",
+        "Bridge_West"
+      ]
+    }
+  ],
+  "lodGroups": [
+    {
+      "id": "city-landmarks",
+      "strategy": "node-suffix",
+      "levels": [
+        {
+          "id": "LOD0",
+          "suffix": "_LOD0",
+          "screenCoverage": 0.35
+        },
+        {
+          "id": "LOD1",
+          "screenCoverage": 0.08
+        },
+        {
+          "id": "LOD2",
+          "glb": "four-gates-city-lod2.glb",
+          "screenCoverage": 0.0,
+          "nodeCount": 663,
+          "animations": 0,
+          "meshCount": 26,
+          "materialCount": 17,
+          "textureMaxResolution": 512,
+          "resourcePruned": true
+        }
+      ],
+      "fallback": "LOD1"
+    }
+  ],
+  "assumptions": [
+    "Canonical city defensive ring diameter is 720 m.",
+    "City plateau walking elevation is Y=30 m; water surface is Y=-2 m.",
+    "Top-down aerial controls overall placement; perspective references control local material and silhouette language.",
+    "Southern imagery conflicts in scale; the canonical double-gate sequence is preserved."
+  ],
+  "knownLimitations": [
+    "Inline navmesh covers principal axes and plaza; district alley polygons remain to be baked from final collision geometry.",
+    "District navmesh uses conservative convex coverage; final blockers should be rebaked after hand-authored building placement.",
+    "General district assets use modular atlas UVs; hero façades and roofs still need bespoke unwraps.",
+    "Water, foam, mist, and energy retain static geometry fallbacks; production refraction, turbulence, depth-fade, and mist particles remain client-shader work."
+  ],
+  "sources": [
+    {
+      "id": "canonical-aerial",
+      "file": "ChatGPT Image Aug 25, 2026, 11_38_19 PM (4).png",
+      "role": "authoritative-layout"
+    },
+    {
+      "id": "perspective-1",
+      "file": "ChatGPT Image Aug 25, 2026, 11_38_18 PM (1).png",
+      "role": "architecture-materials"
+    },
+    {
+      "id": "perspective-2",
+      "file": "ChatGPT Image Aug 25, 2026, 11_38_18 PM (2).png",
+      "role": "south-gates"
+    },
+    {
+      "id": "perspective-3",
+      "file": "ChatGPT Image Aug 25, 2026, 11_38_19 PM (3).png",
+      "role": "districts-and-skyline"
+    }
+  ],
+  "materials": {
+    "strategy": "embedded-atlas-with-baked-primitive-uvs",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "embeddedTextures": [
+      "four-gates-basecolor",
+      "four-gates-normal",
+      "four-gates-orm"
+    ],
+    "channelPacking": {
+      "orm": "R=occlusion,G=roughness,B=metallic"
+    },
+    "landmarkAtlas": {
+      "resolution": [
+        1024,
+        1024
+      ],
+      "maps": [
+        "landmark-basecolor",
+        "landmark-normal",
+        "landmark-orm",
+        "landmark-emissive"
+      ],
+      "families": [
+        "landmark-stone",
+        "landmark-bronze",
+        "landmark-foundation",
+        "landmark-energy"
+      ]
+    }
+  },
+  "animations": [],
+  "districtDetail": {
+    "civic": {
+      "families": [
+        "arcaded-hall",
+        "domed-annex",
+        "service-court"
+      ]
+    },
+    "residential": {
+      "families": [
+        "pitched-residence",
+        "courtyard",
+        "chimney"
+      ]
+    },
+    "agricultural": {
+      "families": [
+        "farmhouse",
+        "granary",
+        "irrigation"
+      ]
+    },
+    "service": {
+      "families": [
+        "dock",
+        "crane"
+      ]
+    }
+  },
+  "authoredGeometry": {
+    "gateTowerMesh": "authored_landmark_tower",
+    "domeMesh": "authored_landmark_dome",
+    "bridgeArchMesh": "authored_bridge_arch",
+    "cliffMesh": "authored_cliff_face",
+    "replacedStableNodes": true
+  },
+  "terrain": {
+    "minimumUsefulElevation": -40.0,
+    "cityTerraceNode": "Terrain_City_Plateau",
+    "shorelineNode": "Terrain_Shoreline_Sculpt",
+    "terraceRadii": [
+      175,
+      285,
+      365,
+      400
+    ],
+    "shorelineOuterRadius": 454,
+    "waterLevel": -2.0
+  },
+  "waterSystem": {
+    "waterfallCount": 0,
+    "channelNodes": [],
+    "poolNodes": [],
+    "foamNodes": [],
+    "mistLocatorNodes": [],
+    "requiresCustomShaderForBestResult": true
+  },
+  "visualDirection": {
+    "reference": "canonical-four-gates-concept-art",
+    "palette": [
+      "warm limestone",
+      "charcoal slate",
+      "aged gold",
+      "sapphire",
+      "turquoise",
+      "alpine green"
+    ],
+    "materialAtlas": "art-directed-4x4-pbr-basecolor",
+    "landmarkAtlas": "art-directed-2x2-pbr-basecolor",
+    "alpineSkylineNodes": [
+      "Mountain_Peak_00",
+      "Mountain_Snowcap_00",
+      "Mountain_Peak_01",
+      "Mountain_Snowcap_01",
+      "Mountain_Peak_02",
+      "Mountain_Snowcap_02",
+      "Mountain_Peak_03",
+      "Mountain_Snowcap_03",
+      "Mountain_Peak_04",
+      "Mountain_Snowcap_04",
+      "Mountain_Peak_05",
+      "Mountain_Snowcap_05",
+      "Mountain_Peak_06",
+      "Mountain_Snowcap_06",
+      "Mountain_Peak_07",
+      "Mountain_Snowcap_07",
+      "Mountain_Peak_08",
+      "Mountain_Snowcap_08",
+      "Mountain_Peak_09",
+      "Mountain_Snowcap_09",
+      "Mountain_Peak_10",
+      "Mountain_Snowcap_10",
+      "Mountain_Peak_11",
+      "Mountain_Snowcap_11",
+      "Mountain_Peak_12",
+      "Mountain_Snowcap_12",
+      "Mountain_Peak_13",
+      "Mountain_Snowcap_13",
+      "Mountain_Peak_14",
+      "Mountain_Snowcap_14",
+      "Mountain_Peak_15",
+      "Mountain_Snowcap_15",
+      "Mountain_Peak_16",
+      "Mountain_Snowcap_16",
+      "Mountain_Peak_17",
+      "Mountain_Snowcap_17",
+      "Mountain_Peak_18",
+      "Mountain_Snowcap_18",
+      "Mountain_Peak_19",
+      "Mountain_Snowcap_19",
+      "Mountain_Peak_20",
+      "Mountain_Snowcap_20",
+      "Mountain_Peak_21",
+      "Mountain_Snowcap_21",
+      "Mountain_Peak_22",
+      "Mountain_Snowcap_22",
+      "Mountain_Peak_23",
+      "Mountain_Snowcap_23",
+      "Mountain_Peak_24",
+      "Mountain_Snowcap_24",
+      "Mountain_Peak_25",
+      "Mountain_Snowcap_25",
+      "Mountain_Peak_26",
+      "Mountain_Snowcap_26",
+      "Mountain_Peak_27",
+      "Mountain_Snowcap_27"
+    ],
+    "outerEvergreenNodes": [
+      "Outer_Evergreen_01",
+      "Outer_Evergreen_02",
+      "Outer_Evergreen_03",
+      "Outer_Evergreen_04",
+      "Outer_Evergreen_05",
+      "Outer_Evergreen_06",
+      "Outer_Evergreen_07",
+      "Outer_Evergreen_08",
+      "Outer_Evergreen_09",
+      "Outer_Evergreen_10",
+      "Outer_Evergreen_11",
+      "Outer_Evergreen_12",
+      "Outer_Evergreen_16",
+      "Outer_Evergreen_17",
+      "Outer_Evergreen_18",
+      "Outer_Evergreen_19",
+      "Outer_Evergreen_20",
+      "Outer_Evergreen_21",
+      "Outer_Evergreen_22",
+      "Outer_Evergreen_23",
+      "Outer_Evergreen_24",
+      "Outer_Evergreen_25",
+      "Outer_Evergreen_26",
+      "Outer_Evergreen_29",
+      "Outer_Evergreen_30",
+      "Outer_Evergreen_31",
+      "Outer_Evergreen_32",
+      "Outer_Evergreen_33",
+      "Outer_Evergreen_34",
+      "Outer_Evergreen_35",
+      "Outer_Evergreen_36",
+      "Outer_Evergreen_37",
+      "Outer_Evergreen_38",
+      "Outer_Evergreen_39",
+      "Outer_Evergreen_40",
+      "Outer_Evergreen_41",
+      "Outer_Evergreen_43",
+      "Outer_Evergreen_44",
+      "Outer_Evergreen_45",
+      "Outer_Evergreen_46",
+      "Outer_Evergreen_47",
+      "Outer_Evergreen_48",
+      "Outer_Evergreen_49",
+      "Outer_Evergreen_50",
+      "Outer_Evergreen_51",
+      "Outer_Evergreen_52",
+      "Outer_Evergreen_53",
+      "Outer_Evergreen_54",
+      "Outer_Evergreen_55"
+    ]
+  },
+  "detailPass": {
+    "reference": "canonical-four-gates-concept-art",
+    "nodePrefix": "Detail_",
+    "nodeCount": 267,
+    "detailNodes": [],
+    "families": {
+      "gates": [
+        "integrated crowns",
+        "energy tracery",
+        "hanging banners"
+      ],
+      "centralCivic": [
+        "radial planted beds",
+        "broadleaf shrubs"
+      ],
+      "market": [
+        "stock crates",
+        "barrels",
+        "sapphire signs"
+      ],
+      "residential": [
+        "balconies",
+        "roof finials"
+      ],
+      "waterfalls": [
+        "rocky lips",
+        "stepped foam ribbons"
+      ],
+      "vegetation": [
+        "inner-ring broadleaf trees",
+        "tiered outer evergreens"
+      ]
+    },
+    "routeClearance": {
+      "cardinalHalfWidth": 30.0,
+      "plazaSpawnClear": true
+    }
+  },
+  "externalResources": {
+    "../_shared/images/069ecda61ba8a4a489b31e38a70fb28502a182856a513fc3c7d263de0890c28a.png": "069ecda61ba8a4a489b31e38a70fb28502a182856a513fc3c7d263de0890c28a",
+    "../_shared/images/33b07872267906c8e37c9a6353a456f045930d8f70f9ccb127e49e0a77fa2395.png": "33b07872267906c8e37c9a6353a456f045930d8f70f9ccb127e49e0a77fa2395",
+    "../_shared/images/6439fa9350796a4034db77ee26f698515a1f9903b0dd3fc2d44ffe2bcdc8351d.png": "6439fa9350796a4034db77ee26f698515a1f9903b0dd3fc2d44ffe2bcdc8351d",
+    "../_shared/images/843bed80347ff138e66ced774b931e89e973228b9e275a21f22c6438504048ed.png": "843bed80347ff138e66ced774b931e89e973228b9e275a21f22c6438504048ed",
+    "../_shared/images/e4742d73d370386a5c6eeba823a7c56351250e0a8f5bf705c3cd6cae2f227eeb.png": "e4742d73d370386a5c6eeba823a7c56351250e0a8f5bf705c3cd6cae2f227eeb",
+    "../_shared/images/fc73f34955571831bd5efb3891754b23886b7f810e614e426ffb7253d0fc8103.png": "fc73f34955571831bd5efb3891754b23886b7f810e614e426ffb7253d0fc8103"
+  }
+}

@@ -1,0 +1,95 @@
+{
+	"id": "spindle_hill",
+	"schema": 1,
+	"ground": {
+		"path_luma_forward": 0.2,
+		"path_tint_forward": [
+			0.85,
+			0.72,
+			0.53
+		],
+		"path_chroma_forward": 1.35,
+		"meadow_value_forward": 0.76,
+		"meadow_chroma_forward": 0.95,
+		"meadow_tint_forward": [
+			1.0,
+			0.95,
+			0.75
+		],
+		"verge_saturation_forward": 1.05,
+		"rock_value_forward": 0.32,
+		"verge_value_earth_forward": 0.7,
+		"paving_tint_forward": [
+			0.6,
+			0.53,
+			0.42
+		],
+		"verge_grain_forward": 1.0,
+		"verge_grain_steep_forward": 0.3
+	},
+	"grass": {
+		"root": [
+			0.16,
+			0.15,
+			0.08
+		],
+		"tip": [
+			0.66,
+			0.64,
+			0.44
+		],
+		"value_forward": 1.55,
+		"open": 0.6,
+		"meadow": 1.0,
+		"open_green": 1.0
+	},
+	"sky": {
+		"haze_warmth_forward": 0.2
+	},
+	"water": {
+		"sea_value_forward": 8.5,
+		"sea_chroma_forward": 1.25,
+		"sea_tint_forward": [
+			0.55,
+			1.0,
+			1.05
+		]
+	},
+	"foliage": {
+		"untamed_words": [
+			"blossom",
+			"flame",
+			"bougainvillea",
+			"lemon"
+		],
+		"shrub_words": [
+			"grass"
+		],
+		"plain_words": [
+			"hedge",
+			"shrub"
+		]
+	},
+	"props": {
+		"keep_words": [
+			"kit-sw-harbour-tower",
+			"kit-th-ringholm-watch-tower"
+		],
+		"hole_words": [
+			"kit-sw-harbour-tower",
+			"kit-th-ringholm-watch-tower",
+			"kit-windmill"
+		]
+	},
+	"notes": {
+		"origin": "Derived from the frozen source palettes for this section; prop signature words retain the union of its contributing shared model libraries. The section identity in content/look-overrides.json is merged over the derived palette.",
+		"sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
+		"sourceProfiles": {
+			"godot-client/src/world/look/regions/tollholms.json": "f248c57ead7fb0415b3c2988b31ed55bc814f76733c7ddd2f0c4c92304d0f04e"
+		},
+		"overrides": {
+			"path": "eloria-assets/maps/continent-v2/spindle_hill/content/look-overrides.json",
+			"sha256": "ddd8d1b7c747df22f83661d3d9e09b1ecdcc9c140375a2706c2b900ea46b8ab3"
+		}
+	}
+}

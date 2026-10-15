@@ -1,0 +1,1564 @@
+{
+  "schemaVersion": "1.1.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "landfall_insides",
+    "name": "Landfall Underground",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        21.196213333052313,
+        -0.15,
+        21.0
+      ],
+      "max": [
+        211.0,
+        7.0,
+        215.8425079580377
+      ]
+    },
+    "interiorClass": "insides",
+    "parentRegion": "landfall",
+    "serverCells": 240
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      0,
+      240
+    ],
+    "serverCells": [
+      240,
+      240
+    ],
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true,
+    "serverStorageVersion": 1,
+    "serverTileMin": [
+      0,
+      0
+    ]
+  },
+  "serverCells": [
+    240,
+    240
+  ],
+  "spawnPoints": [
+    {
+      "id": "lantern_mine",
+      "name": "Lantern Mine",
+      "section": "lantern_mine",
+      "default": true,
+      "position": [
+        55,
+        0.05,
+        208
+      ],
+      "serverTile": [
+        55,
+        32
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "pinebrow_workings",
+      "name": "Pinebrow Deep Workings",
+      "section": "pinebrow_workings",
+      "default": false,
+      "position": [
+        177,
+        0.05,
+        208
+      ],
+      "serverTile": [
+        177,
+        32
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "spindle_cavern",
+      "name": "Spindle Mineral Cavern",
+      "section": "spindle_cavern",
+      "default": false,
+      "position": [
+        55,
+        0.05,
+        87
+      ],
+      "serverTile": [
+        55,
+        153
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "boarsend_barrow",
+      "name": "Boarsend Old Barrow",
+      "section": "boarsend_barrow",
+      "default": false,
+      "position": [
+        177,
+        0.05,
+        87
+      ],
+      "serverTile": [
+        177,
+        153
+      ],
+      "rotationDegrees": 180
+    }
+  ],
+  "chambers": [
+    {
+      "id": "lantern_mine-0",
+      "section": "lantern_mine",
+      "position": [
+        55,
+        0,
+        208
+      ],
+      "radius": 8,
+      "name": "Lantern Mine"
+    },
+    {
+      "id": "lantern_mine-1",
+      "section": "lantern_mine",
+      "position": [
+        55,
+        0,
+        187
+      ],
+      "radius": 12,
+      "name": "Lantern Mine"
+    },
+    {
+      "id": "lantern_mine-2",
+      "section": "lantern_mine",
+      "position": [
+        32,
+        0,
+        180
+      ],
+      "radius": 9,
+      "name": "Lantern Mine"
+    },
+    {
+      "id": "lantern_mine-3",
+      "section": "lantern_mine",
+      "position": [
+        80,
+        0,
+        176
+      ],
+      "radius": 10,
+      "name": "Lantern Mine"
+    },
+    {
+      "id": "lantern_mine-4",
+      "section": "lantern_mine",
+      "position": [
+        55,
+        0,
+        155
+      ],
+      "radius": 8,
+      "name": "Lantern Mine"
+    },
+    {
+      "id": "pinebrow_workings-0",
+      "section": "pinebrow_workings",
+      "position": [
+        177,
+        0,
+        207
+      ],
+      "radius": 9,
+      "name": "Pinebrow Deep Workings"
+    },
+    {
+      "id": "pinebrow_workings-1",
+      "section": "pinebrow_workings",
+      "position": [
+        177,
+        0,
+        185
+      ],
+      "radius": 12,
+      "name": "Pinebrow Deep Workings"
+    },
+    {
+      "id": "pinebrow_workings-2",
+      "section": "pinebrow_workings",
+      "position": [
+        153,
+        0,
+        176
+      ],
+      "radius": 10,
+      "name": "Pinebrow Deep Workings"
+    },
+    {
+      "id": "pinebrow_workings-3",
+      "section": "pinebrow_workings",
+      "position": [
+        199,
+        0,
+        176
+      ],
+      "radius": 10,
+      "name": "Pinebrow Deep Workings"
+    },
+    {
+      "id": "pinebrow_workings-4",
+      "section": "pinebrow_workings",
+      "position": [
+        177,
+        0,
+        154
+      ],
+      "radius": 10,
+      "name": "Pinebrow Deep Workings"
+    },
+    {
+      "id": "spindle_cavern-0",
+      "section": "spindle_cavern",
+      "position": [
+        55,
+        0,
+        86
+      ],
+      "radius": 8,
+      "name": "Spindle Mineral Cavern"
+    },
+    {
+      "id": "spindle_cavern-1",
+      "section": "spindle_cavern",
+      "position": [
+        55,
+        0,
+        62
+      ],
+      "radius": 15,
+      "name": "Spindle Mineral Cavern"
+    },
+    {
+      "id": "spindle_cavern-2",
+      "section": "spindle_cavern",
+      "position": [
+        31,
+        0,
+        52
+      ],
+      "radius": 10,
+      "name": "Spindle Mineral Cavern"
+    },
+    {
+      "id": "spindle_cavern-3",
+      "section": "spindle_cavern",
+      "position": [
+        67,
+        0,
+        34
+      ],
+      "radius": 10,
+      "name": "Spindle Mineral Cavern"
+    },
+    {
+      "id": "boarsend_barrow-0",
+      "section": "boarsend_barrow",
+      "position": [
+        177,
+        0,
+        86
+      ],
+      "radius": 8,
+      "name": "Boarsend Old Barrow"
+    },
+    {
+      "id": "boarsend_barrow-1",
+      "section": "boarsend_barrow",
+      "position": [
+        177,
+        0,
+        62
+      ],
+      "radius": 9,
+      "name": "Boarsend Old Barrow"
+    },
+    {
+      "id": "boarsend_barrow-2",
+      "section": "boarsend_barrow",
+      "position": [
+        153,
+        0,
+        63
+      ],
+      "radius": 9,
+      "name": "Boarsend Old Barrow"
+    },
+    {
+      "id": "boarsend_barrow-3",
+      "section": "boarsend_barrow",
+      "position": [
+        201,
+        0,
+        58
+      ],
+      "radius": 10,
+      "name": "Boarsend Old Barrow"
+    },
+    {
+      "id": "boarsend_barrow-4",
+      "section": "boarsend_barrow",
+      "position": [
+        177,
+        0,
+        31
+      ],
+      "radius": 10,
+      "name": "Boarsend Old Barrow"
+    }
+  ],
+  "harvestables": [
+    {
+      "id": "lantern_mine-1001",
+      "objectId": 1001,
+      "resource": "Coal",
+      "serverTile": [
+        29,
+        57
+      ],
+      "position": [
+        29.5,
+        0,
+        182.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1002",
+      "objectId": 1002,
+      "resource": "Coal",
+      "serverTile": [
+        35,
+        64
+      ],
+      "position": [
+        35.5,
+        0,
+        175.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1003",
+      "objectId": 1003,
+      "resource": "Coal",
+      "serverTile": [
+        47,
+        50
+      ],
+      "position": [
+        47.5,
+        0,
+        189.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1004",
+      "objectId": 1004,
+      "resource": "Coal",
+      "serverTile": [
+        62,
+        57
+      ],
+      "position": [
+        62.5,
+        0,
+        182.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1005",
+      "objectId": 1005,
+      "resource": "Coal",
+      "serverTile": [
+        50,
+        84
+      ],
+      "position": [
+        50.5,
+        0,
+        155.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1006",
+      "objectId": 1006,
+      "resource": "Coal",
+      "serverTile": [
+        59,
+        87
+      ],
+      "position": [
+        59.5,
+        0,
+        152.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1007",
+      "objectId": 1007,
+      "resource": "Iron Ore",
+      "serverTile": [
+        77,
+        61
+      ],
+      "position": [
+        77.5,
+        0,
+        178.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1008",
+      "objectId": 1008,
+      "resource": "Iron Ore",
+      "serverTile": [
+        83,
+        68
+      ],
+      "position": [
+        83.5,
+        0,
+        171.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1009",
+      "objectId": 1009,
+      "resource": "Iron Ore",
+      "serverTile": [
+        80,
+        73
+      ],
+      "position": [
+        80.5,
+        0,
+        166.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_mine-1010",
+      "objectId": 1010,
+      "resource": "Quartz",
+      "serverTile": [
+        35,
+        55
+      ],
+      "position": [
+        35.5,
+        0,
+        184.5
+      ],
+      "section": "lantern_mine",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1101",
+      "objectId": 1101,
+      "resource": "Coal",
+      "serverTile": [
+        173,
+        52
+      ],
+      "position": [
+        173.5,
+        0,
+        187.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1102",
+      "objectId": 1102,
+      "resource": "Coal",
+      "serverTile": [
+        182,
+        58
+      ],
+      "position": [
+        182.5,
+        0,
+        181.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1103",
+      "objectId": 1103,
+      "resource": "Iron Ore",
+      "serverTile": [
+        149,
+        60
+      ],
+      "position": [
+        149.5,
+        0,
+        179.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1104",
+      "objectId": 1104,
+      "resource": "Iron Ore",
+      "serverTile": [
+        157,
+        68
+      ],
+      "position": [
+        157.5,
+        0,
+        171.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1105",
+      "objectId": 1105,
+      "resource": "Iron Ore",
+      "serverTile": [
+        150,
+        69
+      ],
+      "position": [
+        150.5,
+        0,
+        170.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1106",
+      "objectId": 1106,
+      "resource": "Copper",
+      "serverTile": [
+        195,
+        60
+      ],
+      "position": [
+        195.5,
+        0,
+        179.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1107",
+      "objectId": 1107,
+      "resource": "Copper",
+      "serverTile": [
+        203,
+        68
+      ],
+      "position": [
+        203.5,
+        0,
+        171.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1108",
+      "objectId": 1108,
+      "resource": "Copper",
+      "serverTile": [
+        168,
+        88
+      ],
+      "position": [
+        168.5,
+        0,
+        151.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1109",
+      "objectId": 1109,
+      "resource": "Sulfur",
+      "serverTile": [
+        185,
+        90
+      ],
+      "position": [
+        185.5,
+        0,
+        149.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "pinebrow_workings-1110",
+      "objectId": 1110,
+      "resource": "Slate",
+      "serverTile": [
+        181,
+        82
+      ],
+      "position": [
+        181.5,
+        0,
+        157.5
+      ],
+      "section": "pinebrow_workings",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1201",
+      "objectId": 1201,
+      "resource": "Quartz",
+      "serverTile": [
+        49,
+        170
+      ],
+      "position": [
+        49.5,
+        0,
+        69.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1202",
+      "objectId": 1202,
+      "resource": "Quartz",
+      "serverTile": [
+        60,
+        172
+      ],
+      "position": [
+        60.5,
+        0,
+        67.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1203",
+      "objectId": 1203,
+      "resource": "Salt",
+      "serverTile": [
+        46,
+        182
+      ],
+      "position": [
+        46.5,
+        0,
+        57.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1204",
+      "objectId": 1204,
+      "resource": "Salt",
+      "serverTile": [
+        63,
+        185
+      ],
+      "position": [
+        63.5,
+        0,
+        54.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1205",
+      "objectId": 1205,
+      "resource": "Slate",
+      "serverTile": [
+        53,
+        187
+      ],
+      "position": [
+        53.5,
+        0,
+        52.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1206",
+      "objectId": 1206,
+      "resource": "Sulfur",
+      "serverTile": [
+        27,
+        184
+      ],
+      "position": [
+        27.5,
+        0,
+        55.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1207",
+      "objectId": 1207,
+      "resource": "Crystal",
+      "serverTile": [
+        34,
+        192
+      ],
+      "position": [
+        34.5,
+        0,
+        47.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1208",
+      "objectId": 1208,
+      "resource": "Crystal",
+      "serverTile": [
+        62,
+        204
+      ],
+      "position": [
+        62.5,
+        0,
+        35.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1209",
+      "objectId": 1209,
+      "resource": "Geode",
+      "serverTile": [
+        72,
+        208
+      ],
+      "position": [
+        72.5,
+        0,
+        31.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "spindle_cavern-1210",
+      "objectId": 1210,
+      "resource": "Geode",
+      "serverTile": [
+        65,
+        212
+      ],
+      "position": [
+        65.5,
+        0,
+        27.5
+      ],
+      "section": "spindle_cavern",
+      "authority": "server"
+    },
+    {
+      "id": "boarsend_barrow-1301",
+      "objectId": 1301,
+      "resource": "Quartz",
+      "serverTile": [
+        149,
+        180
+      ],
+      "position": [
+        149.5,
+        0,
+        59.5
+      ],
+      "section": "boarsend_barrow",
+      "authority": "server"
+    },
+    {
+      "id": "boarsend_barrow-1302",
+      "objectId": 1302,
+      "resource": "Salt",
+      "serverTile": [
+        204,
+        185
+      ],
+      "position": [
+        204.5,
+        0,
+        54.5
+      ],
+      "section": "boarsend_barrow",
+      "authority": "server"
+    }
+  ],
+  "portals": [
+    {
+      "id": "lantern_mine-exit",
+      "objectId": 59001,
+      "role": "portal",
+      "position": [
+        55,
+        0,
+        214
+      ],
+      "serverTile": [
+        55,
+        26
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        332,
+        81
+      ],
+      "label": "Leave Lantern Mine"
+    },
+    {
+      "id": "pinebrow_workings-exit",
+      "objectId": 59002,
+      "role": "portal",
+      "position": [
+        177,
+        0,
+        214
+      ],
+      "serverTile": [
+        177,
+        26
+      ],
+      "destinationMap": "pinebrow",
+      "destinationTile": [
+        537,
+        485
+      ],
+      "label": "Leave Pinebrow Deep Workings"
+    },
+    {
+      "id": "spindle_cavern-exit",
+      "objectId": 59003,
+      "role": "portal",
+      "position": [
+        55,
+        0,
+        93
+      ],
+      "serverTile": [
+        55,
+        147
+      ],
+      "destinationMap": "spindle_hill",
+      "destinationTile": [
+        104,
+        341
+      ],
+      "label": "Leave Spindle Mineral Cavern"
+    },
+    {
+      "id": "boarsend_barrow-exit",
+      "objectId": 59004,
+      "role": "portal",
+      "position": [
+        177,
+        0,
+        93
+      ],
+      "serverTile": [
+        177,
+        147
+      ],
+      "destinationMap": "boarsend",
+      "destinationTile": [
+        825,
+        484
+      ],
+      "label": "Leave Boarsend Old Barrow"
+    }
+  ],
+  "interactives": [
+    {
+      "id": "lantern_mine-exit",
+      "objectId": 59001,
+      "role": "portal",
+      "position": [
+        55,
+        0,
+        214
+      ],
+      "serverTile": [
+        55,
+        26
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        332,
+        81
+      ],
+      "label": "Leave Lantern Mine"
+    },
+    {
+      "id": "pinebrow_workings-exit",
+      "objectId": 59002,
+      "role": "portal",
+      "position": [
+        177,
+        0,
+        214
+      ],
+      "serverTile": [
+        177,
+        26
+      ],
+      "destinationMap": "pinebrow",
+      "destinationTile": [
+        537,
+        485
+      ],
+      "label": "Leave Pinebrow Deep Workings"
+    },
+    {
+      "id": "spindle_cavern-exit",
+      "objectId": 59003,
+      "role": "portal",
+      "position": [
+        55,
+        0,
+        93
+      ],
+      "serverTile": [
+        55,
+        147
+      ],
+      "destinationMap": "spindle_hill",
+      "destinationTile": [
+        104,
+        341
+      ],
+      "label": "Leave Spindle Mineral Cavern"
+    },
+    {
+      "id": "boarsend_barrow-exit",
+      "objectId": 59004,
+      "role": "portal",
+      "position": [
+        177,
+        0,
+        93
+      ],
+      "serverTile": [
+        177,
+        147
+      ],
+      "destinationMap": "boarsend",
+      "destinationTile": [
+        825,
+        484
+      ],
+      "label": "Leave Boarsend Old Barrow"
+    }
+  ],
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "authority": "server",
+    "defaultSpawn": "lantern_mine"
+  },
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v2",
+    "width": 480,
+    "height": 480,
+    "cellMetres": 0.5,
+    "originMetres": [
+      0,
+      240
+    ],
+    "heightEncoding": {
+      "origin": -0.1,
+      "step": 0.1
+    },
+    "gridAlignment": "tile-centres-v1",
+    "sha256": "20723ffab462711adaf99efed8c6d75a05a48b245424accfa724a3a315d7c2f6",
+    "nodeNames": [
+      "Build_boarsend_barrow_east_rubble_stone",
+      "Build_boarsend_barrow_north_rubble_stone",
+      "Build_boarsend_barrow_south_rubble_stone",
+      "Build_boarsend_barrow_west_rubble_stone",
+      "Build_lantern_mine_east_cliff_rock",
+      "Build_lantern_mine_north_cliff_rock",
+      "Build_lantern_mine_south_cliff_rock",
+      "Build_lantern_mine_west_cliff_rock",
+      "Build_pinebrow_workings_east_cliff_rock",
+      "Build_pinebrow_workings_north_cliff_rock",
+      "Build_pinebrow_workings_south_cliff_rock",
+      "Build_pinebrow_workings_west_cliff_rock",
+      "Build_spindle_cavern_east_cliff_rock",
+      "Build_spindle_cavern_north_cliff_rock",
+      "Build_spindle_cavern_south_cliff_rock",
+      "Build_spindle_cavern_west_cliff_rock"
+    ],
+    "servedGrid": {
+      "binary": "served-grid.escg.gz",
+      "format": "ESCG-v2",
+      "sha256": "63905f5a5fbd60a9dc495a750383a4bcaec0bf3b2c10b8e48267136edc433f19",
+      "unitMetres": 0.05,
+      "climbMetres": 1.0,
+      "originMetres": -100.0,
+      "width": 240,
+      "height": 240
+    }
+  },
+  "environment": {
+    "profile": "cave-interior",
+    "backgroundColor": "#000000",
+    "ambient": {
+      "color": "#acb3bf",
+      "energy": 0.55,
+      "skyContribution": 0
+    },
+    "sun": {
+      "energy": 0.25,
+      "color": "#ffe4c0",
+      "shadows": false
+    },
+    "fog": {
+      "enabled": false
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.1
+    }
+  },
+  "lighting": {
+    "markers": [
+      {
+        "id": "lantern_mine-lamp-0",
+        "position": [
+          48.2,
+          2.6,
+          208
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "lantern_mine-lamp-1",
+        "position": [
+          42.2,
+          2.6,
+          187
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "lantern_mine-lamp-2",
+        "position": [
+          24.2,
+          2.6,
+          180
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "lantern_mine-lamp-3",
+        "position": [
+          71.2,
+          2.6,
+          176
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "lantern_mine-lamp-4",
+        "position": [
+          46.2,
+          2.6,
+          155
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "pinebrow_workings-lamp-0",
+        "position": [
+          169.2,
+          2.6,
+          207
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "pinebrow_workings-lamp-1",
+        "position": [
+          165.2,
+          2.6,
+          185
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "pinebrow_workings-lamp-2",
+        "position": [
+          144.2,
+          2.6,
+          176
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "pinebrow_workings-lamp-3",
+        "position": [
+          190.2,
+          2.6,
+          176
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "pinebrow_workings-lamp-4",
+        "position": [
+          164.2,
+          2.6,
+          154
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "spindle_cavern-lamp-0",
+        "position": [
+          48.2,
+          2.6,
+          86
+        ],
+        "color": [
+          0.65,
+          0.76,
+          1
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "spindle_cavern-lamp-1",
+        "position": [
+          38.2,
+          2.6,
+          62
+        ],
+        "color": [
+          0.65,
+          0.76,
+          1
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "spindle_cavern-lamp-2",
+        "position": [
+          22.2,
+          2.6,
+          52
+        ],
+        "color": [
+          0.65,
+          0.76,
+          1
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "spindle_cavern-lamp-3",
+        "position": [
+          56.2,
+          2.6,
+          34
+        ],
+        "color": [
+          0.65,
+          0.76,
+          1
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "boarsend_barrow-lamp-0",
+        "position": [
+          170.2,
+          2.6,
+          86
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "boarsend_barrow-lamp-1",
+        "position": [
+          169.2,
+          2.6,
+          62
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "boarsend_barrow-lamp-2",
+        "position": [
+          145.2,
+          2.6,
+          63
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "boarsend_barrow-lamp-3",
+        "position": [
+          192.2,
+          2.6,
+          58
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      },
+      {
+        "id": "boarsend_barrow-lamp-4",
+        "position": [
+          165.2,
+          2.6,
+          31
+        ],
+        "color": [
+          1,
+          0.65,
+          0.32
+        ],
+        "energyHint": 1.8,
+        "rangeHint": 18
+      }
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_boarsend_barrow_rubble_stone",
+      "Roof_lantern_mine_cliff_rock",
+      "Roof_pinebrow_workings_cliff_rock",
+      "Roof_spindle_cavern_cliff_rock"
+    ],
+    "walls": [
+      {
+        "node": "Build_boarsend_barrow_east_rubble_stone",
+        "outward": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "node": "Build_boarsend_barrow_north_rubble_stone",
+        "outward": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "node": "Build_boarsend_barrow_south_rubble_stone",
+        "outward": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "node": "Build_boarsend_barrow_west_rubble_stone",
+        "outward": [
+          -1,
+          0,
+          0
+        ]
+      },
+      {
+        "node": "Build_lantern_mine_east_cliff_rock",
+        "outward": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "node": "Build_lantern_mine_north_cliff_rock",
+        "outward": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "node": "Build_lantern_mine_south_cliff_rock",
+        "outward": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "node": "Build_lantern_mine_west_cliff_rock",
+        "outward": [
+          -1,
+          0,
+          0
+        ]
+      },
+      {
+        "node": "Build_pinebrow_workings_east_cliff_rock",
+        "outward": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "node": "Build_pinebrow_workings_north_cliff_rock",
+        "outward": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "node": "Build_pinebrow_workings_south_cliff_rock",
+        "outward": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "node": "Build_pinebrow_workings_west_cliff_rock",
+        "outward": [
+          -1,
+          0,
+          0
+        ]
+      },
+      {
+        "node": "Build_spindle_cavern_east_cliff_rock",
+        "outward": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "node": "Build_spindle_cavern_north_cliff_rock",
+        "outward": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "node": "Build_spindle_cavern_south_cliff_rock",
+        "outward": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "node": "Build_spindle_cavern_west_cliff_rock",
+        "outward": [
+          -1,
+          0,
+          0
+        ]
+      }
+    ],
+    "reason": "The shared interior roof and camera-facing wall cutaway convention"
+  },
+  "minimap": {
+    "file": "minimap.webp",
+    "image": "minimap.webp",
+    "northUp": true,
+    "worldMin": [
+      0,
+      0
+    ],
+    "worldMax": [
+      240,
+      240
+    ],
+    "imageSize": [
+      720,
+      720
+    ]
+  },
+  "provenance": {
+    "source": "_continent_v2/content/underground.json",
+    "sourceSha256": "97dfa01a43a70ece04aec22d2aee828f259e117b762db106da5c436e6ad3bff0",
+    "builder": "_continent_v2/build_underground.py",
+    "builderSha256": "2338c94c3ba669f9a11859486bbd240cce304f04623149069f15adf2327c5cd8"
+  },
+  "externalResources": {
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/220ac7d34c36a6e55506a8036556a86a0ee7ceabe4e3240d614b4a6d734099ef.png": "220ac7d34c36a6e55506a8036556a86a0ee7ceabe4e3240d614b4a6d734099ef",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
+    "../../../_shared/images/6a6cf111b54508d73215576348e0958e50ad721078be4876e39114c00e73e147.png": "6a6cf111b54508d73215576348e0958e50ad721078be4876e39114c00e73e147",
+    "../../../_shared/images/7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2.png": "7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/8725ab2abeba897155f2cced69010a4c89f861f11f9576412b3371b2879702cb.png": "8725ab2abeba897155f2cced69010a4c89f861f11f9576412b3371b2879702cb",
+    "../../../_shared/images/9e5fca50c6ba13f86734b576a604f62e45ae7bade5148c3f989d01242918618b.png": "9e5fca50c6ba13f86734b576a604f62e45ae7bade5148c3f989d01242918618b",
+    "../../../_shared/images/a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392.png": "a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392",
+    "../../../_shared/images/a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c.png": "a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2.png": "af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2",
+    "../../../_shared/images/b305f06de05579a017a85e47470919cec5fac8ea3a08d779538075f19666157f.png": "b305f06de05579a017a85e47470919cec5fac8ea3a08d779538075f19666157f",
+    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
+    "../../../_shared/images/fa31835d6a1afdf66df0d5a8b73ea7c766cf1c6fdae7bb7865ddcf926c2f18ba.png": "fa31835d6a1afdf66df0d5a8b73ea7c766cf1c6fdae7bb7865ddcf926c2f18ba",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c"
+  }
+}

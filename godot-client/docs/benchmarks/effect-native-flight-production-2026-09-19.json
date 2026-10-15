@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "status": "accepted focused component evidence; whole-scene frame impact not established",
+  "comparison": "frozen b90e4238b GDScript ImmediateMesh flight versus optional production native geometry plus ArrayMesh submission",
+  "timingScope": "CPU flight geometry construction, production validation/counters, and mesh submission; excludes frame advance, GPU completion, and frame rate",
+  "sources": {
+    "frozenBaseline": {
+      "path": "tests/fixtures/spell_flight_3d_269c_baseline.gd",
+      "sha256": "0097916f9a7aca508918d088df479c5c6c7061ae0fcc02e950198faa32326d65"
+    },
+    "productionFlight": {
+      "path": "src/world/spell_flight_3d.gd",
+      "sha256": "372662708fffdbe287284e2c706714b88bdf73f1b5eee25fb6536df26e3e45bc"
+    },
+    "nativeSource": {
+      "path": "native/native_crowd/src/native_spell_flight_geometry.cpp",
+      "sha256": "d4f648314b8d9cd363ea259a9627e8a8a3230df3f00047f3587020e0c506debd"
+    },
+    "nativeHeader": {
+      "path": "native/native_crowd/src/native_spell_flight_geometry.h",
+      "sha256": "9d0e88f43b1a3aa627c6a1a62ae9c0e6334ebb3c6c692c59770c94ba075c407a"
+    },
+    "nativeDll": {
+      "path": "bin/windows/native_crowd.windows.template_release.x86_64.dll",
+      "sha256": "cd19c0e8dbb9c22f5c534ac3206dd1890bd83fdd34c857e6698509c9c02a2814",
+      "bytes": 912896
+    },
+    "isolatedPrototype": {
+      "path": "tests/fixtures/spell_flight_3d_native_candidate.gd",
+      "sha256": "1f6e53786da5c4f8dd29a46ff6eb85bd49a0d4f81f53f4e696ac91c89a592656"
+    },
+    "productionContract": {
+      "path": "tests/test_spell_flight_native_presentation.gd",
+      "sha256": "972b3c97fc428ac0fe02cf177eae09f8d8666ff509eb59304763fbd9ad6eeba4"
+    },
+    "focusedProbe": {
+      "path": "tests/performance/effect_native_flight_probe.gd",
+      "sha256": "5954e46f9803da700e2210b2e1900a8ced19587d06be683cb08077b6df67ad3f"
+    },
+    "launcher": {
+      "path": "scripts/run_presentation_checks.ps1",
+      "sha256": "9a17c6ff38b4a56c85c923550636b9458937b30d6a7f42f65c83612851985075"
+    }
+  },
+  "build": {
+    "accepted": {
+      "path": "test-artifacts/native-crowd/native-flight-build-v2.log",
+      "sha256": "b55474fdf1dcb43767b7f50dd68b4d79fd2447d50de6560b908e050299050896"
+    },
+    "rejectedAttempt": {
+      "path": "test-artifacts/native-crowd/native-flight-build.log",
+      "sha256": "de721d54bcef4e8655038d64993e7933cd48c248c43190b33a362ca38d322de5",
+      "reason": "compile error from unavailable Math_PI/Math_TAU identifiers; no performance result"
+    }
+  },
+  "acceptedRuns": [
+    {
+      "kind": "production contract and exact fallback",
+      "renderer": "gl_compatibility",
+      "headless": false,
+      "artifactRoot": "test-artifacts/presentation-checks/spell-flight-native-production-contract-gl_compatibility-20260919T133149063Z",
+      "checksSha256": "3333b7128b41c304363a6baea6e9dc7c4f617446c2d7d70b44035600109ee6ee",
+      "processSha256": "3333b7128b41c304363a6baea6e9dc7c4f617446c2d7d70b44035600109ee6ee",
+      "result": "PASS",
+      "coverage": "flight/both/1 and off/0/cape modes; exact native arrays and material values versus frozen baseline; malformed null output selects exact GDScript fallback; monotonic attempt/success/fallback counters"
+    },
+    {
+      "kind": "production contract and exact fallback",
+      "renderer": "forward_plus",
+      "headless": false,
+      "artifactRoot": "test-artifacts/presentation-checks/spell-flight-native-production-contract-fp-forward_plus-20260919T133238570Z",
+      "checksSha256": "957824432c89456637f4b66eb0f794ed1aff7398713f4c300a3fd89580e0ac2b",
+      "processSha256": "957824432c89456637f4b66eb0f794ed1aff7398713f4c300a3fd89580e0ac2b",
+      "result": "PASS",
+      "coverage": "same production contract under Forward+"
+    },
+    {
+      "kind": "focused production microbenchmark",
+      "renderer": "gl_compatibility",
+      "headless": true,
+      "artifactRoot": "test-artifacts/presentation-checks/effect-native-flight-production-headless-gl_compatibility-20260919T133158224Z",
+      "checksSha256": "d904fe038e9f8b4455f856c5548356f062396ab5498ddb3c3025aefeeba48283",
+      "processSha256": "d904fe038e9f8b4455f856c5548356f062396ab5498ddb3c3025aefeeba48283",
+      "reportSha256": "7e0021a212531368c7aaec47d3029b2a6e346983eee7cda03dc503ddedba337f",
+      "result": "PASS",
+      "trials": 8,
+      "iterationsPerTrial": 180,
+      "baselineMedianMicroseconds": 21789.5,
+      "nativeMedianMicroseconds": 6868.0,
+      "reductionPercent": 68.4802313040685,
+      "nativeStatsDelta": {
+        "buildAttempts": 1424,
+        "buildSuccesses": 1424,
+        "buildFallbacks": 0
+      },
+      "parityAuthoritative": false,
+      "parityReason": "headless renderer is timing-only; actual surface arrays were verified in windowed runs"
+    },
+    {
+      "kind": "focused production microbenchmark",
+      "renderer": "gl_compatibility",
+      "headless": false,
+      "artifactRoot": "test-artifacts/presentation-checks/effect-native-flight-production-windowed-gl_compatibility-20260919T133206328Z",
+      "checksSha256": "0c2fb78d1b4f441c13787dcfcdf9709f3f944534ec784dbad6d0539fa4419351",
+      "processSha256": "0c2fb78d1b4f441c13787dcfcdf9709f3f944534ec784dbad6d0539fa4419351",
+      "reportSha256": "78e784eed236931025987f97651b015e7143bdf8da1c2ef1da3e10efdbaa0af2",
+      "result": "PASS",
+      "trials": 8,
+      "iterationsPerTrial": 180,
+      "baselineMedianMicroseconds": 21971.5,
+      "nativeMedianMicroseconds": 7624.0,
+      "reductionPercent": 65.3005029242428,
+      "nativeStatsDelta": {
+        "buildAttempts": 1514,
+        "buildSuccesses": 1514,
+        "buildFallbacks": 0
+      },
+      "parityAuthoritative": true,
+      "parityCoverage": "exact surface arrays, vertex/color/UV order, materials, effects 0/1/2/10/83/84/85/86/999, powers, cameras, zero/near-zero/vertical/long/moved endpoints, preflight/active/afterglow/expiry times"
+    },
+    {
+      "kind": "adjacent regressions",
+      "renderer": "gl_compatibility",
+      "headless": true,
+      "artifactRoot": "test-artifacts/presentation-checks/native-flight-adjacent-regressions-gl_compatibility-20260919T133226014Z",
+      "checksSha256": "c48b280dd9d03a4c0d3a7d6b86d28c2e7d43bb3c3c5709f8d5ea14acad1289ad",
+      "processRecords": {
+        "test_spell_flights.gd": "89399c338d0b772ae0aec19b43c9e48e7a60596e63c181ddcf794f1e02b408ea",
+        "test_combat_presentation.gd": "339af7cbb6bed23d3c2447a99bedfaf900da8bbbe45296b400837123c0945868"
+      },
+      "result": "PASS"
+    }
+  ],
+  "rejectedRuns": [
+    {
+      "artifactRoot": "test-artifacts/presentation-checks/effect-native-flight-probe-headless-gl_compatibility-20260919T131934327Z",
+      "checksSha256": "5ba9e035727d3133cd3dec5fbbcf58b4abd16ec86d79ed17cd3419a4eb244782",
+      "processSha256": "5ba9e035727d3133cd3dec5fbbcf58b4abd16ec86d79ed17cd3419a4eb244782",
+      "stderrSha256": "72e85d5ecc74a5b5be91ef33ea200ab0e86a8441e89f36c6d6aef5aae65c901b",
+      "reason": "test setup omitted explicit GDExtensionManager load, so the class was unavailable; script errors make all timing ineligible"
+    },
+    {
+      "evidencePath": "docs/benchmarks/effect-arraymesh-flight-negative-2026-09-19.json",
+      "evidenceSha256": "848ea9d5cb66fedb5d1b2dbd2c7ac14fb4b508100e3b963f74d86d6390510d59",
+      "reason": "GDScript ArrayMesh bulk submission preserved output but was 6.53% slower windowed and 9.92% slower headless; it was not activated"
+    }
+  ],
+  "interpretation": "The native coarse geometry boundary materially reduces the isolated flight construction/submission component and preserves exact generated output. It remains opt-in. This evidence does not establish a whole-scene frame-rate gain or 60 FPS."
+}

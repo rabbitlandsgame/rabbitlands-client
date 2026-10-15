@@ -1,0 +1,1987 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "westhaven__chunk_01_07",
+    "name": "Westhaven",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -74.0,
+        -1.1157174110412598,
+        -328.0
+      ],
+      "max": [
+        22.0,
+        21.996272521972656,
+        -292.0
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -170.0,
+        -22.997499465942383,
+        -336.0
+      ],
+      "max": [
+        202.0,
+        344.1594543457031,
+        240.0
+      ]
+    },
+    "seaLevel": 0.0,
+    "serverCells": 438,
+    "mapBounds": {
+      "min": [
+        -170.0,
+        -22.997499465942383,
+        -336.0
+      ],
+      "max": [
+        202.0,
+        344.1594543457031,
+        240.0
+      ]
+    }
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      174,
+      244
+    ],
+    "serverCells": [
+      588,
+      588
+    ],
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "walkingHeight": 14.555402755737305,
+    "invertServerY": true,
+    "serverStorageVersion": 1,
+    "serverTileMin": [
+      0,
+      0
+    ],
+    "addressableWorldBounds": {
+      "min": [
+        -174,
+        -344
+      ],
+      "max": [
+        414,
+        244
+      ]
+    },
+    "authoringSpecSha256": "57291a2f3fed95b3797d0ec9be42170e34469171cbf20faa2866239515a9c10e"
+  },
+  "collision": {
+    "format": "EWCG",
+    "formatVersion": 2,
+    "version": 2,
+    "cellMetres": 0.5,
+    "cellSize": 0.5,
+    "authoredSurfaceExport": true,
+    "gridAlignment": "tile-centres-v1",
+    "nodeNames": [],
+    "serverStorageVersion": 1,
+    "serverTileMin": [
+      0,
+      0
+    ],
+    "serverCells": [
+      588,
+      588
+    ],
+    "originMetres": [
+      -174,
+      244
+    ],
+    "authoringSpecSha256": "57291a2f3fed95b3797d0ec9be42170e34469171cbf20faa2866239515a9c10e"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Terrain_",
+      "Walk_"
+    ],
+    "terrainConforming": true,
+    "authority": "server",
+    "defaultSpawn": "continent-arrival"
+  },
+  "streamingBorders": [
+    {
+      "id": "grey_moors--westhaven",
+      "portal": "road-to-grey_moors",
+      "destination": "grey_moors",
+      "anchor": [
+        -7.0,
+        17.87392807006836,
+        -322.0
+      ],
+      "globalAnchor": [
+        163.0,
+        17.87392807006836,
+        738.0
+      ],
+      "globalTranslation": [
+        170.0,
+        0,
+        1060.0
+      ],
+      "outward": [
+        -0.0,
+        -1.0
+      ],
+      "uvSign": 1,
+      "preloadDistance": 320,
+      "retainDistance": 420,
+      "blendDistance": 0,
+      "collarDepth": 2,
+      "halfWidthTiles": 3,
+      "viewHalfWidth": 240,
+      "viewDepth": 320,
+      "geometryMode": "continent-chunks-v1",
+      "sceneNodes": []
+    },
+    {
+      "id": "four_gates--westhaven",
+      "portal": "road-to-four_gates",
+      "destination": "four_gates",
+      "anchor": [
+        182.0,
+        12.49389362335205,
+        -107.0
+      ],
+      "globalAnchor": [
+        352.0,
+        12.49389362335205,
+        953.0
+      ],
+      "globalTranslation": [
+        170.0,
+        0,
+        1060.0
+      ],
+      "outward": [
+        1.0,
+        0.0
+      ],
+      "uvSign": 1,
+      "preloadDistance": 320,
+      "retainDistance": 420,
+      "blendDistance": 0,
+      "collarDepth": 2,
+      "halfWidthTiles": 3,
+      "viewHalfWidth": 240,
+      "viewDepth": 320,
+      "geometryMode": "continent-chunks-v1",
+      "sceneNodes": []
+    },
+    {
+      "id": "manymouth_delta--westhaven",
+      "portal": "road-to-manymouth_delta",
+      "destination": "manymouth_delta",
+      "anchor": [
+        182.0,
+        1.856467604637146,
+        9.0
+      ],
+      "globalAnchor": [
+        352.0,
+        1.856467604637146,
+        1069.0
+      ],
+      "globalTranslation": [
+        170.0,
+        0,
+        1060.0
+      ],
+      "outward": [
+        1.0,
+        0.0
+      ],
+      "uvSign": 1,
+      "preloadDistance": 320,
+      "retainDistance": 420,
+      "blendDistance": 0,
+      "collarDepth": 2,
+      "halfWidthTiles": 3,
+      "viewHalfWidth": 240,
+      "viewDepth": 320,
+      "geometryMode": "continent-chunks-v1",
+      "sceneNodes": []
+    }
+  ],
+  "environment": {
+    "sky": {
+      "type": "gradient",
+      "zenith": [
+        0.17,
+        0.41,
+        0.72
+      ],
+      "horizon": [
+        0.86,
+        0.88,
+        0.84
+      ],
+      "curve": 0.2,
+      "groundHorizon": [
+        0.52,
+        0.56,
+        0.52
+      ],
+      "groundBottom": [
+        0.2,
+        0.26,
+        0.28
+      ],
+      "sunAngleMax": 16.0,
+      "energy": 1.2
+    },
+    "sun": {
+      "direction": [
+        -0.45,
+        -0.78,
+        -0.43
+      ],
+      "color": [
+        1.0,
+        0.94,
+        0.83
+      ],
+      "energy": 1.1
+    },
+    "ambient": {
+      "color": [
+        0.6,
+        0.67,
+        0.72
+      ],
+      "energy": 0.6
+    },
+    "saturation": 1.34,
+    "fog": {
+      "enabled": true,
+      "color": [
+        0.76,
+        0.8,
+        0.78
+      ],
+      "density": 0.0003,
+      "heightFalloff": 0.002
+    },
+    "variants": {
+      "golden-hour": {
+        "sun": {
+          "direction": [
+            -0.84,
+            -0.24,
+            0.48
+          ],
+          "color": [
+            1.54,
+            1.06,
+            0.64
+          ],
+          "energy": 1.28
+        },
+        "fog": {
+          "enabled": true,
+          "color": [
+            0.8,
+            0.68,
+            0.54
+          ],
+          "density": 0.0017
+        }
+      },
+      "sea-fret": {
+        "sun": {
+          "direction": [
+            -0.3,
+            -0.9,
+            0.32
+          ],
+          "color": [
+            0.92,
+            0.94,
+            0.98
+          ],
+          "energy": 0.72
+        },
+        "fog": {
+          "enabled": true,
+          "color": [
+            0.74,
+            0.78,
+            0.8
+          ],
+          "density": 0.0034,
+          "heightFalloff": 0.01
+        }
+      }
+    },
+    "water": {
+      "shallowColor": [
+        0.2,
+        0.58,
+        0.6
+      ],
+      "deepColor": [
+        0.03,
+        0.16,
+        0.3
+      ],
+      "causticsEnabled": true,
+      "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+    },
+    "presentation": {
+      "gulls": {
+        "enabled": true,
+        "density": 0.8,
+        "zones": [
+          "harbour",
+          "open-sea",
+          "lamp-rock"
+        ]
+      },
+      "mist": {
+        "enabled": false
+      },
+      "spray": {
+        "enabled": true,
+        "zones": [
+          "mole",
+          "gullstone",
+          "lamp-rock"
+        ]
+      },
+      "bannerWind": {
+        "enabled": true,
+        "strength": 0.62
+      },
+      "ambientAudio": [
+        {
+          "id": "harbour-work",
+          "zone": "waterfront"
+        },
+        {
+          "id": "market-crowd",
+          "zone": "lower-town"
+        },
+        {
+          "id": "bells",
+          "zone": "citadel"
+        },
+        {
+          "id": "surf",
+          "zone": "mole"
+        },
+        {
+          "id": "gulls",
+          "zone": "open-sea"
+        }
+      ]
+    },
+    "zones": [
+      {
+        "id": "waterfront",
+        "centre": [
+          60.0,
+          3.4,
+          8.0
+        ],
+        "radius": 230.0
+      },
+      {
+        "id": "lower-town",
+        "centre": [
+          30.0,
+          9.5,
+          -30.0
+        ],
+        "radius": 150.0
+      },
+      {
+        "id": "citadel",
+        "centre": [
+          60.0,
+          41.0,
+          -140.0
+        ],
+        "radius": 120.0
+      },
+      {
+        "id": "upland",
+        "centre": [
+          250.0,
+          34.0,
+          -150.0
+        ],
+        "radius": 240.0
+      },
+      {
+        "id": "mole",
+        "centre": [
+          -40.0,
+          5.2,
+          30.0
+        ],
+        "radius": 140.0
+      },
+      {
+        "id": "gullstone",
+        "centre": [
+          -40.0,
+          20.0,
+          105.0
+        ],
+        "radius": 110.0
+      },
+      {
+        "id": "lamp-rock",
+        "centre": [
+          300.0,
+          18.0,
+          120.0
+        ],
+        "radius": 110.0
+      },
+      {
+        "id": "open-sea",
+        "centre": [
+          110.0,
+          0.0,
+          160.0
+        ],
+        "radius": 420.0
+      }
+    ]
+  },
+  "performance": {
+    "glbBytes": 1435904,
+    "nodes": 52,
+    "meshes": 10,
+    "externalResources": {
+      "../../../_continent/shared-assets/884fe4c3eca79b4492bc9d6baefe1f14965e1ceebbcbad1a0676314117542035.png": "884fe4c3eca79b4492bc9d6baefe1f14965e1ceebbcbad1a0676314117542035",
+      "../../../_continent/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+      "../../../_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+      "../../../_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+      "../../../_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7",
+      "../../../_continent/shared-assets/9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7.png": "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+      "../../../_continent/shared-assets/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",
+      "../../../_continent/shared-assets/1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac.png": "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac",
+      "../../../_continent/shared-assets/06269ead6b384e33be1981702a2798bcb23d0350ef68032f0b0126b125942f11.jpg": "06269ead6b384e33be1981702a2798bcb23d0350ef68032f0b0126b125942f11",
+      "../../../_continent/shared-assets/49afe2234c31d18b45d593b83efecbaf2c4079149b50d1e730785b28b8094ebe.jpg": "49afe2234c31d18b45d593b83efecbaf2c4079149b50d1e730785b28b8094ebe",
+      "../../../_continent/shared-assets/3bc40dac25ea7c6cd6a8b8419747545ff276986a467398da22c074b5a3177f5f.jpg": "3bc40dac25ea7c6cd6a8b8419747545ff276986a467398da22c074b5a3177f5f",
+      "../../../_continent/shared-assets/46230d07cca61550ab9c77574920e3efaac7d05412115c737836aa9e1862f703.jpg": "46230d07cca61550ab9c77574920e3efaac7d05412115c737836aa9e1862f703",
+      "../../../_continent/shared-assets/88b1ad465c49afdfbc70a5d7ee1447ca83615b6855699034b03ddb7f9ced80ed.jpg": "88b1ad465c49afdfbc70a5d7ee1447ca83615b6855699034b03ddb7f9ced80ed",
+      "../../../_continent/shared-assets/88dde380948e786d8970178b88885be02da98b7ef1234f0d63cff1eba79e3ea8.jpg": "88dde380948e786d8970178b88885be02da98b7ef1234f0d63cff1eba79e3ea8",
+      "../../../_continent/shared-assets/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg": "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7",
+      "../../../_continent/shared-assets/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg": "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7",
+      "../../../_continent/shared-assets/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg": "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581"
+    },
+    "sharedResourceResidentBytes": {
+      "884fe4c3eca79b4492bc9d6baefe1f14965e1ceebbcbad1a0676314117542035": 87382,
+      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+      "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805": 5592406,
+      "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5": 1398102,
+      "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7": 1398102,
+      "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7": 8386752,
+      "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630": 349526,
+      "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac": 349526,
+      "06269ead6b384e33be1981702a2798bcb23d0350ef68032f0b0126b125942f11": 1398102,
+      "49afe2234c31d18b45d593b83efecbaf2c4079149b50d1e730785b28b8094ebe": 1398102,
+      "3bc40dac25ea7c6cd6a8b8419747545ff276986a467398da22c074b5a3177f5f": 1398102,
+      "46230d07cca61550ab9c77574920e3efaac7d05412115c737836aa9e1862f703": 1398102,
+      "88b1ad465c49afdfbc70a5d7ee1447ca83615b6855699034b03ddb7f9ced80ed": 1398102,
+      "88dde380948e786d8970178b88885be02da98b7ef1234f0d63cff1eba79e3ea8": 1398102,
+      "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7": 5592406,
+      "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7": 5592406,
+      "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581": 5592406
+    }
+  },
+  "sources": [
+    "_continent/diagonal-plan.json",
+    "_continent/build_continent.py",
+    "_continent/build_library.py"
+  ],
+  "provenance": {
+    "assets": "original to Eloria/Nymara; generated by source/amberwood/*",
+    "thirdParty": "none",
+    "textures": "procedural (numpy + Pillow), no sampled or traced source",
+    "geometry": "procedural (numpy), no imported models",
+    "license": "same as the Eloria client repository"
+  },
+  "productionStatus": "production-geometry-materials-population",
+  "requiresServerMap": {
+    "tiles": 66,
+    "metresPerTile": 1.0,
+    "arrivalTile": [
+      154,
+      166
+    ],
+    "note": "66x66 ELM map tiles provide the 396x396 one-metre collision grid; coordinate origin (120,172), main arrival (154,166)."
+  },
+  "knownLimitations": [],
+  "continentGeography": {
+    "revision": "diagonal-spine-v1",
+    "translation": [
+      170.0,
+      0,
+      1060.0
+    ],
+    "ownershipPolygon": [
+      [
+        0.0,
+        724.0
+      ],
+      [
+        2.0,
+        724.0
+      ],
+      [
+        2.0,
+        726.0
+      ],
+      [
+        28.0,
+        726.0
+      ],
+      [
+        28.0,
+        728.0
+      ],
+      [
+        54.0,
+        728.0
+      ],
+      [
+        54.0,
+        730.0
+      ],
+      [
+        80.0,
+        730.0
+      ],
+      [
+        80.0,
+        732.0
+      ],
+      [
+        106.0,
+        732.0
+      ],
+      [
+        106.0,
+        734.0
+      ],
+      [
+        130.0,
+        734.0
+      ],
+      [
+        130.0,
+        736.0
+      ],
+      [
+        156.0,
+        736.0
+      ],
+      [
+        156.0,
+        738.0
+      ],
+      [
+        182.0,
+        738.0
+      ],
+      [
+        182.0,
+        740.0
+      ],
+      [
+        208.0,
+        740.0
+      ],
+      [
+        208.0,
+        742.0
+      ],
+      [
+        224.0,
+        742.0
+      ],
+      [
+        224.0,
+        746.0
+      ],
+      [
+        226.0,
+        746.0
+      ],
+      [
+        226.0,
+        748.0
+      ],
+      [
+        228.0,
+        748.0
+      ],
+      [
+        228.0,
+        752.0
+      ],
+      [
+        230.0,
+        752.0
+      ],
+      [
+        230.0,
+        756.0
+      ],
+      [
+        232.0,
+        756.0
+      ],
+      [
+        232.0,
+        758.0
+      ],
+      [
+        234.0,
+        758.0
+      ],
+      [
+        234.0,
+        762.0
+      ],
+      [
+        236.0,
+        762.0
+      ],
+      [
+        236.0,
+        766.0
+      ],
+      [
+        238.0,
+        766.0
+      ],
+      [
+        238.0,
+        768.0
+      ],
+      [
+        240.0,
+        768.0
+      ],
+      [
+        240.0,
+        772.0
+      ],
+      [
+        242.0,
+        772.0
+      ],
+      [
+        242.0,
+        774.0
+      ],
+      [
+        244.0,
+        774.0
+      ],
+      [
+        244.0,
+        778.0
+      ],
+      [
+        246.0,
+        778.0
+      ],
+      [
+        246.0,
+        782.0
+      ],
+      [
+        248.0,
+        782.0
+      ],
+      [
+        248.0,
+        784.0
+      ],
+      [
+        250.0,
+        784.0
+      ],
+      [
+        250.0,
+        788.0
+      ],
+      [
+        252.0,
+        788.0
+      ],
+      [
+        252.0,
+        792.0
+      ],
+      [
+        254.0,
+        792.0
+      ],
+      [
+        254.0,
+        794.0
+      ],
+      [
+        256.0,
+        794.0
+      ],
+      [
+        256.0,
+        798.0
+      ],
+      [
+        258.0,
+        798.0
+      ],
+      [
+        258.0,
+        802.0
+      ],
+      [
+        260.0,
+        802.0
+      ],
+      [
+        260.0,
+        804.0
+      ],
+      [
+        262.0,
+        804.0
+      ],
+      [
+        262.0,
+        808.0
+      ],
+      [
+        264.0,
+        808.0
+      ],
+      [
+        264.0,
+        810.0
+      ],
+      [
+        266.0,
+        810.0
+      ],
+      [
+        266.0,
+        814.0
+      ],
+      [
+        268.0,
+        814.0
+      ],
+      [
+        268.0,
+        818.0
+      ],
+      [
+        270.0,
+        818.0
+      ],
+      [
+        270.0,
+        820.0
+      ],
+      [
+        272.0,
+        820.0
+      ],
+      [
+        272.0,
+        824.0
+      ],
+      [
+        274.0,
+        824.0
+      ],
+      [
+        274.0,
+        828.0
+      ],
+      [
+        276.0,
+        828.0
+      ],
+      [
+        276.0,
+        830.0
+      ],
+      [
+        278.0,
+        830.0
+      ],
+      [
+        278.0,
+        834.0
+      ],
+      [
+        280.0,
+        834.0
+      ],
+      [
+        280.0,
+        838.0
+      ],
+      [
+        282.0,
+        838.0
+      ],
+      [
+        282.0,
+        840.0
+      ],
+      [
+        284.0,
+        840.0
+      ],
+      [
+        284.0,
+        844.0
+      ],
+      [
+        286.0,
+        844.0
+      ],
+      [
+        286.0,
+        846.0
+      ],
+      [
+        288.0,
+        846.0
+      ],
+      [
+        288.0,
+        850.0
+      ],
+      [
+        290.0,
+        850.0
+      ],
+      [
+        290.0,
+        854.0
+      ],
+      [
+        292.0,
+        854.0
+      ],
+      [
+        292.0,
+        856.0
+      ],
+      [
+        294.0,
+        856.0
+      ],
+      [
+        294.0,
+        860.0
+      ],
+      [
+        296.0,
+        860.0
+      ],
+      [
+        296.0,
+        864.0
+      ],
+      [
+        298.0,
+        864.0
+      ],
+      [
+        298.0,
+        866.0
+      ],
+      [
+        300.0,
+        866.0
+      ],
+      [
+        300.0,
+        870.0
+      ],
+      [
+        302.0,
+        870.0
+      ],
+      [
+        302.0,
+        874.0
+      ],
+      [
+        304.0,
+        874.0
+      ],
+      [
+        304.0,
+        876.0
+      ],
+      [
+        306.0,
+        876.0
+      ],
+      [
+        306.0,
+        880.0
+      ],
+      [
+        308.0,
+        880.0
+      ],
+      [
+        308.0,
+        882.0
+      ],
+      [
+        310.0,
+        882.0
+      ],
+      [
+        310.0,
+        886.0
+      ],
+      [
+        312.0,
+        886.0
+      ],
+      [
+        312.0,
+        890.0
+      ],
+      [
+        314.0,
+        890.0
+      ],
+      [
+        314.0,
+        892.0
+      ],
+      [
+        316.0,
+        892.0
+      ],
+      [
+        316.0,
+        896.0
+      ],
+      [
+        318.0,
+        896.0
+      ],
+      [
+        318.0,
+        900.0
+      ],
+      [
+        320.0,
+        900.0
+      ],
+      [
+        320.0,
+        902.0
+      ],
+      [
+        322.0,
+        902.0
+      ],
+      [
+        322.0,
+        906.0
+      ],
+      [
+        324.0,
+        906.0
+      ],
+      [
+        324.0,
+        910.0
+      ],
+      [
+        326.0,
+        910.0
+      ],
+      [
+        326.0,
+        912.0
+      ],
+      [
+        328.0,
+        912.0
+      ],
+      [
+        328.0,
+        916.0
+      ],
+      [
+        330.0,
+        916.0
+      ],
+      [
+        330.0,
+        918.0
+      ],
+      [
+        332.0,
+        918.0
+      ],
+      [
+        332.0,
+        922.0
+      ],
+      [
+        334.0,
+        922.0
+      ],
+      [
+        334.0,
+        926.0
+      ],
+      [
+        336.0,
+        926.0
+      ],
+      [
+        336.0,
+        928.0
+      ],
+      [
+        338.0,
+        928.0
+      ],
+      [
+        338.0,
+        932.0
+      ],
+      [
+        340.0,
+        932.0
+      ],
+      [
+        340.0,
+        936.0
+      ],
+      [
+        342.0,
+        936.0
+      ],
+      [
+        342.0,
+        938.0
+      ],
+      [
+        344.0,
+        938.0
+      ],
+      [
+        344.0,
+        942.0
+      ],
+      [
+        346.0,
+        942.0
+      ],
+      [
+        346.0,
+        946.0
+      ],
+      [
+        348.0,
+        946.0
+      ],
+      [
+        348.0,
+        948.0
+      ],
+      [
+        350.0,
+        948.0
+      ],
+      [
+        350.0,
+        952.0
+      ],
+      [
+        352.0,
+        952.0
+      ],
+      [
+        352.0,
+        954.0
+      ],
+      [
+        354.0,
+        954.0
+      ],
+      [
+        354.0,
+        958.0
+      ],
+      [
+        356.0,
+        958.0
+      ],
+      [
+        356.0,
+        962.0
+      ],
+      [
+        358.0,
+        962.0
+      ],
+      [
+        358.0,
+        964.0
+      ],
+      [
+        360.0,
+        964.0
+      ],
+      [
+        360.0,
+        968.0
+      ],
+      [
+        362.0,
+        968.0
+      ],
+      [
+        362.0,
+        972.0
+      ],
+      [
+        364.0,
+        972.0
+      ],
+      [
+        364.0,
+        974.0
+      ],
+      [
+        366.0,
+        974.0
+      ],
+      [
+        366.0,
+        978.0
+      ],
+      [
+        368.0,
+        978.0
+      ],
+      [
+        368.0,
+        982.0
+      ],
+      [
+        370.0,
+        982.0
+      ],
+      [
+        370.0,
+        984.0
+      ],
+      [
+        372.0,
+        984.0
+      ],
+      [
+        372.0,
+        986.0
+      ],
+      [
+        370.0,
+        986.0
+      ],
+      [
+        370.0,
+        996.0
+      ],
+      [
+        368.0,
+        996.0
+      ],
+      [
+        368.0,
+        1004.0
+      ],
+      [
+        366.0,
+        1004.0
+      ],
+      [
+        366.0,
+        1012.0
+      ],
+      [
+        364.0,
+        1012.0
+      ],
+      [
+        364.0,
+        1022.0
+      ],
+      [
+        362.0,
+        1022.0
+      ],
+      [
+        362.0,
+        1030.0
+      ],
+      [
+        360.0,
+        1030.0
+      ],
+      [
+        360.0,
+        1038.0
+      ],
+      [
+        358.0,
+        1038.0
+      ],
+      [
+        358.0,
+        1048.0
+      ],
+      [
+        356.0,
+        1048.0
+      ],
+      [
+        356.0,
+        1056.0
+      ],
+      [
+        354.0,
+        1056.0
+      ],
+      [
+        354.0,
+        1066.0
+      ],
+      [
+        352.0,
+        1066.0
+      ],
+      [
+        352.0,
+        1074.0
+      ],
+      [
+        350.0,
+        1074.0
+      ],
+      [
+        350.0,
+        1082.0
+      ],
+      [
+        348.0,
+        1082.0
+      ],
+      [
+        348.0,
+        1092.0
+      ],
+      [
+        346.0,
+        1092.0
+      ],
+      [
+        346.0,
+        1100.0
+      ],
+      [
+        344.0,
+        1100.0
+      ],
+      [
+        344.0,
+        1108.0
+      ],
+      [
+        342.0,
+        1108.0
+      ],
+      [
+        342.0,
+        1118.0
+      ],
+      [
+        340.0,
+        1118.0
+      ],
+      [
+        340.0,
+        1126.0
+      ],
+      [
+        338.0,
+        1126.0
+      ],
+      [
+        338.0,
+        1136.0
+      ],
+      [
+        336.0,
+        1136.0
+      ],
+      [
+        336.0,
+        1144.0
+      ],
+      [
+        334.0,
+        1144.0
+      ],
+      [
+        334.0,
+        1152.0
+      ],
+      [
+        332.0,
+        1152.0
+      ],
+      [
+        332.0,
+        1162.0
+      ],
+      [
+        330.0,
+        1162.0
+      ],
+      [
+        330.0,
+        1170.0
+      ],
+      [
+        328.0,
+        1170.0
+      ],
+      [
+        328.0,
+        1178.0
+      ],
+      [
+        326.0,
+        1178.0
+      ],
+      [
+        326.0,
+        1188.0
+      ],
+      [
+        324.0,
+        1188.0
+      ],
+      [
+        324.0,
+        1196.0
+      ],
+      [
+        322.0,
+        1196.0
+      ],
+      [
+        322.0,
+        1206.0
+      ],
+      [
+        320.0,
+        1206.0
+      ],
+      [
+        320.0,
+        1214.0
+      ],
+      [
+        318.0,
+        1214.0
+      ],
+      [
+        318.0,
+        1222.0
+      ],
+      [
+        316.0,
+        1222.0
+      ],
+      [
+        316.0,
+        1226.0
+      ],
+      [
+        312.0,
+        1226.0
+      ],
+      [
+        312.0,
+        1228.0
+      ],
+      [
+        304.0,
+        1228.0
+      ],
+      [
+        304.0,
+        1230.0
+      ],
+      [
+        296.0,
+        1230.0
+      ],
+      [
+        296.0,
+        1232.0
+      ],
+      [
+        286.0,
+        1232.0
+      ],
+      [
+        286.0,
+        1234.0
+      ],
+      [
+        278.0,
+        1234.0
+      ],
+      [
+        278.0,
+        1236.0
+      ],
+      [
+        270.0,
+        1236.0
+      ],
+      [
+        270.0,
+        1238.0
+      ],
+      [
+        262.0,
+        1238.0
+      ],
+      [
+        262.0,
+        1240.0
+      ],
+      [
+        252.0,
+        1240.0
+      ],
+      [
+        252.0,
+        1242.0
+      ],
+      [
+        244.0,
+        1242.0
+      ],
+      [
+        244.0,
+        1244.0
+      ],
+      [
+        236.0,
+        1244.0
+      ],
+      [
+        236.0,
+        1246.0
+      ],
+      [
+        228.0,
+        1246.0
+      ],
+      [
+        228.0,
+        1248.0
+      ],
+      [
+        218.0,
+        1248.0
+      ],
+      [
+        218.0,
+        1250.0
+      ],
+      [
+        210.0,
+        1250.0
+      ],
+      [
+        210.0,
+        1252.0
+      ],
+      [
+        202.0,
+        1252.0
+      ],
+      [
+        202.0,
+        1254.0
+      ],
+      [
+        194.0,
+        1254.0
+      ],
+      [
+        194.0,
+        1256.0
+      ],
+      [
+        184.0,
+        1256.0
+      ],
+      [
+        184.0,
+        1258.0
+      ],
+      [
+        176.0,
+        1258.0
+      ],
+      [
+        176.0,
+        1260.0
+      ],
+      [
+        168.0,
+        1260.0
+      ],
+      [
+        168.0,
+        1262.0
+      ],
+      [
+        160.0,
+        1262.0
+      ],
+      [
+        160.0,
+        1264.0
+      ],
+      [
+        150.0,
+        1264.0
+      ],
+      [
+        150.0,
+        1266.0
+      ],
+      [
+        142.0,
+        1266.0
+      ],
+      [
+        142.0,
+        1268.0
+      ],
+      [
+        134.0,
+        1268.0
+      ],
+      [
+        134.0,
+        1270.0
+      ],
+      [
+        126.0,
+        1270.0
+      ],
+      [
+        126.0,
+        1272.0
+      ],
+      [
+        116.0,
+        1272.0
+      ],
+      [
+        116.0,
+        1274.0
+      ],
+      [
+        108.0,
+        1274.0
+      ],
+      [
+        108.0,
+        1276.0
+      ],
+      [
+        100.0,
+        1276.0
+      ],
+      [
+        100.0,
+        1278.0
+      ],
+      [
+        92.0,
+        1278.0
+      ],
+      [
+        92.0,
+        1280.0
+      ],
+      [
+        82.0,
+        1280.0
+      ],
+      [
+        82.0,
+        1282.0
+      ],
+      [
+        74.0,
+        1282.0
+      ],
+      [
+        74.0,
+        1284.0
+      ],
+      [
+        66.0,
+        1284.0
+      ],
+      [
+        66.0,
+        1286.0
+      ],
+      [
+        58.0,
+        1286.0
+      ],
+      [
+        58.0,
+        1288.0
+      ],
+      [
+        48.0,
+        1288.0
+      ],
+      [
+        48.0,
+        1290.0
+      ],
+      [
+        40.0,
+        1290.0
+      ],
+      [
+        40.0,
+        1292.0
+      ],
+      [
+        32.0,
+        1292.0
+      ],
+      [
+        32.0,
+        1294.0
+      ],
+      [
+        24.0,
+        1294.0
+      ],
+      [
+        24.0,
+        1296.0
+      ],
+      [
+        14.0,
+        1296.0
+      ],
+      [
+        14.0,
+        1298.0
+      ],
+      [
+        6.0,
+        1298.0
+      ],
+      [
+        6.0,
+        1300.0
+      ],
+      [
+        0.0,
+        1300.0
+      ]
+    ],
+    "geometryMode": "continent-chunks-v1"
+  },
+  "ambientPopulation": {
+    "groups": []
+  },
+  "bounds": {
+    "min": [
+      -74.0,
+      -1.1157174110412598,
+      -328.0
+    ],
+    "max": [
+      22.0,
+      21.996272521972656,
+      -292.0
+    ]
+  },
+  "terrainRevision": "diagonal-spine-v1:aa50dbe22d1352044ee88410e19221f72ee07404d96798471d022d21420f2a99",
+  "externalResources": {
+    "../../../_continent/shared-assets/884fe4c3eca79b4492bc9d6baefe1f14965e1ceebbcbad1a0676314117542035.png": "884fe4c3eca79b4492bc9d6baefe1f14965e1ceebbcbad1a0676314117542035",
+    "../../../_continent/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+    "../../../_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7",
+    "../../../_continent/shared-assets/9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7.png": "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "../../../_continent/shared-assets/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",
+    "../../../_continent/shared-assets/1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac.png": "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac",
+    "../../../_continent/shared-assets/06269ead6b384e33be1981702a2798bcb23d0350ef68032f0b0126b125942f11.jpg": "06269ead6b384e33be1981702a2798bcb23d0350ef68032f0b0126b125942f11",
+    "../../../_continent/shared-assets/49afe2234c31d18b45d593b83efecbaf2c4079149b50d1e730785b28b8094ebe.jpg": "49afe2234c31d18b45d593b83efecbaf2c4079149b50d1e730785b28b8094ebe",
+    "../../../_continent/shared-assets/3bc40dac25ea7c6cd6a8b8419747545ff276986a467398da22c074b5a3177f5f.jpg": "3bc40dac25ea7c6cd6a8b8419747545ff276986a467398da22c074b5a3177f5f",
+    "../../../_continent/shared-assets/46230d07cca61550ab9c77574920e3efaac7d05412115c737836aa9e1862f703.jpg": "46230d07cca61550ab9c77574920e3efaac7d05412115c737836aa9e1862f703",
+    "../../../_continent/shared-assets/88b1ad465c49afdfbc70a5d7ee1447ca83615b6855699034b03ddb7f9ced80ed.jpg": "88b1ad465c49afdfbc70a5d7ee1447ca83615b6855699034b03ddb7f9ced80ed",
+    "../../../_continent/shared-assets/88dde380948e786d8970178b88885be02da98b7ef1234f0d63cff1eba79e3ea8.jpg": "88dde380948e786d8970178b88885be02da98b7ef1234f0d63cff1eba79e3ea8",
+    "../../../_continent/shared-assets/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg": "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7",
+    "../../../_continent/shared-assets/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg": "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7",
+    "../../../_continent/shared-assets/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg": "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581"
+  },
+  "singleContinentSource": {
+    "revision": "diagonal-spine-v1",
+    "masterSha256": "09c0f06cc093218f821473b2ad674c850b84432645f5b73a699825aebfdb7aad",
+    "planSha256": "54ddec547568e83ae87fcc568ac2a87ce05317cd824522a5eeeee0b477ccb97a",
+    "storage": {
+      "serverCells": [
+        588,
+        588
+      ],
+      "serverStorageVersion": 1,
+      "serverTileMin": [
+        0,
+        0
+      ],
+      "authoringSpecSha256": "57291a2f3fed95b3797d0ec9be42170e34469171cbf20faa2866239515a9c10e"
+    }
+  },
+  "biomeBlend": {
+    "schema": "eloria-biome-blend-v1",
+    "coordinateSpace": "continent-global-xz",
+    "origin": [
+      96.0,
+      672.0
+    ],
+    "innerSize": [
+      64,
+      64
+    ],
+    "gutter": 1,
+    "metresPerPixel": 1.5,
+    "baseMask": {
+      "path": "res://assets/world/biome_blend/masks/01_07-base.png",
+      "sha256": "a1ac0406bfea494f678bc7f2ee2ef43c9d60e95c8c581be2222d768cb60cf708"
+    },
+    "secondaryMask": {
+      "path": "res://assets/world/biome_blend/masks/01_07-secondary.png",
+      "sha256": "d772786bcc22a4e35291c59d0921939bde6aa550b6d8bb88f6db9391e851644f"
+    },
+    "palettes": [
+      {
+        "id": "grey_moors:base",
+        "base": {
+          "preset": "Moor peat heather",
+          "sourceSurfaceSha256": "5411cca05ca0a47a277cf985d3ca04a52b31871966310414b9019ce05d1155f4",
+          "albedoTexture": "res://src/dev/map_authoring_pilot/style/texture_packs/moor-peat-heather/moor-peat-heather-v001.png",
+          "normalTexture": null,
+          "ormTexture": null,
+          "textureSha256": {
+            "albedoTexture": "207c6bf4216ca797f0bb12cc3dcd4a35c4fdd65068b8ff4e889a4aa3a87d9a8d"
+          },
+          "albedoColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "roughness": 0.9599999785423279,
+          "metallic": 0.0,
+          "normalStrength": 1.0,
+          "baseUvMetresInverse": 0.17,
+          "uvScale": [
+            1.470588207244873,
+            1.470588207244873
+          ],
+          "uvOffset": [
+            0.0,
+            0.0
+          ],
+          "rotationDegrees": 0.0
+        },
+        "secondary": {
+          "id": "grey_moors:grass",
+          "role": "grassland",
+          "preset": "Grass",
+          "sourceSurfaceSha256": "17c3803cef25e0c35cfde41ca04ff54f6786515898d3927072b2600b71e5859d",
+          "albedoTexture": "res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png",
+          "normalTexture": null,
+          "ormTexture": null,
+          "textureSha256": {
+            "albedoTexture": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805"
+          },
+          "albedoColor": [
+            0.7599999904632568,
+            0.8199999928474426,
+            0.6100000143051147,
+            1.0
+          ],
+          "roughness": 1.0,
+          "metallic": 0.0,
+          "normalStrength": 1.0,
+          "baseUvMetresInverse": 0.17,
+          "uvScale": [
+            1.470588207244873,
+            1.470588207244873
+          ],
+          "uvOffset": [
+            0.0,
+            0.0
+          ],
+          "rotationDegrees": 0.0
+        }
+      },
+      {
+        "id": "westhaven:base",
+        "base": {
+          "preset": "Grass",
+          "sourceSurfaceSha256": "5c5616d9cbe9734d7354df6b489e1ed5cd7d7310eb0158a715a6cab77861abb1",
+          "albedoTexture": "res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png",
+          "normalTexture": null,
+          "ormTexture": null,
+          "textureSha256": {
+            "albedoTexture": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805"
+          },
+          "albedoColor": [
+            0.699999988079071,
+            0.9200000166893005,
+            0.5,
+            1.0
+          ],
+          "roughness": 1.0,
+          "metallic": 0.0,
+          "normalStrength": 1.0,
+          "baseUvMetresInverse": 0.17,
+          "uvScale": [
+            1.470588207244873,
+            1.470588207244873
+          ],
+          "uvOffset": [
+            0.800000011920929,
+            0.5
+          ],
+          "rotationDegrees": 0.0
+        },
+        "secondary": {
+          "id": "westhaven:coastal-gravel",
+          "role": "limestone",
+          "preset": "Coastal limestone gravel",
+          "sourceSurfaceSha256": "40df9e42c7b870ba30b287236fbeabc434d8a40dfdcd3af9e8051f13a72fc019",
+          "albedoTexture": "res://src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v001.png",
+          "normalTexture": null,
+          "ormTexture": null,
+          "textureSha256": {
+            "albedoTexture": "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7"
+          },
+          "albedoColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "roughness": 0.9399999976158142,
+          "metallic": 0.0,
+          "normalStrength": 1.0,
+          "baseUvMetresInverse": 0.17,
+          "uvScale": [
+            1.470588207244873,
+            1.470588207244873
+          ],
+          "uvOffset": [
+            0.0,
+            0.0
+          ],
+          "rotationDegrees": 0.0
+        }
+      }
+    ],
+    "dominantPaletteId": "grey_moors:base"
+  },
+  "objectMaterialOverrides": {
+    "schema": "eloria-object-material-overrides-v1",
+    "entries": []
+  },
+  "continentPublication": {
+    "revision": "diagonal-spine-v1",
+    "masterSha256": "09c0f06cc093218f821473b2ad674c850b84432645f5b73a699825aebfdb7aad",
+    "collisionSha256": "822afb6334881476e8dfd844468387ad66eb03c4bb40ed7a072ec63da42f85cb",
+    "terrainRevision": "diagonal-spine-v1:aa50dbe22d1352044ee88410e19221f72ee07404d96798471d022d21420f2a99",
+    "storage": {
+      "serverCells": [
+        588,
+        588
+      ],
+      "serverStorageVersion": 1,
+      "serverTileMin": [
+        0,
+        0
+      ],
+      "authoringSpecSha256": "57291a2f3fed95b3797d0ec9be42170e34469171cbf20faa2866239515a9c10e"
+    }
+  },
+  "externalMeshes": {
+    "../../../../_shared/meshes/0218f99b5c5c04a55b8b1a8d21b111864a61936caa9bb2aae622cfb26b37072d.glb": "307bcb0745a61f3b21900ebe3f2b977194fcb6f6bdfedfa18c3f4b9ab79cf06d",
+    "../../../../_shared/meshes/2540d3a85b9d71d165ac2f0c32e2cbf55c6fb401bb61a671a2ae9f8ca48f7214.glb": "d422456b3d3ff74c5f88d0d343817089d0b2208b1d3bd00052872fb5d8c41e49",
+    "../../../../_shared/meshes/6ac5fddcff13d6390f6b9eebd4786520b69690ca5faa4e88f022128d1d8627dc.glb": "d9a57f42073834c7b989e9499377e75c8665c5c4fea6ad7b7b4358d0bef1e361",
+    "../../../../_shared/meshes/8fddda10609c0db61fb08490fa01948261b9c4910ad1f71bde81d405a7c0cf40.glb": "2e2f36b61fb060ef886a84dc016b07fd8faea03d90bc3b6b9206cb5d7c89e085",
+    "../../../../_shared/meshes/b09705b3d8d162c906dbcc6136895b7960984d212f59dceb2a9098e6047a399c.glb": "8872f9d69689362fd5f62f36639b78605815d95e8e85e4097536c4d0ae740c82",
+    "../../../../_shared/meshes/c3f2f782a526e621005076767231ce1afb550fe94617dd4e5c520da1b5ae43d5.glb": "f6e8bc4a18764f5d4fa35ebbc43ef9b4b8f7d59de33c0220de3cbb7efd920fc8",
+    "../../../../_shared/meshes/e340ddbb54ffbc3c290ec9eeb45c3f86ecc4b724cf6cf26910bd2fc1d997f0be.glb": "835025e7085b85ddbb25b94569f40eea3eae41348ebf1228e49bbaa561c8b7ba"
+  }
+}

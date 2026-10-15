@@ -1,0 +1,1119 @@
+{
+  "scope": "16 own-source race bodies and five shared animation clips; isolated worktree delivery",
+  "library_sha256": "b37335813f0677f815a5d1b66290102b1ba88e60a6e3e7c69eef33499ed26fe1",
+  "animation_clips_changed": [
+    "Idle_Subtle",
+    "Walk",
+    "Jog",
+    "Run_Female",
+    "Fighting_Idle"
+  ],
+  "animation_clips_preserved": 157,
+  "checks": {
+    "body_asset_tests": "15 passed",
+    "godot_animation_looping": "passed",
+    "engine_import_exit_code": 0,
+    "engine_captures": "All 16 bodies, appearance, fitted hair and native gear; pilot cycles and installed-resource checks"
+  },
+  "limitations": [
+    "Existing armor sleeve envelopes remain displaced; body/socket validation does not certify equipment art fit.",
+    "Equipment tests: three failures also occur with original shipped bodies; an older boot additionally lies 13 mm below the new grounded body in the static authoring check. Equipment refit remains necessary.",
+    "Ssarathi male has approximately 30-31 mm p99 upper-leg edge extension in Jog and Run_Female. Rendered cycles were inspected without an open tear.",
+    "Ssarathi tails follow pelvis with a 12-hop feather and have no independent tail animation.",
+    "Generic hair/headwear/armor can intersect retained horns, crystals or mushrooms; small source collar texture boundaries remain visible.",
+    "Godot editor import reports existing equipment image MIME and sandbox cache warnings; no GDScript parse errors were found."
+  ],
+  "bodies": [
+    {
+      "slug": "luminous_female",
+      "path": "godot-client/assets/actors/native/races/luminous_female.glb",
+      "sha256": "7d845c63c8f2800d873691d031e53aa7e3b5b795f8f0a4c3b46e86d5c7205bd0",
+      "source": "luminous_human_female_tpose_rigged.glb",
+      "source_sha256": "29db5c2a703326e1f8a23a3d0cb498309e314996616964ee00753a34d015212e",
+      "joints": 77,
+      "triangles": 20330,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 6.194257065025008,
+          "max_edge_extension_mm": 20.73721862826558,
+          "min_vertex_y_m": 0.002999954905471978,
+          "loop_max_delta_m": 9.310641615460591e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 10.818770685057418,
+          "max_edge_extension_mm": 32.29308215561479,
+          "min_vertex_y_m": 0.0021372846687923424,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 18.9903554339042,
+          "max_edge_extension_mm": 76.12263339889324,
+          "min_vertex_y_m": 0.0013909845301759705,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 16.31209914274027,
+          "max_edge_extension_mm": 57.248596366183186,
+          "min_vertex_y_m": 0.002653561004018026,
+          "loop_max_delta_m": 3.908476099818345e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 9.154995947856873,
+          "max_edge_extension_mm": 38.35055157071673,
+          "min_vertex_y_m": -2.5202363275461945e-05,
+          "loop_max_delta_m": 4.845260826646598e-07
+        }
+      ]
+    },
+    {
+      "slug": "luminous_male",
+      "path": "godot-client/assets/actors/native/races/luminous_male.glb",
+      "sha256": "625cf1566e73b5c4a36d5323922732ff2694e80c34d1f1fd5bf8587163bf2f94",
+      "source": "luminous_human_male_tpose_rigged.glb",
+      "source_sha256": "8324750a6cd3568095ce115801b7aaebff2ca5027d27884a1d6210cd6364275f",
+      "joints": 77,
+      "triangles": 19405,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 5.011091609686818,
+          "max_edge_extension_mm": 26.252957770978643,
+          "min_vertex_y_m": 0.004470303404798409,
+          "loop_max_delta_m": 9.106015644445925e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 8.222932666154751,
+          "max_edge_extension_mm": 40.81118392406964,
+          "min_vertex_y_m": -0.00817908234199401,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 15.856901976802277,
+          "max_edge_extension_mm": 76.20290487495727,
+          "min_vertex_y_m": 0.00012218777045034735,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 13.117831123275725,
+          "max_edge_extension_mm": 60.68858145748381,
+          "min_vertex_y_m": 0.0015532886986531218,
+          "loop_max_delta_m": 3.826005955541555e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 7.096448946612255,
+          "max_edge_extension_mm": 45.45155931528021,
+          "min_vertex_y_m": 8.175611560487992e-05,
+          "loop_max_delta_m": 4.89076330255651e-07
+        }
+      ]
+    },
+    {
+      "slug": "votary_female",
+      "path": "godot-client/assets/actors/native/races/votary_female.glb",
+      "sha256": "548f3330c7bef649457768aef5d6aa73ec928ae2c736da6b7f92ce7cea638396",
+      "source": "whitehorn_votary_female_tpose_rigged.glb",
+      "source_sha256": "0ef17d737c59628e9ae133882a2ed3f3a776bcac23faf915292dc6d457a2dc9e",
+      "joints": 77,
+      "triangles": 20043,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 5.066465602354413,
+          "max_edge_extension_mm": 30.330775630483032,
+          "min_vertex_y_m": 0.004097394666820422,
+          "loop_max_delta_m": 8.79748881941485e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 8.420947248728472,
+          "max_edge_extension_mm": 35.478212880749844,
+          "min_vertex_y_m": -0.004520736358054037,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 14.852894943477931,
+          "max_edge_extension_mm": 86.53941466303156,
+          "min_vertex_y_m": 0.002277432249581296,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 13.285053440794414,
+          "max_edge_extension_mm": 71.9769327520223,
+          "min_vertex_y_m": 0.002753134187033412,
+          "loop_max_delta_m": 3.890142293378557e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 7.119234170705049,
+          "max_edge_extension_mm": 46.91925010673169,
+          "min_vertex_y_m": -2.5208899766755744e-05,
+          "loop_max_delta_m": 4.888237276143078e-07
+        }
+      ]
+    },
+    {
+      "slug": "votary_male",
+      "path": "godot-client/assets/actors/native/races/votary_male.glb",
+      "sha256": "86967c330d227aaa965c0616f97b222085c2671d1af81468e2b6a8f8af8dc64b",
+      "source": "whitehorn_votary_male_tpose_rigged.glb",
+      "source_sha256": "d56a91eb392a1411b7057dc6eecc7b269730a2239a7dfac0c79d371883a84aad",
+      "joints": 77,
+      "triangles": 19776,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 4.593078280899006,
+          "max_edge_extension_mm": 26.15222058486772,
+          "min_vertex_y_m": 0.010117263120757662,
+          "loop_max_delta_m": 8.269246642262056e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 8.0423082505629,
+          "max_edge_extension_mm": 33.82528750974252,
+          "min_vertex_y_m": -0.006945304211905538,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 14.159432495398553,
+          "max_edge_extension_mm": 81.12147954377738,
+          "min_vertex_y_m": 0.001428006865013174,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 12.366624778430397,
+          "max_edge_extension_mm": 69.70310507346187,
+          "min_vertex_y_m": 0.0012319834367123972,
+          "loop_max_delta_m": 3.843579468846802e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 6.783780882977389,
+          "max_edge_extension_mm": 46.47808660137682,
+          "min_vertex_y_m": -0.0009545097904848207,
+          "loop_max_delta_m": 4.863170622897485e-07
+        }
+      ]
+    },
+    {
+      "slug": "glasswarden_female",
+      "path": "godot-client/assets/actors/native/races/glasswarden_female.glb",
+      "sha256": "4397d0c7f78fb953f4134f7bf8bd756d8b66cdd56e7f26e228ff57396a544b38",
+      "source": "glasswarden_female_tpose_rigged.glb",
+      "source_sha256": "44aa257f881b16a453bf7f760d11e4f181be04b2f9aaaeaae680c6f45605db17",
+      "joints": 77,
+      "triangles": 19980,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 4.478575563504132,
+          "max_edge_extension_mm": 31.522332293320936,
+          "min_vertex_y_m": 0.010918812603252986,
+          "loop_max_delta_m": 1.0431420988204184e-08
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 8.241252379720084,
+          "max_edge_extension_mm": 45.49416931526574,
+          "min_vertex_y_m": -0.00543734232724527,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 14.227278069187927,
+          "max_edge_extension_mm": 75.36419213672637,
+          "min_vertex_y_m": 0.0033208595078436168,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 13.133498864835468,
+          "max_edge_extension_mm": 64.84172610332043,
+          "min_vertex_y_m": 0.002653164345316196,
+          "loop_max_delta_m": 3.7617825314381574e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 6.891716314530729,
+          "max_edge_extension_mm": 43.198163849604896,
+          "min_vertex_y_m": -2.5249519088924265e-05,
+          "loop_max_delta_m": 4.867863973273793e-07
+        }
+      ]
+    },
+    {
+      "slug": "glasswarden_male",
+      "path": "godot-client/assets/actors/native/races/glasswarden_male.glb",
+      "sha256": "c9cb8849bd181c1de2a9534f8f70cf458a6a82b5cdc11d4ef7634ff7a73bb347",
+      "source": "glasswarden_male_tpose_rigged.glb",
+      "source_sha256": "466a6fc78da50cb14874ba700f21a36e72544c3c18539ecd2320bfa8b8988998",
+      "joints": 77,
+      "triangles": 19932,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 5.560868076701821,
+          "max_edge_extension_mm": 30.89753311881748,
+          "min_vertex_y_m": 0.008742299419193397,
+          "loop_max_delta_m": 1.0382753227934488e-08
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 8.455230777417258,
+          "max_edge_extension_mm": 34.367002631806585,
+          "min_vertex_y_m": -0.00626947349082153,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 14.207164533230667,
+          "max_edge_extension_mm": 94.40370532002586,
+          "min_vertex_y_m": 0.0017089330167782135,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 12.891741524515698,
+          "max_edge_extension_mm": 71.02615988234926,
+          "min_vertex_y_m": -0.0001520194890016046,
+          "loop_max_delta_m": 3.843922774536278e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 6.684760708007731,
+          "max_edge_extension_mm": 57.46961240828781,
+          "min_vertex_y_m": -0.00021560116866535607,
+          "loop_max_delta_m": 4.865848931104542e-07
+        }
+      ]
+    },
+    {
+      "slug": "orun_female",
+      "path": "godot-client/assets/actors/native/races/orun_female.glb",
+      "sha256": "ee53f586fc29ae5ffbab7185336d3b2d079540f1ea2d65a722679b39992ca308",
+      "source": "orun_female_tpose_rigged.glb",
+      "source_sha256": "f8d75783b7750f66a5fd123a04760f400662c5d7d27d85c8d3dec4da71c61046",
+      "joints": 77,
+      "triangles": 20790,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 5.977694894523875,
+          "max_edge_extension_mm": 37.413379506723786,
+          "min_vertex_y_m": 0.011285015256610425,
+          "loop_max_delta_m": 9.643519997162312e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 10.359735742305364,
+          "max_edge_extension_mm": 54.04271122077839,
+          "min_vertex_y_m": -0.00813123173083623,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 18.495320146368485,
+          "max_edge_extension_mm": 77.17843618306193,
+          "min_vertex_y_m": -0.0004625517497977119,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 15.920112594793371,
+          "max_edge_extension_mm": 77.63706213295998,
+          "min_vertex_y_m": 0.00011148001505413465,
+          "loop_max_delta_m": 3.7953689081124186e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 8.923037811307944,
+          "max_edge_extension_mm": 44.247302870456615,
+          "min_vertex_y_m": -0.0018551753782811928,
+          "loop_max_delta_m": 4.849309472856143e-07
+        }
+      ]
+    },
+    {
+      "slug": "orun_male",
+      "path": "godot-client/assets/actors/native/races/orun_male.glb",
+      "sha256": "5f2be37f018523ef3f5f2dce7f37ca5d55cada6bcb21d68508d52ddd740ef02e",
+      "source": "orun_male_tpose_rigged.glb",
+      "source_sha256": "001514631864f36d156c07e5f5bd392c0ba6abf99c02242919fff8d4e3cf98e6",
+      "joints": 77,
+      "triangles": 19621,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 4.957702111778935,
+          "max_edge_extension_mm": 40.24952773716388,
+          "min_vertex_y_m": 0.011652268288661095,
+          "loop_max_delta_m": 9.17993465303958e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 8.939837874148074,
+          "max_edge_extension_mm": 43.92296669190146,
+          "min_vertex_y_m": -0.005830322617970631,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 15.29796135031019,
+          "max_edge_extension_mm": 74.22609865282124,
+          "min_vertex_y_m": 0.002392412685339529,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 13.613018172383972,
+          "max_edge_extension_mm": 63.76517634651179,
+          "min_vertex_y_m": 0.0014419531714958517,
+          "loop_max_delta_m": 3.7196287112550226e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 7.344585273409481,
+          "max_edge_extension_mm": 42.659621018421745,
+          "min_vertex_y_m": -0.0008037196089791246,
+          "loop_max_delta_m": 4.905935128879551e-07
+        }
+      ]
+    },
+    {
+      "slug": "greyhaven_female",
+      "path": "godot-client/assets/actors/native/races/greyhaven_female.glb",
+      "sha256": "99e0cacee626b82264fc472acc13034920d892146978793ec0ce4f0d144d658f",
+      "source": "greyhaven_female_tpose_rigged.glb",
+      "source_sha256": "e65dc484b9c5654c8efa6ac4719edc8e680c4984bfac33b929e650cc02b918f3",
+      "joints": 77,
+      "triangles": 19941,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 4.599166888712917,
+          "max_edge_extension_mm": 27.30760850912043,
+          "min_vertex_y_m": 0.01213452420852629,
+          "loop_max_delta_m": 9.667107294577953e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 8.266476857047033,
+          "max_edge_extension_mm": 53.329633187134775,
+          "min_vertex_y_m": -0.00847727279512879,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 15.579394942790199,
+          "max_edge_extension_mm": 61.779424642960535,
+          "min_vertex_y_m": 0.0006844249470334999,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 12.850779537629348,
+          "max_edge_extension_mm": 76.81152297195784,
+          "min_vertex_y_m": -0.005574246923289666,
+          "loop_max_delta_m": 3.790568759062018e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 7.144713818384087,
+          "max_edge_extension_mm": 36.43762528789207,
+          "min_vertex_y_m": -0.0007864798956522178,
+          "loop_max_delta_m": 4.903288220976568e-07
+        }
+      ]
+    },
+    {
+      "slug": "greyhaven_male",
+      "path": "godot-client/assets/actors/native/races/greyhaven_male.glb",
+      "sha256": "408cf5f2d86eeb33447794e5879898128aff09d49f941ed37b788db2c7a80e64",
+      "source": "greyhaven_male_tpose_rigged.glb",
+      "source_sha256": "c69ecae345b70262a36a82a3de9de280be92925e31e0b8469d357fe71555d5a7",
+      "joints": 77,
+      "triangles": 19523,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 4.6965899087227525,
+          "max_edge_extension_mm": 29.37833506099298,
+          "min_vertex_y_m": 0.006639012354030236,
+          "loop_max_delta_m": 9.760136347727567e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 8.45571693371803,
+          "max_edge_extension_mm": 39.099604675073536,
+          "min_vertex_y_m": -0.008086033191357003,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 15.421991515869683,
+          "max_edge_extension_mm": 75.8827580761556,
+          "min_vertex_y_m": 8.122160614888632e-05,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 13.473765280587635,
+          "max_edge_extension_mm": 55.58935310666417,
+          "min_vertex_y_m": -0.004026359958209547,
+          "loop_max_delta_m": 3.849600504355177e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 7.173651769788286,
+          "max_edge_extension_mm": 42.48198036918158,
+          "min_vertex_y_m": -2.5220708050906293e-05,
+          "loop_max_delta_m": 4.903452557272348e-07
+        }
+      ]
+    },
+    {
+      "slug": "ssarathi_female",
+      "path": "godot-client/assets/actors/native/races/ssarathi_female.glb",
+      "sha256": "3840441d1f7148c036b9b92c2d0a3566d2f38f4bb7c6ee0d9b2caf3b74f166b4",
+      "source": "ssarathi_female_tpose_rigged.glb",
+      "source_sha256": "bccfe89d28307ff0e51f740474eea348d59d1dc249faae8cf48dc880b29d4572",
+      "joints": 77,
+      "triangles": 21131,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 5.535010154870986,
+          "max_edge_extension_mm": 35.661773080771965,
+          "min_vertex_y_m": 0.0037286439832497713,
+          "loop_max_delta_m": 9.018277325042537e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 10.79280872073376,
+          "max_edge_extension_mm": 33.00755827710794,
+          "min_vertex_y_m": -0.0026802517082326477,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 17.588623648171634,
+          "max_edge_extension_mm": 91.6397343795037,
+          "min_vertex_y_m": 0.0015468194568112336,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 16.716792204768176,
+          "max_edge_extension_mm": 66.9775927343042,
+          "min_vertex_y_m": 0.0030130777893329417,
+          "loop_max_delta_m": 3.7786801550662084e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 8.31075633486005,
+          "max_edge_extension_mm": 53.65302535630671,
+          "min_vertex_y_m": 0.001561039113261172,
+          "loop_max_delta_m": 4.835045528204456e-07
+        }
+      ]
+    },
+    {
+      "slug": "ssarathi_male",
+      "path": "godot-client/assets/actors/native/races/ssarathi_male.glb",
+      "sha256": "c422be1aae134bd2d0251a1c866788f7868788eb6f8e307639fc329087fd9d70",
+      "source": "ssarathi_male_tpose_rigged.glb",
+      "source_sha256": "e6885a2fd03b19b47a9d7bb6ea8755dc7241c08081fa8af8bcdd701b0653e7ec",
+      "joints": 77,
+      "triangles": 20950,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [
+        "Jog p99 edge extension exceeds 20mm",
+        "Run_Female p99 edge extension exceeds 20mm"
+      ],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 8.247392169537568,
+          "max_edge_extension_mm": 25.44819413935284,
+          "min_vertex_y_m": 0.012709271528588747,
+          "loop_max_delta_m": 1.0417171602885697e-08
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 17.074125932570837,
+          "max_edge_extension_mm": 28.88173609255396,
+          "min_vertex_y_m": -0.010062623834924608,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 30.29447708084087,
+          "max_edge_extension_mm": 63.38606980128103,
+          "min_vertex_y_m": -0.008090116094831276,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 31.002847891833976,
+          "max_edge_extension_mm": 54.85423181584315,
+          "min_vertex_y_m": -0.0006134540972393963,
+          "loop_max_delta_m": 3.53555639143061e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 7.954594965456644,
+          "max_edge_extension_mm": 38.69936759270651,
+          "min_vertex_y_m": -0.0014354317557186398,
+          "loop_max_delta_m": 4.867985799077237e-07
+        }
+      ]
+    },
+    {
+      "slug": "stoneborn_female",
+      "path": "godot-client/assets/actors/native/races/stoneborn_female.glb",
+      "sha256": "e125ddfbbaed23840864a8925c12141974b7a9eaf8341172ace98ea2076cbee9",
+      "source": "stoneborn_female_tpose_rigged.glb",
+      "source_sha256": "97616e4acc834d1532902e88758c2e399c050566c39bdd954f3b48950cbd595d",
+      "joints": 77,
+      "triangles": 20415,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 4.382230037130325,
+          "max_edge_extension_mm": 36.30830825455091,
+          "min_vertex_y_m": 0.01450086228588076,
+          "loop_max_delta_m": 9.149378853872738e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 7.389698205819766,
+          "max_edge_extension_mm": 59.24123116082132,
+          "min_vertex_y_m": -0.007222482600074198,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 12.458683926128824,
+          "max_edge_extension_mm": 74.44247615176408,
+          "min_vertex_y_m": 0.0005064536913180862,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 11.267683219500483,
+          "max_edge_extension_mm": 83.08344323616716,
+          "min_vertex_y_m": 0.0011706150305348245,
+          "loop_max_delta_m": 3.82684794162393e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 6.707520217335318,
+          "max_edge_extension_mm": 43.614389762949315,
+          "min_vertex_y_m": -0.00021849224351124332,
+          "loop_max_delta_m": 4.941772151726582e-07
+        }
+      ]
+    },
+    {
+      "slug": "stoneborn_male",
+      "path": "godot-client/assets/actors/native/races/stoneborn_male.glb",
+      "sha256": "e829004f63aab17943e6e3925931500417b1dc10c9ce9705d89e96135d2297d4",
+      "source": "stoneborn_male_tpose_rigged.glb",
+      "source_sha256": "a1d2c7f96fba8c2a3c37abf1bdde83eff69b1b6b3a379160417f97270d50937d",
+      "joints": 77,
+      "triangles": 20612,
+      "surfaces": [
+        "body",
+        "eyes",
+        "eyebrows",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 6.066286125884935,
+          "max_edge_extension_mm": 25.3057440838499,
+          "min_vertex_y_m": 0.01205909912319357,
+          "loop_max_delta_m": 1.0048919573727795e-08
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 10.930054513532351,
+          "max_edge_extension_mm": 33.43150345294259,
+          "min_vertex_y_m": -0.006455246186804727,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 18.902911302360167,
+          "max_edge_extension_mm": 93.797761468122,
+          "min_vertex_y_m": -0.003153127476921286,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 16.59296239416618,
+          "max_edge_extension_mm": 78.78697505713579,
+          "min_vertex_y_m": -0.00017291844804789847,
+          "loop_max_delta_m": 3.839857193842942e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 9.859690614202366,
+          "max_edge_extension_mm": 43.05776784909536,
+          "min_vertex_y_m": -0.00011302346879718918,
+          "loop_max_delta_m": 4.861363621546581e-07
+        }
+      ]
+    },
+    {
+      "slug": "mycelari_female",
+      "path": "godot-client/assets/actors/native/races/mycelari_female.glb",
+      "sha256": "4a4afd6c6eeab6e9a0dbe63993f2fb728b1b17f0f42c0f8e6efa6a08c1651b20",
+      "source": "mycelari_female_tpose_rigged.glb",
+      "source_sha256": "2673ce8c0ab7abb4eab0c5483708288fe1c127a0bc7da9ae7691377cae462450",
+      "joints": 77,
+      "triangles": 20597,
+      "surfaces": [
+        "body",
+        "eyes",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user",
+        "eyebrows": "Mycelari source has no painted eyebrows; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 5.058741713454478,
+          "max_edge_extension_mm": 20.40778587862155,
+          "min_vertex_y_m": 0.011827553421467194,
+          "loop_max_delta_m": 9.536220100804082e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 7.824895701658472,
+          "max_edge_extension_mm": 48.66004495700612,
+          "min_vertex_y_m": -0.0040124608241622305,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 13.897837254066358,
+          "max_edge_extension_mm": 77.07049421387431,
+          "min_vertex_y_m": 0.003911575125481926,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 12.280645654033986,
+          "max_edge_extension_mm": 70.22103781856163,
+          "min_vertex_y_m": 0.003525996987455041,
+          "loop_max_delta_m": 3.693127328451062e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 6.756117931623274,
+          "max_edge_extension_mm": 46.11510468098963,
+          "min_vertex_y_m": -2.5258946084218892e-05,
+          "loop_max_delta_m": 5.040187952180082e-07
+        }
+      ]
+    },
+    {
+      "slug": "mycelari_male",
+      "path": "godot-client/assets/actors/native/races/mycelari_male.glb",
+      "sha256": "199d8bd4f97f69053783a3cfc8efc8adae2a196bb20f6aa1140301fa4aa77f3c",
+      "source": "mycelari_male_tpose_rigged.glb",
+      "source_sha256": "27f63939284928eac0f1c26fd336a64d26758bac751d2eae6ec7b40b803057ae",
+      "joints": 77,
+      "triangles": 20926,
+      "surfaces": [
+        "body",
+        "eyes",
+        "scalp",
+        "wardrobe_shirt",
+        "wardrobe_pants",
+        "wardrobe_boots",
+        "wardrobe_head_band",
+        "wardrobe_head_cap"
+      ],
+      "omissions": {
+        "hair": "Source deliberately bald; omission approved by user",
+        "eyebrows": "Mycelari source has no painted eyebrows; omission approved by user"
+      },
+      "rest_max_matrix_error": 1.3084266458074367e-06,
+      "inverse_bind_max_error": 5.872689090580252e-08,
+      "warnings": [],
+      "clips": [
+        {
+          "name": "Idle_Subtle",
+          "frames": 156,
+          "p99_edge_extension_mm": 6.114742931974072,
+          "max_edge_extension_mm": 21.211438424303598,
+          "min_vertex_y_m": 0.005519950593838819,
+          "loop_max_delta_m": 8.893622388826221e-09
+        },
+        {
+          "name": "Walk",
+          "frames": 201,
+          "p99_edge_extension_mm": 9.638865376122254,
+          "max_edge_extension_mm": 34.33682925098998,
+          "min_vertex_y_m": -0.006864091241069859,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Jog",
+          "frames": 141,
+          "p99_edge_extension_mm": 17.570711808598524,
+          "max_edge_extension_mm": 78.15116876577227,
+          "min_vertex_y_m": -0.0005465181469284829,
+          "loop_max_delta_m": 0.0
+        },
+        {
+          "name": "Run_Female",
+          "frames": 51,
+          "p99_edge_extension_mm": 15.281954935626082,
+          "max_edge_extension_mm": 58.91125944397041,
+          "min_vertex_y_m": -0.003928282786091961,
+          "loop_max_delta_m": 3.8879528723892294e-06
+        },
+        {
+          "name": "Fighting_Idle",
+          "frames": 205,
+          "p99_edge_extension_mm": 8.854047679111545,
+          "max_edge_extension_mm": 47.176187803858,
+          "min_vertex_y_m": -0.0009471067745318836,
+          "loop_max_delta_m": 5.105202280965191e-07
+        }
+      ]
+    }
+  ]
+}

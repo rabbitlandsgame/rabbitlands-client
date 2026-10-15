@@ -1,0 +1,74 @@
+{
+ "schema": 1,
+ "recipeVersion": 1,
+ "encoder": "godot 4.7.2.stable.official.ed1daf0bf editor: Image.compress_from_channels (BPTC cvtt, S3TC etcpak)",
+ "container": "EVT1 header + zstd(19) DDS with the full mip chain",
+ "images": {
+  "2fde52d5688d50738f3a297a433ad6d232281e5d45e2835c41367ec2f8311587": {
+   "file": "2fde52d5688d50738f3a297a433ad6d232281e5d45e2835c41367ec2f8311587.orm.evt",
+   "recipe": "orm",
+   "format": "bc1",
+   "width": 64,
+   "height": 64,
+   "mipmaps": 6,
+   "gpuBytes": 2744,
+   "rawBytes": 2872,
+   "fileBytes": 2326,
+   "sha256": "0e15cf1d15c4b04ec856f5c20ca8461138fc3273303440ccf4e1753ff835f371",
+   "roles": [
+    "occlusion",
+    "orm"
+   ]
+  },
+  "5168b5c2d5238b41c0b8b9626b2987775d00fe27f953b84aa9bb8bc7f11349ab": {
+   "file": "5168b5c2d5238b41c0b8b9626b2987775d00fe27f953b84aa9bb8bc7f11349ab.normal.evt",
+   "recipe": "normal",
+   "format": "bc5",
+   "width": 64,
+   "height": 64,
+   "mipmaps": 6,
+   "gpuBytes": 5488,
+   "rawBytes": 5616,
+   "fileBytes": 5220,
+   "sha256": "e3ca954ea4cd01b9f088d970b2e4c106e184901fa9ae06fb045168ab74a87f8c",
+   "roles": [
+    "normal"
+   ]
+  },
+  "90c51de41c0f4fffd8a6c225f67472eb77d262a183e2fcae827383d3e10d32f4": {
+   "file": "90c51de41c0f4fffd8a6c225f67472eb77d262a183e2fcae827383d3e10d32f4.base.evt",
+   "recipe": "base",
+   "format": "bc7",
+   "width": 64,
+   "height": 64,
+   "mipmaps": 6,
+   "gpuBytes": 5488,
+   "rawBytes": 5636,
+   "fileBytes": 5511,
+   "sha256": "d29028988c3a9a82f83bbf5730c6772d426f668d5f0743081b7c6db6426bc0ba",
+   "roles": [
+    "base"
+   ]
+  },
+  "b48124c90b62f2a02746ddf40ca7f6d2f41097d57e4f282856a9bf066043438e": {
+   "file": "b48124c90b62f2a02746ddf40ca7f6d2f41097d57e4f282856a9bf066043438e.base_alpha.evt",
+   "recipe": "base_alpha",
+   "format": "bc7",
+   "width": 64,
+   "height": 64,
+   "mipmaps": 6,
+   "gpuBytes": 5488,
+   "rawBytes": 5636,
+   "fileBytes": 5195,
+   "sha256": "53532b21860e770f207b3e0d7da912832e79357fd65f955b97217e79ac292acb",
+   "roles": [
+    "base_cutout"
+   ]
+  }
+ },
+ "excluded": {
+  "25ee162b44d0b73bd9dd6fe993ba190ef0fdb8533625d6f19b2683542f0da467": "role_conflict: base+normal",
+  "bd27ed1484f5857e7bdf7d09c9142a530a14e9df4bdf71a9777aa4203c352a0c": "size_not_multiple_of_4",
+  "bef267d22f4fb763b3a875d5e4fb4fbc359cd51ad06d6d957899bff3e982cccb": "no_material_role"
+ }
+}

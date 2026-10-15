@@ -1,0 +1,28 @@
+{
+	"id": "reedway",
+	"schema": 1,
+	"grade": {
+		"saturation_forward": 1.1
+	},
+	"ground": {
+		"deck_path": 0,
+		"deck_road_colour": [1.0, 0.922, 0.792],
+		"deck_tint_forward": [0.893, 1.987, 1.173],
+		"path_tint": [0.86, 0.63, 0.38],
+		"path_luma_forward": 0.2,
+		"path_detail": 1.2,
+		"path_fine": 0.06,
+		"deck_chroma_forward": 0.75,
+		"deck_tint_compat": [1.164, 1.51, 1.108]
+	},
+	"sky": {
+		"top": [0.1, 0.26, 0.4],
+		"horizon": [0.26, 0.38, 0.42],
+		"clear": 0.3
+	},
+	"notes": {
+		"grade": "A tutorial map never streamed beside another, so it may take its own grade. Saturation 1.1 over SATURATION_FORWARD (0.69 to 0.76) gives back some of the chroma the shared grade takes from its props, sea and court; the court keeps its own colour (`ground`).",
+		"ground": "Its courts and yards are Walk_ decks from wall to wall, which LookGround paints as roads unless the region says otherwise: path_tint x path_luma x the texture's grain, dropping each deck's own colour. At the defaults every tutorial court came out one road beige (echo_court, wayfarer_bastion, lantern_exchange and waystone_yard drew identical frames). The migration worked round it with a path tint matched to develop's court (path_tint [0.734, 1.0, 0.378], path_luma_forward 0.12), which could give the map only one colour and dropped the flagstones' own tone variation (court world std 21 against develop's 30). deck_path 0 (integration) paints its decks as its own ground: each keeps its own colour with the yard lift, whatever its hue, and none is edged like a road. deck_road_colour is the cart tracks' vertex colour (sRGB 255, 235, 202 on 5,706 vertices, against the meadow's 211, 249, 211 on 19,897): the one deck is painted as a road where its vertex colour is the tracks' (LookProfile.DECK_ROAD_TOLERANCE), so the tracks read again. deck_tint multiplies each deck's own linear colour: the grade warms and greys a kept court (Reedway's meadow came out olive-brown, Bellwatch's cream grey), so it was solved from develop's court colour over three Forward+ renders (integration runs int_small_2 to int_small_4, ground box in boxes_small_maps). Court now (99, 122, 19) luminance 109 against develop's (103, 122, 35) 112. Forward+ only in effect: the compatibility renderer was not measured and keeps the tint too. Polish: the cart tracks were painted in the default PATH_TINT, a cold pinkish-grey gravel (186, 165, 133) with dark flecks (track spread 19.9 against the meadow's 12.8), where develop drew warm orange dirt (153, 108, 33). path_tint [0.86, 0.63, 0.38] at path_luma_forward 0.2 lays warm ochre dirt a little darker, path_detail 1.2 and path_fine 0.06 calm the flecks, and deck_chroma_forward 0.75 takes the meadow off neon (box saturation 0.84 at (99, 122, 19)) at the same luminance. Polish: deck_tint is now deck_tint_forward. It was solved in Forward+ only, but as a bare key it ran in the compatibility renderer too, where Echo Court's court came out (82, 72, 82), luminance 81 against develop's 104, and purple; compat keeps each deck's own colour. deck_tint_compat (polish): with no tint the compatibility renderer's grade drew the court 12-17 % darker than develop (Echo Court 99, 88, 89 against 115, 101, 99); solved against develop's court in three compat renders (scratch polish/solve_compat_tint.py, runs cSM1-cSM3, a blown-out develop court aimed at 185 as in Forward+), now within 1-4 levels.",
+		"sky": "Polish (2026-09-30): the map declares only a background colour (#18363f), so the painted sky fell back to SKY_FALLBACK, and every low view drew a flat off-white band (220, 217, 212) brighter than the court, a paper wall behind the island. A deep sea-teal sky derived from that void (top and horizon here, half as clear as the painted day) keeps a gradient and sits below the court's value. Measured after the first sea sky: its haze band still drew 182 over courts of 105-118 in the low views (the sky takes the grade's exposure); a darker sea-teal (top [0.1, 0.26, 0.4], horizon [0.26, 0.38, 0.42], clear 0.3) puts it under the court."
+	}
+}

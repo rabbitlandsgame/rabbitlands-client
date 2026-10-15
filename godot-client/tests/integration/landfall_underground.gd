@@ -1,0 +1,149 @@
+extends SceneTree
+## Real-loader acceptance: floors, safe arrivals, roofs, blackspace and models.
+## With -- --captures DIR it also saves player-view renders of each section.
+
+const PACKAGE := "res://../eloria-assets/maps/continent-v2/landfall_insides/client/world.json"
+var failures := 0
+
+func _init() -> void:
+	call_deferred("run")
+
+func check(ok: bool, message: String) -> void:
+	if not ok:
+		failures += 1
+		push_error(message)
+
+func ground(space: PhysicsDirectSpaceState3D, position: Vector3) -> Dictionary:
+	return space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		position + Vector3(0, 20, 0), position - Vector3(0, 2, 0), 8))
+
+func run() -> void:
+	root.size = Vector2i(1280, 720)
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var loader := WorldLoader.new()
+	stage.add_child(loader)
+	loader.load_world(ProjectSettings.globalize_path(PACKAGE))
+	var deadline := Time.get_ticks_msec() + 60000
+	while loader.world_root == null and Time.get_ticks_msec() < deadline:
+		await process_frame
+	check(loader.world_root != null, "Underground world imports")
+	if loader.world_root == null:
+		quit(1)
+		return
+	check(loader.manifest.errors.is_empty(), "Underground manifest validates")
+	var cutaway := InteriorCutaway.new()
+	check(cutaway.configure(loader.manifest, loader.world_root) > 4, "Roof and wall cutaways resolve")
+	cutaway.update(0, true)
+	for unused in range(8):
+		await process_frame
+	var space := stage.get_world_3d().direct_space_state
+	for section: Dictionary in loader.manifest.data.spawnPoints:
+		var p: Array = section.position
+		check(not ground(space, Vector3(p[0], 0, p[2])).is_empty(), "Arrival has a rendered floor: " + str(section.id))
+	for room: Dictionary in loader.manifest.data.chambers:
+		var p: Array = room.position
+		check(not ground(space, Vector3(p[0], 0, p[2])).is_empty(), "Chamber has a rendered floor: " + str(room.id))
+	for p: Vector3 in [Vector3(120, 0, 120), Vector3(120, 0, 185), Vector3(55, 0, 120), Vector3(5, 0, 5)]:
+		check(ground(space, p).is_empty(), "Blackspace is unfloored: " + str(p))
+	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/world/objects.json"))
+	var adapter := loader.manifest.coordinate_adapter()
+	for node: Dictionary in loader.manifest.data.harvestables:
+		var object := MapObject3D.new()
+		stage.add_child(object)
+		object.configure({"object_id":node.objectId, "kind":EloriaProtocol.MAP_OBJECT_HARVEST,
+			"x":node.serverTile[0], "y":node.serverTile[1], "label":node.resource}, adapter, catalog)
+		check(not object.model_id.is_empty(), "Harvestable has a runtime model: " + str(node.resource))
+	for doorway: Dictionary in loader.manifest.data.portals:
+		var object := MapObject3D.new()
+		stage.add_child(object)
+		object.configure({"object_id":doorway.objectId, "kind":EloriaProtocol.MAP_OBJECT_INTERACTIVE,
+			"x":doorway.serverTile[0], "y":doorway.serverTile[1], "label":"Portal"}, adapter, catalog)
+		check(object.offers_map_change(), "Doorway offers the server portal action")
+		check(object.get_node_or_null("Model") == null and object.get_node_or_null("Ring") == null,
+			"Doorway keeps the map's authored art")
+		check(object.get_node("PickShape").shape.height >= 3.5, "Doorway has a full-height pick target")
+	var captures := ""
+	var args := OS.get_cmdline_user_args()
+	if args.size() == 2 and args[0] == "--captures":
+		captures = args[1]
+	if not captures.is_empty():
+		DirAccess.make_dir_recursive_absolute(captures)
+		var env := WorldEnvironment.new()
+		env.environment = Environment.new()
+		stage.add_child(env)
+		var sun := DirectionalLight3D.new()
+		stage.add_child(sun)
+		WorldEnvironmentBinder.apply(loader.manifest, env, sun)
+		LightMarkerBinder.apply(loader.manifest, stage)
+		var camera := Camera3D.new()
+		camera.current = true
+		camera.cull_mask = 1
+		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+		camera.size = 62
+		camera.far = 500
+		stage.add_child(camera)
+		for section: Dictionary in loader.manifest.data.spawnPoints:
+			var p: Array = section.position
+			var centre := Vector3(float(p[0]), 0, float(p[2])-29)
+			camera.look_at_from_position(centre+Vector3(0, 45, 50), centre, Vector3.UP)
+			for unused in range(8):
+				await process_frame
+			await RenderingServer.frame_post_draw
+			check(root.get_texture().get_image().save_png(captures.path_join(str(section.id)+".png")) == OK, "Capture saves")
+		stage.queue_free()
+		await process_frame
+		var plan: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+			"res://../eloria-assets/maps/continent-v2/_continent_v2/content/underground.json"))
+		for section: Dictionary in plan.sections:
+			var e: Dictionary = section.entrance
+			var p: Array = e.position
+			var centre := Vector3(p[0], p[1], p[2])
+			var exterior := Node3D.new()
+			root.add_child(exterior)
+			var exterior_loader := WorldLoader.new()
+			exterior.add_child(exterior_loader)
+			exterior_loader.load_world(ProjectSettings.globalize_path(
+				"res://../eloria-assets/maps/continent-v2/"+str(e.map)+"/client/world.json"), centre)
+			deadline = Time.get_ticks_msec()+90000
+			var stream: ContinentChunkStream = exterior_loader.world_root
+			while not framed_resident(stream, centre) and Time.get_ticks_msec()<deadline:
+				await process_frame
+			check(framed_resident(stream, centre), "Exterior entrance and framed neighbours load: "+str(e.map))
+			await physics_frame
+			var exterior_space := exterior.get_world_3d().direct_space_state
+			var floor_hit := exterior_space.intersect_ray(PhysicsRayQueryParameters3D.create(
+				centre+Vector3(0, 300, 0), centre-Vector3(0, 200, 0), 8))
+			check(not floor_hit.is_empty(), "Exterior entrance has rendered ground: "+str(e.map))
+			if not floor_hit.is_empty():
+				print("Entrance ground ", e.map, ": authored=", centre.y, " rendered=", floor_hit.position.y)
+				check(absf(floor_hit.position.y-centre.y)<2.0, "Exterior entrance matches ground height: "+str(e.map))
+			var exterior_env := WorldEnvironment.new()
+			exterior_env.environment = Environment.new()
+			exterior.add_child(exterior_env)
+			var exterior_sun := DirectionalLight3D.new()
+			exterior.add_child(exterior_sun)
+			WorldEnvironmentBinder.apply(exterior_loader.manifest, exterior_env, exterior_sun)
+			var exterior_camera := Camera3D.new()
+			exterior_camera.cull_mask = 1
+			exterior_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+			exterior_camera.size = 20
+			exterior_camera.current = true
+			exterior.add_child(exterior_camera)
+			exterior_camera.look_at_from_position(centre+Vector3(0, 15, 12), centre+Vector3(0, 1, 0), Vector3.UP)
+			for unused in range(12):
+				await process_frame
+			await RenderingServer.frame_post_draw
+			check(root.get_texture().get_image().save_png(captures.path_join(str(section.id)+"-entrance.png")) == OK, "Entrance capture saves")
+			exterior.queue_free()
+			await process_frame
+	print("Landfall underground: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
+	quit(0 if failures == 0 else 1)
+
+func framed_resident(stream: ContinentChunkStream, position: Vector3) -> bool:
+	if not stream.arrival_resident(position):
+		return false
+	for entry: Dictionary in stream.entries:
+		if stream.bounds_distance(position, entry.bounds) <= 35.0 and not stream.cells.has(str(entry.id)):
+			return false
+	return true

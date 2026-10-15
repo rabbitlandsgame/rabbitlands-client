@@ -1,0 +1,450 @@
+{
+ "schemaVersion": "1.0.0",
+ "assetVersion": "1.0.0",
+ "asset": {
+  "id": "ringholm__chunk_08_06",
+  "name": "Ringholm",
+  "glb": "world.glb",
+  "units": "meters",
+  "coordinateSystem": {
+   "handedness": "right",
+   "upAxis": "Y",
+   "northAxis": "-Z"
+  },
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "bounds": {
+   "min": [
+    -209.0,
+    -3.43447208404541,
+    -320.0
+   ],
+   "max": [
+    -113.0,
+    0.0,
+    -308.0
+   ]
+  },
+  "playableBounds": {
+   "min": [
+    -451.0,
+    -16.0,
+    -330.0
+   ],
+   "max": [
+    451.0,
+    109.28700256347656,
+    330.0
+   ]
+  },
+  "mapBounds": {
+   "min": [
+    -451.0,
+    -16.0,
+    -330.0
+   ],
+   "max": [
+    451.0,
+    109.28700256347656,
+    330.0
+   ]
+  },
+  "seaLevel": 0.0,
+  "serverCells": 912
+ },
+ "coordinateTransform": {
+  "metresPerTile": 1.0,
+  "serverOrigin": [
+   455,
+   334
+  ],
+  "serverCells": [
+   912,
+   912
+  ],
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "walkingHeight": 70.65,
+  "invertServerY": true,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "addressableWorldBounds": {
+   "min": [
+    -455,
+    -578
+   ],
+   "max": [
+    457,
+    334
+   ]
+  }
+ },
+ "collision": {
+  "nodeNames": [],
+  "format": "EWCG-v2",
+  "formatVersion": 2,
+  "version": 2,
+  "width": 1824,
+  "height": 1824,
+  "cellMetres": 0.5,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "serverCells": [
+   912,
+   912
+  ],
+  "originMetres": [
+   -455.0,
+   334.0
+  ],
+  "gridAlignment": "tile-centres-v1",
+  "authoredSurfaceExport": true,
+  "maxTerrainGrade": 0.65,
+  "maximumWadingDepth": 0.35,
+  "actorVolume": {
+   "floorClearance": 0.06,
+   "height": 2.1,
+   "halfCellWidth": 0.5
+  },
+  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
+ },
+ "navigation": {
+  "surfaceNodePrefixes": [
+   "Terrain_",
+   "Walk_"
+  ],
+  "terrainConforming": true,
+  "authority": "server",
+  "defaultSpawn": "generated-arrival-ringholm"
+ },
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.2,
+    0.48,
+    0.82
+   ],
+   "horizon": [
+    0.84,
+    0.9,
+    0.94
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.42,
+    0.62,
+    0.66
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    1.0,
+    0.94,
+    0.83
+   ],
+   "energy": 1.1
+  },
+  "ambient": {
+   "color": [
+    0.6,
+    0.67,
+    0.72
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.25,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.82,
+    0.88,
+    0.9
+   ],
+   "density": 0.0003,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  }
+ },
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   2710.0,
+   0.0,
+   6841.0
+  ],
+  "ownershipPolygon": [
+   [
+    2479.0,
+    7171.0
+   ],
+   [
+    2729.0,
+    7171.0
+   ],
+   [
+    3161.0,
+    7171.0
+   ],
+   [
+    3161.0,
+    6959.0
+   ],
+   [
+    3037.0,
+    6863.0
+   ],
+   [
+    2957.0,
+    6797.0
+   ],
+   [
+    2877.0,
+    6713.0
+   ],
+   [
+    2797.0,
+    6627.0
+   ],
+   [
+    2717.0,
+    6547.0
+   ],
+   [
+    2637.0,
+    6511.0
+   ],
+   [
+    2659.0,
+    6521.0
+   ],
+   [
+    2259.0,
+    6521.0
+   ],
+   [
+    2259.0,
+    6717.0
+   ],
+   [
+    2321.0,
+    6691.0
+   ],
+   [
+    2321.0,
+    6761.0
+   ],
+   [
+    2259.0,
+    6789.0
+   ],
+   [
+    2259.0,
+    6921.0
+   ],
+   [
+    2289.0,
+    6981.0
+   ],
+   [
+    2409.0,
+    7101.0
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     2479.0,
+     7171.0
+    ],
+    [
+     2729.0,
+     7171.0
+    ],
+    [
+     3161.0,
+     7171.0
+    ],
+    [
+     3161.0,
+     6959.0
+    ],
+    [
+     3037.0,
+     6863.0
+    ],
+    [
+     2957.0,
+     6797.0
+    ],
+    [
+     2877.0,
+     6713.0
+    ],
+    [
+     2797.0,
+     6627.0
+    ],
+    [
+     2717.0,
+     6547.0
+    ],
+    [
+     2637.0,
+     6511.0
+    ],
+    [
+     2659.0,
+     6521.0
+    ],
+    [
+     2259.0,
+     6521.0
+    ],
+    [
+     2259.0,
+     6717.0
+    ],
+    [
+     2321.0,
+     6691.0
+    ],
+    [
+     2321.0,
+     6761.0
+    ],
+    [
+     2259.0,
+     6789.0
+    ],
+    [
+     2259.0,
+     6921.0
+    ],
+    [
+     2289.0,
+     6981.0
+    ],
+    [
+     2409.0,
+     7101.0
+    ]
+   ]
+  ],
+  "geometryMode": "continent-chunks-v1"
+ },
+ "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
+ "knownLimitations": [
+  "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
+  "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
+  "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
+ ],
+ "provenance": {
+  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
+  "snapshotSha256": "eeb7435e5fcd43c4637aae93dd853a80aa6708ba263f095b54caa27aa3f0e0f5",
+  "sceneSha256": "36796a8a314cea3e111aed0dbc00f7980ce6272142ddec49134fcbadd52f78f6"
+ },
+ "externalResources": {
+  "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+  "../../../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+  "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+  "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0"
+ },
+ "bounds": {
+  "min": [
+   -209.0,
+   -3.43447208404541,
+   -320.0
+  ],
+  "max": [
+   -113.0,
+   0.0,
+   -308.0
+  ]
+ },
+ "performance": {
+  "glbBytes": 114992,
+  "nodes": 6,
+  "meshes": 3,
+  "externalResources": {
+   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+   "../../../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+   "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+   "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0"
+  },
+  "sharedResourceResidentBytes": {
+   "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+   "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+   "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+   "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+  }
+ },
+ "biomeBlend": null,
+ "objectMaterialOverrides": {
+  "schema": "eloria-object-material-overrides-v1",
+  "entries": []
+ }
+}

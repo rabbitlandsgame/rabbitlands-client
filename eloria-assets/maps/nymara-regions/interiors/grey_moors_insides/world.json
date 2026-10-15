@@ -1,0 +1,1975 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "grey_moors_insides",
+    "name": "Grey Moor Barrows",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        35.45,
+        -7.53,
+        35.45
+      ],
+      "max": [
+        225.55,
+        10.95,
+        199.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        35.45,
+        -6.4,
+        35.45
+      ],
+      "max": [
+        225.55,
+        0.0,
+        199.55
+      ]
+    },
+    "interiorClass": "insides",
+    "parentRegion": "grey_moors",
+    "serverCells": 195
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      -33.0,
+      202.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        44.5,
+        0.05,
+        39.5
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "great-barrow-mouth",
+      "name": "The Great Barrow",
+      "position": [
+        44.5,
+        0.05,
+        39.5
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "great_barrow"
+    },
+    {
+      "id": "west-crypt-stair",
+      "name": "The Root Crypt",
+      "position": [
+        138.0,
+        0.05,
+        38.75
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "root_crypt"
+    },
+    {
+      "id": "east-crypt-stair",
+      "name": "The Bone Gallery",
+      "position": [
+        43.0,
+        0.05,
+        143.5
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "bone_gallery"
+    },
+    {
+      "id": "south-crypt-stair",
+      "name": "The Fen Crypt",
+      "position": [
+        138.0,
+        0.05,
+        143.5
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "fen_crypt"
+    },
+    {
+      "id": "fifth-chamber-mouth",
+      "name": "The Fifth Chamber",
+      "position": [
+        201.0,
+        0.05,
+        42.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "fifth_chamber"
+    },
+    {
+      "id": "peat-croft-door",
+      "name": "The Peat Cutter's Croft",
+      "position": [
+        201.0,
+        0.05,
+        177.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "peat_croft"
+    },
+    {
+      "id": "warm-stone-door",
+      "name": "The Warm Stone",
+      "position": [
+        201.0,
+        0.05,
+        126.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "warm_stone"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 390,
+    "height": 336,
+    "cellMetres": 0.5,
+    "originMetres": [
+      33.0,
+      202.0
+    ],
+    "heightEncoding": {
+      "origin": -6.1,
+      "step": 0.1,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 18728,
+    "blockedCells": 112312,
+    "walkableFraction": 0.1429,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_grey_moors_insides",
+      "Roof_grey_moors_insides_cliff_rock",
+      "Roof_grey_moors_insides_grey_moor_granite",
+      "Roof_grey_moors_insides_grey_turf_roof",
+      "Roof_grey_moors_insides_packed_earth",
+      "Roof_grey_moors_insides_rubble_stone",
+      "Build_grey_moors_insides_amber_resin",
+      "Build_grey_moors_insides_bark_dark",
+      "Build_grey_moors_insides_charred_timber",
+      "Build_grey_moors_insides_cliff_rock",
+      "Build_grey_moors_insides_dark_iron",
+      "Build_grey_moors_insides_grey_bog_timber",
+      "Build_grey_moors_insides_grey_bog_water",
+      "Build_grey_moors_insides_grey_bone",
+      "Build_grey_moors_insides_grey_carved_stone",
+      "Build_grey_moors_insides_grey_dead_bark",
+      "Build_grey_moors_insides_grey_drystone",
+      "Build_grey_moors_insides_grey_moor_granite",
+      "Build_grey_moors_insides_grey_votive_flame",
+      "Build_grey_moors_insides_lime_plaster",
+      "Build_grey_moors_insides_packed_earth",
+      "Build_grey_moors_insides_rubble_stone",
+      "Build_grey_moors_insides_thatch_reed",
+      "Build_grey_moors_insides_woven_cloth"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_grey_moors_insides_cliff_rock",
+      "Roof_grey_moors_insides_grey_moor_granite",
+      "Roof_grey_moors_insides_grey_turf_roof",
+      "Roof_grey_moors_insides_packed_earth",
+      "Roof_grey_moors_insides_rubble_stone"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-great-barrow-mouth",
+      "name": "Return to Grey Moors",
+      "type": "map-transition",
+      "position": [
+        44.5,
+        0.05,
+        39.5
+      ],
+      "radius": 3.0,
+      "destinationMap": "grey_moors",
+      "destinationSpawn": "great-barrow-mouth",
+      "section": "great_barrow",
+      "authority": "server"
+    },
+    {
+      "id": "exit-west-crypt-stair",
+      "name": "Return to Grey Moors",
+      "type": "map-transition",
+      "position": [
+        138.0,
+        0.05,
+        38.75
+      ],
+      "radius": 3.0,
+      "destinationMap": "grey_moors",
+      "destinationSpawn": "west-crypt-stair",
+      "section": "root_crypt",
+      "authority": "server"
+    },
+    {
+      "id": "exit-east-crypt-stair",
+      "name": "Return to Grey Moors",
+      "type": "map-transition",
+      "position": [
+        43.0,
+        0.05,
+        143.5
+      ],
+      "radius": 3.0,
+      "destinationMap": "grey_moors",
+      "destinationSpawn": "east-crypt-stair",
+      "section": "bone_gallery",
+      "authority": "server"
+    },
+    {
+      "id": "exit-south-crypt-stair",
+      "name": "Return to Grey Moors",
+      "type": "map-transition",
+      "position": [
+        138.0,
+        0.05,
+        143.5
+      ],
+      "radius": 3.0,
+      "destinationMap": "grey_moors",
+      "destinationSpawn": "south-crypt-stair",
+      "section": "fen_crypt",
+      "authority": "server"
+    },
+    {
+      "id": "exit-fifth-chamber-mouth",
+      "name": "Return to Grey Moors",
+      "type": "map-transition",
+      "position": [
+        201.0,
+        0.05,
+        42.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "grey_moors",
+      "destinationSpawn": "fifth-chamber-mouth",
+      "section": "fifth_chamber",
+      "authority": "server"
+    },
+    {
+      "id": "exit-peat-croft-door",
+      "name": "Return to Grey Moors",
+      "type": "map-transition",
+      "position": [
+        201.0,
+        0.05,
+        177.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "grey_moors",
+      "destinationSpawn": "peat-croft-door",
+      "section": "peat_croft",
+      "authority": "server"
+    },
+    {
+      "id": "exit-warm-stone-door",
+      "name": "Return to Grey Moors",
+      "type": "map-transition",
+      "position": [
+        201.0,
+        0.05,
+        126.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "grey_moors",
+      "destinationSpawn": "warm-stone-door",
+      "section": "warm_stone",
+      "authority": "server"
+    }
+  ],
+  "sections": [
+    {
+      "id": "great_barrow",
+      "name": "The Great Barrow",
+      "class": "tomb",
+      "offset": [
+        40.0,
+        0.0,
+        36.0
+      ],
+      "arrival": [
+        44.5,
+        0.05,
+        39.5
+      ],
+      "spaces": [
+        "great_barrow.entry",
+        "great_barrow.hall",
+        "great_barrow.tomb"
+      ],
+      "notes": [
+        "The only section built to be looked at: dressed granite, spiral carving, a colonnade and a raised dais.",
+        "The tomb chamber is declared open_to_sky. A combined insides map has one environment, so the shaft will not currently show sky."
+      ]
+    },
+    {
+      "id": "root_crypt",
+      "name": "The Root Crypt",
+      "class": "crypt",
+      "offset": [
+        135.0,
+        0.0,
+        36.0
+      ],
+      "arrival": [
+        138.0,
+        0.05,
+        38.75
+      ],
+      "spaces": [
+        "root_crypt.stairhead",
+        "root_crypt.rootfall",
+        "root_crypt.underchamber"
+      ],
+      "notes": [
+        "The counterweight to the Great Barrow: no dressed stone, earth floors, and the roots of the moor's dead trees through the roof.",
+        "Root geometry comes from the toolkit's own `root_ribs`, which is what it was written for."
+      ]
+    },
+    {
+      "id": "bone_gallery",
+      "name": "The Bone Gallery",
+      "class": "ossuary",
+      "offset": [
+        40.0,
+        0.0,
+        141.0
+      ],
+      "arrival": [
+        43.0,
+        0.05,
+        143.5
+      ],
+      "spaces": [
+        "bone_gallery.stairhead",
+        "bone_gallery.gallery",
+        "bone_gallery.altar",
+        "bone_gallery.trapcell"
+      ],
+      "notes": [
+        "Dry, long and mean. The niches are what make it a gallery rather than a corridor with candles in it.",
+        "The stake corridor is the only part of these barrows built to keep people out. It is walkable: the stakes are geometry, not collision, and the trap is the server's to run."
+      ]
+    },
+    {
+      "id": "fen_crypt",
+      "name": "The Fen Crypt",
+      "class": "flooded",
+      "offset": [
+        135.0,
+        0.0,
+        141.0
+      ],
+      "arrival": [
+        138.0,
+        0.05,
+        143.5
+      ],
+      "spaces": [
+        "fen_crypt.stairhead",
+        "fen_crypt.ossuary"
+      ],
+      "notes": [
+        "Shin-deep standing water over the ossuary floor, with a drystone shelf and a causeway a step up out of it. The floor is waded rather than blocked, because the toolkit's chamber floor is always a walk surface and a drowned-but-walkable floor would have been a lie.",
+        "Bog water here is the region's own opaque `grey_bog_water`, not a transparent lake: peat stain kills the light that enters it."
+      ]
+    },
+    {
+      "id": "fifth_chamber",
+      "name": "The Fifth Chamber",
+      "class": "cave",
+      "offset": [
+        201.0,
+        0.0,
+        42.0
+      ],
+      "arrival": [
+        201.0,
+        0.05,
+        42.0
+      ],
+      "spaces": [
+        "fifth_chamber.mouth",
+        "fifth_chamber.throat",
+        "fifth_chamber.chamber",
+        "fifth_chamber.descent",
+        "fifth_chamber.gullet"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: mouth, throat and chamber, dressed for the region above it."
+      ]
+    },
+    {
+      "id": "peat_croft",
+      "name": "The Peat Cutter's Croft",
+      "class": "dwelling",
+      "offset": [
+        201.0,
+        0.0,
+        176.0
+      ],
+      "arrival": [
+        201.0,
+        0.05,
+        177.0
+      ],
+      "spaces": [
+        "peat_croft.hall",
+        "peat_croft.back"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: a hall with a hearth and a back room for its trade (hearth)."
+      ]
+    },
+    {
+      "id": "warm_stone",
+      "name": "The Warm Stone",
+      "class": "shrine",
+      "offset": [
+        201.0,
+        0.0,
+        126.0
+      ],
+      "arrival": [
+        201.0,
+        0.05,
+        126.0
+      ],
+      "spaces": [
+        "warm_stone.porch",
+        "warm_stone.nave",
+        "warm_stone.aisle",
+        "warm_stone.crypt",
+        "warm_stone.crypt-stair"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: a cut sanctuary in the stone manner, with a crypt of niches below."
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "grey-barrow-arch",
+      "name": "The Carved Arch",
+      "space": "great_barrow.hall",
+      "position": [
+        44.5,
+        0.2,
+        70.5
+      ],
+      "section": "great_barrow"
+    },
+    {
+      "id": "grey-barrow-sarcophagi",
+      "name": "The Hall of Sarcophagi",
+      "space": "great_barrow.hall",
+      "position": [
+        44.5,
+        -0.2,
+        70.5
+      ],
+      "section": "great_barrow"
+    },
+    {
+      "id": "grey-barrow-royal",
+      "name": "The Royal Tomb",
+      "space": "great_barrow.tomb",
+      "position": [
+        44.5,
+        0.0,
+        87.5
+      ],
+      "section": "great_barrow"
+    },
+    {
+      "id": "grey-root-crypt",
+      "name": "The Root Crypt",
+      "space": "root_crypt.rootfall",
+      "position": [
+        138.0,
+        -1.8,
+        60.0
+      ],
+      "section": "root_crypt"
+    },
+    {
+      "id": "grey-root-underchamber",
+      "name": "The Under Chamber",
+      "space": "root_crypt.underchamber",
+      "position": [
+        162.0,
+        -3.0,
+        60.0
+      ],
+      "section": "root_crypt"
+    },
+    {
+      "id": "grey-bone-gallery",
+      "name": "The Bone Gallery",
+      "space": "bone_gallery.gallery",
+      "position": [
+        43.0,
+        -0.6,
+        170.5
+      ],
+      "section": "bone_gallery"
+    },
+    {
+      "id": "grey-bone-altar",
+      "name": "The Ritual Altar",
+      "space": "bone_gallery.altar",
+      "position": [
+        43.0,
+        -0.8,
+        193.5
+      ],
+      "section": "bone_gallery"
+    },
+    {
+      "id": "grey-bone-trap",
+      "name": "The Stake Passage",
+      "space": "bone_gallery.trapcell",
+      "position": [
+        68.0,
+        -0.8,
+        193.5
+      ],
+      "section": "bone_gallery"
+    },
+    {
+      "id": "grey-fen-ossuary",
+      "name": "The Flooded Ossuary",
+      "space": "fen_crypt.ossuary",
+      "position": [
+        139.0,
+        -2.4,
+        169.5
+      ],
+      "section": "fen_crypt"
+    },
+    {
+      "id": "grey_fifth_chamber-chamber",
+      "name": "The Fifth Chamber",
+      "space": "fifth_chamber.chamber",
+      "position": [
+        201.0,
+        -4.0,
+        93.0
+      ],
+      "section": "fifth_chamber"
+    },
+    {
+      "id": "grey_peat_croft-hearth",
+      "name": "The Peat Cutter's Croft",
+      "space": "peat_croft.hall",
+      "position": [
+        201.0,
+        1.4,
+        177.0
+      ],
+      "section": "peat_croft"
+    },
+    {
+      "id": "grey_warm_stone-sanctuary",
+      "name": "The Warm Stone",
+      "space": "warm_stone.nave",
+      "position": [
+        201.0,
+        0.4,
+        148.0
+      ],
+      "section": "warm_stone"
+    }
+  ],
+  "interactives": [
+    {
+      "id": "grey-royal-sarcophagus",
+      "name": "Royal Sarcophagus",
+      "type": "container",
+      "position": [
+        44.5,
+        -0.05,
+        87.5
+      ],
+      "authority": "server",
+      "section": "great_barrow"
+    },
+    {
+      "id": "grey-gallery-altar",
+      "name": "Ritual Altar",
+      "type": "altar",
+      "position": [
+        43.0,
+        -1.3,
+        194.0
+      ],
+      "authority": "server",
+      "section": "bone_gallery"
+    },
+    {
+      "id": "secret-moor-crypt-reliquary",
+      "kind": "secret",
+      "secret": "moor-crypt-reliquary",
+      "name": "The West Crypt Reliquary",
+      "label": "A shrine slab with fresh scratches where it has been slid aside.",
+      "prop": "shrine_slab",
+      "key": "Bones",
+      "destinationMap": "grey_moors_secrets",
+      "destinationSpawn": "moor-crypt-reliquary",
+      "position": [
+        46.0,
+        -2.0,
+        173.5
+      ],
+      "space": "bone_gallery.gallery",
+      "authority": "server"
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "grey_fifth_chamber-den",
+      "name": "Moorland Dire Wolf",
+      "kind": "creature-zone",
+      "position": [
+        201.0,
+        -6.0,
+        93.0
+      ],
+      "radius": 12.0,
+      "section": "fifth_chamber"
+    },
+    {
+      "id": "served-staff-barrow-lamplighter-ess-corrow",
+      "name": "Barrow Lamplighter Ess Corrow",
+      "map": "grey_moor_barrows",
+      "role": "dialogue",
+      "authority": "server",
+      "serverTile": [
+        11,
+        159
+      ],
+      "position": [
+        44.5,
+        0.0,
+        42.5
+      ],
+      "placementSource": "publish_interior_staff.py",
+      "placementReason": "Great Barrow entry lamp post"
+    }
+  ],
+  "harvestables": [
+    {
+      "id": "grey-crypt-heartroot",
+      "resource": "heartroot",
+      "position": [
+        138.0,
+        -3.3,
+        60.0
+      ],
+      "authority": "server",
+      "section": "root_crypt"
+    },
+    {
+      "id": "grey-fen-bonemeal",
+      "resource": "bone-meal",
+      "position": [
+        138.0,
+        -2.9,
+        177.0
+      ],
+      "authority": "server",
+      "section": "fen_crypt"
+    }
+  ],
+  "lights": [
+    {
+      "id": "lantern-00",
+      "kind": "point",
+      "position": [
+        42.2,
+        0.4,
+        39.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-01",
+      "kind": "point",
+      "position": [
+        46.8,
+        0.4,
+        39.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-02",
+      "kind": "point",
+      "position": [
+        43.0,
+        -1.0,
+        62.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-03",
+      "kind": "point",
+      "position": [
+        46.0,
+        -1.0,
+        62.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-04",
+      "kind": "point",
+      "position": [
+        38.4,
+        -1.0,
+        69.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-05",
+      "kind": "point",
+      "position": [
+        50.6,
+        -1.0,
+        69.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-06",
+      "kind": "point",
+      "position": [
+        38.4,
+        -1.0,
+        77.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-07",
+      "kind": "point",
+      "position": [
+        50.6,
+        -1.0,
+        77.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-08",
+      "kind": "point",
+      "position": [
+        41.4,
+        -1.0,
+        83.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-09",
+      "kind": "point",
+      "position": [
+        47.6,
+        -1.0,
+        83.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-10",
+      "kind": "point",
+      "position": [
+        42.0,
+        0.35,
+        87.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-11",
+      "kind": "point",
+      "position": [
+        47.0,
+        0.35,
+        87.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-12",
+      "kind": "point",
+      "position": [
+        136.2,
+        0.4,
+        38.4
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-13",
+      "kind": "point",
+      "position": [
+        139.8,
+        0.4,
+        38.4
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-14",
+      "kind": "point",
+      "position": [
+        130.6,
+        -3.0,
+        55.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-15",
+      "kind": "point",
+      "position": [
+        145.4,
+        -3.0,
+        55.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-16",
+      "kind": "point",
+      "position": [
+        130.6,
+        -3.0,
+        65.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-17",
+      "kind": "point",
+      "position": [
+        145.4,
+        -3.0,
+        65.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-18",
+      "kind": "point",
+      "position": [
+        159.0,
+        -3.8,
+        57.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-19",
+      "kind": "point",
+      "position": [
+        165.0,
+        -3.8,
+        63.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-20",
+      "kind": "point",
+      "position": [
+        41.2,
+        0.4,
+        143.2
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-21",
+      "kind": "point",
+      "position": [
+        44.8,
+        0.4,
+        143.2
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-22",
+      "kind": "point",
+      "position": [
+        40.2,
+        -1.6,
+        159.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-23",
+      "kind": "point",
+      "position": [
+        45.8,
+        -1.6,
+        159.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-24",
+      "kind": "point",
+      "position": [
+        40.2,
+        -1.6,
+        168.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-25",
+      "kind": "point",
+      "position": [
+        45.8,
+        -1.6,
+        168.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-26",
+      "kind": "point",
+      "position": [
+        40.2,
+        -1.6,
+        177.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-27",
+      "kind": "point",
+      "position": [
+        45.8,
+        -1.6,
+        177.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-28",
+      "kind": "point",
+      "position": [
+        40.6,
+        -1.6,
+        191.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-29",
+      "kind": "point",
+      "position": [
+        45.4,
+        -1.6,
+        191.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-30",
+      "kind": "point",
+      "position": [
+        43.0,
+        -0.9,
+        196.4
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-31",
+      "kind": "point",
+      "position": [
+        66.5,
+        -1.6,
+        191.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-32",
+      "kind": "point",
+      "position": [
+        136.2,
+        0.4,
+        143.2
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-33",
+      "kind": "point",
+      "position": [
+        139.8,
+        0.4,
+        143.2
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-34",
+      "kind": "point",
+      "position": [
+        129.4,
+        -2.6,
+        161.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-35",
+      "kind": "point",
+      "position": [
+        148.6,
+        -2.6,
+        161.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-36",
+      "kind": "point",
+      "position": [
+        129.4,
+        -2.6,
+        171.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-37",
+      "kind": "point",
+      "position": [
+        148.6,
+        -2.6,
+        171.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-38",
+      "kind": "point",
+      "position": [
+        135.0,
+        -2.6,
+        178.6
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-39",
+      "kind": "point",
+      "position": [
+        141.0,
+        -2.6,
+        178.6
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-40",
+      "kind": "point",
+      "position": [
+        201.0,
+        2.58,
+        40.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-41",
+      "kind": "point",
+      "position": [
+        201.0,
+        -0.82,
+        63.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-42",
+      "kind": "point",
+      "position": [
+        193.0,
+        -2.42,
+        93.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-43",
+      "kind": "point",
+      "position": [
+        209.0,
+        -2.42,
+        93.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-44",
+      "kind": "point",
+      "position": [
+        201.0,
+        2.28,
+        177.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-45",
+      "kind": "point",
+      "position": [
+        202.0,
+        1.98,
+        185.28
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-46",
+      "kind": "point",
+      "position": [
+        201.0,
+        2.78,
+        126.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-47",
+      "kind": "point",
+      "position": [
+        196.0,
+        2.98,
+        142.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-48",
+      "kind": "point",
+      "position": [
+        206.0,
+        2.98,
+        148.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-49",
+      "kind": "point",
+      "position": [
+        201.0,
+        3.38,
+        155.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-50",
+      "kind": "point",
+      "position": [
+        219.0,
+        -1.42,
+        151.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "ambient": {
+      "colour": [
+        0.1,
+        0.1,
+        0.09
+      ],
+      "energy": 0.3
+    },
+    "fog": {
+      "enabled": true,
+      "colour": [
+        0.04,
+        0.04,
+        0.04
+      ],
+      "begin": 12.0,
+      "end": 46.0
+    },
+    "audio": [
+      {
+        "id": "drip",
+        "space": "great_barrow.hall",
+        "loop": true
+      },
+      {
+        "id": "low-chant",
+        "space": "great_barrow.tomb",
+        "loop": true
+      },
+      {
+        "id": "root-creak",
+        "space": "root_crypt.rootfall",
+        "loop": true
+      },
+      {
+        "id": "bone-settle",
+        "space": "bone_gallery.gallery",
+        "loop": true
+      },
+      {
+        "id": "water-lap",
+        "space": "fen_crypt.ossuary",
+        "loop": true
+      }
+    ],
+    "openToSky": [
+      "great_barrow.tomb"
+    ]
+  },
+  "spaces": {
+    "great_barrow.entry": {
+      "x0": 40.0,
+      "x1": 49.0,
+      "z0": 36.0,
+      "z1": 43.0,
+      "floor": 0.0,
+      "height": 3.2
+    },
+    "great_barrow.hall": {
+      "x0": 37.0,
+      "x1": 52.0,
+      "z0": 61.0,
+      "z1": 80.0,
+      "floor": -1.4,
+      "height": 5.2
+    },
+    "great_barrow.tomb": {
+      "x0": 39.0,
+      "x1": 50.0,
+      "z0": 81.0,
+      "z1": 94.0,
+      "floor": -1.4,
+      "height": 7.0
+    },
+    "root_crypt.stairhead": {
+      "x0": 135.0,
+      "x1": 141.0,
+      "z0": 36.0,
+      "z1": 41.5,
+      "floor": 0.0,
+      "height": 3.0
+    },
+    "root_crypt.rootfall": {
+      "x0": 129.0,
+      "x1": 147.0,
+      "z0": 52.0,
+      "z1": 68.0,
+      "floor": -3.4,
+      "height": 6.4
+    },
+    "root_crypt.underchamber": {
+      "x0": 157.0,
+      "x1": 167.0,
+      "z0": 55.0,
+      "z1": 65.0,
+      "floor": -4.2,
+      "height": 4.0
+    },
+    "bone_gallery.stairhead": {
+      "x0": 40.0,
+      "x1": 46.0,
+      "z0": 141.0,
+      "z1": 146.0,
+      "floor": 0.0,
+      "height": 3.0
+    },
+    "bone_gallery.gallery": {
+      "x0": 39.0,
+      "x1": 47.0,
+      "z0": 154.0,
+      "z1": 187.0,
+      "floor": -2.0,
+      "height": 4.2
+    },
+    "bone_gallery.altar": {
+      "x0": 36.0,
+      "x1": 50.0,
+      "z0": 188.0,
+      "z1": 199.0,
+      "floor": -2.0,
+      "height": 5.0
+    },
+    "bone_gallery.trapcell": {
+      "x0": 64.0,
+      "x1": 72.0,
+      "z0": 189.5,
+      "z1": 197.5,
+      "floor": -2.0,
+      "height": 3.6
+    },
+    "fen_crypt.stairhead": {
+      "x0": 135.0,
+      "x1": 141.0,
+      "z0": 141.0,
+      "z1": 146.0,
+      "floor": 0.0,
+      "height": 3.0
+    },
+    "fen_crypt.ossuary": {
+      "x0": 127.0,
+      "x1": 151.0,
+      "z0": 158.0,
+      "z1": 181.0,
+      "floor": -3.6,
+      "height": 7.2
+    },
+    "fifth_chamber.mouth": {
+      "x0": 195.0,
+      "x1": 207.0,
+      "z0": 36.0,
+      "z1": 48.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "fifth_chamber.throat": {
+      "x0": 196.0,
+      "x1": 206.0,
+      "z0": 58.0,
+      "z1": 68.0,
+      "floor": -3.6,
+      "height": 5.6
+    },
+    "fifth_chamber.chamber": {
+      "x0": 185.0,
+      "x1": 217.0,
+      "z0": 78.0,
+      "z1": 108.0,
+      "floor": -6.0,
+      "height": 11.0
+    },
+    "fifth_chamber.descent": {
+      "x0": 198.6,
+      "x1": 203.4,
+      "z0": 45.6,
+      "z1": 60.4,
+      "floor": -3.6,
+      "height": 4.4
+    },
+    "fifth_chamber.gullet": {
+      "x0": 198.7,
+      "x1": 203.3,
+      "z0": 65.7,
+      "z1": 80.3,
+      "floor": -6.0,
+      "height": 4.4
+    },
+    "peat_croft.hall": {
+      "x0": 196.0,
+      "x1": 206.0,
+      "z0": 172.0,
+      "z1": 182.0,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "peat_croft.back": {
+      "x0": 198.0,
+      "x1": 206.0,
+      "z0": 182.55,
+      "z1": 188.0,
+      "floor": 0.0,
+      "height": 3.0
+    },
+    "warm_stone.porch": {
+      "x0": 197.0,
+      "x1": 205.0,
+      "z0": 122.0,
+      "z1": 130.0,
+      "floor": 0.0,
+      "height": 4.2
+    },
+    "warm_stone.nave": {
+      "x0": 193.0,
+      "x1": 209.0,
+      "z0": 138.0,
+      "z1": 158.0,
+      "floor": -1.2,
+      "height": 7.0
+    },
+    "warm_stone.aisle": {
+      "x0": 199.4,
+      "x1": 202.6,
+      "z0": 128.4,
+      "z1": 139.6,
+      "floor": -1.2,
+      "height": 3.6
+    },
+    "warm_stone.crypt": {
+      "x0": 213.0,
+      "x1": 225.0,
+      "z0": 146.0,
+      "z1": 156.0,
+      "floor": -4.0,
+      "height": 4.0
+    },
+    "warm_stone.crypt-stair": {
+      "x0": 207.7,
+      "x1": 214.3,
+      "z0": 148.7,
+      "z1": 151.3,
+      "floor": -4.0,
+      "height": 3.2
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../grey_moor_barrows/references/00-concept-detail-board.png",
+    "role": "parent-region board; these interiors have no board of their own",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "The Great Barrow: barrow entry, from inside the lintel",
+      "The Great Barrow: the spiral-carved arch",
+      "The Great Barrow: the hall of sarcophagi",
+      "The Great Barrow: the royal tomb under its shaft",
+      "The Root Crypt: roots through the crypt roof",
+      "The Root Crypt: the under chamber",
+      "The Bone Gallery: the burial gallery",
+      "The Bone Gallery: the ritual altar",
+      "The Bone Gallery: the stake passage",
+      "The Fen Crypt: the flooded ossuary",
+      "The Fifth Chamber: cave mouth from within",
+      "The Fifth Chamber: the descent",
+      "The Fifth Chamber: the chamber",
+      "The Peat Cutter's Croft: the hall and hearth",
+      "The Peat Cutter's Croft: the hearth",
+      "The Warm Stone: the porch",
+      "The Warm Stone: the nave",
+      "The Warm Stone: the sanctuary"
+    ]
+  },
+  "performance": {
+    "nodes": 30,
+    "meshes": 29,
+    "materials": 20,
+    "images": 59,
+    "textures": 59,
+    "accessors": 145,
+    "bufferViews": 204,
+    "uniqueTriangles": 42140,
+    "uniqueVertices": 42936,
+    "glbBytes": 10923176,
+    "nodeNames": [
+      "Interior_grey_moors_insides",
+      "Roof_grey_moors_insides_cliff_rock",
+      "Roof_grey_moors_insides_grey_moor_granite",
+      "Roof_grey_moors_insides_grey_turf_roof",
+      "Roof_grey_moors_insides_packed_earth",
+      "Roof_grey_moors_insides_rubble_stone",
+      "Build_grey_moors_insides_amber_resin",
+      "Build_grey_moors_insides_bark_dark",
+      "Build_grey_moors_insides_charred_timber",
+      "Build_grey_moors_insides_cliff_rock",
+      "Build_grey_moors_insides_dark_iron",
+      "Build_grey_moors_insides_grey_bog_timber",
+      "Build_grey_moors_insides_grey_bog_water",
+      "Build_grey_moors_insides_grey_bone",
+      "Build_grey_moors_insides_grey_carved_stone",
+      "Build_grey_moors_insides_grey_dead_bark",
+      "Build_grey_moors_insides_grey_drystone",
+      "Build_grey_moors_insides_grey_moor_granite",
+      "Build_grey_moors_insides_grey_votive_flame",
+      "Build_grey_moors_insides_lime_plaster",
+      "Build_grey_moors_insides_packed_earth",
+      "Build_grey_moors_insides_rubble_stone",
+      "Build_grey_moors_insides_thatch_reed",
+      "Build_grey_moors_insides_woven_cloth",
+      "Walk_grey_bog_timber",
+      "Walk_grey_carved_stone",
+      "Walk_grey_drystone",
+      "Walk_grey_moor_granite",
+      "Walk_grey_peat_bog",
+      "Walk_packed_earth"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260902
+    },
+    {
+      "id": "anchor",
+      "landmark": "grey-great-barrow",
+      "position": [
+        114.0,
+        6.4,
+        -273.0
+      ],
+      "role": "surface entrance on the Grey Moors region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the shared Nymara toolkit; no scattered placement",
+    "textures": "procedural, from _toolkit/amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "Four barrows on one map with blackspace between them, in the Eternal Lands convention: one GLB, one manifest, one collision grid, one server map key, and an arrival point per surface door.",
+    "The blackspace is not drawn. The collision grid is built only where a Walk_ surface exists, so the gutters between sections are blocked by construction rather than by a mask that could drift out of step.",
+    "Sections are spaced so no two come within about forty metres, which is what keeps one section's candles and cameras out of the next."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Not opened in Godot: no client is installable in the build environment, so collision response, navmesh generation, portal transition, LOD and transparency sorting are unverified.",
+    "eloria-server has not registered these map keys."
+  ],
+  "externalResources": {
+    "../../../_shared/images/02c681c6ccdfc850312b1610a650ed4313e1a08d2088b257a1aef0322e445a81.png": "02c681c6ccdfc850312b1610a650ed4313e1a08d2088b257a1aef0322e445a81",
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/0c1aed45b209f5f7b000e4c9cc9ffc8412ccc84bba1fb1ef72aec0cae1f6716e.png": "0c1aed45b209f5f7b000e4c9cc9ffc8412ccc84bba1fb1ef72aec0cae1f6716e",
+    "../../../_shared/images/0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f.png": "0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f",
+    "../../../_shared/images/1af8ff2467a2da589fd588011db8e7e4b344fae101a5d8d5d3c048a923a05c44.png": "1af8ff2467a2da589fd588011db8e7e4b344fae101a5d8d5d3c048a923a05c44",
+    "../../../_shared/images/1b4c9eca577a9dda258aab140b14f10b48b82daf441c875121f2b7b6d4097f69.png": "1b4c9eca577a9dda258aab140b14f10b48b82daf441c875121f2b7b6d4097f69",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853.png": "1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853",
+    "../../../_shared/images/1f28f269ba1b149aeb77bff82fa91444c0eb6b76e5f5c379b1c42aafefb2f668.png": "1f28f269ba1b149aeb77bff82fa91444c0eb6b76e5f5c379b1c42aafefb2f668",
+    "../../../_shared/images/2b80bc8a9cc0c49770c8be06c0eeb65504c4364fbd54c1112a1cd0f21e477040.png": "2b80bc8a9cc0c49770c8be06c0eeb65504c4364fbd54c1112a1cd0f21e477040",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/387c5c4aff2e9d2db39d9b0e96f5c811358794e02e515c1cf21abcc3e785ea09.png": "387c5c4aff2e9d2db39d9b0e96f5c811358794e02e515c1cf21abcc3e785ea09",
+    "../../../_shared/images/4186e61514105b24d9ba9766f7d779e58f04a32259ef8f79ec03bd164dc7d945.png": "4186e61514105b24d9ba9766f7d779e58f04a32259ef8f79ec03bd164dc7d945",
+    "../../../_shared/images/44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348.png": "44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348",
+    "../../../_shared/images/475ef8281cbbcd2725103e11e0c83e3078a3126128609801c9e59ae4314a4d19.png": "475ef8281cbbcd2725103e11e0c83e3078a3126128609801c9e59ae4314a4d19",
+    "../../../_shared/images/48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed.png": "48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed",
+    "../../../_shared/images/4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22.png": "4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22",
+    "../../../_shared/images/52739ac9f045cce5aa5627ba5582368a72c02b1625cb5480f69f22299b38ac57.png": "52739ac9f045cce5aa5627ba5582368a72c02b1625cb5480f69f22299b38ac57",
+    "../../../_shared/images/5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03.png": "5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03",
+    "../../../_shared/images/5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843.png": "5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843",
+    "../../../_shared/images/5cead44ee1afc9dde131220bab5509c26b0840822061e613a5a186083c2002be.png": "5cead44ee1afc9dde131220bab5509c26b0840822061e613a5a186083c2002be",
+    "../../../_shared/images/68fa4b2219a3e1883fcb9004fc075b68116d974b376f5ad52cf8ab0162291c18.png": "68fa4b2219a3e1883fcb9004fc075b68116d974b376f5ad52cf8ab0162291c18",
+    "../../../_shared/images/69dd886af4fa4d1c929dbf33bf9c4848a3e4bfb062b0e921f5933bc6f34e053e.png": "69dd886af4fa4d1c929dbf33bf9c4848a3e4bfb062b0e921f5933bc6f34e053e",
+    "../../../_shared/images/75ed80079f9c5fe95d5633c7eeb94efe6d382fa25736dfa6c1349b9c2b6f2ba9.png": "75ed80079f9c5fe95d5633c7eeb94efe6d382fa25736dfa6c1349b9c2b6f2ba9",
+    "../../../_shared/images/7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2.png": "7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/81fed653d8c9495e4ee98c7c2697dec3f400fd69ffa19c4e60fa3acdb8c2f85c.png": "81fed653d8c9495e4ee98c7c2697dec3f400fd69ffa19c4e60fa3acdb8c2f85c",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/867d994537f2718358bee73b254cdba31eb84a14e9681c424980b81be5bd9b8c.png": "867d994537f2718358bee73b254cdba31eb84a14e9681c424980b81be5bd9b8c",
+    "../../../_shared/images/898a33e85f08340ef9889b26a47ed872813252902836877e8ccd6054872a6a8d.png": "898a33e85f08340ef9889b26a47ed872813252902836877e8ccd6054872a6a8d",
+    "../../../_shared/images/8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c.png": "8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c",
+    "../../../_shared/images/8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9.png": "8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9",
+    "../../../_shared/images/9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6.png": "9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6",
+    "../../../_shared/images/9af319e11d6ae0b3275a558a044bb6d48258760bd51212832087ef6ad7b7e793.png": "9af319e11d6ae0b3275a558a044bb6d48258760bd51212832087ef6ad7b7e793",
+    "../../../_shared/images/9fc3cdd90397d333805c3a3da24f9826f722f04f1d0daa9cc5e30d844513cd6d.png": "9fc3cdd90397d333805c3a3da24f9826f722f04f1d0daa9cc5e30d844513cd6d",
+    "../../../_shared/images/a269fe3db242a9e5d0fbec4e228233fb11366e9abaf31a34f74225716351bf39.png": "a269fe3db242a9e5d0fbec4e228233fb11366e9abaf31a34f74225716351bf39",
+    "../../../_shared/images/a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392.png": "a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392",
+    "../../../_shared/images/a4092f0af14dc028848f13d16a22b59436efddedff9909dc998dd1120321641e.png": "a4092f0af14dc028848f13d16a22b59436efddedff9909dc998dd1120321641e",
+    "../../../_shared/images/ab0428a356a76b3a552ccb820522238387733cf9da3a7f9303d5f03f750949fb.png": "ab0428a356a76b3a552ccb820522238387733cf9da3a7f9303d5f03f750949fb",
+    "../../../_shared/images/ab5881fb0f1107266d0692b9c22bb22d3fd692dffa94c058823a27a2dd937b35.png": "ab5881fb0f1107266d0692b9c22bb22d3fd692dffa94c058823a27a2dd937b35",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/af88423acff80eed376f0f57a1e0695a48881367a5927380fd81e54b65d006ac.png": "af88423acff80eed376f0f57a1e0695a48881367a5927380fd81e54b65d006ac",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/bcfa1f748f8242d1d883d0cd12b86a18d1c149ae0b5f637346ff60a9f071c6b0.png": "bcfa1f748f8242d1d883d0cd12b86a18d1c149ae0b5f637346ff60a9f071c6b0",
+    "../../../_shared/images/be1a174e067789b8594a372a9396536d32f9fd93738dd44aee0d7ac99a06c968.png": "be1a174e067789b8594a372a9396536d32f9fd93738dd44aee0d7ac99a06c968",
+    "../../../_shared/images/c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd.png": "c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd",
+    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0.png": "ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0",
+    "../../../_shared/images/cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae.png": "cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae",
+    "../../../_shared/images/d749d5bf9ceb2018ea2bde2a7cb43c6ef9ec8fc6a5f2803d4dc40e26d04d4009.png": "d749d5bf9ceb2018ea2bde2a7cb43c6ef9ec8fc6a5f2803d4dc40e26d04d4009",
+    "../../../_shared/images/d8a35425ab85da77c03d4b1ebf3f2289c55e03073e9fb59d08c160c20b08461a.png": "d8a35425ab85da77c03d4b1ebf3f2289c55e03073e9fb59d08c160c20b08461a",
+    "../../../_shared/images/d901334c8d05c924ad4229c9b8089148b9056f6d22c2334f69740f3f15c5e775.png": "d901334c8d05c924ad4229c9b8089148b9056f6d22c2334f69740f3f15c5e775",
+    "../../../_shared/images/e3203cb4796897b3660cdc9471dd57c8f9d41bb00eadc3358045eef19754e476.png": "e3203cb4796897b3660cdc9471dd57c8f9d41bb00eadc3358045eef19754e476",
+    "../../../_shared/images/e8f97efde3427c94b434e001e599125494ed8a60b462097d319b2a7d3e12628f.png": "e8f97efde3427c94b434e001e599125494ed8a60b462097d319b2a7d3e12628f",
+    "../../../_shared/images/eb7c4e4ed32c33c210c92a16000d0170bd11d21d561b7011f6d40a56e9758f16.png": "eb7c4e4ed32c33c210c92a16000d0170bd11d21d561b7011f6d40a56e9758f16",
+    "../../../_shared/images/f57691ffb1512e80922347979f624aa6bc5dc7f419801b74fab5d42ea00e05e6.png": "f57691ffb1512e80922347979f624aa6bc5dc7f419801b74fab5d42ea00e05e6",
+    "../../../_shared/images/ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247.png": "ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247"
+  }
+}

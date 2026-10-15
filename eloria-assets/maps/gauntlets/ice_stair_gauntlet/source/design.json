@@ -1,0 +1,1601 @@
+{
+ "_note": "Rules of the stair - everything a run of ice_stair_gauntlet needs except geometry (source/layout.json). Written by work-output/gauntlet-v2-design/regions/tools/author_routes.py from the approved concept: three bands by the run's level, five waves of two variants each and a court. Counts are for a party of four; the server multiplies by partyScale (leaders and bosses never multiply).",
+ "schema": "eloria-trail-design-v1",
+ "id": "ice_stair_gauntlet",
+ "route": "ice_stair",
+ "name": "The Ice Stair",
+ "short": "icestair",
+ "region": "whitehorn_range",
+ "flavour": "The silver miners' road zig-zags up the glacier from their camp at its snout: past the frozen cascade, over the crevasse field on a bridge of ice and through the snowed-in miners' hall to the frozen cirque under the adit, where the Rime Matriarch keeps the mine.",
+ "copies": 3,
+ "timeLimitSeconds": 2700,
+ "cooldownHours": 6,
+ "minPlayers": 1,
+ "maxPlayers": 6,
+ "wipeSeconds": 90,
+ "broker": {
+  "npc": "Rellan",
+  "map": "landfall"
+ },
+ "partyScale": {
+  "1": 0.6,
+  "2": 0.75,
+  "3": 0.9,
+  "4": 1.0,
+  "5": 1.15,
+  "6": 1.3
+ },
+ "pulse": {
+  "releaseAliveFraction": 0.34,
+  "releaseSeconds": 45
+ },
+ "leash": {
+  "marginMetres": 10,
+  "evadeSeconds": 8
+ },
+ "checkpointDelaySeconds": 10,
+ "shapes": {
+  "pack": 1.0,
+  "swarm": 0.8,
+  "heavies": 1.25,
+  "leader": 1.25
+ },
+ "mutators": [
+  [
+   "none",
+   5
+  ],
+  [
+   "frenzy",
+   2
+  ],
+  [
+   "hunted",
+   2
+  ],
+  [
+   "bounty",
+   1
+  ],
+  [
+   "swift",
+   1
+  ]
+ ],
+ "cache": [
+  [
+   "Potion of Great Healing",
+   "3-5",
+   "1"
+  ],
+  [
+   "Gold Coins",
+   "150-400",
+   "1"
+  ],
+  [
+   "Bones",
+   "6-12",
+   "1"
+  ]
+ ],
+ "cacheRare": [],
+ "bonus": {
+  "section": "silver-seep",
+  "note": "one harvest node of an existing herb (the server tool's bonus resource)"
+ },
+ "lore": [
+  {
+   "at": "trailhead",
+   "title": "Rules of the stair",
+   "text": "One party at a time. The waves come down to you; the stair behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+  },
+  {
+   "at": "silver-seep",
+   "title": "The prospectors' seep",
+   "text": "A thread of meltwater the miners panned for silver. They found more here than in the mine."
+  }
+ ],
+ "bands": [
+  {
+   "id": "herd",
+   "label": "The Herd",
+   "minLevel": 1,
+   "maxLevel": 24,
+   "story": "The glacier's grazers and the small hunters that follow them.",
+   "roster": [
+    "ice_wolverine",
+    "glacier_crab",
+    "cobalt_ibex",
+    "frosthorn_elk",
+    "whitehorn_ice_ram"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "ice-wolverine",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "glacier-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "cobalt-ibex",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "cobalt_ibex",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "cobalt_ibex",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest",
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "cobalt_ibex",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "frosthorn-elk",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "frosthorn_elk",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "frosthorn_elk",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest",
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "frosthorn_elk",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "ice-wolverine",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          12,
+          "pack"
+         ],
+         [
+          "whitehorn_ice_ram",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "glacier-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          12,
+          "pack"
+         ],
+         [
+          "whitehorn_ice_ram",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "cobalt-ibex",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "cobalt_ibex",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "cobalt_ibex",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest",
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "cobalt_ibex",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "frosthorn-elk",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "frosthorn_elk",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "frosthorn_elk",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest",
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "frosthorn_elk",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "ice-wolverine",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast",
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "ice_wolverine",
+          15,
+          "pack"
+         ],
+         [
+          "whitehorn_ice_ram",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "glacier-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast",
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "glacier_crab",
+          15,
+          "pack"
+         ],
+         [
+          "whitehorn_ice_ram",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "inline",
+    "creature": "whitehorn_ice_ram",
+    "name": "the Old Ram of the Stair",
+    "health": 6.0,
+    "strength": [
+     0.9,
+     1.4
+    ],
+    "adds": [
+     [
+      "ice_wolverine",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "rime",
+   "label": "The Rime",
+   "minLevel": 20,
+   "maxLevel": 44,
+   "story": "The cold's own hunters: leopards, harpies and the yetis of the upper snow.",
+   "roster": [
+    "glacier_harpy",
+    "ice_snow_leopard",
+    "snow_yeti",
+    "whitehorn_ice_griffin",
+    "crystal_polar_bear",
+    "frost_stone_golem"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "glacier-harpy",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "glacier_harpy",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "glacier_harpy",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "glacier_harpy",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ice-snow-leopard",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "ice_snow_leopard",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "ice_snow_leopard",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "ice_snow_leopard",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "snow-yeti",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "snow_yeti",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "snow_yeti",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest",
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "snow_yeti",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ice-griffin",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "whitehorn_ice_griffin",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "whitehorn_ice_griffin",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest",
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "whitehorn_ice_griffin",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "polar-bear",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "crystal_polar_bear",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_polar_bear",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_polar_bear",
+          5,
+          "heavies"
+         ],
+         [
+          "frost_stone_golem",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "glacier-harpy",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "glacier_harpy",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "glacier_harpy",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "glacier_harpy",
+          12,
+          "pack"
+         ],
+         [
+          "frost_stone_golem",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "ice-snow-leopard",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "ice_snow_leopard",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "ice_snow_leopard",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest",
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "ice_snow_leopard",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "snow-yeti",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "snow_yeti",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "snow_yeti",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest",
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "snow_yeti",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "ice-griffin",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "whitehorn_ice_griffin",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "whitehorn_ice_griffin",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast",
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "whitehorn_ice_griffin",
+          15,
+          "pack"
+         ],
+         [
+          "frost_stone_golem",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "polar-bear",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "crystal_polar_bear",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_polar_bear",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast",
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_polar_bear",
+          6,
+          "heavies"
+         ],
+         [
+          "frost_stone_golem",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "rime_matriarch",
+    "existing": true,
+    "name": "Rime Matriarch",
+    "adds": [
+     [
+      "glacier_harpy",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "deepice",
+   "label": "The Deep Ice",
+   "minLevel": 40,
+   "maxLevel": 0,
+   "story": "What the ice keeps: trolls, the old paladins of the pass and the wraiths of the drowned.",
+   "roster": [
+    "glacier_troll",
+    "walrus",
+    "glacier_paladin",
+    "frost_wraith_queen",
+    "dire_wolf",
+    "glacier_titan"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "glacier-troll",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "glacier_troll",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "glacier_troll",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "glacier_troll",
+          4,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "walrus",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "walrus",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "walrus",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "walrus",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "glacier-paladin",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "glacier_paladin",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "glacier_paladin",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest",
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "glacier_paladin",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "frost-wraith-queen",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "frost_wraith_queen",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "frost_wraith_queen",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-southwest",
+         "w2-southeast"
+        ],
+        "groups": [
+         [
+          "frost_wraith_queen",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "dire-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          12,
+          "pack"
+         ],
+         [
+          "glacier_titan",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "glacier-troll",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "glacier_troll",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "glacier_troll",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-west",
+         "w3-east",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "glacier_troll",
+          5,
+          "heavies"
+         ],
+         [
+          "glacier_titan",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "walrus",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "walrus",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "walrus",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest",
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "walrus",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "glacier-paladin",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "glacier_paladin",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "glacier_paladin",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-southwest",
+         "w4-north"
+        ],
+        "groups": [
+         [
+          "glacier_paladin",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "frost-wraith-queen",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "frost_wraith_queen",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "frost_wraith_queen",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast",
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "frost_wraith_queen",
+          15,
+          "pack"
+         ],
+         [
+          "glacier_titan",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "dire-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west",
+         "w5-southeast",
+         "w5-northeast"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          15,
+          "pack"
+         ],
+         [
+          "glacier_titan",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "rime_matriarch",
+    "existing": true,
+    "name": "Rime Matriarch",
+    "adds": [
+     [
+      "walrus",
+      6
+     ]
+    ]
+   }
+  }
+ ]
+}

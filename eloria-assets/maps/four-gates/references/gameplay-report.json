@@ -1,0 +1,453 @@
+{
+  "asset": "four-gates",
+  "checks": [
+    {
+      "check": "client opened a real TCP session to the local test server",
+      "ok": true
+    },
+    {
+      "check": "temporary test character created and logged in through the real flow",
+      "ok": true
+    },
+    {
+      "check": "Four Gates loaded and the local actor is present",
+      "ok": true
+    },
+    {
+      "check": "local actor node exists",
+      "ok": true
+    },
+    {
+      "check": "character spawns standing on the terrain, not below or floating",
+      "ok": true
+    },
+    {
+      "check": "saved 00-spawn.png",
+      "ok": true
+    },
+    {
+      "check": "click-to-move issued a real MOVE_TO and the server moved the character",
+      "ok": true
+    },
+    {
+      "check": "saved 01-click-to-move.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-plaza-centre.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-civic-quarter.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-ring-road-east.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-residential-block.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-east-gate-approach.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-north-avenue.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-north-gate.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-north-bridge-deck.png",
+      "ok": true
+    },
+    {
+      "check": "saved walk-sanctuary-approach.png",
+      "ok": true
+    },
+    {
+      "check": "character walked to every landmark and stayed correctly grounded (9/9)",
+      "ok": true
+    },
+    {
+      "check": "authored collision proxies block movement through structures (4/4 probes)",
+      "ok": true
+    },
+    {
+      "check": "camera rotation responds to input",
+      "ok": true
+    },
+    {
+      "check": "camera zoom responds to input",
+      "ok": true
+    },
+    {
+      "check": "saved 02-camera-rotated.png",
+      "ok": true
+    },
+    {
+      "check": "client world position round-trips to the authoritative server tile",
+      "ok": true
+    },
+    {
+      "check": "HUD minimap renders live from the loaded world",
+      "ok": true
+    },
+    {
+      "check": "saved 03-tab-map.png",
+      "ok": true
+    },
+    {
+      "check": "tab map viewport only renders the world while the tab map is open",
+      "ok": true
+    },
+    {
+      "check": "tab map viewport stops rendering the world once closed",
+      "ok": true
+    },
+    {
+      "check": "declared bounds contain every gameplay area",
+      "ok": true
+    }
+  ],
+  "click_to_move": {
+    "from": [
+      385,
+      267
+    ],
+    "to": [
+      385,
+      261
+    ]
+  },
+  "collision_probe_hits": 4,
+  "coordinates": {
+    "derived": [
+      385,
+      1760
+    ],
+    "server": [
+      384,
+      1760
+    ],
+    "world": [
+      0.232558146119118,
+      74.120002746582,
+      -640.232543945312
+    ]
+  },
+  "failures": 0,
+  "frame_ms_software_gl": {
+    "max": 385.752,
+    "median": 350.38,
+    "min": 344.688,
+    "renderer": "OpenGL compatibility on llvmpipe (no GPU)"
+  },
+  "grounding": [
+    {
+      "actor_y": 31.0999870300293,
+      "delta": 0.0200004577636719,
+      "label": "spawn",
+      "ok": true,
+      "surface_y": 31.0799865722656,
+      "x": 0.232558146119118,
+      "z": 54.6511611938477
+    },
+    {
+      "actor_y": 31.5002574920654,
+      "arrived": true,
+      "delta": 0.0199089050292969,
+      "label": "plaza-centre",
+      "ok": true,
+      "surface_y": 31.4803485870361,
+      "target_tile": [
+        384,
+        384
+      ],
+      "x": 0.232558146119118,
+      "z": -0.232558146119118
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "civic-quarter",
+      "ok": true,
+      "surface_y": 31.0800170898438,
+      "target_tile": [
+        83,
+        470
+      ],
+      "x": -139.767440795898,
+      "z": -40.2325592041016
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0200004577636719,
+      "label": "ring-road-east",
+      "ok": true,
+      "surface_y": 31.0799865722656,
+      "target_tile": [
+        921,
+        384
+      ],
+      "x": 250.0,
+      "z": -0.232558146119118
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "residential-block",
+      "ok": true,
+      "surface_y": 31.0800170898438,
+      "target_tile": [
+        805,
+        178
+      ],
+      "x": 196.046508789062,
+      "z": 95.5813980102539
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0200004577636719,
+      "label": "east-gate-approach",
+      "ok": true,
+      "surface_y": 31.0799865722656,
+      "target_tile": [
+        1072,
+        384
+      ],
+      "x": 320.232543945312,
+      "z": -0.232558146119118
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "north-avenue",
+      "ok": true,
+      "surface_y": 31.0800170898438,
+      "target_tile": [
+        384,
+        1029
+      ],
+      "x": 0.232558146119118,
+      "z": -300.232543945312
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "north-gate",
+      "ok": true,
+      "surface_y": 31.0800170898438,
+      "target_tile": [
+        384,
+        1124
+      ],
+      "x": 0.232558146119118,
+      "z": -344.418609619141
+    },
+    {
+      "actor_y": 29.0199813842773,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "north-bridge-deck",
+      "ok": true,
+      "surface_y": 29.0000114440918,
+      "target_tile": [
+        384,
+        1459
+      ],
+      "x": 0.232558146119118,
+      "z": -500.232543945312
+    },
+    {
+      "actor_y": 74.120002746582,
+      "arrived": true,
+      "delta": 0.0199966430664062,
+      "label": "sanctuary-approach",
+      "ok": true,
+      "surface_y": 74.1000061035156,
+      "target_tile": [
+        384,
+        1760
+      ],
+      "x": 0.232558146119118,
+      "z": -640.232543945312
+    }
+  ],
+  "manifest_warnings": [],
+  "map": "maps/startmap.elm",
+  "render_info": {
+    "draw_calls": 288,
+    "objects": 486,
+    "primitives": 610662,
+    "texture_memory": 306406414,
+    "video_memory": 319816628
+  },
+  "tile_addressability": {
+    "authoredBounds": [
+      [
+        -810.0,
+        -42.2,
+        -810.0
+      ],
+      [
+        810.0,
+        348.0,
+        810.0
+      ]
+    ],
+    "metresPerTile": 0.4651162791,
+    "note": "Tiles outside 0..2047 wrap in the 11-bit actor coordinate field, so world positions outside this range cannot be addressed by MOVE_TO under the current binding.",
+    "serverOrigin": [
+      384.0,
+      384.0
+    ],
+    "worldXRange": [
+      -178.6046511744,
+      773.4883721433
+    ],
+    "worldZRange": [
+      -773.4883721433,
+      178.6046511744
+    ]
+  },
+  "tile_field_covers_walled_city": false,
+  "traversal": [
+    {
+      "actor_y": 31.5002574920654,
+      "arrived": true,
+      "delta": 0.0199089050292969,
+      "label": "plaza-centre",
+      "ok": true,
+      "surface_y": 31.4803485870361,
+      "target_tile": [
+        384,
+        384
+      ],
+      "x": 0.232558146119118,
+      "z": -0.232558146119118
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "civic-quarter",
+      "ok": true,
+      "surface_y": 31.0800170898438,
+      "target_tile": [
+        83,
+        470
+      ],
+      "x": -139.767440795898,
+      "z": -40.2325592041016
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0200004577636719,
+      "label": "ring-road-east",
+      "ok": true,
+      "surface_y": 31.0799865722656,
+      "target_tile": [
+        921,
+        384
+      ],
+      "x": 250.0,
+      "z": -0.232558146119118
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "residential-block",
+      "ok": true,
+      "surface_y": 31.0800170898438,
+      "target_tile": [
+        805,
+        178
+      ],
+      "x": 196.046508789062,
+      "z": 95.5813980102539
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0200004577636719,
+      "label": "east-gate-approach",
+      "ok": true,
+      "surface_y": 31.0799865722656,
+      "target_tile": [
+        1072,
+        384
+      ],
+      "x": 320.232543945312,
+      "z": -0.232558146119118
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "north-avenue",
+      "ok": true,
+      "surface_y": 31.0800170898438,
+      "target_tile": [
+        384,
+        1029
+      ],
+      "x": 0.232558146119118,
+      "z": -300.232543945312
+    },
+    {
+      "actor_y": 31.0999870300293,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "north-gate",
+      "ok": true,
+      "surface_y": 31.0800170898438,
+      "target_tile": [
+        384,
+        1124
+      ],
+      "x": 0.232558146119118,
+      "z": -344.418609619141
+    },
+    {
+      "actor_y": 29.0199813842773,
+      "arrived": true,
+      "delta": 0.0199699401855469,
+      "label": "north-bridge-deck",
+      "ok": true,
+      "surface_y": 29.0000114440918,
+      "target_tile": [
+        384,
+        1459
+      ],
+      "x": 0.232558146119118,
+      "z": -500.232543945312
+    },
+    {
+      "actor_y": 74.120002746582,
+      "arrived": true,
+      "delta": 0.0199966430664062,
+      "label": "sanctuary-approach",
+      "ok": true,
+      "surface_y": 74.1000061035156,
+      "target_tile": [
+        384,
+        1760
+      ],
+      "x": 0.232558146119118,
+      "z": -640.232543945312
+    }
+  ]
+}

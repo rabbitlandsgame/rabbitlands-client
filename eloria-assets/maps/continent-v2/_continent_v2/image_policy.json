@@ -1,0 +1,43 @@
+{
+ "schema": "eloria-continent-v2-image-policy-v1",
+ "note": "image_policy.py: rules the v2 publisher applies to source images before the chunk exporter hashes them. resample: the 1254 px ground albedos, which no BC format holds, replaced by a recorded, wrap-resampled 1256 px copy (a new v2-only image) that a BC7 sidecar holds at 2 MiB instead of 8 MiB RGBA8. keepUncompressed: images that must keep their own bytes and ship without a rule (no BC sidecar holds a 1254 px image, so the client uploads them RGBA8); check() refuses a resample rule for any of them; retiredDerived names the copy a retired rule used to swap in (its file stays in the pool while a committed package still names it).",
+ "resample": {
+  "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5": {
+   "what": "forest ground (sw_isle forest-01..37, gs-forest-01/02, th-forest2-*; 220 cells)",
+   "size": [
+    1256,
+    1256
+   ],
+   "sourceSize": [
+    1254,
+    1254
+   ],
+   "derived": "454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9",
+   "derivedBytes": 3136294
+  },
+  "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7": {
+   "what": "rock ground (sw_isle rock-*, gs-rock-01..07, th-rock2-*; 123 cells)",
+   "size": [
+    1256,
+    1256
+   ],
+   "sourceSize": [
+    1254,
+    1254
+   ],
+   "derived": "e9cf24b430db72629befd33b70e40a836eb8caf593ce731b37afddefb2c7b099",
+   "derivedBytes": 3615582
+  }
+ },
+ "keepUncompressed": {
+  "e9adde18e1b92def62b1a8a83748d3ce0a32ff8c3d53753bbd363e6a9bcff951": {
+   "what": "castle plaza and court paving (castle-plaza, court-*, tollholm-square, ringholm-court, quays; 23 cells)",
+   "why": "owner call 2026-10-03: the hub paving stays uncompressed. Its BC7 1256 px copy (f058f5c8) saved 5.99 MiB per resident copy (2,105,968 against 8,384,072 GPU bytes), but the hub spawn view's static pixels then differed from the picture before the memory pass by a mean 1.60 levels, against 0.42 without the rule",
+   "sourceSize": [
+    1254,
+    1254
+   ],
+   "retiredDerived": "f058f5c8870da7825b4a4c92635d48a34921af5efcde419462ff36cdca8bd780"
+  }
+ }
+}

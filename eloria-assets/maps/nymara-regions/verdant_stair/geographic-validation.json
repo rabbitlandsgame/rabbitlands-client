@@ -1,0 +1,51 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 175,
+    "walkSurfaceTriangles": 901644,
+    "tilesSampled": 86856,
+    "actorTileOffset": [
+      0.5,
+      0.5
+    ],
+    "walkableServerTiles": 86856,
+    "groundingMisses": 0,
+    "groundingMissFraction": 0.0,
+    "surfaceDiscontinuities": 2,
+    "spawnPoints": 10
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "2 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          103,
+          186,
+          9.0
+        ],
+        [
+          100,
+          189,
+          6.87
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "COLLISION_SURFACE_MISMATCH",
+      "message": "1 sampled walkable actor centres disagree with the rendered walk surface",
+      "detail": [
+        {
+          "tile": [
+            96,
+            168
+          ],
+          "encoded": 15.04,
+          "surface": 19.29
+        }
+      ]
+    }
+  ]
+}

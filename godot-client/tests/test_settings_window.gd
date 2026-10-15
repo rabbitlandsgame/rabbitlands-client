@@ -1,0 +1,463 @@
+extends SceneTree
+## Guards the tabbed settings window and the key-rebinding UI.
+##
+## The client had one flat panel and 26 fixed input actions that could not be
+## rebound at all. Everything here is about this machine and this screen: the
+## gameplay tab sends the server's own commands rather than deciding anything,
+## and nothing else leaves the client.
+
+const SETTINGS_PATH := "user://eloria_hud.cfg"
+
+var failures := 0
+
+func _init() -> void:
+	call_deferred("_run")
+
+func _run() -> void:
+	root.size = Vector2i(1280, 720)
+	# Every switch below is saved to the player's own settings file; it is
+	# copied here and put back at the end.
+	var had_settings := FileAccess.file_exists(SETTINGS_PATH)
+	var saved_settings := FileAccess.get_file_as_bytes(SETTINGS_PATH) if had_settings \
+		else PackedByteArray()
+	var saved_look := OS.get_environment(LookProfile.ENABLE_VARIABLE)
+	var saved_quality := OS.get_environment(LookProfile.QUALITY_VARIABLE)
+	OS.unset_environment(LookProfile.ENABLE_VARIABLE)
+	OS.unset_environment(LookProfile.QUALITY_VARIABLE)
+	var main: Control = (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
+	root.add_child(main)
+	await process_frame
+	(main.get_node("GameView") as Control).show()
+	(main.get_node("LoginPanel") as Control).hide()
+	var window: Control = main.get("settings_window") as Control
+	var panel: PanelContainer = window.get_node("SettingsWindow") as PanelContainer
+	var resource_rail: Control = main.get_node("GameView/ResourceHud") as Control
+	await process_frame
+
+	_expect(not panel.visible, "the settings window starts closed")
+	main.call("_on_more_settings_pressed")
+	await process_frame
+	_expect(panel.visible, "the settings button opens it")
+	_expect((window.call("tab_titles") as Array)
+			== ["HUD", "Minimap", "Banners", "Graphics", "Camera", "Audio", "Inventory", "Spells", "Gameplay", "Controls"],
+		"it is tabbed: %s" % str(window.call("tab_titles")))
+	var rect: Rect2 = panel.get_global_rect()
+	_expect(rect.position.x >= 0.0 and rect.position.y >= 0.0
+		and rect.end.x <= 1280.0 and rect.end.y <= 720.0
+		and not rect.intersects(resource_rail.get_global_rect()),
+		"it fits 1280x720 clear of the resource rail: %s" % rect)
+	_test_fps_limit(main, window)
+	await _test_look_and_quality(main, window, panel, resource_rail)
+	await _test_unified_settings(main, window, panel)
+
+	# The map cache row. It is the only setting in this window that spends the
+	# player's disk, so it carries three controls rather than one: the switch,
+	# what the cache is using, and a way to be rid of it. All three are checked
+	# because a row that silently lost its button would look fine.
+	var cache_toggle: CheckBox = window.find_child("map_cache", true, false) as CheckBox
+	var cache_size: Label = window.find_child("MapCacheSize", true, false) as Label
+	var cache_clear: Button = window.find_child("map_cache_clear", true, false) as Button
+	_expect(cache_toggle != null and cache_size != null and cache_clear != null,
+		"the graphics tab carries a map cache switch, a size and a clear button")
+	if cache_toggle != null and cache_size != null and cache_clear != null:
+		_expect(cache_toggle.button_pressed == MapSceneCache.is_enabled(),
+			"the switch opens showing what the client actually has")
+		_expect(not cache_size.text.is_empty(),
+			"the row says what the cache is using: %s" % cache_size.text)
+		# Through the signal a click sends, not by calling the handler.
+		cache_toggle.button_pressed = false
+		await process_frame
+		_expect(not MapSceneCache.is_enabled(),
+			"turning it off turns the cache off")
+		cache_toggle.button_pressed = true
+		await process_frame
+		_expect(MapSceneCache.is_enabled(), "and back on")
+		cache_clear.pressed.emit()
+		await process_frame
+		_expect(MapSceneCache.total_bytes() == 0
+				and cache_size.text.begins_with("empty"),
+			"clearing empties it and says so: %s" % cache_size.text)
+
+	# Every bindable action exists, so no row can be dead.
+	for group: Variant in window.get("BINDABLE"):
+		for action: Variant in (window.get("BINDABLE") as Dictionary)[group]:
+			_expect(InputMap.has_action(str(action)),
+				"%s is a real action" % str(action))
+
+	# Rebinding, through the same path a key press takes.
+	var original: Array[InputEvent] = InputMap.action_get_events("toggle_sit")
+	window.call("begin_capture", "toggle_sit")
+	_expect(str(window.get("capturing")) == "toggle_sit",
+		"the window is waiting for a key")
+	var pressed := InputEventKey.new()
+	pressed.pressed = true
+	pressed.physical_keycode = KEY_F9
+	pressed.shift_pressed = true
+	main.call("_unhandled_input", pressed)
+	await process_frame
+	_expect(str(window.get("capturing")).is_empty(),
+		"the capture ends when a key arrives")
+	var rebound: Array[InputEvent] = InputMap.action_get_events("toggle_sit")
+	_expect(rebound.size() == 1
+		and (rebound[0] as InputEventKey).physical_keycode == KEY_F9
+		and (rebound[0] as InputEventKey).shift_pressed,
+		"the action now answers the key that was pressed, modifiers included")
+	var stored: Dictionary = window.call("stored_bindings") as Dictionary
+	_expect(str(stored.get("toggle_sit", "")) == "Shift+F9",
+		"the binding is stored as text a settings file can hold: %s"
+			% str(stored.get("toggle_sit", "")))
+
+	# Escape keeps what was there.
+	window.call("begin_capture", "toggle_sit")
+	var escape := InputEventKey.new()
+	escape.pressed = true
+	escape.physical_keycode = KEY_ESCAPE
+	main.call("_unhandled_input", escape)
+	await process_frame
+	_expect((InputMap.action_get_events("toggle_sit")[0] as InputEventKey
+			).physical_keycode == KEY_F9,
+		"Escape keeps the binding rather than clearing it")
+
+	# And a stored set comes back.
+	InputMap.action_erase_events("toggle_sit")
+	InputMap.action_add_event("toggle_sit", original[0] if not original.is_empty()
+		else InputEventKey.new())
+	window.call("restore_bindings", {"toggle_sit": "Ctrl+F8"})
+	var restored: InputEventKey = InputMap.action_get_events(
+		"toggle_sit")[0] as InputEventKey
+	_expect(restored.physical_keycode == KEY_F8 and restored.ctrl_pressed
+		and not restored.shift_pressed,
+		"a stored binding is read back exactly")
+	_expect(int(window.call("restore_bindings", {"not_an_action": "F1"})) == 0,
+		"a stored binding for an action that no longer exists is skipped")
+	# A settings file an older build wrote could hold something this build
+	# cannot read. That must leave the action alone, not unbind it.
+	window.call("restore_bindings", {"toggle_sit": "", "toggle_map": "nonsense"})
+	_expect(not InputMap.action_get_events("toggle_sit").is_empty()
+		and not InputMap.action_get_events("toggle_map").is_empty(),
+		"an unreadable stored binding leaves the action exactly as it was")
+
+	# The spell quick slots moved from Shift+number to Alt+number. A settings
+	# file records every bound action, not only chosen ones, so restoring a
+	# stored Shift+1 would hand the old default back to somebody who never
+	# picked it. It is dropped; a binding that is not the old default stands.
+	_expect(int(window.call("restore_bindings", {"quick_spell_1": "Shift+1"})) == 0,
+		"the superseded spell-slot default is not restored")
+	var spell_slot: InputEventKey = InputMap.action_get_events(
+		"quick_spell_1")[0] as InputEventKey
+	_expect(spell_slot.alt_pressed and not spell_slot.shift_pressed
+			and spell_slot.physical_keycode == KEY_1,
+		"quick_spell_1 keeps the current Alt+1 default")
+	window.call("restore_bindings", {"quick_spell_1": "Ctrl+1"})
+	spell_slot = InputMap.action_get_events("quick_spell_1")[0] as InputEventKey
+	_expect(spell_slot.ctrl_pressed and not spell_slot.alt_pressed,
+		"a spell slot the player actually rebound is still restored")
+	InputMap.action_erase_events("quick_spell_1")
+	var alt_one := InputEventKey.new()
+	alt_one.physical_keycode = KEY_1
+	alt_one.alt_pressed = true
+	InputMap.action_add_event("quick_spell_1", alt_one)
+
+	# The presentation switches actually change what is drawn.
+	var effects_before: int = (main.get("world_effects") as Array).size()
+	main.call("_on_client_setting_changed", "Graphics", "particles", false)
+	var app_state: Node = root.get_node("/root/AppState")
+	app_state.set("authenticated", true)
+	app_state.call("_on_packet", 51, _hex(
+		"5b00020004000000000001000001020304050b001e14071400120001416c696365"
+		+ "000040ff0600"))
+	main.call("_sync_world")
+	await process_frame
+	app_state.call("_on_packet", 79, PackedByteArray([17, 0x5b, 0]))
+	await process_frame
+	_expect((main.get("world_effects") as Array).size() == effects_before,
+		"turning effects off stops them being drawn at all")
+	main.call("_on_client_setting_changed", "Graphics", "particles", true)
+	app_state.call("_on_packet", 79, PackedByteArray([17, 0x5b, 0]))
+	await process_frame
+	_expect((main.get("world_effects") as Array).size() > effects_before,
+		"and turning them back on restores them")
+
+	main.call("_on_client_setting_changed", "Camera", "rotation_sensitivity", 0.5)
+	_expect(is_equal_approx(
+		float((main.get("camera_rig") as Node).get("rotation_sensitivity")), 0.5),
+		"a camera slider reaches the camera")
+
+	# Put the key back and save, so the next suite starts where this one did.
+	InputMap.action_erase_events("toggle_sit")
+	for event: InputEvent in original:
+		InputMap.action_add_event("toggle_sit", event)
+	main.call("_save_hud_settings")
+
+	# Cancel closes it like every other window.
+	var cancel: InputEventKey = InputMap.action_get_events(
+		"cancel")[0].duplicate() as InputEventKey
+	cancel.pressed = true
+	main.call("_unhandled_input", cancel)
+	await process_frame
+	_expect(not panel.visible, "cancel closes the settings window")
+
+	print("settings window tests: ",
+		"PASS" if failures == 0 else "FAIL (%d)" % failures)
+	main.queue_free()
+	await process_frame
+	if had_settings:
+		var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
+		file.store_buffer(saved_settings)
+		file.close()
+	else:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SETTINGS_PATH))
+	for pair: Array in [[LookProfile.ENABLE_VARIABLE, saved_look],
+			[LookProfile.QUALITY_VARIABLE, saved_quality]]:
+		if str(pair[1]).is_empty():
+			OS.unset_environment(str(pair[0]))
+		else:
+			OS.set_environment(str(pair[0]), str(pair[1]))
+	quit(failures)
+
+## The painted look's switch and the graphics quality: both on the graphics
+## tab, opening on what the client has, applied and saved the moment they
+## change, and greyed out (still showing the player's own choice) while the
+## environment variable decides for the session.
+func _test_look_and_quality(main: Control, window: Control, panel: PanelContainer,
+		resource_rail: Control) -> void:
+	var look: CheckBox = window.find_child("look", true, false) as CheckBox
+	var quality: OptionButton = window.find_child("quality", true, false) as OptionButton
+	if not _expect(look != null and quality != null,
+			"the graphics tab offers the painted look and the graphics quality"):
+		return
+	var tabs: TabContainer = window.get("tabs") as TabContainer
+	tabs.current_tab = window.call("tab_index_for", look)
+	await process_frame
+	var rect: Rect2 = panel.get_global_rect()
+	_expect(tabs.current_tab == int(window.call("tab_index_for", look))
+		and rect.end.y <= 720.0 and not rect.intersects(resource_rail.get_global_rect()),
+		"the graphics tab with its two new rows still fits 1280x720: %s" % rect)
+	_expect(quality.item_count == 3 and quality.get_item_text(0) == "Low"
+		and quality.get_item_text(1) == "Medium" and quality.get_item_text(2) == "High"
+		and quality.get_item_id(0) == LookProfile.Quality.LOW
+		and quality.get_item_id(2) == LookProfile.Quality.HIGH,
+		"the quality reads Low, Medium, High, each its LookProfile.Quality")
+	_expect(look.button_pressed == LookProfile.player_look()
+		and quality.get_selected_id() == LookProfile.player_quality()
+		and not look.disabled and not quality.disabled,
+		"both open showing what the client has")
+	var original_look := LookProfile.player_look()
+	var original_quality := LookProfile.player_quality()
+	var path: String = str(main.get("SETTINGS_PATH"))
+
+	look.button_pressed = false
+	await process_frame
+	var stored := ConfigFile.new()
+	_expect(not LookProfile.enabled() and stored.load(path) == OK
+		and stored.get_value("graphics", "look", true) == false,
+		"turning the look off turns it off at once and saves it")
+	look.button_pressed = true
+	await process_frame
+	stored.load(path)
+	_expect(LookProfile.enabled() and stored.get_value("graphics", "look", false) == true,
+		"and back on")
+	for level: int in [LookProfile.Quality.LOW, LookProfile.Quality.MEDIUM, LookProfile.Quality.HIGH]:
+		quality.select(quality.get_item_index(level))
+		quality.item_selected.emit(quality.selected)
+		stored.load(path)
+		_expect(LookProfile.quality() == level
+			and str(stored.get_value("graphics", "quality", "")) == LookProfile.quality_name(level),
+			"choosing %s applies it and saves it by name" % LookProfile.quality_name(level))
+
+	# The variables decide for the session; the window says so and keeps the
+	# player's own choice on show.
+	LookProfile.set_player_look(false)
+	main.call("_save_hud_settings")
+	OS.set_environment(LookProfile.ENABLE_VARIABLE, "1")
+	OS.set_environment(LookProfile.QUALITY_VARIABLE, "low")
+	main.call("_load_hud_settings")
+	_expect(look.disabled and not look.button_pressed and LookProfile.enabled()
+		and look.tooltip_text.contains(LookProfile.ENABLE_VARIABLE),
+		"with ELORIA_LOOK set the switch is greyed out, says why, and shows the player's Off")
+	_expect(quality.disabled and quality.get_selected_id() == LookProfile.Quality.HIGH
+		and LookProfile.quality() == LookProfile.Quality.LOW
+		and quality.tooltip_text.contains(LookProfile.QUALITY_VARIABLE),
+		"with ELORIA_LOOK_QUALITY set the quality is greyed out and shows the player's own")
+	OS.unset_environment(LookProfile.ENABLE_VARIABLE)
+	OS.unset_environment(LookProfile.QUALITY_VARIABLE)
+	main.call("_load_hud_settings")
+	_expect(not look.disabled and not quality.disabled and not LookProfile.enabled(),
+		"unset, the player's choice decides again and both can be changed")
+
+	main.call("_on_client_setting_changed", "Graphics", "look", original_look)
+	main.call("_on_client_setting_changed", "Graphics", "quality", original_quality)
+	main.call("_load_hud_settings")
+	tabs.current_tab = 0
+
+func _test_fps_limit(main: Control, window: Control) -> void:
+	var option: OptionButton = window.find_child("fps_limit", true, false) as OptionButton
+	if not _expect(option != null, "the graphics tab offers an FPS limit"):
+		return
+	var original: int = int(main.get("_fps_limit"))
+	var physics_ticks: int = Engine.physics_ticks_per_second
+	var time_scale: float = Engine.time_scale
+	_expect(option.get_selected_id() == Engine.max_fps,
+		"the dropdown shows the active frame cap")
+	_expect(option.get_item_text(option.get_item_index(0)) == "Unlimited",
+		"zero is presented as Unlimited")
+	for limit: int in [30, 60, 75, 90, 120, 144, 165, 240, 360, 0]:
+		var index: int = option.get_item_index(limit)
+		if not _expect(index >= 0, "%d FPS is available" % limit):
+			continue
+		option.select(index)
+		option.item_selected.emit(index)
+		_expect(Engine.max_fps == limit,
+			"selecting %d applies the frame cap immediately" % limit)
+		var stored := ConfigFile.new()
+		_expect(stored.load(str(main.get("SETTINGS_PATH"))) == OK
+			and stored.get_value("graphics", "fps_limit", -1) == limit,
+			"selecting %d saves the frame cap" % limit)
+	_expect(Engine.physics_ticks_per_second == physics_ticks
+		and Engine.time_scale == time_scale,
+		"frame limits preserve physics timing and game speed")
+
+	var config := ConfigFile.new()
+	var path: String = str(main.get("SETTINGS_PATH"))
+	config.load(path)
+	for invalid: Variant in [-1, 1, 9999, "60", null, true, 60.5]:
+		config.set_value("graphics", "fps_limit", invalid)
+		config.save(path)
+		Engine.max_fps = 60
+		main.call("_load_hud_settings")
+		_expect(Engine.max_fps == 0 and option.get_selected_id() == 0,
+			"an invalid saved limit falls back to Unlimited: %s" % str(invalid))
+	config.erase_section_key("graphics", "fps_limit")
+	config.save(path)
+	Engine.max_fps = 60
+	main.call("_load_hud_settings")
+	_expect(Engine.max_fps == 0 and option.get_selected_id() == 0,
+		"settings from an older client default to Unlimited")
+	main.call("_on_client_setting_changed", "Graphics", "fps_limit", original)
+
+## The audit guards the full preference inventory, not just the original
+## graphics controls. Exercise actual UI signals and saved values as well as
+## each context shortcut, so a decorative or disconnected row cannot pass.
+func _test_unified_settings(main: Control, window: Control, panel: PanelContainer) -> void:
+	_expect(main.get("settings_panel") == panel
+		and main.get_node_or_null("GameView/SettingsPanel") == null
+		and main.get_node_or_null("GameView/ActorHudMenu") == null
+		and main.get_node_or_null("HudLayoutMenu") == null,
+		"all settings entry points share one window; the popup shells are gone")
+	var keys: Array[String] = ["UiScale", "MinimapSize", "SoundEnabled", "SoundVolume",
+		"ShowThroughObstacles", "EquipmentSide", "combat_hud_pinned", "timer_stopwatch",
+		"timer_start_seconds", "minimap_visible", "minimap_orientation", "minimap_shape",
+		"minimap_border", "minimap_marker_scale", "minimap_zoom", "inventory_scale",
+		"ground_bag_scale", "storage_docked", "selected_quantity", "spell_bar_expanded",
+		"spell_bar_docked", "CastingMode", "QuickSlotCount", "RingSize", "secure", "start_backdrop",
+		"start_animated", "invasion_assistant_scale", "rotation_sensitivity",
+		"pan_sensitivity", "follow_player", "shadows", "particles", "nameplates"]
+	for key: String in (main.get("BANNER_OPTION_NODES") as Dictionary).values():
+		keys.append(key)
+	for type: StringName in main.get("MINIMAP_MARKER_TYPES"):
+		keys.append("minimap_marker_" + str(type))
+	for index: int in 6:
+		keys.append("quantity_%d" % index)
+	for kind: String in ["store", "drop"]:
+		for index: int in 4:
+			keys.append("protect_%s_%d" % [kind, index])
+	for key: String in keys:
+		var control := window.find_child(key, true, false) as Control
+		_expect(control != null and int(window.call("tab_index_for", control)) >= 0,
+			"the unified window includes " + key)
+	_expect(main.get("_hud_layout_list") is ItemList and window.is_ancestor_of(
+		main.get("_hud_layout_list")), "HUD bar order and visibility live on the HUD tab")
+	_expect(window.is_ancestor_of(main.get("_hud_skill_selector")),
+		"the watched experience skill is included")
+	var bindable: Array[String] = []
+	for group: Array in (window.get("BINDABLE") as Dictionary).values():
+		for action: String in group:
+			bindable.append(action)
+	for action: StringName in InputMap.get_actions():
+		if not str(action).begins_with("ui_"):
+			_expect(str(action) in bindable, "every client key can be rebound: " + str(action))
+
+	window.call("close")
+	main.call("_on_options_pressed")
+	_expect(panel.visible and main.chat_hud.options_button.button_pressed,
+		"Options opens the unified window and lights its HUD button")
+	main.call("_open_actor_hud_menu", Vector2.ZERO)
+	_expect(panel.visible and (window.get("tabs") as TabContainer).get_current_tab_control().name == "Banners",
+		"the character shortcut opens the Banners tab in the same window")
+	(main.get("casting_bar") as Control).call("_dock_menu_action", 2)
+	_expect((window.get("tabs") as TabContainer).get_current_tab_control().name == "Spells",
+		"the spell bar shortcut opens the Spells tab")
+	window.call("close")
+	_expect(not main.chat_hud.options_button.button_pressed,
+		"closing the window clears the HUD button")
+	window.call("open_tab", "Minimap")
+	var orientation := window.find_child("minimap_orientation", true, false) as OptionButton
+	orientation.item_selected.emit(orientation.get_item_index(1))
+	var marker := window.find_child("minimap_marker_npc", true, false) as CheckBox
+	marker.button_pressed = false
+	var timer := window.find_child("timer_start_seconds", true, false) as SpinBox
+	timer.value = 123
+	var protect := window.find_child("protect_drop_2", true, false) as CheckBox
+	protect.button_pressed = true
+	var quantity := window.find_child("quantity_4", true, false) as SpinBox
+	quantity.value = 321
+	var secure := window.find_child("secure", true, false) as CheckBox
+	secure.button_pressed = true
+	await process_frame
+	var config := ConfigFile.new()
+	config.load(SETTINGS_PATH)
+	_expect(str(main.get("_minimap_orientation")) == "player_up"
+		and config.get_value("hud", "minimap_orientation") == "player_up"
+		and config.get_value("hud", "minimap_marker_npc") == false,
+		"orientation and marker controls apply and save")
+	_expect(config.get_value("hud", "timer_start_seconds") == 123
+		and config.get_value("inventory", "quantities")[4] == 321
+		and config.get_value("inventory", "bulk_exclusions")["drop"][2] == true
+		and config.get_value("connection", "secure") == true,
+		"timer, quantities, bulk protection and secure login save through their controls")
+	main.call("_load_hud_settings")
+	_expect(timer.value == 123 and quantity.value == 321 and protect.button_pressed
+		and secure.button_pressed and orientation.get_item_metadata(orientation.selected) == "player_up",
+		"reloading preferences restores every new control without changing its value")
+	main.call("_on_minimap_orientation_selected", 0)
+	_expect(orientation.get_item_metadata(orientation.selected) == "north_up",
+		"HUD context changes immediately refresh the open settings window")
+	var sensitivity := window.find_child("rotation_sensitivity", true, false) as HSlider
+	main.call("_on_client_setting_changed", "Camera", "rotation_sensitivity", 0.4)
+	window.call("open_tab", "Camera")
+	_expect(is_equal_approx(sensitivity.value, 0.4),
+		"camera sensitivity restores its live value instead of the built-in default")
+	# Tab changes and close cancel captures; reopening must not show stale text.
+	window.call("begin_capture", "toggle_sit")
+	window.call("open_tab", "HUD")
+	_expect(str(window.get("capturing")).is_empty()
+		and not (window.get("capture_label") as Label).visible,
+		"switching tabs cancels key capture")
+	for dimensions: Vector2i in [Vector2i(960, 600), Vector2i(1280, 720)]:
+		root.size = dimensions
+		for scale: float in [1.0, 1.5, 0.5]:
+			main.call("_on_ui_scale_changed", scale)
+			for frame: int in 4:
+				await process_frame
+			window.call("open_tab", "Inventory")
+			await process_frame
+			var bounds := panel.get_viewport_rect()
+			_expect(bounds.encloses(panel.get_global_rect())
+				and panel.get_global_rect().end.x <= bounds.end.x - WindowDrag.RESERVED_RIGHT_RAIL + 1.0
+				and panel.get_global_rect().end.y <= bounds.end.y - WindowDrag.RESERVED_BOTTOM_BAR + 1.0,
+				"settings fit %s at UI scale %.1f: %s" % [dimensions, scale, panel.get_global_rect()])
+	main.call("_on_ui_scale_changed", 1.0)
+	root.size = Vector2i(1280, 720)
+	window.call("open_tab", "Graphics")
+
+func _hex(value: String) -> PackedByteArray:
+	var bytes := PackedByteArray()
+	for index: int in range(0, value.length(), 2):
+		bytes.append(value.substr(index, 2).hex_to_int())
+	return bytes
+
+func _expect(value: bool, label: String) -> bool:
+	if not value:
+		failures += 1
+		push_error("FAIL: " + label)
+	return value

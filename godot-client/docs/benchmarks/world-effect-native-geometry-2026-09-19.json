@@ -1,0 +1,1952 @@
+{
+  "schemaVersion": 1,
+  "study": "native world-effect detail geometry",
+  "date": "2026-09-19",
+  "status": "production opt-in validated; whole-scene crowd effect pending",
+  "interpretation": {
+    "measuredBoundary": "WorldEffect3D detail geometry construction, packed-output shape validation, and ArrayMesh/ImmediateMesh submission",
+    "excluded": [
+      "effect setup",
+      "mesh readback",
+      "GPU completion",
+      "ring",
+      "particles",
+      "flight geometry",
+      "anchors",
+      "frame scheduling"
+    ],
+    "parity": "Rendered GL Compatibility and Forward+ runs compare exact vertex/color arrays and material properties against frozen 967744 GDScript output.",
+    "headlessCaveat": "Headless timing is descriptive only; Dummy display mesh readback is explicitly marked non-authoritative.",
+    "performanceCaveat": "Focused microbench reductions are not a whole-frame or 60 FPS claim."
+  },
+  "sourceBasis": {
+    "measurementCommit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+    "dirtyAtMeasurement": [
+      " M godot-client/docs/native-crowd-benchmarks.md",
+      " M godot-client/native/native_crowd/CMakeLists.txt",
+      " M godot-client/native/native_crowd/README.md",
+      " M godot-client/native/native_crowd/src/register_types.cpp",
+      " M godot-client/scripts/run_presentation_checks.ps1",
+      " M godot-client/src/actors/cape_cloth.gd",
+      " M godot-client/src/actors/ranger_bow_3d.gd",
+      " M godot-client/src/world/spell_flight_3d.gd",
+      " M godot-client/src/world/world_effect_3d.gd",
+      " M godot-client/tests/test_spell_flight_native_presentation.gd",
+      "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+      "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+      "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+      "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+      "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+      "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+      "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+      "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+      "?? godot-client/tests/performance/combat_pose_probe.gd",
+      "?? godot-client/tests/performance/world_effect_native_probe.gd",
+      "?? godot-client/tests/test_native_presentation_modes.gd",
+      "?? godot-client/tests/test_world_effect_native_presentation.gd"
+    ],
+    "ownedSourceSha256": {
+      "native/native_crowd/src/native_world_effect_geometry.cpp": "2177bdc3c315f137db72b9c4908ef63f6686e2d5a8ea6c529b2b53fa9b4ecbf3",
+      "native/native_crowd/src/native_world_effect_geometry.h": "7a61fbba602c70cb9c25b4e6c39d11e03f9c10bd874aba0ec5ed85b677ebeaa5",
+      "src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e",
+      "tests/fixtures/world_effect_3d_967744_baseline.gd": "bd93988a1c3424c02a9ee15c93f929527dcfed66b97fc939d086b676deca33f8",
+      "tests/fixtures/world_effect_3d_native_candidate.gd": "09dc107ca1556ee62d0110d7189b3ddb0821e4721863e4e030b23232b412e6b5",
+      "tests/performance/world_effect_native_probe.gd": "8d6db2d178bb4f49b0566a39a86ad7bf61c98da3fa767ac3c6b359dd7ed4b4e1",
+      "tests/test_world_effect_native_presentation.gd": "dcf32e5e1aeea0056086de4e2af685d4cf0afc85f65a73001dc1098084af30fc"
+    },
+    "buildSourceManifest": {
+      "src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+      "src/actors/replicated_actor_3d.gd": "c5885aee3741f0edaa5b95088f90f03e185ab332edc7b9a90d5a67d1c43247fb",
+      "src/actors/combat_presentation_3d.gd": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+      "src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+      "src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e",
+      "src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+      "src/world/combat_effect_mesh.gd": "b931cd573d6e55f1cbc0c85de1b8d142a221a48c345abd78c27c78b71545a7f6",
+      "src/world/spell_energy.gdshader": "f69c63b63b4f47da98d140923a05b57a0c4d92f43bf52acd6ebe7bfffea8320e",
+      "src/world/animation_gate.gd": "f90d7f6b3fee0601cac7fabe2035b3ff61022a0bd8e61082c0ed80f2afc63718",
+      "src/app/main.gd": "04c86038d50cc65ede1e93e460d6bde07aaad138cd24c01a1cabc657729efacd",
+      "project.godot": "d77a65c9c12987ff2e5a03ce617b703ef964e88f6d261b202ace799945adb1fe",
+      "scripts/run_presentation_checks.ps1": "50e35a3890a75de11df43662968e240b069e212f00c1423e1c556deca76ce39e",
+      "native/native_crowd/CMakeLists.txt": "a56a585c2e9aa7201832d11c5d964b8119338f5247e8dde390da8c0681ee6e1e",
+      "native/native_crowd/build_profile.json": "d52c8a2dde63324be3f1fbe7204592e7376834d1db7bd45e0c1afb80625e86fe",
+      "bin/native_crowd.gdextension": "c5cc550d96e2eef8d8ac55318802de980abc56e0e56b6a10ef64237a073d1ea9",
+      "bin/windows/native_crowd.windows.template_release.x86_64.dll": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+      "native/native_crowd/src/native_spell_flight_geometry.cpp": "d4f648314b8d9cd363ea259a9627e8a8a3230df3f00047f3587020e0c506debd",
+      "native/native_crowd/src/native_spell_flight_geometry.h": "9d0e88f43b1a3aa627c6a1a62ae9c0e6334ebb3c6c692c59770c94ba075c407a",
+      "native/native_crowd/src/native_cape_constraint_kernel.cpp": "d428d1b58a017c914ff2a820ba1278c7dbfa18f9fc5c78f5e38ef930af0cb7c2",
+      "native/native_crowd/src/native_cape_constraint_kernel.h": "2302202ad7d4ced38fbd87a9f19577d9dbd05cf6a65883ae57343d5e33d195cc",
+      "native/native_crowd/src/native_world_effect_geometry.cpp": "2177bdc3c315f137db72b9c4908ef63f6686e2d5a8ea6c529b2b53fa9b4ecbf3",
+      "native/native_crowd/src/native_world_effect_geometry.h": "7a61fbba602c70cb9c25b4e6c39d11e03f9c10bd874aba0ec5ed85b677ebeaa5",
+      "tests/fixtures/cape_cloth_baseline.gd": "bb187b73c7c520a259523daf1992c78b9fb1f6b09b65b55cc280391bb20eb58b",
+      "tests/fixtures/cape_cloth_capsule_cache_baseline.gd": "be2e56b7d49e726eab86cb33c44ef01e34a72a16d617bbd0c5e84e02a7e4bf74",
+      "tests/fixtures/cape_cloth_pose_cache_baseline.gd": "cf925dd4a752643084585d292143466da1852a15b52678a4ffc9eac9bdec3cb0",
+      "tests/fixtures/combat_effect_mesh_baseline.gd": "d1b15b5eae05bcfc7b6ccf1839c0b427a521c85094d4ed93465e8f6ed82e910d",
+      "tests/fixtures/combat_presentation_967744_baseline.gd": "e9e0d2449ddd7aa70c464e1b0994026b53ccda5b33916ff64f6b3c19cc1cda5e",
+      "tests/fixtures/ranger_bow_pose_967744_baseline.gd": "c750ac7c45b66f4f2e397dc82839e8ea5c392513aa030d52e8116d01e5129189",
+      "tests/fixtures/spell_flight_3d_269c_baseline.gd": "0097916f9a7aca508918d088df479c5c6c7061ae0fcc02e950198faa32326d65",
+      "tests/fixtures/spell_flight_3d_baseline.gd": "07257e2dbf1d8944c352b9b656ca340e99ac6ee2ddabaee3e2eb2137c0a56644",
+      "tests/fixtures/world_effect_3d_967744_baseline.gd": "bd93988a1c3424c02a9ee15c93f929527dcfed66b97fc939d086b676deca33f8",
+      "tests/fixtures/world_effect_3d_palette_baseline.gd": "e1d0900b2e46181e3145b31b1db0e44288037dd987772096341d9fb0688705a2"
+    },
+    "nativeDllSha256": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+    "frozenProductionSourceSha256": "8586cceda29f07ce352bf4f33513f50d36e33c28e808847941699743558d9e2a",
+    "frozenSourceCommit": "ef6825b92a468ff275a847cc063eed115695b1b5"
+  },
+  "build": {
+    "command": "C:/msys64/mingw64/bin/cmake.exe --build native/native_crowd/build/windows-release --parallel 2",
+    "processorAffinityMask": 15,
+    "pathPrefix": "C:/msys64/mingw64/bin",
+    "accepted": {
+      "log": "test-artifacts/native-crowd/world-effect-native/build-v2.log",
+      "sha256": "5a43a818ebbce3403984d0042436a0feb9658fda61bbcd7ba51974098c3e1542",
+      "result": "linked combined native_crowd DLL"
+    },
+    "rejected": {
+      "log": "test-artifacts/native-crowd/world-effect-native/build-v1.log",
+      "sha256": "a2bc68f6166a3cdbd59c70760338e98436d8c9b3fcc72ee3d2175422898db6d0",
+      "reason": "Initial compile used unsupported godot-cpp Basis * Vector3; replaced with the equivalent Basis.xform call."
+    }
+  },
+  "prototypeEvidence": [
+    {
+      "role": "fixture wrapper rendered GL",
+      "runDirectory": "test-artifacts/presentation-checks/world-effect-native-parity-gl-v4-gl_compatibility-20260919T143417937Z",
+      "report": {
+        "coverage": {
+          "areaRadii": [
+            0.25,
+            3.5
+          ],
+          "degenerateProgressEndpoints": [
+            0.0,
+            1.0
+          ],
+          "directCountPowers": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "effects": [
+            0,
+            1,
+            2,
+            3,
+            18,
+            19,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            84,
+            85,
+            999
+          ],
+          "localAndFlightContact": true,
+          "parityPowers": [
+            1,
+            3,
+            5,
+            7,
+            10
+          ],
+          "progresses": [
+            0.0,
+            0.37,
+            1.0
+          ],
+          "unknownEffect": 999
+        },
+        "displayServer": "Windows",
+        "failures": 0,
+        "nativeStatsDelta": {
+          "buildAttempts": 2520,
+          "buildFallbacks": 0,
+          "buildSuccesses": 2520
+        },
+        "parityAuthoritative": true,
+        "parityExecuted": true,
+        "renderingMethod": "gl_compatibility",
+        "schemaVersion": 1,
+        "sourceBasis": {
+          "baselineCommit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "baselineProductionSha256": "8586cceda29f07ce352bf4f33513f50d36e33c28e808847941699743558d9e2a",
+          "comparison": "frozen 967744 GDS detail path versus native candidate"
+        },
+        "sourceHashes": {
+          "baseline": "bd93988a1c3424c02a9ee15c93f929527dcfed66b97fc939d086b676deca33f8",
+          "candidate": "09dc107ca1556ee62d0110d7189b3ddb0821e4721863e4e030b23232b412e6b5",
+          "nativeDll": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+          "nativeHeader": "7a61fbba602c70cb9c25b4e6c39d11e03f9c10bd874aba0ec5ed85b677ebeaa5",
+          "nativeSource": "2177bdc3c315f137db72b9c4908ef63f6686e2d5a8ea6c529b2b53fa9b4ecbf3"
+        },
+        "summary": {
+          "baselineMedianMicrosecondsPerDraw": 79.5166666666667,
+          "candidateMedianMicrosecondsPerDraw": 42.5083333333333,
+          "candidateVsBaselineRatio": 0.534583944665688,
+          "reductionPercent": 46.5416055334312
+        },
+        "timingAssertions": false,
+        "timingScope": "CPU detail geometry build, packed-output validation and ArrayMesh/ImmediateMesh submission; excludes setup, readback, GPU, ring, particles, flight geometry, anchors and frame rate",
+        "trials": [
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28957,
+                "microsecondsPerDraw": 80.4361111111111
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 15201,
+                "microsecondsPerDraw": 42.225
+              }
+            },
+            "trial": 1
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28010,
+                "microsecondsPerDraw": 77.8055555555556
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 15303,
+                "microsecondsPerDraw": 42.5083333333333
+              }
+            },
+            "trial": 2
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28626,
+                "microsecondsPerDraw": 79.5166666666667
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 15559,
+                "microsecondsPerDraw": 43.2194444444444
+              }
+            },
+            "trial": 3
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 36486,
+                "microsecondsPerDraw": 101.35
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 15984,
+                "microsecondsPerDraw": 44.4
+              }
+            },
+            "trial": 4
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 33370,
+                "microsecondsPerDraw": 92.6944444444444
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 16538,
+                "microsecondsPerDraw": 45.9388888888889
+              }
+            },
+            "trial": 5
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 24403,
+                "microsecondsPerDraw": 67.7861111111111
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 14534,
+                "microsecondsPerDraw": 40.3722222222222
+              }
+            },
+            "trial": 6
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 24989,
+                "microsecondsPerDraw": 69.4138888888889
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 14512,
+                "microsecondsPerDraw": 40.3111111111111
+              }
+            },
+            "trial": 7
+          }
+        ],
+        "videoAdapter": "NVIDIA GeForce RTX 5080 Laptop GPU",
+        "workload": {
+          "areaRadius": 0.0,
+          "effectIds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "flightContact": false,
+          "iterations": 360,
+          "meshReadbackInsideTimedRegion": false,
+          "powerLevel": 10,
+          "rotatedOrder": true,
+          "trials": 7
+        }
+      },
+      "process": {
+        "script": "res://tests/performance/world_effect_native_probe.gd",
+        "scriptSha256": "23ba44ed34aef879e362cad5c3bfebce420eb9656c8a1739b08311fc7603245f",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": false,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-effect-native-parity-gl-v4-gl_compatibility-20260919T143417937Z/tests_performance_world_effect_native_probe/world-effect-native-probe.json": "639ed82b40f5f8c0050939de7b129f412c64e17502cc06b4096ec4c4b4430a89",
+        "test-artifacts/presentation-checks/world-effect-native-parity-gl-v4-gl_compatibility-20260919T143417937Z/tests_performance_world_effect_native_probe/process.json": "13ef4dc1d930071691e0a616be47b4d36deac83d4500b2cc28575a6a78685f39",
+        "test-artifacts/presentation-checks/world-effect-native-parity-gl-v4-gl_compatibility-20260919T143417937Z/tests_performance_world_effect_native_probe/stdout.log": "dfc12ec053a193f1b1bd9da249c4679a9cd9eda733f82958bd3bfe0109f2b366",
+        "test-artifacts/presentation-checks/world-effect-native-parity-gl-v4-gl_compatibility-20260919T143417937Z/tests_performance_world_effect_native_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-effect-native-parity-gl-v4-gl_compatibility-20260919T143417937Z/tests_performance_world_effect_native_probe/godot.log": "5ba901b72bf87060c6b5231068e743a34efb5f8bbdf1385dc05a9bc271281dc0"
+      }
+    },
+    {
+      "role": "fixture wrapper headless",
+      "runDirectory": "test-artifacts/presentation-checks/world-effect-native-micro-headless-v1-gl_compatibility-20260919T143434507Z",
+      "report": {
+        "coverage": {
+          "areaRadii": [
+            0.25,
+            3.5
+          ],
+          "degenerateProgressEndpoints": [
+            0.0,
+            1.0
+          ],
+          "directCountPowers": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "effects": [
+            0,
+            1,
+            2,
+            3,
+            18,
+            19,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            84,
+            85,
+            999
+          ],
+          "localAndFlightContact": true,
+          "parityPowers": [
+            1,
+            3,
+            5,
+            7,
+            10
+          ],
+          "progresses": [
+            0.0,
+            0.37,
+            1.0
+          ],
+          "unknownEffect": 999
+        },
+        "displayServer": "headless",
+        "failures": 0,
+        "nativeStatsDelta": {
+          "buildAttempts": 2520,
+          "buildFallbacks": 0,
+          "buildSuccesses": 2520
+        },
+        "parityAuthoritative": false,
+        "parityExecuted": false,
+        "renderingMethod": "gl_compatibility",
+        "schemaVersion": 1,
+        "sourceBasis": {
+          "baselineCommit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "baselineProductionSha256": "8586cceda29f07ce352bf4f33513f50d36e33c28e808847941699743558d9e2a",
+          "comparison": "frozen 967744 GDS detail path versus native candidate"
+        },
+        "sourceHashes": {
+          "baseline": "bd93988a1c3424c02a9ee15c93f929527dcfed66b97fc939d086b676deca33f8",
+          "candidate": "09dc107ca1556ee62d0110d7189b3ddb0821e4721863e4e030b23232b412e6b5",
+          "nativeDll": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+          "nativeHeader": "7a61fbba602c70cb9c25b4e6c39d11e03f9c10bd874aba0ec5ed85b677ebeaa5",
+          "nativeSource": "2177bdc3c315f137db72b9c4908ef63f6686e2d5a8ea6c529b2b53fa9b4ecbf3"
+        },
+        "summary": {
+          "baselineMedianMicrosecondsPerDraw": 64.8638888888889,
+          "candidateMedianMicrosecondsPerDraw": 34.6972222222222,
+          "candidateVsBaselineRatio": 0.534923557877607,
+          "reductionPercent": 46.5076442122393
+        },
+        "timingAssertions": false,
+        "timingScope": "CPU detail geometry build, packed-output validation and ArrayMesh/ImmediateMesh submission; excludes setup, readback, GPU, ring, particles, flight geometry, anchors and frame rate",
+        "trials": [
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 22203,
+                "microsecondsPerDraw": 61.675
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 12032,
+                "microsecondsPerDraw": 33.4222222222222
+              }
+            },
+            "trial": 1
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 23351,
+                "microsecondsPerDraw": 64.8638888888889
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 12460,
+                "microsecondsPerDraw": 34.6111111111111
+              }
+            },
+            "trial": 2
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 25723,
+                "microsecondsPerDraw": 71.4527777777778
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 13468,
+                "microsecondsPerDraw": 37.4111111111111
+              }
+            },
+            "trial": 3
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 25202,
+                "microsecondsPerDraw": 70.0055555555556
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 13031,
+                "microsecondsPerDraw": 36.1972222222222
+              }
+            },
+            "trial": 4
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 25823,
+                "microsecondsPerDraw": 71.7305555555556
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 14186,
+                "microsecondsPerDraw": 39.4055555555556
+              }
+            },
+            "trial": 5
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 22394,
+                "microsecondsPerDraw": 62.2055555555556
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 12316,
+                "microsecondsPerDraw": 34.2111111111111
+              }
+            },
+            "trial": 6
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 22590,
+                "microsecondsPerDraw": 62.75
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 12491,
+                "microsecondsPerDraw": 34.6972222222222
+              }
+            },
+            "trial": 7
+          }
+        ],
+        "videoAdapter": "",
+        "workload": {
+          "areaRadius": 0.0,
+          "effectIds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "flightContact": false,
+          "iterations": 360,
+          "meshReadbackInsideTimedRegion": false,
+          "powerLevel": 10,
+          "rotatedOrder": true,
+          "trials": 7
+        }
+      },
+      "process": {
+        "script": "res://tests/performance/world_effect_native_probe.gd",
+        "scriptSha256": "23ba44ed34aef879e362cad5c3bfebce420eb9656c8a1739b08311fc7603245f",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": true,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-effect-native-micro-headless-v1-gl_compatibility-20260919T143434507Z/tests_performance_world_effect_native_probe/world-effect-native-probe.json": "f4d2f4e76d84fba1e9e6324faff6bfbbe90ffc75320e4b2da0c0f52f158e0619",
+        "test-artifacts/presentation-checks/world-effect-native-micro-headless-v1-gl_compatibility-20260919T143434507Z/tests_performance_world_effect_native_probe/process.json": "f65fe5677a0db035673361ebe39c09b09f2de02e62d4f1afebd6be49ed78e5f0",
+        "test-artifacts/presentation-checks/world-effect-native-micro-headless-v1-gl_compatibility-20260919T143434507Z/tests_performance_world_effect_native_probe/stdout.log": "c6e3a64cb11abb6cc77547a8c604f7d595a23d0da8917ce93d94f7fc5a0dab9a",
+        "test-artifacts/presentation-checks/world-effect-native-micro-headless-v1-gl_compatibility-20260919T143434507Z/tests_performance_world_effect_native_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-effect-native-micro-headless-v1-gl_compatibility-20260919T143434507Z/tests_performance_world_effect_native_probe/godot.log": "b8b29c9a69946c19b7aac54bb3505530744cd913e601dc8d16ffb1d973effdcf"
+      }
+    }
+  ],
+  "productionEvidence": [
+    {
+      "role": "production rendered GL",
+      "runDirectory": "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z",
+      "report": {
+        "coverage": {
+          "areaRadii": [
+            0.25,
+            3.5
+          ],
+          "degenerateProgressEndpoints": [
+            0.0,
+            1.0
+          ],
+          "directCountPowers": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "effects": [
+            0,
+            1,
+            2,
+            3,
+            18,
+            19,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            84,
+            85,
+            999
+          ],
+          "localAndFlightContact": true,
+          "parityPowers": [
+            1,
+            3,
+            5,
+            7,
+            10
+          ],
+          "progresses": [
+            0.0,
+            0.37,
+            1.0
+          ],
+          "unknownEffect": 999
+        },
+        "displayServer": "Windows",
+        "failures": 0,
+        "nativeStatsDelta": {
+          "buildAttempts": 2520,
+          "buildFallbacks": 0,
+          "buildSuccesses": 2520
+        },
+        "parityAuthoritative": true,
+        "parityExecuted": true,
+        "renderingMethod": "gl_compatibility",
+        "schemaVersion": 1,
+        "sourceBasis": {
+          "baselineCommit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "baselineProductionSha256": "8586cceda29f07ce352bf4f33513f50d36e33c28e808847941699743558d9e2a",
+          "comparison": "frozen 967744 GDS detail path versus production world opt-in"
+        },
+        "sourceHashes": {
+          "baseline": "bd93988a1c3424c02a9ee15c93f929527dcfed66b97fc939d086b676deca33f8",
+          "candidate": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e",
+          "nativeDll": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+          "nativeHeader": "7a61fbba602c70cb9c25b4e6c39d11e03f9c10bd874aba0ec5ed85b677ebeaa5",
+          "nativeSource": "2177bdc3c315f137db72b9c4908ef63f6686e2d5a8ea6c529b2b53fa9b4ecbf3"
+        },
+        "summary": {
+          "baselineMedianMicrosecondsPerDraw": 83.8055555555556,
+          "candidateMedianMicrosecondsPerDraw": 45.4444444444444,
+          "candidateVsBaselineRatio": 0.542260523699039,
+          "reductionPercent": 45.7739476300961
+        },
+        "timingAssertions": false,
+        "timingScope": "CPU detail geometry build, packed-output validation and ArrayMesh/ImmediateMesh submission; excludes setup, readback, GPU, ring, particles, flight geometry, anchors and frame rate",
+        "trials": [
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 25722,
+                "microsecondsPerDraw": 71.45
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 16281,
+                "microsecondsPerDraw": 45.225
+              }
+            },
+            "trial": 1
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 42776,
+                "microsecondsPerDraw": 118.822222222222
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 26430,
+                "microsecondsPerDraw": 73.4166666666667
+              }
+            },
+            "trial": 2
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 39148,
+                "microsecondsPerDraw": 108.744444444444
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 16338,
+                "microsecondsPerDraw": 45.3833333333333
+              }
+            },
+            "trial": 3
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 31832,
+                "microsecondsPerDraw": 88.4222222222222
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 12331,
+                "microsecondsPerDraw": 34.2527777777778
+              }
+            },
+            "trial": 4
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 30170,
+                "microsecondsPerDraw": 83.8055555555556
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 16910,
+                "microsecondsPerDraw": 46.9722222222222
+              }
+            },
+            "trial": 5
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 29095,
+                "microsecondsPerDraw": 80.8194444444444
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 16360,
+                "microsecondsPerDraw": 45.4444444444444
+              }
+            },
+            "trial": 6
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28294,
+                "microsecondsPerDraw": 78.5944444444444
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 16471,
+                "microsecondsPerDraw": 45.7527777777778
+              }
+            },
+            "trial": 7
+          }
+        ],
+        "videoAdapter": "NVIDIA GeForce RTX 5080 Laptop GPU",
+        "workload": {
+          "areaRadius": 0.0,
+          "effectIds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "flightContact": false,
+          "iterations": 360,
+          "meshReadbackInsideTimedRegion": false,
+          "powerLevel": 10,
+          "rotatedOrder": true,
+          "trials": 7
+        }
+      },
+      "process": {
+        "script": "res://tests/performance/world_effect_native_probe.gd",
+        "scriptSha256": "8d6db2d178bb4f49b0566a39a86ad7bf61c98da3fa767ac3c6b359dd7ed4b4e1",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": false,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_performance_world_effect_native_probe/world-effect-native-probe.json": "f3a0c3de0b15533e7f22f7f2952d579e67afc13e26a789cfef877929608b48ef",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_performance_world_effect_native_probe/process.json": "d4f079b2b7cff4bcd1b3dec43a76098a5b631e21aaeba58996e5bd5b1151164b",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_performance_world_effect_native_probe/stdout.log": "89105c866767e6dc82840420379c4005ca14fe82471887a132fbe5b1f53c5d43",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_performance_world_effect_native_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_performance_world_effect_native_probe/godot.log": "bc39dd83319adeaffa03616507bd03c4f7487e36a39c0c96e2e55dae11c922a6"
+      }
+    },
+    {
+      "role": "production rendered Forward+",
+      "runDirectory": "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z",
+      "report": {
+        "coverage": {
+          "areaRadii": [
+            0.25,
+            3.5
+          ],
+          "degenerateProgressEndpoints": [
+            0.0,
+            1.0
+          ],
+          "directCountPowers": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "effects": [
+            0,
+            1,
+            2,
+            3,
+            18,
+            19,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            84,
+            85,
+            999
+          ],
+          "localAndFlightContact": true,
+          "parityPowers": [
+            1,
+            3,
+            5,
+            7,
+            10
+          ],
+          "progresses": [
+            0.0,
+            0.37,
+            1.0
+          ],
+          "unknownEffect": 999
+        },
+        "displayServer": "Windows",
+        "failures": 0,
+        "nativeStatsDelta": {
+          "buildAttempts": 2520,
+          "buildFallbacks": 0,
+          "buildSuccesses": 2520
+        },
+        "parityAuthoritative": true,
+        "parityExecuted": true,
+        "renderingMethod": "forward_plus",
+        "schemaVersion": 1,
+        "sourceBasis": {
+          "baselineCommit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "baselineProductionSha256": "8586cceda29f07ce352bf4f33513f50d36e33c28e808847941699743558d9e2a",
+          "comparison": "frozen 967744 GDS detail path versus production world opt-in"
+        },
+        "sourceHashes": {
+          "baseline": "bd93988a1c3424c02a9ee15c93f929527dcfed66b97fc939d086b676deca33f8",
+          "candidate": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e",
+          "nativeDll": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+          "nativeHeader": "7a61fbba602c70cb9c25b4e6c39d11e03f9c10bd874aba0ec5ed85b677ebeaa5",
+          "nativeSource": "2177bdc3c315f137db72b9c4908ef63f6686e2d5a8ea6c529b2b53fa9b4ecbf3"
+        },
+        "summary": {
+          "baselineMedianMicrosecondsPerDraw": 80.0916666666667,
+          "candidateMedianMicrosecondsPerDraw": 49.6111111111111,
+          "candidateVsBaselineRatio": 0.619429126348282,
+          "reductionPercent": 38.0570873651718
+        },
+        "timingAssertions": false,
+        "timingScope": "CPU detail geometry build, packed-output validation and ArrayMesh/ImmediateMesh submission; excludes setup, readback, GPU, ring, particles, flight geometry, anchors and frame rate",
+        "trials": [
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28867,
+                "microsecondsPerDraw": 80.1861111111111
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 16796,
+                "microsecondsPerDraw": 46.6555555555556
+              }
+            },
+            "trial": 1
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 27539,
+                "microsecondsPerDraw": 76.4972222222222
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 17135,
+                "microsecondsPerDraw": 47.5972222222222
+              }
+            },
+            "trial": 2
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 29995,
+                "microsecondsPerDraw": 83.3194444444444
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 18591,
+                "microsecondsPerDraw": 51.6416666666667
+              }
+            },
+            "trial": 3
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28707,
+                "microsecondsPerDraw": 79.7416666666667
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 19814,
+                "microsecondsPerDraw": 55.0388888888889
+              }
+            },
+            "trial": 4
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28833,
+                "microsecondsPerDraw": 80.0916666666667
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 17860,
+                "microsecondsPerDraw": 49.6111111111111
+              }
+            },
+            "trial": 5
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 27619,
+                "microsecondsPerDraw": 76.7194444444444
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 17647,
+                "microsecondsPerDraw": 49.0194444444444
+              }
+            },
+            "trial": 6
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 29159,
+                "microsecondsPerDraw": 80.9972222222222
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 18073,
+                "microsecondsPerDraw": 50.2027777777778
+              }
+            },
+            "trial": 7
+          }
+        ],
+        "videoAdapter": "NVIDIA GeForce RTX 5080 Laptop GPU",
+        "workload": {
+          "areaRadius": 0.0,
+          "effectIds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "flightContact": false,
+          "iterations": 360,
+          "meshReadbackInsideTimedRegion": false,
+          "powerLevel": 10,
+          "rotatedOrder": true,
+          "trials": 7
+        }
+      },
+      "process": {
+        "script": "res://tests/performance/world_effect_native_probe.gd",
+        "scriptSha256": "8d6db2d178bb4f49b0566a39a86ad7bf61c98da3fa767ac3c6b359dd7ed4b4e1",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "forward_plus",
+        "headless": false,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_performance_world_effect_native_probe/world-effect-native-probe.json": "d16ae0554fba97ca5603d047ffca3feb1ac3ced7ae377d6ce29d4fc6753dbc6a",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_performance_world_effect_native_probe/process.json": "873155d9a2a15ad5d4795f1ab7b21469272cfdb1f8d4647a66b0e20a33956a90",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_performance_world_effect_native_probe/stdout.log": "4fb87c40494c83034068f38b1b37a04a76ed5ef5556d37cd12cdff210ff59ad0",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_performance_world_effect_native_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_performance_world_effect_native_probe/godot.log": "cdff169b1ebabfbadfa234c469ed7fe486a7d57e9d5c0b2f30c03246df6b4f40"
+      }
+    },
+    {
+      "role": "production headless",
+      "runDirectory": "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z",
+      "report": {
+        "coverage": {
+          "areaRadii": [
+            0.25,
+            3.5
+          ],
+          "degenerateProgressEndpoints": [
+            0.0,
+            1.0
+          ],
+          "directCountPowers": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "effects": [
+            0,
+            1,
+            2,
+            3,
+            18,
+            19,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            84,
+            85,
+            999
+          ],
+          "localAndFlightContact": true,
+          "parityPowers": [
+            1,
+            3,
+            5,
+            7,
+            10
+          ],
+          "progresses": [
+            0.0,
+            0.37,
+            1.0
+          ],
+          "unknownEffect": 999
+        },
+        "displayServer": "headless",
+        "failures": 0,
+        "nativeStatsDelta": {
+          "buildAttempts": 2520,
+          "buildFallbacks": 0,
+          "buildSuccesses": 2520
+        },
+        "parityAuthoritative": false,
+        "parityExecuted": false,
+        "renderingMethod": "gl_compatibility",
+        "schemaVersion": 1,
+        "sourceBasis": {
+          "baselineCommit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "baselineProductionSha256": "8586cceda29f07ce352bf4f33513f50d36e33c28e808847941699743558d9e2a",
+          "comparison": "frozen 967744 GDS detail path versus production world opt-in"
+        },
+        "sourceHashes": {
+          "baseline": "bd93988a1c3424c02a9ee15c93f929527dcfed66b97fc939d086b676deca33f8",
+          "candidate": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e",
+          "nativeDll": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+          "nativeHeader": "7a61fbba602c70cb9c25b4e6c39d11e03f9c10bd874aba0ec5ed85b677ebeaa5",
+          "nativeSource": "2177bdc3c315f137db72b9c4908ef63f6686e2d5a8ea6c529b2b53fa9b4ecbf3"
+        },
+        "summary": {
+          "baselineMedianMicrosecondsPerDraw": 75.4472222222222,
+          "candidateMedianMicrosecondsPerDraw": 36.7194444444444,
+          "candidateVsBaselineRatio": 0.486690475313869,
+          "reductionPercent": 51.3309524686131
+        },
+        "timingAssertions": false,
+        "timingScope": "CPU detail geometry build, packed-output validation and ArrayMesh/ImmediateMesh submission; excludes setup, readback, GPU, ring, particles, flight geometry, anchors and frame rate",
+        "trials": [
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 26854,
+                "microsecondsPerDraw": 74.5944444444444
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 11939,
+                "microsecondsPerDraw": 33.1638888888889
+              }
+            },
+            "trial": 1
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 27062,
+                "microsecondsPerDraw": 75.1722222222222
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 12046,
+                "microsecondsPerDraw": 33.4611111111111
+              }
+            },
+            "trial": 2
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 27161,
+                "microsecondsPerDraw": 75.4472222222222
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 13230,
+                "microsecondsPerDraw": 36.75
+              }
+            },
+            "trial": 3
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 26900,
+                "microsecondsPerDraw": 74.7222222222222
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 13219,
+                "microsecondsPerDraw": 36.7194444444444
+              }
+            },
+            "trial": 4
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28634,
+                "microsecondsPerDraw": 79.5388888888889
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 15196,
+                "microsecondsPerDraw": 42.2111111111111
+              }
+            },
+            "trial": 5
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 28158,
+                "microsecondsPerDraw": 78.2166666666667
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 13106,
+                "microsecondsPerDraw": 36.4055555555556
+              }
+            },
+            "trial": 6
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "results": {
+              "baseline": {
+                "iterations": 360,
+                "microseconds": 29015,
+                "microsecondsPerDraw": 80.5972222222222
+              },
+              "candidate": {
+                "iterations": 360,
+                "microseconds": 15397,
+                "microsecondsPerDraw": 42.7694444444444
+              }
+            },
+            "trial": 7
+          }
+        ],
+        "videoAdapter": "",
+        "workload": {
+          "areaRadius": 0.0,
+          "effectIds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "flightContact": false,
+          "iterations": 360,
+          "meshReadbackInsideTimedRegion": false,
+          "powerLevel": 10,
+          "rotatedOrder": true,
+          "trials": 7
+        }
+      },
+      "process": {
+        "script": "res://tests/performance/world_effect_native_probe.gd",
+        "scriptSha256": "8d6db2d178bb4f49b0566a39a86ad7bf61c98da3fa767ac3c6b359dd7ed4b4e1",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": true,
+        "nativePresentationEnvironment": "all",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_performance_world_effect_native_probe/world-effect-native-probe.json": "4cdbfa4366b02c9ac9ccfd992201427dfea83c5423eaffe43d6d498706336db9",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_performance_world_effect_native_probe/process.json": "19db963ef4fd4638357d52ec54c80d0ba18418eaf56586be1cdc3fcdd7e42643",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_performance_world_effect_native_probe/stdout.log": "e96467a4e00d050ebeb9a76980a1a8155c42397f099396c2b3d5168626c5ce84",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_performance_world_effect_native_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_performance_world_effect_native_probe/godot.log": "f7e2d698630e453d4de00b200e77df35dbd0ada52ce866b5585b42dafc9a073f"
+      }
+    }
+  ],
+  "productionContracts": [
+    {
+      "role": "world exact/fallback GL",
+      "process": {
+        "script": "res://tests/test_world_effect_native_presentation.gd",
+        "scriptSha256": "dcf32e5e1aeea0056086de4e2af685d4cf0afc85f65a73001dc1098084af30fc",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": false,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_world_effect_native_presentation/process.json": "02180de1921fb2c7ba52648db06afcbe20144c6ca169b569ac9e509c962a9f2e",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_world_effect_native_presentation/stdout.log": "d9f4a8020b751de9cdf8253e1c01395fd4c7fa954e3cfb10089778b7407bbdf8",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_world_effect_native_presentation/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_world_effect_native_presentation/godot.log": "a379482bf723aed769a4a7227e697a6afbfda8658baacd944a30ccd0c07a62b2"
+      }
+    },
+    {
+      "role": "shared 11-mode selector GL",
+      "process": {
+        "script": "res://tests/test_native_presentation_modes.gd",
+        "scriptSha256": "b6867b277be91dffa1a83fb94b9d733732649d38c7d94c67ca3b4d37f9613ba2",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": false,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_native_presentation_modes/process.json": "331b9f5f130a35f06d1fcb8f570e2ed9e98b7863cad4036223e2a6a1d37f582c",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_native_presentation_modes/stdout.log": "b8fef54f5e094b5ee3940a61505508e688616fc2cfc4098a39288ef2db44a18c",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_native_presentation_modes/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_native_presentation_modes/godot.log": "7f69f811d6d9c8967aa636c40ca87b606301658f517d1e6ab25d8ade8304861a"
+      }
+    },
+    {
+      "role": "combined-DLL flight GL",
+      "process": {
+        "script": "res://tests/test_spell_flight_native_presentation.gd",
+        "scriptSha256": "e72d3509856c21bcbc7bc20651f451a2dc3a212995d1d9a4b9b5281ce326909c",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": false,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_spell_flight_native_presentation/process.json": "091f45131a9cc0c8fb023690030ecdc342ab3c4831f461bf3759b317a345af13",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_spell_flight_native_presentation/stdout.log": "def6eedb18a77daefad368c495f43e3e83c6dac3bc23de695cfb9f82de23febd",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_spell_flight_native_presentation/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-gl-v1-gl_compatibility-20260919T143841813Z/tests_test_spell_flight_native_presentation/godot.log": "f17d7c33480c8aaac48480ca651a618048981c6874e50dbd86747f6818bea96f"
+      }
+    },
+    {
+      "role": "world exact/fallback Forward+",
+      "process": {
+        "script": "res://tests/test_world_effect_native_presentation.gd",
+        "scriptSha256": "dcf32e5e1aeea0056086de4e2af685d4cf0afc85f65a73001dc1098084af30fc",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "forward_plus",
+        "headless": false,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_test_world_effect_native_presentation/process.json": "57f10c44264db14fc0c6a5b52b829a651c8aefb417c7e641d707bcec0caf7d18",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_test_world_effect_native_presentation/stdout.log": "0cc916f990b79f2b74a1362952059ed5fc71f22a14553dc999ca5cc15904ae6b",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_test_world_effect_native_presentation/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_test_world_effect_native_presentation/godot.log": "ffd2b847b4be6f85a78a65ae30e3d51c739f1ae85152eaea0d0a9bc7fdeb1174"
+      }
+    },
+    {
+      "role": "combined-DLL flight Forward+",
+      "process": {
+        "script": "res://tests/test_spell_flight_native_presentation.gd",
+        "scriptSha256": "e72d3509856c21bcbc7bc20651f451a2dc3a212995d1d9a4b9b5281ce326909c",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "forward_plus",
+        "headless": false,
+        "nativePresentationEnvironment": "",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_test_spell_flight_native_presentation/process.json": "8805296940e41dd2310f2ad59699e29aa1259afdc60e65df0f7ce03249644a87",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_test_spell_flight_native_presentation/stdout.log": "35ed769a4bdcc75d74cc48deb60459c8a6d59cd3c9f2f6c49ad22519609d2a3c",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_test_spell_flight_native_presentation/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-fp-v1-forward_plus-20260919T143900431Z/tests_test_spell_flight_native_presentation/godot.log": "7f869ae75bbef2030fb69fa21a3c0644e59a28c45a7095d0cb3075afbded561e"
+      }
+    },
+    {
+      "role": "combined-DLL cape headless all mode",
+      "process": {
+        "script": "res://tests/test_cape_cloth_native_constraint.gd",
+        "scriptSha256": "b7d7c270d8283f9f49ab5ddc0fab960a753aa42ec3d660f6df4ca4d24d3c88b8",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": true,
+        "nativePresentationEnvironment": "all",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_test_cape_cloth_native_constraint/process.json": "5ed83ab84a25be8ad67f0a2a777c9a98c35a14bd8a7e5ee4a86bfcf21229367d",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_test_cape_cloth_native_constraint/stdout.log": "59b1872212530257871b1cec8cab0069d1cab62df861bdc6db9f6bd5ba6a8b59",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_test_cape_cloth_native_constraint/stderr.log": "ad2511405e79ced432018d7c5dcc82547fa4006f2c2de7a5859c677bf8639fc1",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_test_cape_cloth_native_constraint/godot.log": "15e72950ff6f0e97ae3c79b493b43906236af0c9dace9a27f3b07d0aa8275aca"
+      }
+    },
+    {
+      "role": "shared 11-mode selector headless",
+      "process": {
+        "script": "res://tests/test_native_presentation_modes.gd",
+        "scriptSha256": "b6867b277be91dffa1a83fb94b9d733732649d38c7d94c67ca3b4d37f9613ba2",
+        "commit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+        "sourceStatus": [
+          " M godot-client/docs/native-crowd-benchmarks.md",
+          " M godot-client/native/native_crowd/CMakeLists.txt",
+          " M godot-client/native/native_crowd/README.md",
+          " M godot-client/native/native_crowd/src/register_types.cpp",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/cape_cloth.gd",
+          " M godot-client/src/actors/ranger_bow_3d.gd",
+          " M godot-client/src/world/spell_flight_3d.gd",
+          " M godot-client/src/world/world_effect_3d.gd",
+          " M godot-client/tests/test_spell_flight_native_presentation.gd",
+          "?? godot-client/docs/crowd-impact-geometry-optimization.md",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.cpp",
+          "?? godot-client/native/native_crowd/src/native_world_effect_geometry.h",
+          "?? godot-client/tests/fixtures/combat_presentation_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/ranger_bow_pose_cache_candidate.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_967744_baseline.gd",
+          "?? godot-client/tests/fixtures/world_effect_3d_native_candidate.gd",
+          "?? godot-client/tests/performance/combat_pose_probe.gd",
+          "?? godot-client/tests/performance/world_effect_native_probe.gd",
+          "?? godot-client/tests/test_native_presentation_modes.gd",
+          "?? godot-client/tests/test_world_effect_native_presentation.gd"
+        ],
+        "renderer": "gl_compatibility",
+        "headless": true,
+        "nativePresentationEnvironment": "all",
+        "executable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "identityVerified": true,
+        "exitCode": 0,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "passed": true
+      },
+      "artifactSha256": {
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_test_native_presentation_modes/process.json": "babe0c9a16aa3c4a4b97b73e2517f554deef64cd3b15df2113b88409c7416c96",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_test_native_presentation_modes/stdout.log": "1fdd47d6ea5d2fb9835c25bf112693fe432b73d4e8ff64eb12031024b5679581",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_test_native_presentation_modes/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "test-artifacts/presentation-checks/world-native-production-headless-all-v1-gl_compatibility-20260919T143928163Z/tests_test_native_presentation_modes/godot.log": "cb031a70220ad5ca6d91b9e13663004907bd4d3411e58a50704aab24c7f3600a"
+      }
+    }
+  ],
+  "rejectedAttempts": [
+    {
+      "name": "world-effect-native-parity-gl-v1",
+      "reason": "candidate fixture parse error: inferred flight contact lacked an explicit Vector3 type"
+    },
+    {
+      "name": "world-effect-native-parity-gl-v2",
+      "reason": "probe parse error: can_instantiate was invoked on a class constant without Script cast"
+    },
+    {
+      "name": "world-effect-native-parity-gl-v3",
+      "reason": "timing bank nodes ran their production lifetime and expired between trials; exact parity passed but timing was invalid"
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+[instance]
+spawn_type: instance
+spawn_name: sunmane_gauntlet_low
+spawn_desc: The Red Canyon
+short_name: canyon_low
+map_id: ./maps/nymara/sunmane_gauntlet.elm
+route: sunmane_gauntlet
+band: low
+keeper: Rider Anse
+minimum_ad: 1
+maximum_ad: 25
+cooldown_hours: 4
+minimum_players: 1
+maximum_players: 6
+time_limit_seconds: 2400
+entry_x: 25
+entry_y: 319
+exit_map: sunmane_steppe
+exit_x: 183
+exit_y: 142
+copies: sunmane_gauntlet, sunmane_gauntlet_2, sunmane_gauntlet_3
+cache_object: 798
+cache_table: cache_sunmane_gauntlet
+staging_exit: 800
+vault_exit: 799
+mutators: none:5, frenzy:2, hunted:2, bounty:1, swift:1
+wipe_seconds: 90
+
+[leg]
+id: wind-cut
+name: The Wind Cut
+kind: hall
+gate: 801 | 25 | 311 | 25 | 305
+trigger: enter
+advance: cleared
+bounds: 14 | 284 | 36 | 304
+[variant]
+g_canyon_low_wind_cut_0
+[/variant]
+[variant]
+g_canyon_low_wind_cut_1
+g_canyon_low_wind_cut_1_lead
+[/variant]
+[variant]
+g_canyon_low_wind_cut_2
+[/variant]
+[/leg]
+
+[leg]
+id: horse-cave
+name: The Horse Cave
+kind: cavern
+gate: 802 | 28 | 283 | 28 | 277
+trigger: enter
+advance: cleared
+bounds: 15 | 252 | 41 | 276
+[variant]
+g_canyon_low_horse_cave_0
+[/variant]
+[variant]
+g_canyon_low_horse_cave_1
+[/variant]
+[variant]
+g_canyon_low_horse_cave_2
+[/variant]
+[/leg]
+
+[leg]
+id: ridge-path
+name: The Ridge Path
+kind: bridge
+gate: 803 | 24 | 251 | 24 | 245
+trigger: enter
+advance: time:150
+bounds: 22 | 213 | 26 | 241
+[variant]
+g_canyon_low_ridge_path_0
+[/variant]
+[variant]
+g_canyon_low_ridge_path_1
+[/variant]
+[variant]
+g_canyon_low_ridge_path_2
+[/variant]
+[/leg]
+
+[leg]
+id: scree-stair
+name: The Scree Stair
+kind: stair
+gate: 804 | 24 | 209 | 24 | 203
+trigger: enter
+advance: cleared
+bounds: 13 | 170 | 35 | 188
+[variant]
+g_canyon_low_scree_stair_0
+[/variant]
+[variant]
+g_canyon_low_scree_stair_1
+[/variant]
+[variant]
+g_canyon_low_scree_stair_2
+[/variant]
+[/leg]
+
+[leg]
+id: forked-wash
+name: The Forked Wash
+kind: fork
+gate: 805 | 21 | 169 | 21 | 163
+trigger: enter
+advance: cleared
+bounds: 6 | 148 | 36 | 162
+[variant]
+g_canyon_low_forked_wash_0
+[/variant]
+[variant]
+g_canyon_low_forked_wash_1
+[/variant]
+[variant]
+g_canyon_low_forked_wash_2
+[/variant]
+[branch]
+id: shade-fork
+name: The Shade Fork
+kind: cavern
+gate: 806 | 10 | 147 | 10 | 141
+trigger: enter
+advance: cleared
+bounds: 2 | 120 | 18 | 140
+[variant]
+g_canyon_low_shade_fork_0
+[/variant]
+[variant]
+g_canyon_low_shade_fork_1
+[/variant]
+[variant]
+g_canyon_low_shade_fork_2
+[/variant]
+[/branch]
+
+[branch]
+id: sun-fork
+name: The Sun Fork
+kind: hall
+gate: 807 | 32 | 147 | 32 | 141
+trigger: enter
+advance: cleared
+bounds: 24 | 120 | 40 | 140
+[variant]
+g_canyon_low_sun_fork_0
+[/variant]
+[variant]
+g_canyon_low_sun_fork_1
+g_canyon_low_sun_fork_1_lead
+[/variant]
+[variant]
+g_canyon_low_sun_fork_2
+[/variant]
+[/branch]
+
+[/leg]
+
+[leg]
+id: long-wash
+name: The Long Wash
+kind: gallery
+gate: 808 | 21 | 99 | 21 | 93
+trigger: at_gate
+advance: cleared
+bounds: 16 | 60 | 26 | 92
+[variant]
+g_canyon_low_long_wash_0
+[/variant]
+[variant]
+g_canyon_low_long_wash_1
+g_canyon_low_long_wash_1_lead
+[/variant]
+[variant]
+g_canyon_low_long_wash_2
+[/variant]
+[/leg]
+
+[leg]
+id: sun-court
+name: The Sun Court
+kind: court
+gate: 809 | 21 | 59 | 21 | 53
+trigger: enter
+advance: cleared
+bounds: 5 | 22 | 37 | 52
+[variant]
+g_canyon_low_sun_court_court_0
+[/variant]
+[variant]
+g_canyon_low_sun_court_court_1
+[/variant]
+[/leg]
+
+[/instance]

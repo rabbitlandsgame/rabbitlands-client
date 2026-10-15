@@ -1,0 +1,2380 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "verdant_stair_insides",
+    "name": "Verdant Stair Insides",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        15.45,
+        -8.8,
+        18.92
+      ],
+      "max": [
+        334.55,
+        21.4,
+        313.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        15.45,
+        -8.8,
+        20.45
+      ],
+      "max": [
+        334.55,
+        15.11,
+        313.55
+      ]
+    },
+    "interiorClass": "insides",
+    "parentRegion": "verdant_stair",
+    "serverCells": 324
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      -13.0,
+      316.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        60.0,
+        0.05,
+        32.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "temple-sanctum-door",
+      "name": "The Green Sanctum",
+      "position": [
+        60.0,
+        0.05,
+        32.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "cenote-deeps-stair",
+      "name": "The Cenote Deeps",
+      "position": [
+        210.0,
+        0.05,
+        34.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "cenote_deeps"
+    },
+    {
+      "id": "banyan-hollow-arch",
+      "name": "The Banyan Hollow",
+      "position": [
+        60.0,
+        0.05,
+        207.5
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "banyan_hollow"
+    },
+    {
+      "id": "stair-quarry-adit",
+      "name": "The Stair Quarry",
+      "position": [
+        180.0,
+        0.05,
+        210.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "stair_quarry"
+    },
+    {
+      "id": "physick-still-door",
+      "name": "Tessara's Still Room",
+      "position": [
+        318.0,
+        0.05,
+        175.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "physick_still"
+    },
+    {
+      "id": "anchor-hollow-mouth",
+      "name": "The Anchor Hollow",
+      "position": [
+        318.0,
+        0.05,
+        40.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "anchor_hollow"
+    },
+    {
+      "id": "nine-lost-door",
+      "name": "The Shrine of the Nine Lost",
+      "position": [
+        318.0,
+        0.05,
+        124.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "nine_lost"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 648,
+    "height": 594,
+    "cellMetres": 0.5,
+    "originMetres": [
+      13.0,
+      316.0
+    ],
+    "heightEncoding": {
+      "origin": -8.785,
+      "step": 0.3854,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 68480,
+    "blockedCells": 316432,
+    "walkableFraction": 0.1779,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_verdant_stair_insides",
+      "Roof_verdant_stair_insides_bark_dark",
+      "Roof_verdant_stair_insides_thatch_reed",
+      "Roof_verdant_stair_insides_verdant_carved_jade",
+      "Roof_verdant_stair_insides_verdant_jade",
+      "Roof_verdant_stair_insides_verdant_limestone_cliff",
+      "Roof_verdant_stair_insides_verdant_mossy_stone",
+      "Roof_verdant_stair_insides_verdant_terrace_stone",
+      "Build_verdant_stair_insides_amber_glass",
+      "Build_verdant_stair_insides_amber_resin",
+      "Build_verdant_stair_insides_ashlar",
+      "Build_verdant_stair_insides_bark_dark",
+      "Build_verdant_stair_insides_bark_pale",
+      "Build_verdant_stair_insides_dark_iron",
+      "Build_verdant_stair_insides_gilt_brass",
+      "Build_verdant_stair_insides_pale_ashlar",
+      "Build_verdant_stair_insides_rubble_stone",
+      "Build_verdant_stair_insides_thatch_reed",
+      "Build_verdant_stair_insides_timber_dark",
+      "Build_verdant_stair_insides_timber_grey",
+      "Build_verdant_stair_insides_timber_warm",
+      "Build_verdant_stair_insides_verdant_carved_jade",
+      "Build_verdant_stair_insides_verdant_frond",
+      "Build_verdant_stair_insides_verdant_jade",
+      "Build_verdant_stair_insides_verdant_limestone_cliff",
+      "Build_verdant_stair_insides_verdant_mossy_stone",
+      "Build_verdant_stair_insides_verdant_terrace_stone",
+      "Build_verdant_stair_insides_verdant_vine",
+      "Build_verdant_stair_insides_verdant_wet_limestone",
+      "Build_verdant_stair_insides_water_cenote",
+      "Build_verdant_stair_insides_water_deep",
+      "Build_verdant_stair_insides_water_pool",
+      "Build_verdant_stair_insides_water_stream",
+      "Build_verdant_stair_insides_woven_cloth"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_verdant_stair_insides_bark_dark",
+      "Roof_verdant_stair_insides_thatch_reed",
+      "Roof_verdant_stair_insides_verdant_carved_jade",
+      "Roof_verdant_stair_insides_verdant_jade",
+      "Roof_verdant_stair_insides_verdant_limestone_cliff",
+      "Roof_verdant_stair_insides_verdant_mossy_stone",
+      "Roof_verdant_stair_insides_verdant_terrace_stone"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-temple-sanctum-door",
+      "name": "Return to Verdant Stair",
+      "type": "map-transition",
+      "position": [
+        60.0,
+        0.05,
+        32.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "verdant_stair",
+      "destinationSpawn": "temple-sanctum-door",
+      "section": "temple_sanctum",
+      "authority": "server"
+    },
+    {
+      "id": "exit-cenote-deeps-stair",
+      "name": "Return to Verdant Stair",
+      "type": "map-transition",
+      "position": [
+        210.0,
+        0.05,
+        34.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "verdant_stair",
+      "destinationSpawn": "cenote-deeps-stair",
+      "section": "cenote_deeps",
+      "authority": "server"
+    },
+    {
+      "id": "exit-banyan-hollow-arch",
+      "name": "Return to Verdant Stair",
+      "type": "map-transition",
+      "position": [
+        60.0,
+        0.05,
+        207.5
+      ],
+      "radius": 3.0,
+      "destinationMap": "verdant_stair",
+      "destinationSpawn": "banyan-hollow-arch",
+      "section": "banyan_hollow",
+      "authority": "server"
+    },
+    {
+      "id": "exit-stair-quarry-adit",
+      "name": "Return to Verdant Stair",
+      "type": "map-transition",
+      "position": [
+        180.0,
+        0.05,
+        210.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "verdant_stair",
+      "destinationSpawn": "stair-quarry-adit",
+      "section": "stair_quarry",
+      "authority": "server"
+    },
+    {
+      "id": "exit-physick-still-door",
+      "name": "Return to Verdant Stair",
+      "type": "map-transition",
+      "position": [
+        318.0,
+        0.05,
+        175.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "verdant_stair",
+      "destinationSpawn": "physick-still-door",
+      "section": "physick_still",
+      "authority": "server"
+    },
+    {
+      "id": "exit-anchor-hollow-mouth",
+      "name": "Return to Verdant Stair",
+      "type": "map-transition",
+      "position": [
+        318.0,
+        0.05,
+        40.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "verdant_stair",
+      "destinationSpawn": "anchor-hollow-mouth",
+      "section": "anchor_hollow",
+      "authority": "server"
+    },
+    {
+      "id": "exit-nine-lost-door",
+      "name": "Return to Verdant Stair",
+      "type": "map-transition",
+      "position": [
+        318.0,
+        0.05,
+        124.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "verdant_stair",
+      "destinationSpawn": "nine-lost-door",
+      "section": "nine_lost",
+      "authority": "server"
+    }
+  ],
+  "sections": [
+    {
+      "id": "temple_sanctum",
+      "name": "The Green Sanctum",
+      "class": "temple",
+      "offset": [
+        60.0,
+        0.0,
+        34.0
+      ],
+      "arrival": [
+        60.0,
+        0.05,
+        32.0
+      ],
+      "spaces": [
+        "temple_sanctum.narthex",
+        "temple_sanctum.processional",
+        "temple_sanctum.sanctum",
+        "temple_sanctum.basin",
+        "temple_sanctum.relics",
+        "temple_sanctum.approach",
+        "temple_sanctum.axis",
+        "temple_sanctum.basinway",
+        "temple_sanctum.relicway"
+      ],
+      "notes": [
+        "The only section with a straight axis. Everything else in this map is cut by water or grown.",
+        "The runnel down the processional is the aqueduct's water brought indoors; it feeds the basin off the east side."
+      ]
+    },
+    {
+      "id": "cenote_deeps",
+      "name": "The Cenote Deeps",
+      "class": "cave",
+      "offset": [
+        210.0,
+        0.0,
+        34.0
+      ],
+      "arrival": [
+        210.0,
+        0.05,
+        34.0
+      ],
+      "spaces": [
+        "cenote_deeps.shaftfoot",
+        "cenote_deeps.gallery",
+        "cenote_deeps.drowned",
+        "cenote_deeps.roothall",
+        "cenote_deeps.throat",
+        "cenote_deeps.gullet",
+        "cenote_deeps.rootway"
+      ],
+      "notes": [
+        "The shaft foot is declared open to the sky: it is the bottom of the cenote the surface package cuts, and light down that shaft is the only daylight in this map.",
+        "Nothing in this section is dressed. The only built object is the foot of the spiral stair, which is the same kit piece the surface uses."
+      ]
+    },
+    {
+      "id": "banyan_hollow",
+      "name": "The Banyan Hollow",
+      "class": "tree-hall",
+      "offset": [
+        60.0,
+        0.0,
+        209.0
+      ],
+      "arrival": [
+        60.0,
+        0.05,
+        207.5
+      ],
+      "spaces": [
+        "banyan_hollow.rootarch",
+        "banyan_hollow.hollow",
+        "banyan_hollow.store",
+        "banyan_hollow.loft",
+        "banyan_hollow.archway",
+        "banyan_hollow.storeway",
+        "banyan_hollow.loftstair"
+      ],
+      "notes": [
+        "The hollow is declared open to the sky: the trunk is open at the top, which is where its daylight comes from and why the rope walkways read.",
+        "The only section with a floor above another floor. The loft stair is a 24-step run, so it is walkable rather than a ladder the client cannot ground an actor on."
+      ]
+    },
+    {
+      "id": "stair_quarry",
+      "name": "The Stair Quarry",
+      "class": "workings",
+      "offset": [
+        180.0,
+        0.0,
+        209.0
+      ],
+      "arrival": [
+        180.0,
+        0.05,
+        210.0
+      ],
+      "spaces": [
+        "stair_quarry.adit",
+        "stair_quarry.cutting",
+        "stair_quarry.sorting",
+        "stair_quarry.sump",
+        "stair_quarry.driftway",
+        "stair_quarry.sortway",
+        "stair_quarry.winze"
+      ],
+      "notes": [
+        "The face is a working one: blocks are still keyed into it with the wedge channels cut round them, rather than the room being a finished cavity.",
+        "The sump is the only water in this section and it is not walkable; the shelf around it is."
+      ]
+    },
+    {
+      "id": "physick_still",
+      "name": "Tessara's Still Room",
+      "class": "dwelling",
+      "offset": [
+        318.0,
+        0.0,
+        174.0
+      ],
+      "arrival": [
+        318.0,
+        0.05,
+        175.0
+      ],
+      "spaces": [
+        "physick_still.hall",
+        "physick_still.back"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: a hall with a hearth and a back room for its trade (still)."
+      ]
+    },
+    {
+      "id": "anchor_hollow",
+      "name": "The Anchor Hollow",
+      "class": "cave",
+      "offset": [
+        318.0,
+        0.0,
+        40.0
+      ],
+      "arrival": [
+        318.0,
+        0.05,
+        40.0
+      ],
+      "spaces": [
+        "anchor_hollow.mouth",
+        "anchor_hollow.throat",
+        "anchor_hollow.chamber",
+        "anchor_hollow.descent",
+        "anchor_hollow.gullet"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: mouth, throat and chamber, dressed for the region above it."
+      ]
+    },
+    {
+      "id": "nine_lost",
+      "name": "The Shrine of the Nine Lost",
+      "class": "shrine",
+      "offset": [
+        318.0,
+        0.0,
+        124.0
+      ],
+      "arrival": [
+        318.0,
+        0.05,
+        124.0
+      ],
+      "spaces": [
+        "nine_lost.porch",
+        "nine_lost.nave",
+        "nine_lost.aisle"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: a cut sanctuary in the water manner."
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "the-green-figure",
+      "name": "The Green Figure",
+      "space": "temple_sanctum.sanctum",
+      "position": [
+        60.0,
+        -1.0,
+        121.0
+      ],
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "the-processional",
+      "name": "The Processional",
+      "space": "temple_sanctum.processional",
+      "position": [
+        60.0,
+        0.4,
+        71.0
+      ],
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "the-still-basin",
+      "name": "The Still Basin",
+      "space": "temple_sanctum.basin",
+      "position": [
+        96.0,
+        -1.6,
+        80.0
+      ],
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "the-relief-aisle",
+      "name": "The Relief Aisle",
+      "space": "temple_sanctum.relics",
+      "position": [
+        25.5,
+        -1.6,
+        123.0
+      ],
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "the-shaft-foot",
+      "name": "The Shaft Foot",
+      "space": "cenote_deeps.shaftfoot",
+      "position": [
+        210.0,
+        1.6,
+        34.0
+      ],
+      "section": "cenote_deeps"
+    },
+    {
+      "id": "the-drowned-hall",
+      "name": "The Drowned Hall",
+      "space": "cenote_deeps.drowned",
+      "position": [
+        210.0,
+        -3.6,
+        130.0
+      ],
+      "section": "cenote_deeps"
+    },
+    {
+      "id": "the-root-hall",
+      "name": "The Root Hall",
+      "space": "cenote_deeps.roothall",
+      "position": [
+        267.0,
+        -2.2,
+        134.0
+      ],
+      "section": "cenote_deeps"
+    },
+    {
+      "id": "the-hollow",
+      "name": "The Hollow",
+      "space": "banyan_hollow.hollow",
+      "position": [
+        60.0,
+        2.4,
+        242.0
+      ],
+      "section": "banyan_hollow"
+    },
+    {
+      "id": "the-loft",
+      "name": "The Loft",
+      "space": "banyan_hollow.loft",
+      "position": [
+        95.0,
+        11.0,
+        250.0
+      ],
+      "section": "banyan_hollow"
+    },
+    {
+      "id": "the-root-store",
+      "name": "The Root Store",
+      "space": "banyan_hollow.store",
+      "position": [
+        32.0,
+        0.6,
+        236.0
+      ],
+      "section": "banyan_hollow"
+    },
+    {
+      "id": "the-working-face",
+      "name": "The Working Face",
+      "space": "stair_quarry.cutting",
+      "position": [
+        180.0,
+        0.4,
+        248.0
+      ],
+      "section": "stair_quarry"
+    },
+    {
+      "id": "the-sorting-floor",
+      "name": "The Sorting Floor",
+      "space": "stair_quarry.sorting",
+      "position": [
+        141.5,
+        -0.6,
+        255.0
+      ],
+      "section": "stair_quarry"
+    },
+    {
+      "id": "the-sump",
+      "name": "The Sump",
+      "space": "stair_quarry.sump",
+      "position": [
+        180.0,
+        -7.0,
+        297.0
+      ],
+      "section": "stair_quarry"
+    },
+    {
+      "id": "verdant_physick_still-hearth",
+      "name": "Tessara's Still Room",
+      "space": "physick_still.hall",
+      "position": [
+        318.0,
+        1.4,
+        175.0
+      ],
+      "section": "physick_still"
+    },
+    {
+      "id": "verdant_anchor_hollow-chamber",
+      "name": "The Anchor Hollow",
+      "space": "anchor_hollow.chamber",
+      "position": [
+        318.0,
+        -4.0,
+        91.0
+      ],
+      "section": "anchor_hollow"
+    },
+    {
+      "id": "verdant_nine_lost-sanctuary",
+      "name": "The Shrine of the Nine Lost",
+      "space": "nine_lost.nave",
+      "position": [
+        318.0,
+        0.4,
+        146.0
+      ],
+      "section": "nine_lost"
+    }
+  ],
+  "interactives": [
+    {
+      "id": "sanctum-offering",
+      "type": "information",
+      "name": "Offering table",
+      "position": [
+        60.0,
+        -3.0,
+        114.0
+      ],
+      "radius": 2.0,
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "relic-bench",
+      "type": "crafting_station",
+      "name": "Relic bench",
+      "position": [
+        25.5,
+        -3.0,
+        132.0
+      ],
+      "radius": 2.0,
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "hollow-storage",
+      "type": "storage",
+      "name": "Village cache",
+      "position": [
+        36.0,
+        -0.4,
+        240.0
+      ],
+      "radius": 2.0,
+      "authority": "server",
+      "section": "banyan_hollow"
+    },
+    {
+      "id": "hollow-hearth",
+      "type": "crafting_station",
+      "name": "Hollow hearth",
+      "position": [
+        95.0,
+        9.6,
+        250.0
+      ],
+      "radius": 2.0,
+      "authority": "server",
+      "section": "banyan_hollow"
+    },
+    {
+      "id": "quarry-bench",
+      "type": "crafting_station",
+      "name": "Mason's bench",
+      "position": [
+        192.0,
+        -1.8,
+        234.0
+      ],
+      "radius": 2.0,
+      "authority": "server",
+      "section": "stair_quarry"
+    },
+    {
+      "id": "secret-stair-provisioner-cache",
+      "kind": "secret",
+      "secret": "stair-provisioner-cache",
+      "name": "The Provisioner's Cache",
+      "label": "A cellar hatch under the leaves.",
+      "prop": "cellar_hatch",
+      "key": "",
+      "destinationMap": "verdant_stair_secrets",
+      "destinationSpawn": "stair-provisioner-cache",
+      "position": [
+        144.0,
+        -2.0,
+        257.0
+      ],
+      "space": "stair_quarry.sorting",
+      "authority": "server"
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "sanctum-keeper",
+      "name": "Keeper of the Green Sanctum",
+      "type": "npc",
+      "role": "dialogue",
+      "position": [
+        56.0,
+        -3.2,
+        115.0
+      ],
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "hollow-elder",
+      "name": "Hollow Elder",
+      "type": "npc",
+      "role": "dialogue",
+      "position": [
+        55.0,
+        -0.6,
+        250.0
+      ],
+      "authority": "server",
+      "section": "banyan_hollow"
+    },
+    {
+      "id": "verdant_anchor_hollow-den",
+      "name": "Moonshadow Lynx",
+      "kind": "creature-zone",
+      "position": [
+        318.0,
+        -6.0,
+        91.0
+      ],
+      "radius": 12.0,
+      "section": "anchor_hollow"
+    }
+  ],
+  "harvestables": [
+    {
+      "id": "cenote-watercress-00",
+      "resource": "Watercress",
+      "category": "reagent",
+      "position": [
+        202.04,
+        0.0,
+        35.34
+      ],
+      "authority": "server",
+      "section": "cenote_deeps"
+    },
+    {
+      "id": "cenote-watercress-01",
+      "resource": "Watercress",
+      "category": "reagent",
+      "position": [
+        207.84,
+        0.0,
+        30.41
+      ],
+      "authority": "server",
+      "section": "cenote_deeps"
+    },
+    {
+      "id": "cenote-watercress-02",
+      "resource": "Watercress",
+      "category": "reagent",
+      "position": [
+        217.68,
+        0.0,
+        37.03
+      ],
+      "authority": "server",
+      "section": "cenote_deeps"
+    },
+    {
+      "id": "pale-quartz-00",
+      "resource": "Quartz",
+      "category": "mineral",
+      "position": [
+        193.7,
+        -2.0,
+        260.41
+      ],
+      "authority": "server",
+      "section": "stair_quarry"
+    },
+    {
+      "id": "pale-quartz-01",
+      "resource": "Quartz",
+      "category": "mineral",
+      "position": [
+        173.73,
+        -2.0,
+        239.45
+      ],
+      "authority": "server",
+      "section": "stair_quarry"
+    },
+    {
+      "id": "pale-quartz-02",
+      "resource": "Quartz",
+      "category": "mineral",
+      "position": [
+        184.6,
+        -2.0,
+        246.52
+      ],
+      "authority": "server",
+      "section": "stair_quarry"
+    },
+    {
+      "id": "pale-quartz-03",
+      "resource": "Quartz",
+      "category": "mineral",
+      "position": [
+        183.79,
+        -2.0,
+        252.74
+      ],
+      "authority": "server",
+      "section": "stair_quarry"
+    }
+  ],
+  "lights": [
+    {
+      "id": "lantern-00",
+      "kind": "point",
+      "position": [
+        60.0,
+        2.98,
+        31.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-01",
+      "kind": "point",
+      "position": [
+        60.0,
+        2.98,
+        37.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-02",
+      "kind": "point",
+      "position": [
+        52.0,
+        3.78,
+        56.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-03",
+      "kind": "point",
+      "position": [
+        68.0,
+        3.78,
+        56.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-04",
+      "kind": "point",
+      "position": [
+        52.0,
+        3.78,
+        72.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-05",
+      "kind": "point",
+      "position": [
+        68.0,
+        3.78,
+        72.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-06",
+      "kind": "point",
+      "position": [
+        52.0,
+        3.78,
+        88.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-07",
+      "kind": "point",
+      "position": [
+        68.0,
+        3.78,
+        88.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-08",
+      "kind": "point",
+      "position": [
+        49.0,
+        4.98,
+        111.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-09",
+      "kind": "point",
+      "position": [
+        71.0,
+        4.98,
+        111.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-10",
+      "kind": "point",
+      "position": [
+        49.0,
+        4.98,
+        131.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-11",
+      "kind": "point",
+      "position": [
+        71.0,
+        4.98,
+        131.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-12",
+      "kind": "point",
+      "position": [
+        96.0,
+        1.78,
+        80.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-13",
+      "kind": "point",
+      "position": [
+        25.5,
+        0.98,
+        117.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-14",
+      "kind": "point",
+      "position": [
+        25.5,
+        0.98,
+        129.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-15",
+      "kind": "point",
+      "position": [
+        210.0,
+        3.38,
+        64.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-16",
+      "kind": "point",
+      "position": [
+        210.0,
+        3.38,
+        76.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-17",
+      "kind": "point",
+      "position": [
+        210.0,
+        3.38,
+        88.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-18",
+      "kind": "point",
+      "position": [
+        196.0,
+        0.38,
+        142.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-19",
+      "kind": "point",
+      "position": [
+        224.0,
+        0.38,
+        142.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-20",
+      "kind": "point",
+      "position": [
+        210.0,
+        0.38,
+        146.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-21",
+      "kind": "point",
+      "position": [
+        259.0,
+        1.38,
+        134.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-22",
+      "kind": "point",
+      "position": [
+        275.0,
+        1.38,
+        134.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-23",
+      "kind": "point",
+      "position": [
+        60.0,
+        2.58,
+        209.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-24",
+      "kind": "point",
+      "position": [
+        52.0,
+        3.78,
+        234.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-25",
+      "kind": "point",
+      "position": [
+        68.0,
+        3.78,
+        234.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-26",
+      "kind": "point",
+      "position": [
+        52.0,
+        3.78,
+        252.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-27",
+      "kind": "point",
+      "position": [
+        68.0,
+        3.78,
+        252.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-28",
+      "kind": "point",
+      "position": [
+        60.0,
+        8.38,
+        242.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-29",
+      "kind": "point",
+      "position": [
+        60.0,
+        14.38,
+        242.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-30",
+      "kind": "point",
+      "position": [
+        32.0,
+        1.98,
+        236.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-31",
+      "kind": "point",
+      "position": [
+        90.0,
+        12.38,
+        250.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-32",
+      "kind": "point",
+      "position": [
+        100.0,
+        12.38,
+        250.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-33",
+      "kind": "point",
+      "position": [
+        180.0,
+        2.38,
+        211.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-34",
+      "kind": "point",
+      "position": [
+        168.0,
+        3.38,
+        236.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-35",
+      "kind": "point",
+      "position": [
+        192.0,
+        3.38,
+        236.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-36",
+      "kind": "point",
+      "position": [
+        168.0,
+        3.38,
+        256.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-37",
+      "kind": "point",
+      "position": [
+        192.0,
+        3.38,
+        256.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-38",
+      "kind": "point",
+      "position": [
+        180.0,
+        3.38,
+        248.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-39",
+      "kind": "point",
+      "position": [
+        141.5,
+        1.98,
+        249.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-40",
+      "kind": "point",
+      "position": [
+        141.5,
+        1.98,
+        261.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-41",
+      "kind": "point",
+      "position": [
+        172.0,
+        -5.02,
+        297.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-42",
+      "kind": "point",
+      "position": [
+        188.0,
+        -5.02,
+        297.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-43",
+      "kind": "point",
+      "position": [
+        318.0,
+        2.28,
+        175.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-44",
+      "kind": "point",
+      "position": [
+        319.0,
+        1.98,
+        183.28
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-45",
+      "kind": "point",
+      "position": [
+        318.0,
+        2.58,
+        38.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-46",
+      "kind": "point",
+      "position": [
+        318.0,
+        -0.82,
+        61.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-47",
+      "kind": "point",
+      "position": [
+        310.0,
+        -2.42,
+        91.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-48",
+      "kind": "point",
+      "position": [
+        326.0,
+        -2.42,
+        91.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-49",
+      "kind": "point",
+      "position": [
+        318.0,
+        2.78,
+        124.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-50",
+      "kind": "point",
+      "position": [
+        313.0,
+        2.98,
+        140.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-51",
+      "kind": "point",
+      "position": [
+        323.0,
+        2.98,
+        146.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-52",
+      "kind": "point",
+      "position": [
+        318.0,
+        3.38,
+        153.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "ambient": {
+      "colour": [
+        0.32,
+        0.38,
+        0.34
+      ],
+      "energy": 0.62
+    },
+    "exposure": 1.85,
+    "fog": {
+      "enabled": true,
+      "colour": [
+        0.06,
+        0.09,
+        0.08
+      ],
+      "begin": 14.0,
+      "end": 56.0
+    },
+    "audio": [
+      {
+        "id": "temple-hush",
+        "space": "temple_sanctum.sanctum",
+        "loop": true
+      },
+      {
+        "id": "water-runnel",
+        "space": "temple_sanctum.processional",
+        "loop": true
+      },
+      {
+        "id": "drip",
+        "space": "cenote_deeps.gallery",
+        "loop": true
+      },
+      {
+        "id": "water-hollow",
+        "space": "cenote_deeps.drowned",
+        "loop": true
+      },
+      {
+        "id": "village-inside",
+        "space": "banyan_hollow.hollow",
+        "loop": true
+      },
+      {
+        "id": "creaking-timber",
+        "space": "banyan_hollow.loft",
+        "loop": true
+      },
+      {
+        "id": "pick-work",
+        "space": "stair_quarry.cutting",
+        "loop": true
+      },
+      {
+        "id": "drip",
+        "space": "stair_quarry.sump",
+        "loop": true
+      }
+    ],
+    "openToSky": [
+      "cenote_deeps.shaftfoot",
+      "banyan_hollow.hollow"
+    ]
+  },
+  "spaces": {
+    "temple_sanctum.narthex": {
+      "x0": 49.0,
+      "x1": 71.0,
+      "z0": 25.0,
+      "z1": 39.0,
+      "floor": 0.0,
+      "height": 6.0
+    },
+    "temple_sanctum.processional": {
+      "x0": 47.0,
+      "x1": 73.0,
+      "z0": 51.0,
+      "z1": 91.0,
+      "floor": -1.6,
+      "height": 9.0
+    },
+    "temple_sanctum.sanctum": {
+      "x0": 42.0,
+      "x1": 78.0,
+      "z0": 103.0,
+      "z1": 139.0,
+      "floor": -3.2,
+      "height": 14.0
+    },
+    "temple_sanctum.basin": {
+      "x0": 85.0,
+      "x1": 107.0,
+      "z0": 68.0,
+      "z1": 92.0,
+      "floor": -2.6,
+      "height": 7.5
+    },
+    "temple_sanctum.relics": {
+      "x0": 16.0,
+      "x1": 35.0,
+      "z0": 112.0,
+      "z1": 134.0,
+      "floor": -3.2,
+      "height": 6.5
+    },
+    "temple_sanctum.approach": {
+      "x0": 57.8,
+      "x1": 62.2,
+      "z0": 36.8,
+      "z1": 53.2,
+      "floor": -1.6,
+      "height": 4.2
+    },
+    "temple_sanctum.axis": {
+      "x0": 57.5,
+      "x1": 62.5,
+      "z0": 88.5,
+      "z1": 105.5,
+      "floor": -3.2,
+      "height": 5.0
+    },
+    "temple_sanctum.basinway": {
+      "x0": 71.3,
+      "x1": 86.7,
+      "z0": 78.3,
+      "z1": 81.7,
+      "floor": -2.6,
+      "height": 3.6
+    },
+    "temple_sanctum.relicway": {
+      "x0": 33.4,
+      "x1": 43.6,
+      "z0": 119.4,
+      "z1": 122.6,
+      "floor": -3.2,
+      "height": 3.4
+    },
+    "cenote_deeps.shaftfoot": {
+      "x0": 197.0,
+      "x1": 223.0,
+      "z0": 21.0,
+      "z1": 47.0,
+      "floor": 0.0,
+      "height": 18.0
+    },
+    "cenote_deeps.gallery": {
+      "x0": 202.0,
+      "x1": 218.0,
+      "z0": 60.0,
+      "z1": 96.0,
+      "floor": -2.4,
+      "height": 7.0
+    },
+    "cenote_deeps.drowned": {
+      "x0": 184.0,
+      "x1": 236.0,
+      "z0": 108.0,
+      "z1": 152.0,
+      "floor": -6.0,
+      "height": 13.0
+    },
+    "cenote_deeps.roothall": {
+      "x0": 250.0,
+      "x1": 284.0,
+      "z0": 118.0,
+      "z1": 150.0,
+      "floor": -5.2,
+      "height": 16.0
+    },
+    "cenote_deeps.throat": {
+      "x0": 207.3,
+      "x1": 212.7,
+      "z0": 44.3,
+      "z1": 62.7,
+      "floor": -2.4,
+      "height": 5.0
+    },
+    "cenote_deeps.gullet": {
+      "x0": 207.5,
+      "x1": 212.5,
+      "z0": 93.5,
+      "z1": 110.5,
+      "floor": -6.0,
+      "height": 4.6
+    },
+    "cenote_deeps.rootway": {
+      "x0": 233.8,
+      "x1": 252.2,
+      "z0": 131.8,
+      "z1": 136.2,
+      "floor": -6.0,
+      "height": 4.4
+    },
+    "banyan_hollow.rootarch": {
+      "x0": 52.0,
+      "x1": 68.0,
+      "z0": 202.0,
+      "z1": 213.0,
+      "floor": 0.0,
+      "height": 5.0
+    },
+    "banyan_hollow.hollow": {
+      "x0": 43.0,
+      "x1": 77.0,
+      "z0": 225.0,
+      "z1": 259.0,
+      "floor": -0.6,
+      "height": 22.0
+    },
+    "banyan_hollow.store": {
+      "x0": 24.0,
+      "x1": 40.0,
+      "z0": 229.0,
+      "z1": 243.0,
+      "floor": -0.6,
+      "height": 4.4
+    },
+    "banyan_hollow.loft": {
+      "x0": 85.0,
+      "x1": 105.0,
+      "z0": 241.0,
+      "z1": 259.0,
+      "floor": 9.4,
+      "height": 6.0
+    },
+    "banyan_hollow.archway": {
+      "x0": 57.7,
+      "x1": 62.3,
+      "z0": 210.7,
+      "z1": 227.3,
+      "floor": -0.6,
+      "height": 4.4
+    },
+    "banyan_hollow.storeway": {
+      "x0": 38.5,
+      "x1": 44.5,
+      "z0": 233.5,
+      "z1": 236.5,
+      "floor": -0.6,
+      "height": 3.0
+    },
+    "banyan_hollow.loftstair": {
+      "x0": 75.4,
+      "x1": 86.6,
+      "z0": 247.4,
+      "z1": 250.6,
+      "floor": -0.6,
+      "height": 3.6
+    },
+    "stair_quarry.adit": {
+      "x0": 173.0,
+      "x1": 187.0,
+      "z0": 203.0,
+      "z1": 217.0,
+      "floor": 0.0,
+      "height": 5.0
+    },
+    "stair_quarry.cutting": {
+      "x0": 159.0,
+      "x1": 201.0,
+      "z0": 229.0,
+      "z1": 267.0,
+      "floor": -2.0,
+      "height": 11.0
+    },
+    "stair_quarry.sorting": {
+      "x0": 130.0,
+      "x1": 153.0,
+      "z0": 243.0,
+      "z1": 267.0,
+      "floor": -2.0,
+      "height": 7.0
+    },
+    "stair_quarry.sump": {
+      "x0": 162.0,
+      "x1": 198.0,
+      "z0": 281.0,
+      "z1": 313.0,
+      "floor": -8.4,
+      "height": 10.0
+    },
+    "stair_quarry.driftway": {
+      "x0": 177.8,
+      "x1": 182.2,
+      "z0": 214.8,
+      "z1": 231.2,
+      "floor": -2.0,
+      "height": 4.2
+    },
+    "stair_quarry.sortway": {
+      "x0": 151.3,
+      "x1": 160.7,
+      "z0": 253.3,
+      "z1": 256.7,
+      "floor": -2.0,
+      "height": 3.4
+    },
+    "stair_quarry.winze": {
+      "x0": 177.7,
+      "x1": 182.3,
+      "z0": 264.7,
+      "z1": 283.3,
+      "floor": -8.4,
+      "height": 4.4
+    },
+    "physick_still.hall": {
+      "x0": 313.0,
+      "x1": 323.0,
+      "z0": 170.0,
+      "z1": 180.0,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "physick_still.back": {
+      "x0": 315.0,
+      "x1": 323.0,
+      "z0": 180.55,
+      "z1": 186.0,
+      "floor": 0.0,
+      "height": 3.0
+    },
+    "anchor_hollow.mouth": {
+      "x0": 312.0,
+      "x1": 324.0,
+      "z0": 34.0,
+      "z1": 46.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "anchor_hollow.throat": {
+      "x0": 313.0,
+      "x1": 323.0,
+      "z0": 56.0,
+      "z1": 66.0,
+      "floor": -3.6,
+      "height": 5.6
+    },
+    "anchor_hollow.chamber": {
+      "x0": 302.0,
+      "x1": 334.0,
+      "z0": 76.0,
+      "z1": 106.0,
+      "floor": -6.0,
+      "height": 11.0
+    },
+    "anchor_hollow.descent": {
+      "x0": 315.6,
+      "x1": 320.4,
+      "z0": 43.6,
+      "z1": 58.4,
+      "floor": -3.6,
+      "height": 4.4
+    },
+    "anchor_hollow.gullet": {
+      "x0": 315.7,
+      "x1": 320.3,
+      "z0": 63.7,
+      "z1": 78.3,
+      "floor": -6.0,
+      "height": 4.4
+    },
+    "nine_lost.porch": {
+      "x0": 314.0,
+      "x1": 322.0,
+      "z0": 120.0,
+      "z1": 128.0,
+      "floor": 0.0,
+      "height": 4.2
+    },
+    "nine_lost.nave": {
+      "x0": 310.0,
+      "x1": 326.0,
+      "z0": 136.0,
+      "z1": 156.0,
+      "floor": -1.2,
+      "height": 7.0
+    },
+    "nine_lost.aisle": {
+      "x0": 316.4,
+      "x1": 319.6,
+      "z0": 126.4,
+      "z1": 137.6,
+      "floor": -1.2,
+      "height": 3.6
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../../verdant_stair/references/00-concept-detail-board.png",
+    "role": "parent-region board; these interiors have no board of their own",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "The Green Sanctum: the screen at the door",
+      "The Green Sanctum: the processional colonnade",
+      "The Green Sanctum: the axis runnel",
+      "The Green Sanctum: the seated figure",
+      "The Green Sanctum: the sanctum colonnade",
+      "The Green Sanctum: the reflecting basin",
+      "The Green Sanctum: the relief aisle",
+      "The Cenote Deeps: the shaft foot, looking up",
+      "The Cenote Deeps: the water-cut gallery",
+      "The Cenote Deeps: the gullet down",
+      "The Cenote Deeps: the drowned hall",
+      "The Cenote Deeps: flowstone and pillars",
+      "The Cenote Deeps: the root hall",
+      "The Banyan Hollow: the root arch",
+      "The Banyan Hollow: the hollow from the floor",
+      "The Banyan Hollow: the stair up the trunk",
+      "The Banyan Hollow: rope walkways overhead",
+      "The Banyan Hollow: the store among the roots",
+      "The Banyan Hollow: the loft and its hearth",
+      "The Stair Quarry: the adit and its props",
+      "The Stair Quarry: the working face",
+      "The Stair Quarry: blocks keyed into the face",
+      "The Stair Quarry: the sorting floor",
+      "The Stair Quarry: the winze down",
+      "The Stair Quarry: the flooded sump",
+      "Tessara's Still Room: the hall and hearth",
+      "Tessara's Still Room: the still",
+      "The Anchor Hollow: cave mouth from within",
+      "The Anchor Hollow: the descent",
+      "The Anchor Hollow: the chamber",
+      "The Shrine of the Nine Lost: the porch",
+      "The Shrine of the Nine Lost: the nave",
+      "The Shrine of the Nine Lost: the sanctuary"
+    ]
+  },
+  "performance": {
+    "nodes": 40,
+    "meshes": 39,
+    "materials": 28,
+    "images": 78,
+    "textures": 78,
+    "accessors": 195,
+    "bufferViews": 273,
+    "uniqueTriangles": 72069,
+    "uniqueVertices": 80923,
+    "glbBytes": 11418272,
+    "nodeNames": [
+      "Interior_verdant_stair_insides",
+      "Roof_verdant_stair_insides_bark_dark",
+      "Roof_verdant_stair_insides_thatch_reed",
+      "Roof_verdant_stair_insides_verdant_carved_jade",
+      "Roof_verdant_stair_insides_verdant_jade",
+      "Roof_verdant_stair_insides_verdant_limestone_cliff",
+      "Roof_verdant_stair_insides_verdant_mossy_stone",
+      "Roof_verdant_stair_insides_verdant_terrace_stone",
+      "Build_verdant_stair_insides_amber_glass",
+      "Build_verdant_stair_insides_amber_resin",
+      "Build_verdant_stair_insides_ashlar",
+      "Build_verdant_stair_insides_bark_dark",
+      "Build_verdant_stair_insides_bark_pale",
+      "Build_verdant_stair_insides_dark_iron",
+      "Build_verdant_stair_insides_gilt_brass",
+      "Build_verdant_stair_insides_pale_ashlar",
+      "Build_verdant_stair_insides_rubble_stone",
+      "Build_verdant_stair_insides_thatch_reed",
+      "Build_verdant_stair_insides_timber_dark",
+      "Build_verdant_stair_insides_timber_grey",
+      "Build_verdant_stair_insides_timber_warm",
+      "Build_verdant_stair_insides_verdant_carved_jade",
+      "Build_verdant_stair_insides_verdant_frond",
+      "Build_verdant_stair_insides_verdant_jade",
+      "Build_verdant_stair_insides_verdant_limestone_cliff",
+      "Build_verdant_stair_insides_verdant_mossy_stone",
+      "Build_verdant_stair_insides_verdant_terrace_stone",
+      "Build_verdant_stair_insides_verdant_vine",
+      "Build_verdant_stair_insides_verdant_wet_limestone",
+      "Build_verdant_stair_insides_water_cenote",
+      "Build_verdant_stair_insides_water_deep",
+      "Build_verdant_stair_insides_water_pool",
+      "Build_verdant_stair_insides_water_stream",
+      "Build_verdant_stair_insides_woven_cloth",
+      "Walk_packed_earth",
+      "Walk_timber_warm",
+      "Walk_verdant_jungle_floor",
+      "Walk_verdant_mossy_stone",
+      "Walk_verdant_terrace_stone",
+      "Walk_verdant_wet_limestone"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260901
+    },
+    {
+      "id": "anchor",
+      "landmark": "great-temple",
+      "position": [
+        204.0,
+        100.0,
+        -198.0
+      ],
+      "role": "surface entrance on the Verdant Stair region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the shared Nymara toolkit; no scattered placement",
+    "textures": "procedural, from _toolkit/amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "Four interiors on one map with blackspace between them, in the Eternal Lands convention: one GLB, one manifest, one collision grid, one server map key, and an arrival point per surface door.",
+    "The blackspace is not drawn. The collision grid is built only where a Walk_ surface exists, so the gutters between sections are blocked by construction rather than by a mask that could drift out of step.",
+    "Sections are spaced so no two come within about forty metres, which is what keeps one section's lamps and cameras out of the next.",
+    "None of the four has a concept package: Verdant Stair has an aerial and a ten-panel board and no interior brief, so all four are authored from the region's surface landmarks and that board. Every place name is the author's."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Not opened in Godot: no client is installable in the build environment, so collision response, navmesh generation, portal transition, LOD and transparency sorting are unverified.",
+    "eloria-server has not registered these map keys."
+  ],
+  "externalResources": {
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d.png": "06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d",
+    "../../../_shared/images/0bfe9c7929374300820f5d357cdb572bfd4d3af7e512f0b54c8a936979007de9.png": "0bfe9c7929374300820f5d357cdb572bfd4d3af7e512f0b54c8a936979007de9",
+    "../../../_shared/images/0d95704578303710b4bc077b1be05783ba23be1a8eae7482b33421386d4dce8b.png": "0d95704578303710b4bc077b1be05783ba23be1a8eae7482b33421386d4dce8b",
+    "../../../_shared/images/0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0.png": "0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0",
+    "../../../_shared/images/0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f.png": "0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f",
+    "../../../_shared/images/12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1.png": "12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1",
+    "../../../_shared/images/147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed.png": "147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed",
+    "../../../_shared/images/153eb59040ce875a3e419e537749371999ee995e16be1f25e24a8d4d12aef3b7.png": "153eb59040ce875a3e419e537749371999ee995e16be1f25e24a8d4d12aef3b7",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621.png": "1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621",
+    "../../../_shared/images/1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853.png": "1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853",
+    "../../../_shared/images/1f8babd868058447817f7db335e6e439e763599b4db3763e712ffd6cebefa93a.png": "1f8babd868058447817f7db335e6e439e763599b4db3763e712ffd6cebefa93a",
+    "../../../_shared/images/21225f71b302e0dfdf8556d7157955c7b5631f44932e9e7e724efa9ea9374fa0.png": "21225f71b302e0dfdf8556d7157955c7b5631f44932e9e7e724efa9ea9374fa0",
+    "../../../_shared/images/2b7d3d42f1cba2b844ff2710cec6c67cb47a61f51f3f2048074914d821d06a1f.png": "2b7d3d42f1cba2b844ff2710cec6c67cb47a61f51f3f2048074914d821d06a1f",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0.png": "303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0",
+    "../../../_shared/images/322eb09281860c32499c35a7c2dcc4bcc84d13416c3213dbbfee1841daaa77a6.png": "322eb09281860c32499c35a7c2dcc4bcc84d13416c3213dbbfee1841daaa77a6",
+    "../../../_shared/images/332b3162d659936c0ceca6badb78ba0e657ccfafffca1ab5078d2948942d0471.png": "332b3162d659936c0ceca6badb78ba0e657ccfafffca1ab5078d2948942d0471",
+    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/367b3e10291ca513cf68c0012c33706d2dd85bff2f663a79f3dcc062f704000c.png": "367b3e10291ca513cf68c0012c33706d2dd85bff2f663a79f3dcc062f704000c",
+    "../../../_shared/images/374375a66523f050aba6dd6de74293ccd268211420390232c4f674fc130a2669.png": "374375a66523f050aba6dd6de74293ccd268211420390232c4f674fc130a2669",
+    "../../../_shared/images/3a2d2075296235a05c229c07a66af2b757d80b3e3179d121ef7174b3a3e6c25b.png": "3a2d2075296235a05c229c07a66af2b757d80b3e3179d121ef7174b3a3e6c25b",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/3fdf41124c0f35ad79faea5072db9a4cf30b18e479e2319591a90893e9b4f035.png": "3fdf41124c0f35ad79faea5072db9a4cf30b18e479e2319591a90893e9b4f035",
+    "../../../_shared/images/4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4.png": "4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4",
+    "../../../_shared/images/48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed.png": "48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed",
+    "../../../_shared/images/4d7cea7520725efcd78053f330d7a142b2a0c67bf602e9af767cdf199c718324.png": "4d7cea7520725efcd78053f330d7a142b2a0c67bf602e9af767cdf199c718324",
+    "../../../_shared/images/4e3adbd13a3f22fe6d723cc8f8b4477cc8e250b37f75e829013339e951deaa6f.png": "4e3adbd13a3f22fe6d723cc8f8b4477cc8e250b37f75e829013339e951deaa6f",
+    "../../../_shared/images/4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22.png": "4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22",
+    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
+    "../../../_shared/images/562faaf3360b5f39b91d4439c81a3b348832607af0e4b85df9ce19d5f55820f6.png": "562faaf3360b5f39b91d4439c81a3b348832607af0e4b85df9ce19d5f55820f6",
+    "../../../_shared/images/5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03.png": "5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03",
+    "../../../_shared/images/5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843.png": "5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843",
+    "../../../_shared/images/5c337d18c8ddf456006c8d314a95c273e490780fb53226fe8b7262c5ecbe201c.png": "5c337d18c8ddf456006c8d314a95c273e490780fb53226fe8b7262c5ecbe201c",
+    "../../../_shared/images/651d79cd161a5ff0fb66f99c0fcf0a15534708f4a0456659fc741c353c604377.png": "651d79cd161a5ff0fb66f99c0fcf0a15534708f4a0456659fc741c353c604377",
+    "../../../_shared/images/6fb6318c4c2c6196bea83d14de81032d14d8c6b1deee542d86a3afcd98b3400c.png": "6fb6318c4c2c6196bea83d14de81032d14d8c6b1deee542d86a3afcd98b3400c",
+    "../../../_shared/images/70fc5d26c53ab75ccb13cc730db31e3295527dbd4ca3bc7504c180b4a4722f0b.png": "70fc5d26c53ab75ccb13cc730db31e3295527dbd4ca3bc7504c180b4a4722f0b",
+    "../../../_shared/images/7226fc354c61b972d44e7b4c6dc39af8ae91f6ef7586aa217a72ec965b1c62a6.png": "7226fc354c61b972d44e7b4c6dc39af8ae91f6ef7586aa217a72ec965b1c62a6",
+    "../../../_shared/images/7f0e68cbac42a1d868d9662429862c193fa6118374ce9bc657f3d3eb765fe44f.png": "7f0e68cbac42a1d868d9662429862c193fa6118374ce9bc657f3d3eb765fe44f",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/841f43f2e7741c17750895270456ca41b793dfc5a6e03a6939e49ea7a0453755.png": "841f43f2e7741c17750895270456ca41b793dfc5a6e03a6939e49ea7a0453755",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/86609be04fe7f1a2749d884bc996f1fe4b9a69ba1ad37e76b255f5f8a6554bf0.png": "86609be04fe7f1a2749d884bc996f1fe4b9a69ba1ad37e76b255f5f8a6554bf0",
+    "../../../_shared/images/8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9.png": "8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9",
+    "../../../_shared/images/91e8f8f558088e42aeed020a4e35e76edbd1eefb878dea089b055078d0e64395.png": "91e8f8f558088e42aeed020a4e35e76edbd1eefb878dea089b055078d0e64395",
+    "../../../_shared/images/95a6d022b483e224cfe26bcdb7b7e3bd0ef1705aa68cf1b5601a4fc8d9068913.png": "95a6d022b483e224cfe26bcdb7b7e3bd0ef1705aa68cf1b5601a4fc8d9068913",
+    "../../../_shared/images/97e1d68e87e779da8615cdd3d401affa24f36da95ba2038f89783a806da0222d.png": "97e1d68e87e779da8615cdd3d401affa24f36da95ba2038f89783a806da0222d",
+    "../../../_shared/images/9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6.png": "9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6",
+    "../../../_shared/images/99e4f61d9f284a71c2321e4e3408ec2b5731e520abaa06cabd5ba87a1988431f.png": "99e4f61d9f284a71c2321e4e3408ec2b5731e520abaa06cabd5ba87a1988431f",
+    "../../../_shared/images/9d198b47b541d9aa10609c1128920802833ca6cff335674de4f01c192cd1ff79.png": "9d198b47b541d9aa10609c1128920802833ca6cff335674de4f01c192cd1ff79",
+    "../../../_shared/images/9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be.png": "9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be",
+    "../../../_shared/images/9f687313b3caa2f367c9624e62d20ab28bc198221a545387ffcba253cd014d60.png": "9f687313b3caa2f367c9624e62d20ab28bc198221a545387ffcba253cd014d60",
+    "../../../_shared/images/a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e.png": "a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e",
+    "../../../_shared/images/a18749b0e7e8eed66bf2c93c806d955e4d4c5a8411b8a2312dfcce5875e06c79.png": "a18749b0e7e8eed66bf2c93c806d955e4d4c5a8411b8a2312dfcce5875e06c79",
+    "../../../_shared/images/a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0.png": "a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0",
+    "../../../_shared/images/a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c.png": "a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e.png": "ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e",
+    "../../../_shared/images/af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2.png": "af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b82bac0c6a9ab11a561e05b090c17058c78b5aadb692320f5405d9e72e51f699.png": "b82bac0c6a9ab11a561e05b090c17058c78b5aadb692320f5405d9e72e51f699",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/bb351716c2ff383fedc72c284a9b5d6538607300b51bc234ed4ae1f29bba35e3.png": "bb351716c2ff383fedc72c284a9b5d6538607300b51bc234ed4ae1f29bba35e3",
+    "../../../_shared/images/c41762de3532fb217d0fc81637f25bbdd6fb5fc137aff614ddf0bc6102a8f58b.png": "c41762de3532fb217d0fc81637f25bbdd6fb5fc137aff614ddf0bc6102a8f58b",
+    "../../../_shared/images/c79489438a2dbbff5db832d7e36b80a8da856a8666338d627aa905f0a75fc222.png": "c79489438a2dbbff5db832d7e36b80a8da856a8666338d627aa905f0a75fc222",
+    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/ce26722ce5699a7886144552229c8dacf4fed682cb0417e29ca0d2228afe90b2.png": "ce26722ce5699a7886144552229c8dacf4fed682cb0417e29ca0d2228afe90b2",
+    "../../../_shared/images/cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae.png": "cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae",
+    "../../../_shared/images/d3585f391c0d4865b960a98cc67244a405da0d65fb40c1c8d3993a2670f1290f.png": "d3585f391c0d4865b960a98cc67244a405da0d65fb40c1c8d3993a2670f1290f",
+    "../../../_shared/images/d4a7aebc97f9a3af9d11a4b9f38107d82e8cf9759d78b7a2cc8ca6f6a6eae20b.png": "d4a7aebc97f9a3af9d11a4b9f38107d82e8cf9759d78b7a2cc8ca6f6a6eae20b",
+    "../../../_shared/images/dc5b6721703e6b9add7d746445501d29787d64079373dd2ad5624ad9f66715e5.png": "dc5b6721703e6b9add7d746445501d29787d64079373dd2ad5624ad9f66715e5",
+    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
+    "../../../_shared/images/deeca36a3f806527e02b3f8bc46283a4825f2c507e73e4338683cac66781a8a7.png": "deeca36a3f806527e02b3f8bc46283a4825f2c507e73e4338683cac66781a8a7",
+    "../../../_shared/images/fcfc3101d99b5cb9640013e6ced0514fb3d240b13f82beba0b6dfed0bda922fe.png": "fcfc3101d99b5cb9640013e6ced0514fb3d240b13f82beba0b6dfed0bda922fe",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c",
+    "../../../_shared/images/ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65.png": "ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65",
+    "../../../_shared/images/ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247.png": "ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247"
+  }
+}

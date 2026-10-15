@@ -1,0 +1,198 @@
+{
+ "schema": "eloria-continent-v2-server-tables-v1",
+ "about": "The continent-v2 server rows that belong to no single marker: each map's served row (its alias and ELM file; its name is the territory catalog's label), the harvest resources the isles add, the rows the B14 pocket holds back, and which scene points are the home's and the chapter's. publish_server.py reads this beside server-rows.json (the per-marker fields) and the scene markers (every position). No field may hold '|', '#' or a line break.",
+ "maps": [
+  {
+   "id": "boarsend",
+   "alias": "BOARSEND",
+   "file": "maps/nymara/boarsend.elm"
+  },
+  {
+   "id": "brambleshaw",
+   "alias": "BRAMBLESHAW",
+   "file": "maps/nymara/brambleshaw.elm"
+  },
+  {
+   "id": "greenlight",
+   "alias": "GREENLIGHT",
+   "file": "maps/nymara/greenlight.elm"
+  },
+  {
+   "id": "hearthcroft",
+   "alias": "HEARTHCROFT",
+   "file": "maps/nymara/hearthcroft.elm"
+  },
+  {
+   "id": "landfall",
+   "alias": "LANDFALL",
+   "file": "maps/nymara/landfall.elm"
+  },
+  {
+   "id": "pinebrow",
+   "alias": "PINEBROW",
+   "file": "maps/nymara/pinebrow.elm"
+  },
+  {
+   "id": "ravenhead",
+   "alias": "RAVENHEAD",
+   "file": "maps/nymara/ravenhead.elm"
+  },
+  {
+   "id": "reedfall",
+   "alias": "REEDFALL",
+   "file": "maps/nymara/reedfall.elm"
+  },
+  {
+   "id": "ringholm",
+   "alias": "RINGHOLM",
+   "file": "maps/nymara/ringholm.elm"
+  },
+  {
+   "id": "saltsound",
+   "alias": "SALTSOUND",
+   "file": "maps/nymara/saltsound.elm"
+  },
+  {
+   "id": "spindle_hill",
+   "alias": "SPINDLE_HILL",
+   "file": "maps/nymara/spindle_hill.elm"
+  },
+  {
+   "id": "stagheath",
+   "alias": "STAGHEATH",
+   "file": "maps/nymara/stagheath.elm"
+  },
+  {
+   "id": "tollholm",
+   "alias": "TOLLHOLM",
+   "file": "maps/nymara/tollholm.elm"
+  },
+  {
+   "id": "twinbrook",
+   "alias": "TWINBROOK",
+   "file": "maps/nymara/twinbrook.elm"
+  },
+  {
+   "id": "warrenmead",
+   "alias": "WARRENMEAD",
+   "file": "maps/nymara/warrenmead.elm"
+  }
+ ],
+ "resources": [
+  {
+   "name": "Olive",
+   "level": 1,
+   "experience": 6,
+   "seconds": 3.5,
+   "tool": "-",
+   "item": 1860,
+   "source": "review/serve_inputs/harvest/server_rows_draft.txt; item 1860 is on the server since feature/landing-isle S4"
+  },
+  {
+   "name": "Lemon",
+   "level": 4,
+   "experience": 9,
+   "seconds": 3.5,
+   "tool": "-",
+   "item": 1861,
+   "source": "review/serve_inputs/harvest/server_rows_draft.txt; item 1861 is on the server since feature/landing-isle S4"
+  },
+  {
+   "name": "Grapes",
+   "level": 8,
+   "experience": 12,
+   "seconds": 4,
+   "tool": "-",
+   "item": 1892,
+   "source": "owner-approved 2026-10-14 (Landfall liveliness plan H5); item 1892 is on the server since feature/landfall-crops; Tollholm's vineyards"
+  },
+  {
+   "name": "Cabbage",
+   "level": 4,
+   "experience": 9,
+   "seconds": 3.5,
+   "tool": "-",
+   "item": 1893,
+   "source": "owner-approved 2026-10-14 (Landfall liveliness plan H5); item 1893 is on the server since feature/landfall-crops; the Tollholm and Spindle Hill cabbage fields"
+  }
+ ],
+ "holdBack": {
+  "why": "the B14 pocket: AC-3 on bake a1_seams found these 19 rows on 22,488 tiles of the north-east bay that the causeway's west end reached only by a 2.9 m drop. CV3 (ff8662651) graded a ramp into the bay. publish_server.py serves them only when every one of them passes every check; if any fails, all 19 are held back (left out and recorded) instead of being served stranded, and any other failure refuses the publish",
+  "spawns": [
+   "sw-spawn-0432",
+   "sw-spawn-0433",
+   "sw-spawn-0434",
+   "sw-spawn-0435",
+   "sw-spawn-0436",
+   "sw-spawn-0437",
+   "sw-spawn-0438",
+   "sw-spawn-0439"
+  ],
+  "nodes": [
+   {
+    "map": "saltsound",
+    "id": 281
+   },
+   {
+    "map": "saltsound",
+    "id": 282
+   },
+   {
+    "map": "saltsound",
+    "id": 283
+   },
+   {
+    "map": "saltsound",
+    "id": 284
+   },
+   {
+    "map": "saltsound",
+    "id": 289
+   },
+   {
+    "map": "saltsound",
+    "id": 290
+   },
+   {
+    "map": "saltsound",
+    "id": 291
+   },
+   {
+    "map": "saltsound",
+    "id": 292
+   },
+   {
+    "map": "hearthcroft",
+    "id": 318
+   },
+   {
+    "map": "hearthcroft",
+    "id": 319
+   },
+   {
+    "map": "hearthcroft",
+    "id": 320
+   }
+  ]
+ },
+ "homes": {
+  "landfall": {
+   "arrival": "landfall--arrival",
+   "beam": "landfall--runtime-home-beam",
+   "respawn": "landfall--runtime-home-respawn",
+   "underworld": "landfall--runtime-home-respawn"
+  }
+ },
+ "landing": {
+  "map": "landfall",
+  "arrival": "landfall--runtime-home-beam",
+  "register": "landfall--obj-landing-register-desk",
+  "ferry": "greenlight--obj-ferry-n10",
+  "ferryPoint": "greenlight--runtime-ferry-n10",
+  "targetRoles": [
+   "tutorial-target",
+   "tutorial-option"
+  ],
+  "note": "targets are every runtime point of those roles, keyed by its `target`; the cast is every NPC marker of group re-homed in server-rows.json"
+ }
+}

@@ -1,0 +1,1201 @@
+{
+ "_note": "barrow_run_gauntlet: trail road geometry from the concept grey_moors_gauntlet (work-output/gauntlet-v2-design/regions). Plan metres, x east, y SOUTH; arenas are ellipses; paths are [x, y, elev] polylines; mouths are pockets placed along a bearing from the arena centre. `land` shapes the ground round the road (_toolkit/landforms.py) and `dressing` dresses it (_toolkit/trail_dressing.py).",
+ "schema": "eloria-trail-layout-v1",
+ "id": "barrow_run_gauntlet",
+ "size": [
+  384,
+  384
+ ],
+ "sections": [
+  {
+   "id": "trailhead",
+   "kind": "camp",
+   "name": "Mourners' Camp",
+   "at": [
+    44,
+    56
+   ],
+   "rx": 18,
+   "ry": 15,
+   "rot": 0,
+   "elev": 6
+  },
+  {
+   "id": "w1",
+   "kind": "arena",
+   "name": "The Peat Cut",
+   "at": [
+    116,
+    110
+   ],
+   "rx": 34,
+   "ry": 24,
+   "rot": 12,
+   "elev": 5,
+   "order": 1,
+   "mouths": [
+    {
+     "id": "w1-south",
+     "bearing": 80,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-north",
+     "bearing": 285,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-west",
+     "bearing": 180,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "kind": "arena",
+   "name": "The First Barrow",
+   "at": [
+    236,
+    72
+   ],
+   "rx": 30,
+   "ry": 28,
+   "rot": 0,
+   "elev": 8,
+   "order": 2,
+   "mouths": [
+    {
+     "id": "w2-north",
+     "bearing": 275,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-south",
+     "bearing": 105,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-east",
+     "bearing": 345,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "kind": "arena",
+   "name": "The Bog Board",
+   "at": [
+    306,
+    178
+   ],
+   "rx": 42,
+   "ry": 20,
+   "rot": 75,
+   "elev": 1,
+   "order": 3,
+   "mouths": [
+    {
+     "id": "w3-east",
+     "bearing": 15,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-west",
+     "bearing": 185,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-northeast",
+     "bearing": 300,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "kind": "arena",
+   "name": "The Fifth Chamber",
+   "at": [
+    214,
+    254
+   ],
+   "rx": 36,
+   "ry": 26,
+   "rot": 0,
+   "elev": 4,
+   "order": 4,
+   "mouths": [
+    {
+     "id": "w4-north",
+     "bearing": 260,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-south",
+     "bearing": 80,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-west",
+     "bearing": 200,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "kind": "arena",
+   "name": "The Split Barrow",
+   "at": [
+    98,
+    286
+   ],
+   "rx": 32,
+   "ry": 26,
+   "rot": 0,
+   "elev": 6,
+   "order": 5,
+   "mouths": [
+    {
+     "id": "w5-southwest",
+     "bearing": 135,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-north",
+     "bearing": 255,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-west",
+     "bearing": 195,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "kind": "court",
+   "name": "The Reeve's Forecourt",
+   "at": [
+    250,
+    334
+   ],
+   "rx": 28,
+   "ry": 22,
+   "rot": 0,
+   "elev": 3,
+   "order": 6,
+   "mouths": [
+    {
+     "id": "court-north",
+     "bearing": 280,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    },
+    {
+     "id": "court-south",
+     "bearing": 95,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    }
+   ]
+  },
+  {
+   "id": "vault",
+   "kind": "vault",
+   "name": "The Great Barrow",
+   "at": [
+    306,
+    344
+   ],
+   "rx": 8,
+   "ry": 7,
+   "rot": 0,
+   "elev": 3.5
+  }
+ ],
+ "mouthDefaults": {
+  "out": 6,
+  "radius": 7,
+  "linkWidth": 5
+ },
+ "paths": [
+  {
+   "from": "trailhead",
+   "to": "w1",
+   "width": 7,
+   "points": [
+    [
+     70,
+     70,
+     6
+    ],
+    [
+     92,
+     92,
+     5.5
+    ]
+   ]
+  },
+  {
+   "from": "w1",
+   "to": "w2",
+   "width": 6,
+   "points": [
+    [
+     150,
+     104,
+     6
+    ],
+    [
+     182,
+     84,
+     7
+    ],
+    [
+     206,
+     70,
+     8
+    ]
+   ]
+  },
+  {
+   "from": "w2",
+   "to": "w3",
+   "width": 6,
+   "points": [
+    [
+     266,
+     86,
+     7
+    ],
+    [
+     292,
+     116,
+     4
+    ],
+    [
+     304,
+     142,
+     2
+    ]
+   ]
+  },
+  {
+   "from": "w3",
+   "to": "w4",
+   "width": 6,
+   "points": [
+    [
+     296,
+     214,
+     2
+    ],
+    [
+     266,
+     236,
+     3
+    ],
+    [
+     244,
+     248,
+     4
+    ]
+   ]
+  },
+  {
+   "from": "w4",
+   "to": "w5",
+   "width": 6,
+   "points": [
+    [
+     180,
+     262,
+     4.5
+    ],
+    [
+     148,
+     278,
+     5.5
+    ],
+    [
+     128,
+     284,
+     6
+    ]
+   ]
+  },
+  {
+   "from": "w5",
+   "to": "boss",
+   "width": 6,
+   "points": [
+    [
+     126,
+     310,
+     5
+    ],
+    [
+     172,
+     330,
+     4
+    ],
+    [
+     220,
+     334,
+     3.2
+    ]
+   ]
+  },
+  {
+   "from": "boss",
+   "to": "vault",
+   "width": 4,
+   "points": [
+    [
+     282,
+     340,
+     3.2
+    ]
+   ]
+  }
+ ],
+ "land": {
+  "banks": 2.5,
+  "hills": 4.0,
+  "cut": 6,
+  "ground": {
+   "bank": "heather_moor",
+   "network": "grey_barrow_turf",
+   "trail": "grey_moor_track",
+   "cliff": "grey_moor_granite",
+   "bed": "grey_peat_bog",
+   "deck": "grey_bog_timber"
+  },
+  "lakeWater": "water_pool",
+  "crossings": [
+   {
+    "at": [
+     306,
+     178
+    ],
+    "half": [
+     40,
+     2.2
+    ],
+    "rot": 75
+   }
+  ],
+  "mounds": [
+   {
+    "at": [
+     180,
+     150
+    ],
+    "r": 10,
+    "h": 5
+   },
+   {
+    "at": [
+     60,
+     140
+    ],
+    "r": 9,
+    "h": 4
+   },
+   {
+    "at": [
+     350,
+     90
+    ],
+    "r": 12,
+    "h": 6
+   }
+  ],
+  "lakes": [
+   {
+    "at": [
+     300,
+     160
+    ],
+    "rx": 14,
+    "ry": 9,
+    "level": 0.4,
+    "deep": true
+   },
+   {
+    "at": [
+     318,
+     196
+    ],
+    "rx": 12,
+    "ry": 8,
+    "level": 0.4,
+    "deep": true
+   },
+   {
+    "at": [
+     286,
+     196
+    ],
+    "rx": 9,
+    "ry": 6,
+    "level": 0.4,
+    "deep": true
+   },
+   {
+    "at": [
+     60,
+     200
+    ],
+    "rx": 22,
+    "ry": 14,
+    "level": 0.4,
+    "deep": true
+   },
+   {
+    "at": [
+     170,
+     190
+    ],
+    "rx": 18,
+    "ry": 12,
+    "level": 0.4,
+    "deep": true
+   },
+   {
+    "at": [
+     350,
+     280
+    ],
+    "rx": 14,
+    "ry": 10,
+    "level": 0.4,
+    "deep": true
+   }
+  ]
+ },
+ "checkpoints": [
+  {
+   "id": "cp1",
+   "name": "The peat-cutters' fire",
+   "at": [
+    276.2,
+    87.9
+   ],
+   "elev": 6.38,
+   "after": "w2",
+   "reach": 12.0
+  },
+  {
+   "id": "cp2",
+   "name": "The chapel fire",
+   "at": [
+    153.9,
+    267.8
+   ],
+   "elev": 5.22,
+   "after": "w4",
+   "reach": 12.0
+  }
+ ],
+ "sides": [
+  {
+   "id": "mourners-well",
+   "name": "The Mourners' Well",
+   "from": [
+    273.6,
+    230.4,
+    2.75
+   ],
+   "at": [
+    264.2,
+    217.5
+   ],
+   "radius": 7,
+   "elev": 3.05,
+   "width": 4
+  }
+ ],
+ "floors": {
+  "w1": "grey_peat_bog",
+  "boss": "grey_causeway",
+  "vault": "grey_carved_stone"
+ },
+ "environment": {
+  "sky": {
+   "topColor": [
+    0.26,
+    0.24,
+    0.4
+   ],
+   "horizonColor": [
+    0.78,
+    0.58,
+    0.58
+   ],
+   "groundBottomColor": [
+    0.14,
+    0.12,
+    0.14
+   ],
+   "groundHorizonColor": [
+    0.46,
+    0.4,
+    0.44
+   ]
+  },
+  "sun": {
+   "enabled": true,
+   "direction": [
+    0.7,
+    -0.4,
+    0.58
+   ],
+   "color": [
+    1.0,
+    0.76,
+    0.62
+   ],
+   "energy": 1.3
+  },
+  "ambient": {
+   "color": [
+    0.6,
+    0.58,
+    0.7
+   ],
+   "energy": 0.9,
+   "skyContribution": 0.4
+  },
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.66,
+    0.6,
+    0.68
+   ],
+   "density": 0.0022
+  },
+  "tonemap": {
+   "mode": "filmic",
+   "exposure": 1.05,
+   "white": 4.0
+  }
+ },
+ "dressing": {
+  "woods": {
+   "count": 170,
+   "mix": [
+    [
+     "snag",
+     0.25
+    ],
+    [
+     "thorn1",
+     0.2
+    ],
+    [
+     "thorn2",
+     0.2
+    ],
+    [
+     "windpine",
+     0.15
+    ],
+    [
+     "bogoak",
+     0.1
+    ],
+    [
+     "pine",
+     0.05
+    ],
+    [
+     "birch",
+     0.05
+    ]
+   ],
+   "far": 0.2
+  },
+  "cover": {
+   "count": 620,
+   "mix": [
+    [
+     "heather1",
+     1.2
+    ],
+    [
+     "heather2",
+     1.2
+    ],
+    [
+     "cotton",
+     0.8
+    ],
+    [
+     "rushes",
+     0.6
+    ],
+    [
+     "tussock",
+     0.8
+    ],
+    [
+     "gorse",
+     0.6
+    ],
+    [
+     "bracken",
+     0.5
+    ]
+   ]
+  },
+  "rocks": {
+   "count": 110,
+   "mix": [
+    [
+     "boulder1",
+     1
+    ],
+    [
+     "boulder2",
+     1
+    ],
+    [
+     "boulder3",
+     1
+    ],
+    [
+     "lichen",
+     0.6
+    ]
+   ]
+  },
+  "frame": {
+   "count": 24,
+   "mix": [
+    [
+     "crag1",
+     1
+    ],
+    [
+     "crag2",
+     1
+    ],
+    [
+     "crag4",
+     1
+    ]
+   ],
+   "sink": 3.0
+  },
+  "camp": {
+   "tents": "tent",
+   "fire": "firepit",
+   "shelter": "shieling",
+   "crates": [
+    "crate1",
+    "peat"
+   ],
+   "tentScale": 1.25
+  },
+  "lantern": {
+   "key": "lantern",
+   "every": 40
+  },
+  "objects": {
+   "waystone": "waystone",
+   "cache": "cache",
+   "plaque": "notice"
+  },
+  "tint": {
+   "crag1": [
+    0.66,
+    0.64,
+    0.66
+   ],
+   "crag2": [
+    0.66,
+    0.64,
+    0.66
+   ],
+   "crag4": [
+    0.66,
+    0.64,
+    0.66
+   ]
+  },
+  "kits": {
+   "waystone": "whitehorn_range/kit-horn-waystone-1",
+   "cache": "four_gates/kit-crate-stack-1",
+   "notice": "amberwood/kit-notice-board-1",
+   "firepit": "sunmane_steppe/kit-fire-pit",
+   "shelter": "whitehorn_range/kit-firewood-shelter-1",
+   "crate1": "whitehorn_range/kit-supply-crate-1",
+   "crate2": "whitehorn_range/kit-supply-crate-2",
+   "barrels": "four_gates/kit-barrel-stack-1",
+   "snag": "grey_moors/kit-raven-snag-1",
+   "thorn1": "grey_moors/kit-dead-thorn-1",
+   "thorn2": "grey_moors/kit-dead-thorn-2",
+   "windpine": "grey_moors/kit-windbent-pine-tree-1",
+   "bogoak": "grey_moors/kit-bog-oak-stump-1",
+   "pine": "grey_moors/kit-mountain-pine-tree-1",
+   "birch": "grey_moors/kit-golden-birch-tree-1",
+   "heather1": "grey_moors/kit-heather-clump-1",
+   "heather2": "grey_moors/kit-heather-clump-2",
+   "cotton": "grey_moors/kit-cotton-grass-1",
+   "rushes": "grey_moors/kit-bog-rushes-1",
+   "tussock": "grey_moors/kit-tussock-grass-1",
+   "gorse": "grey_moors/kit-gorse-bush-1",
+   "bracken": "grey_moors/kit-bracken-patch-1",
+   "boulder1": "grey_moors/kit-mossy-boulder-1",
+   "boulder2": "grey_moors/kit-mossy-boulder-2",
+   "boulder3": "grey_moors/kit-mossy-boulder-3",
+   "lichen": "grey_moors/kit-lichen-rock-patch-1",
+   "crag1": "grey_moors/kit-mossy-crag-1",
+   "crag2": "grey_moors/kit-mossy-crag-2",
+   "crag4": "grey_moors/kit-mossy-crag-4",
+   "standing1": "grey_moors/kit-moor-standing-stone-1",
+   "standing2": "grey_moors/kit-moor-standing-stone-2",
+   "standing3": "grey_moors/kit-moor-standing-stone-3",
+   "graves": "grey_moors/kit-grave-markers-1",
+   "chapel": "grey_moors/kit-ruined-chapel-1",
+   "peat": "grey_moors/kit-peat-stack-1",
+   "peatbarrow": "grey_moors/kit-peat-barrow-1",
+   "winch": "grey_moors/kit-peat-winch-1",
+   "skeleton": "grey_moors/kit-giant-skeleton-1",
+   "shieling": "grey_moors/kit-turf-shieling-1",
+   "cairn": "grey_moors/kit-cairn-tower-1",
+   "wisp": "grey_moors/kit-wisp-lantern-1",
+   "candles": "grey_moors/kit-candle-stake-1",
+   "dyke": "grey_moors/kit-drystone-dyke-1",
+   "lantern": "grey_moors/kit-trail-lantern-post-1",
+   "tent": "whitehorn_range/kit-expedition-tent-1",
+   "BW1": "@kit/kit-bw-great-barrow-portal.glb",
+   "BW2": "@kit/kit-bw-barrow-passage.glb",
+   "BW3": "@kit/kit-bw-split-barrow.glb",
+   "BW4": "@kit/kit-bw-boardwalk.glb",
+   "BW5": "@kit/kit-bw-spired-chapel.glb"
+  },
+  "landmarks": [
+   {
+    "kit": "peat",
+    "at": [
+     100,
+     104
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "peat",
+    "at": [
+     108,
+     119
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 47
+   },
+   {
+    "kit": "peat",
+    "at": [
+     122,
+     99
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 94
+   },
+   {
+    "kit": "peat",
+    "at": [
+     132,
+     117
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 141
+   },
+   {
+    "kit": "peat",
+    "at": [
+     138,
+     107
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 188
+   },
+   {
+    "kit": "peatbarrow",
+    "at": [
+     114,
+     113
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 30
+   },
+   {
+    "kit": "winch",
+    "at": [
+     128,
+     123
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     116,
+     110
+    ]
+   },
+   {
+    "ring": {
+     "kit": "standing1",
+     "scale": 1.5,
+     "around": [
+      236,
+      72
+     ],
+     "radius": [
+      20,
+      18
+     ],
+     "rotDeg": 0.0,
+     "n": 9,
+     "phase": 0.15
+    }
+   },
+   {
+    "kit": "BW2",
+    "at": [
+     236,
+     72
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "sink": 0.4,
+    "rot": 200
+   },
+   {
+    "line": {
+     "kit": "BW4",
+     "scale": 1.5,
+     "deck": true,
+     "from": [
+      295.64723819589915,
+      139.36296694843728
+     ],
+     "to": [
+      316.35276180410085,
+      216.63703305156272
+     ],
+     "step": "auto"
+    }
+   },
+   {
+    "kit": "skeleton",
+    "at": [
+     332,
+     172
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "scenery",
+    "rot": 40
+   },
+   {
+    "kit": "BW5",
+    "at": [
+     227.95,
+     234.07
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     214,
+     254
+    ]
+   },
+   {
+    "kit": "BW2",
+    "at": [
+     196.94,
+     278.36
+    ],
+    "scale": 0.8,
+    "solid": "footprint",
+    "group": "arena",
+    "sink": 0.4,
+    "face": [
+     214,
+     254
+    ]
+   },
+   {
+    "kit": "BW2",
+    "at": [
+     231.06,
+     229.64
+    ],
+    "scale": 0.75,
+    "solid": "footprint",
+    "group": "arena",
+    "sink": 0.4,
+    "face": [
+     214,
+     254
+    ]
+   },
+   {
+    "kit": "graves",
+    "at": [
+     192,
+     266
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "graves",
+    "at": [
+     201,
+     260
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 31
+   },
+   {
+    "kit": "graves",
+    "at": [
+     210,
+     266
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 62
+   },
+   {
+    "kit": "graves",
+    "at": [
+     219,
+     260
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 93
+   },
+   {
+    "kit": "graves",
+    "at": [
+     228,
+     266
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 124
+   },
+   {
+    "kit": "graves",
+    "at": [
+     237,
+     260
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 155
+   },
+   {
+    "kit": "candles",
+    "at": [
+     210,
+     256
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "candles",
+    "at": [
+     219,
+     253
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "BW3",
+    "at": [
+     98,
+     286
+    ],
+    "scale": 0.7,
+    "solid": "footprint",
+    "group": "arena",
+    "sink": 0.4,
+    "rot": 0
+   },
+   {
+    "kit": "standing2",
+    "at": [
+     79,
+     284
+    ],
+    "scale": 1.6,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "standing3",
+    "at": [
+     117,
+     288
+    ],
+    "scale": 1.6,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "cairn",
+    "at": [
+     78,
+     300
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "cairn",
+    "at": [
+     116,
+     272
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "BW1",
+    "at": [
+     326.5,
+     344
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "sink": 0.5,
+    "rot": 90
+   },
+   {
+    "ring": {
+     "kit": "wisp",
+     "solid": null,
+     "around": [
+      250,
+      334
+     ],
+     "radius": [
+      22,
+      17
+     ],
+     "rotDeg": 0.0,
+     "n": 8,
+     "phase": 0.4
+    }
+   },
+   {
+    "ring": {
+     "kit": "standing3",
+     "scale": 1.3,
+     "around": [
+      250,
+      334
+     ],
+     "radius": [
+      30,
+      24
+     ],
+     "rotDeg": 0.0,
+     "n": 10,
+     "phase": 0.1
+    }
+   }
+  ],
+  "meshyKit": [
+   "BW1",
+   "BW2",
+   "BW3",
+   "BW4",
+   "BW5"
+  ],
+  "labels": {
+   "plaque": [
+    "Rules of the run",
+    "One party at a time. The dead come to you; the road behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+   ],
+   "cache": "The Reeve's grave-goods",
+   "side": [
+    "The mourners' well",
+    "Mourners left a coin here for the walk back. The coins are gone. The walk back is still long."
+   ]
+  }
+ }
+}

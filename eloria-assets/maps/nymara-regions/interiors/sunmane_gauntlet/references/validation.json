@@ -1,0 +1,72 @@
+{
+  "server": {
+    "passed": 2033,
+    "subtestsPassed": 498
+  },
+  "client": {
+    "passed": 202,
+    "preExistingFailures": 88,
+    "subtestsPassed": 9305,
+    "failureIdentitiesUnchanged": true
+  },
+  "gltf": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "coplanarOverlapSquareMetres": 0,
+  "grounding": {
+    "walkableTiles": 3640,
+    "groundingMisses": 0,
+    "coverage": "Every walkable server tile checked against the exported GLB; both branches, gates, climb, court and vault checked by the route contract. Three regression cases cover ramp rays and conservative height export."
+  },
+  "runtime": {
+    "errors": 0,
+    "warnings": [
+      "GROUNDING_RAY_MISS"
+    ],
+    "warningContext": "The sampler includes the blocked void outside the authored route."
+  },
+  "determinism": {
+    "world.glb": {
+      "identical": true,
+      "sha256": "e91db72d215831ac9f2de3e3d8ba71306e01d8034d7300d0dd3026a25b29a1ad"
+    },
+    "world.json": {
+      "identical": true,
+      "sha256": "0da63a91cfaae2cc87ad744c291392ef460bb1cd1f5d1b7390092d524861c25d"
+    },
+    "collision.bin": {
+      "identical": true,
+      "sha256": "813a2922e68266de264cd165451844236abf104916f9a03c079581fa7bb547a9"
+    },
+    "server-collision.bin": {
+      "identical": true,
+      "sha256": "fdaba137214a2bdadc4ad14ed280255cc342aa7d569db5ec5fb452223a7e498b"
+    }
+  },
+  "performance": {
+    "nodes": 135,
+    "meshes": 105,
+    "materials": 8,
+    "uniqueTriangles": 42713,
+    "uniqueVertices": 86442,
+    "glbBytes": 7146236
+  },
+  "captures": {
+    "count": 22,
+    "renderingMethod": "gl_compatibility",
+    "driver": "opengl3",
+    "environment": "manifest",
+    "declaredPointLights": 6
+  },
+  "layoutSync": {
+    "secondRunChangedFiles": 0,
+    "publishedRulesAndRosterPreserved": true,
+    "otherRoutesUnchanged": true
+  },
+  "cpuAffinityMask": 15,
+  "grassNormals": {
+    "facesChecked": 24,
+    "geometricAndDeclaredNormalsAgree": true
+  }
+}

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="1_1me1p"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png" id="2_qyxdu"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-normal.png" id="3_fidpq"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-orm.png" id="4_xr7b2"]
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_wlmic"]
+cull_mode = 2
+albedo_color = Color(0.78, 0.86, 0.72, 1)
+albedo_texture = ExtResource("2_qyxdu")
+orm_texture = ExtResource("4_xr7b2")
+normal_enabled = true
+normal_scale = 0.75
+normal_texture = ExtResource("3_fidpq")
+uv1_scale = Vector3(0.24, 0.24, 0.24)
+texture_filter = 5
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_1me1p")
+texture_preset = "Grass"
+rotation_degrees = -9.0
+source_material = SubResource("ORMMaterial3D_wlmic")

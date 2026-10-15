@@ -1,0 +1,133 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "verdant_stair",
+  "label": "Verdant Stair",
+  "adapter": "published-generic-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/verdant_stair/verdant_stair.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/verdant_stair/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/verdant_stair/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/verdant_stair/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/verdant_stair/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/verdant_stair/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    1100.0,
+    0.0,
+    1120.0
+  ],
+  "server": {
+    "origin": [
+      298,
+      164
+    ],
+    "cells": [
+      702,
+      702
+    ],
+    "collisionOriginMetres": [
+      -298.0,
+      164.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -296.0,
+      -238.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      349,
+      201
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        402,
+        441
+      ],
+      "previousGridSha256": "3aec53295391668ac0cc48bfd44de91bf916ae045546be58487c910e4dfa18f9"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "discovery-verdant_stair-345",
+      "discovery-verdant_stair-353",
+      "discovery-verdant_stair-357",
+      "discovery-verdant_stair-358",
+      "discovery-verdant_stair-359",
+      "discovery-verdant_stair-360",
+      "discovery-verdant_stair-361",
+      "discovery-verdant_stair-362",
+      "discovery-verdant_stair-363",
+      "discovery-verdant_stair-364",
+      "discovery-verdant_stair-365",
+      "discovery-verdant_stair-366",
+      "discovery-verdant_stair-368",
+      "discovery-verdant_stair-369",
+      "door-verdant_stair-anchor-hollow-mouth",
+      "door-verdant_stair-banyan-hollow-arch",
+      "door-verdant_stair-cenote-deeps-stair",
+      "door-verdant_stair-nine-lost-door",
+      "door-verdant_stair-physick-still-door",
+      "door-verdant_stair-stair-quarry-adit",
+      "door-verdant_stair-temple-sanctum-door",
+      "manymouth_delta--verdant_stair-verdant_stair",
+      "mirrorhold--verdant_stair-verdant_stair",
+      "ssarathi_ruins--verdant_stair-verdant_stair",
+      "sunmane_steppe--verdant_stair-verdant_stair"
+    ],
+    "requiredRouteIds": [
+      "door-verdant_stair-anchor-hollow-mouth",
+      "door-verdant_stair-banyan-hollow-arch",
+      "door-verdant_stair-cenote-deeps-stair",
+      "door-verdant_stair-nine-lost-door",
+      "door-verdant_stair-physick-still-door",
+      "door-verdant_stair-stair-quarry-adit",
+      "door-verdant_stair-temple-sanctum-door",
+      "manymouth_delta--verdant_stair-verdant_stair",
+      "mirrorhold--verdant_stair-verdant_stair",
+      "ssarathi_ruins--verdant_stair-verdant_stair",
+      "sunmane_steppe--verdant_stair-verdant_stair"
+    ],
+    "ownedPlanFeatureIds": [],
+    "ownedFerryConnectionIds": []
+  },
+  "gameplay": {
+    "runtimeBindingCount": 147,
+    "runtimePointCount": 137,
+    "existingMarkerBindingCount": 10
+  },
+  "bootstrap": {
+    "schema": "eloria-published-region-bootstrap-v1",
+    "objectCount": 776,
+    "objectIdsSha256": "94649008850a2f8ca5dfec9e7dfd63784866b69a1fae0fdca0866ee00fe875a3",
+    "visibleGameplayCount": 112,
+    "assemblies": [
+      {
+        "id": "southern_river@646",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_015_verdant_stair"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_015_verdant_stair"
+      },
+      {
+        "id": "southern_river@756",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_016_verdant_stair"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_016_verdant_stair"
+      }
+    ],
+    "water": [],
+    "bakedTerrainFeatures": [],
+    "previewUvMetresInverse": 0.17,
+    "baselineProofSha256": "b0fdf5a858dea76939c8d48d4dc725d9d3dd83223f5173bac3567f5fdde3b21f"
+  }
+}

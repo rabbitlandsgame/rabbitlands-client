@@ -1,0 +1,1229 @@
+{
+ "schema": "eloria-continent-v2-spawns-v1",
+ "map": "brambleshaw",
+ "about": "Pinned original spawn rows, partitioned by exact continent position. local remains the source of truth.",
+ "source": {
+  "sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
+  "originalSources": {
+   "sw_isle": {
+    "file": "spawn_plan_rf.json",
+    "sha256": "13dd506f5c254b91fd1fbeb7faeb707c8690d21b1d76d4e649aa63358219dc4f",
+    "schema": "eloria-continent-v2-spawn-plan-draft-1",
+    "date": "2026-10-02",
+    "note": "review fix 2026-10-03: sw-spawn-0883 re-seated onto a fully reached 3x3 tile ring (rf_sw1 asset-aware check)",
+    "diffCheck": "differs from spawn_plan.json (2026-10-02 21:57) only in sw-spawn-0883, (1718, 218) -> (1718, 219) in the pre-D2b frame, (1718, 188) -> (1718, 189) in D2b",
+    "savedCopy": "work-output/continent-v2/review/serve_inputs/spawns/spawn_plan_rf.json",
+    "originally": "session scratchpad continent_v2/content/spawns/spawn_plan_rf.json"
+   }
+  }
+ },
+ "spawns": [
+  {
+   "id": "sw-spawn-0614",
+   "creature": "rabbit",
+   "local": [
+    66.5,
+    33.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0616",
+   "creature": "rabbit",
+   "local": [
+    -192.5,
+    17.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0619",
+   "creature": "pheasant",
+   "local": [
+    -16.5,
+    36.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0621",
+   "creature": "shrew",
+   "local": [
+    1.5,
+    -86.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0622",
+   "creature": "hedgehog",
+   "local": [
+    141.5,
+    -95.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0623",
+   "creature": "stoat",
+   "local": [
+    -218.5,
+    -102.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "meadow",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0624",
+   "creature": "squirrel",
+   "local": [
+    -82.5,
+    51.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0626",
+   "creature": "rabbit",
+   "local": [
+    -180.5,
+    -114.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0627",
+   "creature": "rabbit",
+   "local": [
+    -226.5,
+    -75.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0628",
+   "creature": "stoat",
+   "local": [
+    -56.5,
+    -81.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "forest",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0630",
+   "creature": "rabbit",
+   "local": [
+    -16.5,
+    -97.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0631",
+   "creature": "rabbit",
+   "local": [
+    56.5,
+    -71.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0632",
+   "creature": "squirrel",
+   "local": [
+    109.5,
+    21.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0633",
+   "creature": "squirrel",
+   "local": [
+    -98.5,
+    75.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0636",
+   "creature": "dormouse",
+   "local": [
+    -150.5,
+    119.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0637",
+   "creature": "squirrel",
+   "local": [
+    -97.5,
+    -151.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0638",
+   "creature": "squirrel",
+   "local": [
+    -69.5,
+    28.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0639",
+   "creature": "rabbit",
+   "local": [
+    14.5,
+    10.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0640",
+   "creature": "hedgehog",
+   "local": [
+    125.5,
+    -41.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0641",
+   "creature": "dormouse",
+   "local": [
+    -69.5,
+    -0.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0642",
+   "creature": "rabbit",
+   "local": [
+    -82.5,
+    -78.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0644",
+   "creature": "dormouse",
+   "local": [
+    32.5,
+    -73.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0646",
+   "creature": "squirrel",
+   "local": [
+    -117.5,
+    91.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0650",
+   "creature": "squirrel",
+   "local": [
+    -16.5,
+    -54.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0652",
+   "creature": "pheasant",
+   "local": [
+    -251.5,
+    -130.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0657",
+   "creature": "rabbit",
+   "local": [
+    -249.5,
+    29.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0660",
+   "creature": "stoat",
+   "local": [
+    -44.5,
+    128.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "forest",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0662",
+   "creature": "rabbit",
+   "local": [
+    -262.5,
+    -17.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0663",
+   "creature": "dormouse",
+   "local": [
+    -147.5,
+    -129.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0664",
+   "creature": "stoat",
+   "local": [
+    -256.5,
+    -112.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "forest",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0665",
+   "creature": "gecko",
+   "local": [
+    -25.5,
+    79.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0666",
+   "creature": "squirrel",
+   "local": [
+    -48.5,
+    20.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0667",
+   "creature": "shrew",
+   "local": [
+    -213.5,
+    -8.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0668",
+   "creature": "hedgehog",
+   "local": [
+    -23.5,
+    120.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0669",
+   "creature": "hedgehog",
+   "local": [
+    82.5,
+    -73.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0670",
+   "creature": "shrew",
+   "local": [
+    -31.5,
+    -118.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0672",
+   "creature": "dormouse",
+   "local": [
+    21.5,
+    70.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0673",
+   "creature": "pheasant",
+   "local": [
+    -32.5,
+    -18.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0675",
+   "creature": "rabbit",
+   "local": [
+    -195.5,
+    -132.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0676",
+   "creature": "stoat",
+   "local": [
+    107.5,
+    -45.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "meadow",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0677",
+   "creature": "gecko",
+   "local": [
+    -87.5,
+    -11.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0678",
+   "creature": "gecko",
+   "local": [
+    -60.5,
+    58.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0679",
+   "creature": "squirrel",
+   "local": [
+    -248.5,
+    -89.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0680",
+   "creature": "dormouse",
+   "local": [
+    -75.5,
+    -134.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0682",
+   "creature": "rabbit",
+   "local": [
+    93.5,
+    -97.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0684",
+   "creature": "hedgehog",
+   "local": [
+    -105.5,
+    -119.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0685",
+   "creature": "hedgehog",
+   "local": [
+    -225.5,
+    -147.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0688",
+   "creature": "shrew",
+   "local": [
+    -54.5,
+    111.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0689",
+   "creature": "hedgehog",
+   "local": [
+    66.5,
+    4.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0690",
+   "creature": "shrew",
+   "local": [
+    11.5,
+    55.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0691",
+   "creature": "hedgehog",
+   "local": [
+    5.5,
+    -48.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0693",
+   "creature": "pheasant",
+   "local": [
+    -26.5,
+    4.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0694",
+   "creature": "stoat",
+   "local": [
+    -88.5,
+    32.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "forest",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0695",
+   "creature": "dormouse",
+   "local": [
+    -69.5,
+    128.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0696",
+   "creature": "dormouse",
+   "local": [
+    -222.5,
+    33.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0698",
+   "creature": "hedgehog",
+   "local": [
+    22.5,
+    97.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0699",
+   "creature": "stoat",
+   "local": [
+    -249.5,
+    92.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "forest",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0700",
+   "creature": "stoat",
+   "local": [
+    87.5,
+    -51.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "meadow",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0702",
+   "creature": "gecko",
+   "local": [
+    -67.5,
+    -40.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0704",
+   "creature": "gecko",
+   "local": [
+    45.5,
+    75.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0706",
+   "creature": "pheasant",
+   "local": [
+    46.5,
+    37.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0707",
+   "creature": "shrew",
+   "local": [
+    -76.5,
+    86.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0710",
+   "creature": "squirrel",
+   "local": [
+    -229.5,
+    -127.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0711",
+   "creature": "stoat",
+   "local": [
+    -255.5,
+    -49.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "meadow",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0712",
+   "creature": "hedgehog",
+   "local": [
+    -230.5,
+    -23.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0715",
+   "creature": "shrew",
+   "local": [
+    25.5,
+    -34.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0716",
+   "creature": "rabbit",
+   "local": [
+    -75.5,
+    -60.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0717",
+   "creature": "squirrel",
+   "local": [
+    -124.5,
+    -106.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0718",
+   "creature": "gecko",
+   "local": [
+    -216.5,
+    94.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0720",
+   "creature": "hedgehog",
+   "local": [
+    -134.5,
+    102.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0721",
+   "creature": "shrew",
+   "local": [
+    -170.5,
+    -150.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0722",
+   "creature": "dormouse",
+   "local": [
+    -120.5,
+    -143.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0723",
+   "creature": "dormouse",
+   "local": [
+    -125.5,
+    31.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0724",
+   "creature": "squirrel",
+   "local": [
+    -146.5,
+    45.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0725",
+   "creature": "stoat",
+   "local": [
+    34.5,
+    16.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "meadow",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0726",
+   "creature": "squirrel",
+   "local": [
+    -46.5,
+    -99.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0727",
+   "creature": "gecko",
+   "local": [
+    -38.5,
+    58.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0728",
+   "creature": "stoat",
+   "local": [
+    102.5,
+    -17.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 6,
+   "habitat": "forest",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0729",
+   "creature": "hedgehog",
+   "local": [
+    -98.5,
+    -93.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0730",
+   "creature": "squirrel",
+   "local": [
+    -187.5,
+    71.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0731",
+   "creature": "rabbit",
+   "local": [
+    -245.5,
+    -158.5
+   ],
+   "leash": 25,
+   "zone": "south_forest:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0732",
+   "creature": "pheasant",
+   "local": [
+    15.5,
+    132.5
+   ],
+   "leash": 35,
+   "zone": "south_forest:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0733",
+   "creature": "pheasant",
+   "local": [
+    -31.5,
+    147.5
+   ],
+   "leash": 35,
+   "zone": "south_forest:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0736",
+   "creature": "magpie",
+   "local": [
+    77.5,
+    95.5
+   ],
+   "leash": 35,
+   "zone": "south_forest:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0738",
+   "creature": "chameleon",
+   "local": [
+    48.5,
+    96.5
+   ],
+   "leash": 35,
+   "zone": "south_forest:C",
+   "band": "C",
+   "level": 4,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0739",
+   "creature": "chameleon",
+   "local": [
+    142.5,
+    19.5
+   ],
+   "leash": 35,
+   "zone": "south_forest:C",
+   "band": "C",
+   "level": 4,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0740",
+   "creature": "chameleon",
+   "local": [
+    25.5,
+    158.5
+   ],
+   "leash": 35,
+   "zone": "south_forest:C",
+   "band": "C",
+   "level": 4,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0741",
+   "creature": "crown_antler_stag",
+   "local": [
+    -119.5,
+    143.5
+   ],
+   "leash": 35,
+   "zone": "south_forest:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0742",
+   "creature": "pheasant",
+   "local": [
+    -84.5,
+    140.5
+   ],
+   "leash": 35,
+   "zone": "south_forest:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0743",
+   "creature": "gecko",
+   "local": [
+    -211.5,
+    135.5
+   ],
+   "leash": 25,
+   "zone": "south_hamlet:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0745",
+   "creature": "hedgehog",
+   "local": [
+    -272.5,
+    98.5
+   ],
+   "leash": 25,
+   "zone": "south_hamlet:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0759",
+   "creature": "gecko",
+   "local": [
+    -235.5,
+    122.5
+   ],
+   "leash": 25,
+   "zone": "south_hamlet:B",
+   "band": "B",
+   "level": 1,
+   "habitat": "rock"
+  }
+ ]
+}

@@ -1,0 +1,308 @@
+{
+ "schema": "eloria-continent-v2-server-rows-v1",
+ "about": "The fields of the continent-v2 server rows that are not coordinates, keyed by the scene marker record_id (the marker gives the position and the tile, through _continent_v2/frames.py). publish_server.py joins the two; a marker of kind npc_marker or interactive without an entry here is refused. No field may hold '|', '#' or a line break: the server's npcs.txt and interactives.txt loaders split on the pipe and do not strip inline comments.",
+ "maps": {
+  "boarsend": {
+   "npcs": {
+    "boarsend--npc-swineherd-gil-mast": {
+     "name": "Gil Mast",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 375,
+     "greeting": "Mind the sows. In this wood they have right of way, and they know it. The boars in the thicket are not mine; the boars would like that made clear.",
+     "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {}
+  },
+  "brambleshaw": {
+   "npcs": {},
+   "interactives": {}
+  },
+  "greenlight": {
+   "npcs": {
+    "greenlight--npc-ferryman-caldus": {
+     "name": "Ferryman Caldus",
+     "group": "re-homed",
+     "role": "dialogue",
+     "actorType": 310,
+     "greeting": "I keep the ferry under the green light. My lantern marks the channel when the mist closes in.",
+     "greetingSource": "the owner's pick, 2026-10-04 (continent-v2/review/isle_greetings_and_names.md section 2, the recommended line); the Four Gates line stays in the server's npcs.txt and npc_dialogue.txt for the rollback",
+     "servedFrom": "M3 home_npcs.txt; said only after the flip (home_map = landfall, eloria/home.py reword_greetings). Before it, the isle copy landing_install_isle_cast stands from M2 says the Four Gates line, and so does the rollback"
+    },
+    "greenlight--npc-causeway-warden-edda-tine": {
+     "name": "Edda Tine",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 323,
+     "greeting": "Halfway. The arches ring when the tide turns, and I light the lamps by the note. Stand a while; the causeway is longer than it looks from either end.",
+     "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {
+    "greenlight--obj-ferry-n10": {
+     "objectId": 21,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "The Landfall ferry rides at the green light's quay, bound for Crownwater. Ferryman Caldus keeps the gangplank.",
+     "portal": {
+      "destinationMap": "crownwater",
+      "oneWay": true,
+      "landing": "derived by publish_server.py: the server's eloria/continent_geography.py MAPS[destination].arrival, cross-checked against the server manifest's maps[] entry and continentGeography region and the client's legacy publication, refused unless it and its eight neighbours are walkable and steppable on the destination's vendored grid; never typed here"
+     },
+     "source": "serve plan S5 (B3 notes section 3.2); owner call 2 default: one way"
+    },
+    "greenlight--obj-shared-storage": {
+     "objectId": 22,
+     "role": "storage",
+     "target": "shared",
+     "text": "Greenlight quay storehouse opens your shared storage."
+    }
+   }
+  },
+  "hearthcroft": {
+   "npcs": {
+    "hearthcroft--npc-crofter-oyun-tarag": {
+     "name": "Oyun Tarag",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 332,
+     "greeting": "Five roads meet at my gate, and every one of them arrives hungry. Sit. The soup is barley and it costs nothing, which on this isle takes some explaining.",
+     "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {
+    "hearthcroft--obj-shared-storage": {
+     "objectId": 22,
+     "role": "storage",
+     "target": "shared",
+     "text": "Hearthcroft supply chest opens your shared storage."
+    }
+   }
+  },
+  "landfall": {
+   "npcs": {
+    "landfall--npc-toolkeeper-rowan-hale": {
+     "name": "Rowan Hale",
+     "group": "new",
+     "role": "shop",
+     "actorType": 302,
+     "greeting": "Welcome to Rowan's Tools. Pickaxes, hatchets and the tools for your next trade, all at a fair price.",
+     "servedFrom": "M1 npcs.txt"
+    },
+    "landfall--npc-bettany-orl": {
+     "name": "Bettany Orl",
+     "group": "re-homed",
+     "role": "shop",
+     "actorType": 303,
+     "greeting": "Bread, broth, and whatever the last boat was willing to say out loud. The broth is better.",
+     "greetingSource": "the owner's pick, 2026-10-04 (continent-v2/review/isle_greetings_and_names.md section 2, the recommended line); the Four Gates line stays in the server's npcs.txt and npc_dialogue.txt for the rollback",
+     "servedFrom": "M3 home_npcs.txt; said only after the flip (home_map = landfall, eloria/home.py reword_greetings). Before it, the isle copy landing_install_isle_cast stands from M2 says the Four Gates line, and so does the rollback"
+    },
+    "landfall--npc-gate-warden-ilyon": {
+     "name": "Gate Warden Ilyon",
+     "group": "re-homed",
+     "role": "guide",
+     "actorType": 308,
+     "greeting": "Every people keeps a post on this isle. Keep your weapons low and your purpose clear, and we will get on.",
+     "greetingSource": "the owner's pick, 2026-10-04 (continent-v2/review/isle_greetings_and_names.md section 2, the recommended line); the Four Gates line stays in the server's npcs.txt and npc_dialogue.txt for the rollback",
+     "servedFrom": "M3 home_npcs.txt; said only after the flip (home_map = landfall, eloria/home.py reword_greetings). Before it, the isle copy landing_install_isle_cast stands from M2 says the Four Gates line, and so does the rollback"
+    },
+    "landfall--npc-grove-keeper-ammet-sorrel": {
+     "name": "Ammet Sorrel",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 376,
+     "greeting": "Pick from the low branches. The high ones belong to the palace, and the palace has not looked up in two hundred years.",
+     "greetingSource": "tutorial/npc_dialogue_draft.txt (Part A)",
+     "servedFrom": "M1 npcs.txt"
+    },
+    "landfall--npc-register-clerk-hemmen": {
+     "name": "Register Clerk Hemmen",
+     "group": "re-homed",
+     "role": "dialogue",
+     "actorType": 312,
+     "greeting": "The Landing Register is the only document all eight peoples ever agreed to sign. Mind how you write in it.",
+     "greetingSource": "the owner's pick, 2026-10-04 (continent-v2/review/isle_greetings_and_names.md section 2, the recommended line); the Four Gates line stays in the server's npcs.txt and npc_dialogue.txt for the rollback",
+     "servedFrom": "M3 home_npcs.txt; said only after the flip (home_map = landfall, eloria/home.py reword_greetings). Before it, the isle copy landing_install_isle_cast stands from M2 says the Four Gates line, and so does the rollback"
+    },
+    "landfall--npc-temple-warden-ostrid-hollin": {
+     "name": "Ostrid Hollin",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 315,
+     "greeting": "Whoever falls on this isle wakes by the beacon, a stone's throw from my door. I count them in. I have not yet had to count anyone out.",
+     "greetingSource": "tutorial/npc_dialogue_draft.txt (Part A)",
+     "servedFrom": "M1 npcs.txt"
+    },
+    "landfall--npc-wayfinder-nesh": {
+     "name": "Wayfinder Nesh",
+     "group": "re-homed",
+     "role": "tutorial",
+     "actorType": 307,
+     "greeting": "New ashore? Then start where everyone does, and I will not have to fish you out of the lake.",
+     "greetingSource": "the owner's pick, 2026-10-04 (continent-v2/review/isle_greetings_and_names.md section 2, the recommended line); the Four Gates line stays in the server's npcs.txt and npc_dialogue.txt for the rollback",
+     "servedFrom": "M3 home_npcs.txt; said only after the flip (home_map = landfall, eloria/home.py reword_greetings). Before it, the isle copy landing_install_isle_cast stands from M2 says the Four Gates line, and so does the rollback"
+    }
+   },
+   "interactives": {
+    "landfall--obj-landing-register-desk": {
+     "objectId": 20,
+     "role": "information",
+     "target": "register",
+     "text": "The Landing Register lies open on its desk: name, road, date, and four empty lines for the countersigns.",
+     "source": "serve plan S5 (B3 notes section 7)"
+    },
+    "landfall--obj-shared-storage": {
+     "objectId": 22,
+     "role": "storage",
+     "target": "shared",
+     "text": "Landfall civic storehouse opens your shared storage."
+    }
+   }
+  },
+  "pinebrow": {
+   "npcs": {},
+   "interactives": {}
+  },
+  "ravenhead": {
+   "npcs": {},
+   "interactives": {
+    "ravenhead--obj-boat-tollholm": {
+     "objectId": 23,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "The Tollholm ferry is berthed at the end of the pier, ready to carry you across the sound to Tollholm's north jetty. The crew ask no fare.",
+     "portal": {
+      "destinationMap": "tollholm",
+      "oneWay": true,
+      "landingMarker": "tollholm--runtime-boat-landing",
+      "returnBy": "tollholm--obj-boat-ravenhead"
+     },
+     "source": "owner 2026-10-14: R5, close the eastern loop with a boat connection (landfall-audit-2026-10-14 routes F5); free crossing"
+    }
+   }
+  },
+  "reedfall": {
+   "npcs": {},
+   "interactives": {}
+  },
+  "ringholm": {
+   "npcs": {
+    "ringholm--npc-stone-keeper-ylva-stane": {
+     "name": "Ylva Stane",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 363,
+     "greeting": "Eight stones, and every one says the same thing a different way. Read them from inside the ring. That is the only way they face.",
+     "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {}
+  },
+  "saltsound": {
+   "npcs": {
+    "saltsound--npc-salter-ruha-sel": {
+     "name": "Ruha-Sel",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 358,
+     "greeting": "Mind the pans; that crust is a week of sun. Salt is what the sea leaves behind when it gives up, and here it gives up twice a day.",
+     "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {}
+  },
+  "spindle_hill": {
+   "npcs": {},
+   "interactives": {}
+  },
+  "stagheath": {
+   "npcs": {
+    "stagheath--npc-light-keeper-marta-quell": {
+     "name": "Marta Quell",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 342,
+     "greeting": "The red light is the oldest on the isle and the cheapest to insure. Mind the dog; he is the expensive part.",
+     "greetingSource": "tutorial/npc_dialogue_draft.txt (Part A)",
+     "servedFrom": "M1 npcs.txt"
+    },
+    "stagheath--npc-tavi-unhar": {
+     "name": "Tavi Unhar",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 338,
+     "greeting": "Forty-one hulls since dawn. I am not hiding. I am counting.",
+     "greetingSource": "tutorial/npc_dialogue_draft.txt (Part A)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {
+    "stagheath--obj-shared-storage": {
+     "objectId": 22,
+     "role": "storage",
+     "target": "shared",
+     "text": "Red light supply chest opens your shared storage."
+    }
+   }
+  },
+  "tollholm": {
+   "npcs": {
+    "tollholm--npc-toll-keeper-tobin-ware": {
+     "name": "Tobin Ware",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 348,
+     "greeting": "One cask in twenty of everything that leaves the holm. Not you; you are not a cask. Welcome to Tollholm.",
+     "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {
+    "tollholm--obj-shared-storage": {
+     "objectId": 22,
+     "role": "storage",
+     "target": "shared",
+     "text": "Tollholm civic storehouse opens your shared storage."
+    },
+    "tollholm--obj-boat-ravenhead": {
+     "objectId": 23,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "The Ravenhead ferry is berthed at the north jetty, ready to carry you back across the sound to Ravenhead pier. The crew ask no fare.",
+     "portal": {
+      "destinationMap": "ravenhead",
+      "oneWay": true,
+      "landingMarker": "ravenhead--runtime-boat-landing",
+      "returnBy": "ravenhead--obj-boat-tollholm"
+     },
+     "source": "owner 2026-10-14: R5, close the eastern loop with a boat connection (landfall-audit-2026-10-14 routes F5); free crossing"
+    }
+   }
+  },
+  "twinbrook": {
+   "npcs": {
+    "twinbrook--npc-sluice-keeper-odo-fenn": {
+     "name": "Odo Fenn",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 360,
+     "greeting": "This brook feeds the castle, the grove and the lake, in that order. The beavers would like to change the order.",
+     "greetingSource": "tutorial/npc_dialogue_draft.txt (Part A)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {}
+  },
+  "warrenmead": {
+   "npcs": {},
+   "interactives": {}
+  }
+ }
+}

@@ -1,0 +1,151 @@
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+WARNING: Not a PNG file
+   at: check_error (drivers/png/png_driver_common.cpp:57)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "!success" is true. Returning: ERR_FILE_CORRUPT
+   at: png_to_image (drivers/png/png_driver_common.cpp:70)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "err" is true. Returning: Ref<Image>()
+   at: load_mem_png (drivers/png/image_loader_png.cpp:60)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "image.is_null()" is true. Returning: ERR_PARSE_ERROR
+   at: _load_from_buffer (core/io/image.cpp:4559)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+WARNING: Not a PNG file
+   at: check_error (drivers/png/png_driver_common.cpp:57)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "!success" is true. Returning: ERR_FILE_CORRUPT
+   at: png_to_image (drivers/png/png_driver_common.cpp:70)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "err" is true. Returning: Ref<Image>()
+   at: load_mem_png (drivers/png/image_loader_png.cpp:60)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "image.is_null()" is true. Returning: ERR_PARSE_ERROR
+   at: _load_from_buffer (core/io/image.cpp:4559)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+WARNING: Not a PNG file
+   at: check_error (drivers/png/png_driver_common.cpp:57)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "!success" is true. Returning: ERR_FILE_CORRUPT
+   at: png_to_image (drivers/png/png_driver_common.cpp:70)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "err" is true. Returning: Ref<Image>()
+   at: load_mem_png (drivers/png/image_loader_png.cpp:60)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "image.is_null()" is true. Returning: ERR_PARSE_ERROR
+   at: _load_from_buffer (core/io/image.cpp:4559)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+WARNING: Not a PNG file
+   at: check_error (drivers/png/png_driver_common.cpp:57)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "!success" is true. Returning: ERR_FILE_CORRUPT
+   at: png_to_image (drivers/png/png_driver_common.cpp:70)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "err" is true. Returning: Ref<Image>()
+   at: load_mem_png (drivers/png/image_loader_png.cpp:60)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+ERROR: Condition "image.is_null()" is true. Returning: ERR_PARSE_ERROR
+   at: _load_from_buffer (core/io/image.cpp:4559)
+   GDScript backtrace (most recent call first):
+       [0] _equipment_pieces (res://src/actors/replicated_actor_3d.gd:2390)
+       [1] _equipment_instance (res://src/actors/replicated_actor_3d.gd:1660)
+       [2] _attach_socketed_equipment (res://src/actors/replicated_actor_3d.gd:1584)
+       [3] _create_equipment_part (res://src/actors/replicated_actor_3d.gd:1256)
+       [4] apply_equipment_visuals (res://src/actors/replicated_actor_3d.gd:1165)
+       [5] run (res://tests/integration/equipment_fit_profiles.gd:56)
+EQUIPMENT_FIT_PROFILES checks=8425 failures=0

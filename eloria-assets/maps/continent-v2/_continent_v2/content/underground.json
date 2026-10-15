@@ -1,0 +1,42 @@
+{
+  "schema": "eloria-landfall-underground-v1",
+  "map": {"id": "landfall_insides", "name": "Landfall Underground", "alias": "LFI", "cells": 240},
+  "sections": [
+    {
+      "id": "lantern_mine", "name": "Lantern Mine", "style": "mine", "danger": "Safe working mine",
+      "entrance": {"map": "landfall", "marker": "landfall--lantern-mine-door", "object": 59001, "tile": [332,86], "position": [50.5,106.15,161.5], "returnTile": [332,81]},
+      "arrival": [55,32], "exit": [55,26],
+      "rooms": [[55,32,8,8],[55,53,14,12],[32,60,9,10],[80,64,10,12],[55,85,10,8]],
+      "links": [[0,1,6],[1,2,5],[1,3,5],[1,4,5]],
+      "nodes": [[1001,"Coal",29,57],[1002,"Coal",35,64],[1003,"Coal",47,50],[1004,"Coal",62,57],[1005,"Coal",50,84],[1006,"Coal",59,87],[1007,"Iron Ore",77,61],[1008,"Iron Ore",83,68],[1009,"Iron Ore",80,73],[1010,"Quartz",35,55]],
+      "spawns": []
+    },
+    {
+      "id": "pinebrow_workings", "name": "Pinebrow Deep Workings", "style": "mine", "danger": "Kobolds and spiders in the lower cuts",
+      "entrance": {"map": "pinebrow", "marker": "pinebrow--deep-workings-door", "object": 59002, "tile": [537,490], "position": [128.5,155.95,-96.5], "returnTile": [537,485]},
+      "arrival": [177,32], "exit": [177,26],
+      "rooms": [[177,33,9,9],[177,55,13,12],[153,64,10,10],[199,64,10,10],[177,86,14,10]],
+      "links": [[0,1,6],[1,2,5],[1,3,5],[1,4,6]],
+      "nodes": [[1101,"Coal",173,52],[1102,"Coal",182,58],[1103,"Iron Ore",149,60],[1104,"Iron Ore",157,68],[1105,"Iron Ore",150,69],[1106,"Copper",195,60],[1107,"Copper",203,68],[1108,"Copper",168,88],[1109,"Sulfur",185,90],[1110,"Slate",181,82]],
+      "spawns": [["coal_kobold",174,87,6],["coal_kobold",184,86,6],["nightweave_spider",199,64,5]]
+    },
+    {
+      "id": "spindle_cavern", "name": "Spindle Mineral Cavern", "style": "crystal", "danger": "Cave spiders and a moss golem",
+      "entrance": {"map": "spindle_hill", "marker": "spindle-hill--mineral-cavern-door", "object": 59003, "tile": [104,346], "position": [-45.5,85.7,-6.5], "returnTile": [104,341]},
+      "arrival": [55,153], "exit": [55,147],
+      "rooms": [[55,154,8,9],[55,178,18,15],[31,188,10,10],[67,206,12,10]],
+      "links": [[0,1,6],[1,2,6],[1,3,6]],
+      "nodes": [[1201,"Quartz",49,170],[1202,"Quartz",60,172],[1203,"Salt",46,182],[1204,"Salt",63,185],[1205,"Slate",53,187],[1206,"Sulfur",27,184],[1207,"Crystal",34,192],[1208,"Crystal",62,204],[1209,"Geode",72,208],[1210,"Geode",65,212]],
+      "spawns": [["crystal_cave_spider",30,189,5],["crystal_cave_spider",63,197,5],["mossbound_stone_golem",69,204,5]]
+    },
+    {
+      "id": "boarsend_barrow", "name": "Boarsend Old Barrow", "style": "barrow", "danger": "Skeletons beyond the burial hall",
+      "entrance": {"map": "boarsend", "marker": "boarsend--old-barrow-door", "object": 59004, "tile": [825,489], "position": [143.5,144.35,-60.5], "returnTile": [825,484]},
+      "arrival": [177,153], "exit": [177,147],
+      "rooms": [[177,154,8,9],[177,178,9,12],[153,177,9,9],[201,182,10,10],[177,209,13,10]],
+      "links": [[0,1,6],[1,2,5],[1,3,5],[1,4,6]],
+      "nodes": [[1301,"Quartz",149,180],[1302,"Salt",204,185]],
+      "spawns": [["skeleton",171,209,5],["skeleton",183,209,5],["mossbound_stone_golem",200,178,4]]
+    }
+  ]
+}

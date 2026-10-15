@@ -1,0 +1,238 @@
+{
+ "schemaVersion": 1,
+ "asset": {
+  "id": "ravenhead",
+  "name": "Ravenhead",
+  "glb": "world.glb",
+  "units": "meters",
+  "seaLevel": 0.0
+ },
+ "productionStatus": "continent-v2-editor-source",
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   2505.0,
+   0.0,
+   7096.0
+  ],
+  "ownershipPolygon": [
+   [
+    1939,
+    6849
+   ],
+   [
+    2259,
+    6717
+   ],
+   [
+    2259,
+    6521
+   ],
+   [
+    1919,
+    6781
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     1939,
+     6849
+    ],
+    [
+     2259,
+     6717
+    ],
+    [
+     2259,
+     6521
+    ],
+    [
+     1919,
+     6781
+    ]
+   ],
+   [
+    [
+     2719,
+     7671
+    ],
+    [
+     2729,
+     7671
+    ],
+    [
+     3161,
+     7671
+    ],
+    [
+     3161,
+     7171
+    ],
+    [
+     2729,
+     7171
+    ],
+    [
+     2479,
+     7171
+    ],
+    [
+     2409,
+     7101
+    ],
+    [
+     2289,
+     6981
+    ],
+    [
+     2259,
+     6921
+    ],
+    [
+     2259,
+     6789
+    ],
+    [
+     1959,
+     6919
+    ],
+    [
+     1959,
+     6921
+    ],
+    [
+     1949,
+     7221
+    ],
+    [
+     1849,
+     7371
+    ],
+    [
+     1899,
+     7671
+    ],
+    [
+     2437,
+     7671
+    ]
+   ]
+  ],
+  "geometryMode": "continent-v2-editor-source"
+ },
+ "server": {
+  "origin": [
+   660,
+   579
+  ],
+  "cells": [
+   1320,
+   1320
+  ],
+  "collisionOriginMetres": [
+   -660.0,
+   579.0
+  ]
+ },
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.22,
+    0.3,
+    0.42
+   ],
+   "horizon": [
+    0.58,
+    0.6,
+    0.62
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.42,
+    0.62,
+    0.66
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    0.92,
+    0.92,
+    0.95
+   ],
+   "energy": 0.98
+  },
+  "ambient": {
+   "color": [
+    0.55,
+    0.6,
+    0.66
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.05,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.55,
+    0.58,
+    0.62
+   ],
+   "density": 0.0008,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  }
+ }
+}

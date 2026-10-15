@@ -1,0 +1,171 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 6,
+    "walkSurfaceTriangles": 3264,
+    "tilesSampled": 88209,
+    "groundingMisses": 73091,
+    "groundingMissFraction": 0.82861,
+    "surfaceDiscontinuities": 227,
+    "spawnPoints": 5
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_RAY_MISS",
+      "message": "73091 server tiles have no walk surface under them; a character there would fall back to walkingHeight=0.0",
+      "detail": [
+        [
+          0,
+          0,
+          13.0,
+          316.0
+        ],
+        [
+          1,
+          0,
+          14.0,
+          316.0
+        ],
+        [
+          2,
+          0,
+          15.0,
+          316.0
+        ],
+        [
+          3,
+          0,
+          16.0,
+          316.0
+        ],
+        [
+          4,
+          0,
+          17.0,
+          316.0
+        ],
+        [
+          5,
+          0,
+          18.0,
+          316.0
+        ],
+        [
+          6,
+          0,
+          19.0,
+          316.0
+        ],
+        [
+          7,
+          0,
+          20.0,
+          316.0
+        ],
+        [
+          8,
+          0,
+          21.0,
+          316.0
+        ],
+        [
+          9,
+          0,
+          22.0,
+          316.0
+        ],
+        [
+          10,
+          0,
+          23.0,
+          316.0
+        ],
+        [
+          11,
+          0,
+          24.0,
+          316.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "227 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          206,
+          281,
+          15.11
+        ],
+        [
+          207,
+          281,
+          15.11
+        ],
+        [
+          208,
+          281,
+          15.11
+        ],
+        [
+          208,
+          282,
+          15.11
+        ],
+        [
+          205,
+          282,
+          15.11
+        ],
+        [
+          208,
+          282,
+          15.11
+        ],
+        [
+          205,
+          283,
+          14.87
+        ],
+        [
+          207,
+          283,
+          14.87
+        ],
+        [
+          205,
+          284,
+          14.63
+        ],
+        [
+          207,
+          284,
+          14.63
+        ],
+        [
+          205,
+          285,
+          14.38
+        ],
+        [
+          207,
+          285,
+          14.38
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_FLOATING",
+      "message": "1 landmarks sit more than 3 m above the walk surface",
+      "detail": [
+        {
+          "id": "the-hollow",
+          "gap": 3.0
+        }
+      ]
+    }
+  ]
+}

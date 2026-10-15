@@ -1,0 +1,181 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 61,
+    "walkSurfaceTriangles": 499475,
+    "tilesSampled": 147456,
+    "groundingMisses": 448,
+    "groundingMissFraction": 0.00304,
+    "surfaceDiscontinuities": 132,
+    "spawnPoints": 10
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_RAY_MISS",
+      "message": "448 server tiles have no walk surface under them; a character there would fall back to walkingHeight=1.45",
+      "detail": [
+        [
+          381,
+          165,
+          265.0,
+          -49.0
+        ],
+        [
+          382,
+          165,
+          266.0,
+          -49.0
+        ],
+        [
+          383,
+          165,
+          267.0,
+          -49.0
+        ],
+        [
+          381,
+          166,
+          265.0,
+          -50.0
+        ],
+        [
+          382,
+          166,
+          266.0,
+          -50.0
+        ],
+        [
+          383,
+          166,
+          267.0,
+          -50.0
+        ],
+        [
+          381,
+          167,
+          265.0,
+          -51.0
+        ],
+        [
+          382,
+          167,
+          266.0,
+          -51.0
+        ],
+        [
+          383,
+          167,
+          267.0,
+          -51.0
+        ],
+        [
+          381,
+          168,
+          265.0,
+          -52.0
+        ],
+        [
+          382,
+          168,
+          266.0,
+          -52.0
+        ],
+        [
+          383,
+          168,
+          267.0,
+          -52.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "132 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          141,
+          313,
+          35.32
+        ],
+        [
+          142,
+          313,
+          35.32
+        ],
+        [
+          143,
+          313,
+          35.32
+        ],
+        [
+          144,
+          313,
+          35.32
+        ],
+        [
+          145,
+          313,
+          35.32
+        ],
+        [
+          146,
+          313,
+          35.32
+        ],
+        [
+          147,
+          313,
+          35.32
+        ],
+        [
+          148,
+          313,
+          35.32
+        ],
+        [
+          149,
+          313,
+          35.32
+        ],
+        [
+          150,
+          313,
+          35.32
+        ],
+        [
+          151,
+          313,
+          35.32
+        ],
+        [
+          152,
+          313,
+          35.32
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_BELOW_SURFACE",
+      "message": "landmark 'great-temple' is 35.32 m below the surface",
+      "detail": [
+        40.0,
+        21.0,
+        -182.0
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_FLOATING",
+      "message": "1 landmarks sit more than 3 m above the walk surface",
+      "detail": [
+        {
+          "id": "east-falls",
+          "gap": 22.01
+        }
+      ]
+    }
+  ]
+}

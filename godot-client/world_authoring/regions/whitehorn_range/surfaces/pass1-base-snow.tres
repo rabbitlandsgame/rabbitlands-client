@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="1_surface"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/texture_packs/alpine-snow-crust/alpine-snow-crust-v002.png" id="2_albedo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.60, 0.67, 0.75, 1)
+albedo_texture = ExtResource("2_albedo")
+roughness = 0.96
+metallic = 0.0
+vertex_color_use_as_albedo = true
+uv1_scale = Vector3(1.4705882, 1.4705882, 1)
+uv1_offset = Vector3(0.5, 0.4, 0)
+texture_filter = 5
+cull_mode = 2
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_surface")
+texture_preset = "Alpine snow crust"
+biome_blend_enabled = true
+rotation_degrees = 0.0
+source_material = SubResource("StandardMaterial3D_ground")

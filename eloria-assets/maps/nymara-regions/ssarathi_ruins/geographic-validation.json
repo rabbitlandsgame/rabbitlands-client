@@ -1,0 +1,40 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 111,
+    "walkSurfaceTriangles": 716312,
+    "tilesSampled": 77114,
+    "actorTileOffset": [
+      0.5,
+      0.5
+    ],
+    "walkableServerTiles": 77114,
+    "groundingMisses": 0,
+    "groundingMissFraction": 0.0,
+    "surfaceDiscontinuities": 0,
+    "spawnPoints": 10
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "LANDMARK_BELOW_SURFACE",
+      "message": "landmark 'great-temple' is 35.32 m below the surface",
+      "detail": [
+        40.0,
+        21.0,
+        -182.0
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_FLOATING",
+      "message": "1 landmarks sit more than 3 m above the walk surface",
+      "detail": [
+        {
+          "id": "east-falls",
+          "gap": 22.01
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2606 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "westhaven_insides",
+    "name": "Westhaven Insides",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        7.45,
+        -10.66,
+        21.45
+      ],
+      "max": [
+        242.55,
+        26.2,
+        262.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        7.45,
+        -8.8,
+        21.45
+      ],
+      "max": [
+        242.55,
+        18.4,
+        262.55
+      ]
+    },
+    "interiorClass": "insides",
+    "parentRegion": "westhaven",
+    "serverCells": 246
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      -5.0,
+      265.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        40.0,
+        0.05,
+        30.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "custom-house-hall",
+      "name": "The Custom House",
+      "position": [
+        40.0,
+        0.05,
+        30.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "custom_house"
+    },
+    {
+      "id": "bonded-vaults-tunnel",
+      "name": "The Bonded Vaults",
+      "position": [
+        150.0,
+        0.05,
+        29.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "bonded_vaults"
+    },
+    {
+      "id": "lamp-rock-foot",
+      "name": "The Lamp Rock Light",
+      "position": [
+        160.0,
+        0.05,
+        170.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "lamp_rock_light"
+    },
+    {
+      "id": "gullstone-cleft",
+      "name": "The Gullstone Undertow",
+      "position": [
+        40.0,
+        0.05,
+        170.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "gullstone_cave"
+    },
+    {
+      "id": "gullscar-farmhouse-door",
+      "name": "The Gullscar Farmhouse",
+      "position": [
+        218.0,
+        0.05,
+        171.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "gullscar_farmhouse"
+    },
+    {
+      "id": "haven-undercroft-door",
+      "name": "The Haven Undercroft",
+      "position": [
+        218.0,
+        0.05,
+        120.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "haven_undercroft"
+    },
+    {
+      "id": "salvage-hole-mouth",
+      "name": "The Salvage Hole",
+      "position": [
+        218.0,
+        0.05,
+        36.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "salvage_hole"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 480,
+    "height": 492,
+    "cellMetres": 0.5,
+    "originMetres": [
+      5.0,
+      265.0
+    ],
+    "heightEncoding": {
+      "origin": -8.839,
+      "step": 0.4393,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 40488,
+    "blockedCells": 195672,
+    "walkableFraction": 0.1714,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_westhaven_insides",
+      "Roof_westhaven_insides_ashlar",
+      "Roof_westhaven_insides_cliff_rock",
+      "Roof_westhaven_insides_dark_iron",
+      "Roof_westhaven_insides_lime_plaster",
+      "Roof_westhaven_insides_rubble_stone",
+      "Roof_westhaven_insides_timber_dark",
+      "Roof_westhaven_insides_westhaven_sea_rock",
+      "Build_westhaven_insides_amber_resin",
+      "Build_westhaven_insides_ashlar",
+      "Build_westhaven_insides_bark_dark",
+      "Build_westhaven_insides_canvas_awning",
+      "Build_westhaven_insides_carved_wood",
+      "Build_westhaven_insides_cliff_rock",
+      "Build_westhaven_insides_dark_iron",
+      "Build_westhaven_insides_lime_plaster",
+      "Build_westhaven_insides_pale_ashlar",
+      "Build_westhaven_insides_rubble_stone",
+      "Build_westhaven_insides_thatch_reed",
+      "Build_westhaven_insides_timber_dark",
+      "Build_westhaven_insides_timber_grey",
+      "Build_westhaven_insides_timber_warm",
+      "Build_westhaven_insides_water_deep",
+      "Build_westhaven_insides_westhaven_brass",
+      "Build_westhaven_insides_westhaven_quay_plank",
+      "Build_westhaven_insides_westhaven_sea_rock",
+      "Build_westhaven_insides_woven_cloth"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_westhaven_insides_ashlar",
+      "Roof_westhaven_insides_cliff_rock",
+      "Roof_westhaven_insides_dark_iron",
+      "Roof_westhaven_insides_lime_plaster",
+      "Roof_westhaven_insides_rubble_stone",
+      "Roof_westhaven_insides_timber_dark",
+      "Roof_westhaven_insides_westhaven_sea_rock"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-custom-house-hall",
+      "name": "Return to Westhaven",
+      "type": "map-transition",
+      "position": [
+        40.0,
+        0.05,
+        30.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "westhaven",
+      "destinationSpawn": "custom-house-hall",
+      "section": "custom_house",
+      "authority": "server"
+    },
+    {
+      "id": "exit-bonded-vaults-tunnel",
+      "name": "Return to Westhaven",
+      "type": "map-transition",
+      "position": [
+        150.0,
+        0.05,
+        29.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "westhaven",
+      "destinationSpawn": "bonded-vaults-tunnel",
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "exit-lamp-rock-foot",
+      "name": "Return to Westhaven",
+      "type": "map-transition",
+      "position": [
+        160.0,
+        0.05,
+        170.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "westhaven",
+      "destinationSpawn": "lamp-rock-foot",
+      "section": "lamp_rock_light",
+      "authority": "server"
+    },
+    {
+      "id": "exit-gullstone-cleft",
+      "name": "Return to Westhaven",
+      "type": "map-transition",
+      "position": [
+        40.0,
+        0.05,
+        170.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "westhaven",
+      "destinationSpawn": "gullstone-cleft",
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "exit-gullscar-farmhouse-door",
+      "name": "Return to Westhaven",
+      "type": "map-transition",
+      "position": [
+        218.0,
+        0.05,
+        171.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "westhaven",
+      "destinationSpawn": "gullscar-farmhouse-door",
+      "section": "gullscar_farmhouse",
+      "authority": "server"
+    },
+    {
+      "id": "exit-haven-undercroft-door",
+      "name": "Return to Westhaven",
+      "type": "map-transition",
+      "position": [
+        218.0,
+        0.05,
+        120.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "westhaven",
+      "destinationSpawn": "haven-undercroft-door",
+      "section": "haven_undercroft",
+      "authority": "server"
+    },
+    {
+      "id": "exit-salvage-hole-mouth",
+      "name": "Return to Westhaven",
+      "type": "map-transition",
+      "position": [
+        218.0,
+        0.05,
+        36.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "westhaven",
+      "destinationSpawn": "salvage-hole-mouth",
+      "section": "salvage_hole",
+      "authority": "server"
+    }
+  ],
+  "sections": [
+    {
+      "id": "custom_house",
+      "name": "The Custom House",
+      "class": "civic",
+      "offset": [
+        40.0,
+        0.0,
+        30.0
+      ],
+      "arrival": [
+        40.0,
+        0.05,
+        30.0
+      ],
+      "surfaceLandmark": "custom-house-door",
+      "spaces": [
+        "custom_house.hall",
+        "custom_house.ledgers",
+        "custom_house.weighing",
+        "custom_house.strongroom",
+        "custom_house.loft",
+        "custom_house.entry_run",
+        "custom_house.weigh_way",
+        "custom_house.vault_way",
+        "custom_house.loft_stair"
+      ],
+      "notes": [
+        "Dressed ashlar, polished oak, brass and glass. The one warm, orderly, occupied place of the four."
+      ],
+      "surfacePosition": [
+        -72.75,
+        3.5,
+        -9.25
+      ]
+    },
+    {
+      "id": "bonded_vaults",
+      "name": "The Bonded Vaults",
+      "class": "stores",
+      "offset": [
+        150.0,
+        0.0,
+        30.0
+      ],
+      "arrival": [
+        150.0,
+        0.05,
+        29.0
+      ],
+      "surfaceLandmark": "bonded-vaults-door",
+      "spaces": [
+        "bonded_vaults.tunnel_head",
+        "bonded_vaults.bay_a",
+        "bonded_vaults.bay_b",
+        "bonded_vaults.hoist",
+        "bonded_vaults.tally",
+        "bonded_vaults.sump",
+        "bonded_vaults.descent",
+        "bonded_vaults.bays",
+        "bonded_vaults.hoistway",
+        "bonded_vaults.tallyway",
+        "bonded_vaults.sumpway"
+      ],
+      "notes": [
+        "Brick barrel vaults, cargo, damp and no daylight. The seaward end floods: the sump's water is at -4.55, half a metre over its floor."
+      ],
+      "surfacePosition": [
+        -40.08,
+        9.6,
+        -35.28
+      ]
+    },
+    {
+      "id": "lamp_rock_light",
+      "name": "The Lamp Rock Light",
+      "class": "tower",
+      "offset": [
+        160.0,
+        0.0,
+        170.0
+      ],
+      "arrival": [
+        160.0,
+        0.05,
+        170.0
+      ],
+      "surfaceLandmark": "lamp-rock-door",
+      "spaces": [
+        "lamp_rock_light.foot",
+        "lamp_rock_light.oilstore",
+        "lamp_rock_light.mid_landing",
+        "lamp_rock_light.watchroom",
+        "lamp_rock_light.lantern",
+        "lamp_rock_light.gallery",
+        "lamp_rock_light.oilway",
+        "lamp_rock_light.lower_stair",
+        "lamp_rock_light.upper_stair",
+        "lamp_rock_light.lantern_stair",
+        "lamp_rock_light.gallery_door"
+      ],
+      "notes": [
+        "Stone, iron and glass, and almost nothing else.",
+        "Unfolded in plan rather than stacked, because the server collision grid is 2-D and a stacked tower makes every space but the top one unreachable."
+      ],
+      "surfacePosition": [
+        295.44,
+        18.08,
+        120.24
+      ]
+    },
+    {
+      "id": "gullstone_cave",
+      "name": "The Gullstone Undertow",
+      "class": "cave",
+      "offset": [
+        40.0,
+        0.0,
+        170.0
+      ],
+      "arrival": [
+        40.0,
+        0.05,
+        170.0
+      ],
+      "surfaceLandmark": "gullstone-door",
+      "spaces": [
+        "gullstone_cave.cleft",
+        "gullstone_cave.cavern",
+        "gullstone_cave.beach",
+        "gullstone_cave.stash",
+        "gullstone_cave.blowhole",
+        "gullstone_cave.descent",
+        "gullstone_cave.beachway",
+        "gullstone_cave.stashway",
+        "gullstone_cave.blowway"
+      ],
+      "notes": [
+        "No dressed stone and no straight line except a boat's keel and one timber staging.",
+        "Boulders are placed on a radial falloff from the walked centre line, so the rock is dense at the walls and thin where the route runs."
+      ],
+      "surfacePosition": [
+        -79.75,
+        33.03,
+        100.75
+      ]
+    },
+    {
+      "id": "gullscar_farmhouse",
+      "name": "The Gullscar Farmhouse",
+      "class": "dwelling",
+      "offset": [
+        218.0,
+        0.0,
+        170.0
+      ],
+      "arrival": [
+        218.0,
+        0.05,
+        171.0
+      ],
+      "surfaceLandmark": "gullscar-farmhouse-door",
+      "spaces": [
+        "gullscar_farmhouse.hall",
+        "gullscar_farmhouse.back"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: a hall with a hearth and a back room for its trade (hearth)."
+      ],
+      "surfacePosition": [
+        216.24,
+        38.1,
+        -245.52
+      ]
+    },
+    {
+      "id": "haven_undercroft",
+      "name": "The Haven Undercroft",
+      "class": "shrine",
+      "offset": [
+        218.0,
+        0.0,
+        120.0
+      ],
+      "arrival": [
+        218.0,
+        0.05,
+        120.0
+      ],
+      "surfaceLandmark": "haven-undercroft-door",
+      "spaces": [
+        "haven_undercroft.porch",
+        "haven_undercroft.nave",
+        "haven_undercroft.aisle",
+        "haven_undercroft.crypt",
+        "haven_undercroft.crypt-stair"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: a cut sanctuary in the lantern manner, with a crypt of niches below."
+      ],
+      "surfacePosition": [
+        59.28,
+        41.1,
+        -136.08
+      ]
+    },
+    {
+      "id": "salvage_hole",
+      "name": "The Salvage Hole",
+      "class": "cave",
+      "offset": [
+        218.0,
+        0.0,
+        36.0
+      ],
+      "arrival": [
+        218.0,
+        0.05,
+        36.0
+      ],
+      "surfaceLandmark": "salvage-hole-mouth",
+      "spaces": [
+        "salvage_hole.mouth",
+        "salvage_hole.throat",
+        "salvage_hole.chamber",
+        "salvage_hole.descent",
+        "salvage_hole.gullet"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: mouth, throat and chamber, dressed for the region above it."
+      ],
+      "surfacePosition": [
+        319.92,
+        56.57,
+        -145.44
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "westhaven-tide-board",
+      "name": "The Tide Board",
+      "space": "custom_house.hall",
+      "position": [
+        40.0,
+        1.8,
+        30.0
+      ],
+      "section": "custom_house"
+    },
+    {
+      "id": "westhaven-beam-scale",
+      "name": "The King's Beam",
+      "space": "custom_house.weighing",
+      "position": [
+        70.0,
+        3.0,
+        32.0
+      ],
+      "section": "custom_house"
+    },
+    {
+      "id": "westhaven-hoist",
+      "name": "The Bonded Hoist",
+      "space": "bonded_vaults.hoist",
+      "position": [
+        172.0,
+        -1.0,
+        54.0
+      ],
+      "section": "bonded_vaults"
+    },
+    {
+      "id": "westhaven-tide-grating",
+      "name": "The Tide Grating",
+      "space": "bonded_vaults.sump",
+      "position": [
+        150.0,
+        -4.2,
+        95.0
+      ],
+      "section": "bonded_vaults"
+    },
+    {
+      "id": "westhaven-lens",
+      "name": "The Lamp Rock Lens",
+      "space": "lamp_rock_light.lantern",
+      "position": [
+        160.0,
+        20.8,
+        233.0
+      ],
+      "section": "lamp_rock_light"
+    },
+    {
+      "id": "westhaven-watch-room",
+      "name": "The Keeper's Watch",
+      "space": "lamp_rock_light.watchroom",
+      "position": [
+        160.0,
+        13.2,
+        211.0
+      ],
+      "section": "lamp_rock_light"
+    },
+    {
+      "id": "westhaven-undertow-pool",
+      "name": "The Undertow Pool",
+      "space": "gullstone_cave.cavern",
+      "position": [
+        40.0,
+        -7.4,
+        216.0
+      ],
+      "section": "gullstone_cave"
+    },
+    {
+      "id": "westhaven-blowhole",
+      "name": "The Gullstone Blowhole",
+      "space": "gullstone_cave.blowhole",
+      "position": [
+        40.0,
+        -6.4,
+        252.0
+      ],
+      "section": "gullstone_cave"
+    },
+    {
+      "id": "westhaven_gullscar_farmhouse-hearth",
+      "name": "The Gullscar Farmhouse",
+      "space": "gullscar_farmhouse.hall",
+      "position": [
+        218.0,
+        1.4,
+        171.0
+      ],
+      "section": "gullscar_farmhouse"
+    },
+    {
+      "id": "westhaven_haven_undercroft-sanctuary",
+      "name": "The Haven Undercroft",
+      "space": "haven_undercroft.nave",
+      "position": [
+        218.0,
+        0.4,
+        142.0
+      ],
+      "section": "haven_undercroft"
+    },
+    {
+      "id": "westhaven_salvage_hole-chamber",
+      "name": "The Salvage Hole",
+      "space": "salvage_hole.chamber",
+      "position": [
+        218.0,
+        -4.0,
+        87.0
+      ],
+      "section": "salvage_hole"
+    }
+  ],
+  "interactives": [
+    {
+      "id": "westhaven-customs-counter",
+      "name": "Customs Counter",
+      "type": "workstation",
+      "position": [
+        38.0,
+        1.3,
+        31.2
+      ],
+      "section": "custom_house",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-duty-ledger",
+      "name": "Duty Ledger",
+      "type": "notice",
+      "position": [
+        40.0,
+        1.0,
+        50.0
+      ],
+      "section": "custom_house",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-kings-beam",
+      "name": "The King's Beam",
+      "type": "workstation",
+      "position": [
+        70.0,
+        2.4,
+        32.0
+      ],
+      "section": "custom_house",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-bond-chest",
+      "name": "Bond Chest",
+      "type": "container",
+      "position": [
+        71.5,
+        0.5,
+        56.0
+      ],
+      "section": "custom_house",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-tally-bench",
+      "name": "Tallyman's Bench",
+      "type": "workstation",
+      "position": [
+        131.0,
+        -2.2,
+        56.4
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-bonded-cask",
+      "name": "Bonded Cask",
+      "type": "container",
+      "position": [
+        155.0,
+        -3.0,
+        50.0
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-windlass",
+      "name": "Hoist Windlass",
+      "type": "workstation",
+      "position": [
+        172.0,
+        -3.0,
+        52.2
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-lamp-burner",
+      "name": "The Burner",
+      "type": "workstation",
+      "position": [
+        160.0,
+        19.5,
+        233.0
+      ],
+      "section": "lamp_rock_light",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-keepers-log",
+      "name": "Keeper's Log",
+      "type": "notice",
+      "position": [
+        160.0,
+        12.8,
+        210.0
+      ],
+      "section": "lamp_rock_light",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-oil-stillage",
+      "name": "Oil Stillage",
+      "type": "container",
+      "position": [
+        178.0,
+        0.4,
+        169.0
+      ],
+      "section": "lamp_rock_light",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-smugglers-cache",
+      "name": "Smugglers' Cache",
+      "type": "container",
+      "position": [
+        80.0,
+        -4.2,
+        214.0
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cave-fire",
+      "name": "Beach Fire",
+      "type": "fire",
+      "position": [
+        14.0,
+        -7.2,
+        248.0
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "secret-haven-bonded-cache",
+      "kind": "secret",
+      "secret": "haven-bonded-cache",
+      "name": "The Bonded Cache",
+      "label": "A cellar hatch under the leaves.",
+      "prop": "cellar_hatch",
+      "key": "",
+      "destinationMap": "westhaven_secrets",
+      "destinationSpawn": "haven-bonded-cache",
+      "position": [
+        152.0,
+        -3.0,
+        76.0
+      ],
+      "space": "bonded_vaults.bay_b",
+      "authority": "server"
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "westhaven-collector",
+      "name": "Collector of Customs",
+      "type": "npc",
+      "position": [
+        38.0,
+        0.0,
+        33.0
+      ],
+      "section": "custom_house",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-ledger-clerk",
+      "name": "Ledger Clerk",
+      "type": "npc",
+      "position": [
+        44.4,
+        0.0,
+        53.7
+      ],
+      "section": "custom_house",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-weighmaster",
+      "name": "Weighmaster",
+      "type": "npc",
+      "position": [
+        67.0,
+        0.0,
+        32.0
+      ],
+      "section": "custom_house",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-tallyman",
+      "name": "Tallyman",
+      "type": "npc",
+      "position": [
+        132.0,
+        -3.0,
+        54.5
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cellarman",
+      "name": "Cellarman",
+      "type": "npc",
+      "position": [
+        150.0,
+        -3.0,
+        63.0
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-lightkeeper-in",
+      "name": "Lightkeeper",
+      "type": "npc",
+      "position": [
+        160.0,
+        11.8,
+        213.0
+      ],
+      "section": "lamp_rock_light",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-free-trader",
+      "name": "Free Trader",
+      "type": "npc",
+      "position": [
+        20.0,
+        -7.6,
+        250.0
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven_salvage_hole-den",
+      "name": "Bronze Tide Crab",
+      "kind": "creature-zone",
+      "position": [
+        218.0,
+        -6.0,
+        87.0
+      ],
+      "radius": 12.0,
+      "section": "salvage_hole",
+      "authority": "server"
+    }
+  ],
+  "harvestables": [
+    {
+      "id": "westhaven-cellar-mussels-0",
+      "name": "Cellar Mussels",
+      "type": "shellfish",
+      "position": [
+        150.17,
+        -5.3,
+        93.75
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cellar-mussels-1",
+      "name": "Cellar Mussels",
+      "type": "shellfish",
+      "position": [
+        154.24,
+        -5.3,
+        91.88
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cellar-mussels-2",
+      "name": "Cellar Mussels",
+      "type": "shellfish",
+      "position": [
+        150.06,
+        -5.3,
+        89.89
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cellar-mussels-3",
+      "name": "Cellar Mussels",
+      "type": "shellfish",
+      "position": [
+        145.0,
+        -5.3,
+        99.52
+      ],
+      "section": "bonded_vaults",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cave-limpets-0",
+      "name": "Cave Limpets",
+      "type": "shellfish",
+      "position": [
+        44.07,
+        -8.3,
+        210.25
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cave-limpets-1",
+      "name": "Cave Limpets",
+      "type": "shellfish",
+      "position": [
+        29.34,
+        -8.3,
+        202.55
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cave-limpets-2",
+      "name": "Cave Limpets",
+      "type": "shellfish",
+      "position": [
+        26.82,
+        -8.3,
+        199.44
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cave-limpets-3",
+      "name": "Cave Limpets",
+      "type": "shellfish",
+      "position": [
+        54.79,
+        -8.3,
+        235.68
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-cave-limpets-4",
+      "name": "Cave Limpets",
+      "type": "shellfish",
+      "position": [
+        58.92,
+        -8.3,
+        217.93
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-driftwood-cave-0",
+      "name": "Driftwood",
+      "type": "wood",
+      "position": [
+        17.43,
+        -7.5,
+        257.44
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-driftwood-cave-1",
+      "name": "Driftwood",
+      "type": "wood",
+      "position": [
+        26.53,
+        -7.5,
+        251.33
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    },
+    {
+      "id": "westhaven-driftwood-cave-2",
+      "name": "Driftwood",
+      "type": "wood",
+      "position": [
+        24.73,
+        -7.5,
+        251.96
+      ],
+      "section": "gullstone_cave",
+      "authority": "server"
+    }
+  ],
+  "lights": [
+    {
+      "id": "lantern-00",
+      "kind": "point",
+      "position": [
+        40.0,
+        3.6,
+        30.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-01",
+      "kind": "point",
+      "position": [
+        40.0,
+        3.6,
+        34.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-02",
+      "kind": "point",
+      "position": [
+        40.0,
+        3.4,
+        48.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-03",
+      "kind": "point",
+      "position": [
+        40.0,
+        3.4,
+        55.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-04",
+      "kind": "point",
+      "position": [
+        40.0,
+        3.4,
+        62.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-05",
+      "kind": "point",
+      "position": [
+        70.0,
+        5.4,
+        32.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-06",
+      "kind": "point",
+      "position": [
+        64.0,
+        4.6,
+        38.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-07",
+      "kind": "point",
+      "position": [
+        76.0,
+        4.6,
+        26.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-08",
+      "kind": "point",
+      "position": [
+        68.0,
+        2.6,
+        56.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-09",
+      "kind": "point",
+      "position": [
+        40.0,
+        8.4,
+        78.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-10",
+      "kind": "point",
+      "position": [
+        40.0,
+        8.4,
+        85.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-11",
+      "kind": "point",
+      "position": [
+        150.0,
+        0.6,
+        48.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-12",
+      "kind": "point",
+      "position": [
+        150.0,
+        0.6,
+        57.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-13",
+      "kind": "point",
+      "position": [
+        150.0,
+        0.6,
+        70.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-14",
+      "kind": "point",
+      "position": [
+        150.0,
+        0.6,
+        79.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-15",
+      "kind": "point",
+      "position": [
+        169.0,
+        0.0,
+        54.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-16",
+      "kind": "point",
+      "position": [
+        131.0,
+        -0.6,
+        54.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-17",
+      "kind": "point",
+      "position": [
+        150.0,
+        -3.4,
+        90.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-18",
+      "kind": "point",
+      "position": [
+        160.0,
+        3.4,
+        170.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-19",
+      "kind": "point",
+      "position": [
+        178.0,
+        2.6,
+        169.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-20",
+      "kind": "point",
+      "position": [
+        160.0,
+        8.6,
+        191.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-21",
+      "kind": "point",
+      "position": [
+        160.0,
+        15.2,
+        210.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-22",
+      "kind": "point",
+      "position": [
+        160.0,
+        15.2,
+        215.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-23",
+      "kind": "point",
+      "position": [
+        160.0,
+        21.0,
+        233.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-24",
+      "kind": "point",
+      "position": [
+        160.0,
+        20.4,
+        246.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-25",
+      "kind": "point",
+      "position": [
+        24.0,
+        -5.4,
+        197.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 26.0,
+      "energy": 2.2
+    },
+    {
+      "id": "lantern-26",
+      "kind": "point",
+      "position": [
+        22.0,
+        -5.4,
+        208.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 26.0,
+      "energy": 2.2
+    },
+    {
+      "id": "lantern-27",
+      "kind": "point",
+      "position": [
+        23.0,
+        -5.4,
+        220.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 26.0,
+      "energy": 2.2
+    },
+    {
+      "id": "lantern-28",
+      "kind": "point",
+      "position": [
+        26.0,
+        -5.4,
+        232.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 24.0,
+      "energy": 2.0
+    },
+    {
+      "id": "lantern-29",
+      "kind": "point",
+      "position": [
+        42.0,
+        -5.8,
+        203.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 22.0,
+      "energy": 1.8
+    },
+    {
+      "id": "lantern-30",
+      "kind": "point",
+      "position": [
+        46.0,
+        -5.8,
+        226.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 22.0,
+      "energy": 1.8
+    },
+    {
+      "id": "lantern-31",
+      "kind": "point",
+      "position": [
+        18.0,
+        -5.6,
+        252.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 18.0,
+      "energy": 2.0
+    },
+    {
+      "id": "lantern-32",
+      "kind": "point",
+      "position": [
+        13.5,
+        -6.2,
+        248.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 16.0,
+      "energy": 2.4
+    },
+    {
+      "id": "lantern-33",
+      "kind": "point",
+      "position": [
+        24.0,
+        -5.8,
+        256.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 16.0,
+      "energy": 1.8
+    },
+    {
+      "id": "lantern-34",
+      "kind": "point",
+      "position": [
+        80.0,
+        -3.0,
+        216.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 14.0,
+      "energy": 1.7
+    },
+    {
+      "id": "lantern-35",
+      "kind": "point",
+      "position": [
+        77.0,
+        -3.2,
+        212.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 12.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-36",
+      "kind": "point",
+      "position": [
+        84.0,
+        -3.2,
+        219.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 12.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-37",
+      "kind": "point",
+      "position": [
+        40.0,
+        -5.0,
+        252.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 20.0,
+      "energy": 1.9
+    },
+    {
+      "id": "lantern-38",
+      "kind": "point",
+      "position": [
+        36.5,
+        -6.4,
+        249.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 15.0,
+      "energy": 1.6
+    },
+    {
+      "id": "lantern-39",
+      "kind": "point",
+      "position": [
+        43.5,
+        -6.4,
+        255.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 15.0,
+      "energy": 1.6
+    },
+    {
+      "id": "lantern-40",
+      "kind": "point",
+      "position": [
+        218.0,
+        2.28,
+        171.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-41",
+      "kind": "point",
+      "position": [
+        219.0,
+        1.98,
+        179.28
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-42",
+      "kind": "point",
+      "position": [
+        218.0,
+        2.78,
+        120.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-43",
+      "kind": "point",
+      "position": [
+        213.0,
+        2.98,
+        136.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-44",
+      "kind": "point",
+      "position": [
+        223.0,
+        2.98,
+        142.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-45",
+      "kind": "point",
+      "position": [
+        218.0,
+        3.38,
+        149.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-46",
+      "kind": "point",
+      "position": [
+        236.0,
+        -1.42,
+        145.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-47",
+      "kind": "point",
+      "position": [
+        218.0,
+        2.58,
+        34.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-48",
+      "kind": "point",
+      "position": [
+        218.0,
+        -0.82,
+        57.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-49",
+      "kind": "point",
+      "position": [
+        210.0,
+        -2.42,
+        87.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-50",
+      "kind": "point",
+      "position": [
+        226.0,
+        -2.42,
+        87.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "ambient": {
+      "colour": [
+        0.13,
+        0.15,
+        0.18
+      ],
+      "energy": 0.42
+    },
+    "fog": {
+      "enabled": true,
+      "colour": [
+        0.06,
+        0.07,
+        0.08
+      ],
+      "begin": 14.0,
+      "end": 48.0
+    },
+    "audio": [
+      {
+        "id": "quill-and-crowd",
+        "space": "custom_house.ledgers",
+        "loop": true
+      },
+      {
+        "id": "scale-chain",
+        "space": "custom_house.weighing",
+        "loop": true
+      },
+      {
+        "id": "cellar-drip",
+        "space": "bonded_vaults.bay_a",
+        "loop": true
+      },
+      {
+        "id": "bilge-slap",
+        "space": "bonded_vaults.sump",
+        "loop": true
+      },
+      {
+        "id": "wind-in-glazing",
+        "space": "lamp_rock_light.lantern",
+        "loop": true
+      },
+      {
+        "id": "gulls-outside",
+        "space": "lamp_rock_light.gallery",
+        "loop": true
+      },
+      {
+        "id": "surge",
+        "space": "gullstone_cave.cavern",
+        "loop": true
+      },
+      {
+        "id": "blowhole-boom",
+        "space": "gullstone_cave.blowhole",
+        "loop": true
+      }
+    ],
+    "openToSky": [
+      "lamp_rock_light.gallery",
+      "lamp_rock_light.gallery",
+      "gullstone_cave.blowhole",
+      "gullstone_cave.blowhole"
+    ]
+  },
+  "spaces": {
+    "custom_house.hall": {
+      "x0": 32.0,
+      "x1": 48.0,
+      "z0": 24.0,
+      "z1": 36.0,
+      "floor": 0.0,
+      "height": 5.0
+    },
+    "custom_house.ledgers": {
+      "x0": 32.0,
+      "x1": 48.0,
+      "z0": 44.0,
+      "z1": 64.0,
+      "floor": 0.0,
+      "height": 4.4
+    },
+    "custom_house.weighing": {
+      "x0": 60.0,
+      "x1": 80.0,
+      "z0": 22.0,
+      "z1": 42.0,
+      "floor": 0.0,
+      "height": 7.2
+    },
+    "custom_house.strongroom": {
+      "x0": 62.0,
+      "x1": 74.0,
+      "z0": 50.0,
+      "z1": 62.0,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "custom_house.loft": {
+      "x0": 32.0,
+      "x1": 48.0,
+      "z0": 72.0,
+      "z1": 88.0,
+      "floor": 5.4,
+      "height": 4.0
+    },
+    "custom_house.entry_run": {
+      "x0": 38.0,
+      "x1": 42.0,
+      "z0": 34.0,
+      "z1": 46.0,
+      "floor": 0.0,
+      "height": 4.0
+    },
+    "custom_house.weigh_way": {
+      "x0": 46.2,
+      "x1": 61.8,
+      "z0": 30.2,
+      "z1": 33.8,
+      "floor": 0.0,
+      "height": 4.0
+    },
+    "custom_house.vault_way": {
+      "x0": 46.6,
+      "x1": 63.4,
+      "z0": 54.6,
+      "z1": 57.4,
+      "floor": 0.0,
+      "height": 3.0
+    },
+    "custom_house.loft_stair": {
+      "x0": 38.5,
+      "x1": 41.5,
+      "z0": 62.5,
+      "z1": 73.5,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "bonded_vaults.tunnel_head": {
+      "x0": 145.0,
+      "x1": 155.0,
+      "z0": 24.0,
+      "z1": 34.0,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "bonded_vaults.bay_a": {
+      "x0": 141.0,
+      "x1": 159.0,
+      "z0": 44.0,
+      "z1": 60.0,
+      "floor": -3.0,
+      "height": 5.0
+    },
+    "bonded_vaults.bay_b": {
+      "x0": 141.0,
+      "x1": 159.0,
+      "z0": 66.0,
+      "z1": 82.0,
+      "floor": -3.0,
+      "height": 5.0
+    },
+    "bonded_vaults.hoist": {
+      "x0": 166.0,
+      "x1": 178.0,
+      "z0": 48.0,
+      "z1": 60.0,
+      "floor": -3.0,
+      "height": 11.5
+    },
+    "bonded_vaults.tally": {
+      "x0": 126.0,
+      "x1": 136.0,
+      "z0": 50.0,
+      "z1": 58.0,
+      "floor": -3.0,
+      "height": 3.2
+    },
+    "bonded_vaults.sump": {
+      "x0": 141.0,
+      "x1": 159.0,
+      "z0": 88.0,
+      "z1": 102.0,
+      "floor": -5.4,
+      "height": 4.6
+    },
+    "bonded_vaults.descent": {
+      "x0": 147.9,
+      "x1": 152.1,
+      "z0": 31.9,
+      "z1": 46.1,
+      "floor": -3.0,
+      "height": 3.8
+    },
+    "bonded_vaults.bays": {
+      "x0": 148.0,
+      "x1": 152.0,
+      "z0": 58.0,
+      "z1": 68.0,
+      "floor": -3.0,
+      "height": 4.4
+    },
+    "bonded_vaults.hoistway": {
+      "x0": 157.4,
+      "x1": 167.6,
+      "z0": 52.4,
+      "z1": 55.6,
+      "floor": -3.0,
+      "height": 4.0
+    },
+    "bonded_vaults.tallyway": {
+      "x0": 134.7,
+      "x1": 142.3,
+      "z0": 52.7,
+      "z1": 55.3,
+      "floor": -3.0,
+      "height": 3.0
+    },
+    "bonded_vaults.sumpway": {
+      "x0": 148.2,
+      "x1": 151.8,
+      "z0": 80.2,
+      "z1": 89.8,
+      "floor": -5.4,
+      "height": 4.0
+    },
+    "lamp_rock_light.foot": {
+      "x0": 153.0,
+      "x1": 167.0,
+      "z0": 164.0,
+      "z1": 176.0,
+      "floor": 0.0,
+      "height": 4.6
+    },
+    "lamp_rock_light.oilstore": {
+      "x0": 172.0,
+      "x1": 184.0,
+      "z0": 164.0,
+      "z1": 174.0,
+      "floor": 0.0,
+      "height": 3.6
+    },
+    "lamp_rock_light.mid_landing": {
+      "x0": 154.0,
+      "x1": 166.0,
+      "z0": 186.0,
+      "z1": 196.0,
+      "floor": 5.8,
+      "height": 4.0
+    },
+    "lamp_rock_light.watchroom": {
+      "x0": 152.0,
+      "x1": 168.0,
+      "z0": 204.0,
+      "z1": 218.0,
+      "floor": 11.8,
+      "height": 4.4
+    },
+    "lamp_rock_light.lantern": {
+      "x0": 153.0,
+      "x1": 167.0,
+      "z0": 226.0,
+      "z1": 240.0,
+      "floor": 18.4,
+      "height": 6.2
+    },
+    "lamp_rock_light.gallery": {
+      "x0": 150.0,
+      "x1": 170.0,
+      "z0": 242.0,
+      "z1": 250.0,
+      "floor": 18.4,
+      "height": 3.2
+    },
+    "lamp_rock_light.oilway": {
+      "x0": 165.5,
+      "x1": 173.5,
+      "z0": 167.5,
+      "z1": 170.5,
+      "floor": 0.0,
+      "height": 3.2
+    },
+    "lamp_rock_light.lower_stair": {
+      "x0": 158.4,
+      "x1": 161.6,
+      "z0": 174.4,
+      "z1": 187.6,
+      "floor": 0.0,
+      "height": 3.6
+    },
+    "lamp_rock_light.upper_stair": {
+      "x0": 158.4,
+      "x1": 161.6,
+      "z0": 194.4,
+      "z1": 205.6,
+      "floor": 5.8,
+      "height": 3.6
+    },
+    "lamp_rock_light.lantern_stair": {
+      "x0": 158.5,
+      "x1": 161.5,
+      "z0": 216.5,
+      "z1": 227.5,
+      "floor": 11.8,
+      "height": 3.4
+    },
+    "lamp_rock_light.gallery_door": {
+      "x0": 158.5,
+      "x1": 161.5,
+      "z0": 238.5,
+      "z1": 243.5,
+      "floor": 18.4,
+      "height": 3.0
+    },
+    "gullstone_cave.cleft": {
+      "x0": 34.0,
+      "x1": 46.0,
+      "z0": 164.0,
+      "z1": 176.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "gullstone_cave.cavern": {
+      "x0": 14.0,
+      "x1": 66.0,
+      "z0": 192.0,
+      "z1": 240.0,
+      "floor": -8.4,
+      "height": 17.0
+    },
+    "gullstone_cave.beach": {
+      "x0": 8.0,
+      "x1": 30.0,
+      "z0": 244.0,
+      "z1": 262.0,
+      "floor": -7.6,
+      "height": 9.0
+    },
+    "gullstone_cave.stash": {
+      "x0": 74.0,
+      "x1": 86.0,
+      "z0": 210.0,
+      "z1": 222.0,
+      "floor": -4.6,
+      "height": 4.2
+    },
+    "gullstone_cave.blowhole": {
+      "x0": 34.0,
+      "x1": 46.0,
+      "z0": 246.0,
+      "z1": 258.0,
+      "floor": -8.4,
+      "height": 19.0
+    },
+    "gullstone_cave.descent": {
+      "x0": 37.8,
+      "x1": 42.2,
+      "z0": 173.8,
+      "z1": 194.2,
+      "floor": -8.4,
+      "height": 5.0
+    },
+    "gullstone_cave.beachway": {
+      "x0": 17.5,
+      "x1": 22.5,
+      "z0": 237.5,
+      "z1": 246.5,
+      "floor": -8.4,
+      "height": 5.0
+    },
+    "gullstone_cave.stashway": {
+      "x0": 64.0,
+      "x1": 76.0,
+      "z0": 214.0,
+      "z1": 218.0,
+      "floor": -8.4,
+      "height": 4.0
+    },
+    "gullstone_cave.blowway": {
+      "x0": 38.0,
+      "x1": 42.0,
+      "z0": 238.0,
+      "z1": 248.0,
+      "floor": -8.4,
+      "height": 4.4
+    },
+    "gullscar_farmhouse.hall": {
+      "x0": 213.0,
+      "x1": 223.0,
+      "z0": 166.0,
+      "z1": 176.0,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "gullscar_farmhouse.back": {
+      "x0": 215.0,
+      "x1": 223.0,
+      "z0": 176.55,
+      "z1": 182.0,
+      "floor": 0.0,
+      "height": 3.0
+    },
+    "haven_undercroft.porch": {
+      "x0": 214.0,
+      "x1": 222.0,
+      "z0": 116.0,
+      "z1": 124.0,
+      "floor": 0.0,
+      "height": 4.2
+    },
+    "haven_undercroft.nave": {
+      "x0": 210.0,
+      "x1": 226.0,
+      "z0": 132.0,
+      "z1": 152.0,
+      "floor": -1.2,
+      "height": 7.0
+    },
+    "haven_undercroft.aisle": {
+      "x0": 216.4,
+      "x1": 219.6,
+      "z0": 122.4,
+      "z1": 133.6,
+      "floor": -1.2,
+      "height": 3.6
+    },
+    "haven_undercroft.crypt": {
+      "x0": 230.0,
+      "x1": 242.0,
+      "z0": 140.0,
+      "z1": 150.0,
+      "floor": -4.0,
+      "height": 4.0
+    },
+    "haven_undercroft.crypt-stair": {
+      "x0": 224.7,
+      "x1": 231.3,
+      "z0": 142.7,
+      "z1": 145.3,
+      "floor": -4.0,
+      "height": 3.2
+    },
+    "salvage_hole.mouth": {
+      "x0": 212.0,
+      "x1": 224.0,
+      "z0": 30.0,
+      "z1": 42.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "salvage_hole.throat": {
+      "x0": 213.0,
+      "x1": 223.0,
+      "z0": 52.0,
+      "z1": 62.0,
+      "floor": -3.6,
+      "height": 5.6
+    },
+    "salvage_hole.chamber": {
+      "x0": 202.0,
+      "x1": 234.0,
+      "z0": 72.0,
+      "z1": 102.0,
+      "floor": -6.0,
+      "height": 11.0
+    },
+    "salvage_hole.descent": {
+      "x0": 215.6,
+      "x1": 220.4,
+      "z0": 39.6,
+      "z1": 54.4,
+      "floor": -3.6,
+      "height": 4.4
+    },
+    "salvage_hole.gullet": {
+      "x0": 215.7,
+      "x1": 220.3,
+      "z0": 59.7,
+      "z1": 74.3,
+      "floor": -6.0,
+      "height": 4.4
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../../westhaven/references/00-concept-detail-board.png",
+    "role": "parent-region board; these interiors have no board of their own",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "The Custom House: the tide board and the public counter",
+      "The Custom House: clerks' desks and the bound ledgers",
+      "The Custom House: the great beam scale on the weighing floor",
+      "The Custom House: cargo held against unpaid duty",
+      "The Custom House: the records loft over the office",
+      "The Bonded Vaults: the cargo tunnel down from the quay",
+      "The Bonded Vaults: casks stacked to the springing of the vault",
+      "The Bonded Vaults: the windlass and the trap up to the warehouse floor",
+      "The Bonded Vaults: the tallyman's bench and brazier",
+      "The Bonded Vaults: standing water and the tide grating",
+      "The Lamp Rock Light: the entry stage at the tower's foot",
+      "The Lamp Rock Light: the year's oil on its stillages",
+      "The Lamp Rock Light: the stair worked through the rock",
+      "The Lamp Rock Light: chart table, log and stove",
+      "The Lamp Rock Light: the burner and the lens",
+      "The Lamp Rock Light: the gallery outside the lantern, open to the sky",
+      "The Gullstone Undertow: the cleft down from the watch tower",
+      "The Gullstone Undertow: the main cavern and its tidal pool",
+      "The Gullstone Undertow: shingle, a boat drawn up, a fire",
+      "The Gullstone Undertow: what the Custom House never saw",
+      "The Gullstone Undertow: the shaft the sea breathes through",
+      "The Gullscar Farmhouse: the hall and hearth",
+      "The Gullscar Farmhouse: the hearth",
+      "The Haven Undercroft: the porch",
+      "The Haven Undercroft: the nave",
+      "The Haven Undercroft: the sanctuary",
+      "The Salvage Hole: cave mouth from within",
+      "The Salvage Hole: the descent",
+      "The Salvage Hole: the chamber"
+    ]
+  },
+  "performance": {
+    "nodes": 34,
+    "meshes": 33,
+    "materials": 22,
+    "images": 61,
+    "textures": 61,
+    "accessors": 165,
+    "bufferViews": 226,
+    "uniqueTriangles": 60586,
+    "uniqueVertices": 80792,
+    "glbBytes": 11520552,
+    "nodeNames": [
+      "Interior_westhaven_insides",
+      "Roof_westhaven_insides_ashlar",
+      "Roof_westhaven_insides_cliff_rock",
+      "Roof_westhaven_insides_dark_iron",
+      "Roof_westhaven_insides_lime_plaster",
+      "Roof_westhaven_insides_rubble_stone",
+      "Roof_westhaven_insides_timber_dark",
+      "Roof_westhaven_insides_westhaven_sea_rock",
+      "Build_westhaven_insides_amber_resin",
+      "Build_westhaven_insides_ashlar",
+      "Build_westhaven_insides_bark_dark",
+      "Build_westhaven_insides_canvas_awning",
+      "Build_westhaven_insides_carved_wood",
+      "Build_westhaven_insides_cliff_rock",
+      "Build_westhaven_insides_dark_iron",
+      "Build_westhaven_insides_lime_plaster",
+      "Build_westhaven_insides_pale_ashlar",
+      "Build_westhaven_insides_rubble_stone",
+      "Build_westhaven_insides_thatch_reed",
+      "Build_westhaven_insides_timber_dark",
+      "Build_westhaven_insides_timber_grey",
+      "Build_westhaven_insides_timber_warm",
+      "Build_westhaven_insides_water_deep",
+      "Build_westhaven_insides_westhaven_brass",
+      "Build_westhaven_insides_westhaven_quay_plank",
+      "Build_westhaven_insides_westhaven_sea_rock",
+      "Build_westhaven_insides_woven_cloth",
+      "Walk_ashlar",
+      "Walk_dark_iron",
+      "Walk_packed_earth",
+      "Walk_timber_warm",
+      "Walk_westhaven_sea_rock",
+      "Walk_westhaven_sett",
+      "Walk_westhaven_tide_shingle"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260902
+    },
+    {
+      "id": "anchor",
+      "landmark": "custom-house-door",
+      "position": [
+        -72.75,
+        3.5,
+        -9.25
+      ],
+      "role": "surface entrance on the Westhaven region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the shared Nymara toolkit; no scattered placement",
+    "textures": "procedural, from _toolkit/amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "Four interiors on one map with blackspace between them, in the Eternal Lands convention: one GLB, one manifest, one collision grid, one server map key, and an arrival point per surface door.",
+    "The blackspace is not drawn. The collision grid is built only where a Walk_ surface exists, so the gutters between sections are blocked by construction rather than by a mask that could drift out of step.",
+    "Sections are spaced so no two come within about forty metres, which is what keeps one section's lamps and cameras out of the next.",
+    "No two spaces overlap in plan, in any section. The server collision grid is 2-D, so a cell carries one height; the Lamp Rock Light is unfolded rather than stacked for exactly that reason."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Not opened in Godot: no client is installable in the build environment, so collision response, navmesh generation, portal transition, LOD and transparency sorting are unverified.",
+    "eloria-server has not registered these map keys."
+  ],
+  "externalResources": {
+    "../../../_shared/images/018671435a95b7c86b0d29b83763ea7fa04f36d1850ba3cbaf9c625ab6730aab.png": "018671435a95b7c86b0d29b83763ea7fa04f36d1850ba3cbaf9c625ab6730aab",
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d.png": "06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d",
+    "../../../_shared/images/0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0.png": "0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0",
+    "../../../_shared/images/0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f.png": "0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f",
+    "../../../_shared/images/12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1.png": "12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1",
+    "../../../_shared/images/147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed.png": "147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621.png": "1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621",
+    "../../../_shared/images/1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853.png": "1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853",
+    "../../../_shared/images/22bb2076baa4100a3664da38707774e762d5cab4689c68e9d6f560406f84e095.png": "22bb2076baa4100a3664da38707774e762d5cab4689c68e9d6f560406f84e095",
+    "../../../_shared/images/249937f2b014a26bb95a5a0d7a6c8ee17b1be1806e679dc453e58b1b075fdf91.png": "249937f2b014a26bb95a5a0d7a6c8ee17b1be1806e679dc453e58b1b075fdf91",
+    "../../../_shared/images/295a0f4c41c18096ac7cda839f7157a4ab8d571eca73ca95d94332b9a4f927c3.png": "295a0f4c41c18096ac7cda839f7157a4ab8d571eca73ca95d94332b9a4f927c3",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0.png": "303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0",
+    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348.png": "44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348",
+    "../../../_shared/images/4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4.png": "4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4",
+    "../../../_shared/images/48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed.png": "48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed",
+    "../../../_shared/images/4c6c26e676f9b3b71b41bab3deb295d851c70e39dc762b6de8c31c3819a84af2.png": "4c6c26e676f9b3b71b41bab3deb295d851c70e39dc762b6de8c31c3819a84af2",
+    "../../../_shared/images/4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22.png": "4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22",
+    "../../../_shared/images/4f2b4d4d74e0a09ec1bb588e28a220fbe4692324ae9faa75cfc9a2354ec26e75.png": "4f2b4d4d74e0a09ec1bb588e28a220fbe4692324ae9faa75cfc9a2354ec26e75",
+    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
+    "../../../_shared/images/579f02c4192b9fbf78d17a1070b250350c6493698a7d130d4598298531ad864e.png": "579f02c4192b9fbf78d17a1070b250350c6493698a7d130d4598298531ad864e",
+    "../../../_shared/images/5b7a93a3f5763c18543cee2f6e29aebda01531d85331e6e5be14e019401d05c3.png": "5b7a93a3f5763c18543cee2f6e29aebda01531d85331e6e5be14e019401d05c3",
+    "../../../_shared/images/5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03.png": "5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03",
+    "../../../_shared/images/5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843.png": "5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843",
+    "../../../_shared/images/5fb08fd6777b4fe2654b0403cdd05f30fea4619e488d2cce4dcad6d35ca8f314.png": "5fb08fd6777b4fe2654b0403cdd05f30fea4619e488d2cce4dcad6d35ca8f314",
+    "../../../_shared/images/6523494baa1588c7586087b2d6aa21652739f7c5389627992c74c38dfdf49f1d.png": "6523494baa1588c7586087b2d6aa21652739f7c5389627992c74c38dfdf49f1d",
+    "../../../_shared/images/71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac.png": "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac",
+    "../../../_shared/images/750f327817c7cab5295bc9dfaa73f02724fdaef26918e35c5ca722a847452b2a.png": "750f327817c7cab5295bc9dfaa73f02724fdaef26918e35c5ca722a847452b2a",
+    "../../../_shared/images/7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2.png": "7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c.png": "8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c",
+    "../../../_shared/images/8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9.png": "8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9",
+    "../../../_shared/images/90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a.png": "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a",
+    "../../../_shared/images/9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6.png": "9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6",
+    "../../../_shared/images/9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be.png": "9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be",
+    "../../../_shared/images/a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e.png": "a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e",
+    "../../../_shared/images/a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392.png": "a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392",
+    "../../../_shared/images/a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0.png": "a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0",
+    "../../../_shared/images/a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c.png": "a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c",
+    "../../../_shared/images/a61340d08d14c505800db7fca40a8252faa32816464c16031161d026a9496a89.png": "a61340d08d14c505800db7fca40a8252faa32816464c16031161d026a9496a89",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e.png": "ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e",
+    "../../../_shared/images/af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2.png": "af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/c4f32f6a4f45349165fceb23e0a6de48642ecb43338b43cd184a5529576e1072.png": "c4f32f6a4f45349165fceb23e0a6de48642ecb43338b43cd184a5529576e1072",
+    "../../../_shared/images/c54f090a879e751530203a4eb7e2a749aa5aabfb653dce07130eaaa0cda9101a.png": "c54f090a879e751530203a4eb7e2a749aa5aabfb653dce07130eaaa0cda9101a",
+    "../../../_shared/images/c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd.png": "c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd",
+    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0.png": "ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0",
+    "../../../_shared/images/cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae.png": "cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae",
+    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
+    "../../../_shared/images/f7a23f3289a852baa0dc5006a8e5fd916f4376a1e0e1aecb13a37bd032f5914c.png": "f7a23f3289a852baa0dc5006a8e5fd916f4376a1e0e1aecb13a37bd032f5914c",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c",
+    "../../../_shared/images/ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65.png": "ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65",
+    "../../../_shared/images/ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247.png": "ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247"
+  }
+}

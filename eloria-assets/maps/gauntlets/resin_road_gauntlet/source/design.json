@@ -1,0 +1,1680 @@
+{
+ "_note": "Rules of the road - everything a run of resin_road_gauntlet needs except geometry (source/layout.json). Written by work-output/gauntlet-v2-design/regions/tools/author_routes.py from the approved concept: three bands by the run's level, five waves of two variants each and a court. Counts are for a party of four; the server multiplies by partyScale (leaders and bosses never multiply).",
+ "schema": "eloria-trail-design-v1",
+ "id": "resin_road_gauntlet",
+ "route": "resin_road",
+ "name": "The Resin Road",
+ "short": "resinroad",
+ "region": "amberwood",
+ "flavour": "The charcoal burners' road runs down from the kilns on the ridge into the amber wood, over the sap ravine and through the resin works to the wallow under the oldest oak, where the Boar King lies. The burners left. The boars did not.",
+ "copies": 3,
+ "timeLimitSeconds": 2700,
+ "cooldownHours": 6,
+ "minPlayers": 1,
+ "maxPlayers": 6,
+ "wipeSeconds": 90,
+ "broker": {
+  "npc": "Rellan",
+  "map": "landfall"
+ },
+ "partyScale": {
+  "1": 0.6,
+  "2": 0.75,
+  "3": 0.9,
+  "4": 1.0,
+  "5": 1.15,
+  "6": 1.3
+ },
+ "pulse": {
+  "releaseAliveFraction": 0.34,
+  "releaseSeconds": 45
+ },
+ "leash": {
+  "marginMetres": 10,
+  "evadeSeconds": 8
+ },
+ "checkpointDelaySeconds": 10,
+ "shapes": {
+  "pack": 1.0,
+  "swarm": 0.8,
+  "heavies": 1.25,
+  "leader": 1.25
+ },
+ "mutators": [
+  [
+   "none",
+   5
+  ],
+  [
+   "frenzy",
+   2
+  ],
+  [
+   "hunted",
+   2
+  ],
+  [
+   "bounty",
+   1
+  ],
+  [
+   "swift",
+   1
+  ]
+ ],
+ "cache": [
+  [
+   "Potion of Great Healing",
+   "3-5",
+   "1"
+  ],
+  [
+   "Gold Coins",
+   "150-400",
+   "1"
+  ],
+  [
+   "Bones",
+   "6-12",
+   "1"
+  ]
+ ],
+ "cacheRare": [],
+ "bonus": {
+  "section": "sap-spring",
+  "note": "one harvest node of an existing herb (the server tool's bonus resource)"
+ },
+ "lore": [
+  {
+   "at": "trailhead",
+   "title": "Rules of the road",
+   "text": "One party at a time. The waves come to you; the road behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+  },
+  {
+   "at": "sap-spring",
+   "title": "The tappers' spring",
+   "text": "The tappers drank here and washed the resin off their hands. It never quite came off."
+  }
+ ],
+ "bands": [
+  {
+   "id": "sounder",
+   "label": "The Sounder",
+   "minLevel": 1,
+   "maxLevel": 24,
+   "story": "The boars and the small things of the wood own the road below the ravine.",
+   "roster": [
+    "brambleback_boar",
+    "berry_bramble_boar",
+    "thornbark_wolf",
+    "giant_leech",
+    "mire_goblin",
+    "giant_amber_moth"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "bramble-boar",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "brambleback_boar",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "brambleback_boar",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "brambleback_boar",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "berry-boar",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "berry_bramble_boar",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "berry_bramble_boar",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "berry_bramble_boar",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "bark-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "thornbark_wolf",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "thornbark_wolf",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "thornbark_wolf",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "giant-leech",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          11,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "mire-goblin",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "mire_goblin",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "mire_goblin",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west",
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "mire_goblin",
+          12,
+          "pack"
+         ],
+         [
+          "giant_amber_moth",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "bramble-boar",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "brambleback_boar",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "brambleback_boar",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west",
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "brambleback_boar",
+          12,
+          "pack"
+         ],
+         [
+          "giant_amber_moth",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "berry-boar",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "berry_bramble_boar",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "berry_bramble_boar",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "berry_bramble_boar",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "bark-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "thornbark_wolf",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "thornbark_wolf",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "thornbark_wolf",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "giant-leech",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "swarm"
+         ],
+         [
+          "giant_amber_moth",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mire-goblin",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south"
+        ],
+        "groups": [
+         [
+          "mire_goblin",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "mire_goblin",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "mire_goblin",
+          15,
+          "pack"
+         ],
+         [
+          "giant_amber_moth",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "inline",
+    "creature": "brambleback_boar",
+    "name": "the Boar King",
+    "health": 6.0,
+    "strength": [
+     0.9,
+     1.4
+    ],
+    "adds": [
+     [
+      "brambleback_boar",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "thorn",
+   "label": "The Thorn",
+   "minLevel": 20,
+   "maxLevel": 44,
+   "story": "Thorn-backed wolves and the bigger things come down out of the old wood.",
+   "roster": [
+    "giant_wasp",
+    "giant_centipede",
+    "moss_bugbear",
+    "owlbear",
+    "thornwood_dryad_queen",
+    "amberwood_great_owl"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "giant-wasp",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "giant_wasp",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "giant_wasp",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "giant_wasp",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "giant_wasp",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "giant-centipede",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "giant_centipede",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "giant_centipede",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "giant_centipede",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "giant_centipede",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "moss-bugbear",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "moss_bugbear",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "moss_bugbear",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "moss_bugbear",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "owlbear",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "owlbear",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "owlbear",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "owlbear",
+          4,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "thorn-dryad",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "thornwood_dryad_queen",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "thornwood_dryad_queen",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west",
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "thornwood_dryad_queen",
+          5,
+          "heavies"
+         ],
+         [
+          "amberwood_great_owl",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "giant-wasp",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "giant_wasp",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "giant_wasp",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "giant_wasp",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west",
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "giant_wasp",
+          12,
+          "swarm"
+         ],
+         [
+          "amberwood_great_owl",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "giant-centipede",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "giant_centipede",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "giant_centipede",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "giant_centipede",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "giant_centipede",
+          13,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moss-bugbear",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "moss_bugbear",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "moss_bugbear",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "moss_bugbear",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "owlbear",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south"
+        ],
+        "groups": [
+         [
+          "owlbear",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "owlbear",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "owlbear",
+          6,
+          "heavies"
+         ],
+         [
+          "amberwood_great_owl",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "thorn-dryad",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south"
+        ],
+        "groups": [
+         [
+          "thornwood_dryad_queen",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "thornwood_dryad_queen",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "thornwood_dryad_queen",
+          6,
+          "heavies"
+         ],
+         [
+          "amberwood_great_owl",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "boar_king",
+    "existing": true,
+    "name": "Boar King of the Resin Road",
+    "adds": [
+     [
+      "giant_wasp",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "oldwood",
+   "label": "The Old Wood",
+   "minLevel": 40,
+   "maxLevel": 0,
+   "story": "The old wood itself walks: knights that never left it, and the trees that keep them.",
+   "roster": [
+    "spectral_forest_knight",
+    "autumn_bark_treant",
+    "elderwood_dryad_queen",
+    "moss_badger",
+    "heartwood_treant",
+    "moss_bear"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "forest-knight",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "spectral_forest_knight",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "spectral_forest_knight",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "spectral_forest_knight",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "autumn-bark-treant",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "autumn_bark_treant",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "autumn_bark_treant",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "autumn_bark_treant",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "dryad-queen",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "elderwood_dryad_queen",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "elderwood_dryad_queen",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "elderwood_dryad_queen",
+          4,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moss-badger",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "moss_badger",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "moss_badger",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "moss_badger",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "heartwood-treant",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "heartwood_treant",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "heartwood_treant",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west",
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "heartwood_treant",
+          5,
+          "heavies"
+         ],
+         [
+          "moss_bear",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "forest-knight",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "spectral_forest_knight",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "spectral_forest_knight",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-west",
+         "w3-north"
+        ],
+        "groups": [
+         [
+          "spectral_forest_knight",
+          12,
+          "pack"
+         ],
+         [
+          "moss_bear",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "autumn-bark-treant",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "autumn_bark_treant",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "autumn_bark_treant",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "autumn_bark_treant",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "dryad-queen",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "elderwood_dryad_queen",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "elderwood_dryad_queen",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "elderwood_dryad_queen",
+          5,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "moss-badger",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south"
+        ],
+        "groups": [
+         [
+          "moss_badger",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "moss_badger",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "moss_badger",
+          15,
+          "pack"
+         ],
+         [
+          "moss_bear",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "heartwood-treant",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south"
+        ],
+        "groups": [
+         [
+          "heartwood_treant",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "heartwood_treant",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-north",
+         "w5-south",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "heartwood_treant",
+          6,
+          "heavies"
+         ],
+         [
+          "moss_bear",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "boar_king",
+    "existing": true,
+    "name": "Boar King of the Resin Road",
+    "adds": [
+     [
+      "spectral_forest_knight",
+      6
+     ]
+    ]
+   }
+  }
+ ]
+}

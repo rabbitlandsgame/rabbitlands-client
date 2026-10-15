@@ -1,0 +1,92 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 226,
+    "walkSurfaceTriangles": 241806,
+    "tilesSampled": 331776,
+    "groundingMisses": 0,
+    "groundingMissFraction": 0.0,
+    "surfaceDiscontinuities": 709,
+    "spawnPoints": 11
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "709 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          47,
+          481,
+          15.37
+        ],
+        [
+          47,
+          482,
+          15.37
+        ],
+        [
+          49,
+          481,
+          15.36
+        ],
+        [
+          52,
+          482,
+          15.3
+        ],
+        [
+          52,
+          483,
+          15.3
+        ],
+        [
+          52,
+          483,
+          15.3
+        ],
+        [
+          50,
+          476,
+          15.17
+        ],
+        [
+          53,
+          480,
+          15.17
+        ],
+        [
+          50,
+          477,
+          15.17
+        ],
+        [
+          52,
+          480,
+          15.17
+        ],
+        [
+          54,
+          480,
+          15.12
+        ],
+        [
+          54,
+          480,
+          15.12
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_FLOATING",
+      "message": "1 landmarks sit more than 3 m above the walk surface",
+      "detail": [
+        {
+          "id": "paddy-watchtower",
+          "gap": 7.0
+        }
+      ]
+    }
+  ]
+}

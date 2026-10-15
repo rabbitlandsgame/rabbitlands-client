@@ -1,0 +1,4539 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "crownwater_gauntlet",
+    "name": "The Drowned Arcades",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -12.55,
+        -4.28,
+        -0.55
+      ],
+      "max": [
+        26.55,
+        16.65,
+        324.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -12.55,
+        -0.4,
+        -0.55
+      ],
+      "max": [
+        26.55,
+        3.5,
+        324.55
+      ]
+    },
+    "interiorClass": "gauntlet",
+    "parentRegion": "crownwater",
+    "serverCells": 384
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      15.0,
+      327.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        0.0,
+        0.05,
+        7.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "vault",
+      "position": [
+        4.0,
+        3.05,
+        318.0
+      ],
+      "rotationDegrees": 180,
+      "surface": "Walk"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 84,
+    "height": 660,
+    "cellMetres": 0.5,
+    "originMetres": [
+      -15.0,
+      327.0
+    ],
+    "heightEncoding": {
+      "origin": -0.2,
+      "step": 0.2,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true
+    },
+    "walkableCells": 15821,
+    "blockedCells": 39619,
+    "walkableFraction": 0.2854,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Secrets_crownwater_gauntlet",
+      "Section_crownwater_gauntlet_band_-001",
+      "Roof_crownwater_gauntlet_band_-001_crownwater_marble",
+      "Build_crownwater_gauntlet_band_-001_ashlar",
+      "Section_crownwater_gauntlet_band_+000",
+      "Roof_crownwater_gauntlet_band_+000_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+000_amber_resin",
+      "Build_crownwater_gauntlet_band_+000_ashlar",
+      "Build_crownwater_gauntlet_band_+000_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+000_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+000_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+000_dark_iron",
+      "Build_crownwater_gauntlet_band_+000_timber_warm",
+      "Section_crownwater_gauntlet_band_+001",
+      "Roof_crownwater_gauntlet_band_+001_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+001_ashlar",
+      "Build_crownwater_gauntlet_band_+001_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+001_dark_iron",
+      "Build_crownwater_gauntlet_band_+001_timber_warm",
+      "Section_crownwater_gauntlet_band_+002",
+      "Roof_crownwater_gauntlet_band_+002_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+002_amber_resin",
+      "Build_crownwater_gauntlet_band_+002_ashlar",
+      "Build_crownwater_gauntlet_band_+002_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+002_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+002_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+002_dark_iron",
+      "Build_crownwater_gauntlet_band_+002_timber_warm",
+      "Section_crownwater_gauntlet_band_+003",
+      "Roof_crownwater_gauntlet_band_+003_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+003_amber_resin",
+      "Build_crownwater_gauntlet_band_+003_ashlar",
+      "Build_crownwater_gauntlet_band_+003_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+003_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+003_dark_iron",
+      "Build_crownwater_gauntlet_band_+003_timber_warm",
+      "Section_crownwater_gauntlet_band_+004",
+      "Roof_crownwater_gauntlet_band_+004_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+004_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+004_amber_resin",
+      "Build_crownwater_gauntlet_band_+004_ashlar",
+      "Build_crownwater_gauntlet_band_+004_cliff_rock",
+      "Build_crownwater_gauntlet_band_+004_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+004_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+004_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+004_dark_iron",
+      "Section_crownwater_gauntlet_band_+005",
+      "Roof_crownwater_gauntlet_band_+005_cliff_rock",
+      "Build_crownwater_gauntlet_band_+005_amber_resin",
+      "Build_crownwater_gauntlet_band_+005_cliff_rock",
+      "Build_crownwater_gauntlet_band_+005_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+005_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+005_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+005_dark_iron",
+      "Section_crownwater_gauntlet_band_+006",
+      "Roof_crownwater_gauntlet_band_+006_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+006_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+006_amber_resin",
+      "Build_crownwater_gauntlet_band_+006_ashlar",
+      "Build_crownwater_gauntlet_band_+006_cliff_rock",
+      "Build_crownwater_gauntlet_band_+006_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+006_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+006_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+006_dark_iron",
+      "Section_crownwater_gauntlet_band_+007",
+      "Roof_crownwater_gauntlet_band_+007_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+007_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+007_amber_resin",
+      "Build_crownwater_gauntlet_band_+007_ashlar",
+      "Build_crownwater_gauntlet_band_+007_cliff_rock",
+      "Build_crownwater_gauntlet_band_+007_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+007_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+007_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+007_dark_iron",
+      "Section_crownwater_gauntlet_band_+008",
+      "Roof_crownwater_gauntlet_band_+008_cliff_rock",
+      "Build_crownwater_gauntlet_band_+008_amber_resin",
+      "Build_crownwater_gauntlet_band_+008_cliff_rock",
+      "Build_crownwater_gauntlet_band_+008_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+008_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+008_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+008_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+008_dark_iron",
+      "Section_crownwater_gauntlet_band_+009",
+      "Roof_crownwater_gauntlet_band_+009_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+009_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+009_amber_resin",
+      "Build_crownwater_gauntlet_band_+009_ashlar",
+      "Build_crownwater_gauntlet_band_+009_cliff_rock",
+      "Build_crownwater_gauntlet_band_+009_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+009_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+009_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+009_dark_iron",
+      "Section_crownwater_gauntlet_band_+010",
+      "Roof_crownwater_gauntlet_band_+010_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+010_amber_resin",
+      "Build_crownwater_gauntlet_band_+010_ashlar",
+      "Build_crownwater_gauntlet_band_+010_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+010_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+010_dark_iron",
+      "Build_crownwater_gauntlet_band_+010_timber_warm",
+      "Section_crownwater_gauntlet_band_+011",
+      "Roof_crownwater_gauntlet_band_+011_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+011_amber_resin",
+      "Build_crownwater_gauntlet_band_+011_ashlar",
+      "Build_crownwater_gauntlet_band_+011_blue_crystal",
+      "Build_crownwater_gauntlet_band_+011_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+011_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+011_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+011_dark_iron",
+      "Section_crownwater_gauntlet_band_+012",
+      "Roof_crownwater_gauntlet_band_+012_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+012_amber_resin",
+      "Build_crownwater_gauntlet_band_+012_ashlar",
+      "Build_crownwater_gauntlet_band_+012_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+012_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+012_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+012_dark_iron",
+      "Build_crownwater_gauntlet_band_+012_timber_warm",
+      "Section_crownwater_gauntlet_band_+013",
+      "Roof_crownwater_gauntlet_band_+013_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+013_ashlar",
+      "Build_crownwater_gauntlet_band_+013_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+013_dark_iron",
+      "Section_crownwater_gauntlet_band_+014",
+      "Roof_crownwater_gauntlet_band_+014_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+014_amber_resin",
+      "Build_crownwater_gauntlet_band_+014_ashlar",
+      "Build_crownwater_gauntlet_band_+014_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+014_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+014_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+014_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+014_dark_iron",
+      "Section_crownwater_gauntlet_band_+015",
+      "Roof_crownwater_gauntlet_band_+015_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+015_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+015_amber_resin",
+      "Build_crownwater_gauntlet_band_+015_ashlar",
+      "Build_crownwater_gauntlet_band_+015_cliff_rock",
+      "Build_crownwater_gauntlet_band_+015_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+015_crownwater_sand",
+      "Build_crownwater_gauntlet_band_+015_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+015_dark_iron",
+      "Section_crownwater_gauntlet_band_+016",
+      "Roof_crownwater_gauntlet_band_+016_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+016_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+016_amber_resin",
+      "Build_crownwater_gauntlet_band_+016_ashlar",
+      "Build_crownwater_gauntlet_band_+016_cliff_rock",
+      "Build_crownwater_gauntlet_band_+016_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+016_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+016_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+016_crownwater_sand",
+      "Build_crownwater_gauntlet_band_+016_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+016_dark_iron",
+      "Build_crownwater_gauntlet_band_+016_timber_warm",
+      "Section_crownwater_gauntlet_band_+017",
+      "Roof_crownwater_gauntlet_band_+017_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+017_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+017_ashlar",
+      "Build_crownwater_gauntlet_band_+017_cliff_rock",
+      "Build_crownwater_gauntlet_band_+017_crownwater_lagoon",
+      "Section_crownwater_gauntlet_band_+018",
+      "Roof_crownwater_gauntlet_band_+018_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+018_amber_resin",
+      "Build_crownwater_gauntlet_band_+018_ashlar",
+      "Build_crownwater_gauntlet_band_+018_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+018_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+018_dark_iron",
+      "Section_crownwater_gauntlet_band_+019",
+      "Roof_crownwater_gauntlet_band_+019_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+019_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+019_ashlar",
+      "Build_crownwater_gauntlet_band_+019_cliff_rock",
+      "Build_crownwater_gauntlet_band_+019_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+019_dark_iron",
+      "Section_crownwater_gauntlet_band_+020",
+      "Roof_crownwater_gauntlet_band_+020_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+020_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+020_amber_resin",
+      "Build_crownwater_gauntlet_band_+020_ashlar",
+      "Build_crownwater_gauntlet_band_+020_cliff_rock",
+      "Build_crownwater_gauntlet_band_+020_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+020_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+020_dark_iron",
+      "Section_crownwater_gauntlet_band_+021",
+      "Roof_crownwater_gauntlet_band_+021_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+021_amber_resin",
+      "Build_crownwater_gauntlet_band_+021_ashlar",
+      "Build_crownwater_gauntlet_band_+021_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+021_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+021_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+021_dark_iron",
+      "Section_crownwater_gauntlet_band_+022",
+      "Roof_crownwater_gauntlet_band_+022_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+022_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+022_ashlar",
+      "Build_crownwater_gauntlet_band_+022_cliff_rock",
+      "Build_crownwater_gauntlet_band_+022_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+022_dark_iron",
+      "Section_crownwater_gauntlet_band_+023",
+      "Roof_crownwater_gauntlet_band_+023_cliff_rock",
+      "Build_crownwater_gauntlet_band_+023_amber_resin",
+      "Build_crownwater_gauntlet_band_+023_cliff_rock",
+      "Build_crownwater_gauntlet_band_+023_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+023_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+023_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+023_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+023_dark_iron",
+      "Section_crownwater_gauntlet_band_+024",
+      "Roof_crownwater_gauntlet_band_+024_cliff_rock",
+      "Build_crownwater_gauntlet_band_+024_amber_resin",
+      "Build_crownwater_gauntlet_band_+024_cliff_rock",
+      "Build_crownwater_gauntlet_band_+024_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+024_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+024_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+024_dark_iron",
+      "Section_crownwater_gauntlet_band_+025",
+      "Roof_crownwater_gauntlet_band_+025_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+025_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+025_amber_resin",
+      "Build_crownwater_gauntlet_band_+025_ashlar",
+      "Build_crownwater_gauntlet_band_+025_cliff_rock",
+      "Build_crownwater_gauntlet_band_+025_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+025_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+025_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+025_dark_iron",
+      "Section_crownwater_gauntlet_band_+026",
+      "Roof_crownwater_gauntlet_band_+026_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+026_amber_resin",
+      "Build_crownwater_gauntlet_band_+026_ashlar",
+      "Build_crownwater_gauntlet_band_+026_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+026_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+026_dark_iron",
+      "Build_crownwater_gauntlet_band_+026_timber_warm",
+      "Section_crownwater_gauntlet_band_+027",
+      "Roof_crownwater_gauntlet_band_+027_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+027_crownwater_marble"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_crownwater_gauntlet_band_-001_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+000_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+001_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+002_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+003_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+004_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+004_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+005_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+006_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+006_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+007_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+007_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+008_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+009_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+009_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+010_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+011_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+012_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+013_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+014_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+015_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+015_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+016_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+016_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+017_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+017_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+018_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+019_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+019_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+020_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+020_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+021_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+022_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+022_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+023_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+024_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+025_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+025_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+026_crownwater_marble",
+      "Roof_crownwater_gauntlet_band_+027_crownwater_marble"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    }
+  },
+  "portals": [],
+  "landmarks": [
+    {
+      "id": "crownwater_gauntlet-staging",
+      "name": "The Drowned Arcades",
+      "space": "staging",
+      "position": [
+        0.0,
+        1.6,
+        7.0
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "plaque-staging-0",
+      "kind": "information",
+      "target": "lore",
+      "label": "Rules of the arcades",
+      "text": "One party at a time. The dead wake at the customs hall. Waystones count you out. The court is the end of it.",
+      "position": [
+        -6.8,
+        1.0,
+        12.6
+      ],
+      "serverTile": [
+        8,
+        314
+      ],
+      "objectId": 861
+    },
+    {
+      "id": "exit-staging",
+      "kind": "waystone",
+      "target": "home",
+      "label": "Waystone",
+      "text": "The waystone home. Using it counts you out of the run.",
+      "position": [
+        5.8,
+        1.0,
+        11.0
+      ],
+      "serverTile": [
+        21,
+        316
+      ],
+      "objectId": 800
+    },
+    {
+      "id": "plaque-customs-arcade",
+      "kind": "information",
+      "target": "lore",
+      "label": "The arcades",
+      "text": "The customs house kept its arcades dry for three hundred years. The eleventh bell rang, the crown went under, and the arcades went with it.",
+      "position": [
+        -9.2,
+        1.0,
+        24.0
+      ],
+      "serverTile": [
+        6,
+        303
+      ],
+      "objectId": 862
+    },
+    {
+      "id": "cache",
+      "kind": "cache",
+      "target": "run",
+      "label": "Reward cache",
+      "text": "The run's cache. It opens once for each of you when the court is quiet.",
+      "position": [
+        4.0,
+        3.6,
+        320.5
+      ],
+      "serverTile": [
+        19,
+        6
+      ],
+      "objectId": 798
+    },
+    {
+      "id": "exit-vault",
+      "kind": "waystone",
+      "target": "home",
+      "label": "Waystone",
+      "text": "The waystone home.",
+      "position": [
+        9.0,
+        4.0,
+        315.0
+      ],
+      "serverTile": [
+        24,
+        12
+      ],
+      "objectId": 799
+    },
+    {
+      "id": "plaque-vault",
+      "kind": "information",
+      "target": "lore",
+      "label": "The court is quiet",
+      "text": "Whoever reads this walked the whole road. The cache is yours; the waystone is the way home.",
+      "position": [
+        -1.6,
+        4.0,
+        322.0
+      ],
+      "serverTile": [
+        13,
+        5
+      ],
+      "objectId": 863
+    }
+  ],
+  "npcMarkers": [],
+  "harvestables": [
+    {
+      "id": "long-arcade-bonus",
+      "resource": "Kelp",
+      "position": [
+        -1.5,
+        0.0,
+        140.0
+      ],
+      "serverTile": [
+        14,
+        187
+      ]
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "backgroundColor": [
+      0.025,
+      0.045,
+      0.05
+    ],
+    "sun": {
+      "enabled": false
+    },
+    "ambient": {
+      "color": [
+        0.45,
+        0.57,
+        0.59
+      ],
+      "energy": 1.15
+    },
+    "fog": {
+      "enabled": true,
+      "color": [
+        0.045,
+        0.075,
+        0.08
+      ],
+      "density": 0.003
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.2,
+      "white": 3.5
+    },
+    "openToSky": [],
+    "lights": [
+      {
+        "id": "lamp-000",
+        "kind": "point",
+        "position": [
+          -6.0,
+          0.98,
+          3.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-001",
+        "kind": "point",
+        "position": [
+          6.0,
+          0.98,
+          3.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-002",
+        "kind": "point",
+        "position": [
+          0.0,
+          3.38,
+          32.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-003",
+        "kind": "point",
+        "position": [
+          3.0,
+          4.38,
+          104.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-004",
+        "kind": "point",
+        "position": [
+          7.0,
+          3.38,
+          140.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-005",
+        "kind": "point",
+        "position": [
+          7.0,
+          3.38,
+          171.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-006",
+        "kind": "point",
+        "position": [
+          -4.0,
+          3.38,
+          196.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-007",
+        "kind": "point",
+        "position": [
+          18.0,
+          3.38,
+          196.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-008",
+        "kind": "point",
+        "position": [
+          7.0,
+          3.38,
+          220.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-009",
+        "kind": "point",
+        "position": [
+          7.0,
+          6.38,
+          257.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-010",
+        "kind": "point",
+        "position": [
+          16.47,
+          3.98,
+          294.45
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-011",
+        "kind": "point",
+        "position": [
+          12.58,
+          3.98,
+          298.48
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-012",
+        "kind": "point",
+        "position": [
+          7.05,
+          3.98,
+          300.71
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-013",
+        "kind": "point",
+        "position": [
+          0.95,
+          3.98,
+          300.71
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-014",
+        "kind": "point",
+        "position": [
+          -4.58,
+          3.98,
+          298.48
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-015",
+        "kind": "point",
+        "position": [
+          -8.47,
+          3.98,
+          294.45
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-016",
+        "kind": "point",
+        "position": [
+          -1.0,
+          3.98,
+          315.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-017",
+        "kind": "point",
+        "position": [
+          -2.85,
+          2.88,
+          7.95
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-018",
+        "kind": "point",
+        "position": [
+          -5.2,
+          2.88,
+          3.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-019",
+        "kind": "point",
+        "position": [
+          4.8,
+          3.08,
+          4.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-020",
+        "kind": "point",
+        "position": [
+          -7.7,
+          2.88,
+          28.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-021",
+        "kind": "point",
+        "position": [
+          -7.7,
+          2.88,
+          35.7
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-022",
+        "kind": "point",
+        "position": [
+          7.7,
+          2.88,
+          28.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-023",
+        "kind": "point",
+        "position": [
+          7.7,
+          2.88,
+          35.7
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-024",
+        "kind": "point",
+        "position": [
+          -3.05,
+          3.28,
+          24.75
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-025",
+        "kind": "point",
+        "position": [
+          -3.05,
+          3.28,
+          38.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-026",
+        "kind": "point",
+        "position": [
+          1.0,
+          2.88,
+          55.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-027",
+        "kind": "point",
+        "position": [
+          1.0,
+          2.88,
+          66.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-028",
+        "kind": "point",
+        "position": [
+          1.0,
+          2.88,
+          77.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-029",
+        "kind": "point",
+        "position": [
+          -8.05,
+          4.03,
+          104.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-030",
+        "kind": "point",
+        "position": [
+          14.05,
+          4.03,
+          104.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-031",
+        "kind": "point",
+        "position": [
+          -1.05,
+          4.28,
+          95.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-032",
+        "kind": "point",
+        "position": [
+          -1.05,
+          4.28,
+          111.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-033",
+        "kind": "point",
+        "position": [
+          3.65,
+          3.08,
+          127.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-034",
+        "kind": "point",
+        "position": [
+          3.65,
+          3.08,
+          137.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-035",
+        "kind": "point",
+        "position": [
+          3.65,
+          3.08,
+          147.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-036",
+        "kind": "point",
+        "position": [
+          -1.5,
+          2.88,
+          128.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-037",
+        "kind": "point",
+        "position": [
+          -1.5,
+          2.88,
+          148.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-038",
+        "kind": "point",
+        "position": [
+          -6.0,
+          2.78,
+          175.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-039",
+        "kind": "point",
+        "position": [
+          16.0,
+          2.78,
+          175.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-040",
+        "kind": "point",
+        "position": [
+          7.0,
+          3.18,
+          176.05
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-041",
+        "kind": "point",
+        "position": [
+          -10.0,
+          3.18,
+          196.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-042",
+        "kind": "point",
+        "position": [
+          -9.6,
+          2.88,
+          200.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-043",
+        "kind": "point",
+        "position": [
+          2.0,
+          3.18,
+          196.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-044",
+        "kind": "point",
+        "position": [
+          1.6,
+          2.88,
+          200.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-045",
+        "kind": "point",
+        "position": [
+          -6.5,
+          3.28,
+          188.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-046",
+        "kind": "point",
+        "position": [
+          24.1,
+          3.18,
+          196.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-047",
+        "kind": "point",
+        "position": [
+          19.5,
+          2.98,
+          191.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-048",
+        "kind": "point",
+        "position": [
+          19.5,
+          2.98,
+          202.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-049",
+        "kind": "point",
+        "position": [
+          15.5,
+          3.28,
+          202.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-050",
+        "kind": "point",
+        "position": [
+          1.5,
+          3.18,
+          220.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-051",
+        "kind": "point",
+        "position": [
+          12.5,
+          3.18,
+          220.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-052",
+        "kind": "point",
+        "position": [
+          3.75,
+          6.38,
+          250.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-053",
+        "kind": "point",
+        "position": [
+          1.0,
+          6.18,
+          259.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-054",
+        "kind": "point",
+        "position": [
+          13.0,
+          6.18,
+          259.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-055",
+        "kind": "point",
+        "position": [
+          0.25,
+          9.68,
+          301.95
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-056",
+        "kind": "point",
+        "position": [
+          -9.6,
+          7.03,
+          285.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-057",
+        "kind": "point",
+        "position": [
+          0.0,
+          9.18,
+          299.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-058",
+        "kind": "point",
+        "position": [
+          17.6,
+          7.03,
+          285.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-059",
+        "kind": "point",
+        "position": [
+          8.0,
+          9.18,
+          299.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-060",
+        "kind": "point",
+        "position": [
+          1.15,
+          5.88,
+          322.55
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      }
+    ]
+  },
+  "spaces": {
+    "staging": {
+      "x0": -8.0,
+      "z0": 0.0,
+      "x1": 8.0,
+      "z1": 14.0,
+      "floor": 0.0,
+      "height": 5.2
+    },
+    "customs-arcade-way-a": {
+      "x0": -1.8,
+      "z0": 12.2,
+      "x1": 1.8,
+      "z1": 18.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "customs-arcade-way-b": {
+      "x0": -1.8,
+      "z0": 17.6,
+      "x1": 1.8,
+      "z1": 23.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "customs-arcade": {
+      "x0": -10.6,
+      "z0": 22.0,
+      "x1": 10.6,
+      "z1": 42.0,
+      "floor": 0.0,
+      "height": 5.6
+    },
+    "bell-walk-way-a": {
+      "x0": 1.2,
+      "z0": 40.2,
+      "x1": 4.8,
+      "z1": 46.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "bell-walk-way-b": {
+      "x0": 1.2,
+      "z0": 45.6,
+      "x1": 4.8,
+      "z1": 51.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "bell-walk-in": {
+      "x0": 0.0,
+      "z0": 50.0,
+      "x1": 6.0,
+      "z1": 53.0,
+      "floor": 0.0,
+      "height": 4.4
+    },
+    "bell-walk-out": {
+      "x0": 0.0,
+      "z0": 81.0,
+      "x1": 6.0,
+      "z1": 84.0,
+      "floor": 0.0,
+      "height": 4.4
+    },
+    "bell-walk": {
+      "x0": -6.0,
+      "z0": 53.0,
+      "x1": 12.0,
+      "z1": 81.0,
+      "floor": -3.0,
+      "height": 9.0
+    },
+    "cistern-way-a": {
+      "x0": 1.2,
+      "z0": 82.2,
+      "x1": 4.8,
+      "z1": 88.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "cistern-way-b": {
+      "x0": 1.2,
+      "z0": 87.6,
+      "x1": 4.8,
+      "z1": 93.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "cistern": {
+      "x0": -10.0,
+      "z0": 92.0,
+      "x1": 16.0,
+      "z1": 116.0,
+      "floor": 0.0,
+      "height": 8.0
+    },
+    "long-arcade-way-a": {
+      "x0": 5.2,
+      "z0": 114.2,
+      "x1": 8.8,
+      "z1": 120.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "long-arcade-way-b": {
+      "x0": 5.2,
+      "z0": 119.6,
+      "x1": 8.8,
+      "z1": 125.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "long-arcade": {
+      "x0": 1.5,
+      "z0": 124.0,
+      "x1": 12.5,
+      "z1": 156.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "long-arcade-alcove-0": {
+      "x0": -4.5,
+      "z0": 127.5,
+      "x1": 1.5,
+      "z1": 132.5,
+      "floor": 0.0,
+      "height": 4.0
+    },
+    "long-arcade-alcove-1": {
+      "x0": -4.5,
+      "z0": 137.5,
+      "x1": 1.5,
+      "z1": 142.5,
+      "floor": 0.0,
+      "height": 4.0
+    },
+    "long-arcade-alcove-2": {
+      "x0": -4.5,
+      "z0": 147.5,
+      "x1": 1.5,
+      "z1": 152.5,
+      "floor": 0.0,
+      "height": 4.0
+    },
+    "two-sluices-way-a": {
+      "x0": 5.2,
+      "z0": 154.2,
+      "x1": 8.8,
+      "z1": 160.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "two-sluices-way-b": {
+      "x0": 5.2,
+      "z0": 159.6,
+      "x1": 8.8,
+      "z1": 165.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "two-sluices-hub": {
+      "x0": -8.0,
+      "z0": 164.0,
+      "x1": 22.0,
+      "z1": 178.0,
+      "floor": 0.0,
+      "height": 5.6
+    },
+    "two-sluices-north-sluice": {
+      "x0": -12.0,
+      "z0": 186.0,
+      "x1": 4.0,
+      "z1": 206.0,
+      "floor": 0.0,
+      "height": 6.0
+    },
+    "two-sluices-south-sluice": {
+      "x0": 10.0,
+      "z0": 186.0,
+      "x1": 26.0,
+      "z1": 206.0,
+      "floor": 0.0,
+      "height": 6.0
+    },
+    "two-sluices-merge": {
+      "x0": -8.0,
+      "z0": 214.0,
+      "x1": 22.0,
+      "z1": 226.0,
+      "floor": 0.0,
+      "height": 5.6
+    },
+    "two-sluices-north-sluice-out": {
+      "x0": -5.8,
+      "z0": 204.2,
+      "x1": -2.2,
+      "z1": 215.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "two-sluices-south-sluice-out": {
+      "x0": 16.2,
+      "z0": 204.2,
+      "x1": 19.8,
+      "z1": 215.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "two-sluices-north-sluice-way-a": {
+      "x0": -5.8,
+      "z0": 176.2,
+      "x1": -2.2,
+      "z1": 182.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "two-sluices-north-sluice-way-b": {
+      "x0": -5.8,
+      "z0": 181.6,
+      "x1": -2.2,
+      "z1": 187.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "two-sluices-south-sluice-way-a": {
+      "x0": 16.2,
+      "z0": 176.2,
+      "x1": 19.8,
+      "z1": 182.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "two-sluices-south-sluice-way-b": {
+      "x0": 16.2,
+      "z0": 181.6,
+      "x1": 19.8,
+      "z1": 187.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "campanile-stair-way-a": {
+      "x0": 5.2,
+      "z0": 224.2,
+      "x1": 8.8,
+      "z1": 230.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "campanile-stair-way-b": {
+      "x0": 5.2,
+      "z0": 229.6,
+      "x1": 8.8,
+      "z1": 235.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "campanile-stair-climb": {
+      "x0": 5.2,
+      "z0": 232.2,
+      "x1": 8.8,
+      "z1": 249.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "campanile-stair": {
+      "x0": -4.4,
+      "z0": 248.0,
+      "x1": 18.4,
+      "z1": 266.0,
+      "floor": 3.0,
+      "height": 5.6
+    },
+    "bell-court-way-a": {
+      "x0": 2.2,
+      "z0": 264.2,
+      "x1": 5.8,
+      "z1": 270.4,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "bell-court-way-b": {
+      "x0": 2.2,
+      "z0": 269.6,
+      "x1": 5.8,
+      "z1": 275.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "bell-court": {
+      "x0": -12.0,
+      "z0": 274.0,
+      "x1": 20.0,
+      "z1": 304.0,
+      "floor": 3.0,
+      "height": 9.0
+    },
+    "vault-way": {
+      "x0": 2.2,
+      "z0": 302.2,
+      "x1": 5.8,
+      "z1": 313.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "vault": {
+      "x0": -3.0,
+      "z0": 312.0,
+      "x1": 11.0,
+      "z1": 324.0,
+      "floor": 3.0,
+      "height": 5.0
+    }
+  },
+  "gauntlet": {
+    "id": "crownwater_gauntlet",
+    "region": "crownwater",
+    "name": "The Drowned Arcades",
+    "short": "arcades",
+    "flavour": "The customs arcades of the old city, flooded to the knee since the crown went under, and full of what came up with the water.",
+    "staging": {
+      "room": "staging",
+      "boundsTiles": {
+        "min": [
+          7,
+          313
+        ],
+        "max": [
+          23,
+          327
+        ]
+      },
+      "arrival": [
+        0.0,
+        0.05,
+        7.0
+      ],
+      "arrivalTile": [
+        15,
+        320
+      ],
+      "exit": {
+        "id": "exit-staging",
+        "kind": "waystone",
+        "target": "home",
+        "label": "Waystone",
+        "text": "The waystone home. Using it counts you out of the run.",
+        "position": [
+          5.8,
+          1.0,
+          11.0
+        ],
+        "serverTile": [
+          21,
+          316
+        ],
+        "objectId": 800
+      }
+    },
+    "legs": [
+      {
+        "id": "customs-arcade",
+        "name": "The Customs Arcade",
+        "kind": "hall",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 0.8,
+        "late": 0.0,
+        "gate": {
+          "id": "gate-customs-arcade",
+          "kind": "bars",
+          "label": "An iron bar gate. It opens when the way behind you is quiet.",
+          "position": [
+            0.0,
+            1.2,
+            18.0
+          ],
+          "before": [
+            0.0,
+            0.0,
+            15.0
+          ],
+          "beyond": [
+            0.0,
+            0.0,
+            21.1
+          ],
+          "tile": [
+            15,
+            312
+          ],
+          "beyondTile": [
+            15,
+            306
+          ],
+          "objectId": 801
+        },
+        "bonus": "",
+        "room": "customs-arcade",
+        "bounds": [
+          -10.6,
+          22.0,
+          10.6,
+          42.0
+        ],
+        "spawns": [
+          [
+            -8.2,
+            0.0,
+            26.0
+          ],
+          [
+            -5.2,
+            0.0,
+            26.0
+          ],
+          [
+            -2.2,
+            0.0,
+            26.0
+          ],
+          [
+            0.8,
+            0.0,
+            26.0
+          ],
+          [
+            3.8,
+            0.0,
+            26.0
+          ],
+          [
+            6.8,
+            0.0,
+            26.0
+          ],
+          [
+            -8.2,
+            0.0,
+            29.0
+          ],
+          [
+            -5.2,
+            0.0,
+            29.0
+          ],
+          [
+            -2.2,
+            0.0,
+            29.0
+          ],
+          [
+            0.8,
+            0.0,
+            29.0
+          ],
+          [
+            3.8,
+            0.0,
+            29.0
+          ],
+          [
+            6.8,
+            0.0,
+            29.0
+          ],
+          [
+            -8.2,
+            0.0,
+            32.0
+          ],
+          [
+            -5.2,
+            0.0,
+            32.0
+          ],
+          [
+            -2.2,
+            0.0,
+            32.0
+          ],
+          [
+            0.8,
+            0.0,
+            32.0
+          ],
+          [
+            3.8,
+            0.0,
+            32.0
+          ],
+          [
+            6.8,
+            0.0,
+            32.0
+          ],
+          [
+            -8.2,
+            0.0,
+            35.0
+          ],
+          [
+            -5.2,
+            0.0,
+            35.0
+          ],
+          [
+            -2.2,
+            0.0,
+            35.0
+          ],
+          [
+            0.8,
+            0.0,
+            35.0
+          ],
+          [
+            3.8,
+            0.0,
+            35.0
+          ],
+          [
+            6.8,
+            0.0,
+            35.0
+          ],
+          [
+            -8.2,
+            0.0,
+            38.0
+          ],
+          [
+            -5.2,
+            0.0,
+            38.0
+          ],
+          [
+            -2.2,
+            0.0,
+            38.0
+          ],
+          [
+            0.8,
+            0.0,
+            38.0
+          ],
+          [
+            3.8,
+            0.0,
+            38.0
+          ],
+          [
+            6.8,
+            0.0,
+            38.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            4,
+            285
+          ],
+          "max": [
+            26,
+            305
+          ]
+        },
+        "spawnTiles": [
+          [
+            13,
+            301
+          ],
+          [
+            16,
+            301
+          ],
+          [
+            13,
+            298
+          ],
+          [
+            16,
+            298
+          ],
+          [
+            19,
+            298
+          ],
+          [
+            13,
+            295
+          ],
+          [
+            16,
+            295
+          ],
+          [
+            19,
+            295
+          ],
+          [
+            13,
+            292
+          ],
+          [
+            16,
+            292
+          ],
+          [
+            19,
+            292
+          ],
+          [
+            13,
+            289
+          ],
+          [
+            16,
+            289
+          ]
+        ]
+      },
+      {
+        "id": "bell-walk",
+        "name": "The Bell Walk",
+        "kind": "bridge",
+        "advance": "time:150",
+        "trigger": "enter",
+        "pressure": 0.9,
+        "late": 0.25,
+        "gate": {
+          "id": "gate-bell-walk",
+          "kind": "bars",
+          "label": "An iron bar gate. It opens when the way behind you is quiet.",
+          "position": [
+            3.0,
+            1.2,
+            46.0
+          ],
+          "before": [
+            3.0,
+            0.0,
+            43.0
+          ],
+          "beyond": [
+            3.0,
+            0.0,
+            49.1
+          ],
+          "tile": [
+            18,
+            284
+          ],
+          "beyondTile": [
+            18,
+            278
+          ],
+          "objectId": 802
+        },
+        "bonus": "",
+        "room": "bell-walk",
+        "bounds": [
+          0.7999999999999998,
+          53.0,
+          5.2,
+          81.0
+        ],
+        "spawns": [
+          [
+            1.9,
+            0.0,
+            57.0
+          ],
+          [
+            4.1,
+            0.0,
+            57.0
+          ],
+          [
+            1.9,
+            0.0,
+            60.2
+          ],
+          [
+            4.1,
+            0.0,
+            60.2
+          ],
+          [
+            1.9,
+            0.0,
+            63.4
+          ],
+          [
+            4.1,
+            0.0,
+            63.4
+          ],
+          [
+            1.9,
+            0.0,
+            66.6
+          ],
+          [
+            4.1,
+            0.0,
+            66.6
+          ],
+          [
+            1.9,
+            0.0,
+            69.8
+          ],
+          [
+            4.1,
+            0.0,
+            69.8
+          ],
+          [
+            1.9,
+            0.0,
+            73.0
+          ],
+          [
+            4.1,
+            0.0,
+            73.0
+          ],
+          [
+            1.9,
+            0.0,
+            76.2
+          ],
+          [
+            4.1,
+            0.0,
+            76.2
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            16,
+            246
+          ],
+          "max": [
+            20,
+            274
+          ]
+        },
+        "spawnTiles": [
+          [
+            17,
+            270
+          ],
+          [
+            19,
+            270
+          ],
+          [
+            17,
+            267
+          ],
+          [
+            19,
+            267
+          ],
+          [
+            17,
+            264
+          ],
+          [
+            19,
+            264
+          ],
+          [
+            17,
+            260
+          ],
+          [
+            19,
+            260
+          ],
+          [
+            17,
+            257
+          ],
+          [
+            19,
+            257
+          ],
+          [
+            17,
+            254
+          ],
+          [
+            19,
+            254
+          ],
+          [
+            17,
+            251
+          ],
+          [
+            19,
+            251
+          ]
+        ]
+      },
+      {
+        "id": "cistern",
+        "name": "The Cistern",
+        "kind": "cavern",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.0,
+        "late": 0.4,
+        "gate": {
+          "id": "gate-cistern",
+          "kind": "portcullis",
+          "label": "A portcullis, down. It lifts when the way behind you is quiet.",
+          "position": [
+            3.0,
+            1.2,
+            88.0
+          ],
+          "before": [
+            3.0,
+            0.0,
+            85.0
+          ],
+          "beyond": [
+            3.0,
+            0.0,
+            91.1
+          ],
+          "tile": [
+            18,
+            242
+          ],
+          "beyondTile": [
+            18,
+            236
+          ],
+          "objectId": 803
+        },
+        "bonus": "",
+        "room": "cistern",
+        "bounds": [
+          -10.0,
+          92.0,
+          16.0,
+          116.0
+        ],
+        "spawns": [
+          [
+            -7.6,
+            0.0,
+            96.0
+          ],
+          [
+            -4.1,
+            0.0,
+            96.0
+          ],
+          [
+            -0.6,
+            0.0,
+            96.0
+          ],
+          [
+            2.9,
+            0.0,
+            96.0
+          ],
+          [
+            6.4,
+            0.0,
+            96.0
+          ],
+          [
+            9.9,
+            0.0,
+            96.0
+          ],
+          [
+            13.4,
+            0.0,
+            96.0
+          ],
+          [
+            -7.6,
+            0.0,
+            99.5
+          ],
+          [
+            -4.1,
+            0.0,
+            99.5
+          ],
+          [
+            -0.6,
+            0.0,
+            99.5
+          ],
+          [
+            2.9,
+            0.0,
+            99.5
+          ],
+          [
+            6.4,
+            0.0,
+            99.5
+          ],
+          [
+            9.9,
+            0.0,
+            99.5
+          ],
+          [
+            13.4,
+            0.0,
+            99.5
+          ],
+          [
+            -7.6,
+            0.0,
+            103.0
+          ],
+          [
+            -4.1,
+            0.0,
+            103.0
+          ],
+          [
+            -0.6,
+            0.0,
+            103.0
+          ],
+          [
+            2.9,
+            0.0,
+            103.0
+          ],
+          [
+            6.4,
+            0.0,
+            103.0
+          ],
+          [
+            9.9,
+            0.0,
+            103.0
+          ],
+          [
+            13.4,
+            0.0,
+            103.0
+          ],
+          [
+            -7.6,
+            0.0,
+            106.5
+          ],
+          [
+            -4.1,
+            0.0,
+            106.5
+          ],
+          [
+            -0.6,
+            0.0,
+            106.5
+          ],
+          [
+            2.9,
+            0.0,
+            106.5
+          ],
+          [
+            6.4,
+            0.0,
+            106.5
+          ],
+          [
+            9.9,
+            0.0,
+            106.5
+          ],
+          [
+            13.4,
+            0.0,
+            106.5
+          ],
+          [
+            -7.6,
+            0.0,
+            110.0
+          ],
+          [
+            -4.1,
+            0.0,
+            110.0
+          ],
+          [
+            -0.6,
+            0.0,
+            110.0
+          ],
+          [
+            2.9,
+            0.0,
+            110.0
+          ],
+          [
+            6.4,
+            0.0,
+            110.0
+          ],
+          [
+            9.9,
+            0.0,
+            110.0
+          ],
+          [
+            13.4,
+            0.0,
+            110.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            5,
+            211
+          ],
+          "max": [
+            31,
+            235
+          ]
+        },
+        "spawnTiles": [
+          [
+            11,
+            231
+          ],
+          [
+            18,
+            231
+          ],
+          [
+            21,
+            231
+          ],
+          [
+            25,
+            231
+          ],
+          [
+            7,
+            228
+          ],
+          [
+            11,
+            228
+          ],
+          [
+            14,
+            228
+          ],
+          [
+            18,
+            228
+          ],
+          [
+            21,
+            228
+          ],
+          [
+            25,
+            228
+          ],
+          [
+            28,
+            228
+          ],
+          [
+            7,
+            224
+          ],
+          [
+            11,
+            224
+          ],
+          [
+            14,
+            224
+          ],
+          [
+            18,
+            224
+          ],
+          [
+            21,
+            224
+          ],
+          [
+            25,
+            224
+          ],
+          [
+            28,
+            224
+          ],
+          [
+            7,
+            220
+          ],
+          [
+            11,
+            220
+          ],
+          [
+            14,
+            220
+          ],
+          [
+            18,
+            220
+          ],
+          [
+            21,
+            220
+          ],
+          [
+            25,
+            220
+          ],
+          [
+            28,
+            220
+          ],
+          [
+            7,
+            217
+          ],
+          [
+            11,
+            217
+          ],
+          [
+            14,
+            217
+          ],
+          [
+            18,
+            217
+          ],
+          [
+            21,
+            217
+          ],
+          [
+            25,
+            217
+          ],
+          [
+            28,
+            217
+          ]
+        ]
+      },
+      {
+        "id": "long-arcade",
+        "name": "The Long Arcade",
+        "kind": "gallery",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.0,
+        "late": 0.5,
+        "gate": {
+          "id": "gate-long-arcade",
+          "kind": "portcullis",
+          "label": "A portcullis, down. It lifts when the way behind you is quiet.",
+          "position": [
+            7.0,
+            1.2,
+            120.0
+          ],
+          "before": [
+            7.0,
+            0.0,
+            117.0
+          ],
+          "beyond": [
+            7.0,
+            0.0,
+            123.1
+          ],
+          "tile": [
+            22,
+            210
+          ],
+          "beyondTile": [
+            22,
+            204
+          ],
+          "objectId": 804
+        },
+        "bonus": "node:Kelp",
+        "room": "long-arcade",
+        "bounds": [
+          1.5,
+          124.0,
+          12.5,
+          156.0
+        ],
+        "spawns": [
+          [
+            3.9,
+            0.0,
+            128.0
+          ],
+          [
+            7.1,
+            0.0,
+            128.0
+          ],
+          [
+            3.9,
+            0.0,
+            131.2
+          ],
+          [
+            7.1,
+            0.0,
+            131.2
+          ],
+          [
+            3.9,
+            0.0,
+            134.4
+          ],
+          [
+            7.1,
+            0.0,
+            134.4
+          ],
+          [
+            3.9,
+            0.0,
+            137.6
+          ],
+          [
+            7.1,
+            0.0,
+            137.6
+          ],
+          [
+            3.9,
+            0.0,
+            140.8
+          ],
+          [
+            7.1,
+            0.0,
+            140.8
+          ],
+          [
+            3.9,
+            0.0,
+            144.0
+          ],
+          [
+            7.1,
+            0.0,
+            144.0
+          ],
+          [
+            3.9,
+            0.0,
+            147.2
+          ],
+          [
+            7.1,
+            0.0,
+            147.2
+          ],
+          [
+            3.9,
+            0.0,
+            150.4
+          ],
+          [
+            7.1,
+            0.0,
+            150.4
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            16,
+            171
+          ],
+          "max": [
+            28,
+            203
+          ]
+        },
+        "spawnTiles": [
+          [
+            19,
+            199
+          ],
+          [
+            22,
+            199
+          ],
+          [
+            19,
+            196
+          ],
+          [
+            22,
+            196
+          ],
+          [
+            19,
+            193
+          ],
+          [
+            22,
+            193
+          ],
+          [
+            19,
+            189
+          ],
+          [
+            22,
+            189
+          ],
+          [
+            19,
+            186
+          ],
+          [
+            22,
+            186
+          ],
+          [
+            19,
+            183
+          ],
+          [
+            22,
+            183
+          ],
+          [
+            19,
+            180
+          ],
+          [
+            22,
+            180
+          ],
+          [
+            19,
+            177
+          ],
+          [
+            22,
+            177
+          ]
+        ]
+      },
+      {
+        "id": "two-sluices",
+        "name": "The Two Sluices",
+        "kind": "fork",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.1,
+        "late": 0.65,
+        "gate": {
+          "id": "gate-two-sluices",
+          "kind": "portcullis",
+          "label": "A portcullis, down. It lifts when the way behind you is quiet.",
+          "position": [
+            7.0,
+            1.2,
+            160.0
+          ],
+          "before": [
+            7.0,
+            0.0,
+            157.0
+          ],
+          "beyond": [
+            7.0,
+            0.0,
+            163.1
+          ],
+          "tile": [
+            22,
+            170
+          ],
+          "beyondTile": [
+            22,
+            164
+          ],
+          "objectId": 805
+        },
+        "bonus": "",
+        "room": "two-sluices-hub",
+        "bounds": [
+          -8.0,
+          164.0,
+          22.0,
+          178.0
+        ],
+        "spawns": [
+          [
+            -5.6,
+            0.0,
+            167.5
+          ],
+          [
+            -2.1,
+            0.0,
+            167.5
+          ],
+          [
+            1.4,
+            0.0,
+            167.5
+          ],
+          [
+            4.9,
+            0.0,
+            167.5
+          ],
+          [
+            8.4,
+            0.0,
+            167.5
+          ],
+          [
+            11.9,
+            0.0,
+            167.5
+          ],
+          [
+            15.4,
+            0.0,
+            167.5
+          ],
+          [
+            18.9,
+            0.0,
+            167.5
+          ],
+          [
+            -5.6,
+            0.0,
+            171.0
+          ],
+          [
+            -2.1,
+            0.0,
+            171.0
+          ],
+          [
+            1.4,
+            0.0,
+            171.0
+          ],
+          [
+            4.9,
+            0.0,
+            171.0
+          ],
+          [
+            8.4,
+            0.0,
+            171.0
+          ],
+          [
+            11.9,
+            0.0,
+            171.0
+          ],
+          [
+            15.4,
+            0.0,
+            171.0
+          ],
+          [
+            18.9,
+            0.0,
+            171.0
+          ],
+          [
+            -5.6,
+            0.0,
+            174.5
+          ],
+          [
+            -2.1,
+            0.0,
+            174.5
+          ],
+          [
+            1.4,
+            0.0,
+            174.5
+          ],
+          [
+            4.9,
+            0.0,
+            174.5
+          ],
+          [
+            8.4,
+            0.0,
+            174.5
+          ],
+          [
+            11.9,
+            0.0,
+            174.5
+          ],
+          [
+            15.4,
+            0.0,
+            174.5
+          ],
+          [
+            18.9,
+            0.0,
+            174.5
+          ]
+        ],
+        "branches": [
+          {
+            "id": "north-sluice",
+            "name": "The North Sluice",
+            "kind": "hall",
+            "room": "two-sluices-north-sluice",
+            "bounds": [
+              -12.0,
+              186.0,
+              4.0,
+              206.0
+            ],
+            "spawns": [
+              [
+                -9.6,
+                0.0,
+                190.0
+              ],
+              [
+                -6.6,
+                0.0,
+                190.0
+              ],
+              [
+                -3.6,
+                0.0,
+                190.0
+              ],
+              [
+                -0.6,
+                0.0,
+                190.0
+              ],
+              [
+                -9.6,
+                0.0,
+                193.0
+              ],
+              [
+                -6.6,
+                0.0,
+                193.0
+              ],
+              [
+                -3.6,
+                0.0,
+                193.0
+              ],
+              [
+                -0.6,
+                0.0,
+                193.0
+              ],
+              [
+                -9.6,
+                0.0,
+                196.0
+              ],
+              [
+                -6.6,
+                0.0,
+                196.0
+              ],
+              [
+                -3.6,
+                0.0,
+                196.0
+              ],
+              [
+                -0.6,
+                0.0,
+                196.0
+              ],
+              [
+                -9.6,
+                0.0,
+                199.0
+              ],
+              [
+                -6.6,
+                0.0,
+                199.0
+              ],
+              [
+                -3.6,
+                0.0,
+                199.0
+              ],
+              [
+                -0.6,
+                0.0,
+                199.0
+              ],
+              [
+                -9.6,
+                0.0,
+                202.0
+              ],
+              [
+                -6.6,
+                0.0,
+                202.0
+              ],
+              [
+                -3.6,
+                0.0,
+                202.0
+              ],
+              [
+                -0.6,
+                0.0,
+                202.0
+              ]
+            ],
+            "gate": {
+              "id": "gate-two-sluices-north-sluice",
+              "kind": "portcullis",
+              "label": "A portcullis, down. It lifts when the way behind you is quiet.",
+              "position": [
+                -4.0,
+                1.2,
+                182.0
+              ],
+              "before": [
+                -4.0,
+                0.0,
+                179.0
+              ],
+              "beyond": [
+                -4.0,
+                0.0,
+                185.1
+              ],
+              "tile": [
+                11,
+                148
+              ],
+              "beyondTile": [
+                11,
+                142
+              ],
+              "objectId": 806
+            },
+            "boundsTiles": {
+              "min": [
+                3,
+                121
+              ],
+              "max": [
+                19,
+                141
+              ]
+            },
+            "spawnTiles": [
+              [
+                5,
+                137
+              ],
+              [
+                11,
+                137
+              ],
+              [
+                5,
+                134
+              ],
+              [
+                8,
+                134
+              ],
+              [
+                11,
+                134
+              ],
+              [
+                14,
+                134
+              ],
+              [
+                5,
+                131
+              ],
+              [
+                8,
+                131
+              ],
+              [
+                11,
+                131
+              ],
+              [
+                14,
+                131
+              ],
+              [
+                11,
+                128
+              ],
+              [
+                11,
+                125
+              ]
+            ]
+          },
+          {
+            "id": "south-sluice",
+            "name": "The South Sluice",
+            "kind": "cavern",
+            "room": "two-sluices-south-sluice",
+            "bounds": [
+              10.0,
+              186.0,
+              26.0,
+              206.0
+            ],
+            "spawns": [
+              [
+                12.4,
+                0.0,
+                190.0
+              ],
+              [
+                15.4,
+                0.0,
+                190.0
+              ],
+              [
+                18.4,
+                0.0,
+                190.0
+              ],
+              [
+                21.4,
+                0.0,
+                190.0
+              ],
+              [
+                12.4,
+                0.0,
+                193.0
+              ],
+              [
+                15.4,
+                0.0,
+                193.0
+              ],
+              [
+                18.4,
+                0.0,
+                193.0
+              ],
+              [
+                21.4,
+                0.0,
+                193.0
+              ],
+              [
+                12.4,
+                0.0,
+                196.0
+              ],
+              [
+                15.4,
+                0.0,
+                196.0
+              ],
+              [
+                18.4,
+                0.0,
+                196.0
+              ],
+              [
+                21.4,
+                0.0,
+                196.0
+              ],
+              [
+                12.4,
+                0.0,
+                199.0
+              ],
+              [
+                15.4,
+                0.0,
+                199.0
+              ],
+              [
+                18.4,
+                0.0,
+                199.0
+              ],
+              [
+                21.4,
+                0.0,
+                199.0
+              ],
+              [
+                12.4,
+                0.0,
+                202.0
+              ],
+              [
+                15.4,
+                0.0,
+                202.0
+              ],
+              [
+                18.4,
+                0.0,
+                202.0
+              ],
+              [
+                21.4,
+                0.0,
+                202.0
+              ]
+            ],
+            "gate": {
+              "id": "gate-two-sluices-south-sluice",
+              "kind": "portcullis",
+              "label": "A portcullis, down. It lifts when the way behind you is quiet.",
+              "position": [
+                18.0,
+                1.2,
+                182.0
+              ],
+              "before": [
+                18.0,
+                0.0,
+                179.0
+              ],
+              "beyond": [
+                18.0,
+                0.0,
+                185.1
+              ],
+              "tile": [
+                33,
+                148
+              ],
+              "beyondTile": [
+                33,
+                142
+              ],
+              "objectId": 807
+            },
+            "boundsTiles": {
+              "min": [
+                25,
+                121
+              ],
+              "max": [
+                41,
+                141
+              ]
+            },
+            "spawnTiles": [
+              [
+                30,
+                137
+              ],
+              [
+                33,
+                137
+              ],
+              [
+                36,
+                137
+              ],
+              [
+                30,
+                134
+              ],
+              [
+                33,
+                134
+              ],
+              [
+                36,
+                134
+              ],
+              [
+                27,
+                131
+              ],
+              [
+                30,
+                131
+              ],
+              [
+                33,
+                131
+              ],
+              [
+                36,
+                131
+              ],
+              [
+                27,
+                128
+              ],
+              [
+                30,
+                128
+              ],
+              [
+                33,
+                128
+              ],
+              [
+                36,
+                128
+              ],
+              [
+                33,
+                125
+              ]
+            ]
+          }
+        ],
+        "merge": {
+          "room": "two-sluices-merge",
+          "bounds": [
+            -8.0,
+            214.0,
+            22.0,
+            226.0
+          ],
+          "boundsTiles": {
+            "min": [
+              7,
+              101
+            ],
+            "max": [
+              37,
+              113
+            ]
+          }
+        },
+        "boundsTiles": {
+          "min": [
+            7,
+            149
+          ],
+          "max": [
+            37,
+            163
+          ]
+        },
+        "spawnTiles": [
+          [
+            9,
+            160
+          ],
+          [
+            13,
+            160
+          ],
+          [
+            16,
+            160
+          ],
+          [
+            20,
+            160
+          ],
+          [
+            23,
+            160
+          ],
+          [
+            27,
+            160
+          ],
+          [
+            30,
+            160
+          ],
+          [
+            34,
+            160
+          ],
+          [
+            9,
+            156
+          ],
+          [
+            13,
+            156
+          ],
+          [
+            16,
+            156
+          ],
+          [
+            20,
+            156
+          ],
+          [
+            23,
+            156
+          ],
+          [
+            27,
+            156
+          ],
+          [
+            30,
+            156
+          ],
+          [
+            34,
+            156
+          ],
+          [
+            16,
+            152
+          ],
+          [
+            20,
+            152
+          ],
+          [
+            23,
+            152
+          ],
+          [
+            27,
+            152
+          ],
+          [
+            34,
+            152
+          ]
+        ]
+      },
+      {
+        "id": "campanile-stair",
+        "name": "The Campanile Stair",
+        "kind": "stair",
+        "advance": "cleared",
+        "trigger": "at_gate",
+        "pressure": 1.2,
+        "late": 0.85,
+        "gate": {
+          "id": "gate-campanile-stair",
+          "kind": "bars",
+          "label": "An iron bar gate. It opens when the way behind you is quiet.",
+          "position": [
+            7.0,
+            1.2,
+            230.0
+          ],
+          "before": [
+            7.0,
+            0.0,
+            227.0
+          ],
+          "beyond": [
+            7.0,
+            0.0,
+            233.1
+          ],
+          "tile": [
+            22,
+            100
+          ],
+          "beyondTile": [
+            22,
+            94
+          ],
+          "objectId": 808
+        },
+        "bonus": "",
+        "room": "campanile-stair",
+        "bounds": [
+          -4.4,
+          248.0,
+          18.4,
+          266.0
+        ],
+        "spawns": [
+          [
+            -2.0,
+            3.0,
+            252.0
+          ],
+          [
+            1.0,
+            3.0,
+            252.0
+          ],
+          [
+            4.0,
+            3.0,
+            252.0
+          ],
+          [
+            7.0,
+            3.0,
+            252.0
+          ],
+          [
+            10.0,
+            3.0,
+            252.0
+          ],
+          [
+            13.0,
+            3.0,
+            252.0
+          ],
+          [
+            -2.0,
+            3.0,
+            255.0
+          ],
+          [
+            1.0,
+            3.0,
+            255.0
+          ],
+          [
+            4.0,
+            3.0,
+            255.0
+          ],
+          [
+            7.0,
+            3.0,
+            255.0
+          ],
+          [
+            10.0,
+            3.0,
+            255.0
+          ],
+          [
+            13.0,
+            3.0,
+            255.0
+          ],
+          [
+            -2.0,
+            3.0,
+            258.0
+          ],
+          [
+            1.0,
+            3.0,
+            258.0
+          ],
+          [
+            4.0,
+            3.0,
+            258.0
+          ],
+          [
+            7.0,
+            3.0,
+            258.0
+          ],
+          [
+            10.0,
+            3.0,
+            258.0
+          ],
+          [
+            13.0,
+            3.0,
+            258.0
+          ],
+          [
+            -2.0,
+            3.0,
+            261.0
+          ],
+          [
+            1.0,
+            3.0,
+            261.0
+          ],
+          [
+            4.0,
+            3.0,
+            261.0
+          ],
+          [
+            7.0,
+            3.0,
+            261.0
+          ],
+          [
+            10.0,
+            3.0,
+            261.0
+          ],
+          [
+            13.0,
+            3.0,
+            261.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            11,
+            61
+          ],
+          "max": [
+            33,
+            79
+          ]
+        },
+        "spawnTiles": [
+          [
+            13,
+            75
+          ],
+          [
+            16,
+            75
+          ],
+          [
+            19,
+            75
+          ],
+          [
+            22,
+            75
+          ],
+          [
+            25,
+            75
+          ],
+          [
+            28,
+            75
+          ],
+          [
+            13,
+            72
+          ],
+          [
+            16,
+            72
+          ],
+          [
+            19,
+            72
+          ],
+          [
+            22,
+            72
+          ],
+          [
+            25,
+            72
+          ],
+          [
+            28,
+            72
+          ],
+          [
+            19,
+            69
+          ],
+          [
+            22,
+            69
+          ],
+          [
+            25,
+            69
+          ],
+          [
+            13,
+            66
+          ],
+          [
+            16,
+            66
+          ],
+          [
+            19,
+            66
+          ],
+          [
+            22,
+            66
+          ],
+          [
+            25,
+            66
+          ],
+          [
+            28,
+            66
+          ]
+        ]
+      },
+      {
+        "id": "bell-court",
+        "name": "The Bell Court",
+        "kind": "court",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.0,
+        "late": 1.0,
+        "gate": {
+          "id": "gate-bell-court",
+          "kind": "portcullis",
+          "label": "A portcullis, down. It lifts when the way behind you is quiet.",
+          "position": [
+            4.0,
+            4.2,
+            270.0
+          ],
+          "before": [
+            4.0,
+            3.0,
+            267.0
+          ],
+          "beyond": [
+            4.0,
+            3.0,
+            273.1
+          ],
+          "tile": [
+            19,
+            60
+          ],
+          "beyondTile": [
+            19,
+            54
+          ],
+          "objectId": 809
+        },
+        "bonus": "",
+        "boss": [
+          4.0,
+          3.5,
+          297.0
+        ],
+        "room": "bell-court",
+        "bounds": [
+          -12.0,
+          274.0,
+          20.0,
+          304.0
+        ],
+        "spawns": [
+          [
+            11.0,
+            3.0,
+            289.0
+          ],
+          [
+            8.95,
+            3.0,
+            293.24
+          ],
+          [
+            4.0,
+            3.0,
+            295.0
+          ],
+          [
+            -0.95,
+            3.0,
+            293.24
+          ],
+          [
+            -3.0,
+            3.0,
+            289.0
+          ],
+          [
+            -0.95,
+            3.0,
+            284.76
+          ],
+          [
+            4.0,
+            3.0,
+            283.0
+          ],
+          [
+            8.95,
+            3.0,
+            284.76
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            3,
+            23
+          ],
+          "max": [
+            35,
+            53
+          ]
+        },
+        "spawnTiles": [
+          [
+            26,
+            38
+          ],
+          [
+            24,
+            34
+          ],
+          [
+            19,
+            32
+          ],
+          [
+            14,
+            34
+          ],
+          [
+            12,
+            38
+          ],
+          [
+            14,
+            42
+          ],
+          [
+            19,
+            44
+          ],
+          [
+            24,
+            42
+          ]
+        ],
+        "bossTile": [
+          19,
+          30
+        ]
+      }
+    ],
+    "vault": {
+      "room": "vault",
+      "boundsTiles": {
+        "min": [
+          12,
+          3
+        ],
+        "max": [
+          26,
+          15
+        ]
+      },
+      "spot": [
+        4.0,
+        3.05,
+        318.0
+      ],
+      "spotTile": [
+        19,
+        9
+      ],
+      "cache": {
+        "id": "cache",
+        "kind": "cache",
+        "target": "run",
+        "label": "Reward cache",
+        "text": "The run's cache. It opens once for each of you when the court is quiet.",
+        "position": [
+          4.0,
+          3.6,
+          320.5
+        ],
+        "serverTile": [
+          19,
+          6
+        ],
+        "objectId": 798
+      },
+      "exit": {
+        "id": "exit-vault",
+        "kind": "waystone",
+        "target": "home",
+        "label": "Waystone",
+        "text": "The waystone home.",
+        "position": [
+          9.0,
+          4.0,
+          315.0
+        ],
+        "serverTile": [
+          24,
+          12
+        ],
+        "objectId": 799
+      }
+    },
+    "keeper": {
+      "name": "Tollmaster Quent",
+      "at": "crownwater-customs-hall",
+      "offset": [
+        6.0,
+        3.0
+      ],
+      "actorType": 307
+    },
+    "maxPlayers": 6,
+    "bands": [
+      {
+        "id": "low",
+        "label": "The Drowned Arcades (5-30)",
+        "minAd": 5,
+        "maxAd": 30,
+        "timeLimit": 2400,
+        "cooldownHours": 6
+      },
+      {
+        "id": "mid",
+        "label": "The Drowned Arcades (24-55)",
+        "minAd": 24,
+        "maxAd": 55,
+        "timeLimit": 2700,
+        "cooldownHours": 6
+      }
+    ]
+  },
+  "performance": {
+    "nodes": 286,
+    "meshes": 256,
+    "materials": 12,
+    "images": 36,
+    "textures": 36,
+    "accessors": 1280,
+    "bufferViews": 1316,
+    "uniqueTriangles": 64393,
+    "uniqueVertices": 65418,
+    "glbBytes": 7412640,
+    "nodeNames": [
+      "Secrets_crownwater_gauntlet",
+      "Section_crownwater_gauntlet_band_-001",
+      "Roof_crownwater_gauntlet_band_-001_crownwater_marble",
+      "Build_crownwater_gauntlet_band_-001_ashlar",
+      "Walk_crownwater_gauntlet_band_-001_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+000",
+      "Roof_crownwater_gauntlet_band_+000_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+000_amber_resin",
+      "Build_crownwater_gauntlet_band_+000_ashlar",
+      "Build_crownwater_gauntlet_band_+000_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+000_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+000_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+000_dark_iron",
+      "Build_crownwater_gauntlet_band_+000_timber_warm",
+      "Walk_crownwater_gauntlet_band_+000_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+001",
+      "Roof_crownwater_gauntlet_band_+001_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+001_ashlar",
+      "Build_crownwater_gauntlet_band_+001_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+001_dark_iron",
+      "Build_crownwater_gauntlet_band_+001_timber_warm",
+      "Walk_crownwater_gauntlet_band_+001_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+001_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+002",
+      "Roof_crownwater_gauntlet_band_+002_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+002_amber_resin",
+      "Build_crownwater_gauntlet_band_+002_ashlar",
+      "Build_crownwater_gauntlet_band_+002_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+002_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+002_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+002_dark_iron",
+      "Build_crownwater_gauntlet_band_+002_timber_warm",
+      "Walk_crownwater_gauntlet_band_+002_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+003",
+      "Roof_crownwater_gauntlet_band_+003_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+003_amber_resin",
+      "Build_crownwater_gauntlet_band_+003_ashlar",
+      "Build_crownwater_gauntlet_band_+003_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+003_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+003_dark_iron",
+      "Build_crownwater_gauntlet_band_+003_timber_warm",
+      "Walk_crownwater_gauntlet_band_+003_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+003_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+004",
+      "Roof_crownwater_gauntlet_band_+004_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+004_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+004_amber_resin",
+      "Build_crownwater_gauntlet_band_+004_ashlar",
+      "Build_crownwater_gauntlet_band_+004_cliff_rock",
+      "Build_crownwater_gauntlet_band_+004_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+004_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+004_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+004_dark_iron",
+      "Walk_crownwater_gauntlet_band_+004_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+005",
+      "Roof_crownwater_gauntlet_band_+005_cliff_rock",
+      "Build_crownwater_gauntlet_band_+005_amber_resin",
+      "Build_crownwater_gauntlet_band_+005_cliff_rock",
+      "Build_crownwater_gauntlet_band_+005_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+005_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+005_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+005_dark_iron",
+      "Walk_crownwater_gauntlet_band_+005_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+006",
+      "Roof_crownwater_gauntlet_band_+006_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+006_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+006_amber_resin",
+      "Build_crownwater_gauntlet_band_+006_ashlar",
+      "Build_crownwater_gauntlet_band_+006_cliff_rock",
+      "Build_crownwater_gauntlet_band_+006_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+006_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+006_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+006_dark_iron",
+      "Walk_crownwater_gauntlet_band_+006_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+007",
+      "Roof_crownwater_gauntlet_band_+007_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+007_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+007_amber_resin",
+      "Build_crownwater_gauntlet_band_+007_ashlar",
+      "Build_crownwater_gauntlet_band_+007_cliff_rock",
+      "Build_crownwater_gauntlet_band_+007_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+007_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+007_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+007_dark_iron",
+      "Walk_crownwater_gauntlet_band_+007_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+007_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+008",
+      "Roof_crownwater_gauntlet_band_+008_cliff_rock",
+      "Build_crownwater_gauntlet_band_+008_amber_resin",
+      "Build_crownwater_gauntlet_band_+008_cliff_rock",
+      "Build_crownwater_gauntlet_band_+008_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+008_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+008_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+008_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+008_dark_iron",
+      "Walk_crownwater_gauntlet_band_+008_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+009",
+      "Roof_crownwater_gauntlet_band_+009_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+009_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+009_amber_resin",
+      "Build_crownwater_gauntlet_band_+009_ashlar",
+      "Build_crownwater_gauntlet_band_+009_cliff_rock",
+      "Build_crownwater_gauntlet_band_+009_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+009_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+009_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+009_dark_iron",
+      "Walk_crownwater_gauntlet_band_+009_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+009_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+010",
+      "Roof_crownwater_gauntlet_band_+010_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+010_amber_resin",
+      "Build_crownwater_gauntlet_band_+010_ashlar",
+      "Build_crownwater_gauntlet_band_+010_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+010_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+010_dark_iron",
+      "Build_crownwater_gauntlet_band_+010_timber_warm",
+      "Walk_crownwater_gauntlet_band_+010_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+010_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+011",
+      "Roof_crownwater_gauntlet_band_+011_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+011_amber_resin",
+      "Build_crownwater_gauntlet_band_+011_ashlar",
+      "Build_crownwater_gauntlet_band_+011_blue_crystal",
+      "Build_crownwater_gauntlet_band_+011_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+011_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+011_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+011_dark_iron",
+      "Walk_crownwater_gauntlet_band_+011_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+011_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+012",
+      "Roof_crownwater_gauntlet_band_+012_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+012_amber_resin",
+      "Build_crownwater_gauntlet_band_+012_ashlar",
+      "Build_crownwater_gauntlet_band_+012_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+012_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+012_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+012_dark_iron",
+      "Build_crownwater_gauntlet_band_+012_timber_warm",
+      "Walk_crownwater_gauntlet_band_+012_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+012_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+013",
+      "Roof_crownwater_gauntlet_band_+013_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+013_ashlar",
+      "Build_crownwater_gauntlet_band_+013_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+013_dark_iron",
+      "Walk_crownwater_gauntlet_band_+013_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+013_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+014",
+      "Roof_crownwater_gauntlet_band_+014_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+014_amber_resin",
+      "Build_crownwater_gauntlet_band_+014_ashlar",
+      "Build_crownwater_gauntlet_band_+014_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+014_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+014_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+014_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+014_dark_iron",
+      "Walk_crownwater_gauntlet_band_+014_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+014_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+015",
+      "Roof_crownwater_gauntlet_band_+015_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+015_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+015_amber_resin",
+      "Build_crownwater_gauntlet_band_+015_ashlar",
+      "Build_crownwater_gauntlet_band_+015_cliff_rock",
+      "Build_crownwater_gauntlet_band_+015_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+015_crownwater_sand",
+      "Build_crownwater_gauntlet_band_+015_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+015_dark_iron",
+      "Walk_crownwater_gauntlet_band_+015_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+015_crownwater_mosaic",
+      "Walk_crownwater_gauntlet_band_+015_crownwater_sand",
+      "Section_crownwater_gauntlet_band_+016",
+      "Roof_crownwater_gauntlet_band_+016_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+016_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+016_amber_resin",
+      "Build_crownwater_gauntlet_band_+016_ashlar",
+      "Build_crownwater_gauntlet_band_+016_cliff_rock",
+      "Build_crownwater_gauntlet_band_+016_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+016_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+016_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+016_crownwater_sand",
+      "Build_crownwater_gauntlet_band_+016_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+016_dark_iron",
+      "Build_crownwater_gauntlet_band_+016_timber_warm",
+      "Walk_crownwater_gauntlet_band_+016_crownwater_mosaic",
+      "Walk_crownwater_gauntlet_band_+016_crownwater_sand",
+      "Section_crownwater_gauntlet_band_+017",
+      "Roof_crownwater_gauntlet_band_+017_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+017_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+017_ashlar",
+      "Build_crownwater_gauntlet_band_+017_cliff_rock",
+      "Build_crownwater_gauntlet_band_+017_crownwater_lagoon",
+      "Walk_crownwater_gauntlet_band_+017_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+017_crownwater_mosaic",
+      "Walk_crownwater_gauntlet_band_+017_crownwater_sand",
+      "Section_crownwater_gauntlet_band_+018",
+      "Roof_crownwater_gauntlet_band_+018_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+018_amber_resin",
+      "Build_crownwater_gauntlet_band_+018_ashlar",
+      "Build_crownwater_gauntlet_band_+018_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+018_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+018_dark_iron",
+      "Walk_crownwater_gauntlet_band_+018_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+018_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+019",
+      "Roof_crownwater_gauntlet_band_+019_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+019_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+019_ashlar",
+      "Build_crownwater_gauntlet_band_+019_cliff_rock",
+      "Build_crownwater_gauntlet_band_+019_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+019_dark_iron",
+      "Walk_crownwater_gauntlet_band_+019_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+019_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+020",
+      "Roof_crownwater_gauntlet_band_+020_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+020_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+020_amber_resin",
+      "Build_crownwater_gauntlet_band_+020_ashlar",
+      "Build_crownwater_gauntlet_band_+020_cliff_rock",
+      "Build_crownwater_gauntlet_band_+020_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+020_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+020_dark_iron",
+      "Walk_crownwater_gauntlet_band_+020_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+020_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+021",
+      "Roof_crownwater_gauntlet_band_+021_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+021_amber_resin",
+      "Build_crownwater_gauntlet_band_+021_ashlar",
+      "Build_crownwater_gauntlet_band_+021_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+021_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+021_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+021_dark_iron",
+      "Walk_crownwater_gauntlet_band_+021_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+022",
+      "Roof_crownwater_gauntlet_band_+022_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+022_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+022_ashlar",
+      "Build_crownwater_gauntlet_band_+022_cliff_rock",
+      "Build_crownwater_gauntlet_band_+022_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+022_dark_iron",
+      "Walk_crownwater_gauntlet_band_+022_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+023",
+      "Roof_crownwater_gauntlet_band_+023_cliff_rock",
+      "Build_crownwater_gauntlet_band_+023_amber_resin",
+      "Build_crownwater_gauntlet_band_+023_cliff_rock",
+      "Build_crownwater_gauntlet_band_+023_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+023_crownwater_lagoon",
+      "Build_crownwater_gauntlet_band_+023_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+023_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+023_dark_iron",
+      "Walk_crownwater_gauntlet_band_+023_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+024",
+      "Roof_crownwater_gauntlet_band_+024_cliff_rock",
+      "Build_crownwater_gauntlet_band_+024_amber_resin",
+      "Build_crownwater_gauntlet_band_+024_cliff_rock",
+      "Build_crownwater_gauntlet_band_+024_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+024_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+024_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+024_dark_iron",
+      "Walk_crownwater_gauntlet_band_+024_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+024_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+025",
+      "Roof_crownwater_gauntlet_band_+025_cliff_rock",
+      "Roof_crownwater_gauntlet_band_+025_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+025_amber_resin",
+      "Build_crownwater_gauntlet_band_+025_ashlar",
+      "Build_crownwater_gauntlet_band_+025_cliff_rock",
+      "Build_crownwater_gauntlet_band_+025_crownwater_gilt",
+      "Build_crownwater_gauntlet_band_+025_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+025_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+025_dark_iron",
+      "Walk_crownwater_gauntlet_band_+025_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+025_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+026",
+      "Roof_crownwater_gauntlet_band_+026_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+026_amber_resin",
+      "Build_crownwater_gauntlet_band_+026_ashlar",
+      "Build_crownwater_gauntlet_band_+026_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+026_crownwater_verdigris",
+      "Build_crownwater_gauntlet_band_+026_dark_iron",
+      "Build_crownwater_gauntlet_band_+026_timber_warm",
+      "Walk_crownwater_gauntlet_band_+026_crownwater_mosaic",
+      "Section_crownwater_gauntlet_band_+027",
+      "Roof_crownwater_gauntlet_band_+027_crownwater_marble",
+      "Build_crownwater_gauntlet_band_+027_crownwater_marble",
+      "Walk_crownwater_gauntlet_band_+027_crownwater_mosaic"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "_toolkit/gauntlets/build.py",
+      "role": "reproducible-build",
+      "design": "_toolkit/gauntlets/designs.py"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the gauntlet rooms over the shared toolkit",
+    "license": "CC-BY-4.0"
+  },
+  "productionStatus": "authored-geometry-materials-population",
+  "notes": [
+    "The Drowned Arcades: a linear instanced route of 7 legs under crownwater; the server runs it as an instance and opens each gate when the leg before it is quiet."
+  ],
+  "externalMeshes": {
+    "../../../_shared/meshes/13704f163daffb062aa43cd1e66e1da0f41d32bc1d3dcb532822ad17839a66ca.glb": "0a763c919b7a424797ba229d23733f08e3ee1a59fc4160e51ad152ffaa723783",
+    "../../../_shared/meshes/29850ef8147efa5418a899845ef4e232b36f5c7fe06b80269f3e69be90163668.glb": "0b912719c9117c22fd77dfc3a538ac950a5b67698ac0f38f90d11c65947480b3",
+    "../../../_shared/meshes/bfd1a1142cdfafbccd85e2b95320f26ff099bb617e4da9d204b7cd1018e4ded2.glb": "16fa751a040003affb458b1a92cc8ab6668b5d3fdd2bfa82ada1b2dc00ce022d"
+  },
+  "externalResources": {
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0.png": "0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1ec2aeebc803ecd33cde67e4c642107e0dfede62efca2f325253beeaac19ea30.png": "1ec2aeebc803ecd33cde67e4c642107e0dfede62efca2f325253beeaac19ea30",
+    "../../../_shared/images/1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f.png": "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f",
+    "../../../_shared/images/222923069c53612b70a30a0645d409a9d0459377f63c85ef6beef7c210313482.png": "222923069c53612b70a30a0645d409a9d0459377f63c85ef6beef7c210313482",
+    "../../../_shared/images/2334276da8ac075a59e7126393b9e7f2792eaaec3ac702872753edcc9847ad2e.png": "2334276da8ac075a59e7126393b9e7f2792eaaec3ac702872753edcc9847ad2e",
+    "../../../_shared/images/29cf3e77438a371afb144e2cb4340e21be201241893f412c38d075b268774535.png": "29cf3e77438a371afb144e2cb4340e21be201241893f412c38d075b268774535",
+    "../../../_shared/images/2c6bbced40ac480a1c162af7c96741aad40da8bbf7012b8fc213482a967432c3.png": "2c6bbced40ac480a1c162af7c96741aad40da8bbf7012b8fc213482a967432c3",
+    "../../../_shared/images/325ed686de27437c35eddc9d8928a7d68cc5d249c555a1cefeeac613fff7d2dd.png": "325ed686de27437c35eddc9d8928a7d68cc5d249c555a1cefeeac613fff7d2dd",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/4408177221307397cb8ef77908654d8f8a7f661a86e43819f0711af70e992a4d.png": "4408177221307397cb8ef77908654d8f8a7f661a86e43819f0711af70e992a4d",
+    "../../../_shared/images/46bf0c9395b0db44479d3a2ab168e5c7c16fae3a52e461be506420ecbf19e9e1.png": "46bf0c9395b0db44479d3a2ab168e5c7c16fae3a52e461be506420ecbf19e9e1",
+    "../../../_shared/images/4e6e10185da2279e2d47a45f3fa8e145e44ccb1a200cea4f8368c026c3a6c184.png": "4e6e10185da2279e2d47a45f3fa8e145e44ccb1a200cea4f8368c026c3a6c184",
+    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
+    "../../../_shared/images/60159a9fb7085a3df4d468a9a36ac0547e72baff8e44c00814f887d2afef74c2.png": "60159a9fb7085a3df4d468a9a36ac0547e72baff8e44c00814f887d2afef74c2",
+    "../../../_shared/images/7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23.png": "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23",
+    "../../../_shared/images/7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2.png": "7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/8866a23ceb1476153132c00a6618040e3c9371397a7ceb5be993bdd46746b6ef.png": "8866a23ceb1476153132c00a6618040e3c9371397a7ceb5be993bdd46746b6ef",
+    "../../../_shared/images/95436cf72c368fc61d29bedeca68007496b6a6651fcf40ffddd9fc1e0e64fc08.png": "95436cf72c368fc61d29bedeca68007496b6a6651fcf40ffddd9fc1e0e64fc08",
+    "../../../_shared/images/a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e.png": "a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e",
+    "../../../_shared/images/a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392.png": "a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/b31299f9fe199ad5d52a01c25ba8246dcf399a22459e800b894c74ab6c65a92f.png": "b31299f9fe199ad5d52a01c25ba8246dcf399a22459e800b894c74ab6c65a92f",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/c5c809b7a098674301b6c06bdd9de9d86728387d86ae86a1997631c536c228af.png": "c5c809b7a098674301b6c06bdd9de9d86728387d86ae86a1997631c536c228af",
+    "../../../_shared/images/ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0.png": "ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0",
+    "../../../_shared/images/d4f7f86d98cf2675ebcd2bc4ce47553a18dccb278f54b6aeb835adfefe5169d3.png": "d4f7f86d98cf2675ebcd2bc4ce47553a18dccb278f54b6aeb835adfefe5169d3",
+    "../../../_shared/images/d6eaed8cf04e59d32779c2f49f64fd1b8ab69f0cb2e1226cbe2f78a8d6e057a4.png": "d6eaed8cf04e59d32779c2f49f64fd1b8ab69f0cb2e1226cbe2f78a8d6e057a4",
+    "../../../_shared/images/da1849e60f770ad20c0d322317679ae7865bf70332882ab5e4c57e3dbc7b71a0.png": "da1849e60f770ad20c0d322317679ae7865bf70332882ab5e4c57e3dbc7b71a0",
+    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
+    "../../../_shared/images/f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c.png": "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c",
+    "../../../_shared/images/f9b24a696205ffb0451d2c53705d79ba0cf4c8491305dc5ccd9810465fbb9a4a.png": "f9b24a696205ffb0451d2c53705d79ba0cf4c8491305dc5ccd9810465fbb9a4a",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c"
+  }
+}

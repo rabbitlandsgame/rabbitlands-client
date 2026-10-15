@@ -1,0 +1,203 @@
+[instance]
+spawn_type: instance
+spawn_name: amethyst_gauntlet_high
+spawn_desc: The Resonant Cut
+short_name: cut_high
+map_id: ./maps/nymara/amethyst_gauntlet.elm
+route: amethyst_gauntlet
+band: high
+keeper: Grinder Vell
+minimum_ad: 25
+maximum_ad: 65
+cooldown_hours: 6
+minimum_players: 1
+maximum_players: 6
+time_limit_seconds: 2700
+entry_x: 21
+entry_y: 356
+exit_map: amethyst_barrens
+exit_x: 50
+exit_y: 343
+copies: amethyst_gauntlet, amethyst_gauntlet_2, amethyst_gauntlet_3
+cache_object: 798
+cache_table: cache_amethyst_gauntlet
+staging_exit: 800
+vault_exit: 799
+mutators: none:5, frenzy:2, hunted:2, bounty:1, swift:1
+wipe_seconds: 90
+
+[leg]
+id: mite-cut
+name: The Mite Cut
+kind: cavern
+gate: 801 | 21 | 346 | 21 | 340
+trigger: enter
+advance: cleared
+bounds: 8 | 313 | 34 | 337
+[variant]
+g_cut_high_mite_cut_0
+[/variant]
+[variant]
+g_cut_high_mite_cut_1
+[/variant]
+[variant]
+g_cut_high_mite_cut_2
+g_cut_high_mite_cut_2_lead
+[/variant]
+[/leg]
+
+[leg]
+id: shard-gallery
+name: The Shard Gallery
+kind: gallery
+gate: 802 | 25 | 310 | 25 | 304
+trigger: enter
+advance: cleared
+bounds: 20 | 269 | 30 | 301
+[variant]
+g_cut_high_shard_gallery_0
+[/variant]
+[variant]
+g_cut_high_shard_gallery_1
+g_cut_high_shard_gallery_1_lead
+[/variant]
+[variant]
+g_cut_high_shard_gallery_2
+[/variant]
+[/leg]
+
+[leg]
+id: hum-bridge
+name: The Hum Bridge
+kind: bridge
+gate: 803 | 25 | 266 | 25 | 260
+trigger: enter
+advance: time:150
+bounds: 23 | 226 | 27 | 254
+[variant]
+g_cut_high_hum_bridge_0
+[/variant]
+[variant]
+g_cut_high_hum_bridge_1
+[/variant]
+[variant]
+g_cut_high_hum_bridge_2
+[/variant]
+[/leg]
+
+[leg]
+id: resonant-hall
+name: The Resonant Hall
+kind: hall
+gate: 804 | 25 | 220 | 25 | 214
+trigger: enter
+advance: cleared
+bounds: 14 | 191 | 36 | 211
+[variant]
+g_cut_high_resonant_hall_0
+[/variant]
+[variant]
+g_cut_high_resonant_hall_1
+g_cut_high_resonant_hall_1_lead
+[/variant]
+[variant]
+g_cut_high_resonant_hall_2
+[/variant]
+[/leg]
+
+[leg]
+id: split-seam
+name: The Split Seam
+kind: fork
+gate: 805 | 22 | 188 | 22 | 182
+trigger: enter
+advance: cleared
+bounds: 7 | 165 | 37 | 179
+[variant]
+g_cut_high_split_seam_0
+[/variant]
+[variant]
+g_cut_high_split_seam_1
+[/variant]
+[variant]
+g_cut_high_split_seam_2
+[/variant]
+[branch]
+id: bright-seam
+name: The Bright Seam
+kind: cavern
+gate: 806 | 11 | 162 | 11 | 156
+trigger: enter
+advance: cleared
+bounds: 3 | 133 | 19 | 153
+[variant]
+g_cut_high_bright_seam_0
+[/variant]
+[variant]
+g_cut_high_bright_seam_1
+[/variant]
+[variant]
+g_cut_high_bright_seam_2
+g_cut_high_bright_seam_2_lead
+[/variant]
+[/branch]
+
+[branch]
+id: dark-seam
+name: The Dark Seam
+kind: hall
+gate: 807 | 33 | 162 | 33 | 156
+trigger: enter
+advance: cleared
+bounds: 25 | 133 | 41 | 153
+[variant]
+g_cut_high_dark_seam_0
+[/variant]
+[variant]
+g_cut_high_dark_seam_1
+g_cut_high_dark_seam_1_lead
+[/variant]
+[variant]
+g_cut_high_dark_seam_2
+[/variant]
+[/branch]
+
+[/leg]
+
+[leg]
+id: storm-stair
+name: The Storm Stair
+kind: stair
+gate: 808 | 22 | 106 | 22 | 100
+trigger: at_gate
+advance: cleared
+bounds: 11 | 65 | 33 | 83
+[variant]
+g_cut_high_storm_stair_0
+[/variant]
+[variant]
+g_cut_high_storm_stair_1
+[/variant]
+[variant]
+g_cut_high_storm_stair_2
+g_cut_high_storm_stair_2_lead
+[/variant]
+[/leg]
+
+[leg]
+id: prism-court
+name: The Prism Court
+kind: court
+gate: 809 | 19 | 62 | 19 | 56
+trigger: enter
+advance: cleared
+bounds: 3 | 23 | 35 | 53
+[variant]
+g_cut_high_prism_court_court_0
+[/variant]
+[variant]
+g_cut_high_prism_court_court_1
+[/variant]
+[/leg]
+
+[/instance]

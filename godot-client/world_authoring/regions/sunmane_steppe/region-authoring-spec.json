@@ -1,0 +1,81 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "sunmane_steppe",
+  "label": "Sunmane Steppe",
+  "adapter": "sunmane-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/sunmane_steppe/sunmane_steppe.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/sunmane_steppe/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/sunmane_steppe/authoring/continent-authoring.json"
+  },
+  "continentTranslation": [
+    1200.0,
+    0.0,
+    720.0
+  ],
+  "server": {
+    "origin": [
+      194,
+      292
+    ],
+    "cells": [
+      792,
+      792
+    ],
+    "collisionOriginMetres": [
+      -194.0,
+      292.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -194.0,
+      -500.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      397,
+      397
+    ]
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "amethyst_barrens--sunmane_steppe-sunmane_steppe",
+      "discovery-sunmane_steppe-301",
+      "discovery-sunmane_steppe-302",
+      "discovery-sunmane_steppe-303",
+      "discovery-sunmane_steppe-304",
+      "discovery-sunmane_steppe-305",
+      "discovery-sunmane_steppe-306",
+      "discovery-sunmane_steppe-307",
+      "discovery-sunmane_steppe-308",
+      "discovery-sunmane_steppe-309",
+      "discovery-sunmane_steppe-310",
+      "discovery-sunmane_steppe-311",
+      "discovery-sunmane_steppe-312",
+      "discovery-sunmane_steppe-313",
+      "discovery-sunmane_steppe-713",
+      "door-sunmane_steppe-cave-crystal_hollow",
+      "door-sunmane_steppe-cave-wind_caves",
+      "east-gate-main-ramp",
+      "east-gate-town-ramp",
+      "mirrorhold--sunmane_steppe-sunmane_steppe",
+      "sunmane_steppe--verdant_stair-sunmane_steppe"
+    ],
+    "requiredRouteIds": [
+      "amethyst_barrens--sunmane_steppe-sunmane_steppe",
+      "door-sunmane_steppe-cave-crystal_hollow",
+      "door-sunmane_steppe-cave-wind_caves",
+      "mirrorhold--sunmane_steppe-sunmane_steppe",
+      "sunmane_steppe--verdant_stair-sunmane_steppe"
+    ],
+    "ownedPlanFeatureIds": [
+      "southern_river"
+    ]
+  },
+  "gameplay": {
+    "runtimeBindingCount": 245,
+    "runtimePointCount": 163,
+    "existingMarkerBindingCount": 81
+  }
+}

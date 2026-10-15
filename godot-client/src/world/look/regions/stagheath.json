@@ -1,0 +1,109 @@
+{
+	"id": "stagheath",
+	"schema": 1,
+	"ground": {
+		"path_luma_forward": 0.2,
+		"path_tint_forward": [
+			0.88,
+			0.76,
+			0.58
+		],
+		"path_chroma_forward": 1.35,
+		"meadow_value_forward": 0.76,
+		"meadow_chroma_forward": 0.85,
+		"meadow_tint_forward": [
+			0.82,
+			0.7,
+			0.92
+		],
+		"verge_saturation_forward": 1.05,
+		"rock_value_forward": 0.32,
+		"verge_value_earth_forward": 0.7,
+		"paving_tint_forward": [
+			0.6,
+			0.53,
+			0.42
+		],
+		"verge_grain_forward": 1.0,
+		"verge_grain_steep_forward": 0.3
+	},
+	"grass": {
+		"root": [
+			0.13,
+			0.1,
+			0.09
+		],
+		"tip": [
+			0.58,
+			0.47,
+			0.43
+		],
+		"value_forward": 1.55,
+		"open": 0.6,
+		"meadow": 0.85,
+		"open_green": 1.0
+	},
+	"sky": {
+		"haze_warmth_forward": 0.18
+	},
+	"water": {
+		"sea_value_forward": 8.5,
+		"sea_chroma_forward": 1.25,
+		"sea_tint_forward": [
+			0.55,
+			1.0,
+			1.05
+		]
+	},
+	"foliage": {
+		"untamed_words": [
+			"blossom",
+			"flame",
+			"bougainvillea",
+			"lemon"
+		],
+		"shrub_words": [
+			"grass",
+			"heather",
+			"gorse",
+			"bracken",
+			"juniper",
+			"tussock"
+		],
+		"plain_words": [
+			"hedge",
+			"shrub"
+		]
+	},
+	"props": {
+		"keep_words": [
+			"crownwater_gilt",
+			"kit-sw-domed-temple",
+			"kit-sw-harbour-tower",
+			"kit-sw-landing-beacon",
+			"kit-sw-palace-keep",
+			"kit-sw-plaza-rosette",
+			"kit-sw-townhouse",
+			"kit-sw-wall-bastion",
+			"kit-sw-wall-tower-round"
+		],
+		"hole_words": [
+			"kit-sw-domed-temple",
+			"kit-sw-gatehouse",
+			"kit-sw-palace-keep",
+			"kit-sw-townhouse-dome",
+			"kit-sw-wall-tower-round"
+		]
+	},
+	"notes": {
+		"origin": "Derived from the frozen source palettes for this section; prop signature words retain the union of its contributing shared model libraries. The section identity in content/look-overrides.json is merged over the derived palette.",
+		"sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
+		"sourceProfiles": {
+			"godot-client/src/world/look/regions/sw_isle.json": "2487485ac4f32e62525a71740e1a2561d554a140fe9db80b82d9d9bc0bc849cf"
+		},
+		"overrides": {
+			"path": "eloria-assets/maps/continent-v2/stagheath/content/look-overrides.json",
+			"sha256": "0a531d58e9b2e17c58030fce1c0005a179f68cbb64e062d615c5feca47428cc9"
+		}
+	}
+}

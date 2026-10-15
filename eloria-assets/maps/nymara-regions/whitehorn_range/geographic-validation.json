@@ -1,0 +1,125 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 130,
+    "walkSurfaceTriangles": 930661,
+    "tilesSampled": 117992,
+    "actorTileOffset": [
+      0.5,
+      0.5
+    ],
+    "walkableServerTiles": 117992,
+    "groundingMisses": 0,
+    "groundingMissFraction": 0.0,
+    "surfaceDiscontinuities": 23,
+    "spawnPoints": 10
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "23 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          279,
+          245,
+          19.82
+        ],
+        [
+          279,
+          246,
+          19.81
+        ],
+        [
+          279,
+          247,
+          19.77
+        ],
+        [
+          279,
+          248,
+          19.66
+        ],
+        [
+          279,
+          244,
+          19.62
+        ],
+        [
+          279,
+          249,
+          19.55
+        ],
+        [
+          279,
+          243,
+          19.42
+        ],
+        [
+          279,
+          250,
+          19.25
+        ],
+        [
+          279,
+          242,
+          19.16
+        ],
+        [
+          279,
+          251,
+          18.92
+        ],
+        [
+          279,
+          241,
+          18.88
+        ],
+        [
+          279,
+          252,
+          18.39
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "COLLISION_SURFACE_MISMATCH",
+      "message": "4 sampled walkable actor centres disagree with the rendered walk surface",
+      "detail": [
+        {
+          "tile": [
+            216,
+            366
+          ],
+          "encoded": 69.8,
+          "surface": 72.96
+        },
+        {
+          "tile": [
+            222,
+            366
+          ],
+          "encoded": 69.8,
+          "surface": 72.67
+        },
+        {
+          "tile": [
+            228,
+            366
+          ],
+          "encoded": 69.8,
+          "surface": 72.47
+        },
+        {
+          "tile": [
+            234,
+            366
+          ],
+          "encoded": 69.8,
+          "surface": 72.49
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1103 @@
+{
+  "schemaVersion": 1,
+  "evidenceDate": "2026-09-19",
+  "classification": "SKIN_RESOURCE_INTERNING_ABBAAB",
+  "statement": "Exact-content Skin interning removes duplicate per-mesh Skin identities while preserving mesh count, materials, tints, equipment swaps, body-cover toggles, cape state, and posed geometry. Shared-host ABBAAB wall samples are descriptive only.",
+  "shippingStatus": {
+    "rendererChanged": false,
+    "targetFrameMilliseconds": 16.67,
+    "targetMet": false,
+    "overallStableFpsClaim": false
+  },
+  "workload": {
+    "actors": 300,
+    "visibleActors": 150,
+    "activeActors": 100,
+    "sequence": [
+      "A",
+      "B",
+      "B",
+      "A",
+      "A",
+      "B"
+    ],
+    "sampleMilliseconds": 5000,
+    "nativePresentation": "All",
+    "affinityMask": 15,
+    "interference": "shared host; unrelated Godot jobs authorized; activity not continuously monitored"
+  },
+  "revisions": {
+    "baseline": "c7463ece20ac36b075962b39092f2bccbcb56753",
+    "candidate": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+    "candidateRuntimePath": "godot-client/src/actors/replicated_actor_3d.gd",
+    "candidateHelper": "godot-client/src/actors/rebound_skin_pool.gd"
+  },
+  "sessions": [
+    {
+      "label": "skin-pool-headless-abbaab",
+      "manifest": {
+        "path": "godot-client/test-artifacts/native-crowd/optimization-reversal/skin-pool-headless-abbaab-Headless-20260919T180011617Z/reversal-session.json",
+        "bytes": 12845,
+        "sha256": "feb7bcf2c2cff27f78982fcd3a58bc2787147bcd03f8ff39cc1dc7a35595cd2d"
+      },
+      "mode": "Headless",
+      "renderer": "gl_compatibility",
+      "sequence": [
+        "A",
+        "B",
+        "B",
+        "A",
+        "A",
+        "B"
+      ],
+      "sampleMilliseconds": 5000,
+      "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+      "baselineNativePresentation": "All",
+      "candidateNativePresentation": "All",
+      "runner": {
+        "path": "godot-client/scripts/run_crowd_benchmarks.ps1",
+        "sha256": "73d03a4ab52db8af7aead7c7b2638e1b9cfdf37a09f9619364e0d7231bd526d1"
+      },
+      "godot": {
+        "requestedSha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+        "launchSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424"
+      },
+      "scope": {
+        "optimizedRevision": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+        "baselineRevision": "c7463ece20ac36b075962b39092f2bccbcb56753",
+        "relativePaths": [
+          "godot-client/src/actors/replicated_actor_3d.gd"
+        ],
+        "approvedRelativePaths": [
+          "godot-client/src/app/main.gd",
+          "godot-client/src/actors/cape_cloth.gd",
+          "godot-client/src/actors/combat_presentation_3d.gd",
+          "godot-client/src/actors/ranger_bow_3d.gd",
+          "godot-client/src/actors/replicated_actor_3d.gd",
+          "godot-client/src/world/combat_effect_mesh.gd",
+          "godot-client/src/world/spell_flight_3d.gd",
+          "godot-client/src/world/world_effect_3d.gd"
+        ],
+        "unlistedRevisionChanges": []
+      },
+      "runs": [
+        {
+          "order": 1,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "c7463ece20ac36b075962b39092f2bccbcb56753",
+          "label": "skin-pool-headless-abbaab-01-baseline-c7463ece-d3815b70b8b0",
+          "nativePresentation": "All",
+          "effectiveDigest": "d3815b70b8b070a321bd5e6908f6c32c83b18dbe717e7306a2303f85f48501f0",
+          "startedAtUtc": "2026-09-19T18:00:13.7982062Z",
+          "completedAtUtc": "2026-09-19T18:00:34.9661341Z",
+          "sourceHash": "4febb8448717d90be20a6166fb2cb0dde6783fb30a28eb5e49aa8e7cfca38345",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-01-baseline-c7463ece-d3815b70b8b0-primary-gdscript-gl_compatibility-headless-trial1-20260919T180014103Z.json",
+            "bytes": 181358,
+            "sha256": "f7c5c17cf1c2af929b48f18206f4a67a1b3de69153b7120c9d86d9b0b0a8e3c7"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-01-baseline-c7463ece-d3815b70b8b0-primary-gdscript-gl_compatibility-headless-trial1-20260919T180014103Z.process.json",
+            "bytes": 13666,
+            "sha256": "e18b650fa0425bd8fec8fe59a95f4b9ebde72856160b86be92d2435a59450383"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 24.841,
+            "p95": 43.624,
+            "p99": 48.903,
+            "max": 55.335,
+            "samples": 201
+          },
+          "sampleFrames": 201,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 19,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 115500,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 1500
+          }
+        },
+        {
+          "order": 2,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+          "label": "skin-pool-headless-abbaab-02-optimized-01e9af09-49b6d276c781",
+          "nativePresentation": "All",
+          "effectiveDigest": "49b6d276c78164fe8f5b5b6d1af4e1f29840a52444ffde32f16dd3bed7d93672",
+          "startedAtUtc": "2026-09-19T18:00:35.4045534Z",
+          "completedAtUtc": "2026-09-19T18:00:55.2955863Z",
+          "sourceHash": "878a0bcc850ff29fdd55ba94d7e1fb58387a420ab99852fe00bf88f57d017723",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-02-optimized-01e9af09-49b6d276c781-primary-gdscript-gl_compatibility-headless-trial1-20260919T180035711Z.json",
+            "bytes": 189085,
+            "sha256": "76d121930f4a1d7aeb0c0fe50540bd0259960dc34eb3c7ff83df6ef62730c526"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-02-optimized-01e9af09-49b6d276c781-primary-gdscript-gl_compatibility-headless-trial1-20260919T180035711Z.process.json",
+            "bytes": 13335,
+            "sha256": "61aae207151ec131dc70e439c3dccf397c2c0398ef3732918ee95c1cfc9e3029"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 22.451,
+            "p95": 40.293,
+            "p99": 51.909,
+            "max": 56.048,
+            "samples": 222
+          },
+          "sampleFrames": 222,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 3,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 34650,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 450
+          }
+        },
+        {
+          "order": 3,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+          "label": "skin-pool-headless-abbaab-03-optimized-01e9af09-49b6d276c781",
+          "nativePresentation": "All",
+          "effectiveDigest": "49b6d276c78164fe8f5b5b6d1af4e1f29840a52444ffde32f16dd3bed7d93672",
+          "startedAtUtc": "2026-09-19T18:00:55.6367951Z",
+          "completedAtUtc": "2026-09-19T18:01:15.5084526Z",
+          "sourceHash": "878a0bcc850ff29fdd55ba94d7e1fb58387a420ab99852fe00bf88f57d017723",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-03-optimized-01e9af09-49b6d276c781-primary-gdscript-gl_compatibility-headless-trial1-20260919T180055887Z.json",
+            "bytes": 197739,
+            "sha256": "3b6a8de151f5edd2ac930cdfbf966b038c07b0a75411ce8b56d8f4da354a7ba4"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-03-optimized-01e9af09-49b6d276c781-primary-gdscript-gl_compatibility-headless-trial1-20260919T180055887Z.process.json",
+            "bytes": 13336,
+            "sha256": "e64d45958a73d4c66abcc51a4fe710c86f29421c6d23b30e9046f3ff942251e4"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 20.378,
+            "p95": 35.542,
+            "p99": 44.585,
+            "max": 46.215,
+            "samples": 245
+          },
+          "sampleFrames": 245,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 3,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 34650,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 450
+          }
+        },
+        {
+          "order": 4,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "c7463ece20ac36b075962b39092f2bccbcb56753",
+          "label": "skin-pool-headless-abbaab-04-baseline-c7463ece-d3815b70b8b0",
+          "nativePresentation": "All",
+          "effectiveDigest": "d3815b70b8b070a321bd5e6908f6c32c83b18dbe717e7306a2303f85f48501f0",
+          "startedAtUtc": "2026-09-19T18:01:15.8916377Z",
+          "completedAtUtc": "2026-09-19T18:01:36.7175839Z",
+          "sourceHash": "4febb8448717d90be20a6166fb2cb0dde6783fb30a28eb5e49aa8e7cfca38345",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-04-baseline-c7463ece-d3815b70b8b0-primary-gdscript-gl_compatibility-headless-trial1-20260919T180116158Z.json",
+            "bytes": 185488,
+            "sha256": "739d57192683c711f76f11f0aa56d4b40153febcd7da29f3f8f083e4d910ca96"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-04-baseline-c7463ece-d3815b70b8b0-primary-gdscript-gl_compatibility-headless-trial1-20260919T180116158Z.process.json",
+            "bytes": 13666,
+            "sha256": "d69b14da60b667887787a322354aca02bcc9b349e0ca2442cc2ae37efea35663"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 23.595,
+            "p95": 41.259,
+            "p99": 50.949,
+            "max": 54.083,
+            "samples": 212
+          },
+          "sampleFrames": 212,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 19,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 115500,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 1500
+          }
+        },
+        {
+          "order": 5,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "c7463ece20ac36b075962b39092f2bccbcb56753",
+          "label": "skin-pool-headless-abbaab-05-baseline-c7463ece-d3815b70b8b0",
+          "nativePresentation": "All",
+          "effectiveDigest": "d3815b70b8b070a321bd5e6908f6c32c83b18dbe717e7306a2303f85f48501f0",
+          "startedAtUtc": "2026-09-19T18:01:37.0307715Z",
+          "completedAtUtc": "2026-09-19T18:01:55.8502433Z",
+          "sourceHash": "4febb8448717d90be20a6166fb2cb0dde6783fb30a28eb5e49aa8e7cfca38345",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-05-baseline-c7463ece-d3815b70b8b0-primary-gdscript-gl_compatibility-headless-trial1-20260919T180137276Z.json",
+            "bytes": 209938,
+            "sha256": "188875548356a19c9ad5441008dc9031a633a97ed5656e720149814caedf9935"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-05-baseline-c7463ece-d3815b70b8b0-primary-gdscript-gl_compatibility-headless-trial1-20260919T180137276Z.process.json",
+            "bytes": 12998,
+            "sha256": "bfb5b79b111d76bf58ddc3be36655bb1a3ea089dade7c6ce0a707e7725610d29"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 18.051,
+            "p95": 30.425,
+            "p99": 35.858,
+            "max": 37.528,
+            "samples": 277
+          },
+          "sampleFrames": 277,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 19,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 115500,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 1500
+          }
+        },
+        {
+          "order": 6,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+          "label": "skin-pool-headless-abbaab-06-optimized-01e9af09-49b6d276c781",
+          "nativePresentation": "All",
+          "effectiveDigest": "49b6d276c78164fe8f5b5b6d1af4e1f29840a52444ffde32f16dd3bed7d93672",
+          "startedAtUtc": "2026-09-19T18:01:56.2437759Z",
+          "completedAtUtc": "2026-09-19T18:02:16.1244658Z",
+          "sourceHash": "878a0bcc850ff29fdd55ba94d7e1fb58387a420ab99852fe00bf88f57d017723",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-06-optimized-01e9af09-49b6d276c781-primary-gdscript-gl_compatibility-headless-trial1-20260919T180156477Z.json",
+            "bytes": 201887,
+            "sha256": "2b70e5fa2d1a93f18ebb5fbad1da948350fb53911f7a646a9f21db5ba6ffe5d9"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-headless-abbaab-06-optimized-01e9af09-49b6d276c781-primary-gdscript-gl_compatibility-headless-trial1-20260919T180156477Z.process.json",
+            "bytes": 13335,
+            "sha256": "0d63fdbeb024647774fb1fceaae76db3ab1b46e50e14b8e432a6d75d1792e47c"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 19.479,
+            "p95": 35.129,
+            "p99": 41.969,
+            "max": 42.656,
+            "samples": 256
+          },
+          "sampleFrames": 256,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 3,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 34650,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 450
+          }
+        }
+      ],
+      "descriptiveMediansWallMilliseconds": {
+        "baseline": {
+          "runCount": 3,
+          "mean": 23.595,
+          "p95": 41.259,
+          "p99": 48.903,
+          "max": 54.083,
+          "samples": 212
+        },
+        "optimized": {
+          "runCount": 3,
+          "mean": 20.378,
+          "p95": 35.542,
+          "p99": 44.585,
+          "max": 46.215,
+          "samples": 245
+        }
+      },
+      "restored": true,
+      "restoreErrors": []
+    },
+    {
+      "label": "skin-pool-forward-abbaab",
+      "manifest": {
+        "path": "godot-client/test-artifacts/native-crowd/optimization-reversal/skin-pool-forward-abbaab-Windowed-20260919T180252981Z/reversal-session.json",
+        "bytes": 12744,
+        "sha256": "5138ae78318d2988c669b8da6c7a28904483989da603ca2815f825cadc7a6c13"
+      },
+      "mode": "Windowed",
+      "renderer": "forward_plus",
+      "sequence": [
+        "A",
+        "B",
+        "B",
+        "A",
+        "A",
+        "B"
+      ],
+      "sampleMilliseconds": 5000,
+      "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+      "baselineNativePresentation": "All",
+      "candidateNativePresentation": "All",
+      "runner": {
+        "path": "godot-client/scripts/run_crowd_benchmarks.ps1",
+        "sha256": "73d03a4ab52db8af7aead7c7b2638e1b9cfdf37a09f9619364e0d7231bd526d1"
+      },
+      "godot": {
+        "requestedSha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+        "launchSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424"
+      },
+      "scope": {
+        "optimizedRevision": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+        "baselineRevision": "c7463ece20ac36b075962b39092f2bccbcb56753",
+        "relativePaths": [
+          "godot-client/src/actors/replicated_actor_3d.gd"
+        ],
+        "approvedRelativePaths": [
+          "godot-client/src/app/main.gd",
+          "godot-client/src/actors/cape_cloth.gd",
+          "godot-client/src/actors/combat_presentation_3d.gd",
+          "godot-client/src/actors/ranger_bow_3d.gd",
+          "godot-client/src/actors/replicated_actor_3d.gd",
+          "godot-client/src/world/combat_effect_mesh.gd",
+          "godot-client/src/world/spell_flight_3d.gd",
+          "godot-client/src/world/world_effect_3d.gd"
+        ],
+        "unlistedRevisionChanges": []
+      },
+      "runs": [
+        {
+          "order": 1,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "c7463ece20ac36b075962b39092f2bccbcb56753",
+          "label": "skin-pool-forward-abbaab-01-baseline-c7463ece-d3815b70b8b0",
+          "nativePresentation": "All",
+          "effectiveDigest": "d3815b70b8b070a321bd5e6908f6c32c83b18dbe717e7306a2303f85f48501f0",
+          "startedAtUtc": "2026-09-19T18:02:55.0974424Z",
+          "completedAtUtc": "2026-09-19T18:03:27.4651236Z",
+          "sourceHash": "4febb8448717d90be20a6166fb2cb0dde6783fb30a28eb5e49aa8e7cfca38345",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-01-baseline-c7463ece-d3815b70b8b0-primary-gdscript-forward_plus-windowed-trial1-20260919T180255393Z.json",
+            "bytes": 149377,
+            "sha256": "689faf337623d7e90fb91fb0ea4e229c954a37e6d0df27b09b688dd63613af12"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-01-baseline-c7463ece-d3815b70b8b0-primary-gdscript-forward_plus-windowed-trial1-20260919T180255393Z.process.json",
+            "bytes": 17477,
+            "sha256": "a3156dfe0f348b56588eccf25c90ce33ca271cdbf06b4c0dd8576f5a66a86dfd"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 50.723,
+            "p95": 71.074,
+            "p99": 89.541,
+            "max": 89.541,
+            "samples": 99
+          },
+          "sampleFrames": 99,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 19,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 115500,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 1500
+          }
+        },
+        {
+          "order": 2,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+          "label": "skin-pool-forward-abbaab-02-optimized-01e9af09-49b6d276c781",
+          "nativePresentation": "All",
+          "effectiveDigest": "49b6d276c78164fe8f5b5b6d1af4e1f29840a52444ffde32f16dd3bed7d93672",
+          "startedAtUtc": "2026-09-19T18:03:27.8774217Z",
+          "completedAtUtc": "2026-09-19T18:03:58.9223128Z",
+          "sourceHash": "878a0bcc850ff29fdd55ba94d7e1fb58387a420ab99852fe00bf88f57d017723",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-02-optimized-01e9af09-49b6d276c781-primary-gdscript-forward_plus-windowed-trial1-20260919T180328129Z.json",
+            "bytes": 153519,
+            "sha256": "df2d7e75c05fbcc63511e7cd0e3b60f8825dd351ea37f17b99dcc4133b572186"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-02-optimized-01e9af09-49b6d276c781-primary-gdscript-forward_plus-windowed-trial1-20260919T180328129Z.process.json",
+            "bytes": 17135,
+            "sha256": "4941b9bc29f97e3dccd9b431e145aad1026cbdb909c76af8b72d9e631cc24f5c"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 45.964,
+            "p95": 72.69,
+            "p99": 83.577,
+            "max": 88.247,
+            "samples": 109
+          },
+          "sampleFrames": 109,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 3,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 34650,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 450
+          }
+        },
+        {
+          "order": 3,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+          "label": "skin-pool-forward-abbaab-03-optimized-01e9af09-49b6d276c781",
+          "nativePresentation": "All",
+          "effectiveDigest": "49b6d276c78164fe8f5b5b6d1af4e1f29840a52444ffde32f16dd3bed7d93672",
+          "startedAtUtc": "2026-09-19T18:03:59.3095557Z",
+          "completedAtUtc": "2026-09-19T18:04:32.4939065Z",
+          "sourceHash": "878a0bcc850ff29fdd55ba94d7e1fb58387a420ab99852fe00bf88f57d017723",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-03-optimized-01e9af09-49b6d276c781-primary-gdscript-forward_plus-windowed-trial1-20260919T180359618Z.json",
+            "bytes": 160807,
+            "sha256": "fbfc010b5fb950e5ce3dc59a8ba9c1618fc8fdb15489920c1631758c297eb15b"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-03-optimized-01e9af09-49b6d276c781-primary-gdscript-forward_plus-windowed-trial1-20260919T180359618Z.process.json",
+            "bytes": 17812,
+            "sha256": "ce05cd2cedd4651d710a79e9dffd960c921d389330c04e360705c982dd540946"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 39.798,
+            "p95": 59.205,
+            "p99": 76.132,
+            "max": 96.323,
+            "samples": 126
+          },
+          "sampleFrames": 126,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 3,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 34650,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 450
+          }
+        },
+        {
+          "order": 4,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "c7463ece20ac36b075962b39092f2bccbcb56753",
+          "label": "skin-pool-forward-abbaab-04-baseline-c7463ece-d3815b70b8b0",
+          "nativePresentation": "All",
+          "effectiveDigest": "d3815b70b8b070a321bd5e6908f6c32c83b18dbe717e7306a2303f85f48501f0",
+          "startedAtUtc": "2026-09-19T18:04:32.8904040Z",
+          "completedAtUtc": "2026-09-19T18:05:06.1641988Z",
+          "sourceHash": "4febb8448717d90be20a6166fb2cb0dde6783fb30a28eb5e49aa8e7cfca38345",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-04-baseline-c7463ece-d3815b70b8b0-primary-gdscript-forward_plus-windowed-trial1-20260919T180433189Z.json",
+            "bytes": 146794,
+            "sha256": "1a71a3af618cb31c33c9e03a9b830c930cdba59acfcaa5371b8de0d1acc8abb6"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-04-baseline-c7463ece-d3815b70b8b0-primary-gdscript-forward_plus-windowed-trial1-20260919T180433189Z.process.json",
+            "bytes": 17816,
+            "sha256": "2a5cce23158ff6416ffba40dcb6a2c5345191030af98c4c06f8adbf4c0495bb9"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 53.759,
+            "p95": 90.627,
+            "p99": 101.671,
+            "max": 101.671,
+            "samples": 93
+          },
+          "sampleFrames": 93,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 19,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 115500,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 1500
+          }
+        },
+        {
+          "order": 5,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "c7463ece20ac36b075962b39092f2bccbcb56753",
+          "label": "skin-pool-forward-abbaab-05-baseline-c7463ece-d3815b70b8b0",
+          "nativePresentation": "All",
+          "effectiveDigest": "d3815b70b8b070a321bd5e6908f6c32c83b18dbe717e7306a2303f85f48501f0",
+          "startedAtUtc": "2026-09-19T18:05:06.5277052Z",
+          "completedAtUtc": "2026-09-19T18:05:37.7270746Z",
+          "sourceHash": "4febb8448717d90be20a6166fb2cb0dde6783fb30a28eb5e49aa8e7cfca38345",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-05-baseline-c7463ece-d3815b70b8b0-primary-gdscript-forward_plus-windowed-trial1-20260919T180506781Z.json",
+            "bytes": 157076,
+            "sha256": "c22576b32b6590584b711f8eba5599bbc7db1f9b257176c0ff07ca585025bbbb"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-05-baseline-c7463ece-d3815b70b8b0-primary-gdscript-forward_plus-windowed-trial1-20260919T180506781Z.process.json",
+            "bytes": 17139,
+            "sha256": "8ab6436397d407c65c51eef0163064921e738e0a3460d3fad9ce9b5029c1be6c"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 42.8,
+            "p95": 67.187,
+            "p99": 70.007,
+            "max": 81.223,
+            "samples": 117
+          },
+          "sampleFrames": 117,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 19,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 115500,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 1500
+          }
+        },
+        {
+          "order": 6,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "01e9af09cf0296bef44c1973c7e82dce1fb81784",
+          "label": "skin-pool-forward-abbaab-06-optimized-01e9af09-49b6d276c781",
+          "nativePresentation": "All",
+          "effectiveDigest": "49b6d276c78164fe8f5b5b6d1af4e1f29840a52444ffde32f16dd3bed7d93672",
+          "startedAtUtc": "2026-09-19T18:05:38.1988612Z",
+          "completedAtUtc": "2026-09-19T18:06:10.4286986Z",
+          "sourceHash": "878a0bcc850ff29fdd55ba94d7e1fb58387a420ab99852fe00bf88f57d017723",
+          "report": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-06-optimized-01e9af09-49b6d276c781-primary-gdscript-forward_plus-windowed-trial1-20260919T180538478Z.json",
+            "bytes": 159097,
+            "sha256": "3a768b52d023762876f4432634ea64931175174f9df572f18efb034390dd4c02"
+          },
+          "process": {
+            "path": "godot-client/test-artifacts/native-crowd/skin-pool-forward-abbaab-06-optimized-01e9af09-49b6d276c781-primary-gdscript-forward_plus-windowed-trial1-20260919T180538478Z.process.json",
+            "bytes": 17480,
+            "sha256": "9202cc0cf82c1c1501f9d9ab8ddca3ba6b720d6976126226673749cc196ddf79"
+          },
+          "hashMatches": true,
+          "wallMilliseconds": {
+            "mean": 41.121,
+            "p95": 63.712,
+            "p99": 79.913,
+            "max": 83.47,
+            "samples": 122
+          },
+          "sampleFrames": 122,
+          "workloadValidation": {
+            "passed": true,
+            "commands": 2812,
+            "plannedActive": 100,
+            "plannedMoving": 50,
+            "physicsProcessing": 50
+          },
+          "processValidation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "forcedTermination": false,
+            "scriptErrorsDetected": false
+          },
+          "equipmentCensusTotal": {
+            "actors": 300,
+            "distinctSkinContents": 3,
+            "distinctSkins": 3,
+            "meshInstances": 1500,
+            "sumActorDeduplicatedBindCount": 34650,
+            "sumActorDeduplicatedContentBindCount": 34650,
+            "sumActorDistinctSkinContents": 450,
+            "sumActorDistinctSkins": 450
+          }
+        }
+      ],
+      "descriptiveMediansWallMilliseconds": {
+        "baseline": {
+          "runCount": 3,
+          "mean": 50.723,
+          "p95": 71.074,
+          "p99": 89.541,
+          "max": 89.541,
+          "samples": 99
+        },
+        "optimized": {
+          "runCount": 3,
+          "mean": 41.121,
+          "p95": 63.712,
+          "p99": 79.913,
+          "max": 88.247,
+          "samples": 122
+        }
+      },
+      "restored": true,
+      "restoreErrors": []
+    }
+  ],
+  "descriptiveSummary": {
+    "metric": "wallMilliseconds",
+    "interpretation": "Median of three run summaries per variant and renderer; descriptive only, not stable FPS.",
+    "headlessCompatibility": {
+      "baseline": {
+        "runCount": 3,
+        "mean": 23.595,
+        "p95": 41.259,
+        "p99": 48.903,
+        "max": 54.083,
+        "samples": 212
+      },
+      "optimized": {
+        "runCount": 3,
+        "mean": 20.378,
+        "p95": 35.542,
+        "p99": 44.585,
+        "max": 46.215,
+        "samples": 245
+      }
+    },
+    "forwardPlusWindowed": {
+      "baseline": {
+        "runCount": 3,
+        "mean": 50.723,
+        "p95": 71.074,
+        "p99": 89.541,
+        "max": 89.541,
+        "samples": 99
+      },
+      "optimized": {
+        "runCount": 3,
+        "mean": 41.121,
+        "p95": 63.712,
+        "p99": 79.913,
+        "max": 88.247,
+        "samples": 122
+      }
+    }
+  },
+  "structuralCensus": {
+    "scope": "native_equipment MeshInstance3D with Skin; internal SkinReference count unavailable",
+    "baseline": {
+      "sumActorDistinctSkinIdentities": 1500,
+      "sumActorDeduplicatedBindCount": 115500,
+      "globalDistinctSkins": 19,
+      "meshInstances": 1500
+    },
+    "candidate": {
+      "sumActorDistinctSkinIdentities": 450,
+      "sumActorDeduplicatedBindCount": 34650,
+      "globalDistinctSkins": 3,
+      "meshInstances": 1500
+    },
+    "reduction": {
+      "actorSkinIdentitiesPercent": 70.0,
+      "deduplicatedBindCountPercent": 70.0,
+      "meshCountPercent": 0.0
+    }
+  },
+  "engineProfile": {
+    "status": "accepted component evidence; shared-host diagnostic",
+    "sameCallsPerFrame": 150,
+    "skeletonNotificationsPerFrame": 300,
+    "zones": [
+      {
+        "renderer": "gl_compatibility headless",
+        "updateSkinsMsPerFrame": {
+          "baseline": 0.9184996149425287,
+          "candidate": 0.4025626377079482,
+          "observedReductionPercent": 56.2
+        },
+        "totalSkeletonMsPerFrame": {
+          "baseline": 7.95635496743295,
+          "candidate": 7.3260129131238445
+        }
+      },
+      {
+        "renderer": "forward_plus windowed",
+        "updateSkinsMsPerFrame": {
+          "baseline": 1.2987161545454546,
+          "candidate": 0.5288621428571428,
+          "observedReductionPercent": 59.3
+        },
+        "totalSkeletonMsPerFrame": {
+          "baseline": 9.332074500000001,
+          "candidate": 7.7761593397683395
+        }
+      }
+    ],
+    "details": [
+      "godot-client/test-artifacts/engine-profile/captures/20260919T180754135Z-headless-gl_compatibility/steady-zone-summary.json",
+      "godot-client/test-artifacts/engine-profile/captures/20260919T180930579Z-windowed-forward_plus/steady-zone-summary.json"
+    ],
+    "interpretation": "70% structural redundancy aligns with 56.2%-59.3% update_skins fall; nested inclusive zones are not additive and no total-frame/FPS gain is claimed.",
+    "report": "godot-client/docs/crowd-engine-profile.md",
+    "limits": "One captured window per variant and renderer on the same custom engine; wall spans can include waits/preemption. Baseline profile 35902800 precedes unused helper and manifest additions in official reversal baseline c7463ece; production scheduling is unchanged."
+  },
+  "parity": {
+    "comparison": {
+      "path": "godot-client/test-artifacts/skin-pool/parity-comparison.json",
+      "bytes": 6783,
+      "sha256": "e5f6d4dda4294e6e6f2c04d101f568c38a4c22f619bbf900abbc0676c26f90cf"
+    },
+    "baseline": {
+      "path": "godot-client/test-artifacts/skin-pool/baseline-parity.json",
+      "bytes": 766858,
+      "sha256": "09b6672bde9b5e7d6f8464a46a1b445e2c071552ba4e8e703d1fa391b06c6177"
+    },
+    "candidate": {
+      "path": "godot-client/test-artifacts/skin-pool/candidate-parity.json",
+      "bytes": 766859,
+      "sha256": "cf01380f5fd4fd4ceb80bf126e0c27d10d91bec124a42c9c690682a6486ae2bd"
+    },
+    "exactMatchIgnoringPhase": true,
+    "rigs": [
+      "luminous_male",
+      "luminous_female",
+      "orun_male",
+      "ssarathi_male"
+    ],
+    "snapshots": 20,
+    "statesPerRig": [
+      "kitA",
+      "kitB",
+      "stripped",
+      "bare",
+      "restored"
+    ],
+    "pose": {
+      "action": "idle",
+      "timeSeconds": 0.37,
+      "manualAnimationProcess": true,
+      "clothFreeze": {
+        "enabled": true,
+        "reason": "freeze CapeCloth so parity isolates equipment and skin output",
+        "scope": "fixture-only"
+      },
+      "rationale": "Fixture-only CapeCloth freeze, manual AnimationPlayer seek to idle at 0.37 seconds, pause, and ordered bind/material/visibility/posed-vertex capture."
+    }
+  },
+  "acceptedChecks": {
+    "baselineV3AndCandidate": {
+      "baselineV3": {
+        "artifact": {
+          "path": "godot-client/test-artifacts/presentation-checks/skin-pool-baseline-v3-gl_compatibility-20260919T175731178Z/checks.json",
+          "bytes": 6044,
+          "sha256": "a191abd07952431d1cb1719c0e0ac6b84215527be2036b7f14941913c35ba359"
+        },
+        "passedEntries": 1,
+        "scripts": [
+          "res://tests/integration/rebound_skin_pool_parity.gd"
+        ],
+        "commits": [
+          "359028002a081d4c66520d08047a9db7633baf2f"
+        ],
+        "allPassed": true
+      },
+      "candidate": {
+        "artifact": {
+          "path": "godot-client/test-artifacts/presentation-checks/skin-pool-candidate-gl_compatibility-20260919T175828349Z/checks.json",
+          "bytes": 18173,
+          "sha256": "e75d9ffb6419426741e81e1ef2a90bf82fbf96d5bbb5d4ff9dc3f783fbb86ad1"
+        },
+        "passedEntries": 3,
+        "scripts": [
+          "res://tests/integration/rebound_skin_pool_parity.gd",
+          "res://tests/integration/equipment_fit_profiles.gd",
+          "res://tests/test_crowd_benchmark.gd"
+        ],
+        "commits": [
+          "c7463ece20ac36b075962b39092f2bccbcb56753"
+        ],
+        "allPassed": true
+      }
+    },
+    "syntheticContract": {
+      "path": "godot-client/tests/test_rebound_skin_pool.gd",
+      "status": "PASS"
+    },
+    "equipmentProfiles": {
+      "path": "godot-client/tests/integration/equipment_fit_profiles.gd",
+      "status": "PASS",
+      "scope": "all body templates"
+    },
+    "crowdContract": {
+      "path": "godot-client/tests/test_crowd_benchmark.gd",
+      "status": "PASS"
+    }
+  },
+  "visualEvidence": {
+    "artifact": {
+      "path": "godot-client/test-artifacts/skin-pool/renderer-parity-validation-2026-09-19.json",
+      "bytes": 11771,
+      "sha256": "de110397770543b33f919c0986ce07ed9b21615e5d9854cc9db30b33680d899e"
+    },
+    "sameRendererPngByteIdentical": true,
+    "compatibilityPngSha256": "284c1c4726ca21952d544d76c6a1ab3f21062a1dffda6a9bd8b80a68b234ded5",
+    "forwardPlusPngSha256": "42c8868fe6f5797332401395fe46d84e36d27ef193013ddd84f147e09c40e715",
+    "materialShaderControlsPassed": 6,
+    "maxObservedRgbDelta": "1/255",
+    "nativePresentation": 0,
+    "affinityMask": 15,
+    "scope": "bounded static-cloth, particles-off fixture; no FPS/general renderer claim"
+  },
+  "workloadAttestation": {
+    "all12Runs": {
+      "count": 12,
+      "hashMatches": true,
+      "processClean": true,
+      "reportValid": true,
+      "schemaValid": true,
+      "affinityMask": 15,
+      "failures": 0
+    },
+    "allSessionsRestored": true,
+    "restoreErrors": []
+  },
+  "nextMeasuredHotspots": [
+    "cape cloth modifier work",
+    "combat presentation update_pose",
+    "AnimationMixer animation processing"
+  ],
+  "limitations": [
+    "Shared-host interference prevents stable FPS claim.",
+    "Headless render and draw-call metrics unavailable in acceptance samples.",
+    "Census counts Skin resources, not internal Skeleton3D SkinReference instances.",
+    "Shipping renderer and production schedule unchanged.",
+    "Windowed wall timing is compositor-paced; available high-end development hardware with a four-logical-CPU task allocation is not mid-range certification."
+  ]
+}

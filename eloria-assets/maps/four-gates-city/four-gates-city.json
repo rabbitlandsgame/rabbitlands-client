@@ -1,0 +1,3117 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "0.9.0",
+  "asset": {
+    "id": "four-gates-city",
+    "name": "Four Gates City",
+    "glb": "four-gates-city.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -750,
+        -40,
+        -820
+      ],
+      "max": [
+        750,
+        195,
+        750
+      ]
+    },
+    "cityDiameterMeters": 720,
+    "lowestUsefulTerrainElevation": -40
+  },
+  "landmarks": [
+    {
+      "id": "south-outer-gate",
+      "name": "Southern Outer Gate",
+      "node": "Gate_South_Outer",
+      "type": "gate",
+      "position": [
+        0,
+        30,
+        570
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          25,
+          510
+        ],
+        "max": [
+          60,
+          170,
+          630
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "south-inner-gate",
+      "name": "Southern Inner Gate",
+      "node": "Gate_South_Inner",
+      "type": "gate",
+      "position": [
+        0,
+        30,
+        345
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          25,
+          285
+        ],
+        "max": [
+          60,
+          170,
+          405
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "east-gate",
+      "name": "Eastern Gate",
+      "node": "Gate_East",
+      "type": "gate",
+      "position": [
+        345,
+        30,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          285,
+          25,
+          -60
+        ],
+        "max": [
+          405,
+          170,
+          60
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "west-gate",
+      "name": "Western Gate",
+      "node": "Gate_West",
+      "type": "gate",
+      "position": [
+        -345,
+        30,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -405,
+          25,
+          -60
+        ],
+        "max": [
+          -285,
+          170,
+          60
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "north-gate",
+      "name": "Northern Gate",
+      "node": "Gate_North",
+      "type": "gate",
+      "position": [
+        0,
+        30,
+        -345
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          25,
+          -405
+        ],
+        "max": [
+          60,
+          170,
+          -285
+        ]
+      },
+      "tags": [
+        "landmark",
+        "gate"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "central-plaza",
+      "name": "Central Plaza",
+      "node": "Central_Plaza",
+      "type": "plaza",
+      "position": [
+        0,
+        30,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          25,
+          -60
+        ],
+        "max": [
+          60,
+          170,
+          60
+        ]
+      },
+      "tags": [
+        "landmark",
+        "plaza"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    },
+    {
+      "id": "northern-sanctuary",
+      "name": "Northern Sanctuary",
+      "node": "Northern_Sanctuary",
+      "type": "sanctuary",
+      "position": [
+        0,
+        50,
+        -730
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "bounds": {
+        "min": [
+          -60,
+          45,
+          -790
+        ],
+        "max": [
+          60,
+          190,
+          -670
+        ]
+      },
+      "tags": [
+        "landmark",
+        "sanctuary"
+      ],
+      "cameraPointIds": [],
+      "interactionIds": []
+    }
+  ],
+  "districts": [
+    {
+      "id": "residential",
+      "node": "District_Residential"
+    },
+    {
+      "id": "civic",
+      "node": "District_Civic"
+    },
+    {
+      "id": "agricultural",
+      "node": "District_Agricultural"
+    },
+    {
+      "id": "service",
+      "node": "District_Service"
+    }
+  ],
+  "gates": [
+    {
+      "id": "south-outer",
+      "node": "Gate_South_Outer",
+      "exteriorApproach": [
+        0,
+        32,
+        645
+      ],
+      "interiorApproach": [
+        0,
+        32,
+        515
+      ],
+      "portcullisNode": "Gate_South_Outer_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "service",
+      "connectedBridgeId": "south",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_South_Outer"
+      ],
+      "interactionId": "interact-south-outer"
+    },
+    {
+      "id": "south-inner",
+      "node": "Gate_South_Inner",
+      "exteriorApproach": [
+        0,
+        32,
+        420
+      ],
+      "interiorApproach": [
+        0,
+        32,
+        290
+      ],
+      "portcullisNode": "Gate_South_Inner_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "agricultural",
+      "connectedBridgeId": "south",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_South_Inner"
+      ],
+      "interactionId": "interact-south-inner"
+    },
+    {
+      "id": "east",
+      "node": "Gate_East",
+      "exteriorApproach": [
+        420,
+        32,
+        0
+      ],
+      "interiorApproach": [
+        290,
+        32,
+        0
+      ],
+      "portcullisNode": "Gate_East_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "residential",
+      "connectedBridgeId": "east",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_East"
+      ],
+      "interactionId": "interact-east"
+    },
+    {
+      "id": "west",
+      "node": "Gate_West",
+      "exteriorApproach": [
+        -270,
+        32,
+        0
+      ],
+      "interiorApproach": [
+        -400,
+        32,
+        0
+      ],
+      "portcullisNode": "Gate_West_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "civic",
+      "connectedBridgeId": "west",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_West"
+      ],
+      "interactionId": "interact-west"
+    },
+    {
+      "id": "north",
+      "node": "Gate_North",
+      "exteriorApproach": [
+        0,
+        32,
+        -270
+      ],
+      "interiorApproach": [
+        0,
+        32,
+        -400
+      ],
+      "portcullisNode": "Gate_North_Portcullis",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "connectedDistrictId": "residential",
+      "connectedBridgeId": "north",
+      "traversalWidth": 28,
+      "traversalHeight": 32,
+      "traversable": true,
+      "animated": false,
+      "locked": false,
+      "collisionNodes": [
+        "COLLISION_Gate_North"
+      ],
+      "interactionId": "interact-north"
+    }
+  ],
+  "bridges": [
+    {
+      "id": "south",
+      "node": "Bridge_South",
+      "connects": [
+        "city",
+        "south-approach"
+      ],
+      "walkable": true
+    },
+    {
+      "id": "east",
+      "node": "Bridge_East",
+      "connects": [
+        "city",
+        "east-approach"
+      ],
+      "walkable": true
+    },
+    {
+      "id": "west",
+      "node": "Bridge_West",
+      "connects": [
+        "city",
+        "west-approach"
+      ],
+      "walkable": true
+    },
+    {
+      "id": "north",
+      "node": "Bridge_North",
+      "connects": [
+        "city",
+        "north-approach"
+      ],
+      "walkable": true
+    }
+  ],
+  "spawnPoints": [
+    {
+      "id": "player-south",
+      "node": "Spawn_Player_South",
+      "position": [
+        0,
+        32,
+        310
+      ],
+      "facing": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "player-central",
+      "node": "Spawn_Player_Central",
+      "position": [
+        0,
+        32,
+        55
+      ],
+      "facing": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "cameraPoints": [
+    {
+      "id": "camera-south-outer-exterior",
+      "position": [
+        0,
+        95,
+        690
+      ],
+      "lookTarget": [
+        0,
+        50,
+        570
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-south-outer-exterior",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-south-outer-interior",
+      "position": [
+        0,
+        70,
+        520
+      ],
+      "lookTarget": [
+        0,
+        60,
+        345
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-south-outer-interior",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-south-inner-exterior",
+      "position": [
+        0,
+        100,
+        455
+      ],
+      "lookTarget": [
+        0,
+        65,
+        345
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-south-inner-exterior",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-south-inner-city-side",
+      "position": [
+        0,
+        85,
+        255
+      ],
+      "lookTarget": [
+        0,
+        65,
+        345
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-south-inner-city-side",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-west-gate",
+      "position": [
+        -540,
+        100,
+        120
+      ],
+      "lookTarget": [
+        -345,
+        55,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-west-gate",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-east-gate",
+      "position": [
+        540,
+        100,
+        -120
+      ],
+      "lookTarget": [
+        345,
+        55,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-east-gate",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-north-gate",
+      "position": [
+        0,
+        100,
+        -455
+      ],
+      "lookTarget": [
+        0,
+        60,
+        -345
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-north-gate",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-north-axial-bridge",
+      "position": [
+        145,
+        120,
+        -520
+      ],
+      "lookTarget": [
+        0,
+        35,
+        -520
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-north-axial-bridge",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-mountain-sanctuary",
+      "position": [
+        190,
+        150,
+        -820
+      ],
+      "lookTarget": [
+        0,
+        90,
+        -700
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-mountain-sanctuary",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-central-plaza",
+      "position": [
+        180,
+        145,
+        190
+      ],
+      "lookTarget": [
+        0,
+        50,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-central-plaza",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-residential-district",
+      "position": [
+        330,
+        115,
+        270
+      ],
+      "lookTarget": [
+        210,
+        45,
+        190
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-residential-district",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-market-civic-district",
+      "position": [
+        -260,
+        105,
+        130
+      ],
+      "lookTarget": [
+        -145,
+        45,
+        70
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-market-civic-district",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-agricultural-district",
+      "position": [
+        230,
+        105,
+        390
+      ],
+      "lookTarget": [
+        100,
+        35,
+        245
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-agricultural-district",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-curtain-wall",
+      "position": [
+        510,
+        100,
+        260
+      ],
+      "lookTarget": [
+        320,
+        48,
+        180
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-curtain-wall",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-bridge-detail",
+      "position": [
+        110,
+        65,
+        505
+      ],
+      "lookTarget": [
+        0,
+        28,
+        465
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-bridge-detail",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-cliff-waterfall",
+      "position": [
+        450,
+        70,
+        430
+      ],
+      "lookTarget": [
+        300,
+        0,
+        270
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-cliff-waterfall",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-water-level",
+      "position": [
+        520,
+        5,
+        520
+      ],
+      "lookTarget": [
+        230,
+        40,
+        230
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-water-level",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-rooftop-skyline",
+      "position": [
+        -400,
+        170,
+        350
+      ],
+      "lookTarget": [
+        0,
+        70,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-rooftop-skyline",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-main-avenue",
+      "position": [
+        0,
+        55,
+        250
+      ],
+      "lookTarget": [
+        0,
+        45,
+        0
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-main-avenue",
+      "nearClip": 0.1,
+      "farClip": 2200
+    },
+    {
+      "id": "camera-secondary-alley",
+      "position": [
+        250,
+        58,
+        140
+      ],
+      "lookTarget": [
+        175,
+        40,
+        90
+      ],
+      "fieldOfViewDegrees": 55,
+      "intendedUse": "reference-secondary-alley",
+      "nearClip": 0.1,
+      "farClip": 2200
+    }
+  ],
+  "pointsOfInterest": [
+    {
+      "id": "sanctuary",
+      "node": "POI_Sanctuary",
+      "position": [
+        0,
+        65,
+        -730
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "id": "south-central-axis",
+      "waypoints": [
+        [
+          0,
+          32,
+          620
+        ],
+        [
+          0,
+          32,
+          570
+        ],
+        [
+          0,
+          32,
+          345
+        ],
+        [
+          0,
+          32,
+          0
+        ]
+      ],
+      "width": 26,
+      "directionality": "both",
+      "traversalType": "walk",
+      "connects": [
+        "south-outer-gate",
+        "south-inner-gate",
+        "central-plaza"
+      ],
+      "approximateMaxSlopeDegrees": 3,
+      "accessibilityRestrictions": [],
+      "crosses": [
+        "bridge",
+        "gate"
+      ]
+    },
+    {
+      "id": "north-sanctuary-axis",
+      "waypoints": [
+        [
+          0,
+          32,
+          0
+        ],
+        [
+          0,
+          32,
+          -345
+        ],
+        [
+          0,
+          34,
+          -510
+        ],
+        [
+          0,
+          55,
+          -690
+        ]
+      ],
+      "width": 28,
+      "directionality": "both",
+      "traversalType": "walk",
+      "connects": [
+        "central-plaza",
+        "north-gate",
+        "northern-sanctuary"
+      ],
+      "approximateMaxSlopeDegrees": 6,
+      "accessibilityRestrictions": [],
+      "crosses": [
+        "gate",
+        "bridge"
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "interact-south-outer",
+      "node": "Gate_South_Outer_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    },
+    {
+      "id": "interact-south-inner",
+      "node": "Gate_South_Inner_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    },
+    {
+      "id": "interact-east",
+      "node": "Gate_East_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    },
+    {
+      "id": "interact-west",
+      "node": "Gate_West_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    },
+    {
+      "id": "interact-north",
+      "node": "Gate_North_Portcullis",
+      "type": "gate-portcullis",
+      "initialState": "open"
+    }
+  ],
+  "effects": [
+    {
+      "id": "water",
+      "type": "water-pbr",
+      "node": "Water_Turquoise_Basin",
+      "color": [
+        0.02,
+        0.55,
+        0.68,
+        0.72
+      ]
+    },
+    {
+      "id": "falls",
+      "type": "waterfall-sheet",
+      "nodePrefix": "Waterfall_",
+      "customShaderRecommended": true
+    },
+    {
+      "id": "blue-energy",
+      "type": "emissive-pulse",
+      "nodeSuffix": [
+        "Crystal",
+        "Beacon",
+        "Portal"
+      ],
+      "color": [
+        0.05,
+        0.3,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "waterfall-mist-00",
+      "node": "FX_Waterfall_Mist_00",
+      "type": "mist-emitter",
+      "dimensions": [
+        40,
+        36,
+        28
+      ],
+      "color": [
+        0.72,
+        0.9,
+        1.0
+      ],
+      "intensity": 0.65,
+      "fallback": "locator-only"
+    },
+    {
+      "id": "waterfall-mist-01",
+      "node": "FX_Waterfall_Mist_01",
+      "type": "mist-emitter",
+      "dimensions": [
+        40,
+        36,
+        28
+      ],
+      "color": [
+        0.72,
+        0.9,
+        1.0
+      ],
+      "intensity": 0.65,
+      "fallback": "locator-only"
+    },
+    {
+      "id": "waterfall-mist-02",
+      "node": "FX_Waterfall_Mist_02",
+      "type": "mist-emitter",
+      "dimensions": [
+        40,
+        36,
+        28
+      ],
+      "color": [
+        0.72,
+        0.9,
+        1.0
+      ],
+      "intensity": 0.65,
+      "fallback": "locator-only"
+    },
+    {
+      "id": "waterfall-mist-03",
+      "node": "FX_Waterfall_Mist_03",
+      "type": "mist-emitter",
+      "dimensions": [
+        40,
+        36,
+        28
+      ],
+      "color": [
+        0.72,
+        0.9,
+        1.0
+      ],
+      "intensity": 0.65,
+      "fallback": "locator-only"
+    },
+    {
+      "id": "waterfall-mist-04",
+      "node": "FX_Waterfall_Mist_04",
+      "type": "mist-emitter",
+      "dimensions": [
+        40,
+        36,
+        28
+      ],
+      "color": [
+        0.72,
+        0.9,
+        1.0
+      ],
+      "intensity": 0.65,
+      "fallback": "locator-only"
+    },
+    {
+      "id": "waterfall-mist-05",
+      "node": "FX_Waterfall_Mist_05",
+      "type": "mist-emitter",
+      "dimensions": [
+        40,
+        36,
+        28
+      ],
+      "color": [
+        0.72,
+        0.9,
+        1.0
+      ],
+      "intensity": 0.65,
+      "fallback": "locator-only"
+    },
+    {
+      "id": "waterfall-mist-06",
+      "node": "FX_Waterfall_Mist_06",
+      "type": "mist-emitter",
+      "dimensions": [
+        40,
+        36,
+        28
+      ],
+      "color": [
+        0.72,
+        0.9,
+        1.0
+      ],
+      "intensity": 0.65,
+      "fallback": "locator-only"
+    },
+    {
+      "id": "waterfall-mist-07",
+      "node": "FX_Waterfall_Mist_07",
+      "type": "mist-emitter",
+      "dimensions": [
+        40,
+        36,
+        28
+      ],
+      "color": [
+        0.72,
+        0.9,
+        1.0
+      ],
+      "intensity": 0.65,
+      "fallback": "locator-only"
+    }
+  ],
+  "collision": {
+    "nodeNames": [
+      "COLLISION_Gate_South_Inner",
+      "COLLISION_Gate_South_Outer",
+      "COLLISION_Gate_North",
+      "COLLISION_Gate_East",
+      "COLLISION_Gate_West",
+      "COLLISION_Bridge_South",
+      "COLLISION_Bridge_North",
+      "COLLISION_Bridge_East",
+      "COLLISION_Bridge_West",
+      "COLLISION_Sanctuary_Entrance"
+    ]
+  },
+  "navigation": {
+    "nodeNames": [
+      "Navigation"
+    ],
+    "walkableAreas": [
+      "radial-roads",
+      "ring-roads",
+      "bridges",
+      "plaza"
+    ],
+    "surfaceNodePrefixes": [
+      "Terrain_City_Plateau",
+      "Road_Radial_",
+      "Road_Ring_",
+      "Plaza_Disc",
+      "Bridge_South_Deck",
+      "Bridge_North_Deck",
+      "Bridge_East_Deck",
+      "Bridge_West_Deck"
+    ],
+    "navmesh": {
+      "format": "inline-convex-polygons-v1",
+      "coordinateSystem": "asset",
+      "agentRadius": 0.6,
+      "agentHeight": 2.0,
+      "maxSlopeDegrees": 35,
+      "polygons": [
+        {
+          "id": "plaza",
+          "vertices": [
+            [
+              -72,
+              31,
+              -72
+            ],
+            [
+              72,
+              31,
+              -72
+            ],
+            [
+              72,
+              31,
+              72
+            ],
+            [
+              -72,
+              31,
+              72
+            ]
+          ]
+        },
+        {
+          "id": "south-axis",
+          "vertices": [
+            [
+              -13,
+              31,
+              0
+            ],
+            [
+              13,
+              31,
+              0
+            ],
+            [
+              13,
+              31,
+              620
+            ],
+            [
+              -13,
+              31,
+              620
+            ]
+          ]
+        },
+        {
+          "id": "north-axis",
+          "vertices": [
+            [
+              -14,
+              31,
+              -690
+            ],
+            [
+              14,
+              31,
+              -690
+            ],
+            [
+              14,
+              31,
+              0
+            ],
+            [
+              -14,
+              31,
+              0
+            ]
+          ]
+        },
+        {
+          "id": "east-axis",
+          "vertices": [
+            [
+              0,
+              31,
+              -13
+            ],
+            [
+              620,
+              31,
+              -13
+            ],
+            [
+              620,
+              31,
+              13
+            ],
+            [
+              0,
+              31,
+              13
+            ]
+          ]
+        },
+        {
+          "id": "west-axis",
+          "vertices": [
+            [
+              -620,
+              31,
+              -13
+            ],
+            [
+              0,
+              31,
+              -13
+            ],
+            [
+              0,
+              31,
+              13
+            ],
+            [
+              -620,
+              31,
+              13
+            ]
+          ]
+        },
+        {
+          "id": "district-walkable-0",
+          "vertices": [
+            [
+              -330,
+              31,
+              -330
+            ],
+            [
+              -35,
+              31,
+              -330
+            ],
+            [
+              -35,
+              31,
+              -35
+            ],
+            [
+              -330,
+              31,
+              -35
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        },
+        {
+          "id": "district-walkable-1",
+          "vertices": [
+            [
+              35,
+              31,
+              -330
+            ],
+            [
+              330,
+              31,
+              -330
+            ],
+            [
+              330,
+              31,
+              -35
+            ],
+            [
+              35,
+              31,
+              -35
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        },
+        {
+          "id": "district-walkable-2",
+          "vertices": [
+            [
+              -330,
+              31,
+              35
+            ],
+            [
+              -35,
+              31,
+              35
+            ],
+            [
+              -35,
+              31,
+              330
+            ],
+            [
+              -330,
+              31,
+              330
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        },
+        {
+          "id": "district-walkable-3",
+          "vertices": [
+            [
+              35,
+              31,
+              35
+            ],
+            [
+              330,
+              31,
+              35
+            ],
+            [
+              330,
+              31,
+              330
+            ],
+            [
+              35,
+              31,
+              330
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        },
+        {
+          "id": "district-walkable-4",
+          "vertices": [
+            [
+              -300,
+              31,
+              205
+            ],
+            [
+              300,
+              31,
+              205
+            ],
+            [
+              300,
+              31,
+              315
+            ],
+            [
+              -300,
+              31,
+              315
+            ]
+          ],
+          "tags": [
+            "district",
+            "alley-courtyard"
+          ]
+        }
+      ],
+      "offMeshLinks": [
+        {
+          "id": "sanctuary-rise",
+          "start": [
+            0,
+            34,
+            -620
+          ],
+          "end": [
+            0,
+            55,
+            -690
+          ],
+          "bidirectional": true,
+          "type": "ramp"
+        }
+      ],
+      "exclusions": [
+        {
+          "id": "central-monument",
+          "shape": "cylinder",
+          "center": [
+            0,
+            31,
+            0
+          ],
+          "radius": 18
+        },
+        {
+          "id": "city-wall",
+          "shape": "outside-circle",
+          "center": [
+            0,
+            31,
+            0
+          ],
+          "radius": 350
+        }
+      ],
+      "obstacles": [
+        {
+          "node": "Civic_Hall_0_Body",
+          "center": [
+            -49.59292078222195,
+            45.0,
+            -136.25543001395673
+          ],
+          "halfExtents": [
+            21.0,
+            15.0,
+            14.0
+          ]
+        },
+        {
+          "node": "Civic_Hall_1_Body",
+          "center": [
+            -117.63013257263668,
+            49.0,
+            -140.18613309077298
+          ],
+          "halfExtents": [
+            21.0,
+            19.0,
+            14.0
+          ]
+        },
+        {
+          "node": "Civic_Hall_2_Body",
+          "center": [
+            -125.57368354874356,
+            53.0,
+            -72.50000000000007
+          ],
+          "halfExtents": [
+            21.0,
+            23.0,
+            14.0
+          ]
+        },
+        {
+          "node": "Civic_Hall_3_Body",
+          "center": [
+            -180.21981880123406,
+            45.0,
+            -31.77761651304825
+          ],
+          "halfExtents": [
+            21.0,
+            15.0,
+            14.0
+          ]
+        },
+        {
+          "node": "Civic_Hall_4_Body",
+          "center": [
+            -142.7971241867702,
+            49.0,
+            25.178985761704844
+          ],
+          "halfExtents": [
+            21.0,
+            19.0,
+            14.0
+          ]
+        },
+        {
+          "node": "Civic_Hall_5_Body",
+          "center": [
+            -158.48264889255228,
+            53.0,
+            91.50000000000001
+          ],
+          "halfExtents": [
+            21.0,
+            23.0,
+            14.0
+          ]
+        },
+        {
+          "node": "Civic_Hall_6_Body",
+          "center": [
+            -93.20420340454824,
+            45.0,
+            111.07644425225178
+          ],
+          "halfExtents": [
+            21.0,
+            15.0,
+            14.0
+          ]
+        },
+        {
+          "node": "Residence_0_Body",
+          "center": [
+            60.82247559909237,
+            41.0,
+            226.99256917793105
+          ],
+          "halfExtents": [
+            12.0,
+            11.0,
+            9.5
+          ]
+        },
+        {
+          "node": "Residence_0_Window_1",
+          "center": [
+            56.70094907511461,
+            42.0,
+            238.65674592179718
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_0_Window_2",
+          "center": [
+            56.70094907511461,
+            50.0,
+            238.65674592179718
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_1_Body",
+          "center": [
+            131.49999999999997,
+            43.5,
+            227.7646811953074
+          ],
+          "halfExtents": [
+            15.5,
+            13.5,
+            11.0
+          ]
+        },
+        {
+          "node": "Residence_1_Window_1",
+          "center": [
+            131.2878221735089,
+            42.0,
+            241.39717841958532
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_1_Window_2",
+          "center": [
+            131.2878221735089,
+            50.0,
+            241.39717841958532
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_2_Body",
+          "center": [
+            205.76807332528531,
+            46.0,
+            205.76807332528534
+          ],
+          "halfExtents": [
+            12.0,
+            16.0,
+            12.5
+          ]
+        },
+        {
+          "node": "Residence_2_Window_1",
+          "center": [
+            210.1521353686419,
+            42.0,
+            220.0516303052536
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_2_Window_2",
+          "center": [
+            210.1521353686419,
+            50.0,
+            220.0516303052536
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_2_Window_3",
+          "center": [
+            210.1521353686419,
+            58.0,
+            220.0516303052536
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_3_Body",
+          "center": [
+            203.51596988934307,
+            48.5,
+            117.50000000000003
+          ],
+          "halfExtents": [
+            15.5,
+            18.5,
+            9.5
+          ]
+        },
+        {
+          "node": "Residence_3_Window_1",
+          "center": [
+            208.84942900794434,
+            42.0,
+            128.6621778264911
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_3_Window_2",
+          "center": [
+            208.84942900794434,
+            50.0,
+            128.6621778264911
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_3_Window_3",
+          "center": [
+            208.84942900794434,
+            58.0,
+            128.6621778264911
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_4_Body",
+          "center": [
+            254.03849231402498,
+            41.0,
+            68.06940886196296
+          ],
+          "halfExtents": [
+            12.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Residence_4_Window_1",
+          "center": [
+            263.5280911658894,
+            42.0,
+            77.85907247368593
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_4_Window_2",
+          "center": [
+            263.5280911658894,
+            50.0,
+            77.85907247368593
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_5_Body",
+          "center": [
+            291.0,
+            43.5,
+            1.781861092759399e-14
+          ],
+          "halfExtents": [
+            15.5,
+            13.5,
+            12.5
+          ]
+        },
+        {
+          "node": "Residence_5_Window_1",
+          "center": [
+            304.2,
+            42.0,
+            7.000000000000019
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_5_Window_2",
+          "center": [
+            304.2,
+            50.0,
+            7.000000000000019
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_6_Body",
+          "center": [
+            226.99256917793105,
+            46.0,
+            -60.8224755990924
+          ],
+          "halfExtents": [
+            12.0,
+            16.0,
+            9.5
+          ]
+        },
+        {
+          "node": "Residence_6_Window_1",
+          "center": [
+            238.65674592179718,
+            42.0,
+            -56.700949075114636
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_6_Window_2",
+          "center": [
+            238.65674592179718,
+            50.0,
+            -56.700949075114636
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_6_Window_3",
+          "center": [
+            238.65674592179718,
+            58.0,
+            -56.700949075114636
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_7_Body",
+          "center": [
+            227.7646811953074,
+            48.5,
+            -131.49999999999994
+          ],
+          "halfExtents": [
+            15.5,
+            18.5,
+            11.0
+          ]
+        },
+        {
+          "node": "Residence_7_Window_1",
+          "center": [
+            241.39717841958532,
+            42.0,
+            -131.28782217350889
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_7_Window_2",
+          "center": [
+            241.39717841958532,
+            50.0,
+            -131.28782217350889
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_7_Window_3",
+          "center": [
+            241.39717841958532,
+            58.0,
+            -131.28782217350889
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_8_Body",
+          "center": [
+            205.76807332528534,
+            41.0,
+            -205.76807332528531
+          ],
+          "halfExtents": [
+            12.0,
+            11.0,
+            12.5
+          ]
+        },
+        {
+          "node": "Residence_8_Window_1",
+          "center": [
+            220.0516303052536,
+            42.0,
+            -210.1521353686419
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_8_Window_2",
+          "center": [
+            220.0516303052536,
+            50.0,
+            -210.1521353686419
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_9_Body",
+          "center": [
+            117.49999999999999,
+            43.5,
+            -203.5159698893431
+          ],
+          "halfExtents": [
+            15.5,
+            13.5,
+            9.5
+          ]
+        },
+        {
+          "node": "Residence_9_Window_1",
+          "center": [
+            128.66217782649105,
+            42.0,
+            -208.84942900794437
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_9_Window_2",
+          "center": [
+            128.66217782649105,
+            50.0,
+            -208.84942900794437
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_10_Body",
+          "center": [
+            68.06940886196303,
+            46.0,
+            -254.03849231402495
+          ],
+          "halfExtents": [
+            12.0,
+            16.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Residence_10_Window_1",
+          "center": [
+            77.859072473686,
+            42.0,
+            -263.5280911658894
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_10_Window_2",
+          "center": [
+            77.859072473686,
+            50.0,
+            -263.5280911658894
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_10_Window_3",
+          "center": [
+            77.859072473686,
+            58.0,
+            -263.5280911658894
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_11_Body",
+          "center": [
+            3.563722185518798e-14,
+            48.5,
+            -291.0
+          ],
+          "halfExtents": [
+            15.5,
+            18.5,
+            12.5
+          ]
+        },
+        {
+          "node": "Residence_11_Window_1",
+          "center": [
+            7.000000000000037,
+            42.0,
+            -304.2
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_11_Window_2",
+          "center": [
+            7.000000000000037,
+            50.0,
+            -304.2
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_11_Window_3",
+          "center": [
+            7.000000000000037,
+            58.0,
+            -304.2
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_12_Body",
+          "center": [
+            -60.822475599092385,
+            41.0,
+            -226.99256917793105
+          ],
+          "halfExtents": [
+            12.0,
+            11.0,
+            9.5
+          ]
+        },
+        {
+          "node": "Residence_12_Window_1",
+          "center": [
+            -56.70094907511462,
+            42.0,
+            -238.65674592179718
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Residence_12_Window_2",
+          "center": [
+            -56.70094907511462,
+            50.0,
+            -238.65674592179718
+          ],
+          "halfExtents": [
+            2.0,
+            2.5,
+            0.3
+          ]
+        },
+        {
+          "node": "Farmhouse_0",
+          "center": [
+            -260.0,
+            41.0,
+            255.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_0",
+          "center": [
+            -238.0,
+            43.0,
+            235.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        },
+        {
+          "node": "Farmhouse_1",
+          "center": [
+            -195.0,
+            41.0,
+            290.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_1",
+          "center": [
+            -173.0,
+            43.0,
+            270.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        },
+        {
+          "node": "Farmhouse_2",
+          "center": [
+            -130.0,
+            41.0,
+            255.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_2",
+          "center": [
+            -108.0,
+            43.0,
+            235.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        },
+        {
+          "node": "Farmhouse_3",
+          "center": [
+            -65.0,
+            41.0,
+            290.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_3",
+          "center": [
+            -43.0,
+            43.0,
+            270.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        },
+        {
+          "node": "Farmhouse_4",
+          "center": [
+            0.0,
+            41.0,
+            255.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_4",
+          "center": [
+            22.0,
+            43.0,
+            235.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        },
+        {
+          "node": "Farmhouse_5",
+          "center": [
+            65.0,
+            41.0,
+            290.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_5",
+          "center": [
+            87.0,
+            43.0,
+            270.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        },
+        {
+          "node": "Farmhouse_6",
+          "center": [
+            130.0,
+            41.0,
+            255.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_6",
+          "center": [
+            152.0,
+            43.0,
+            235.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        },
+        {
+          "node": "Farmhouse_7",
+          "center": [
+            195.0,
+            41.0,
+            290.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_7",
+          "center": [
+            217.0,
+            43.0,
+            270.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        },
+        {
+          "node": "Farmhouse_8",
+          "center": [
+            260.0,
+            41.0,
+            255.0
+          ],
+          "halfExtents": [
+            15.0,
+            11.0,
+            11.0
+          ]
+        },
+        {
+          "node": "Granary_8",
+          "center": [
+            282.0,
+            43.0,
+            235.0
+          ],
+          "halfExtents": [
+            7.5,
+            13.0,
+            7.5
+          ]
+        }
+      ]
+    }
+  },
+  "streamingGroups": [
+    {
+      "id": "core",
+      "nodes": [
+        "Central_Plaza",
+        "District_Civic"
+      ]
+    },
+    {
+      "id": "south",
+      "nodes": [
+        "Gate_South_Outer",
+        "Gate_South_Inner",
+        "Bridge_South"
+      ]
+    },
+    {
+      "id": "north",
+      "nodes": [
+        "Gate_North",
+        "Bridge_North",
+        "Northern_Sanctuary"
+      ]
+    },
+    {
+      "id": "east-west",
+      "nodes": [
+        "Gate_East",
+        "Gate_West",
+        "Bridge_East",
+        "Bridge_West"
+      ]
+    }
+  ],
+  "lodGroups": [
+    {
+      "id": "city-landmarks",
+      "strategy": "node-suffix",
+      "levels": [
+        {
+          "id": "LOD0",
+          "suffix": "_LOD0",
+          "screenCoverage": 0.35
+        },
+        {
+          "id": "LOD1",
+          "suffix": null,
+          "screenCoverage": 0.08
+        },
+        {
+          "id": "LOD2",
+          "glb": "four-gates-city-lod2.glb",
+          "screenCoverage": 0.0,
+          "nodeCount": 663,
+          "animations": 0,
+          "meshCount": 26,
+          "materialCount": 17,
+          "textureMaxResolution": 512,
+          "resourcePruned": true
+        }
+      ],
+      "fallback": "LOD1"
+    }
+  ],
+  "assumptions": [
+    "Canonical city defensive ring diameter is 720 m.",
+    "City plateau walking elevation is Y=30 m; water surface is Y=-2 m.",
+    "Top-down aerial controls overall placement; perspective references control local material and silhouette language.",
+    "Southern imagery conflicts in scale; the canonical double-gate sequence is preserved."
+  ],
+  "knownLimitations": [
+    "Inline navmesh covers principal axes and plaza; district alley polygons remain to be baked from final collision geometry.",
+    "District navmesh uses conservative convex coverage; final blockers should be rebaked after hand-authored building placement.",
+    "General district assets use modular atlas UVs; hero façades and roofs still need bespoke unwraps.",
+    "Water, foam, mist, and energy retain static geometry fallbacks; production refraction, turbulence, depth-fade, and mist particles remain client-shader work."
+  ],
+  "sources": [
+    {
+      "id": "canonical-aerial",
+      "file": "ChatGPT Image Aug 25, 2026, 11_38_19 PM (4).png",
+      "role": "authoritative-layout"
+    },
+    {
+      "id": "perspective-1",
+      "file": "ChatGPT Image Aug 25, 2026, 11_38_18 PM (1).png",
+      "role": "architecture-materials"
+    },
+    {
+      "id": "perspective-2",
+      "file": "ChatGPT Image Aug 25, 2026, 11_38_18 PM (2).png",
+      "role": "south-gates"
+    },
+    {
+      "id": "perspective-3",
+      "file": "ChatGPT Image Aug 25, 2026, 11_38_19 PM (3).png",
+      "role": "districts-and-skyline"
+    }
+  ],
+  "materials": {
+    "strategy": "embedded-atlas-with-baked-primitive-uvs",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "embeddedTextures": [
+      "four-gates-basecolor",
+      "four-gates-normal",
+      "four-gates-orm"
+    ],
+    "channelPacking": {
+      "orm": "R=occlusion,G=roughness,B=metallic"
+    },
+    "landmarkAtlas": {
+      "resolution": [
+        1024,
+        1024
+      ],
+      "maps": [
+        "landmark-basecolor",
+        "landmark-normal",
+        "landmark-orm",
+        "landmark-emissive"
+      ],
+      "families": [
+        "landmark-stone",
+        "landmark-bronze",
+        "landmark-foundation",
+        "landmark-energy"
+      ]
+    }
+  },
+  "animations": [
+    {
+      "name": "Gate_South_Outer_OpenClose",
+      "standard": "glTF-2.0",
+      "optional": true
+    },
+    {
+      "name": "Gate_South_Inner_OpenClose",
+      "standard": "glTF-2.0",
+      "optional": true
+    },
+    {
+      "name": "Gate_North_OpenClose",
+      "standard": "glTF-2.0",
+      "optional": true
+    },
+    {
+      "name": "Gate_East_OpenClose",
+      "standard": "glTF-2.0",
+      "optional": true
+    },
+    {
+      "name": "Gate_West_OpenClose",
+      "standard": "glTF-2.0",
+      "optional": true
+    },
+    {
+      "name": "Sanctuary_Beacon_Pulse",
+      "standard": "glTF-2.0",
+      "optional": true
+    },
+    {
+      "name": "Plaza_Monument_Crystal_Pulse",
+      "standard": "glTF-2.0",
+      "optional": true
+    }
+  ],
+  "districtDetail": {
+    "civic": {
+      "families": [
+        "arcaded-hall",
+        "domed-annex",
+        "service-court"
+      ]
+    },
+    "residential": {
+      "families": [
+        "pitched-residence",
+        "courtyard",
+        "chimney"
+      ]
+    },
+    "agricultural": {
+      "families": [
+        "farmhouse",
+        "granary",
+        "irrigation"
+      ]
+    },
+    "service": {
+      "families": [
+        "dock",
+        "crane"
+      ]
+    }
+  },
+  "authoredGeometry": {
+    "gateTowerMesh": "authored_landmark_tower",
+    "domeMesh": "authored_landmark_dome",
+    "bridgeArchMesh": "authored_bridge_arch",
+    "cliffMesh": "authored_cliff_face",
+    "replacedStableNodes": true
+  },
+  "terrain": {
+    "minimumUsefulElevation": -40.0,
+    "cityTerraceNode": "Terrain_City_Plateau",
+    "shorelineNode": "Terrain_Shoreline_Sculpt",
+    "terraceRadii": [
+      175,
+      285,
+      365,
+      400
+    ],
+    "shorelineOuterRadius": 454,
+    "waterLevel": -2.0
+  },
+  "waterSystem": {
+    "waterfallCount": 8,
+    "channelNodes": [
+      "Water_Channel_00",
+      "Water_Channel_01",
+      "Water_Channel_02",
+      "Water_Channel_03",
+      "Water_Channel_04",
+      "Water_Channel_05",
+      "Water_Channel_06",
+      "Water_Channel_07"
+    ],
+    "poolNodes": [
+      "Waterfall_Pool_00",
+      "Waterfall_Pool_01",
+      "Waterfall_Pool_02",
+      "Waterfall_Pool_03",
+      "Waterfall_Pool_04",
+      "Waterfall_Pool_05",
+      "Waterfall_Pool_06",
+      "Waterfall_Pool_07"
+    ],
+    "foamNodes": [
+      "Waterfall_Foam_00",
+      "Waterfall_Foam_01",
+      "Waterfall_Foam_02",
+      "Waterfall_Foam_03",
+      "Waterfall_Foam_04",
+      "Waterfall_Foam_05",
+      "Waterfall_Foam_06",
+      "Waterfall_Foam_07"
+    ],
+    "mistLocatorNodes": [
+      "FX_Waterfall_Mist_00",
+      "FX_Waterfall_Mist_01",
+      "FX_Waterfall_Mist_02",
+      "FX_Waterfall_Mist_03",
+      "FX_Waterfall_Mist_04",
+      "FX_Waterfall_Mist_05",
+      "FX_Waterfall_Mist_06",
+      "FX_Waterfall_Mist_07"
+    ],
+    "requiresCustomShaderForBestResult": true
+  },
+  "visualDirection": {
+    "reference": "canonical-four-gates-concept-art",
+    "palette": [
+      "warm limestone",
+      "charcoal slate",
+      "aged gold",
+      "sapphire",
+      "turquoise",
+      "alpine green"
+    ],
+    "materialAtlas": "art-directed-4x4-pbr-basecolor",
+    "landmarkAtlas": "art-directed-2x2-pbr-basecolor",
+    "alpineSkylineNodes": [
+      "Mountain_Peak_00",
+      "Mountain_Snowcap_00",
+      "Mountain_Peak_01",
+      "Mountain_Snowcap_01",
+      "Mountain_Peak_02",
+      "Mountain_Snowcap_02",
+      "Mountain_Peak_03",
+      "Mountain_Snowcap_03",
+      "Mountain_Peak_04",
+      "Mountain_Snowcap_04",
+      "Mountain_Peak_05",
+      "Mountain_Snowcap_05",
+      "Mountain_Peak_06",
+      "Mountain_Snowcap_06",
+      "Mountain_Peak_07",
+      "Mountain_Snowcap_07",
+      "Mountain_Peak_08",
+      "Mountain_Snowcap_08",
+      "Mountain_Peak_09",
+      "Mountain_Snowcap_09",
+      "Mountain_Peak_10",
+      "Mountain_Snowcap_10",
+      "Mountain_Peak_11",
+      "Mountain_Snowcap_11",
+      "Mountain_Peak_12",
+      "Mountain_Snowcap_12",
+      "Mountain_Peak_13",
+      "Mountain_Snowcap_13",
+      "Mountain_Peak_14",
+      "Mountain_Snowcap_14",
+      "Mountain_Peak_15",
+      "Mountain_Snowcap_15",
+      "Mountain_Peak_16",
+      "Mountain_Snowcap_16",
+      "Mountain_Peak_17",
+      "Mountain_Snowcap_17",
+      "Mountain_Peak_18",
+      "Mountain_Snowcap_18",
+      "Mountain_Peak_19",
+      "Mountain_Snowcap_19",
+      "Mountain_Peak_20",
+      "Mountain_Snowcap_20",
+      "Mountain_Peak_21",
+      "Mountain_Snowcap_21",
+      "Mountain_Peak_22",
+      "Mountain_Snowcap_22",
+      "Mountain_Peak_23",
+      "Mountain_Snowcap_23",
+      "Mountain_Peak_24",
+      "Mountain_Snowcap_24",
+      "Mountain_Peak_25",
+      "Mountain_Snowcap_25",
+      "Mountain_Peak_26",
+      "Mountain_Snowcap_26",
+      "Mountain_Peak_27",
+      "Mountain_Snowcap_27"
+    ],
+    "outerEvergreenNodes": [
+      "Outer_Evergreen_01",
+      "Outer_Evergreen_02",
+      "Outer_Evergreen_03",
+      "Outer_Evergreen_04",
+      "Outer_Evergreen_05",
+      "Outer_Evergreen_06",
+      "Outer_Evergreen_07",
+      "Outer_Evergreen_08",
+      "Outer_Evergreen_09",
+      "Outer_Evergreen_10",
+      "Outer_Evergreen_11",
+      "Outer_Evergreen_12",
+      "Outer_Evergreen_16",
+      "Outer_Evergreen_17",
+      "Outer_Evergreen_18",
+      "Outer_Evergreen_19",
+      "Outer_Evergreen_20",
+      "Outer_Evergreen_21",
+      "Outer_Evergreen_22",
+      "Outer_Evergreen_23",
+      "Outer_Evergreen_24",
+      "Outer_Evergreen_25",
+      "Outer_Evergreen_26",
+      "Outer_Evergreen_29",
+      "Outer_Evergreen_30",
+      "Outer_Evergreen_31",
+      "Outer_Evergreen_32",
+      "Outer_Evergreen_33",
+      "Outer_Evergreen_34",
+      "Outer_Evergreen_35",
+      "Outer_Evergreen_36",
+      "Outer_Evergreen_37",
+      "Outer_Evergreen_38",
+      "Outer_Evergreen_39",
+      "Outer_Evergreen_40",
+      "Outer_Evergreen_41",
+      "Outer_Evergreen_43",
+      "Outer_Evergreen_44",
+      "Outer_Evergreen_45",
+      "Outer_Evergreen_46",
+      "Outer_Evergreen_47",
+      "Outer_Evergreen_48",
+      "Outer_Evergreen_49",
+      "Outer_Evergreen_50",
+      "Outer_Evergreen_51",
+      "Outer_Evergreen_52",
+      "Outer_Evergreen_53",
+      "Outer_Evergreen_54",
+      "Outer_Evergreen_55"
+    ]
+  },
+  "detailPass": {
+    "reference": "canonical-four-gates-concept-art",
+    "nodePrefix": "Detail_",
+    "nodeCount": 267,
+    "detailNodes": [
+      "Detail_Gate_South_Outer_Crown_-1",
+      "Detail_Gate_South_Outer_Jewel_-1",
+      "Detail_Gate_South_Outer_Banner_Pole_-1",
+      "Detail_Gate_South_Outer_Banner_Cloth_-1",
+      "Detail_Gate_South_Outer_Crown_+1",
+      "Detail_Gate_South_Outer_Jewel_+1",
+      "Detail_Gate_South_Outer_Banner_Pole_+1",
+      "Detail_Gate_South_Outer_Banner_Cloth_+1",
+      "Detail_Gate_South_Outer_Energy_Rib_-1",
+      "Detail_Gate_South_Outer_Energy_Rib_+1",
+      "Detail_Gate_South_Inner_Crown_-1",
+      "Detail_Gate_South_Inner_Jewel_-1",
+      "Detail_Gate_South_Inner_Banner_Pole_-1",
+      "Detail_Gate_South_Inner_Banner_Cloth_-1",
+      "Detail_Gate_South_Inner_Crown_+1",
+      "Detail_Gate_South_Inner_Jewel_+1",
+      "Detail_Gate_South_Inner_Banner_Pole_+1",
+      "Detail_Gate_South_Inner_Banner_Cloth_+1",
+      "Detail_Gate_South_Inner_Energy_Rib_-1",
+      "Detail_Gate_South_Inner_Energy_Rib_+1",
+      "Detail_Gate_North_Crown_-1",
+      "Detail_Gate_North_Jewel_-1",
+      "Detail_Gate_North_Banner_Pole_-1",
+      "Detail_Gate_North_Banner_Cloth_-1",
+      "Detail_Gate_North_Crown_+1",
+      "Detail_Gate_North_Jewel_+1",
+      "Detail_Gate_North_Banner_Pole_+1",
+      "Detail_Gate_North_Banner_Cloth_+1",
+      "Detail_Gate_North_Energy_Rib_-1",
+      "Detail_Gate_North_Energy_Rib_+1",
+      "Detail_Gate_East_Crown_-1",
+      "Detail_Gate_East_Jewel_-1",
+      "Detail_Gate_East_Banner_Pole_-1",
+      "Detail_Gate_East_Banner_Cloth_-1",
+      "Detail_Gate_East_Crown_+1",
+      "Detail_Gate_East_Jewel_+1",
+      "Detail_Gate_East_Banner_Pole_+1",
+      "Detail_Gate_East_Banner_Cloth_+1",
+      "Detail_Gate_East_Energy_Rib_-1",
+      "Detail_Gate_East_Energy_Rib_+1",
+      "Detail_Gate_West_Crown_-1",
+      "Detail_Gate_West_Jewel_-1",
+      "Detail_Gate_West_Banner_Pole_-1",
+      "Detail_Gate_West_Banner_Cloth_-1",
+      "Detail_Gate_West_Crown_+1",
+      "Detail_Gate_West_Jewel_+1",
+      "Detail_Gate_West_Banner_Pole_+1",
+      "Detail_Gate_West_Banner_Cloth_+1",
+      "Detail_Gate_West_Energy_Rib_-1",
+      "Detail_Gate_West_Energy_Rib_+1",
+      "Detail_Civic_Planter_00_Border",
+      "Detail_Civic_Planter_00_Soil",
+      "Detail_Civic_Planter_00_Shrub_-1",
+      "Detail_Civic_Planter_00_Shrub_+0",
+      "Detail_Civic_Planter_00_Shrub_+1",
+      "Detail_Civic_Planter_01_Border",
+      "Detail_Civic_Planter_01_Soil",
+      "Detail_Civic_Planter_01_Shrub_-1",
+      "Detail_Civic_Planter_01_Shrub_+0",
+      "Detail_Civic_Planter_01_Shrub_+1",
+      "Detail_Civic_Planter_02_Border",
+      "Detail_Civic_Planter_02_Soil",
+      "Detail_Civic_Planter_02_Shrub_-1",
+      "Detail_Civic_Planter_02_Shrub_+0",
+      "Detail_Civic_Planter_02_Shrub_+1",
+      "Detail_Civic_Planter_03_Border",
+      "Detail_Civic_Planter_03_Soil",
+      "Detail_Civic_Planter_03_Shrub_-1",
+      "Detail_Civic_Planter_03_Shrub_+0",
+      "Detail_Civic_Planter_03_Shrub_+1",
+      "Detail_Civic_Planter_04_Border",
+      "Detail_Civic_Planter_04_Soil",
+      "Detail_Civic_Planter_04_Shrub_-1",
+      "Detail_Civic_Planter_04_Shrub_+0",
+      "Detail_Civic_Planter_04_Shrub_+1",
+      "Detail_Civic_Planter_05_Border",
+      "Detail_Civic_Planter_05_Soil",
+      "Detail_Civic_Planter_05_Shrub_-1",
+      "Detail_Civic_Planter_05_Shrub_+0",
+      "Detail_Civic_Planter_05_Shrub_+1",
+      "Detail_Civic_Planter_06_Border",
+      "Detail_Civic_Planter_06_Soil",
+      "Detail_Civic_Planter_06_Shrub_-1",
+      "Detail_Civic_Planter_06_Shrub_+0",
+      "Detail_Civic_Planter_06_Shrub_+1",
+      "Detail_Civic_Planter_07_Border",
+      "Detail_Civic_Planter_07_Soil",
+      "Detail_Civic_Planter_07_Shrub_-1",
+      "Detail_Civic_Planter_07_Shrub_+0",
+      "Detail_Civic_Planter_07_Shrub_+1",
+      "Detail_Market_Crate_00_A",
+      "Detail_Market_Crate_00_B",
+      "Detail_Market_Barrel_00",
+      "Detail_Market_Sign_Pole_00",
+      "Detail_Market_Sign_00",
+      "Detail_Market_Crate_01_A",
+      "Detail_Market_Crate_01_B",
+      "Detail_Market_Barrel_01",
+      "Detail_Market_Sign_Pole_01",
+      "Detail_Market_Sign_01",
+      "Detail_Market_Crate_02_A",
+      "Detail_Market_Crate_02_B",
+      "Detail_Market_Barrel_02",
+      "Detail_Market_Sign_Pole_02",
+      "Detail_Market_Sign_02",
+      "Detail_Market_Crate_03_A",
+      "Detail_Market_Crate_03_B",
+      "Detail_Market_Barrel_03",
+      "Detail_Market_Sign_Pole_03",
+      "Detail_Market_Sign_03",
+      "Detail_Market_Crate_04_A",
+      "Detail_Market_Crate_04_B",
+      "Detail_Market_Barrel_04",
+      "Detail_Market_Sign_Pole_04",
+      "Detail_Market_Sign_04",
+      "Detail_Market_Crate_05_A",
+      "Detail_Market_Crate_05_B",
+      "Detail_Market_Barrel_05",
+      "Detail_Market_Sign_Pole_05",
+      "Detail_Market_Sign_05",
+      "Detail_Market_Crate_06_A",
+      "Detail_Market_Crate_06_B",
+      "Detail_Market_Barrel_06",
+      "Detail_Market_Sign_Pole_06",
+      "Detail_Market_Sign_06",
+      "Detail_Market_Crate_07_A",
+      "Detail_Market_Crate_07_B",
+      "Detail_Market_Barrel_07",
+      "Detail_Market_Sign_Pole_07",
+      "Detail_Market_Sign_07",
+      "Detail_Market_Crate_08_A",
+      "Detail_Market_Crate_08_B",
+      "Detail_Market_Barrel_08",
+      "Detail_Market_Sign_Pole_08",
+      "Detail_Market_Sign_08",
+      "Detail_Market_Crate_09_A",
+      "Detail_Market_Crate_09_B",
+      "Detail_Market_Barrel_09",
+      "Detail_Market_Sign_Pole_09",
+      "Detail_Market_Sign_09",
+      "Detail_Market_Crate_10_A",
+      "Detail_Market_Crate_10_B",
+      "Detail_Market_Barrel_10",
+      "Detail_Market_Sign_Pole_10",
+      "Detail_Market_Sign_10",
+      "Detail_Market_Crate_11_A",
+      "Detail_Market_Crate_11_B",
+      "Detail_Market_Barrel_11",
+      "Detail_Market_Sign_Pole_11",
+      "Detail_Market_Sign_11",
+      "Detail_Residence_0_Balcony",
+      "Detail_Residence_0_Balcony_Rail",
+      "Detail_Residence_0_Roof_Finial",
+      "Detail_Residence_2_Balcony",
+      "Detail_Residence_2_Balcony_Rail",
+      "Detail_Residence_2_Roof_Finial",
+      "Detail_Residence_4_Balcony",
+      "Detail_Residence_4_Balcony_Rail",
+      "Detail_Residence_4_Roof_Finial",
+      "Detail_Residence_6_Balcony",
+      "Detail_Residence_6_Balcony_Rail",
+      "Detail_Residence_6_Roof_Finial",
+      "Detail_Residence_8_Balcony",
+      "Detail_Residence_8_Balcony_Rail",
+      "Detail_Residence_8_Roof_Finial",
+      "Detail_Residence_10_Balcony",
+      "Detail_Residence_10_Balcony_Rail",
+      "Detail_Residence_10_Roof_Finial",
+      "Detail_Residence_12_Balcony",
+      "Detail_Residence_12_Balcony_Rail",
+      "Detail_Residence_12_Roof_Finial",
+      "Detail_Broadleaf_00_Trunk",
+      "Detail_Broadleaf_00_Crown",
+      "Detail_Broadleaf_01_Trunk",
+      "Detail_Broadleaf_01_Crown",
+      "Detail_Broadleaf_02_Trunk",
+      "Detail_Broadleaf_02_Crown",
+      "Detail_Broadleaf_03_Trunk",
+      "Detail_Broadleaf_03_Crown",
+      "Detail_Broadleaf_04_Trunk",
+      "Detail_Broadleaf_04_Crown",
+      "Detail_Broadleaf_05_Trunk",
+      "Detail_Broadleaf_05_Crown",
+      "Detail_Broadleaf_06_Trunk",
+      "Detail_Broadleaf_06_Crown",
+      "Detail_Broadleaf_07_Trunk",
+      "Detail_Broadleaf_07_Crown",
+      "Detail_Broadleaf_08_Trunk",
+      "Detail_Broadleaf_08_Crown",
+      "Detail_Broadleaf_09_Trunk",
+      "Detail_Broadleaf_09_Crown",
+      "Detail_Broadleaf_10_Trunk",
+      "Detail_Broadleaf_10_Crown",
+      "Detail_Broadleaf_11_Trunk",
+      "Detail_Broadleaf_11_Crown",
+      "Detail_Broadleaf_12_Trunk",
+      "Detail_Broadleaf_12_Crown",
+      "Detail_Broadleaf_13_Trunk",
+      "Detail_Broadleaf_13_Crown",
+      "Detail_Broadleaf_14_Trunk",
+      "Detail_Broadleaf_14_Crown",
+      "Detail_Broadleaf_15_Trunk",
+      "Detail_Broadleaf_15_Crown",
+      "Detail_Broadleaf_16_Trunk",
+      "Detail_Broadleaf_16_Crown",
+      "Detail_Broadleaf_17_Trunk",
+      "Detail_Broadleaf_17_Crown",
+      "Detail_Broadleaf_18_Trunk",
+      "Detail_Broadleaf_18_Crown",
+      "Detail_Broadleaf_19_Trunk",
+      "Detail_Broadleaf_19_Crown",
+      "Detail_Broadleaf_20_Trunk",
+      "Detail_Broadleaf_20_Crown",
+      "Detail_Broadleaf_21_Trunk",
+      "Detail_Broadleaf_21_Crown",
+      "Detail_Broadleaf_22_Trunk",
+      "Detail_Broadleaf_22_Crown",
+      "Detail_Broadleaf_23_Trunk",
+      "Detail_Broadleaf_23_Crown",
+      "Detail_Waterfall_00_Rock_0",
+      "Detail_Waterfall_00_Rock_1",
+      "Detail_Waterfall_00_Rock_2",
+      "Detail_Waterfall_00_Rock_3",
+      "Detail_Waterfall_00_Foam_Ribbon_0",
+      "Detail_Waterfall_00_Foam_Ribbon_1",
+      "Detail_Waterfall_01_Rock_0",
+      "Detail_Waterfall_01_Rock_1",
+      "Detail_Waterfall_01_Rock_2",
+      "Detail_Waterfall_01_Rock_3",
+      "Detail_Waterfall_01_Foam_Ribbon_0",
+      "Detail_Waterfall_01_Foam_Ribbon_1",
+      "Detail_Waterfall_02_Rock_0",
+      "Detail_Waterfall_02_Rock_1",
+      "Detail_Waterfall_02_Rock_2",
+      "Detail_Waterfall_02_Rock_3",
+      "Detail_Waterfall_02_Foam_Ribbon_0",
+      "Detail_Waterfall_02_Foam_Ribbon_1",
+      "Detail_Waterfall_03_Rock_0",
+      "Detail_Waterfall_03_Rock_1",
+      "Detail_Waterfall_03_Rock_2",
+      "Detail_Waterfall_03_Rock_3",
+      "Detail_Waterfall_03_Foam_Ribbon_0",
+      "Detail_Waterfall_03_Foam_Ribbon_1",
+      "Detail_Waterfall_04_Rock_0",
+      "Detail_Waterfall_04_Rock_1",
+      "Detail_Waterfall_04_Rock_2",
+      "Detail_Waterfall_04_Rock_3",
+      "Detail_Waterfall_04_Foam_Ribbon_0",
+      "Detail_Waterfall_04_Foam_Ribbon_1",
+      "Detail_Waterfall_05_Rock_0",
+      "Detail_Waterfall_05_Rock_1",
+      "Detail_Waterfall_05_Rock_2",
+      "Detail_Waterfall_05_Rock_3",
+      "Detail_Waterfall_05_Foam_Ribbon_0",
+      "Detail_Waterfall_05_Foam_Ribbon_1",
+      "Detail_Waterfall_06_Rock_0",
+      "Detail_Waterfall_06_Rock_1",
+      "Detail_Waterfall_06_Rock_2",
+      "Detail_Waterfall_06_Rock_3",
+      "Detail_Waterfall_06_Foam_Ribbon_0",
+      "Detail_Waterfall_06_Foam_Ribbon_1",
+      "Detail_Waterfall_07_Rock_0",
+      "Detail_Waterfall_07_Rock_1",
+      "Detail_Waterfall_07_Rock_2",
+      "Detail_Waterfall_07_Rock_3",
+      "Detail_Waterfall_07_Foam_Ribbon_0",
+      "Detail_Waterfall_07_Foam_Ribbon_1"
+    ],
+    "families": {
+      "gates": [
+        "integrated crowns",
+        "energy tracery",
+        "hanging banners"
+      ],
+      "centralCivic": [
+        "radial planted beds",
+        "broadleaf shrubs"
+      ],
+      "market": [
+        "stock crates",
+        "barrels",
+        "sapphire signs"
+      ],
+      "residential": [
+        "balconies",
+        "roof finials"
+      ],
+      "waterfalls": [
+        "rocky lips",
+        "stepped foam ribbons"
+      ],
+      "vegetation": [
+        "inner-ring broadleaf trees",
+        "tiered outer evergreens"
+      ]
+    },
+    "routeClearance": {
+      "cardinalHalfWidth": 30.0,
+      "plazaSpawnClear": true
+    }
+  },
+  "externalResources": {
+    "../_shared/images/093365d113599460bea527b4a5ce871295b41bcd2f17eed56f99286197027d23.png": "093365d113599460bea527b4a5ce871295b41bcd2f17eed56f99286197027d23",
+    "../_shared/images/4762aeace554db8769c82323f6dabcb9153f069ef8f7203ba7cb4d09bae0e0d5.png": "4762aeace554db8769c82323f6dabcb9153f069ef8f7203ba7cb4d09bae0e0d5",
+    "../_shared/images/9e7e3159811e6d2fb57c6ee60c575bc21efdccf60c9d88c435aa9efd7fbb20f0.png": "9e7e3159811e6d2fb57c6ee60c575bc21efdccf60c9d88c435aa9efd7fbb20f0",
+    "../_shared/images/9f1b28d99ac863faca707c7e6d9d2cd22a8c80550a86f12be35291d321a1e853.png": "9f1b28d99ac863faca707c7e6d9d2cd22a8c80550a86f12be35291d321a1e853",
+    "../_shared/images/b65651d722cb089dc1b906f84a6989178f2c1384bead919d92e2c2fe33f2709d.png": "b65651d722cb089dc1b906f84a6989178f2c1384bead919d92e2c2fe33f2709d",
+    "../_shared/images/ba66b21b3a98d9c3392c5eb09f53d4102f6f1eeeb6e4ac0317ba82e0c8d60c44.png": "ba66b21b3a98d9c3392c5eb09f53d4102f6f1eeeb6e4ac0317ba82e0c8d60c44",
+    "../_shared/images/f50765353cb112e0ad8f3024b956a1b9f68b1a1223c5cc1c58100962de773b06.png": "f50765353cb112e0ad8f3024b956a1b9f68b1a1223c5cc1c58100962de773b06"
+  }
+}

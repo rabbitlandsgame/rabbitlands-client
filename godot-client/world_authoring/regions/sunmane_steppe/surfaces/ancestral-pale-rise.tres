@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="1_nlmjp"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v001.png" id="2_bjw24"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-normal.png" id="3_15os8"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-orm.png" id="4_nsvnp"]
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_srs3b"]
+cull_mode = 2
+albedo_color = Color(0.68, 0.65, 0.54, 1)
+albedo_texture = ExtResource("2_bjw24")
+orm_texture = ExtResource("4_nsvnp")
+normal_enabled = true
+normal_scale = 0.75
+normal_texture = ExtResource("3_15os8")
+uv1_scale = Vector3(1.0416667, 1.0416667, 0.25)
+texture_filter = 5
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_nlmjp")
+texture_preset = "Coastal limestone gravel"
+rotation_degrees = 11.0
+source_material = SubResource("ORMMaterial3D_srs3b")

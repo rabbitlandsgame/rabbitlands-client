@@ -1,0 +1,62 @@
+{
+  "schema": "eloria-texture-pack-entry-v1",
+  "assetId": "alpine-snow-crust",
+  "version": "v002",
+  "generator": "OpenAI built-in image_gen edit",
+  "generationId": "exec-29f6de69-82cd-4092-ac78-78d7cb2ad320",
+  "generationLineage": [
+    {
+      "generationId": "exec-29f6de69-82cd-4092-ac78-78d7cb2ad320",
+      "inputImages": [
+        {
+          "role": "edit target",
+          "path": "C:\\rabbitlands\\work-output\\region-materials-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\texture_packs\\alpine-snow-crust\\alpine-snow-crust-v001.png",
+          "sha256": "617140cd6c378afcf3f846020d66fd11a8b38aa7def0e4c08a35c652c2a933a9"
+        }
+      ]
+    }
+  ],
+  "generatedSource": "C:/rabbitlands/private-inputs\\.codex\\generated_images\\01a0d202-9e5e-7430-9e95-399455b48aea\\exec-29f6de69-82cd-4092-ac78-78d7cb2ad320.png",
+  "integrationAsset": "C:\\rabbitlands\\work-output\\region-materials-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\texture_packs\\alpine-snow-crust\\alpine-snow-crust-v002.png",
+  "assetSha256": "e8895b714d8db2ce8a19056f34d4f642ea4c9ce9a50e8265c8b7186fea569539",
+  "generatedSourceSha256": "e8895b714d8db2ce8a19056f34d4f642ea4c9ce9a50e8265c8b7186fea569539",
+  "designReferences": [
+    {
+      "role": "design reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\textures\\ground-basecolor.png",
+      "sha256": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805"
+    },
+    {
+      "role": "design reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\textures\\desert-basecolor.png",
+      "sha256": "5d3d975e645bf4fd460f1022d0522c29b3dbc7b4e281bf0deb9559062fc9570a"
+    },
+    {
+      "role": "gameplay-scale style reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\prototypes\\last-lantern\\previews\\garden.png",
+      "sha256": "0f2041f063f534eed49c812183b7e2ebf651c530b5b1fc338df4fde33584686e"
+    }
+  ],
+  "generationInputImages": [
+    {
+      "role": "edit target",
+      "path": "C:\\rabbitlands\\work-output\\region-materials-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\texture_packs\\alpine-snow-crust\\alpine-snow-crust-v001.png",
+      "sha256": "617140cd6c378afcf3f846020d66fd11a8b38aa7def0e4c08a35c652c2a933a9"
+    }
+  ],
+  "generationPrompts": [
+    "Edit this snow albedo texture into a flatter, more evenly colored seamless-repeat surface. Preserve its pale bluish-white low-contrast snow crust and sparse tiny grey mineral/rock-dust grains, but remove the broad dark edge and corner vignette and any center-to-edge lighting gradient. Match the overall edge tone to the central field so adjacent repeated tiles do not form a dark grid. Keep the same restrained soft, painterly material character and fine diffuse granules. Orthographic flat diffuse albedo only, uniform lighting, no shadows/highlights, no cracks, no large rocks, no text, no border. Keep the source image square and ensure its left/right and top/bottom edges repeat naturally."
+  ],
+  "intendedRole": "soft pale bluish-white snow crust with low-contrast granules and sparse fine rock dust",
+  "suggestedRegions": [
+    "Whitehorn Range",
+    "Mirrorhold"
+  ],
+  "worldRepeat": "4 m",
+  "roughnessScalarSuggestion": 0.96,
+  "metallicScalarSuggestion": 0.0,
+  "normalMapStatus": "not generated; any reuse of compatible existing map requires separate validation",
+  "ormMapStatus": "not generated; use scalar settings unless an existing compatible map is separately validated",
+  "seamReview": "edge darkening reduced in source review; repeated-plane review pending",
+  "approvalStatus": "approved for integration as an asset; not yet product-assigned"
+}

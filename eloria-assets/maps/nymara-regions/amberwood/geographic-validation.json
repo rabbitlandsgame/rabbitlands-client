@@ -1,0 +1,121 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 122,
+    "walkSurfaceTriangles": 819417,
+    "tilesSampled": 91577,
+    "actorTileOffset": [
+      0.5,
+      0.5
+    ],
+    "walkableServerTiles": 91577,
+    "groundingMisses": 0,
+    "groundingMissFraction": 0.0,
+    "surfaceDiscontinuities": 65,
+    "spawnPoints": 3
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "65 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          92,
+          368,
+          38.31
+        ],
+        [
+          82,
+          362,
+          15.55
+        ],
+        [
+          203,
+          335,
+          15.04
+        ],
+        [
+          210,
+          308,
+          13.9
+        ],
+        [
+          200,
+          336,
+          13.72
+        ],
+        [
+          210,
+          309,
+          13.47
+        ],
+        [
+          245,
+          303,
+          13.29
+        ],
+        [
+          190,
+          333,
+          13.14
+        ],
+        [
+          197,
+          337,
+          13.11
+        ],
+        [
+          188,
+          334,
+          12.99
+        ],
+        [
+          115,
+          382,
+          12.67
+        ],
+        [
+          208,
+          282,
+          12.6
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_BELOW_SURFACE",
+      "message": "landmark 'great-tree' is 12.10 m below the surface",
+      "detail": [
+        73.2229,
+        56.18,
+        -185.431
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_BELOW_SURFACE",
+      "message": "landmark 'deep-grove' is 12.46 m below the surface",
+      "detail": [
+        -48.4713,
+        28.7,
+        -224.9205
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "COLLISION_SURFACE_MISMATCH",
+      "message": "1 sampled walkable actor centres disagree with the rendered walk surface",
+      "detail": [
+        {
+          "tile": [
+            90,
+            360
+          ],
+          "encoded": 16.62,
+          "surface": 19.28
+        }
+      ]
+    }
+  ]
+}

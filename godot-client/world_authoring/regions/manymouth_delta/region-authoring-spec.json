@@ -1,0 +1,312 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "manymouth_delta",
+  "label": "Manymouth Delta",
+  "adapter": "published-generic-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/manymouth_delta/manymouth_delta.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/manymouth_delta/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/manymouth_delta/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/manymouth_delta/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/manymouth_delta/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/manymouth_delta/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    520.0,
+    0.0,
+    1140.0
+  ],
+  "server": {
+    "origin": [
+      208,
+      310
+    ],
+    "cells": [
+      510,
+      510
+    ],
+    "collisionOriginMetres": [
+      -208.0,
+      310.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -206.0,
+      -180.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      253,
+      245
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        157,
+        480
+      ],
+      "previousGridSha256": "d09754f04ddf39c99782b7f79ebeee7cbad4fa3e0701af486fd57c93fb2c0fa6"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "crownwater--manymouth_delta-manymouth_delta",
+      "discovery-manymouth_delta-1002",
+      "discovery-manymouth_delta-1003",
+      "discovery-manymouth_delta-1004",
+      "discovery-manymouth_delta-1005",
+      "discovery-manymouth_delta-1006",
+      "discovery-manymouth_delta-1007",
+      "discovery-manymouth_delta-1009",
+      "discovery-manymouth_delta-1010",
+      "discovery-manymouth_delta-1011",
+      "discovery-manymouth_delta-1012",
+      "discovery-manymouth_delta-1013",
+      "discovery-manymouth_delta-1014",
+      "discovery-manymouth_delta-1015",
+      "door-manymouth_delta-bund-shrine-door",
+      "door-manymouth_delta-bund-warden-door",
+      "door-manymouth_delta-gate-descent",
+      "door-manymouth_delta-labyrinth-mouth",
+      "door-manymouth_delta-paddy-sump-mouth",
+      "door-manymouth_delta-temple-sanctum-door",
+      "door-manymouth_delta-tide-hall-door",
+      "door-manymouth_delta-underdeck-hatch",
+      "four_gates--manymouth_delta-manymouth_delta",
+      "manymouth_delta--verdant_stair-manymouth_delta",
+      "manymouth_delta--westhaven-manymouth_delta"
+    ],
+    "requiredRouteIds": [
+      "crownwater--manymouth_delta-manymouth_delta",
+      "door-manymouth_delta-bund-shrine-door",
+      "door-manymouth_delta-bund-warden-door",
+      "door-manymouth_delta-gate-descent",
+      "door-manymouth_delta-labyrinth-mouth",
+      "door-manymouth_delta-paddy-sump-mouth",
+      "door-manymouth_delta-temple-sanctum-door",
+      "door-manymouth_delta-tide-hall-door",
+      "door-manymouth_delta-underdeck-hatch",
+      "four_gates--manymouth_delta-manymouth_delta",
+      "manymouth_delta--verdant_stair-manymouth_delta",
+      "manymouth_delta--westhaven-manymouth_delta"
+    ],
+    "ownedPlanFeatureIds": [
+      "eastern_distributary",
+      "western_distributary"
+    ],
+    "ownedFerryConnectionIds": [
+      "crownwater--manymouth_delta"
+    ]
+  },
+  "gameplay": {
+    "runtimeBindingCount": 182,
+    "runtimePointCount": 174,
+    "existingMarkerBindingCount": 7
+  },
+  "bootstrap": {
+    "schema": "eloria-published-region-bootstrap-v1",
+    "objectCount": 380,
+    "objectIdsSha256": "a9e6a187adfa882917d54eeab1df1acbc6e350948bfa2d9817eb9ae1b8af28e5",
+    "visibleGameplayCount": 178,
+    "assemblies": [
+      {
+        "id": "eastern_distributary@86",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_009_572_1156",
+          "BridgeUnionTimberEdge_009_manymouth_delta"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_009_manymouth_delta"
+      },
+      {
+        "id": "ferry-quay-00",
+        "kind": "access",
+        "supportNodes": [
+          "FerryQuay_manymouth_delta_00_Fascia_-1",
+          "FerryQuay_manymouth_delta_00_Fascia_1",
+          "FerryQuay_manymouth_delta_00_FerrySign",
+          "FerryQuay_manymouth_delta_00_MooringRopes",
+          "FerryQuay_manymouth_delta_00_PilesAndPosts",
+          "FerryQuay_manymouth_delta_00_Signpost",
+          "FerryQuay_manymouth_delta_00_Skiff_Floor",
+          "FerryQuay_manymouth_delta_00_Skiff_FurledSail",
+          "FerryQuay_manymouth_delta_00_Skiff_Gunwale",
+          "FerryQuay_manymouth_delta_00_Skiff_Hull",
+          "FerryQuay_manymouth_delta_00_Skiff_Mast",
+          "FerryQuay_manymouth_delta_00_Skiff_Seat_0",
+          "FerryQuay_manymouth_delta_00_Skiff_Seat_1",
+          "FerryQuay_manymouth_delta_00_Skiff_Seat_2"
+        ],
+        "walkNode": "Walk_FerryQuay_manymouth_delta_00"
+      },
+      {
+        "id": "loose-502",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_502_396_996",
+          "BridgeUnionPier_502_412_988",
+          "BridgeUnionPier_502_420_988",
+          "BridgeUnionPier_502_428_988",
+          "BridgeUnionPier_502_436_996",
+          "BridgeUnionTimberEdge_502_manymouth_delta"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_502_manymouth_delta"
+      },
+      {
+        "id": "loose-coastal-502",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeCoastal_coastal-502_Support_Walk_Coastal502_TerminalSupport_manymouth_delta"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_coastal-502_manymouth_delta"
+      },
+      {
+        "id": "manymouth-village-boat_yard",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_Village_Fascia_boat_yard",
+          "Manymouth_Village_Piles_boat_yard"
+        ],
+        "walkNode": "Walk_Manymouth_Village_boat_yard"
+      },
+      {
+        "id": "manymouth-village-deep_grove",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_Village_Fascia_deep_grove",
+          "Manymouth_Village_Piles_deep_grove"
+        ],
+        "walkNode": "Walk_Manymouth_Village_deep_grove"
+      },
+      {
+        "id": "manymouth-village-east_hamlet",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_Village_Fascia_east_hamlet",
+          "Manymouth_Village_Piles_east_hamlet"
+        ],
+        "walkNode": "Walk_Manymouth_Village_east_hamlet"
+      },
+      {
+        "id": "manymouth-village-far_bar",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_Village_Fascia_far_bar",
+          "Manymouth_Village_Piles_far_bar"
+        ],
+        "walkNode": "Walk_Manymouth_Village_far_bar"
+      },
+      {
+        "id": "manymouth-village-floating_market",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_Village_Fascia_floating_market",
+          "Manymouth_Village_Piles_floating_market"
+        ],
+        "walkNode": "Walk_Manymouth_Village_floating_market"
+      },
+      {
+        "id": "manymouth-village-sea_landing",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_Village_Fascia_sea_landing",
+          "Manymouth_Village_Piles_sea_landing"
+        ],
+        "walkNode": "Walk_Manymouth_Village_sea_landing"
+      },
+      {
+        "id": "manymouth-village-south_hamlet",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_Village_Fascia_south_hamlet",
+          "Manymouth_Village_Piles_south_hamlet"
+        ],
+        "walkNode": "Walk_Manymouth_Village_south_hamlet"
+      },
+      {
+        "id": "manymouth-village-town",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_Village_Fascia_town",
+          "Manymouth_Village_Piles_town"
+        ],
+        "walkNode": "Walk_Manymouth_Village_town"
+      },
+      {
+        "id": "walk-manymouth-fishingboardwalk",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_FishingBoardwalk_Piles"
+        ],
+        "walkNode": "Walk_Manymouth_FishingBoardwalk"
+      },
+      {
+        "id": "walk-manymouth-marketentrance",
+        "kind": "access",
+        "supportNodes": [],
+        "walkNode": "Walk_Manymouth_MarketEntrance"
+      },
+      {
+        "id": "walk-manymouth-paddystreet",
+        "kind": "access",
+        "supportNodes": [
+          "Manymouth_PaddyStreet_Fascia",
+          "Manymouth_PaddyStreet_Piles"
+        ],
+        "walkNode": "Walk_Manymouth_PaddyStreet"
+      },
+      {
+        "id": "western_distributary@48",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_011_468_1036",
+          "BridgeUnionPier_011_468_1044",
+          "BridgeUnionTimberEdge_011_manymouth_delta"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_011_manymouth_delta"
+      },
+      {
+        "id": "western_river@760",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_010_508_1052",
+          "BridgeUnionPier_010_516_1060",
+          "BridgeUnionPier_010_524_1060",
+          "BridgeUnionTimberEdge_010_manymouth_delta"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_010_manymouth_delta"
+      },
+      {
+        "id": "western_river@982",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_012_444_1268",
+          "BridgeUnionPier_012_452_1268",
+          "BridgeUnionPier_012_460_1268",
+          "BridgeUnionTimberEdge_012_manymouth_delta"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_012_manymouth_delta"
+      }
+    ],
+    "water": [
+      {
+        "id": "eastern_distributary",
+        "kind": "river",
+        "planFeatureId": "eastern_distributary"
+      },
+      {
+        "id": "western_distributary",
+        "kind": "river",
+        "planFeatureId": "western_distributary"
+      }
+    ],
+    "bakedTerrainFeatures": [],
+    "previewUvMetresInverse": 0.17,
+    "baselineProofSha256": "b0fdf5a858dea76939c8d48d4dc725d9d3dd83223f5173bac3567f5fdde3b21f"
+  }
+}

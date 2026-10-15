@@ -1,0 +1,248 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 148,
+    "walkSurfaceTriangles": 716456,
+    "tilesSampled": 147456,
+    "groundingMisses": 2016,
+    "groundingMissFraction": 0.01367,
+    "surfaceDiscontinuities": 330,
+    "spawnPoints": 3
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_RAY_MISS",
+      "message": "2016 server tiles have no walk surface under them; a character there would fall back to walkingHeight=17.0",
+      "detail": [
+        [
+          256,
+          0,
+          136.0,
+          96.0
+        ],
+        [
+          257,
+          0,
+          137.0,
+          96.0
+        ],
+        [
+          258,
+          0,
+          138.0,
+          96.0
+        ],
+        [
+          259,
+          0,
+          139.0,
+          96.0
+        ],
+        [
+          260,
+          0,
+          140.0,
+          96.0
+        ],
+        [
+          261,
+          0,
+          141.0,
+          96.0
+        ],
+        [
+          262,
+          0,
+          142.0,
+          96.0
+        ],
+        [
+          263,
+          0,
+          143.0,
+          96.0
+        ],
+        [
+          264,
+          0,
+          144.0,
+          96.0
+        ],
+        [
+          265,
+          0,
+          145.0,
+          96.0
+        ],
+        [
+          266,
+          0,
+          146.0,
+          96.0
+        ],
+        [
+          267,
+          0,
+          147.0,
+          96.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "330 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          202,
+          15,
+          16.3
+        ],
+        [
+          203,
+          15,
+          16.23
+        ],
+        [
+          194,
+          12,
+          15.97
+        ],
+        [
+          195,
+          12,
+          15.91
+        ],
+        [
+          197,
+          262,
+          15.16
+        ],
+        [
+          241,
+          262,
+          15.16
+        ],
+        [
+          197,
+          263,
+          15.16
+        ],
+        [
+          241,
+          263,
+          15.16
+        ],
+        [
+          197,
+          264,
+          15.16
+        ],
+        [
+          241,
+          264,
+          15.16
+        ],
+        [
+          197,
+          265,
+          15.16
+        ],
+        [
+          241,
+          265,
+          15.16
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "COLLISION_SURFACE_MISMATCH",
+      "message": "15 sampled walkable cells disagree with the rendered walk surface",
+      "detail": [
+        {
+          "cell": [
+            0,
+            72
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            84
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            96
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            108
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            120
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            132
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            144
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            156
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            168
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            180
+          ],
+          "issue": "no-surface"
+        }
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_FLOATING",
+      "message": "1 landmarks sit more than 3 m above the walk surface",
+      "detail": [
+        {
+          "id": "orrery",
+          "gap": 9.63
+        }
+      ]
+    }
+  ]
+}

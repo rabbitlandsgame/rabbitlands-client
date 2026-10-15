@@ -1,0 +1,202 @@
+[instance]
+spawn_type: instance
+spawn_name: amberwood_gauntlet_low
+spawn_desc: The Resin Road
+short_name: resin_low
+map_id: ./maps/nymara/amberwood_gauntlet.elm
+route: amberwood_gauntlet
+band: low
+keeper: Old Pyke
+minimum_ad: 8
+maximum_ad: 30
+cooldown_hours: 6
+minimum_players: 1
+maximum_players: 6
+time_limit_seconds: 2400
+entry_x: 26
+entry_y: 320
+exit_map: amberwood
+exit_x: 329
+exit_y: 117
+copies: amberwood_gauntlet, amberwood_gauntlet_2, amberwood_gauntlet_3
+cache_object: 798
+cache_table: cache_amberwood_gauntlet
+staging_exit: 800
+vault_exit: 799
+mutators: none:5, frenzy:2, hunted:2, bounty:1, swift:1
+wipe_seconds: 90
+
+[leg]
+id: undercut
+name: The Undercut
+kind: hall
+gate: 801 | 26 | 312 | 26 | 306
+trigger: enter
+advance: cleared
+bounds: 15 | 285 | 37 | 305
+[variant]
+g_resin_low_undercut_0
+[/variant]
+[variant]
+g_resin_low_undercut_1
+g_resin_low_undercut_1_lead
+[/variant]
+[variant]
+g_resin_low_undercut_2
+[/variant]
+[/leg]
+
+[leg]
+id: root-cellar
+name: The Root Cellar
+kind: cavern
+gate: 802 | 29 | 284 | 29 | 278
+trigger: enter
+advance: cleared
+bounds: 16 | 253 | 42 | 277
+[variant]
+g_resin_low_root_cellar_0
+[/variant]
+[variant]
+g_resin_low_root_cellar_1
+[/variant]
+[variant]
+g_resin_low_root_cellar_2
+g_resin_low_root_cellar_2_lead
+[/variant]
+[/leg]
+
+[leg]
+id: sap-bridge
+name: The Sap Bridge
+kind: bridge
+gate: 803 | 25 | 252 | 25 | 246
+trigger: enter
+advance: time:150
+bounds: 23 | 214 | 27 | 242
+[variant]
+g_resin_low_sap_bridge_0
+[/variant]
+[variant]
+g_resin_low_sap_bridge_1
+[/variant]
+[variant]
+g_resin_low_sap_bridge_2
+[/variant]
+[/leg]
+
+[leg]
+id: stump-stair
+name: The Stump Stair
+kind: stair
+gate: 804 | 25 | 210 | 25 | 204
+trigger: enter
+advance: cleared
+bounds: 14 | 171 | 36 | 189
+[variant]
+g_resin_low_stump_stair_0
+[/variant]
+[variant]
+g_resin_low_stump_stair_1
+[/variant]
+[variant]
+g_resin_low_stump_stair_2
+g_resin_low_stump_stair_2_lead
+[/variant]
+[/leg]
+
+[leg]
+id: twin-hollows
+name: The Twin Hollows
+kind: fork
+gate: 805 | 22 | 170 | 22 | 164
+trigger: enter
+advance: cleared
+bounds: 7 | 149 | 37 | 163
+[variant]
+g_resin_low_twin_hollows_0
+[/variant]
+[variant]
+g_resin_low_twin_hollows_1
+[/variant]
+[variant]
+g_resin_low_twin_hollows_2
+[/variant]
+[branch]
+id: wet-hollow
+name: The Wet Hollow
+kind: cavern
+gate: 806 | 11 | 148 | 11 | 142
+trigger: enter
+advance: cleared
+bounds: 3 | 121 | 19 | 141
+[variant]
+g_resin_low_wet_hollow_0
+[/variant]
+[variant]
+g_resin_low_wet_hollow_1
+[/variant]
+[variant]
+g_resin_low_wet_hollow_2
+g_resin_low_wet_hollow_2_lead
+[/variant]
+[/branch]
+
+[branch]
+id: dry-hollow
+name: The Dry Hollow
+kind: hall
+gate: 807 | 33 | 148 | 33 | 142
+trigger: enter
+advance: cleared
+bounds: 25 | 121 | 41 | 141
+[variant]
+g_resin_low_dry_hollow_0
+[/variant]
+[variant]
+g_resin_low_dry_hollow_1
+[/variant]
+[variant]
+g_resin_low_dry_hollow_2
+[/variant]
+[/branch]
+
+[/leg]
+
+[leg]
+id: lantern-walk
+name: The Lantern Walk
+kind: gallery
+gate: 808 | 22 | 100 | 22 | 94
+trigger: at_gate
+advance: cleared
+bounds: 16 | 61 | 28 | 93
+[variant]
+g_resin_low_lantern_walk_0
+[/variant]
+[variant]
+g_resin_low_lantern_walk_1
+g_resin_low_lantern_walk_1_lead
+[/variant]
+[variant]
+g_resin_low_lantern_walk_2
+[/variant]
+[/leg]
+
+[leg]
+id: boar-court
+name: The Boar King's Court
+kind: court
+gate: 809 | 22 | 60 | 22 | 54
+trigger: enter
+advance: cleared
+bounds: 6 | 23 | 38 | 53
+[variant]
+g_resin_low_boar_court_court_0
+[/variant]
+[variant]
+g_resin_low_boar_court_court_1
+[/variant]
+[/leg]
+
+[/instance]

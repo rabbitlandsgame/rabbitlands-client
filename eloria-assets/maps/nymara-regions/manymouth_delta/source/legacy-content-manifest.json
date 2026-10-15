@@ -1,0 +1,2773 @@
+{
+  "asset": {
+    "id": "manymouth_delta",
+    "name": "Manymouth Delta",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -624.0,
+        -25.83,
+        -851.0
+      ],
+      "max": [
+        852.0,
+        43.33,
+        625.0
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -174.0,
+        -25.83,
+        -401.0
+      ],
+      "max": [
+        401.0,
+        14.82,
+        174.0
+      ]
+    },
+    "seaLevel": 0.0,
+    "serverCells": 576
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      174.0,
+      174.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 1.88,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        36.0,
+        2.25,
+        -48.0
+      ],
+      "serverTile": [
+        210,
+        222
+      ],
+      "rotationDegrees": 38.0,
+      "surface": "Trail",
+      "grounded": true,
+      "note": "grounded on the surveyed landing at the town and route junctions"
+    },
+    {
+      "id": "arch-stair",
+      "position": [
+        81.0,
+        1.8,
+        -93.0
+      ],
+      "serverTile": [
+        255,
+        267
+      ],
+      "rotationDegrees": -140.0,
+      "surface": "Paving",
+      "grounded": true,
+      "note": "grounded on the surveyed landing at the town and route junctions"
+    },
+    {
+      "id": "temple-quay",
+      "position": [
+        264.0,
+        1.8,
+        -276.0
+      ],
+      "serverTile": [
+        438,
+        450
+      ],
+      "rotationDegrees": -104.0,
+      "surface": "Paving",
+      "grounded": true,
+      "note": "grounded on the surveyed landing at the town and route junctions"
+    },
+    {
+      "id": "labyrinth-mouth",
+      "position": [
+        207.0,
+        8.16,
+        -2.5
+      ],
+      "serverTile": [
+        381,
+        176
+      ],
+      "rotationDegrees": 20.0,
+      "surface": "Paving",
+      "grounded": true,
+      "note": "return landing for the insides map's exit portal"
+    },
+    {
+      "id": "underdeck-hatch",
+      "position": [
+        54.0,
+        2.25,
+        -33.0
+      ],
+      "serverTile": [
+        228,
+        207
+      ],
+      "rotationDegrees": 34.0,
+      "surface": "Shore",
+      "grounded": true,
+      "note": "return landing for the insides map's exit portal"
+    },
+    {
+      "id": "tide-hall-door",
+      "position": [
+        31.39,
+        2.25,
+        -57.22
+      ],
+      "serverTile": [
+        205,
+        231
+      ],
+      "rotationDegrees": 18.0,
+      "surface": "ForestFloor",
+      "grounded": true,
+      "note": "return landing for the insides map's exit portal"
+    },
+    {
+      "id": "temple-sanctum-door",
+      "position": [
+        281.0,
+        14.87,
+        -293.0
+      ],
+      "serverTile": [
+        455,
+        467
+      ],
+      "rotationDegrees": -104.0,
+      "surface": "Paving",
+      "grounded": true,
+      "note": "return landing for the insides map's exit portal"
+    },
+    {
+      "id": "gate-descent",
+      "position": [
+        114.0,
+        0.6,
+        -114.0
+      ],
+      "serverTile": [
+        288,
+        288
+      ],
+      "rotationDegrees": -140.0,
+      "surface": "Paving",
+      "grounded": true,
+      "note": "return landing for the insides map's exit portal"
+    },
+    {
+      "id": "paddy-sump-mouth",
+      "position": [
+        -12.0,
+        2.0,
+        -276.0
+      ],
+      "serverTile": [
+        162,
+        450
+      ],
+      "rotationDegrees": 90.0,
+      "surface": "Paddy",
+      "grounded": true,
+      "note": "return landing for the insides map's exit portal"
+    },
+    {
+      "id": "bund-shrine-door",
+      "position": [
+        72.0,
+        1.8,
+        123.0
+      ],
+      "serverTile": [
+        246,
+        51
+      ],
+      "rotationDegrees": 0.0,
+      "surface": "Trail",
+      "grounded": true,
+      "note": "return landing for the insides map's exit portal"
+    },
+    {
+      "id": "bund-warden-door",
+      "position": [
+        -84.0,
+        1.8,
+        -234.0
+      ],
+      "serverTile": [
+        90,
+        408
+      ],
+      "rotationDegrees": 45.0,
+      "surface": "Trail",
+      "grounded": true,
+      "note": "return landing for the insides map's exit portal"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "great-arch",
+      "name": "The Manymouth Arch",
+      "description": "The drowned ring-gate standing over the central whirl.",
+      "node": "Landmark_GreatArch",
+      "position": [
+        114.0,
+        0.35,
+        -114.0
+      ],
+      "serverTile": [
+        288,
+        288
+      ]
+    },
+    {
+      "id": "stelae-court",
+      "name": "The Stelae Court",
+      "description": "A ring of glyph-cut stones on a silt bar.",
+      "node": "Landmark_StelaeCourt",
+      "position": [
+        228.0,
+        1.43,
+        -228.0
+      ],
+      "serverTile": [
+        402,
+        402
+      ]
+    },
+    {
+      "id": "labyrinth-mouth",
+      "name": "Mouth of the Flooded Labyrinth",
+      "description": "The cut arch into the drowned ruins under the headland.",
+      "node": "Landmark_LabyrinthMouth",
+      "position": [
+        207.0,
+        8.17,
+        -10.5
+      ],
+      "serverTile": [
+        381,
+        184
+      ]
+    },
+    {
+      "id": "green-temple",
+      "name": "The Green Temple",
+      "description": "A stepped bronze-banded temple on the delta's east rim.",
+      "node": "Landmark_GreenTemple",
+      "position": [
+        297.0,
+        14.82,
+        -309.0
+      ],
+      "serverTile": [
+        471,
+        483
+      ]
+    },
+    {
+      "id": "moot-hall",
+      "name": "The Tide Hall",
+      "description": "The town's tiered meeting hall, its ridge capped in bronze.",
+      "node": "Landmark_MootHall",
+      "position": [
+        30.0,
+        2.2,
+        -61.5
+      ],
+      "serverTile": [
+        204,
+        236
+      ]
+    },
+    {
+      "id": "market-hall",
+      "name": "The Long Market",
+      "description": "A barrel-vaulted market hall over the main walkway.",
+      "node": "Landmark_MarketHall",
+      "position": [
+        13.5,
+        2.2,
+        -27.0
+      ],
+      "serverTile": [
+        188,
+        201
+      ]
+    },
+    {
+      "id": "delta-overlook",
+      "name": "The Long Look",
+      "description": "A plank deck on a bar edge, open to the whole fan.",
+      "node": "Landmark_Overlook",
+      "position": [
+        156.0,
+        2.39,
+        18.0
+      ],
+      "serverTile": [
+        330,
+        156
+      ]
+    },
+    {
+      "id": "paddy-watchtower",
+      "name": "The Paddy Watch",
+      "description": "A stilted watch over the terraced water.",
+      "node": "Landmark_PaddyTower",
+      "position": [
+        -4.0,
+        1.55,
+        -271.0
+      ],
+      "serverTile": [
+        170,
+        445
+      ]
+    },
+    {
+      "id": "south-shrine",
+      "name": "The South Shrine",
+      "description": "A single stele on a southern bar.",
+      "node": "Landmark_SouthShrine",
+      "position": [
+        80.0,
+        1.35,
+        128.0
+      ],
+      "serverTile": [
+        254,
+        46
+      ]
+    },
+    {
+      "id": "east-watch",
+      "name": "The East Watch",
+      "description": "A stilt watch on the eastern reach.",
+      "node": "Landmark_EastWatch",
+      "position": [
+        371.0,
+        3.38,
+        -31.0
+      ],
+      "serverTile": [
+        545,
+        205
+      ]
+    },
+    {
+      "id": "deck-study",
+      "name": "The Ferry Post",
+      "description": "Matting, rope, a bronze-headed staff and fallen blossom.",
+      "node": "Landmark_DeckStudy",
+      "position": [
+        110.63,
+        0.55,
+        -111.85
+      ],
+      "serverTile": [
+        285,
+        286
+      ]
+    },
+    {
+      "id": "great-banyan",
+      "name": "The Root Landing",
+      "description": "A deck built inside the aerial roots of a great banyan.",
+      "node": "Landmark_GreatBanyan",
+      "position": [
+        70.0,
+        1.58,
+        -188.0
+      ],
+      "serverTile": [
+        244,
+        362
+      ]
+    },
+    {
+      "id": "stelae-court",
+      "name": "The Stelae Court",
+      "node": "Lore_stelae_court",
+      "type": "lore-site",
+      "thread": "G",
+      "position": [
+        311.24,
+        2.25,
+        -93.04
+      ],
+      "note": "The water lineage in the order the channels were claimed: two ranks with a reading path between them, and the tenth stone left blank."
+    },
+    {
+      "id": "march-north-landing",
+      "name": "The Channel Landing",
+      "node": "March_north_landing_Stone",
+      "type": "transition",
+      "position": [
+        96.7,
+        1.29,
+        -345.0
+      ],
+      "note": "Where the Manymouth Delta gives way to Crownwater: ssarathi road furniture, a march stone, a waystation, and 2 pieces of the country beyond."
+    },
+    {
+      "id": "station-north-landing",
+      "name": "Crownwater Road Station",
+      "node": "March_north_landing_Station",
+      "type": "waystation",
+      "position": [
+        90.5,
+        -4.99,
+        -329.0
+      ]
+    },
+    {
+      "id": "march-east-landing",
+      "name": "The Temple March",
+      "node": "March_east_landing_Stone",
+      "type": "transition",
+      "position": [
+        357.0,
+        3.54,
+        -41.3
+      ],
+      "note": "Where the Manymouth Delta gives way to the Ssarathi Ruins: ssarathi road furniture, a march stone, a waystation, and 16 pieces of the country beyond."
+    },
+    {
+      "id": "station-east-landing",
+      "name": "Ssarathi Ruins Road Station",
+      "node": "March_east_landing_Station",
+      "type": "waystation",
+      "position": [
+        341.0,
+        0.81,
+        -47.5
+      ]
+    },
+    {
+      "id": "march-west-landing",
+      "name": "The Drain March",
+      "node": "March_west_landing_Stone",
+      "type": "transition",
+      "position": [
+        -126.0,
+        -0.27,
+        -324.7
+      ],
+      "note": "Where the Manymouth Delta gives way to the Grey Moors: ssarathi road furniture, a march stone, a waystation, and 0 pieces of the country beyond."
+    },
+    {
+      "id": "station-west-landing",
+      "name": "Grey Moors Road Station",
+      "node": "March_west_landing_Station",
+      "type": "waystation",
+      "position": [
+        -110.0,
+        -13.18,
+        -318.5
+      ]
+    },
+    {
+      "id": "march-south-landing",
+      "name": "The Coast Road March",
+      "node": "March_south_landing_Stone",
+      "type": "transition",
+      "position": [
+        296.51,
+        1.48,
+        49.01
+      ],
+      "note": "Where the Manymouth Delta gives way to Westhaven: ssarathi road furniture, a march stone, a waystation, and 9 pieces of the country beyond."
+    },
+    {
+      "id": "station-south-landing",
+      "name": "Westhaven Road Station",
+      "node": "March_south_landing_Station",
+      "type": "waystation",
+      "position": [
+        289.58,
+        0.95,
+        33.31
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "arch-gate",
+      "name": "The Manymouth Arch",
+      "type": "portal-focus",
+      "position": [
+        114.0,
+        0.65,
+        -114.0
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "labyrinth-door",
+      "name": "Mouth of the Flooded Labyrinth",
+      "type": "interior-entrance",
+      "position": [
+        216.0,
+        9.32,
+        -24.0
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "moot-hall-door",
+      "name": "Tide Hall",
+      "type": "door",
+      "position": [
+        30.0,
+        2.3,
+        -61.5
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "market-scales",
+      "name": "Market Scales",
+      "type": "vendor",
+      "position": [
+        13.5,
+        2.3,
+        -27.0
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "ferry-post",
+      "name": "Ferry Post",
+      "type": "travel",
+      "position": [
+        54.0,
+        2.3,
+        -33.0
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "temple-altar",
+      "name": "Temple Altar",
+      "type": "shrine",
+      "position": [
+        297.0,
+        28.58,
+        -309.0
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "paddy-sluice",
+      "name": "Paddy Sluice",
+      "type": "mechanism",
+      "position": [
+        -51.0,
+        1.85,
+        -258.0
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "secret-delta-lotus-hollow",
+      "kind": "secret",
+      "secret": "delta-lotus-hollow",
+      "name": "The Lotus Hollow",
+      "label": "A hide of cut reeds, and a plank floor under it where there should be mud.",
+      "prop": "reed_hide",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-lotus-hollow",
+      "position": [
+        119.0,
+        1.55,
+        -180.0
+      ],
+      "authority": "server",
+      "serverTile": [
+        293,
+        354
+      ]
+    },
+    {
+      "id": "secret-delta-paddy-garden",
+      "kind": "secret",
+      "secret": "delta-paddy-garden",
+      "name": "The Paddy Garden",
+      "label": "A hide of cut reeds, and a plank floor under it where there should be mud.",
+      "prop": "reed_hide",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-paddy-garden",
+      "position": [
+        -3.0,
+        1.26,
+        -247.41
+      ],
+      "authority": "server",
+      "serverTile": [
+        171,
+        421
+      ]
+    },
+    {
+      "id": "secret-delta-moot-vault",
+      "kind": "secret",
+      "secret": "delta-moot-vault",
+      "name": "The Moot Vault",
+      "label": "A cracked flagstone that rings hollow underfoot.",
+      "prop": "cracked_slab",
+      "key": "Storage Token",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-moot-vault",
+      "position": [
+        49.0,
+        1.06,
+        -53.5
+      ],
+      "authority": "server",
+      "serverTile": [
+        223,
+        228
+      ]
+    },
+    {
+      "id": "secret-delta-crab-pit",
+      "kind": "secret",
+      "secret": "delta-crab-pit",
+      "name": "The Crab Pit",
+      "label": "A hide of cut reeds, and a plank floor under it where there should be mud.",
+      "prop": "reed_hide",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-crab-pit",
+      "position": [
+        167.0,
+        1.76,
+        26.0
+      ],
+      "authority": "server",
+      "serverTile": [
+        341,
+        148
+      ]
+    },
+    {
+      "id": "secret-delta-study-school",
+      "kind": "secret",
+      "secret": "delta-study-school",
+      "name": "The Deck Study School",
+      "label": "A cellar hatch under the leaves.",
+      "prop": "cellar_hatch",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-study-school",
+      "position": [
+        166.63,
+        0.82,
+        -103.85
+      ],
+      "authority": "server",
+      "serverTile": [
+        341,
+        278
+      ]
+    },
+    {
+      "id": "secret-delta-temple-spring",
+      "kind": "secret",
+      "secret": "delta-temple-spring",
+      "name": "The Green Temple Spring",
+      "label": "A loose stone in the rock; something moves behind it.",
+      "prop": "loose_stone",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-temple-spring",
+      "position": [
+        265.61,
+        1.52,
+        -293.0
+      ],
+      "authority": "server",
+      "serverTile": [
+        440,
+        467
+      ]
+    },
+    {
+      "id": "secret-delta-watch-butts",
+      "kind": "secret",
+      "secret": "delta-watch-butts",
+      "name": "The East Watch Butts",
+      "label": "A cellar hatch under the leaves.",
+      "prop": "cellar_hatch",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-watch-butts",
+      "position": [
+        363.0,
+        3.14,
+        -23.0
+      ],
+      "authority": "server",
+      "serverTile": [
+        537,
+        197
+      ]
+    },
+    {
+      "id": "secret-delta-stelae-reliquary",
+      "kind": "secret",
+      "secret": "delta-stelae-reliquary",
+      "name": "The Stelae Reliquary",
+      "label": "A shrine slab with fresh scratches where it has been slid aside.",
+      "prop": "shrine_slab",
+      "key": "Shell",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-stelae-reliquary",
+      "position": [
+        279.0,
+        1.41,
+        -220.0
+      ],
+      "authority": "server",
+      "serverTile": [
+        453,
+        394
+      ]
+    },
+    {
+      "id": "secret-delta-shrine-well",
+      "kind": "secret",
+      "secret": "delta-shrine-well",
+      "name": "The South Shrine Well",
+      "label": "A cracked flagstone that rings hollow underfoot.",
+      "prop": "cracked_slab",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-shrine-well",
+      "position": [
+        88.0,
+        0.8,
+        136.0
+      ],
+      "authority": "server",
+      "serverTile": [
+        262,
+        38
+      ]
+    },
+    {
+      "id": "secret-delta-arch-focus",
+      "kind": "secret",
+      "secret": "delta-arch-focus",
+      "name": "The Great Arch Focus",
+      "label": "A hide of cut reeds, and a plank floor under it where there should be mud.",
+      "prop": "reed_hide",
+      "key": "Iron Rune",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-arch-focus",
+      "position": [
+        146.5,
+        1.11,
+        -144.97
+      ],
+      "authority": "server",
+      "serverTile": [
+        320,
+        319
+      ]
+    },
+    {
+      "id": "secret-delta-bund-run",
+      "kind": "secret",
+      "secret": "delta-bund-run",
+      "name": "The Bund-Run",
+      "label": "A hide of cut reeds, and a plank floor under it where there should be mud.",
+      "prop": "reed_hide",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-bund-run",
+      "position": [
+        -14.0,
+        1.94,
+        -252.0
+      ],
+      "authority": "server",
+      "serverTile": [
+        160,
+        426
+      ]
+    },
+    {
+      "id": "secret-delta-waystone",
+      "kind": "secret",
+      "secret": "delta-waystone",
+      "name": "The Delta Waystone",
+      "label": "A cracked flagstone that rings hollow underfoot.",
+      "prop": "cracked_slab",
+      "key": "Iron Rune",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-waystone",
+      "position": [
+        214.0,
+        9.64,
+        -23.7
+      ],
+      "authority": "server",
+      "serverTile": [
+        388,
+        198
+      ]
+    },
+    {
+      "id": "secret-delta-banyan-eyrie",
+      "kind": "secret",
+      "secret": "delta-banyan-eyrie",
+      "name": "The Banyan Eyrie",
+      "label": "An arch so grown with vine it reads as hedge.",
+      "prop": "ivy_arch",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-banyan-eyrie",
+      "position": [
+        42.0,
+        1.23,
+        -196.0
+      ],
+      "authority": "server",
+      "serverTile": [
+        216,
+        370
+      ]
+    },
+    {
+      "id": "secret-delta-rootrun-mouth",
+      "kind": "secret",
+      "secret": "delta-rootrun-mouth",
+      "name": "The Root-Run Mouth",
+      "label": "A knot of roots grown over a door frame.",
+      "prop": "root_door",
+      "key": "",
+      "destinationMap": "ssarathi_ruins_secrets",
+      "destinationSpawn": "ruins-rootrun-far",
+      "position": [
+        64.0,
+        0.8,
+        -229.18
+      ],
+      "authority": "server",
+      "serverTile": [
+        238,
+        403
+      ]
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "stilt_town-villager-0",
+      "role": "villager",
+      "position": [
+        40.11,
+        2.2,
+        -25.87
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "stilt_town-villager-1",
+      "role": "villager",
+      "position": [
+        17.06,
+        2.2,
+        -62.16
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "stilt_town-villager-2",
+      "role": "villager",
+      "position": [
+        40.85,
+        2.2,
+        -46.69
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "stilt_town-villager-3",
+      "role": "villager",
+      "position": [
+        51.93,
+        2.2,
+        -44.79
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "stilt_town-villager-4",
+      "role": "villager",
+      "position": [
+        14.18,
+        2.2,
+        -43.74
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "stilt_town-villager-5",
+      "role": "villager",
+      "position": [
+        38.99,
+        2.2,
+        -67.58
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "stilt_town-villager-6",
+      "role": "villager",
+      "position": [
+        21.87,
+        2.2,
+        -38.81
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "stilt_town-villager-7",
+      "role": "villager",
+      "position": [
+        35.94,
+        2.2,
+        -36.92
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "stilt_town-villager-8",
+      "role": "villager",
+      "position": [
+        56.21,
+        2.2,
+        -49.31
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "floating_market-trader-0",
+      "role": "trader",
+      "position": [
+        -46.66,
+        2.2,
+        -11.42
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "floating_market-trader-1",
+      "role": "trader",
+      "position": [
+        -17.37,
+        2.2,
+        -4.9
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "floating_market-trader-2",
+      "role": "trader",
+      "position": [
+        -18.21,
+        2.2,
+        -3.75
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "floating_market-trader-3",
+      "role": "trader",
+      "position": [
+        -32.1,
+        2.2,
+        -32.57
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "floating_market-trader-4",
+      "role": "trader",
+      "position": [
+        -47.57,
+        2.2,
+        -13.28
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "floating_market-trader-5",
+      "role": "trader",
+      "position": [
+        -45.84,
+        2.2,
+        3.14
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "floating_market-trader-6",
+      "role": "trader",
+      "position": [
+        -47.03,
+        2.2,
+        -21.86
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "town_quay-ferryman-0",
+      "role": "ferryman",
+      "position": [
+        68.65,
+        2.2,
+        -19.4
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "town_quay-ferryman-1",
+      "role": "ferryman",
+      "position": [
+        46.63,
+        2.2,
+        -39.08
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "town_quay-ferryman-2",
+      "role": "ferryman",
+      "position": [
+        63.13,
+        2.2,
+        -39.12
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "green_temple-acolyte-0",
+      "role": "acolyte",
+      "position": [
+        294.7,
+        14.82,
+        -329.71
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "green_temple-acolyte-1",
+      "role": "acolyte",
+      "position": [
+        295.2,
+        14.82,
+        -294.07
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "green_temple-acolyte-2",
+      "role": "acolyte",
+      "position": [
+        282.6,
+        14.82,
+        -310.27
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "green_temple-acolyte-3",
+      "role": "acolyte",
+      "position": [
+        314.59,
+        14.82,
+        -302.1
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "paddy_terraces-farmer-0",
+      "role": "farmer",
+      "position": [
+        -65.03,
+        1.75,
+        -261.25
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "paddy_terraces-farmer-1",
+      "role": "farmer",
+      "position": [
+        -53.55,
+        1.75,
+        -246.55
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "paddy_terraces-farmer-2",
+      "role": "farmer",
+      "position": [
+        -30.23,
+        1.75,
+        -248.19
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "paddy_terraces-farmer-3",
+      "role": "farmer",
+      "position": [
+        -55.63,
+        1.75,
+        -277.46
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "paddy_terraces-farmer-4",
+      "role": "farmer",
+      "position": [
+        -42.72,
+        1.75,
+        -271.22
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "east_hamlet-villager-0",
+      "role": "villager",
+      "position": [
+        360.1,
+        1.75,
+        -175.41
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "east_hamlet-villager-1",
+      "role": "villager",
+      "position": [
+        359.43,
+        1.75,
+        -163.22
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "east_hamlet-villager-2",
+      "role": "villager",
+      "position": [
+        360.41,
+        1.75,
+        -162.58
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "east_hamlet-villager-3",
+      "role": "villager",
+      "position": [
+        352.16,
+        1.75,
+        -181.79
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "south_hamlet-villager-0",
+      "role": "villager",
+      "position": [
+        171.05,
+        1.75,
+        108.88
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "south_hamlet-villager-1",
+      "role": "villager",
+      "position": [
+        176.0,
+        1.75,
+        108.79
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "south_hamlet-villager-2",
+      "role": "villager",
+      "position": [
+        177.74,
+        1.75,
+        88.84
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "south_hamlet-villager-3",
+      "role": "villager",
+      "position": [
+        178.73,
+        1.75,
+        102.34
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "boat_yard-shipwright-0",
+      "role": "shipwright",
+      "position": [
+        -1.77,
+        1.75,
+        83.46
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "boat_yard-shipwright-1",
+      "role": "shipwright",
+      "position": [
+        -35.68,
+        1.75,
+        92.33
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "boat_yard-shipwright-2",
+      "role": "shipwright",
+      "position": [
+        -10.65,
+        1.75,
+        90.85
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "west_hamlet-villager-0",
+      "role": "villager",
+      "position": [
+        -138.02,
+        1.75,
+        57.83
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "west_hamlet-villager-1",
+      "role": "villager",
+      "position": [
+        -143.34,
+        1.75,
+        57.0
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "west_hamlet-villager-2",
+      "role": "villager",
+      "position": [
+        -113.57,
+        1.75,
+        27.55
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "north_fishing-fisher-0",
+      "role": "fisher",
+      "position": [
+        84.55,
+        1.75,
+        -346.92
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "north_fishing-fisher-1",
+      "role": "fisher",
+      "position": [
+        117.1,
+        1.75,
+        -347.93
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "north_fishing-fisher-2",
+      "role": "fisher",
+      "position": [
+        121.83,
+        1.75,
+        -357.26
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "north_fishing-fisher-3",
+      "role": "fisher",
+      "position": [
+        103.65,
+        1.75,
+        -342.96
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove_reach-delta-crocodile-0",
+      "role": "creature",
+      "species": "delta-crocodile",
+      "position": [
+        -107.44,
+        -2.38,
+        -172.36
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove_reach-delta-crocodile-1",
+      "role": "creature",
+      "species": "delta-crocodile",
+      "position": [
+        -135.42,
+        -6.61,
+        -158.64
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove_reach-delta-crocodile-2",
+      "role": "creature",
+      "species": "delta-crocodile",
+      "position": [
+        -114.53,
+        -0.9,
+        -121.38
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove_reach-delta-crocodile-3",
+      "role": "creature",
+      "species": "delta-crocodile",
+      "position": [
+        -90.33,
+        -4.86,
+        -142.15
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "great_arch-drowned-sentinel-0",
+      "role": "creature",
+      "species": "drowned-sentinel",
+      "position": [
+        112.2,
+        -0.55,
+        -125.78
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "great_arch-drowned-sentinel-1",
+      "role": "creature",
+      "species": "drowned-sentinel",
+      "position": [
+        104.69,
+        -0.55,
+        -106.28
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "great_arch-drowned-sentinel-2",
+      "role": "creature",
+      "species": "drowned-sentinel",
+      "position": [
+        135.78,
+        0.38,
+        -112.98
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "great_arch-drowned-sentinel-3",
+      "role": "creature",
+      "species": "drowned-sentinel",
+      "position": [
+        82.98,
+        -8.43,
+        -104.33
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "great_arch-drowned-sentinel-4",
+      "role": "creature",
+      "species": "drowned-sentinel",
+      "position": [
+        109.48,
+        -0.94,
+        -146.74
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "cave_mouth-labyrinth-crawler-0",
+      "role": "creature",
+      "species": "labyrinth-crawler",
+      "position": [
+        214.27,
+        1.11,
+        -40.66
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "cave_mouth-labyrinth-crawler-1",
+      "role": "creature",
+      "species": "labyrinth-crawler",
+      "position": [
+        196.98,
+        -0.88,
+        -42.56
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "cave_mouth-labyrinth-crawler-2",
+      "role": "creature",
+      "species": "labyrinth-crawler",
+      "position": [
+        187.5,
+        -0.08,
+        -4.23
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "cave_mouth-labyrinth-crawler-3",
+      "role": "creature",
+      "species": "labyrinth-crawler",
+      "position": [
+        200.36,
+        8.56,
+        -26.35
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "cave_mouth-labyrinth-crawler-4",
+      "role": "creature",
+      "species": "labyrinth-crawler",
+      "position": [
+        225.49,
+        7.08,
+        -17.18
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "sea_landing-shore-raider-0",
+      "role": "creature",
+      "species": "shore-raider",
+      "position": [
+        -142.12,
+        -6.27,
+        -323.6
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "sea_landing-shore-raider-1",
+      "role": "creature",
+      "species": "shore-raider",
+      "position": [
+        -96.73,
+        -14.35,
+        -333.59
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "sea_landing-shore-raider-2",
+      "role": "creature",
+      "species": "shore-raider",
+      "position": [
+        -107.88,
+        -12.87,
+        -312.95
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "sea_landing-shore-raider-3",
+      "role": "creature",
+      "species": "shore-raider",
+      "position": [
+        -131.15,
+        -7.49,
+        -341.51
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "deep_grove-canopy-serpent-0",
+      "role": "creature",
+      "species": "canopy-serpent",
+      "position": [
+        238.78,
+        -1.3,
+        -132.38
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "deep_grove-canopy-serpent-1",
+      "role": "creature",
+      "species": "canopy-serpent",
+      "position": [
+        205.99,
+        2.41,
+        -128.64
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "deep_grove-canopy-serpent-2",
+      "role": "creature",
+      "species": "canopy-serpent",
+      "position": [
+        213.54,
+        2.33,
+        -136.29
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "deep_grove-canopy-serpent-3",
+      "role": "creature",
+      "species": "canopy-serpent",
+      "position": [
+        203.03,
+        2.24,
+        -125.11
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "ruin_stelae-silt-wight-0",
+      "role": "creature",
+      "species": "silt-wight",
+      "position": [
+        234.63,
+        0.77,
+        -237.21
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "ruin_stelae-silt-wight-1",
+      "role": "creature",
+      "species": "silt-wight",
+      "position": [
+        248.27,
+        -3.37,
+        -214.41
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "ruin_stelae-silt-wight-2",
+      "role": "creature",
+      "species": "silt-wight",
+      "position": [
+        198.47,
+        -4.16,
+        -242.48
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "ruin_stelae-silt-wight-3",
+      "role": "creature",
+      "species": "silt-wight",
+      "position": [
+        223.26,
+        -6.99,
+        -192.35
+      ],
+      "authority": "server"
+    }
+  ],
+  "harvestables": [
+    {
+      "id": "lotus-root-0-0",
+      "resource": "lotus-root",
+      "position": [
+        -42.47,
+        1.15,
+        -232.17
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "lotus-root-0-1",
+      "resource": "lotus-root",
+      "position": [
+        -45.14,
+        1.75,
+        -269.93
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "lotus-root-0-2",
+      "resource": "lotus-root",
+      "position": [
+        -52.33,
+        1.29,
+        -267.5
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "lotus-root-0-3",
+      "resource": "lotus-root",
+      "position": [
+        -58.28,
+        1.15,
+        -277.41
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "lotus-root-0-4",
+      "resource": "lotus-root",
+      "position": [
+        -26.08,
+        1.15,
+        -243.81
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "lotus-root-0-5",
+      "resource": "lotus-root",
+      "position": [
+        -67.95,
+        1.15,
+        -262.91
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "lotus-root-0-6",
+      "resource": "lotus-root",
+      "position": [
+        -21.58,
+        1.75,
+        -256.64
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "lotus-root-0-7",
+      "resource": "lotus-root",
+      "position": [
+        -60.7,
+        1.17,
+        -281.15
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "rice-1-0",
+      "resource": "rice",
+      "position": [
+        60.76,
+        1.3,
+        -325.92
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "rice-1-1",
+      "resource": "rice",
+      "position": [
+        38.89,
+        2.25,
+        -341.4
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "rice-1-2",
+      "resource": "rice",
+      "position": [
+        62.63,
+        1.3,
+        -352.38
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "rice-1-3",
+      "resource": "rice",
+      "position": [
+        64.61,
+        1.24,
+        -317.39
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "rice-1-4",
+      "resource": "rice",
+      "position": [
+        47.19,
+        0.86,
+        -319.96
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "rice-1-5",
+      "resource": "rice",
+      "position": [
+        27.7,
+        -1.38,
+        -340.57
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "rice-1-6",
+      "resource": "rice",
+      "position": [
+        40.34,
+        1.29,
+        -330.05
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "rice-1-7",
+      "resource": "rice",
+      "position": [
+        65.61,
+        1.18,
+        -317.64
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove-bark-2-0",
+      "resource": "mangrove-bark",
+      "position": [
+        -99.13,
+        -0.85,
+        -148.54
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove-bark-2-1",
+      "resource": "mangrove-bark",
+      "position": [
+        -108.94,
+        -0.85,
+        -157.36
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove-bark-2-2",
+      "resource": "mangrove-bark",
+      "position": [
+        -136.57,
+        -2.73,
+        -136.08
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove-bark-2-3",
+      "resource": "mangrove-bark",
+      "position": [
+        -113.52,
+        -1.22,
+        -165.46
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove-bark-2-4",
+      "resource": "mangrove-bark",
+      "position": [
+        -104.72,
+        -1.25,
+        -121.48
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove-bark-2-5",
+      "resource": "mangrove-bark",
+      "position": [
+        -111.25,
+        -0.85,
+        -153.45
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "mangrove-bark-2-6",
+      "resource": "mangrove-bark",
+      "position": [
+        -101.87,
+        -0.85,
+        -147.58
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "banyan-resin-3-0",
+      "resource": "banyan-resin",
+      "position": [
+        66.14,
+        -2.64,
+        -162.46
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "banyan-resin-3-1",
+      "resource": "banyan-resin",
+      "position": [
+        80.76,
+        1.58,
+        -171.44
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "banyan-resin-3-2",
+      "resource": "banyan-resin",
+      "position": [
+        75.04,
+        -2.29,
+        -157.25
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "banyan-resin-3-3",
+      "resource": "banyan-resin",
+      "position": [
+        86.11,
+        1.59,
+        -175.22
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "banyan-resin-3-4",
+      "resource": "banyan-resin",
+      "position": [
+        88.5,
+        1.79,
+        -184.4
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "river-fish-4-0",
+      "resource": "river-fish",
+      "position": [
+        -60.39,
+        -8.86,
+        0.73
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "river-fish-4-1",
+      "resource": "river-fish",
+      "position": [
+        -47.7,
+        -5.35,
+        -3.8
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "river-fish-4-2",
+      "resource": "river-fish",
+      "position": [
+        -13.9,
+        -3.67,
+        -22.41
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "river-fish-4-3",
+      "resource": "river-fish",
+      "position": [
+        -34.76,
+        -9.08,
+        5.71
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "river-fish-4-4",
+      "resource": "river-fish",
+      "position": [
+        -20.72,
+        -3.49,
+        -21.83
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "river-fish-4-5",
+      "resource": "river-fish",
+      "position": [
+        -59.37,
+        -3.3,
+        -13.26
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "shell-lime-5-0",
+      "resource": "shell-lime",
+      "position": [
+        287.82,
+        1.44,
+        38.57
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "shell-lime-5-1",
+      "resource": "shell-lime",
+      "position": [
+        285.61,
+        1.3,
+        62.43
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "shell-lime-5-2",
+      "resource": "shell-lime",
+      "position": [
+        313.73,
+        1.46,
+        51.86
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "shell-lime-5-3",
+      "resource": "shell-lime",
+      "position": [
+        320.36,
+        1.84,
+        67.11
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "shell-lime-5-4",
+      "resource": "shell-lime",
+      "position": [
+        300.93,
+        1.65,
+        70.69
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "shell-lime-5-5",
+      "resource": "shell-lime",
+      "position": [
+        283.04,
+        1.58,
+        42.15
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "salt-pan-6-0",
+      "resource": "salt-pan",
+      "position": [
+        -117.99,
+        -17.75,
+        -353.47
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "salt-pan-6-1",
+      "resource": "salt-pan",
+      "position": [
+        -132.98,
+        -17.26,
+        -352.94
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "salt-pan-6-2",
+      "resource": "salt-pan",
+      "position": [
+        -121.68,
+        -4.06,
+        -330.75
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "salt-pan-6-3",
+      "resource": "salt-pan",
+      "position": [
+        -160.29,
+        -21.72,
+        -321.06
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "salt-pan-6-4",
+      "resource": "salt-pan",
+      "position": [
+        -146.12,
+        -10.68,
+        -325.32
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "palm-heart-7-0",
+      "resource": "palm-heart",
+      "position": [
+        219.38,
+        1.7,
+        -125.05
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "palm-heart-7-1",
+      "resource": "palm-heart",
+      "position": [
+        209.75,
+        2.31,
+        -123.45
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "palm-heart-7-2",
+      "resource": "palm-heart",
+      "position": [
+        192.62,
+        1.66,
+        -133.01
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "palm-heart-7-3",
+      "resource": "palm-heart",
+      "position": [
+        226.99,
+        0.67,
+        -128.63
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "palm-heart-7-4",
+      "resource": "palm-heart",
+      "position": [
+        194.42,
+        2.01,
+        -139.17
+      ],
+      "authority": "server"
+    },
+    {
+      "id": "palm-heart-7-5",
+      "resource": "palm-heart",
+      "position": [
+        189.02,
+        -0.42,
+        -114.28
+      ],
+      "authority": "server"
+    }
+  ],
+  "portals": [
+    {
+      "id": "labyrinth-mouth",
+      "name": "Mouth of the Flooded Labyrinth",
+      "type": "map-transition",
+      "position": [
+        207.0,
+        8.21,
+        -2.5
+      ],
+      "serverTile": [
+        381,
+        176
+      ],
+      "destinationMap": "manymouth_flooded_labyrinth",
+      "destinationSpawn": "labyrinth-mouth",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "underdeck-hatch",
+      "name": "The Underdeck Hatch",
+      "type": "map-transition",
+      "position": [
+        54.0,
+        2.3,
+        -33.0
+      ],
+      "serverTile": [
+        228,
+        207
+      ],
+      "destinationMap": "manymouth_flooded_labyrinth",
+      "destinationSpawn": "underdeck-hatch",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "tide-hall-door",
+      "name": "The Tide Hall",
+      "type": "map-transition",
+      "position": [
+        31.39,
+        2.3,
+        -57.22
+      ],
+      "serverTile": [
+        205,
+        231
+      ],
+      "destinationMap": "manymouth_flooded_labyrinth",
+      "destinationSpawn": "tide-hall-door",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "temple-sanctum-door",
+      "name": "The Sanctum Stair",
+      "type": "map-transition",
+      "position": [
+        281.0,
+        14.92,
+        -293.0
+      ],
+      "serverTile": [
+        455,
+        467
+      ],
+      "destinationMap": "manymouth_flooded_labyrinth",
+      "destinationSpawn": "temple-sanctum-door",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "gate-descent",
+      "name": "The Manymouth Arch",
+      "type": "map-transition",
+      "position": [
+        114.0,
+        0.65,
+        -114.0
+      ],
+      "serverTile": [
+        288,
+        288
+      ],
+      "destinationMap": "manymouth_flooded_labyrinth",
+      "destinationSpawn": "gate-descent",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "paddy-sump-mouth",
+      "name": "The Paddy Watch Sump",
+      "type": "map-transition",
+      "position": [
+        -12.0,
+        2.05,
+        -276.0
+      ],
+      "serverTile": [
+        162,
+        450
+      ],
+      "destinationMap": "manymouth_flooded_labyrinth",
+      "destinationSpawn": "paddy-sump-mouth",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "bund-shrine-door",
+      "name": "The Bund Shrine",
+      "type": "map-transition",
+      "position": [
+        72.0,
+        1.85,
+        123.0
+      ],
+      "serverTile": [
+        246,
+        51
+      ],
+      "destinationMap": "manymouth_flooded_labyrinth",
+      "destinationSpawn": "bund-shrine-door",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "bund-warden-door",
+      "name": "The Bund Warden's House",
+      "type": "map-transition",
+      "position": [
+        -84.0,
+        1.85,
+        -234.0
+      ],
+      "serverTile": [
+        90,
+        408
+      ],
+      "destinationMap": "manymouth_flooded_labyrinth",
+      "destinationSpawn": "bund-warden-door",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "north-landing",
+      "name": "Crownwater Packet up the Channel",
+      "type": "map-transition",
+      "position": [
+        102.0,
+        1.85,
+        -351.0
+      ],
+      "serverTile": [
+        276,
+        525
+      ],
+      "destinationMap": "crownwater",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "east-landing",
+      "name": "Temple Causeway to the Ssarathi Ruins",
+      "type": "map-transition",
+      "position": [
+        363.0,
+        3.84,
+        -36.0
+      ],
+      "serverTile": [
+        537,
+        210
+      ],
+      "destinationMap": "ssarathi_ruins",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "south-landing",
+      "name": "Coast Road to Westhaven",
+      "type": "map-transition",
+      "position": [
+        297.0,
+        1.85,
+        57.0
+      ],
+      "serverTile": [
+        471,
+        117
+      ],
+      "destinationMap": "westhaven",
+      "radius": 3.5,
+      "authority": "server"
+    },
+    {
+      "id": "west-landing",
+      "name": "Drain Track up to the Grey Moors",
+      "type": "map-transition",
+      "position": [
+        -132.0,
+        1.85,
+        -330.0
+      ],
+      "serverTile": [
+        42,
+        504
+      ],
+      "destinationMap": "grey_moors",
+      "radius": 3.5,
+      "authority": "server"
+    }
+  ],
+  "contentLayout": {
+    "services": [
+      {
+        "role": "information",
+        "position": [
+          32,
+          2.2,
+          -46
+        ]
+      },
+      {
+        "role": "storage",
+        "position": [
+          31,
+          2.2,
+          -50
+        ]
+      },
+      {
+        "role": "crafting_station",
+        "position": [
+          39,
+          2.2,
+          -43
+        ]
+      },
+      {
+        "role": "training",
+        "position": [
+          41,
+          2.2,
+          -49
+        ]
+      }
+    ],
+    "roadClearance": 2.2,
+    "wildlife": {
+      "mangrove_crab": [
+        [
+          -115,
+          -130,
+          34
+        ],
+        [
+          -117,
+          39,
+          30
+        ]
+      ],
+      "delta_crocodile": [
+        [
+          83,
+          -174,
+          35
+        ],
+        [
+          172,
+          94,
+          35
+        ]
+      ],
+      "floodmaw": [
+        [
+          209,
+          -139,
+          32
+        ],
+        [
+          252,
+          -259,
+          38
+        ]
+      ],
+      "delta_mud_crab": [
+        [
+          -85,
+          -231,
+          30
+        ],
+        [
+          91,
+          -353,
+          30
+        ]
+      ],
+      "manymouth_crab": [
+        [
+          -121,
+          -324,
+          28
+        ],
+        [
+          344,
+          -175,
+          30
+        ]
+      ],
+      "swamp_heron": [
+        [
+          -42,
+          -260,
+          36
+        ],
+        [
+          49,
+          -329,
+          28
+        ]
+      ],
+      "bronze_diving_beetle": [
+        [
+          -43,
+          -267,
+          38
+        ]
+      ],
+      "saltmarsh_crocodile": [
+        [
+          171,
+          94,
+          38
+        ]
+      ],
+      "viridian_basilisk": [
+        [
+          293,
+          -300,
+          38
+        ],
+        [
+          217,
+          -229,
+          30
+        ]
+      ],
+      "drowned_pirate": [
+        [
+          -126,
+          -321,
+          55
+        ],
+        [
+          99,
+          -348,
+          55
+        ],
+        [
+          -115,
+          -145,
+          40
+        ]
+      ],
+      "reed_mask_hunter": [
+        [
+          343,
+          -174,
+          38
+        ],
+        [
+          207,
+          -138,
+          34
+        ]
+      ],
+      "drowned_lich_king": [
+        [
+          290,
+          -309,
+          44
+        ],
+        [
+          218,
+          -229,
+          34
+        ],
+        [
+          214,
+          -18,
+          32
+        ]
+      ],
+      "mire_kelpie": [
+        [
+          82,
+          -176,
+          36
+        ],
+        [
+          -111,
+          -144,
+          34
+        ]
+      ]
+    },
+    "harvest": {
+      "Pearl": [
+        [
+          -125,
+          -326,
+          35
+        ],
+        [
+          97,
+          -351,
+          32
+        ]
+      ],
+      "Clay": [
+        [
+          -82,
+          -230,
+          32
+        ],
+        [
+          -42,
+          -255,
+          33
+        ]
+      ],
+      "Lotus": [
+        [
+          -42,
+          -263,
+          38
+        ],
+        [
+          43,
+          -329,
+          30
+        ]
+      ],
+      "Sap": [
+        [
+          78,
+          -175,
+          34
+        ],
+        [
+          207,
+          -139,
+          32
+        ]
+      ],
+      "Lichen": [
+        [
+          221,
+          -226,
+          32
+        ],
+        [
+          301,
+          -305,
+          38
+        ]
+      ],
+      "Venom Bulb": [
+        [
+          219,
+          -140,
+          35
+        ],
+        [
+          306,
+          -311,
+          38
+        ]
+      ],
+      "Riverflax": [
+        [
+          -42,
+          -261,
+          36
+        ]
+      ],
+      "Toadstool": [
+        [
+          79,
+          -180,
+          36
+        ],
+        [
+          204,
+          -138,
+          36
+        ]
+      ],
+      "Kelp": [
+        [
+          -121,
+          -323,
+          40
+        ],
+        [
+          91,
+          -354,
+          34
+        ]
+      ],
+      "Shell": [
+        [
+          -123,
+          39,
+          34
+        ],
+        [
+          288,
+          58,
+          35
+        ]
+      ],
+      "Bog Iron": [
+        [
+          -118,
+          -147,
+          35
+        ],
+        [
+          220,
+          -225,
+          35
+        ]
+      ],
+      "Watercress": [
+        [
+          -40,
+          -260,
+          38
+        ]
+      ]
+    },
+    "npcs": {
+      "Mara Tide": [
+        34,
+        2.2,
+        -43
+      ],
+      "Jori Reed": [
+        39,
+        2.2,
+        -52
+      ],
+      "Tide Hall Speaker Nen-Ilsa": [
+        30,
+        2.2,
+        -56
+      ],
+      "Long Market Broker Cass Merrow": [
+        13.5,
+        2.2,
+        -27
+      ],
+      "Ferry Post Pilot Ruk-Tal": [
+        54,
+        2.2,
+        -33
+      ],
+      "Root Landing Elder Ba-Nuun": [
+        81,
+        2,
+        -180
+      ],
+      "Paddy Watch Sentry Ossa-Kel": [
+        -12,
+        2,
+        -276
+      ],
+      "Silt Measurer Ives Kanton": [
+        -51,
+        2,
+        -258
+      ],
+      "Labyrinth Guide Hess-Uru": [
+        207,
+        2,
+        -2.5
+      ],
+      "Green Temple Warden Vashi-Lo": [
+        281,
+        14.8,
+        -293
+      ],
+      "South Shrine Cantor Tem-Ossa": [
+        72,
+        2,
+        123
+      ],
+      "East Watch Runner Bel Kiddow": [
+        363,
+        2,
+        -36
+      ],
+      "Stelae Court Scribe Ann-Sesh": [
+        326,
+        2,
+        -106
+      ],
+      "Bund Warden Ilse": [
+        -84,
+        2,
+        -234
+      ]
+    }
+  }
+}

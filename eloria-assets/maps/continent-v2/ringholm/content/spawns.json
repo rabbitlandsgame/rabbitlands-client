@@ -1,0 +1,882 @@
+{
+ "schema": "eloria-continent-v2-spawns-v1",
+ "map": "ringholm",
+ "about": "Pinned original spawn rows, partitioned by exact continent position. local remains the source of truth.",
+ "source": {
+  "sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
+  "originalSources": {
+   "sw_isle": {
+    "file": "spawn_plan_rf.json",
+    "sha256": "13dd506f5c254b91fd1fbeb7faeb707c8690d21b1d76d4e649aa63358219dc4f",
+    "schema": "eloria-continent-v2-spawn-plan-draft-1",
+    "date": "2026-10-02",
+    "note": "review fix 2026-10-03: sw-spawn-0883 re-seated onto a fully reached 3x3 tile ring (rf_sw1 asset-aware check)",
+    "diffCheck": "differs from spawn_plan.json (2026-10-02 21:57) only in sw-spawn-0883, (1718, 218) -> (1718, 219) in the pre-D2b frame, (1718, 188) -> (1718, 189) in D2b",
+    "savedCopy": "work-output/continent-v2/review/serve_inputs/spawns/spawn_plan_rf.json",
+    "originally": "session scratchpad continent_v2/content/spawns/spawn_plan_rf.json"
+   },
+   "tollholms": {
+    "file": "adjacent_d2_rf.json",
+    "sha256": "971629ee21633372290433eba5cb8fa15b98ad463513d387d946ea2cf4b470f0",
+    "schema": "eloria-continent-v2-adjacent-spawns-d2-v1",
+    "note": "SUPERSEDED 2026-10-03 (review fix): every row now has its 1 m tile and its 8 neighbours reached on the built maps' served-rule union checks (reports/rf_th2, reports/rf_gs1); the old rule was 8-neighbour BFS over dry (>= 0.6 m) 2 m cells, step grade <= 0.65, inside the map polygon, seeded at the map's land crossings",
+    "savedCopy": "work-output/continent-v2/review/serve_inputs/spawns/adjacent_d2_rf.json",
+    "originally": "session scratchpad continent_v2/content/spawns/adjacent_d2_rf.json"
+   }
+  }
+ },
+ "spawns": [
+  {
+   "id": "sw-spawn-0544",
+   "creature": "crown_antler_stag",
+   "local": [
+    -324.5,
+    -160.5
+   ],
+   "leash": 45,
+   "zone": "east_point:D",
+   "band": "D",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0546",
+   "creature": "jackalope",
+   "local": [
+    -345.5,
+    -67.5
+   ],
+   "leash": 45,
+   "zone": "east_point:D",
+   "band": "D",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0560",
+   "creature": "magpie",
+   "local": [
+    -362.5,
+    -91.5
+   ],
+   "leash": 45,
+   "zone": "east_point:D",
+   "band": "D",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0012",
+   "creature": "coralcrest_heron",
+   "local": [
+    -119.5,
+    -204.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0013",
+   "creature": "raven",
+   "local": [
+    -255.0,
+    -158.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0014",
+   "creature": "frilled_lizard",
+   "local": [
+    -75.0,
+    -120.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0015",
+   "creature": "goose",
+   "local": [
+    -147.0,
+    -102.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0016",
+   "creature": "mossback_boar",
+   "local": [
+    -257.0,
+    -98.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0017",
+   "creature": "raven",
+   "local": [
+    -106.5,
+    -98.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0018",
+   "creature": "frilled_lizard",
+   "local": [
+    -9.0,
+    -88.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0019",
+   "creature": "coralcrest_heron",
+   "local": [
+    101.0,
+    -88.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0020",
+   "creature": "brambleback_boar",
+   "local": [
+    -139.0,
+    -68.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0021",
+   "creature": "frilled_lizard",
+   "local": [
+    -111.0,
+    -64.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0022",
+   "creature": "crown_antler_stag",
+   "local": [
+    -67.0,
+    -58.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0023",
+   "creature": "goose",
+   "local": [
+    -11.0,
+    -56.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0024",
+   "creature": "crown_antler_stag",
+   "local": [
+    -41.5,
+    -50.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0025",
+   "creature": "magpie",
+   "local": [
+    103.0,
+    -28.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0026",
+   "creature": "russet_faun",
+   "local": [
+    -179.0,
+    -24.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0027",
+   "creature": "mossback_boar",
+   "local": [
+    -153.0,
+    -24.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0028",
+   "creature": "crown_antler_stag",
+   "local": [
+    29.0,
+    -24.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0029",
+   "creature": "magpie",
+   "local": [
+    -49.0,
+    -18.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0030",
+   "creature": "raven",
+   "local": [
+    65.0,
+    -16.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0031",
+   "creature": "raven",
+   "local": [
+    -91.0,
+    -6.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0032",
+   "creature": "jackalope",
+   "local": [
+    1.0,
+    4.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0033",
+   "creature": "goose",
+   "local": [
+    -59.0,
+    6.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0034",
+   "creature": "pelican",
+   "local": [
+    173.0,
+    8.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0035",
+   "creature": "goose",
+   "local": [
+    -203.0,
+    26.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0036",
+   "creature": "brambleback_boar",
+   "local": [
+    -133.0,
+    26.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0037",
+   "creature": "crown_antler_stag",
+   "local": [
+    41.0,
+    26.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0038",
+   "creature": "crystal_shore_crab",
+   "local": [
+    195.0,
+    30.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0039",
+   "creature": "jackalope",
+   "local": [
+    95.5,
+    32.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0040",
+   "creature": "raven",
+   "local": [
+    -157.0,
+    46.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0041",
+   "creature": "raven",
+   "local": [
+    -111.0,
+    48.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0042",
+   "creature": "jackalope",
+   "local": [
+    121.0,
+    48.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0043",
+   "creature": "goose",
+   "local": [
+    157.5,
+    53.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0044",
+   "creature": "crystal_shore_crab",
+   "local": [
+    227.0,
+    58.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0045",
+   "creature": "goose",
+   "local": [
+    -227.0,
+    60.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0046",
+   "creature": "crown_antler_stag",
+   "local": [
+    201.0,
+    60.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0047",
+   "creature": "frilled_lizard",
+   "local": [
+    -73.0,
+    66.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0048",
+   "creature": "bronze_tide_crab",
+   "local": [
+    169.0,
+    78.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0049",
+   "creature": "coralcrest_heron",
+   "local": [
+    103.0,
+    88.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0050",
+   "creature": "goose",
+   "local": [
+    -201.0,
+    94.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0051",
+   "creature": "brambleback_boar",
+   "local": [
+    -173.0,
+    94.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0052",
+   "creature": "pelican",
+   "local": [
+    199.0,
+    94.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0053",
+   "creature": "chameleon",
+   "local": [
+    -237.0,
+    96.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 4,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0054",
+   "creature": "raven",
+   "local": [
+    -163.0,
+    118.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0055",
+   "creature": "magpie",
+   "local": [
+    -219.0,
+    144.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0056",
+   "creature": "raven",
+   "local": [
+    -175.0,
+    146.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0057",
+   "creature": "raven",
+   "local": [
+    -129.0,
+    152.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:east_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0111",
+   "creature": "raven",
+   "local": [
+    -115.5,
+    -179.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0112",
+   "creature": "raven",
+   "local": [
+    -109.5,
+    -171.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0113",
+   "creature": "coralcrest_heron",
+   "local": [
+    -21.0,
+    -130.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0114",
+   "creature": "frilled_lizard",
+   "local": [
+    -148.5,
+    -125.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0115",
+   "creature": "pelican",
+   "local": [
+    34.5,
+    -105.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0116",
+   "creature": "brambleback_boar",
+   "local": [
+    -205.0,
+    -82.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0117",
+   "creature": "mossback_badger",
+   "local": [
+    21.0,
+    -68.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0118",
+   "creature": "mossback_boar",
+   "local": [
+    -225.0,
+    -66.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0119",
+   "creature": "chameleon",
+   "local": [
+    -183.5,
+    -48.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 4,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0120",
+   "creature": "crystal_shore_crab",
+   "local": [
+    124.5,
+    -55.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "shore",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0121",
+   "creature": "coralcrest_heron",
+   "local": [
+    131.0,
+    -20.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0122",
+   "creature": "crown_antler_stag",
+   "local": [
+    -41.0,
+    32.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0123",
+   "creature": "crown_antler_stag",
+   "local": [
+    -37.0,
+    60.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0124",
+   "creature": "chameleon",
+   "local": [
+    -115.0,
+    126.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 4,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0125",
+   "creature": "riverglass_otter",
+   "local": [
+    47.5,
+    95.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 4,
+   "habitat": "shore",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "lv-ringholm-road-01",
+   "creature": "goose",
+   "local": [
+    -314.5,
+    -54.5
+   ],
+   "leash": 25,
+   "zone": "lv-roadside-life",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  }
+ ]
+}

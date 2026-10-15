@@ -1,0 +1,497 @@
+{
+ "sw_isle": {
+  "schemaVersion": 1,
+  "asset": {
+   "id": "sw_isle",
+   "name": "Landfall",
+   "glb": "world.glb",
+   "units": "meters",
+   "seaLevel": 0.0
+  },
+  "productionStatus": "editor source only: not composed, not published, no server map",
+  "continentGeography": {
+   "revision": "continent-v2-draft-1",
+   "translation": [
+    1418.0,
+    0.0,
+    7270.0
+   ],
+   "ownershipPolygon": [
+    [
+     399.0,
+     6221.0
+    ],
+    [
+     2437.0,
+     6221.0
+    ],
+    [
+     2437.0,
+     8259.0
+    ],
+    [
+     399.0,
+     8259.0
+    ]
+   ],
+   "geometryMode": "continent-v2-editor-source"
+  },
+  "server": {
+   "origin": [
+    1023,
+    993
+   ],
+   "cells": [
+    2046,
+    2046
+   ],
+   "collisionOriginMetres": [
+    -1023.0,
+    993.0
+   ]
+  },
+  "environment": {
+   "sky": {
+    "type": "gradient",
+    "zenith": [
+     0.16,
+     0.42,
+     0.72
+    ],
+    "horizon": [
+     0.72,
+     0.87,
+     0.92
+    ],
+    "curve": 0.14,
+    "groundHorizon": [
+     0.42,
+     0.62,
+     0.66
+    ],
+    "groundBottom": [
+     0.16,
+     0.3,
+     0.38
+    ],
+    "sunAngleMax": 14.0,
+    "energy": 1.16
+   },
+   "sun": {
+    "direction": [
+     -0.45,
+     -0.78,
+     -0.43
+    ],
+    "color": [
+     1.0,
+     0.94,
+     0.83
+    ],
+    "energy": 1.1
+   },
+   "ambient": {
+    "color": [
+     0.6,
+     0.67,
+     0.72
+    ],
+    "energy": 0.6
+   },
+   "saturation": 1.34,
+   "fog": {
+    "enabled": true,
+    "color": [
+     0.62,
+     0.8,
+     0.86
+    ],
+    "density": 0.00035,
+    "heightFalloff": 0.0022
+   },
+   "variants": {
+    "golden-hour": {
+     "sun": {
+      "direction": [
+       -0.8,
+       -0.26,
+       0.54
+      ],
+      "color": [
+       1.52,
+       1.02,
+       0.62
+      ],
+      "energy": 1.25
+     },
+     "fog": {
+      "enabled": true,
+      "color": [
+       0.78,
+       0.66,
+       0.52
+      ],
+      "density": 0.0016
+     }
+    }
+   },
+   "water": {
+    "shallowColor": [
+     0.24,
+     0.74,
+     0.74
+    ],
+    "deepColor": [
+     0.04,
+     0.24,
+     0.44
+    ],
+    "causticsEnabled": true,
+    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+   }
+  },
+  "environmentNote": "sky, sun, ambient, fog, variants and water tint copied from crownwater/world.json (the lagoon's blue horizon and fog; Westhaven's pale ones read as a cream haze in the game client); no presentation or audio zones until the isle authors its own"
+ },
+ "gull_skerries": {
+  "schemaVersion": 1,
+  "asset": {
+   "id": "gull_skerries",
+   "name": "The Gull Skerries",
+   "glb": "world.glb",
+   "units": "meters",
+   "seaLevel": 0.0
+  },
+  "productionStatus": "editor source only: not composed, not published, no server map",
+  "continentGeography": {
+   "revision": "continent-v2-draft-1",
+   "translation": [
+    896.0,
+    0.0,
+    7876.0
+   ],
+   "ownershipPolygon": [
+    [
+     329.0,
+     7101.0
+    ],
+    [
+     399.0,
+     7101.0
+    ],
+    [
+     399.0,
+     8259.0
+    ],
+    [
+     1461.0,
+     8259.0
+    ],
+    [
+     1461.0,
+     8651.0
+    ],
+    [
+     329.0,
+     8651.0
+    ]
+   ],
+   "geometryMode": "continent-v2-editor-source"
+  },
+  "server": {
+   "origin": [
+    571,
+    779
+   ],
+   "cells": [
+    1560,
+    1560
+   ],
+   "collisionOriginMetres": [
+    -571.0,
+    779.0
+   ]
+  },
+  "environment": {
+   "sky": {
+    "type": "gradient",
+    "zenith": [
+     0.16,
+     0.42,
+     0.72
+    ],
+    "horizon": [
+     0.72,
+     0.87,
+     0.92
+    ],
+    "curve": 0.14,
+    "groundHorizon": [
+     0.42,
+     0.62,
+     0.66
+    ],
+    "groundBottom": [
+     0.16,
+     0.3,
+     0.38
+    ],
+    "sunAngleMax": 14.0,
+    "energy": 1.16
+   },
+   "sun": {
+    "direction": [
+     -0.45,
+     -0.78,
+     -0.43
+    ],
+    "color": [
+     1.0,
+     0.94,
+     0.83
+    ],
+    "energy": 1.1
+   },
+   "ambient": {
+    "color": [
+     0.6,
+     0.67,
+     0.72
+    ],
+    "energy": 0.6
+   },
+   "saturation": 1.34,
+   "fog": {
+    "enabled": true,
+    "color": [
+     0.62,
+     0.8,
+     0.86
+    ],
+    "density": 0.00035,
+    "heightFalloff": 0.0022
+   },
+   "variants": {
+    "golden-hour": {
+     "sun": {
+      "direction": [
+       -0.8,
+       -0.26,
+       0.54
+      ],
+      "color": [
+       1.52,
+       1.02,
+       0.62
+      ],
+      "energy": 1.25
+     },
+     "fog": {
+      "enabled": true,
+      "color": [
+       0.78,
+       0.66,
+       0.52
+      ],
+      "density": 0.0016
+     }
+    }
+   },
+   "water": {
+    "shallowColor": [
+     0.24,
+     0.74,
+     0.74
+    ],
+    "deepColor": [
+     0.04,
+     0.24,
+     0.44
+    ],
+    "causticsEnabled": true,
+    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+   }
+  },
+  "environmentNote": "sky, sun, ambient, fog, variants and water tint copied from crownwater/world.json (the lagoon's blue horizon and fog; Westhaven's pale ones read as a cream haze in the game client); no presentation or audio zones until the isle authors its own"
+ },
+ "tollholms": {
+  "schemaVersion": 1,
+  "asset": {
+   "id": "tollholms",
+   "name": "The Tollholms",
+   "glb": "world.glb",
+   "units": "meters",
+   "seaLevel": 0.0
+  },
+  "productionStatus": "editor source only: not composed, not published, no server map",
+  "continentGeography": {
+   "revision": "continent-v2-draft-1",
+   "translation": [
+    2800.0,
+    0.0,
+    7398.0
+   ],
+   "ownershipPolygon": [
+    [
+     2437.0,
+     6453.0
+    ],
+    [
+     2517.0,
+     6499.0
+    ],
+    [
+     2637.0,
+     6511.0
+    ],
+    [
+     2717.0,
+     6547.0
+    ],
+    [
+     2797.0,
+     6627.0
+    ],
+    [
+     2877.0,
+     6713.0
+    ],
+    [
+     2957.0,
+     6797.0
+    ],
+    [
+     3037.0,
+     6863.0
+    ],
+    [
+     3161.0,
+     6959.0
+    ],
+    [
+     3161.0,
+     8343.0
+    ],
+    [
+     2437.0,
+     8343.0
+    ]
+   ],
+   "geometryMode": "continent-v2-editor-source"
+  },
+  "server": {
+   "origin": [
+    367,
+    949
+   ],
+   "cells": [
+    1902,
+    1902
+   ],
+   "collisionOriginMetres": [
+    -367.0,
+    949.0
+   ]
+  },
+  "environment": {
+   "sky": {
+    "type": "gradient",
+    "zenith": [
+     0.16,
+     0.42,
+     0.72
+    ],
+    "horizon": [
+     0.72,
+     0.87,
+     0.92
+    ],
+    "curve": 0.14,
+    "groundHorizon": [
+     0.42,
+     0.62,
+     0.66
+    ],
+    "groundBottom": [
+     0.16,
+     0.3,
+     0.38
+    ],
+    "sunAngleMax": 14.0,
+    "energy": 1.16
+   },
+   "sun": {
+    "direction": [
+     -0.45,
+     -0.78,
+     -0.43
+    ],
+    "color": [
+     1.0,
+     0.94,
+     0.83
+    ],
+    "energy": 1.1
+   },
+   "ambient": {
+    "color": [
+     0.6,
+     0.67,
+     0.72
+    ],
+    "energy": 0.6
+   },
+   "saturation": 1.34,
+   "fog": {
+    "enabled": true,
+    "color": [
+     0.62,
+     0.8,
+     0.86
+    ],
+    "density": 0.00035,
+    "heightFalloff": 0.0022
+   },
+   "variants": {
+    "golden-hour": {
+     "sun": {
+      "direction": [
+       -0.8,
+       -0.26,
+       0.54
+      ],
+      "color": [
+       1.52,
+       1.02,
+       0.62
+      ],
+      "energy": 1.25
+     },
+     "fog": {
+      "enabled": true,
+      "color": [
+       0.78,
+       0.66,
+       0.52
+      ],
+      "density": 0.0016
+     }
+    }
+   },
+   "water": {
+    "shallowColor": [
+     0.24,
+     0.74,
+     0.74
+    ],
+    "deepColor": [
+     0.04,
+     0.24,
+     0.44
+    ],
+    "causticsEnabled": true,
+    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+   }
+  },
+  "environmentNote": "sky, sun, ambient, fog, variants and water tint copied from crownwater/world.json (the lagoon's blue horizon and fog; Westhaven's pale ones read as a cream haze in the game client); no presentation or audio zones until the isle authors its own"
+ }
+}

@@ -1,0 +1,68 @@
+{
+  "schema": "eloria-luminous-female-cuff-derived-propagation-v1",
+  "status": "retired",
+  "retiredAt": "2026-10-06",
+  "retiredReason": "Every derived female race was rebased onto the regenerated Human body (eloria-assets/tools/rebase_race_body.py, sharedBodyShape v3) and now carries the Human pants and boots below the neck, so no installed body carries this propagation's outputs. The authoring record stays as history.",
+  "reviewedAt": "2026-10-03",
+  "parentContract": "eloria-assets/qa/luminous-female-cuff-fit.json",
+  "template": {
+    "race": "luminous_female",
+    "catalogTemplateSHA256Semantics": "pre-cuff assembled Luminous template lineage used by the derived head builds; the installed cuffed template is installedSHA256",
+    "historicalSourceSHA256": "963726cc3180a57d8a8921c51a8695828d77bdac633a5bcf6f075472d6890dc7",
+    "embeddedTemplateSHA256": "8d8dea9c58e9a0085f8e28afbf28c8e3205d78dec8f098d166202fc8be6e2a66",
+    "embeddedTemplateSHA256Semantics": "original body-donor lineage retained in asset.extras.sharedBodyShape by the derived head builds",
+    "installedSHA256": "b95921cd99da9f69009c5bc8295bae164ccf84189aefcaab6b6b13cb693a5552",
+    "inputPantsSemanticSHA256": "d84bb1ebbc1a25b40c92e02e9bd6e2520515f52130888572a5840d7415cec1e2",
+    "outputPantsSemanticSHA256": "318477d09a732d50c68ea2b8289f76a1a2a148a9f7857e9004bdb9ffa842cebb",
+    "bootsSemanticSHA256": "0bc2ed61dbe444a66cdee295ae3535643ce82a2d5f44905af7694c0afce6bcd9"
+  },
+  "contract": {
+    "targetMesh": "wardrobe_pants",
+    "targetPrimitiveIndex": 0,
+    "bootAuthorityMesh": "wardrobe_boots",
+    "selectedHiddenOverlapMm": 3.0,
+    "openHiddenBoundary": true,
+    "capTriangles": 0,
+    "sourceGeometryEquivalence": "order-independent POSITION/NORMAL/JOINTS_0/WEIGHTS_0 triangle signatures",
+    "preserveAdditionalPantsPrimitives": true,
+    "additionalDraws": 0,
+    "additionalMaterials": 0,
+    "additionalBones": 0,
+    "perFrameOperations": 0
+  },
+  "authoringEvidence": {
+    "toolPath": "eloria-assets/tools/author_luminous_cuff_fit.py",
+    "toolCanonicalLfSHA256": "d9009d2b3168402ebbb7e4de61a4539d583ece68e4ceb3ec26ed602119cb6b8b",
+    "deterministicRuns": 2,
+    "byteIdentical": true,
+    "reviewBundle": "godot-client/test-artifacts/luminous-cuff-derived-authoring-v1",
+    "revalidations": [
+      {
+        "revalidatedAt": "2026-10-04",
+        "reason": "The tool gained the Ranger lining seal; the derived wardrobe-pants cut path is unchanged.",
+        "previousToolCanonicalLfSHA256": "f1d61bfa306e81e37dd245886b0e568062b35a70f0864902597482018fba072b",
+        "toolCanonicalLfSHA256": "d9009d2b3168402ebbb7e4de61a4539d583ece68e4ceb3ec26ed602119cb6b8b",
+        "method": "clipped_copy from each sourceGitBlob with this contract, under both tool versions",
+        "outputsMatchingOutputSHA256": 7
+      }
+    ]
+  },
+  "sourceGitCommit": "c29866f34aab26ffeaad728b9574a96a441c7747",
+  "assets": {},
+  "clientReview": {
+    "actualClient": true,
+    "quality": "high",
+    "animation": "Idle_Subtle",
+    "animationTime": 0.3,
+    "region": "boots",
+    "angles": ["front", "side", "back"],
+    "representativeRaces": [
+      "glasswarden_female",
+      "greyhaven_female",
+      "ssarathi_female"
+    ],
+    "matchedBaselineAndCandidate": true,
+    "candidateNoWorseThanBaseline": true,
+    "renderBundle": "godot-client/test-artifacts/luminous-cuff-derived-review-v1/renders"
+  }
+}

@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-19",
+  "verdict": "pass",
+  "commit": "b7534014af0a8d6ddab5a3cf56c0c6d2e6a6eb3c",
+  "runnerExitCode": 0,
+  "sharedHostLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+  "scope": "protocol decode plus AppState actor add/remove; no Main",
+  "interpretation": "ADD_NEW_ACTOR, ADD_NEW_ACTOR_EXTENDED, and REMOVE_ACTOR use the same protocol/AppState lifecycle path in both modes; the native reducer intercepts ADD_ACTOR_COMMAND only. Cross-process timing differences here are not a native lifecycle speedup claim.",
+  "diagnostics": {
+    "scriptOrParseErrors": 0,
+    "nonFatalMessages": [
+      "Godot could not read the Windows root certificate store in both runs; the benchmark is offline and both reports passed."
+    ]
+  },
+  "comparison": [
+    {
+      "actors": 100,
+      "gdscriptAddMedianMs": 1.264,
+      "nativeModeAddMedianMs": 1.229,
+      "addNativeToGdscriptRatio": 0.97231,
+      "gdscriptRemoveMedianMs": 0.122,
+      "nativeModeRemoveMedianMs": 0.12,
+      "removeNativeToGdscriptRatio": 0.983607
+    },
+    {
+      "actors": 200,
+      "gdscriptAddMedianMs": 3.232,
+      "nativeModeAddMedianMs": 1.598,
+      "addNativeToGdscriptRatio": 0.494431,
+      "gdscriptRemoveMedianMs": 0.317,
+      "nativeModeRemoveMedianMs": 0.167,
+      "removeNativeToGdscriptRatio": 0.526814
+    },
+    {
+      "actors": 300,
+      "gdscriptAddMedianMs": 3.697,
+      "nativeModeAddMedianMs": 2.645,
+      "addNativeToGdscriptRatio": 0.715445,
+      "gdscriptRemoveMedianMs": 0.428,
+      "nativeModeRemoveMedianMs": 0.249,
+      "removeNativeToGdscriptRatio": 0.581776
+    },
+    {
+      "actors": 500,
+      "gdscriptAddMedianMs": 7.311,
+      "nativeModeAddMedianMs": 7.448,
+      "addNativeToGdscriptRatio": 1.018739,
+      "gdscriptRemoveMedianMs": 0.676,
+      "nativeModeRemoveMedianMs": 0.897,
+      "removeNativeToGdscriptRatio": 1.326923
+    }
+  ],
+  "runs": {
+    "gdscript": {
+      "report": {
+        "backend": "gdscript",
+        "commit": "b7534014af0a8d6ddab5a3cf56c0c6d2e6a6eb3c",
+        "counts": [
+          100,
+          200,
+          300,
+          500
+        ],
+        "failureCount": 0,
+        "failures": [],
+        "godot": "4.7.2",
+        "nativeActive": false,
+        "repeats": 9,
+        "results": [
+          {
+            "actors": 100,
+            "add": {
+              "maximumMs": 1.537,
+              "medianMs": 1.264,
+              "minimumMs": 1.22,
+              "p95Ms": 1.537,
+              "samplesMs": [
+                1.537,
+                1.306,
+                1.307,
+                1.265,
+                1.264,
+                1.236,
+                1.22,
+                1.232,
+                1.259
+              ]
+            },
+            "decodeErrorCount": 0,
+            "dictionaryParityVerified": true,
+            "extendedActors": 50,
+            "legacyActors": 50,
+            "packetShape": "100 add callbacks + 1 batched removal callback",
+            "remove": {
+              "maximumMs": 0.146,
+              "medianMs": 0.122,
+              "minimumMs": 0.119,
+              "p95Ms": 0.146,
+              "samplesMs": [
+                0.146,
+                0.127,
+                0.121,
+                0.127,
+                0.123,
+                0.119,
+                0.119,
+                0.122,
+                0.121
+              ]
+            },
+            "repeats": 9
+          },
+          {
+            "actors": 200,
+            "add": {
+              "maximumMs": 3.522,
+              "medianMs": 3.232,
+              "minimumMs": 2.822,
+              "p95Ms": 3.522,
+              "samplesMs": [
+                2.822,
+                3.13,
+                3.019,
+                3.121,
+                3.233,
+                3.522,
+                3.388,
+                3.319,
+                3.232
+              ]
+            },
+            "decodeErrorCount": 0,
+            "dictionaryParityVerified": true,
+            "extendedActors": 100,
+            "legacyActors": 100,
+            "packetShape": "200 add callbacks + 1 batched removal callback",
+            "remove": {
+              "maximumMs": 0.327,
+              "medianMs": 0.317,
+              "minimumMs": 0.293,
+              "p95Ms": 0.327,
+              "samplesMs": [
+                0.326,
+                0.298,
+                0.317,
+                0.293,
+                0.304,
+                0.319,
+                0.327,
+                0.321,
+                0.315
+              ]
+            },
+            "repeats": 9
+          },
+          {
+            "actors": 300,
+            "add": {
+              "maximumMs": 5.701,
+              "medianMs": 3.697,
+              "minimumMs": 2.959,
+              "p95Ms": 5.701,
+              "samplesMs": [
+                5.453,
+                3.122,
+                2.989,
+                2.959,
+                3.536,
+                4.068,
+                3.697,
+                4.675,
+                5.701
+              ]
+            },
+            "decodeErrorCount": 0,
+            "dictionaryParityVerified": true,
+            "extendedActors": 150,
+            "legacyActors": 150,
+            "packetShape": "300 add callbacks + 1 batched removal callback",
+            "remove": {
+              "maximumMs": 0.549,
+              "medianMs": 0.428,
+              "minimumMs": 0.259,
+              "p95Ms": 0.549,
+              "samplesMs": [
+                0.538,
+                0.285,
+                0.345,
+                0.393,
+                0.479,
+                0.259,
+                0.428,
+                0.549,
+                0.518
+              ]
+            },
+            "repeats": 9
+          },
+          {
+            "actors": 500,
+            "add": {
+              "maximumMs": 8.569,
+              "medianMs": 7.311,
+              "minimumMs": 5.495,
+              "p95Ms": 8.569,
+              "samplesMs": [
+                8.218,
+                7.311,
+                7.721,
+                8.569,
+                7.613,
+                6.497,
+                5.622,
+                6.271,
+                5.495
+              ]
+            },
+            "decodeErrorCount": 0,
+            "dictionaryParityVerified": true,
+            "extendedActors": 250,
+            "legacyActors": 250,
+            "packetShape": "500 add callbacks + 1 batched removal callback",
+            "remove": {
+              "maximumMs": 0.958,
+              "medianMs": 0.676,
+              "minimumMs": 0.509,
+              "p95Ms": 0.958,
+              "samplesMs": [
+                0.958,
+                0.833,
+                0.932,
+                0.844,
+                0.676,
+                0.528,
+                0.612,
+                0.642,
+                0.509
+              ]
+            },
+            "repeats": 9
+          }
+        ],
+        "scope": "protocol decode plus AppState actor add/remove; no Main",
+        "sharedHostLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+        "sourceSha256": "18fb0234fc7f662e752b18dc7616cb8687d0df80974ca788716bf05dab19c5d4",
+        "unixTime": 1789810562,
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/lifecycle/runtime/appdata/Godot/app_userdata/Eloria"
+      },
+      "process": {
+        "schemaVersion": 1,
+        "backend": "gdscript",
+        "processId": 36772,
+        "directExecutablePath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "startTimeUtc": "2026-09-19T09:36:01.6607803Z",
+        "initialAffinityMask": 15,
+        "observedAffinityMasks": [
+          {
+            "timeUtc": "2026-09-19T09:36:01.6997214Z",
+            "affinityMask": 15
+          },
+          {
+            "timeUtc": "2026-09-19T09:36:01.9646654Z",
+            "affinityMask": 15
+          },
+          {
+            "timeUtc": "2026-09-19T09:36:02.2279423Z",
+            "affinityMask": 15
+          },
+          {
+            "timeUtc": "2026-09-19T09:36:02.4837604Z",
+            "affinityMask": 15
+          }
+        ],
+        "affinityVerified": true,
+        "timedOut": false,
+        "exitCode": 0,
+        "scriptErrorsDetected": false,
+        "scriptErrorFiles": [],
+        "reportPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\lifecycle\\crowd-lifecycle-gdscript.json",
+        "reportValid": true,
+        "reportValidationError": "",
+        "reportFailureCount": 0,
+        "reportFailures": null,
+        "inputs": {
+          "backend": "gdscript",
+          "nativeFlag": "0",
+          "counts": [
+            100,
+            200,
+            300,
+            500
+          ],
+          "repeats": 9,
+          "arguments": [
+            "--headless",
+            "--single-threaded-scene",
+            "--audio-driver",
+            "Dummy",
+            "--path",
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client",
+            "--script",
+            "res://tests/integration/crowd_lifecycle_benchmark.gd",
+            "--log-file",
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\lifecycle\\gdscript.godot.log"
+          ],
+          "godotExecutable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+          "godotExecutableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+          "userDataRoot": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\lifecycle\\runtime\\appdata\\Godot\\app_userdata\\Eloria",
+          "artifactRoot": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\lifecycle",
+          "timeoutSeconds": 120,
+          "interference": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "commit": "b7534014af0a8d6ddab5a3cf56c0c6d2e6a6eb3c",
+          "sourceSha256": "18fb0234fc7f662e752b18dc7616cb8687d0df80974ca788716bf05dab19c5d4"
+        },
+        "inputSha256": "78d686212dbfea6937f54ba1f05d68045cdbbc630388a9fb34d8afda6a7542bf",
+        "sourceFilesSha256": {
+          "godot-client/src/network/protocol.gd": "afc955928705553696b81af78d6265287aa5e50619669b3bb6d8c53cc0e18a0c",
+          "godot-client/src/state/app_state.gd": "beb724243e9622d777c1bc957c764d773626aef3f21d7a5842aa9f55203125e2",
+          "godot-client/src/state/actor_reducer.gd": "e53f82edb9919204b3de0bb21d831c3ddc467908bf6fe9ea7f3fe5e8bf5abb3a",
+          "godot-client/native/native_crowd/src/native_crowd_reducer.cpp": "3393c3c67053f17f3158a76b0734531f36751d08484c02a9a0803e2d5ea7c429",
+          "godot-client/native/native_crowd/src/native_crowd_reducer.h": "1663bccbfc4aff94846c8ea800dbb6013b9848bce5bfe1de0207eff314542312",
+          "godot-client/tests/integration/crowd_lifecycle_benchmark.gd": "ffa2ae1f0b970dbd35d19f4eb4282552d27e3b613124ce8393beaed80d029d5a",
+          "godot-client/scripts/run_crowd_lifecycle_benchmark.ps1": "e21664f4e8992ed06a56f36077c552a26458219581e189bfb8475f6d6f8db39f",
+          "godot-client/bin/native_crowd.gdextension": "c5cc550d96e2eef8d8ac55318802de980abc56e0e56b6a10ef64237a073d1ea9",
+          "godot-client/bin/windows/native_crowd.windows.template_release.x86_64.dll": "b3af98d7c04702f59f14626dff1a71090f3b34da54dae4a1f61d87a2cb52bab1"
+        },
+        "sourceCompositeSha256": "18fb0234fc7f662e752b18dc7616cb8687d0df80974ca788716bf05dab19c5d4",
+        "errors": []
+      }
+    },
+    "native": {
+      "report": {
+        "backend": "native",
+        "commit": "b7534014af0a8d6ddab5a3cf56c0c6d2e6a6eb3c",
+        "counts": [
+          100,
+          200,
+          300,
+          500
+        ],
+        "failureCount": 0,
+        "failures": [],
+        "godot": "4.7.2",
+        "nativeActive": true,
+        "repeats": 9,
+        "results": [
+          {
+            "actors": 100,
+            "add": {
+              "maximumMs": 1.441,
+              "medianMs": 1.229,
+              "minimumMs": 1.193,
+              "p95Ms": 1.441,
+              "samplesMs": [
+                1.441,
+                1.254,
+                1.229,
+                1.193,
+                1.243,
+                1.237,
+                1.22,
+                1.203,
+                1.218
+              ]
+            },
+            "decodeErrorCount": 0,
+            "dictionaryParityVerified": true,
+            "extendedActors": 50,
+            "legacyActors": 50,
+            "packetShape": "100 add callbacks + 1 batched removal callback",
+            "remove": {
+              "maximumMs": 0.141,
+              "medianMs": 0.12,
+              "minimumMs": 0.111,
+              "p95Ms": 0.141,
+              "samplesMs": [
+                0.128,
+                0.134,
+                0.117,
+                0.115,
+                0.141,
+                0.136,
+                0.111,
+                0.112,
+                0.12
+              ]
+            },
+            "repeats": 9
+          },
+          {
+            "actors": 200,
+            "add": {
+              "maximumMs": 2.854,
+              "medianMs": 1.598,
+              "minimumMs": 1.401,
+              "p95Ms": 2.854,
+              "samplesMs": [
+                2.854,
+                2.397,
+                1.598,
+                1.971,
+                2.378,
+                1.401,
+                1.413,
+                1.524,
+                1.549
+              ]
+            },
+            "decodeErrorCount": 0,
+            "dictionaryParityVerified": true,
+            "extendedActors": 100,
+            "legacyActors": 100,
+            "packetShape": "200 add callbacks + 1 batched removal callback",
+            "remove": {
+              "maximumMs": 0.266,
+              "medianMs": 0.167,
+              "minimumMs": 0.137,
+              "p95Ms": 0.266,
+              "samplesMs": [
+                0.266,
+                0.164,
+                0.213,
+                0.184,
+                0.209,
+                0.137,
+                0.152,
+                0.147,
+                0.167
+              ]
+            },
+            "repeats": 9
+          },
+          {
+            "actors": 300,
+            "add": {
+              "maximumMs": 3.091,
+              "medianMs": 2.645,
+              "minimumMs": 2.143,
+              "p95Ms": 3.091,
+              "samplesMs": [
+                2.983,
+                2.323,
+                2.143,
+                2.337,
+                2.645,
+                2.601,
+                2.77,
+                2.891,
+                3.091
+              ]
+            },
+            "decodeErrorCount": 0,
+            "dictionaryParityVerified": true,
+            "extendedActors": 150,
+            "legacyActors": 150,
+            "packetShape": "300 add callbacks + 1 batched removal callback",
+            "remove": {
+              "maximumMs": 0.576,
+              "medianMs": 0.249,
+              "minimumMs": 0.216,
+              "p95Ms": 0.576,
+              "samplesMs": [
+                0.245,
+                0.216,
+                0.228,
+                0.229,
+                0.251,
+                0.249,
+                0.261,
+                0.257,
+                0.576
+              ]
+            },
+            "repeats": 9
+          },
+          {
+            "actors": 500,
+            "add": {
+              "maximumMs": 8.783,
+              "medianMs": 7.448,
+              "minimumMs": 5.074,
+              "p95Ms": 8.783,
+              "samplesMs": [
+                7.134,
+                8.565,
+                8.783,
+                7.464,
+                5.858,
+                5.074,
+                6.169,
+                7.448,
+                8.362
+              ]
+            },
+            "decodeErrorCount": 0,
+            "dictionaryParityVerified": true,
+            "extendedActors": 250,
+            "legacyActors": 250,
+            "packetShape": "500 add callbacks + 1 batched removal callback",
+            "remove": {
+              "maximumMs": 0.996,
+              "medianMs": 0.897,
+              "minimumMs": 0.666,
+              "p95Ms": 0.996,
+              "samplesMs": [
+                0.897,
+                0.933,
+                0.996,
+                0.977,
+                0.666,
+                0.74,
+                0.843,
+                0.908,
+                0.817
+              ]
+            },
+            "repeats": 9
+          }
+        ],
+        "scope": "protocol decode plus AppState actor add/remove; no Main",
+        "sharedHostLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+        "sourceSha256": "18fb0234fc7f662e752b18dc7616cb8687d0df80974ca788716bf05dab19c5d4",
+        "unixTime": 1789810563,
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/lifecycle/runtime/appdata/Godot/app_userdata/Eloria"
+      },
+      "process": {
+        "schemaVersion": 1,
+        "backend": "native",
+        "processId": 40060,
+        "directExecutablePath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "startTimeUtc": "2026-09-19T09:36:02.8083511Z",
+        "initialAffinityMask": 15,
+        "observedAffinityMasks": [
+          {
+            "timeUtc": "2026-09-19T09:36:02.8290663Z",
+            "affinityMask": 15
+          },
+          {
+            "timeUtc": "2026-09-19T09:36:03.0928191Z",
+            "affinityMask": 15
+          },
+          {
+            "timeUtc": "2026-09-19T09:36:03.3473134Z",
+            "affinityMask": 15
+          },
+          {
+            "timeUtc": "2026-09-19T09:36:03.6122554Z",
+            "affinityMask": 15
+          }
+        ],
+        "affinityVerified": true,
+        "timedOut": false,
+        "exitCode": 0,
+        "scriptErrorsDetected": false,
+        "scriptErrorFiles": [],
+        "reportPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\lifecycle\\crowd-lifecycle-native.json",
+        "reportValid": true,
+        "reportValidationError": "",
+        "reportFailureCount": 0,
+        "reportFailures": null,
+        "inputs": {
+          "backend": "native",
+          "nativeFlag": "1",
+          "counts": [
+            100,
+            200,
+            300,
+            500
+          ],
+          "repeats": 9,
+          "arguments": [
+            "--headless",
+            "--single-threaded-scene",
+            "--audio-driver",
+            "Dummy",
+            "--path",
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client",
+            "--script",
+            "res://tests/integration/crowd_lifecycle_benchmark.gd",
+            "--log-file",
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\lifecycle\\native.godot.log"
+          ],
+          "godotExecutable": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+          "godotExecutableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+          "userDataRoot": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\lifecycle\\runtime\\appdata\\Godot\\app_userdata\\Eloria",
+          "artifactRoot": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\lifecycle",
+          "timeoutSeconds": 120,
+          "interference": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "commit": "b7534014af0a8d6ddab5a3cf56c0c6d2e6a6eb3c",
+          "sourceSha256": "18fb0234fc7f662e752b18dc7616cb8687d0df80974ca788716bf05dab19c5d4"
+        },
+        "inputSha256": "27c64f54486ed5d4cbf6a059a1f0b40a1a0ad91bc1265fa5917ca9c38eabc370",
+        "sourceFilesSha256": {
+          "godot-client/src/network/protocol.gd": "afc955928705553696b81af78d6265287aa5e50619669b3bb6d8c53cc0e18a0c",
+          "godot-client/src/state/app_state.gd": "beb724243e9622d777c1bc957c764d773626aef3f21d7a5842aa9f55203125e2",
+          "godot-client/src/state/actor_reducer.gd": "e53f82edb9919204b3de0bb21d831c3ddc467908bf6fe9ea7f3fe5e8bf5abb3a",
+          "godot-client/native/native_crowd/src/native_crowd_reducer.cpp": "3393c3c67053f17f3158a76b0734531f36751d08484c02a9a0803e2d5ea7c429",
+          "godot-client/native/native_crowd/src/native_crowd_reducer.h": "1663bccbfc4aff94846c8ea800dbb6013b9848bce5bfe1de0207eff314542312",
+          "godot-client/tests/integration/crowd_lifecycle_benchmark.gd": "ffa2ae1f0b970dbd35d19f4eb4282552d27e3b613124ce8393beaed80d029d5a",
+          "godot-client/scripts/run_crowd_lifecycle_benchmark.ps1": "e21664f4e8992ed06a56f36077c552a26458219581e189bfb8475f6d6f8db39f",
+          "godot-client/bin/native_crowd.gdextension": "c5cc550d96e2eef8d8ac55318802de980abc56e0e56b6a10ef64237a073d1ea9",
+          "godot-client/bin/windows/native_crowd.windows.template_release.x86_64.dll": "b3af98d7c04702f59f14626dff1a71090f3b34da54dae4a1f61d87a2cb52bab1"
+        },
+        "sourceCompositeSha256": "18fb0234fc7f662e752b18dc7616cb8687d0df80974ca788716bf05dab19c5d4",
+        "errors": []
+      }
+    }
+  }
+}

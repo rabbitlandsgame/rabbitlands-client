@@ -1,0 +1,738 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "amberwood_gate_undercroft",
+    "name": "The Gate Undercroft",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -14.55,
+        -8.6,
+        -7.55
+      ],
+      "max": [
+        44.55,
+        7.52,
+        78.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -14.55,
+        -8.2,
+        -7.55
+      ],
+      "max": [
+        44.55,
+        0.0,
+        78.55
+      ]
+    },
+    "interiorClass": "annex",
+    "parentRegion": "amberwood",
+    "serverCells": 90
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      17.0,
+      81.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        0.0,
+        0.05,
+        0.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "gate-undercroft-stair",
+      "position": [
+        0.0,
+        0.05,
+        0.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 126,
+    "height": 180,
+    "cellMetres": 0.5,
+    "originMetres": [
+      -17.0,
+      81.0
+    ],
+    "heightEncoding": {
+      "origin": -7.928,
+      "step": 0.1279,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 9500,
+    "blockedCells": 13180,
+    "walkableFraction": 0.4189,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_amberwood_gate_undercroft",
+      "Roof_amberwood_gate_undercroft_ashlar",
+      "Build_amberwood_gate_undercroft_amber_resin",
+      "Build_amberwood_gate_undercroft_ashlar",
+      "Build_amberwood_gate_undercroft_bark_dark",
+      "Build_amberwood_gate_undercroft_dark_iron",
+      "Build_amberwood_gate_undercroft_forest_floor",
+      "Build_amberwood_gate_undercroft_water_deep"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_amberwood_gate_undercroft_ashlar"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-to-amberwood",
+      "name": "Return to Amberwood",
+      "type": "map-transition",
+      "position": [
+        0.0,
+        0.05,
+        0.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "amberwood",
+      "destinationSpawn": "gate-undercroft-stair",
+      "authority": "server"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "the-landing",
+      "name": "The Gate Stair",
+      "space": "landing",
+      "position": [
+        0.0,
+        1.6,
+        0.0
+      ]
+    },
+    {
+      "id": "the-antechamber",
+      "name": "The Antechamber",
+      "space": "antechamber",
+      "position": [
+        0.0,
+        -3.8,
+        30.0
+      ]
+    },
+    {
+      "id": "the-cistern",
+      "name": "The Cistern",
+      "space": "cistern",
+      "position": [
+        32.0,
+        -5.2,
+        32.0
+      ]
+    },
+    {
+      "id": "the-colonnade",
+      "name": "The Sunken Colonnade",
+      "space": "colonnade",
+      "position": [
+        32.0,
+        -6.6,
+        63.0
+      ]
+    },
+    {
+      "id": "the-crypt",
+      "name": "The Founders' Vault",
+      "space": "crypt",
+      "position": [
+        -1.0,
+        -6.6,
+        66.0
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "votive-niche",
+      "kind": "shrine",
+      "position": [
+        24.8,
+        -5.2,
+        32.0
+      ]
+    },
+    {
+      "id": "founders-marker",
+      "kind": "lore",
+      "position": [
+        -1.0,
+        -6.3,
+        66.0
+      ]
+    }
+  ],
+  "npcMarkers": [],
+  "harvestables": [],
+  "lights": [
+    {
+      "id": "lantern-00",
+      "kind": "point",
+      "position": [
+        -5.2,
+        3.18,
+        -3.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-01",
+      "kind": "point",
+      "position": [
+        5.2,
+        3.18,
+        3.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-02",
+      "kind": "point",
+      "position": [
+        0.0,
+        -1.82,
+        12.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-03",
+      "kind": "point",
+      "position": [
+        0.0,
+        -4.02,
+        19.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-04",
+      "kind": "point",
+      "position": [
+        -8.0,
+        -2.02,
+        25.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-05",
+      "kind": "point",
+      "position": [
+        8.0,
+        -2.02,
+        35.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-06",
+      "kind": "point",
+      "position": [
+        0.0,
+        -2.02,
+        30.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-07",
+      "kind": "point",
+      "position": [
+        17.5,
+        -3.22,
+        30.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-08",
+      "kind": "point",
+      "position": [
+        26.5,
+        -3.22,
+        26.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-09",
+      "kind": "point",
+      "position": [
+        37.5,
+        -3.22,
+        37.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-10",
+      "kind": "point",
+      "position": [
+        32.0,
+        -3.22,
+        30.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-11",
+      "kind": "point",
+      "position": [
+        32.0,
+        -5.22,
+        45.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-12",
+      "kind": "point",
+      "position": [
+        23.0,
+        -3.62,
+        55.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-13",
+      "kind": "point",
+      "position": [
+        41.0,
+        -3.62,
+        71.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-14",
+      "kind": "point",
+      "position": [
+        32.0,
+        -3.62,
+        63.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-15",
+      "kind": "point",
+      "position": [
+        16.0,
+        -5.22,
+        63.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-16",
+      "kind": "point",
+      "position": [
+        -11.0,
+        -3.22,
+        57.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-17",
+      "kind": "point",
+      "position": [
+        9.0,
+        -3.22,
+        75.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-18",
+      "kind": "point",
+      "position": [
+        -1.0,
+        -3.22,
+        66.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "ambient": {
+      "colour": [
+        0.15,
+        0.15,
+        0.16
+      ],
+      "energy": 0.4
+    },
+    "fog": {
+      "enabled": true,
+      "colour": [
+        0.06,
+        0.07,
+        0.07
+      ],
+      "begin": 14.0,
+      "end": 46.0
+    },
+    "audio": [
+      {
+        "id": "drip",
+        "space": "cistern",
+        "loop": true
+      }
+    ],
+    "openToSky": [
+      "landing"
+    ]
+  },
+  "spaces": {
+    "landing": {
+      "x0": -7.0,
+      "z0": -7.0,
+      "x1": 7.0,
+      "z1": 7.0,
+      "floor": 0.0,
+      "height": 5.6
+    },
+    "antechamber": {
+      "x0": -11.0,
+      "z0": 22.0,
+      "x1": 11.0,
+      "z1": 38.0,
+      "floor": -5.0,
+      "height": 5.4
+    },
+    "cistern": {
+      "x0": 24.0,
+      "z0": 24.0,
+      "x1": 40.0,
+      "z1": 40.0,
+      "floor": -6.4,
+      "height": 5.6
+    },
+    "colonnade": {
+      "x0": 20.0,
+      "z0": 52.0,
+      "x1": 44.0,
+      "z1": 74.0,
+      "floor": -7.8,
+      "height": 6.6
+    },
+    "crypt": {
+      "x0": -14.0,
+      "z0": 54.0,
+      "x1": 12.0,
+      "z1": 78.0,
+      "floor": -7.8,
+      "height": 7.4
+    },
+    "stairhead": {
+      "x0": -2.5,
+      "z0": 4.5,
+      "x1": 2.5,
+      "z1": 24.5,
+      "floor": -5.0,
+      "height": 4.2
+    },
+    "breach": {
+      "x0": 8.7,
+      "z0": 27.7,
+      "x1": 26.3,
+      "z1": 32.3,
+      "floor": -6.4,
+      "height": 4.0
+    },
+    "cisternway": {
+      "x0": 29.5,
+      "z0": 37.5,
+      "x1": 34.5,
+      "z1": 54.5,
+      "floor": -7.8,
+      "height": 4.4
+    },
+    "cryptway": {
+      "x0": 9.6,
+      "z0": 60.6,
+      "x1": 22.4,
+      "z1": 65.4,
+      "floor": -7.8,
+      "height": 4.4
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../../amberwood/references/00-concept-detail-board.png",
+    "role": "parent-region board; these interiors have no board of their own",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "stair descent",
+      "vaulted antechamber",
+      "carved keystone arch",
+      "votive niche",
+      "cistern hall",
+      "root breach",
+      "sunken colonnade",
+      "silt pool",
+      "founders vault",
+      "weathered granite moss iron materials"
+    ]
+  },
+  "performance": {
+    "nodes": 11,
+    "meshes": 10,
+    "materials": 8,
+    "images": 24,
+    "textures": 24,
+    "accessors": 50,
+    "bufferViews": 74,
+    "uniqueTriangles": 12790,
+    "uniqueVertices": 12771,
+    "glbBytes": 3452652,
+    "nodeNames": [
+      "Interior_amberwood_gate_undercroft",
+      "Roof_amberwood_gate_undercroft_ashlar",
+      "Build_amberwood_gate_undercroft_amber_resin",
+      "Build_amberwood_gate_undercroft_ashlar",
+      "Build_amberwood_gate_undercroft_bark_dark",
+      "Build_amberwood_gate_undercroft_dark_iron",
+      "Build_amberwood_gate_undercroft_forest_floor",
+      "Build_amberwood_gate_undercroft_water_deep",
+      "Walk_ashlar",
+      "Walk_cobble_paving",
+      "Walk_rubble_stone"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260828
+    },
+    {
+      "id": "anchor",
+      "landmark": "great-arch",
+      "position": [
+        174.0,
+        36.97,
+        -102.0
+      ],
+      "role": "surface entrance on the Amberwood region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the Amberwood region toolkit; no scattered placement",
+    "textures": "procedural, from amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "Dry dressed stone throughout, so the two standing-water rooms read as failure of the founders' drainage rather than as decoration."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Not opened in Godot: no client is installable in the build environment, so collision response, navmesh generation, portal transition, LOD and transparency sorting are unverified.",
+    "eloria-server has not registered these map keys."
+  ],
+  "externalMeshes": {
+    "../../../_shared/meshes/0b1071ec1db031ed15f75db6f225ac00ee68f0c8526084a96d2e525a62535bbf.glb": "d6a78d8e0d0b19538412c5e854285edb104e40a20facbf1d3744dd003e3d17e2",
+    "../../../_shared/meshes/1d428cbce4a794af99dc6c19b1db2880aa82dcb0fef6c19347e193e7ca426809.glb": "cfe61596cd9c500d11e5d27589e2d945bf19123382055b190f73945072df96db",
+    "../../../_shared/meshes/5b24f7dbc2a9f5fcd2625a50360757f0cd3a0bcb49d2316f432fc707f1f062aa.glb": "e6c5efcd65208822dbc9103f5903a7923a4d4db070fb9594657769f07450afe0",
+    "../../../_shared/meshes/73c9703a825d1444512cc528a443b277b97f462ba977c85338717122add5fa09.glb": "3086e5d736a7cacfc803f7eb3eb7fc9e183f62fd51d1bb0618b34b900def7f18",
+    "../../../_shared/meshes/925c9758a920b43af0750e4b27b2ba48e08681eef6d6ca97fdd9e2c4a7c58ec5.glb": "094f9815e661e548615bf03ce94d05e3c0bead47602c2f448858ae11d580aef8",
+    "../../../_shared/meshes/a81600d62645fc0da4492afcee39b4ec6c39a0e0a434abedf8e85137f70fe09b.glb": "d5c22ed747a35cce5651af750161edefcf13df5a26e921de9633d9e8437a0d83",
+    "../../../_shared/meshes/e54dc1266dee737246b21d36d4779c650e71bc7042299936ecdcac9e208fd55c.glb": "16906041201830fb2ebce601f27ba8fe5e50888656e016a53d8173b7e6e59f3d"
+  },
+  "externalResources": {
+    "../../../_shared/images/12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1.png": "12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1",
+    "../../../_shared/images/147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed.png": "147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed",
+    "../../../_shared/images/303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0.png": "303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0",
+    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e.png": "a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e",
+    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae.png": "cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c"
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "four_gates",
+  "label": "Four Gates",
+  "adapter": "published-generic-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/four_gates/four_gates.tscn",
+    "manifest": "eloria-assets/maps/four-gates/world.json",
+    "snapshot": "eloria-assets/maps/four-gates/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/four_gates/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/four_gates/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/four_gates/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    530.0,
+    0.0,
+    840.0
+  ],
+  "server": {
+    "origin": [
+      310,
+      164
+    ],
+    "cells": [
+      594,
+      594
+    ],
+    "collisionOriginMetres": [
+      -310.0,
+      164.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -306.0,
+      -222.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      292,
+      203
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        112,
+        309
+      ],
+      "previousGridSha256": "198e61cb323ecfa08440ddc647860775917d1b465c7b7c3be46333820b845ed2"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "amberwood--four_gates-four_gates",
+      "discovery-four_gates-257",
+      "discovery-four_gates-258",
+      "discovery-four_gates-259",
+      "discovery-four_gates-260",
+      "discovery-four_gates-261",
+      "discovery-four_gates-262",
+      "discovery-four_gates-263",
+      "discovery-four_gates-264",
+      "discovery-four_gates-265",
+      "discovery-four_gates-266",
+      "discovery-four_gates-267",
+      "discovery-four_gates-268",
+      "discovery-four_gates-269",
+      "discovery-four_gates-913",
+      "door-four_gates-interior-four-gates-deposit-four-keys",
+      "door-four_gates-interior-four-gates-ferrymans-rest",
+      "door-four_gates-interior-four-gates-lantern-row",
+      "door-four_gates-interior-four-gates-mirrorsmith-forge",
+      "door-four_gates-interior-four-gates-reedworks",
+      "door-four_gates-interior-four-gates-stormglass-house",
+      "four_gates--manymouth_delta-four_gates",
+      "four_gates--mirrorhold-four_gates",
+      "four_gates--westhaven-four_gates"
+    ],
+    "requiredRouteIds": [
+      "amberwood--four_gates-four_gates",
+      "door-four_gates-interior-four-gates-deposit-four-keys",
+      "door-four_gates-interior-four-gates-ferrymans-rest",
+      "door-four_gates-interior-four-gates-lantern-row",
+      "door-four_gates-interior-four-gates-mirrorsmith-forge",
+      "door-four_gates-interior-four-gates-reedworks",
+      "door-four_gates-interior-four-gates-stormglass-house",
+      "four_gates--manymouth_delta-four_gates",
+      "four_gates--mirrorhold-four_gates",
+      "four_gates--westhaven-four_gates"
+    ],
+    "ownedPlanFeatureIds": [],
+    "ownedFerryConnectionIds": []
+  },
+  "gameplay": {
+    "runtimeBindingCount": 133,
+    "runtimePointCount": 83,
+    "existingMarkerBindingCount": 50
+  },
+  "bootstrap": {
+    "schema": "eloria-published-region-bootstrap-v1",
+    "objectCount": 288,
+    "objectIdsSha256": "7c544ba0d185c481475f2ffe0bfb2cd0c3632c73ec606b5f48c93ee2512186d1",
+    "visibleGameplayCount": 91,
+    "assemblies": [
+      {
+        "id": "loose-502",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_502_four_gates"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_502_four_gates"
+      },
+      {
+        "id": "western_river@428",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_007_356_788",
+          "BridgeUnionPier_007_364_796",
+          "BridgeUnionTimberEdge_007_four_gates"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_007_four_gates"
+      }
+    ],
+    "water": [],
+    "bakedTerrainFeatures": [],
+    "previewUvMetresInverse": 0.17,
+    "baselineProofSha256": "b0fdf5a858dea76939c8d48d4dc725d9d3dd83223f5173bac3567f5fdde3b21f"
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "evidenceDate": "2026-09-19",
+  "classification": "REJECTED_NONPRODUCTION_ARRAYMESH_FLIGHT_EXPERIMENT",
+  "conclusion": "Exact ArrayMesh output parity passed, but interface-inclusive CPU time regressed in headless and windowed Compatibility; do not activate this candidate.",
+  "productionSourceSha256": "0097916f9a7aca508918d088df479c5c6c7061ae0fcc02e950198faa32326d65",
+  "timingScope": "CPU flight geometry construction and mesh submission; frame advance outside timed regions; excludes GPU completion and frame rate.",
+  "acceptedResults": {
+    "headless": {
+      "baselineMedianMicroseconds": 30905.5,
+      "candidateMedianMicroseconds": 33970.5,
+      "iterations": 180,
+      "candidateVsBaselineRatio": 1.09917328630826,
+      "regressionPercent": 9.91732863082624
+    },
+    "windowedCompatibility": {
+      "baselineMedianMicroseconds": 29150.0,
+      "candidateMedianMicroseconds": 31053.5,
+      "iterations": 180,
+      "candidateVsBaselineRatio": 1.06530017152659,
+      "regressionPercent": 6.53001715265866,
+      "exactArrayAndMaterialParity": true
+    }
+  },
+  "sessions": [
+    {
+      "classification": "accepted_headless_cpu_proxy",
+      "directory": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-v2-gl_compatibility-20260919T130756857Z",
+      "parityExecuted": false,
+      "parityAuthoritative": false,
+      "failures": 0,
+      "summary": {
+        "baselineMedianMicroseconds": 30905.5,
+        "candidateMedianMicroseconds": 33970.5,
+        "candidateVsBaselineRatio": 1.09917328630826,
+        "reductionPercent": -9.91732863082624
+      },
+      "artifacts": [
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-v2-gl_compatibility-20260919T130756857Z/checks.json",
+          "bytes": 3493,
+          "sha256": "d85749b967e2043cffa119f9d4696ab9fbf72c1eb188b4bc1aefcf76eb79d360"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-v2-gl_compatibility-20260919T130756857Z/tests_performance_effect_arraymesh_flight_probe/effect-arraymesh-flight-probe.json",
+          "bytes": 2874,
+          "sha256": "08ba0d46d0b8735cababc21e9c20281526da8c05bcb4aa4b84fd006d71695c0f"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-v2-gl_compatibility-20260919T130756857Z/tests_performance_effect_arraymesh_flight_probe/godot.log",
+          "bytes": 506,
+          "sha256": "422075d99d5a4cb32f1f69955434e6c720115e22a75861ee6b07f03c25359184"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-v2-gl_compatibility-20260919T130756857Z/tests_performance_effect_arraymesh_flight_probe/process.json",
+          "bytes": 3493,
+          "sha256": "d85749b967e2043cffa119f9d4696ab9fbf72c1eb188b4bc1aefcf76eb79d360"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-v2-gl_compatibility-20260919T130756857Z/tests_performance_effect_arraymesh_flight_probe/stderr.log",
+          "bytes": 125,
+          "sha256": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-v2-gl_compatibility-20260919T130756857Z/tests_performance_effect_arraymesh_flight_probe/stdout.log",
+          "bytes": 386,
+          "sha256": "06266cbd0452deca15a51036c339f416ce361d340b2391f6dea27d49ee74efd5"
+        }
+      ]
+    },
+    {
+      "classification": "accepted_windowed_authoritative_parity",
+      "directory": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z",
+      "parityExecuted": true,
+      "parityAuthoritative": true,
+      "failures": 0,
+      "summary": {
+        "baselineMedianMicroseconds": 29150.0,
+        "candidateMedianMicroseconds": 31053.5,
+        "candidateVsBaselineRatio": 1.06530017152659,
+        "reductionPercent": -6.53001715265866
+      },
+      "artifacts": [
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/checks.json",
+          "bytes": 3494,
+          "sha256": "6e26b44885791d3501a6bbe5fb54fa9eb8ffbdca74d873f0adfa274366741fd6"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/tests_performance_effect_arraymesh_flight_probe/effect-arraymesh-flight-probe.json",
+          "bytes": 2905,
+          "sha256": "356430a6f8aaf729df5af2349c32ef670e5e286f87a38ba7d462050a5c083110"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/tests_performance_effect_arraymesh_flight_probe/godot.log",
+          "bytes": 613,
+          "sha256": "4a4235fea7e2d422b830ba51291417f64650301a510b910b7d2ab0197b30ae06"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/tests_performance_effect_arraymesh_flight_probe/process.json",
+          "bytes": 3494,
+          "sha256": "6e26b44885791d3501a6bbe5fb54fa9eb8ffbdca74d873f0adfa274366741fd6"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/tests_performance_effect_arraymesh_flight_probe/stderr.log",
+          "bytes": 125,
+          "sha256": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/tests_performance_effect_arraymesh_flight_probe/stdout.log",
+          "bytes": 494,
+          "sha256": "639064b58732e7f7cc169b55a3fddf0d41bb0e93e96dc68b96987c95a81b60fc"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/user-data/appdata/Godot/app_userdata/Eloria/shader_cache/CopyShaderGLES3/ab5f4b4023523e3dd3b460eb32e9862d90be8759671975ea794700c140af15ed/6bb7c9a2fd1c4a8fa77cb96555b9b4a720209981.cache",
+          "bytes": 118055,
+          "sha256": "852fa12318451b72264980e73056880dc890817f3bf71a23ee5b37112eb96e94"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/user-data/appdata/Godot/app_userdata/Eloria/shader_cache/FeedShaderGLES3/336a7a81e584260ea7f2d8d6abeb503a749234c08f00dbd2d7fecf4bb69af5d0/6bb7c9a2fd1c4a8fa77cb96555b9b4a720209981.cache",
+          "bytes": 8261,
+          "sha256": "eeb5400301c2927d4015b6c65c921431b7cd033d18ef947f0e6aae13d03a664a"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/user-data/appdata/Godot/app_userdata/Eloria/shader_cache/PostShaderGLES3/81a343688f651b09974fa59240bab02f78b214b9eb17f0c4dadac8beecd799c4/6bb7c9a2fd1c4a8fa77cb96555b9b4a720209981.cache",
+          "bytes": 13656,
+          "sha256": "ab26505d6b693d80b21e781fd5f52268e5b89df3f15ac9c64f22e92d413e88bf"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-windowed-v2-gl_compatibility-20260919T130806382Z/user-data/appdata/Godot/app_userdata/Eloria/shader_cache/SceneShaderGLES3/9d3a29847ef9ebf5de0bc4354ddee4f828a1a4aca9f3932f8ec134e4a499bf87/6bb7c9a2fd1c4a8fa77cb96555b9b4a720209981.cache",
+          "bytes": 800909,
+          "sha256": "d59b4e88f81fe7c793bd44a0f426705c1b4a2e4786877d874aa056a276c4005e"
+        }
+      ]
+    },
+    {
+      "classification": "rejected_reporting_error",
+      "directory": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-gl_compatibility-20260919T130726061Z",
+      "parityExecuted": false,
+      "parityAuthoritative": false,
+      "failures": 0,
+      "summary": {},
+      "artifacts": [
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-gl_compatibility-20260919T130726061Z/checks.json",
+          "bytes": 3732,
+          "sha256": "1b8ec19961babd85d34be0c1df177288627e1cd8d4d57cd69fdfa523582fcf99"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-gl_compatibility-20260919T130726061Z/tests_performance_effect_arraymesh_flight_probe/effect-arraymesh-flight-probe.json",
+          "bytes": 708,
+          "sha256": "5b0bf0526b494b5b6e02f5d715a32208124cb4c5c3c5c6753c4932fddcd4acf5"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-gl_compatibility-20260919T130726061Z/tests_performance_effect_arraymesh_flight_probe/godot.log",
+          "bytes": 860,
+          "sha256": "7bd1d553b17306956d0c44ed1ca024b3036ef2404fe1285cd8caab6138396dfc"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-gl_compatibility-20260919T130726061Z/tests_performance_effect_arraymesh_flight_probe/process.json",
+          "bytes": 3732,
+          "sha256": "1b8ec19961babd85d34be0c1df177288627e1cd8d4d57cd69fdfa523582fcf99"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-gl_compatibility-20260919T130726061Z/tests_performance_effect_arraymesh_flight_probe/stderr.log",
+          "bytes": 487,
+          "sha256": "553a3ffaca6473f98f8998f27fdc00cdd5da5ef46aedab9aff8002c378de1f07"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/effect-arraymesh-flight-probe-headless-gl_compatibility-20260919T130726061Z/tests_performance_effect_arraymesh_flight_probe/stdout.log",
+          "bytes": 383,
+          "sha256": "44005051f7a676767e68662be4fe9089bc0e30c214b314c6ccb6288b53f571ed"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1069 @@
+{
+  "schemaVersion": 1,
+  "kind": "remaining-cost-attribution-diagnostic",
+  "status": "diagnostic-only; excluded from acceptance aggregation",
+  "fixture": "mixed 300 actors / 150 visible / 100 workload-active / normal burst",
+  "nativeReducer": "GDScript/off",
+  "nativePresentation": "Both",
+  "sampleMilliseconds": 5000,
+  "minimumFrames": 60,
+  "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+  "caveats": [
+    "Attribution observers and timers add overhead, so these runs are not acceptance timings.",
+    "Feature ablations change broad causal regions and their deltas must not be added to nested callback timings.",
+    "The two ablation means moved with cell order while the full control remained stable; retain paired ranges rather than selecting one reduction.",
+    "no_animation retains native cape processing and observed 75 cape-driven skeleton updates per frame; it does not remove all skeleton work.",
+    "no_effects disables actor combat-effect geometry and WorldEffect3D creation together; it is not a WorldEffect-only measurement."
+  ],
+  "runs": [
+    {
+      "label": "remaining-cost-attribution-rotate-a-v1",
+      "runId": "remaining-cost-attribution-rotate-a-v1-custom-gdscript-gl_compatibility-headless-trial1-20260919T141240535Z",
+      "report": {
+        "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\remaining-cost-attribution-rotate-a-v1-custom-gdscript-gl_compatibility-headless-trial1-20260919T141240535Z.json",
+        "sha256": "278081438cc933c09993651e46923f57c2a4fa447dbf95c5b6358d1a8a192126",
+        "bytes": 544199
+      },
+      "process": {
+        "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\remaining-cost-attribution-rotate-a-v1-custom-gdscript-gl_compatibility-headless-trial1-20260919T141240535Z.process.json",
+        "sha256": "cb1921dd907ada80e1c85bd92df0baeb741ddd50598591576041325c71bf286f",
+        "bytes": 4894
+      },
+      "commit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+      "sourceHash": "ff4d5d50aef495ac9dc0f7b622a958b7bce0665c8f6c03bdec2aaf5122a76d8a",
+      "dirty": false,
+      "godot": {
+        "build": "official",
+        "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+        "hex": 263938,
+        "major": 4,
+        "minor": 7,
+        "patch": 2,
+        "status": "stable",
+        "string": "4.7.2-stable (official)",
+        "timestamp": 0
+      },
+      "display": "headless",
+      "requestedRenderingMethod": "gl_compatibility",
+      "actualRenderingMethod": "gl_compatibility",
+      "userDataDirectory": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/user-data/appdata/Godot/app_userdata/Eloria",
+      "measurement": {
+        "acceptance": {
+          "diagnosticOnly": false,
+          "eligible": true,
+          "reason": "production presentation features"
+        },
+        "attribution": {
+          "acceptanceTimingComparable": false,
+          "enabled": true,
+          "purpose": "diagnostic callback attribution; timer, signal and observer overhead is included"
+        },
+        "cadenceMilliseconds": 100,
+        "headlessRenderMetricsAvailable": false,
+        "sampleMilliseconds": 5000,
+        "warmupMilliseconds": 1000,
+        "windowWallTimeAuthoritative": false
+      },
+      "nativePresentationActual": {
+        "capeActiveInstancesMaximum": 150,
+        "capeFallbackCalls": 0,
+        "capeGdscriptBackendInstancesMaximum": 30,
+        "capeMatchedRequest": true,
+        "capeModifierInstancesMaximum": 180,
+        "capeNativeBackendInstancesMaximum": 150,
+        "capeNativeCalls": 59550,
+        "capeStatsSupportedInstancesMaximum": 180,
+        "flightActiveInstancesMaximum": 55,
+        "flightBuildAttempts": 14719,
+        "flightBuildFallbacks": 0,
+        "flightBuildSuccesses": 14719,
+        "flightInstancesMaximum": 55,
+        "flightMatchedRequest": true,
+        "matchedRequest": true
+      },
+      "cellOrder": [
+        "full",
+        "no_animation",
+        "no_effects"
+      ],
+      "processAttestation": {
+        "exitCode": 0,
+        "cleanExit": true,
+        "reportValid": true,
+        "schemaValid": true,
+        "scriptErrorsDetected": false,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "affinityMask": 15,
+        "allObservedProcessesVerified": true,
+        "nativePresentationRequested": "Both",
+        "nativePresentationEnvironment": "both",
+        "rootPid": 33580,
+        "observedProcesses": {
+          "33580": {
+            "startTimeUtc": "2026-09-19T14:12:40.5674772Z",
+            "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+            "affinityMask": 15,
+            "name": "Godot_v4.7.2-stable_win64"
+          }
+        },
+        "requestedGodotPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+        "launchExecutablePath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe"
+      },
+      "sourceFiles": {
+        "godot-client/tests/integration/crowd_benchmarks.gd": "9d116642e1dbbb48fefe3e95e7eb7865c65e93c89a94416d85b735602018df81",
+        "godot-client/tests/integration/crowd_benchmark_main.gd": "caa62e7c26a733e3cdb63d8216719bd19e8ce57d1d46070bedd80f1e744f5d78",
+        "godot-client/tests/integration/crowd_benchmark_main.tscn": "e0dd330bb32d117d0688eb83aeddf43d0ac060e47d953263180c47bdafbcbc98",
+        "godot-client/scripts/run_crowd_benchmarks.ps1": "3e76a5f4104da3dc383eea2d42cc1be07a42f07fed12fa320cdcbe99c073f54e",
+        "godot-client/project.godot": "d77a65c9c12987ff2e5a03ce617b703ef964e88f6d261b202ace799945adb1fe",
+        "godot-client/src/state/app_state.gd": "beb724243e9622d777c1bc957c764d773626aef3f21d7a5842aa9f55203125e2",
+        "godot-client/src/app/main.gd": "04c86038d50cc65ede1e93e460d6bde07aaad138cd24c01a1cabc657729efacd",
+        "godot-client/src/actors/replicated_actor_3d.gd": "c5885aee3741f0edaa5b95088f90f03e185ab332edc7b9a90d5a67d1c43247fb",
+        "godot-client/src/actors/cape_cloth.gd": "069db6ce5d491c196319e94fa5bb1121d4d006a3406e8e91a50a3b031a9f4183",
+        "godot-client/src/actors/combat_presentation_3d.gd": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+        "godot-client/src/world/world_effect_3d.gd": "8586cceda29f07ce352bf4f33513f50d36e33c28e808847941699743558d9e2a",
+        "godot-client/src/world/spell_flight_3d.gd": "372662708fffdbe287284e2c706714b88bdf73f1b5eee25fb6536df26e3e45bc",
+        "godot-client/src/world/combat_effect_mesh.gd": "b931cd573d6e55f1cbc0c85de1b8d142a221a48c345abd78c27c78b71545a7f6",
+        "godot-client/src/world/animation_gate.gd": "f90d7f6b3fee0601cac7fabe2035b3ff61022a0bd8e61082c0ed80f2afc63718",
+        "godot-client/native/native_crowd/src/native_crowd_reducer.cpp": "3393c3c67053f17f3158a76b0734531f36751d08484c02a9a0803e2d5ea7c429",
+        "godot-client/native/native_crowd/src/native_crowd_reducer.h": "1663bccbfc4aff94846c8ea800dbb6013b9848bce5bfe1de0207eff314542312",
+        "godot-client/native/native_crowd/src/register_types.cpp": "a4349193340f9e72d4951543a0ea19190822948bd748e1c2566b36c901561adc",
+        "godot-client/native/native_crowd/src/register_types.h": "79cd715590b9bc523e7c551143f23c0b811298841f3b3d9f9c41c4ceecc347fc",
+        "godot-client/native/native_crowd/CMakeLists.txt": "efead46669a731179b1e963d92193aa15329e76f7f887122111fed11e0e67424",
+        "godot-client/native/native_crowd/build_profile.json": "d52c8a2dde63324be3f1fbe7204592e7376834d1db7bd45e0c1afb80625e86fe",
+        "godot-client/bin/native_crowd.gdextension": "c5cc550d96e2eef8d8ac55318802de980abc56e0e56b6a10ef64237a073d1ea9",
+        "godot-client/bin/windows/native_crowd.windows.template_release.x86_64.dll": "ae9db9a49cc967ec4ba1d5327952957de207e126f8c73436ca308d8f3184591b",
+        "godot-client/native/native_crowd/src/native_cape_constraint_kernel.cpp": "d428d1b58a017c914ff2a820ba1278c7dbfa18f9fc5c78f5e38ef930af0cb7c2",
+        "godot-client/native/native_crowd/src/native_cape_constraint_kernel.h": "2302202ad7d4ced38fbd87a9f19577d9dbd05cf6a65883ae57343d5e33d195cc",
+        "godot-client/native/native_crowd/src/native_spell_flight_geometry.cpp": "d4f648314b8d9cd363ea259a9627e8a8a3230df3f00047f3587020e0c506debd",
+        "godot-client/native/native_crowd/src/native_spell_flight_geometry.h": "9d0e88f43b1a3aa627c6a1a62ae9c0e6334ebb3c6c692c59770c94ba075c407a"
+      },
+      "cells": [
+        {
+          "feature": "full",
+          "diagnosticOnly": true,
+          "frames": 208,
+          "elapsedMilliseconds": 5010,
+          "counters": {
+            "wallMilliseconds": {
+              "samples": 208,
+              "mean": 23.992,
+              "p95": 37.654,
+              "p99": 45.283,
+              "max": 54.854
+            },
+            "mainProcessInclusiveMilliseconds": {
+              "samples": 208,
+              "mean": 1.293,
+              "p95": 3.163,
+              "p99": 3.842,
+              "max": 4.288
+            },
+            "combatPoseFromSkeletonMilliseconds": {
+              "samples": 208,
+              "mean": 3.501,
+              "p95": 4.542,
+              "p99": 5.03,
+              "max": 5.415
+            },
+            "syncWorldMilliseconds": {
+              "samples": 208,
+              "mean": 1.009,
+              "p95": 4.605,
+              "p99": 5.921,
+              "max": 6.785
+            },
+            "presentMilliseconds": {
+              "samples": 208,
+              "mean": 0.597,
+              "p95": 3.016,
+              "p99": 3.973,
+              "max": 4.409
+            },
+            "packetDispatchInclusiveMilliseconds": {
+              "samples": 208,
+              "mean": 0.43,
+              "p95": 4.862,
+              "p99": 6.509,
+              "max": 9.058
+            },
+            "animationGateMilliseconds": {
+              "samples": 208,
+              "mean": 0.226,
+              "p95": 1.145,
+              "p99": 1.495,
+              "max": 3.15
+            },
+            "skeletonUpdatesPerFrame": {
+              "samples": 208,
+              "mean": 150.0,
+              "p95": 150.0,
+              "p99": 150.0,
+              "max": 150.0
+            },
+            "uniqueSkeletonsUpdatedPerFrame": {
+              "samples": 208,
+              "mean": 150.0,
+              "p95": 150.0,
+              "p99": 150.0,
+              "max": 150.0
+            },
+            "transientWorldEffects": {
+              "samples": 208,
+              "mean": 57.663,
+              "p95": 65.0,
+              "p99": 78.0,
+              "max": 78.0
+            }
+          },
+          "activeAnimationPlayers": 150,
+          "rates": {
+            "actorCommandsPerSecond": 561.277,
+            "combatPresentationEventsPerSecond": 67.465,
+            "flushesPerSecond": 9.98,
+            "packetsPerSecond": 80.04,
+            "stateUpdatesPerSecond": 628.743
+          },
+          "nativePresentation": {
+            "requestedMode": "both",
+            "delta": {
+              "capeFallbackCalls": 0,
+              "capeNativeCalls": 15600,
+              "flightBuildAttempts": 5562,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 5562
+            },
+            "capeCallsPerFrame": 75.0,
+            "fallbackCalls": 0
+          },
+          "driverAttestation": {
+            "actualFlushes": 50,
+            "atMostOneFlushPerFrame": true,
+            "casterAndRangedRolesReceiveVisualEventsOnly": true,
+            "dirtyCommandsObserved": true,
+            "dirtyCommandsProducedFlush": true,
+            "flushMetricSource": "frame_calls.sync_world_inclusive",
+            "manualPresentationFlushes": false,
+            "maximumFlushesPerFrame": 1,
+            "meleeRolesReceiveCommand46": true,
+            "roleCounts": {
+              "casterEffect": 13,
+              "fighting": 50,
+              "meleePrimary": 24,
+              "rangedAnimation": 13
+            },
+            "roleCycle": [
+              "caster_effect",
+              "ranged_animation",
+              "melee_primary",
+              "melee_primary"
+            ],
+            "version": "deferred-coalesced-role-faithful-v2"
+          }
+        },
+        {
+          "feature": "no_animation",
+          "diagnosticOnly": true,
+          "frames": 298,
+          "elapsedMilliseconds": 5006,
+          "counters": {
+            "wallMilliseconds": {
+              "samples": 298,
+              "mean": 16.709,
+              "p95": 25.767,
+              "p99": 31.383,
+              "max": 35.859
+            },
+            "mainProcessInclusiveMilliseconds": {
+              "samples": 298,
+              "mean": 1.044,
+              "p95": 2.603,
+              "p99": 3.953,
+              "max": 5.291
+            },
+            "combatPoseFromSkeletonMilliseconds": {
+              "samples": 298,
+              "mean": 2.826,
+              "p95": 3.491,
+              "p99": 4.324,
+              "max": 4.602
+            },
+            "syncWorldMilliseconds": {
+              "samples": 298,
+              "mean": 0.629,
+              "p95": 3.989,
+              "p99": 4.954,
+              "max": 5.515
+            },
+            "presentMilliseconds": {
+              "samples": 298,
+              "mean": 0.376,
+              "p95": 2.539,
+              "p99": 3.31,
+              "max": 3.432
+            },
+            "packetDispatchInclusiveMilliseconds": {
+              "samples": 298,
+              "mean": 0.283,
+              "p95": 0.557,
+              "p99": 5.863,
+              "max": 6.436
+            },
+            "animationGateMilliseconds": {
+              "samples": 298,
+              "mean": 0.176,
+              "p95": 1.116,
+              "p99": 1.448,
+              "max": 1.544
+            },
+            "skeletonUpdatesPerFrame": {
+              "samples": 298,
+              "mean": 75.0,
+              "p95": 75.0,
+              "p99": 75.0,
+              "max": 75.0
+            },
+            "uniqueSkeletonsUpdatedPerFrame": {
+              "samples": 298,
+              "mean": 75.0,
+              "p95": 75.0,
+              "p99": 75.0,
+              "max": 75.0
+            },
+            "transientWorldEffects": {
+              "samples": 298,
+              "mean": 60.205,
+              "p95": 68.0,
+              "p99": 78.0,
+              "max": 78.0
+            }
+          },
+          "activeAnimationPlayers": 0,
+          "rates": {
+            "actorCommandsPerSecond": 561.726,
+            "combatPresentationEventsPerSecond": 67.519,
+            "flushesPerSecond": 9.988,
+            "packetsPerSecond": 80.104,
+            "stateUpdatesPerSecond": 629.245
+          },
+          "nativePresentation": {
+            "requestedMode": "both",
+            "delta": {
+              "capeFallbackCalls": 0,
+              "capeNativeCalls": 22350,
+              "flightBuildAttempts": 9157,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 9157
+            },
+            "capeCallsPerFrame": 75.0,
+            "fallbackCalls": 0
+          },
+          "driverAttestation": {
+            "actualFlushes": 50,
+            "atMostOneFlushPerFrame": true,
+            "casterAndRangedRolesReceiveVisualEventsOnly": true,
+            "dirtyCommandsObserved": true,
+            "dirtyCommandsProducedFlush": true,
+            "flushMetricSource": "frame_calls.sync_world_inclusive",
+            "manualPresentationFlushes": false,
+            "maximumFlushesPerFrame": 1,
+            "meleeRolesReceiveCommand46": true,
+            "roleCounts": {
+              "casterEffect": 13,
+              "fighting": 50,
+              "meleePrimary": 24,
+              "rangedAnimation": 13
+            },
+            "roleCycle": [
+              "caster_effect",
+              "ranged_animation",
+              "melee_primary",
+              "melee_primary"
+            ],
+            "version": "deferred-coalesced-role-faithful-v2"
+          }
+        },
+        {
+          "feature": "no_effects",
+          "diagnosticOnly": true,
+          "frames": 288,
+          "elapsedMilliseconds": 5004,
+          "counters": {
+            "wallMilliseconds": {
+              "samples": 288,
+              "mean": 17.293,
+              "p95": 25.707,
+              "p99": 32.315,
+              "max": 48.286
+            },
+            "mainProcessInclusiveMilliseconds": {
+              "samples": 288,
+              "mean": 1.07,
+              "p95": 2.592,
+              "p99": 3.343,
+              "max": 3.551
+            },
+            "combatPoseFromSkeletonMilliseconds": {
+              "samples": 288,
+              "mean": 2.919,
+              "p95": 3.475,
+              "p99": 4.503,
+              "max": 7.474
+            },
+            "syncWorldMilliseconds": {
+              "samples": 288,
+              "mean": 0.659,
+              "p95": 4.246,
+              "p99": 5.428,
+              "max": 5.879
+            },
+            "presentMilliseconds": {
+              "samples": 288,
+              "mean": 0.392,
+              "p95": 2.446,
+              "p99": 3.198,
+              "max": 4.172
+            },
+            "packetDispatchInclusiveMilliseconds": {
+              "samples": 288,
+              "mean": 0.166,
+              "p95": 0.508,
+              "p99": 2.632,
+              "max": 3.082
+            },
+            "animationGateMilliseconds": {
+              "samples": 288,
+              "mean": 0.158,
+              "p95": 1.012,
+              "p99": 1.194,
+              "max": 1.291
+            },
+            "skeletonUpdatesPerFrame": {
+              "samples": 288,
+              "mean": 150.0,
+              "p95": 150.0,
+              "p99": 150.0,
+              "max": 150.0
+            },
+            "uniqueSkeletonsUpdatedPerFrame": {
+              "samples": 288,
+              "mean": 150.0,
+              "p95": 150.0,
+              "p99": 150.0,
+              "max": 150.0
+            },
+            "transientWorldEffects": {
+              "samples": 288,
+              "mean": 0.0,
+              "p95": 0.0,
+              "p99": 0.0,
+              "max": 0.0
+            }
+          },
+          "activeAnimationPlayers": 150,
+          "rates": {
+            "actorCommandsPerSecond": 561.95,
+            "combatPresentationEventsPerSecond": 67.546,
+            "flushesPerSecond": 9.992,
+            "packetsPerSecond": 80.136,
+            "stateUpdatesPerSecond": 629.496
+          },
+          "nativePresentation": {
+            "requestedMode": "both",
+            "delta": {
+              "capeFallbackCalls": 0,
+              "capeNativeCalls": 21600,
+              "flightBuildAttempts": 0,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 0
+            },
+            "capeCallsPerFrame": 75.0,
+            "fallbackCalls": 0
+          },
+          "driverAttestation": {
+            "actualFlushes": 50,
+            "atMostOneFlushPerFrame": true,
+            "casterAndRangedRolesReceiveVisualEventsOnly": true,
+            "dirtyCommandsObserved": true,
+            "dirtyCommandsProducedFlush": true,
+            "flushMetricSource": "frame_calls.sync_world_inclusive",
+            "manualPresentationFlushes": false,
+            "maximumFlushesPerFrame": 1,
+            "meleeRolesReceiveCommand46": true,
+            "roleCounts": {
+              "casterEffect": 13,
+              "fighting": 50,
+              "meleePrimary": 24,
+              "rangedAnimation": 13
+            },
+            "roleCycle": [
+              "caster_effect",
+              "ranged_animation",
+              "melee_primary",
+              "melee_primary"
+            ],
+            "version": "deferred-coalesced-role-faithful-v2"
+          }
+        }
+      ],
+      "pairedDescriptiveDeltas": [
+        {
+          "feature": "no_animation",
+          "fullMeanMilliseconds": 23.992,
+          "ablatedMeanMilliseconds": 16.709,
+          "differenceMilliseconds": 7.283,
+          "descriptiveReductionPercent": 30.356
+        },
+        {
+          "feature": "no_effects",
+          "fullMeanMilliseconds": 23.992,
+          "ablatedMeanMilliseconds": 17.293,
+          "differenceMilliseconds": 6.699,
+          "descriptiveReductionPercent": 27.922
+        }
+      ]
+    },
+    {
+      "label": "remaining-cost-attribution-rotate-b-v1",
+      "runId": "remaining-cost-attribution-rotate-b-v1-custom-gdscript-gl_compatibility-headless-trial1-20260919T141353240Z",
+      "report": {
+        "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\remaining-cost-attribution-rotate-b-v1-custom-gdscript-gl_compatibility-headless-trial1-20260919T141353240Z.json",
+        "sha256": "cb60424606ebaabb16135e793655794fe0e9f72f5a7a6ce103149961d3be9d3a",
+        "bytes": 491360
+      },
+      "process": {
+        "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\remaining-cost-attribution-rotate-b-v1-custom-gdscript-gl_compatibility-headless-trial1-20260919T141353240Z.process.json",
+        "sha256": "c74492614b3ff64c1567cdae6f8f6167d417ca2082edeea6e50956f3b880e6d2",
+        "bytes": 4894
+      },
+      "commit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+      "sourceHash": "ff4d5d50aef495ac9dc0f7b622a958b7bce0665c8f6c03bdec2aaf5122a76d8a",
+      "dirty": false,
+      "godot": {
+        "build": "official",
+        "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+        "hex": 263938,
+        "major": 4,
+        "minor": 7,
+        "patch": 2,
+        "status": "stable",
+        "string": "4.7.2-stable (official)",
+        "timestamp": 0
+      },
+      "display": "headless",
+      "requestedRenderingMethod": "gl_compatibility",
+      "actualRenderingMethod": "gl_compatibility",
+      "userDataDirectory": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/user-data/appdata/Godot/app_userdata/Eloria",
+      "measurement": {
+        "acceptance": {
+          "diagnosticOnly": false,
+          "eligible": true,
+          "reason": "production presentation features"
+        },
+        "attribution": {
+          "acceptanceTimingComparable": false,
+          "enabled": true,
+          "purpose": "diagnostic callback attribution; timer, signal and observer overhead is included"
+        },
+        "cadenceMilliseconds": 100,
+        "headlessRenderMetricsAvailable": false,
+        "sampleMilliseconds": 5000,
+        "warmupMilliseconds": 1000,
+        "windowWallTimeAuthoritative": false
+      },
+      "nativePresentationActual": {
+        "capeActiveInstancesMaximum": 150,
+        "capeFallbackCalls": 0,
+        "capeGdscriptBackendInstancesMaximum": 30,
+        "capeMatchedRequest": true,
+        "capeModifierInstancesMaximum": 180,
+        "capeNativeBackendInstancesMaximum": 150,
+        "capeNativeCalls": 52950,
+        "capeStatsSupportedInstancesMaximum": 180,
+        "flightActiveInstancesMaximum": 55,
+        "flightBuildAttempts": 13091,
+        "flightBuildFallbacks": 0,
+        "flightBuildSuccesses": 13091,
+        "flightInstancesMaximum": 55,
+        "flightMatchedRequest": true,
+        "matchedRequest": true
+      },
+      "cellOrder": [
+        "no_effects",
+        "no_animation",
+        "full"
+      ],
+      "processAttestation": {
+        "exitCode": 0,
+        "cleanExit": true,
+        "reportValid": true,
+        "schemaValid": true,
+        "scriptErrorsDetected": false,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "affinityMask": 15,
+        "allObservedProcessesVerified": true,
+        "nativePresentationRequested": "Both",
+        "nativePresentationEnvironment": "both",
+        "rootPid": 37456,
+        "observedProcesses": {
+          "37456": {
+            "affinityMask": 15,
+            "startTimeUtc": "2026-09-19T14:13:53.2774583Z",
+            "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+            "name": "Godot_v4.7.2-stable_win64"
+          }
+        },
+        "requestedGodotPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+        "launchExecutablePath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe"
+      },
+      "sourceFiles": {
+        "godot-client/tests/integration/crowd_benchmarks.gd": "9d116642e1dbbb48fefe3e95e7eb7865c65e93c89a94416d85b735602018df81",
+        "godot-client/tests/integration/crowd_benchmark_main.gd": "caa62e7c26a733e3cdb63d8216719bd19e8ce57d1d46070bedd80f1e744f5d78",
+        "godot-client/tests/integration/crowd_benchmark_main.tscn": "e0dd330bb32d117d0688eb83aeddf43d0ac060e47d953263180c47bdafbcbc98",
+        "godot-client/scripts/run_crowd_benchmarks.ps1": "3e76a5f4104da3dc383eea2d42cc1be07a42f07fed12fa320cdcbe99c073f54e",
+        "godot-client/project.godot": "d77a65c9c12987ff2e5a03ce617b703ef964e88f6d261b202ace799945adb1fe",
+        "godot-client/src/state/app_state.gd": "beb724243e9622d777c1bc957c764d773626aef3f21d7a5842aa9f55203125e2",
+        "godot-client/src/app/main.gd": "04c86038d50cc65ede1e93e460d6bde07aaad138cd24c01a1cabc657729efacd",
+        "godot-client/src/actors/replicated_actor_3d.gd": "c5885aee3741f0edaa5b95088f90f03e185ab332edc7b9a90d5a67d1c43247fb",
+        "godot-client/src/actors/cape_cloth.gd": "069db6ce5d491c196319e94fa5bb1121d4d006a3406e8e91a50a3b031a9f4183",
+        "godot-client/src/actors/combat_presentation_3d.gd": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+        "godot-client/src/world/world_effect_3d.gd": "8586cceda29f07ce352bf4f33513f50d36e33c28e808847941699743558d9e2a",
+        "godot-client/src/world/spell_flight_3d.gd": "372662708fffdbe287284e2c706714b88bdf73f1b5eee25fb6536df26e3e45bc",
+        "godot-client/src/world/combat_effect_mesh.gd": "b931cd573d6e55f1cbc0c85de1b8d142a221a48c345abd78c27c78b71545a7f6",
+        "godot-client/src/world/animation_gate.gd": "f90d7f6b3fee0601cac7fabe2035b3ff61022a0bd8e61082c0ed80f2afc63718",
+        "godot-client/native/native_crowd/src/native_crowd_reducer.cpp": "3393c3c67053f17f3158a76b0734531f36751d08484c02a9a0803e2d5ea7c429",
+        "godot-client/native/native_crowd/src/native_crowd_reducer.h": "1663bccbfc4aff94846c8ea800dbb6013b9848bce5bfe1de0207eff314542312",
+        "godot-client/native/native_crowd/src/register_types.cpp": "a4349193340f9e72d4951543a0ea19190822948bd748e1c2566b36c901561adc",
+        "godot-client/native/native_crowd/src/register_types.h": "79cd715590b9bc523e7c551143f23c0b811298841f3b3d9f9c41c4ceecc347fc",
+        "godot-client/native/native_crowd/CMakeLists.txt": "efead46669a731179b1e963d92193aa15329e76f7f887122111fed11e0e67424",
+        "godot-client/native/native_crowd/build_profile.json": "d52c8a2dde63324be3f1fbe7204592e7376834d1db7bd45e0c1afb80625e86fe",
+        "godot-client/bin/native_crowd.gdextension": "c5cc550d96e2eef8d8ac55318802de980abc56e0e56b6a10ef64237a073d1ea9",
+        "godot-client/bin/windows/native_crowd.windows.template_release.x86_64.dll": "ae9db9a49cc967ec4ba1d5327952957de207e126f8c73436ca308d8f3184591b",
+        "godot-client/native/native_crowd/src/native_cape_constraint_kernel.cpp": "d428d1b58a017c914ff2a820ba1278c7dbfa18f9fc5c78f5e38ef930af0cb7c2",
+        "godot-client/native/native_crowd/src/native_cape_constraint_kernel.h": "2302202ad7d4ced38fbd87a9f19577d9dbd05cf6a65883ae57343d5e33d195cc",
+        "godot-client/native/native_crowd/src/native_spell_flight_geometry.cpp": "d4f648314b8d9cd363ea259a9627e8a8a3230df3f00047f3587020e0c506debd",
+        "godot-client/native/native_crowd/src/native_spell_flight_geometry.h": "9d0e88f43b1a3aa627c6a1a62ae9c0e6334ebb3c6c692c59770c94ba075c407a"
+      },
+      "cells": [
+        {
+          "feature": "no_effects",
+          "diagnosticOnly": true,
+          "frames": 250,
+          "elapsedMilliseconds": 5009,
+          "counters": {
+            "wallMilliseconds": {
+              "samples": 250,
+              "mean": 19.955,
+              "p95": 31.645,
+              "p99": 41.103,
+              "max": 43.258
+            },
+            "mainProcessInclusiveMilliseconds": {
+              "samples": 250,
+              "mean": 1.272,
+              "p95": 2.857,
+              "p99": 4.107,
+              "max": 4.768
+            },
+            "combatPoseFromSkeletonMilliseconds": {
+              "samples": 250,
+              "mean": 3.279,
+              "p95": 4.068,
+              "p99": 5.859,
+              "max": 6.731
+            },
+            "syncWorldMilliseconds": {
+              "samples": 250,
+              "mean": 0.874,
+              "p95": 4.599,
+              "p99": 6.113,
+              "max": 8.71
+            },
+            "presentMilliseconds": {
+              "samples": 250,
+              "mean": 0.526,
+              "p95": 2.978,
+              "p99": 3.983,
+              "max": 6.103
+            },
+            "packetDispatchInclusiveMilliseconds": {
+              "samples": 250,
+              "mean": 0.208,
+              "p95": 2.271,
+              "p99": 3.111,
+              "max": 3.884
+            },
+            "animationGateMilliseconds": {
+              "samples": 250,
+              "mean": 0.212,
+              "p95": 1.285,
+              "p99": 1.453,
+              "max": 1.501
+            },
+            "skeletonUpdatesPerFrame": {
+              "samples": 250,
+              "mean": 150.0,
+              "p95": 150.0,
+              "p99": 150.0,
+              "max": 150.0
+            },
+            "uniqueSkeletonsUpdatedPerFrame": {
+              "samples": 250,
+              "mean": 150.0,
+              "p95": 150.0,
+              "p99": 150.0,
+              "max": 150.0
+            },
+            "transientWorldEffects": {
+              "samples": 250,
+              "mean": 0.0,
+              "p95": 0.0,
+              "p99": 0.0,
+              "max": 0.0
+            }
+          },
+          "activeAnimationPlayers": 150,
+          "rates": {
+            "actorCommandsPerSecond": 561.389,
+            "combatPresentationEventsPerSecond": 67.479,
+            "flushesPerSecond": 9.982,
+            "packetsPerSecond": 80.056,
+            "stateUpdatesPerSecond": 628.868
+          },
+          "nativePresentation": {
+            "requestedMode": "both",
+            "delta": {
+              "capeFallbackCalls": 0,
+              "capeNativeCalls": 18750,
+              "flightBuildAttempts": 0,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 0
+            },
+            "capeCallsPerFrame": 75.0,
+            "fallbackCalls": 0
+          },
+          "driverAttestation": {
+            "actualFlushes": 50,
+            "atMostOneFlushPerFrame": true,
+            "casterAndRangedRolesReceiveVisualEventsOnly": true,
+            "dirtyCommandsObserved": true,
+            "dirtyCommandsProducedFlush": true,
+            "flushMetricSource": "frame_calls.sync_world_inclusive",
+            "manualPresentationFlushes": false,
+            "maximumFlushesPerFrame": 1,
+            "meleeRolesReceiveCommand46": true,
+            "roleCounts": {
+              "casterEffect": 13,
+              "fighting": 50,
+              "meleePrimary": 24,
+              "rangedAnimation": 13
+            },
+            "roleCycle": [
+              "caster_effect",
+              "ranged_animation",
+              "melee_primary",
+              "melee_primary"
+            ],
+            "version": "deferred-coalesced-role-faithful-v2"
+          }
+        },
+        {
+          "feature": "no_animation",
+          "diagnosticOnly": true,
+          "frames": 246,
+          "elapsedMilliseconds": 5017,
+          "counters": {
+            "wallMilliseconds": {
+              "samples": 246,
+              "mean": 20.288,
+              "p95": 30.755,
+              "p99": 36.135,
+              "max": 42.474
+            },
+            "mainProcessInclusiveMilliseconds": {
+              "samples": 246,
+              "mean": 1.343,
+              "p95": 2.776,
+              "p99": 3.663,
+              "max": 4.663
+            },
+            "combatPoseFromSkeletonMilliseconds": {
+              "samples": 246,
+              "mean": 3.39,
+              "p95": 4.223,
+              "p99": 4.644,
+              "max": 5.599
+            },
+            "syncWorldMilliseconds": {
+              "samples": 246,
+              "mean": 0.954,
+              "p95": 5.565,
+              "p99": 6.68,
+              "max": 7.151
+            },
+            "presentMilliseconds": {
+              "samples": 246,
+              "mean": 0.58,
+              "p95": 3.408,
+              "p99": 4.476,
+              "max": 5.055
+            },
+            "packetDispatchInclusiveMilliseconds": {
+              "samples": 246,
+              "mean": 0.401,
+              "p95": 4.976,
+              "p99": 6.795,
+              "max": 7.208
+            },
+            "animationGateMilliseconds": {
+              "samples": 246,
+              "mean": 0.258,
+              "p95": 1.494,
+              "p99": 1.864,
+              "max": 1.932
+            },
+            "skeletonUpdatesPerFrame": {
+              "samples": 246,
+              "mean": 75.0,
+              "p95": 75.0,
+              "p99": 75.0,
+              "max": 75.0
+            },
+            "uniqueSkeletonsUpdatedPerFrame": {
+              "samples": 246,
+              "mean": 75.0,
+              "p95": 75.0,
+              "p99": 75.0,
+              "max": 75.0
+            },
+            "transientWorldEffects": {
+              "samples": 246,
+              "mean": 59.695,
+              "p95": 65.0,
+              "p99": 78.0,
+              "max": 78.0
+            }
+          },
+          "activeAnimationPlayers": 0,
+          "rates": {
+            "actorCommandsPerSecond": 560.494,
+            "combatPresentationEventsPerSecond": 67.371,
+            "flushesPerSecond": 9.966,
+            "packetsPerSecond": 79.928,
+            "stateUpdatesPerSecond": 627.865
+          },
+          "nativePresentation": {
+            "requestedMode": "both",
+            "delta": {
+              "capeFallbackCalls": 0,
+              "capeNativeCalls": 18450,
+              "flightBuildAttempts": 7467,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 7467
+            },
+            "capeCallsPerFrame": 75.0,
+            "fallbackCalls": 0
+          },
+          "driverAttestation": {
+            "actualFlushes": 50,
+            "atMostOneFlushPerFrame": true,
+            "casterAndRangedRolesReceiveVisualEventsOnly": true,
+            "dirtyCommandsObserved": true,
+            "dirtyCommandsProducedFlush": true,
+            "flushMetricSource": "frame_calls.sync_world_inclusive",
+            "manualPresentationFlushes": false,
+            "maximumFlushesPerFrame": 1,
+            "meleeRolesReceiveCommand46": true,
+            "roleCounts": {
+              "casterEffect": 13,
+              "fighting": 50,
+              "meleePrimary": 24,
+              "rangedAnimation": 13
+            },
+            "roleCycle": [
+              "caster_effect",
+              "ranged_animation",
+              "melee_primary",
+              "melee_primary"
+            ],
+            "version": "deferred-coalesced-role-faithful-v2"
+          }
+        },
+        {
+          "feature": "full",
+          "diagnosticOnly": true,
+          "frames": 210,
+          "elapsedMilliseconds": 5024,
+          "counters": {
+            "wallMilliseconds": {
+              "samples": 210,
+              "mean": 23.827,
+              "p95": 40.226,
+              "p99": 44.88,
+              "max": 49.3
+            },
+            "mainProcessInclusiveMilliseconds": {
+              "samples": 210,
+              "mean": 1.322,
+              "p95": 3.32,
+              "p99": 3.977,
+              "max": 5.277
+            },
+            "combatPoseFromSkeletonMilliseconds": {
+              "samples": 210,
+              "mean": 3.498,
+              "p95": 4.079,
+              "p99": 4.206,
+              "max": 4.334
+            },
+            "syncWorldMilliseconds": {
+              "samples": 210,
+              "mean": 0.967,
+              "p95": 4.95,
+              "p99": 5.467,
+              "max": 6.088
+            },
+            "presentMilliseconds": {
+              "samples": 210,
+              "mean": 0.585,
+              "p95": 3.358,
+              "p99": 3.639,
+              "max": 4.124
+            },
+            "packetDispatchInclusiveMilliseconds": {
+              "samples": 210,
+              "mean": 0.404,
+              "p95": 5.031,
+              "p99": 5.792,
+              "max": 6.231
+            },
+            "animationGateMilliseconds": {
+              "samples": 210,
+              "mean": 0.249,
+              "p95": 1.253,
+              "p99": 1.373,
+              "max": 1.495
+            },
+            "skeletonUpdatesPerFrame": {
+              "samples": 210,
+              "mean": 150.0,
+              "p95": 150.0,
+              "p99": 150.0,
+              "max": 150.0
+            },
+            "uniqueSkeletonsUpdatedPerFrame": {
+              "samples": 210,
+              "mean": 150.0,
+              "p95": 150.0,
+              "p99": 150.0,
+              "max": 150.0
+            },
+            "transientWorldEffects": {
+              "samples": 210,
+              "mean": 57.348,
+              "p95": 65.0,
+              "p99": 78.0,
+              "max": 78.0
+            }
+          },
+          "activeAnimationPlayers": 150,
+          "rates": {
+            "actorCommandsPerSecond": 559.713,
+            "combatPresentationEventsPerSecond": 67.277,
+            "flushesPerSecond": 9.952,
+            "packetsPerSecond": 79.817,
+            "stateUpdatesPerSecond": 626.99
+          },
+          "nativePresentation": {
+            "requestedMode": "both",
+            "delta": {
+              "capeFallbackCalls": 0,
+              "capeNativeCalls": 15750,
+              "flightBuildAttempts": 5624,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 5624
+            },
+            "capeCallsPerFrame": 75.0,
+            "fallbackCalls": 0
+          },
+          "driverAttestation": {
+            "actualFlushes": 50,
+            "atMostOneFlushPerFrame": true,
+            "casterAndRangedRolesReceiveVisualEventsOnly": true,
+            "dirtyCommandsObserved": true,
+            "dirtyCommandsProducedFlush": true,
+            "flushMetricSource": "frame_calls.sync_world_inclusive",
+            "manualPresentationFlushes": false,
+            "maximumFlushesPerFrame": 1,
+            "meleeRolesReceiveCommand46": true,
+            "roleCounts": {
+              "casterEffect": 13,
+              "fighting": 50,
+              "meleePrimary": 24,
+              "rangedAnimation": 13
+            },
+            "roleCycle": [
+              "caster_effect",
+              "ranged_animation",
+              "melee_primary",
+              "melee_primary"
+            ],
+            "version": "deferred-coalesced-role-faithful-v2"
+          }
+        }
+      ],
+      "pairedDescriptiveDeltas": [
+        {
+          "feature": "no_animation",
+          "fullMeanMilliseconds": 23.827,
+          "ablatedMeanMilliseconds": 20.288,
+          "differenceMilliseconds": 3.539,
+          "descriptiveReductionPercent": 14.853
+        },
+        {
+          "feature": "no_effects",
+          "fullMeanMilliseconds": 23.827,
+          "ablatedMeanMilliseconds": 19.955,
+          "differenceMilliseconds": 3.872,
+          "descriptiveReductionPercent": 16.25
+        }
+      ]
+    }
+  ],
+  "derived": {
+    "full": {
+      "runMeansMilliseconds": [
+        23.992,
+        23.827
+      ],
+      "medianOfTwoRunMeansMilliseconds": 23.9095,
+      "rangeMilliseconds": [
+        23.827,
+        23.992
+      ]
+    },
+    "no_animation": {
+      "runMeansMilliseconds": [
+        16.709,
+        20.288
+      ],
+      "medianOfTwoRunMeansMilliseconds": 18.4985,
+      "rangeMilliseconds": [
+        16.709,
+        20.288
+      ]
+    },
+    "no_effects": {
+      "runMeansMilliseconds": [
+        17.293,
+        19.955
+      ],
+      "medianOfTwoRunMeansMilliseconds": 18.624,
+      "rangeMilliseconds": [
+        17.293,
+        19.955
+      ]
+    }
+  }
+}

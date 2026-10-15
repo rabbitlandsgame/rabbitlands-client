@@ -1,0 +1,71 @@
+{
+ "schema": "eloria-region-authoring-spec-v1",
+ "regionId": "reedfall",
+ "label": "Reedfall",
+ "adapter": "continent-v2-meshy-v1",
+ "paths": {
+  "scene": "godot-client/world_authoring/regions/reedfall/reedfall.tscn",
+  "manifest": "eloria-assets/maps/continent-v2/reedfall/world.json",
+  "snapshot": "eloria-assets/maps/continent-v2/reedfall/authoring/continent-authoring.json"
+ },
+ "inputs": {
+  "baseHeights": "godot-client/world_authoring/regions/reedfall/base-heights.f32le",
+  "baseColors": "godot-client/world_authoring/regions/reedfall/base-colors.rgba8"
+ },
+ "continentTranslation": [
+  1606.0,
+  0.0,
+  7404.0
+ ],
+ "server": {
+  "origin": [
+   347,
+   267
+  ],
+  "cells": [
+   696,
+   696
+  ],
+  "collisionOriginMetres": [
+   -347.0,
+   267.0
+  ]
+ },
+ "terrain": {
+  "origin": [
+   -403.0,
+   -323.0
+  ],
+  "cellMetres": 2.0,
+  "vertices": [
+   404,
+   324
+  ]
+ },
+ "authority": {
+  "ownedRouteIds": [],
+  "requiredRouteIds": [],
+  "ownedPlanFeatureIds": [],
+  "ownedFerryConnectionIds": []
+ },
+ "gameplay": {
+  "runtimeBindingCount": 0,
+  "runtimePointCount": 1,
+  "existingMarkerBindingCount": 0,
+  "generatedArrival": {
+   "path": "eloria-assets/maps/continent-v2/reedfall/content/arrival.json",
+   "sha256": "5a1f2c261e60e532c02329780f5e7e2df42e37f4aaaf1c9ac790dab6cc9158fc"
+  },
+  "authoredMarkerCount": 59
+ },
+ "continentV2": {
+  "planPath": "eloria-assets/maps/continent-v2/_continent_v2/continent-v2-plan.json",
+  "vertical": {
+   "A": 259.0078328433769,
+   "u0": 259.0078328433769,
+   "peakMetres": 350.0,
+   "gainAtSea": 1.0
+  },
+  "planSha256": "731d24f05084b5893d91f0f5d54f7d7e4f7183e3396b850a2f9da3d7c4f7d392"
+ }
+}

@@ -1,0 +1,618 @@
+{
+  "schemaVersion": "1.1.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "sunmane_wind_caves",
+    "name": "Sunmane Wind Caves",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -30.0,
+        -4.35,
+        -30.0
+      ],
+      "max": [
+        30.0,
+        7.77,
+        30.0
+      ]
+    },
+    "regionSpanMeters": 60.0,
+    "interior": true
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      30.0,
+      30.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": -0.219,
+    "invertServerY": true,
+    "addressableWorldBounds": {
+      "min": [
+        -30.0,
+        -30.0
+      ],
+      "max": [
+        30.0,
+        30.0
+      ]
+    }
+  },
+  "spawnPoints": [
+    {
+      "id": "entrance-hall",
+      "node": "Terrain_CaveFloor_2_3",
+      "serverTile": [
+        30,
+        12
+      ],
+      "position": [
+        0.0,
+        -0.219,
+        18.0
+      ],
+      "facing": [
+        0,
+        0,
+        -1
+      ],
+      "groundedBy": "navigation-surface-raycast",
+      "note": "Entrance hall"
+    },
+    {
+      "id": "wind-gallery",
+      "node": "Terrain_CaveFloor_2_2",
+      "serverTile": [
+        30,
+        28
+      ],
+      "position": [
+        0.0,
+        -1.17,
+        2.0
+      ],
+      "facing": [
+        0,
+        0,
+        -1
+      ],
+      "groundedBy": "navigation-surface-raycast",
+      "note": "The wind gallery"
+    }
+  ],
+  "collision": {
+    "nodeNames": [
+      "Detail_barrel_stack_014",
+      "Detail_cart_013",
+      "Detail_cave_boulder_0_060",
+      "Detail_cave_boulder_0_066",
+      "Detail_cave_boulder_0_087",
+      "Detail_cave_boulder_0_091",
+      "Detail_cave_boulder_0_095",
+      "Detail_cave_boulder_0_098",
+      "Detail_cave_boulder_0_101",
+      "Detail_cave_boulder_0_103",
+      "Detail_cave_boulder_1_022",
+      "Detail_cave_boulder_1_024",
+      "Detail_cave_boulder_1_036",
+      "Detail_cave_boulder_1_040",
+      "Detail_cave_boulder_1_044",
+      "Detail_cave_boulder_1_071",
+      "Detail_cave_boulder_1_078",
+      "Detail_cave_boulder_1_127",
+      "Detail_cave_boulder_1_129",
+      "Detail_cave_boulder_1_145",
+      "Detail_cave_boulder_2_084",
+      "Detail_cave_boulder_2_140",
+      "Detail_cave_boulder_3_035",
+      "Detail_cave_boulder_3_039",
+      "Detail_cave_boulder_3_063",
+      "Detail_cave_boulder_3_075",
+      "Detail_cave_boulder_3_077",
+      "Detail_cave_boulder_3_107",
+      "Detail_cave_boulder_3_122",
+      "Detail_cave_boulder_3_123",
+      "Detail_cave_column_0_089",
+      "Detail_cave_column_1_153",
+      "Detail_hay_bale_015",
+      "Detail_pit_props_0_000",
+      "Detail_pit_props_0_001",
+      "Detail_pit_props_0_002",
+      "Detail_pit_props_1_003",
+      "Detail_pit_props_1_004",
+      "Detail_pit_props_1_005",
+      "Detail_pit_props_1_006",
+      "Detail_tool_rack_016",
+      "Landmark_cave_brazier_007",
+      "Landmark_cave_brazier_008",
+      "Landmark_cave_brazier_009",
+      "Landmark_cave_brazier_010",
+      "Landmark_cave_brazier_011",
+      "Structure_CaveRoof_0_1",
+      "Structure_CaveRoof_1_0",
+      "Structure_CaveRoof_1_1",
+      "Structure_CaveRoof_1_2",
+      "Structure_CaveRoof_1_3",
+      "Structure_CaveRoof_2_0",
+      "Structure_CaveRoof_2_1",
+      "Structure_CaveRoof_2_2",
+      "Structure_CaveRoof_2_3",
+      "Structure_CaveRoof_3_1",
+      "Structure_CaveRoof_3_2",
+      "Structure_CaveWall_0_1",
+      "Structure_CaveWall_1_0",
+      "Structure_CaveWall_1_1",
+      "Structure_CaveWall_1_2",
+      "Structure_CaveWall_1_3",
+      "Structure_CaveWall_2_0",
+      "Structure_CaveWall_2_1",
+      "Structure_CaveWall_2_2",
+      "Structure_CaveWall_2_3",
+      "Structure_CaveWall_3_1",
+      "Structure_CaveWall_3_2"
+    ]
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Terrain_"
+    ],
+    "walkableAreas": [
+      "cave_floor"
+    ],
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "agentRadius": 0.55,
+      "agentHeight": 1.9,
+      "maxSlopeDegrees": 42,
+      "polygons": []
+    },
+    "note": "The cavern floor carries the Terrain_ prefix so the grounding raycast lands on it; the roof and the wall skirt carry structural collision, which is what keeps a player inside the system."
+  },
+  "landmarks": [
+    {
+      "id": "Landmark_cave_brazier_007",
+      "kind": "brazier",
+      "node": "Landmark_cave_brazier_007",
+      "position": [
+        -2.96,
+        -0.23,
+        18.24
+      ],
+      "serverTile": [
+        27,
+        12
+      ],
+      "reachable": true,
+      "label": "Entrance hall brazier"
+    },
+    {
+      "id": "Landmark_cave_brazier_008",
+      "kind": "brazier",
+      "node": "Landmark_cave_brazier_008",
+      "position": [
+        3.82,
+        -1.41,
+        3.35
+      ],
+      "serverTile": [
+        34,
+        27
+      ],
+      "reachable": true,
+      "label": "The wind gallery brazier"
+    },
+    {
+      "id": "Landmark_cave_brazier_009",
+      "kind": "brazier",
+      "node": "Landmark_cave_brazier_009",
+      "position": [
+        -13.21,
+        -0.88,
+        -8.1
+      ],
+      "serverTile": [
+        17,
+        38
+      ],
+      "reachable": true,
+      "label": "Drovers' camp brazier"
+    },
+    {
+      "id": "Landmark_cave_brazier_010",
+      "kind": "brazier",
+      "node": "Landmark_cave_brazier_010",
+      "position": [
+        12.77,
+        -2.36,
+        -7.18
+      ],
+      "serverTile": [
+        43,
+        37
+      ],
+      "reachable": true,
+      "label": "The whistle shaft brazier"
+    },
+    {
+      "id": "Landmark_cave_brazier_011",
+      "kind": "brazier",
+      "node": "Landmark_cave_brazier_011",
+      "position": [
+        0.21,
+        -3.29,
+        -19.51
+      ],
+      "serverTile": [
+        30,
+        50
+      ],
+      "reachable": true,
+      "label": "The still pool brazier"
+    },
+    {
+      "id": "Landmark_fire_pit_012",
+      "kind": "camp",
+      "node": "Landmark_fire_pit_012",
+      "position": [
+        -16.0,
+        -0.85,
+        -8.0
+      ],
+      "serverTile": [
+        14,
+        38
+      ],
+      "reachable": true,
+      "label": "Underground camp"
+    }
+  ],
+  "interactives": [],
+  "chambers": [
+    {
+      "id": "entrance-hall",
+      "label": "Entrance hall",
+      "position": [
+        0.0,
+        -0.22,
+        18.0
+      ],
+      "radius": 6.6,
+      "headroom": 4.4,
+      "serverTile": [
+        30,
+        12
+      ]
+    },
+    {
+      "id": "wind-gallery",
+      "label": "The wind gallery",
+      "position": [
+        0.0,
+        -1.17,
+        2.0
+      ],
+      "radius": 9.0,
+      "headroom": 6.6,
+      "serverTile": [
+        30,
+        28
+      ]
+    },
+    {
+      "id": "drovers-camp",
+      "label": "Drovers' camp",
+      "position": [
+        -16.0,
+        -0.85,
+        -8.0
+      ],
+      "radius": 6.2,
+      "headroom": 4.4,
+      "serverTile": [
+        14,
+        38
+      ]
+    },
+    {
+      "id": "whistle-shaft",
+      "label": "The whistle shaft",
+      "position": [
+        15.0,
+        -2.55,
+        -6.0
+      ],
+      "radius": 5.6,
+      "headroom": 9.0,
+      "serverTile": [
+        45,
+        36
+      ]
+    },
+    {
+      "id": "still-pool",
+      "label": "The still pool",
+      "position": [
+        2.0,
+        -3.25,
+        -18.0
+      ],
+      "radius": 5.2,
+      "headroom": 4.0,
+      "serverTile": [
+        32,
+        48
+      ]
+    }
+  ],
+  "materials": {
+    "strategy": "shared-tileable-pbr-families-with-world-scale-uvs",
+    "channelPacking": {
+      "orm": "R=occlusion,G=roughness,B=metallic"
+    },
+    "embedded": true
+  },
+  "environment": {
+    "profile": "cave-interior",
+    "sky": {
+      "topColor": "#05060a",
+      "horizonColor": "#0b0d14",
+      "groundHorizonColor": "#08090d",
+      "groundBottomColor": "#05060a",
+      "curve": 0.4,
+      "sunAngleMax": 2.0,
+      "energy": 0.35
+    },
+    "ambient": {
+      "color": "#9a8f7e",
+      "skyContribution": 0.0,
+      "energy": 0.26
+    },
+    "sun": {
+      "rotationDegrees": [
+        -62,
+        8,
+        0
+      ],
+      "color": "#ffd9a8",
+      "energy": 0.22,
+      "indirectEnergy": 0.4,
+      "shadows": false
+    },
+    "fog": {
+      "enabled": true,
+      "color": "#241f19",
+      "density": 0.017,
+      "skyAffect": 0.0,
+      "aerialPerspective": 0.3
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.2,
+      "white": 2.0
+    },
+    "note": "An interior profile: no sky contribution, dense short fog and a low fill so the brazier and crystal markers carry the lighting."
+  },
+  "lighting": {
+    "markers": [
+      {
+        "id": "Light_Brazier_entrance-hall",
+        "kind": "brazier",
+        "node": "Landmark_cave_brazier_007",
+        "position": [
+          -2.96,
+          1.12,
+          18.24
+        ],
+        "color": [
+          1.0,
+          0.69,
+          0.4
+        ],
+        "energyHint": 2.1,
+        "rangeHint": 12.54
+      },
+      {
+        "id": "Light_Brazier_wind-gallery",
+        "kind": "brazier",
+        "node": "Landmark_cave_brazier_008",
+        "position": [
+          3.82,
+          -0.06,
+          3.35
+        ],
+        "color": [
+          1.0,
+          0.69,
+          0.4
+        ],
+        "energyHint": 2.1,
+        "rangeHint": 17.1
+      },
+      {
+        "id": "Light_Brazier_drovers-camp",
+        "kind": "brazier",
+        "node": "Landmark_cave_brazier_009",
+        "position": [
+          -13.21,
+          0.47,
+          -8.1
+        ],
+        "color": [
+          1.0,
+          0.69,
+          0.4
+        ],
+        "energyHint": 2.1,
+        "rangeHint": 11.78
+      },
+      {
+        "id": "Light_Brazier_whistle-shaft",
+        "kind": "brazier",
+        "node": "Landmark_cave_brazier_010",
+        "position": [
+          12.77,
+          -1.01,
+          -7.18
+        ],
+        "color": [
+          1.0,
+          0.69,
+          0.4
+        ],
+        "energyHint": 2.1,
+        "rangeHint": 10.64
+      },
+      {
+        "id": "Light_Brazier_still-pool",
+        "kind": "brazier",
+        "node": "Landmark_cave_brazier_011",
+        "position": [
+          0.21,
+          -1.94,
+          -19.51
+        ],
+        "color": [
+          1.0,
+          0.69,
+          0.4
+        ],
+        "energyHint": 2.1,
+        "rangeHint": 10.0
+      }
+    ],
+    "note": "Braziers and, in the hollow, the crystal faces are the light sources; they are emitted as named markers so a client lighting pass can bind them without the package depending on a glTF light extension."
+  },
+  "minimap": {
+    "image": "minimap.webp",
+    "imageSize": [
+      60,
+      60
+    ],
+    "pixelsPerMetre": 1.0,
+    "worldMin": [
+      -30.0,
+      -30.0
+    ],
+    "worldMax": [
+      30.0,
+      30.0
+    ],
+    "northAxis": "-Z",
+    "orientation": "north-up",
+    "projection": "orthographic-top-down",
+    "renderedFrom": "world.glb",
+    "transform": {
+      "pixelX": {
+        "scale": 1.0,
+        "offset": 30.0
+      },
+      "pixelY": {
+        "scale": 1.0,
+        "offset": 30.0
+      },
+      "formula": "pixel_x = world_x * scale + offset; pixel_y = world_z * scale + offset"
+    },
+    "note": "Every Eloria minimap is drawn at one pixel to the metre, so the image's pixel size is the map's size in metres.",
+    "generator": "godot-client/tests/integration/sunmane_cave_minimap.gd, rendered through the client's own WorldLoader",
+    "file": "minimap.webp",
+    "pixels": 60,
+    "size": [
+      60,
+      60
+    ],
+    "metresPerPixel": 1.0,
+    "centre": [
+      0.0,
+      0.0
+    ],
+    "northUp": true
+  },
+  "portals": [
+    {
+      "id": "exit-to-steppe",
+      "kind": "map-transition",
+      "position": [
+        0.0,
+        -0.22,
+        19.98
+      ],
+      "serverTile": [
+        30,
+        10
+      ],
+      "destinationMap": "sunmane_steppe",
+      "destinationTile": [
+        128,
+        175
+      ],
+      "label": "Back out to the Sunmane Steppe"
+    }
+  ],
+  "provenance": {
+    "generator": "eloria-assets/maps/nymara-regions/sunmane_steppe/source/caves.py",
+    "surfaceMap": "eloria-assets/maps/nymara-regions/sunmane_steppe",
+    "writtenDescription": [
+      "eloria-assets/qa/regions/sunmane-steppe/README.md",
+      "eloria-assets/NYMARA_ASSET_MANIFEST.md"
+    ],
+    "license": "Original Eloria project work, CC-BY-4.0",
+    "thirdPartyAssets": "none"
+  },
+  "statistics": {
+    "shellTriangles": 12740,
+    "openCells": 2922,
+    "shellChunks": 33,
+    "instances": 167,
+    "kitUniqueTriangles": 4931,
+    "kitAssets": 25,
+    "waterTriangles": 22,
+    "nodes": 201,
+    "meshes": 59,
+    "materials": 15,
+    "textures": 24,
+    "accessors": 369,
+    "uniqueMeshTriangles": 17693,
+    "glbBytes": 4161408,
+    "buildSeconds": 7.7
+  },
+  "externalMeshes": {
+    "../../../_shared/meshes/00bd22cd719b5ed61d6255eb80ad5029ee22c7178a564abf352d2722214f2d84.glb": "78641f55efd17a24121d66d773d4f825631ae4a9b029353a1e205fe49d417e9b",
+    "../../../_shared/meshes/39bcf527caaa375613627862194b4b146dafe974199c9a41b124479972a1270e.glb": "2e46aaa6e246f1901de73af144a2e3205d04cd7c67e341760fcfd90ce7fbf4be",
+    "../../../_shared/meshes/4cd5d409ff8acb861cdb92aaaecfb25d492c96f16c31907c6954cc11d532e16a.glb": "fefeaaf6969be9695ef34fa42bef6f8b9b42f425044972e344f8c5c338cbd7ef",
+    "../../../_shared/meshes/53ef7a74a1e9777b1e8aaf3b761927e825238b3ed3428ba109e520450efd6777.glb": "c243d95f92cc94a7f67c6aca5af3838a9f72692d0cfb2c0a94b74f4993722de9",
+    "../../../_shared/meshes/859ad355c6004dcc270be170d9e24e3cac63de5f19a1ba59d40d28bfcaa691c9.glb": "8ed54ebc8d3794a4d72cca412eeeb05b149d044edcdf8270c8caa0156bc2082f",
+    "../../../_shared/meshes/9fbc4ee38e71b0233c99adfc77fe5fc03c4402a6e98404489060317744ec630b.glb": "4129e264dc0a94c3200946be8fbef1ef0374e38295abdda80b9df28116e8dee2",
+    "../../../_shared/meshes/afc59e93c0cb4ca25aac6629d6ea8353ec29cd16e6ad8459dc78524a5549b82e.glb": "9b5c4c7be41c65f84ba2a9f6c14c54c45fa917e0ea46c9addb42afd7f2f8e8cf",
+    "../../../_shared/meshes/b4a42b42af3836048d5107c00085832e90ce3b013fa7dc5d66fa88df76e0fa29.glb": "938c40488d7d9d0bf77d101e939cb85af7fca96a2efbe2a2bd99159189b9dd7e",
+    "../../../_shared/meshes/dd00543c881bb3f4c06eb6ef5ff073f72e3c0eee66c17537009415cec6e5eb4e.glb": "63bf060affd0b23199b046a13e5a26aaa792e938251fbf92decc8c7f70e79236",
+    "../../../_shared/meshes/fdfc2a1faddf409978437349f607bab7c45f7223ef35e54765b317c72394dcec.glb": "8b2bcc84a03390eafbb37ab4df03f09aa4270063de47bd69ddff42a8bd01d612"
+  },
+  "externalResources": {
+    "../../../_shared/images/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",
+    "../../../_shared/images/1300c345ddfa32e06d58ebf00aae3d2deaac6e1c93695953ed81eef5550c6e33.png": "1300c345ddfa32e06d58ebf00aae3d2deaac6e1c93695953ed81eef5550c6e33",
+    "../../../_shared/images/1536228a69528acd56c649c5555e5a3dbbd25e8324cd891322046f5afecf7e6d.png": "1536228a69528acd56c649c5555e5a3dbbd25e8324cd891322046f5afecf7e6d",
+    "../../../_shared/images/1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac.png": "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac",
+    "../../../_shared/images/4f84c72d31eb2d3e1246047a0ad955ea041b62ac42c959c307d9b113195fe755.png": "4f84c72d31eb2d3e1246047a0ad955ea041b62ac42c959c307d9b113195fe755",
+    "../../../_shared/images/597e89848cf9fb902f2f05921643683cea4b6784402a42659921e5c416c93a54.png": "597e89848cf9fb902f2f05921643683cea4b6784402a42659921e5c416c93a54",
+    "../../../_shared/images/ccada634290b55490b333393c4213a30b597ed8474a08060332921e371b38760.png": "ccada634290b55490b333393c4213a30b597ed8474a08060332921e371b38760",
+    "../../../_shared/images/dc007b56b0106096b20579a6da6fdfb4d67e9fd5fac656fc47a87d66113be95f.png": "dc007b56b0106096b20579a6da6fdfb4d67e9fd5fac656fc47a87d66113be95f",
+    "../../../_shared/images/ef0b274710b119d7754b3b2431d56f4cb486bba5758b35544aa086f2d823d77a.png": "ef0b274710b119d7754b3b2431d56f4cb486bba5758b35544aa086f2d823d77a"
+  }
+}

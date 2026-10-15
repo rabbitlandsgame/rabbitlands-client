@@ -1,0 +1,257 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 125,
+    "walkSurfaceTriangles": 411402,
+    "tilesSampled": 147456,
+    "groundingMisses": 2032,
+    "groundingMissFraction": 0.01378,
+    "surfaceDiscontinuities": 287,
+    "spawnPoints": 3
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_RAY_MISS",
+      "message": "2032 server tiles have no walk surface under them; a character there would fall back to walkingHeight=40.8",
+      "detail": [
+        [
+          199,
+          0,
+          83.0,
+          116.0
+        ],
+        [
+          200,
+          0,
+          84.0,
+          116.0
+        ],
+        [
+          201,
+          0,
+          85.0,
+          116.0
+        ],
+        [
+          202,
+          0,
+          86.0,
+          116.0
+        ],
+        [
+          203,
+          0,
+          87.0,
+          116.0
+        ],
+        [
+          204,
+          0,
+          88.0,
+          116.0
+        ],
+        [
+          205,
+          0,
+          89.0,
+          116.0
+        ],
+        [
+          206,
+          0,
+          90.0,
+          116.0
+        ],
+        [
+          207,
+          0,
+          91.0,
+          116.0
+        ],
+        [
+          208,
+          0,
+          92.0,
+          116.0
+        ],
+        [
+          209,
+          0,
+          93.0,
+          116.0
+        ],
+        [
+          210,
+          0,
+          94.0,
+          116.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "287 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          42,
+          376,
+          52.58
+        ],
+        [
+          42,
+          376,
+          52.43
+        ],
+        [
+          44,
+          375,
+          51.5
+        ],
+        [
+          44,
+          375,
+          51.36
+        ],
+        [
+          51,
+          371,
+          47.91
+        ],
+        [
+          50,
+          372,
+          47.56
+        ],
+        [
+          53,
+          370,
+          46.89
+        ],
+        [
+          53,
+          370,
+          46.74
+        ],
+        [
+          55,
+          369,
+          45.91
+        ],
+        [
+          55,
+          369,
+          45.76
+        ],
+        [
+          57,
+          368,
+          44.84
+        ],
+        [
+          61,
+          365,
+          43.16
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_BELOW_SURFACE",
+      "message": "landmark 'great-tree' is 12.10 m below the surface",
+      "detail": [
+        73.2229,
+        56.18,
+        -185.431
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_BELOW_SURFACE",
+      "message": "landmark 'deep-grove' is 12.46 m below the surface",
+      "detail": [
+        -48.4713,
+        28.7,
+        -224.9205
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "COLLISION_SURFACE_MISMATCH",
+      "message": "17 sampled walkable cells disagree with the rendered walk surface",
+      "detail": [
+        {
+          "cell": [
+            408,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            420,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            432,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            444,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            456,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            468,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            480,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            492,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            504,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            516,
+            0
+          ],
+          "issue": "no-surface"
+        }
+      ]
+    }
+  ]
+}

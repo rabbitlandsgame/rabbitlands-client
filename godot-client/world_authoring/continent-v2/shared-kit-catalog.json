@@ -1,0 +1,2173 @@
+{
+ "schema": "eloria-shared-kit-catalog-v1",
+ "sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
+ "sourceFiles": {
+  "godot-client/world_authoring/continent-v2/territories.json": {
+   "sha256": "da8faf86b73cfcdd41cce7b263af3b547ad20e643034ce96c95af2fc77e11e9a",
+   "bytes": 1314
+  },
+  "godot-client/world_authoring/regions/gull_skerries/gull_skerries.tscn": {
+   "sha256": "0ad21f70113aee75ff95e03ce882947457b75265b5f447e87865a689057d046a",
+   "bytes": 841604
+  },
+  "godot-client/world_authoring/regions/sw_isle/sw_isle.tscn": {
+   "sha256": "4e61457d63f7effb4f74d4ad53ce8bf13c90c06c14409bfddb7812706307eb08",
+   "bytes": 14760349
+  },
+  "godot-client/world_authoring/regions/tollholms/tollholms.tscn": {
+   "sha256": "96341027aee45d5c3a0298bae966c1e62a668237eebd2e07eab092c2652720e2",
+   "bytes": 4134752
+  }
+ },
+ "sourcePlacements": 17401,
+ "models": {
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-beach-flower-mat-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-beach-flower-mat-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-beach-palm-tree-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-beach-palm-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-beach-palm-tree-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-beach-palm-tree-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-beach-palm-tree-3.glb": {
+   "catalogAssetId": "gull_skerries:kit-beach-palm-tree-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-beach-palm-tree-4.glb": {
+   "catalogAssetId": "gull_skerries:kit-beach-palm-tree-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-beach-rocks-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-beach-rocks-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-coastal-boulders-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-coastal-boulders-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-3.glb": {
+   "catalogAssetId": "gull_skerries:kit-coastal-boulders-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-4.glb": {
+   "catalogAssetId": "gull_skerries:kit-coastal-boulders-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-coastal-rock-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-coastal-rock-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3.glb": {
+   "catalogAssetId": "gull_skerries:kit-coastal-rock-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-cypress-tree-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-cypress-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-driftwood-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-driftwood-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-driftwood-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-driftwood-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-dune-grass-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-dune-grass-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-dune-grass-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-dune-grass-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-fan-palm-tree-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-fan-palm-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-flower-meadow-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-flower-meadow-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-flower-meadow-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-flower-meadow-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-flower-meadow-3.glb": {
+   "catalogAssetId": "gull_skerries:kit-flower-meadow-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-flower-meadow-4.glb": {
+   "catalogAssetId": "gull_skerries:kit-flower-meadow-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-flower-shrub-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-flower-shrub-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-flower-shrub-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-flower-shrub-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-flower-shrub-3.glb": {
+   "catalogAssetId": "gull_skerries:kit-flower-shrub-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-jungle-undergrowth-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-jungle-undergrowth-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-kelp-wrack-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-kelp-wrack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-sea-stack-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-sea-stack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-sea-stack-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-sea-stack-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-shell-scree-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-shell-scree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-sw-broadleaf-tree-a.glb": {
+   "catalogAssetId": "gull_skerries:kit-sw-broadleaf-tree-a",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-sw-broadleaf-tree-b.glb": {
+   "catalogAssetId": "gull_skerries:kit-sw-broadleaf-tree-b",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-sw-sea-cliff-face.glb": {
+   "catalogAssetId": "gull_skerries:kit-sw-sea-cliff-face",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-tree-fern-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-tree-fern-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-umbrella-pine-tree-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-umbrella-pine-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-undergrowth-1.glb": {
+   "catalogAssetId": "gull_skerries:kit-undergrowth-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-undergrowth-2.glb": {
+   "catalogAssetId": "gull_skerries:kit-undergrowth-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-undergrowth-3.glb": {
+   "catalogAssetId": "gull_skerries:kit-undergrowth-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-undergrowth-4.glb": {
+   "catalogAssetId": "gull_skerries:kit-undergrowth-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-undergrowth-5.glb": {
+   "catalogAssetId": "gull_skerries:kit-undergrowth-5",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-apple-cart-1.glb": {
+   "catalogAssetId": "sw_isle:kit-apple-cart-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-banyan-tree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-banyan-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-barrel-stack-1.glb": {
+   "catalogAssetId": "sw_isle:kit-barrel-stack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-flower-mat-1.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-flower-mat-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1-clear.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-palm-tree-1-clear",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-palm-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-2-clear.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-palm-tree-2-clear",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-2.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-palm-tree-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-palm-tree-3-clear",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-palm-tree-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-4.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-palm-tree-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-rocks-1.glb": {
+   "catalogAssetId": "sw_isle:kit-beach-rocks-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beehive-skeps-1.glb": {
+   "catalogAssetId": "sw_isle:kit-beehive-skeps-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-blue-dome-kiosk-1.glb": {
+   "catalogAssetId": "sw_isle:kit-blue-dome-kiosk-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-bougainvillea-shrub-1.glb": {
+   "catalogAssetId": "sw_isle:kit-bougainvillea-shrub-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-citrus-planter-1.glb": {
+   "catalogAssetId": "sw_isle:kit-citrus-planter-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb": {
+   "catalogAssetId": "sw_isle:kit-coastal-boulders-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb": {
+   "catalogAssetId": "sw_isle:kit-coastal-boulders-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb": {
+   "catalogAssetId": "sw_isle:kit-coastal-boulders-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb": {
+   "catalogAssetId": "sw_isle:kit-coastal-boulders-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb": {
+   "catalogAssetId": "sw_isle:kit-coastal-rock-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb": {
+   "catalogAssetId": "sw_isle:kit-coastal-rock-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb": {
+   "catalogAssetId": "sw_isle:kit-coastal-rock-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-crate-stack-1.glb": {
+   "catalogAssetId": "sw_isle:kit-crate-stack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-crown-fountain-1.glb": {
+   "catalogAssetId": "sw_isle:kit-crown-fountain-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-cypress-tree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-cypress-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-driftwood-1.glb": {
+   "catalogAssetId": "sw_isle:kit-driftwood-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-driftwood-2.glb": {
+   "catalogAssetId": "sw_isle:kit-driftwood-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-dune-grass-1.glb": {
+   "catalogAssetId": "sw_isle:kit-dune-grass-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-dune-grass-2.glb": {
+   "catalogAssetId": "sw_isle:kit-dune-grass-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-fan-palm-tree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-fan-palm-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-feed-sacks-1.glb": {
+   "catalogAssetId": "sw_isle:kit-feed-sacks-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-fish-crates-1.glb": {
+   "catalogAssetId": "sw_isle:kit-fish-crates-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-fisher-hut-1.glb": {
+   "catalogAssetId": "sw_isle:kit-fisher-hut-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-fishing-boat-1.glb": {
+   "catalogAssetId": "sw_isle:kit-fishing-boat-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-fishing-boat-2.glb": {
+   "catalogAssetId": "sw_isle:kit-fishing-boat-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flame-tree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-flame-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-cart-1.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-cart-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-meadow-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-2.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-meadow-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-3.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-meadow-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-4.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-meadow-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-planter-1.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-planter-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-1.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-shrub-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-2.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-shrub-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-3.glb": {
+   "catalogAssetId": "sw_isle:kit-flower-shrub-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-garden-hedge-1.glb": {
+   "catalogAssetId": "sw_isle:kit-garden-hedge-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-garden-pergola-1.glb": {
+   "catalogAssetId": "sw_isle:kit-garden-pergola-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-garden-urn-1.glb": {
+   "catalogAssetId": "sw_isle:kit-garden-urn-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-harbour-banner-1.glb": {
+   "catalogAssetId": "sw_isle:kit-harbour-banner-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-harbour-banner-2.glb": {
+   "catalogAssetId": "sw_isle:kit-harbour-banner-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-harbour-crane-1.glb": {
+   "catalogAssetId": "sw_isle:kit-harbour-crane-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-jungle-undergrowth-1.glb": {
+   "catalogAssetId": "sw_isle:kit-jungle-undergrowth-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-jungle-undergrowth-2.glb": {
+   "catalogAssetId": "sw_isle:kit-jungle-undergrowth-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-kelp-wrack-1.glb": {
+   "catalogAssetId": "sw_isle:kit-kelp-wrack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lamp-buoy-1.glb": {
+   "catalogAssetId": "sw_isle:kit-lamp-buoy-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb": {
+   "catalogAssetId": "sw_isle:kit-lantern-post-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lemon-tree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-lemon-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lobster-pots-1.glb": {
+   "catalogAssetId": "sw_isle:kit-lobster-pots-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-marble-balustrade-1.glb": {
+   "catalogAssetId": "sw_isle:kit-marble-balustrade-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-market-canopy-0.glb": {
+   "catalogAssetId": "sw_isle:kit-market-canopy-0",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-market-canopy-1.glb": {
+   "catalogAssetId": "sw_isle:kit-market-canopy-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-market-canopy-2.glb": {
+   "catalogAssetId": "sw_isle:kit-market-canopy-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-mooring-buoy-1.glb": {
+   "catalogAssetId": "sw_isle:kit-mooring-buoy-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-mooring-posts-1.glb": {
+   "catalogAssetId": "sw_isle:kit-mooring-posts-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-net-drying-frame-1.glb": {
+   "catalogAssetId": "sw_isle:kit-net-drying-frame-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-notice-board-1.glb": {
+   "catalogAssetId": "sw_isle:kit-notice-board-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-olive-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb": {
+   "catalogAssetId": "sw_isle:kit-olive-tree-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-produce-stall-1.glb": {
+   "catalogAssetId": "sw_isle:kit-produce-stall-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-quay-steps-1.glb": {
+   "catalogAssetId": "sw_isle:kit-quay-steps-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-reflecting-pool-1.glb": {
+   "catalogAssetId": "sw_isle:kit-reflecting-pool-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-rope-coils-1.glb": {
+   "catalogAssetId": "sw_isle:kit-rope-coils-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-rose-arch-1.glb": {
+   "catalogAssetId": "sw_isle:kit-rose-arch-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-rowing-boat-1.glb": {
+   "catalogAssetId": "sw_isle:kit-rowing-boat-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-stack-1.glb": {
+   "catalogAssetId": "sw_isle:kit-sea-stack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-stack-2.glb": {
+   "catalogAssetId": "sw_isle:kit-sea-stack-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb": {
+   "catalogAssetId": "sw_isle:kit-sea-wall-segment-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-shell-scree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-shell-scree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sloop-1.glb": {
+   "catalogAssetId": "sw_isle:kit-sloop-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-bench-1.glb": {
+   "catalogAssetId": "sw_isle:kit-stone-bench-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-landing-stage-1.glb": {
+   "catalogAssetId": "sw_isle:kit-stone-landing-stage-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-well-1.glb": {
+   "catalogAssetId": "sw_isle:kit-stone-well-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sundial-plinth-1.glb": {
+   "catalogAssetId": "sw_isle:kit-sundial-plinth-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-blossom-tree",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-broadleaf-tree-a.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-broadleaf-tree-a",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-broadleaf-tree-b.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-broadleaf-tree-b",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-arch-ramp-g037.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-arch-ramp-g037",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-arch-ramp-g053.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-arch-ramp-g053",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-arch-span-gate.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-arch-span-gate",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-arch-span.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-arch-span",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b12-120.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b12-120",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b12-121.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b12-121",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b12-122.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b12-122",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b12-123.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b12-123",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b12-124.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b12-124",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b12-125.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b12-125",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b12-126.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b12-126",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-001.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-001",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-002.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-002",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-003.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-003",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-004.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-004",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-005.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-005",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-006.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-006",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-007.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-007",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-008.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-008",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-009.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-009",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-010.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-010",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-011.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-011",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-012.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-012",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-013.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-013",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-014.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-014",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-015.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-015",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-016.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-016",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-017.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-017",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-018.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-018",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-019.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-019",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-020.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-020",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-021.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-021",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-022.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-022",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-023.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-023",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-024.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-024",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-025.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-025",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b13-026.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b13-026",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-027.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-027",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-028.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-028",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-029.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-029",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-030.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-030",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-031.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-031",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-032.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-032",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-033.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-033",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-034.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-034",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-035.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-035",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-036.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-036",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-037.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-037",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-038.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-038",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-039.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-039",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-040.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-040",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-041.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-041",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-042.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-042",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-043.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-043",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-044.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-044",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-045.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-045",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-046.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-046",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-047.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-047",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-048.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-048",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-049.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-049",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-050.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-050",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-051.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-051",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-052.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-052",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-053.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-053",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-054.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-054",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-055.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-055",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-056.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-056",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-057.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-057",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-058.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-058",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-059.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-059",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-060.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-060",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-061.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-061",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-062.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-062",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-063.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-063",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-064.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-064",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-065.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-065",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-066.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-066",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-067.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-067",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-068.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-068",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-069.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-069",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b14-070.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b14-070",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-071.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-071",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-072.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-072",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-073.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-073",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-074.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-074",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-075.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-075",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-076.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-076",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-077.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-077",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-078.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-078",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-079.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-079",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-080.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-080",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-081.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-081",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-082.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-082",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-083.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-083",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-084.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-084",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-085.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-085",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-086.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-086",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-087.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-087",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-088.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-088",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-089.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-089",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-090.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-090",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-091.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-091",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-092.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-092",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-093.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-093",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-094.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-094",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-095.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-095",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-096.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-096",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-097.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-097",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-098.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-098",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-099.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-099",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-100.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-100",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-101.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-101",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-102.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-102",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-103.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-103",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-104.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-104",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-105.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-105",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-106.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-106",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-107.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-107",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-108.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-108",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-109.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-109",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-110.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-110",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-111.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-111",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-112.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-112",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-113.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-113",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-114.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-114",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-115.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-115",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-116.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-116",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-117.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-117",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-118.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-118",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b22-119.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b22-119",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b24-127.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b24-127",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b24-128.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b24-128",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-joint-deck-b24-129.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-joint-deck-b24-129",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-001.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-001",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-002.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-002",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-003.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-003",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-004.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-004",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-005.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-005",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-006.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-006",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-007.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-007",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-008.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-008",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-009.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-009",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-010.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-010",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-011.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-011",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-012.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-012",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-013.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-013",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-014.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-014",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-015.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-015",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-016.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-016",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-018.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-018",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-019.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-019",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-020.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-020",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-021.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-021",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-022.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-022",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-023.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-023",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-024.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-024",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-025.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-025",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-026.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-026",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-027.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-027",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-028.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-028",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-029.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-029",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-030.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-030",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-031.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-031",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-032.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-032",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-033.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-033",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-034.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-034",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-035.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-035",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-036.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-036",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-037.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-037",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-038.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-038",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-039.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-039",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-040.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-040",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-041.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-041",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-042.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-042",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-043.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-043",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-044.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-044",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-045.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-045",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-046.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-046",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-047.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-047",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-048.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-048",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-049.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-049",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-050.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-050",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-051.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-051",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-052.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-052",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-053.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-053",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-054.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-054",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-055.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-055",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-056.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-056",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-057.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-057",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-058.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-058",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-059.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-059",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-060.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-060",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-062.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-062",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-063.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-063",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-064.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-064",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-065.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-065",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-066.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-066",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-067.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-067",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-068.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-068",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-069.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-069",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-070.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-070",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-071.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-071",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-072.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-072",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-073.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-073",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-074.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-074",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-075.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-075",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-076.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-076",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-077.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-077",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-080.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-080",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-081.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-081",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-082.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-082",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-083.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-083",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-084.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-084",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-085.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-085",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-086.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-086",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-087.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-087",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-088.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-088",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-089.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-089",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-090.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-090",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-091.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-091",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-092.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-092",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-093.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-093",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-094.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-094",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-095.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-095",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-096.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-096",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-097.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-097",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-098.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-098",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-099.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-099",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-100.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-100",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-101.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-101",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-102.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-102",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-103.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-103",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-104.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-104",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-105.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-105",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-106.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-106",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-107.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-107",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-108.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-108",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-109.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-109",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-110.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-110",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-111.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-111",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-112.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-112",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-113.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-113",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-114.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-114",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-115.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-115",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-116.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-116",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-119.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-119",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-120.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-120",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-121.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-121",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-122.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-122",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-123.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-123",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-124.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-124",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-125.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-125",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-126.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-126",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-128.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-128",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-129.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-129",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-130.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-130",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-131.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-131",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-132.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-132",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-133.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-133",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-134.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-134",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-135.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-135",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-144.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-144",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-145.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-145",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-146.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-146",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-147.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-147",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-148.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-148",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-149.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-149",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-150.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-150",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-151.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-151",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-152.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-152",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-span-153.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-causeway-support-span-153",
+   "collisionRole": "none"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-curtain-revetment.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-curtain-revetment",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-curtain-wall.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-curtain-wall",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-domed-temple.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-domed-temple",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-ferry-ship.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-ferry-ship",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-5-10.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-5-10",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-5-11.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-5-11",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-6-10.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-6-10",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-6-12.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-6-12",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-10.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-7-10",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-11.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-7-11",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-12.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-7-12",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-8-10.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-8-10",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-8-11.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-garden-paving-8-11",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-gatehouse.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-gatehouse",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-harbour-tower.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-harbour-tower",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-landing-beacon.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-landing-beacon",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-lighthouse-green.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-lighthouse-green",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-lighthouse-red.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-lighthouse-red",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-palace-keep.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-palace-keep",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-plaza-rosette.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-plaza-rosette",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-sea-cliff-corner.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-sea-cliff-corner",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-sea-cliff-face.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-sea-cliff-face",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-townhouse-blue.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-townhouse-blue",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-townhouse-dome-arcade.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-townhouse-dome-arcade",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span-long24.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-trestle-pier-span-long24",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-trestle-pier-span",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-wall-bastion.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-wall-bastion",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-wall-tower-round.glb": {
+   "catalogAssetId": "sw_isle:kit-sw-wall-tower-round",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-teal-dome-gazebo-1.glb": {
+   "catalogAssetId": "sw_isle:kit-teal-dome-gazebo-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-topiary-cone-1.glb": {
+   "catalogAssetId": "sw_isle:kit-topiary-cone-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-1.glb": {
+   "catalogAssetId": "sw_isle:kit-tree-fern-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-2.glb": {
+   "catalogAssetId": "sw_isle:kit-tree-fern-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-umbrella-pine-tree-1.glb": {
+   "catalogAssetId": "sw_isle:kit-umbrella-pine-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-1.glb": {
+   "catalogAssetId": "sw_isle:kit-undergrowth-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-2.glb": {
+   "catalogAssetId": "sw_isle:kit-undergrowth-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-3.glb": {
+   "catalogAssetId": "sw_isle:kit-undergrowth-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-4.glb": {
+   "catalogAssetId": "sw_isle:kit-undergrowth-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-5.glb": {
+   "catalogAssetId": "sw_isle:kit-undergrowth-5",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/sw_isle/assets/prototypes/kit-waterfall-sheet-1.glb": {
+   "catalogAssetId": "sw_isle:kit-waterfall-sheet-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-apple-cart-1.glb": {
+   "catalogAssetId": "tollholms:kit-apple-cart-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-barrel-stack-1.glb": {
+   "catalogAssetId": "tollholms:kit-barrel-stack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-flower-mat-1.glb": {
+   "catalogAssetId": "tollholms:kit-beach-flower-mat-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-palm-tree-1.glb": {
+   "catalogAssetId": "tollholms:kit-beach-palm-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-palm-tree-2.glb": {
+   "catalogAssetId": "tollholms:kit-beach-palm-tree-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-palm-tree-3.glb": {
+   "catalogAssetId": "tollholms:kit-beach-palm-tree-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-palm-tree-4.glb": {
+   "catalogAssetId": "tollholms:kit-beach-palm-tree-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb": {
+   "catalogAssetId": "tollholms:kit-beach-rocks-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-beehive-skeps-1.glb": {
+   "catalogAssetId": "tollholms:kit-beehive-skeps-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-bougainvillea-shrub-1.glb": {
+   "catalogAssetId": "tollholms:kit-bougainvillea-shrub-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-cabbage-rows-1.glb": {
+   "catalogAssetId": "tollholms:kit-cabbage-rows-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-citrus-planter-1.glb": {
+   "catalogAssetId": "tollholms:kit-citrus-planter-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-boulders-1.glb": {
+   "catalogAssetId": "tollholms:kit-coastal-boulders-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-boulders-2.glb": {
+   "catalogAssetId": "tollholms:kit-coastal-boulders-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-boulders-3.glb": {
+   "catalogAssetId": "tollholms:kit-coastal-boulders-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-boulders-4.glb": {
+   "catalogAssetId": "tollholms:kit-coastal-boulders-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-1.glb": {
+   "catalogAssetId": "tollholms:kit-coastal-rock-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-2.glb": {
+   "catalogAssetId": "tollholms:kit-coastal-rock-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb": {
+   "catalogAssetId": "tollholms:kit-coastal-rock-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-crate-stack-1.glb": {
+   "catalogAssetId": "tollholms:kit-crate-stack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-cypress-tree-1.glb": {
+   "catalogAssetId": "tollholms:kit-cypress-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-dovecote-1.glb": {
+   "catalogAssetId": "tollholms:kit-dovecote-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-driftwood-1.glb": {
+   "catalogAssetId": "tollholms:kit-driftwood-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-driftwood-2.glb": {
+   "catalogAssetId": "tollholms:kit-driftwood-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-drystone-dyke-1.glb": {
+   "catalogAssetId": "tollholms:kit-drystone-dyke-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-dune-grass-1.glb": {
+   "catalogAssetId": "tollholms:kit-dune-grass-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-dune-grass-2.glb": {
+   "catalogAssetId": "tollholms:kit-dune-grass-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-fan-palm-tree-1.glb": {
+   "catalogAssetId": "tollholms:kit-fan-palm-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-feed-sacks-1.glb": {
+   "catalogAssetId": "tollholms:kit-feed-sacks-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-fish-crates-1.glb": {
+   "catalogAssetId": "tollholms:kit-fish-crates-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-fisher-hut-1.glb": {
+   "catalogAssetId": "tollholms:kit-fisher-hut-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-1.glb": {
+   "catalogAssetId": "tollholms:kit-fishing-boat-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb": {
+   "catalogAssetId": "tollholms:kit-fishing-boat-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flame-tree-1.glb": {
+   "catalogAssetId": "tollholms:kit-flame-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-cart-1.glb": {
+   "catalogAssetId": "tollholms:kit-flower-cart-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-meadow-1.glb": {
+   "catalogAssetId": "tollholms:kit-flower-meadow-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-meadow-2.glb": {
+   "catalogAssetId": "tollholms:kit-flower-meadow-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-meadow-3.glb": {
+   "catalogAssetId": "tollholms:kit-flower-meadow-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-meadow-4.glb": {
+   "catalogAssetId": "tollholms:kit-flower-meadow-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-planter-1.glb": {
+   "catalogAssetId": "tollholms:kit-flower-planter-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb": {
+   "catalogAssetId": "tollholms:kit-flower-shrub-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb": {
+   "catalogAssetId": "tollholms:kit-flower-shrub-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb": {
+   "catalogAssetId": "tollholms:kit-flower-shrub-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb": {
+   "catalogAssetId": "tollholms:kit-harbour-banner-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-2.glb": {
+   "catalogAssetId": "tollholms:kit-harbour-banner-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-haven-townhouse-1.glb": {
+   "catalogAssetId": "tollholms:kit-haven-townhouse-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-haven-townhouse-2.glb": {
+   "catalogAssetId": "tollholms:kit-haven-townhouse-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-haven-townhouse-3.glb": {
+   "catalogAssetId": "tollholms:kit-haven-townhouse-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-jungle-undergrowth-1.glb": {
+   "catalogAssetId": "tollholms:kit-jungle-undergrowth-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-kelp-wrack-1.glb": {
+   "catalogAssetId": "tollholms:kit-kelp-wrack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-lamp-buoy-1.glb": {
+   "catalogAssetId": "tollholms:kit-lamp-buoy-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb": {
+   "catalogAssetId": "tollholms:kit-lantern-post-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-lemon-tree-1.glb": {
+   "catalogAssetId": "tollholms:kit-lemon-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-lobster-pots-1.glb": {
+   "catalogAssetId": "tollholms:kit-lobster-pots-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-market-canopy-1.glb": {
+   "catalogAssetId": "tollholms:kit-market-canopy-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-market-canopy-2.glb": {
+   "catalogAssetId": "tollholms:kit-market-canopy-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-merchant-house-1.glb": {
+   "catalogAssetId": "tollholms:kit-merchant-house-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-mooring-buoy-1.glb": {
+   "catalogAssetId": "tollholms:kit-mooring-buoy-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-mooring-posts-1.glb": {
+   "catalogAssetId": "tollholms:kit-mooring-posts-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-net-drying-frame-1.glb": {
+   "catalogAssetId": "tollholms:kit-net-drying-frame-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-net-shed-1.glb": {
+   "catalogAssetId": "tollholms:kit-net-shed-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-notice-board-1.glb": {
+   "catalogAssetId": "tollholms:kit-notice-board-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-olive-tree-1.glb": {
+   "catalogAssetId": "tollholms:kit-olive-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-olive-tree-2.glb": {
+   "catalogAssetId": "tollholms:kit-olive-tree-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-produce-stall-1.glb": {
+   "catalogAssetId": "tollholms:kit-produce-stall-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-quay-steps-1.glb": {
+   "catalogAssetId": "tollholms:kit-quay-steps-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-rope-coils-1.glb": {
+   "catalogAssetId": "tollholms:kit-rope-coils-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-rowing-boat-1.glb": {
+   "catalogAssetId": "tollholms:kit-rowing-boat-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sea-stack-1.glb": {
+   "catalogAssetId": "tollholms:kit-sea-stack-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sea-stack-2.glb": {
+   "catalogAssetId": "tollholms:kit-sea-stack-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sea-wall-segment-1.glb": {
+   "catalogAssetId": "tollholms:kit-sea-wall-segment-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb": {
+   "catalogAssetId": "tollholms:kit-shell-scree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sloop-1.glb": {
+   "catalogAssetId": "tollholms:kit-sloop-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-split-rail-fence-1.glb": {
+   "catalogAssetId": "tollholms:kit-split-rail-fence-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-stone-bench-1.glb": {
+   "catalogAssetId": "tollholms:kit-stone-bench-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-stone-landing-stage-1.glb": {
+   "catalogAssetId": "tollholms:kit-stone-landing-stage-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-stone-well-1.glb": {
+   "catalogAssetId": "tollholms:kit-stone-well-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-blossom-tree.glb": {
+   "catalogAssetId": "tollholms:kit-sw-blossom-tree",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-broadleaf-tree-a.glb": {
+   "catalogAssetId": "tollholms:kit-sw-broadleaf-tree-a",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-broadleaf-tree-b.glb": {
+   "catalogAssetId": "tollholms:kit-sw-broadleaf-tree-b",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-causeway-arch-span.glb": {
+   "catalogAssetId": "tollholms:kit-sw-causeway-arch-span",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-ferry-ship.glb": {
+   "catalogAssetId": "tollholms:kit-sw-ferry-ship",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-harbour-tower.glb": {
+   "catalogAssetId": "tollholms:kit-sw-harbour-tower",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb": {
+   "catalogAssetId": "tollholms:kit-sw-trestle-pier-span-long24",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb": {
+   "catalogAssetId": "tollholms:kit-sw-trestle-pier-span",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-terracotta-pots-1.glb": {
+   "catalogAssetId": "tollholms:kit-terracotta-pots-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-th-ringholm-watch-tower.glb": {
+   "catalogAssetId": "tollholms:kit-th-ringholm-watch-tower",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-th-tollholm-boathouse.glb": {
+   "catalogAssetId": "tollholms:kit-th-tollholm-boathouse",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-tree-fern-1.glb": {
+   "catalogAssetId": "tollholms:kit-tree-fern-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-tree-fern-2.glb": {
+   "catalogAssetId": "tollholms:kit-tree-fern-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-umbrella-pine-tree-1.glb": {
+   "catalogAssetId": "tollholms:kit-umbrella-pine-tree-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-undergrowth-1.glb": {
+   "catalogAssetId": "tollholms:kit-undergrowth-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-undergrowth-2.glb": {
+   "catalogAssetId": "tollholms:kit-undergrowth-2",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-undergrowth-3.glb": {
+   "catalogAssetId": "tollholms:kit-undergrowth-3",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-undergrowth-4.glb": {
+   "catalogAssetId": "tollholms:kit-undergrowth-4",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-undergrowth-5.glb": {
+   "catalogAssetId": "tollholms:kit-undergrowth-5",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-vineyard-rows-1-light.glb": {
+   "catalogAssetId": "tollholms:kit-vineyard-rows-1-light",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-wheat-stooks-1.glb": {
+   "catalogAssetId": "tollholms:kit-wheat-stooks-1",
+   "collisionRole": "solid"
+  },
+  "res://world_authoring/regions/tollholms/assets/prototypes/kit-windmill-1.glb": {
+   "catalogAssetId": "tollholms:kit-windmill-1",
+   "collisionRole": "solid"
+  }
+ }
+}

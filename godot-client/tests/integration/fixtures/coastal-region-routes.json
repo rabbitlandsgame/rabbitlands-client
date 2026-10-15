@@ -1,0 +1,2685 @@
+[
+  {
+    "id": "westhaven-quay-services",
+    "map": "westhaven",
+    "start": [
+      154,
+      165
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          144,
+          172
+        ],
+        "label": "information",
+        "capture": "westhaven-information",
+        "useObject": 13,
+        "expectText": "The local board records roads, dangers, and current work in Westhaven."
+      },
+      {
+        "tile": [
+          152,
+          174
+        ],
+        "label": "storage",
+        "capture": "westhaven-storage",
+        "useObject": 14,
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          163,
+          172
+        ],
+        "label": "crafting",
+        "capture": "westhaven-crafting",
+        "useObject": 15,
+        "expectText": "This field station supports ordinary mixing and crafting."
+      },
+      {
+        "tile": [
+          168,
+          166
+        ],
+        "label": "training",
+        "capture": "westhaven-training",
+        "useObject": 16,
+        "expectText": "The practice post lists your recent combat results."
+      }
+    ]
+  },
+  {
+    "id": "westhaven-market-civic-circuit",
+    "map": "westhaven",
+    "start": [
+      154,
+      165
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          97,
+          181
+        ],
+        "label": "market-ramp",
+        "capture": "westhaven-market-ramp"
+      },
+      {
+        "tile": [
+          131,
+          206
+        ],
+        "label": "lower-street"
+      },
+      {
+        "tile": [
+          145,
+          232
+        ],
+        "label": "civic-climb"
+      },
+      {
+        "tile": [
+          113,
+          255
+        ],
+        "label": "long-arcade",
+        "capture": "westhaven-long-arcade"
+      },
+      {
+        "tile": [
+          162,
+          340
+        ],
+        "label": "crown-terrace",
+        "capture": "westhaven-crown-terrace"
+      },
+      {
+        "tile": [
+          225,
+          327
+        ],
+        "label": "north-gate"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-upland-fields",
+    "map": "westhaven",
+    "start": [
+      300,
+      265
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          260,
+          257
+        ],
+        "label": "wheat-working",
+        "capture": "westhaven-wheat-working"
+      },
+      {
+        "tile": [
+          280,
+          280
+        ],
+        "label": "farm-approach"
+      },
+      {
+        "tile": [
+          307,
+          299
+        ],
+        "label": "sage-working",
+        "capture": "westhaven-sage-working"
+      },
+      {
+        "tile": [
+          337,
+          329
+        ],
+        "label": "upland-encounter-edge",
+        "capture": "westhaven-upland-encounter-edge"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-custom-house-door",
+    "map": "westhaven",
+    "start": [
+      77,
+      172
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          69,
+          180
+        ],
+        "destination": "westhaven_insides",
+        "label": "custom-house-door",
+        "capture": "westhaven-custom-house-door-inside"
+      },
+      {
+        "tile": [
+          33,
+          234
+        ],
+        "label": "clear-interior-threshold"
+      },
+      {
+        "tile": [
+          35,
+          235
+        ],
+        "destination": "westhaven",
+        "label": "return",
+        "capture": "westhaven-custom-house-door-return"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-bonded-vaults-door",
+    "map": "westhaven",
+    "start": [
+      97,
+      180
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          91,
+          193
+        ],
+        "destination": "westhaven_insides",
+        "label": "bonded-vaults-door",
+        "capture": "westhaven-bonded-vaults-door-inside"
+      },
+      {
+        "tile": [
+          143,
+          235
+        ],
+        "label": "clear-interior-threshold"
+      },
+      {
+        "tile": [
+          145,
+          236
+        ],
+        "destination": "westhaven",
+        "label": "return",
+        "capture": "westhaven-bonded-vaults-door-return"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-lamp-rock-door",
+    "map": "westhaven",
+    "start": [
+      279,
+      167
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          313,
+          154
+        ],
+        "label": "yard-bridge",
+        "capture": "westhaven-yard-bridge"
+      },
+      {
+        "tile": [
+          382,
+          148
+        ],
+        "label": "lamp-neck-north"
+      },
+      {
+        "tile": [
+          374,
+          110
+        ],
+        "label": "lamp-neck-south",
+        "capture": "westhaven-lamp-neck-south"
+      },
+      {
+        "tile": [
+          335,
+          92
+        ],
+        "destination": "westhaven_insides",
+        "label": "lamp-rock-door",
+        "capture": "westhaven-lamp-rock-door-inside"
+      },
+      {
+        "tile": [
+          153,
+          94
+        ],
+        "label": "clear-interior-threshold"
+      },
+      {
+        "tile": [
+          155,
+          95
+        ],
+        "destination": "westhaven",
+        "label": "return",
+        "capture": "westhaven-lamp-rock-door-return"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-gullstone-door",
+    "map": "westhaven",
+    "start": [
+      62,
+      172
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          47,
+          148
+        ],
+        "label": "gullstone-span",
+        "capture": "westhaven-gullstone-span"
+      },
+      {
+        "tile": [
+          58,
+          120
+        ],
+        "label": "gullstone-landing",
+        "capture": "westhaven-gullstone-landing"
+      },
+      {
+        "tile": [
+          53,
+          99
+        ],
+        "destination": "westhaven_insides",
+        "label": "gullstone-door",
+        "capture": "westhaven-gullstone-door-inside"
+      },
+      {
+        "tile": [
+          33,
+          94
+        ],
+        "label": "clear-interior-threshold"
+      },
+      {
+        "tile": [
+          35,
+          95
+        ],
+        "destination": "westhaven",
+        "label": "return",
+        "capture": "westhaven-gullstone-door-return"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-gullscar-farmhouse-door",
+    "map": "westhaven",
+    "start": [
+      290,
+      280
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          271,
+          280
+        ],
+        "destination": "westhaven_insides",
+        "label": "gullscar-farmhouse-door",
+        "capture": "westhaven-gullscar-farmhouse-door-inside"
+      },
+      {
+        "tile": [
+          211,
+          93
+        ],
+        "label": "clear-interior-threshold"
+      },
+      {
+        "tile": [
+          213,
+          94
+        ],
+        "destination": "westhaven",
+        "label": "return",
+        "capture": "westhaven-gullscar-farmhouse-door-return"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-haven-undercroft-door",
+    "map": "westhaven",
+    "start": [
+      145,
+      244
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          173,
+          249
+        ],
+        "destination": "westhaven_insides",
+        "label": "haven-undercroft-door",
+        "capture": "westhaven-haven-undercroft-door-inside"
+      },
+      {
+        "tile": [
+          211,
+          144
+        ],
+        "label": "clear-interior-threshold"
+      },
+      {
+        "tile": [
+          213,
+          145
+        ],
+        "destination": "westhaven",
+        "label": "return",
+        "capture": "westhaven-haven-undercroft-door-return"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-salvage-hole-mouth",
+    "map": "westhaven",
+    "start": [
+      333,
+      256
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          355,
+          258
+        ],
+        "destination": "westhaven_insides",
+        "label": "salvage-hole-mouth",
+        "capture": "westhaven-salvage-hole-mouth-inside"
+      },
+      {
+        "tile": [
+          211,
+          228
+        ],
+        "label": "clear-interior-threshold"
+      },
+      {
+        "tile": [
+          213,
+          229
+        ],
+        "destination": "westhaven",
+        "label": "return",
+        "capture": "westhaven-salvage-hole-mouth-return"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-north-road",
+    "map": "westhaven",
+    "start": [
+      310,
+      368
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          310,
+          386
+        ],
+        "destination": "grey_moors",
+        "label": "depart",
+        "capture": "westhaven-north-road"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-east-road",
+    "map": "westhaven",
+    "start": [
+      373,
+      217
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          384,
+          210
+        ],
+        "destination": "manymouth_delta",
+        "label": "depart",
+        "capture": "westhaven-east-road"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-crownwater-berth",
+    "map": "westhaven",
+    "start": [
+      64,
+      172
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          53,
+          172
+        ],
+        "destination": "crownwater",
+        "label": "depart",
+        "capture": "westhaven-crownwater-berth"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-amber-berth",
+    "map": "westhaven",
+    "start": [
+      188,
+      167
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          188,
+          157
+        ],
+        "destination": "amberwood",
+        "label": "depart",
+        "capture": "westhaven-amber-berth"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-civic-secrets",
+    "map": "westhaven",
+    "start": [
+      97,
+      181
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          90,
+          183
+        ],
+        "label": "haven-waystone",
+        "capture": "westhaven-haven-waystone"
+      },
+      {
+        "tile": [
+          114,
+          220
+        ],
+        "label": "haven-gate-well",
+        "capture": "westhaven-haven-gate-well"
+      },
+      {
+        "tile": [
+          97,
+          255
+        ],
+        "label": "haven-arcade-school",
+        "capture": "westhaven-haven-arcade-school"
+      },
+      {
+        "tile": [
+          200,
+          215
+        ],
+        "label": "haven-guild-vault",
+        "capture": "westhaven-haven-guild-vault"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-upland-secrets",
+    "map": "westhaven",
+    "start": [
+      198,
+      263
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          201,
+          271
+        ],
+        "label": "haven-cathedral-reliquary",
+        "capture": "westhaven-haven-cathedral-reliquary"
+      },
+      {
+        "tile": [
+          241,
+          290
+        ],
+        "label": "haven-spire-focus",
+        "capture": "westhaven-haven-spire-focus"
+      },
+      {
+        "tile": [
+          258,
+          291
+        ],
+        "label": "haven-peatcut-mouth",
+        "capture": "westhaven-haven-peatcut-mouth"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-working-waterfront-secrets",
+    "map": "westhaven",
+    "start": [
+      276,
+      170
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          273,
+          196
+        ],
+        "label": "haven-ropewalk-garden",
+        "capture": "westhaven-haven-ropewalk-garden"
+      },
+      {
+        "tile": [
+          300,
+          176
+        ],
+        "label": "haven-shipyard-butts",
+        "capture": "westhaven-haven-shipyard-butts"
+      },
+      {
+        "tile": [
+          51,
+          160
+        ],
+        "label": "haven-mole-pit",
+        "capture": "westhaven-haven-mole-pit"
+      },
+      {
+        "tile": [
+          54,
+          116
+        ],
+        "label": "haven-lamp-spring",
+        "capture": "westhaven-haven-lamp-spring"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-gullstone-secrets",
+    "map": "westhaven",
+    "start": [
+      58,
+      120
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          71,
+          85
+        ],
+        "label": "haven-wrack-hollow",
+        "capture": "westhaven-haven-wrack-hollow"
+      },
+      {
+        "tile": [
+          127,
+          65
+        ],
+        "label": "haven-smuggle",
+        "capture": "westhaven-haven-smuggle"
+      }
+    ]
+  },
+  {
+    "id": "westhaven-lighthouse-secret",
+    "map": "westhaven",
+    "start": [
+      341,
+      90
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "walkTimeout": 85,
+    "steps": [
+      {
+        "tile": [
+          336,
+          82
+        ],
+        "label": "haven-lighthouse-eyrie",
+        "capture": "westhaven-haven-lighthouse-eyrie"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-service-court",
+    "map": "crownwater",
+    "start": [
+      120,
+      120
+    ],
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          117,
+          122
+        ],
+        "label": "information",
+        "useObject": 13,
+        "capture": "crown-information",
+        "expectText": "The local board records"
+      },
+      {
+        "tile": [
+          110,
+          113
+        ],
+        "label": "storage",
+        "useObject": 14,
+        "capture": "crown-storage",
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          102,
+          111
+        ],
+        "label": "crafting_station",
+        "useObject": 15,
+        "capture": "crown-crafting_station",
+        "expectText": "This field station supports"
+      },
+      {
+        "tile": [
+          102,
+          132
+        ],
+        "label": "net-menders-front",
+        "capture": "crown-inhabited-harbour"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-civic-approach",
+    "map": "crownwater",
+    "start": [
+      149,
+      149
+    ],
+    "distance": 32,
+    "yaw": -35,
+    "steps": [
+      {
+        "tile": [
+          162,
+          162
+        ],
+        "label": "graded-basilica-bank",
+        "capture": "crown-civic-bank"
+      },
+      {
+        "tile": [
+          181,
+          176
+        ],
+        "label": "processional-walk",
+        "capture": "crown-procession"
+      },
+      {
+        "tile": [
+          198,
+          183
+        ],
+        "label": "basilica-forecourt",
+        "capture": "crown-basilica"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-working-shores",
+    "map": "crownwater",
+    "start": [
+      286,
+      189
+    ],
+    "distance": 32,
+    "yaw": 0,
+    "steps": [
+      {
+        "tile": [
+          295,
+          182
+        ],
+        "label": "pearl-divers-shore",
+        "capture": "crown-pearl-shore"
+      },
+      {
+        "tile": [
+          307,
+          187
+        ],
+        "label": "pearl-working-ground",
+        "capture": "crown-pearl-work"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-arcades-keeper",
+    "map": "crownwater",
+    "start": [
+      140,
+      130
+    ],
+    "distance": 32,
+    "yaw": 0,
+    "steps": [
+      {
+        "tile": [
+          135,
+          124
+        ],
+        "label": "Tollmaster Quent",
+        "capture": "crown-arcades-keeper"
+      },
+      {
+        "tile": [
+          152,
+          122
+        ],
+        "label": "Drowned Arcades return court",
+        "capture": "crown-arcades-return"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-north-quay",
+    "map": "crownwater",
+    "start": [
+      263,
+      372
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          265,
+          383
+        ],
+        "label": "Mirrorhold Packet",
+        "destination": "mirrorhold",
+        "capture": "crown-arrive-north-quay"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-north-quay-east",
+    "map": "crownwater",
+    "start": [
+      272,
+      373
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          275,
+          383
+        ],
+        "label": "Barrens Packet",
+        "destination": "amethyst_barrens",
+        "capture": "crown-arrive-north-quay-east"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-west-quay",
+    "map": "crownwater",
+    "start": [
+      17,
+      261
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          12,
+          265
+        ],
+        "label": "Westhaven Packet",
+        "destination": "westhaven",
+        "capture": "crown-arrive-west-quay"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-west-quay-south",
+    "map": "crownwater",
+    "start": [
+      24,
+      254
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          12,
+          255
+        ],
+        "label": "Moor Jetty Packet",
+        "destination": "grey_moors",
+        "capture": "crown-arrive-west-quay-south"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-south-quay",
+    "map": "crownwater",
+    "start": [
+      125,
+      18
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          132,
+          12
+        ],
+        "label": "Delta Packet",
+        "destination": "manymouth_delta",
+        "capture": "crown-arrive-south-quay"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-south-quay-east",
+    "map": "crownwater",
+    "start": [
+      136,
+      19
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          142,
+          12
+        ],
+        "label": "Temple Boat",
+        "destination": "ssarathi_ruins",
+        "capture": "crown-arrive-south-quay-east"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-east-quay",
+    "map": "crownwater",
+    "start": [
+      378,
+      130
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          391,
+          130
+        ],
+        "label": "Four Gates Causeway",
+        "destination": "four_gates",
+        "capture": "crown-arrive-east-quay"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-basilica-undercroft",
+    "map": "crownwater",
+    "start": [
+      215,
+      188
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          223,
+          193
+        ],
+        "label": "The Drowned Crown",
+        "destination": "drowned_crown",
+        "capture": "crown-arrive-basilica-undercroft"
+      },
+      {
+        "tile": [
+          41,
+          277
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          43,
+          277
+        ],
+        "label": "return from interior",
+        "destination": "crownwater",
+        "capture": "crown-return-basilica-undercroft"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-campanile-door",
+    "map": "crownwater",
+    "start": [
+      233,
+      230
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          246,
+          230
+        ],
+        "label": "The Tide Campanile",
+        "destination": "drowned_crown",
+        "capture": "crown-arrive-campanile-door"
+      },
+      {
+        "tile": [
+          51,
+          37
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          53,
+          37
+        ],
+        "label": "return from interior",
+        "destination": "crownwater",
+        "capture": "crown-return-campanile-door"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-cistern-stair",
+    "map": "crownwater",
+    "start": [
+      78,
+      211
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          78,
+          192
+        ],
+        "label": "The Tide Cistern",
+        "destination": "drowned_crown",
+        "capture": "crown-arrive-cistern-stair"
+      },
+      {
+        "tile": [
+          251,
+          277
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          253,
+          277
+        ],
+        "label": "return from interior",
+        "destination": "crownwater",
+        "capture": "crown-return-cistern-stair"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-customs-door",
+    "map": "crownwater",
+    "start": [
+      117,
+      112
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          130,
+          112
+        ],
+        "label": "The Harbour Customs Hall",
+        "destination": "drowned_crown",
+        "capture": "crown-arrive-customs-door"
+      },
+      {
+        "tile": [
+          241,
+          76
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          243,
+          76
+        ],
+        "label": "return from interior",
+        "destination": "crownwater",
+        "capture": "crown-return-customs-door"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-eleventh-bell-door",
+    "map": "crownwater",
+    "start": [
+      279,
+      278
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          292,
+          278
+        ],
+        "label": "The Eleventh Bell",
+        "destination": "drowned_crown",
+        "capture": "crown-arrive-eleventh-bell-door"
+      },
+      {
+        "tile": [
+          329,
+          277
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          331,
+          277
+        ],
+        "label": "return from interior",
+        "destination": "crownwater",
+        "capture": "crown-return-eleventh-bell-door"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-case-room-door",
+    "map": "crownwater",
+    "start": [
+      285,
+      192
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          298,
+          192
+        ],
+        "label": "The Case Room",
+        "destination": "drowned_crown",
+        "capture": "crown-arrive-case-room-door"
+      },
+      {
+        "tile": [
+          329,
+          216
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          331,
+          216
+        ],
+        "label": "return from interior",
+        "destination": "crownwater",
+        "capture": "crown-return-case-room-door"
+      }
+    ]
+  },
+  {
+    "id": "crownwater-grating-mouth",
+    "map": "crownwater",
+    "start": [
+      177,
+      64
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          190,
+          64
+        ],
+        "label": "The Grating",
+        "destination": "drowned_crown",
+        "capture": "crown-arrive-grating-mouth"
+      },
+      {
+        "tile": [
+          329,
+          157
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          331,
+          157
+        ],
+        "label": "return from interior",
+        "destination": "crownwater",
+        "capture": "crown-return-grating-mouth"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-civic-services",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          200,
+          142
+        ],
+        "label": "information",
+        "useObject": 13,
+        "capture": "four-gates-information",
+        "expectText": "The local board records"
+      },
+      {
+        "tile": [
+          160,
+          137
+        ],
+        "label": "storage approach"
+      },
+      {
+        "tile": [
+          134,
+          163
+        ],
+        "label": "storage",
+        "useObject": 14,
+        "capture": "four-gates-storage",
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          159,
+          197
+        ],
+        "label": "crafting_station approach"
+      },
+      {
+        "tile": [
+          199,
+          237
+        ],
+        "label": "crafting_station approach"
+      },
+      {
+        "tile": [
+          233,
+          264
+        ],
+        "label": "crafting_station approach"
+      },
+      {
+        "tile": [
+          239,
+          260
+        ],
+        "label": "crafting_station",
+        "useObject": 15,
+        "capture": "four-gates-crafting_station",
+        "expectText": "This field station supports"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-tutorial-road",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          198,
+          151
+        ],
+        "label": "tutorial station 0",
+        "capture": "four-gates-tutorial-0"
+      },
+      {
+        "tile": [
+          186,
+          160
+        ],
+        "label": "tutorial station 1",
+        "capture": "four-gates-tutorial-1"
+      },
+      {
+        "tile": [
+          161,
+          194
+        ],
+        "label": "tutorial station 2",
+        "capture": "four-gates-tutorial-2"
+      },
+      {
+        "tile": [
+          146,
+          206
+        ],
+        "label": "tutorial station 3",
+        "capture": "four-gates-tutorial-3"
+      },
+      {
+        "tile": [
+          128,
+          213
+        ],
+        "label": "tutorial station 4",
+        "capture": "four-gates-tutorial-4"
+      },
+      {
+        "tile": [
+          126,
+          232
+        ],
+        "label": "tutorial station 5",
+        "capture": "four-gates-tutorial-5"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-teaching-garden",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          218,
+          114
+        ],
+        "label": "resource 2512",
+        "capture": "four-gates-resource-2512"
+      },
+      {
+        "tile": [
+          226,
+          111
+        ],
+        "label": "resource 498",
+        "capture": "four-gates-resource-498"
+      },
+      {
+        "tile": [
+          235,
+          100
+        ],
+        "label": "resource 2506",
+        "capture": "four-gates-resource-2506"
+      },
+      {
+        "tile": [
+          220,
+          97
+        ],
+        "label": "resource 2509",
+        "capture": "four-gates-resource-2509"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-mineral-plots",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          193,
+          183
+        ],
+        "label": "resource 515 approach"
+      },
+      {
+        "tile": [
+          188,
+          223
+        ],
+        "label": "resource 515 approach"
+      },
+      {
+        "tile": [
+          188,
+          263
+        ],
+        "label": "resource 515 approach"
+      },
+      {
+        "tile": [
+          176,
+          287
+        ],
+        "label": "resource 515",
+        "capture": "four-gates-resource-515"
+      },
+      {
+        "tile": [
+          216,
+          287
+        ],
+        "label": "resource 2503 approach"
+      },
+      {
+        "tile": [
+          221,
+          282
+        ],
+        "label": "resource 2503",
+        "capture": "four-gates-resource-2503"
+      },
+      {
+        "tile": [
+          181,
+          282
+        ],
+        "label": "resource 2501 approach"
+      },
+      {
+        "tile": [
+          164,
+          294
+        ],
+        "label": "resource 2501",
+        "capture": "four-gates-resource-2501"
+      },
+      {
+        "tile": [
+          204,
+          294
+        ],
+        "label": "resource 2500 approach"
+      },
+      {
+        "tile": [
+          232,
+          301
+        ],
+        "label": "resource 2500",
+        "capture": "four-gates-resource-2500"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-room-lantern-row",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          163,
+          123
+        ],
+        "label": "enter four-gates-lantern-row",
+        "destination": "four-gates-lantern-row",
+        "capture": "inside-four-gates-lantern-row"
+      },
+      {
+        "tile": [
+          18,
+          13
+        ],
+        "label": "return to street",
+        "destination": "four_gates"
+      },
+      {
+        "tile": [
+          163,
+          127
+        ],
+        "label": "clear external return",
+        "capture": "return-four-gates-lantern-row"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-room-reedworks",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          238,
+          132
+        ],
+        "label": "enter four-gates-reedworks approach"
+      },
+      {
+        "tile": [
+          262,
+          124
+        ],
+        "label": "enter four-gates-reedworks",
+        "destination": "four-gates-reedworks",
+        "capture": "inside-four-gates-reedworks"
+      },
+      {
+        "tile": [
+          15,
+          10
+        ],
+        "label": "return to street",
+        "destination": "four_gates"
+      },
+      {
+        "tile": [
+          262,
+          128
+        ],
+        "label": "clear external return",
+        "capture": "return-four-gates-reedworks"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-room-stormglass-house",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          168,
+          178
+        ],
+        "label": "enter four-gates-stormglass-house approach"
+      },
+      {
+        "tile": [
+          134,
+          218
+        ],
+        "label": "enter four-gates-stormglass-house approach"
+      },
+      {
+        "tile": [
+          132,
+          258
+        ],
+        "label": "enter four-gates-stormglass-house approach"
+      },
+      {
+        "tile": [
+          143,
+          270
+        ],
+        "label": "enter four-gates-stormglass-house",
+        "destination": "four-gates-stormglass-house",
+        "capture": "inside-four-gates-stormglass-house"
+      },
+      {
+        "tile": [
+          12,
+          8
+        ],
+        "label": "return to street",
+        "destination": "four_gates"
+      },
+      {
+        "tile": [
+          143,
+          268
+        ],
+        "label": "clear external return",
+        "capture": "return-four-gates-stormglass-house"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-room-mirrorsmith-forge",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          228,
+          178
+        ],
+        "label": "enter four-gates-mirrorsmith-forge approach"
+      },
+      {
+        "tile": [
+          262,
+          218
+        ],
+        "label": "enter four-gates-mirrorsmith-forge approach"
+      },
+      {
+        "tile": [
+          264,
+          258
+        ],
+        "label": "enter four-gates-mirrorsmith-forge approach"
+      },
+      {
+        "tile": [
+          253,
+          272
+        ],
+        "label": "enter four-gates-mirrorsmith-forge",
+        "destination": "four-gates-mirrorsmith-forge",
+        "capture": "inside-four-gates-mirrorsmith-forge"
+      },
+      {
+        "tile": [
+          12,
+          7
+        ],
+        "label": "return to street",
+        "destination": "four_gates"
+      },
+      {
+        "tile": [
+          253,
+          269
+        ],
+        "label": "clear external return",
+        "capture": "return-four-gates-mirrorsmith-forge"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-room-ferrymans-rest",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          168,
+          178
+        ],
+        "label": "enter four-gates-ferrymans-rest approach"
+      },
+      {
+        "tile": [
+          134,
+          218
+        ],
+        "label": "enter four-gates-ferrymans-rest approach"
+      },
+      {
+        "tile": [
+          119,
+          237
+        ],
+        "label": "enter four-gates-ferrymans-rest",
+        "destination": "four-gates-ferrymans-rest",
+        "capture": "inside-four-gates-ferrymans-rest"
+      },
+      {
+        "tile": [
+          15,
+          10
+        ],
+        "label": "return to street",
+        "destination": "four_gates"
+      },
+      {
+        "tile": [
+          122,
+          237
+        ],
+        "label": "clear external return",
+        "capture": "return-four-gates-ferrymans-rest"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-room-deposit-four-keys",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          158,
+          132
+        ],
+        "label": "enter four-gates-deposit-four-keys approach"
+      },
+      {
+        "tile": [
+          123,
+          160
+        ],
+        "label": "enter four-gates-deposit-four-keys",
+        "destination": "four-gates-deposit-four-keys",
+        "capture": "inside-four-gates-deposit-four-keys"
+      },
+      {
+        "tile": [
+          12,
+          7
+        ],
+        "label": "return to street",
+        "destination": "four_gates"
+      },
+      {
+        "tile": [
+          126,
+          160
+        ],
+        "label": "clear external return",
+        "capture": "return-four-gates-deposit-four-keys"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-north-causeway",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          193,
+          183
+        ],
+        "label": "north road before crossing approach"
+      },
+      {
+        "tile": [
+          188,
+          223
+        ],
+        "label": "north road before crossing approach"
+      },
+      {
+        "tile": [
+          188,
+          263
+        ],
+        "label": "north road before crossing approach"
+      },
+      {
+        "tile": [
+          190,
+          303
+        ],
+        "label": "north road before crossing approach"
+      },
+      {
+        "tile": [
+          191,
+          343
+        ],
+        "label": "north road before crossing approach"
+      },
+      {
+        "tile": [
+          195,
+          383
+        ],
+        "label": "north road before crossing approach"
+      },
+      {
+        "tile": [
+          198,
+          389
+        ],
+        "label": "north road before crossing",
+        "capture": "four-gates-north-approach"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-west-causeway",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 90,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          158,
+          159
+        ],
+        "label": "west road before crossing approach"
+      },
+      {
+        "tile": [
+          118,
+          176
+        ],
+        "label": "west road before crossing approach"
+      },
+      {
+        "tile": [
+          78,
+          190
+        ],
+        "label": "west road before crossing approach"
+      },
+      {
+        "tile": [
+          38,
+          195
+        ],
+        "label": "west road before crossing approach"
+      },
+      {
+        "tile": [
+          6,
+          198
+        ],
+        "label": "west road before crossing",
+        "capture": "four-gates-west-approach"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-east-causeway",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": -90,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          238,
+          159
+        ],
+        "label": "east road before crossing approach"
+      },
+      {
+        "tile": [
+          278,
+          176
+        ],
+        "label": "east road before crossing approach"
+      },
+      {
+        "tile": [
+          318,
+          190
+        ],
+        "label": "east road before crossing approach"
+      },
+      {
+        "tile": [
+          358,
+          195
+        ],
+        "label": "east road before crossing approach"
+      },
+      {
+        "tile": [
+          388,
+          198
+        ],
+        "label": "east road before crossing",
+        "capture": "four-gates-east-approach"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-south-causeway",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 180,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          198,
+          103
+        ],
+        "label": "south road before crossing approach"
+      },
+      {
+        "tile": [
+          198,
+          63
+        ],
+        "label": "south road before crossing approach"
+      },
+      {
+        "tile": [
+          198,
+          23
+        ],
+        "label": "south road before crossing approach"
+      },
+      {
+        "tile": [
+          198,
+          7
+        ],
+        "label": "south road before crossing",
+        "capture": "four-gates-south-approach"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-sanctuary-stairs",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          193,
+          183
+        ],
+        "label": "Sanctuary forecourt approach"
+      },
+      {
+        "tile": [
+          188,
+          223
+        ],
+        "label": "Sanctuary forecourt approach"
+      },
+      {
+        "tile": [
+          188,
+          263
+        ],
+        "label": "Sanctuary forecourt approach"
+      },
+      {
+        "tile": [
+          190,
+          303
+        ],
+        "label": "Sanctuary forecourt approach"
+      },
+      {
+        "tile": [
+          176,
+          329
+        ],
+        "label": "Sanctuary forecourt approach"
+      },
+      {
+        "tile": [
+          136,
+          337
+        ],
+        "label": "Sanctuary forecourt approach"
+      },
+      {
+        "tile": [
+          96,
+          337
+        ],
+        "label": "Sanctuary forecourt approach"
+      },
+      {
+        "tile": [
+          83,
+          341
+        ],
+        "label": "Sanctuary forecourt"
+      },
+      {
+        "tile": [
+          83,
+          359
+        ],
+        "label": "18 risers to the upper porch",
+        "capture": "four-gates-sanctuary-porch"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-four-gates-40",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          158,
+          159
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          118,
+          176
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          78,
+          190
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          55,
+          168
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          48,
+          128
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          46,
+          88
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          43,
+          48
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          10,
+          15
+        ],
+        "label": "practice corner 0",
+        "capture": "four-gates-40-0"
+      },
+      {
+        "tile": [
+          40,
+          15
+        ],
+        "label": "practice corner 1",
+        "capture": "four-gates-40-1"
+      },
+      {
+        "tile": [
+          40,
+          45
+        ],
+        "label": "practice corner 2",
+        "capture": "four-gates-40-2"
+      },
+      {
+        "tile": [
+          10,
+          45
+        ],
+        "label": "practice corner 3",
+        "capture": "four-gates-40-3"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-four-gates-60",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          238,
+          159
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          278,
+          176
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          318,
+          190
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          341,
+          170
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          344,
+          130
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          345,
+          90
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          345,
+          50
+        ],
+        "label": "practice corner 0 approach"
+      },
+      {
+        "tile": [
+          355,
+          17
+        ],
+        "label": "practice corner 0",
+        "capture": "four-gates-60-0"
+      },
+      {
+        "tile": [
+          385,
+          17
+        ],
+        "label": "practice corner 1",
+        "capture": "four-gates-60-1"
+      },
+      {
+        "tile": [
+          385,
+          47
+        ],
+        "label": "practice corner 2",
+        "capture": "four-gates-60-2"
+      },
+      {
+        "tile": [
+          355,
+          47
+        ],
+        "label": "practice corner 3",
+        "capture": "four-gates-60-3"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-secret-posts-0",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          238,
+          132
+        ],
+        "label": "gates-sunleaf-hollow approach"
+      },
+      {
+        "tile": [
+          278,
+          149
+        ],
+        "label": "gates-sunleaf-hollow approach"
+      },
+      {
+        "tile": [
+          283,
+          154
+        ],
+        "label": "gates-sunleaf-hollow",
+        "capture": "four-gates-sunleaf-hollow"
+      },
+      {
+        "tile": [
+          311,
+          190
+        ],
+        "label": "gates-otter-pit approach"
+      },
+      {
+        "tile": [
+          340,
+          177
+        ],
+        "label": "gates-otter-pit approach"
+      },
+      {
+        "tile": [
+          344,
+          137
+        ],
+        "label": "gates-otter-pit approach"
+      },
+      {
+        "tile": [
+          345,
+          97
+        ],
+        "label": "gates-otter-pit approach"
+      },
+      {
+        "tile": [
+          332,
+          57
+        ],
+        "label": "gates-otter-pit",
+        "capture": "four-gates-otter-pit"
+      },
+      {
+        "tile": [
+          342,
+          97
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          344,
+          137
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          340,
+          177
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          311,
+          201
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          271,
+          241
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          231,
+          281
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          191,
+          321
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          158,
+          334
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          118,
+          337
+        ],
+        "label": "gates-sanctuary-reliquary approach"
+      },
+      {
+        "tile": [
+          99,
+          341
+        ],
+        "label": "gates-sanctuary-reliquary",
+        "capture": "four-gates-sanctuary-reliquary"
+      },
+      {
+        "tile": [
+          139,
+          341
+        ],
+        "label": "gates-wall-eyrie approach"
+      },
+      {
+        "tile": [
+          179,
+          340
+        ],
+        "label": "gates-wall-eyrie approach"
+      },
+      {
+        "tile": [
+          212,
+          303
+        ],
+        "label": "gates-wall-eyrie approach"
+      },
+      {
+        "tile": [
+          252,
+          274
+        ],
+        "label": "gates-wall-eyrie approach"
+      },
+      {
+        "tile": [
+          292,
+          241
+        ],
+        "label": "gates-wall-eyrie approach"
+      },
+      {
+        "tile": [
+          305,
+          228
+        ],
+        "label": "gates-wall-eyrie",
+        "capture": "four-gates-wall-eyrie"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-secret-posts-1",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          238,
+          132
+        ],
+        "label": "gates-reedworks-garden approach"
+      },
+      {
+        "tile": [
+          273,
+          123
+        ],
+        "label": "gates-reedworks-garden",
+        "capture": "four-gates-reedworks-garden"
+      },
+      {
+        "tile": [
+          264,
+          163
+        ],
+        "label": "gates-stormglass-school approach"
+      },
+      {
+        "tile": [
+          237,
+          197
+        ],
+        "label": "gates-stormglass-school approach"
+      },
+      {
+        "tile": [
+          197,
+          237
+        ],
+        "label": "gates-stormglass-school approach"
+      },
+      {
+        "tile": [
+          163,
+          264
+        ],
+        "label": "gates-stormglass-school approach"
+      },
+      {
+        "tile": [
+          152,
+          270
+        ],
+        "label": "gates-stormglass-school",
+        "capture": "four-gates-stormglass-school"
+      },
+      {
+        "tile": [
+          192,
+          270
+        ],
+        "label": "gates-mirrorsmith-well approach"
+      },
+      {
+        "tile": [
+          232,
+          270
+        ],
+        "label": "gates-mirrorsmith-well approach"
+      },
+      {
+        "tile": [
+          242,
+          271
+        ],
+        "label": "gates-mirrorsmith-well",
+        "capture": "four-gates-mirrorsmith-well"
+      },
+      {
+        "tile": [
+          202,
+          271
+        ],
+        "label": "gates-drain-mouth approach"
+      },
+      {
+        "tile": [
+          162,
+          236
+        ],
+        "label": "gates-drain-mouth approach"
+      },
+      {
+        "tile": [
+          122,
+          200
+        ],
+        "label": "gates-drain-mouth approach"
+      },
+      {
+        "tile": [
+          91,
+          175
+        ],
+        "label": "gates-drain-mouth",
+        "capture": "four-gates-drain-mouth"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-secret-posts-2",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          171,
+          124
+        ],
+        "label": "gates-lantern-cache",
+        "capture": "four-gates-lantern-cache"
+      },
+      {
+        "tile": [
+          200,
+          164
+        ],
+        "label": "gates-plaza-spring approach"
+      },
+      {
+        "tile": [
+          215,
+          180
+        ],
+        "label": "gates-plaza-spring",
+        "capture": "four-gates-plaza-spring"
+      },
+      {
+        "tile": [
+          180,
+          174
+        ],
+        "label": "gates-civic-focus",
+        "capture": "four-gates-civic-focus"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-secret-posts-3",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          158,
+          132
+        ],
+        "label": "gates-deposit-vault approach"
+      },
+      {
+        "tile": [
+          123,
+          150
+        ],
+        "label": "gates-deposit-vault",
+        "capture": "four-gates-deposit-vault"
+      },
+      {
+        "tile": [
+          132,
+          160
+        ],
+        "label": "Deposit front court, clear of the doorway"
+      },
+      {
+        "tile": [
+          122,
+          190
+        ],
+        "label": "gates-ferry-butts approach"
+      },
+      {
+        "tile": [
+          119,
+          223
+        ],
+        "label": "gates-ferry-butts",
+        "capture": "four-gates-ferry-butts"
+      },
+      {
+        "tile": [
+          155,
+          183
+        ],
+        "label": "gates-waystone approach"
+      },
+      {
+        "tile": [
+          193,
+          145
+        ],
+        "label": "gates-waystone approach"
+      },
+      {
+        "tile": [
+          206,
+          132
+        ],
+        "label": "gates-waystone",
+        "capture": "four-gates-waystone"
+      }
+    ]
+  }
+]

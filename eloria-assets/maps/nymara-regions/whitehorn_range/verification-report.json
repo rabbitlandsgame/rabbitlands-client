@@ -1,0 +1,237 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 105,
+    "walkSurfaceTriangles": 601871,
+    "tilesSampled": 156816,
+    "groundingMisses": 3312,
+    "groundingMissFraction": 0.02112,
+    "surfaceDiscontinuities": 35,
+    "spawnPoints": 10
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_RAY_MISS",
+      "message": "3312 server tiles have no walk surface under them; a character there would fall back to walkingHeight=19.66",
+      "detail": [
+        [
+          79,
+          0,
+          -41.0,
+          120.0
+        ],
+        [
+          80,
+          0,
+          -40.0,
+          120.0
+        ],
+        [
+          81,
+          0,
+          -39.0,
+          120.0
+        ],
+        [
+          82,
+          0,
+          -38.0,
+          120.0
+        ],
+        [
+          83,
+          0,
+          -37.0,
+          120.0
+        ],
+        [
+          84,
+          0,
+          -36.0,
+          120.0
+        ],
+        [
+          85,
+          0,
+          -35.0,
+          120.0
+        ],
+        [
+          86,
+          0,
+          -34.0,
+          120.0
+        ],
+        [
+          87,
+          0,
+          -33.0,
+          120.0
+        ],
+        [
+          88,
+          0,
+          -32.0,
+          120.0
+        ],
+        [
+          89,
+          0,
+          -31.0,
+          120.0
+        ],
+        [
+          90,
+          0,
+          -30.0,
+          120.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "35 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          273,
+          237,
+          19.87
+        ],
+        [
+          273,
+          238,
+          19.84
+        ],
+        [
+          273,
+          236,
+          19.77
+        ],
+        [
+          273,
+          239,
+          19.75
+        ],
+        [
+          273,
+          235,
+          19.6
+        ],
+        [
+          273,
+          240,
+          19.6
+        ],
+        [
+          273,
+          234,
+          19.4
+        ],
+        [
+          273,
+          241,
+          19.36
+        ],
+        [
+          273,
+          233,
+          19.15
+        ],
+        [
+          273,
+          242,
+          18.98
+        ],
+        [
+          273,
+          232,
+          18.75
+        ],
+        [
+          273,
+          243,
+          18.53
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "COLLISION_SURFACE_MISMATCH",
+      "message": "35 sampled walkable cells disagree with the rendered walk surface",
+      "detail": [
+        {
+          "cell": [
+            168,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            180,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            192,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            204,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            216,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            228,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            240,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            252,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            264,
+            0
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            276,
+            0
+          ],
+          "issue": "no-surface"
+        }
+      ]
+    }
+  ]
+}

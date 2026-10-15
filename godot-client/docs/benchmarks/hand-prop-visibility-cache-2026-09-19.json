@@ -1,0 +1,2282 @@
+{
+  "schemaVersion": 1,
+  "study": "hand-prop ranged-animation classification cache",
+  "date": "2026-09-19",
+  "status": "focused parity and callback timing passed",
+  "interpretation": {
+    "measuredBoundary": "complete CombatPresentation3D.update_pose callback on warmed real actors",
+    "includes": [
+      "hand-prop visibility assignment",
+      "presentation pose work",
+      "synchronous mesh submission"
+    ],
+    "excludes": [
+      "skeleton evaluation",
+      "skeleton_updated signal dispatch",
+      "whole-frame scene traversal",
+      "GPU completion"
+    ],
+    "performanceCaveat": "Focused callback timings are not a whole-frame or 60 FPS claim.",
+    "headlessCaveat": "The headless result is a CPU proxy; the windowed GL result is a rendering-backend diagnostic.",
+    "timingAssertions": false
+  },
+  "baselineCorrection": {
+    "capturedIncorrectCommit": "90b0dd505c063f6049068e974db78ed3b02ac4b7",
+    "capturedCommitResolves": false,
+    "correctCommit": "66f575ffe14f23153caa4920b2bfb47ccbc4f219",
+    "correctCommitResolvesAs": "commit",
+    "actualCommitMethodSha256": "f94a9c970d26c257853df0bf4766281654dc04d3bf48c4d469774f027c22e6fd",
+    "correctedFixtureMethodSha256": "f94a9c970d26c257853df0bf4766281654dc04d3bf48c4d469774f027c22e6fd",
+    "methodBytesMatch": true,
+    "rawArtifactsPreserved": true,
+    "explanation": "Both accepted raw reports captured a mistyped non-existent baseline commit string. Their frozen method bytes and timing data are unchanged; this portable evidence records the corrected source commit explicitly."
+  },
+  "correctedAnalyticalSourceHashes": {
+    "tests/fixtures/replicated_actor_hand_props_90b0_baseline.gd": "ad8053e27db10f579cb59c27b6e8cbc8bc53dd73b2bdf216f674c1cb7e051888",
+    "tests/fixtures/replicated_actor_hand_props_90b0_trace.gd": "ad2f93d7b8d5e533eac2b1af6ccbd63046d35ce24e07dd637498fad84d73b0cf",
+    "tests/performance/hand_prop_visibility_cache_probe.gd": "c3ae4943dffeafaae3348bbfb281db3c0c3fbbf23f16f1b5a086e7069bd9b7dc"
+  },
+  "acceptedRuns": [
+    {
+      "role": "headless CPU proxy",
+      "runDirectory": "test-artifacts/presentation-checks/hand-prop-cache-headless-v2-gl_compatibility-20260919T152941453Z",
+      "validation": {
+        "status": "accepted",
+        "exitCode": 0,
+        "passed": true,
+        "identityVerified": true,
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "isolatedUserData": true,
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "commit": "61d801040bf4a3392ea1efb4b57dfe9bfaec420e",
+        "dirtySourceStatus": [
+          " M godot-client/scripts/run_crowd_benchmarks.ps1",
+          " M godot-client/scripts/run_crowd_reversal_benchmark.ps1",
+          " M godot-client/scripts/run_crowd_script_profile.ps1",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/replicated_actor_3d.gd",
+          "?? godot-client/docs/crowd-equipment-data-optimization.md",
+          "?? godot-client/src/actors/equipment_registry_snapshot_cache.gd",
+          "?? godot-client/tests/fixtures/replicated_actor_hand_props_90b0_baseline.gd",
+          "?? godot-client/tests/fixtures/replicated_actor_hand_props_90b0_trace.gd",
+          "?? godot-client/tests/performance/equipment_registry_snapshot_probe.gd",
+          "?? godot-client/tests/performance/hand_prop_visibility_cache_probe.gd",
+          "?? godot-client/tests/test_equipment_registry_snapshot_cache.gd"
+        ]
+      },
+      "capturedSourceHashes": {
+        "actor": "6acf48f8768d2b61583324cfb367e71702e7c80c5617e6b77c852207bf8da68d",
+        "frozenAccessor": "3f5f52412efc86e99e0b5b8700d4fce4fa311f31048c097fedd32f86bad1795d",
+        "frozenTraceAccessor": "ad2f93d7b8d5e533eac2b1af6ccbd63046d35ce24e07dd637498fad84d73b0cf",
+        "probe": "87b71f5c53bdfba94df631f7f32bcc5f4dff4655080b1b1685c6985744061a21"
+      },
+      "capturedBaselineMetadata": {
+        "baselineCommit": "90b0dd505c063f6049068e974db78ed3b02ac4b7",
+        "baselineMethodSha256": "f94a9c970d26c257853df0bf4766281654dc04d3bf48c4d469774f027c22e6fd",
+        "comparison": "frozen 90b0 hand-prop accessor versus cached production accessor",
+        "frozenLookupEvidence": "exact frozen source resolves one fitted main-hand model per valid hand prop; tracing is kept out of both timed implementations"
+      },
+      "metadataCorrection": {
+        "capturedBaselineCommitIsInvalid": true,
+        "capturedValue": "90b0dd505c063f6049068e974db78ed3b02ac4b7",
+        "correctedValue": "66f575ffe14f23153caa4920b2bfb47ccbc4f219",
+        "rawArtifactRewritten": false
+      },
+      "recomputedMedianMicrosecondsPerCallback": {
+        "idle_bow": {
+          "frozen": 16.075,
+          "candidate": 8.32,
+          "candidateVersusFrozenMedianPercent": -48.24261275272161
+        },
+        "ranged_hold": {
+          "frozen": 16.035,
+          "candidate": 8.16333333333333,
+          "candidateVersusFrozenMedianPercent": -49.09053112982021
+        },
+        "casting": {
+          "frozen": 101.226666666667,
+          "candidate": 86.275,
+          "candidateVersusFrozenMedianPercent": -14.770482086407021
+        },
+        "melee": {
+          "frozen": 16.3033333333333,
+          "candidate": 4.785,
+          "candidateVersusFrozenMedianPercent": -70.65017378859122
+        },
+        "effects_disabled_casting": {
+          "frozen": 15.6683333333333,
+          "candidate": 3.98,
+          "candidateVersusFrozenMedianPercent": -74.59844697372615
+        }
+      },
+      "untimedLookupTrace": {
+        "casting": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        },
+        "effects_disabled_casting": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        },
+        "idle_bow": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        },
+        "melee": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        },
+        "ranged_hold": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        }
+      },
+      "parity": {
+        "emptyAndShieldFastPaths": {
+          "legacy_no_props": {
+            "snapshot": [],
+            "trace": {
+              "equipmentModelLookups": 0
+            }
+          },
+          "shield_only": {
+            "snapshot": [
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ],
+            "trace": {
+              "equipmentModelLookups": 0
+            }
+          }
+        },
+        "legacy_attach_bow": [
+          {
+            "enabled": false,
+            "snapshot": []
+          },
+          {
+            "enabled": true,
+            "snapshot": []
+          },
+          {
+            "enabled": true,
+            "snapshot": []
+          }
+        ],
+        "melee": [
+          {
+            "enabled": false,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          }
+        ],
+        "melee new prop": [
+          {
+            "name": "EquipmentPart_0_Visual_114_hand_r",
+            "part": 0,
+            "visible": true
+          },
+          {
+            "name": "SyntheticLateMainHandProp",
+            "part": 0,
+            "visible": true
+          },
+          {
+            "name": "EquipmentPart_1_Visual_106_hand_l",
+            "part": 1,
+            "visible": true
+          }
+        ],
+        "ranged": [
+          {
+            "enabled": false,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          }
+        ],
+        "ranged new prop": [
+          {
+            "name": "EquipmentPart_0_Visual_164_hand_r",
+            "part": 0,
+            "visible": false
+          },
+          {
+            "name": "SyntheticLateMainHandProp",
+            "part": 0,
+            "visible": false
+          },
+          {
+            "name": "EquipmentPart_1_Visual_111_hand_l",
+            "part": 1,
+            "visible": true
+          }
+        ],
+        "reconfigureFittedVariant": [
+          {
+            "name": "EquipmentPart_0_Visual_114_hand_r",
+            "part": 0,
+            "visible": false
+          },
+          {
+            "name": "EquipmentPart_1_Visual_106_hand_l",
+            "part": 1,
+            "visible": true
+          }
+        ],
+        "shield_only": [
+          {
+            "enabled": false,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          }
+        ],
+        "swapClearEquivalent": [
+          {
+            "id": "ranged",
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "equivalent_ranged",
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "melee",
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "clear",
+            "snapshot": []
+          },
+          {
+            "id": "legacy",
+            "snapshot": []
+          }
+        ]
+      },
+      "timedSnapshots": {
+        "casting": {
+          "candidate": {
+            "bowVisible": false,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": false,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "sha256": "a5a95f13560a38934f21c3e2063b5eed4c96c5e63e9507d75cd44da570114e69"
+        },
+        "effects_disabled_casting": {
+          "candidate": {
+            "bowVisible": false,
+            "effectsEnabled": false,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": false,
+            "effectsEnabled": false,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "sha256": "4e8510fa16d67b1af677ad0272e0d1b6a30a7de35061ce038904bf49067a45ce"
+        },
+        "idle_bow": {
+          "candidate": {
+            "bowVisible": true,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": true,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "sha256": "a6b91aea87e4272cbaf65f21dd854371ab29cb49042624075932c767d1c44009"
+        },
+        "melee": {
+          "candidate": {
+            "bowVisible": false,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": false,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "sha256": "a5a95f13560a38934f21c3e2063b5eed4c96c5e63e9507d75cd44da570114e69"
+        },
+        "ranged_hold": {
+          "candidate": {
+            "bowVisible": true,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": true,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          "sha256": "cffba2d3c573d1bbc7762570cba1ec875aed85f860fd394d17d71ef61a464b0a"
+        }
+      },
+      "trials": [
+        {
+          "order": [
+            "frozen",
+            "candidate"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 86.4383333333333,
+                "totalMicroseconds": 51863
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 101.938333333333,
+                "totalMicroseconds": 61163
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.13666666666667,
+                "totalMicroseconds": 2482
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.8183333333333,
+                "totalMicroseconds": 9491
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.32,
+                "totalMicroseconds": 4992
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.4583333333333,
+                "totalMicroseconds": 9275
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 5.63666666666667,
+                "totalMicroseconds": 3382
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 16.09,
+                "totalMicroseconds": 9654
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.25,
+                "totalMicroseconds": 4950
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.645,
+                "totalMicroseconds": 9387
+              }
+            }
+          },
+          "trial": 1
+        },
+        {
+          "order": [
+            "candidate",
+            "frozen"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 86.275,
+                "totalMicroseconds": 51765
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 99.175,
+                "totalMicroseconds": 59505
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.52333333333333,
+                "totalMicroseconds": 2714
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 16.6816666666667,
+                "totalMicroseconds": 10009
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.71666666666667,
+                "totalMicroseconds": 5230
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.6516666666667,
+                "totalMicroseconds": 11191
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.72,
+                "totalMicroseconds": 2832
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 16.7633333333333,
+                "totalMicroseconds": 10058
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.985,
+                "totalMicroseconds": 5391
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.1566666666667,
+                "totalMicroseconds": 9094
+              }
+            }
+          },
+          "trial": 2
+        },
+        {
+          "order": [
+            "frozen",
+            "candidate"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 86.125,
+                "totalMicroseconds": 51675
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 107.556666666667,
+                "totalMicroseconds": 64534
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 3.87,
+                "totalMicroseconds": 2322
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.6833333333333,
+                "totalMicroseconds": 9410
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 11.7833333333333,
+                "totalMicroseconds": 7070
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 21.6666666666667,
+                "totalMicroseconds": 13000
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.54666666666667,
+                "totalMicroseconds": 2728
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 16.3033333333333,
+                "totalMicroseconds": 9782
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 9.17333333333333,
+                "totalMicroseconds": 5504
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.38,
+                "totalMicroseconds": 11028
+              }
+            }
+          },
+          "trial": 3
+        },
+        {
+          "order": [
+            "candidate",
+            "frozen"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 93.2683333333333,
+                "totalMicroseconds": 55961
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 105.031666666667,
+                "totalMicroseconds": 63019
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.01166666666667,
+                "totalMicroseconds": 2407
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.3066666666667,
+                "totalMicroseconds": 9184
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.98833333333333,
+                "totalMicroseconds": 5393
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 19.3533333333333,
+                "totalMicroseconds": 11612
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.785,
+                "totalMicroseconds": 2871
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.6633333333333,
+                "totalMicroseconds": 9398
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 7.27833333333333,
+                "totalMicroseconds": 4367
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.415,
+                "totalMicroseconds": 11049
+              }
+            }
+          },
+          "trial": 4
+        },
+        {
+          "order": [
+            "frozen",
+            "candidate"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 84.7016666666667,
+                "totalMicroseconds": 50821
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 99.6083333333333,
+                "totalMicroseconds": 59765
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 3.98,
+                "totalMicroseconds": 2388
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 14.3483333333333,
+                "totalMicroseconds": 8609
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.12833333333333,
+                "totalMicroseconds": 4877
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 16.075,
+                "totalMicroseconds": 9645
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 6.49,
+                "totalMicroseconds": 3894
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 17.6733333333333,
+                "totalMicroseconds": 10604
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.16333333333333,
+                "totalMicroseconds": 4898
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 16.035,
+                "totalMicroseconds": 9621
+              }
+            }
+          },
+          "trial": 5
+        },
+        {
+          "order": [
+            "candidate",
+            "frozen"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 86.3066666666667,
+                "totalMicroseconds": 51784
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 101.226666666667,
+                "totalMicroseconds": 60736
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 3.83166666666667,
+                "totalMicroseconds": 2299
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.6683333333333,
+                "totalMicroseconds": 9401
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.08333333333333,
+                "totalMicroseconds": 4850
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.735,
+                "totalMicroseconds": 9441
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.58,
+                "totalMicroseconds": 2748
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.74,
+                "totalMicroseconds": 9444
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 7.78166666666667,
+                "totalMicroseconds": 4669
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 17.0916666666667,
+                "totalMicroseconds": 10255
+              }
+            }
+          },
+          "trial": 6
+        },
+        {
+          "order": [
+            "frozen",
+            "candidate"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 82.31,
+                "totalMicroseconds": 49386
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 97.9816666666667,
+                "totalMicroseconds": 58789
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 3.92166666666667,
+                "totalMicroseconds": 2353
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 14.4766666666667,
+                "totalMicroseconds": 8686
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.07666666666667,
+                "totalMicroseconds": 4846
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.6833333333333,
+                "totalMicroseconds": 9410
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 6.13666666666667,
+                "totalMicroseconds": 3682
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.3633333333333,
+                "totalMicroseconds": 11018
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 7.49666666666667,
+                "totalMicroseconds": 4498
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 14.7916666666667,
+                "totalMicroseconds": 8875
+              }
+            }
+          },
+          "trial": 7
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v2-gl_compatibility-20260919T152941453Z/checks.json",
+          "sha256": "949eff577758f3fef5804911881f7b8d18527b63f9ca0ea72ac47e696ee0448e"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v2-gl_compatibility-20260919T152941453Z/tests_performance_hand_prop_visibility_cache_probe/hand-prop-visibility-cache-probe.json",
+          "sha256": "f9e22e116d86905d0dfd54e4ead26e95684987a4a34b7559125a4d4bbd040d7d"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v2-gl_compatibility-20260919T152941453Z/tests_performance_hand_prop_visibility_cache_probe/process.json",
+          "sha256": "949eff577758f3fef5804911881f7b8d18527b63f9ca0ea72ac47e696ee0448e"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v2-gl_compatibility-20260919T152941453Z/tests_performance_hand_prop_visibility_cache_probe/stdout.log",
+          "sha256": "cdc3bb0159bee1c19511a264881999fb8afc7980257138ee66b8cada26779518"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v2-gl_compatibility-20260919T152941453Z/tests_performance_hand_prop_visibility_cache_probe/stderr.log",
+          "sha256": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v2-gl_compatibility-20260919T152941453Z/tests_performance_hand_prop_visibility_cache_probe/godot.log",
+          "sha256": "ad875c45175d5d00f0a29ae4588871c5bc5ac20753dffef5b1d38569f92e1c34"
+        }
+      ]
+    },
+    {
+      "role": "windowed GL diagnostic",
+      "runDirectory": "test-artifacts/presentation-checks/hand-prop-cache-gl-v1-gl_compatibility-20260919T152959990Z",
+      "validation": {
+        "status": "accepted",
+        "exitCode": 0,
+        "passed": true,
+        "identityVerified": true,
+        "affinityMask": 15,
+        "requestedWorkers": 2,
+        "forcedTermination": false,
+        "monitoringError": "",
+        "scriptErrorsDetected": false,
+        "isolatedUserData": true,
+        "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "commit": "61d801040bf4a3392ea1efb4b57dfe9bfaec420e",
+        "dirtySourceStatus": [
+          " M godot-client/scripts/run_crowd_benchmarks.ps1",
+          " M godot-client/scripts/run_crowd_reversal_benchmark.ps1",
+          " M godot-client/scripts/run_crowd_script_profile.ps1",
+          " M godot-client/scripts/run_presentation_checks.ps1",
+          " M godot-client/src/actors/replicated_actor_3d.gd",
+          "?? godot-client/docs/crowd-equipment-data-optimization.md",
+          "?? godot-client/src/actors/equipment_registry_snapshot_cache.gd",
+          "?? godot-client/tests/fixtures/replicated_actor_hand_props_90b0_baseline.gd",
+          "?? godot-client/tests/fixtures/replicated_actor_hand_props_90b0_trace.gd",
+          "?? godot-client/tests/performance/equipment_registry_snapshot_probe.gd",
+          "?? godot-client/tests/performance/hand_prop_visibility_cache_probe.gd",
+          "?? godot-client/tests/test_equipment_registry_snapshot_cache.gd"
+        ]
+      },
+      "capturedSourceHashes": {
+        "actor": "6acf48f8768d2b61583324cfb367e71702e7c80c5617e6b77c852207bf8da68d",
+        "frozenAccessor": "3f5f52412efc86e99e0b5b8700d4fce4fa311f31048c097fedd32f86bad1795d",
+        "frozenTraceAccessor": "ad2f93d7b8d5e533eac2b1af6ccbd63046d35ce24e07dd637498fad84d73b0cf",
+        "probe": "87b71f5c53bdfba94df631f7f32bcc5f4dff4655080b1b1685c6985744061a21"
+      },
+      "capturedBaselineMetadata": {
+        "baselineCommit": "90b0dd505c063f6049068e974db78ed3b02ac4b7",
+        "baselineMethodSha256": "f94a9c970d26c257853df0bf4766281654dc04d3bf48c4d469774f027c22e6fd",
+        "comparison": "frozen 90b0 hand-prop accessor versus cached production accessor",
+        "frozenLookupEvidence": "exact frozen source resolves one fitted main-hand model per valid hand prop; tracing is kept out of both timed implementations"
+      },
+      "metadataCorrection": {
+        "capturedBaselineCommitIsInvalid": true,
+        "capturedValue": "90b0dd505c063f6049068e974db78ed3b02ac4b7",
+        "correctedValue": "66f575ffe14f23153caa4920b2bfb47ccbc4f219",
+        "rawArtifactRewritten": false
+      },
+      "recomputedMedianMicrosecondsPerCallback": {
+        "idle_bow": {
+          "frozen": 18.61,
+          "candidate": 9.68166666666667,
+          "candidateVersusFrozenMedianPercent": -47.97599856707861
+        },
+        "ranged_hold": {
+          "frozen": 18.2083333333333,
+          "candidate": 8.37833333333333,
+          "candidateVersusFrozenMedianPercent": -53.98627002288323
+        },
+        "casting": {
+          "frozen": 116.718333333333,
+          "candidate": 96.945,
+          "candidateVersusFrozenMedianPercent": -16.941068955176764
+        },
+        "melee": {
+          "frozen": 17.205,
+          "candidate": 5.08833333333333,
+          "candidateVersusFrozenMedianPercent": -70.42526397365108
+        },
+        "effects_disabled_casting": {
+          "frozen": 17.6483333333333,
+          "candidate": 4.44333333333333,
+          "candidateVersusFrozenMedianPercent": -74.82292945509488
+        }
+      },
+      "untimedLookupTrace": {
+        "casting": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        },
+        "effects_disabled_casting": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        },
+        "idle_bow": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        },
+        "melee": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        },
+        "ranged_hold": {
+          "candidate": {
+            "equipmentModelLookups": 0
+          },
+          "frozen": {
+            "equipmentModelLookups": 2
+          }
+        }
+      },
+      "parity": {
+        "emptyAndShieldFastPaths": {
+          "legacy_no_props": {
+            "snapshot": [],
+            "trace": {
+              "equipmentModelLookups": 0
+            }
+          },
+          "shield_only": {
+            "snapshot": [
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ],
+            "trace": {
+              "equipmentModelLookups": 0
+            }
+          }
+        },
+        "legacy_attach_bow": [
+          {
+            "enabled": false,
+            "snapshot": []
+          },
+          {
+            "enabled": true,
+            "snapshot": []
+          },
+          {
+            "enabled": true,
+            "snapshot": []
+          }
+        ],
+        "melee": [
+          {
+            "enabled": false,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          }
+        ],
+        "melee new prop": [
+          {
+            "name": "EquipmentPart_0_Visual_114_hand_r",
+            "part": 0,
+            "visible": true
+          },
+          {
+            "name": "SyntheticLateMainHandProp",
+            "part": 0,
+            "visible": true
+          },
+          {
+            "name": "EquipmentPart_1_Visual_106_hand_l",
+            "part": 1,
+            "visible": true
+          }
+        ],
+        "ranged": [
+          {
+            "enabled": false,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          }
+        ],
+        "ranged new prop": [
+          {
+            "name": "EquipmentPart_0_Visual_164_hand_r",
+            "part": 0,
+            "visible": false
+          },
+          {
+            "name": "SyntheticLateMainHandProp",
+            "part": 0,
+            "visible": false
+          },
+          {
+            "name": "EquipmentPart_1_Visual_111_hand_l",
+            "part": 1,
+            "visible": true
+          }
+        ],
+        "reconfigureFittedVariant": [
+          {
+            "name": "EquipmentPart_0_Visual_114_hand_r",
+            "part": 0,
+            "visible": false
+          },
+          {
+            "name": "EquipmentPart_1_Visual_106_hand_l",
+            "part": 1,
+            "visible": true
+          }
+        ],
+        "shield_only": [
+          {
+            "enabled": false,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "enabled": true,
+            "snapshot": [
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          }
+        ],
+        "swapClearEquivalent": [
+          {
+            "id": "ranged",
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "equivalent_ranged",
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "melee",
+            "snapshot": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          {
+            "id": "clear",
+            "snapshot": []
+          },
+          {
+            "id": "legacy",
+            "snapshot": []
+          }
+        ]
+      },
+      "timedSnapshots": {
+        "casting": {
+          "candidate": {
+            "bowVisible": false,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": false,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "sha256": "a5a95f13560a38934f21c3e2063b5eed4c96c5e63e9507d75cd44da570114e69"
+        },
+        "effects_disabled_casting": {
+          "candidate": {
+            "bowVisible": false,
+            "effectsEnabled": false,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": false,
+            "effectsEnabled": false,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "sha256": "4e8510fa16d67b1af677ad0272e0d1b6a30a7de35061ce038904bf49067a45ce"
+        },
+        "idle_bow": {
+          "candidate": {
+            "bowVisible": true,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": true,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "sha256": "a6b91aea87e4272cbaf65f21dd854371ab29cb49042624075932c767d1c44009"
+        },
+        "melee": {
+          "candidate": {
+            "bowVisible": false,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": false,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_114_hand_r",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "SyntheticLateMainHandProp",
+                "part": 0,
+                "visible": true
+              },
+              {
+                "name": "EquipmentPart_1_Visual_106_hand_l",
+                "part": 1,
+                "visible": true
+              }
+            ]
+          },
+          "sha256": "a5a95f13560a38934f21c3e2063b5eed4c96c5e63e9507d75cd44da570114e69"
+        },
+        "ranged_hold": {
+          "candidate": {
+            "bowVisible": true,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          "frozen": {
+            "bowVisible": true,
+            "effectsEnabled": true,
+            "handProps": [
+              {
+                "name": "EquipmentPart_0_Visual_164_hand_r",
+                "part": 0,
+                "visible": false
+              },
+              {
+                "name": "EquipmentPart_1_Visual_111_hand_l",
+                "part": 1,
+                "visible": false
+              }
+            ]
+          },
+          "sha256": "cffba2d3c573d1bbc7762570cba1ec875aed85f860fd394d17d71ef61a464b0a"
+        }
+      },
+      "trials": [
+        {
+          "order": [
+            "frozen",
+            "candidate"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 102.918333333333,
+                "totalMicroseconds": 61751
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 120.191666666667,
+                "totalMicroseconds": 72115
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.65833333333333,
+                "totalMicroseconds": 2795
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.0883333333333,
+                "totalMicroseconds": 10853
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 9.68166666666667,
+                "totalMicroseconds": 5809
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.61,
+                "totalMicroseconds": 11166
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 5.87333333333333,
+                "totalMicroseconds": 3524
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.4483333333333,
+                "totalMicroseconds": 11069
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.4,
+                "totalMicroseconds": 5040
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.2083333333333,
+                "totalMicroseconds": 10925
+              }
+            }
+          },
+          "trial": 1
+        },
+        {
+          "order": [
+            "candidate",
+            "frozen"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 87.3333333333333,
+                "totalMicroseconds": 52400
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 117.433333333333,
+                "totalMicroseconds": 70460
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 3.92,
+                "totalMicroseconds": 2352
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.17,
+                "totalMicroseconds": 9102
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 9.955,
+                "totalMicroseconds": 5973
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.7216666666667,
+                "totalMicroseconds": 11233
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.98,
+                "totalMicroseconds": 2988
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.5616666666667,
+                "totalMicroseconds": 9337
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.41,
+                "totalMicroseconds": 5046
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.4766666666667,
+                "totalMicroseconds": 11086
+              }
+            }
+          },
+          "trial": 2
+        },
+        {
+          "order": [
+            "frozen",
+            "candidate"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 96.945,
+                "totalMicroseconds": 58167
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 116.895,
+                "totalMicroseconds": 70137
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.23,
+                "totalMicroseconds": 2538
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 14.9033333333333,
+                "totalMicroseconds": 8942
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 7.96833333333333,
+                "totalMicroseconds": 4781
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 16.0566666666667,
+                "totalMicroseconds": 9634
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.47166666666667,
+                "totalMicroseconds": 2683
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.66,
+                "totalMicroseconds": 9396
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 7.21666666666667,
+                "totalMicroseconds": 4330
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.11,
+                "totalMicroseconds": 9066
+              }
+            }
+          },
+          "trial": 3
+        },
+        {
+          "order": [
+            "candidate",
+            "frozen"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 94.5683333333333,
+                "totalMicroseconds": 56741
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 96.3966666666667,
+                "totalMicroseconds": 57838
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.44333333333333,
+                "totalMicroseconds": 2666
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.6,
+                "totalMicroseconds": 11160
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 9.35333333333333,
+                "totalMicroseconds": 5612
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.215,
+                "totalMicroseconds": 10929
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 5.08833333333333,
+                "totalMicroseconds": 3053
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 17.205,
+                "totalMicroseconds": 10323
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.28,
+                "totalMicroseconds": 4968
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.15,
+                "totalMicroseconds": 10890
+              }
+            }
+          },
+          "trial": 4
+        },
+        {
+          "order": [
+            "frozen",
+            "candidate"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 92.4016666666667,
+                "totalMicroseconds": 55441
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 100.928333333333,
+                "totalMicroseconds": 60557
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.47833333333333,
+                "totalMicroseconds": 2687
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 16.5666666666667,
+                "totalMicroseconds": 9940
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 10.9316666666667,
+                "totalMicroseconds": 6559
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 19.6616666666667,
+                "totalMicroseconds": 11797
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.62,
+                "totalMicroseconds": 2772
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 15.375,
+                "totalMicroseconds": 9225
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 6.57833333333333,
+                "totalMicroseconds": 3947
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 21.115,
+                "totalMicroseconds": 12669
+              }
+            }
+          },
+          "trial": 5
+        },
+        {
+          "order": [
+            "candidate",
+            "frozen"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 97.0166666666667,
+                "totalMicroseconds": 58210
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 112.35,
+                "totalMicroseconds": 67410
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 4.65166666666667,
+                "totalMicroseconds": 2791
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.3183333333333,
+                "totalMicroseconds": 10991
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 10.5933333333333,
+                "totalMicroseconds": 6356
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.5183333333333,
+                "totalMicroseconds": 11111
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 5.35833333333333,
+                "totalMicroseconds": 3215
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.67,
+                "totalMicroseconds": 11202
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.425,
+                "totalMicroseconds": 5055
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 19.4866666666667,
+                "totalMicroseconds": 11692
+              }
+            }
+          },
+          "trial": 6
+        },
+        {
+          "order": [
+            "frozen",
+            "candidate"
+          ],
+          "scenarios": {
+            "casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 101.135,
+                "totalMicroseconds": 60681
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 116.718333333333,
+                "totalMicroseconds": 70031
+              }
+            },
+            "effects_disabled_casting": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 3.62666666666667,
+                "totalMicroseconds": 2176
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 17.6483333333333,
+                "totalMicroseconds": 10589
+              }
+            },
+            "idle_bow": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 9.55833333333333,
+                "totalMicroseconds": 5735
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 19.3166666666667,
+                "totalMicroseconds": 11590
+              }
+            },
+            "melee": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 5.53666666666667,
+                "totalMicroseconds": 3322
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.3883333333333,
+                "totalMicroseconds": 11033
+              }
+            },
+            "ranged_hold": {
+              "candidate": {
+                "iterations": 600,
+                "microsecondsPerCallback": 8.37833333333333,
+                "totalMicroseconds": 5027
+              },
+              "frozen": {
+                "iterations": 600,
+                "microsecondsPerCallback": 18.1566666666667,
+                "totalMicroseconds": 10894
+              }
+            }
+          },
+          "trial": 7
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-gl-v1-gl_compatibility-20260919T152959990Z/checks.json",
+          "sha256": "057c56d4ae10f096d498d3b9d58ff36525e3f2cbdd8f278d804da6714a346ddd"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-gl-v1-gl_compatibility-20260919T152959990Z/tests_performance_hand_prop_visibility_cache_probe/hand-prop-visibility-cache-probe.json",
+          "sha256": "b16a39b5c9bb54c52bba8cfa68058bdd2abe3e0f37ef52b4c36203c1887820db"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-gl-v1-gl_compatibility-20260919T152959990Z/tests_performance_hand_prop_visibility_cache_probe/process.json",
+          "sha256": "057c56d4ae10f096d498d3b9d58ff36525e3f2cbdd8f278d804da6714a346ddd"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-gl-v1-gl_compatibility-20260919T152959990Z/tests_performance_hand_prop_visibility_cache_probe/stdout.log",
+          "sha256": "ac32fbb1e150a08cdb35e0d249d0d9113a7002fc79a3d12a6cf35c460aa913b0"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-gl-v1-gl_compatibility-20260919T152959990Z/tests_performance_hand_prop_visibility_cache_probe/stderr.log",
+          "sha256": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-gl-v1-gl_compatibility-20260919T152959990Z/tests_performance_hand_prop_visibility_cache_probe/godot.log",
+          "sha256": "198f91245f42fdede670a89761b1f65e6dea119d992f9450292d064f5b2589a1"
+        }
+      ]
+    }
+  ],
+  "rejectedAttempts": [
+    {
+      "runDirectory": "test-artifacts/presentation-checks/hand-prop-cache-headless-v1-gl_compatibility-20260919T152922162Z",
+      "status": "rejected",
+      "reason": "Probe parse error: a multiline comparison omitted the GDScript continuation marker; no timing or parity result was produced.",
+      "artifacts": [
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v1-gl_compatibility-20260919T152922162Z/tests_performance_hand_prop_visibility_cache_probe/process.json",
+          "sha256": "e6c762ea0e3afad19709f73dbbc3d328e6ddf699881a606ba177c60155cfea35"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v1-gl_compatibility-20260919T152922162Z/tests_performance_hand_prop_visibility_cache_probe/godot.log",
+          "sha256": "e6ab883fbd7f5c88486632e07e753c634469a8a0b6fc1ed8ed047e73097b60b0"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/hand-prop-cache-headless-v1-gl_compatibility-20260919T152922162Z/tests_performance_hand_prop_visibility_cache_probe/stderr.log",
+          "sha256": "4333b1de89500f8569e8093aa906511d97ca586ef4a6db939c1885c2c9f23da3"
+        }
+      ]
+    }
+  ]
+}

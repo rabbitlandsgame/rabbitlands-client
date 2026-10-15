@@ -1,0 +1,90 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/sw_isle.tscn" id="island"]
+[ext_resource type="Texture2D" path="res://world_authoring/continent-v2/viewer/sea-tint.png" id="sea_tint"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_view"]
+sky_top_color = Color(0.3, 0.5, 0.76, 1)
+sky_horizon_color = Color(0.74, 0.8, 0.84, 1)
+ground_bottom_color = Color(0.18, 0.26, 0.3, 1)
+ground_horizon_color = Color(0.62, 0.68, 0.7, 1)
+
+[sub_resource type="Sky" id="Sky_view"]
+sky_material = SubResource("ProceduralSkyMaterial_view")
+
+[sub_resource type="Environment" id="Environment_view"]
+background_mode = 2
+sky = SubResource("Sky_view")
+ambient_light_source = 3
+ambient_light_energy = 0.55
+tonemap_mode = 2
+tonemap_exposure = 0.9
+fog_enabled = true
+fog_light_color = Color(0.74, 0.79, 0.82, 1)
+fog_density = 0.000035
+fog_sky_affect = 0.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sea"]
+albedo_texture = ExtResource("sea_tint")
+metallic_specular = 0.25
+roughness = 0.55
+uv1_scale = Vector3(6.91562932227, 7.94281175536, 1)
+uv1_offset = Vector3(-2.9581604426, -3.47180301827, 0)
+texture_repeat = false
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sea_qa"]
+transparency = 1
+albedo_color = Color(0.07, 0.25, 0.32, 0.86)
+metallic_specular = 0.25
+roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_seabed"]
+albedo_color = Color(0.05, 0.16, 0.21, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_seabed"]
+material = SubResource("StandardMaterial3D_seabed")
+size = Vector2(20000, 20000)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_sea"]
+material = SubResource("StandardMaterial3D_sea")
+size = Vector2(20000, 20000)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_sea_qa"]
+material = SubResource("StandardMaterial3D_sea_qa")
+size = Vector2(20000, 20000)
+
+[node name="SouthWestIsleView" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_view")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.643192, 0.587121, -0.491521, 0, 0.641919, 0.766772, 0.765705, 0.493182, -0.412877, 0, 400, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 1.2
+shadow_enabled = true
+directional_shadow_max_distance = 1800.0
+
+[node name="Sea" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 325, 0, 150)
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_sea")
+
+[node name="SeaTranslucentQA" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 325, 0, 150)
+visible = false
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_sea_qa")
+
+[node name="Seabed" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 325, -48, 150)
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_seabed")
+
+[node name="SouthWestIsle" parent="." instance=ExtResource("island")]
+
+[node name="CastleBookmark" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, -0.352253, 0.613121, 0, 0.867085, 0.498161, -0.707107, -0.352253, 0.613121, 304.8, 641.494202, 703.5)
+fov = 50.0
+far = 9000.0

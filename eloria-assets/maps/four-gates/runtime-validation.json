@@ -1,0 +1,114 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 36,
+    "walkSurfaceTriangles": 408764,
+    "tilesSampled": 156816,
+    "groundingMisses": 736,
+    "groundingMissFraction": 0.00469,
+    "surfaceDiscontinuities": 0,
+    "spawnPoints": 2
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_RAY_MISS",
+      "message": "736 server tiles have no walk surface under them; a character there would fall back to walkingHeight=31.1",
+      "detail": [
+        [
+          159,
+          0,
+          -39.0,
+          198.0
+        ],
+        [
+          160,
+          0,
+          -38.0,
+          198.0
+        ],
+        [
+          161,
+          0,
+          -37.0,
+          198.0
+        ],
+        [
+          162,
+          0,
+          -36.0,
+          198.0
+        ],
+        [
+          163,
+          0,
+          -35.0,
+          198.0
+        ],
+        [
+          164,
+          0,
+          -34.0,
+          198.0
+        ],
+        [
+          165,
+          0,
+          -33.0,
+          198.0
+        ],
+        [
+          166,
+          0,
+          -32.0,
+          198.0
+        ],
+        [
+          167,
+          0,
+          -31.0,
+          198.0
+        ],
+        [
+          168,
+          0,
+          -30.0,
+          198.0
+        ],
+        [
+          169,
+          0,
+          -29.0,
+          198.0
+        ],
+        [
+          170,
+          0,
+          -28.0,
+          198.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_BELOW_SURFACE",
+      "message": "landmark 'northern-sanctuary' is 5.01 m below the surface",
+      "detail": [
+        -115,
+        37,
+        -162
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_FLOATING",
+      "message": "1 landmarks sit more than 3 m above the walk surface",
+      "detail": [
+        {
+          "id": "sanctuary-beacon",
+          "gap": 39.6
+        }
+      ]
+    }
+  ]
+}

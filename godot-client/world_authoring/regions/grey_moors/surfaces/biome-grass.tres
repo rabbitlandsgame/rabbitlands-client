@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="MapAuthoringBiomePaletteEntry" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/biome_palette_entry.gd" id="1_entry"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="2_surface"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png" id="3_albedo"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_secondary"]
+albedo_color = Color(0.76, 0.82, 0.61, 1)
+albedo_texture = ExtResource("3_albedo")
+roughness = 1
+vertex_color_use_as_albedo = true
+uv1_scale = Vector3(1.4705882, 1.4705882, 1)
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="Resource" id="Resource_secondary"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+texture_preset = "Grass"
+source_material = SubResource("StandardMaterial3D_secondary")
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_entry")
+id = "grass"
+role = "grassland"
+surface = SubResource("Resource_secondary")

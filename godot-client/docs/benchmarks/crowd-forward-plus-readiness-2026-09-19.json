@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-19",
+  "startingRevision": "0bf6c96bc09aba578b2bd54877a8940c2964f4a6",
+  "scope": "Fixed-state visual comparison of representative crowd equipment, overhead names and health, controlled ground, production spell flight, and a production radiation contact.",
+  "result": {
+    "historicalDiagnosis": "V2 isolated sRGB-authored vertex COLOR being consumed as linear ALBEDO in Forward+.",
+    "validatedCorrection": "V3 decodes vertex RGB only when OUTPUT_IS_SRGB is false; three shader/StandardMaterial pairs pass in both renderers.",
+    "shippingRendererChanged": false,
+    "shippingRenderer": "gl_compatibility",
+    "fpsClaim": false,
+    "generalRendererParityClaim": false,
+    "independentImageInspection": "Root inspected the v2 diagnostic and v3 final Compatibility and Forward+ images."
+  },
+  "fixtureLimits": {
+    "nativePresentation": "0 (off)",
+    "particles": "disabled only in this deterministic visual fixture",
+    "capeCloth": "inactive only after the fixture's fixed authored pose",
+    "staticAnimationSeconds": 0.37,
+    "flightFraction": 0.56,
+    "contactSeconds": 0.42
+  },
+  "engine": {
+    "version": "Godot 4.7.2 stable official ed1daf0bf",
+    "resolvedExecutable": "godot-client/Godot_v4.7.2-stable_win64.exe",
+    "resolvedExecutableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+    "commandLauncher": "godot-client/Godot_v4.7.2-stable_win64_console.exe",
+    "commandLauncherSha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+    "adapter": "NVIDIA GeForce RTX 5080 Laptop GPU"
+  },
+  "sourceSha256": {
+    "historicalV2": {
+      "tests/integration/rendered_renderer_parity.gd": "d27f69be2f4f791c9b7e5b41d61c41ec52ea87d6de4f6c771f2e0c96d1173cb1",
+      "src/world/spell_energy.gdshader": "f69c63b63b4f47da98d140923a05b57a0c4d92f43bf52acd6ebe7bfffea8320e"
+    },
+    "validatedV3": {
+      "tests/integration/rendered_renderer_parity.gd": "59c778ec2dcdb9ff6029a7ea70b6a27ed8e24cfe7a16e9301cc6f721feaeae7f",
+      "src/world/spell_energy.gdshader": "a3cfd52a8d8731921e309611640a33730ee30e64cd1a705c1a2b3407ec8c130c",
+      "scripts/compare_renderer_parity.py": "788a5e8a2916f031ae9cdfa3f398d0bbf0fe0f135034f49e704e9ddadf74d3f2",
+      "scripts/run_presentation_checks.ps1": "08f58a08669d66266a54382b10e963e5c46dcf005251a3438c5801c3bb2bed3f",
+      "src/world/spell_flight_3d.gd": "b1cc2b82de27ad652ab9d1e337489bfb522a34b2ee9794cfd0868314aa9bd5bb",
+      "src/world/world_effect_3d.gd": "8df8b01cc7dcbb7f1f20771ca3cbe5bf94f7b0cec7dd57b02c91c91aaffc6674",
+      "src/world/combat_effect_mesh.gd": "5e3a5e0e61b800f3b622bbfba57fcc6da20d4b5be393956d05fc7a010a0c7642",
+      "src/actors/replicated_actor_3d.gd": "8ec24b4c9744f6940d6688b1a33f89fe57a20b0e0d837de43ea337f42a7688ee",
+      "data/actors/models.json": "5f0e762abbd11a9c5341d504a005d9859fba9d4866bf93c0d6ee1496b4233905",
+      "data/animations/luminous.json": "9d0575008cd6e053d0b16cc305fee020c7a02160f77cbdf3ab6300de16ddf694",
+      "data/actors/equipment.json": "5a5232d83a9a26b87ade9d648a2a5c4cfb52858e85eb6316617bbefb0f6104da",
+      "project.godot": "d77a65c9c12987ff2e5a03ce617b703ef964e88f6d261b202ace799945adb1fe"
+    }
+  },
+  "historicalV2Evidence": {
+    "compatibility": {
+      "checks": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-gl_compatibility-20260919T163543513Z/checks.json", "sha256": "918134a59a1b3b71a6f4e836bb61b69ff3bedbfc4815509633438a6d51e38126"},
+      "process": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-gl_compatibility-20260919T163543513Z/tests_integration_rendered_renderer_parity/process.json", "sha256": "918134a59a1b3b71a6f4e836bb61b69ff3bedbfc4815509633438a6d51e38126"},
+      "fixtureReport": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-gl_compatibility-20260919T163543513Z/tests_integration_rendered_renderer_parity/renderer-parity.json", "sha256": "e3a1690d9021f6df76d9d419c6756d91d67cff42384fdda6f8ab74a13087d8a5"},
+      "png": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-gl_compatibility-20260919T163543513Z/tests_integration_rendered_renderer_parity/renderer-parity.png", "sha256": "300bf5690762b603cc0a68cb8b9149cca3034176bf5961ea5486687bc4a7896d"}
+    },
+    "forwardPlus": {
+      "checks": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-forward_plus-20260919T163602429Z/checks.json", "sha256": "5f482a5921ba485f64e4a356de1cb8c264bd854b7c7f6e7d8f1d37e138f0afff"},
+      "process": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-forward_plus-20260919T163602429Z/tests_integration_rendered_renderer_parity/process.json", "sha256": "5f482a5921ba485f64e4a356de1cb8c264bd854b7c7f6e7d8f1d37e138f0afff"},
+      "fixtureReport": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-forward_plus-20260919T163602429Z/tests_integration_rendered_renderer_parity/renderer-parity.json", "sha256": "4196cd29151a5b1882cf137945ddb424ec5daa31d53a198088066b6544a6d8e0"},
+      "png": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-forward_plus-20260919T163602429Z/tests_integration_rendered_renderer_parity/renderer-parity.png", "sha256": "94f1d669e940dbeda1ba4ff40ef77cbc331bf6360bc8f6e3e7c37a75d8698351"}
+    },
+    "comparisonReport": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v2-comparison/renderer-parity-comparison.json", "sha256": "db7f154b83cbd21a6080eba01bac5309b0e9c30d8b7cee2d35219192502a9c7e"},
+    "diagnostic": {
+      "compatibilityStandardVsVertexRmse": 0.000344,
+      "forwardPlusStandardVsVertexRmse": 0.146974,
+      "forwardPlusVertexMinusStandardRgb": [0.223529, 0.098039, 0.072296],
+      "forwardPlusRawColorAsLinearPredictionRmse": 0.001277
+    }
+  },
+  "validatedV3Evidence": {
+    "compatibility": {
+      "checks": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-native-off-gl_compatibility-20260919T170022482Z/checks.json", "sha256": "5770f35b59043e26563649d70a8d3e87e2eba7027053e33e7e1538606c74fd26"},
+      "process": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-native-off-gl_compatibility-20260919T170022482Z/tests_integration_rendered_renderer_parity/process.json", "sha256": "5770f35b59043e26563649d70a8d3e87e2eba7027053e33e7e1538606c74fd26"},
+      "fixtureReport": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-native-off-gl_compatibility-20260919T170022482Z/tests_integration_rendered_renderer_parity/renderer-parity.json", "sha256": "58af4e8fcb4b79d7f44759f3d4a38abc3c64c6782473aa02ef0b84185e8fa12c"},
+      "rawPng": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-native-off-gl_compatibility-20260919T170022482Z/tests_integration_rendered_renderer_parity/renderer-parity.png", "sha256": "284c1c4726ca21952d544d76c6a1ab3f21062a1dffda6a9bd8b80a68b234ded5"},
+      "portablePng": {"path": "godot-client/docs/benchmarks/crowd-forward-plus-readiness-compatibility-2026-09-19.png", "sha256": "284c1c4726ca21952d544d76c6a1ab3f21062a1dffda6a9bd8b80a68b234ded5"},
+      "passed": true,
+      "identityVerified": true,
+      "affinityMask": 15
+    },
+    "forwardPlus": {
+      "checks": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-native-off-forward_plus-20260919T170041688Z/checks.json", "sha256": "268f121b6600d70252f32387efaca190a148fff99bf0060aac55efe4616281e0"},
+      "process": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-native-off-forward_plus-20260919T170041688Z/tests_integration_rendered_renderer_parity/process.json", "sha256": "268f121b6600d70252f32387efaca190a148fff99bf0060aac55efe4616281e0"},
+      "fixtureReport": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-native-off-forward_plus-20260919T170041688Z/tests_integration_rendered_renderer_parity/renderer-parity.json", "sha256": "f5385b898a85b0722d0862997df46e746f8dec778747c7a9867f7d57742425a9"},
+      "rawPng": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-native-off-forward_plus-20260919T170041688Z/tests_integration_rendered_renderer_parity/renderer-parity.png", "sha256": "42c8868fe6f5797332401395fe46d84e36d27ef193013ddd84f147e09c40e715"},
+      "portablePng": {"path": "godot-client/docs/benchmarks/crowd-forward-plus-readiness-forward-plus-2026-09-19.png", "sha256": "42c8868fe6f5797332401395fe46d84e36d27ef193013ddd84f147e09c40e715"},
+      "passed": true,
+      "identityVerified": true,
+      "affinityMask": 15
+    },
+    "comparisonReport": {"path": "godot-client/test-artifacts/presentation-checks/renderer-parity-v3-comparison/renderer-parity-comparison.json", "sha256": "09e0d7dba0b0897fe555ae93985f583f618faa2950ba5b2bf35a1841fe64517f"},
+    "probeTolerance": 0.011765,
+    "probeMaximumAbsoluteRgbDelta": {
+      "compatibility": {"threshold": 0.0, "cyan": 0.003922, "orange": 0.003922},
+      "forwardPlus": {"threshold": 0.001801, "cyan": 0.0, "orange": 0.003922}
+    },
+    "regions": {
+      "ground": {"compatibilityEncodedLuma": 0.319561, "forwardPlusEncodedLuma": 0.320020, "pixelRmse": 0.003881},
+      "fireFlight": {"compatibilityEncodedLuma": 0.476018, "forwardPlusEncodedLuma": 0.437544, "pixelRmse": 0.086422},
+      "radiationContact": {"compatibilityEncodedLuma": 0.376173, "forwardPlusEncodedLuma": 0.375546, "pixelRmse": 0.020596}
+    }
+  },
+  "headlessContract": {
+    "script": "res://tests/test_crowd_benchmark.gd",
+    "scriptSha256": "da13d45f6ac679e20a4ae2c3c700dddc2ac520d8d244a56c73d2f99e70a6f441",
+    "checks": {"path": "godot-client/test-artifacts/presentation-checks/crowd-skin-census-contract-gl_compatibility-20260919T170103221Z/checks.json", "sha256": "b2de76f7b331cc2418a93031f00eac133d0fb3580e74330186939917dc54e6c9"},
+    "process": {"path": "godot-client/test-artifacts/presentation-checks/crowd-skin-census-contract-gl_compatibility-20260919T170103221Z/tests_test_crowd_benchmark/process.json", "sha256": "b2de76f7b331cc2418a93031f00eac133d0fb3580e74330186939917dc54e6c9"},
+    "passed": true
+  },
+  "replay": {
+    "workingDirectory": "godot-client",
+    "environment": {"ELORIA_NATIVE_PRESENTATION": "0"},
+    "compatibility": ".\\scripts\\run_presentation_checks.ps1 -GodotPath '.\\Godot_v4.7.2-stable_win64_console.exe' -Scripts 'res://tests/integration/rendered_renderer_parity.gd' -Renderer gl_compatibility -Label renderer-parity-v3-native-off -TimeoutMinutes 10",
+    "forwardPlus": ".\\scripts\\run_presentation_checks.ps1 -GodotPath '.\\Godot_v4.7.2-stable_win64_console.exe' -Scripts 'res://tests/integration/rendered_renderer_parity.gd' -Renderer forward_plus -Label renderer-parity-v3-native-off -TimeoutMinutes 10",
+    "affinityMask": 15
+  }
+}

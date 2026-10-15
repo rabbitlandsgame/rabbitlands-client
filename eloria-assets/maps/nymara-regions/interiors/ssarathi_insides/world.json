@@ -1,0 +1,2108 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "ssarathi_insides",
+    "name": "Ssarathi Ruins Insides",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        30.45,
+        -11.0,
+        30.12
+      ],
+      "max": [
+        311.55,
+        13.4,
+        324.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        30.45,
+        -10.2,
+        30.45
+      ],
+      "max": [
+        311.55,
+        4.6,
+        324.55
+      ]
+    },
+    "interiorClass": "insides",
+    "parentRegion": "amberwood",
+    "serverCells": 297
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      -28.0,
+      327.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": -1.9,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        55.0,
+        -1.85,
+        39.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "royal_archive"
+    },
+    {
+      "id": "archive-vault-door",
+      "position": [
+        55.0,
+        -1.85,
+        39.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "royal_archive"
+    },
+    {
+      "id": "hatchery-descent",
+      "position": [
+        217.0,
+        -1.95,
+        46.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "serpent_hatchery"
+    },
+    {
+      "id": "cistern-shaft",
+      "position": [
+        69.0,
+        -0.55,
+        258.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "drowned_cistern"
+    },
+    {
+      "id": "undercroft-mouth",
+      "position": [
+        213.0,
+        -0.45,
+        264.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "root_undercroft"
+    },
+    {
+      "id": "tenth-mouth-door",
+      "position": [
+        295.0,
+        0.05,
+        38.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "tenth_mouth"
+    },
+    {
+      "id": "water-gate-undercut-mouth",
+      "position": [
+        295.0,
+        0.05,
+        110.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "water_gate_undercut"
+    },
+    {
+      "id": "lineage-house-door",
+      "position": [
+        295.0,
+        0.05,
+        201.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk",
+      "section": "lineage_house"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 570,
+    "height": 594,
+    "cellMetres": 0.5,
+    "originMetres": [
+      28.0,
+      327.0
+    ],
+    "heightEncoding": {
+      "origin": -8.003,
+      "step": 0.2033,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 62300,
+    "blockedCells": 276280,
+    "walkableFraction": 0.184,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_ssarathi_insides",
+      "Roof_ssarathi_insides_ashlar",
+      "Roof_ssarathi_insides_cliff_rock",
+      "Roof_ssarathi_insides_rubble_stone",
+      "Roof_ssarathi_insides_ssarathi_jade_ashlar",
+      "Roof_ssarathi_insides_timber_grey",
+      "Build_ssarathi_insides_amber_resin",
+      "Build_ssarathi_insides_ashlar",
+      "Build_ssarathi_insides_bark_dark",
+      "Build_ssarathi_insides_cliff_rock",
+      "Build_ssarathi_insides_dark_iron",
+      "Build_ssarathi_insides_lime_plaster",
+      "Build_ssarathi_insides_pale_ashlar",
+      "Build_ssarathi_insides_rubble_stone",
+      "Build_ssarathi_insides_ssarathi_basin_water",
+      "Build_ssarathi_insides_ssarathi_gilt",
+      "Build_ssarathi_insides_ssarathi_jade_ashlar",
+      "Build_ssarathi_insides_ssarathi_jade_scale",
+      "Build_ssarathi_insides_ssarathi_serpent_stone",
+      "Build_ssarathi_insides_ssarathi_silt",
+      "Build_ssarathi_insides_ssarathi_vine",
+      "Build_ssarathi_insides_timber_dark",
+      "Build_ssarathi_insides_timber_grey",
+      "Build_ssarathi_insides_timber_warm",
+      "Build_ssarathi_insides_verdant_terrace_stone",
+      "Build_ssarathi_insides_water_deep",
+      "Build_ssarathi_insides_woven_cloth"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_ssarathi_insides_ashlar",
+      "Roof_ssarathi_insides_cliff_rock",
+      "Roof_ssarathi_insides_rubble_stone",
+      "Roof_ssarathi_insides_ssarathi_jade_ashlar",
+      "Roof_ssarathi_insides_timber_grey"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-archive-vault-door",
+      "name": "Return to Ssarathi Ruins (The Royal Archive)",
+      "type": "map-transition",
+      "position": [
+        55.0,
+        -1.85,
+        39.0
+      ],
+      "destinationMap": "ssarathi_ruins",
+      "destinationSpawn": "archive-vault-door",
+      "radius": 2.5,
+      "section": "royal_archive",
+      "authority": "server"
+    },
+    {
+      "id": "exit-hatchery-descent",
+      "name": "Return to Ssarathi Ruins (The Serpent Hatchery)",
+      "type": "map-transition",
+      "position": [
+        217.0,
+        -1.95,
+        46.0
+      ],
+      "destinationMap": "ssarathi_ruins",
+      "destinationSpawn": "hatchery-descent",
+      "radius": 2.5,
+      "section": "serpent_hatchery",
+      "authority": "server"
+    },
+    {
+      "id": "exit-cistern-shaft",
+      "name": "Return to Ssarathi Ruins (The Drowned Cistern)",
+      "type": "map-transition",
+      "position": [
+        69.0,
+        -0.55,
+        258.0
+      ],
+      "destinationMap": "ssarathi_ruins",
+      "destinationSpawn": "cistern-shaft",
+      "radius": 2.5,
+      "section": "drowned_cistern",
+      "authority": "server"
+    },
+    {
+      "id": "exit-undercroft-mouth",
+      "name": "Return to Ssarathi Ruins (The Root Undercroft)",
+      "type": "map-transition",
+      "position": [
+        213.0,
+        -0.45,
+        264.0
+      ],
+      "destinationMap": "ssarathi_ruins",
+      "destinationSpawn": "undercroft-mouth",
+      "radius": 2.5,
+      "section": "root_undercroft",
+      "authority": "server"
+    },
+    {
+      "id": "exit-tenth-mouth-door",
+      "name": "Return to Ssarathi Ruins (The Tenth Mouth Shrine)",
+      "type": "map-transition",
+      "position": [
+        295.0,
+        0.05,
+        38.0
+      ],
+      "destinationMap": "ssarathi_ruins",
+      "destinationSpawn": "tenth-mouth-door",
+      "radius": 2.5,
+      "section": "tenth_mouth",
+      "authority": "server"
+    },
+    {
+      "id": "exit-water-gate-undercut-mouth",
+      "name": "Return to Ssarathi Ruins (The Water Gate Undercut)",
+      "type": "map-transition",
+      "position": [
+        295.0,
+        0.05,
+        110.0
+      ],
+      "destinationMap": "ssarathi_ruins",
+      "destinationSpawn": "water-gate-undercut-mouth",
+      "radius": 2.5,
+      "section": "water_gate_undercut",
+      "authority": "server"
+    },
+    {
+      "id": "exit-lineage-house-door",
+      "name": "Return to Ssarathi Ruins (The Lineage Reader's House)",
+      "type": "map-transition",
+      "position": [
+        295.0,
+        0.05,
+        201.0
+      ],
+      "destinationMap": "ssarathi_ruins",
+      "destinationSpawn": "lineage-house-door",
+      "radius": 2.5,
+      "section": "lineage_house",
+      "authority": "server"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "royal_archive-water-door",
+      "name": "The Water Door",
+      "space": "royal_archive.water_entrance",
+      "position": [
+        55.0,
+        -0.4,
+        39.0
+      ]
+    },
+    {
+      "id": "royal_archive-scaled-mosaic",
+      "name": "The Scaled Mosaic",
+      "space": "royal_archive.reading_hall",
+      "position": [
+        55.0,
+        0.95,
+        71.0
+      ]
+    },
+    {
+      "id": "royal_archive-water-arch",
+      "name": "The Water Arch",
+      "space": "royal_archive.arch_crossing",
+      "position": [
+        55.0,
+        2.35,
+        98.0
+      ]
+    },
+    {
+      "id": "royal_archive-archive-shelves",
+      "name": "The Long Aisle",
+      "space": "royal_archive.shelf_aisle",
+      "position": [
+        87.0,
+        1.95,
+        80.0
+      ]
+    },
+    {
+      "id": "royal_archive-royal-statue",
+      "name": "The Serpent King",
+      "space": "royal_archive.statue_court",
+      "position": [
+        87.0,
+        3.35,
+        112.0
+      ]
+    },
+    {
+      "id": "royal_archive-vault-trap",
+      "name": "The Vault Trap",
+      "space": "royal_archive.trap_corridor",
+      "position": [
+        66.0,
+        1.75,
+        112.0
+      ]
+    },
+    {
+      "id": "royal_archive-flooded-repository",
+      "name": "The Flooded Repository",
+      "space": "royal_archive.flooded_repository",
+      "position": [
+        41.0,
+        -0.7,
+        114.0
+      ]
+    },
+    {
+      "id": "royal_archive-central-archive",
+      "name": "The Central Archive",
+      "space": "royal_archive.central_archive",
+      "position": [
+        55.0,
+        2.15,
+        150.0
+      ]
+    },
+    {
+      "id": "royal_archive-material-study",
+      "name": "The Study Table",
+      "space": "royal_archive.central_archive",
+      "position": [
+        55.0,
+        1.25,
+        150.0
+      ]
+    },
+    {
+      "id": "serpent_hatchery-hatchery-pool",
+      "name": "The Hatchery Pool",
+      "space": "serpent_hatchery.brood_cavern",
+      "position": [
+        217.0,
+        -5.8,
+        94.0
+      ]
+    },
+    {
+      "id": "serpent_hatchery-hatchery-warden",
+      "name": "The Warden's Cell",
+      "space": "serpent_hatchery.warden_cell",
+      "position": [
+        254.0,
+        -6.6,
+        94.0
+      ]
+    },
+    {
+      "id": "drowned_cistern-cistern-basin",
+      "name": "The Cistern Basin",
+      "space": "drowned_cistern.basin",
+      "position": [
+        69.0,
+        -2.2,
+        300.0
+      ]
+    },
+    {
+      "id": "drowned_cistern-cistern-sluice",
+      "name": "The Sluice Gear",
+      "space": "drowned_cistern.sluice",
+      "position": [
+        110.0,
+        -2.8,
+        300.0
+      ]
+    },
+    {
+      "id": "root_undercroft-root-vault",
+      "name": "The Root Vault",
+      "space": "root_undercroft.undercroft",
+      "position": [
+        213.0,
+        -1.0,
+        300.0
+      ]
+    },
+    {
+      "id": "root_undercroft-root-tomb",
+      "name": "The Root Tomb",
+      "space": "root_undercroft.tomb_niche",
+      "position": [
+        246.0,
+        -2.2,
+        301.0
+      ]
+    },
+    {
+      "id": "tenth_mouth-ssarathi_tenth_mouth-sanctuary",
+      "name": "The Tenth Mouth Shrine",
+      "space": "tenth_mouth.nave",
+      "position": [
+        295.0,
+        0.4,
+        60.0
+      ]
+    },
+    {
+      "id": "water_gate_undercut-ssarathi_water_gate_undercut-chamber",
+      "name": "The Water Gate Undercut",
+      "space": "water_gate_undercut.chamber",
+      "position": [
+        295.0,
+        -4.0,
+        161.0
+      ]
+    },
+    {
+      "id": "lineage_house-ssarathi_lineage_house-hearth",
+      "name": "The Lineage Reader's House",
+      "space": "lineage_house.hall",
+      "position": [
+        295.0,
+        1.4,
+        201.0
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "ssarathi-archive-trap",
+      "name": "Vault Trap Mechanism",
+      "type": "mechanism",
+      "position": [
+        66.0,
+        1.4,
+        112.0
+      ],
+      "authority": "server",
+      "section": "royal_archive"
+    },
+    {
+      "id": "ssarathi-archive-catalogue",
+      "name": "The Great Catalogue",
+      "type": "lectern",
+      "position": [
+        55.0,
+        1.5,
+        150.0
+      ],
+      "authority": "server",
+      "section": "royal_archive"
+    },
+    {
+      "id": "ssarathi-hatchery-pool",
+      "name": "The Hatchery Pool",
+      "type": "font",
+      "position": [
+        217.0,
+        -9.8,
+        94.0
+      ],
+      "authority": "server",
+      "section": "serpent_hatchery"
+    },
+    {
+      "id": "ssarathi-cistern-sluice",
+      "name": "Cistern Sluice Gear",
+      "type": "mechanism",
+      "position": [
+        110.0,
+        -2.4,
+        300.0
+      ],
+      "authority": "server",
+      "section": "drowned_cistern"
+    },
+    {
+      "id": "secret-ruins-vault-of-the-sun",
+      "kind": "secret",
+      "secret": "ruins-vault-of-the-sun",
+      "name": "The Sun Vault Undercroft",
+      "label": "A cracked flagstone that rings hollow underfoot.",
+      "prop": "cracked_slab",
+      "key": "Storage Token",
+      "destinationMap": "ssarathi_ruins_secrets",
+      "destinationSpawn": "ruins-vault-of-the-sun",
+      "position": [
+        58.0,
+        0.35,
+        153.0
+      ],
+      "space": "royal_archive.central_archive",
+      "authority": "server"
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "ssarathi_water_gate_undercut-den",
+      "name": "Saltmarsh Crocodile",
+      "kind": "creature-zone",
+      "position": [
+        295.0,
+        -6.0,
+        161.0
+      ],
+      "radius": 12.0,
+      "section": "water_gate_undercut"
+    }
+  ],
+  "harvestables": [],
+  "environment": {
+    "sky": {
+      "type": "gradient",
+      "zenith": [
+        0.06,
+        0.1,
+        0.09
+      ],
+      "horizon": [
+        0.16,
+        0.22,
+        0.18
+      ],
+      "energy": 0.5
+    },
+    "sun": {
+      "enabled": true,
+      "direction": [
+        -0.2,
+        -0.94,
+        0.28
+      ],
+      "color": [
+        0.86,
+        0.92,
+        0.84
+      ],
+      "energy": 0.3,
+      "shadows": true
+    },
+    "ambient": {
+      "color": [
+        0.4,
+        0.48,
+        0.42
+      ],
+      "energy": 1.3,
+      "skyContribution": 0.2
+    },
+    "fog": {
+      "enabled": true,
+      "color": [
+        0.16,
+        0.22,
+        0.19
+      ],
+      "density": 0.0035,
+      "skyAffect": 0.08
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.3,
+      "white": 6.0
+    },
+    "openToSky": [
+      "root_undercroft.mouth",
+      "root_undercroft.undercroft"
+    ],
+    "lights": [
+      {
+        "id": "lantern-00",
+        "kind": "point",
+        "position": [
+          55.0,
+          2.58,
+          65.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-01",
+        "kind": "point",
+        "position": [
+          55.0,
+          2.58,
+          77.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-02",
+        "kind": "point",
+        "position": [
+          55.0,
+          2.38,
+          98.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-03",
+        "kind": "point",
+        "position": [
+          87.0,
+          2.38,
+          72.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-04",
+        "kind": "point",
+        "position": [
+          87.0,
+          2.38,
+          90.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-05",
+        "kind": "point",
+        "position": [
+          87.0,
+          3.78,
+          112.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-06",
+        "kind": "point",
+        "position": [
+          66.0,
+          2.18,
+          112.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-07",
+        "kind": "point",
+        "position": [
+          41.0,
+          1.78,
+          114.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-08",
+        "kind": "point",
+        "position": [
+          48.0,
+          3.38,
+          150.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-09",
+        "kind": "point",
+        "position": [
+          62.0,
+          3.38,
+          150.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-10",
+        "kind": "point",
+        "position": [
+          55.0,
+          4.98,
+          160.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-11",
+        "kind": "point",
+        "position": [
+          217.0,
+          -1.62,
+          46.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-12",
+        "kind": "point",
+        "position": [
+          217.0,
+          -5.62,
+          50.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-13",
+        "kind": "point",
+        "position": [
+          203.0,
+          -5.02,
+          94.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-14",
+        "kind": "point",
+        "position": [
+          231.0,
+          -5.02,
+          94.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-15",
+        "kind": "point",
+        "position": [
+          217.0,
+          -4.62,
+          80.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-16",
+        "kind": "point",
+        "position": [
+          217.0,
+          -4.62,
+          108.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-17",
+        "kind": "point",
+        "position": [
+          217.0,
+          -6.62,
+          94.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-18",
+        "kind": "point",
+        "position": [
+          254.0,
+          -6.02,
+          94.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-19",
+        "kind": "point",
+        "position": [
+          69.0,
+          0.78,
+          258.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-20",
+        "kind": "point",
+        "position": [
+          69.0,
+          -2.02,
+          284.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-21",
+        "kind": "point",
+        "position": [
+          69.0,
+          -2.02,
+          300.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-22",
+        "kind": "point",
+        "position": [
+          69.0,
+          -2.02,
+          316.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-23",
+        "kind": "point",
+        "position": [
+          110.0,
+          -2.42,
+          300.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-24",
+        "kind": "point",
+        "position": [
+          213.0,
+          0.98,
+          264.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-25",
+        "kind": "point",
+        "position": [
+          202.0,
+          -1.02,
+          300.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-26",
+        "kind": "point",
+        "position": [
+          224.0,
+          -1.02,
+          300.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-27",
+        "kind": "point",
+        "position": [
+          213.0,
+          -1.02,
+          312.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-28",
+        "kind": "point",
+        "position": [
+          246.0,
+          -2.02,
+          301.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-29",
+        "kind": "point",
+        "position": [
+          295.0,
+          2.78,
+          38.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-30",
+        "kind": "point",
+        "position": [
+          290.0,
+          2.98,
+          54.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-31",
+        "kind": "point",
+        "position": [
+          300.0,
+          2.98,
+          60.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-32",
+        "kind": "point",
+        "position": [
+          295.0,
+          3.38,
+          67.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-33",
+        "kind": "point",
+        "position": [
+          295.0,
+          2.58,
+          108.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-34",
+        "kind": "point",
+        "position": [
+          295.0,
+          -0.82,
+          131.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-35",
+        "kind": "point",
+        "position": [
+          287.0,
+          -2.42,
+          161.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-36",
+        "kind": "point",
+        "position": [
+          303.0,
+          -2.42,
+          161.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-37",
+        "kind": "point",
+        "position": [
+          295.0,
+          2.28,
+          201.0
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      },
+      {
+        "id": "lantern-38",
+        "kind": "point",
+        "position": [
+          296.0,
+          1.98,
+          209.28
+        ],
+        "color": [
+          1.0,
+          0.7,
+          0.38
+        ],
+        "range": 26.0,
+        "energy": 7.0,
+        "attenuation": 1.1
+      }
+    ]
+  },
+  "spaces": {
+    "royal_archive.water_entrance": {
+      "x0": 48.0,
+      "z0": 31.0,
+      "x1": 62.0,
+      "z1": 47.0,
+      "floor": -1.9,
+      "height": 5.0
+    },
+    "royal_archive.reading_hall": {
+      "x0": 42.0,
+      "z0": 58.0,
+      "x1": 68.0,
+      "z1": 84.0,
+      "floor": 0.35,
+      "height": 6.4
+    },
+    "royal_archive.entrance_stair": {
+      "x0": 53.3,
+      "z0": 45.3,
+      "x1": 56.7,
+      "z1": 59.7,
+      "floor": -1.9,
+      "height": 3.4
+    },
+    "royal_archive.arch_crossing": {
+      "x0": 46.0,
+      "z0": 90.0,
+      "x1": 64.0,
+      "z1": 106.0,
+      "floor": 0.35,
+      "height": 6.0
+    },
+    "royal_archive.hall_to_arch": {
+      "x0": 53.4,
+      "z0": 82.4,
+      "x1": 56.6,
+      "z1": 91.6,
+      "floor": 0.35,
+      "height": 3.4
+    },
+    "royal_archive.shelf_aisle": {
+      "x0": 75.0,
+      "z0": 62.0,
+      "x1": 99.0,
+      "z1": 98.0,
+      "floor": 0.35,
+      "height": 5.6
+    },
+    "royal_archive.hall_to_aisle": {
+      "x0": 66.5,
+      "z0": 69.5,
+      "x1": 76.5,
+      "z1": 72.5,
+      "floor": 0.35,
+      "height": 3.2
+    },
+    "royal_archive.statue_court": {
+      "x0": 77.0,
+      "z0": 102.0,
+      "x1": 97.0,
+      "z1": 122.0,
+      "floor": 0.35,
+      "height": 8.2
+    },
+    "royal_archive.aisle_to_statue": {
+      "x0": 85.5,
+      "z0": 96.5,
+      "x1": 88.5,
+      "z1": 103.5,
+      "floor": 0.35,
+      "height": 3.2
+    },
+    "royal_archive.trap_corridor": {
+      "x0": 57.0,
+      "z0": 106.0,
+      "x1": 75.0,
+      "z1": 118.0,
+      "floor": 0.35,
+      "height": 4.4
+    },
+    "royal_archive.statue_to_trap": {
+      "x0": 73.5,
+      "z0": 110.5,
+      "x1": 78.5,
+      "z1": 113.5,
+      "floor": 0.35,
+      "height": 3.2
+    },
+    "royal_archive.flooded_repository": {
+      "x0": 31.0,
+      "z0": 104.0,
+      "x1": 51.0,
+      "z1": 124.0,
+      "floor": -1.9,
+      "height": 5.6
+    },
+    "royal_archive.trap_to_repository": {
+      "x0": 49.5,
+      "z0": 110.5,
+      "x1": 58.5,
+      "z1": 113.5,
+      "floor": -1.9,
+      "height": 3.4
+    },
+    "royal_archive.central_archive": {
+      "x0": 39.0,
+      "z0": 134.0,
+      "x1": 71.0,
+      "z1": 166.0,
+      "floor": 0.35,
+      "height": 9.0
+    },
+    "royal_archive.repository_to_central": {
+      "x0": 39.3,
+      "z0": 122.3,
+      "x1": 56.7,
+      "z1": 135.7,
+      "floor": -1.9,
+      "height": 3.6
+    },
+    "serpent_hatchery.descent": {
+      "x0": 209.0,
+      "z0": 38.0,
+      "x1": 225.0,
+      "z1": 54.0,
+      "floor": -2.0,
+      "height": 5.0
+    },
+    "serpent_hatchery.brood_cavern": {
+      "x0": 191.0,
+      "z0": 68.0,
+      "x1": 243.0,
+      "z1": 120.0,
+      "floor": -7.8,
+      "height": 11.0
+    },
+    "serpent_hatchery.descent_run": {
+      "x0": 215.3,
+      "z0": 52.3,
+      "x1": 218.7,
+      "z1": 69.7,
+      "floor": -7.8,
+      "height": 3.6
+    },
+    "serpent_hatchery.warden_cell": {
+      "x0": 247.0,
+      "z0": 86.0,
+      "x1": 261.0,
+      "z1": 102.0,
+      "floor": -7.8,
+      "height": 4.6
+    },
+    "serpent_hatchery.cell_run": {
+      "x0": 241.6,
+      "z0": 92.6,
+      "x1": 248.4,
+      "z1": 95.4,
+      "floor": -7.8,
+      "height": 3.0
+    },
+    "drowned_cistern.shaft_room": {
+      "x0": 63.0,
+      "z0": 252.0,
+      "x1": 75.0,
+      "z1": 264.0,
+      "floor": -0.6,
+      "height": 4.6
+    },
+    "drowned_cistern.basin": {
+      "x0": 39.0,
+      "z0": 276.0,
+      "x1": 99.0,
+      "z1": 324.0,
+      "floor": -4.2,
+      "height": 8.0
+    },
+    "drowned_cistern.cistern_stair": {
+      "x0": 67.3,
+      "z0": 262.3,
+      "x1": 70.7,
+      "z1": 277.7,
+      "floor": -4.2,
+      "height": 3.4
+    },
+    "drowned_cistern.sluice": {
+      "x0": 103.0,
+      "z0": 292.0,
+      "x1": 117.0,
+      "z1": 308.0,
+      "floor": -4.2,
+      "height": 5.0
+    },
+    "drowned_cistern.sluice_run": {
+      "x0": 97.4,
+      "z0": 298.4,
+      "x1": 104.6,
+      "z1": 301.6,
+      "floor": -4.2,
+      "height": 3.4
+    },
+    "root_undercroft.mouth": {
+      "x0": 206.0,
+      "z0": 258.0,
+      "x1": 220.0,
+      "z1": 270.0,
+      "floor": -0.5,
+      "height": 4.8
+    },
+    "root_undercroft.undercroft": {
+      "x0": 191.0,
+      "z0": 282.0,
+      "x1": 235.0,
+      "z1": 318.0,
+      "floor": -3.4,
+      "height": 8.6
+    },
+    "root_undercroft.root_stair": {
+      "x0": 211.2,
+      "z0": 268.2,
+      "x1": 214.8,
+      "z1": 283.8,
+      "floor": -3.4,
+      "height": 3.6
+    },
+    "root_undercroft.tomb_niche": {
+      "x0": 239.0,
+      "z0": 294.0,
+      "x1": 253.0,
+      "z1": 308.0,
+      "floor": -3.4,
+      "height": 4.4
+    },
+    "root_undercroft.niche_run": {
+      "x0": 233.6,
+      "z0": 298.6,
+      "x1": 240.4,
+      "z1": 301.4,
+      "floor": -3.4,
+      "height": 3.0
+    },
+    "tenth_mouth.porch": {
+      "x0": 291.0,
+      "z0": 34.0,
+      "x1": 299.0,
+      "z1": 42.0,
+      "floor": 0.0,
+      "height": 4.2
+    },
+    "tenth_mouth.nave": {
+      "x0": 287.0,
+      "z0": 50.0,
+      "x1": 303.0,
+      "z1": 70.0,
+      "floor": -1.2,
+      "height": 7.0
+    },
+    "tenth_mouth.aisle": {
+      "x0": 293.4,
+      "z0": 40.4,
+      "x1": 296.6,
+      "z1": 51.6,
+      "floor": -1.2,
+      "height": 3.6
+    },
+    "water_gate_undercut.mouth": {
+      "x0": 289.0,
+      "z0": 104.0,
+      "x1": 301.0,
+      "z1": 116.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "water_gate_undercut.throat": {
+      "x0": 290.0,
+      "z0": 126.0,
+      "x1": 300.0,
+      "z1": 136.0,
+      "floor": -3.6,
+      "height": 5.6
+    },
+    "water_gate_undercut.chamber": {
+      "x0": 279.0,
+      "z0": 146.0,
+      "x1": 311.0,
+      "z1": 176.0,
+      "floor": -6.0,
+      "height": 11.0
+    },
+    "water_gate_undercut.descent": {
+      "x0": 292.6,
+      "z0": 113.6,
+      "x1": 297.4,
+      "z1": 128.4,
+      "floor": -3.6,
+      "height": 4.4
+    },
+    "water_gate_undercut.gullet": {
+      "x0": 292.7,
+      "z0": 133.7,
+      "x1": 297.3,
+      "z1": 148.3,
+      "floor": -6.0,
+      "height": 4.4
+    },
+    "lineage_house.hall": {
+      "x0": 290.0,
+      "z0": 196.0,
+      "x1": 300.0,
+      "z1": 206.0,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "lineage_house.back": {
+      "x0": 292.0,
+      "z0": 206.55,
+      "x1": 300.0,
+      "z1": 212.0,
+      "floor": 0.0,
+      "height": 3.0
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../../ssarathi_ruins/references/00-concept-detail-board.png",
+    "role": "parent-region board; only drowned_crown has its own concept",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "royal_archive.water_entrance",
+      "royal_archive.reading_hall",
+      "royal_archive.reading_hall",
+      "royal_archive.arch_crossing",
+      "royal_archive.shelf_aisle",
+      "royal_archive.statue_court",
+      "royal_archive.trap_corridor",
+      "royal_archive.flooded_repository",
+      "royal_archive.central_archive",
+      "royal_archive.central_archive",
+      "serpent_hatchery.descent",
+      "serpent_hatchery.brood_cavern",
+      "serpent_hatchery.brood_cavern",
+      "serpent_hatchery.warden_cell",
+      "drowned_cistern.shaft_room",
+      "drowned_cistern.basin",
+      "drowned_cistern.sluice",
+      "root_undercroft.mouth",
+      "root_undercroft.undercroft",
+      "root_undercroft.tomb_niche",
+      "tenth_mouth.the porch",
+      "tenth_mouth.the nave",
+      "tenth_mouth.the sanctuary",
+      "water_gate_undercut.cave mouth from within",
+      "water_gate_undercut.the descent",
+      "water_gate_undercut.the chamber",
+      "lineage_house.the hall and hearth",
+      "lineage_house.the workshop"
+    ]
+  },
+  "performance": {
+    "nodes": 34,
+    "meshes": 33,
+    "materials": 24,
+    "images": 70,
+    "textures": 70,
+    "accessors": 165,
+    "bufferViews": 235,
+    "uniqueTriangles": 124242,
+    "uniqueVertices": 133255,
+    "glbBytes": 14223712,
+    "nodeNames": [
+      "Interior_ssarathi_insides",
+      "Roof_ssarathi_insides_ashlar",
+      "Roof_ssarathi_insides_cliff_rock",
+      "Roof_ssarathi_insides_rubble_stone",
+      "Roof_ssarathi_insides_ssarathi_jade_ashlar",
+      "Roof_ssarathi_insides_timber_grey",
+      "Build_ssarathi_insides_amber_resin",
+      "Build_ssarathi_insides_ashlar",
+      "Build_ssarathi_insides_bark_dark",
+      "Build_ssarathi_insides_cliff_rock",
+      "Build_ssarathi_insides_dark_iron",
+      "Build_ssarathi_insides_lime_plaster",
+      "Build_ssarathi_insides_pale_ashlar",
+      "Build_ssarathi_insides_rubble_stone",
+      "Build_ssarathi_insides_ssarathi_basin_water",
+      "Build_ssarathi_insides_ssarathi_gilt",
+      "Build_ssarathi_insides_ssarathi_jade_ashlar",
+      "Build_ssarathi_insides_ssarathi_jade_scale",
+      "Build_ssarathi_insides_ssarathi_serpent_stone",
+      "Build_ssarathi_insides_ssarathi_silt",
+      "Build_ssarathi_insides_ssarathi_vine",
+      "Build_ssarathi_insides_timber_dark",
+      "Build_ssarathi_insides_timber_grey",
+      "Build_ssarathi_insides_timber_warm",
+      "Build_ssarathi_insides_verdant_terrace_stone",
+      "Build_ssarathi_insides_water_deep",
+      "Build_ssarathi_insides_woven_cloth",
+      "Walk_ashlar",
+      "Walk_packed_earth",
+      "Walk_ssarathi_jade_paving",
+      "Walk_ssarathi_jade_scale",
+      "Walk_ssarathi_moss_stone",
+      "Walk_ssarathi_silt",
+      "Walk_timber_warm"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260901
+    },
+    {
+      "id": "anchor",
+      "landmark": "sun-vault",
+      "position": [
+        60.0,
+        13.0,
+        -208.5
+      ],
+      "role": "surface entrance on the Ssarathi Ruins region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the Ssarathi Ruins region kit over the shared toolkit; no scattered placement",
+    "textures": "procedural, from amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "[royal_archive] Built from concept.json's written subject list and the authored asset pack's names: its own concept board does not decode at all.",
+    "[serpent_hatchery] Authored from the asset pack's `ssarathi_hatchery_pool`, which is Ssarathi interior content outside the Archive's ten subjects. No concept art exists for it.",
+    "[tenth_mouth] Built from the shared small-room kit: a cut sanctuary in the water manner.",
+    "[water_gate_undercut] Built from the shared small-room kit: mouth, throat and chamber, dressed for the region above it.",
+    "[lineage_house] Built from the shared small-room kit: a hall with a hearth and a back room for its trade (workshop).",
+    "Four insides on one map with blackspace between them, following amethyst_barrens_insides and crownwater_insides. Cells between sections are zero in collision.bin because no Walk_ surface covers them - the void is not drawn, it is simply the absence of floor."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Not opened in Godot: no client is installable in the build environment, so collision response, navmesh generation, portal transition, LOD and transparency sorting are unverified.",
+    "eloria-server has not registered these map keys.",
+    "One environment block serves four sections of different character; the per-section lamps carry most of the lighting difference.",
+    "The Royal Archive's own concept board does not decode - zero rows, not just the truncated tail every region board has - so its ten subjects were worked from concept.json's written list and the authored asset pack's piece names. There is no panel comparison for it.",
+    "The other three sections have no concept art at all and are authored from the region's surface landmarks and its (intact) region board."
+  ],
+  "sections": [
+    {
+      "id": "royal_archive",
+      "name": "The Royal Archive",
+      "class": "archive",
+      "spawn": "archive-vault-door",
+      "entrance": "royal_archive.water_entrance",
+      "offset": [
+        55.0,
+        38.0
+      ],
+      "arrival": [
+        55.0,
+        -1.85,
+        39.0
+      ],
+      "bounds": {
+        "min": [
+          31.0,
+          31.0
+        ],
+        "max": [
+          99.0,
+          166.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          48.0,
+          31.0
+        ],
+        "max": [
+          62.0,
+          47.0
+        ]
+      },
+      "surfaceLandmark": "sun-vault"
+    },
+    {
+      "id": "serpent_hatchery",
+      "name": "The Serpent Hatchery",
+      "class": "sanctum",
+      "spawn": "hatchery-descent",
+      "entrance": "serpent_hatchery.descent",
+      "offset": [
+        217.0,
+        46.0
+      ],
+      "arrival": [
+        217.0,
+        -1.95,
+        46.0
+      ],
+      "bounds": {
+        "min": [
+          191.0,
+          38.0
+        ],
+        "max": [
+          261.0,
+          120.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          209.0,
+          38.0
+        ],
+        "max": [
+          225.0,
+          54.0
+        ]
+      },
+      "surfaceLandmark": "ritual-plaza"
+    },
+    {
+      "id": "drowned_cistern",
+      "name": "The Drowned Cistern",
+      "class": "utility",
+      "spawn": "cistern-shaft",
+      "entrance": "drowned_cistern.shaft_room",
+      "offset": [
+        69.0,
+        258.0
+      ],
+      "arrival": [
+        69.0,
+        -0.55,
+        258.0
+      ],
+      "bounds": {
+        "min": [
+          39.0,
+          252.0
+        ],
+        "max": [
+          117.0,
+          324.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          63.0,
+          252.0
+        ],
+        "max": [
+          75.0,
+          264.0
+        ]
+      },
+      "surfaceLandmark": "drowned-quarter"
+    },
+    {
+      "id": "root_undercroft",
+      "name": "The Root Undercroft",
+      "class": "ruin",
+      "spawn": "undercroft-mouth",
+      "entrance": "root_undercroft.mouth",
+      "offset": [
+        213.0,
+        264.0
+      ],
+      "arrival": [
+        213.0,
+        -0.45,
+        264.0
+      ],
+      "bounds": {
+        "min": [
+          191.0,
+          258.0
+        ],
+        "max": [
+          253.0,
+          318.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          206.0,
+          258.0
+        ],
+        "max": [
+          220.0,
+          270.0
+        ]
+      },
+      "surfaceLandmark": "root-arch"
+    },
+    {
+      "id": "tenth_mouth",
+      "name": "The Tenth Mouth Shrine",
+      "class": "shrine",
+      "spawn": "tenth-mouth-door",
+      "entrance": "tenth_mouth.porch",
+      "offset": [
+        295.0,
+        38.0
+      ],
+      "arrival": [
+        295.0,
+        0.05,
+        38.0
+      ],
+      "bounds": {
+        "min": [
+          287.0,
+          34.0
+        ],
+        "max": [
+          303.0,
+          70.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          291.0,
+          34.0
+        ],
+        "max": [
+          299.0,
+          42.0
+        ]
+      },
+      "surfaceLandmark": "lily-court"
+    },
+    {
+      "id": "water_gate_undercut",
+      "name": "The Water Gate Undercut",
+      "class": "cave",
+      "spawn": "water-gate-undercut-mouth",
+      "entrance": "water_gate_undercut.mouth",
+      "offset": [
+        295.0,
+        110.0
+      ],
+      "arrival": [
+        295.0,
+        0.05,
+        110.0
+      ],
+      "bounds": {
+        "min": [
+          279.0,
+          104.0
+        ],
+        "max": [
+          311.0,
+          176.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          289.0,
+          104.0
+        ],
+        "max": [
+          301.0,
+          116.0
+        ]
+      },
+      "surfaceLandmark": "south-water-gate"
+    },
+    {
+      "id": "lineage_house",
+      "name": "The Lineage Reader's House",
+      "class": "dwelling",
+      "spawn": "lineage-house-door",
+      "entrance": "lineage_house.hall",
+      "offset": [
+        295.0,
+        200.0
+      ],
+      "arrival": [
+        295.0,
+        0.05,
+        201.0
+      ],
+      "bounds": {
+        "min": [
+          290.0,
+          196.0
+        ],
+        "max": [
+          300.0,
+          212.0
+        ]
+      },
+      "entranceBounds": {
+        "min": [
+          290.0,
+          196.0
+        ],
+        "max": [
+          300.0,
+          206.0
+        ]
+      },
+      "surfaceLandmark": "serpent-gate"
+    }
+  ],
+  "externalResources": {
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d.png": "06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d",
+    "../../../_shared/images/0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0.png": "0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0",
+    "../../../_shared/images/0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f.png": "0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f",
+    "../../../_shared/images/12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1.png": "12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1",
+    "../../../_shared/images/147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed.png": "147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621.png": "1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621",
+    "../../../_shared/images/1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853.png": "1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853",
+    "../../../_shared/images/2185d802eb347e56a329699d132e9601f8a9a7aebd81f1b966bd7b637505fa66.png": "2185d802eb347e56a329699d132e9601f8a9a7aebd81f1b966bd7b637505fa66",
+    "../../../_shared/images/271c5297eff9419cafc86e1ec8173a98b68ac43a148ddb5d1fd6db82b466384c.png": "271c5297eff9419cafc86e1ec8173a98b68ac43a148ddb5d1fd6db82b466384c",
+    "../../../_shared/images/27de4c32f8b3e2af380f4062f972e62bd776c293f19450b79f393157419ab02d.png": "27de4c32f8b3e2af380f4062f972e62bd776c293f19450b79f393157419ab02d",
+    "../../../_shared/images/2bb72fb67793e79e8a986e6016a84afadb94432203f15db874d9611ee518effe.png": "2bb72fb67793e79e8a986e6016a84afadb94432203f15db874d9611ee518effe",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0.png": "303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0",
+    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/370790616ae0f5ae9f7dca4e36c502ccdbc3094daee999986e7733d0b08a6999.png": "370790616ae0f5ae9f7dca4e36c502ccdbc3094daee999986e7733d0b08a6999",
+    "../../../_shared/images/374375a66523f050aba6dd6de74293ccd268211420390232c4f674fc130a2669.png": "374375a66523f050aba6dd6de74293ccd268211420390232c4f674fc130a2669",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/3ea4a92ee93cda358a7a4e5729abb3ff404453516faefb38344e7e372087c6f8.png": "3ea4a92ee93cda358a7a4e5729abb3ff404453516faefb38344e7e372087c6f8",
+    "../../../_shared/images/44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348.png": "44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348",
+    "../../../_shared/images/4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4.png": "4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4",
+    "../../../_shared/images/4e3adbd13a3f22fe6d723cc8f8b4477cc8e250b37f75e829013339e951deaa6f.png": "4e3adbd13a3f22fe6d723cc8f8b4477cc8e250b37f75e829013339e951deaa6f",
+    "../../../_shared/images/4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22.png": "4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22",
+    "../../../_shared/images/50ec541cd66583b04ff23098636525c6407d2cabed2802d7486f2be54d07db20.png": "50ec541cd66583b04ff23098636525c6407d2cabed2802d7486f2be54d07db20",
+    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
+    "../../../_shared/images/57e2d4d9aef865b99ba2ea291d83cbb9c084cfa9a0cb714cfeef97f10f283be9.png": "57e2d4d9aef865b99ba2ea291d83cbb9c084cfa9a0cb714cfeef97f10f283be9",
+    "../../../_shared/images/5a697e14d4cbeae369ccb30e653eb57c7e9962a725965d2bcc7a9927d16bda10.png": "5a697e14d4cbeae369ccb30e653eb57c7e9962a725965d2bcc7a9927d16bda10",
+    "../../../_shared/images/5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843.png": "5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843",
+    "../../../_shared/images/5d99c9774bacfb4be57c9b2c015b4c28614feda9e74b0ce2c102024f91a0ef8a.png": "5d99c9774bacfb4be57c9b2c015b4c28614feda9e74b0ce2c102024f91a0ef8a",
+    "../../../_shared/images/5e579b9bd7f54f859f2c3cc492624e0623446c62ae869ee568c05bc7aa822f38.png": "5e579b9bd7f54f859f2c3cc492624e0623446c62ae869ee568c05bc7aa822f38",
+    "../../../_shared/images/656d804ee3c8d40b3ba6f88b7c66e5a67a55a857bc50cd64ebe9d2ec308afa99.png": "656d804ee3c8d40b3ba6f88b7c66e5a67a55a857bc50cd64ebe9d2ec308afa99",
+    "../../../_shared/images/70fc5d26c53ab75ccb13cc730db31e3295527dbd4ca3bc7504c180b4a4722f0b.png": "70fc5d26c53ab75ccb13cc730db31e3295527dbd4ca3bc7504c180b4a4722f0b",
+    "../../../_shared/images/7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2.png": "7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/878cc2b391f7e5d0ff07f6a624a24ade32690b0d16d8bd26861f4dcebd33185e.png": "878cc2b391f7e5d0ff07f6a624a24ade32690b0d16d8bd26861f4dcebd33185e",
+    "../../../_shared/images/8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c.png": "8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c",
+    "../../../_shared/images/8fdb62a3dd31849bff9827a766e826e4ed7a8e8af3c33946946945b5997b4ca8.png": "8fdb62a3dd31849bff9827a766e826e4ed7a8e8af3c33946946945b5997b4ca8",
+    "../../../_shared/images/960aed83984fef43cff0620b22ff071520800a7d4a420b5ffd337ef856662238.png": "960aed83984fef43cff0620b22ff071520800a7d4a420b5ffd337ef856662238",
+    "../../../_shared/images/9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6.png": "9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6",
+    "../../../_shared/images/9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be.png": "9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be",
+    "../../../_shared/images/a010f9df1e16f5c405f2182925e2a1a8e6ece0adb06649d8263526b0f59042e5.png": "a010f9df1e16f5c405f2182925e2a1a8e6ece0adb06649d8263526b0f59042e5",
+    "../../../_shared/images/a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e.png": "a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e",
+    "../../../_shared/images/a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392.png": "a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392",
+    "../../../_shared/images/a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0.png": "a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0",
+    "../../../_shared/images/a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c.png": "a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/ab6963639f53e407580e37e5a406d73c0c397083d724170bc2e7fb9d013c38a0.png": "ab6963639f53e407580e37e5a406d73c0c397083d724170bc2e7fb9d013c38a0",
+    "../../../_shared/images/ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e.png": "ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e",
+    "../../../_shared/images/af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2.png": "af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/be913cf09ab73db46d5c7acea951ede51a6f451317d27458e4b3860b615441cd.png": "be913cf09ab73db46d5c7acea951ede51a6f451317d27458e4b3860b615441cd",
+    "../../../_shared/images/c474c4461f147188e3c6cf416f2760590dcf677fcc4fd674d94fd2587d060e56.png": "c474c4461f147188e3c6cf416f2760590dcf677fcc4fd674d94fd2587d060e56",
+    "../../../_shared/images/c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd.png": "c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd",
+    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/cba844159f5ebadeb2ebe5368aae7188308334c9821fd2bc9da96da93fff8edc.png": "cba844159f5ebadeb2ebe5368aae7188308334c9821fd2bc9da96da93fff8edc",
+    "../../../_shared/images/ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0.png": "ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0",
+    "../../../_shared/images/cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae.png": "cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae",
+    "../../../_shared/images/d2448fcc28b6c214b9e1a4cc98ef29f530bc6d6065f38abf63ec3063dad47209.png": "d2448fcc28b6c214b9e1a4cc98ef29f530bc6d6065f38abf63ec3063dad47209",
+    "../../../_shared/images/d2c73e33f69452ec0402666220a82757cb5d5a55bcb8c3d25d21c8d3f1eb3970.png": "d2c73e33f69452ec0402666220a82757cb5d5a55bcb8c3d25d21c8d3f1eb3970",
+    "../../../_shared/images/d72d0b3b9efe4671e7dbcce75587ecf87999b552a88ebefffa66bcf78c9edeed.png": "d72d0b3b9efe4671e7dbcce75587ecf87999b552a88ebefffa66bcf78c9edeed",
+    "../../../_shared/images/d91c13807a9b1b80c1f90959cf891ae42c10b37e4c981a697c38b9973db31091.png": "d91c13807a9b1b80c1f90959cf891ae42c10b37e4c981a697c38b9973db31091",
+    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
+    "../../../_shared/images/e4aeeaac0de8e8909eaa0506373f319b88e099168f6a7599c890ce7dae5b4eea.png": "e4aeeaac0de8e8909eaa0506373f319b88e099168f6a7599c890ce7dae5b4eea",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c",
+    "../../../_shared/images/feed0ccaa70930ef63453cb77dce7990b83b6503db24b8e2f8c3c88381dbc912.png": "feed0ccaa70930ef63453cb77dce7990b83b6503db24b8e2f8c3c88381dbc912",
+    "../../../_shared/images/ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65.png": "ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65",
+    "../../../_shared/images/ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247.png": "ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247"
+  }
+}

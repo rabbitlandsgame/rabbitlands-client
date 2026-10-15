@@ -1,0 +1,1071 @@
+{
+ "_note": "red_canyon_gauntlet: trail road geometry from the concept sunmane_gauntlet (work-output/gauntlet-v2-design/regions). Plan metres, x east, y SOUTH; arenas are ellipses; paths are [x, y, elev] polylines; mouths are pockets placed along a bearing from the arena centre. `land` shapes the ground round the road (_toolkit/landforms.py) and `dressing` dresses it (_toolkit/trail_dressing.py).",
+ "schema": "eloria-trail-layout-v1",
+ "id": "red_canyon_gauntlet",
+ "size": [
+  384,
+  384
+ ],
+ "sections": [
+  {
+   "id": "trailhead",
+   "kind": "camp",
+   "name": "Riders' Camp",
+   "at": [
+    34,
+    128
+   ],
+   "rx": 18,
+   "ry": 15,
+   "rot": 0,
+   "elev": 0
+  },
+  {
+   "id": "w1",
+   "kind": "arena",
+   "name": "The Wind Cut",
+   "at": [
+    96,
+    88
+   ],
+   "rx": 32,
+   "ry": 22,
+   "rot": -15,
+   "elev": 1,
+   "order": 1,
+   "mouths": [
+    {
+     "id": "w1-north",
+     "bearing": 250,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-south",
+     "bearing": 75,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-northeast",
+     "bearing": 325,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "kind": "arena",
+   "name": "The Horse Caves",
+   "at": [
+    196,
+    68
+   ],
+   "rx": 36,
+   "ry": 22,
+   "rot": 0,
+   "elev": 3,
+   "order": 2,
+   "mouths": [
+    {
+     "id": "w2-north",
+     "bearing": 260,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-south",
+     "bearing": 85,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-northeast",
+     "bearing": 330,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "kind": "arena",
+   "name": "The Rock Arch",
+   "at": [
+    296,
+    110
+   ],
+   "rx": 32,
+   "ry": 24,
+   "rot": 0,
+   "elev": 6,
+   "order": 3,
+   "mouths": [
+    {
+     "id": "w3-northeast",
+     "bearing": 305,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-southwest",
+     "bearing": 130,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-east",
+     "bearing": 5,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "kind": "arena",
+   "name": "The Long Wash",
+   "at": [
+    318,
+    232
+   ],
+   "rx": 22,
+   "ry": 40,
+   "rot": 0,
+   "elev": 4,
+   "order": 4,
+   "mouths": [
+    {
+     "id": "w4-west",
+     "bearing": 185,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-east",
+     "bearing": 5,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-northwest",
+     "bearing": 245,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "kind": "arena",
+   "name": "The Scree Stair",
+   "at": [
+    250,
+    326
+   ],
+   "rx": 36,
+   "ry": 22,
+   "rot": -10,
+   "elev": 14,
+   "order": 5,
+   "mouths": [
+    {
+     "id": "w5-south",
+     "bearing": 80,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-north",
+     "bearing": 260,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-southwest",
+     "bearing": 140,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "kind": "court",
+   "name": "The Sun Court",
+   "at": [
+    148,
+    282
+   ],
+   "rx": 28,
+   "ry": 24,
+   "rot": 0,
+   "elev": 34,
+   "order": 6,
+   "mouths": [
+    {
+     "id": "court-north",
+     "bearing": 250,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    },
+    {
+     "id": "court-south",
+     "bearing": 100,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    }
+   ]
+  },
+  {
+   "id": "vault",
+   "kind": "vault",
+   "name": "The Shade Shelter",
+   "at": [
+    104,
+    300
+   ],
+   "rx": 8,
+   "ry": 7,
+   "rot": 0,
+   "elev": 34.5
+  }
+ ],
+ "mouthDefaults": {
+  "out": 6,
+  "radius": 7,
+  "linkWidth": 5
+ },
+ "paths": [
+  {
+   "from": "trailhead",
+   "to": "w1",
+   "width": 7,
+   "points": [
+    [
+     52,
+     116,
+     0.4
+    ],
+    [
+     70,
+     100,
+     0.8
+    ]
+   ]
+  },
+  {
+   "from": "w1",
+   "to": "w2",
+   "width": 6,
+   "points": [
+    [
+     130,
+     86,
+     1.6
+    ],
+    [
+     164,
+     74,
+     2.5
+    ]
+   ]
+  },
+  {
+   "from": "w2",
+   "to": "w3",
+   "width": 6,
+   "points": [
+    [
+     232,
+     70,
+     3.8
+    ],
+    [
+     262,
+     88,
+     5
+    ]
+   ]
+  },
+  {
+   "from": "w3",
+   "to": "w4",
+   "width": 6,
+   "points": [
+    [
+     318,
+     138,
+     5.5
+    ],
+    [
+     324,
+     170,
+     5
+    ],
+    [
+     322,
+     196,
+     4.5
+    ]
+   ]
+  },
+  {
+   "from": "w4",
+   "to": "w5",
+   "width": 6,
+   "points": [
+    [
+     314,
+     274,
+     6
+    ],
+    [
+     296,
+     304,
+     9
+    ],
+    [
+     276,
+     320,
+     12
+    ]
+   ]
+  },
+  {
+   "from": "w5",
+   "to": "boss",
+   "width": 6,
+   "points": [
+    [
+     214,
+     330,
+     19
+    ],
+    [
+     186,
+     314,
+     27
+    ],
+    [
+     166,
+     296,
+     32
+    ]
+   ]
+  },
+  {
+   "from": "boss",
+   "to": "vault",
+   "width": 4,
+   "points": [
+    [
+     118,
+     294,
+     34.3
+    ]
+   ]
+  }
+ ],
+ "land": {
+  "banks": 7,
+  "hills": 4.0,
+  "cut": 8,
+  "ground": {
+   "bank": "red_sand",
+   "network": "red_sand",
+   "trail": "steppe_dust",
+   "cliff": "red_rock",
+   "mesa": "red_mesa",
+   "bed": "steppe_dust"
+  },
+  "massifs": [
+   {
+    "at": [
+     150,
+     286
+    ],
+    "rx": 74,
+    "ry": 52,
+    "top": 34
+   },
+   {
+    "at": [
+     190,
+     190
+    ],
+    "rx": 60,
+    "ry": 40,
+    "top": 50
+   },
+   {
+    "at": [
+     40,
+     300
+    ],
+    "rx": 40,
+    "ry": 46,
+    "top": 44
+   },
+   {
+    "at": [
+     330,
+     30
+    ],
+    "rx": 50,
+    "ry": 26,
+    "top": 40
+   },
+   {
+    "at": [
+     360,
+     330
+    ],
+    "rx": 30,
+    "ry": 50,
+    "top": 42
+   }
+  ],
+  "rivers": [
+   {
+    "points": [
+     [
+      296,
+      0
+     ],
+     [
+      296,
+      110
+     ],
+     [
+      300,
+      160
+     ]
+    ],
+    "width": 6,
+    "dry": true
+   }
+  ]
+ },
+ "checkpoints": [
+  {
+   "id": "cp1",
+   "name": "The arch fire",
+   "at": [
+    245.6,
+    85.7
+   ],
+   "elev": 4.48,
+   "after": "w2",
+   "reach": 12.0
+  },
+  {
+   "id": "cp2",
+   "name": "The wash fire",
+   "at": [
+    296.8,
+    290.0
+   ],
+   "elev": 7.93,
+   "after": "w4",
+   "reach": 12.0
+  }
+ ],
+ "sides": [
+  {
+   "id": "seep-spring",
+   "name": "The Seep",
+   "from": [
+    323.5,
+    167.1,
+    5.05
+   ],
+   "at": [
+    339.2,
+    164.2
+   ],
+   "radius": 7,
+   "elev": 5.35,
+   "width": 4
+  }
+ ],
+ "floors": {
+  "boss": "steppe_dust",
+  "vault": "steppe_dust",
+  "trailhead": "steppe_dust"
+ },
+ "environment": {
+  "sky": {
+   "topColor": [
+    0.3,
+    0.5,
+    0.82
+   ],
+   "horizonColor": [
+    0.98,
+    0.8,
+    0.56
+   ],
+   "groundBottomColor": [
+    0.3,
+    0.16,
+    0.1
+   ],
+   "groundHorizonColor": [
+    0.82,
+    0.56,
+    0.38
+   ]
+  },
+  "sun": {
+   "enabled": true,
+   "direction": [
+    0.48,
+    -0.74,
+    0.47
+   ],
+   "color": [
+    1.0,
+    0.88,
+    0.7
+   ],
+   "energy": 1.85
+  },
+  "ambient": {
+   "color": [
+    0.8,
+    0.68,
+    0.58
+   ],
+   "energy": 0.85,
+   "skyContribution": 0.35
+  },
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.94,
+    0.78,
+    0.58
+   ],
+   "density": 0.0006
+  },
+  "tonemap": {
+   "mode": "filmic",
+   "exposure": 0.98,
+   "white": 4.0
+  }
+ },
+ "dressing": {
+  "woods": {
+   "count": 150,
+   "far": 0.25,
+   "mix": [
+    [
+     "tree0",
+     0.2
+    ],
+    [
+     "tree1",
+     0.2
+    ],
+    [
+     "saxaul1",
+     0.25
+    ],
+    [
+     "saxaul2",
+     0.2
+    ],
+    [
+     "deadscrub",
+     0.15
+    ]
+   ]
+  },
+  "cover": {
+   "count": 520,
+   "mix": [
+    [
+     "sage1",
+     1
+    ],
+    [
+     "sage2",
+     1
+    ],
+    [
+     "drygrass0",
+     1
+    ],
+    [
+     "drygrass1",
+     1
+    ],
+    [
+     "feather1",
+     0.8
+    ],
+    [
+     "ochre",
+     0.8
+    ],
+    [
+     "tumble",
+     0.3
+    ]
+   ]
+  },
+  "rocks": {
+   "count": 140,
+   "mix": [
+    [
+     "sandboulder0",
+     1
+    ],
+    [
+     "sandboulder1",
+     1
+    ],
+    [
+     "talus1",
+     0.8
+    ],
+    [
+     "talus2",
+     0.8
+    ],
+    [
+     "boulder",
+     0.5
+    ]
+   ]
+  },
+  "frame": {
+   "count": 30,
+   "mix": [
+    [
+     "spire0",
+     1
+    ],
+    [
+     "spire2",
+     1
+    ],
+    [
+     "spire3",
+     1
+    ],
+    [
+     "hoodoo",
+     0.6
+    ]
+   ],
+   "sink": 2.0
+  },
+  "camp": {
+   "tents": "tent",
+   "fire": "firepit",
+   "shelter": "saddle",
+   "crates": [
+    "haystack",
+    "trough",
+    "crate1"
+   ],
+   "tentScale": 0.85
+  },
+  "lantern": {
+   "key": "stone",
+   "every": 60
+  },
+  "objects": {
+   "waystone": "dwaystone",
+   "cache": "cache",
+   "plaque": "notice"
+  },
+  "kits": {
+   "waystone": "whitehorn_range/kit-horn-waystone-1",
+   "cache": "four_gates/kit-crate-stack-1",
+   "notice": "amberwood/kit-notice-board-1",
+   "firepit": "sunmane_steppe/kit-fire-pit",
+   "shelter": "whitehorn_range/kit-firewood-shelter-1",
+   "crate1": "whitehorn_range/kit-supply-crate-1",
+   "crate2": "whitehorn_range/kit-supply-crate-2",
+   "barrels": "four_gates/kit-barrel-stack-1",
+   "spire0": "sunmane_steppe/kit-badland-spire-0",
+   "spire1": "sunmane_steppe/kit-badland-spire-1",
+   "spire2": "sunmane_steppe/kit-badland-spire-2",
+   "spire3": "sunmane_steppe/kit-badland-spire-3",
+   "hoodoo": "sunmane_steppe/kit-mesa-hoodoo-1",
+   "face1": "sunmane_steppe/kit-mesa-face-1",
+   "face2": "sunmane_steppe/kit-mesa-face-2",
+   "corner": "sunmane_steppe/kit-mesa-corner-1",
+   "talus1": "sunmane_steppe/kit-mesa-talus-1",
+   "talus2": "sunmane_steppe/kit-mesa-talus-2",
+   "scree": "sunmane_steppe/kit-mountain-scree-1",
+   "tree0": "sunmane_steppe/kit-steppe-tree-0",
+   "tree1": "sunmane_steppe/kit-steppe-tree-1",
+   "saxaul1": "sunmane_steppe/kit-saxaul-1",
+   "saxaul2": "sunmane_steppe/kit-saxaul-2",
+   "sage1": "sunmane_steppe/kit-sagebrush-1",
+   "sage2": "sunmane_steppe/kit-sagebrush-2",
+   "drygrass0": "sunmane_steppe/kit-dry-grass-0",
+   "drygrass1": "sunmane_steppe/kit-dry-grass-1",
+   "feather1": "sunmane_steppe/kit-feather-grass-1",
+   "ochre": "sunmane_steppe/kit-ochre-scrub-0",
+   "deadscrub": "sunmane_steppe/kit-dead-scrub-0",
+   "tumble": "sunmane_steppe/kit-tumbleweed-1",
+   "sandboulder0": "sunmane_steppe/kit-sand-boulder-0",
+   "sandboulder1": "sunmane_steppe/kit-sand-boulder-1",
+   "boulder": "sunmane_steppe/kit-grey-boulder-0",
+   "bones": "sunmane_steppe/kit-bleached-bones-0",
+   "cave": "sunmane_steppe/kit-cave-mouth-plain",
+   "rail": "sunmane_steppe/kit-hitching-rail-1",
+   "blanket": "sunmane_steppe/kit-horse-blanket-1",
+   "haystack": "sunmane_steppe/kit-hay-stack",
+   "trough": "sunmane_steppe/kit-water-trough",
+   "shrine": "sunmane_steppe/kit-banner-shrine-0",
+   "stone": "sunmane_steppe/kit-standing-stone-1",
+   "tent": "sunmane_steppe/kit-round-tent-0",
+   "saddle": "sunmane_steppe/kit-saddle-rack-1",
+   "dwaystone": "sunmane_steppe/kit-desert-waystone-0",
+   "RC1": "@kit/kit-rc-natural-arch.glb",
+   "RC2": "@kit/kit-rc-cliff-shelter.glb",
+   "RC3": "@kit/kit-rc-split-pillars.glb",
+   "RC4": "@kit/kit-rc-shade-shelter.glb"
+  },
+  "landmarks": [
+   {
+    "kit": "spire0",
+    "at": [
+     78,
+     78
+    ],
+    "scale": 0.8,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "hoodoo",
+    "at": [
+     90,
+     100
+    ],
+    "scale": 1.1,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 61
+   },
+   {
+    "kit": "spire0",
+    "at": [
+     104,
+     74
+    ],
+    "scale": 0.8,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 122
+   },
+   {
+    "kit": "hoodoo",
+    "at": [
+     116,
+     96
+    ],
+    "scale": 1.1,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 183
+   },
+   {
+    "kit": "spire0",
+    "at": [
+     122,
+     84
+    ],
+    "scale": 0.8,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 244
+   },
+   {
+    "kit": "RC2",
+    "at": [
+     168.23,
+     48.56
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "face": [
+     196,
+     68
+    ]
+   },
+   {
+    "kit": "rail",
+    "at": [
+     186,
+     59
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "rail",
+    "at": [
+     208,
+     58
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "blanket",
+    "at": [
+     192,
+     56
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "haystack",
+    "at": [
+     220,
+     60
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "RC1",
+    "at": [
+     296,
+     110
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "bones",
+    "at": [
+     325,
+     202
+    ],
+    "scale": 1.6,
+    "solid": null,
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "bones",
+    "at": [
+     311,
+     214
+    ],
+    "scale": 1.6,
+    "solid": null,
+    "group": "arena",
+    "rot": 53
+   },
+   {
+    "kit": "bones",
+    "at": [
+     325,
+     226
+    ],
+    "scale": 1.6,
+    "solid": null,
+    "group": "arena",
+    "rot": 106
+   },
+   {
+    "kit": "bones",
+    "at": [
+     311,
+     238
+    ],
+    "scale": 1.6,
+    "solid": null,
+    "group": "arena",
+    "rot": 159
+   },
+   {
+    "kit": "bones",
+    "at": [
+     325,
+     250
+    ],
+    "scale": 1.6,
+    "solid": null,
+    "group": "arena",
+    "rot": 212
+   },
+   {
+    "kit": "bones",
+    "at": [
+     311,
+     262
+    ],
+    "scale": 1.6,
+    "solid": null,
+    "group": "arena",
+    "rot": 265
+   },
+   {
+    "kit": "bones",
+    "at": [
+     318,
+     236
+    ],
+    "scale": 3.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 20
+   },
+   {
+    "kit": "talus2",
+    "at": [
+     226,
+     316
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "talus1",
+    "at": [
+     236,
+     338
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 70
+   },
+   {
+    "kit": "talus2",
+    "at": [
+     256,
+     314
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 140
+   },
+   {
+    "kit": "talus1",
+    "at": [
+     270,
+     336
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 210
+   },
+   {
+    "kit": "talus2",
+    "at": [
+     278,
+     320
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 280
+   },
+   {
+    "kit": "RC3",
+    "at": [
+     180.33,
+     259.36
+    ],
+    "scale": 0.8,
+    "solid": "footprint",
+    "group": "scenery",
+    "face": [
+     148,
+     282
+    ]
+   },
+   {
+    "kit": "shrine",
+    "at": [
+     165.59,
+     269.68
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     148,
+     282
+    ]
+   },
+   {
+    "kit": "RC4",
+    "at": [
+     92.89,
+     304.54
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "face": [
+     148,
+     282
+    ]
+   }
+  ],
+  "meshyKit": [
+   "RC1",
+   "RC2",
+   "RC3",
+   "RC4"
+  ],
+  "labels": {
+   "plaque": [
+    "Rules of the canyon",
+    "One party at a time. The pride comes to you; the wash behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+   ],
+   "cache": "Duskmane's spoils",
+   "side": [
+    "The riders' seep",
+    "The only water in the canyon. The riders' horses found it first; the lions found the horses."
+   ]
+  }
+ }
+}

@@ -1,0 +1,3475 @@
+[gd_scene load_steps=13 format=3 uid="uid://bfmrbcawfltal"]
+
+[ext_resource type="Script" uid="uid://dbhj8rl6i8dyi" path="res://src/app/main.gd" id="1"]
+[ext_resource type="Script" uid="uid://dbpi40yl6pryr" path="res://src/camera/isometric_camera_controller.gd" id="2"]
+[ext_resource type="Script" uid="uid://dqdcovlp0tml2" path="res://src/world/world_loader.gd" id="3"]
+[ext_resource type="Script" path="res://src/ui/chat_hud.gd" id="chat_hud"]
+
+[sub_resource type="Shader" id="Shader_login_landfall"]
+code = "shader_type canvas_item;\nrender_mode unshaded;\n\nuniform float animation_strength : hint_range(0.0, 1.0) = 1.0;\nuniform float motion_amount : hint_range(0.0, 0.01) = 0.0024;\n\nvoid fragment() {\n\tfloat slow_wave = sin(TIME * 0.12);\n\tfloat slow_lift = cos(TIME * 0.09);\n\tfloat zoom = 1.008 + (0.002 * sin(TIME * 0.07) * animation_strength);\n\tvec2 sample_uv = (UV - vec2(0.5)) * zoom + vec2(0.5);\n\tsample_uv += vec2(slow_wave, slow_lift) * motion_amount * animation_strength;\n\tvec4 painted_scene = texture(TEXTURE, clamp(sample_uv, vec2(0.001), vec2(0.999)));\n\n\tCOLOR = painted_scene;\n}\n"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_login_landfall"]
+shader = SubResource("Shader_login_landfall")
+shader_parameter/animation_strength = 1.0
+shader_parameter/motion_amount = 0.0024
+
+[sub_resource type="Environment" id="Environment_world"]
+background_mode = 1
+background_color = Color(0.1, 0.15, 0.21, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.65, 0.72, 0.82, 1)
+ambient_light_energy = 0.85
+
+[sub_resource type="Environment" id="Environment_preview"]
+background_mode = 1
+background_color = Color(0.22, 0.23, 0.25, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.9, 0.93, 1, 1)
+ambient_light_energy = 0.45
+tonemap_mode = 0
+
+[sub_resource type="StandardMaterial3D" id="Material_ground"]
+albedo_color = Color(0.2, 0.28, 0.22, 1)
+roughness = 0.95
+
+[sub_resource type="PlaneMesh" id="Mesh_ground"]
+material = SubResource("Material_ground")
+size = Vector2(1200, 1200)
+
+[sub_resource type="StandardMaterial3D" id="Material_map_marker"]
+render_priority = 1
+transparency = 1
+no_depth_test = true
+shading_mode = 0
+
+[sub_resource type="StandardMaterial3D" id="Material_map_marker_outline"]
+transparency = 1
+no_depth_test = true
+shading_mode = 0
+albedo_color = Color(0.04, 0.04, 0.05, 1)
+
+[sub_resource type="StandardMaterial3D" id="Material_preview_ground"]
+albedo_color = Color(0.19, 0.2, 0.16, 1)
+roughness = 1.0
+metallic_specular = 0.1
+
+[sub_resource type="CylinderMesh" id="Mesh_preview_ground"]
+material = SubResource("Material_preview_ground")
+top_radius = 0.78
+bottom_radius = 0.88
+height = 0.09
+radial_segments = 48
+
+[sub_resource type="CylinderMesh" id="Mesh_map_marker"]
+material = SubResource("Material_map_marker")
+top_radius = 9.0
+bottom_radius = 9.0
+height = 0.35
+
+[sub_resource type="CylinderMesh" id="Mesh_map_marker_outline"]
+material = SubResource("Material_map_marker_outline")
+top_radius = 10.6
+bottom_radius = 10.6
+height = 0.35
+
+[node name="Main" type="Control" unique_id=1866924712]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Backdrop" type="ColorRect" parent="." unique_id=1023332505]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.035, 0.055, 0.08, 1)
+
+[node name="LoginBackground" type="TextureRect" parent="." unique_id=2073448342]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_login_landfall")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="GameView" type="Control" parent="." unique_id=1389946843]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ViewportContainer" type="TextureRect" parent="GameView" unique_id=649363417]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+expand_mode = 1
+
+[node name="Viewport" type="SubViewport" parent="GameView/ViewportContainer" unique_id=1897165837]
+handle_input_locally = false
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="WorldRoot" type="Node3D" parent="GameView/ViewportContainer/Viewport" unique_id=374776235]
+unique_name_in_owner = true
+
+[node name="Environment" type="WorldEnvironment" parent="GameView/ViewportContainer/Viewport/WorldRoot" unique_id=1409977916]
+environment = SubResource("Environment_world")
+
+[node name="Ground" type="MeshInstance3D" parent="GameView/ViewportContainer/Viewport/WorldRoot" unique_id=747221865]
+mesh = SubResource("Mesh_ground")
+
+[node name="Sun" type="DirectionalLight3D" parent="GameView/ViewportContainer/Viewport/WorldRoot" unique_id=875828061]
+transform = Transform3D(0.8660254, 0.40957603, -0.28678823, 0, 0.57357645, 0.81915206, 0.5, -0.7094065, 0.49673176, 0, 0, 0)
+light_energy = 1.15
+shadow_enabled = true
+
+[node name="Moon" type="DirectionalLight3D" parent="GameView/ViewportContainer/Viewport/WorldRoot" unique_id=875828062]
+transform = Transform3D(0.8660254, 0.40957603, -0.28678823, 0, 0.57357645, 0.81915206, 0.5, -0.7094065, 0.49673176, 0, 0, 0)
+light_energy = 0.0
+light_color = Color(0.52, 0.6, 0.86, 1)
+shadow_enabled = false
+
+[node name="WorldLoader" type="Node3D" parent="GameView/ViewportContainer/Viewport/WorldRoot" unique_id=1379080989]
+unique_name_in_owner = true
+script = ExtResource("3")
+
+[node name="CameraRig" type="Node3D" parent="GameView/ViewportContainer/Viewport/WorldRoot" unique_id=439123448]
+unique_name_in_owner = true
+script = ExtResource("2")
+
+[node name="Camera" type="Camera3D" parent="GameView/ViewportContainer/Viewport/WorldRoot/CameraRig" unique_id=1939897761]
+unique_name_in_owner = true
+cull_mask = 3
+current = true
+fov = 50.0
+near = 1.0
+far = 1800.0
+
+[node name="PlayerMapMarker" type="MeshInstance3D" parent="GameView/ViewportContainer/Viewport/WorldRoot" unique_id=113081557]
+unique_name_in_owner = true
+visible = false
+layers = 4
+mesh = SubResource("Mesh_map_marker")
+
+[node name="PlayerMapMarkerOutline" type="MeshInstance3D" parent="GameView/ViewportContainer/Viewport/WorldRoot/PlayerMapMarker"]
+layers = 4
+mesh = SubResource("Mesh_map_marker_outline")
+
+[node name="Hud" type="PanelContainer" parent="GameView" unique_id=794390329]
+visible = false
+layout_mode = 0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 330.0
+offset_bottom = 88.0
+
+[node name="HudRows" type="VBoxContainer" parent="GameView/Hud" unique_id=1090648592]
+layout_mode = 2
+
+[node name="MapLabel" type="Label" parent="GameView/Hud/HudRows" unique_id=157702248]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Entering world…"
+
+[node name="ActorLabel" type="Label" parent="GameView/Hud/HudRows" unique_id=610156493]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Actors: 0"
+
+[node name="SelectedTarget" type="Label" parent="GameView/Hud/HudRows" unique_id=455903393]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Target: none"
+
+[node name="ChatWindow" type="PanelContainer" parent="GameView"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 12.0
+offset_top = 418.0
+offset_right = 442.0
+offset_bottom = 668.0
+mouse_filter = 0
+script = ExtResource("chat_hud")
+
+[node name="Frame" type="Control" parent="GameView/ChatWindow"]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 190)
+
+[node name="Layout" type="VBoxContainer" parent="GameView/ChatWindow/Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+
+[node name="Header" type="HBoxContainer" parent="GameView/ChatWindow/Frame/Layout"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="GameView/ChatWindow/Frame/Layout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "Chat"
+
+[node name="Options" type="Button" parent="GameView/ChatWindow/Frame/Layout/Header"]
+layout_mode = 2
+toggle_mode = true
+text = "…"
+
+[node name="Close" type="Button" parent="GameView/ChatWindow/Frame/Layout/Header"]
+layout_mode = 2
+text = "×"
+tooltip_text = "Hide chat; press T or the Chat button to reopen"
+
+[node name="ChatTabs" type="HFlowContainer" parent="GameView/ChatWindow/Frame/Layout" unique_id=1600221536]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+
+[node name="ChatPanel" type="PanelContainer" parent="GameView/ChatWindow/Frame/Layout" unique_id=1315911672]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChatOutput" type="RichTextLabel" parent="GameView/ChatWindow/Frame/Layout/ChatPanel" unique_id=309617186]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+scroll_following = true
+
+[node name="ChatInput" type="LineEdit" parent="GameView/ChatWindow/Frame/Layout" unique_id=1360046506]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Enter sends local chat; /name message sends a private message; // message replies to the last sender"
+placeholder_text = "Chat, /name private message, or // reply"
+
+[node name="ResizeGrip" type="Label" parent="GameView/ChatWindow/Frame"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -13.0
+offset_top = -13.0
+offset_right = 7.0
+offset_bottom = 7.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "◢"
+
+[node name="DialoguePanel" type="PanelContainer" parent="GameView" unique_id=1594192884]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 32.0
+offset_top = 128.0
+offset_right = 592.0
+offset_bottom = 688.0
+
+[node name="DialogueContent" type="VBoxContainer" parent="GameView/DialoguePanel" unique_id=1434935607]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DialogueKicker" type="Label" parent="GameView/DialoguePanel/DialogueContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "A VOICE OF ELORIA"
+horizontal_alignment = 0
+
+[node name="DialogueName" type="Label" parent="GameView/DialoguePanel/DialogueContent" unique_id=288768166]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 21
+text = "NPC"
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="DialogueDivider" type="HSeparator" parent="GameView/DialoguePanel/DialogueContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DialogueText" type="RichTextLabel" parent="GameView/DialoguePanel/DialogueContent" unique_id=1140118479]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DialogueInstruction" type="Label" parent="GameView/DialoguePanel/DialogueContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "CHOOSE YOUR RESPONSE"
+
+[node name="DialogueOptionsScroll" type="ScrollContainer" parent="GameView/DialoguePanel/DialogueContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_vertical = 0
+horizontal_scroll_mode = 0
+
+[node name="DialogueOptions" type="VBoxContainer" parent="GameView/DialoguePanel/DialogueContent/DialogueOptionsScroll" unique_id=291149601]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="DialogueFooter" type="Label" parent="GameView/DialoguePanel/DialogueContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "ESC  Close"
+horizontal_alignment = 2
+
+[node name="DialogueFrameTexture" type="TextureRect" parent="GameView"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 32.0
+offset_top = 128.0
+offset_right = 592.0
+offset_bottom = 688.0
+mouse_filter = 2
+expand_mode = 1
+
+[node name="DialogueBackdrop" type="Panel" parent="GameView"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 82.0
+offset_top = 178.0
+offset_right = 542.0
+offset_bottom = 638.0
+mouse_filter = 2
+
+[node name="PopupPanel" type="PanelContainer" parent="GameView" unique_id=1090442391]
+unique_name_in_owner = true
+visible = false
+z_index = 40
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -170.0
+offset_right = 260.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PopupContent" type="VBoxContainer" parent="GameView/PopupPanel" unique_id=1855194360]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PopupTitle" type="Label" parent="GameView/PopupPanel/PopupContent" unique_id=1247331229]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Server question"
+horizontal_alignment = 1
+
+[node name="PopupText" type="RichTextLabel" parent="GameView/PopupPanel/PopupContent" unique_id=1665043321]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(480, 84)
+layout_mode = 2
+fit_content = true
+
+[node name="PopupOptions" type="VBoxContainer" parent="GameView/PopupPanel/PopupContent" unique_id=1382566405]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="PopupActions" type="HBoxContainer" parent="GameView/PopupPanel/PopupContent" unique_id=1004683862]
+layout_mode = 2
+alignment = 2
+
+[node name="PopupConfirm" type="Button" parent="GameView/PopupPanel/PopupContent/PopupActions" unique_id=1587244103]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Send"
+
+[node name="PopupDismiss" type="Button" parent="GameView/PopupPanel/PopupContent/PopupActions" unique_id=1121953622]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Dismiss"
+
+[node name="ReadingPanel" type="PanelContainer" parent="GameView" unique_id=1935572846]
+unique_name_in_owner = true
+visible = false
+z_index = 22
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -418.0
+offset_top = 44.0
+offset_right = -102.0
+offset_bottom = 168.0
+grow_horizontal = 0
+
+[node name="ReadingContent" type="VBoxContainer" parent="GameView/ReadingPanel" unique_id=1046512775]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ReadingHeader" type="HBoxContainer" parent="GameView/ReadingPanel/ReadingContent" unique_id=1287669550]
+layout_mode = 2
+
+[node name="ReadingTitle" type="Label" parent="GameView/ReadingPanel/ReadingContent/ReadingHeader" unique_id=1725105723]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+text = "Reading"
+
+[node name="ReadingClose" type="Button" parent="GameView/ReadingPanel/ReadingContent/ReadingHeader" unique_id=1156297325]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Hide"
+
+[node name="ReadingProgress" type="ProgressBar" parent="GameView/ReadingPanel/ReadingContent" unique_id=1622030129]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+show_percentage = false
+
+[node name="ReadingDetail" type="RichTextLabel" parent="GameView/ReadingPanel/ReadingContent" unique_id=1859364713]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+
+[node name="MapViewport" type="SubViewport" parent="GameView" unique_id=891640277]
+unique_name_in_owner = true
+render_target_update_mode = 0
+
+[node name="MapCamera" type="Camera3D" parent="GameView/MapViewport" unique_id=1016038437]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 220, 0)
+cull_mask = 1
+projection = 1
+current = true
+size = 180.0
+far = 1000.0
+
+[node name="FullMapViewport" type="SubViewport" parent="GameView" unique_id=596270942]
+unique_name_in_owner = true
+size = Vector2i(768, 768)
+render_target_update_mode = 0
+
+[node name="FullMapCamera" type="Camera3D" parent="GameView/FullMapViewport" unique_id=462932064]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 1200, 0)
+cull_mask = 1
+projection = 1
+current = true
+size = 1600.0
+far = 2500.0
+
+[node name="RightRail" type="Panel" parent="GameView" unique_id=1420003001]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -74.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EloriaLogoFrame" type="PanelContainer" parent="GameView" unique_id=99447398]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -68.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = 50.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="HudLogo" type="TextureRect" parent="GameView/EloriaLogoFrame" unique_id=939669768]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(62, 44)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ConnectionBanner" type="Label" parent="GameView" unique_id=1732401558]
+unique_name_in_owner = true
+visible = false
+z_index = 30
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -260.0
+offset_top = 4.0
+offset_right = 260.0
+offset_bottom = 30.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+
+[node name="HarvestBanner" type="Label" parent="GameView" unique_id=1477203964]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -180.0
+offset_top = -137.0
+offset_right = 180.0
+offset_bottom = -111.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 17
+text = "Harvesting"
+horizontal_alignment = 1
+
+[node name="MinimapFrame" type="Panel" parent="GameView" unique_id=860838546]
+unique_name_in_owner = true
+visible = false
+z_index = 4
+layout_mode = 1
+offset_left = 16.0
+offset_top = 42.0
+offset_right = 280.0
+offset_bottom = 306.0
+tooltip_text = "Floating minimap [Alt+M] — drag its compass border; right-click for orientation, marker types and appearance"
+
+[node name="Minimap" type="TextureRect" parent="GameView/MinimapFrame" unique_id=1494890654]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 27.0
+offset_top = 27.0
+offset_right = -27.0
+offset_bottom = -27.0
+mouse_filter = 1
+expand_mode = 1
+stretch_mode = 5
+
+[node name="North" type="Label" parent="GameView/MinimapFrame" unique_id=973746298]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 88.0
+offset_top = 0.0
+offset_right = 104.0
+offset_bottom = 18.0
+mouse_filter = 2
+text = "N"
+horizontal_alignment = 1
+
+[node name="East" type="Label" parent="GameView/MinimapFrame" unique_id=541309957]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 174.0
+offset_top = 87.0
+offset_right = 190.0
+offset_bottom = 105.0
+mouse_filter = 2
+text = "E"
+horizontal_alignment = 1
+
+[node name="South" type="Label" parent="GameView/MinimapFrame" unique_id=1136181840]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 88.0
+offset_top = 174.0
+offset_right = 104.0
+offset_bottom = 192.0
+mouse_filter = 2
+text = "S"
+horizontal_alignment = 1
+
+[node name="West" type="Label" parent="GameView/MinimapFrame" unique_id=779813131]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 2.0
+offset_top = 87.0
+offset_right = 18.0
+offset_bottom = 105.0
+mouse_filter = 2
+text = "W"
+horizontal_alignment = 1
+
+[node name="CompassOverlay" type="TextureRect" parent="GameView/MinimapFrame" unique_id=641388635]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FullMap" type="PanelContainer" parent="GameView" unique_id=1902359484]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 32.0
+offset_right = -94.0
+offset_bottom = -86.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MapLayout" type="Control" parent="GameView/FullMap" unique_id=1231044442]
+custom_minimum_size = Vector2(856, 560)
+layout_mode = 2
+
+[node name="Sidebar" type="PanelContainer" parent="GameView/FullMap/MapLayout" unique_id=1129579151]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 216.0
+
+[node name="SidebarContent" type="VBoxContainer" parent="GameView/FullMap/MapLayout/Sidebar" unique_id=47257493]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ContinentButton" type="TextureButton" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=1082257832]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 150)
+layout_mode = 2
+tooltip_text = "Show the Nymara continent"
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="CurrentMapButton" type="Button" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=45447814]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Return to your current server map"
+text = "Current map"
+
+[node name="LegendTitle" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=627063153]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "LEGEND"
+horizontal_alignment = 1
+
+[node name="MapLegend" type="RichTextLabel" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=1862950269]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 354)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+text = "[color=#ef795f]●[/color] Tavern
+[color=#4fc67a]●[/color] General store
+[color=#d6bb7a]•[/color] Storage
+[color=#e687da]◆[/color] Flower shop
+[color=#e75252]◆[/color] Books
+[color=#e2cf48]◆[/color] Magic / crafts
+[color=#9d73d8]◆[/color] Blacksmith
+[color=#58b8d9]◆[/color] Potion / tailor
+[color=#e8a84f]◆[/color] Temple / school
+[color=#9fd2ff]●[/color] Player / NPC
+[color=#fa5a5a]●[/color] Invasion creature
+[color=#fcec38]●[/color] Creature
+[color=#6bdb70]●[/color] Harvest node
+[color=#f29e3d]●[/color] Interactive
+[color=#ffffff]●[/color] Your position
+[color=#e8d09b]•[/color] Insides entrance
+[color=#58e1ff]P[/color] Portal
+[color=#ff4747]X[/color] Map exit"
+fit_content = true
+scroll_active = false
+
+[node name="MapMarkerTitle" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=627063154]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "MARKERS"
+horizontal_alignment = 1
+
+[node name="MapMarkerList" type="RichTextLabel" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=1862950270]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="MapCoordinates" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=407150951]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 10
+theme_override_colors/font_color = Color(1, 0.9, 0.35, 1)
+text = "Coordinates: —"
+vertical_alignment = 2
+autowrap_mode = 2
+
+[node name="MapTitle" type="Label" parent="GameView/FullMap/MapLayout" unique_id=1012637189]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 224.0
+offset_right = -8.0
+offset_bottom = 30.0
+theme_override_font_sizes/font_size = 22
+text = "CURRENT MAP"
+horizontal_alignment = 1
+
+[node name="MapImage" type="TextureRect" parent="GameView/FullMap/MapLayout" unique_id=1760195381]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(480, 480)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 224.0
+offset_top = 32.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RegionPreview" type="TextureRect" parent="GameView/FullMap/MapLayout" unique_id=525656475]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 224.0
+offset_top = 32.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ContinentView" type="Control" parent="GameView/FullMap/MapLayout" unique_id=334592415]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 224.0
+offset_top = 32.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ContinentImage" type="TextureRect" parent="GameView/FullMap/MapLayout/ContinentView" unique_id=147357095]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ResourceHud" type="PanelContainer" parent="GameView" unique_id=1140901950]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -68.0
+offset_top = 342.0
+offset_right = -6.0
+offset_bottom = -196.0
+grow_horizontal = 0
+
+[node name="Bars" type="VBoxContainer" parent="GameView/ResourceHud" unique_id=2124962916]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="Health" type="ProgressBar" parent="GameView/ResourceHud/Bars" unique_id=1445643184]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="HealthText" type="Label" parent="GameView/ResourceHud/Bars" unique_id=1403292119]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Health: synchronizing"
+horizontal_alignment = 1
+
+[node name="Mana" type="ProgressBar" parent="GameView/ResourceHud/Bars" unique_id=947120881]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="ManaText" type="Label" parent="GameView/ResourceHud/Bars" unique_id=1551326495]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+text = "Ethereality"
+horizontal_alignment = 1
+
+[node name="Action" type="ProgressBar" parent="GameView/ResourceHud/Bars" unique_id=2047018865]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="ActionText" type="Label" parent="GameView/ResourceHud/Bars" unique_id=1855584276]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+text = "Action"
+horizontal_alignment = 1
+
+[node name="SkillRows" type="VBoxContainer" parent="GameView/ResourceHud/Bars"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(62, 182)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="RailMeters" type="PanelContainer" parent="GameView"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -68.0
+offset_top = -194.0
+offset_right = -6.0
+offset_bottom = -162.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="RailMeterRows" type="VBoxContainer" parent="GameView/RailMeters"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="HudTimer" type="Label" parent="GameView/RailMeters/RailMeterRows"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+tooltip_text = "Countdown timer. Click to start or stop, Shift+click to switch to the stopwatch, middle-click to reset, mouse wheel to set the start time"
+mouse_filter = 0
+theme_override_colors/font_color = Color(1, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "C1:30"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="KnowledgeBar" type="ProgressBar" parent="GameView/RailMeters/RailMeterRows"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+tooltip_text = "Research progress. Click for what you are reading"
+mouse_filter = 0
+max_value = 100.0
+show_percentage = false
+
+[node name="KnowledgeText" type="Label" parent="GameView/RailMeters/RailMeterRows/KnowledgeBar"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 10
+text = "Idle"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FpsLabel" type="Label" parent="GameView"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 8.0
+offset_right = -96.0
+offset_bottom = 26.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
+text = "FPS: 0"
+horizontal_alignment = 2
+
+[node name="Quickbar" type="PanelContainer" parent="GameView" unique_id=345733723]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = -67.0
+offset_right = -73.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="QuickRows" type="VBoxContainer" parent="GameView/Quickbar" unique_id=1053244761]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="BottomMeters" type="HBoxContainer" parent="GameView/Quickbar/QuickRows" unique_id=468745462]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="ManaMeter" type="HBoxContainer" parent="GameView/Quickbar/QuickRows/BottomMeters" unique_id=1699102087]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="EtherBottomText" type="Label" parent="GameView/Quickbar/QuickRows/BottomMeters/ManaMeter" unique_id=1288880991]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="EtherBottom" type="ProgressBar" parent="GameView/Quickbar/QuickRows/BottomMeters/ManaMeter" unique_id=135964267]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+show_percentage = false
+
+[node name="FoodMeter" type="HBoxContainer" parent="GameView/Quickbar/QuickRows/BottomMeters" unique_id=2122954159]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="FoodBottomText" type="Label" parent="GameView/Quickbar/QuickRows/BottomMeters/FoodMeter" unique_id=2083664227]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="FoodBottom" type="ProgressBar" parent="GameView/Quickbar/QuickRows/BottomMeters/FoodMeter" unique_id=1046676446]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+show_percentage = false
+
+[node name="HealthMeter" type="HBoxContainer" parent="GameView/Quickbar/QuickRows/BottomMeters" unique_id=619984808]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="HealthBottomText" type="Label" parent="GameView/Quickbar/QuickRows/BottomMeters/HealthMeter" unique_id=911816140]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="HealthBottom" type="ProgressBar" parent="GameView/Quickbar/QuickRows/BottomMeters/HealthMeter" unique_id=182390875]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+show_percentage = false
+
+[node name="LoadMeter" type="HBoxContainer" parent="GameView/Quickbar/QuickRows/BottomMeters" unique_id=1001086088]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="LoadBottomText" type="Label" parent="GameView/Quickbar/QuickRows/BottomMeters/LoadMeter" unique_id=1392631346]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LoadBottom" type="ProgressBar" parent="GameView/Quickbar/QuickRows/BottomMeters/LoadMeter" unique_id=444958794]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+show_percentage = false
+
+[node name="ActionMeter" type="HBoxContainer" parent="GameView/Quickbar/QuickRows/BottomMeters" unique_id=462048745]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ActionBottomText" type="Label" parent="GameView/Quickbar/QuickRows/BottomMeters/ActionMeter" unique_id=812359597]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ActionBottom" type="ProgressBar" parent="GameView/Quickbar/QuickRows/BottomMeters/ActionMeter" unique_id=373551685]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+show_percentage = false
+
+[node name="ExperienceMeter" type="HBoxContainer" parent="GameView/Quickbar/QuickRows/BottomMeters" unique_id=203008187]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ExperienceBottomText" type="Label" parent="GameView/Quickbar/QuickRows/BottomMeters/ExperienceMeter" unique_id=1748269424]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="ExperienceBottom" type="ProgressBar" parent="GameView/Quickbar/QuickRows/BottomMeters/ExperienceMeter" unique_id=904545607]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+show_percentage = false
+
+[node name="ExperienceSkillLabel" type="Label" parent="GameView/Quickbar/QuickRows/BottomMeters/ExperienceMeter"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "Harvest"
+vertical_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="GameView/Quickbar/QuickRows" unique_id=71743284]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="WalkButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=445313357]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Walk mode; hold Shift while clicking to run"
+text = "Walk"
+
+[node name="SitButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=1921670903]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Sit down / stand up [Alt+S]"
+
+[node name="LookButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=714975903]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Select a player to look at"
+disabled = true
+text = "Look"
+
+[node name="TradeButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=1648943459]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Arm trade, then click a player to request or accept a trade; both players must be within four tiles"
+text = "Trade"
+
+[node name="AttackButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=714975902]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Select a living player or creature to attack"
+disabled = true
+text = "Attack"
+
+[node name="InventoryButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=1783261573]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View inventory [Ctrl+I]"
+text = "Inventory"
+
+[node name="SpellsButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View spells window [Ctrl+S]"
+text = "Spells"
+
+[node name="ManufacturingButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=2137104916]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View manufacture window [Ctrl+M]"
+text = "Mix"
+
+[node name="EmotesButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View Emote window [Ctrl+J]"
+text = "Emote"
+
+[node name="QuestButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View quest journal [Ctrl+G]"
+text = "Quest"
+
+[node name="MapButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=1775801386]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View map [Tab]"
+
+[node name="InfoButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View notepad and links [Ctrl+N]"
+text = "Info"
+
+[node name="BuddyButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View buddy list [Ctrl+B]"
+text = "Buddy"
+
+[node name="StatsButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=275169132]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View stats [Ctrl+A]"
+text = "Stats"
+
+[node name="KnowledgeButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=1802598050]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Knowledge and books"
+text = "Knowledge"
+
+[node name="ConsoleButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View console [`]"
+text = "Console"
+
+[node name="HelpButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View help window [Ctrl+H]"
+text = "Help"
+
+[node name="EncyclopediaButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=1802598051]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "The Rabbit Lands Encyclopedia [Ctrl+E]"
+
+[node name="RangingButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View Ranging window [Ctrl+T]"
+text = "Range"
+
+[node name="MinimapButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View Minimap window [Alt+M]"
+text = "Mini"
+
+[node name="OptionsButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "View options window [Ctrl+O]"
+text = "Opts"
+
+[node name="ChatButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=830873219]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Chat [T]"
+
+[node name="DisconnectButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=955808082]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Disconnect [Ctrl+D]"
+
+[node name="IndicatorSpacer" type="Control" parent="GameView/Quickbar/QuickRows/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="HudIndicators" type="HBoxContainer" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 0
+
+[node name="SpellQuickbar" type="PanelContainer" parent="GameView" unique_id=1659454984]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -72.0
+offset_top = 54.0
+offset_right = -2.0
+offset_bottom = 338.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="SpellContent" type="VBoxContainer" parent="GameView/SpellQuickbar" unique_id=1525103299]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="SpellControls" type="HBoxContainer" parent="GameView/SpellQuickbar/SpellContent" unique_id=581058978]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="SpellPowerDown" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellControls" unique_id=1170753186]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(12, 18)
+theme_override_font_sizes/font_size = 10
+layout_mode = 2
+tooltip_text = "Cast at a lower power"
+text = "-"
+
+[node name="SpellPowerValue" type="Label" parent="GameView/SpellQuickbar/SpellContent/SpellControls" unique_id=1170753187]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 18)
+theme_override_font_sizes/font_size = 10
+layout_mode = 2
+tooltip_text = "The power the next cast asks for"
+text = "P1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpellPowerUp" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellControls" unique_id=1170753188]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(12, 18)
+theme_override_font_sizes/font_size = 10
+layout_mode = 2
+tooltip_text = "Cast at a higher power"
+text = "+"
+
+[node name="SpellSlots" type="GridContainer" parent="GameView/SpellQuickbar/SpellContent" unique_id=1658351948]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 0
+
+[node name="Spell1" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1703423071]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S1"
+
+[node name="Spell2" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=801858288]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S2"
+
+[node name="Spell3" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=128823861]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S3"
+
+[node name="Spell4" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=906480734]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S4"
+
+[node name="Spell5" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1078702335]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S5"
+
+[node name="Spell6" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1998188672]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S6"
+
+[node name="Spell7" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1998188673]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S7"
+
+[node name="Spell8" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1998188674]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S8"
+
+[node name="Spell9" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1998188675]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S9"
+
+[node name="Spell10" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1998188676]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S10"
+
+[node name="Spell11" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1998188677]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S11"
+
+[node name="Spell12" type="Button" parent="GameView/SpellQuickbar/SpellContent/SpellSlots" unique_id=1998188678]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+disabled = true
+text = "S12"
+
+[node name="SpellStatus" type="Label" parent="GameView/SpellQuickbar/SpellContent" unique_id=1099053680]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Spells synchronize with the server"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ItemQuickbar" type="ScrollContainer" parent="GameView" unique_id=2075191282]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -34.0
+offset_top = 71.0
+offset_right = -2.0
+offset_bottom = 334.0
+grow_horizontal = 0
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+
+[node name="ItemSlots" type="GridContainer" parent="GameView/ItemQuickbar" unique_id=1143185417]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 1
+
+[node name="Slot1" type="Button" parent="GameView/ItemQuickbar/ItemSlots" unique_id=936343613]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+disabled = true
+text = "1"
+
+[node name="Slot2" type="Button" parent="GameView/ItemQuickbar/ItemSlots" unique_id=8324975]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+disabled = true
+text = "2"
+
+[node name="Slot3" type="Button" parent="GameView/ItemQuickbar/ItemSlots" unique_id=3667407]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+disabled = true
+text = "3"
+
+[node name="Slot4" type="Button" parent="GameView/ItemQuickbar/ItemSlots" unique_id=13771242]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+disabled = true
+text = "4"
+
+[node name="Slot5" type="Button" parent="GameView/ItemQuickbar/ItemSlots" unique_id=499178370]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+disabled = true
+text = "5"
+
+[node name="Slot6" type="Button" parent="GameView/ItemQuickbar/ItemSlots" unique_id=723199210]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+disabled = true
+text = "6"
+
+[node name="Slot7" type="Button" parent="GameView/ItemQuickbar/ItemSlots" unique_id=1885221478]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+disabled = true
+text = "7"
+
+[node name="Slot8" type="Button" parent="GameView/ItemQuickbar/ItemSlots" unique_id=1334539660]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+disabled = true
+text = "8"
+
+[node name="ClockFrame" type="VBoxContainer" parent="GameView" unique_id=675878166]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -68.0
+offset_top = -160.0
+offset_right = -6.0
+offset_bottom = -78.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 0
+
+[node name="ClockText" type="Label" parent="GameView/ClockFrame" unique_id=975520127]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.42, 1)
+theme_override_font_sizes/font_size = 14
+text = "0:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ClockFace" type="TextureRect" parent="GameView/ClockFrame" unique_id=317724463]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(62, 62)
+layout_mode = 2
+tooltip_text = "Click for the server date and time"
+mouse_filter = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ClockHand" type="Line2D" parent="GameView/ClockFrame/ClockFace" unique_id=36008867]
+unique_name_in_owner = true
+position = Vector2(31, 31)
+points = PackedVector2Array(0, 4, 0, -22)
+width = 2.0
+default_color = Color(0.96, 0.65, 0.16, 1)
+
+[node name="CompassFrame" type="PanelContainer" parent="GameView" unique_id=1782216449]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -68.0
+offset_top = -74.0
+offset_right = -6.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="CompassFace" type="TextureRect" parent="GameView/CompassFrame" unique_id=385712299]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+tooltip_text = "Click for your map and coordinates; Ctrl+click shares them to your active channel"
+mouse_filter = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CompassNeedle" type="Line2D" parent="GameView/CompassFrame/CompassFace" unique_id=1167598822]
+unique_name_in_owner = true
+position = Vector2(32, 32)
+points = PackedVector2Array(0, 7, 0, -23)
+width = 3.0
+default_color = Color(0.12, 0.82, 0.92, 1)
+
+[node name="ActorResourceOverlay" type="PanelContainer" parent="GameView" unique_id=252402047]
+unique_name_in_owner = true
+visible = false
+z_index = 1
+layout_mode = 0
+offset_right = 150.0
+offset_bottom = 86.0
+mouse_filter = 2
+
+[node name="Rows" type="VBoxContainer" parent="GameView/ActorResourceOverlay" unique_id=369393993]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="OverheadPlayerName" type="Label" parent="GameView/ActorResourceOverlay/Rows" unique_id=1088233333]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 12
+text = "Player"
+horizontal_alignment = 1
+
+[node name="HealthRow" type="HBoxContainer" parent="GameView/ActorResourceOverlay/Rows" unique_id=2104241967]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Bar" type="ProgressBar" parent="GameView/ActorResourceOverlay/Rows/HealthRow" unique_id=1575428599]
+custom_minimum_size = Vector2(56, 7)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+
+[node name="Number" type="Label" parent="GameView/ActorResourceOverlay/Rows/HealthRow" unique_id=2084256219]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.24, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+text = "0/0"
+horizontal_alignment = 1
+
+[node name="EtherRow" type="HBoxContainer" parent="GameView/ActorResourceOverlay/Rows" unique_id=176712075]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Bar" type="ProgressBar" parent="GameView/ActorResourceOverlay/Rows/EtherRow" unique_id=680916082]
+custom_minimum_size = Vector2(56, 7)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+
+[node name="Number" type="Label" parent="GameView/ActorResourceOverlay/Rows/EtherRow" unique_id=921509039]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.45, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+text = "0/0"
+horizontal_alignment = 1
+
+[node name="FoodRow" type="HBoxContainer" parent="GameView/ActorResourceOverlay/Rows" unique_id=1103548980]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Bar" type="ProgressBar" parent="GameView/ActorResourceOverlay/Rows/FoodRow" unique_id=1860915691]
+custom_minimum_size = Vector2(56, 7)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+
+[node name="Number" type="Label" parent="GameView/ActorResourceOverlay/Rows/FoodRow" unique_id=1053885112]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.18, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+text = "0/45"
+horizontal_alignment = 1
+
+[node name="ActionRow" type="HBoxContainer" parent="GameView/ActorResourceOverlay/Rows" unique_id=356194824]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Bar" type="ProgressBar" parent="GameView/ActorResourceOverlay/Rows/ActionRow" unique_id=1497610989]
+custom_minimum_size = Vector2(56, 7)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+
+[node name="Number" type="Label" parent="GameView/ActorResourceOverlay/Rows/ActionRow" unique_id=535032641]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.48, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+text = "0/0"
+horizontal_alignment = 1
+
+[node name="BannerControls" type="VBoxContainer" parent="GameView" unique_id=80465671]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+layout_mode = 0
+offset_right = 196.0
+offset_bottom = 248.0
+
+[node name="Options" type="VBoxContainer" parent="GameView/BannerControls" unique_id=1995381659]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="ShowNames" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000001]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Names"
+
+[node name="ShowHealthBar" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000002]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Health Bars"
+
+[node name="ShowHealthNumbers" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000003]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Health Numbers"
+
+[node name="ShowEtherBar" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000004]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Ether Bar"
+
+[node name="ShowEtherNumbers" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000005]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Ether Numbers"
+
+[node name="ShowFoodBar" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000006]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Food Bar"
+
+[node name="ShowFoodNumbers" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000007]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Food Numbers"
+
+[node name="ShowActionBar" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000008]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Action Point Bar"
+
+[node name="ShowActionNumbers" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000009]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Show Action Point Numbers"
+
+[node name="InstanceMode" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000010]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Enable Instance Mode"
+
+[node name="SpeechBubbles" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000011]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Show Speech Bubbles"
+
+[node name="BannerBackground" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000012]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Enable Banner Background"
+
+[node name="SitLock" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000013]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Sit Lock"
+
+[node name="RangingLock" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000014]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Ranging Lock"
+
+[node name="MenuSeparator" type="HSeparator" parent="GameView/BannerControls/Options" unique_id=1810000015]
+layout_mode = 2
+
+[node name="DisableMenu" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000016]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Disable This Menu"
+
+[node name="SettingsControls" type="VBoxContainer" parent="GameView" unique_id=1883968079]
+unique_name_in_owner = true
+visible = false
+z_index = 30
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.0
+offset_top = -150.0
+offset_right = 230.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/SettingsControls" unique_id=748644090]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MinimapHint" type="Label" parent="GameView/SettingsControls/Content" unique_id=292103680]
+layout_mode = 2
+text = "The minimap is a floating window. Toggle it with Alt+M."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="MinimapSizeRow" type="HBoxContainer" parent="GameView/SettingsControls/Content" unique_id=429341514]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="GameView/SettingsControls/Content/MinimapSizeRow" unique_id=1171067698]
+layout_mode = 2
+text = "Minimap size"
+
+[node name="MinimapSize" type="HSlider" parent="GameView/SettingsControls/Content/MinimapSizeRow" unique_id=2077981643]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.75
+max_value = 1.75
+step = 0.05
+value = 1.0
+
+[node name="MinimapSizeValue" type="Label" parent="GameView/SettingsControls/Content/MinimapSizeRow" unique_id=282957130]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="SoundRow" type="HBoxContainer" parent="GameView/SettingsControls/Content" unique_id=429341515]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SoundEnabled" type="CheckButton" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341516]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Play Rabbit Lands' sounds for what the server reports"
+button_pressed = true
+text = "Sound"
+
+[node name="SoundVolume" type="HSlider" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341517]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+value = 0.7
+
+[node name="SoundVolumeValue" type="Label" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341518]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "70%"
+horizontal_alignment = 2
+
+[node name="ShowThroughObstacles" type="CheckButton" parent="GameView/SettingsControls/Content" unique_id=1502773650]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Fades whatever stands between the camera and your character - trees, roofs, walls - so you see yourself through it. Only your own line of sight, never anyone else's. Toggle with Alt+V."
+button_pressed = true
+text = "Show my character through obstacles"
+
+[node name="UiScaleRow" type="HBoxContainer" parent="GameView/SettingsControls/Content" unique_id=1502773641]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="GameView/SettingsControls/Content/UiScaleRow" unique_id=1502773642]
+layout_mode = 2
+text = "UI scale"
+
+[node name="UiScale" type="HSlider" parent="GameView/SettingsControls/Content/UiScaleRow" unique_id=1502773643]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Size of the HUD relative to the window. Lower values trade HUD size for screen space; the world always renders at the window resolution."
+min_value = 0.5
+max_value = 1.5
+step = 0.05
+value = 1.0
+
+[node name="UiScaleValue" type="Label" parent="GameView/SettingsControls/Content/UiScaleRow" unique_id=1502773644]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="EquipmentSideRow" type="HBoxContainer" parent="GameView/SettingsControls/Content" unique_id=375411056]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="GameView/SettingsControls/Content/EquipmentSideRow" unique_id=1700662411]
+layout_mode = 2
+text = "Equipment slots"
+
+[node name="EquipmentSide" type="OptionButton" parent="GameView/SettingsControls/Content/EquipmentSideRow" unique_id=38519375]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Choose which side of the backpack holds equipped items"
+
+[node name="ReferenceButton" type="Button" parent="GameView/SettingsControls/Content" unique_id=1997232258]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Help, your notes, linked addresses and the encyclopedia"
+text = "Reference"
+
+[node name="AudioCreditsButton" type="Button" parent="GameView/SettingsControls/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Audio credits"
+tooltip_text = "Music and sound creators, sources, and licenses"
+
+[node name="ConsolePanel" type="PanelContainer" parent="GameView" unique_id=103656375]
+unique_name_in_owner = true
+visible = false
+z_index = 25
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 32.0
+offset_right = -94.0
+offset_bottom = -86.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/ConsolePanel" unique_id=276604645]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Header" type="HBoxContainer" parent="GameView/ConsolePanel/Content" unique_id=2144339765]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="GameView/ConsolePanel/Content/Header" unique_id=1772956107]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "MESSAGE CONSOLE  •  full session history  •  ~ to close"
+
+[node name="ConsoleDiagnostics" type="Button" parent="GameView/ConsolePanel/Content/Header" unique_id=411902733]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+tooltip_text = "Protocol diagnostics: undecoded opcodes seen this session and recent decode errors"
+text = "Protocol"
+
+[node name="ConsoleClose" type="Button" parent="GameView/ConsolePanel/Content/Header" unique_id=233814864]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Close"
+
+[node name="ConsoleOutput" type="RichTextLabel" parent="GameView/ConsolePanel/Content" unique_id=1494655407]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+selection_enabled = true
+
+[node name="DiagnosticsOutput" type="RichTextLabel" parent="GameView/ConsolePanel/Content" unique_id=1205877344]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+bbcode_enabled = true
+selection_enabled = true
+
+[node name="StatsPanel" type="PanelContainer" parent="GameView" unique_id=839039862]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -390.0
+offset_top = -285.0
+offset_right = 300.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/StatsPanel" unique_id=478286103]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Header" type="HBoxContainer" parent="GameView/StatsPanel/Content" unique_id=64649625]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="GameView/StatsPanel/Content/Header" unique_id=1603200307]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "STATISTICS"
+horizontal_alignment = 1
+
+[node name="StatsClose" type="Button" parent="GameView/StatsPanel/Content/Header" unique_id=517929653]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 28)
+layout_mode = 2
+tooltip_text = "Close statistics"
+text = "×"
+
+[node name="StatsTabs" type="TabContainer" parent="GameView/StatsPanel/Content" unique_id=28315277]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(670, 500)
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Statistics" type="MarginContainer" parent="GameView/StatsPanel/Content/StatsTabs" unique_id=2128883501]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="StatsText" type="RichTextLabel" parent="GameView/StatsPanel/Content/StatsTabs/Statistics" unique_id=766370288]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+theme_override_constants/table_h_separation = 8
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+selection_enabled = true
+
+[node name="Knowledge" type="MarginContainer" parent="GameView/StatsPanel/Content/StatsTabs" unique_id=65413638]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="KnowledgeContent" type="VBoxContainer" parent="GameView/StatsPanel/Content/StatsTabs/Knowledge" unique_id=2005789432]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="KnowledgeKnownOnly" type="CheckBox" parent="GameView/StatsPanel/Content/StatsTabs/Knowledge/KnowledgeContent" unique_id=2095208473]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Filter the server-owned knowledge bitset"
+text = "Show read knowledge only"
+
+[node name="Columns" type="HBoxContainer" parent="GameView/StatsPanel/Content/StatsTabs/Knowledge/KnowledgeContent" unique_id=2042216425]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="KnowledgeList" type="ItemList" parent="GameView/StatsPanel/Content/StatsTabs/Knowledge/KnowledgeContent/Columns" unique_id=978309244]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 410)
+layout_mode = 2
+allow_reselect = true
+
+[node name="KnowledgeDetail" type="RichTextLabel" parent="GameView/StatsPanel/Content/StatsTabs/Knowledge/KnowledgeContent/Columns" unique_id=1372983616]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(340, 410)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Select an entry to request its server description."
+
+[node name="Counters" type="MarginContainer" parent="GameView/StatsPanel/Content/StatsTabs" unique_id=1824847642]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="CounterColumns" type="HBoxContainer" parent="GameView/StatsPanel/Content/StatsTabs/Counters" unique_id=1568456002]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CounterCategories" type="ItemList" parent="GameView/StatsPanel/Content/StatsTabs/Counters/CounterColumns" unique_id=1621376761]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(145, 430)
+layout_mode = 2
+
+[node name="CounterText" type="RichTextLabel" parent="GameView/StatsPanel/Content/StatsTabs/Counters/CounterColumns" unique_id=946228517]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+theme_override_constants/table_h_separation = 18
+theme_override_font_sizes/normal_font_size = 15
+bbcode_enabled = true
+selection_enabled = true
+
+[node name="Session" type="MarginContainer" parent="GameView/StatsPanel/Content/StatsTabs" unique_id=1093034675]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 3
+
+[node name="SessionContent" type="VBoxContainer" parent="GameView/StatsPanel/Content/StatsTabs/Session" unique_id=1059992587]
+layout_mode = 2
+
+[node name="SessionXpText" type="RichTextLabel" parent="GameView/StatsPanel/Content/StatsTabs/Session/SessionContent" unique_id=1749797643]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+theme_override_constants/table_h_separation = 18
+theme_override_font_sizes/normal_font_size = 15
+bbcode_enabled = true
+selection_enabled = true
+
+[node name="SessionFooter" type="HBoxContainer" parent="GameView/StatsPanel/Content/StatsTabs/Session/SessionContent" unique_id=2084912449]
+layout_mode = 2
+alignment = 2
+
+[node name="SessionReset" type="Button" parent="GameView/StatsPanel/Content/StatsTabs/Session/SessionContent/SessionFooter" unique_id=652495474]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Reset session"
+
+[node name="InventoryPanel" type="PanelContainer" parent="GameView" unique_id=2049255245]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -486.0
+offset_top = -245.0
+offset_right = -16.0
+offset_bottom = 245.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/InventoryPanel" unique_id=477610738]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Header" type="HBoxContainer" parent="GameView/InventoryPanel/Content" unique_id=1496969303]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 13
+
+[node name="Title" type="Label" parent="GameView/InventoryPanel/Content/Header" unique_id=799454455]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+text = "INVENTORY"
+horizontal_alignment = 1
+
+[node name="InventoryClose" type="Button" parent="GameView/InventoryPanel/Content/Header" unique_id=1900593256]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 28)
+layout_mode = 2
+tooltip_text = "Close inventory [Ctrl+I]"
+text = "×"
+
+[node name="InventoryBody" type="HBoxContainer" parent="GameView/InventoryPanel/Content" unique_id=1949090920]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_vertical = 3
+
+[node name="EquipmentColumn" type="VBoxContainer" parent="GameView/InventoryPanel/Content/InventoryBody" unique_id=1822552852]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+
+[node name="EquipmentTitle" type="Label" parent="GameView/InventoryPanel/Content/InventoryBody/EquipmentColumn" unique_id=2099304826]
+layout_mode = 2
+text = "EQUIPMENT"
+horizontal_alignment = 1
+
+[node name="EquipmentGrid" type="GridContainer" parent="GameView/InventoryPanel/Content/InventoryBody/EquipmentColumn" unique_id=1969487089]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 2
+
+[node name="BackpackColumn" type="VBoxContainer" parent="GameView/InventoryPanel/Content/InventoryBody" unique_id=875026746]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Scroll" type="ScrollContainer" parent="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn" unique_id=397175415]
+custom_minimum_size = Vector2(292, 292)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="InventoryGrid" type="GridContainer" parent="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Scroll" unique_id=1940068517]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+columns = 6
+
+[node name="InventoryDescription" type="RichTextLabel" parent="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn" unique_id=1077859020]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(284, 44)
+layout_mode = 2
+text = "Select an item to inspect it."
+fit_content = true
+
+[node name="Actions" type="HBoxContainer" parent="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn" unique_id=488541426]
+layout_mode = 2
+alignment = 2
+
+[node name="InventoryUse" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Actions" unique_id=2077964374]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Use the selected item"
+disabled = true
+text = "Use"
+
+[node name="InventoryEquip" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Actions" unique_id=957466156]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Equip the selected inventory item; the server validates compatibility"
+disabled = true
+text = "Equip"
+
+[node name="InventoryUnequip" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Actions" unique_id=120286888]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Move the selected equipped item into the first empty inventory slot"
+disabled = true
+text = "Unequip"
+
+[node name="InventoryInspect" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Actions" unique_id=1997792207]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Inspect"
+
+[node name="SideActions" type="VBoxContainer" parent="GameView/InventoryPanel/Content/InventoryBody" unique_id=831076230]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+
+[node name="InventoryStoreAll" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/SideActions" unique_id=640470377]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Deposit all eligible backpack items. Right-click to set protected rows and columns."
+text = "Sto
+All"
+
+[node name="InventoryGetAll" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/SideActions" unique_id=68223114]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Open the ground bag below you and request every stack; free slots and load are server-validated"
+text = "Get
+All"
+
+[node name="InventoryDropAll" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/SideActions" unique_id=1459884991]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Drop all eligible backpack items. Right-click to set protected rows and columns."
+text = "Drop
+All"
+
+[node name="InventoryMixAll" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/SideActions" unique_id=717672287]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Mix as many of the selected recipe as the server allows"
+text = "Mix
+All"
+
+[node name="InventoryItemLists" type="Button" parent="GameView/InventoryPanel/Content/InventoryBody/SideActions" unique_id=1451059284]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Define reusable item-id and quantity lists for storage"
+text = "Item
+Lists"
+
+[node name="InventoryFooter" type="HBoxContainer" parent="GameView/InventoryPanel/Content" unique_id=482771902]
+layout_mode = 2
+
+[node name="InventoryLoad" type="Label" parent="GameView/InventoryPanel/Content/InventoryFooter" unique_id=773477488]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Load: 0 / 0"
+
+[node name="QuantityCaption" type="Label" parent="GameView/InventoryPanel/Content/InventoryFooter" unique_id=773477489]
+layout_mode = 2
+text = "Quantity"
+
+[node name="InventoryResizeGrip" type="Button" parent="GameView/InventoryPanel/Content/InventoryFooter" unique_id=985245371]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 26)
+layout_mode = 2
+tooltip_text = "Drag to resize the inventory proportionally"
+focus_mode = 0
+mouse_default_cursor_shape = 12
+text = "◢"
+
+[node name="InventoryQuantityBar" type="HBoxContainer" parent="GameView/InventoryPanel/Content" unique_id=773477490]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="InventoryQuantityEdit" type="LineEdit" parent="GameView/InventoryPanel/Content" unique_id=773477491]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_right = 104.0
+offset_bottom = 26.0
+alignment = 1
+max_length = 7
+
+[node name="ItemListsPanel" type="PanelContainer" parent="GameView" unique_id=1831077212]
+unique_name_in_owner = true
+visible = false
+z_index = 25
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -225.0
+offset_right = 280.0
+offset_bottom = 225.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/ItemListsPanel" unique_id=1689931534]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="GameView/ItemListsPanel/Content" unique_id=1008151649]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="GameView/ItemListsPanel/Content/Header" unique_id=1587559057]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "STORAGE ITEM LISTS"
+horizontal_alignment = 1
+
+[node name="ItemListsClose" type="Button" parent="GameView/ItemListsPanel/Content/Header" unique_id=1713053120]
+unique_name_in_owner = true
+layout_mode = 2
+text = "×"
+
+[node name="ItemListColumns" type="HBoxContainer" parent="GameView/ItemListsPanel/Content" unique_id=1239309494]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SavedLists" type="VBoxContainer" parent="GameView/ItemListsPanel/Content/ItemListColumns" unique_id=1259626576]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameView/ItemListsPanel/Content/ItemListColumns/SavedLists" unique_id=661915086]
+layout_mode = 2
+text = "Saved lists"
+
+[node name="SavedItemLists" type="ItemList" parent="GameView/ItemListsPanel/Content/ItemListColumns/SavedLists" unique_id=198402365]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 300)
+layout_mode = 2
+
+[node name="Editor" type="VBoxContainer" parent="GameView/ItemListsPanel/Content/ItemListColumns" unique_id=330627632]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ItemListName" type="LineEdit" parent="GameView/ItemListsPanel/Content/ItemListColumns/Editor" unique_id=392667405]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "List name"
+
+[node name="Hint" type="Label" parent="GameView/ItemListsPanel/Content/ItemListColumns/Editor" unique_id=1035740343]
+layout_mode = 2
+text = "One item per line: image_id:quantity"
+
+[node name="ItemListEntries" type="TextEdit" parent="GameView/ItemListsPanel/Content/ItemListColumns/Editor" unique_id=493972292]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 240)
+layout_mode = 2
+placeholder_text = "1158:20
+189:1"
+
+[node name="ItemListStatus" type="Label" parent="GameView/ItemListsPanel/Content/ItemListColumns/Editor" unique_id=2075451083]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="GameView/ItemListsPanel/Content" unique_id=1138089927]
+layout_mode = 2
+alignment = 2
+
+[node name="ItemListSave" type="Button" parent="GameView/ItemListsPanel/Content/Actions" unique_id=653470834]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save"
+
+[node name="ItemListDelete" type="Button" parent="GameView/ItemListsPanel/Content/Actions" unique_id=1192025275]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Delete"
+
+[node name="ItemListGet" type="Button" parent="GameView/ItemListsPanel/Content/Actions" unique_id=37786002]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Get from storage"
+
+[node name="TradePanel" type="PanelContainer" parent="GameView" unique_id=840627396]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -390.0
+offset_top = -260.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/TradePanel" unique_id=142234226]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="GameView/TradePanel/Content" unique_id=1902146872]
+layout_mode = 2
+text = "TRADE"
+horizontal_alignment = 1
+
+[node name="TradePartner" type="Label" parent="GameView/TradePanel/Content" unique_id=1873140215]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Synchronizing trade partner…"
+horizontal_alignment = 1
+
+[node name="Columns" type="HBoxContainer" parent="GameView/TradePanel/Content" unique_id=50614995]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Source" type="VBoxContainer" parent="GameView/TradePanel/Content/Columns" unique_id=1069993102]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameView/TradePanel/Content/Columns/Source" unique_id=1321716382]
+layout_mode = 2
+text = "YOUR INVENTORY"
+horizontal_alignment = 1
+
+[node name="TradeSource" type="ItemList" parent="GameView/TradePanel/Content/Columns/Source" unique_id=1698935706]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 300)
+layout_mode = 2
+allow_reselect = true
+
+[node name="Own" type="VBoxContainer" parent="GameView/TradePanel/Content/Columns" unique_id=1043206578]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameView/TradePanel/Content/Columns/Own" unique_id=1033310009]
+layout_mode = 2
+text = "YOUR OFFER"
+horizontal_alignment = 1
+
+[node name="TradeOwnOffers" type="ItemList" parent="GameView/TradePanel/Content/Columns/Own" unique_id=1117383355]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 300)
+layout_mode = 2
+allow_reselect = true
+
+[node name="Other" type="VBoxContainer" parent="GameView/TradePanel/Content/Columns" unique_id=1559500847]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameView/TradePanel/Content/Columns/Other" unique_id=1295430647]
+layout_mode = 2
+text = "THEIR OFFER"
+horizontal_alignment = 1
+
+[node name="TradeOtherOffers" type="ItemList" parent="GameView/TradePanel/Content/Columns/Other" unique_id=917245062]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 300)
+layout_mode = 2
+allow_reselect = true
+
+[node name="QuantityRow" type="HBoxContainer" parent="GameView/TradePanel/Content" unique_id=55862058]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="GameView/TradePanel/Content/QuantityRow" unique_id=266330381]
+layout_mode = 2
+text = "Quantity"
+
+[node name="TradeQuantity" type="SpinBox" parent="GameView/TradePanel/Content/QuantityRow" unique_id=838432151]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 2147483647.0
+value = 1.0
+
+[node name="TradeStorageDestination" type="CheckBox" parent="GameView/TradePanel/Content/QuantityRow" unique_id=1586695677]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Available only when both players are near storage; applies to the selected partner-offer slot"
+disabled = true
+text = "Receive selected partner offer in storage"
+
+[node name="TradeStatus" type="Label" parent="GameView/TradePanel/Content" unique_id=1669129032]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Both players must accept and then confirm."
+horizontal_alignment = 1
+
+[node name="Actions" type="HBoxContainer" parent="GameView/TradePanel/Content" unique_id=97842582]
+layout_mode = 2
+alignment = 1
+
+[node name="TradeOffer" type="Button" parent="GameView/TradePanel/Content/Actions" unique_id=574390552]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Move the selected inventory quantity into your server-authoritative offer"
+text = "Offer selected"
+
+[node name="TradeRemove" type="Button" parent="GameView/TradePanel/Content/Actions" unique_id=80987859]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Return the selected offered quantity to your inventory"
+text = "Remove selected"
+
+[node name="TradeInspect" type="Button" parent="GameView/TradePanel/Content/Actions" unique_id=2115650517]
+layout_mode = 2
+tooltip_text = "Ask the server to describe the selected offer"
+text = "Inspect"
+
+[node name="TradeAccept" type="Button" parent="GameView/TradePanel/Content/Actions" unique_id=2107852465]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Accept offer"
+
+[node name="TradeReject" type="Button" parent="GameView/TradePanel/Content/Actions" unique_id=1770636573]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Reset both players' acceptance without closing the trade"
+text = "Withdraw acceptance"
+
+[node name="TradeCancel" type="Button" parent="GameView/TradePanel/Content/Actions" unique_id=1362088395]
+layout_mode = 2
+tooltip_text = "Cancel the trade and restore all offered items"
+text = "Cancel trade"
+
+[node name="StoragePanel" type="PanelContainer" parent="GameView" unique_id=1125170779]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -410.0
+offset_top = -260.0
+offset_right = 330.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/StoragePanel" unique_id=1557192975]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="GameView/StoragePanel/Content" unique_id=826175953]
+layout_mode = 2
+text = "STORAGE"
+horizontal_alignment = 1
+
+[node name="Columns" type="HBoxContainer" parent="GameView/StoragePanel/Content" unique_id=233493078]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Categories" type="VBoxContainer" parent="GameView/StoragePanel/Content/Columns" unique_id=1940305020]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameView/StoragePanel/Content/Columns/Categories" unique_id=1292906108]
+layout_mode = 2
+text = "CATEGORIES"
+horizontal_alignment = 1
+
+[node name="StorageCategories" type="ItemList" parent="GameView/StoragePanel/Content/Columns/Categories" unique_id=2126948041]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 320)
+layout_mode = 2
+allow_reselect = true
+
+[node name="Stored" type="VBoxContainer" parent="GameView/StoragePanel/Content/Columns" unique_id=1489508697]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameView/StoragePanel/Content/Columns/Stored" unique_id=1704632732]
+layout_mode = 2
+text = "STORED ITEMS"
+horizontal_alignment = 1
+
+[node name="Organizer" type="HBoxContainer" parent="GameView/StoragePanel/Content/Columns/Stored" unique_id=1704632733]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TypeLabel" type="Label" parent="GameView/StoragePanel/Content/Columns/Stored/Organizer" unique_id=1704632734]
+layout_mode = 2
+text = "Type"
+
+[node name="StorageType" type="OptionButton" parent="GameView/StoragePanel/Content/Columns/Stored/Organizer" unique_id=1704632735]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Show only one type of item from this category."
+
+[node name="SortLabel" type="Label" parent="GameView/StoragePanel/Content/Columns/Stored/Organizer" unique_id=1704632736]
+layout_mode = 2
+text = "Sort"
+
+[node name="StorageSort" type="OptionButton" parent="GameView/StoragePanel/Content/Columns/Stored/Organizer" unique_id=1704632737]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Order the stored items by name, strength, or rarity."
+
+[node name="StorageItems" type="ItemList" parent="GameView/StoragePanel/Content/Columns/Stored" unique_id=562090784]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 320)
+layout_mode = 2
+allow_reselect = true
+
+[node name="Inventory" type="VBoxContainer" parent="GameView/StoragePanel/Content/Columns" unique_id=1217929772]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameView/StoragePanel/Content/Columns/Inventory" unique_id=1794109139]
+layout_mode = 2
+text = "YOUR INVENTORY"
+horizontal_alignment = 1
+
+[node name="StorageInventory" type="ItemList" parent="GameView/StoragePanel/Content/Columns/Inventory" unique_id=1089711139]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 320)
+layout_mode = 2
+allow_reselect = true
+
+[node name="QuantityRow" type="HBoxContainer" parent="GameView/StoragePanel/Content" unique_id=169319918]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="GameView/StoragePanel/Content/QuantityRow" unique_id=71850606]
+layout_mode = 2
+text = "Quantity"
+
+[node name="StorageQuantity" type="SpinBox" parent="GameView/StoragePanel/Content/QuantityRow" unique_id=833326698]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 2147483647.0
+value = 1.0
+
+[node name="StorageStatus" type="Label" parent="GameView/StoragePanel/Content" unique_id=1115867618]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Select an inventory item to deposit or a stored item to withdraw."
+horizontal_alignment = 1
+
+[node name="Actions" type="HBoxContainer" parent="GameView/StoragePanel/Content" unique_id=601062223]
+layout_mode = 2
+alignment = 1
+
+[node name="StorageDeposit" type="Button" parent="GameView/StoragePanel/Content/Actions" unique_id=1042118450]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Deposit selected"
+
+[node name="StorageWithdraw" type="Button" parent="GameView/StoragePanel/Content/Actions" unique_id=1276898917]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Withdraw selected"
+
+[node name="StorageInspect" type="Button" parent="GameView/StoragePanel/Content/Actions" unique_id=342527375]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Inspect stored item"
+
+[node name="StorageClose" type="Button" parent="GameView/StoragePanel/Content/Actions" unique_id=919600374]
+layout_mode = 2
+text = "Close"
+
+[node name="ManufacturingPanel" type="PanelContainer" parent="GameView" unique_id=477815533]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -250.0
+offset_right = 350.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/ManufacturingPanel" unique_id=2002392679]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="GameView/ManufacturingPanel/Content" unique_id=1689019652]
+layout_mode = 2
+text = "MANUFACTURING"
+horizontal_alignment = 1
+
+[node name="ManufacturingFilter" type="LineEdit" parent="GameView/ManufacturingPanel/Content" unique_id=818217131]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Filter recipes by result, skill, or ingredient"
+clear_button_enabled = true
+
+[node name="Columns" type="HBoxContainer" parent="GameView/ManufacturingPanel/Content" unique_id=535978311]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ManufacturingList" type="ItemList" parent="GameView/ManufacturingPanel/Content/Columns" unique_id=1368588320]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 350)
+layout_mode = 2
+allow_reselect = true
+
+[node name="ManufacturingDetail" type="RichTextLabel" parent="GameView/ManufacturingPanel/Content/Columns" unique_id=754297677]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(350, 350)
+layout_mode = 2
+bbcode_enabled = true
+text = "Select a server recipe to review exact ingredients."
+
+[node name="ManufacturingStatus" type="Label" parent="GameView/ManufacturingPanel/Content" unique_id=712825641]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Select a recipe."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="GameView/ManufacturingPanel/Content" unique_id=1609077777]
+layout_mode = 2
+alignment = 2
+
+[node name="ManufacturingMixOne" type="Button" parent="GameView/ManufacturingPanel/Content/Actions" unique_id=1539301554]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Ask the server to make one item from the exact selected recipe"
+disabled = true
+text = "Mix one"
+
+[node name="ManufacturingMixAll" type="Button" parent="GameView/ManufacturingPanel/Content/Actions" unique_id=2095593718]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Ask the server to repeat this recipe while resources and validation permit"
+disabled = true
+text = "Mix all"
+
+[node name="ManufacturingClose" type="Button" parent="GameView/ManufacturingPanel/Content/Actions" unique_id=1942384626]
+layout_mode = 2
+text = "Close"
+
+[node name="GroundBagPanel" type="PanelContainer" parent="GameView" unique_id=1091567745]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 16.0
+offset_top = -160.0
+offset_right = 246.0
+offset_bottom = 160.0
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="GameView/GroundBagPanel" unique_id=690039969]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="GroundBagHeader" type="HBoxContainer" parent="GameView/GroundBagPanel/Content" unique_id=310244501]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 13
+
+[node name="Title" type="Label" parent="GameView/GroundBagPanel/Content/GroundBagHeader" unique_id=43304331]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+text = "BAG"
+horizontal_alignment = 1
+
+[node name="GroundBagClose" type="Button" parent="GameView/GroundBagPanel/Content/GroundBagHeader" unique_id=666367948]
+custom_minimum_size = Vector2(30, 28)
+layout_mode = 2
+tooltip_text = "Close the bag [Esc]"
+text = "×"
+
+[node name="Scroll" type="ScrollContainer" parent="GameView/GroundBagPanel/Content" unique_id=1973775800]
+custom_minimum_size = Vector2(204, 200)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="GroundBagGrid" type="GridContainer" parent="GameView/GroundBagPanel/Content/Scroll" unique_id=119445876]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+columns = 4
+
+[node name="Actions" type="HBoxContainer" parent="GameView/GroundBagPanel/Content" unique_id=1731541790]
+layout_mode = 2
+alignment = 1
+
+[node name="GroundBagPickAll" type="Button" parent="GameView/GroundBagPanel/Content/Actions" unique_id=1878723392]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Ask the server to pick every available stack"
+text = "Get All"
+
+[node name="GroundBagDrop" type="Button" parent="GameView/GroundBagPanel/Content/Actions" unique_id=1637161786]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Drop the selected inventory item, using the inventory quantity box"
+disabled = true
+text = "Drop"
+
+[node name="GroundBagFooter" type="HBoxContainer" parent="GameView/GroundBagPanel/Content" unique_id=811004201]
+layout_mode = 2
+
+[node name="GroundBagSpacer" type="Control" parent="GameView/GroundBagPanel/Content/GroundBagFooter" unique_id=811004202]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="GroundBagResizeGrip" type="Button" parent="GameView/GroundBagPanel/Content/GroundBagFooter" unique_id=811004203]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 26)
+layout_mode = 2
+tooltip_text = "Drag to resize the bag proportionally"
+focus_mode = 0
+mouse_default_cursor_shape = 12
+text = "◢"
+
+[node name="Help" type="Label" parent="GameView" unique_id=246712093]
+visible = false
+layout_mode = 0
+offset_left = 12.0
+offset_top = 92.0
+offset_right = 520.0
+offset_bottom = 126.0
+text = "LMB move  •  RMB drag rotate  •  MMB drag pan  •  Wheel zoom  •  Tab map"
+
+[node name="CarriedItem" type="TextureRect" parent="GameView" unique_id=311420778]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_right = 44.0
+offset_bottom = 44.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Quantity" type="Label" parent="GameView/CarriedItem" unique_id=311420779]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -34.0
+offset_top = -17.0
+offset_right = -3.0
+offset_bottom = -2.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="CreationPanel" type="PanelContainer" parent="." unique_id=1808525772]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CreationBackdrop" type="TextureRect" parent="CreationPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CreationShade" type="ColorRect" parent="CreationPanel"]
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.015, 0.02, 0.035, 0.22)
+
+[node name="Columns" type="HBoxContainer" parent="CreationPanel" unique_id=1052155099]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="ClassRail" type="PanelContainer" parent="CreationPanel/Columns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(178, 0)
+layout_mode = 2
+
+[node name="ClassContent" type="VBoxContainer" parent="CreationPanel/Columns/ClassRail"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ClassHeader" type="Label" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "CHOOSE A CLASS"
+horizontal_alignment = 1
+
+[node name="ClassButtons" type="GridContainer" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="ClassChoice0" type="Button" parent="CreationPanel/Columns/ClassRail/ClassContent/ClassButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+toggle_mode = true
+expand_icon = true
+icon_max_width = 62
+
+[node name="ClassChoice1" type="Button" parent="CreationPanel/Columns/ClassRail/ClassContent/ClassButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+toggle_mode = true
+expand_icon = true
+icon_max_width = 62
+
+[node name="ClassChoice2" type="Button" parent="CreationPanel/Columns/ClassRail/ClassContent/ClassButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+toggle_mode = true
+expand_icon = true
+icon_max_width = 62
+
+[node name="ClassChoice3" type="Button" parent="CreationPanel/Columns/ClassRail/ClassContent/ClassButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+toggle_mode = true
+expand_icon = true
+icon_max_width = 62
+
+[node name="ClassTitle" type="Label" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Vanguard"
+horizontal_alignment = 1
+
+[node name="ClassTagline" type="Label" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Hold the line"
+horizontal_alignment = 1
+
+[node name="ClassDescription" type="Label" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+text = "A steady front-line adventurer."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ClassNav" type="HBoxContainer" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ClassPrevious" type="Button" parent="CreationPanel/Columns/ClassRail/ClassContent/ClassNav"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "‹"
+tooltip_text = "Previous class"
+
+[node name="ClassPage" type="Label" parent="CreationPanel/Columns/ClassRail/ClassContent/ClassNav"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "1 / 4"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ClassNext" type="Button" parent="CreationPanel/Columns/ClassRail/ClassContent/ClassNav"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+text = "›"
+tooltip_text = "Next class"
+
+[node name="ShowClassGear" type="CheckBox" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Preview class gear"
+
+[node name="StartingHeader" type="Label" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "STARTING ITEMS"
+
+[node name="ClassStartingItems" type="Label" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Sword, shield and guard supplies"
+autowrap_mode = 2
+
+[node name="ProgressionHint" type="Label" parent="CreationPanel/Columns/ClassRail/ClassContent"]
+layout_mode = 2
+size_flags_vertical = 10
+text = "Your class grants starting items. Every race keeps access to Rabbit Lands' open-ended skills."
+vertical_alignment = 2
+autowrap_mode = 2
+
+[node name="CharacterPreview" type="SubViewportContainer" parent="CreationPanel/Columns" unique_id=879978873]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 620)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tooltip_text = "Drag to rotate; mouse wheel to zoom"
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="CreationPanel/Columns/CharacterPreview" unique_id=1568543517]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(560, 680)
+transparent_bg = true
+render_target_update_mode = 4
+
+[node name="PreviewRoot" type="Node3D" parent="CreationPanel/Columns/CharacterPreview/Viewport" unique_id=1055949710]
+unique_name_in_owner = true
+
+[node name="PreviewGround" type="MeshInstance3D" parent="CreationPanel/Columns/CharacterPreview/Viewport/PreviewRoot" unique_id=1328503270]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.045, 0)
+mesh = SubResource("Mesh_preview_ground")
+
+[node name="PreviewCamera" type="Camera3D" parent="CreationPanel/Columns/CharacterPreview/Viewport/PreviewRoot" unique_id=1328503269]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 4.2)
+cull_mask = 3
+current = true
+
+[node name="PreviewEnvironment" type="WorldEnvironment" parent="CreationPanel/Columns/CharacterPreview/Viewport/PreviewRoot"]
+environment = SubResource("Environment_preview")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="CreationPanel/Columns/CharacterPreview/Viewport/PreviewRoot"]
+unique_name_in_owner = true
+rotation_degrees = Vector3(-32, 0, 0)
+light_energy = 0.85
+shadow_enabled = true
+directional_shadow_max_distance = 12.0
+
+[node name="FillLight" type="DirectionalLight3D" parent="CreationPanel/Columns/CharacterPreview/Viewport/PreviewRoot"]
+unique_name_in_owner = true
+rotation_degrees = Vector3(-8, 145, 0)
+light_color = Color(1, 1, 1, 1)
+light_energy = 0.2
+
+[node name="RimLight" type="DirectionalLight3D" parent="CreationPanel/Columns/CharacterPreview/Viewport/PreviewRoot"]
+unique_name_in_owner = true
+rotation_degrees = Vector3(28, 205, 0)
+light_color = Color(1, 1, 1, 1)
+light_energy = 0.2
+
+[node name="FormPanel" type="PanelContainer" parent="CreationPanel/Columns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(430, 0)
+layout_mode = 2
+
+[node name="FormParchment" type="Panel" parent="CreationPanel/Columns/FormPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Form" type="VBoxContainer" parent="CreationPanel/Columns/FormPanel" unique_id=381403297]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="CreationPanel/Columns/FormPanel/Form" unique_id=1115436561]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "CREATE YOUR RABBIT LANDS CHARACTER"
+horizontal_alignment = 1
+
+[node name="AccountSection" type="Label" parent="CreationPanel/Columns/FormPanel/Form"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "ACCOUNT CREDENTIALS"
+
+[node name="CreateName" type="LineEdit" parent="CreationPanel/Columns/FormPanel/Form" unique_id=1963432485]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Character name (3–20 characters)"
+max_length = 20
+
+[node name="CreatePassword" type="LineEdit" parent="CreationPanel/Columns/FormPanel/Form" unique_id=623348386]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Password (minimum 4 characters)"
+max_length = 72
+secret = true
+
+[node name="CreateConfirm" type="LineEdit" parent="CreationPanel/Columns/FormPanel/Form" unique_id=1665344537]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Confirm password"
+max_length = 72
+secret = true
+
+[node name="IdentitySection" type="Label" parent="CreationPanel/Columns/FormPanel/Form"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "HERITAGE"
+
+[node name="IdentityRow" type="HBoxContainer" parent="CreationPanel/Columns/FormPanel/Form"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RaceColumn" type="VBoxContainer" parent="CreationPanel/Columns/FormPanel/Form/IdentityRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RaceLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/IdentityRow/RaceColumn"]
+layout_mode = 2
+text = "Race"
+
+[node name="CreateRace" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/IdentityRow/RaceColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="SexColumn" type="VBoxContainer" parent="CreationPanel/Columns/FormPanel/Form/IdentityRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SexLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/IdentityRow/SexColumn" unique_id=1136646209]
+layout_mode = 2
+text = "Sex"
+
+[node name="CreateGender" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/IdentityRow/SexColumn" unique_id=49062652]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="AppearanceSection" type="Label" parent="CreationPanel/Columns/FormPanel/Form"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "APPEARANCE"
+
+[node name="AppearanceGrid" type="GridContainer" parent="CreationPanel/Columns/FormPanel/Form" unique_id=1087399755]
+layout_mode = 2
+columns = 4
+
+[node name="SkinLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=391669437]
+layout_mode = 2
+text = "Skin"
+
+[node name="CreateSkin" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1006247239]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="HairLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=265946802]
+layout_mode = 2
+text = "Hair style"
+
+[node name="CreateHair" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=742634566]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="EyesLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=2141837957]
+layout_mode = 2
+text = "Eyes"
+
+[node name="CreateEyes" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1416915646]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="HairColorLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1865317685]
+layout_mode = 2
+text = "Hair color"
+
+[node name="CreateHairColor" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1621312374]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="ShirtLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1006247301]
+layout_mode = 2
+text = "Shirt"
+
+[node name="CreateShirt" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1006247302]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="PantsLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1006247303]
+layout_mode = 2
+text = "Trousers"
+
+[node name="CreatePants" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1006247304]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="BootsLabel" type="Label" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1006247305]
+layout_mode = 2
+text = "Boots"
+
+[node name="CreateBoots" type="OptionButton" parent="CreationPanel/Columns/FormPanel/Form/AppearanceGrid" unique_id=1006247306]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(132, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
+clip_text = true
+
+[node name="RandomizeAppearance" type="Button" parent="CreationPanel/Columns/FormPanel/Form"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Randomize Appearance"
+tooltip_text = "Try another complete character look"
+
+[node name="CreateStatus" type="Label" parent="CreationPanel/Columns/FormPanel/Form" unique_id=147417984]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 10
+text = "Choose appearance, then create your character."
+vertical_alignment = 2
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="CreationPanel/Columns/FormPanel/Form" unique_id=956235979]
+layout_mode = 2
+
+[node name="Back" type="Button" parent="CreationPanel/Columns/FormPanel/Form/Actions" unique_id=1682763350]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Back"
+
+[node name="Create" type="Button" parent="CreationPanel/Columns/FormPanel/Form/Actions" unique_id=438089216]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Create Character"
+
+[node name="LoginLogo" type="TextureRect" parent="." unique_id=2145300785]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 28.0
+offset_top = 22.0
+offset_right = 310.0
+offset_bottom = 198.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LoginPanel" type="PanelContainer" parent="." unique_id=1880397975]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 0.77
+anchor_top = 0.52
+anchor_right = 0.77
+anchor_bottom = 0.52
+offset_left = -180.0
+offset_top = -208.0
+offset_right = 180.0
+offset_bottom = 205.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="LoginPanel" unique_id=1600697510]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="LoginPanel/Content" unique_id=32813430]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "RABBIT LANDS"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="LoginPanel/Content" unique_id=2089721036]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Enter the world of Eloria"
+horizontal_alignment = 1
+
+[node name="Host" type="LineEdit" parent="LoginPanel/Content" unique_id=2004348178]
+unique_name_in_owner = true
+layout_mode = 2
+text = "game.rabbitlandsgame.com"
+placeholder_text = "Server host"
+
+[node name="Port" type="SpinBox" parent="LoginPanel/Content" unique_id=1655281064]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 65535.0
+value = 2000.0
+
+[node name="Secure" type="CheckBox" parent="LoginPanel/Content" unique_id=1774390021]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Encrypted connection (TLS)"
+
+[node name="Username" type="LineEdit" parent="LoginPanel/Content" unique_id=1883658216]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Username"
+
+[node name="Password" type="LineEdit" parent="LoginPanel/Content" unique_id=1408431049]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Password"
+secret = true
+
+[node name="Connect" type="Button" parent="LoginPanel/Content" unique_id=365065249]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Connect"
+
+[node name="Login" type="Button" parent="LoginPanel/Content" unique_id=1071613149]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Log In"
+
+[node name="NewCharacter" type="Button" parent="LoginPanel/Content" unique_id=38402473]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Create New Character"
+
+[node name="Status" type="Label" parent="LoginPanel/Content" unique_id=154840591]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Disconnected"
+horizontal_alignment = 1
+
+[connection signal="text_submitted" from="GameView/ChatWindow/Frame/Layout/ChatInput" to="." method="_on_chat_submitted"]
+[connection signal="gui_input" from="GameView/ChatWindow/Frame/Layout/ChatInput" to="." method="_on_chat_input_gui_input"]
+[connection signal="focus_exited" from="GameView/ChatWindow/Frame/Layout/ChatInput" to="." method="_hide_chat_input"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/WalkButton" to="." method="_on_walk_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/MapButton" to="." method="_on_map_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/SitButton" to="." method="_on_sit_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/AttackButton" to="." method="_on_attack_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/TradeButton" to="." method="_on_trade_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/LookButton" to="." method="_on_look_button_pressed"]
+[connection signal="pressed" from="GameView/SettingsControls/Content/ReferenceButton" to="." method="_on_reference_pressed"]
+[connection signal="pressed" from="GameView/SpellQuickbar/SpellContent/SpellControls/SpellPowerDown" to="." method="_on_spell_power_down_pressed"]
+[connection signal="pressed" from="GameView/SpellQuickbar/SpellContent/SpellControls/SpellPowerUp" to="." method="_on_spell_power_up_pressed"]
+[connection signal="pressed" from="GameView/GroundBagPanel/Content/Actions/GroundBagLook" to="." method="_on_ground_bag_look_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/InventoryButton" to="." method="_on_inventory_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/StatsButton" to="." method="_on_stats_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/KnowledgeButton" to="." method="_on_knowledge_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/EncyclopediaButton" to="." method="_on_encyclopedia_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/ManufacturingButton" to="." method="_on_manufacturing_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/ChatButton" to="." method="_on_chat_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/DisconnectButton" to="." method="_on_disconnect_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/SpellsButton" to="." method="_on_spells_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/EmotesButton" to="." method="_on_emotes_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/QuestButton" to="." method="_on_quest_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/InfoButton" to="." method="_on_info_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/BuddyButton" to="." method="_on_buddy_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/ConsoleButton" to="." method="_on_console_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/HelpButton" to="." method="_on_help_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/RangingButton" to="." method="_on_ranging_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/MinimapButton" to="." method="_on_minimap_button_pressed"]
+[connection signal="pressed" from="GameView/Quickbar/QuickRows/Buttons/OptionsButton" to="." method="_on_options_pressed"]
+[connection signal="pressed" from="GameView/InventoryPanel/Content/Header/InventoryClose" to="." method="_on_inventory_close_pressed"]
+[connection signal="pressed" from="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Actions/InventoryUse" to="." method="_on_inventory_use_pressed"]
+[connection signal="pressed" from="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Actions/InventoryEquip" to="." method="_on_inventory_equip_pressed"]
+[connection signal="pressed" from="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Actions/InventoryUnequip" to="." method="_on_inventory_unequip_pressed"]
+[connection signal="pressed" from="GameView/InventoryPanel/Content/InventoryBody/BackpackColumn/Actions/InventoryInspect" to="." method="_on_inventory_inspect_pressed"]
+[connection signal="toggled" from="GameView/TradePanel/Content/QuantityRow/TradeStorageDestination" to="." method="_on_trade_storage_destination_toggled"]
+[connection signal="pressed" from="GameView/TradePanel/Content/Actions/TradeOffer" to="." method="_on_trade_offer_pressed"]
+[connection signal="pressed" from="GameView/TradePanel/Content/Actions/TradeRemove" to="." method="_on_trade_remove_pressed"]
+[connection signal="pressed" from="GameView/TradePanel/Content/Actions/TradeInspect" to="." method="_on_trade_inspect_pressed"]
+[connection signal="pressed" from="GameView/TradePanel/Content/Actions/TradeAccept" to="." method="_on_trade_accept_pressed"]
+[connection signal="pressed" from="GameView/TradePanel/Content/Actions/TradeReject" to="." method="_on_trade_reject_pressed"]
+[connection signal="pressed" from="GameView/TradePanel/Content/Actions/TradeCancel" to="." method="_on_trade_cancel_pressed"]
+[connection signal="pressed" from="GameView/StoragePanel/Content/Actions/StorageDeposit" to="." method="_on_storage_deposit_pressed"]
+[connection signal="pressed" from="GameView/StoragePanel/Content/Actions/StorageWithdraw" to="." method="_on_storage_withdraw_pressed"]
+[connection signal="pressed" from="GameView/StoragePanel/Content/Actions/StorageInspect" to="." method="_on_storage_inspect_pressed"]
+[connection signal="pressed" from="GameView/StoragePanel/Content/Actions/StorageClose" to="." method="_on_storage_close_pressed"]
+[connection signal="pressed" from="GameView/ManufacturingPanel/Content/Actions/ManufacturingMixOne" to="." method="_on_manufacturing_mix_one_pressed"]
+[connection signal="pressed" from="GameView/ManufacturingPanel/Content/Actions/ManufacturingMixAll" to="." method="_on_manufacturing_mix_all_pressed"]
+[connection signal="pressed" from="GameView/ManufacturingPanel/Content/Actions/ManufacturingClose" to="." method="_on_manufacturing_close_pressed"]
+[connection signal="pressed" from="GameView/GroundBagPanel/Content/Actions/GroundBagPickAll" to="." method="_on_ground_bag_pick_all_pressed"]
+[connection signal="pressed" from="GameView/GroundBagPanel/Content/Actions/GroundBagDrop" to="." method="_on_ground_bag_drop_pressed"]
+[connection signal="pressed" from="GameView/GroundBagPanel/Content/GroundBagHeader/GroundBagClose" to="." method="_on_ground_bag_close_pressed"]
+[connection signal="gui_input" from="CreationPanel/Columns/CharacterPreview" to="." method="_on_character_preview_gui_input"]
+[connection signal="pressed" from="CreationPanel/Columns/ClassRail/ClassContent/ClassButtons/ClassChoice0" to="." method="_on_creation_class_chosen" binds= [0]]
+[connection signal="pressed" from="CreationPanel/Columns/ClassRail/ClassContent/ClassButtons/ClassChoice1" to="." method="_on_creation_class_chosen" binds= [1]]
+[connection signal="pressed" from="CreationPanel/Columns/ClassRail/ClassContent/ClassButtons/ClassChoice2" to="." method="_on_creation_class_chosen" binds= [2]]
+[connection signal="pressed" from="CreationPanel/Columns/ClassRail/ClassContent/ClassButtons/ClassChoice3" to="." method="_on_creation_class_chosen" binds= [3]]
+[connection signal="pressed" from="CreationPanel/Columns/ClassRail/ClassContent/ClassNav/ClassPrevious" to="." method="_on_creation_class_rotated" binds= [-1]]
+[connection signal="pressed" from="CreationPanel/Columns/ClassRail/ClassContent/ClassNav/ClassNext" to="." method="_on_creation_class_rotated" binds= [1]]
+[connection signal="toggled" from="CreationPanel/Columns/ClassRail/ClassContent/ShowClassGear" to="." method="_on_creation_class_gear_toggled"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/IdentityRow/RaceColumn/CreateRace" to="." method="_on_create_race_item_selected"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/IdentityRow/SexColumn/CreateGender" to="." method="_on_create_gender_item_selected"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/AppearanceGrid/CreateSkin" to="." method="_on_create_appearance_changed"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/AppearanceGrid/CreateHair" to="." method="_on_create_appearance_changed"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/AppearanceGrid/CreateEyes" to="." method="_on_create_appearance_changed"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/AppearanceGrid/CreateHairColor" to="." method="_on_create_appearance_changed"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/AppearanceGrid/CreateShirt" to="." method="_on_create_appearance_changed"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/AppearanceGrid/CreatePants" to="." method="_on_create_appearance_changed"]
+[connection signal="item_selected" from="CreationPanel/Columns/FormPanel/Form/AppearanceGrid/CreateBoots" to="." method="_on_create_appearance_changed"]
+[connection signal="pressed" from="CreationPanel/Columns/FormPanel/Form/RandomizeAppearance" to="." method="_on_randomize_creation_pressed"]
+[connection signal="pressed" from="CreationPanel/Columns/FormPanel/Form/Actions/Back" to="." method="_on_creation_back_pressed"]
+[connection signal="pressed" from="CreationPanel/Columns/FormPanel/Form/Actions/Create" to="." method="_on_create_pressed"]
+[connection signal="text_submitted" from="LoginPanel/Content/Password" to="." method="_on_login_submitted"]
+[connection signal="pressed" from="LoginPanel/Content/Connect" to="." method="_on_connect_pressed"]
+[connection signal="pressed" from="LoginPanel/Content/Login" to="." method="_on_login_pressed"]
+[connection signal="pressed" from="LoginPanel/Content/NewCharacter" to="." method="_on_new_character_pressed"]
+
+[connection signal="pressed" from="GameView/SettingsControls/Content/AudioCreditsButton" to="." method="_on_audio_credits_pressed"]

@@ -1,0 +1,21 @@
+{
+	"id": "crownwater_insides",
+	"schema": 1,
+	"grade": {
+		"exposure_forward": 0.6,
+		"saturation_forward": 1.1
+	},
+	"sky": {
+		"paint": 0
+	},
+	"props": {
+		"keep_words": ["mosaic"],
+		"keep_chroma_forward": 1.15,
+		"keep_tint_forward": [0.9, 1.0, 1.06]
+	},
+	"notes": {
+		"grade": "The Drowned Crown (registry drowned_crown) declares an enabled sun for its collapsed dome, so the look grades it. Measured in Forward+ at the spawn (50, 60), pitch -60 and -30, against develop's compatibility frame. Untrimmed, the grade lifted the white marble floor from luma 174 to 199 and flattened the frame (world std 49 to 28): AgX's shoulder crushes the marble. exposure_forward 0.6 puts the floor back at 173 and 165 (develop 174 and 169); 0.7 left it at 182. Saturation stays near 1: the warm key turns the teal mosaic cream, and a saturation trim only amplifies that (1.45 took the void beyond the walls to an orange of saturation 0.42). The compatibility renderer was not measured, so it keeps the defaults.",
+		"sky": "sky.paint 0 (integration): the painted sky and its haze are off here, so the void keeps the binder's own sky; the grade still runs. With the sky layer on, the haze beyond the walls was luma 105 at the play camera and 164 at the low view, against develop's procedural ground at 86 and 89.",
+		"props": "The Drowned Crown's teal mosaic floor (crownwater_mosaic) keeps its chroma: under the grade it went cream (warm R-B 10.7 to 29.7). keep_chroma_forward 1.15: at the default 1.45 the room went cyan (saturation 0.35 against develop's 0.17); the point is its teal floor against the warm key, not more chroma than develop. keep_tint_forward [0.9, 1.0, 1.06]: the warm cast is the grade's key, which a chroma scale cannot turn back (at 1.15 the floor stayed (178, 172, 166), R-B +12, against develop's (168, 175, 170)); the mosaic's own tint is turned back towards its teal instead."
+	}
+}

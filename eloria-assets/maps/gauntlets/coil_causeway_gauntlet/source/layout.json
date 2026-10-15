@@ -1,0 +1,1382 @@
+{
+ "_note": "coil_causeway_gauntlet: trail road geometry from the concept ssarathi_gauntlet (work-output/gauntlet-v2-design/regions). Plan metres, x east, y SOUTH; arenas are ellipses; paths are [x, y, elev] polylines; mouths are pockets placed along a bearing from the arena centre. `land` shapes the ground round the road (_toolkit/landforms.py) and `dressing` dresses it (_toolkit/trail_dressing.py).",
+ "schema": "eloria-trail-layout-v1",
+ "id": "coil_causeway_gauntlet",
+ "size": [
+  384,
+  384
+ ],
+ "sections": [
+  {
+   "id": "trailhead",
+   "kind": "camp",
+   "name": "Shore Landing",
+   "at": [
+    44,
+    338
+   ],
+   "rx": 18,
+   "ry": 15,
+   "rot": 0,
+   "elev": 1
+  },
+  {
+   "id": "w1",
+   "kind": "arena",
+   "name": "The Water Gate",
+   "at": [
+    112,
+    300
+   ],
+   "rx": 30,
+   "ry": 22,
+   "rot": 0,
+   "elev": 1.5,
+   "order": 1,
+   "mouths": [
+    {
+     "id": "w1-northwest",
+     "bearing": 235,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-south",
+     "bearing": 80,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-northeast",
+     "bearing": 335,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "kind": "arena",
+   "name": "The Lily Hatchery",
+   "at": [
+    262,
+    322
+   ],
+   "rx": 38,
+   "ry": 24,
+   "rot": -8,
+   "elev": 1.0,
+   "order": 2,
+   "mouths": [
+    {
+     "id": "w2-southeast",
+     "bearing": 60,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-north",
+     "bearing": 250,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-southwest",
+     "bearing": 140,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "kind": "arena",
+   "name": "The Serpent Colonnade",
+   "at": [
+    332,
+    196
+   ],
+   "rx": 26,
+   "ry": 36,
+   "rot": 0,
+   "elev": 2.0,
+   "order": 3,
+   "mouths": [
+    {
+     "id": "w3-east",
+     "bearing": 5,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-west",
+     "bearing": 180,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-northeast",
+     "bearing": 300,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "kind": "arena",
+   "name": "The Two Mouths",
+   "at": [
+    256,
+    76
+   ],
+   "rx": 36,
+   "ry": 24,
+   "rot": 12,
+   "elev": 2.5,
+   "order": 4,
+   "mouths": [
+    {
+     "id": "w4-north",
+     "bearing": 280,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-south",
+     "bearing": 105,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-east",
+     "bearing": 345,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "kind": "arena",
+   "name": "The Sun Stair",
+   "at": [
+    100,
+    108
+   ],
+   "rx": 30,
+   "ry": 28,
+   "rot": 0,
+   "elev": 5.0,
+   "order": 5,
+   "mouths": [
+    {
+     "id": "w5-southwest",
+     "bearing": 150,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-north",
+     "bearing": 270,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-southeast",
+     "bearing": 25,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "kind": "court",
+   "name": "The Coiled Court",
+   "at": [
+    196,
+    192
+   ],
+   "rx": 26,
+   "ry": 24,
+   "rot": 0,
+   "elev": 12,
+   "order": 6,
+   "mouths": [
+    {
+     "id": "court-east",
+     "bearing": 0,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    },
+    {
+     "id": "court-northwest",
+     "bearing": 240,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    }
+   ]
+  },
+  {
+   "id": "vault",
+   "kind": "vault",
+   "name": "The Brood Vault",
+   "at": [
+    196,
+    222
+   ],
+   "rx": 8,
+   "ry": 6,
+   "rot": 0,
+   "elev": 12
+  }
+ ],
+ "mouthDefaults": {
+  "out": 6,
+  "radius": 7,
+  "linkWidth": 5
+ },
+ "paths": [
+  {
+   "from": "trailhead",
+   "to": "w1",
+   "width": 7,
+   "points": [
+    [
+     70,
+     330,
+     1.2
+    ],
+    [
+     90,
+     316,
+     1.4
+    ]
+   ]
+  },
+  {
+   "from": "w1",
+   "to": "w2",
+   "width": 7,
+   "points": [
+    [
+     150,
+     312,
+     1.3
+    ],
+    [
+     196,
+     330,
+     1.1
+    ],
+    [
+     226,
+     328,
+     1.0
+    ]
+   ]
+  },
+  {
+   "from": "w2",
+   "to": "w3",
+   "width": 7,
+   "points": [
+    [
+     300,
+     300,
+     1.4
+    ],
+    [
+     322,
+     262,
+     1.8
+    ],
+    [
+     330,
+     232,
+     2.0
+    ]
+   ]
+  },
+  {
+   "from": "w3",
+   "to": "w4",
+   "width": 7,
+   "points": [
+    [
+     330,
+     156,
+     2.2
+    ],
+    [
+     316,
+     110,
+     2.4
+    ],
+    [
+     290,
+     86,
+     2.5
+    ]
+   ]
+  },
+  {
+   "from": "w4",
+   "to": "w5",
+   "width": 7,
+   "points": [
+    [
+     220,
+     70,
+     3.0
+    ],
+    [
+     170,
+     76,
+     3.8
+    ],
+    [
+     130,
+     92,
+     4.5
+    ]
+   ]
+  },
+  {
+   "from": "w5",
+   "to": "boss",
+   "width": 7,
+   "points": [
+    [
+     120,
+     140,
+     6.0
+    ],
+    [
+     150,
+     172,
+     8.5
+    ],
+    [
+     172,
+     188,
+     10.5
+    ]
+   ]
+  },
+  {
+   "from": "boss",
+   "to": "vault",
+   "width": 4,
+   "points": [
+    [
+     196,
+     210,
+     12
+    ]
+   ]
+  }
+ ],
+ "land": {
+  "hills": 1.5,
+  "floor": -4.0,
+  "waterLevel": 0.0,
+  "shore": 4.0,
+  "water": "water_lagoon",
+  "ground": {
+   "bank": "verdant_jungle_floor",
+   "network": "verdant_jungle_floor",
+   "trail": "verdant_terrace_stone",
+   "cliff": "verdant_limestone_cliff",
+   "bed": "verdant_lagoon_sand",
+   "mesa": "verdant_terrace_stone",
+   "deck": "verdant_terrace_stone"
+  },
+  "islands": [
+   {
+    "at": [
+     196,
+     192
+    ],
+    "rx": 52,
+    "ry": 46,
+    "top": 2.0,
+    "fall": 7
+   }
+  ],
+  "massifs": [
+   {
+    "at": [
+     196,
+     192
+    ],
+    "rx": 40,
+    "ry": 36,
+    "top": 5.5,
+    "fall": 2.0
+   },
+   {
+    "at": [
+     196,
+     192
+    ],
+    "rx": 32,
+    "ry": 29,
+    "top": 9.0,
+    "fall": 2.0
+   }
+  ]
+ },
+ "checkpoints": [
+  {
+   "id": "cp1",
+   "name": "The ferry fire",
+   "at": [
+    314.7,
+    287.6
+   ],
+   "elev": 1.56,
+   "after": "w2",
+   "reach": 12.0
+  },
+  {
+   "id": "cp2",
+   "name": "The stela fire",
+   "at": [
+    190.4,
+    67.0
+   ],
+   "elev": 3.46,
+   "after": "w4",
+   "reach": 12.0
+  }
+ ],
+ "sides": [
+  {
+   "id": "lotus-steps",
+   "name": "The Lotus Steps",
+   "from": [
+    318.5,
+    118.3,
+    2.36
+   ],
+   "at": [
+    333.8,
+    113.6
+   ],
+   "radius": 7,
+   "elev": 2.66,
+   "width": 4
+  }
+ ],
+ "floors": {
+  "w1": "verdant_terrace_stone",
+  "w3": "verdant_terrace_stone",
+  "w4": "verdant_terrace_stone",
+  "w5": "verdant_terrace_stone",
+  "boss": "verdant_carved_jade",
+  "vault": "verdant_carved_jade",
+  "trailhead": "verdant_lagoon_sand"
+ },
+ "environment": {
+  "sky": {
+   "topColor": [
+    0.2,
+    0.5,
+    0.8
+   ],
+   "horizonColor": [
+    0.8,
+    0.9,
+    0.86
+   ],
+   "groundBottomColor": [
+    0.1,
+    0.22,
+    0.18
+   ],
+   "groundHorizonColor": [
+    0.5,
+    0.66,
+    0.54
+   ]
+  },
+  "sun": {
+   "enabled": true,
+   "direction": [
+    0.45,
+    -0.72,
+    0.52
+   ],
+   "color": [
+    1.0,
+    0.94,
+    0.8
+   ],
+   "energy": 1.75
+  },
+  "ambient": {
+   "color": [
+    0.64,
+    0.76,
+    0.72
+   ],
+   "energy": 0.9,
+   "skyContribution": 0.4
+  },
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.76,
+    0.88,
+    0.84
+   ],
+   "density": 0.0007
+  },
+  "tonemap": {
+   "mode": "filmic",
+   "exposure": 1.0,
+   "white": 4.0
+  }
+ },
+ "dressing": {
+  "woods": {
+   "count": 520,
+   "minElev": 0.7,
+   "mix": [
+    [
+     "palm1",
+     0.18
+    ],
+    [
+     "palm2",
+     0.18
+    ],
+    [
+     "palm3",
+     0.14
+    ],
+    [
+     "palm4",
+     0.14
+    ],
+    [
+     "mangrove1",
+     0.1
+    ],
+    [
+     "mangrove2",
+     0.08
+    ],
+    [
+     "treefern1",
+     0.1
+    ],
+    [
+     "treefern2",
+     0.08
+    ]
+   ]
+  },
+  "cover": {
+   "count": 520,
+   "mix": [
+    [
+     "jungle1",
+     1
+    ],
+    [
+     "jungle2",
+     1
+    ],
+    [
+     "jungle3",
+     1
+    ],
+    [
+     "jungle4",
+     1
+    ],
+    [
+     "flowers1",
+     0.6
+    ],
+    [
+     "flowers2",
+     0.6
+    ]
+   ]
+  },
+  "rocks": {
+   "count": 90,
+   "mix": [
+    [
+     "boulder1",
+     1
+    ],
+    [
+     "boulder2",
+     1
+    ],
+    [
+     "coastrock1",
+     0.7
+    ],
+    [
+     "coastrock2",
+     0.7
+    ]
+   ]
+  },
+  "camp": {
+   "tents": "leanto",
+   "fire": "firepit",
+   "shelter": "stilts",
+   "crates": [
+    "fishtrap",
+    "canoe",
+    "crate1"
+   ],
+   "tentScale": 1.6
+  },
+  "lantern": {
+   "key": "jadelamp",
+   "every": 40
+  },
+  "objects": {
+   "waystone": "waystone",
+   "cache": "cache",
+   "plaque": "notice"
+  },
+  "kits": {
+   "waystone": "whitehorn_range/kit-horn-waystone-1",
+   "cache": "four_gates/kit-crate-stack-1",
+   "notice": "amberwood/kit-notice-board-1",
+   "firepit": "sunmane_steppe/kit-fire-pit",
+   "shelter": "whitehorn_range/kit-firewood-shelter-1",
+   "crate1": "whitehorn_range/kit-supply-crate-1",
+   "crate2": "whitehorn_range/kit-supply-crate-2",
+   "barrels": "four_gates/kit-barrel-stack-1",
+   "palm1": "ssarathi_ruins/kit-beach-palm-tree-1",
+   "palm2": "ssarathi_ruins/kit-beach-palm-tree-2",
+   "palm3": "ssarathi_ruins/kit-beach-palm-tree-3",
+   "palm4": "ssarathi_ruins/kit-beach-palm-tree-4",
+   "mangrove1": "ssarathi_ruins/kit-mangrove-tree-1",
+   "mangrove2": "ssarathi_ruins/kit-mangrove-tree-2",
+   "treefern1": "ssarathi_ruins/kit-tree-fern-1",
+   "treefern2": "ssarathi_ruins/kit-tree-fern-2",
+   "jungle1": "ssarathi_ruins/kit-jungle-undergrowth-1",
+   "jungle2": "ssarathi_ruins/kit-jungle-undergrowth-2",
+   "jungle3": "ssarathi_ruins/kit-jungle-undergrowth-3",
+   "jungle4": "ssarathi_ruins/kit-jungle-undergrowth-4",
+   "flowers1": "ssarathi_ruins/kit-flower-shrub-1",
+   "flowers2": "ssarathi_ruins/kit-flower-shrub-2",
+   "reed": "ssarathi_ruins/kit-lagoon-reed-1",
+   "lotus": "ssarathi_ruins/kit-lotus-flower-pads-1",
+   "boulder1": "ssarathi_ruins/kit-mossy-boulder-1",
+   "boulder2": "ssarathi_ruins/kit-mossy-boulder-2",
+   "coastrock1": "ssarathi_ruins/kit-coastal-rock-1",
+   "coastrock2": "ssarathi_ruins/kit-coastal-rock-2",
+   "seastack": "ssarathi_ruins/kit-sea-stack-1",
+   "seastack2": "ssarathi_ruins/kit-sea-stack-2",
+   "ruin1": "ssarathi_ruins/kit-serpent-ruin-1",
+   "ruin2": "ssarathi_ruins/kit-serpent-ruin-2",
+   "ruin3": "ssarathi_ruins/kit-serpent-ruin-3",
+   "ruin5": "ssarathi_ruins/kit-serpent-ruin-5",
+   "ruin6": "ssarathi_ruins/kit-serpent-ruin-6",
+   "ruin8": "ssarathi_ruins/kit-serpent-ruin-8",
+   "jadelamp": "ssarathi_ruins/kit-jade-lantern-pole-1",
+   "brazier": "ssarathi_ruins/kit-serpent-incense-brazier-1",
+   "canoe": "ssarathi_ruins/kit-dugout-canoe-1",
+   "fishtrap": "ssarathi_ruins/kit-fish-trap-basket-1",
+   "banners": "ssarathi_ruins/kit-prayer-banner-rack-1",
+   "stilts": "ssarathi_ruins/kit-stilt-fishing-platform-1",
+   "leanto": "amethyst_barrens/kit-prospector-lean-to-1",
+   "CC1": "@kit/kit-cc-water-gate.glb",
+   "CC2": "@kit/kit-cc-causeway-span.glb",
+   "CC3": "@kit/kit-cc-serpent-pillar.glb",
+   "CC4": "@kit/kit-cc-serpent-head.glb",
+   "CC5": "@kit/kit-cc-egg-clutch.glb",
+   "CC6": "@kit/kit-cc-sun-stela.glb",
+   "CC7": "@kit/kit-cc-pyramid-shrine.glb",
+   "CC8": "@kit/kit-cc-temple-stair.glb"
+  },
+  "landmarks": [
+   {
+    "kit": "CC2",
+    "at": [
+     161.78,
+     316.61
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 21.370622269343183
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     181.34,
+     324.26
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 21.370622269343183
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     201.24,
+     329.65
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": -3.8140748342903543
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     304.3,
+     292.57
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": -59.93141717813756
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     314.83,
+     274.39
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": -59.93141717813756
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     323.72,
+     255.54
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": -75.06858282186245
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     326.38,
+     144.09
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": -106.92751306414705
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     320.26,
+     124.0
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": -106.92751306414705
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     311.32,
+     105.68
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": -137.29061004263855
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     295.89,
+     91.44
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": -137.29061004263855
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     204.11,
+     71.91
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 173.15722658736905
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     183.26,
+     74.41
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 173.15722658736905
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     162.9,
+     78.84
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 158.19859051364818
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     143.4,
+     86.64
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 158.19859051364818
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     130.1,
+     150.77
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 46.8476102659946
+   },
+   {
+    "kit": "CC2",
+    "at": [
+     144.46,
+     166.09
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 46.8476102659946
+   },
+   {
+    "kit": "CC1",
+    "at": [
+     118,
+     281
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     112,
+     300
+    ]
+   },
+   {
+    "kit": "banners",
+    "at": [
+     98,
+     308
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     112,
+     300
+    ]
+   },
+   {
+    "kit": "brazier",
+    "at": [
+     122,
+     306
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "CC5",
+    "at": [
+     289.3,
+     329.31
+    ],
+    "scale": 1.1,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 867.8984963192247
+   },
+   {
+    "kit": "CC5",
+    "at": [
+     258.75,
+     340.44
+    ],
+    "scale": 1.1,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 776.2479414406451
+   },
+   {
+    "kit": "CC5",
+    "at": [
+     268.76,
+     303.42
+    ],
+    "scale": 1.1,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 806.2826980607624
+   },
+   {
+    "kit": "CC5",
+    "at": [
+     240.94,
+     309.84
+    ],
+    "scale": 1.1,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 722.825680242053
+   },
+   {
+    "kit": "lotus",
+    "at": [
+     265,
+     319
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "lotus",
+    "at": [
+     250,
+     326
+    ],
+    "scale": 1.4,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     321,
+     171
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     343,
+     171
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 180
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     321,
+     181
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     343,
+     181
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 180
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     321,
+     191
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     343,
+     191
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 180
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     321,
+     201
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     343,
+     201
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 180
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     321,
+     211
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     343,
+     211
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 180
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     321,
+     221
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "CC3",
+    "at": [
+     343,
+     221
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 180
+   },
+   {
+    "kit": "CC4",
+    "at": [
+     238.76,
+     51.38
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     256,
+     76
+    ]
+   },
+   {
+    "kit": "CC4",
+    "at": [
+     270.54,
+     101.18
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     256,
+     76
+    ]
+   },
+   {
+    "kit": "CC8",
+    "at": [
+     84,
+     107
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     100,
+     108
+    ]
+   },
+   {
+    "kit": "CC6",
+    "at": [
+     114,
+     100
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     100,
+     108
+    ]
+   },
+   {
+    "kit": "CC7",
+    "at": [
+     196,
+     161
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "z": 11.8,
+    "face": [
+     196,
+     192
+    ]
+   },
+   {
+    "kit": "CC8",
+    "at": [
+     237.0,
+     192.0
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "scenery",
+    "z": 1.9,
+    "rot": -90
+   },
+   {
+    "kit": "CC8",
+    "at": [
+     196.0,
+     229.0
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "scenery",
+    "z": 1.9,
+    "rot": 0
+   },
+   {
+    "kit": "CC8",
+    "at": [
+     196.0,
+     155.0
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "scenery",
+    "z": 1.9,
+    "rot": 180
+   },
+   {
+    "kit": "brazier",
+    "at": [
+     184,
+     180
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "brazier",
+    "at": [
+     208,
+     180
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "ruin2",
+    "at": [
+     178,
+     198
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     196,
+     192
+    ]
+   },
+   {
+    "kit": "ruin2",
+    "at": [
+     214,
+     198
+    ],
+    "scale": 1.3,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     196,
+     192
+    ]
+   },
+   {
+    "kit": "seastack",
+    "at": [
+     40,
+     40
+    ],
+    "scale": 1.4,
+    "solid": null,
+    "group": "scenery",
+    "rot": 40
+   },
+   {
+    "kit": "seastack",
+    "at": [
+     340,
+     40
+    ],
+    "scale": 1.4,
+    "solid": null,
+    "group": "scenery",
+    "rot": 340
+   },
+   {
+    "kit": "seastack",
+    "at": [
+     350,
+     300
+    ],
+    "scale": 1.4,
+    "solid": null,
+    "group": "scenery",
+    "rot": 350
+   },
+   {
+    "kit": "seastack",
+    "at": [
+     30,
+     200
+    ],
+    "scale": 1.4,
+    "solid": null,
+    "group": "scenery",
+    "rot": 30
+   },
+   {
+    "kit": "seastack",
+    "at": [
+     300,
+     360
+    ],
+    "scale": 1.4,
+    "solid": null,
+    "group": "scenery",
+    "rot": 300
+   }
+  ],
+  "meshyKit": [
+   "CC1",
+   "CC2",
+   "CC3",
+   "CC4",
+   "CC5",
+   "CC6",
+   "CC7",
+   "CC8"
+  ],
+  "labels": {
+   "plaque": [
+    "Rules of the causeway",
+    "One party at a time. The brood comes to you; the causeway behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+   ],
+   "cache": "The Sovereign's tithe-chest",
+   "side": [
+    "The lotus steps",
+    "The priests came down these steps at dawn to cut lotus for the court. The lotus still grows."
+   ]
+  }
+ }
+}

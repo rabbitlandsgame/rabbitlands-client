@@ -1,0 +1,95 @@
+[gd_resource type="Resource" script_class="MapAuthoringVisualStyle" load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_visual_style.gd" id="1_style"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png" id="2_ground_color"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-normal.png" id="3_ground_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-orm.png" id="4_ground_orm"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-basecolor.png" id="5_timber_color"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-normal.png" id="6_timber_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-orm.png" id="7_timber_orm"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-basecolor.png" id="8_stone_color"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-normal.png" id="9_stone_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-orm.png" id="10_stone_orm"]
+[ext_resource type="Shader" path="res://src/dev/map_authoring_pilot/style/worn_path.gdshader" id="11_path_shader"]
+[ext_resource type="Shader" path="res://src/dev/map_authoring_pilot/style/water.gdshader" id="12_water_shader"]
+
+[sub_resource type="ORMMaterial3D" id="StandardMaterial3D_terrain"]
+albedo_color = Color(0.78, 0.86, 0.72, 1)
+albedo_texture = ExtResource("2_ground_color")
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.75
+normal_texture = ExtResource("3_ground_normal")
+orm_texture = ExtResource("4_ground_orm")
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial3D_path"]
+render_priority = 1
+shader = ExtResource("11_path_shader")
+shader_parameter/ground_albedo = ExtResource("2_ground_color")
+shader_parameter/ground_normal = ExtResource("3_ground_normal")
+shader_parameter/ground_orm = ExtResource("4_ground_orm")
+shader_parameter/worn_tint = Color(0.60, 0.48, 0.31, 1)
+shader_parameter/texture_scale = 1.0
+shader_parameter/roughness_multiplier = 1.0
+shader_parameter/normal_strength = 0.72
+shader_parameter/edge_feather = 0.16
+
+[sub_resource type="ORMMaterial3D" id="StandardMaterial3D_timber"]
+albedo_color = Color(0.65, 0.64, 0.59, 1)
+albedo_texture = ExtResource("5_timber_color")
+roughness = 0.86
+normal_enabled = true
+normal_scale = 0.8
+normal_texture = ExtResource("6_timber_normal")
+orm_texture = ExtResource("7_timber_orm")
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="ORMMaterial3D" id="StandardMaterial3D_stone"]
+albedo_color = Color(0.48, 0.56, 0.56, 1)
+albedo_texture = ExtResource("8_stone_color")
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.72
+normal_texture = ExtResource("9_stone_normal")
+orm_texture = ExtResource("10_stone_orm")
+uv1_scale = Vector3(0.8, 0.8, 0.8)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_slate"]
+albedo_color = Color(0.095, 0.17, 0.20, 1)
+roughness = 0.55
+uv1_scale = Vector3(0.8, 0.8, 0.8)
+uv1_triplanar = true
+uv1_world_triplanar = true
+cull_mode = 2
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial3D_water"]
+render_priority = 0
+shader = ExtResource("12_water_shader")
+shader_parameter/deep_color = Color(0.045, 0.15, 0.20, 0.90)
+shader_parameter/shallow_color = Color(0.12, 0.29, 0.28, 0.86)
+shader_parameter/foam_color = Color(0.38, 0.56, 0.54, 1)
+shader_parameter/river_half_width = 3.0
+
+[resource]
+script = ExtResource("1_style")
+terrain_texture = "Grass"
+road_texture = "Worn earth"
+woodwork_texture = "Timber"
+stonework_texture = "Stone"
+roof_texture = "Slate"
+terrain_material = SubResource("StandardMaterial3D_terrain")
+worn_path_material = SubResource("ShaderMaterial3D_path")
+timber_material = SubResource("StandardMaterial3D_timber")
+stone_material = SubResource("StandardMaterial3D_stone")
+slate_material = SubResource("StandardMaterial3D_slate")
+water_material = SubResource("ShaderMaterial3D_water")

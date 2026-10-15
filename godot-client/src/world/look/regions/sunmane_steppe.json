@@ -1,0 +1,30 @@
+{
+	"id": "sunmane_steppe",
+	"schema": 1,
+	"ground": {
+		"path_tint": [0.86, 0.74, 0.44],
+		"path_chroma_forward": 1.7,
+		"path_luma_forward": 0.295,
+		"verge_value_earth_forward": 0.7,
+		"verge_saturation_forward": 1.12
+	},
+	"grass": {
+		"root": [0.17, 0.16, 0.06],
+		"tip": [0.68, 0.62, 0.27],
+		"value_forward": 1.5,
+		"open": 0.3,
+		"meadow": 0.5
+	},
+	"foliage": {
+		"crown_materials": ["sun_foliage"]
+	},
+	"props": {
+		"keep_words": ["crystal"]
+	},
+	"notes": {
+		"ground": "A golden steppe: ochre earth (the SunmaneBase texture, display hue 33-35 on develop) and gold sand roads (develop: hue 41, saturation 0.52). Under the shared Forward+ grade and the default paint the roads went a grey dusty stone (hue 31, saturation 0.16) and the earth a pale salmon (hue 28, saturation 0.43); frame saturation fell from develop's 0.44 to 0.28. The roads are painted in gold sand (path_tint, hue 43) with more chroma (path_chroma_forward 1.7: saturation 0.36-0.38 at hue 43-44). The earth verge keeps more chroma (verge_saturation_forward 1.12: hue 33-34 as on develop, saturation 0.56-0.65). At 1.25 a quarter of the hub frame passed saturation 0.6 and read neon orange. The earth is half 'pale' to the paint (its reference luminance sits inside PALE_LUMA), so verge_value_earth moves it little: 0.8 to 0.75 took the ground boxes down about one level. 0.7, with path_luma_forward 0.295, lifts the roads over it: path/ground 1.23-1.34 on ss_road and the three border roads, 1.71 at the hub, where the ground box is a slope-shaded bank (develop 0.91-0.99, 1.41 at ss_road). The ground changes at every border (Verdant's green grass, Amethyst's grey scree, Mirrorhold's pale rock), and develop's road decks already change colour there, so these trims draw no new seam (ss_border_vs, _ab and _mh, mig_sunmane_steppe_3). Compatibility renderer: only path_tint applies there (with the default chroma); not rendered.",
+		"grass": "Sunmane has no biome blend, so every open spot counts as fully grassy (5,879 tufts at the hub), and grass.layers cannot weigh it. The default green palette drew dark specks at about 0.55 of the ground's luminance (hf95 59 at ss_wild against develop's 22). A pale straw palette (tip 0.8, 0.7, 0.36) at value 2.6 read as frost on the ochre earth and as white blotches in the pasture beds. This dry olive-gold (hue about 51-55, the pasture patches' own hue) at value_forward 1.7 reads as steppe grass on both and frames the roads without speckle (hf95 24-31 across the shots). Compatibility renderer: the palette applies at the default value; not rendered. open 0.6 (integration): the steppe has no biome blend, and ground outside every biome cell counted as a meadow, so its ochre banks and the plaza's edges were as grassy as the pastures (5,879 tufts at the hub, tall ones on the banks). The pasture patches (#9cad66 and kin) now grow full grass as green meadow patches (LookProfile.GRASS_PATCH_GREEN); 0.6 on the open ground is the migration agent's estimate, not a measured value. Polish (2026-09-30): open 0.6 grew a carpet of spiky tufts over the pastures and banks (ss_wild hf95 50, develop 22; ss_grove 42 against 16); open 0.3 and value_forward 1.5 with LookProfile.GRASS_DENSITY_FLOOR thin the open steppe to beds, and the pastures are meadows now (LookGround.is_meadow), drawn in their own green rather than glazed as soil. meadow 0.5: the pastures are meadow patches, as grassy as a meadow by default, and their beds were most of ss_wild's speckle (hf95 42 with grass against 20 without); at 0.5 they carry half the beds, which the density floor thins to clumps.",
+		"foliage": "The steppe trees' and shrubs' leaf material is sun_foliage (Grove_*__Kit_steppe_tree_*, Kit_steppe_shrub_*), listed so they paint as crowns; it is single-sided (glTF doubleSided false, CULL_BACK), which LookFoliage.painted_for paints with the back-culled crown shaders since 461e2e0c6. The market canopies (sun_textile, sun_canvas_*, sun_leather) are textiles and stay unpainted.",
+		"props": "The amethyst outcrops (sun_crystal_amethyst) keep their chroma, as the Amethyst Barrens' crystals do."
+	}
+}

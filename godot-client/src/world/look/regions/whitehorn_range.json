@@ -1,0 +1,25 @@
+{
+	"id": "whitehorn_range",
+	"schema": 1,
+	"ground": {
+		"path_luma": 0.13,
+		"path_luma_forward": 0.11,
+		"path_tint": [0.74, 0.56, 0.4],
+		"verge_value_earth_forward": 1.0,
+		"verge_saturation_forward": 1.3
+	},
+	"grass": {
+		"root": [0.3, 0.29, 0.2],
+		"tip": [0.78, 0.74, 0.54],
+		"value_forward": 1.5
+	},
+	"foliage": {
+		"shrub_words": ["tussock", "grass"]
+	},
+	"notes": {
+		"ground": "Snow is the palest ground here, so a road cannot be 1.25-1.7 times its verge as it is on grass: Whitehorn's tracks are trodden gravel darker than the snow. Measured in Forward+ (2026-09-30): path/ground 0.83-0.87 at the hub and the Amethyst lane and 0.57 in the gorge's shade, against develop's mud-brown decks at 0.36-0.50 and the default look's pale roads at 1.00-1.04, which drew them value-flat on the snow. path_luma 0.15 (0.13 compat, not rendered) matches the Grey Moors (0.16 / 0.14) and Amethyst Barrens (0.15 / 0.13) drafts, so the lanes into them step little; Amberwood is 0.1. At 0.12 (path/ground 0.76-0.80) the Grey Moors lane showed a hard step at the border. The tint is a grey-tan gravel between Amberwood's ochre and Grey Moors' grey. The snow: the bluish snow crust used to count as green in look_green (green above red), so it was deepened as grass and lost a third of its red, pale cyan-grey at luminance 174-176 against develop's 236-242. Since the integration look_green asks green to lead blue as well, the snow takes the earth verge (0.8 in Forward+: neutral white at about 196 in wr_road), and verge_value_earth_forward 0.92 lifts it a step further. Safe at the borders, where Amberwood's and the Amethyst Barrens' blends carry the same snow, because region trims now fade into the neighbour's over LookProfile.BORDER_FEATHER_METRES either side of the border (LookBorders), so a trim no longer draws the border as a line. Polish (2026-09-30): the grey-tan gravel (0.15, [0.76, 0.64, 0.5]) stood at path/ground 0.74-0.76 on the snow, and the narrow trail at wr_trees nearly vanished (develop drew it brown, 148, 128, 112, on snow at 240; the look grey, 163, 157, 151, on 213). A warmer, darker trodden earth-gravel (0.11, [0.74, 0.56, 0.4]) reads on the snow at every width. The snow was a neutral grey (193, 198, 205) with no cool shade (world saturation 0.23 to 0.06-0.12): verge_value_earth_forward 1.0 and verge_saturation_forward 1.3 keep its authored cool cast in shade and let the sun warm it. The granite crags are rock now (LookGround.is_rock), drawn solid in their own colour instead of glazed towards the snow.",
+		"grass": "Pale alpine straw. Most tufts here are verge tufts along road rims over snow (a deck's rim grows verge whatever the biome under it), where the default green palette read as dark green specks; value_forward 1.5 keeps them near the value of the snow's edge band. The generic layer words suit this region (snow and scree 0, ground-basecolor 1, heather 0.6, moss 0.5).",
+		"foliage": "kit-tussock-grass (36) and kit-frost-grass (46) are the kit's grass clumps; these words paint them as shrubs (the probe lists them as kit shrubs, painted), so they sway with the grass beds. Every tree and juniper in the kit already matches the generic words (tree, fir, pine, juniper, shrub), and the snowy firs keep their snow.",
+		"other": "No grade (a continent region), no sky (the map declares its own), no water (continent water is never decoded)."
+	}
+}

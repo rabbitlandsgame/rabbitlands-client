@@ -1,0 +1,3422 @@
+{
+  "sourceRevision": "c29594767ec5669186435e7310325d4c7ad9eeb6",
+  "godot": "4.7.2",
+  "variants": 272,
+  "designs": 136,
+  "bodyTemplates": [
+    "luminous_male",
+    "luminous_female"
+  ],
+  "playableModels": 16,
+  "causes": [
+    "The split body neck ends at the stock shirt neckline, above several equipment collars.",
+    "Regenerated calves curve behind the retained skeleton; lower garment shafts followed the bone axes instead of body sections.",
+    "All 16 waist measurements were omitted because spine_01 owns too few vertices."
+  ],
+  "corrections": [
+    "Continue the native skinned neck rim beneath equipped collars, sharing body materials and the original boundary attributes.",
+    "Align every canonical trouser and boot variant to common body sections; keep soles, waist and rigid ornaments stable.",
+    "Measure sparse spine influences through adjacent torso bones, using the same geometric slab."
+  ],
+  "geometryChecks": {
+    "finiteAttributes": true,
+    "skinWeightsUnchanged": true,
+    "inverseBindsUnchanged": true,
+    "uvsUnchanged": true,
+    "indicesUnchanged": true,
+    "verticalCoordinatesUnchanged": true,
+    "reversedFaces": 0,
+    "invertedClosedShells": 0,
+    "changedVertices": 1855712
+  },
+  "rangerShaftAlignment": {
+    "6:226-female": {
+      "l": {
+        "beforeMeanMm": 18.512856616065864,
+        "afterMeanMm": 3.3997422325564006
+      },
+      "r": {
+        "beforeMeanMm": 18.530737957476404,
+        "afterMeanMm": 3.3972970482896994
+      }
+    },
+    "4:230-female": {
+      "l": {
+        "beforeMeanMm": 63.60732354507397,
+        "afterMeanMm": 1.5222547266229494
+      },
+      "r": {
+        "beforeMeanMm": 62.484024786249535,
+        "afterMeanMm": 1.1397902894799827
+      }
+    },
+    "6:226-male": {
+      "l": {
+        "beforeMeanMm": 21.6158499578523,
+        "afterMeanMm": 3.5738743664928716
+      },
+      "r": {
+        "beforeMeanMm": 21.907779775797454,
+        "afterMeanMm": 3.505309004176458
+      }
+    },
+    "4:230-male": {
+      "l": {
+        "beforeMeanMm": 83.61618213508454,
+        "afterMeanMm": 9.518220941261275
+      },
+      "r": {
+        "beforeMeanMm": 83.17608391357726,
+        "afterMeanMm": 4.249123952429947
+      }
+    }
+  },
+  "waistMeasurements": {
+    "glasswarden_female": {
+      "spine_01": 0.14804
+    },
+    "glasswarden_male": {
+      "spine_01": 0.14271
+    },
+    "greyhaven_female": {
+      "spine_01": 0.14804
+    },
+    "greyhaven_male": {
+      "spine_01": 0.14271
+    },
+    "luminous_female": {
+      "spine_01": 0.14929
+    },
+    "luminous_male": {
+      "spine_01": 0.14273
+    },
+    "mycelari_female": {
+      "spine_01": 0.14804
+    },
+    "mycelari_male": {
+      "spine_01": 0.14271
+    },
+    "orun_female": {
+      "spine_01": 0.14804
+    },
+    "orun_male": {
+      "spine_01": 0.14271
+    },
+    "ssarathi_female": {
+      "spine_01": 0.14804
+    },
+    "ssarathi_male": {
+      "spine_01": 0.14271
+    },
+    "stoneborn_female": {
+      "spine_01": 0.14804
+    },
+    "stoneborn_male": {
+      "spine_01": 0.14271
+    },
+    "votary_female": {
+      "spine_01": 0.14804
+    },
+    "votary_male": {
+      "spine_01": 0.14271
+    }
+  },
+  "verification": {
+    "python": {
+      "passed": 76,
+      "subtestsPassed": 226
+    },
+    "necklineChecks": 3126,
+    "creationClassChecks": 52202,
+    "fitProfileChecks": 25601,
+    "npcChecks": 2292,
+    "npcs": 256,
+    "renderedWardrobeChecks": 651,
+    "jointAndImportChecks": 68,
+    "failures": 0,
+    "scope": "Equipment fit and appearance checks"
+  },
+  "renderedEvidence": [
+    "ranger-before-after.jpg",
+    "starter-equipment.jpg"
+  ],
+  "reproduction": {
+    "import": "godot --headless --path godot-client --editor --quit",
+    "jointViews": "ELORIA_GEAR_ARTIFACTS=<output directory> godot --path godot-client --script res://tests/integration/equipment_joint_fit.gd",
+    "wardrobeSweep": "ELORIA_GEAR_ARTIFACTS=<output directory> godot --path godot-client --script res://tests/integration/gear_fit_sweep.gd",
+    "authoring": "eloria-assets/tools/limb_head_remap.py calls equipment_joint_fit.align before skinning and backing construction."
+  },
+  "files": [
+    {
+      "key": "6:200",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_boots_01.glb",
+      "beforeSHA256": "1125430b576874c9c0f5c671094babc0204ce1e4a58c350cee800908865b014f",
+      "afterSHA256": "c943846685c1bc1b43a2723cc52fa51f53e89ea5c922ed7178c6593364254352",
+      "fit": {
+        "changedVertices": 5886,
+        "maximumMove": 0.07838588484609092,
+        "limitedVertices": 454
+      }
+    },
+    {
+      "key": "6:201",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_boots_02.glb",
+      "beforeSHA256": "6e96f747dcaab3a0266b448b698bae7c6625a1a3ca5f2ddf1178643924d667b8",
+      "afterSHA256": "868e80ba1317b474c208d5c76e084d63ffa302cca12b5fca1e34f397efec0d85",
+      "fit": {
+        "changedVertices": 6627,
+        "maximumMove": 0.10497365644263373,
+        "limitedVertices": 607
+      }
+    },
+    {
+      "key": "6:202",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_boots_03.glb",
+      "beforeSHA256": "761a6554225623a126f839f2a1d8ba0769e51755fbb5cbb92f87f259396db8a5",
+      "afterSHA256": "19d6d879640e8897f7062610d1bfc01225365d6bce06aefb2c95f5c70a35b60b",
+      "fit": {
+        "changedVertices": 7755,
+        "maximumMove": 0.09589769390691963,
+        "limitedVertices": 2615
+      }
+    },
+    {
+      "key": "6:203",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_boots_04.glb",
+      "beforeSHA256": "5532ff1b9d8af6b9b6bb1e4f6d5f5febc143e60a0b72ff4f29ac4af061533c87",
+      "afterSHA256": "1435f454f891b6494ea335ef5f439ab3907a2d0fdacc5bc1c5a7d3aeb9251511",
+      "fit": {
+        "changedVertices": 6609,
+        "maximumMove": 0.01392030933927925,
+        "limitedVertices": 114
+      }
+    },
+    {
+      "key": "6:204",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_boots_05.glb",
+      "beforeSHA256": "9f7f09b33e1990b1c60774f61abea095cd7a28ed3a1e7d65b9ee053c938b0cf0",
+      "afterSHA256": "c9bbb0bb08aa0bbb656fcb53a6b09e581b88316ad08be8b0f45016d8283098ac",
+      "fit": {
+        "changedVertices": 6718,
+        "maximumMove": 0.08005854622389291,
+        "limitedVertices": 529
+      }
+    },
+    {
+      "key": "6:205",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_boots_06.glb",
+      "beforeSHA256": "c3244e873c9229e2922bf8850f8937699ab598098f82fd782b3061bac6b6848d",
+      "afterSHA256": "450ac87b6d330be9d52d084f752217f1d9e349e73b04d88285e87991c3baffa6",
+      "fit": {
+        "changedVertices": 6019,
+        "maximumMove": 0.10823648148277504,
+        "limitedVertices": 1108
+      }
+    },
+    {
+      "key": "6:206",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_boots_07.glb",
+      "beforeSHA256": "2e4d46a56ea90fb3b54a92423f16c0939f06123522bd7902b49c6ccc346b00db",
+      "afterSHA256": "dcc128d50809522dbc9b2c62fa7aa22122b2fca1c91f5f7b345cffb16de3f91d",
+      "fit": {
+        "changedVertices": 7902,
+        "maximumMove": 0.06921449691208709,
+        "limitedVertices": 2131
+      }
+    },
+    {
+      "key": "6:207",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_boots_08.glb",
+      "beforeSHA256": "1b2287659ff97b49a066937fdf13f04c0cca1f74a631ea8152d64e6fb9368b17",
+      "afterSHA256": "ddcb3e645608dc3c9b57e9a7e261591f4750e713a02118f464b9896501a81424",
+      "fit": {
+        "changedVertices": 7073,
+        "maximumMove": 0.11881603315812994,
+        "limitedVertices": 2034
+      }
+    },
+    {
+      "key": "4:171",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_legguards_01.glb",
+      "beforeSHA256": "675b72967c114825bdb6f67697d98170d58ef710d9eb98e246d91ba46444d9a7",
+      "afterSHA256": "0a7f91f98ef7c404b41bc4192dca993a6f7e923dee163a1ee205ea25ffb885d5",
+      "fit": {
+        "changedVertices": 11067,
+        "maximumMove": 0.09736582485776805,
+        "limitedVertices": 9195
+      }
+    },
+    {
+      "key": "4:172",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_legguards_02.glb",
+      "beforeSHA256": "8ae0ed4275687d71574530524dd41b3a79a4f9e1e83f89bbc92214f0ae71e06f",
+      "afterSHA256": "31fe41e61626fdecf6f62c79e5f850ae850b008a3c2dff17d21417c2e624fd8b",
+      "fit": {
+        "changedVertices": 11011,
+        "maximumMove": 0.07869417116701564,
+        "limitedVertices": 9236
+      }
+    },
+    {
+      "key": "4:173",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_legguards_03.glb",
+      "beforeSHA256": "3fdaf39a3068309ca761aa470c3cd27bae18eaf1a6f05d95403d3a6813c1ea8f",
+      "afterSHA256": "1353f095d2bc40add5c78e6aa64d156db907ced5b089c0b0c05d650750d961a3",
+      "fit": {
+        "changedVertices": 10723,
+        "maximumMove": 0.11222782485285378,
+        "limitedVertices": 8806
+      }
+    },
+    {
+      "key": "4:174",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_legguards_04.glb",
+      "beforeSHA256": "f24069969d5e06561621fa3b0a4f7afe9731da4f6fd43dd4d5af16b9aaee9190",
+      "afterSHA256": "49fe98d62ee3507d0e965576c2e0e045a91df174888761c3be23a8ada5365725",
+      "fit": {
+        "changedVertices": 10402,
+        "maximumMove": 0.06869582428843153,
+        "limitedVertices": 4479
+      }
+    },
+    {
+      "key": "4:175",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_legguards_05.glb",
+      "beforeSHA256": "207a528fd2426840d8fcdd9f919d40d0cf40d8e60c8b7081e899f55c31beb963",
+      "afterSHA256": "c4f66a2fc8f5ecf0c8dc238a2a577015a860efbc33dcff81d4734a6d2353226e",
+      "fit": {
+        "changedVertices": 10600,
+        "maximumMove": 0.07484093855062116,
+        "limitedVertices": 6864
+      }
+    },
+    {
+      "key": "4:176",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_legguards_06.glb",
+      "beforeSHA256": "e88557f58e49a54dd9a0e7c16ee43ec07a99884f5e0856c293e6cbf86cb3bf45",
+      "afterSHA256": "54c2422cf95d2ffb07178db3b97cdd43a6d262bb38d9ee8830e14ca88634b77a",
+      "fit": {
+        "changedVertices": 10448,
+        "maximumMove": 0.07258286303234592,
+        "limitedVertices": 8777
+      }
+    },
+    {
+      "key": "4:177",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_legguards_07.glb",
+      "beforeSHA256": "5cabc58a25fec73d8740d87ee27885618532e862b1fb8296a3f7b6adb0dd5d87",
+      "afterSHA256": "19702844d355598273d629e4fe78b54299dedaef279af07d60df90c27124b097",
+      "fit": {
+        "changedVertices": 10455,
+        "maximumMove": 0.06958309024601755,
+        "limitedVertices": 7014
+      }
+    },
+    {
+      "key": "4:178",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/amberwood_woodland_legguards_08.glb",
+      "beforeSHA256": "a5360e4cf27af6e9fa9c34b5a1296184d0e9ceca19b639f546cf44853ffb5583",
+      "afterSHA256": "6d3e14a4f311386fd8e7be4e1e332f09a2841dabc5ebf1e3e0ba144c84178088",
+      "fit": {
+        "changedVertices": 10505,
+        "maximumMove": 0.08409530352794391,
+        "limitedVertices": 8888
+      }
+    },
+    {
+      "key": "6:192",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_fantasy_boots_01.glb",
+      "beforeSHA256": "0b1dee8628a2fc7154813677e76c1de64856fab8c465e031fe099c358e2a8ad4",
+      "afterSHA256": "7d705fa7cc1a67c26f1f144d5009e51f862109b40eb048c5bd10b2495897bf5b",
+      "fit": {
+        "changedVertices": 5571,
+        "maximumMove": 0.03326956115003185,
+        "limitedVertices": 20
+      }
+    },
+    {
+      "key": "6:193",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_fantasy_boots_02.glb",
+      "beforeSHA256": "7a38ad6a01af8227f4a260837809029e52a5adf2468ba2fa14245c5051337dd0",
+      "afterSHA256": "d647a42f0abc2dd1695e6e270f484530f85b4fd2b24e59641889ae8227e1881f",
+      "fit": {
+        "changedVertices": 6003,
+        "maximumMove": 0.030566954443668068,
+        "limitedVertices": 134
+      }
+    },
+    {
+      "key": "6:194",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_fantasy_boots_03.glb",
+      "beforeSHA256": "92cfa60833271497d9990f73bc688050b458b8e68f98d910b5dd5b6e5a5b694f",
+      "afterSHA256": "76788bf5851953645d584f8ea646dfe3be0196dfde4ffea6052d794570debe53",
+      "fit": {
+        "changedVertices": 7802,
+        "maximumMove": 0.030992105533013816,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:195",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_fantasy_boots_04.glb",
+      "beforeSHA256": "64d0dd5b560ede5d398fe644baa39e1eca009dad922c20eeea61348b23de9c0d",
+      "afterSHA256": "4a9816adae0a5894da0477f1dc80abb42928d028b1e7cdc5b9e1db0cbe8a6938",
+      "fit": {
+        "changedVertices": 7700,
+        "maximumMove": 0.05699186576002717,
+        "limitedVertices": 3694
+      }
+    },
+    {
+      "key": "6:196",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_fantasy_boots_05.glb",
+      "beforeSHA256": "f7e7b80876e7e8c6046b38ef5c8f38ee5ae475b62625e810c03d33a318bcecbe",
+      "afterSHA256": "79412c25eb0fe1b764327abe4bbbde1210bbba7885df9b6e6334c930d8fba5b8",
+      "fit": {
+        "changedVertices": 6689,
+        "maximumMove": 0.06073996258869496,
+        "limitedVertices": 2475
+      }
+    },
+    {
+      "key": "6:197",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_fantasy_boots_06.glb",
+      "beforeSHA256": "61234059b4af74fccfb71024ea00a02573e09c45994ad1510c561a7b45bc6edb",
+      "afterSHA256": "eaf3f93b05b948635169aa7e811e8aeca3d921952f6877ee6c4d5f98a1a097d7",
+      "fit": {
+        "changedVertices": 7671,
+        "maximumMove": 0.04618620123512889,
+        "limitedVertices": 1975
+      }
+    },
+    {
+      "key": "6:198",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_fantasy_boots_07.glb",
+      "beforeSHA256": "4b44b30577cb14471b9073357823c778281d4dde51373bc074d332eadd065733",
+      "afterSHA256": "9de9c88d713ade28191cfa5102f125318fc3ec6882613dfc95bdbcaf2c4827f4",
+      "fit": {
+        "changedVertices": 5855,
+        "maximumMove": 0.030098243907701737,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:199",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_fantasy_boots_08.glb",
+      "beforeSHA256": "4269821aa4d742c4dc5cabc1e732fb13d2fabb326651ecf80b986fd473d27493",
+      "afterSHA256": "d0b270058be6a5e03e6addeecce597aa0fcc22211377edcb4e5288dd4ec13b7e",
+      "fit": {
+        "changedVertices": 6481,
+        "maximumMove": 0.057965583441412616,
+        "limitedVertices": 931
+      }
+    },
+    {
+      "key": "4:179",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_leg_armor_01.glb",
+      "beforeSHA256": "33c122c8ce99b044d5dfa2ebad9058922d5cee2383a7cfd578a4abb297c1d70d",
+      "afterSHA256": "b148b52c3f64909853ac24cb9bdb87a2a13077dfccde84a15cd6265dabaa6705",
+      "fit": {
+        "changedVertices": 10662,
+        "maximumMove": 0.10102402475103249,
+        "limitedVertices": 9072
+      }
+    },
+    {
+      "key": "4:180",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_leg_armor_02.glb",
+      "beforeSHA256": "8a2b6a1a5c43a76f06b982500a88028f14a541499acc0c6eee9e672e0d6bd08f",
+      "afterSHA256": "b2a5fafa983d6aee6cc52bbf83470e768d7bb395809103c771f50a319f906a94",
+      "fit": {
+        "changedVertices": 10546,
+        "maximumMove": 0.07708661821196584,
+        "limitedVertices": 8967
+      }
+    },
+    {
+      "key": "4:181",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_leg_armor_03.glb",
+      "beforeSHA256": "8d86079f8a00a77d5d3c96407f212d4254718319c12d0115368201a5e3081bb4",
+      "afterSHA256": "46f54ee580a301c08b9365a112f3593ab0480cd06b6bb541ec2f54c92cbb74e0",
+      "fit": {
+        "changedVertices": 10634,
+        "maximumMove": 0.08154939189921516,
+        "limitedVertices": 8895
+      }
+    },
+    {
+      "key": "4:182",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_leg_armor_04.glb",
+      "beforeSHA256": "01dc6db1770de4176c0a22d5db0ade46ce273c985d58aea3a553427296e9e36c",
+      "afterSHA256": "820af09a2cc702c3896a222351287178f1397b9ab62d346e1d406ac30d860f61",
+      "fit": {
+        "changedVertices": 10401,
+        "maximumMove": 0.07573847631743595,
+        "limitedVertices": 8822
+      }
+    },
+    {
+      "key": "4:183",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_leg_armor_05.glb",
+      "beforeSHA256": "d10804e7776b96c0d6549472c0ada7c71469459fe1d091eb11176c2030057ba2",
+      "afterSHA256": "2aa7464ea68e1ebde3f107b2dc5e633a6b23312d883778c783700c0c2adab46e",
+      "fit": {
+        "changedVertices": 12082,
+        "maximumMove": 0.10438922986559683,
+        "limitedVertices": 10362
+      }
+    },
+    {
+      "key": "4:184",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_leg_armor_06.glb",
+      "beforeSHA256": "d3f2365175d156ab8f7ca9c08cf35e7df44fea2a293762df420ec4fddbb53272",
+      "afterSHA256": "9fdd672a31ba512e92c6630796459dfeda1f4f4db97346704f7b0f6263b65562",
+      "fit": {
+        "changedVertices": 10548,
+        "maximumMove": 0.07894253577085786,
+        "limitedVertices": 6621
+      }
+    },
+    {
+      "key": "4:185",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_leg_armor_07.glb",
+      "beforeSHA256": "f31f2712da89db7bb04027afa8ae772e9967fb0c672b6c9bb92db5bf511cdf7d",
+      "afterSHA256": "17f9f19f19ca758b6875c44848b788763f69718fec98170a828e1c0435c44fbc",
+      "fit": {
+        "changedVertices": 10445,
+        "maximumMove": 0.07589781434411695,
+        "limitedVertices": 2532
+      }
+    },
+    {
+      "key": "4:186",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/arcane_leg_armor_08.glb",
+      "beforeSHA256": "082be5d1ad05ac009b6c25a276842e3d72b8b9170572b6fca5e765f13e02bb5d",
+      "afterSHA256": "f4396dadcce20407fae85be4169c0e35397864009ba29032e166b8bb7121a1e2",
+      "fit": {
+        "changedVertices": 10700,
+        "maximumMove": 0.07501860052543452,
+        "limitedVertices": 6833
+      }
+    },
+    {
+      "key": "4:187",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/ceremonial_knight_greaves_01.glb",
+      "beforeSHA256": "f6b55e61ef073cbb384dac8713b35a60d54884766ea66f07b6a71e3af0f3a45f",
+      "afterSHA256": "6e87df443618e450ed6b8643261af058ca4e8f805eecf3a465553cfcd8663b20",
+      "fit": {
+        "changedVertices": 10566,
+        "maximumMove": 0.07490890955144308,
+        "limitedVertices": 8773
+      }
+    },
+    {
+      "key": "4:188",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/ceremonial_knight_greaves_02.glb",
+      "beforeSHA256": "5b7f4b62bafcbcdc6eabc063a1cb7d676dc5b8fdf2ce173b7a6d3082dc7928e7",
+      "afterSHA256": "0355748c17380cfcc0ee6c7c291f075aec53a93f0df2b2bb24affeaa7a11553e",
+      "fit": {
+        "changedVertices": 10574,
+        "maximumMove": 0.07158666368239304,
+        "limitedVertices": 6973
+      }
+    },
+    {
+      "key": "4:189",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/ceremonial_knight_greaves_03.glb",
+      "beforeSHA256": "c41a78bf7089bea32a10307db7a648ca195ab541e8faf012bf43491657e8f1f2",
+      "afterSHA256": "def0d2e9a6ac3f9923acb8bf52c43dce046f4af5f6b88a4a1f7b233d620c102e",
+      "fit": {
+        "changedVertices": 10526,
+        "maximumMove": 0.06910289333696007,
+        "limitedVertices": 5063
+      }
+    },
+    {
+      "key": "4:190",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/ceremonial_knight_greaves_04.glb",
+      "beforeSHA256": "1dbff9730b8c0db96faa88095c654ad75d0375dc8123e3c43267319fdec0c550",
+      "afterSHA256": "fb3a0b410d20d5eab29174f59e934a23a37aeadadb54cfa6be997cc51252d98e",
+      "fit": {
+        "changedVertices": 10655,
+        "maximumMove": 0.07397108916077472,
+        "limitedVertices": 6695
+      }
+    },
+    {
+      "key": "4:191",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/ceremonial_knight_greaves_05.glb",
+      "beforeSHA256": "7f7c2a41e91a82feeaad4b13640f9844817275b6d06739d7a8469dc7a6c69d4c",
+      "afterSHA256": "e6bc17d778c08194cb3163b338a321da345fc2714e6127260b925e3023fadc58",
+      "fit": {
+        "changedVertices": 10495,
+        "maximumMove": 0.07302306125536581,
+        "limitedVertices": 6903
+      }
+    },
+    {
+      "key": "4:192",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/ceremonial_knight_greaves_06.glb",
+      "beforeSHA256": "c6a6f0b7816012b49860ce2b0ed547b388824adfe47bf96ea36c2ca80e593472",
+      "afterSHA256": "eff8c43625b9cf440b371df82613585cb3cfd25800941b612f9475206e89072a",
+      "fit": {
+        "changedVertices": 10554,
+        "maximumMove": 0.06909768197213631,
+        "limitedVertices": 6838
+      }
+    },
+    {
+      "key": "4:193",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/ceremonial_knight_greaves_07.glb",
+      "beforeSHA256": "67c01f09006d5141035305d5ec56f0743dd36760cc13105ac0389ec0293cb1bf",
+      "afterSHA256": "c4b7a7b1e09fb01b243276b08f80aa7237522d1b849057e3eac562232f9d2fec",
+      "fit": {
+        "changedVertices": 10613,
+        "maximumMove": 0.09148573147748194,
+        "limitedVertices": 9520
+      }
+    },
+    {
+      "key": "4:194",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/ceremonial_knight_greaves_08.glb",
+      "beforeSHA256": "b1c48f77aa86bb896652a599a9b8ac23c7cc27259cc42d45fd3f2765b2c8397c",
+      "afterSHA256": "3ddec529269967107efa7e5f0c85d993d7103a8f56b6604bd03c0065a088a19a",
+      "fit": {
+        "changedVertices": 10477,
+        "maximumMove": 0.07395932656759388,
+        "limitedVertices": 8790
+      }
+    },
+    {
+      "key": "6:224",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/frontier_boots_01.glb",
+      "beforeSHA256": "b2463f3a3abaa88ed13f38d095d2f31a2f70452c1b0f0dbc2c7b0bc6c4b308f0",
+      "afterSHA256": "9905bf801a685573d184183e7d59d4f37499e8ef833d57c65389595437890ca4",
+      "fit": {
+        "changedVertices": 4793,
+        "maximumMove": 0.016022944963084818,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:225",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/frontier_boots_02.glb",
+      "beforeSHA256": "1f974bceea8b0df95e186e9be73749e76845a6817603d15a639ce77a4391d8cc",
+      "afterSHA256": "ef80ef26a55f016475692a5ecf0bff96293f2dc268847260f040d24942e2b801",
+      "fit": {
+        "changedVertices": 5916,
+        "maximumMove": 0.03026575486129005,
+        "limitedVertices": 1050
+      }
+    },
+    {
+      "key": "6:226",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/frontier_boots_03.glb",
+      "beforeSHA256": "1fed953b2b0dc1fd96b7716dd505ecca0a411354fe0c827b061fa5ca98a1ceb8",
+      "afterSHA256": "bee2ad0aa91791a15713d69906357b0dc14c3a7fbede0f31437f1ee56af2e17d",
+      "fit": {
+        "changedVertices": 5538,
+        "maximumMove": 0.041219211959323064,
+        "limitedVertices": 446
+      }
+    },
+    {
+      "key": "6:227",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/frontier_boots_04.glb",
+      "beforeSHA256": "2bbd469799f2bffbbcc19b7be3fcff0f5596a7b7f398e5c6deb825a92dcf797e",
+      "afterSHA256": "aeabbaa7de2d7a2c69655fed4fdea61935b4f2fdd0977fb7fc92b1da7aeee3b0",
+      "fit": {
+        "changedVertices": 5520,
+        "maximumMove": 0.0450841810810753,
+        "limitedVertices": 403
+      }
+    },
+    {
+      "key": "6:228",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/frontier_boots_05.glb",
+      "beforeSHA256": "21cb5456b91f121b6858af32332ced2b39a0bef97db77308c8b072d6743aea07",
+      "afterSHA256": "736b5986b4923c97ded72ee28557fff7d7dae7c7f039dfbfedc807b170af7d6e",
+      "fit": {
+        "changedVertices": 5911,
+        "maximumMove": 0.032852227820283415,
+        "limitedVertices": 379
+      }
+    },
+    {
+      "key": "6:229",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/frontier_boots_06.glb",
+      "beforeSHA256": "2624ae050f8a5525124441c204a7efac664d6e70f287d19b1fcd629254230fec",
+      "afterSHA256": "cef668e4200dcc13afd7738769848528460c27c97d499de0de70511961de85cc",
+      "fit": {
+        "changedVertices": 5569,
+        "maximumMove": 0.023774067549987732,
+        "limitedVertices": 449
+      }
+    },
+    {
+      "key": "6:230",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/frontier_boots_07.glb",
+      "beforeSHA256": "b2c213cdef30201cf1504fddc448b45bf7d68fca8ace57dfb9016917d2f953eb",
+      "afterSHA256": "7b9c538ea3182ee55bc873d42714e5efc5d2d5790660301623a322175d4da03e",
+      "fit": {
+        "changedVertices": 5431,
+        "maximumMove": 0.02885617537797225,
+        "limitedVertices": 588
+      }
+    },
+    {
+      "key": "6:231",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/frontier_boots_08.glb",
+      "beforeSHA256": "c45c8d1b92a26d681dc03fc0da4cc3beccfb69eeccc9aabf89b6b2ed88758009",
+      "afterSHA256": "1880746b6f26b2934df6671738c70ee1dc42156980374a574025a2243ad055de",
+      "fit": {
+        "changedVertices": 5571,
+        "maximumMove": 0.03347376346997572,
+        "limitedVertices": 1890
+      }
+    },
+    {
+      "key": "4:243",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/humble_frontier_pants_01.glb",
+      "beforeSHA256": "4e948dabc9a06a7fe71ea41ae7302847775436f8544474284acbd69a94a1e6d3",
+      "afterSHA256": "e8404f42a3f531f6b31f41b0b6ae3570d96cf4cf972f8965b198c2a1b73b8fc5",
+      "fit": {
+        "changedVertices": 10732,
+        "maximumMove": 0.07091367459701073,
+        "limitedVertices": 4092
+      }
+    },
+    {
+      "key": "4:244",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/humble_frontier_pants_02.glb",
+      "beforeSHA256": "9c1c2c78ff9d3bf70d776343524cd96f57ba01e0f37f69d80b3aa31a0082fdb8",
+      "afterSHA256": "7e1e8b0e94a9c6289d27649088cf2b0a682572bbd7ef0823ba850d13f9201bf4",
+      "fit": {
+        "changedVertices": 10546,
+        "maximumMove": 0.06773691682396853,
+        "limitedVertices": 6744
+      }
+    },
+    {
+      "key": "4:245",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/humble_frontier_pants_03.glb",
+      "beforeSHA256": "631181ac8b903956298760539cac85e38fe09f245dbfae35ccc761c8c139256a",
+      "afterSHA256": "f5e4245cc8e33a3351f653d2849dbe0389da9483be6a41edca35a45d0647963f",
+      "fit": {
+        "changedVertices": 10608,
+        "maximumMove": 0.07181026113765891,
+        "limitedVertices": 6608
+      }
+    },
+    {
+      "key": "4:246",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/humble_frontier_pants_04.glb",
+      "beforeSHA256": "883903bc54664f9c2e3d30688576f20615e0644161a02dfcc925dd176895996a",
+      "afterSHA256": "e1afc3dc83e53083d22adbc0b5668b1719f33cc861a166efbdd5127a30c4e6d6",
+      "fit": {
+        "changedVertices": 10780,
+        "maximumMove": 0.0703933865811602,
+        "limitedVertices": 8730
+      }
+    },
+    {
+      "key": "4:247",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/humble_frontier_pants_05.glb",
+      "beforeSHA256": "941581f10bee6373005993368f924919a258241315c4a33c3b6df7f84fba4639",
+      "afterSHA256": "625cec65e9eec16b342f57a5e2309f7b14575826a6abc7e1756f07042887325b",
+      "fit": {
+        "changedVertices": 10875,
+        "maximumMove": 0.0719988418937136,
+        "limitedVertices": 6940
+      }
+    },
+    {
+      "key": "4:248",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/humble_frontier_pants_06.glb",
+      "beforeSHA256": "50d862354af7def43c252daa00fcb08683b1bf365a3514c1b3ad52c96ab44f43",
+      "afterSHA256": "a985b291a817e66cd52413ecbb597d79f8112d25f9088ff89ad6fa95dea66000",
+      "fit": {
+        "changedVertices": 10698,
+        "maximumMove": 0.06978300881512962,
+        "limitedVertices": 4327
+      }
+    },
+    {
+      "key": "4:249",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/humble_frontier_pants_07.glb",
+      "beforeSHA256": "14e7b77234767c7debff1a18550f838f8fff9f74c263d40cb08d14e8050c42af",
+      "afterSHA256": "158c194be5787e1ff678ad38ea007389de136cb3aa46e5a7df671e5d722cfd1e",
+      "fit": {
+        "changedVertices": 10739,
+        "maximumMove": 0.07440469231452485,
+        "limitedVertices": 8475
+      }
+    },
+    {
+      "key": "4:250",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/humble_frontier_pants_08.glb",
+      "beforeSHA256": "0ac51177020168bc632d496a4213c6c7de416fb2287b536499ce571eaf04422e",
+      "afterSHA256": "99c8ba4d07b90074827b4dfbb9db1aab6b40ec0eab7f7c49f92dce72462275b1",
+      "fit": {
+        "changedVertices": 10921,
+        "maximumMove": 0.07767958432700002,
+        "limitedVertices": 8737
+      }
+    },
+    {
+      "key": "6:240",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/knightly_greaves_01.glb",
+      "beforeSHA256": "d7e97ba902b31fe7a819a94c10e50622e1085ef8e0bc8ae62c344b445c9c442f",
+      "afterSHA256": "8b848f5aaa88633fca5dc701437c2ab21d6bae79d877e5cbc8bb16690f50cf16",
+      "fit": {
+        "changedVertices": 7748,
+        "maximumMove": 0.0559763985250511,
+        "limitedVertices": 2112
+      }
+    },
+    {
+      "key": "6:241",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/knightly_greaves_02.glb",
+      "beforeSHA256": "96727f7ef6cf2b7404cf8ee5d7488ce3dae1193972dffc540ffacb4398239cb5",
+      "afterSHA256": "ad069ca381d5555a69a60fe2b55470594efa4e2fe8200540e865f6537f8c2b92",
+      "fit": {
+        "changedVertices": 5737,
+        "maximumMove": 0.01843760851010467,
+        "limitedVertices": 66
+      }
+    },
+    {
+      "key": "6:242",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/knightly_greaves_03.glb",
+      "beforeSHA256": "1d3d556e31ce87a86d28846d7d04d61364380c13442a3f51ae648846b7d3a8be",
+      "afterSHA256": "12506f0b9258a97fe30f5e04e090b9aa2df0f15a6222be743356bee7892682a9",
+      "fit": {
+        "changedVertices": 7901,
+        "maximumMove": 0.049670975353345366,
+        "limitedVertices": 1199
+      }
+    },
+    {
+      "key": "6:243",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/knightly_greaves_04.glb",
+      "beforeSHA256": "e2bea5db4015b90b47127821ba4eb25ca5920b20f7da8c89c176eb209bd357b9",
+      "afterSHA256": "01ba4c368e3071ea7b51b7f5f51f87c00e469497925148f2c94c7a9c8ef37bde",
+      "fit": {
+        "changedVertices": 8178,
+        "maximumMove": 0.07639609198518064,
+        "limitedVertices": 1804
+      }
+    },
+    {
+      "key": "6:244",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/knightly_greaves_05.glb",
+      "beforeSHA256": "5d8f54898f676c4c0a152d68d80ddb7ecc3a647862797428b4fc5064fd1a287d",
+      "afterSHA256": "c8ac5274c7e7271d4973cb996f9a9f708479dda07923e13d247496ef90a10dad",
+      "fit": {
+        "changedVertices": 5666,
+        "maximumMove": 0.034206851224981114,
+        "limitedVertices": 562
+      }
+    },
+    {
+      "key": "6:245",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/knightly_greaves_06.glb",
+      "beforeSHA256": "8995acf820171a2453555ea8789905a6b0a0757a27c3be9a57a018acf72950bb",
+      "afterSHA256": "3743ef2dcff3daf2c750121ff1dc001f3d92815826448ca3c4eeb832f7b84d37",
+      "fit": {
+        "changedVertices": 7639,
+        "maximumMove": 0.03471216905961989,
+        "limitedVertices": 2079
+      }
+    },
+    {
+      "key": "6:246",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/knightly_greaves_07.glb",
+      "beforeSHA256": "f6e92651baf497c09ceb685769e3cbea98fdae0b5b7a5fcbbaa72ce6fa31ed3a",
+      "afterSHA256": "4fbec8440609bfce696dc7c75e64fbf254fd515bf0ed3fc64d577aa16021db14",
+      "fit": {
+        "changedVertices": 8221,
+        "maximumMove": 0.03058220786575162,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:247",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/knightly_greaves_08.glb",
+      "beforeSHA256": "bdddea5f2f04f3e3718b862a4e1ee29b18e7b7240e8d9ea32f780acbd983bf45",
+      "afterSHA256": "241a8c061ef608c08580769d82ee51abb538ab5e16027f736358d8b42139cfa2",
+      "fit": {
+        "changedVertices": 5757,
+        "maximumMove": 0.07572272651311111,
+        "limitedVertices": 209
+      }
+    },
+    {
+      "key": "6:232",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/leather_adventurer_boots_01.glb",
+      "beforeSHA256": "954b68343cb55da9d21898e0e34ccf0b44a063e911a71355d1b1f4c96ae5e82a",
+      "afterSHA256": "e807ade61d044cd19fd6678b602a618ca606fa8e5bc0ea1655f133c491b23640",
+      "fit": {
+        "changedVertices": 5423,
+        "maximumMove": 0.03734023958820914,
+        "limitedVertices": 575
+      }
+    },
+    {
+      "key": "6:233",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/leather_adventurer_boots_02.glb",
+      "beforeSHA256": "f13b1206ead63ee301aadc78c7497a8df57ea9d1807a6fac3526142ad5643482",
+      "afterSHA256": "d4308a25009ad4cf287c88bc5a8bfaba6bef7c54dc22bee4cd49583542ea7bf1",
+      "fit": {
+        "changedVertices": 5995,
+        "maximumMove": 0.05343418532675178,
+        "limitedVertices": 336
+      }
+    },
+    {
+      "key": "6:234",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/leather_adventurer_boots_03.glb",
+      "beforeSHA256": "2652f4787dc6d1e4d3d5ba331952595183521eb57eb8730de1797a408e9c5f66",
+      "afterSHA256": "f2dc2ba68363dc9ddf7c2aa98d51dd1ec78b417bd72e30defff50cdb334ef459",
+      "fit": {
+        "changedVertices": 5755,
+        "maximumMove": 0.023895673326742115,
+        "limitedVertices": 44
+      }
+    },
+    {
+      "key": "6:235",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/leather_adventurer_boots_04.glb",
+      "beforeSHA256": "e745eba1cb94c8944a6c38a15dc7388c6eda1b907bb806c8d51aa77e16c71a29",
+      "afterSHA256": "f83d6e9f4746e38f3aa77cbbed05b7eecfbbd1547c4650fb9cce47f63169ad5a",
+      "fit": {
+        "changedVertices": 5845,
+        "maximumMove": 0.04053928673498739,
+        "limitedVertices": 397
+      }
+    },
+    {
+      "key": "6:236",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/leather_adventurer_boots_05.glb",
+      "beforeSHA256": "6274ea652d5c0d4db072d1e9944a0f17d274a359197a748e1227833741fa77bd",
+      "afterSHA256": "05f46fdc7bf742acefcc20df97c45558f7518b57e9c2de075696a718103e26df",
+      "fit": {
+        "changedVertices": 5878,
+        "maximumMove": 0.041831298307523676,
+        "limitedVertices": 428
+      }
+    },
+    {
+      "key": "6:237",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/leather_adventurer_boots_06.glb",
+      "beforeSHA256": "6c587864351cf4984bd4d390aa2072a89424275089fd4fc4f4ff4fcb73adaeb3",
+      "afterSHA256": "981d52b1558fb749b89fca26b456e53a04460343271376d8b0209427ad667601",
+      "fit": {
+        "changedVertices": 5862,
+        "maximumMove": 0.0441634770391571,
+        "limitedVertices": 391
+      }
+    },
+    {
+      "key": "6:238",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/leather_adventurer_boots_07.glb",
+      "beforeSHA256": "f4e0b6e494a6d0a1f50d87be1253964de5f4453906fc658fe2757d148e6ba5e3",
+      "afterSHA256": "b9e69be0d83dfd4ff400d277503d5fdc07feba27b5ae6b49a7594d5452523cdd",
+      "fit": {
+        "changedVertices": 5600,
+        "maximumMove": 0.028570962439356223,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:239",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/leather_adventurer_boots_08.glb",
+      "beforeSHA256": "05f118d3cd9d07c4db125de4c9d958c84da6b4a9e9d9f83cb0d739414ac23481",
+      "afterSHA256": "1460d2541697b909a847a030222500b92a56280218080975906010554e23644b",
+      "fit": {
+        "changedVertices": 5443,
+        "maximumMove": 0.05307948092849894,
+        "limitedVertices": 268
+      }
+    },
+    {
+      "key": "6:208",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_eloria_boots_01.glb",
+      "beforeSHA256": "76619a48f2cde08245b352f0f4bbc1631c50966a94077df178104f36441893ba",
+      "afterSHA256": "aa9f46ef08338ca4d3a2b12a9ad23dd3db732d3bf18a06591b6d5d23e88e7403",
+      "fit": {
+        "changedVertices": 6035,
+        "maximumMove": 0.020114799247391082,
+        "limitedVertices": 297
+      }
+    },
+    {
+      "key": "6:209",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_eloria_boots_02.glb",
+      "beforeSHA256": "f239ec70c475aff38714c704984b93e966224bd53292a7b4e728ed48739a5151",
+      "afterSHA256": "8597a5c92aee10606a99f6ff96e5fb6f9388519b352d7793e5dd1b9d8e4675ae",
+      "fit": {
+        "changedVertices": 7733,
+        "maximumMove": 0.03393825794056401,
+        "limitedVertices": 975
+      }
+    },
+    {
+      "key": "6:210",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_eloria_boots_03.glb",
+      "beforeSHA256": "b656f90a8ace3de495cdfc549b032463581360701c91fc239795b886b2386fc2",
+      "afterSHA256": "9655348409175ae092122d824eca7b1294cb341ea18d29409c42e7b713ff88fc",
+      "fit": {
+        "changedVertices": 7699,
+        "maximumMove": 0.0453770293153739,
+        "limitedVertices": 3250
+      }
+    },
+    {
+      "key": "6:211",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_eloria_boots_04.glb",
+      "beforeSHA256": "462bdf59998cbf742a1db85eb4801b3fa41d902d265005eaec0b9aa510063370",
+      "afterSHA256": "b0a6ceebec17ac077b69505246cce950e824951cd1b8321ca6b50675468039fe",
+      "fit": {
+        "changedVertices": 7933,
+        "maximumMove": 0.08298588609500954,
+        "limitedVertices": 2335
+      }
+    },
+    {
+      "key": "6:212",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_eloria_boots_05.glb",
+      "beforeSHA256": "de584087f54ab0c72191976a29f09e30ba01e6f664a592f51d66d8ceab40a608",
+      "afterSHA256": "fefd4e1e321ae2fa6a5f5a5e4fed6010c18c95f5135231117b44ec7792a2bed4",
+      "fit": {
+        "changedVertices": 7961,
+        "maximumMove": 0.05648538813331217,
+        "limitedVertices": 2293
+      }
+    },
+    {
+      "key": "6:213",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_eloria_boots_06.glb",
+      "beforeSHA256": "f337677902f9b04ee135f11093dfea53355e791b6e38b592ae60ed5a51152f34",
+      "afterSHA256": "497b15028cdb4af9783ed4c743046489d5f31d1d8ace04b9b9d6140299470b61",
+      "fit": {
+        "changedVertices": 7707,
+        "maximumMove": 0.06660315446737776,
+        "limitedVertices": 2488
+      }
+    },
+    {
+      "key": "6:214",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_eloria_boots_07.glb",
+      "beforeSHA256": "54ee6aa866c706ba65319bcef650a6875470d89350855a3b05f09d80634f7771",
+      "afterSHA256": "63e476737bd8aa23a6c0a6ca201ca731881dddae3c72c67c4411bfd7f256e264",
+      "fit": {
+        "changedVertices": 7818,
+        "maximumMove": 0.04695287419624641,
+        "limitedVertices": 28
+      }
+    },
+    {
+      "key": "6:215",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_eloria_boots_08.glb",
+      "beforeSHA256": "9daf2b179860f029e37b8f20c8143a253d0899b93cffe57144982325a119cb31",
+      "afterSHA256": "3ed2731007efc1a031fb3398f03d09f315fea2e8c853d9a13ffe5c1a8d39181a",
+      "fit": {
+        "changedVertices": 7719,
+        "maximumMove": 0.03433980969218713,
+        "limitedVertices": 124
+      }
+    },
+    {
+      "key": "4:195",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_leg_armor_01.glb",
+      "beforeSHA256": "3eba2816826a4740fc7a7f00057e672503fd1e045501f85a61b71e156af7be1a",
+      "afterSHA256": "8b4bb30f623faa7166414e82a3e1815fe1449cd88f5452746624e376346c0aa4",
+      "fit": {
+        "changedVertices": 7992,
+        "maximumMove": 0.07490187605204648,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "4:196",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_leg_armor_02.glb",
+      "beforeSHA256": "5beeecec797c027b7fc5ea1d6d5bd939df18f514509f95d1370a005fbe7ae39c",
+      "afterSHA256": "528e28512791250f6d87e42174932b212c5ecd29016b58c426e569af4a701af6",
+      "fit": {
+        "changedVertices": 7970,
+        "maximumMove": 0.06401174918115833,
+        "limitedVertices": 6676
+      }
+    },
+    {
+      "key": "4:197",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_leg_armor_03.glb",
+      "beforeSHA256": "3099b4e92b871f05dd10e65c31046843d845e1a8ee4754a5fafee8e1c41943c8",
+      "afterSHA256": "baba9be2dfbb8a04bd7bba81e14e43cc36c7edf69a30a35d54d71116663aa05d",
+      "fit": {
+        "changedVertices": 7933,
+        "maximumMove": 0.060837347571986056,
+        "limitedVertices": 6698
+      }
+    },
+    {
+      "key": "4:198",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_leg_armor_04.glb",
+      "beforeSHA256": "5923cdba6b37ad0177280e79993b876a477cc54578fc148d76c24f6a67ea2081",
+      "afterSHA256": "dc459ce38cdf2efeb9096c0630860cb2a31f61ac9076f3ab08f80cbf1021fdc3",
+      "fit": {
+        "changedVertices": 8028,
+        "maximumMove": 0.08859851479697622,
+        "limitedVertices": 6383
+      }
+    },
+    {
+      "key": "4:199",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_leg_armor_05.glb",
+      "beforeSHA256": "e718aab947f6dd3e0528dbeb01cfa0aeed29448fccc1b5e61b4f09c20b194012",
+      "afterSHA256": "e66b3e9c3434b05b213b8c905aea85cb34728d5f6fc874ed6a0caa554fc0cb37",
+      "fit": {
+        "changedVertices": 7969,
+        "maximumMove": 0.06879599676645418,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "4:200",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_leg_armor_06.glb",
+      "beforeSHA256": "85ffabe492b7e9c2dae404b95fc8e28ea7243552c1d7de40907361631b1caa09",
+      "afterSHA256": "9d46df3933c751b4343e3b819c38fdf6873de5ceb868dc887d027d55a384be0b",
+      "fit": {
+        "changedVertices": 8193,
+        "maximumMove": 0.0716067185219572,
+        "limitedVertices": 6463
+      }
+    },
+    {
+      "key": "4:201",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_leg_armor_07.glb",
+      "beforeSHA256": "48484715a32eb3891905c96ecd44dbe63d333ddc8bb3b51ea11a0b092350f205",
+      "afterSHA256": "9fb1fd7cf9b74be90dfb689bf01a7940f93cb8e674515fcfe58cd0d8b164cc33",
+      "fit": {
+        "changedVertices": 8182,
+        "maximumMove": 0.0710783562465982,
+        "limitedVertices": 6024
+      }
+    },
+    {
+      "key": "4:202",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_leg_armor_08.glb",
+      "beforeSHA256": "d26808db27fa18d89ab94ae9d168cee70f430078efcf95057fd010400478a2e0",
+      "afterSHA256": "ada172e195bb7ad314ff9129bc65136fd1d8d18e9d8126cb02f94f1804db67f2",
+      "fit": {
+        "changedVertices": 8117,
+        "maximumMove": 0.07271650681880173,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:107",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_sabatons_01.glb",
+      "beforeSHA256": "b9d5a1bbb3dab00ca35097651d9bf520dfc4ca76adeb4c71e89ae73c05d9fa45",
+      "afterSHA256": "7f6cfc224f8e1c94a8c02c1e1f5f69a67328c696db2054fd8ae83ea1abad8987",
+      "fit": {
+        "changedVertices": 4895,
+        "maximumMove": 0.07863490896940813,
+        "limitedVertices": 4207
+      }
+    },
+    {
+      "key": "6:108",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_sabatons_02.glb",
+      "beforeSHA256": "6b3ddd27eadde0f9c9d3c613c54543ff79194aec3b963b0cf08bcff793f1f167",
+      "afterSHA256": "73612b762754389ab7f5f330788e09bee26c9ba42d4822643442464fb9b46b78",
+      "fit": {
+        "changedVertices": 4811,
+        "maximumMove": 0.06675978005804269,
+        "limitedVertices": 3449
+      }
+    },
+    {
+      "key": "6:109",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_sabatons_03.glb",
+      "beforeSHA256": "3d42d5833f7c0159f2630b822ce89ddf83829258b3a2c98487c7d668b4c3e95f",
+      "afterSHA256": "078c5b4a09b9dce53e51081ef7eb07a2153ccb186b10f296eb870d7138e11351",
+      "fit": {
+        "changedVertices": 4917,
+        "maximumMove": 0.06389969540409232,
+        "limitedVertices": 2880
+      }
+    },
+    {
+      "key": "6:110",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_sabatons_04.glb",
+      "beforeSHA256": "2517049427740d0eab856965c047ee614093460505b73e5d83eb6082cf6e55ce",
+      "afterSHA256": "e64efbfd48fc38b2d23dffd4a356404f60e7548edbc75942f6a5b28949dbb0d4",
+      "fit": {
+        "changedVertices": 4948,
+        "maximumMove": 0.0473939750281176,
+        "limitedVertices": 2810
+      }
+    },
+    {
+      "key": "6:111",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_sabatons_05.glb",
+      "beforeSHA256": "3acba832550d81b51584adb48e036bfa444daf1af2161da09f31c63800ee96d6",
+      "afterSHA256": "003fce879a4b07bcb96cb33f6555619e7e28b32492cf4d18cfe14d05f263bb5b",
+      "fit": {
+        "changedVertices": 4937,
+        "maximumMove": 0.06774087202312663,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:112",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_sabatons_06.glb",
+      "beforeSHA256": "ee14c7c46e8af89a1b833762e03ab82ed00465263d9e22893d1634eee5341f1c",
+      "afterSHA256": "806fe4c71483d8339331930fc6fabc3e5eb6190f3fbce08dd3730a26ffa1b5a8",
+      "fit": {
+        "changedVertices": 4853,
+        "maximumMove": 0.07309881216084445,
+        "limitedVertices": 4100
+      }
+    },
+    {
+      "key": "6:113",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_sabatons_07.glb",
+      "beforeSHA256": "0ae70e33fd3ecb632a2324e3edb3d952e5995ae845c8d335eb15db89c03268ec",
+      "afterSHA256": "76f66585623cf21548636f20f54185a4de519b52f3f169c3e7ff70585e9a84ed",
+      "fit": {
+        "changedVertices": 5017,
+        "maximumMove": 0.07310006308037334,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:114",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/legendary_sabatons_08.glb",
+      "beforeSHA256": "947e6abc648d3a3c95c7666645e4dff92fc0772427542b8f8ce5f1f8c0d5239e",
+      "afterSHA256": "b8f174776f966b7701bd4d609ffc9a8d567736ac80c98faf9ba8041b88e518bf",
+      "fit": {
+        "changedVertices": 4963,
+        "maximumMove": 0.06787426268713848,
+        "limitedVertices": 2820
+      }
+    },
+    {
+      "key": "6:248",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_greaves_01.glb",
+      "beforeSHA256": "ebba6cf89dfda66015329c64338f3a4b2f31f1294d6a728f4ef0833dc4e5dc9c",
+      "afterSHA256": "e87c1a564ba0546b1b71df7b0ce1eef43c266076611de539386116d4e675d270",
+      "fit": {
+        "changedVertices": 5764,
+        "maximumMove": 0.06893239026411835,
+        "limitedVertices": 178
+      }
+    },
+    {
+      "key": "6:249",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_greaves_02.glb",
+      "beforeSHA256": "a55223fce3777a7fa05338ba03c16227683ddc559cee7ea0a66bbd66becd57d9",
+      "afterSHA256": "8ded5248f887d0b214003cd664adaf7fc7e0fd04cb4a0d1102cce1a04c17f007",
+      "fit": {
+        "changedVertices": 7742,
+        "maximumMove": 0.07810141136909132,
+        "limitedVertices": 2023
+      }
+    },
+    {
+      "key": "6:250",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_greaves_03.glb",
+      "beforeSHA256": "04accaf16e7b4195e8b546ac53ada5cef64d4f271a4ebe9bbe2cae32895dd4d9",
+      "afterSHA256": "e9972db0e3bd386e574e144fd7007e98a2a3cfde6fc3f3d55177fa4fa7282c51",
+      "fit": {
+        "changedVertices": 7052,
+        "maximumMove": 0.05061042568388023,
+        "limitedVertices": 1011
+      }
+    },
+    {
+      "key": "6:251",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_greaves_04.glb",
+      "beforeSHA256": "8820f036f4bff4c32c784c60a6abca9bdf0546de550e44999d570556f88d7493",
+      "afterSHA256": "5041b00fea0d41103486f63b21c66e40f8198dd4ac5a10454f60d2a3f0cab734",
+      "fit": {
+        "changedVertices": 6809,
+        "maximumMove": 0.03038513612050575,
+        "limitedVertices": 1362
+      }
+    },
+    {
+      "key": "6:252",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_greaves_05.glb",
+      "beforeSHA256": "d68f70881bfd0fc288923c2c573d5780ca2b2fe9abe9272bd556b88b5359308f",
+      "afterSHA256": "4c7e8242613b95f48042bc1ed803a865292eb994e8c1ec36d56b103107285169",
+      "fit": {
+        "changedVertices": 6679,
+        "maximumMove": 0.07214273654111465,
+        "limitedVertices": 81
+      }
+    },
+    {
+      "key": "6:253",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_greaves_06.glb",
+      "beforeSHA256": "156b3b6ce91ec10dfb8a268e2cf075107adacd5ef3de8bb6f300d0b25f76c767",
+      "afterSHA256": "394736528f1a44605ab17ec69185363d7f3e24aee0ae3f4a572c8fea11814d37",
+      "fit": {
+        "changedVertices": 6475,
+        "maximumMove": 0.02110893943805536,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:254",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_greaves_07.glb",
+      "beforeSHA256": "54755bf2da706e8c569c3dc52fc7448213383e1207cc7966045a005f6faabc99",
+      "afterSHA256": "6b00053345295bd51827ff6cb826a27f0bdbadc47607efe1c7cbf051832fc291",
+      "fit": {
+        "changedVertices": 7594,
+        "maximumMove": 0.08308942108722064,
+        "limitedVertices": 2350
+      }
+    },
+    {
+      "key": "6:255",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_greaves_08.glb",
+      "beforeSHA256": "cbc60caa519a8abd208a5cd34b75d91caceb45a1442b8e92b63240a66a4153ed",
+      "afterSHA256": "0060613fe7ec10c9e7408e9cb885423b4be9648ce4b8c811195d583fcb04e7e5",
+      "fit": {
+        "changedVertices": 6837,
+        "maximumMove": 0.0358297826011884,
+        "limitedVertices": 239
+      }
+    },
+    {
+      "key": "4:219",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_leg_armor_01.glb",
+      "beforeSHA256": "4e4e5f28f62d815907cbfdc7c48b589716d5774297f6730f3bfaf1e0787248ab",
+      "afterSHA256": "17004bd12569eda792469e97772433e04cae5334d6c6b97924d6ae9ef6841d7d",
+      "fit": {
+        "changedVertices": 10791,
+        "maximumMove": 0.0736819869853566,
+        "limitedVertices": 7043
+      }
+    },
+    {
+      "key": "4:220",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_leg_armor_02.glb",
+      "beforeSHA256": "4ab270ff890732b78960b124ab13b3b3f75f7c642386df477e3090f6cd1bc46f",
+      "afterSHA256": "5e1463e6ae01e5c809d8d46fada6f435b651125e516f3f7ec228295aa3e1e1f3",
+      "fit": {
+        "changedVertices": 10671,
+        "maximumMove": 0.07049132723727546,
+        "limitedVertices": 8972
+      }
+    },
+    {
+      "key": "4:221",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_leg_armor_03.glb",
+      "beforeSHA256": "392a77cfcf0096095d20b8c887c365f5d529a8f13cd1e291f9586f24accb93c6",
+      "afterSHA256": "558c2764999ccbd73d24661a029956bed949afe4dfcfe0285acbd22b06dab4c4",
+      "fit": {
+        "changedVertices": 10599,
+        "maximumMove": 0.06793690327698491,
+        "limitedVertices": 4864
+      }
+    },
+    {
+      "key": "4:222",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_leg_armor_04.glb",
+      "beforeSHA256": "529205ba01b8793d9d42614382c4316b576e6a50beab3bf551d882510a4f71c3",
+      "afterSHA256": "371d168a322ff3e7f4ce9cb5991bd4aef9bf56c598b2cea337cf375e0eccdf4f",
+      "fit": {
+        "changedVertices": 10690,
+        "maximumMove": 0.07260624525401765,
+        "limitedVertices": 4817
+      }
+    },
+    {
+      "key": "4:223",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_leg_armor_05.glb",
+      "beforeSHA256": "c735d71c44ac74f8019c01f08d9f222567c54a73241eff226db3163a0aba7d88",
+      "afterSHA256": "c5d282c47037e6c0939d0c4ee6ab00948d9e3ad71efd60e40a8fe8457341d8fb",
+      "fit": {
+        "changedVertices": 10346,
+        "maximumMove": 0.06695451314298752,
+        "limitedVertices": 6595
+      }
+    },
+    {
+      "key": "4:224",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_leg_armor_06.glb",
+      "beforeSHA256": "687b4c2e2972f10454127ac9d71a8c6855d94c7018ff7504a8aba6958f5178b0",
+      "afterSHA256": "8d7b93a4300a13d216a1061f555cc4bf8630ac11d80c867268509be48ab8037b",
+      "fit": {
+        "changedVertices": 10834,
+        "maximumMove": 0.07318815191255075,
+        "limitedVertices": 4836
+      }
+    },
+    {
+      "key": "4:225",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_leg_armor_07.glb",
+      "beforeSHA256": "b62ef9555d359799d25b1d22728f36da220e15c148327ef092a3c3ae20b5bd55",
+      "afterSHA256": "a9675fc01ff926b44011fd35c8c068903b96a541760ff4fd39188c8a59333d0d",
+      "fit": {
+        "changedVertices": 10631,
+        "maximumMove": 0.07570384699703366,
+        "limitedVertices": 7977
+      }
+    },
+    {
+      "key": "4:226",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_leg_armor_08.glb",
+      "beforeSHA256": "796ac3a6f3c5a4a6a4128d9050df78afa6d966e9906af888d5203ab00575b4c5",
+      "afterSHA256": "c23e0c2d2305c44254547e3432e79cec350bfd10204b16982ff2bb4457678343",
+      "fit": {
+        "changedVertices": 10742,
+        "maximumMove": 0.07878017262304009,
+        "limitedVertices": 6875
+      }
+    },
+    {
+      "key": "4:227",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/rugged_ranger_legwear_01.glb",
+      "beforeSHA256": "98be8151abb45f1dbb1e8d4fbf0d7584467543f88b248c57b673e19192de87a1",
+      "afterSHA256": "3335dd7d696726c0ab9326b8a5694826eb859a3cbf7cb82548156f7cae0378b1",
+      "fit": {
+        "changedVertices": 10375,
+        "maximumMove": 0.07303082538664485,
+        "limitedVertices": 5055
+      }
+    },
+    {
+      "key": "4:228",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/rugged_ranger_legwear_02.glb",
+      "beforeSHA256": "1c500b77b7f1b9e92982fae26f47fe6ee8fc7421d35b4b7754933bc055682fd0",
+      "afterSHA256": "35c56703536adcb01c2eb7ec3bcd6e5633d1b88804fe8c8b84775ed6b862eff5",
+      "fit": {
+        "changedVertices": 10589,
+        "maximumMove": 0.08265090568526842,
+        "limitedVertices": 8949
+      }
+    },
+    {
+      "key": "4:229",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/rugged_ranger_legwear_03.glb",
+      "beforeSHA256": "483041b3859c16b7a80310c61386366938defaab557d5b53977084ddf9a96434",
+      "afterSHA256": "c2537c6cc652c2749a89e561ccec3bbf53bf654e11830630e5e3af52b62093e8",
+      "fit": {
+        "changedVertices": 10540,
+        "maximumMove": 0.06933181308133023,
+        "limitedVertices": 8998
+      }
+    },
+    {
+      "key": "4:230",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/rugged_ranger_legwear_04.glb",
+      "beforeSHA256": "52c5dcadcb04aee963e533922168878e1f8690b206b53fd5de5e34b85b8c23f2",
+      "afterSHA256": "2f63d52d0071469c6296da68560697e16df7c376ff47e80bb94eda84c5413492",
+      "fit": {
+        "changedVertices": 10644,
+        "maximumMove": 0.06725749965240259,
+        "limitedVertices": 6787
+      }
+    },
+    {
+      "key": "4:231",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/rugged_ranger_legwear_05.glb",
+      "beforeSHA256": "a7f8e4d1d8f0f5e484280323d4f86ba62af029fccea9b7a6598697557df8f87c",
+      "afterSHA256": "7b1cc767f11460af934101b39b717bbcc556301622bc0089fb748076809723aa",
+      "fit": {
+        "changedVertices": 10334,
+        "maximumMove": 0.07209964884261165,
+        "limitedVertices": 7077
+      }
+    },
+    {
+      "key": "4:232",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/rugged_ranger_legwear_06.glb",
+      "beforeSHA256": "c1febf338ffcf0ee0693d85e6fcd57b99aefb071d1a078378f95a3936caec0d6",
+      "afterSHA256": "0f39940e661cba2c2e87b38dc782ef7c733f9c6ed1b8b31d25a7c1d3dd4b38e3",
+      "fit": {
+        "changedVertices": 10497,
+        "maximumMove": 0.06858618034880871,
+        "limitedVertices": 8943
+      }
+    },
+    {
+      "key": "4:233",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/rugged_ranger_legwear_07.glb",
+      "beforeSHA256": "84bf919a2a433bf4e4a2305123b6c476140c02349d9ac2f40fcc7189e2ba475d",
+      "afterSHA256": "5cecb3fed6cd1c283844be5ae164f0d70d38efd6bbcb8d7cc4e444a3a42e821e",
+      "fit": {
+        "changedVertices": 10688,
+        "maximumMove": 0.07633052847900523,
+        "limitedVertices": 7501
+      }
+    },
+    {
+      "key": "4:234",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/rugged_ranger_legwear_08.glb",
+      "beforeSHA256": "26d78e305a7c81e2c2b6c1aad7ce9e222a2a4a50dc71a91db7ac12d35f1f0e97",
+      "afterSHA256": "d4c409d31c9f9ccad48b6a697b79e686691e3d82af901958d5c365158de24182",
+      "fit": {
+        "changedVertices": 10499,
+        "maximumMove": 0.07708504298621399,
+        "limitedVertices": 8520
+      }
+    },
+    {
+      "key": "6:216",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_boots_01.glb",
+      "beforeSHA256": "663911cc8199641cd67fb0d5e74cf164c207277bf8289898788a3b6524dcaee5",
+      "afterSHA256": "e3c3b58bde90f4068ca27f0c7611dc78a1bab419f1a43f159f501e959d0a8095",
+      "fit": {
+        "changedVertices": 7931,
+        "maximumMove": 0.04479763144411703,
+        "limitedVertices": 1703
+      }
+    },
+    {
+      "key": "6:217",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_boots_02.glb",
+      "beforeSHA256": "a54d00bf2ebb7c5132d28a65332971d5bdaf83fc8e336080ed375a6032f4160f",
+      "afterSHA256": "3ce9d57ebd7cbef23cba159ab8bc6cd0a9d119f9531b613531e179294a147ad5",
+      "fit": {
+        "changedVertices": 6288,
+        "maximumMove": 0.02902210013315888,
+        "limitedVertices": 184
+      }
+    },
+    {
+      "key": "6:218",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_boots_03.glb",
+      "beforeSHA256": "000bd15d02002bdd1ce121a8241ac01fa5ed23d83f5430a8efb8ff5b1957a6fb",
+      "afterSHA256": "fb6b9e00997fff1c1dd060deb174b01fbea03c5fe858c7857a38962686b513ae",
+      "fit": {
+        "changedVertices": 7620,
+        "maximumMove": 0.02393245805761926,
+        "limitedVertices": 273
+      }
+    },
+    {
+      "key": "6:219",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_boots_04.glb",
+      "beforeSHA256": "2379ab9b781e5aa2218fd2146f3a878f9d590e6936d77170e0b3c9d531372288",
+      "afterSHA256": "aa60709ac53b5f213cfdcebbde190374f725f59579710dba6ad6e87015d8047b",
+      "fit": {
+        "changedVertices": 7848,
+        "maximumMove": 0.05677205615767551,
+        "limitedVertices": 555
+      }
+    },
+    {
+      "key": "6:220",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_boots_05.glb",
+      "beforeSHA256": "59b5203e3d4af8629a2d148f338e559154eb6aa18eeff2d3622d6ec20eefd393",
+      "afterSHA256": "6225fc35a4ab9364230d0d38639f18e24f8984b66e7a850237fadeb798f6961a",
+      "fit": {
+        "changedVertices": 7768,
+        "maximumMove": 0.027458007195309046,
+        "limitedVertices": 1098
+      }
+    },
+    {
+      "key": "6:221",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_boots_06.glb",
+      "beforeSHA256": "e68e300bd147bb35a55feadb89fb26b83e41b8749068bceb5e45dd6c0d5befa9",
+      "afterSHA256": "d7f504e1bd6d39c9ef7ddb145346464982c50f5bd8b17b687d048ada00987ba1",
+      "fit": {
+        "changedVertices": 7895,
+        "maximumMove": 0.0576994363769482,
+        "limitedVertices": 4697
+      }
+    },
+    {
+      "key": "6:222",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_boots_07.glb",
+      "beforeSHA256": "8190dfd88a09e2662e0eba653b08181167eda40be24e4d67d581917b3883c567",
+      "afterSHA256": "e57d6c618634b3312c8390e2c6ab837da45db80df2c275d94788be955be1c574",
+      "fit": {
+        "changedVertices": 5793,
+        "maximumMove": 0.022801612666719658,
+        "limitedVertices": 106
+      }
+    },
+    {
+      "key": "6:223",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_boots_08.glb",
+      "beforeSHA256": "e02083af5df2520e45bcdfcc2b8c321bb40ba3dfc3aa98d05c4fcaa358b6c309",
+      "afterSHA256": "ffba7f9b0c8ae68ace5ec28b0f53a97cbf5a471b9be8f10dd1505538694c7237",
+      "fit": {
+        "changedVertices": 8196,
+        "maximumMove": 0.03057922161433378,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "4:235",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_legwear_01.glb",
+      "beforeSHA256": "6bd2192d1f83e5f8023cedb1d7d50213634b69cae0452b5a26f301558fcf72b1",
+      "afterSHA256": "df2384bca648702c52986e355a054308018e46194111f281912d9a74531c560b",
+      "fit": {
+        "changedVertices": 10698,
+        "maximumMove": 0.0656079496843291,
+        "limitedVertices": 6941
+      }
+    },
+    {
+      "key": "4:236",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_legwear_02.glb",
+      "beforeSHA256": "43e6a0a2b4853e610d58f7e75ed305db76d9fc0c77ad6fbbcb1e3aad3ab39bec",
+      "afterSHA256": "c33e7984dcac67a61867d13bfba34d1c58603635d6001889e878eb01b107efc8",
+      "fit": {
+        "changedVertices": 10905,
+        "maximumMove": 0.0858445872989878,
+        "limitedVertices": 8924
+      }
+    },
+    {
+      "key": "4:237",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_legwear_03.glb",
+      "beforeSHA256": "3284607634bc95a131446807a86c21e3a01ca6d49e914eaa3b2db4eb331d164f",
+      "afterSHA256": "f60323cdc65e35629269e74df09983ce32bce9d5ea897e46c878ef6724121f75",
+      "fit": {
+        "changedVertices": 10994,
+        "maximumMove": 0.07167820940055222,
+        "limitedVertices": 4929
+      }
+    },
+    {
+      "key": "4:238",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_legwear_04.glb",
+      "beforeSHA256": "d7bdb9100bd923425c31ec31717a32e2778b11fe62ee979b9bcbe9c54a48c4a2",
+      "afterSHA256": "f842ba39a2e033201b773b0fb219b40b85cf146bce989e531f4dc6090dde4044",
+      "fit": {
+        "changedVertices": 10652,
+        "maximumMove": 0.07369056730058286,
+        "limitedVertices": 9078
+      }
+    },
+    {
+      "key": "4:239",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_legwear_05.glb",
+      "beforeSHA256": "65e67d989325bfbfda42e86c1eb34765ff498d4ec97306e877f7adbc9a7f4116",
+      "afterSHA256": "b723c58e651d1c764ea993714792afbefbfc0b7236e4327f24b61ec12d80edd5",
+      "fit": {
+        "changedVertices": 10537,
+        "maximumMove": 0.07860697624822141,
+        "limitedVertices": 7020
+      }
+    },
+    {
+      "key": "4:240",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_legwear_06.glb",
+      "beforeSHA256": "35c7c2890938a96bb0611227e1035ec2156ff091384b75c03b60567bdf2c46e5",
+      "afterSHA256": "161a19b7bc3f987654f02174b7d88413e107ab33a22ca84ce8fe4829001d00d6",
+      "fit": {
+        "changedVertices": 10656,
+        "maximumMove": 0.10218095959604201,
+        "limitedVertices": 8143
+      }
+    },
+    {
+      "key": "4:241",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_legwear_07.glb",
+      "beforeSHA256": "6691a5fa1d3c3a39cbd275dd0ad8417ead874e8757141632f2fc99d324e26a00",
+      "afterSHA256": "5088ab92bd3f8ab333ae429eb284f2260a5d2ff2b718c281214329473718ac57",
+      "fit": {
+        "changedVertices": 10675,
+        "maximumMove": 0.06300713177238873,
+        "limitedVertices": 8771
+      }
+    },
+    {
+      "key": "4:242",
+      "sex": "female",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/sunmane_steppe_legwear_08.glb",
+      "beforeSHA256": "735783fba26b86dd0595815a2ee6395f75466af12c2016c894005e63515f2ed1",
+      "afterSHA256": "bda77223954f7a4a270fbef1f270743b23acb991c74672d35988aa746666c845",
+      "fit": {
+        "changedVertices": 10899,
+        "maximumMove": 0.0667704112853171,
+        "limitedVertices": 8998
+      }
+    },
+    {
+      "key": "6:200",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_boots_01.glb",
+      "beforeSHA256": "825662e8c453bdad5ae1cc0b3903ea76ef29be51127456648f60e9b160e9df8a",
+      "afterSHA256": "0d537591bbc297781ed6bb6ffc09da6b8e24ff939de5ae4f60ac91b559e9245a",
+      "fit": {
+        "changedVertices": 3319,
+        "maximumMove": 0.0652916744348581,
+        "limitedVertices": 1172
+      }
+    },
+    {
+      "key": "6:201",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_boots_02.glb",
+      "beforeSHA256": "ed42e31239fa06abb5afa7ae7b5c7a99d69768bcd6aa466a33edb6d3ff906ae1",
+      "afterSHA256": "6a9a361a74277d141f8bc8c44b9c74abdd6c21ba9f6adadc60e08cb79320cb29",
+      "fit": {
+        "changedVertices": 4935,
+        "maximumMove": 0.11147937014209887,
+        "limitedVertices": 1960
+      }
+    },
+    {
+      "key": "6:202",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_boots_03.glb",
+      "beforeSHA256": "dc1be2bd17ea3dff2d246fb94eef2e389e29b2e02a399089d908caab16b2d458",
+      "afterSHA256": "4a5df998b6d0d983c6a53f03d11e044c18aa01870277a881eda1dcdd64181bd9",
+      "fit": {
+        "changedVertices": 4884,
+        "maximumMove": 0.1038933595886911,
+        "limitedVertices": 2414
+      }
+    },
+    {
+      "key": "6:203",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_boots_04.glb",
+      "beforeSHA256": "cb70950635e3aca9f4fd78b30a1a0a947755421a0ace687a0dfcb09e4a707b5d",
+      "afterSHA256": "959b0cc506fa93cec9395bd7b11e00d9d5a7d55d5e89710f01bfeafe632c7153",
+      "fit": {
+        "changedVertices": 4847,
+        "maximumMove": 0.01972951157664469,
+        "limitedVertices": 1696
+      }
+    },
+    {
+      "key": "6:204",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_boots_05.glb",
+      "beforeSHA256": "d46b8ac3d3f012338487c138226671482c1850e5c5081fa71c15e8f8ffeee77f",
+      "afterSHA256": "edad62d4afb93e5cfa2fcdf197ac3b3df50b8f0a83047c590b59fb49a15c8538",
+      "fit": {
+        "changedVertices": 4983,
+        "maximumMove": 0.07643499353197229,
+        "limitedVertices": 2271
+      }
+    },
+    {
+      "key": "6:205",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_boots_06.glb",
+      "beforeSHA256": "a0d80808c8be7ece428c034af820721fb1d76acca7d078aa671e8022715960fa",
+      "afterSHA256": "08bd4765ee02a6fc625eec9b65bcc9ed49fe291e3ec515c5ec7c091639252b5d",
+      "fit": {
+        "changedVertices": 3451,
+        "maximumMove": 0.07214155707104034,
+        "limitedVertices": 982
+      }
+    },
+    {
+      "key": "6:206",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_boots_07.glb",
+      "beforeSHA256": "640efdd1e680f7b6dce2b74f9f7b9bcae04f6027ed970419aa041fffa366c264",
+      "afterSHA256": "549285c3ab84e40250bf21f76211eb41b257f9d6fd375490858b53a94ff2e99b",
+      "fit": {
+        "changedVertices": 5019,
+        "maximumMove": 0.08088718274525769,
+        "limitedVertices": 1803
+      }
+    },
+    {
+      "key": "6:207",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_boots_08.glb",
+      "beforeSHA256": "852fe014ecb342f7e97b28b86e076b5c15de5ffca78617254b9ae38100865fe4",
+      "afterSHA256": "1b588aa4a4c535b7c1fadec01d8ee1f66c08ac1577a99032be22238c43cefe39",
+      "fit": {
+        "changedVertices": 5073,
+        "maximumMove": 0.1128530459946671,
+        "limitedVertices": 2136
+      }
+    },
+    {
+      "key": "4:171",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_legguards_01.glb",
+      "beforeSHA256": "d1e7420ec316f47988b990ef79d123868d048edc6692e06af3cfa5f6534a469e",
+      "afterSHA256": "acd1346baf9a8dfa42fdb0a49af4548c969a3dbb366c988d60a44a28bfc295c7",
+      "fit": {
+        "changedVertices": 7323,
+        "maximumMove": 0.11322026442423994,
+        "limitedVertices": 5630
+      }
+    },
+    {
+      "key": "4:172",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_legguards_02.glb",
+      "beforeSHA256": "1f80f1504969ca55d343b27967317cdb310bcd4f664e6f5e646752c15388e7a1",
+      "afterSHA256": "7482b38a2e5f8f35f8e13fbd43d240d58123d9fdf3f43bcd8770df80f3a7a893",
+      "fit": {
+        "changedVertices": 7262,
+        "maximumMove": 0.09459102767961207,
+        "limitedVertices": 5528
+      }
+    },
+    {
+      "key": "4:173",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_legguards_03.glb",
+      "beforeSHA256": "cf6a58843929306629dec29a65736ed2bcba2b1f8aa54c4ce7848dd42c86dd15",
+      "afterSHA256": "3109e9693f9001f52108b57556cf65f5cc3fed49c5ea003580681e7366e6e62d",
+      "fit": {
+        "changedVertices": 7046,
+        "maximumMove": 0.12458777150955883,
+        "limitedVertices": 5603
+      }
+    },
+    {
+      "key": "4:174",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_legguards_04.glb",
+      "beforeSHA256": "e7715051cc0769a6a5ba53765643a2e4f9122e25c453e5bece251f1397023644",
+      "afterSHA256": "32a724f7c82774f7b37455cbdca0d7f4d53b66a997aeb0193d638b1167e1796b",
+      "fit": {
+        "changedVertices": 6637,
+        "maximumMove": 0.08835794071547999,
+        "limitedVertices": 5529
+      }
+    },
+    {
+      "key": "4:175",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_legguards_05.glb",
+      "beforeSHA256": "541bbc9598248d27773fad82ed2953eb17bf8a4155ef4c6ea80a63bc985e2ea0",
+      "afterSHA256": "fc151499ecadee66186d32799e7f77bee37c1721568fa5b33a62a2ab8262a8d5",
+      "fit": {
+        "changedVertices": 6845,
+        "maximumMove": 0.09292316074534115,
+        "limitedVertices": 5432
+      }
+    },
+    {
+      "key": "4:176",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_legguards_06.glb",
+      "beforeSHA256": "307ea7fdd3e6a8dc4849c53002b7ccf948015dab498d737f8caaecdb84f326c8",
+      "afterSHA256": "74462f92d3f61808f2cdaf0953b13840ab4f7888c7ca1ab4195c8342148f22ba",
+      "fit": {
+        "changedVertices": 6718,
+        "maximumMove": 0.09321433550654074,
+        "limitedVertices": 5344
+      }
+    },
+    {
+      "key": "4:177",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_legguards_07.glb",
+      "beforeSHA256": "405188175157bf2793465cea1699d9e91521022fa7d5ccbb117cb1c550d34c07",
+      "afterSHA256": "5eba6f7c48ae152336db70276e818693b5afaacec60e2da1e905461da60b057d",
+      "fit": {
+        "changedVertices": 6712,
+        "maximumMove": 0.08981661663644079,
+        "limitedVertices": 4161
+      }
+    },
+    {
+      "key": "4:178",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/amberwood_woodland_legguards_08.glb",
+      "beforeSHA256": "e9d23e4b9056578dce569ed380dff9db7fdfd1da00bd19197b88e33c3d62b720",
+      "afterSHA256": "6e65e929b42e7d3f285ef36a70a2434d97898117693efa6c963d829d6763a9ab",
+      "fit": {
+        "changedVertices": 6727,
+        "maximumMove": 0.10127468772777856,
+        "limitedVertices": 5279
+      }
+    },
+    {
+      "key": "6:192",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_fantasy_boots_01.glb",
+      "beforeSHA256": "9ab71ad0253f9f441df311705f2345a89a47471f47eacc1153fa08e443cf70f9",
+      "afterSHA256": "caee71b79035893faa5658c6c17787b61667dc181c0721ab885acb3f98ae088f",
+      "fit": {
+        "changedVertices": 3398,
+        "maximumMove": 0.029417653379980643,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "6:193",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_fantasy_boots_02.glb",
+      "beforeSHA256": "df3e49ff3501de66cf02aa30836bd5462cb7806ee1964623d3ceaa3f4f654849",
+      "afterSHA256": "52b455785f37af3167ba822856a785862dde145148d539a9e0fa03f456b17447",
+      "fit": {
+        "changedVertices": 3472,
+        "maximumMove": 0.029888360520181626,
+        "limitedVertices": 1093
+      }
+    },
+    {
+      "key": "6:194",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_fantasy_boots_03.glb",
+      "beforeSHA256": "884e6fdcbc86b643b6404bfe8034c1fc203dd539ccb8f5da6f75dfe4b4eb76a1",
+      "afterSHA256": "23367e2da8aa9d99fc607b28c9e6c2e4cf2a8b60916664b4fc181ebce62f376b",
+      "fit": {
+        "changedVertices": 4955,
+        "maximumMove": 0.0316095628636676,
+        "limitedVertices": 831
+      }
+    },
+    {
+      "key": "6:195",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_fantasy_boots_04.glb",
+      "beforeSHA256": "1c0ed94002aaa3c75a2825a2575ed9ad616b59c59255875f3349eca55eb21e35",
+      "afterSHA256": "45523cc7847a252f94e24a2ca101e06984443be6f9597a04767d85e5451fd20e",
+      "fit": {
+        "changedVertices": 4767,
+        "maximumMove": 0.05620622580391948,
+        "limitedVertices": 2413
+      }
+    },
+    {
+      "key": "6:196",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_fantasy_boots_05.glb",
+      "beforeSHA256": "6e297420dd53af028d9a034ceac2b3ea97c91fe16108bbdd92d06b720b00607b",
+      "afterSHA256": "18c6b7380a3b2bef7a1bc1788d48a4a331b1d4642fc3469cf91c5b60aa7d5f6d",
+      "fit": {
+        "changedVertices": 4654,
+        "maximumMove": 0.06240088019929487,
+        "limitedVertices": 2689
+      }
+    },
+    {
+      "key": "6:197",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_fantasy_boots_06.glb",
+      "beforeSHA256": "39202f1c454c4a48176a759865ed12802ce3ac75a7f19230387e97c71e4f2f08",
+      "afterSHA256": "74fe452540853b92598ae0f2538c98f9899ef792b001693287a6b5254706fa56",
+      "fit": {
+        "changedVertices": 5294,
+        "maximumMove": 0.04293125737770621,
+        "limitedVertices": 2231
+      }
+    },
+    {
+      "key": "6:198",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_fantasy_boots_07.glb",
+      "beforeSHA256": "8c1a8b2fb43d3f4317f532a7b226182b34ed3a088096a1c9f1f57a8a82be69fe",
+      "afterSHA256": "4c8f99d4b6f52352d672c6a205693a1dc0d787a541a12fb17161d9d09e8e1622",
+      "fit": {
+        "changedVertices": 3293,
+        "maximumMove": 0.02971368030611451,
+        "limitedVertices": 469
+      }
+    },
+    {
+      "key": "6:199",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_fantasy_boots_08.glb",
+      "beforeSHA256": "0966f85422c675178fa4e87acc60c812085f17451369a838b848de3110e9fa45",
+      "afterSHA256": "57ff6332d5ae4847c46dbc8af9917cdf7a6d5f7c4a7e5c563e5a9263039001a3",
+      "fit": {
+        "changedVertices": 4905,
+        "maximumMove": 0.06506227177645932,
+        "limitedVertices": 1854
+      }
+    },
+    {
+      "key": "4:179",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_leg_armor_01.glb",
+      "beforeSHA256": "e8c47a47d7df3d7805635a0ed8c33c0fc2095e5306aa1caa08a7a12db6fa4234",
+      "afterSHA256": "8d2b42623428afdfa7e165cc42f40edfbe7558ea87eb088e720426247b02833c",
+      "fit": {
+        "changedVertices": 6896,
+        "maximumMove": 0.10046188915783896,
+        "limitedVertices": 4279
+      }
+    },
+    {
+      "key": "4:180",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_leg_armor_02.glb",
+      "beforeSHA256": "b55507c06d4ef69ac632ea26119b37527f1650964bd6b40807f2a9a43f92e676",
+      "afterSHA256": "e37590ef229fcd1b3824b828e744f81f6b267d7f87a3ffccbbbefde8a009edad",
+      "fit": {
+        "changedVertices": 6743,
+        "maximumMove": 0.09659730250735468,
+        "limitedVertices": 5450
+      }
+    },
+    {
+      "key": "4:181",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_leg_armor_03.glb",
+      "beforeSHA256": "1fa403e2a2dd51c044811bace46a22b1dd073d3384160bfe672fc465c61c779d",
+      "afterSHA256": "d778cae613adb6211d2617850740939785318798045c04c48fcb60ea63d8046d",
+      "fit": {
+        "changedVertices": 6894,
+        "maximumMove": 0.10112620479204225,
+        "limitedVertices": 5458
+      }
+    },
+    {
+      "key": "4:182",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_leg_armor_04.glb",
+      "beforeSHA256": "4b3f2e74b0d2fb713559c97cfca07db2ead126227bcc66dce43f24c9c5ce7d86",
+      "afterSHA256": "7c7a9fba58a58706ccd4501af9c95264013ef2e22c563f3b84619416f6ebbead",
+      "fit": {
+        "changedVertices": 6651,
+        "maximumMove": 0.0957531410912625,
+        "limitedVertices": 5360
+      }
+    },
+    {
+      "key": "4:183",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_leg_armor_05.glb",
+      "beforeSHA256": "2e7275eea8ae1ea81403e45b0c381463ad367d2886c3cac1df504d22c65330f2",
+      "afterSHA256": "b783778f6cc1c15fe52ffc1dfe975f6b7d6a0871f517fea403f7553e65c195a4",
+      "fit": {
+        "changedVertices": 8326,
+        "maximumMove": 0.12235305244041399,
+        "limitedVertices": 6929
+      }
+    },
+    {
+      "key": "4:184",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_leg_armor_06.glb",
+      "beforeSHA256": "950ffb8cce382e3b5023bd3a7103877f3f1ef9fd6bab7d9be0353b39657dd726",
+      "afterSHA256": "c769730d6141e738b8352e66de9a4d7d6b6588c8a6b3a1265653c45999cbbd2c",
+      "fit": {
+        "changedVertices": 6795,
+        "maximumMove": 0.09634719484423146,
+        "limitedVertices": 5315
+      }
+    },
+    {
+      "key": "4:185",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_leg_armor_07.glb",
+      "beforeSHA256": "f8a3b343e76c5c93bc9950a3da1f99ecaf6dd943977b2d4c912f6f4980af694c",
+      "afterSHA256": "ee00f866fb326b4c8804a76bd13386ef7fc347ee8f7a514101c16149628919ce",
+      "fit": {
+        "changedVertices": 6699,
+        "maximumMove": 0.09588361271299109,
+        "limitedVertices": 5416
+      }
+    },
+    {
+      "key": "4:186",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/arcane_leg_armor_08.glb",
+      "beforeSHA256": "a5b6da94429b452eade143204873b2a55055faedc432a05a8e9c7113f0e7db24",
+      "afterSHA256": "64d1ed71d226d54bd0ebd4dc8c17a6f22cd20eac125e05277a0420da06020025",
+      "fit": {
+        "changedVertices": 6954,
+        "maximumMove": 0.10021153628517193,
+        "limitedVertices": 5435
+      }
+    },
+    {
+      "key": "4:187",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/ceremonial_knight_greaves_01.glb",
+      "beforeSHA256": "9fbf988634e681e917cdc61c412de9ee8e7cc82be8f3d39d5f22ad5a238d3c35",
+      "afterSHA256": "0ce7d686758b6d24ff9987f1f29ffb4fe16362eca4204feab11dd10eb9f2a29c",
+      "fit": {
+        "changedVertices": 6831,
+        "maximumMove": 0.0952280433930547,
+        "limitedVertices": 5415
+      }
+    },
+    {
+      "key": "4:188",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/ceremonial_knight_greaves_02.glb",
+      "beforeSHA256": "c13d18904bd628de904fa55d85c41c760ed682913ee5d274f8565f5b6bacafc6",
+      "afterSHA256": "586ecfe80ae198914df4422d71f36f48f866b7c0f0ab05cafc0118641bede3d0",
+      "fit": {
+        "changedVertices": 6824,
+        "maximumMove": 0.09331585411413493,
+        "limitedVertices": 5426
+      }
+    },
+    {
+      "key": "4:189",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/ceremonial_knight_greaves_03.glb",
+      "beforeSHA256": "e4747741314025b978f8fb1205413b2b9f39816a90f39291d43d860bac9cf135",
+      "afterSHA256": "78db3738b82f3e4353f090a142879d0066a04bbebbea8a2e2d994656729ff381",
+      "fit": {
+        "changedVertices": 6783,
+        "maximumMove": 0.09083809917382032,
+        "limitedVertices": 5421
+      }
+    },
+    {
+      "key": "4:190",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/ceremonial_knight_greaves_04.glb",
+      "beforeSHA256": "d79fcaafef1586417ee1a26b9691c79aa807e6e24bfdd4f96ddc5f2906dba462",
+      "afterSHA256": "0c601d08a092aca7eae208c8da35152b6fc24620a40ef1983ef5203a83e16d7d",
+      "fit": {
+        "changedVertices": 6891,
+        "maximumMove": 0.09631457144910152,
+        "limitedVertices": 4077
+      }
+    },
+    {
+      "key": "4:191",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/ceremonial_knight_greaves_05.glb",
+      "beforeSHA256": "b91e2fbfed8cb375f4c5b947ef384aeb98540e6bad88f353fed873f06de8c069",
+      "afterSHA256": "df090365a8a4e4c57dfe0ee6be909801e328512a0a74f36b39fd7e020793a78a",
+      "fit": {
+        "changedVertices": 6720,
+        "maximumMove": 0.0916875358515578,
+        "limitedVertices": 5328
+      }
+    },
+    {
+      "key": "4:192",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/ceremonial_knight_greaves_06.glb",
+      "beforeSHA256": "e59cda5dc5aa49aa6cf3d0a8fbfc08779588e065945c3d68f47598908f9e2d47",
+      "afterSHA256": "326308f67cf2eeb721410a00087c32bd1bc1ae62ec93f62bdcbe6c2b1fadb898",
+      "fit": {
+        "changedVertices": 6804,
+        "maximumMove": 0.0887007538289547,
+        "limitedVertices": 5438
+      }
+    },
+    {
+      "key": "4:193",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/ceremonial_knight_greaves_07.glb",
+      "beforeSHA256": "f8004545c988ef3b3eab85e4e2f026be6366414e9ba9fca4dad30d07fb0aaa44",
+      "afterSHA256": "58a4f7caa0656f743a01930d94833dd412c61752c6a57980a99de5dd38fd0336",
+      "fit": {
+        "changedVertices": 6881,
+        "maximumMove": 0.11097420132706504,
+        "limitedVertices": 5819
+      }
+    },
+    {
+      "key": "4:194",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/ceremonial_knight_greaves_08.glb",
+      "beforeSHA256": "4d26610f792dccd85b44219b191f037a09685f5bf44328e4a372bab9088636c0",
+      "afterSHA256": "574afcbef94569ca89ad20dfc5b4342d6e1bb25f2aa81af2134eacdc1eed15ea",
+      "fit": {
+        "changedVertices": 6762,
+        "maximumMove": 0.0922085336486301,
+        "limitedVertices": 5414
+      }
+    },
+    {
+      "key": "6:224",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/frontier_boots_01.glb",
+      "beforeSHA256": "091ac44fa8dc01e714729c14146b17b9b3490d76483424ea1ad3196add131e49",
+      "afterSHA256": "e8297fd969fc0dcb60ecbf86feb3a6561f85e815ee174d4d5cd1e1dd59357741",
+      "fit": {
+        "changedVertices": 2813,
+        "maximumMove": 0.06268943774753448,
+        "limitedVertices": 1293
+      }
+    },
+    {
+      "key": "6:225",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/frontier_boots_02.glb",
+      "beforeSHA256": "8579caaf6428cad9d2cbbc8b9e041ec1b00910c0d95c7417612bd795ff9754a8",
+      "afterSHA256": "934e0394d97b77bbfe31b5edfbaa08a6fb324774d13eee53768e80e4b714b17d",
+      "fit": {
+        "changedVertices": 3531,
+        "maximumMove": 0.03460297344547638,
+        "limitedVertices": 696
+      }
+    },
+    {
+      "key": "6:226",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/frontier_boots_03.glb",
+      "beforeSHA256": "586f77123014b46da0caeaba6d60eaada8d25b540a34fc17d85823f0da86a61f",
+      "afterSHA256": "2392dea703fef42f6e1b71de61b24993776af07cba0979f21c77067f32439a82",
+      "fit": {
+        "changedVertices": 3265,
+        "maximumMove": 0.034738329012546684,
+        "limitedVertices": 430
+      }
+    },
+    {
+      "key": "6:227",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/frontier_boots_04.glb",
+      "beforeSHA256": "ac9258b4a1dc6a691a73a4403b2774ae0835e87bceb6f3c60c9bd16068e060e7",
+      "afterSHA256": "2834bec2bfbb4acbe9f98b8e1e0028cbea041ba03b4575a3cb7836e62a13b45f",
+      "fit": {
+        "changedVertices": 3313,
+        "maximumMove": 0.036346859426663686,
+        "limitedVertices": 361
+      }
+    },
+    {
+      "key": "6:228",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/frontier_boots_05.glb",
+      "beforeSHA256": "9f8274c13fe116d03922785cd9e77a6f6c30eca7e3f7c665281bcd5320c808cd",
+      "afterSHA256": "0bf10cf448cfdbb6f77bfc645e31010265550049d2dab4aca110956c59d61e45",
+      "fit": {
+        "changedVertices": 3364,
+        "maximumMove": 0.026654367078113445,
+        "limitedVertices": 312
+      }
+    },
+    {
+      "key": "6:229",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/frontier_boots_06.glb",
+      "beforeSHA256": "bfabf77b2e778346d8464c21ee13b05e4edd8b11f3defb215d91e986b8dabe14",
+      "afterSHA256": "b2c6f4d490dbd541628bf2a9c1e6e09470f58cbe0fd3397f810e9bb0bab35874",
+      "fit": {
+        "changedVertices": 3324,
+        "maximumMove": 0.026326819950234382,
+        "limitedVertices": 726
+      }
+    },
+    {
+      "key": "6:230",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/frontier_boots_07.glb",
+      "beforeSHA256": "efe65d01cdee01df1b8e3a5f38074c4bef3d15522fc06965972fe838755916f5",
+      "afterSHA256": "fe20150cc144dc360d8b39d029b07876470b0fbd66fd036e60ea19598bbd3a72",
+      "fit": {
+        "changedVertices": 3052,
+        "maximumMove": 0.031579305517575755,
+        "limitedVertices": 805
+      }
+    },
+    {
+      "key": "6:231",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/frontier_boots_08.glb",
+      "beforeSHA256": "4e816722c5b3fae1544b51717469612b074c7ee1c6b4a0d7b7934d1625fd981a",
+      "afterSHA256": "effbbb178f76ec32f6c59e88c25ecdaab9b9cd2ee30bb1e1222c5731d94ccf60",
+      "fit": {
+        "changedVertices": 3354,
+        "maximumMove": 0.03541890834457562,
+        "limitedVertices": 1440
+      }
+    },
+    {
+      "key": "4:243",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/humble_frontier_pants_01.glb",
+      "beforeSHA256": "69ea8098a266c475c207b897d6c178e8ee57466a645b6e56649fded1dcf6558a",
+      "afterSHA256": "d53949af748b736a837c8414f080f4ab52a73506835fc59ad279c80fbd0ced51",
+      "fit": {
+        "changedVertices": 6975,
+        "maximumMove": 0.08749770041189664,
+        "limitedVertices": 5246
+      }
+    },
+    {
+      "key": "4:244",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/humble_frontier_pants_02.glb",
+      "beforeSHA256": "2237150f1e5d64e849131c45b834e7a78017a40dcc220e65521f793573a58f3b",
+      "afterSHA256": "63ae95c5779ce7733de7dd2ca14006ec0ccb7b1293df9080ae6690518739a602",
+      "fit": {
+        "changedVertices": 6798,
+        "maximumMove": 0.08712011197457868,
+        "limitedVertices": 5381
+      }
+    },
+    {
+      "key": "4:245",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/humble_frontier_pants_03.glb",
+      "beforeSHA256": "fe00a89e4dff4965ef53042dda341a44b643a8b8e5535e33234db7cf19a305ec",
+      "afterSHA256": "272dda954a3de454bc607f11bd785548e8f56500e7b85d81f01a6f9a193d0566",
+      "fit": {
+        "changedVertices": 6847,
+        "maximumMove": 0.088376138290923,
+        "limitedVertices": 5282
+      }
+    },
+    {
+      "key": "4:246",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/humble_frontier_pants_04.glb",
+      "beforeSHA256": "e0e7726508fee8a4dc4b1c433e8cd69be359bc839488a9df9e2074c4ae137200",
+      "afterSHA256": "622dde46fc0f737bdeb5c8b1a57d5123604c564a055016ee86abfb3ba00420b4",
+      "fit": {
+        "changedVertices": 7013,
+        "maximumMove": 0.08895590747023452,
+        "limitedVertices": 5308
+      }
+    },
+    {
+      "key": "4:247",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/humble_frontier_pants_05.glb",
+      "beforeSHA256": "56c62e039d894efabc10548f4151d5d358f856e26b0cf664fd3414feb0bcc9f5",
+      "afterSHA256": "d023b1255483482b301d3d9bd7dea57a6f3cb8ff62a671289fb7365fbebe556b",
+      "fit": {
+        "changedVertices": 7126,
+        "maximumMove": 0.09232152201134268,
+        "limitedVertices": 5241
+      }
+    },
+    {
+      "key": "4:248",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/humble_frontier_pants_06.glb",
+      "beforeSHA256": "1126d077b8ed0b8331aa2472e8891ff2b2fd573212f52a8a13c4e16c97646a9e",
+      "afterSHA256": "a54cedda2d86d2aca3f317877448b26d0b9fd13cebefb41b9cf719150b48df38",
+      "fit": {
+        "changedVertices": 6948,
+        "maximumMove": 0.09008440085106731,
+        "limitedVertices": 5335
+      }
+    },
+    {
+      "key": "4:249",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/humble_frontier_pants_07.glb",
+      "beforeSHA256": "05c8ec43740e82765f7f5a272cefc53a66144af4c8f8d829779b1d01c9c0a548",
+      "afterSHA256": "17f32c667df475899a1e9f848860504439c47ba83ccfa9e6a183413def3b76e0",
+      "fit": {
+        "changedVertices": 6993,
+        "maximumMove": 0.09600525357924079,
+        "limitedVertices": 5292
+      }
+    },
+    {
+      "key": "4:250",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/humble_frontier_pants_08.glb",
+      "beforeSHA256": "7e3dde54c49dee93bb20c6034437f8a94c305d5df8392b31ad5703cd54f634a7",
+      "afterSHA256": "e2740184f1159abcb43dd8d67ae0fe6f9f9ddf3a12679cfa4c7fb6ecb9c4e542",
+      "fit": {
+        "changedVertices": 7166,
+        "maximumMove": 0.09301341232855824,
+        "limitedVertices": 5326
+      }
+    },
+    {
+      "key": "6:240",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/knightly_greaves_01.glb",
+      "beforeSHA256": "781ff130325927e269c9cdcf9070493bf3d8793b53a1c22778b016275bb0c766",
+      "afterSHA256": "1a7fd3df142bff93c5beb6983b60121aac8e52c0bf2844e41746c06f7d0b6cd3",
+      "fit": {
+        "changedVertices": 4835,
+        "maximumMove": 0.044855536728003735,
+        "limitedVertices": 2628
+      }
+    },
+    {
+      "key": "6:241",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/knightly_greaves_02.glb",
+      "beforeSHA256": "e224c1a1a31d184e0959a7283cfb5c93503f77cb9e0f7254f180811a9008d88a",
+      "afterSHA256": "c281be7bf22d15108f53eff1fa4b1665eda88ecee564770dbe0a3ef06ddde06f",
+      "fit": {
+        "changedVertices": 3183,
+        "maximumMove": 0.0245246203518013,
+        "limitedVertices": 663
+      }
+    },
+    {
+      "key": "6:242",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/knightly_greaves_03.glb",
+      "beforeSHA256": "8a56cc08359f0254fe7f5f140f288839406ae61faab1dd7276ca25eb4f42b05a",
+      "afterSHA256": "dc67b34682f589a68254beb3940f882a030a32b689baae4129d1db7457623448",
+      "fit": {
+        "changedVertices": 4964,
+        "maximumMove": 0.028618156826385972,
+        "limitedVertices": 2150
+      }
+    },
+    {
+      "key": "6:243",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/knightly_greaves_04.glb",
+      "beforeSHA256": "6e6dc15f9a043c527c9579c69d78ef8112be7c027770fb325632eb44952ec593",
+      "afterSHA256": "e4ab022576959ff80bc2558e73d184d7222e2d8e311521d89d547699bad75790",
+      "fit": {
+        "changedVertices": 5246,
+        "maximumMove": 0.06618626140400775,
+        "limitedVertices": 2064
+      }
+    },
+    {
+      "key": "6:244",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/knightly_greaves_05.glb",
+      "beforeSHA256": "0d3230cc37cbaaba4418ff992e963088fc12cbabf85439467867d23237dcc33c",
+      "afterSHA256": "96da8ab44882270e79da76abfa587b99cba9ab3fb73462e880dfea6a9249725d",
+      "fit": {
+        "changedVertices": 3177,
+        "maximumMove": 0.01939820401067979,
+        "limitedVertices": 1272
+      }
+    },
+    {
+      "key": "6:245",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/knightly_greaves_06.glb",
+      "beforeSHA256": "5a8b1ff875da3ec5ec3f26f4c27bcfa249c89d73cb43e50cd395b8c6a4afb023",
+      "afterSHA256": "cf93446f7db7f778c3bdce9f7c2085091985e1758a77657dc992878939ac4773",
+      "fit": {
+        "changedVertices": 4780,
+        "maximumMove": 0.029630980922100182,
+        "limitedVertices": 3401
+      }
+    },
+    {
+      "key": "6:246",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/knightly_greaves_07.glb",
+      "beforeSHA256": "5761d8aa95c5ce61f339e9c391179b6b89748190f029ff1ce436e5bceffe7cc4",
+      "afterSHA256": "c66e1a7d95d92e6cb3a47854e3cb2d9291d235c0109d99f48f943435e19ae7bb",
+      "fit": {
+        "changedVertices": 5197,
+        "maximumMove": 0.03551631910626224,
+        "limitedVertices": 2793
+      }
+    },
+    {
+      "key": "6:247",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/knightly_greaves_08.glb",
+      "beforeSHA256": "e7271fc23655f35d85c26db870a94f51e7b9d45f6d22db3f4cda5b43f4b75afb",
+      "afterSHA256": "667b1b65c43b089e95f8f1163aa4059098b299e706b4d9f1c9efd5c3f63d848c",
+      "fit": {
+        "changedVertices": 3261,
+        "maximumMove": 0.07473538341191086,
+        "limitedVertices": 797
+      }
+    },
+    {
+      "key": "6:232",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/leather_adventurer_boots_01.glb",
+      "beforeSHA256": "90efe645d8783cc6bcbefac980d682e053f16afca598bd69a8b9c0ffb19a418d",
+      "afterSHA256": "914e6b16176a0ca9479bfb5c055d85e07c8aabd42a06c59187289b1b8eeae189",
+      "fit": {
+        "changedVertices": 3048,
+        "maximumMove": 0.03747762818663862,
+        "limitedVertices": 826
+      }
+    },
+    {
+      "key": "6:233",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/leather_adventurer_boots_02.glb",
+      "beforeSHA256": "c66d893c1bfd7326f3d892e2bf7610a10292f866edea3d0bbc62b3e425590a07",
+      "afterSHA256": "1087ecbc1175c845810e7c9f83ed1f8a34d5542178290131ac1ecaf7dabb8491",
+      "fit": {
+        "changedVertices": 3440,
+        "maximumMove": 0.04098633390840139,
+        "limitedVertices": 1091
+      }
+    },
+    {
+      "key": "6:234",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/leather_adventurer_boots_03.glb",
+      "beforeSHA256": "fc6b13b4e3eb1db86a3710bf6f00dc97beeddb5d05d3b4fd05b462f5f33e6cff",
+      "afterSHA256": "7ac4bdc805b6d166a373199ff90a0cb78b69d61df3da69966b975e19cebb0019",
+      "fit": {
+        "changedVertices": 3267,
+        "maximumMove": 0.03141626830136628,
+        "limitedVertices": 1132
+      }
+    },
+    {
+      "key": "6:235",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/leather_adventurer_boots_04.glb",
+      "beforeSHA256": "883ccf9b6f80b45d21d004e8ace9c6c60e0f52198b13805404c6d54dc56919d7",
+      "afterSHA256": "79c10dd606182ae4e7ac4fe4889c69ef24b3a39ded9a27596823525e4c4ddf6a",
+      "fit": {
+        "changedVertices": 3384,
+        "maximumMove": 0.04300730078567059,
+        "limitedVertices": 1054
+      }
+    },
+    {
+      "key": "6:236",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/leather_adventurer_boots_05.glb",
+      "beforeSHA256": "52d0a9eda8ba009ba290fb8a66d28f3c56f0e910b2837ba864abf95732834d49",
+      "afterSHA256": "9b44488469ff67eb1297ac55b449b677597e7073da9d88d5347aaef4fa3d84a9",
+      "fit": {
+        "changedVertices": 3425,
+        "maximumMove": 0.028691618100924778,
+        "limitedVertices": 1108
+      }
+    },
+    {
+      "key": "6:237",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/leather_adventurer_boots_06.glb",
+      "beforeSHA256": "07a599e0de9fb44f8c023c7b953e64eeeb4972c7c81706615ac4276974db91de",
+      "afterSHA256": "e6811525b66028438025da5ee85a68b40717daeacc89f3e96d78d71a5b3194fa",
+      "fit": {
+        "changedVertices": 3514,
+        "maximumMove": 0.04937032439749693,
+        "limitedVertices": 403
+      }
+    },
+    {
+      "key": "6:238",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/leather_adventurer_boots_07.glb",
+      "beforeSHA256": "f69aec201f124c28d98343d6a48821f4ea516010a6115b03e9cdea3a63687210",
+      "afterSHA256": "23dbb401f8fd1ca00ec736d282181db65e1ce8510882ac04abf873466d5ec548",
+      "fit": {
+        "changedVertices": 3118,
+        "maximumMove": 0.031219449241167534,
+        "limitedVertices": 373
+      }
+    },
+    {
+      "key": "6:239",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/leather_adventurer_boots_08.glb",
+      "beforeSHA256": "8e2a728bc90d630fa1a67504950d578fbb211133acb2a8308832038ef9598e1e",
+      "afterSHA256": "d17edb5adaa32f7bc7b7a3214bf6abcee62d2a9957d111e3c11a9495609c591b",
+      "fit": {
+        "changedVertices": 3199,
+        "maximumMove": 0.04827031511741141,
+        "limitedVertices": 499
+      }
+    },
+    {
+      "key": "6:208",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_eloria_boots_01.glb",
+      "beforeSHA256": "9eb078c9d04d65eba9106944852f8a4a5862cc527662ce3401786e95b5b2f8ee",
+      "afterSHA256": "36a750a9048b96b3a913d44374adc94d82e8d451b850210031e1f1fb15cc4393",
+      "fit": {
+        "changedVertices": 4068,
+        "maximumMove": 0.027832769321481224,
+        "limitedVertices": 380
+      }
+    },
+    {
+      "key": "6:209",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_eloria_boots_02.glb",
+      "beforeSHA256": "1c68f20c0b3c8914ecf2447ff69cd84e8a3d80830e9983f659fbdf54bfe657e9",
+      "afterSHA256": "e4f2eee805b7c89a6efd2ee51219bb94974dd28e5be0af6fe32c239ac0b90451",
+      "fit": {
+        "changedVertices": 4851,
+        "maximumMove": 0.03782369180552586,
+        "limitedVertices": 710
+      }
+    },
+    {
+      "key": "6:210",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_eloria_boots_03.glb",
+      "beforeSHA256": "12dafd8c2551685a4103886d70da583db19bb0456b25a785a992c767227f7070",
+      "afterSHA256": "ad685905bec32fddd1f1b4a28c47130f16e119651df04ac7e6f0b50ea7ca59b6",
+      "fit": {
+        "changedVertices": 4859,
+        "maximumMove": 0.047051500976242853,
+        "limitedVertices": 2287
+      }
+    },
+    {
+      "key": "6:211",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_eloria_boots_04.glb",
+      "beforeSHA256": "c2a5635ae70ea57dad75e527792fe8ebd7cd962abc632bd7dab001f038b64535",
+      "afterSHA256": "e9b59740ecd9af3bcd799eb0d4573f19c3bdfefe22c7a5dcc7279f61bd983e3e",
+      "fit": {
+        "changedVertices": 5119,
+        "maximumMove": 0.08699682859464909,
+        "limitedVertices": 2424
+      }
+    },
+    {
+      "key": "6:212",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_eloria_boots_05.glb",
+      "beforeSHA256": "3f093475df89be029388b62bf0257cd13325f7d4951d6ed7a90c8997be8f6063",
+      "afterSHA256": "aeaae7c0de0f9342fdcb021ee32057b93e83112a0a674630dc2571f2061aa506",
+      "fit": {
+        "changedVertices": 5082,
+        "maximumMove": 0.061927134601851196,
+        "limitedVertices": 1742
+      }
+    },
+    {
+      "key": "6:213",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_eloria_boots_06.glb",
+      "beforeSHA256": "e8a84a3e0d69435bf6c9039d17451e341948fd4c36720a732f29f57fa8c99786",
+      "afterSHA256": "bf1bad57f9cd2a8b2d3d1ffd48805153912a8bde55dd5eb86f375a54c6ee81a5",
+      "fit": {
+        "changedVertices": 4868,
+        "maximumMove": 0.05425114311102744,
+        "limitedVertices": 2524
+      }
+    },
+    {
+      "key": "6:214",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_eloria_boots_07.glb",
+      "beforeSHA256": "33f8192611c1074af0b3c49ffd90ad64399679a6bf773f438eeea9c3128a3efa",
+      "afterSHA256": "63550a0b2867414bf3ac70afc7a4c1f06d44e4b6daf0e53cac55a118ae52081f",
+      "fit": {
+        "changedVertices": 4911,
+        "maximumMove": 0.04680112839966682,
+        "limitedVertices": 1039
+      }
+    },
+    {
+      "key": "6:215",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_eloria_boots_08.glb",
+      "beforeSHA256": "3c79ec5bbb989a74c191f80488ba1802286fb71cef908f13de48446b4c063bfe",
+      "afterSHA256": "407b8f43db7ea521c804cd2038551dd56073349a7497cc993c0372a6159e28e9",
+      "fit": {
+        "changedVertices": 4834,
+        "maximumMove": 0.04784753123561902,
+        "limitedVertices": 1053
+      }
+    },
+    {
+      "key": "4:195",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_leg_armor_01.glb",
+      "beforeSHA256": "21675b7c902ec73614c43a761773a960f89f70508753276b4cedb98926c103dc",
+      "afterSHA256": "03533d5e6eec08f20ea41e596c9f065eb1eed905de9c076f380ab1074c87eccc",
+      "fit": {
+        "changedVertices": 5851,
+        "maximumMove": 0.0955102378440831,
+        "limitedVertices": 0
+      }
+    },
+    {
+      "key": "4:196",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_leg_armor_02.glb",
+      "beforeSHA256": "7335ca39477335701ca950f5cd3165d875e355819d07103dfa987fcd243bcad4",
+      "afterSHA256": "39eb52bf11ccbb7d1867ab9a5e6393718fe0630285f89da587e02e5871542a65",
+      "fit": {
+        "changedVertices": 5823,
+        "maximumMove": 0.08505523899261494,
+        "limitedVertices": 4790
+      }
+    },
+    {
+      "key": "4:197",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_leg_armor_03.glb",
+      "beforeSHA256": "5844eeb0655bb2c0d05b908ae6b2009588e24317c90a877acf4ed886d109bbb4",
+      "afterSHA256": "e6dfc74bfd6d202955d272ace6f3dc3274cb40cd90adfc3c130a97be9c27c3e1",
+      "fit": {
+        "changedVertices": 5787,
+        "maximumMove": 0.082595125242065,
+        "limitedVertices": 4789
+      }
+    },
+    {
+      "key": "4:198",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_leg_armor_04.glb",
+      "beforeSHA256": "7ddefbdef3ee2b84d882e51f16a01dacf02e17890dbeb997df20b37ec9c97607",
+      "afterSHA256": "d3edae11df3a9cefa6df09c1075fc4742b1624f24cdd28dd799342ba0aa2107c",
+      "fit": {
+        "changedVertices": 5886,
+        "maximumMove": 0.1265163705976881,
+        "limitedVertices": 4655
+      }
+    },
+    {
+      "key": "4:199",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_leg_armor_05.glb",
+      "beforeSHA256": "68fb610d875ca2ea3d34ee7f324a210dfa2ee93cb485395631a283c30d50b3c6",
+      "afterSHA256": "4331f14ddc9424da6b7ff0e26576d67b470215b3da704ace77814b708d6652ec",
+      "fit": {
+        "changedVertices": 5831,
+        "maximumMove": 0.08955356734108486,
+        "limitedVertices": 4693
+      }
+    },
+    {
+      "key": "4:200",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_leg_armor_06.glb",
+      "beforeSHA256": "102a9d2cc33b2d6bd42f72ef0d4afa99e859cf8685c242bfac2b6cd7e2598264",
+      "afterSHA256": "ea8f44cb0253dfde89d3a66d832efb5d9ec2113e6131cd586266db615be83cb4",
+      "fit": {
+        "changedVertices": 6041,
+        "maximumMove": 0.08947720854469149,
+        "limitedVertices": 4677
+      }
+    },
+    {
+      "key": "4:201",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_leg_armor_07.glb",
+      "beforeSHA256": "e5c43696e4e94c48aaed58d36635631994a5af0b2b310d56d27c5c5438e764c4",
+      "afterSHA256": "c788746ae03811e225ebc15f51b15f5d0a777bd18b92558cf0d773d87703fe8c",
+      "fit": {
+        "changedVertices": 6057,
+        "maximumMove": 0.08896426668414188,
+        "limitedVertices": 4530
+      }
+    },
+    {
+      "key": "4:202",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_leg_armor_08.glb",
+      "beforeSHA256": "9f3beab39aab58cf42fb1a306c85f7a4165b1edd8061a4228ac433bf0933b546",
+      "afterSHA256": "ead3d677682478f1bfaa4ec9fbcb658d6d298b787c03a632ca65dc9b20518f24",
+      "fit": {
+        "changedVertices": 5974,
+        "maximumMove": 0.08902001660284073,
+        "limitedVertices": 4702
+      }
+    },
+    {
+      "key": "6:107",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_sabatons_01.glb",
+      "beforeSHA256": "d15e5f4fbb334a1c1668108bd9b7e46255e29e791c267aea3f483b5ecd34bb7c",
+      "afterSHA256": "50385ba983f45ab178800a1371dbf9af4e74394c2110aead78caeaca9eeb68dd",
+      "fit": {
+        "changedVertices": 2429,
+        "maximumMove": 0.09743579980235102,
+        "limitedVertices": 2284
+      }
+    },
+    {
+      "key": "6:108",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_sabatons_02.glb",
+      "beforeSHA256": "26417f1afc66f097baed9011d8d6761a761489d8fb8f4d8bad680e2e0bdfa4f4",
+      "afterSHA256": "cc2475f5665017ccf64b0fed1cbd9b82be9cb5bab519bafcfbec3bee62eefbaf",
+      "fit": {
+        "changedVertices": 2356,
+        "maximumMove": 0.08563417849995801,
+        "limitedVertices": 2256
+      }
+    },
+    {
+      "key": "6:109",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_sabatons_03.glb",
+      "beforeSHA256": "0c565e44e3b975c557d1e3d63e60a96390795b4dcf87dff4f195c799d222efb0",
+      "afterSHA256": "8173e6dda5abf30121e133fd6eb586547d0dc203c91e7919e3ecead12393e45a",
+      "fit": {
+        "changedVertices": 2490,
+        "maximumMove": 0.08327362167909745,
+        "limitedVertices": 1983
+      }
+    },
+    {
+      "key": "6:110",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_sabatons_04.glb",
+      "beforeSHA256": "93d9ef7d99c39fd05693d743d08708ce06845643f2283ba8d4ed8c0137c1fbf1",
+      "afterSHA256": "7788b0ebe37d5551627dcb409318b86e3b4fccc9b4b9299860bc8e026a574fee",
+      "fit": {
+        "changedVertices": 2482,
+        "maximumMove": 0.07117370198759601,
+        "limitedVertices": 2103
+      }
+    },
+    {
+      "key": "6:111",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_sabatons_05.glb",
+      "beforeSHA256": "1aa9139ad4af6d76faddbd3bd43ca3a4956001031a770e6c4560963fdbb414b7",
+      "afterSHA256": "3a4560ef9403fe8c42b9b44bfb251b9e968534fa6757dc855fb4b3970a4566e4",
+      "fit": {
+        "changedVertices": 2467,
+        "maximumMove": 0.08809884703693811,
+        "limitedVertices": 2144
+      }
+    },
+    {
+      "key": "6:112",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_sabatons_06.glb",
+      "beforeSHA256": "5ea2bb29078358495ea99c85de8fd899e4240d0ec17fbd773967e56b0639bd11",
+      "afterSHA256": "8fa63f88b15d6ecf29310784bc3323954fb2aba37e6d9a640f42f7878e50e81a",
+      "fit": {
+        "changedVertices": 2379,
+        "maximumMove": 0.0901875178680445,
+        "limitedVertices": 2269
+      }
+    },
+    {
+      "key": "6:113",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_sabatons_07.glb",
+      "beforeSHA256": "08c095db2cc5887e802cd2d9f26710803371cfb6f80763e7684677803ed951b3",
+      "afterSHA256": "52abcac9ec98c4105ca5e139746710ea7f30664e96bf73640b83616d803dbb6d",
+      "fit": {
+        "changedVertices": 2509,
+        "maximumMove": 0.08884842830773348,
+        "limitedVertices": 1704
+      }
+    },
+    {
+      "key": "6:114",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/legendary_sabatons_08.glb",
+      "beforeSHA256": "2c5090fbac5334e19aa18300e3e49005aceba6212571c35120647c8381f55bd1",
+      "afterSHA256": "e887025bb657ed83c38c5fcebda7bbbafa8b37429e43dcfad1fd15cda919e011",
+      "fit": {
+        "changedVertices": 2461,
+        "maximumMove": 0.08711718733326788,
+        "limitedVertices": 2082
+      }
+    },
+    {
+      "key": "6:248",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_greaves_01.glb",
+      "beforeSHA256": "8fc848bfc962f335864e92ff078abe1f9a30914939e70bc1859657eed0f49bea",
+      "afterSHA256": "ccaf546185e82fe028429c959fd9bc9800930b23948b9753ea036fceccba5aa9",
+      "fit": {
+        "changedVertices": 3311,
+        "maximumMove": 0.0771823425008537,
+        "limitedVertices": 691
+      }
+    },
+    {
+      "key": "6:249",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_greaves_02.glb",
+      "beforeSHA256": "51fd52686e492228bcde45331d3d388cf55fd23c98e58fcf9244092dc8210005",
+      "afterSHA256": "fbddb0489672f07276b336505a4b509363a183c68fbfc2f6f011a534936e3250",
+      "fit": {
+        "changedVertices": 4919,
+        "maximumMove": 0.07716260601622983,
+        "limitedVertices": 1564
+      }
+    },
+    {
+      "key": "6:250",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_greaves_03.glb",
+      "beforeSHA256": "49ef521a55cf2380174c6ccbafbc92ebf230f2b5f4973595b7f08c8a80f6fcf7",
+      "afterSHA256": "6bb4bbb42f0b4e9dd2f9e03c4210992a2d3cfb6d1687563934f05dd2aad77e82",
+      "fit": {
+        "changedVertices": 4737,
+        "maximumMove": 0.05137405701841025,
+        "limitedVertices": 1548
+      }
+    },
+    {
+      "key": "6:251",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_greaves_04.glb",
+      "beforeSHA256": "0a276b8c09afd6d1b365e672852067deb7c00c2a36471952c92ff314d3ab2b9c",
+      "afterSHA256": "0402ff7970752e73ec841fd91d5f23111265d12a0471442b369284bae0c19cf3",
+      "fit": {
+        "changedVertices": 4749,
+        "maximumMove": 0.03631997472255842,
+        "limitedVertices": 908
+      }
+    },
+    {
+      "key": "6:252",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_greaves_05.glb",
+      "beforeSHA256": "c8548d65047b985493ff4dd9030d93c32582fdaa9f4830a669d8c43433d147c4",
+      "afterSHA256": "a3bbda34cb4f5ced4a3570d5efabe987681d1a7169dc86d919a57efc40c9abe2",
+      "fit": {
+        "changedVertices": 4930,
+        "maximumMove": 0.08610541282695024,
+        "limitedVertices": 1985
+      }
+    },
+    {
+      "key": "6:253",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_greaves_06.glb",
+      "beforeSHA256": "f30d230e2c308d5e0fda67c2ac573669c46de7e93800af6c34ef4a3bb5d85a5b",
+      "afterSHA256": "4e8cb3b85e13c9fe42e1fec82608e89e914956523bcddd797eb74cccb3289914",
+      "fit": {
+        "changedVertices": 4726,
+        "maximumMove": 0.025990343126135903,
+        "limitedVertices": 1106
+      }
+    },
+    {
+      "key": "6:254",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_greaves_07.glb",
+      "beforeSHA256": "cb11e5e45798cb974b8ea72fb9a2857842573bd3fff037a81740960d086530dd",
+      "afterSHA256": "7a77658c2e6e309b2566cd84ea00c0152c34ce6ffe3f8aa1952c98d3590db36d",
+      "fit": {
+        "changedVertices": 4774,
+        "maximumMove": 0.10067319676680711,
+        "limitedVertices": 2466
+      }
+    },
+    {
+      "key": "6:255",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_greaves_08.glb",
+      "beforeSHA256": "2066f4dc6266bc49d728f132ae88d1c2ca722909167254c86953eac9f857b9ae",
+      "afterSHA256": "97a42cb06928c94c99d83b27c194c18055648bb5ee68916ad891354759564734",
+      "fit": {
+        "changedVertices": 4959,
+        "maximumMove": 0.039975168372799345,
+        "limitedVertices": 2255
+      }
+    },
+    {
+      "key": "4:219",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_leg_armor_01.glb",
+      "beforeSHA256": "871eb21fa6f29c2ff16b3494e642505f0f78c16643074d6e0b8f8c98d28bb646",
+      "afterSHA256": "ab03e51dabafc32320f47043f174c6c76bedaa988e92361df3c9bee8997bc50e",
+      "fit": {
+        "changedVertices": 7043,
+        "maximumMove": 0.09318778208468971,
+        "limitedVertices": 4097
+      }
+    },
+    {
+      "key": "4:220",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_leg_armor_02.glb",
+      "beforeSHA256": "23d3ca26c08aaf8f9d07f2a9b74d69be6f0a6564ddd225fe115fb9627b5f167d",
+      "afterSHA256": "4f60118f1d948cf63855121256d22e2989d7f985fcb44b74537351876d468d7f",
+      "fit": {
+        "changedVertices": 6900,
+        "maximumMove": 0.08822883821378406,
+        "limitedVertices": 5412
+      }
+    },
+    {
+      "key": "4:221",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_leg_armor_03.glb",
+      "beforeSHA256": "0167d8a5325b0531dd452db00d6dc94c319bda86ee87d88139cb5206ac5c8a23",
+      "afterSHA256": "9d04824d995d6d4b5bacfbb9746d40f6d27cb351c2fe9affd22b1d0e8c0feef0",
+      "fit": {
+        "changedVertices": 6848,
+        "maximumMove": 0.09263754349736697,
+        "limitedVertices": 5323
+      }
+    },
+    {
+      "key": "4:222",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_leg_armor_04.glb",
+      "beforeSHA256": "352e00b5d2a40d370ac1fab2f199f09e653bf1cd76ee4acc7ba5c2d6b4a6aeae",
+      "afterSHA256": "95802da0249a58764d715a9e77ac0a88ec59f8a2563afc36fe7226332b895ae1",
+      "fit": {
+        "changedVertices": 6931,
+        "maximumMove": 0.09153525441468165,
+        "limitedVertices": 2919
+      }
+    },
+    {
+      "key": "4:223",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_leg_armor_05.glb",
+      "beforeSHA256": "b07c6cb16c2ca95aab779c2b91c15de0fbb3bf21933d6853adcf6b6212db9f23",
+      "afterSHA256": "f9e670a8be119586be5fa460cffd42238f2ae16e07dd5361a79c931b2deadf9e",
+      "fit": {
+        "changedVertices": 6585,
+        "maximumMove": 0.08572338884675246,
+        "limitedVertices": 5355
+      }
+    },
+    {
+      "key": "4:224",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_leg_armor_06.glb",
+      "beforeSHA256": "45c68590b001b5612682014c0aae75e37e4717263827a2371039717653e28ae9",
+      "afterSHA256": "2b1e6967f578973f7387ed7173a1c0d63af42b4b5943b59afde618b554cf0f93",
+      "fit": {
+        "changedVertices": 7055,
+        "maximumMove": 0.09212003617957848,
+        "limitedVertices": 5237
+      }
+    },
+    {
+      "key": "4:225",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_leg_armor_07.glb",
+      "beforeSHA256": "45fd733453ca78bb5f90fdf510506b53f124cd0050be2ea7501a93ca627a8052",
+      "afterSHA256": "66ed3dd9a6808a5f37e1a3e00da8e7da86d82b7b6c7538d332a90a10a6f80bbf",
+      "fit": {
+        "changedVertices": 6864,
+        "maximumMove": 0.0953671886241878,
+        "limitedVertices": 5268
+      }
+    },
+    {
+      "key": "4:226",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_leg_armor_08.glb",
+      "beforeSHA256": "babce5cb01bc63c1e038e1013e21e0a1fb6174e9a287fbcdde1cccbaaa2fa005",
+      "afterSHA256": "c984f76aece00be83a0d632d672dfa1b41216a076d7b4824d82c2b86046d9c90",
+      "fit": {
+        "changedVertices": 6988,
+        "maximumMove": 0.09576642023884858,
+        "limitedVertices": 5223
+      }
+    },
+    {
+      "key": "4:227",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/rugged_ranger_legwear_01.glb",
+      "beforeSHA256": "7298660926264d2facfda1454007909b8b68f81cbf194e0bcac0075eeb132b08",
+      "afterSHA256": "b2c031b82281097c4468d6f09eabff069659d3eb42f8ed6ea0e789283795c289",
+      "fit": {
+        "changedVertices": 6622,
+        "maximumMove": 0.09242598498326804,
+        "limitedVertices": 5404
+      }
+    },
+    {
+      "key": "4:228",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/rugged_ranger_legwear_02.glb",
+      "beforeSHA256": "19f9b2ec89c03554fb0298f3f795529b10f69fb5989c8e32ce93ae7754c80772",
+      "afterSHA256": "764bbd7716391b2dc03b116681ada953c0b56beea244f9606fb465f65f3faab8",
+      "fit": {
+        "changedVertices": 6846,
+        "maximumMove": 0.09314076921069049,
+        "limitedVertices": 5431
+      }
+    },
+    {
+      "key": "4:229",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/rugged_ranger_legwear_03.glb",
+      "beforeSHA256": "10b7aa281e601ef197dd0746302bdcd7eba5ab2bd521ceb689c32b21c9b8355b",
+      "afterSHA256": "3a27dd770995f37b7d885ed9cb09e1f69e389a9aca30a911608cfdbac51154fc",
+      "fit": {
+        "changedVertices": 6782,
+        "maximumMove": 0.08879206463849372,
+        "limitedVertices": 5515
+      }
+    },
+    {
+      "key": "4:230",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/rugged_ranger_legwear_04.glb",
+      "beforeSHA256": "8e6ce57064a7d12d57b54c301547ea39d9a91d42a8e8b10bbb22a45d041ad38e",
+      "afterSHA256": "f044a9848f17502f47298eecfe4d6bb5d5a630c6819bcfff0fd7c43567f40f7c",
+      "fit": {
+        "changedVertices": 6894,
+        "maximumMove": 0.08765751223891736,
+        "limitedVertices": 5344
+      }
+    },
+    {
+      "key": "4:231",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/rugged_ranger_legwear_05.glb",
+      "beforeSHA256": "40031bf63a7b287e57178f882b9e8dea8d53ded7ffb790b902fd71c0c45a6e9c",
+      "afterSHA256": "a3b6d6f922d5409e1186825a83f2bb391f31c0f10c81e08febbba9ba5ff1f72e",
+      "fit": {
+        "changedVertices": 6590,
+        "maximumMove": 0.0906584154986267,
+        "limitedVertices": 5451
+      }
+    },
+    {
+      "key": "4:232",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/rugged_ranger_legwear_06.glb",
+      "beforeSHA256": "a528cd24439259e945c55927f6e6e1a2af5c0323ff9d3c513376c23cf1af5cc4",
+      "afterSHA256": "109e2268f00ef4d619b92c8456f9d343fde433c166983dc35e2d5c6b744c299f",
+      "fit": {
+        "changedVertices": 6744,
+        "maximumMove": 0.09142880059471949,
+        "limitedVertices": 5407
+      }
+    },
+    {
+      "key": "4:233",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/rugged_ranger_legwear_07.glb",
+      "beforeSHA256": "297400f9ffa1af8057b4038ba89f585827db1c6132ab44b02918800bdf589618",
+      "afterSHA256": "0f621acce4860e6016da556debbf3dfa0f97c450ad21c3217daae5ea6c377584",
+      "fit": {
+        "changedVertices": 6925,
+        "maximumMove": 0.09390282733820815,
+        "limitedVertices": 3684
+      }
+    },
+    {
+      "key": "4:234",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/rugged_ranger_legwear_08.glb",
+      "beforeSHA256": "014872f2704a3c2c2d64f031499f0e98ce55a4bc17ba8363f3b59485373acbcb",
+      "afterSHA256": "ab367c1751ead0b64d3e753edcf289e35f7136b956a46b44a2fa2697d85c33d4",
+      "fit": {
+        "changedVertices": 6756,
+        "maximumMove": 0.09370627741994896,
+        "limitedVertices": 5145
+      }
+    },
+    {
+      "key": "6:216",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_boots_01.glb",
+      "beforeSHA256": "11723b5d286fc0a7f121dca0b7dd8a72105f73252ecf32105a00af481c45d9cc",
+      "afterSHA256": "d8476ba5d32cfb8b09a90bc0e172437625c4d2ef5be1c7f29fa599f70014dc9c",
+      "fit": {
+        "changedVertices": 5008,
+        "maximumMove": 0.0386876881574374,
+        "limitedVertices": 2267
+      }
+    },
+    {
+      "key": "6:217",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_boots_02.glb",
+      "beforeSHA256": "e75f155c91d0f8d4ed15bb08d8760c44a3a91c25027a840aff2001a6ea785b61",
+      "afterSHA256": "2451a28dede3ae9ee2a495bbdc3cda067a3713fd5cd6b82bba48423114663366",
+      "fit": {
+        "changedVertices": 3732,
+        "maximumMove": 0.03731190879067555,
+        "limitedVertices": 526
+      }
+    },
+    {
+      "key": "6:218",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_boots_03.glb",
+      "beforeSHA256": "2ac9c37bc5629d10093b7a161495d4ae3c8e9e29efdabdc8d5734e2195fe52f7",
+      "afterSHA256": "4f33509d9d10a4df7dd1992cd2d2be90e2d5953842ce5b7e3a3d232afeb72098",
+      "fit": {
+        "changedVertices": 4730,
+        "maximumMove": 0.02539531018126138,
+        "limitedVertices": 2406
+      }
+    },
+    {
+      "key": "6:219",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_boots_04.glb",
+      "beforeSHA256": "d75b92180678277916a6d0d04b36adac9067a489698776b4d9f7204da918cbe5",
+      "afterSHA256": "6fb55cee72de42930ffda48b94b5f2e9fe75e8e96b8a6edf84a7d024b4961bf4",
+      "fit": {
+        "changedVertices": 5052,
+        "maximumMove": 0.046113218081041914,
+        "limitedVertices": 888
+      }
+    },
+    {
+      "key": "6:220",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_boots_05.glb",
+      "beforeSHA256": "6afe5b18bf3eef00180a7302e229f697256cc9950b8726656764cf351b9de7bc",
+      "afterSHA256": "bc66136993bb0f3d20a0050d0c4be3991cabffab32246bc6a6d46c773980fbc1",
+      "fit": {
+        "changedVertices": 4894,
+        "maximumMove": 0.030254482334744908,
+        "limitedVertices": 314
+      }
+    },
+    {
+      "key": "6:221",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_boots_06.glb",
+      "beforeSHA256": "b280a16b94dd2401143547a7ed30deac6e3573d5199b9b61b318b362f92c70ad",
+      "afterSHA256": "0345e238f9395f1e29b4f7c89b3d0752a4b0d6a8f4afd719be0f073479d7175b",
+      "fit": {
+        "changedVertices": 5065,
+        "maximumMove": 0.06742210338045762,
+        "limitedVertices": 3768
+      }
+    },
+    {
+      "key": "6:222",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_boots_07.glb",
+      "beforeSHA256": "437f919d3111054d2d02c758a1f1171d850bc7b5bf0c005a0778ba0928307a68",
+      "afterSHA256": "58cd9cbc5767f68e4d7f2ddbffd4fe1c2eff0fe54d930defecf2bedcfcf4f8d9",
+      "fit": {
+        "changedVertices": 3223,
+        "maximumMove": 0.02422080131618744,
+        "limitedVertices": 472
+      }
+    },
+    {
+      "key": "6:223",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_boots_08.glb",
+      "beforeSHA256": "f78c67c6a046d71693023fc68812a460248f37efce8f9e96ccc830d0032989de",
+      "afterSHA256": "db3e71c8510885bea4d928b283fb4653ee0635ab824238629384526718a38f4f",
+      "fit": {
+        "changedVertices": 5300,
+        "maximumMove": 0.03602922068468601,
+        "limitedVertices": 1288
+      }
+    },
+    {
+      "key": "4:235",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_legwear_01.glb",
+      "beforeSHA256": "c8b07cc8ddb2355b5c76d7257e8579fe97994dfc8fc46fc5bd56075c727d4f4c",
+      "afterSHA256": "2c024523a56872f032eb308319fdb6f92f67c337b90c24a6439003ad1dcf21f8",
+      "fit": {
+        "changedVertices": 6949,
+        "maximumMove": 0.08658441846393415,
+        "limitedVertices": 5427
+      }
+    },
+    {
+      "key": "4:236",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_legwear_02.glb",
+      "beforeSHA256": "67a1597477b98df9a14390abb0e5169a13e4feb1ed7cf016c819309c5b42ac42",
+      "afterSHA256": "9633c0604630c5e7d1c5ba385df85f43c6c190046ea57fe2a8358ddfee6dc063",
+      "fit": {
+        "changedVertices": 7136,
+        "maximumMove": 0.10811695437286534,
+        "limitedVertices": 5406
+      }
+    },
+    {
+      "key": "4:237",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_legwear_03.glb",
+      "beforeSHA256": "6a7733b01eb1244dbd7a4783797b8711d7dae911d47086372be94e6712eac2d8",
+      "afterSHA256": "6e00e8ff8e900bb5b6578e7da1302db7af2711642b7a1eed71509cb494a5cd72",
+      "fit": {
+        "changedVertices": 7218,
+        "maximumMove": 0.08923014670582229,
+        "limitedVertices": 5301
+      }
+    },
+    {
+      "key": "4:238",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_legwear_04.glb",
+      "beforeSHA256": "a450d8b7dc05c751e5b23b977652cd62a669ecb6d873fde5a0f3a3d61be10907",
+      "afterSHA256": "4a7f1c56c1cd8b03f7e0243d358701d4a2c77be37d9940d49a9e1723901715a5",
+      "fit": {
+        "changedVertices": 6893,
+        "maximumMove": 0.09116683242397039,
+        "limitedVertices": 5358
+      }
+    },
+    {
+      "key": "4:239",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_legwear_05.glb",
+      "beforeSHA256": "383babb4c3aeb48c0972a13d41a6de4d8e9b0cf25ba355f1083d2c2998c757ef",
+      "afterSHA256": "9a224b430442c046a33849324aa97e427cc2a5e8716e620a459d730947d08f74",
+      "fit": {
+        "changedVertices": 6795,
+        "maximumMove": 0.09985580897554058,
+        "limitedVertices": 5408
+      }
+    },
+    {
+      "key": "4:240",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_legwear_06.glb",
+      "beforeSHA256": "79a078c14b13095024eb9cd7dc45b71b73dad7b7167a22ea729b90d8268c4710",
+      "afterSHA256": "bb0344d08d6af0d25b9da3c5679b60cd3cb4a222f9ce17415afb8e45d0ff3633",
+      "fit": {
+        "changedVertices": 6896,
+        "maximumMove": 0.1021122763899314,
+        "limitedVertices": 4026
+      }
+    },
+    {
+      "key": "4:241",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_legwear_07.glb",
+      "beforeSHA256": "fe89a17e78699341db231f3ba45e8bf8f807c74ac750dd6d35a3e30d1a8aa45c",
+      "afterSHA256": "64e9d8e16aa6cc4bc8c7f5809a2d2d59bbf9c486087a45972ddf9171f2d7e96b",
+      "fit": {
+        "changedVertices": 6923,
+        "maximumMove": 0.08399111888866113,
+        "limitedVertices": 5404
+      }
+    },
+    {
+      "key": "4:242",
+      "sex": "male",
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/sunmane_steppe_legwear_08.glb",
+      "beforeSHA256": "847c4952f7ac8bc34d014a9bb3f242d835546aae41c4a7ce9a48e38b97ea4ea6",
+      "afterSHA256": "800f38c5409af63d8e3b75ae7672b9119818d0f4cc4f238ddd1078fe898532ea",
+      "fit": {
+        "changedVertices": 7159,
+        "maximumMove": 0.08719233980383846,
+        "limitedVertices": 5377
+      }
+    }
+  ],
+  "broaderNativeCatalogueSuite": {
+    "tests": 35,
+    "startingRevisionFailures": 69,
+    "currentFailures": 69,
+    "identicalFailureSet": true,
+    "newFailures": []
+  }
+}

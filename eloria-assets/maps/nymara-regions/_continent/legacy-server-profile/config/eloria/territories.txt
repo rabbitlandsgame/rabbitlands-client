@@ -1,0 +1,43 @@
+# Nymara territories. Twelve regions, one skill each, so every discipline is
+# represented exactly once.
+#
+# Replaces the Eternal Lands territory table for this profile. The Eloria
+# profile previously fell back to config/territories.txt, which names Isla
+# Prima, White Stone, Naralik and Valley of the Dwarves. That file remains
+# correct for the EL-compatible default profile; it is simply not this world.
+#
+# Coordinates:
+#   objective            the map's arrival/respawn datum, from the client's
+#                        data/maps/registry.json serverOrigin.
+#   attacker / defender  portal ARRIVAL tiles from config/eloria/maps.txt --
+#                        tiles the game already lands players on. Portal
+#                        TRIGGER tiles are excluded on purpose: standing on one
+#                        sends the player to the neighbouring map, which would
+#                        empty a raid the moment it started.
+#
+# Generated against config/eloria/maps.txt sha256:2322e3952e20. The arrival tiles
+# move with that file -- if it changes, re-derive these rather than assuming
+# they still land on walkable ground.
+#
+# Map scales differ -- Sunmane Steppe centres on (58,58), most on (174,174),
+# Westhaven (174,250), Four Gates (360,360). Never copy between regions.
+#
+# Marked "derived": too few usable arrival tiles far enough apart, so spawns
+# are placed symmetrically about the datum and are NOT verified walkable --
+# amethyst_barrens, ssarathi_ruins, manymouth_delta.
+#
+# Skill assignment is a design choice, not derived from anything. Change freely.
+#
+# key | name | defended map | skill | attacker x | attacker y | defender x | defender y | objective x | objective y | attacker group | defender group
+four_gates | Four Gates | four_gates | defense | 76 | 210 | 329 | 210 | 213 | 213 |  |
+crownwater | Crownwater | crownwater | crafting | 105 |  78 | 211 | 253 | 161 | 166 |  |
+mirrorhold | Mirrorhold | mirrorhold | engineering | 40 | 18 | 152 | 384 |  102 |  89 |  |
+whitehorn_range | Whitehorn Range | whitehorn_range | potion | 39 |  81 | 124 | 277 | 124 | 147 |  |
+amethyst_barrens | Amethyst Barrens | amethyst_barrens | magic | 40 |  95 | 231 |  95 | 149 |  95 |  |   # derived - verify in game
+sunmane_steppe | Sunmane Steppe | sunmane_steppe | ranging | 49 | 102 | 156 | 98 | 145 | 109 |  |
+amberwood | Amberwood | amberwood | harvesting | 213 | 396 | 405 | 174 | 141 | 134 |  |
+grey_moors | Grey Moors | grey_moors | summoning | 14 | 122 | 238 | 122 | 120 | 122 |  |
+westhaven | Westhaven | westhaven | manufacturing | 132 | 163 | 132 | 162 | 120 | 172 |  |
+verdant_stair | Verdant Stair | verdant_stair | alchemy | 42 | 148 | 337 | 189 | 113 | 108 |  |
+ssarathi_ruins | Ssarathi Ruins | ssarathi_ruins | attack | 72 | 115 | 237 | 110 | 153 | 116 |  |   # derived - verify in game
+manymouth_delta | Manymouth Delta | manymouth_delta | tailoring | 269 |  62 | 359 | 139 | 269 |  62 |  |   # derived - verify in game

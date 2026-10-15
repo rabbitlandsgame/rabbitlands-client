@@ -1,0 +1,454 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "four-gates-lantern-row",
+    "name": "Lantern Row",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bounds": {
+      "min": [
+        -14.5,
+        -1.0,
+        -9.0
+      ],
+      "max": [
+        14.5,
+        8.1,
+        9.0
+      ]
+    },
+    "interior": true,
+    "parentMap": "four_gates",
+    "quarter": "agricultural",
+    "description": "Covered market hall; general goods and Nima Vey's counting desk."
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      18.0,
+      18.0
+    ],
+    "origin": [
+      0.0,
+      0.05,
+      0.0
+    ],
+    "walkingHeight": 0.05,
+    "invertServerY": true,
+    "serverCells": [
+      36,
+      36
+    ],
+    "addressableWorldBounds": {
+      "min": [
+        -18.0,
+        -17.0
+      ],
+      "max": [
+        17.0,
+        18.0
+      ]
+    }
+  },
+  "spawnPoints": [
+    {
+      "id": "entrance",
+      "node": "Spawn_Entrance",
+      "position": [
+        0.0,
+        0.0,
+        2.0
+      ],
+      "facing": [
+        0,
+        0,
+        -1
+      ],
+      "default": true
+    }
+  ],
+  "portals": [
+    {
+      "id": "exit",
+      "position": [
+        0.0,
+        0.0,
+        5.0
+      ],
+      "radius": 1.6,
+      "targetMap": "four_gates",
+      "targetPosition": [
+        -34.5,
+        21.748455047607422,
+        67.5
+      ],
+      "label": "Out to the street"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "counting-desk",
+      "name": "Nima Vey's counting desk",
+      "node": "Counting_Desk",
+      "type": "vendor",
+      "position": [
+        0.0,
+        0.0,
+        -5.6
+      ]
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "nima-vey-merchant",
+      "actorType": 309,
+      "role": "merchant",
+      "position": [
+        0.0,
+        0.0,
+        -4.4
+      ],
+      "rotationDegrees": 180
+    }
+  ],
+  "interactives": [],
+  "collision": {
+    "nodeNames": [
+      "Shell_Wall_North",
+      "Shell_Wall_South",
+      "Shell_Wall_East",
+      "Shell_Wall_West",
+      "Counting_Desk"
+    ],
+    "note": "The four walls plus solid fittings; the floor is a walk surface and the walls stay solid while cut away.",
+    "binary": "collision.bin",
+    "format": "EWCG",
+    "version": 2,
+    "cellSize": 0.5,
+    "width": 72,
+    "height": 72,
+    "originMetres": [
+      -18.0,
+      18.0
+    ],
+    "heightEncoding": {
+      "origin": -0.2,
+      "step": 0.2,
+      "range": [
+        1,
+        255
+      ]
+    },
+    "authoredSurfaceExport": {
+      "floorMeshNodes": 1,
+      "solidMeshNodes": 5,
+      "walkableCells": 1380
+    },
+    "walkableCells": 1380,
+    "walkableFraction": 0.2662,
+    "actorSurfaceGuard": {
+      "method": "rendered-tile-centre-v1",
+      "actorTileOffset": [
+        0.5,
+        0.5
+      ],
+      "heightToleranceMetres": 0.8,
+      "closedTiles": 0,
+      "unsupportedTiles": 0,
+      "submergedTiles": 0,
+      "heightMismatchTiles": 0,
+      "samples": []
+    }
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Floor_",
+      "Deck_",
+      "Stair_"
+    ],
+    "walkableAreas": [
+      "floor"
+    ],
+    "navmesh": {
+      "format": "inline-convex-polygons-v1",
+      "coordinateSystem": "asset",
+      "agentRadius": 0.4,
+      "agentHeight": 1.9,
+      "maxSlopeDegrees": 30,
+      "polygons": [
+        {
+          "id": "room",
+          "tags": [
+            "interior",
+            "walkable"
+          ],
+          "vertices": [
+            [
+              -12.4,
+              0.02,
+              -6.9
+            ],
+            [
+              12.4,
+              0.02,
+              -6.9
+            ],
+            [
+              12.4,
+              0.02,
+              6.9
+            ],
+            [
+              -12.4,
+              0.02,
+              6.9
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "camera": {
+    "distance": 17.0,
+    "minDistance": 12.0,
+    "maxDistance": 23.0,
+    "pitchDegrees": -48.0,
+    "zoomStep": 1.2,
+    "note": "Framed for the whole room with the ceiling and near wall cut away; closer and shallower than the city rig."
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Shell_Ceiling",
+      "Shell_Beams"
+    ],
+    "walls": [
+      {
+        "node": "Shell_Wall_North",
+        "outward": [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Shell_Wall_South",
+        "outward": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "node": "Shell_Wall_East",
+        "outward": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "node": "Shell_Wall_West",
+        "outward": [
+          -1.0,
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "facingThreshold": 0.2,
+    "note": "Hide the roof, and any wall whose outward normal points back towards the camera, so the room stays visible from an isometric rig. Collision is unaffected."
+  },
+  "environment": {
+    "backgroundColor": [
+      0.04,
+      0.05,
+      0.06
+    ],
+    "ambient": {
+      "color": [
+        0.3,
+        0.29,
+        0.27
+      ],
+      "energy": 0.93,
+      "skyContribution": 0.0
+    },
+    "sun": {
+      "enabled": false
+    },
+    "fog": {
+      "enabled": false
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.0,
+      "whitePoint": 8.0
+    },
+    "lights": [
+      {
+        "position": [
+          0.0,
+          5.1,
+          -6.25
+        ],
+        "color": [
+          1.0,
+          0.86,
+          0.66
+        ],
+        "energy": 3.4,
+        "range": 11.0
+      },
+      {
+        "position": [
+          0.0,
+          5.1,
+          -3.75
+        ],
+        "color": [
+          1.0,
+          0.86,
+          0.66
+        ],
+        "energy": 3.4,
+        "range": 11.0
+      },
+      {
+        "position": [
+          0.0,
+          5.1,
+          -1.25
+        ],
+        "color": [
+          1.0,
+          0.86,
+          0.66
+        ],
+        "energy": 3.4,
+        "range": 11.0
+      },
+      {
+        "position": [
+          0.0,
+          5.1,
+          1.25
+        ],
+        "color": [
+          1.0,
+          0.86,
+          0.66
+        ],
+        "energy": 3.4,
+        "range": 11.0
+      },
+      {
+        "position": [
+          0.0,
+          5.1,
+          3.75
+        ],
+        "color": [
+          1.0,
+          0.86,
+          0.66
+        ],
+        "energy": 3.4,
+        "range": 11.0
+      },
+      {
+        "position": [
+          0.0,
+          5.1,
+          6.25
+        ],
+        "color": [
+          1.0,
+          0.86,
+          0.66
+        ],
+        "energy": 3.4,
+        "range": 11.0
+      },
+      {
+        "position": [
+          0.0,
+          2.4,
+          -4.9
+        ],
+        "color": [
+          0.72,
+          0.86,
+          1.0
+        ],
+        "energy": 4.0,
+        "range": 9.0
+      }
+    ]
+  },
+  "performance": {
+    "bytes": 3688128,
+    "nodes": 54,
+    "meshes": 14,
+    "materials": 13,
+    "textures": 41,
+    "animations": 0,
+    "uniqueTriangles": 1648,
+    "instances": 49,
+    "visibleTriangles": 7296,
+    "textureMemoryBytes": 26913450
+  },
+  "externalResources": {
+    "../_shared/images/03c747fb9ba6a29991344d4643d0c282aa98ca120ee7d2250f7610744c496666.png": "03c747fb9ba6a29991344d4643d0c282aa98ca120ee7d2250f7610744c496666",
+    "../_shared/images/04c465836ad3b7383cc6be848a8e7a2c9ba771dad5a5b8d7469efa64868ee496.png": "04c465836ad3b7383cc6be848a8e7a2c9ba771dad5a5b8d7469efa64868ee496",
+    "../_shared/images/1210849cbce929a159b022d97146d451e9d582b396abfaa2b65d5ea1cd620f20.png": "1210849cbce929a159b022d97146d451e9d582b396abfaa2b65d5ea1cd620f20",
+    "../_shared/images/23bd7cc0991f0ecdd159ef99bb62d73d3f43bfef16abacf35d9b723fbb8af753.png": "23bd7cc0991f0ecdd159ef99bb62d73d3f43bfef16abacf35d9b723fbb8af753",
+    "../_shared/images/268cc71e15ac95b41e08c95aaefa833e0bb1611d46fce8385aaf1037187c4e7e.png": "268cc71e15ac95b41e08c95aaefa833e0bb1611d46fce8385aaf1037187c4e7e",
+    "../_shared/images/28f072d672502fb6fc12301cdd70013677a6149ba1c9604664a7ecf0963b0ac2.png": "28f072d672502fb6fc12301cdd70013677a6149ba1c9604664a7ecf0963b0ac2",
+    "../_shared/images/2be92ad017af356fcd340f92f1fdd7f6e0f708d993f6c265cf38f28898e46859.png": "2be92ad017af356fcd340f92f1fdd7f6e0f708d993f6c265cf38f28898e46859",
+    "../_shared/images/32df3cbee2010170f68422d14ff1d9e92d4380a8b6af6f9651d50937615521e0.png": "32df3cbee2010170f68422d14ff1d9e92d4380a8b6af6f9651d50937615521e0",
+    "../_shared/images/3397aa112f705585d204e54a7f229a3533558b8646a29d98da6845fc35d5893f.png": "3397aa112f705585d204e54a7f229a3533558b8646a29d98da6845fc35d5893f",
+    "../_shared/images/34766134b8eb8394af9df8f15bfae269313c7773372d80ad08e15ccfe3e29f78.png": "34766134b8eb8394af9df8f15bfae269313c7773372d80ad08e15ccfe3e29f78",
+    "../_shared/images/3620143623bf8f39334be36051ff4818153c9f3076d5a1e5400d68b0b57a32da.png": "3620143623bf8f39334be36051ff4818153c9f3076d5a1e5400d68b0b57a32da",
+    "../_shared/images/381c790b8e5936b3c9803ea2c62b8d24eccfb90c562417d2971e2dc46a3f13d0.png": "381c790b8e5936b3c9803ea2c62b8d24eccfb90c562417d2971e2dc46a3f13d0",
+    "../_shared/images/40b4c092d37b9365455419dabb8331d2d771d23a7d0b3a37c602c21c3322409f.png": "40b4c092d37b9365455419dabb8331d2d771d23a7d0b3a37c602c21c3322409f",
+    "../_shared/images/4cbf70e2be32ec907a9237b3f55d1f4e6bd0755a7fb8a8b7b2733fa7ad2ffc45.png": "4cbf70e2be32ec907a9237b3f55d1f4e6bd0755a7fb8a8b7b2733fa7ad2ffc45",
+    "../_shared/images/570d950d123edf4cb1a77ba07bf7bb9108727abde2edaee290505940f98a5630.png": "570d950d123edf4cb1a77ba07bf7bb9108727abde2edaee290505940f98a5630",
+    "../_shared/images/5b37a983e9f13bfe7659d8201357f32e24e9b4a6d7b7479801097f5ab45d503e.png": "5b37a983e9f13bfe7659d8201357f32e24e9b4a6d7b7479801097f5ab45d503e",
+    "../_shared/images/65d2caf06fb916d9a02f97c80af5927fd25322f0b9f8cd8e42ef394ec35c9bb5.png": "65d2caf06fb916d9a02f97c80af5927fd25322f0b9f8cd8e42ef394ec35c9bb5",
+    "../_shared/images/7275bb144346be6c484c347ff5cc082f0807588f0eca7ad4f1829684e405cdd7.png": "7275bb144346be6c484c347ff5cc082f0807588f0eca7ad4f1829684e405cdd7",
+    "../_shared/images/78edcb259b9eeb6a0b1c3f8fbac8668c5ceecacab7884d6981f0025c0671da4c.png": "78edcb259b9eeb6a0b1c3f8fbac8668c5ceecacab7884d6981f0025c0671da4c",
+    "../_shared/images/7da2435fee0460bec13557b28d0334bd7fc798aa75408a8f665339dd87a61a16.png": "7da2435fee0460bec13557b28d0334bd7fc798aa75408a8f665339dd87a61a16",
+    "../_shared/images/8611cc7e838cf6f930230b8a2f95f602cdce17d35bea82e7d03f2f13c73dfa43.png": "8611cc7e838cf6f930230b8a2f95f602cdce17d35bea82e7d03f2f13c73dfa43",
+    "../_shared/images/88211ab4c250877705562a9335e9ebbc300a3039ab33b84ec425e3fcd7c949a2.png": "88211ab4c250877705562a9335e9ebbc300a3039ab33b84ec425e3fcd7c949a2",
+    "../_shared/images/89b70a5a565e186d57ec26e7a2a3f903afd509b0febdd2a71bdf282c557b3044.png": "89b70a5a565e186d57ec26e7a2a3f903afd509b0febdd2a71bdf282c557b3044",
+    "../_shared/images/8dad03f4a7434e6d67e71de8f163fc38bf76b8a1b1c0bd2c1e3f0151d57260fd.png": "8dad03f4a7434e6d67e71de8f163fc38bf76b8a1b1c0bd2c1e3f0151d57260fd",
+    "../_shared/images/907b500f6e347905db8b5862a05c3b23e24c353365454e59497934afccaf0061.png": "907b500f6e347905db8b5862a05c3b23e24c353365454e59497934afccaf0061",
+    "../_shared/images/9832cb4aedfd142f546ca8d8fafd98a9c1b99b784763c807bba6a46dc5aa98d0.png": "9832cb4aedfd142f546ca8d8fafd98a9c1b99b784763c807bba6a46dc5aa98d0",
+    "../_shared/images/9ccc195f77a38469b594d890a20e92efe94df7099008321c9896253b1f7497c6.png": "9ccc195f77a38469b594d890a20e92efe94df7099008321c9896253b1f7497c6",
+    "../_shared/images/af1d93b8bc7fd7ebf00398a0e76805141217f97d96d4ffc4a756f5bf49ea4080.png": "af1d93b8bc7fd7ebf00398a0e76805141217f97d96d4ffc4a756f5bf49ea4080",
+    "../_shared/images/b4a1179382a3d93e6382370b7dcabd842f59f73f1d215f80f6a58d860cdca962.png": "b4a1179382a3d93e6382370b7dcabd842f59f73f1d215f80f6a58d860cdca962",
+    "../_shared/images/c0f946b6e04ca8ad941116aa91f0b810bcef69dbbc89a79f0c3e72f133e10de7.png": "c0f946b6e04ca8ad941116aa91f0b810bcef69dbbc89a79f0c3e72f133e10de7",
+    "../_shared/images/c28bf72eac51621252373a8327b8ca47f51d1d5d2557d4e895a9b34bbd5a2d92.png": "c28bf72eac51621252373a8327b8ca47f51d1d5d2557d4e895a9b34bbd5a2d92",
+    "../_shared/images/c7eb0768dbed65650962ebe94da0a0b355ecb411a6076a01eedc48a0a0f59cf5.png": "c7eb0768dbed65650962ebe94da0a0b355ecb411a6076a01eedc48a0a0f59cf5",
+    "../_shared/images/cf457a889d87cb836c7b6a8316389e517f19768a7112325ba9a73b5abdc87c63.png": "cf457a889d87cb836c7b6a8316389e517f19768a7112325ba9a73b5abdc87c63",
+    "../_shared/images/d4739319259541e03b391d543b59a0b03ed661ea012cf19729846c13600d3abd.png": "d4739319259541e03b391d543b59a0b03ed661ea012cf19729846c13600d3abd",
+    "../_shared/images/d6355701bbfa627e397b8e8b6f9f94f066fcbd35743f62398918b5bbed47a3e9.png": "d6355701bbfa627e397b8e8b6f9f94f066fcbd35743f62398918b5bbed47a3e9",
+    "../_shared/images/e17309524e7d99954e14f4e301c7873e3593576917f14656711ade78f42a7a03.png": "e17309524e7d99954e14f4e301c7873e3593576917f14656711ade78f42a7a03",
+    "../_shared/images/e5a60e78d807a79b7f0faef240109dc115ae34b1f1c5fb173f1cf7a743b44110.png": "e5a60e78d807a79b7f0faef240109dc115ae34b1f1c5fb173f1cf7a743b44110",
+    "../_shared/images/e6f43cbf74eeb5daa5fd86ffa87857924c3b161e07c6601101a07b66f4e59272.png": "e6f43cbf74eeb5daa5fd86ffa87857924c3b161e07c6601101a07b66f4e59272",
+    "../_shared/images/ef8927e3c6f9237815495149085e86451ca92e66fc2d84c80646c2ca442c4aaf.png": "ef8927e3c6f9237815495149085e86451ca92e66fc2d84c80646c2ca442c4aaf",
+    "../_shared/images/f45d2b230c12dbd8dd4dc258b3c47d5e863dbd466198a1305cff158403a65a72.png": "f45d2b230c12dbd8dd4dc258b3c47d5e863dbd466198a1305cff158403a65a72",
+    "../_shared/images/f6f587a6401b62a85cb10ec93847b1536a4266766669540a1dfcfedf2e00c893.png": "f6f587a6401b62a85cb10ec93847b1536a4266766669540a1dfcfedf2e00c893"
+  }
+}

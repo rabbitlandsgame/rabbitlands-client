@@ -1,0 +1,71 @@
+{
+ "schema": "eloria-region-authoring-spec-v1",
+ "regionId": "hearthcroft",
+ "label": "Hearthcroft",
+ "adapter": "continent-v2-meshy-v1",
+ "paths": {
+  "scene": "godot-client/world_authoring/regions/hearthcroft/hearthcroft.tscn",
+  "manifest": "eloria-assets/maps/continent-v2/hearthcroft/world.json",
+  "snapshot": "eloria-assets/maps/continent-v2/hearthcroft/authoring/continent-authoring.json"
+ },
+ "inputs": {
+  "baseHeights": "godot-client/world_authoring/regions/hearthcroft/base-heights.f32le",
+  "baseColors": "godot-client/world_authoring/regions/hearthcroft/base-colors.rgba8"
+ },
+ "continentTranslation": [
+  1900.0,
+  0.0,
+  6956.0
+ ],
+ "server": {
+  "origin": [
+   425,
+   269
+  ],
+  "cells": [
+   852,
+   852
+  ],
+  "collisionOriginMetres": [
+   -425.0,
+   269.0
+  ]
+ },
+ "terrain": {
+  "origin": [
+   -481.0,
+   -325.0
+  ],
+  "cellMetres": 2.0,
+  "vertices": [
+   482,
+   326
+  ]
+ },
+ "authority": {
+  "ownedRouteIds": [],
+  "requiredRouteIds": [],
+  "ownedPlanFeatureIds": [],
+  "ownedFerryConnectionIds": []
+ },
+ "gameplay": {
+  "runtimeBindingCount": 0,
+  "runtimePointCount": 0,
+  "existingMarkerBindingCount": 0,
+  "generatedArrival": {
+   "path": "eloria-assets/maps/continent-v2/hearthcroft/content/arrival.json",
+   "sha256": "a7c0fd726be418aacf25baaf74b180d0c0c5b05c711ae3a58f882e556fc2a75a"
+  },
+  "authoredMarkerCount": 115
+ },
+ "continentV2": {
+  "planPath": "eloria-assets/maps/continent-v2/_continent_v2/continent-v2-plan.json",
+  "vertical": {
+   "A": 259.0078328433769,
+   "u0": 259.0078328433769,
+   "peakMetres": 350.0,
+   "gainAtSea": 1.0
+  },
+  "planSha256": "731d24f05084b5893d91f0f5d54f7d7e4f7183e3396b850a2f9da3d7c4f7d392"
+ }
+}

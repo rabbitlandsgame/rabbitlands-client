@@ -1,0 +1,768 @@
+{
+ "schema": "eloria-continent-v2-spawns-v1",
+ "map": "hearthcroft",
+ "about": "Pinned original spawn rows, partitioned by exact continent position. local remains the source of truth.",
+ "source": {
+  "sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
+  "originalSources": {
+   "sw_isle": {
+    "file": "spawn_plan_rf.json",
+    "sha256": "13dd506f5c254b91fd1fbeb7faeb707c8690d21b1d76d4e649aa63358219dc4f",
+    "schema": "eloria-continent-v2-spawn-plan-draft-1",
+    "date": "2026-10-02",
+    "note": "review fix 2026-10-03: sw-spawn-0883 re-seated onto a fully reached 3x3 tile ring (rf_sw1 asset-aware check)",
+    "diffCheck": "differs from spawn_plan.json (2026-10-02 21:57) only in sw-spawn-0883, (1718, 218) -> (1718, 219) in the pre-D2b frame, (1718, 188) -> (1718, 189) in D2b",
+    "savedCopy": "work-output/continent-v2/review/serve_inputs/spawns/spawn_plan_rf.json",
+    "originally": "session scratchpad continent_v2/content/spawns/spawn_plan_rf.json"
+   }
+  }
+ },
+ "spawns": [
+  {
+   "id": "sw-spawn-0398",
+   "creature": "pheasant",
+   "local": [
+    -248.5,
+    -44.5
+   ],
+   "leash": 35,
+   "zone": "ne_bay:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0404",
+   "creature": "stoat",
+   "local": [
+    -350.5,
+    -83.5
+   ],
+   "leash": 35,
+   "zone": "ne_bay:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0409",
+   "creature": "red_fox",
+   "local": [
+    -414.5,
+    -118.5
+   ],
+   "leash": 35,
+   "zone": "ne_bay:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0411",
+   "creature": "chameleon",
+   "local": [
+    -325.5,
+    -86.5
+   ],
+   "leash": 35,
+   "zone": "ne_bay:C",
+   "band": "C",
+   "level": 4,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0419",
+   "creature": "squirrel",
+   "local": [
+    -363.5,
+    -124.5
+   ],
+   "leash": 35,
+   "zone": "ne_bay:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0427",
+   "creature": "magpie",
+   "local": [
+    -345.5,
+    -45.5
+   ],
+   "leash": 35,
+   "zone": "ne_bay:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0433",
+   "creature": "riverglass_otter",
+   "local": [
+    -19.5,
+    -137.5
+   ],
+   "leash": 45,
+   "zone": "ne_bay:D",
+   "band": "D",
+   "level": 4,
+   "habitat": "shore"
+  },
+  {
+   "id": "sw-spawn-0434",
+   "creature": "delta_mud_crab",
+   "local": [
+    -117.5,
+    -133.5
+   ],
+   "leash": 45,
+   "zone": "ne_bay:D",
+   "band": "D",
+   "level": 12,
+   "habitat": "shore",
+   "note": "owner swap 2026-10-02 (beach_crab): was river_otter"
+  },
+  {
+   "id": "sw-spawn-0438",
+   "creature": "pelican",
+   "local": [
+    -146.5,
+    -110.5
+   ],
+   "leash": 45,
+   "zone": "ne_bay:D",
+   "band": "D",
+   "level": 9,
+   "habitat": "shore"
+  },
+  {
+   "id": "sw-spawn-0439",
+   "creature": "delta_mud_crab",
+   "local": [
+    -48.5,
+    -115.5
+   ],
+   "leash": 45,
+   "zone": "ne_bay:D",
+   "band": "D",
+   "level": 12,
+   "habitat": "shore",
+   "note": "owner swap 2026-10-02 (beach_crab): was river_otter"
+  },
+  {
+   "id": "sw-spawn-0463",
+   "creature": "crown_antler_stag",
+   "local": [
+    -42.5,
+    43.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0465",
+   "creature": "rabbit",
+   "local": [
+    3.5,
+    200.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0467",
+   "creature": "magpie",
+   "local": [
+    -119.5,
+    119.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0469",
+   "creature": "red_fox",
+   "local": [
+    -44.5,
+    15.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0470",
+   "creature": "squirrel",
+   "local": [
+    -91.5,
+    244.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0473",
+   "creature": "pheasant",
+   "local": [
+    -291.5,
+    13.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0475",
+   "creature": "crown_antler_stag",
+   "local": [
+    -315.5,
+    -12.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0478",
+   "creature": "stoat",
+   "local": [
+    -25.5,
+    196.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "meadow",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0479",
+   "creature": "magpie",
+   "local": [
+    -65.5,
+    69.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0481",
+   "creature": "stoat",
+   "local": [
+    -52.5,
+    144.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "meadow",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0482",
+   "creature": "pheasant",
+   "local": [
+    -127.5,
+    204.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0483",
+   "creature": "chameleon",
+   "local": [
+    -280.5,
+    132.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 4,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0484",
+   "creature": "pheasant",
+   "local": [
+    -70.5,
+    27.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0485",
+   "creature": "stoat",
+   "local": [
+    -165.5,
+    210.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0489",
+   "creature": "rabbit",
+   "local": [
+    -232.5,
+    186.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0490",
+   "creature": "stoat",
+   "local": [
+    6.5,
+    35.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0492",
+   "creature": "crown_antler_stag",
+   "local": [
+    8.5,
+    96.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0494",
+   "creature": "pheasant",
+   "local": [
+    -101.5,
+    196.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0496",
+   "creature": "squirrel",
+   "local": [
+    -259.5,
+    155.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0499",
+   "creature": "crown_antler_stag",
+   "local": [
+    -52.5,
+    200.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0503",
+   "creature": "magpie",
+   "local": [
+    -211.5,
+    -27.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0506",
+   "creature": "pheasant",
+   "local": [
+    -43.5,
+    223.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0507",
+   "creature": "magpie",
+   "local": [
+    -100.5,
+    104.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0508",
+   "creature": "magpie",
+   "local": [
+    -215.5,
+    157.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0510",
+   "creature": "pheasant",
+   "local": [
+    -239.5,
+    139.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0511",
+   "creature": "magpie",
+   "local": [
+    -24.5,
+    147.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0512",
+   "creature": "squirrel",
+   "local": [
+    -187.5,
+    181.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0518",
+   "creature": "chameleon",
+   "local": [
+    -286.5,
+    43.5
+   ],
+   "leash": 35,
+   "zone": "east_hamlet_fields:C",
+   "band": "C",
+   "level": 4,
+   "habitat": "forest"
+  },
+  {
+   "id": "sw-spawn-0519",
+   "creature": "rabbit",
+   "local": [
+    46.5,
+    151.5
+   ],
+   "leash": 35,
+   "zone": "east_point:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0520",
+   "creature": "gecko",
+   "local": [
+    33.5,
+    16.5
+   ],
+   "leash": 35,
+   "zone": "east_point:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "rock"
+  },
+  {
+   "id": "sw-spawn-0525",
+   "creature": "stoat",
+   "local": [
+    47.5,
+    69.5
+   ],
+   "leash": 35,
+   "zone": "east_point:C",
+   "band": "C",
+   "level": 6,
+   "habitat": "meadow",
+   "note": "owner swap 2026-10-02 (fox_to_stoat): was red_fox"
+  },
+  {
+   "id": "sw-spawn-0528",
+   "creature": "pheasant",
+   "local": [
+    6.5,
+    198.5
+   ],
+   "leash": 35,
+   "zone": "east_point:C",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0530",
+   "creature": "magpie",
+   "local": [
+    26.5,
+    47.5
+   ],
+   "leash": 35,
+   "zone": "east_point:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0532",
+   "creature": "rabbit",
+   "local": [
+    21.5,
+    99.5
+   ],
+   "leash": 35,
+   "zone": "east_point:C",
+   "band": "C",
+   "level": 1,
+   "habitat": "meadow"
+  },
+  {
+   "id": "sw-spawn-0535",
+   "creature": "magpie",
+   "local": [
+    48.5,
+    233.5
+   ],
+   "leash": 35,
+   "zone": "east_point:C",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "lv-hearthcroft-b14bay-01",
+   "creature": "pelican",
+   "local": [
+    228.5,
+    -137.5
+   ],
+   "leash": 12,
+   "zone": "lv-crossing-stops",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore"
+  },
+  {
+   "id": "lv-hearthcroft-road-01",
+   "creature": "pheasant",
+   "local": [
+    -157.5,
+    24.5
+   ],
+   "leash": 25,
+   "zone": "lv-roadside-life",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "lv-hearthcroft-road-02",
+   "creature": "magpie",
+   "local": [
+    -5.5,
+    -42.5
+   ],
+   "leash": 25,
+   "zone": "lv-roadside-life",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "lv-hearthcroft-road-03",
+   "creature": "pelican",
+   "local": [
+    391.5,
+    -226.5
+   ],
+   "leash": 12,
+   "zone": "lv-roadside-life",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore"
+  },
+  {
+   "id": "lv-hearthcroft-road-04",
+   "creature": "bronze_tide_crab",
+   "local": [
+    290.5,
+    -186.5
+   ],
+   "leash": 10,
+   "zone": "lv-roadside-life",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "shore"
+  },
+  {
+   "id": "lv-hearthcroft-road-05",
+   "creature": "stoat",
+   "local": [
+    -111.5,
+    -9.5
+   ],
+   "leash": 25,
+   "zone": "lv-roadside-life",
+   "band": "C",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "lv-hearthcroft-road-06",
+   "creature": "crown_antler_stag",
+   "local": [
+    -230.5,
+    55.5
+   ],
+   "leash": 25,
+   "zone": "lv-roadside-life",
+   "band": "C",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "lv-hearthcroft-road-07",
+   "creature": "pheasant",
+   "local": [
+    -402.5,
+    -45.5
+   ],
+   "leash": 25,
+   "zone": "lv-roadside-life",
+   "band": "C",
+   "level": 3,
+   "habitat": "meadow"
+  },
+  {
+   "id": "lv-hearthcroft-road-08",
+   "creature": "pelican",
+   "local": [
+    85.5,
+    -91.5
+   ],
+   "leash": 12,
+   "zone": "lv-roadside-life",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore"
+  },
+  {
+   "id": "lv-hearthcroft-road-09",
+   "creature": "bronze_tide_crab",
+   "local": [
+    153.5,
+    -131.5
+   ],
+   "leash": 10,
+   "zone": "lv-roadside-life",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "shore"
+  },
+  {
+   "id": "lv-hearthcroft-road-10",
+   "creature": "magpie",
+   "local": [
+    -2.5,
+    4.5
+   ],
+   "leash": 25,
+   "zone": "lv-roadside-life",
+   "band": "C",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "lv-hearthcroft-road-11",
+   "creature": "pelican",
+   "local": [
+    336.5,
+    -203.5
+   ],
+   "leash": 12,
+   "zone": "lv-roadside-life",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore"
+  }
+ ]
+}

@@ -1,0 +1,290 @@
+[
+  {
+    "id": "verdant-lagoon-to-steppe-ascent",
+    "map": "verdant_stair",
+    "start": [
+      38,
+      61
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 45,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          38,
+          61
+        ],
+        "label": "quay-climb-foot",
+        "capture": "verdant-quay-climb-foot"
+      },
+      {
+        "tile": [
+          58,
+          81
+        ],
+        "label": "quay-climb-head",
+        "capture": "verdant-quay-climb-head"
+      },
+      {
+        "tile": [
+          60,
+          62
+        ],
+        "label": "lower-climb-foot",
+        "capture": "verdant-lower-climb-foot"
+      },
+      {
+        "tile": [
+          93,
+          93
+        ],
+        "label": "lower-climb-head",
+        "capture": "verdant-lower-climb-head"
+      },
+      {
+        "tile": [
+          78,
+          105
+        ],
+        "label": "physick-public-path-south",
+        "capture": "verdant-physick-public-path-south"
+      },
+      {
+        "tile": [
+          78,
+          124
+        ],
+        "label": "physick-public-path-north",
+        "capture": "verdant-physick-public-path-north"
+      },
+      {
+        "tile": [
+          69,
+          138
+        ],
+        "label": "grand-stair-foot",
+        "capture": "verdant-grand-stair-foot"
+      },
+      {
+        "tile": [
+          114,
+          167
+        ],
+        "label": "grand-stair-head",
+        "capture": "verdant-grand-stair-head"
+      },
+      {
+        "tile": [
+          147,
+          172
+        ],
+        "label": "shrine-climb-foot",
+        "capture": "verdant-shrine-climb-foot"
+      },
+      {
+        "tile": [
+          179,
+          202
+        ],
+        "label": "shrine-climb-head",
+        "capture": "verdant-shrine-climb-head"
+      },
+      {
+        "tile": [
+          221,
+          188
+        ],
+        "label": "temple-climb-foot",
+        "capture": "verdant-temple-climb-foot"
+      },
+      {
+        "tile": [
+          252,
+          220
+        ],
+        "label": "temple-climb-head",
+        "capture": "verdant-temple-climb-head"
+      },
+      {
+        "tile": [
+          257,
+          197
+        ],
+        "label": "summit-climb-foot",
+        "capture": "verdant-summit-climb-foot"
+      },
+      {
+        "tile": [
+          288,
+          228
+        ],
+        "label": "summit-climb-head",
+        "capture": "verdant-summit-climb-head"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-floodplain-encounter",
+    "map": "ssarathi_ruins",
+    "start": [
+      201,
+      154
+    ],
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          202,
+          139
+        ],
+        "label": "herons beside the drowned city",
+        "expectCreature": 598,
+        "capture": "ssarathi-herons"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-steppe-ascent",
+    "map": "amethyst_barrens",
+    "start": [
+      224,
+      68
+    ],
+    "startTolerance": 2,
+    "walkTimeout": 100,
+    "distance": 32,
+    "yaw": 180,
+    "steps": [
+      {
+        "tile": [
+          209,
+          61
+        ],
+        "label": "amethyst-steppe-0",
+        "capture": "amethyst-steppe-0"
+      },
+      {
+        "tile": [
+          193,
+          54
+        ],
+        "label": "amethyst-steppe-1",
+        "capture": "amethyst-steppe-1"
+      },
+      {
+        "tile": [
+          179,
+          48
+        ],
+        "label": "amethyst-steppe-2",
+        "capture": "amethyst-steppe-2"
+      },
+      {
+        "tile": [
+          170,
+          43
+        ],
+        "label": "amethyst-steppe-3",
+        "capture": "amethyst-steppe-3"
+      },
+      {
+        "tile": [
+          173,
+          33
+        ],
+        "label": "amethyst-steppe-4",
+        "capture": "amethyst-steppe-4"
+      },
+      {
+        "tile": [
+          173,
+          25
+        ],
+        "label": "amethyst-steppe-5",
+        "capture": "amethyst-steppe-5"
+      },
+      {
+        "tile": [
+          170,
+          12
+        ],
+        "label": "amethyst-steppe-6",
+        "capture": "amethyst-steppe-6"
+      },
+      {
+        "tile": [
+          170,
+          6
+        ],
+        "label": "amethyst-steppe-7",
+        "capture": "amethyst-steppe-7"
+      }
+    ]
+  },
+  {
+    "id": "whitehorn-fix-whitehorn-ice-cave-mouth",
+    "map": "whitehorn_range",
+    "start": [
+      40,
+      176
+    ],
+    "startTolerance": 0,
+    "distance": 31,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          35,
+          179
+        ],
+        "label": "enter",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-enter",
+        "destination": "whitehorn_glacier_temple"
+      },
+      {
+        "tile": [
+          121,
+          92
+        ],
+        "label": "inside-clear",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-inside-clear"
+      },
+      {
+        "tile": [
+          124,
+          92
+        ],
+        "label": "return",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-return",
+        "destination": "whitehorn_range"
+      },
+      {
+        "tile": [
+          33,
+          177
+        ],
+        "label": "outside-lower-tread",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-outside-lower-tread"
+      },
+      {
+        "tile": [
+          36,
+          177
+        ],
+        "label": "outside-lateral-tread",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-outside-lateral-tread"
+      },
+      {
+        "tile": [
+          40,
+          176
+        ],
+        "label": "exterior-apron",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-exterior-apron"
+      }
+    ]
+  }
+]

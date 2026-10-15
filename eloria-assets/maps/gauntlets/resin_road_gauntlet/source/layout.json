@@ -1,0 +1,1417 @@
+{
+ "_note": "resin_road_gauntlet: trail road geometry from the concept amberwood_gauntlet (work-output/gauntlet-v2-design/regions). Plan metres, x east, y SOUTH; arenas are ellipses; paths are [x, y, elev] polylines; mouths are pockets placed along a bearing from the arena centre. `land` shapes the ground round the road (_toolkit/landforms.py) and `dressing` dresses it (_toolkit/trail_dressing.py).",
+ "schema": "eloria-trail-layout-v1",
+ "id": "resin_road_gauntlet",
+ "size": [
+  384,
+  384
+ ],
+ "sections": [
+  {
+   "id": "trailhead",
+   "kind": "camp",
+   "name": "Charcoal Ridge Camp",
+   "at": [
+    52,
+    56
+   ],
+   "rx": 18,
+   "ry": 15,
+   "rot": 0,
+   "elev": 22
+  },
+  {
+   "id": "w1",
+   "kind": "arena",
+   "name": "The Kiln Clearing",
+   "at": [
+    128,
+    92
+   ],
+   "rx": 34,
+   "ry": 24,
+   "rot": 10,
+   "elev": 19,
+   "order": 1,
+   "mouths": [
+    {
+     "id": "w1-south",
+     "bearing": 105,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-north",
+     "bearing": 285,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-west",
+     "bearing": 170,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "kind": "arena",
+   "name": "The Root Cellar",
+   "at": [
+    226,
+    66
+   ],
+   "rx": 32,
+   "ry": 25,
+   "rot": -8,
+   "elev": 13,
+   "order": 2,
+   "mouths": [
+    {
+     "id": "w2-south",
+     "bearing": 80,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-north",
+     "bearing": 265,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-southwest",
+     "bearing": 125,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "kind": "arena",
+   "name": "The Sap Ravine",
+   "at": [
+    306,
+    132
+   ],
+   "rx": 40,
+   "ry": 19,
+   "rot": 70,
+   "elev": 6,
+   "order": 3,
+   "mouths": [
+    {
+     "id": "w3-southeast",
+     "bearing": 25,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-west",
+     "bearing": 185,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-north",
+     "bearing": 285,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "kind": "arena",
+   "name": "The Resin Works",
+   "at": [
+    300,
+    246
+   ],
+   "rx": 35,
+   "ry": 26,
+   "rot": 0,
+   "elev": 2,
+   "order": 4,
+   "mouths": [
+    {
+     "id": "w4-east",
+     "bearing": 0,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-west",
+     "bearing": 190,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-south",
+     "bearing": 95,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "kind": "arena",
+   "name": "The Lantern Glade",
+   "at": [
+    196,
+    296
+   ],
+   "rx": 40,
+   "ry": 22,
+   "rot": -15,
+   "elev": -1,
+   "order": 5,
+   "mouths": [
+    {
+     "id": "w5-north",
+     "bearing": 270,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-south",
+     "bearing": 90,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-northwest",
+     "bearing": 205,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "kind": "court",
+   "name": "The Boar King's Wallow",
+   "at": [
+    96,
+    300
+   ],
+   "rx": 27,
+   "ry": 25,
+   "rot": 0,
+   "elev": -3,
+   "order": 6,
+   "mouths": [
+    {
+     "id": "court-northwest",
+     "bearing": 225,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    },
+    {
+     "id": "court-southeast",
+     "bearing": 65,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    }
+   ]
+  },
+  {
+   "id": "vault",
+   "kind": "vault",
+   "name": "The Hollow Oak",
+   "at": [
+    62,
+    334
+   ],
+   "rx": 8,
+   "ry": 7,
+   "rot": 0,
+   "elev": -2.5
+  }
+ ],
+ "mouthDefaults": {
+  "out": 6,
+  "radius": 7,
+  "linkWidth": 5
+ },
+ "paths": [
+  {
+   "from": "trailhead",
+   "to": "w1",
+   "width": 7,
+   "points": [
+    [
+     76,
+     62,
+     21.5
+    ],
+    [
+     98,
+     80,
+     20
+    ]
+   ]
+  },
+  {
+   "from": "w1",
+   "to": "w2",
+   "width": 6,
+   "points": [
+    [
+     162,
+     98,
+     17.5
+    ],
+    [
+     182,
+     82,
+     15.5
+    ],
+    [
+     198,
+     62,
+     14
+    ]
+   ]
+  },
+  {
+   "from": "w2",
+   "to": "w3",
+   "width": 6,
+   "points": [
+    [
+     256,
+     58,
+     12
+    ],
+    [
+     280,
+     70,
+     10
+    ],
+    [
+     292,
+     96,
+     8
+    ]
+   ]
+  },
+  {
+   "from": "w3",
+   "to": "w4",
+   "width": 6,
+   "points": [
+    [
+     286,
+     168,
+     5
+    ],
+    [
+     270,
+     196,
+     4
+    ],
+    [
+     284,
+     220,
+     3
+    ]
+   ]
+  },
+  {
+   "from": "w4",
+   "to": "w5",
+   "width": 6,
+   "points": [
+    [
+     266,
+     270,
+     1.5
+    ],
+    [
+     240,
+     290,
+     0.5
+    ],
+    [
+     222,
+     300,
+     0
+    ]
+   ]
+  },
+  {
+   "from": "w5",
+   "to": "boss",
+   "width": 6,
+   "points": [
+    [
+     160,
+     304,
+     -1.5
+    ],
+    [
+     132,
+     296,
+     -2.5
+    ]
+   ]
+  },
+  {
+   "from": "boss",
+   "to": "vault",
+   "width": 4,
+   "points": [
+    [
+     76,
+     322,
+     -3
+    ]
+   ]
+  }
+ ],
+ "land": {
+  "banks": 7,
+  "hills": 6.0,
+  "cut": 11,
+  "ground": {
+   "bank": "meadow_grass",
+   "network": "meadow_grass",
+   "trail": "packed_earth",
+   "cliff": "cliff_rock",
+   "bed": "shore_shingle",
+   "deck": "timber_dark"
+  },
+  "rivers": [
+   {
+    "points": [
+     [
+      384,
+      112,
+      9.0
+     ],
+     [
+      340,
+      124,
+      6.0
+     ],
+     [
+      306,
+      134,
+      3.6
+     ],
+     [
+      270,
+      148,
+      2.6
+     ],
+     [
+      236,
+      170,
+      2.0
+     ],
+     [
+      200,
+      176,
+      1.5
+     ],
+     [
+      150,
+      190,
+      0.6
+     ],
+     [
+      60,
+      206,
+      -1.0
+     ],
+     [
+      0,
+      214,
+      -1.5
+     ]
+    ],
+    "width": 8,
+    "material": "water_stream"
+   }
+  ],
+  "lakes": [
+   {
+    "at": [
+     96,
+     300
+    ],
+    "rx": 9,
+    "ry": 7,
+    "level": -2.75,
+    "deep": false,
+    "depth": 0.35,
+    "material": "water_pool"
+   },
+   {
+    "at": [
+     312,
+     254
+    ],
+    "rx": 5,
+    "ry": 4,
+    "level": 1.85,
+    "material": "amber_resin"
+   },
+   {
+    "at": [
+     288,
+     238
+    ],
+    "rx": 4,
+    "ry": 3,
+    "level": 1.85,
+    "material": "amber_resin"
+   }
+  ],
+  "crossings": [
+   {
+    "at": [
+     306,
+     134
+    ],
+    "half": [
+     13,
+     2.6
+    ],
+    "rot": 70
+   }
+  ]
+ },
+ "checkpoints": [
+  {
+   "id": "cp1",
+   "name": "The burners' fire",
+   "at": [
+    275.9,
+    60.7
+   ],
+   "elev": 10.58,
+   "after": "w2",
+   "reach": 12.0
+  },
+  {
+   "id": "cp2",
+   "name": "The tappers' fire",
+   "at": [
+    256.6,
+    269.1
+   ],
+   "elev": 1.29,
+   "after": "w4",
+   "reach": 12.0
+  }
+ ],
+ "sides": [
+  {
+   "id": "sap-spring",
+   "name": "The Sap Spring",
+   "from": [
+    273.8,
+    189.4,
+    4.23
+   ],
+   "at": [
+    259.9,
+    181.5
+   ],
+   "radius": 7,
+   "elev": 4.53,
+   "width": 4
+  }
+ ],
+ "floors": {
+  "w4": "packed_earth",
+  "w5": "forest_floor",
+  "boss": "forest_floor",
+  "vault": "forest_floor"
+ },
+ "environment": {
+  "sky": {
+   "topColor": [
+    0.32,
+    0.48,
+    0.7
+   ],
+   "horizonColor": [
+    0.94,
+    0.76,
+    0.52
+   ],
+   "groundBottomColor": [
+    0.2,
+    0.16,
+    0.1
+   ],
+   "groundHorizonColor": [
+    0.62,
+    0.48,
+    0.3
+   ]
+  },
+  "sun": {
+   "enabled": true,
+   "direction": [
+    0.62,
+    -0.55,
+    0.55
+   ],
+   "color": [
+    1.0,
+    0.86,
+    0.66
+   ],
+   "energy": 1.65
+  },
+  "ambient": {
+   "color": [
+    0.72,
+    0.66,
+    0.58
+   ],
+   "energy": 0.85,
+   "skyContribution": 0.35
+  },
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.86,
+    0.72,
+    0.52
+   ],
+   "density": 0.0008
+  },
+  "tonemap": {
+   "mode": "filmic",
+   "exposure": 1.0,
+   "white": 4.0
+  }
+ },
+ "dressing": {
+  "woods": {
+   "count": 620,
+   "mix": [
+    [
+     "oak",
+     0.12
+    ],
+    [
+     "maple1",
+     0.08
+    ],
+    [
+     "maple2",
+     0.08
+    ],
+    [
+     "beech",
+     0.08
+    ],
+    [
+     "larch",
+     0.09
+    ],
+    [
+     "chestnut",
+     0.06
+    ],
+    [
+     "resinpine",
+     0.08
+    ],
+    [
+     "fir",
+     0.14
+    ],
+    [
+     "broadleafa",
+     0.08
+    ],
+    [
+     "broadleafb",
+     0.14
+    ],
+    [
+     "birch",
+     0.05
+    ]
+   ]
+  },
+  "cover": {
+   "count": 600,
+   "mix": [
+    [
+     "under1",
+     1
+    ],
+    [
+     "under2",
+     1
+    ],
+    [
+     "under3",
+     1
+    ],
+    [
+     "under4",
+     1
+    ],
+    [
+     "bracken",
+     1
+    ],
+    [
+     "bramble",
+     0.6
+    ],
+    [
+     "fern",
+     1
+    ],
+    [
+     "shrub1",
+     0.8
+    ],
+    [
+     "leaves",
+     0.8
+    ]
+   ]
+  },
+  "rocks": {
+   "count": 130,
+   "mix": [
+    [
+     "boulder1",
+     1
+    ],
+    [
+     "boulder2",
+     1
+    ],
+    [
+     "boulder3",
+     1
+    ],
+    [
+     "boulder4",
+     1
+    ]
+   ]
+  },
+  "frame": {
+   "count": 30,
+   "mix": [
+    [
+     "crag1",
+     1
+    ],
+    [
+     "crag2",
+     1
+    ],
+    [
+     "crag3",
+     1
+    ]
+   ]
+  },
+  "camp": {
+   "tents": "tent",
+   "fire": "firepit",
+   "shelter": "shelter",
+   "crates": [
+    "crate1",
+    "crate2",
+    "barrels"
+   ],
+   "tentScale": 1.25
+  },
+  "lantern": {
+   "key": "lantern",
+   "every": 46
+  },
+  "objects": {
+   "waystone": "waystone",
+   "cache": "cache",
+   "plaque": "notice"
+  },
+  "tint": {
+   "crag1": [
+    0.62,
+    0.58,
+    0.52
+   ],
+   "crag2": [
+    0.62,
+    0.58,
+    0.52
+   ],
+   "crag3": [
+    0.62,
+    0.58,
+    0.52
+   ]
+  },
+  "kits": {
+   "waystone": "whitehorn_range/kit-horn-waystone-1",
+   "cache": "four_gates/kit-crate-stack-1",
+   "notice": "amberwood/kit-notice-board-1",
+   "firepit": "sunmane_steppe/kit-fire-pit",
+   "shelter": "whitehorn_range/kit-firewood-shelter-1",
+   "crate1": "whitehorn_range/kit-supply-crate-1",
+   "crate2": "whitehorn_range/kit-supply-crate-2",
+   "barrels": "four_gates/kit-barrel-stack-1",
+   "oak": "amberwood/kit-russet-oak-tree-1",
+   "maple1": "amberwood/kit-autumn-maple-tree-1",
+   "maple2": "amberwood/kit-autumn-maple-tree-2",
+   "beech": "amberwood/kit-copper-beech-1",
+   "larch": "amberwood/kit-golden-larch-1",
+   "chestnut": "amberwood/kit-sweet-chestnut-1",
+   "resinpine": "amberwood/kit-resin-tapped-pine-1",
+   "fir": "amberwood/kit-dark-fir-1",
+   "broadleafa": "sw_isle/kit-sw-broadleaf-tree-a",
+   "broadleafb": "sw_isle/kit-sw-broadleaf-tree-b",
+   "greatoak": "amberwood/kit-great-amber-oak-1",
+   "birch": "amberwood/kit-golden-birch-tree-1",
+   "under1": "amberwood/kit-undergrowth-1",
+   "under2": "amberwood/kit-undergrowth-2",
+   "under3": "amberwood/kit-undergrowth-3",
+   "under4": "amberwood/kit-undergrowth-4",
+   "bracken": "amberwood/kit-bracken-patch-1",
+   "bramble": "amberwood/kit-bramble-1",
+   "fern": "amberwood/kit-autumn-fern-1",
+   "shrub1": "amberwood/kit-autumn-shrub-1",
+   "leaves": "amberwood/kit-fallen-leaves-1",
+   "boulder1": "amberwood/kit-mossy-boulder-1",
+   "boulder2": "amberwood/kit-mossy-boulder-2",
+   "boulder3": "amberwood/kit-mossy-boulder-3",
+   "boulder4": "amberwood/kit-mossy-boulder-4",
+   "crag1": "grey_moors/kit-mossy-crag-1",
+   "crag2": "grey_moors/kit-mossy-crag-2",
+   "crag3": "grey_moors/kit-mossy-crag-3",
+   "log1": "amberwood/kit-mossy-log-1",
+   "log2": "amberwood/kit-mossy-log-2",
+   "hollowlog": "amberwood/kit-hollow-log-1",
+   "stump": "amberwood/kit-mossy-stump-1",
+   "woodblock": "amberwood/kit-woodcutter-block-1",
+   "sawhorse": "amberwood/kit-sawhorse-1",
+   "rack": "amberwood/kit-amber-drying-rack-1",
+   "cottage": "amberwood/kit-amber-cottage-2",
+   "cart": "sunmane_steppe/kit-cart",
+   "shrine": "amberwood/kit-forest-shrine-1",
+   "lantern": "grey_moors/kit-trail-lantern-post-1",
+   "tent": "whitehorn_range/kit-expedition-tent-1",
+   "falls1": "amberwood/kit-waterfall-rocks-1",
+   "stones": "amberwood/kit-river-stones-1",
+   "toadstools": "amberwood/kit-toadstool-ring-1",
+   "bones": "sunmane_steppe/kit-bleached-bones-0",
+   "RR1": "@kit/kit-rr-charcoal-kiln.glb",
+   "RR2": "@kit/kit-rr-charcoal-clamp.glb",
+   "RR3": "@kit/kit-rr-root-arch.glb",
+   "RR4": "@kit/kit-rr-fallen-log-bridge.glb",
+   "RR5": "@kit/kit-rr-tapping-frame.glb",
+   "RR6": "@kit/kit-rr-resin-vat.glb",
+   "RR7": "@kit/kit-rr-hollow-amber-oak.glb",
+   "RR8": "@kit/kit-rr-glade-giant.glb"
+  },
+  "landmarks": [
+   {
+    "kit": "RR1",
+    "at": [
+     114,
+     83
+    ],
+    "scale": 0.9,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     128,
+     92
+    ]
+   },
+   {
+    "kit": "RR1",
+    "at": [
+     126,
+     102
+    ],
+    "scale": 0.9,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     128,
+     92
+    ]
+   },
+   {
+    "kit": "RR1",
+    "at": [
+     139,
+     82
+    ],
+    "scale": 0.9,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     128,
+     92
+    ]
+   },
+   {
+    "kit": "RR1",
+    "at": [
+     148,
+     98
+    ],
+    "scale": 0.9,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     128,
+     92
+    ]
+   },
+   {
+    "kit": "RR2",
+    "at": [
+     138.98,
+     111.01
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 60
+   },
+   {
+    "kit": "RR2",
+    "at": [
+     148.41,
+     80.21
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 330
+   },
+   {
+    "kit": "RR2",
+    "at": [
+     119.01,
+     72.73
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 245
+   },
+   {
+    "kit": "log1",
+    "at": [
+     134,
+     105
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 20
+   },
+   {
+    "kit": "log2",
+    "at": [
+     108,
+     97
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": -30
+   },
+   {
+    "kit": "woodblock",
+    "at": [
+     131,
+     89
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "sawhorse",
+    "at": [
+     122,
+     94
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 40
+   },
+   {
+    "kit": "cart",
+    "at": [
+     104,
+     84
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 10
+   },
+   {
+    "kit": "RR3",
+    "at": [
+     208,
+     64
+    ],
+    "scale": 0.8,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 82
+   },
+   {
+    "kit": "RR3",
+    "at": [
+     226,
+     66
+    ],
+    "scale": 0.8,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 82
+   },
+   {
+    "kit": "RR3",
+    "at": [
+     244,
+     68
+    ],
+    "scale": 0.8,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 82
+   },
+   {
+    "kit": "hollowlog",
+    "at": [
+     240,
+     80
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 60
+   },
+   {
+    "kit": "stump",
+    "at": [
+     217,
+     52
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "toadstools",
+    "at": [
+     228,
+     68
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "RR4",
+    "at": [
+     306,
+     132
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "deck": true,
+    "fitLength": 28,
+    "rot": 70
+   },
+   {
+    "kit": "falls1",
+    "at": [
+     322,
+     124
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 100
+   },
+   {
+    "kit": "stones",
+    "at": [
+     298,
+     137
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "log2",
+    "at": [
+     294,
+     116
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 150
+   },
+   {
+    "kit": "boulder2",
+    "at": [
+     316,
+     150
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "cottage",
+    "at": [
+     304,
+     226
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     300,
+     246
+    ]
+   },
+   {
+    "kit": "barrels",
+    "at": [
+     296,
+     258
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "cart",
+    "at": [
+     320,
+     240
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 70
+   },
+   {
+    "kit": "RR5",
+    "at": [
+     290,
+     240
+    ],
+    "scale": 0.7,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 30
+   },
+   {
+    "kit": "RR5",
+    "at": [
+     314,
+     252
+    ],
+    "scale": 0.7,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": -20
+   },
+   {
+    "kit": "RR6",
+    "at": [
+     284,
+     254
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": -112
+   },
+   {
+    "kit": "RR6",
+    "at": [
+     306,
+     248
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 42
+   },
+   {
+    "kit": "RR6",
+    "at": [
+     298,
+     236
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": -14
+   },
+   {
+    "ring": {
+     "kit": "resinpine",
+     "scale": 1.4,
+     "solid": "trunk",
+     "around": [
+      300,
+      246
+     ],
+     "radius": [
+      44,
+      34
+     ],
+     "rotDeg": 0.0,
+     "n": 9,
+     "phase": 0.3
+    }
+   },
+   {
+    "kit": "RR8",
+    "at": [
+     166,
+     308
+    ],
+    "scale": 0.7,
+    "solid": {
+     "disc": 2.4
+    },
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "lantern",
+    "at": [
+     170,
+     308
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "RR8",
+    "at": [
+     181,
+     284
+    ],
+    "scale": 0.7,
+    "solid": {
+     "disc": 2.4
+    },
+    "group": "arena",
+    "rot": 67
+   },
+   {
+    "kit": "lantern",
+    "at": [
+     185,
+     284
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "RR8",
+    "at": [
+     196,
+     308
+    ],
+    "scale": 0.7,
+    "solid": {
+     "disc": 2.4
+    },
+    "group": "arena",
+    "rot": 134
+   },
+   {
+    "kit": "lantern",
+    "at": [
+     200,
+     308
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "RR8",
+    "at": [
+     211,
+     284
+    ],
+    "scale": 0.7,
+    "solid": {
+     "disc": 2.4
+    },
+    "group": "arena",
+    "rot": 201
+   },
+   {
+    "kit": "lantern",
+    "at": [
+     215,
+     284
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "RR8",
+    "at": [
+     226,
+     308
+    ],
+    "scale": 0.7,
+    "solid": {
+     "disc": 2.4
+    },
+    "group": "arena",
+    "rot": 268
+   },
+   {
+    "kit": "lantern",
+    "at": [
+     230,
+     308
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "shrine",
+    "at": [
+     198,
+     297
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     196,
+     296
+    ]
+   },
+   {
+    "kit": "RR7",
+    "at": [
+     49.27,
+     346.73
+    ],
+    "scale": 0.7,
+    "solid": "footprint",
+    "group": "scenery",
+    "face": [
+     96,
+     300
+    ]
+   },
+   {
+    "kit": "bones",
+    "at": [
+     102,
+     292
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "bones",
+    "at": [
+     86,
+     304
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "log1",
+    "at": [
+     110,
+     312
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": -20
+   }
+  ],
+  "meshyKit": [
+   "RR1",
+   "RR2",
+   "RR3",
+   "RR4",
+   "RR5",
+   "RR6",
+   "RR7",
+   "RR8"
+  ],
+  "labels": {
+   "plaque": [
+    "Rules of the road",
+    "One party at a time. The waves come to you; the road behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+   ],
+   "cache": "The Boar King's hoard",
+   "side": [
+    "The tappers' spring",
+    "The tappers drank here and washed the resin off their hands. It never quite came off."
+   ]
+  }
+ }
+}

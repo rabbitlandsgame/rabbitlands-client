@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.15,
+    "run": 1.25
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "bodyPlan": "biped_arms",
+  "locomotionStyle": "grounded",
+  "notes": "Walk and Jog are runtime clip names; motion follows the creature body (swim, slither, crawl, hover or grounded gait).",
+  "primary_attack": {
+    "id": 94,
+    "slug": "094_two_headed_giant",
+    "name": "Two Headed Giant",
+    "motion": "four_punch",
+    "label": "Alternating four-punch combination",
+    "duration_seconds": 1.45,
+    "source_key": "fantasy",
+    "source_title": "Wizards of the Coast: SRD 5.2.1 creature actions",
+    "source_url": "https://media.dndbeyond.com/compendium-images/srd/5.2/SRD_CC_v5.2.1.pdf",
+    "interpretation": "Game choreography inferred from anatomy or fantasy archetype; timing and amplitude are authored for readability.",
+    "revision": 13,
+    "generator": "work-output/generate_creature_attacks_r13.py",
+    "revision_13_motion": "Revision 13: Alternating four-punch combination. Retain all 97 attack POSITION/NORMAL correction shapes and weight/reset tracks; these preserve the fingers, head and attachments. All non-attack posed surfaces and clip durations are unchanged."
+  },
+  "locomotion_retiming": {
+    "walk": 1.35,
+    "jog": 1.5,
+    "baked_into_clip_timestamps": true
+  },
+  "revision": 13,
+  "corrective_clips": [
+    "Hit_Chest",
+    "Sword_Attack"
+  ],
+  "surface_correctives": {
+    "morph_targets": 130,
+    "clips": [
+      "Hit_Chest",
+      "Sword_Attack"
+    ],
+    "reset_unrelated_shapes": true,
+    "preserve_on_export": true
+  },
+  "facial_binding_report": "094_two_headed_giant_face_binding_r11.json",
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ]
+}

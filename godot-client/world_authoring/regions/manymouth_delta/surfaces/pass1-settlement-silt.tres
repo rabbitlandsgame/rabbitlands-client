@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" load_steps=4 format=3]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="surface"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png" id="albedo"]
+[sub_resource type="StandardMaterial3D" id="material"]
+resource_local_to_scene = true
+albedo_color = Color(0.66, 0.54, 0.39, 1)
+albedo_texture = ExtResource("albedo")
+roughness = 0.98
+uv1_scale = Vector3(0.8, 0.8, 1)
+texture_filter = 5
+cull_mode = 2
+[resource]
+resource_local_to_scene = true
+script = ExtResource("surface")
+texture_preset = "Soil"
+rotation_degrees = -19
+source_material = SubResource("material")

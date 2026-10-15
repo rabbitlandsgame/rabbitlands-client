@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="1_t7xl5"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/texture_packs/alpine-scree-lichen/alpine-scree-lichen-v001.png" id="2_8m633"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-normal.png" id="3_fhuwa"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-orm.png" id="4_akev6"]
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_xphuk"]
+cull_mode = 2
+albedo_color = Color(0.78, 0.69, 0.83, 1)
+albedo_texture = ExtResource("2_8m633")
+orm_texture = ExtResource("4_akev6")
+normal_enabled = true
+normal_scale = 0.8
+normal_texture = ExtResource("3_fhuwa")
+uv1_scale = Vector3(1.0416667, 1.0416667, 0.25)
+texture_filter = 5
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_t7xl5")
+texture_preset = "Alpine scree lichen"
+rotation_degrees = -14.0
+source_material = SubResource("ORMMaterial3D_xphuk")

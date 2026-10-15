@@ -1,0 +1,1010 @@
+{
+ "_note": "drowned_arcades_gauntlet: trail road geometry from the concept crownwater_gauntlet (work-output/gauntlet-v2-design/regions). Plan metres, x east, y SOUTH; arenas are ellipses; paths are [x, y, elev] polylines; mouths are pockets placed along a bearing from the arena centre. `land` shapes the ground round the road (_toolkit/landforms.py) and `dressing` dresses it (_toolkit/trail_dressing.py).",
+ "schema": "eloria-trail-layout-v1",
+ "id": "drowned_arcades_gauntlet",
+ "size": [
+  384,
+  384
+ ],
+ "sections": [
+  {
+   "id": "trailhead",
+   "kind": "camp",
+   "name": "Customs Quay",
+   "at": [
+    44,
+    344
+   ],
+   "rx": 18,
+   "ry": 15,
+   "rot": 0,
+   "elev": 0.4
+  },
+  {
+   "id": "w1",
+   "kind": "arena",
+   "name": "The Customs Square",
+   "at": [
+    100,
+    300
+   ],
+   "rx": 30,
+   "ry": 22,
+   "rot": 0,
+   "elev": 0.3,
+   "order": 1,
+   "mouths": [
+    {
+     "id": "w1-northwest",
+     "bearing": 235,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-southeast",
+     "bearing": 60,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-northeast",
+     "bearing": 305,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "kind": "arena",
+   "name": "The Bell Walk",
+   "at": [
+    176,
+    246
+   ],
+   "rx": 13,
+   "ry": 40,
+   "rot": 12,
+   "elev": 2.5,
+   "order": 2,
+   "mouths": [
+    {
+     "id": "w2-east",
+     "bearing": 20,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-northwest",
+     "bearing": 210,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-south",
+     "bearing": 80,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "kind": "arena",
+   "name": "The Cistern Square",
+   "at": [
+    276,
+    166
+   ],
+   "rx": 30,
+   "ry": 26,
+   "rot": 0,
+   "elev": 0.3,
+   "order": 3,
+   "mouths": [
+    {
+     "id": "w3-southeast",
+     "bearing": 45,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-northwest",
+     "bearing": 235,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-southwest",
+     "bearing": 125,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "kind": "arena",
+   "name": "The Long Arcade",
+   "at": [
+    330,
+    84
+   ],
+   "rx": 16,
+   "ry": 38,
+   "rot": 0,
+   "elev": 0.3,
+   "order": 4,
+   "mouths": [
+    {
+     "id": "w4-east",
+     "bearing": 5,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-west",
+     "bearing": 180,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-northeast",
+     "bearing": 295,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "kind": "arena",
+   "name": "The Two Sluices",
+   "at": [
+    206,
+    64
+   ],
+   "rx": 36,
+   "ry": 20,
+   "rot": 0,
+   "elev": 0.5,
+   "order": 5,
+   "mouths": [
+    {
+     "id": "w5-south",
+     "bearing": 70,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-north",
+     "bearing": 250,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-southwest",
+     "bearing": 135,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "kind": "court",
+   "name": "The Bell Court",
+   "at": [
+    96,
+    100
+   ],
+   "rx": 28,
+   "ry": 26,
+   "rot": 0,
+   "elev": 0.6,
+   "order": 6,
+   "mouths": [
+    {
+     "id": "court-south",
+     "bearing": 75,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    },
+    {
+     "id": "court-north",
+     "bearing": 285,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    }
+   ]
+  },
+  {
+   "id": "vault",
+   "kind": "vault",
+   "name": "The Treasury",
+   "at": [
+    50,
+    58
+   ],
+   "rx": 8,
+   "ry": 7,
+   "rot": 0,
+   "elev": 0.8
+  }
+ ],
+ "mouthDefaults": {
+  "out": 6,
+  "radius": 7,
+  "linkWidth": 5
+ },
+ "paths": [
+  {
+   "from": "trailhead",
+   "to": "w1",
+   "width": 7,
+   "points": [
+    [
+     64,
+     330,
+     0.4
+    ],
+    [
+     82,
+     314,
+     0.35
+    ]
+   ]
+  },
+  {
+   "from": "w1",
+   "to": "w2",
+   "width": 6,
+   "points": [
+    [
+     128,
+     288,
+     0.6
+    ],
+    [
+     160,
+     284,
+     1.6
+    ]
+   ]
+  },
+  {
+   "from": "w2",
+   "to": "w3",
+   "width": 6,
+   "points": [
+    [
+     190,
+     202,
+     1.6
+    ],
+    [
+     230,
+     186,
+     0.6
+    ],
+    [
+     252,
+     176,
+     0.35
+    ]
+   ]
+  },
+  {
+   "from": "w3",
+   "to": "w4",
+   "width": 6,
+   "points": [
+    [
+     300,
+     140,
+     0.3
+    ],
+    [
+     324,
+     124,
+     0.3
+    ]
+   ]
+  },
+  {
+   "from": "w4",
+   "to": "w5",
+   "width": 6,
+   "points": [
+    [
+     326,
+     42,
+     0.35
+    ],
+    [
+     280,
+     40,
+     0.4
+    ],
+    [
+     240,
+     54,
+     0.45
+    ]
+   ]
+  },
+  {
+   "from": "w5",
+   "to": "boss",
+   "width": 6,
+   "points": [
+    [
+     172,
+     70,
+     0.5
+    ],
+    [
+     140,
+     84,
+     0.55
+    ],
+    [
+     122,
+     92,
+     0.6
+    ]
+   ]
+  },
+  {
+   "from": "boss",
+   "to": "vault",
+   "width": 4,
+   "points": [
+    [
+     70,
+     74,
+     0.7
+    ]
+   ]
+  }
+ ],
+ "land": {
+  "hills": 0.3,
+  "floor": -0.2,
+  "waterLevel": 0.5,
+  "water": "water_lagoon",
+  "ground": {
+   "bank": "pale_ashlar",
+   "network": "pale_ashlar",
+   "trail": "veined_marble",
+   "cliff": "pale_ashlar",
+   "bed": "pale_ashlar",
+   "deck": "veined_marble"
+  },
+  "floorDefaults": {
+   "camp": "pale_ashlar",
+   "vault": "pale_ashlar",
+   "court": "pale_ashlar"
+  },
+  "crossings": [
+   {
+    "at": [
+     176,
+     246
+    ],
+    "half": [
+     38,
+     6.0
+    ],
+    "rot": 102
+   },
+   {
+    "at": [
+     206,
+     52
+    ],
+    "half": [
+     8,
+     2.4
+    ],
+    "rot": 0
+   },
+   {
+    "at": [
+     206,
+     76
+    ],
+    "half": [
+     8,
+     2.4
+    ],
+    "rot": 0
+   }
+  ],
+  "canals": [
+   {
+    "points": [
+     [
+      0,
+      236
+     ],
+     [
+      90,
+      252
+     ],
+     [
+      176,
+      246
+     ],
+     [
+      260,
+      222
+     ],
+     [
+      384,
+      208
+     ]
+    ],
+    "width": 16,
+    "depth": 3
+   },
+   {
+    "points": [
+     [
+      206,
+      0
+     ],
+     [
+      206,
+      112
+     ]
+    ],
+    "width": 10,
+    "depth": 3
+   }
+  ]
+ },
+ "checkpoints": [
+  {
+   "id": "cp1",
+   "name": "The bridge-foot fire",
+   "at": [
+    214.3,
+    199.3
+   ],
+   "elev": 1.05,
+   "after": "w2",
+   "reach": 12.0
+  },
+  {
+   "id": "cp2",
+   "name": "The arcade fire",
+   "at": [
+    302.1,
+    34.5
+   ],
+   "elev": 0.38,
+   "after": "w4",
+   "reach": 12.0
+  }
+ ],
+ "sides": [
+  {
+   "id": "bell-steps",
+   "name": "The Bell Steps",
+   "from": [
+    305.4,
+    136.4,
+    0.3
+   ],
+   "at": [
+    296.5,
+    123.1
+   ],
+   "radius": 7,
+   "elev": 0.6,
+   "width": 4
+  }
+ ],
+ "floors": {},
+ "environment": {
+  "sky": {
+   "topColor": [
+    0.22,
+    0.48,
+    0.82
+   ],
+   "horizonColor": [
+    0.86,
+    0.9,
+    0.92
+   ],
+   "groundBottomColor": [
+    0.2,
+    0.28,
+    0.32
+   ],
+   "groundHorizonColor": [
+    0.7,
+    0.76,
+    0.78
+   ]
+  },
+  "sun": {
+   "enabled": true,
+   "direction": [
+    0.52,
+    -0.68,
+    0.52
+   ],
+   "color": [
+    1.0,
+    0.95,
+    0.84
+   ],
+   "energy": 1.75
+  },
+  "ambient": {
+   "color": [
+    0.68,
+    0.74,
+    0.8
+   ],
+   "energy": 0.9,
+   "skyContribution": 0.4
+  },
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.84,
+    0.88,
+    0.9
+   ],
+   "density": 0.0006
+  },
+  "tonemap": {
+   "mode": "filmic",
+   "exposure": 0.98,
+   "white": 4.0
+  }
+ },
+ "dressing": {
+  "camp": {
+   "tents": "parasols",
+   "fire": "firepit",
+   "shelter": "gazebo",
+   "crates": [
+    "fishcrates",
+    "ropes",
+    "mooring"
+   ],
+   "tentScale": 1.2
+  },
+  "checkpoint": {
+   "fire": "firepit",
+   "shelter": null
+  },
+  "lantern": {
+   "key": "obelisk",
+   "every": 36,
+   "wet": true
+  },
+  "objects": {
+   "waystone": "waystone",
+   "cache": "cache",
+   "plaque": "notice"
+  },
+  "city": {
+   "count": 120,
+   "gap": 3.0,
+   "scale": 1.25,
+   "mix": [
+    [
+     "house1",
+     1
+    ],
+    [
+     "house2",
+     1
+    ],
+    [
+     "house3",
+     1
+    ],
+    [
+     "house4",
+     0.8
+    ],
+    [
+     "house5",
+     1
+    ],
+    [
+     "house6",
+     0.8
+    ],
+    [
+     "house7",
+     0.8
+    ]
+   ]
+  },
+  "kits": {
+   "waystone": "whitehorn_range/kit-horn-waystone-1",
+   "cache": "four_gates/kit-crate-stack-1",
+   "notice": "amberwood/kit-notice-board-1",
+   "firepit": "sunmane_steppe/kit-fire-pit",
+   "shelter": "whitehorn_range/kit-firewood-shelter-1",
+   "crate1": "whitehorn_range/kit-supply-crate-1",
+   "crate2": "whitehorn_range/kit-supply-crate-2",
+   "barrels": "four_gates/kit-barrel-stack-1",
+   "house1": "sw_isle/kit-sw-townhouse-blue",
+   "house2": "sw_isle/kit-sw-townhouse-dome-arcade",
+   "house3": "sw_isle/kit-haven-townhouse-1",
+   "house4": "sw_isle/kit-haven-townhouse-2",
+   "house5": "sw_isle/kit-haven-townhouse-3",
+   "house6": "sw_isle/kit-merchant-house-1",
+   "house7": "sw_isle/kit-wallside-rowhouse-1",
+   "temple": "sw_isle/kit-sw-domed-temple",
+   "tower": "sw_isle/kit-sw-harbour-tower",
+   "fountain": "crownwater/kit-crown-fountain-1",
+   "obelisk": "crownwater/kit-obelisk-lamp-1",
+   "balustrade": "crownwater/kit-marble-balustrade-1",
+   "cypress": "crownwater/kit-cypress-tree-1",
+   "potcypress": "crownwater/kit-potted-cypress-tree-1",
+   "gondola": "crownwater/kit-gondola-1",
+   "gondolapost": "crownwater/kit-gondola-post-1",
+   "statuehead": "crownwater/kit-sunken-statue-head-1",
+   "parasols": "crownwater/kit-market-parasols-1",
+   "gazebo": "crownwater/kit-teal-dome-gazebo-1",
+   "waterstair": "crownwater/kit-water-stair-1",
+   "mooring": "crownwater/kit-mooring-posts-1",
+   "ropes": "crownwater/kit-rope-coils-1",
+   "fishcrates": "crownwater/kit-fish-crates-1",
+   "bench": "crownwater/kit-stone-bench-1",
+   "urn": "crownwater/kit-garden-urn-1",
+   "seawall": "crownwater/kit-sea-wall-segment-1",
+   "DA1": "@kit/kit-da-arcade-bay.glb",
+   "DA2": "@kit/kit-da-bridge-span.glb",
+   "DA3": "@kit/kit-da-cistern-fountain.glb",
+   "DA4": "@kit/kit-da-sluice-lock.glb",
+   "DA5": "@kit/kit-da-campanile.glb",
+   "DA6": "@kit/kit-da-treasury.glb"
+  },
+  "landmarks": [
+   {
+    "kit": "DA1",
+    "at": [
+     71.82,
+     295.03
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     100,
+     300
+    ]
+   },
+   {
+    "kit": "DA1",
+    "at": [
+     125.93,
+     309.44
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     100,
+     300
+    ]
+   },
+   {
+    "kit": "DA1",
+    "at": [
+     96.33,
+     320.83
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     100,
+     300
+    ]
+   },
+   {
+    "kit": "DA1",
+    "at": [
+     100.0,
+     279.0
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     100,
+     300
+    ]
+   },
+   {
+    "kit": "DA1",
+    "at": [
+     118.98,
+     284.08
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     100,
+     300
+    ]
+   },
+   {
+    "kit": "statuehead",
+    "at": [
+     108,
+     306
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 200
+   },
+   {
+    "kit": "urn",
+    "at": [
+     88,
+     308
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "DA2",
+    "at": [
+     176,
+     246
+    ],
+    "scale": 1.8,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "deckMax": 0.7,
+    "rot": 102
+   },
+   {
+    "kit": "gondola",
+    "at": [
+     146,
+     250
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "scenery",
+    "rot": -5
+   },
+   {
+    "kit": "gondola",
+    "at": [
+     210,
+     236
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "scenery",
+    "rot": -20
+   },
+   {
+    "kit": "DA3",
+    "at": [
+     276,
+     166
+    ],
+    "scale": 1.2,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "bench",
+    "at": [
+     258,
+     179
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     276,
+     166
+    ]
+   },
+   {
+    "kit": "bench",
+    "at": [
+     294,
+     153
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     276,
+     166
+    ]
+   },
+   {
+    "line": {
+     "kit": "DA1",
+     "from": [
+      343,
+      50
+     ],
+     "to": [
+      343,
+      118
+     ],
+     "step": "auto"
+    }
+   },
+   {
+    "line": {
+     "kit": "DA1",
+     "from": [
+      317,
+      118
+     ],
+     "to": [
+      317,
+      50
+     ],
+     "step": "auto"
+    }
+   },
+   {
+    "kit": "parasols",
+    "at": [
+     326,
+     74
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "parasols",
+    "at": [
+     333,
+     98
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 90
+   },
+   {
+    "kit": "DA4",
+    "at": [
+     206,
+     52
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 0
+   },
+   {
+    "kit": "DA4",
+    "at": [
+     206,
+     76
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 0
+   },
+   {
+    "kit": "gondolapost",
+    "at": [
+     200,
+     64
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "DA5",
+    "at": [
+     126,
+     66
+    ],
+    "scale": 0.9,
+    "solid": "footprint",
+    "group": "scenery",
+    "face": [
+     96,
+     100
+    ]
+   },
+   {
+    "kit": "DA6",
+    "at": [
+     38.18,
+     47.21
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "face": [
+     96,
+     100
+    ]
+   },
+   {
+    "kit": "obelisk",
+    "at": [
+     82,
+     110
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "obelisk",
+    "at": [
+     110,
+     110
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   }
+  ],
+  "meshyKit": [
+   "DA1",
+   "DA2",
+   "DA3",
+   "DA4",
+   "DA5",
+   "DA6"
+  ],
+  "labels": {
+   "plaque": [
+    "Rules of the arcades",
+    "One party at a time. The tide brings them to you; the streets behind stay quiet once you have cleared them. Fall and you rise at the last fire you passed. The waystones count you out."
+   ],
+   "cache": "The customs house's last strongbox",
+   "side": [
+    "The bell-ringers' steps",
+    "The ringers climbed out of the flood here to dry their ropes. One rope is still tied to the rail."
+   ]
+  }
+ }
+}

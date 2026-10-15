@@ -1,0 +1,396 @@
+{
+  "id": "the_last_lantern",
+  "version": 1,
+  "status": "playable design prototype",
+  "map": "lantern_reach",
+  "durationMinutes": [
+    18,
+    22
+  ],
+  "private": true,
+  "steps": [
+    {
+      "id": "first_steps",
+      "scene": 1,
+      "objective": "Follow Nesh's lantern",
+      "target": "nesh",
+      "condition": [
+        "flag",
+        "arrived"
+      ],
+      "hint": "Click the ground to walk. Right-drag rotates the camera; scroll to zoom.",
+      "voice": "Nesh: Over here. Follow my lantern."
+    },
+    {
+      "id": "ask_caldus",
+      "scene": 2,
+      "objective": "Talk to Caldus in the boathouse",
+      "target": "caldus",
+      "condition": [
+        "flag",
+        "supplied"
+      ],
+      "hint": "Click Caldus. He has the supplies for the climb.",
+      "voice": "Caldus: That boat will follow our light. There isn't a light."
+    },
+    {
+      "id": "chart",
+      "scene": 2,
+      "objective": "Read the keeper's chart",
+      "target": "chart",
+      "condition": [
+        "flag",
+        "chart_read"
+      ],
+      "hint": "Click the chart beside Caldus. Your quest log keeps the current instruction.",
+      "voice": "Nesh: Reeds for the shutters. Quartz for the lantern. The shore kept enough."
+    },
+    {
+      "id": "map",
+      "scene": 2,
+      "objective": "Open the map",
+      "target": "chart",
+      "condition": [
+        "flag",
+        "map_opened"
+      ],
+      "hint": "Press Tab or click Map. The gold marker matches the lantern in the world.",
+      "voice": ""
+    },
+    {
+      "id": "reeds",
+      "scene": 3,
+      "objective": "Gather 3 Reed",
+      "target": "reed",
+      "condition": [
+        "harvest",
+        "Reed",
+        3
+      ],
+      "hint": "Click the exposed Reed patch. Harvesting repeats and stops at three.",
+      "voice": ""
+    },
+    {
+      "id": "quartz",
+      "scene": 3,
+      "objective": "Mine 1 Quartz",
+      "target": "quartz",
+      "condition": [
+        "harvest",
+        "Quartz",
+        1
+      ],
+      "hint": "Your Pickaxe is in your pack. Minerals require the right tool.",
+      "voice": ""
+    },
+    {
+      "id": "store_reed",
+      "scene": 4,
+      "objective": "Store the 3 Reed in the keeper's cache",
+      "target": "lower_cache",
+      "condition": [
+        "storage",
+        "Reed",
+        3
+      ],
+      "hint": "Click the cache. Select Reed in your pack, then Deposit.",
+      "voice": "Nesh: The lantern upstairs uses the same cache seal. Leave the repair parts here."
+    },
+    {
+      "id": "store_quartz",
+      "scene": 4,
+      "objective": "Store the Quartz",
+      "target": "lower_cache",
+      "condition": [
+        "storage",
+        "Quartz",
+        1
+      ],
+      "hint": "Deposit the Quartz too. Both caches share the same contents.",
+      "voice": ""
+    },
+    {
+      "id": "take_plank",
+      "scene": 4,
+      "objective": "Withdraw 1 Wood Plank",
+      "target": "lower_cache",
+      "condition": [
+        "inventory",
+        "Wood Plank",
+        1
+      ],
+      "hint": "Take the plank from the cache's crafting supplies.",
+      "voice": ""
+    },
+    {
+      "id": "take_cloth",
+      "scene": 4,
+      "objective": "Withdraw 1 Cloth Roll",
+      "target": "lower_cache",
+      "condition": [
+        "inventory",
+        "Cloth Roll",
+        1
+      ],
+      "hint": "Take the cloth for your torch.",
+      "voice": ""
+    },
+    {
+      "id": "take_hatchet",
+      "scene": 4,
+      "objective": "Withdraw the Hatchet",
+      "target": "lower_cache",
+      "condition": [
+        "inventory",
+        "Hatchet",
+        1
+      ],
+      "hint": "The Hatchet is a tool. Crafting uses the materials but keeps the tool.",
+      "voice": ""
+    },
+    {
+      "id": "torch",
+      "scene": 4,
+      "objective": "Make a Torch",
+      "target": "bench",
+      "condition": [
+        "flag",
+        "crafted"
+      ],
+      "hint": "Open Manufacturing at the bench: 1 Wood Plank + 1 Cloth Roll, with a Hatchet.",
+      "voice": "Nesh: Plank, cloth and a steady hand. I'll help you with the first one."
+    },
+    {
+      "id": "sword",
+      "scene": 5,
+      "objective": "Equip your Sword",
+      "target": "boar",
+      "condition": [
+        "equipped",
+        "Sword"
+      ],
+      "hint": "Open Inventory and equip the Sword before approaching the boar.",
+      "voice": "Nesh: Shield up. I'll keep him clear."
+    },
+    {
+      "id": "shield",
+      "scene": 5,
+      "objective": "Equip your Shield",
+      "target": "boar",
+      "condition": [
+        "equipped",
+        "Shield"
+      ],
+      "hint": "Equip the Shield in your other hand. Attacks and defense happen automatically.",
+      "voice": ""
+    },
+    {
+      "id": "hold_path",
+      "scene": 5,
+      "objective": "Clear the causeway",
+      "target": "boar",
+      "condition": [
+        "flag",
+        "defeated"
+      ],
+      "hint": "Click the boar to attack. Click open ground to retreat. Nesh can help you recover.",
+      "voice": ""
+    },
+    {
+      "id": "loot",
+      "scene": 5,
+      "objective": "Take the boar's supplies",
+      "target": "bag",
+      "condition": [
+        "flag",
+        "looted"
+      ],
+      "hint": "Take the Raw Meat from the bag. Auto-gather also completes this step.",
+      "voice": ""
+    },
+    {
+      "id": "landing",
+      "scene": 6,
+      "objective": "Reach the sheltered landing",
+      "target": "rest",
+      "condition": [
+        "flag",
+        "rested"
+      ],
+      "hint": "Follow the path up to Nesh's lantern.",
+      "voice": "Nesh: Eat. You did the hard part."
+    },
+    {
+      "id": "food",
+      "scene": 6,
+      "objective": "Recover your food to 35 or more",
+      "target": "rest",
+      "condition": [
+        "food",
+        35
+      ],
+      "hint": "Open Inventory and eat Bread. Positive food supports health and ether recovery.",
+      "voice": ""
+    },
+    {
+      "id": "attribute",
+      "scene": 6,
+      "objective": "Spend a pickpoint on Matter or Carry",
+      "target": "rest",
+      "condition": [
+        "flag",
+        "spent"
+      ],
+      "hint": "Open Statistics. Matter increases health; Carry increases pack capacity. Either advances.",
+      "voice": "Nesh: Decide what will help you on the road. Then we'll finish the climb."
+    },
+    {
+      "id": "retrieve_reed",
+      "scene": 7,
+      "objective": "Withdraw your 3 Reed from the upper cache",
+      "target": "upper_cache",
+      "condition": [
+        "inventory",
+        "Reed",
+        3
+      ],
+      "hint": "The same seal. The same supplies. Take the Reed upstairs.",
+      "voice": ""
+    },
+    {
+      "id": "retrieve_quartz",
+      "scene": 7,
+      "objective": "Withdraw your Quartz",
+      "target": "upper_cache",
+      "condition": [
+        "inventory",
+        "Quartz",
+        1
+      ],
+      "hint": "Take the Quartz, then approach the beacon housing.",
+      "voice": ""
+    },
+    {
+      "id": "repair",
+      "scene": 7,
+      "objective": "Repair the beacon housing",
+      "target": "housing",
+      "condition": [
+        "flag",
+        "repaired"
+      ],
+      "hint": "Use the housing to fit the shutters and Quartz. This uses 3 Reed and 1 Quartz.",
+      "voice": "Caldus, below: The bell! They're nearly on the rocks!"
+    },
+    {
+      "id": "light",
+      "scene": 7,
+      "objective": "Light the beacon with your Torch",
+      "target": "housing",
+      "condition": [
+        "flag",
+        "lit"
+      ],
+      "hint": "Use your crafted Torch. The boat is waiting for your light.",
+      "voice": "Nesh: Your flame. Go on."
+    },
+    {
+      "id": "return",
+      "scene": 8,
+      "objective": "Take the return stair to the dock",
+      "target": "dock",
+      "condition": [
+        "flag",
+        "returned"
+      ],
+      "hint": "The eastern shortcut is open. Follow it down to the saved boat.",
+      "voice": "Nesh: This seal was cut, not broken by the storm. We'll show Ilyon."
+    },
+    {
+      "id": "sell",
+      "scene": 8,
+      "objective": "Sell 1 Raw Meat to Caldus",
+      "target": "dock",
+      "condition": [
+        "flag",
+        "sold"
+      ],
+      "hint": "The galley pays 10 gold for this meat. Sell once at Caldus's counter.",
+      "voice": "Caldus: Fresh meat for the galley? Take bread for the crossing."
+    },
+    {
+      "id": "buy",
+      "scene": 8,
+      "objective": "Buy Bread for the crossing",
+      "target": "dock",
+      "condition": [
+        "flag",
+        "bought"
+      ],
+      "hint": "Bread costs 8 gold, leaving you 2. This is a normal NPC trade, without another player.",
+      "voice": ""
+    },
+    {
+      "id": "depart",
+      "scene": 8,
+      "objective": "Board the boat to Four Gates",
+      "target": "ferry",
+      "condition": [
+        "flag",
+        "departed"
+      ],
+      "hint": "Choose Ready for Four Gates, or take one more look. The beacon will stay lit.",
+      "voice": "Caldus: You got them home. Come on. The road is yours."
+    }
+  ],
+  "starterKit": {
+    "Sword": 1,
+    "Shield": 1,
+    "Pickaxe": 1,
+    "Bread": 3
+  },
+  "cacheStock": {
+    "Wood Plank": 1,
+    "Cloth Roll": 1,
+    "Hatchet": 1
+  },
+  "recipe": {
+    "output": "Torch",
+    "ingredients": {
+      "Wood Plank": 1,
+      "Cloth Roll": 1
+    },
+    "tools": [
+      "Hatchet"
+    ],
+    "food": 1
+  },
+  "trade": {
+    "sellItem": "Raw Meat",
+    "sellQuantity": 1,
+    "sellPrice": 10,
+    "buyItem": "Bread",
+    "buyPrice": 8
+  },
+  "reward": {
+    "achievement": "Keeper of the First Light",
+    "repeatable": false
+  },
+  "handoff": {
+    "map": "four_gates",
+    "npc": "Gate Warden Ilyon",
+    "objective": "Talk to Gate Warden Ilyon",
+    "repeatOldIntro": false
+  },
+  "assistance": {
+    "firstCraftGuaranteed": true,
+    "toolBreakage": false,
+    "lossOnDefeat": false,
+    "noTimer": true
+  },
+  "notes": [
+    "The prototype simulates UI, combat and XP. Production World handlers are not connected.",
+    "Bread's 8-gold price and the Torch recipe match current server content. Meat's 10-gold galley sale is a one-time quest offer.",
+    "The handoff ends at a preview card; this draft never writes a live character or changes a server map."
+  ]
+}

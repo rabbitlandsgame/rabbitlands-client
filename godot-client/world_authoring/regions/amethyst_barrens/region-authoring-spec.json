@@ -1,0 +1,85 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "amethyst_barrens",
+  "label": "Amethyst Barrens",
+  "adapter": "amethyst-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/amethyst_barrens/amethyst_barrens.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/amethyst_barrens/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/amethyst_barrens/authoring/continent-authoring.json"
+  },
+  "continentTranslation": [
+    950.0,
+    0.0,
+    400.0
+  ],
+  "server": {
+    "origin": [
+      182,
+      166
+    ],
+    "cells": [
+      738,
+      738
+    ],
+    "collisionOriginMetres": [
+      -182.0,
+      166.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -182.0,
+      -572.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      370,
+      370
+    ]
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "amethyst_barrens--mirrorhold-amethyst_barrens",
+      "amethyst_barrens--sunmane_steppe-amethyst_barrens",
+      "amethyst_barrens--whitehorn_range-amethyst_barrens",
+      "discovery-amethyst_barrens-1276",
+      "discovery-amethyst_barrens-699",
+      "discovery-amethyst_barrens-700",
+      "discovery-amethyst_barrens-701",
+      "discovery-amethyst_barrens-702",
+      "discovery-amethyst_barrens-703",
+      "discovery-amethyst_barrens-704",
+      "discovery-amethyst_barrens-705",
+      "discovery-amethyst_barrens-706",
+      "discovery-amethyst_barrens-707",
+      "discovery-amethyst_barrens-708",
+      "discovery-amethyst_barrens-710",
+      "door-amethyst_barrens-counting-house-door",
+      "door-amethyst_barrens-geode-hollow-mouth",
+      "door-amethyst_barrens-measure-house-door",
+      "door-amethyst_barrens-resonant-vault-stair",
+      "door-amethyst_barrens-shardworks-headframe",
+      "door-amethyst_barrens-sour-cut-mouth",
+      "door-amethyst_barrens-storm-barrow-stair"
+    ],
+    "requiredRouteIds": [
+      "amethyst_barrens--mirrorhold-amethyst_barrens",
+      "amethyst_barrens--sunmane_steppe-amethyst_barrens",
+      "amethyst_barrens--whitehorn_range-amethyst_barrens",
+      "door-amethyst_barrens-counting-house-door",
+      "door-amethyst_barrens-geode-hollow-mouth",
+      "door-amethyst_barrens-measure-house-door",
+      "door-amethyst_barrens-resonant-vault-stair",
+      "door-amethyst_barrens-shardworks-headframe",
+      "door-amethyst_barrens-sour-cut-mouth",
+      "door-amethyst_barrens-storm-barrow-stair"
+    ],
+    "ownedPlanFeatureIds": []
+  },
+  "gameplay": {
+    "runtimeBindingCount": 191,
+    "runtimePointCount": 131,
+    "existingMarkerBindingCount": 54
+  }
+}

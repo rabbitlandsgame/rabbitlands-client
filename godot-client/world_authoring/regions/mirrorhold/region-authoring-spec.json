@@ -1,0 +1,127 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "mirrorhold",
+  "label": "Mirrorhold",
+  "adapter": "mirrorhold-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/mirrorhold/mirrorhold.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/mirrorhold/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/mirrorhold/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/mirrorhold/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/mirrorhold/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/mirrorhold/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    840.0,
+    0.0,
+    650.0
+  ],
+  "server": {
+    "origin": [
+      208,
+      350
+    ],
+    "cells": [
+      540,
+      540
+    ],
+    "collisionOriginMetres": [
+      -208.0,
+      350.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -208.0,
+      -224.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      271,
+      289
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        316,
+        213
+      ],
+      "previousGridSha256": "0511c783876d44444e27a435cb3f78f88f1f9fa2869907102cfa628aebff12ab"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "access-mirrorhold-north-plateau",
+      "amberwood--mirrorhold-mirrorhold",
+      "amethyst_barrens--mirrorhold-mirrorhold",
+      "discovery-mirrorhold-606",
+      "discovery-mirrorhold-607",
+      "discovery-mirrorhold-608",
+      "discovery-mirrorhold-612",
+      "discovery-mirrorhold-73",
+      "door-mirrorhold-cistern-door",
+      "door-mirrorhold-lens-vault-stair",
+      "door-mirrorhold-stair-cellars-door",
+      "four_gates--mirrorhold-mirrorhold",
+      "mirrorhold--sunmane_steppe-mirrorhold",
+      "mirrorhold--verdant_stair-mirrorhold",
+      "street-mirrorhold-arrival-lane",
+      "street-mirrorhold-canal-sluice-lane",
+      "street-mirrorhold-cistern-yard-lane",
+      "street-mirrorhold-citadel-service-road",
+      "street-mirrorhold-civic-ascent",
+      "street-mirrorhold-civic-bridge-exit",
+      "street-mirrorhold-east-bench-yard-link",
+      "street-mirrorhold-east-stair-home-yard-link",
+      "street-mirrorhold-east-stair-yard",
+      "street-mirrorhold-east-working-road",
+      "street-mirrorhold-icebore-lane",
+      "street-mirrorhold-lake-north-yard-link",
+      "street-mirrorhold-lens-vault-lane",
+      "street-mirrorhold-lens-yard-lane",
+      "street-mirrorhold-lower-terrace-yard-link",
+      "street-mirrorhold-mid-bench-yard-link",
+      "street-mirrorhold-orrery-pilgrim-road",
+      "street-mirrorhold-overlook-lane",
+      "street-mirrorhold-quarry-adit-lane",
+      "street-mirrorhold-quarry-road",
+      "street-mirrorhold-quay-descent",
+      "street-mirrorhold-reed-cut-lane",
+      "street-mirrorhold-rose-gallery-lane",
+      "street-mirrorhold-sanctuary-causeway-approach",
+      "street-mirrorhold-south-shore-yard-link",
+      "street-mirrorhold-south-watch-lane",
+      "street-mirrorhold-stair-town-0",
+      "street-mirrorhold-stair-town-1",
+      "street-mirrorhold-stair-town-2",
+      "street-mirrorhold-watch-hatch-approach",
+      "street-mirrorhold-west-bench-yard-link",
+      "street-mirrorhold-west-shore-yard-link",
+      "street-mirrorhold-western-lens-lane",
+      "trail-mirrorhold-0"
+    ],
+    "requiredRouteIds": [
+      "amberwood--mirrorhold-mirrorhold",
+      "amethyst_barrens--mirrorhold-mirrorhold",
+      "door-mirrorhold-cistern-door",
+      "door-mirrorhold-lens-vault-stair",
+      "door-mirrorhold-stair-cellars-door",
+      "four_gates--mirrorhold-mirrorhold",
+      "mirrorhold--sunmane_steppe-mirrorhold",
+      "mirrorhold--verdant_stair-mirrorhold"
+    ],
+    "ownedPlanFeatureIds": [
+      "mirror_lake",
+      "mirror_outlet"
+    ]
+  },
+  "gameplay": {
+    "runtimeBindingCount": 139,
+    "runtimePointCount": 93,
+    "existingMarkerBindingCount": 46
+  }
+}

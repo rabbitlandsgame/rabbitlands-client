@@ -1,0 +1,192 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "amberwood",
+  "label": "Amberwood",
+  "adapter": "published-generic-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/amberwood/amberwood.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/amberwood/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/amberwood/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/amberwood/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/amberwood/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/amberwood/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    510.0,
+    0.0,
+    540.0
+  ],
+  "server": {
+    "origin": [
+      242,
+      182
+    ],
+    "cells": [
+      426,
+      426
+    ],
+    "collisionOriginMetres": [
+      -242.0,
+      182.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -292.0,
+      -152.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      243,
+      166
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        109,
+        194
+      ],
+      "previousGridSha256": "f7f0d87bc489c449b0fe4fc3515da4158eb6b54d770c4c477ce0ebe0e84aa896"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "amber-chapel-climb",
+      "amber-moot-path",
+      "amber-motherroot-yard",
+      "amber-ridge-camp",
+      "amber-side-kilnyard",
+      "amber-undercut-path",
+      "amber-yard-approach",
+      "amberwood--four_gates-amberwood",
+      "amberwood--grey_moors-amberwood",
+      "amberwood--mirrorhold-amberwood",
+      "amberwood--whitehorn_range-amberwood",
+      "discovery-amberwood-1078",
+      "discovery-amberwood-467",
+      "discovery-amberwood-472",
+      "discovery-amberwood-473",
+      "discovery-amberwood-474",
+      "discovery-amberwood-475",
+      "discovery-amberwood-476",
+      "discovery-amberwood-477",
+      "discovery-amberwood-478",
+      "discovery-amberwood-479",
+      "discovery-amberwood-480",
+      "discovery-amberwood-481",
+      "discovery-amberwood-482",
+      "discovery-amberwood-483",
+      "discovery-amberwood-484",
+      "discovery-amberwood-825",
+      "door-amberwood-amber-hall-door",
+      "door-amberwood-cinder-chapel-door",
+      "door-amberwood-gate-undercroft-stair",
+      "door-amberwood-motherroot-mouth"
+    ],
+    "requiredRouteIds": [
+      "amberwood--four_gates-amberwood",
+      "amberwood--grey_moors-amberwood",
+      "amberwood--mirrorhold-amberwood",
+      "amberwood--whitehorn_range-amberwood",
+      "door-amberwood-amber-hall-door",
+      "door-amberwood-cinder-chapel-door",
+      "door-amberwood-gate-undercroft-stair",
+      "door-amberwood-motherroot-mouth"
+    ],
+    "ownedPlanFeatureIds": [
+      "amber_tributary",
+      "western_river",
+      "whitehorn_torrent"
+    ],
+    "ownedFerryConnectionIds": []
+  },
+  "gameplay": {
+    "runtimeBindingCount": 244,
+    "runtimePointCount": 191,
+    "existingMarkerBindingCount": 52
+  },
+  "bootstrap": {
+    "schema": "eloria-published-region-bootstrap-v1",
+    "objectCount": 769,
+    "objectIdsSha256": "028cc04eca50e9c1df30273e361d4d80a91ea4cda46d0ec6ecf22498ee9b81dc",
+    "visibleGameplayCount": 181,
+    "assemblies": [
+      {
+        "id": "amber-market-canopy-stair",
+        "kind": "access",
+        "supportNodes": [
+          "Amber_MarketCanopyStair_Posts"
+        ],
+        "walkNode": "Walk_Amber_MarketCanopyStair"
+      },
+      {
+        "id": "amber-root-ramp",
+        "kind": "access",
+        "supportNodes": [
+          "Amber_RootRamp_Posts",
+          "Amber_RootRamp_Rails",
+          "Amber_RootRamp_Skirt"
+        ],
+        "walkNode": "Walk_Amber_RootRamp"
+      },
+      {
+        "id": "amber_tributary@128",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_005_amberwood"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_005_amberwood"
+      },
+      {
+        "id": "motherroot-root-hatch",
+        "kind": "access",
+        "supportNodes": [],
+        "walkNode": "Motherroot_RootHatch"
+      },
+      {
+        "id": "western_river@122",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_002_396_540",
+          "BridgeUnionPier_002_404_548",
+          "BridgeUnionTimberEdge_002_amberwood"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_002_amberwood"
+      },
+      {
+        "id": "western_river@258",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_006_412_676",
+          "BridgeUnionPier_006_420_668",
+          "BridgeUnionTimberEdge_006_amberwood"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_006_amberwood"
+      }
+    ],
+    "water": [
+      {
+        "id": "amber_tributary",
+        "kind": "river",
+        "planFeatureId": "amber_tributary"
+      },
+      {
+        "id": "western_river",
+        "kind": "river",
+        "planFeatureId": "western_river"
+      },
+      {
+        "id": "whitehorn_torrent",
+        "kind": "river",
+        "planFeatureId": "whitehorn_torrent"
+      }
+    ],
+    "bakedTerrainFeatures": [],
+    "previewUvMetresInverse": 0.17,
+    "baselineProofSha256": "b0fdf5a858dea76939c8d48d4dc725d9d3dd83223f5173bac3567f5fdde3b21f"
+  }
+}

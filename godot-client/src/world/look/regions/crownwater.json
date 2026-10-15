@@ -1,0 +1,21 @@
+{
+	"id": "crownwater",
+	"schema": 1,
+	"ground": {
+		"path_luma_forward": 0.22,
+		"path_tint_forward": [0.85, 0.72, 0.53],
+		"path_chroma_forward": 1.35
+	},
+	"grass": {
+		"root": [0.07, 0.15, 0.06],
+		"tip": [0.5, 0.63, 0.29],
+		"value_forward": 1.55
+	},
+	"notes": {
+		"ground": "A marble-and-gilt canal city, so its roads are a pale warm limestone rather than the default's near-white cream. At the Forward+ defaults they came out at luminance 183 and saturation 0.17 (white against the teal roofs), 2.2 times the dark garden bed beside the hub path and 1.54 times the open grass by the south quay. At path_luma 0.22 with a honey-limestone tint at chroma 1.35 they are at 171 and saturation 0.27 (RGB about 189, 169, 138): 1.85 times the garden bed and 1.44 times the open grass, still the palest ground in the frame. Chroma 1.5 at 0.21 turned them to orange sand (saturation 0.38), which is Amberwood's, not a marble city's. The verge is left at the renderer defaults. Crownwater's grass runs on into Manymouth's for about 290 m of its south-east border and into Ssarathi's for about 70 m; a verge trim would now fade across it (LookBorders), but none was measured. Only _forward keys are used, so the compatibility renderer (CI) is unchanged. No road crosses a land border in the frames checked (local 292,-200 and 446,-70), so the path trims draw no seam there. The ferry roads end at the water.",
+		"grass": "Lagoon-garden green, a little cooler than the default. At the default Forward+ value the tufts were 0.69-0.79 of the luminance of the ground under them, which read as dark speckle. At 1.55 they are 0.90-1.01 (cw_hub 0.99, cw_hub_low 0.90, cw_horizon 0.98, cw_road 1.01). This was measured on pixels that changed between value steps, against unchanged grass in the same frame.",
+		"sky": "Not needed: the map declares its own sky, and the look paints it.",
+		"water": "Nothing here: the continent sea (continent_water.gdshader) is decoded in Forward+ for the whole continent at LookProfile.CONTINENT_SEA_VALUE (LookGround.decode_continent_sea), because it runs on across every border. At the migration it drew pale turquoise, as bright as the roads.",
+		"foliage": "Nothing to add: every crown was painted (kit tree 16, kit shrub 17, authored 9). What is left is statues, bollards, fountains and bark, which are correctly left alone."
+	}
+}

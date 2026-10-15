@@ -1,0 +1,3401 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "sunmane_gauntlet",
+    "name": "The Red Canyon",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -25.8,
+        -3.3,
+        -2.8
+      ],
+      "max": [
+        18.8,
+        26.82,
+        327.8
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -23.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        16.0,
+        3.5,
+        324.0
+      ]
+    },
+    "interiorClass": "gauntlet",
+    "parentRegion": "sunmane_steppe",
+    "serverCells": 384
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      25.0,
+      326.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        0.0,
+        0.05,
+        7.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "vault",
+      "position": [
+        -4.0,
+        3.05,
+        318.0
+      ],
+      "rotationDegrees": 180,
+      "surface": "Walk"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 84,
+    "height": 654,
+    "cellMetres": 0.5,
+    "originMetres": [
+      -25.0,
+      326.0
+    ],
+    "heightEncoding": {
+      "origin": -0.2,
+      "step": 0.2,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true
+    },
+    "walkableCells": 16340,
+    "blockedCells": 38596,
+    "walkableFraction": 0.2974,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Secrets_sunmane_gauntlet",
+      "Section_sunmane_gauntlet_band_-001",
+      "Build_sunmane_gauntlet_band_-001_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+000",
+      "Build_sunmane_gauntlet_band_+000_amber_resin",
+      "Build_sunmane_gauntlet_band_+000_dark_iron",
+      "Build_sunmane_gauntlet_band_+000_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+000_timber_warm",
+      "Build_sunmane_gauntlet_band_+000_woven_cloth",
+      "Section_sunmane_gauntlet_band_+001",
+      "Build_sunmane_gauntlet_band_+001_dark_iron",
+      "Build_sunmane_gauntlet_band_+001_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+001_timber_warm",
+      "Section_sunmane_gauntlet_band_+002",
+      "Build_sunmane_gauntlet_band_+002_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+002_timber_warm",
+      "Build_sunmane_gauntlet_band_+002_woven_cloth",
+      "Section_sunmane_gauntlet_band_+003",
+      "Build_sunmane_gauntlet_band_+003_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+003_thatch_reed",
+      "Section_sunmane_gauntlet_band_+004",
+      "Build_sunmane_gauntlet_band_+004_amber_resin",
+      "Build_sunmane_gauntlet_band_+004_dark_iron",
+      "Build_sunmane_gauntlet_band_+004_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+005",
+      "Build_sunmane_gauntlet_band_+005_amber_resin",
+      "Build_sunmane_gauntlet_band_+005_dark_iron",
+      "Build_sunmane_gauntlet_band_+005_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+005_thatch_reed",
+      "Section_sunmane_gauntlet_band_+006",
+      "Build_sunmane_gauntlet_band_+006_dark_iron",
+      "Build_sunmane_gauntlet_band_+006_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+007",
+      "Build_sunmane_gauntlet_band_+007_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+007_sunmane_wash_sand",
+      "Build_sunmane_gauntlet_band_+007_timber_warm",
+      "Build_sunmane_gauntlet_band_+007_woven_cloth",
+      "Section_sunmane_gauntlet_band_+008",
+      "Build_sunmane_gauntlet_band_+008_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+008_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+009",
+      "Build_sunmane_gauntlet_band_+009_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+009_timber_warm",
+      "Build_sunmane_gauntlet_band_+009_woven_cloth",
+      "Section_sunmane_gauntlet_band_+010",
+      "Build_sunmane_gauntlet_band_+010_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+011",
+      "Build_sunmane_gauntlet_band_+011_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+011_timber_warm",
+      "Build_sunmane_gauntlet_band_+011_woven_cloth",
+      "Section_sunmane_gauntlet_band_+012",
+      "Build_sunmane_gauntlet_band_+012_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+012_thatch_reed",
+      "Section_sunmane_gauntlet_band_+013",
+      "Build_sunmane_gauntlet_band_+013_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+014",
+      "Build_sunmane_gauntlet_band_+014_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+014_timber_warm",
+      "Build_sunmane_gauntlet_band_+014_woven_cloth",
+      "Section_sunmane_gauntlet_band_+015",
+      "Build_sunmane_gauntlet_band_+015_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+015_thatch_reed",
+      "Section_sunmane_gauntlet_band_+016",
+      "Build_sunmane_gauntlet_band_+016_amber_resin",
+      "Build_sunmane_gauntlet_band_+016_dark_iron",
+      "Build_sunmane_gauntlet_band_+016_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+016_thatch_reed",
+      "Section_sunmane_gauntlet_band_+017",
+      "Build_sunmane_gauntlet_band_+017_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+018",
+      "Build_sunmane_gauntlet_band_+018_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+018_thatch_reed",
+      "Section_sunmane_gauntlet_band_+019",
+      "Build_sunmane_gauntlet_band_+019_dark_iron",
+      "Build_sunmane_gauntlet_band_+019_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+019_thatch_reed",
+      "Section_sunmane_gauntlet_band_+020",
+      "Build_sunmane_gauntlet_band_+020_amber_resin",
+      "Build_sunmane_gauntlet_band_+020_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+020_thatch_reed",
+      "Section_sunmane_gauntlet_band_+021",
+      "Build_sunmane_gauntlet_band_+021_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+021_thatch_reed",
+      "Section_sunmane_gauntlet_band_+022",
+      "Build_sunmane_gauntlet_band_+022_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+023",
+      "Build_sunmane_gauntlet_band_+023_grey_bone",
+      "Build_sunmane_gauntlet_band_+023_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+024",
+      "Build_sunmane_gauntlet_band_+024_amber_resin",
+      "Build_sunmane_gauntlet_band_+024_dark_iron",
+      "Build_sunmane_gauntlet_band_+024_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+025",
+      "Build_sunmane_gauntlet_band_+025_amber_resin",
+      "Build_sunmane_gauntlet_band_+025_dark_iron",
+      "Build_sunmane_gauntlet_band_+025_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+026",
+      "Build_sunmane_gauntlet_band_+026_amber_resin",
+      "Build_sunmane_gauntlet_band_+026_dark_iron",
+      "Build_sunmane_gauntlet_band_+026_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+026_timber_warm",
+      "Build_sunmane_gauntlet_band_+026_woven_cloth",
+      "Section_sunmane_gauntlet_band_+027",
+      "Build_sunmane_gauntlet_band_+027_sunmane_red_sandstone"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    }
+  },
+  "portals": [],
+  "landmarks": [
+    {
+      "id": "sunmane_gauntlet-staging",
+      "name": "The Red Canyon",
+      "space": "staging",
+      "position": [
+        0.0,
+        1.6,
+        7.0
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "plaque-staging-0",
+      "kind": "information",
+      "target": "lore",
+      "label": "Rules of the wash",
+      "text": "One party at a time. The dead wake at the east gate. Waystones count you out. The court is the end of it.",
+      "position": [
+        -6.8,
+        1.0,
+        12.6
+      ],
+      "serverTile": [
+        18,
+        313
+      ],
+      "objectId": 861
+    },
+    {
+      "id": "exit-staging",
+      "kind": "waystone",
+      "target": "home",
+      "label": "Waystone",
+      "text": "The waystone home. Using it counts you out of the run.",
+      "position": [
+        5.8,
+        1.0,
+        11.0
+      ],
+      "serverTile": [
+        31,
+        315
+      ],
+      "objectId": 800
+    },
+    {
+      "id": "plaque-wind-cut",
+      "kind": "information",
+      "target": "lore",
+      "label": "The wash",
+      "text": "When the rains come the wash runs a horse deep for an hour. The rest of the year it is the only shade for a day's ride, and everything knows it.",
+      "position": [
+        -9.2,
+        1.0,
+        24.0
+      ],
+      "serverTile": [
+        16,
+        302
+      ],
+      "objectId": 862
+    },
+    {
+      "id": "cache",
+      "kind": "cache",
+      "target": "run",
+      "label": "Reward cache",
+      "text": "The run's cache. It opens once for each of you when the court is quiet.",
+      "position": [
+        -4.0,
+        3.6,
+        320.5
+      ],
+      "serverTile": [
+        21,
+        6
+      ],
+      "objectId": 798
+    },
+    {
+      "id": "exit-vault",
+      "kind": "waystone",
+      "target": "home",
+      "label": "Waystone",
+      "text": "The waystone home.",
+      "position": [
+        1.0,
+        4.0,
+        315.0
+      ],
+      "serverTile": [
+        26,
+        11
+      ],
+      "objectId": 799
+    },
+    {
+      "id": "plaque-vault",
+      "kind": "information",
+      "target": "lore",
+      "label": "The court is quiet",
+      "text": "Whoever reads this walked the whole road. The cache is yours; the waystone is the way home.",
+      "position": [
+        -9.6,
+        4.0,
+        322.0
+      ],
+      "serverTile": [
+        15,
+        4
+      ],
+      "objectId": 863
+    }
+  ],
+  "npcMarkers": [],
+  "harvestables": [
+    {
+      "id": "long-wash-bonus",
+      "resource": "Seed",
+      "position": [
+        -12.5,
+        3.0,
+        250.0
+      ],
+      "serverTile": [
+        12,
+        76
+      ]
+    }
+  ],
+  "environment": {
+    "sky": {
+      "topColor": [
+        0.27,
+        0.43,
+        0.58
+      ],
+      "horizonColor": [
+        0.74,
+        0.7,
+        0.56
+      ],
+      "groundBottomColor": [
+        0.25,
+        0.19,
+        0.13
+      ],
+      "groundHorizonColor": [
+        0.63,
+        0.49,
+        0.31
+      ]
+    },
+    "sun": {
+      "enabled": true,
+      "direction": [
+        0.52,
+        -0.8,
+        0.28
+      ],
+      "color": [
+        1,
+        0.94,
+        0.85
+      ],
+      "energy": 1.15
+    },
+    "ambient": {
+      "color": [
+        0.65,
+        0.65,
+        0.63
+      ],
+      "energy": 0.7,
+      "skyContribution": 0.3
+    },
+    "fog": {
+      "enabled": true,
+      "color": [
+        0.65,
+        0.51,
+        0.35
+      ],
+      "density": 0.0014
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.0,
+      "white": 4.0
+    },
+    "openToSky": [
+      "staging",
+      "wind-cut-way-a",
+      "wind-cut-way-b",
+      "wind-cut",
+      "horse-cave-way-a",
+      "horse-cave-way-b",
+      "horse-cave",
+      "ridge-path-way-a",
+      "ridge-path-way-b",
+      "ridge-path-in",
+      "ridge-path-out",
+      "ridge-path",
+      "scree-stair-way-a",
+      "scree-stair-way-b",
+      "scree-stair-climb",
+      "scree-stair",
+      "forked-wash-way-a",
+      "forked-wash-way-b",
+      "forked-wash-hub",
+      "forked-wash-shade-fork",
+      "forked-wash-sun-fork",
+      "forked-wash-merge",
+      "forked-wash-shade-fork-out",
+      "forked-wash-sun-fork-out",
+      "forked-wash-shade-fork-way-a",
+      "forked-wash-shade-fork-way-b",
+      "forked-wash-sun-fork-way-a",
+      "forked-wash-sun-fork-way-b",
+      "long-wash-way-a",
+      "long-wash-way-b",
+      "long-wash",
+      "long-wash-alcove-0",
+      "long-wash-alcove-1",
+      "long-wash-alcove-2",
+      "sun-court-way-a",
+      "sun-court-way-b",
+      "sun-court",
+      "vault-way",
+      "vault"
+    ],
+    "lights": [
+      {
+        "id": "lamp-000",
+        "kind": "point",
+        "position": [
+          -4,
+          2.58,
+          7
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-001",
+        "kind": "point",
+        "position": [
+          -5.5,
+          2.78,
+          60.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-002",
+        "kind": "point",
+        "position": [
+          12.0,
+          2.38,
+          68.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-003",
+        "kind": "point",
+        "position": [
+          -18.6,
+          5.48,
+          194.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-004",
+        "kind": "point",
+        "position": [
+          -10.5,
+          5.58,
+          201.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-005",
+        "kind": "point",
+        "position": [
+          -4.0,
+          5.98,
+          321.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      }
+    ]
+  },
+  "spaces": {
+    "staging": {
+      "x0": -8.0,
+      "z0": 0.0,
+      "x1": 8.0,
+      "z1": 14.0,
+      "floor": 0.0,
+      "height": 5.2
+    },
+    "wind-cut-way-a": {
+      "x0": -1.8,
+      "z0": 12.2,
+      "x1": 1.8,
+      "z1": 18.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "wind-cut-way-b": {
+      "x0": -1.8,
+      "z0": 17.6,
+      "x1": 1.8,
+      "z1": 23.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "wind-cut": {
+      "x0": -10.6,
+      "z0": 22.0,
+      "x1": 10.6,
+      "z1": 42.0,
+      "floor": 0.0,
+      "height": 5.6
+    },
+    "horse-cave-way-a": {
+      "x0": 1.2,
+      "z0": 40.2,
+      "x1": 4.8,
+      "z1": 46.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "horse-cave-way-b": {
+      "x0": 1.2,
+      "z0": 45.6,
+      "x1": 4.8,
+      "z1": 51.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "horse-cave": {
+      "x0": -10.0,
+      "z0": 50.0,
+      "x1": 16.0,
+      "z1": 74.0,
+      "floor": 0.0,
+      "height": 8.0
+    },
+    "ridge-path-way-a": {
+      "x0": -2.8,
+      "z0": 72.2,
+      "x1": 0.8,
+      "z1": 78.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "ridge-path-way-b": {
+      "x0": -2.8,
+      "z0": 77.6,
+      "x1": 0.8,
+      "z1": 83.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "ridge-path-in": {
+      "x0": -4.0,
+      "z0": 82.0,
+      "x1": 2.0,
+      "z1": 85.0,
+      "floor": 0.0,
+      "height": 4.4
+    },
+    "ridge-path-out": {
+      "x0": -4.0,
+      "z0": 113.0,
+      "x1": 2.0,
+      "z1": 116.0,
+      "floor": 0.0,
+      "height": 4.4
+    },
+    "ridge-path": {
+      "x0": -10.0,
+      "z0": 85.0,
+      "x1": 8.0,
+      "z1": 113.0,
+      "floor": -3.0,
+      "height": 9.0
+    },
+    "scree-stair-way-a": {
+      "x0": -2.8,
+      "z0": 114.2,
+      "x1": 0.8,
+      "z1": 120.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "scree-stair-way-b": {
+      "x0": -2.8,
+      "z0": 119.6,
+      "x1": 0.8,
+      "z1": 125.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "scree-stair-climb": {
+      "x0": -2.8,
+      "z0": 122.2,
+      "x1": 0.8,
+      "z1": 139.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "scree-stair": {
+      "x0": -12.0,
+      "z0": 138.0,
+      "x1": 10.0,
+      "z1": 156.0,
+      "floor": 3.0,
+      "height": 5.6
+    },
+    "forked-wash-way-a": {
+      "x0": -5.8,
+      "z0": 154.2,
+      "x1": -2.2,
+      "z1": 160.4,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "forked-wash-way-b": {
+      "x0": -5.8,
+      "z0": 159.6,
+      "x1": -2.2,
+      "z1": 165.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "forked-wash-hub": {
+      "x0": -19.0,
+      "z0": 164.0,
+      "x1": 11.0,
+      "z1": 178.0,
+      "floor": 3.0,
+      "height": 5.6
+    },
+    "forked-wash-shade-fork": {
+      "x0": -23.0,
+      "z0": 186.0,
+      "x1": -7.0,
+      "z1": 206.0,
+      "floor": 3.0,
+      "height": 6.0
+    },
+    "forked-wash-sun-fork": {
+      "x0": -1.0,
+      "z0": 186.0,
+      "x1": 15.0,
+      "z1": 206.0,
+      "floor": 3.0,
+      "height": 6.0
+    },
+    "forked-wash-merge": {
+      "x0": -19.0,
+      "z0": 214.0,
+      "x1": 11.0,
+      "z1": 226.0,
+      "floor": 3.0,
+      "height": 5.6
+    },
+    "forked-wash-shade-fork-out": {
+      "x0": -16.8,
+      "z0": 204.2,
+      "x1": -13.2,
+      "z1": 215.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "forked-wash-sun-fork-out": {
+      "x0": 5.2,
+      "z0": 204.2,
+      "x1": 8.8,
+      "z1": 215.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "forked-wash-shade-fork-way-a": {
+      "x0": -16.8,
+      "z0": 176.2,
+      "x1": -13.2,
+      "z1": 182.4,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "forked-wash-shade-fork-way-b": {
+      "x0": -16.8,
+      "z0": 181.6,
+      "x1": -13.2,
+      "z1": 187.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "forked-wash-sun-fork-way-a": {
+      "x0": 5.2,
+      "z0": 176.2,
+      "x1": 8.8,
+      "z1": 182.4,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "forked-wash-sun-fork-way-b": {
+      "x0": 5.2,
+      "z0": 181.6,
+      "x1": 8.8,
+      "z1": 187.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "long-wash-way-a": {
+      "x0": -5.8,
+      "z0": 224.2,
+      "x1": -2.2,
+      "z1": 230.4,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "long-wash-way-b": {
+      "x0": -5.8,
+      "z0": 229.6,
+      "x1": -2.2,
+      "z1": 235.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "long-wash": {
+      "x0": -9.5,
+      "z0": 234.0,
+      "x1": 1.5,
+      "z1": 266.0,
+      "floor": 3.0,
+      "height": 5.4
+    },
+    "long-wash-alcove-0": {
+      "x0": -15.5,
+      "z0": 237.5,
+      "x1": -9.5,
+      "z1": 242.5,
+      "floor": 3.0,
+      "height": 4.0
+    },
+    "long-wash-alcove-1": {
+      "x0": -15.5,
+      "z0": 247.5,
+      "x1": -9.5,
+      "z1": 252.5,
+      "floor": 3.0,
+      "height": 4.0
+    },
+    "long-wash-alcove-2": {
+      "x0": -15.5,
+      "z0": 257.5,
+      "x1": -9.5,
+      "z1": 262.5,
+      "floor": 3.0,
+      "height": 4.0
+    },
+    "sun-court-way-a": {
+      "x0": -5.8,
+      "z0": 264.2,
+      "x1": -2.2,
+      "z1": 270.4,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "sun-court-way-b": {
+      "x0": -5.8,
+      "z0": 269.6,
+      "x1": -2.2,
+      "z1": 275.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "sun-court": {
+      "x0": -20.0,
+      "z0": 274.0,
+      "x1": 12.0,
+      "z1": 304.0,
+      "floor": 3.0,
+      "height": 9.0
+    },
+    "vault-way": {
+      "x0": -5.8,
+      "z0": 302.2,
+      "x1": -2.2,
+      "z1": 313.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "vault": {
+      "x0": -11.0,
+      "z0": 312.0,
+      "x1": 3.0,
+      "z1": 324.0,
+      "floor": 3.0,
+      "height": 5.0
+    }
+  },
+  "gauntlet": {
+    "id": "sunmane_gauntlet",
+    "region": "sunmane_steppe",
+    "name": "The Red Canyon",
+    "short": "canyon",
+    "flavour": "A dry wash that cuts through the red rock east of the camp. The herds shelter in it and the things that eat the herds follow them in.",
+    "staging": {
+      "room": "staging",
+      "boundsTiles": {
+        "min": [
+          17,
+          312
+        ],
+        "max": [
+          33,
+          326
+        ]
+      },
+      "arrival": [
+        0.0,
+        0.05,
+        7.0
+      ],
+      "arrivalTile": [
+        25,
+        319
+      ],
+      "exit": {
+        "id": "exit-staging",
+        "kind": "waystone",
+        "target": "home",
+        "label": "Waystone",
+        "text": "The waystone home. Using it counts you out of the run.",
+        "position": [
+          5.8,
+          1.0,
+          11.0
+        ],
+        "serverTile": [
+          31,
+          315
+        ],
+        "objectId": 800
+      }
+    },
+    "legs": [
+      {
+        "id": "wind-cut",
+        "name": "The Wind Cut",
+        "kind": "hall",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 0.8,
+        "late": 0.0,
+        "gate": {
+          "id": "gate-wind-cut",
+          "kind": "bars",
+          "label": "An iron bar gate. It opens when the way behind you is quiet.",
+          "position": [
+            0.0,
+            1.2,
+            18.0
+          ],
+          "before": [
+            0.0,
+            0.0,
+            15.0
+          ],
+          "beyond": [
+            0.0,
+            0.0,
+            21.1
+          ],
+          "tile": [
+            25,
+            311
+          ],
+          "beyondTile": [
+            25,
+            305
+          ],
+          "objectId": 801
+        },
+        "bonus": "",
+        "room": "wind-cut",
+        "bounds": [
+          -10.6,
+          22.0,
+          10.6,
+          42.0
+        ],
+        "spawns": [
+          [
+            -8.2,
+            0.0,
+            26.0
+          ],
+          [
+            -5.2,
+            0.0,
+            26.0
+          ],
+          [
+            -2.2,
+            0.0,
+            26.0
+          ],
+          [
+            0.8,
+            0.0,
+            26.0
+          ],
+          [
+            3.8,
+            0.0,
+            26.0
+          ],
+          [
+            6.8,
+            0.0,
+            26.0
+          ],
+          [
+            -8.2,
+            0.0,
+            29.0
+          ],
+          [
+            -5.2,
+            0.0,
+            29.0
+          ],
+          [
+            -2.2,
+            0.0,
+            29.0
+          ],
+          [
+            0.8,
+            0.0,
+            29.0
+          ],
+          [
+            3.8,
+            0.0,
+            29.0
+          ],
+          [
+            6.8,
+            0.0,
+            29.0
+          ],
+          [
+            -8.2,
+            0.0,
+            32.0
+          ],
+          [
+            -5.2,
+            0.0,
+            32.0
+          ],
+          [
+            -2.2,
+            0.0,
+            32.0
+          ],
+          [
+            0.8,
+            0.0,
+            32.0
+          ],
+          [
+            3.8,
+            0.0,
+            32.0
+          ],
+          [
+            6.8,
+            0.0,
+            32.0
+          ],
+          [
+            -8.2,
+            0.0,
+            35.0
+          ],
+          [
+            -5.2,
+            0.0,
+            35.0
+          ],
+          [
+            -2.2,
+            0.0,
+            35.0
+          ],
+          [
+            0.8,
+            0.0,
+            35.0
+          ],
+          [
+            3.8,
+            0.0,
+            35.0
+          ],
+          [
+            6.8,
+            0.0,
+            35.0
+          ],
+          [
+            -8.2,
+            0.0,
+            38.0
+          ],
+          [
+            -5.2,
+            0.0,
+            38.0
+          ],
+          [
+            -2.2,
+            0.0,
+            38.0
+          ],
+          [
+            0.8,
+            0.0,
+            38.0
+          ],
+          [
+            3.8,
+            0.0,
+            38.0
+          ],
+          [
+            6.8,
+            0.0,
+            38.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            14,
+            284
+          ],
+          "max": [
+            36,
+            304
+          ]
+        },
+        "spawnTiles": [
+          [
+            20,
+            300
+          ],
+          [
+            23,
+            300
+          ],
+          [
+            26,
+            300
+          ],
+          [
+            29,
+            300
+          ],
+          [
+            32,
+            300
+          ],
+          [
+            17,
+            297
+          ],
+          [
+            20,
+            297
+          ],
+          [
+            23,
+            297
+          ],
+          [
+            26,
+            297
+          ],
+          [
+            29,
+            297
+          ],
+          [
+            32,
+            297
+          ],
+          [
+            20,
+            294
+          ],
+          [
+            23,
+            294
+          ],
+          [
+            26,
+            294
+          ],
+          [
+            29,
+            294
+          ],
+          [
+            17,
+            291
+          ],
+          [
+            20,
+            291
+          ],
+          [
+            23,
+            291
+          ],
+          [
+            26,
+            291
+          ],
+          [
+            29,
+            291
+          ],
+          [
+            20,
+            288
+          ],
+          [
+            23,
+            288
+          ],
+          [
+            26,
+            288
+          ],
+          [
+            29,
+            288
+          ]
+        ]
+      },
+      {
+        "id": "horse-cave",
+        "name": "The Horse Cave",
+        "kind": "cavern",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.0,
+        "late": 0.2,
+        "gate": {
+          "id": "gate-horse-cave",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            3.0,
+            1.2,
+            46.0
+          ],
+          "before": [
+            3.0,
+            0.0,
+            43.0
+          ],
+          "beyond": [
+            3.0,
+            0.0,
+            49.1
+          ],
+          "tile": [
+            28,
+            283
+          ],
+          "beyondTile": [
+            28,
+            277
+          ],
+          "objectId": 802
+        },
+        "bonus": "",
+        "room": "horse-cave",
+        "bounds": [
+          -10.0,
+          50.0,
+          16.0,
+          74.0
+        ],
+        "spawns": [
+          [
+            -7.6,
+            0.0,
+            54.0
+          ],
+          [
+            -4.1,
+            0.0,
+            54.0
+          ],
+          [
+            -0.6,
+            0.0,
+            54.0
+          ],
+          [
+            2.9,
+            0.0,
+            54.0
+          ],
+          [
+            6.4,
+            0.0,
+            54.0
+          ],
+          [
+            9.9,
+            0.0,
+            54.0
+          ],
+          [
+            13.4,
+            0.0,
+            54.0
+          ],
+          [
+            -7.6,
+            0.0,
+            57.5
+          ],
+          [
+            -4.1,
+            0.0,
+            57.5
+          ],
+          [
+            -0.6,
+            0.0,
+            57.5
+          ],
+          [
+            2.9,
+            0.0,
+            57.5
+          ],
+          [
+            6.4,
+            0.0,
+            57.5
+          ],
+          [
+            9.9,
+            0.0,
+            57.5
+          ],
+          [
+            13.4,
+            0.0,
+            57.5
+          ],
+          [
+            -7.6,
+            0.0,
+            61.0
+          ],
+          [
+            -4.1,
+            0.0,
+            61.0
+          ],
+          [
+            -0.6,
+            0.0,
+            61.0
+          ],
+          [
+            2.9,
+            0.0,
+            61.0
+          ],
+          [
+            6.4,
+            0.0,
+            61.0
+          ],
+          [
+            9.9,
+            0.0,
+            61.0
+          ],
+          [
+            13.4,
+            0.0,
+            61.0
+          ],
+          [
+            -7.6,
+            0.0,
+            64.5
+          ],
+          [
+            -4.1,
+            0.0,
+            64.5
+          ],
+          [
+            -0.6,
+            0.0,
+            64.5
+          ],
+          [
+            2.9,
+            0.0,
+            64.5
+          ],
+          [
+            6.4,
+            0.0,
+            64.5
+          ],
+          [
+            9.9,
+            0.0,
+            64.5
+          ],
+          [
+            13.4,
+            0.0,
+            64.5
+          ],
+          [
+            -7.6,
+            0.0,
+            68.0
+          ],
+          [
+            -4.1,
+            0.0,
+            68.0
+          ],
+          [
+            -0.6,
+            0.0,
+            68.0
+          ],
+          [
+            2.9,
+            0.0,
+            68.0
+          ],
+          [
+            6.4,
+            0.0,
+            68.0
+          ],
+          [
+            9.9,
+            0.0,
+            68.0
+          ],
+          [
+            13.4,
+            0.0,
+            68.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            15,
+            252
+          ],
+          "max": [
+            41,
+            276
+          ]
+        },
+        "spawnTiles": [
+          [
+            17,
+            272
+          ],
+          [
+            21,
+            272
+          ],
+          [
+            24,
+            272
+          ],
+          [
+            28,
+            272
+          ],
+          [
+            31,
+            272
+          ],
+          [
+            35,
+            272
+          ],
+          [
+            38,
+            272
+          ],
+          [
+            17,
+            268
+          ],
+          [
+            21,
+            268
+          ],
+          [
+            24,
+            268
+          ],
+          [
+            28,
+            268
+          ],
+          [
+            31,
+            268
+          ],
+          [
+            35,
+            268
+          ],
+          [
+            38,
+            268
+          ],
+          [
+            17,
+            265
+          ],
+          [
+            24,
+            265
+          ],
+          [
+            28,
+            265
+          ],
+          [
+            31,
+            265
+          ],
+          [
+            35,
+            265
+          ],
+          [
+            38,
+            265
+          ],
+          [
+            17,
+            262
+          ],
+          [
+            21,
+            262
+          ],
+          [
+            24,
+            262
+          ],
+          [
+            28,
+            262
+          ],
+          [
+            31,
+            262
+          ],
+          [
+            35,
+            262
+          ],
+          [
+            38,
+            262
+          ],
+          [
+            17,
+            258
+          ],
+          [
+            21,
+            258
+          ],
+          [
+            24,
+            258
+          ],
+          [
+            28,
+            258
+          ],
+          [
+            31,
+            258
+          ],
+          [
+            35,
+            258
+          ]
+        ]
+      },
+      {
+        "id": "ridge-path",
+        "name": "The Ridge Path",
+        "kind": "bridge",
+        "advance": "time:150",
+        "trigger": "enter",
+        "pressure": 0.9,
+        "late": 0.3,
+        "gate": {
+          "id": "gate-ridge-path",
+          "kind": "bars",
+          "label": "An iron bar gate. It opens when the way behind you is quiet.",
+          "position": [
+            -1.0,
+            1.2,
+            78.0
+          ],
+          "before": [
+            -1.0,
+            0.0,
+            75.0
+          ],
+          "beyond": [
+            -1.0,
+            0.0,
+            81.1
+          ],
+          "tile": [
+            24,
+            251
+          ],
+          "beyondTile": [
+            24,
+            245
+          ],
+          "objectId": 803
+        },
+        "bonus": "",
+        "room": "ridge-path",
+        "bounds": [
+          -3.2,
+          85.0,
+          1.2000000000000002,
+          113.0
+        ],
+        "spawns": [
+          [
+            -2.1,
+            0.0,
+            89.0
+          ],
+          [
+            0.1,
+            0.0,
+            89.0
+          ],
+          [
+            -2.1,
+            0.0,
+            92.2
+          ],
+          [
+            0.1,
+            0.0,
+            92.2
+          ],
+          [
+            -2.1,
+            0.0,
+            95.4
+          ],
+          [
+            0.1,
+            0.0,
+            95.4
+          ],
+          [
+            -2.1,
+            0.0,
+            98.6
+          ],
+          [
+            0.1,
+            0.0,
+            98.6
+          ],
+          [
+            -2.1,
+            0.0,
+            101.8
+          ],
+          [
+            0.1,
+            0.0,
+            101.8
+          ],
+          [
+            -2.1,
+            0.0,
+            105.0
+          ],
+          [
+            0.1,
+            0.0,
+            105.0
+          ],
+          [
+            -2.1,
+            0.0,
+            108.2
+          ],
+          [
+            0.1,
+            0.0,
+            108.2
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            22,
+            213
+          ],
+          "max": [
+            26,
+            241
+          ]
+        },
+        "spawnTiles": [
+          [
+            23,
+            237
+          ],
+          [
+            25,
+            237
+          ],
+          [
+            23,
+            234
+          ],
+          [
+            25,
+            234
+          ],
+          [
+            23,
+            231
+          ],
+          [
+            25,
+            231
+          ],
+          [
+            23,
+            227
+          ],
+          [
+            25,
+            227
+          ],
+          [
+            23,
+            224
+          ],
+          [
+            25,
+            224
+          ],
+          [
+            23,
+            221
+          ],
+          [
+            25,
+            221
+          ],
+          [
+            23,
+            218
+          ],
+          [
+            25,
+            218
+          ]
+        ]
+      },
+      {
+        "id": "scree-stair",
+        "name": "The Scree Stair",
+        "kind": "stair",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.0,
+        "late": 0.45,
+        "gate": {
+          "id": "gate-scree-stair",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            -1.0,
+            1.2,
+            120.0
+          ],
+          "before": [
+            -1.0,
+            0.0,
+            117.0
+          ],
+          "beyond": [
+            -1.0,
+            0.0,
+            123.1
+          ],
+          "tile": [
+            24,
+            209
+          ],
+          "beyondTile": [
+            24,
+            203
+          ],
+          "objectId": 804
+        },
+        "bonus": "",
+        "room": "scree-stair",
+        "bounds": [
+          -12.0,
+          138.0,
+          10.0,
+          156.0
+        ],
+        "spawns": [
+          [
+            -9.6,
+            3.0,
+            142.0
+          ],
+          [
+            -6.6,
+            3.0,
+            142.0
+          ],
+          [
+            -3.6,
+            3.0,
+            142.0
+          ],
+          [
+            -0.6,
+            3.0,
+            142.0
+          ],
+          [
+            2.4,
+            3.0,
+            142.0
+          ],
+          [
+            5.4,
+            3.0,
+            142.0
+          ],
+          [
+            -9.6,
+            3.0,
+            145.0
+          ],
+          [
+            -6.6,
+            3.0,
+            145.0
+          ],
+          [
+            -3.6,
+            3.0,
+            145.0
+          ],
+          [
+            -0.6,
+            3.0,
+            145.0
+          ],
+          [
+            2.4,
+            3.0,
+            145.0
+          ],
+          [
+            5.4,
+            3.0,
+            145.0
+          ],
+          [
+            -9.6,
+            3.0,
+            148.0
+          ],
+          [
+            -6.6,
+            3.0,
+            148.0
+          ],
+          [
+            -3.6,
+            3.0,
+            148.0
+          ],
+          [
+            -0.6,
+            3.0,
+            148.0
+          ],
+          [
+            2.4,
+            3.0,
+            148.0
+          ],
+          [
+            5.4,
+            3.0,
+            148.0
+          ],
+          [
+            -9.6,
+            3.0,
+            151.0
+          ],
+          [
+            -6.6,
+            3.0,
+            151.0
+          ],
+          [
+            -3.6,
+            3.0,
+            151.0
+          ],
+          [
+            -0.6,
+            3.0,
+            151.0
+          ],
+          [
+            2.4,
+            3.0,
+            151.0
+          ],
+          [
+            5.4,
+            3.0,
+            151.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            13,
+            170
+          ],
+          "max": [
+            35,
+            188
+          ]
+        },
+        "spawnTiles": [
+          [
+            15,
+            184
+          ],
+          [
+            18,
+            184
+          ],
+          [
+            21,
+            184
+          ],
+          [
+            24,
+            184
+          ],
+          [
+            27,
+            184
+          ],
+          [
+            15,
+            181
+          ],
+          [
+            18,
+            181
+          ],
+          [
+            21,
+            181
+          ],
+          [
+            24,
+            181
+          ],
+          [
+            27,
+            181
+          ],
+          [
+            15,
+            178
+          ],
+          [
+            18,
+            178
+          ],
+          [
+            21,
+            178
+          ],
+          [
+            24,
+            178
+          ],
+          [
+            27,
+            178
+          ],
+          [
+            21,
+            175
+          ],
+          [
+            24,
+            175
+          ],
+          [
+            27,
+            175
+          ],
+          [
+            30,
+            175
+          ]
+        ]
+      },
+      {
+        "id": "forked-wash",
+        "name": "The Forked Wash",
+        "kind": "fork",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.1,
+        "late": 0.6,
+        "gate": {
+          "id": "gate-forked-wash",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            -4.0,
+            4.2,
+            160.0
+          ],
+          "before": [
+            -4.0,
+            3.0,
+            157.0
+          ],
+          "beyond": [
+            -4.0,
+            3.0,
+            163.1
+          ],
+          "tile": [
+            21,
+            169
+          ],
+          "beyondTile": [
+            21,
+            163
+          ],
+          "objectId": 805
+        },
+        "bonus": "",
+        "room": "forked-wash-hub",
+        "bounds": [
+          -19.0,
+          164.0,
+          11.0,
+          178.0
+        ],
+        "spawns": [
+          [
+            -16.6,
+            3.0,
+            167.5
+          ],
+          [
+            -13.1,
+            3.0,
+            167.5
+          ],
+          [
+            -9.6,
+            3.0,
+            167.5
+          ],
+          [
+            -6.1,
+            3.0,
+            167.5
+          ],
+          [
+            -2.6,
+            3.0,
+            167.5
+          ],
+          [
+            0.9,
+            3.0,
+            167.5
+          ],
+          [
+            4.4,
+            3.0,
+            167.5
+          ],
+          [
+            7.9,
+            3.0,
+            167.5
+          ],
+          [
+            -16.6,
+            3.0,
+            171.0
+          ],
+          [
+            -13.1,
+            3.0,
+            171.0
+          ],
+          [
+            -9.6,
+            3.0,
+            171.0
+          ],
+          [
+            -6.1,
+            3.0,
+            171.0
+          ],
+          [
+            -2.6,
+            3.0,
+            171.0
+          ],
+          [
+            0.9,
+            3.0,
+            171.0
+          ],
+          [
+            4.4,
+            3.0,
+            171.0
+          ],
+          [
+            7.9,
+            3.0,
+            171.0
+          ],
+          [
+            -16.6,
+            3.0,
+            174.5
+          ],
+          [
+            -13.1,
+            3.0,
+            174.5
+          ],
+          [
+            -9.6,
+            3.0,
+            174.5
+          ],
+          [
+            -6.1,
+            3.0,
+            174.5
+          ],
+          [
+            -2.6,
+            3.0,
+            174.5
+          ],
+          [
+            0.9,
+            3.0,
+            174.5
+          ],
+          [
+            4.4,
+            3.0,
+            174.5
+          ],
+          [
+            7.9,
+            3.0,
+            174.5
+          ]
+        ],
+        "branches": [
+          {
+            "id": "shade-fork",
+            "name": "The Shade Fork",
+            "kind": "cavern",
+            "room": "forked-wash-shade-fork",
+            "bounds": [
+              -23.0,
+              186.0,
+              -7.0,
+              206.0
+            ],
+            "spawns": [
+              [
+                -20.6,
+                3.0,
+                190.0
+              ],
+              [
+                -17.6,
+                3.0,
+                190.0
+              ],
+              [
+                -14.6,
+                3.0,
+                190.0
+              ],
+              [
+                -11.6,
+                3.0,
+                190.0
+              ],
+              [
+                -20.6,
+                3.0,
+                193.0
+              ],
+              [
+                -17.6,
+                3.0,
+                193.0
+              ],
+              [
+                -14.6,
+                3.0,
+                193.0
+              ],
+              [
+                -11.6,
+                3.0,
+                193.0
+              ],
+              [
+                -20.6,
+                3.0,
+                196.0
+              ],
+              [
+                -17.6,
+                3.0,
+                196.0
+              ],
+              [
+                -14.6,
+                3.0,
+                196.0
+              ],
+              [
+                -11.6,
+                3.0,
+                196.0
+              ],
+              [
+                -20.6,
+                3.0,
+                199.0
+              ],
+              [
+                -17.6,
+                3.0,
+                199.0
+              ],
+              [
+                -14.6,
+                3.0,
+                199.0
+              ],
+              [
+                -11.6,
+                3.0,
+                199.0
+              ],
+              [
+                -20.6,
+                3.0,
+                202.0
+              ],
+              [
+                -17.6,
+                3.0,
+                202.0
+              ],
+              [
+                -14.6,
+                3.0,
+                202.0
+              ],
+              [
+                -11.6,
+                3.0,
+                202.0
+              ]
+            ],
+            "gate": {
+              "id": "gate-forked-wash-shade-fork",
+              "kind": "slab",
+              "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+              "position": [
+                -15.0,
+                4.2,
+                182.0
+              ],
+              "before": [
+                -15.0,
+                3.0,
+                179.0
+              ],
+              "beyond": [
+                -15.0,
+                3.0,
+                185.1
+              ],
+              "tile": [
+                10,
+                147
+              ],
+              "beyondTile": [
+                10,
+                141
+              ],
+              "objectId": 806
+            },
+            "boundsTiles": {
+              "min": [
+                2,
+                120
+              ],
+              "max": [
+                18,
+                140
+              ]
+            },
+            "spawnTiles": [
+              [
+                4,
+                136
+              ],
+              [
+                7,
+                136
+              ],
+              [
+                10,
+                136
+              ],
+              [
+                13,
+                136
+              ],
+              [
+                4,
+                133
+              ],
+              [
+                7,
+                133
+              ],
+              [
+                10,
+                133
+              ],
+              [
+                13,
+                133
+              ],
+              [
+                10,
+                130
+              ],
+              [
+                13,
+                130
+              ],
+              [
+                4,
+                127
+              ],
+              [
+                7,
+                127
+              ],
+              [
+                10,
+                127
+              ],
+              [
+                13,
+                127
+              ],
+              [
+                4,
+                124
+              ],
+              [
+                7,
+                124
+              ],
+              [
+                10,
+                124
+              ],
+              [
+                13,
+                124
+              ]
+            ]
+          },
+          {
+            "id": "sun-fork",
+            "name": "The Sun Fork",
+            "kind": "hall",
+            "room": "forked-wash-sun-fork",
+            "bounds": [
+              -1.0,
+              186.0,
+              15.0,
+              206.0
+            ],
+            "spawns": [
+              [
+                1.4,
+                3.0,
+                190.0
+              ],
+              [
+                4.4,
+                3.0,
+                190.0
+              ],
+              [
+                7.4,
+                3.0,
+                190.0
+              ],
+              [
+                10.4,
+                3.0,
+                190.0
+              ],
+              [
+                1.4,
+                3.0,
+                193.0
+              ],
+              [
+                4.4,
+                3.0,
+                193.0
+              ],
+              [
+                7.4,
+                3.0,
+                193.0
+              ],
+              [
+                10.4,
+                3.0,
+                193.0
+              ],
+              [
+                1.4,
+                3.0,
+                196.0
+              ],
+              [
+                4.4,
+                3.0,
+                196.0
+              ],
+              [
+                7.4,
+                3.0,
+                196.0
+              ],
+              [
+                10.4,
+                3.0,
+                196.0
+              ],
+              [
+                1.4,
+                3.0,
+                199.0
+              ],
+              [
+                4.4,
+                3.0,
+                199.0
+              ],
+              [
+                7.4,
+                3.0,
+                199.0
+              ],
+              [
+                10.4,
+                3.0,
+                199.0
+              ],
+              [
+                1.4,
+                3.0,
+                202.0
+              ],
+              [
+                4.4,
+                3.0,
+                202.0
+              ],
+              [
+                7.4,
+                3.0,
+                202.0
+              ],
+              [
+                10.4,
+                3.0,
+                202.0
+              ]
+            ],
+            "gate": {
+              "id": "gate-forked-wash-sun-fork",
+              "kind": "slab",
+              "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+              "position": [
+                7.0,
+                4.2,
+                182.0
+              ],
+              "before": [
+                7.0,
+                3.0,
+                179.0
+              ],
+              "beyond": [
+                7.0,
+                3.0,
+                185.1
+              ],
+              "tile": [
+                32,
+                147
+              ],
+              "beyondTile": [
+                32,
+                141
+              ],
+              "objectId": 807
+            },
+            "boundsTiles": {
+              "min": [
+                24,
+                120
+              ],
+              "max": [
+                40,
+                140
+              ]
+            },
+            "spawnTiles": [
+              [
+                26,
+                136
+              ],
+              [
+                29,
+                136
+              ],
+              [
+                32,
+                136
+              ],
+              [
+                35,
+                136
+              ],
+              [
+                26,
+                133
+              ],
+              [
+                29,
+                133
+              ],
+              [
+                32,
+                133
+              ],
+              [
+                35,
+                133
+              ],
+              [
+                26,
+                130
+              ],
+              [
+                29,
+                130
+              ],
+              [
+                32,
+                130
+              ],
+              [
+                35,
+                130
+              ],
+              [
+                29,
+                127
+              ],
+              [
+                32,
+                127
+              ],
+              [
+                35,
+                127
+              ],
+              [
+                29,
+                124
+              ],
+              [
+                32,
+                124
+              ],
+              [
+                35,
+                124
+              ]
+            ]
+          }
+        ],
+        "merge": {
+          "room": "forked-wash-merge",
+          "bounds": [
+            -19.0,
+            214.0,
+            11.0,
+            226.0
+          ],
+          "boundsTiles": {
+            "min": [
+              6,
+              100
+            ],
+            "max": [
+              36,
+              112
+            ]
+          }
+        },
+        "boundsTiles": {
+          "min": [
+            6,
+            148
+          ],
+          "max": [
+            36,
+            162
+          ]
+        },
+        "spawnTiles": [
+          [
+            8,
+            158
+          ],
+          [
+            12,
+            158
+          ],
+          [
+            15,
+            158
+          ],
+          [
+            19,
+            158
+          ],
+          [
+            22,
+            158
+          ],
+          [
+            26,
+            158
+          ],
+          [
+            29,
+            158
+          ],
+          [
+            33,
+            158
+          ],
+          [
+            8,
+            155
+          ],
+          [
+            12,
+            155
+          ],
+          [
+            15,
+            155
+          ],
+          [
+            19,
+            155
+          ],
+          [
+            22,
+            155
+          ],
+          [
+            26,
+            155
+          ],
+          [
+            29,
+            155
+          ],
+          [
+            33,
+            155
+          ],
+          [
+            8,
+            152
+          ],
+          [
+            12,
+            152
+          ],
+          [
+            15,
+            152
+          ],
+          [
+            19,
+            152
+          ],
+          [
+            22,
+            152
+          ],
+          [
+            26,
+            152
+          ],
+          [
+            29,
+            152
+          ],
+          [
+            33,
+            152
+          ]
+        ]
+      },
+      {
+        "id": "long-wash",
+        "name": "The Long Wash",
+        "kind": "gallery",
+        "advance": "cleared",
+        "trigger": "at_gate",
+        "pressure": 1.2,
+        "late": 0.8,
+        "gate": {
+          "id": "gate-long-wash",
+          "kind": "bars",
+          "label": "An iron bar gate. It opens when the way behind you is quiet.",
+          "position": [
+            -4.0,
+            4.2,
+            230.0
+          ],
+          "before": [
+            -4.0,
+            3.0,
+            227.0
+          ],
+          "beyond": [
+            -4.0,
+            3.0,
+            233.1
+          ],
+          "tile": [
+            21,
+            99
+          ],
+          "beyondTile": [
+            21,
+            93
+          ],
+          "objectId": 808
+        },
+        "bonus": "node:Seed",
+        "room": "long-wash",
+        "bounds": [
+          -9.5,
+          234.0,
+          1.5,
+          266.0
+        ],
+        "spawns": [
+          [
+            -7.1,
+            3.0,
+            238.0
+          ],
+          [
+            -3.9,
+            3.0,
+            238.0
+          ],
+          [
+            -7.1,
+            3.0,
+            241.2
+          ],
+          [
+            -3.9,
+            3.0,
+            241.2
+          ],
+          [
+            -7.1,
+            3.0,
+            244.4
+          ],
+          [
+            -3.9,
+            3.0,
+            244.4
+          ],
+          [
+            -7.1,
+            3.0,
+            247.6
+          ],
+          [
+            -3.9,
+            3.0,
+            247.6
+          ],
+          [
+            -7.1,
+            3.0,
+            250.8
+          ],
+          [
+            -3.9,
+            3.0,
+            250.8
+          ],
+          [
+            -7.1,
+            3.0,
+            254.0
+          ],
+          [
+            -3.9,
+            3.0,
+            254.0
+          ],
+          [
+            -7.1,
+            3.0,
+            257.2
+          ],
+          [
+            -3.9,
+            3.0,
+            257.2
+          ],
+          [
+            -7.1,
+            3.0,
+            260.4
+          ],
+          [
+            -3.9,
+            3.0,
+            260.4
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            16,
+            60
+          ],
+          "max": [
+            26,
+            92
+          ]
+        },
+        "spawnTiles": [
+          [
+            21,
+            88
+          ],
+          [
+            21,
+            85
+          ],
+          [
+            18,
+            82
+          ],
+          [
+            21,
+            82
+          ],
+          [
+            21,
+            78
+          ],
+          [
+            21,
+            75
+          ],
+          [
+            18,
+            72
+          ],
+          [
+            21,
+            72
+          ],
+          [
+            21,
+            69
+          ],
+          [
+            18,
+            66
+          ],
+          [
+            21,
+            66
+          ]
+        ]
+      },
+      {
+        "id": "sun-court",
+        "name": "The Sun Court",
+        "kind": "court",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.0,
+        "late": 1.0,
+        "gate": {
+          "id": "gate-sun-court",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            -4.0,
+            4.2,
+            270.0
+          ],
+          "before": [
+            -4.0,
+            3.0,
+            267.0
+          ],
+          "beyond": [
+            -4.0,
+            3.0,
+            273.1
+          ],
+          "tile": [
+            21,
+            59
+          ],
+          "beyondTile": [
+            21,
+            53
+          ],
+          "objectId": 809
+        },
+        "bonus": "",
+        "boss": [
+          -4.0,
+          3.5,
+          297.0
+        ],
+        "room": "sun-court",
+        "bounds": [
+          -20.0,
+          274.0,
+          12.0,
+          304.0
+        ],
+        "spawns": [
+          [
+            3.0,
+            3.0,
+            289.0
+          ],
+          [
+            0.95,
+            3.0,
+            293.24
+          ],
+          [
+            -4.0,
+            3.0,
+            295.0
+          ],
+          [
+            -8.95,
+            3.0,
+            293.24
+          ],
+          [
+            -11.0,
+            3.0,
+            289.0
+          ],
+          [
+            -8.95,
+            3.0,
+            284.76
+          ],
+          [
+            -4.0,
+            3.0,
+            283.0
+          ],
+          [
+            0.95,
+            3.0,
+            284.76
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            5,
+            22
+          ],
+          "max": [
+            37,
+            52
+          ]
+        },
+        "spawnTiles": [
+          [
+            28,
+            37
+          ],
+          [
+            26,
+            33
+          ],
+          [
+            21,
+            31
+          ],
+          [
+            16,
+            33
+          ],
+          [
+            14,
+            37
+          ],
+          [
+            16,
+            41
+          ],
+          [
+            21,
+            43
+          ],
+          [
+            26,
+            41
+          ]
+        ],
+        "bossTile": [
+          21,
+          29
+        ]
+      }
+    ],
+    "vault": {
+      "room": "vault",
+      "boundsTiles": {
+        "min": [
+          14,
+          2
+        ],
+        "max": [
+          28,
+          14
+        ]
+      },
+      "spot": [
+        -4.0,
+        3.05,
+        318.0
+      ],
+      "spotTile": [
+        21,
+        8
+      ],
+      "cache": {
+        "id": "cache",
+        "kind": "cache",
+        "target": "run",
+        "label": "Reward cache",
+        "text": "The run's cache. It opens once for each of you when the court is quiet.",
+        "position": [
+          -4.0,
+          3.6,
+          320.5
+        ],
+        "serverTile": [
+          21,
+          6
+        ],
+        "objectId": 798
+      },
+      "exit": {
+        "id": "exit-vault",
+        "kind": "waystone",
+        "target": "home",
+        "label": "Waystone",
+        "text": "The waystone home.",
+        "position": [
+          1.0,
+          4.0,
+          315.0
+        ],
+        "serverTile": [
+          26,
+          11
+        ],
+        "objectId": 799
+      }
+    },
+    "keeper": {
+      "name": "Rider Anse",
+      "at": "Gate_East",
+      "offset": [
+        6.0,
+        4.0
+      ],
+      "actorType": 333
+    },
+    "maxPlayers": 6,
+    "bands": [
+      {
+        "id": "low",
+        "label": "The Red Canyon (1-25)",
+        "minAd": 1,
+        "maxAd": 25,
+        "timeLimit": 2400,
+        "cooldownHours": 4
+      },
+      {
+        "id": "mid",
+        "label": "The Red Canyon (20-50)",
+        "minAd": 20,
+        "maxAd": 50,
+        "timeLimit": 2700,
+        "cooldownHours": 6
+      }
+    ]
+  },
+  "performance": {
+    "nodes": 135,
+    "meshes": 105,
+    "materials": 8,
+    "images": 23,
+    "textures": 23,
+    "accessors": 525,
+    "bufferViews": 548,
+    "uniqueTriangles": 42713,
+    "uniqueVertices": 86442,
+    "glbBytes": 7146236,
+    "nodeNames": [
+      "Secrets_sunmane_gauntlet",
+      "Section_sunmane_gauntlet_band_-001",
+      "Build_sunmane_gauntlet_band_-001_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+000",
+      "Build_sunmane_gauntlet_band_+000_amber_resin",
+      "Build_sunmane_gauntlet_band_+000_dark_iron",
+      "Build_sunmane_gauntlet_band_+000_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+000_timber_warm",
+      "Build_sunmane_gauntlet_band_+000_woven_cloth",
+      "Walk_sunmane_gauntlet_band_+000_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+001",
+      "Build_sunmane_gauntlet_band_+001_dark_iron",
+      "Build_sunmane_gauntlet_band_+001_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+001_timber_warm",
+      "Walk_sunmane_gauntlet_band_+001_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+002",
+      "Build_sunmane_gauntlet_band_+002_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+002_timber_warm",
+      "Build_sunmane_gauntlet_band_+002_woven_cloth",
+      "Walk_sunmane_gauntlet_band_+002_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+003",
+      "Build_sunmane_gauntlet_band_+003_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+003_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+003_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+004",
+      "Build_sunmane_gauntlet_band_+004_amber_resin",
+      "Build_sunmane_gauntlet_band_+004_dark_iron",
+      "Build_sunmane_gauntlet_band_+004_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+004_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+005",
+      "Build_sunmane_gauntlet_band_+005_amber_resin",
+      "Build_sunmane_gauntlet_band_+005_dark_iron",
+      "Build_sunmane_gauntlet_band_+005_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+005_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+005_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+006",
+      "Build_sunmane_gauntlet_band_+006_dark_iron",
+      "Build_sunmane_gauntlet_band_+006_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+006_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+007",
+      "Build_sunmane_gauntlet_band_+007_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+007_sunmane_wash_sand",
+      "Build_sunmane_gauntlet_band_+007_timber_warm",
+      "Build_sunmane_gauntlet_band_+007_woven_cloth",
+      "Walk_sunmane_gauntlet_band_+007_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+007_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+008",
+      "Build_sunmane_gauntlet_band_+008_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+008_sunmane_wash_sand",
+      "Walk_sunmane_gauntlet_band_+008_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+009",
+      "Build_sunmane_gauntlet_band_+009_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+009_timber_warm",
+      "Build_sunmane_gauntlet_band_+009_woven_cloth",
+      "Walk_sunmane_gauntlet_band_+009_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+010",
+      "Build_sunmane_gauntlet_band_+010_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+010_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+010_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+011",
+      "Build_sunmane_gauntlet_band_+011_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+011_timber_warm",
+      "Build_sunmane_gauntlet_band_+011_woven_cloth",
+      "Walk_sunmane_gauntlet_band_+011_sunmane_red_sandstone",
+      "Section_sunmane_gauntlet_band_+012",
+      "Build_sunmane_gauntlet_band_+012_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+012_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+012_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+013",
+      "Build_sunmane_gauntlet_band_+013_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+013_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+014",
+      "Build_sunmane_gauntlet_band_+014_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+014_timber_warm",
+      "Build_sunmane_gauntlet_band_+014_woven_cloth",
+      "Walk_sunmane_gauntlet_band_+014_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+015",
+      "Build_sunmane_gauntlet_band_+015_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+015_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+015_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+016",
+      "Build_sunmane_gauntlet_band_+016_amber_resin",
+      "Build_sunmane_gauntlet_band_+016_dark_iron",
+      "Build_sunmane_gauntlet_band_+016_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+016_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+016_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+017",
+      "Build_sunmane_gauntlet_band_+017_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+017_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+018",
+      "Build_sunmane_gauntlet_band_+018_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+018_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+018_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+019",
+      "Build_sunmane_gauntlet_band_+019_dark_iron",
+      "Build_sunmane_gauntlet_band_+019_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+019_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+019_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+020",
+      "Build_sunmane_gauntlet_band_+020_amber_resin",
+      "Build_sunmane_gauntlet_band_+020_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+020_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+020_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+021",
+      "Build_sunmane_gauntlet_band_+021_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+021_thatch_reed",
+      "Walk_sunmane_gauntlet_band_+021_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+022",
+      "Build_sunmane_gauntlet_band_+022_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+022_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+023",
+      "Build_sunmane_gauntlet_band_+023_grey_bone",
+      "Build_sunmane_gauntlet_band_+023_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+023_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+024",
+      "Build_sunmane_gauntlet_band_+024_amber_resin",
+      "Build_sunmane_gauntlet_band_+024_dark_iron",
+      "Build_sunmane_gauntlet_band_+024_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+024_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+024_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+025",
+      "Build_sunmane_gauntlet_band_+025_amber_resin",
+      "Build_sunmane_gauntlet_band_+025_dark_iron",
+      "Build_sunmane_gauntlet_band_+025_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+025_sunmane_red_sandstone",
+      "Walk_sunmane_gauntlet_band_+025_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+026",
+      "Build_sunmane_gauntlet_band_+026_amber_resin",
+      "Build_sunmane_gauntlet_band_+026_dark_iron",
+      "Build_sunmane_gauntlet_band_+026_sunmane_red_sandstone",
+      "Build_sunmane_gauntlet_band_+026_timber_warm",
+      "Build_sunmane_gauntlet_band_+026_woven_cloth",
+      "Walk_sunmane_gauntlet_band_+026_sunmane_wash_sand",
+      "Section_sunmane_gauntlet_band_+027",
+      "Build_sunmane_gauntlet_band_+027_sunmane_red_sandstone"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "_toolkit/gauntlets/build.py",
+      "role": "reproducible-build",
+      "design": "_toolkit/gauntlets/designs.py"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the gauntlet rooms over the shared toolkit",
+    "license": "CC-BY-4.0"
+  },
+  "productionStatus": "authored-geometry-materials-population",
+  "notes": [
+    "The Red Canyon: a linear instanced route of 7 legs under sunmane_steppe; the server runs it as an instance and opens each gate when the leg before it is quiet."
+  ],
+  "externalMeshes": {
+    "../../../_shared/meshes/29850ef8147efa5418a899845ef4e232b36f5c7fe06b80269f3e69be90163668.glb": "0b912719c9117c22fd77dfc3a538ac950a5b67698ac0f38f90d11c65947480b3",
+    "../../../_shared/meshes/6d7798e2ee04393d91657dc936e45be7124f33bfdc523f9379bec6e9024ba9d5.glb": "2962e67e44f174f8dd9c2e4d5faebfbd6f7d4d3d1fc10037f65c84a87e6325b8",
+    "../../../_shared/meshes/bfd1a1142cdfafbccd85e2b95320f26ff099bb617e4da9d204b7cd1018e4ded2.glb": "16fa751a040003affb458b1a92cc8ab6668b5d3fdd2bfa82ada1b2dc00ce022d"
+  },
+  "externalResources": {
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0.png": "0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0",
+    "../../../_shared/images/0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f.png": "0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f",
+    "../../../_shared/images/17834b4bc14cacd1ce9caffe3317ac700b17bb5e422807c78728b8de9df49ab5.png": "17834b4bc14cacd1ce9caffe3317ac700b17bb5e422807c78728b8de9df49ab5",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1f28f269ba1b149aeb77bff82fa91444c0eb6b76e5f5c379b1c42aafefb2f668.png": "1f28f269ba1b149aeb77bff82fa91444c0eb6b76e5f5c379b1c42aafefb2f668",
+    "../../../_shared/images/2b80bc8a9cc0c49770c8be06c0eeb65504c4364fbd54c1112a1cd0f21e477040.png": "2b80bc8a9cc0c49770c8be06c0eeb65504c4364fbd54c1112a1cd0f21e477040",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed.png": "48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed",
+    "../../../_shared/images/4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22.png": "4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22",
+    "../../../_shared/images/52739ac9f045cce5aa5627ba5582368a72c02b1625cb5480f69f22299b38ac57.png": "52739ac9f045cce5aa5627ba5582368a72c02b1625cb5480f69f22299b38ac57",
+    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
+    "../../../_shared/images/5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03.png": "5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03",
+    "../../../_shared/images/5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843.png": "5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9.png": "8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
+    "../../../_shared/images/e5e339fb1fcad3975d5fa7fca72fd5b6f763cad4758326cb0bb942adf5ad2fa9.png": "e5e339fb1fcad3975d5fa7fca72fd5b6f763cad4758326cb0bb942adf5ad2fa9",
+    "../../../_shared/images/f3aed7c96b140f679a2c37f1173aec18832b4576a58ecfb8387c9e3240b1ad90.png": "f3aed7c96b140f679a2c37f1173aec18832b4576a58ecfb8387c9e3240b1ad90"
+  }
+}

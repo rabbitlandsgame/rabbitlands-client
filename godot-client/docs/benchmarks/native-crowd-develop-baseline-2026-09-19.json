@@ -1,0 +1,997 @@
+{
+  "schemaVersion": 1,
+  "evidenceDate": "2026-09-19",
+  "title": "Historical unchanged-develop native crowd baseline",
+  "classification": "HISTORICAL_PROVISIONAL_BASELINE",
+  "steadyAcceptance": false,
+  "baselineCommit": "05596ec5cfb3c3a363b55973dbe8611af42eecbb",
+  "sourceGitBlobs": {
+    "godot-client/tests/integration/client_benchmarks.gd": "c05e8f95c836cad74f30c6b95ea7a5249f1a62a0",
+    "godot-client/docs/runtime-performance.md": "8005b87cc131c0a8368ce1f01464175d8269829e"
+  },
+  "provenance": {
+    "statement": "Values are copied without retiming from the ignored baseline artifacts listed and hashed below.",
+    "rawArtifactsRemainIgnored": true,
+    "fullSmallReportsEmbedded": true,
+    "logsEmbedded": false,
+    "logsAttestedBySha256": true
+  },
+  "godot": {
+    "version": "4.7.2.stable.official.ed1daf0bf",
+    "executable": "Godot_v4.7.2-stable_win64_console.exe",
+    "versionAuthority": "engine startup header; the executable filename alone is not the version authority"
+  },
+  "host": {
+    "osRegistryProductName": "Windows 10 Pro",
+    "osDisplayVersion": "24H2",
+    "osBuild": "26100.9457",
+    "osBuildFamilyNote": "Build 26100 is in the Windows 11 family although the registry ProductName says Windows 10.",
+    "cpu": "Intel Core Ultra 9 275HX",
+    "logicalProcessorsVisible": 24,
+    "physicalMemoryBytes": 33690267648,
+    "physicalMemoryGiB": 31.38,
+    "availableMemoryGiBAtQuery": 11.03,
+    "gpu": "NVIDIA GeForce RTX 5080 Laptop GPU",
+    "gpuDriver": "591.91",
+    "gpuVramMiB": 16303,
+    "viewport": [
+      1280,
+      720
+    ]
+  },
+  "executionControls": {
+    "processorAffinityMaskDecimal": 15,
+    "processorAffinityMaskHex": "0x0000000f",
+    "logicalProcessorsAllowed": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "environmentWorkerLimit": 4,
+    "singleThreadedScene": true,
+    "processEvidence": "Every embedded process record reports launcherAffinity=15, inheritedAffinity=15, realInheritedAffinity=15, environmentWorkerLimit=4, and exitCode=0.",
+    "userDataIsolation": {
+      "intended": true,
+      "pathsWereWorktreeLocal": true,
+      "historicalPerProcessRuntimeAttestation": false,
+      "assessment": "Strongly supported by same-shell environment redirection, matching runtime cache timestamps, and later controlled probes; the historical report JSON did not record OS.get_user_data_dir(), so each old process is not directly runtime-attested.",
+      "contaminationEvidence": "none found"
+    }
+  },
+  "sharedHostInterference": {
+    "classification": "PROVISIONAL_SHARED_HOST",
+    "cpuSample": {
+      "sampledAt": "2026-09-19T10:32:10.8330405+02:00",
+      "wallSeconds": 5,
+      "processes": [
+        {
+          "Id": 3284,
+          "Path": "C:\\rabbitlands\\rabbitlands-client\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+          "Affinity": 255,
+          "CpuSecondsOver5s": null
+        },
+        {
+          "Id": 17864,
+          "Path": "C:\\rabbitlands\\clean_client\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+          "Affinity": 16777215,
+          "CpuSecondsOver5s": 2.3906
+        },
+        {
+          "Id": 33124,
+          "Path": "C:\\rabbitlands\\clean_client\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+          "Affinity": 16777215,
+          "CpuSecondsOver5s": 0.0469
+        }
+      ]
+    },
+    "interpretation": "During the five-second pre-packet sample, foreign Godot processes consumed 2.3906 and 0.0469 CPU seconds; a third appeared during the interval and has no complete delta. GPU contention from other windows was not continuously measured."
+  },
+  "limitations": {
+    "actorRendererReadings": "PROVISIONAL",
+    "actorTimingsAreSteadyAcceptance": false,
+    "reasons": [
+      "The legacy actor harness waited for world_root plus 24 fast frames, not for chunk streaming and background cache work to become quiescent.",
+      "Headless node count rose from 6200 at idle to 8123 while walking; GL rose from 8123 at idle to 9449 while walking; Forward+ rose from 6200 at idle to 8123 while walking.",
+      "World-load and continent-chunk messages occur during measurement and continue after client benchmarks: PASS.",
+      "The renderer field in the Forward+ report says gl_compatibility because the harness read the project setting; the CLI command and Vulkan Forward+ startup header identify the actual renderer.",
+      "The host was shared and windowed GPU contention was not continuously monitored.",
+      "Shutdown logs contain unfinished background work and resource leak diagnostics after PASS."
+    ],
+    "rendererAuthority": {
+      "compatibility": "OpenGL API 3.3.0 NVIDIA 591.91 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 5080 Laptop GPU",
+      "forwardPlus": "Vulkan 1.4.325 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 5080 Laptop GPU"
+    }
+  },
+  "packetBaseline": {
+    "packetCount": 500,
+    "repeatsPerReport": 8,
+    "mix": {
+      "actor_commands": 300,
+      "partial_stats": 100,
+      "chat": 100
+    },
+    "runs": [
+      {
+        "name": "packets-headless-1",
+        "report": {
+          "adapter": "",
+          "display": "headless",
+          "godot": "4.7.2",
+          "headless": true,
+          "label": "baseline-headless-packets-1",
+          "packets": {
+            "bytes": 14478,
+            "decodeAndReduceMilliseconds": 14.937,
+            "decodeMilliseconds": 0.624,
+            "microsecondsPerPacket": 29.87,
+            "mix": {
+              "actor_commands": 300,
+              "chat": 100,
+              "partial_stats": 100
+            },
+            "packets": 500,
+            "reduceMilliseconds": 14.313,
+            "reduceMillisecondsByKind": {
+              "actor_commands": 10.378,
+              "chat": 1.747,
+              "partial_stats": 1.027
+            },
+            "repeats": 8
+          },
+          "renderer": "gl_compatibility",
+          "sections": [
+            "packets"
+          ],
+          "unixTime": 1789806739,
+          "viewport": [
+            1280,
+            720
+          ]
+        },
+        "process": {
+          "runName": "packets-headless-1",
+          "command": [
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+            "--headless",
+            "--single-threaded-scene",
+            "--path",
+            ".",
+            "--script",
+            "res://tests/integration/client_benchmarks.gd",
+            "--log-file",
+            "test-artifacts/native-crowd/baseline/packets-headless-1-godot.log"
+          ],
+          "launcherPid": 11216,
+          "launcherAffinity": 15,
+          "processId": 35164,
+          "inheritedAffinity": 15,
+          "realProcessId": 38076,
+          "realInheritedAffinity": 15,
+          "hardAffinityLimitHex": "0x0000000f",
+          "environmentWorkerLimit": 4,
+          "startedAt": "2026-09-19T10:32:18.7464763+02:00",
+          "finishedAt": "2026-09-19T10:32:20.2602226+02:00",
+          "elapsedMilliseconds": 1513.7,
+          "exitCode": 0,
+          "peakWorkingSetBytes": 140951552,
+          "peakPagedMemoryBytes": 92655616,
+          "isolatedAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\appdata",
+          "isolatedLocalAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\localappdata",
+          "isolatedTemp": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\temp",
+          "isolatedUserProfile": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\userprofile",
+          "runEnvironment": {
+            "ELORIA_BENCH_SECTIONS": "packets",
+            "ELORIA_BENCH_LABEL": "baseline-headless-packets-1",
+            "ELORIA_BENCH_OUTPUT": "packets-headless-1.json",
+            "ELORIA_ARTIFACT_DIR": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline"
+          }
+        }
+      },
+      {
+        "name": "packets-headless-2",
+        "report": {
+          "adapter": "",
+          "display": "headless",
+          "godot": "4.7.2",
+          "headless": true,
+          "label": "baseline-headless-packets-2",
+          "packets": {
+            "bytes": 14478,
+            "decodeAndReduceMilliseconds": 13.466,
+            "decodeMilliseconds": 0.558,
+            "microsecondsPerPacket": 26.93,
+            "mix": {
+              "actor_commands": 300,
+              "chat": 100,
+              "partial_stats": 100
+            },
+            "packets": 500,
+            "reduceMilliseconds": 12.908,
+            "reduceMillisecondsByKind": {
+              "actor_commands": 10.009,
+              "chat": 1.608,
+              "partial_stats": 1.153
+            },
+            "repeats": 8
+          },
+          "renderer": "gl_compatibility",
+          "sections": [
+            "packets"
+          ],
+          "unixTime": 1789806753,
+          "viewport": [
+            1280,
+            720
+          ]
+        },
+        "process": {
+          "runName": "packets-headless-2",
+          "command": [
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+            "--headless",
+            "--single-threaded-scene",
+            "--path",
+            ".",
+            "--script",
+            "res://tests/integration/client_benchmarks.gd",
+            "--log-file",
+            "test-artifacts/native-crowd/baseline/packets-headless-2-godot.log"
+          ],
+          "launcherPid": 39912,
+          "launcherAffinity": 15,
+          "processId": 2560,
+          "inheritedAffinity": 15,
+          "realProcessId": 40788,
+          "realInheritedAffinity": 15,
+          "hardAffinityLimitHex": "0x0000000f",
+          "environmentWorkerLimit": 4,
+          "startedAt": "2026-09-19T10:32:32.7554226+02:00",
+          "finishedAt": "2026-09-19T10:32:33.995907+02:00",
+          "elapsedMilliseconds": 1240.5,
+          "exitCode": 0,
+          "peakWorkingSetBytes": 128729088,
+          "peakPagedMemoryBytes": 79839232,
+          "isolatedAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\appdata",
+          "isolatedLocalAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\localappdata",
+          "isolatedTemp": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\temp",
+          "isolatedUserProfile": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\userprofile",
+          "runEnvironment": {
+            "ELORIA_BENCH_OUTPUT": "packets-headless-2.json",
+            "ELORIA_BENCH_LABEL": "baseline-headless-packets-2",
+            "ELORIA_ARTIFACT_DIR": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline",
+            "ELORIA_BENCH_SECTIONS": "packets"
+          }
+        }
+      },
+      {
+        "name": "packets-headless-3",
+        "report": {
+          "adapter": "",
+          "display": "headless",
+          "godot": "4.7.2",
+          "headless": true,
+          "label": "baseline-headless-packets-3",
+          "packets": {
+            "bytes": 14478,
+            "decodeAndReduceMilliseconds": 14.752,
+            "decodeMilliseconds": 0.562,
+            "microsecondsPerPacket": 29.5,
+            "mix": {
+              "actor_commands": 300,
+              "chat": 100,
+              "partial_stats": 100
+            },
+            "packets": 500,
+            "reduceMilliseconds": 14.19,
+            "reduceMillisecondsByKind": {
+              "actor_commands": 10.462,
+              "chat": 2.115,
+              "partial_stats": 0.975
+            },
+            "repeats": 8
+          },
+          "renderer": "gl_compatibility",
+          "sections": [
+            "packets"
+          ],
+          "unixTime": 1789806754,
+          "viewport": [
+            1280,
+            720
+          ]
+        },
+        "process": {
+          "runName": "packets-headless-3",
+          "command": [
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+            "--headless",
+            "--single-threaded-scene",
+            "--path",
+            ".",
+            "--script",
+            "res://tests/integration/client_benchmarks.gd",
+            "--log-file",
+            "test-artifacts/native-crowd/baseline/packets-headless-3-godot.log"
+          ],
+          "launcherPid": 39912,
+          "launcherAffinity": 15,
+          "processId": 12120,
+          "inheritedAffinity": 15,
+          "realProcessId": 36452,
+          "realInheritedAffinity": 15,
+          "hardAffinityLimitHex": "0x0000000f",
+          "environmentWorkerLimit": 4,
+          "startedAt": "2026-09-19T10:32:34.0329693+02:00",
+          "finishedAt": "2026-09-19T10:32:35.2217045+02:00",
+          "elapsedMilliseconds": 1188.7,
+          "exitCode": 0,
+          "peakWorkingSetBytes": 140120064,
+          "peakPagedMemoryBytes": 92487680,
+          "isolatedAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\appdata",
+          "isolatedLocalAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\localappdata",
+          "isolatedTemp": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\temp",
+          "isolatedUserProfile": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\userprofile",
+          "runEnvironment": {
+            "ELORIA_BENCH_OUTPUT": "packets-headless-3.json",
+            "ELORIA_BENCH_LABEL": "baseline-headless-packets-3",
+            "ELORIA_ARTIFACT_DIR": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline",
+            "ELORIA_BENCH_SECTIONS": "packets"
+          }
+        }
+      }
+    ],
+    "median": {
+      "decodeMilliseconds": 0.562,
+      "decodeAndReduceMilliseconds": 14.752,
+      "reduceMilliseconds": 14.19,
+      "microsecondsPerPacket": 29.5,
+      "reduceMillisecondsByKind": {
+        "actor_commands": 10.378,
+        "partial_stats": 1.027,
+        "chat": 1.747
+      }
+    }
+  },
+  "actorBaseline": {
+    "actorCount": 100,
+    "classification": "PROVISIONAL_NOT_STEADY_ACCEPTANCE",
+    "runs": {
+      "actors-headless": {
+        "classification": "PROVISIONAL_NOT_STEADY_ACCEPTANCE",
+        "reason": "The legacy harness sampled while asynchronous world chunks were still loading; load messages continued after PASS.",
+        "actualRenderer": {
+          "mode": "headless",
+          "startupHeader": "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org",
+          "authority": "stdout startup header and process command"
+        },
+        "reportRendererFieldCaveat": "The startup header and process command are authoritative for the actual runtime mode.",
+        "report": {
+          "actors": {
+            "actorCount": 100,
+            "actorTypes": 10,
+            "cachedLibraries": 10,
+            "cachedScenes": 10,
+            "empty": {
+              "bufferBytes": 0,
+              "drawCalls": 0,
+              "frames": 120,
+              "id": "empty",
+              "monitorStaticBytes": 238421214,
+              "nodes": 2964,
+              "objects": 19061,
+              "primitives": 0,
+              "renderCpuMilliseconds": 0.0,
+              "renderGpuMilliseconds": 0.0,
+              "resources": 155,
+              "sceneMillisecondsPerFrame": 0.127,
+              "staticBytes": 238420742,
+              "textureBytes": 0,
+              "videoBytes": 0,
+              "worldRenderCpuMilliseconds": 0.0,
+              "worldRenderGpuMilliseconds": 0.0
+            },
+            "fieldOrigin": [
+              280,
+              134
+            ],
+            "fieldTiles": 60,
+            "idle": {
+              "bufferBytes": 0,
+              "drawCalls": 0,
+              "drawn": 100,
+              "frames": 120,
+              "halfRatePlayers": 6,
+              "id": "idle",
+              "monitorStaticBytes": 816326330,
+              "nodes": 6200,
+              "objects": 19214,
+              "primitives": 0,
+              "renderCpuMilliseconds": 0.0,
+              "renderGpuMilliseconds": 0.0,
+              "resources": 158,
+              "sceneMillisecondsPerFrame": 1.18,
+              "staticBytes": 816326330,
+              "textureBytes": 0,
+              "tiers": {
+                "full": 56,
+                "half": 6,
+                "paused": 38
+              },
+              "videoBytes": 0,
+              "worldRenderCpuMilliseconds": 0.0,
+              "worldRenderGpuMilliseconds": 0.0
+            },
+            "map": "four_gates",
+            "meshes": {
+              "distinctMaterials": 614,
+              "distinctMeshes": 529,
+              "distinctModelMaterials": 114,
+              "distinctModelMeshes": 19,
+              "meshInstances": 700,
+              "modelMeshInstances": 190
+            },
+            "spawnMilliseconds": 4337.9,
+            "spawnPasses": 13,
+            "spawnedNodes": 100,
+            "walking": {
+              "bufferBytes": 0,
+              "drawCalls": 0,
+              "frames": 120,
+              "monitorStaticBytes": 857642610,
+              "nodes": 8123,
+              "objects": 22451,
+              "presentMillisecondsPerFrame": 4.559,
+              "primitives": 0,
+              "reduceMillisecondsPerFrame": 0.507,
+              "renderCpuMilliseconds": 0.0,
+              "renderGpuMilliseconds": 0.0,
+              "resources": 158,
+              "restMillisecondsPerFrame": 3.461,
+              "sceneMillisecondsPerFrame": 8.527,
+              "staticBytes": 857641898,
+              "textureBytes": 0,
+              "videoBytes": 0,
+              "worldRenderCpuMilliseconds": 0.0,
+              "worldRenderGpuMilliseconds": 0.0
+            }
+          },
+          "adapter": "",
+          "display": "headless",
+          "godot": "4.7.2",
+          "headless": true,
+          "label": "baseline-headless-actors",
+          "renderer": "gl_compatibility",
+          "sections": [
+            "actors"
+          ],
+          "unixTime": 1789806785,
+          "viewport": [
+            1280,
+            720
+          ]
+        },
+        "process": {
+          "runName": "actors-headless",
+          "command": [
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+            "--headless",
+            "--single-threaded-scene",
+            "--path",
+            ".",
+            "--script",
+            "res://tests/integration/client_benchmarks.gd",
+            "--log-file",
+            "test-artifacts/native-crowd/baseline/actors-headless-godot.log"
+          ],
+          "launcherPid": 24468,
+          "launcherAffinity": 15,
+          "processId": 29264,
+          "inheritedAffinity": 15,
+          "realProcessId": 39400,
+          "realInheritedAffinity": 15,
+          "hardAffinityLimitHex": "0x0000000f",
+          "environmentWorkerLimit": 4,
+          "startedAt": "2026-09-19T10:33:04.2552434+02:00",
+          "finishedAt": "2026-09-19T10:33:13.9499943+02:00",
+          "elapsedMilliseconds": 9694.8,
+          "exitCode": 0,
+          "peakWorkingSetBytes": 1097035776,
+          "peakPagedMemoryBytes": 1061433344,
+          "isolatedAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\appdata",
+          "isolatedLocalAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\localappdata",
+          "isolatedTemp": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\temp",
+          "isolatedUserProfile": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\userprofile",
+          "runEnvironment": {
+            "ELORIA_ARTIFACT_DIR": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline",
+            "ELORIA_BENCH_MAP": "four_gates",
+            "ELORIA_BENCH_OUTPUT": "actors-headless.json",
+            "ELORIA_BENCH_SECTIONS": "actors",
+            "ELORIA_BENCH_LABEL": "baseline-headless-actors"
+          }
+        }
+      },
+      "actors-gl": {
+        "classification": "PROVISIONAL_NOT_STEADY_ACCEPTANCE",
+        "reason": "The legacy harness sampled while asynchronous world chunks were still loading; load messages continued after PASS.",
+        "actualRenderer": {
+          "mode": "OpenGL Compatibility",
+          "startupHeader": "OpenGL API 3.3.0 NVIDIA 591.91 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 5080 Laptop GPU",
+          "authority": "stdout startup header"
+        },
+        "reportRendererFieldCaveat": "The startup header and process command are authoritative for the actual runtime mode.",
+        "report": {
+          "actors": {
+            "actorCount": 100,
+            "actorTypes": 10,
+            "cachedLibraries": 10,
+            "cachedScenes": 10,
+            "empty": {
+              "bufferBytes": 8834268,
+              "drawCalls": 122,
+              "frames": 120,
+              "id": "empty",
+              "monitorStaticBytes": 167459762,
+              "nodes": 2964,
+              "objects": 9588,
+              "primitives": 2812,
+              "renderCpuMilliseconds": 0.291,
+              "renderGpuMilliseconds": 0.066,
+              "resources": 155,
+              "sceneMillisecondsPerFrame": 4.166,
+              "staticBytes": 167459762,
+              "textureBytes": 45924767,
+              "videoBytes": 54759035,
+              "worldRenderCpuMilliseconds": 0.122,
+              "worldRenderGpuMilliseconds": 0.025
+            },
+            "fieldOrigin": [
+              280,
+              134
+            ],
+            "fieldTiles": 60,
+            "idle": {
+              "bufferBytes": 70155718,
+              "drawCalls": 485,
+              "drawn": 100,
+              "frames": 120,
+              "halfRatePlayers": 6,
+              "id": "idle",
+              "monitorStaticBytes": 590429976,
+              "nodes": 8123,
+              "objects": 22161,
+              "primitives": 482094,
+              "renderCpuMilliseconds": 0.559,
+              "renderGpuMilliseconds": 0.448,
+              "resources": 158,
+              "sceneMillisecondsPerFrame": 6.635,
+              "staticBytes": 590429976,
+              "textureBytes": 317453039,
+              "tiers": {
+                "full": 56,
+                "half": 6,
+                "paused": 38
+              },
+              "videoBytes": 387608757,
+              "worldRenderCpuMilliseconds": 1.771,
+              "worldRenderGpuMilliseconds": 1.526
+            },
+            "map": "four_gates",
+            "meshes": {
+              "distinctMaterials": 614,
+              "distinctMeshes": 529,
+              "distinctModelMaterials": 114,
+              "distinctModelMeshes": 19,
+              "meshInstances": 700,
+              "modelMeshInstances": 190
+            },
+            "spawnMilliseconds": 13243.6,
+            "spawnPasses": 13,
+            "spawnedNodes": 100,
+            "walking": {
+              "bufferBytes": 72385522,
+              "drawCalls": 490,
+              "frames": 120,
+              "monitorStaticBytes": 611769039,
+              "nodes": 9449,
+              "objects": 23211,
+              "presentMillisecondsPerFrame": 5.665,
+              "primitives": 481446,
+              "reduceMillisecondsPerFrame": 0.602,
+              "renderCpuMilliseconds": 0.404,
+              "renderGpuMilliseconds": 0.051,
+              "resources": 158,
+              "restMillisecondsPerFrame": 10.014,
+              "sceneMillisecondsPerFrame": 16.281,
+              "staticBytes": 611769039,
+              "textureBytes": 326759138,
+              "videoBytes": 399144660,
+              "worldRenderCpuMilliseconds": 1.876,
+              "worldRenderGpuMilliseconds": 1.464
+            }
+          },
+          "adapter": "NVIDIA GeForce RTX 5080 Laptop GPU",
+          "display": "Windows",
+          "godot": "4.7.2",
+          "headless": false,
+          "label": "baseline-windowed-gl-actors",
+          "renderer": "gl_compatibility",
+          "sections": [
+            "actors"
+          ],
+          "unixTime": 1789806818,
+          "viewport": [
+            1280,
+            720
+          ]
+        },
+        "process": {
+          "runName": "actors-gl",
+          "command": [
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+            "--audio-driver",
+            "Dummy",
+            "--rendering-method",
+            "gl_compatibility",
+            "--single-threaded-scene",
+            "--path",
+            ".",
+            "--script",
+            "res://tests/integration/client_benchmarks.gd",
+            "--log-file",
+            "test-artifacts/native-crowd/baseline/actors-gl-godot.log"
+          ],
+          "launcherPid": 10852,
+          "launcherAffinity": 15,
+          "processId": 39356,
+          "inheritedAffinity": 15,
+          "realProcessId": 34908,
+          "realInheritedAffinity": 15,
+          "hardAffinityLimitHex": "0x0000000f",
+          "environmentWorkerLimit": 4,
+          "startedAt": "2026-09-19T10:33:36.6880633+02:00",
+          "finishedAt": "2026-09-19T10:34:00.4465653+02:00",
+          "elapsedMilliseconds": 23758.5,
+          "exitCode": 0,
+          "peakWorkingSetBytes": 1318924288,
+          "peakPagedMemoryBytes": 1912381440,
+          "isolatedAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\appdata",
+          "isolatedLocalAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\localappdata",
+          "isolatedTemp": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\temp",
+          "isolatedUserProfile": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\userprofile",
+          "runEnvironment": {
+            "ELORIA_BENCH_SECTIONS": "actors",
+            "ELORIA_ARTIFACT_DIR": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline",
+            "ELORIA_BENCH_MAP": "four_gates",
+            "ELORIA_BENCH_LABEL": "baseline-windowed-gl-actors",
+            "ELORIA_BENCH_OUTPUT": "actors-gl.json"
+          }
+        }
+      },
+      "actors-forward-plus": {
+        "classification": "PROVISIONAL_NOT_STEADY_ACCEPTANCE",
+        "reason": "The legacy harness sampled while asynchronous world chunks were still loading; load messages continued after PASS.",
+        "actualRenderer": {
+          "mode": "Vulkan Forward+",
+          "startupHeader": "Vulkan 1.4.325 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 5080 Laptop GPU",
+          "authority": "stdout startup header"
+        },
+        "reportRendererFieldCaveat": "The report says gl_compatibility because it records the project setting rather than the CLI override. The Vulkan Forward+ startup header is authoritative.",
+        "report": {
+          "actors": {
+            "actorCount": 100,
+            "actorTypes": 10,
+            "cachedLibraries": 10,
+            "cachedScenes": 10,
+            "empty": {
+              "bufferBytes": 17334592,
+              "drawCalls": 122,
+              "frames": 120,
+              "id": "empty",
+              "monitorStaticBytes": 185650944,
+              "nodes": 2964,
+              "objects": 9595,
+              "primitives": 2812,
+              "renderCpuMilliseconds": 0.109,
+              "renderGpuMilliseconds": 0.022,
+              "resources": 155,
+              "sceneMillisecondsPerFrame": 4.199,
+              "staticBytes": 185650944,
+              "textureBytes": 122602496,
+              "videoBytes": 159406688,
+              "worldRenderCpuMilliseconds": 0.089,
+              "worldRenderGpuMilliseconds": 0.177
+            },
+            "fieldOrigin": [
+              280,
+              134
+            ],
+            "fieldTiles": 60,
+            "idle": {
+              "bufferBytes": 67374832,
+              "drawCalls": 477,
+              "drawn": 100,
+              "frames": 120,
+              "halfRatePlayers": 6,
+              "id": "idle",
+              "monitorStaticBytes": 629830213,
+              "nodes": 6200,
+              "objects": 19242,
+              "primitives": 482094,
+              "renderCpuMilliseconds": 0.144,
+              "renderGpuMilliseconds": 0.028,
+              "resources": 158,
+              "sceneMillisecondsPerFrame": 28.28,
+              "staticBytes": 629830213,
+              "textureBytes": 435801088,
+              "tiers": {
+                "full": 56,
+                "half": 6,
+                "paused": 38
+              },
+              "videoBytes": 554128768,
+              "worldRenderCpuMilliseconds": 0.578,
+              "worldRenderGpuMilliseconds": 0.491
+            },
+            "map": "four_gates",
+            "meshes": {
+              "distinctMaterials": 614,
+              "distinctMeshes": 529,
+              "distinctModelMaterials": 114,
+              "distinctModelMeshes": 19,
+              "meshInstances": 700,
+              "modelMeshInstances": 190
+            },
+            "spawnMilliseconds": 16666.4,
+            "spawnPasses": 13,
+            "spawnedNodes": 100,
+            "walking": {
+              "bufferBytes": 70590574,
+              "drawCalls": 482,
+              "frames": 120,
+              "monitorStaticBytes": 636927033,
+              "nodes": 8123,
+              "objects": 22166,
+              "presentMillisecondsPerFrame": 6.507,
+              "primitives": 481446,
+              "reduceMillisecondsPerFrame": 0.674,
+              "renderCpuMilliseconds": 0.238,
+              "renderGpuMilliseconds": 0.027,
+              "resources": 158,
+              "restMillisecondsPerFrame": 32.688,
+              "sceneMillisecondsPerFrame": 39.869,
+              "staticBytes": 636927033,
+              "textureBytes": 417982464,
+              "videoBytes": 539531904,
+              "worldRenderCpuMilliseconds": 1.696,
+              "worldRenderGpuMilliseconds": 0.489
+            }
+          },
+          "adapter": "NVIDIA GeForce RTX 5080 Laptop GPU",
+          "display": "Windows",
+          "godot": "4.7.2",
+          "headless": false,
+          "label": "baseline-windowed-forward-plus-actors",
+          "renderer": "gl_compatibility",
+          "sections": [
+            "actors"
+          ],
+          "unixTime": 1789806889,
+          "viewport": [
+            1280,
+            720
+          ]
+        },
+        "process": {
+          "runName": "actors-forward-plus",
+          "command": [
+            "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+            "--audio-driver",
+            "Dummy",
+            "--rendering-method",
+            "forward_plus",
+            "--single-threaded-scene",
+            "--path",
+            ".",
+            "--script",
+            "res://tests/integration/client_benchmarks.gd",
+            "--log-file",
+            "test-artifacts/native-crowd/baseline/actors-forward-plus-godot.log"
+          ],
+          "launcherPid": 25116,
+          "launcherAffinity": 15,
+          "processId": 37444,
+          "inheritedAffinity": 15,
+          "realProcessId": 34872,
+          "realInheritedAffinity": 15,
+          "hardAffinityLimitHex": "0x0000000f",
+          "environmentWorkerLimit": 4,
+          "startedAt": "2026-09-19T10:34:47.0416298+02:00",
+          "finishedAt": "2026-09-19T10:35:20.0949077+02:00",
+          "elapsedMilliseconds": 33053.3,
+          "exitCode": 0,
+          "peakWorkingSetBytes": 2287104000,
+          "peakPagedMemoryBytes": 2983247872,
+          "isolatedAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\appdata",
+          "isolatedLocalAppData": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\localappdata",
+          "isolatedTemp": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\temp",
+          "isolatedUserProfile": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline\\runtime\\userprofile",
+          "runEnvironment": {
+            "ELORIA_BENCH_SECTIONS": "actors",
+            "ELORIA_BENCH_OUTPUT": "actors-forward-plus.json",
+            "ELORIA_BENCH_LABEL": "baseline-windowed-forward-plus-actors",
+            "ELORIA_ARTIFACT_DIR": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\test-artifacts\\native-crowd\\baseline",
+            "ELORIA_BENCH_MAP": "four_gates"
+          }
+        }
+      }
+    }
+  },
+  "rawInputsSha256": [
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-1.json",
+      "bytes": 701,
+      "sha256": "a4c2aed88b42bc3eee4c4e262c27d172eea0375cf54f8a3b8d9092b2d23039fc"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-1.process.json",
+      "bytes": 1869,
+      "sha256": "ffa6359f94819599a24f8fb6738a4895d6eb9fe0289f32d9951780b2ba6688ab"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-1.stdout.log",
+      "bytes": 326,
+      "sha256": "77a1ade34df0fdf2b8df889f9956f63906d3901dd4ed29cbec60afd2f380dc28"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-1.stderr.log",
+      "bytes": 125,
+      "sha256": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-1-godot.log",
+      "bytes": 444,
+      "sha256": "712aad42b5ba2b8873985d59e43b9db9c2da1bb921bbae6c4aed7725088c0113"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-2.json",
+      "bytes": 701,
+      "sha256": "568651de2d4f442c0c0d5ce9f8659a33567d91bb5298a60ba1db2ae23a6a5880"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-2.process.json",
+      "bytes": 1868,
+      "sha256": "2660a8813a9bab81bbc4e911575f917bb6d9049647e8787e881cd6a266cc301e"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-2.stdout.log",
+      "bytes": 326,
+      "sha256": "aa6717bd6890cb3b5eee529e2e5602f32f2ab39b8ca01d1456685525d5565516"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-2.stderr.log",
+      "bytes": 125,
+      "sha256": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-2-godot.log",
+      "bytes": 444,
+      "sha256": "d042b67fe2dcab9e32ccfc4a7b43e197d9e5b83fbefb07b2dc7c4626d8fe7f70"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-3.json",
+      "bytes": 699,
+      "sha256": "ae52dff485a398aee18389d0810db872cd11384b19c48a73e093f8d929d857d7"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-3.process.json",
+      "bytes": 1869,
+      "sha256": "0e0c8c12ea9946cb8608eb21c7aa67db4649284bdc80957fe8ed4b7f9b9c2ae4"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-3.stdout.log",
+      "bytes": 326,
+      "sha256": "1ced5594862a8f431411b7f7b6ec00b41ed6f8acf2c601c6f7c449450ad887e7"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-3.stderr.log",
+      "bytes": 125,
+      "sha256": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/packets-headless-3-godot.log",
+      "bytes": 444,
+      "sha256": "e4647d7ee8b022e1ee66ab73bee50d87903f200c89745cd69aedb1a8ff68cc22"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-headless.json",
+      "bytes": 2549,
+      "sha256": "a0b70cc7edb0aa778db81b6e3f2f9cbe94b81fc392add5c76a436e5b7f0413dc"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-headless.process.json",
+      "bytes": 1898,
+      "sha256": "02d510be993fb740e2c0bff7ba4b0e3f7d4310939af62c9e74f11c07b5829737"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-headless.stdout.log",
+      "bytes": 45771,
+      "sha256": "c238420c450b948274a6a994148392936b9ba955dc90881a2a54c10574ab708c"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-headless.stderr.log",
+      "bytes": 42462,
+      "sha256": "85cbb7f12e689a45cf476db74fee60817044eaaefc0415527baf6f5b7435f6ad"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-headless-godot.log",
+      "bytes": 48520,
+      "sha256": "02e51138c415a7f0c50ea6068567e383880c4246ed2d11afd9fc410a6d5243ba"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-gl.json",
+      "bytes": 2698,
+      "sha256": "d8cddd0b50bf582eb3f8480e71268535782531c1827a058f41b27eee175107f3"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-gl.process.json",
+      "bytes": 1954,
+      "sha256": "b55453f7180cd5fd961a3b91fa5dafb702de7f92f7f506bd084b1a0c64f01cb0"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-gl.stdout.log",
+      "bytes": 57378,
+      "sha256": "571508dd66fe3db39083263e84a495de8c4442ed3784371241edf3f5027e67d9"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-gl.stderr.log",
+      "bytes": 38447,
+      "sha256": "2d873627719f62737120826f884d4868bf06b1fecd013df4ac99d21cdd905a2c"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-gl-godot.log",
+      "bytes": 60623,
+      "sha256": "560e37d2d48a2907c22fe11cc2497fa0d7069f71201cbfccfe6d3f87a3db1980"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-forward-plus.json",
+      "bytes": 2711,
+      "sha256": "28f5f91d221610cf942e5ca5b6a2c655df1c7b881a7dfce8373d29598168d253"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-forward-plus.process.json",
+      "bytes": 1990,
+      "sha256": "eb26359db39d2a4e6e3bde04db59ec91f73cf48d7d49000115d04976f571fc74"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-forward-plus.stdout.log",
+      "bytes": 45941,
+      "sha256": "fa41d25f0dea019a5ffc4e291d541672b9e573f23822e5dd4aafbebbc6c864c5"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-forward-plus.stderr.log",
+      "bytes": 58270,
+      "sha256": "a856f8617211974ae756e7b652ba0ed497b545e7a364b07f61d27e1a7ae292f3"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/actors-forward-plus-godot.log",
+      "bytes": 49138,
+      "sha256": "d93a14dc4a935cca47d9aeec6446717196fd298ffd775c12125ec1a8cacfc523"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/interference-before-packets.json",
+      "bytes": 743,
+      "sha256": "cc81e1eb19cb079dec9063f07ad277ecc1bcfd23174416c58246076527e21dd8"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/README.md",
+      "bytes": 8800,
+      "sha256": "b0a4f1b6b254f44100ef263af75aa07fa10a7b45aab7652779f86abd622237ab"
+    },
+    {
+      "path": "test-artifacts/native-crowd/baseline/run_godot_4core.ps1",
+      "bytes": 4847,
+      "sha256": "2524c622a55bd95c77a332137a2a65a147505f06454b94f0510e081406dc2bfe"
+    }
+  ]
+}

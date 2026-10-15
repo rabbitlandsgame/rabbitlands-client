@@ -1,0 +1,4384 @@
+{
+  "schemaVersion": 1,
+  "title": "Crowd impact geometry final whole-scene evidence",
+  "date": "2026-09-19",
+  "status": "valid controlled evidence; 60 FPS target remains unmet",
+  "conclusion": {
+    "headless": "Across the rotated six-run controlled comparison, the median of run means changed from 23.666 ms to 21.114 ms (-10.78%). All three candidate run means were lower, while one paired p95 comparison regressed; baseline temporal drift prevents a blanket tail claim.",
+    "rendered": "The paced GL Compatibility and Forward+ B/A/B rows do not show a stable whole-frame gain. GL rendering remains far above the 16.67 ms target, and the shipping renderer was not changed.",
+    "scope": "The controlled candidate combines the native cape, flight and world kernels, the cape capsule cache, and the retained ranger-bow local geometry. Focused tests isolate component correctness and callback cost; their savings are not added to scene timings."
+  },
+  "sourceBasis": {
+    "baselineRuntimeRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+    "candidateRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+    "primaryAndDevelopReadOnlyRevision": "349600742f6cd7646ccbe28eb31d33bf2809a2e8",
+    "candidateSourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+    "baselineEffectiveSourceHash": "fed43c2569e43130824beaa9d546edcd6e845504e3f1110102d37274d5e23da3",
+    "nativeDll": {
+      "path": "bin/windows/native_crowd.windows.template_release.x86_64.dll",
+      "sha256": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+      "bytes": 981504
+    },
+    "extensionDescriptor": {
+      "path": "bin/native_crowd.gdextension",
+      "sha256": "c5cc550d96e2eef8d8ac55318802de980abc56e0e56b6a10ef64237a073d1ea9",
+      "bytes": 288
+    },
+    "runner": {
+      "path": "scripts/run_crowd_benchmarks.ps1",
+      "sha256": "f88f925ea071a95137e8beca225f6d4f38341ec0dd3351641cb10527910b2257",
+      "bytes": 30721
+    },
+    "reversalRunner": {
+      "path": "scripts/run_crowd_reversal_benchmark.ps1",
+      "sha256": "97cc7e65cdcf0a42727c406dc0fa0b0866cfd7a5c27ce91b3480505724ae8865",
+      "bytes": 22270
+    },
+    "godotConsole": {
+      "path": "Godot_v4.7.2-stable_win64_console.exe",
+      "sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+      "bytes": 198152
+    },
+    "godotDirect": {
+      "path": "Godot_v4.7.2-stable_win64.exe",
+      "sha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+      "bytes": 180858888
+    },
+    "candidateManifestFiles": {
+      "godot-client/tests/integration/crowd_benchmarks.gd": "4d856f91f7aa2d0a3684c76a688c0b2b129ac04526756b6c4fd764500ab9d6c4",
+      "godot-client/tests/integration/crowd_benchmark_main.gd": "caa62e7c26a733e3cdb63d8216719bd19e8ce57d1d46070bedd80f1e744f5d78",
+      "godot-client/tests/integration/crowd_benchmark_main.tscn": "e0dd330bb32d117d0688eb83aeddf43d0ac060e47d953263180c47bdafbcbc98",
+      "godot-client/scripts/run_crowd_benchmarks.ps1": "f88f925ea071a95137e8beca225f6d4f38341ec0dd3351641cb10527910b2257",
+      "godot-client/project.godot": "d77a65c9c12987ff2e5a03ce617b703ef964e88f6d261b202ace799945adb1fe",
+      "godot-client/src/state/app_state.gd": "beb724243e9622d777c1bc957c764d773626aef3f21d7a5842aa9f55203125e2",
+      "godot-client/src/app/main.gd": "04c86038d50cc65ede1e93e460d6bde07aaad138cd24c01a1cabc657729efacd",
+      "godot-client/src/actors/replicated_actor_3d.gd": "c5885aee3741f0edaa5b95088f90f03e185ab332edc7b9a90d5a67d1c43247fb",
+      "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+      "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+      "godot-client/src/actors/combat_presentation_3d.gd": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+      "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e",
+      "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+      "godot-client/src/world/combat_effect_mesh.gd": "b931cd573d6e55f1cbc0c85de1b8d142a221a48c345abd78c27c78b71545a7f6",
+      "godot-client/src/world/animation_gate.gd": "f90d7f6b3fee0601cac7fabe2035b3ff61022a0bd8e61082c0ed80f2afc63718",
+      "godot-client/native/native_crowd/src/native_crowd_reducer.cpp": "3393c3c67053f17f3158a76b0734531f36751d08484c02a9a0803e2d5ea7c429",
+      "godot-client/native/native_crowd/src/native_crowd_reducer.h": "1663bccbfc4aff94846c8ea800dbb6013b9848bce5bfe1de0207eff314542312",
+      "godot-client/native/native_crowd/src/register_types.cpp": "616e8a8ddcae8ce6860a37bdf44c25a80b1d49ddb560860330e701fdd0a0a685",
+      "godot-client/native/native_crowd/src/register_types.h": "79cd715590b9bc523e7c551143f23c0b811298841f3b3d9f9c41c4ceecc347fc",
+      "godot-client/native/native_crowd/CMakeLists.txt": "a56a585c2e9aa7201832d11c5d964b8119338f5247e8dde390da8c0681ee6e1e",
+      "godot-client/native/native_crowd/build_profile.json": "d52c8a2dde63324be3f1fbe7204592e7376834d1db7bd45e0c1afb80625e86fe",
+      "godot-client/bin/native_crowd.gdextension": "c5cc550d96e2eef8d8ac55318802de980abc56e0e56b6a10ef64237a073d1ea9",
+      "godot-client/bin/windows/native_crowd.windows.template_release.x86_64.dll": "7321af0475b974313a15317ed6f9db459cf6e47146c5b5ff4ca983f74ccb5a1a",
+      "godot-client/native/native_crowd/src/native_cape_constraint_kernel.cpp": "d428d1b58a017c914ff2a820ba1278c7dbfa18f9fc5c78f5e38ef930af0cb7c2",
+      "godot-client/native/native_crowd/src/native_cape_constraint_kernel.h": "2302202ad7d4ced38fbd87a9f19577d9dbd05cf6a65883ae57343d5e33d195cc",
+      "godot-client/native/native_crowd/src/native_spell_flight_geometry.cpp": "d4f648314b8d9cd363ea259a9627e8a8a3230df3f00047f3587020e0c506debd",
+      "godot-client/native/native_crowd/src/native_spell_flight_geometry.h": "9d0e88f43b1a3aa627c6a1a62ae9c0e6334ebb3c6c692c59770c94ba075c407a",
+      "godot-client/native/native_crowd/src/native_world_effect_geometry.cpp": "2177bdc3c315f137db72b9c4908ef63f6686e2d5a8ea6c529b2b53fa9b4ecbf3",
+      "godot-client/native/native_crowd/src/native_world_effect_geometry.h": "7a61fbba602c70cb9c25b4e6c39d11e03f9c10bd874aba0ec5ed85b677ebeaa5"
+    },
+    "changedRuntimePaths": [
+      "godot-client/src/actors/cape_cloth.gd",
+      "godot-client/src/actors/ranger_bow_3d.gd",
+      "godot-client/src/world/spell_flight_3d.gd",
+      "godot-client/src/world/world_effect_3d.gd"
+    ]
+  },
+  "measurementContract": {
+    "fixture": "primary mixed 300 actors / 150 camera-visible / 100 active",
+    "sampleMilliseconds": 5000,
+    "minimumFrames": 60,
+    "actorReducer": "GDScript / ELORIA_NATIVE_CROWD=0",
+    "baselineNativePresentation": "Both (cape + flight)",
+    "candidateNativePresentation": "All (cape + flight + world)",
+    "processAffinityMask": 15,
+    "logicalProcessors": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "requestedWorkerThreads": 2,
+    "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+    "hostCaveat": "shared development host; unrelated activity was not continuously monitored",
+    "windowCaveat": "windowed wall time includes compositor/pacing and is descriptive",
+    "percentileCaveat": "all-frame percentiles mix packet-bearing and quiet frames"
+  },
+  "focusedEvidence": {
+    "worldEffect": {
+      "bundle": {
+        "path": "docs/benchmarks/world-effect-native-geometry-2026-09-19.json",
+        "sha256": "fa0086c25411281f7897cf7e5af4f69f46c0f8537a6a892590cf524b73eeba20",
+        "bytes": 87819
+      },
+      "status": "production opt-in validated; whole-scene crowd effect pending",
+      "renderedGlSummary": {
+        "baselineMedianMicrosecondsPerDraw": 83.8055555555556,
+        "candidateMedianMicrosecondsPerDraw": 45.4444444444444,
+        "candidateVsBaselineRatio": 0.542260523699039,
+        "reductionPercent": 45.7739476300961
+      },
+      "renderedGlParity": true,
+      "renderedGlNativeStatsDelta": {
+        "buildAttempts": 2520,
+        "buildFallbacks": 0,
+        "buildSuccesses": 2520
+      },
+      "contracts": 7,
+      "caveat": "Focused microbench reductions are not a whole-frame or 60 FPS claim."
+    },
+    "rangerBow": {
+      "bundle": {
+        "path": "docs/benchmarks/combat-bow-pose-cache-2026-09-19.json",
+        "sha256": "0b3a7387d272ec79742b54c63494baea67fba22eb102a78c3044ec3b5869a31c",
+        "bytes": 84958
+      },
+      "conclusion": "When exact local draw point and flex are unchanged, retaining bowstring geometry and cached limb nodes preserves reviewed output and reduces the complete equipped-bow update_pose callback by about 40-46% in the focused repeated-pose workload.",
+      "controlledResults": {
+        "windowedCompatibility": {
+          "idleBow": {
+            "frozenMedianMicroseconds": 32.9583333333333,
+            "productionMedianMicroseconds": 17.6916666666667,
+            "changePercent": -46.3211125158028
+          },
+          "rangedHold": {
+            "frozenMedianMicroseconds": 31.8833333333333,
+            "productionMedianMicroseconds": 17.2491666666667,
+            "changePercent": -45.8991113434396
+          }
+        },
+        "headlessCompatibility": {
+          "idleBow": {
+            "frozenMedianMicroseconds": 26.4033333333333,
+            "productionMedianMicroseconds": 15.625,
+            "changePercent": -40.8218659260194
+          },
+          "rangedHold": {
+            "frozenMedianMicroseconds": 25.0266666666667,
+            "productionMedianMicroseconds": 14.94,
+            "changePercent": -40.3036760788492
+          }
+        }
+      },
+      "correctness": {
+        "windowedExactParity": "19 actor presentation states plus 11-step dynamic bow sequence; zero failures",
+        "dynamicCases": [
+          "idle world motion with retained local geometry",
+          "draw and repeated hold",
+          "changed draw point and size",
+          "release recoil at 0, 0.01, 0.08, and 0.16 seconds",
+          "return to idle",
+          "Sunmane asset/tip replacement"
+        ],
+        "regression": "test_combat_presentation.gd PASS for 16 player rigs"
+      },
+      "postRunNormalization": "The frozen bow fixture final file removes one trailing blank line and the probe updates that file-hash constant. The frozen pose function bytes and runtime semantics are unchanged; per-session manifests retain the exact measured file hashes."
+    }
+  },
+  "smokes": {
+    "worldOnly": {
+      "report": {
+        "path": "test-artifacts/native-crowd/impact-world-smoke-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T144309734Z.json",
+        "sha256": "877203bfa153b166f8ade9454f729c1f7178b19a57a9eb9fd689cf3ab29f6e11",
+        "bytes": 95987
+      },
+      "process": {
+        "path": "test-artifacts/native-crowd/impact-world-smoke-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T144309734Z.process.json",
+        "sha256": "3e473d3f9c64f46e952ef3f70b35b2b1a7d981c47c52c558b7a7845372e3cae6",
+        "bytes": 5288
+      },
+      "label": "impact-world-smoke-v1",
+      "runId": "impact-world-smoke-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T144309734Z",
+      "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+      "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+      "dirty": false,
+      "display": "headless",
+      "headless": true,
+      "requestedRenderingMethod": "gl_compatibility",
+      "actualRenderingMethod": "gl_compatibility",
+      "renderingDevice": "",
+      "nativeBackend": "gdscript",
+      "nativeBackendActive": false,
+      "failureCount": 0,
+      "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+      "nativePresentation": {
+        "requestedMode": "world",
+        "environmentValue": "world",
+        "actual": {
+          "capeActiveInstancesMaximum": 0,
+          "capeFallbackCalls": 0,
+          "capeGdscriptBackendInstancesMaximum": 180,
+          "capeMatchedRequest": true,
+          "capeModifierInstancesMaximum": 180,
+          "capeNativeBackendInstancesMaximum": 0,
+          "capeNativeCalls": 0,
+          "capeStatsSupportedInstancesMaximum": 180,
+          "flightActiveInstancesMaximum": 0,
+          "flightBuildAttempts": 0,
+          "flightBuildFallbacks": 0,
+          "flightBuildSuccesses": 0,
+          "flightInstancesMaximum": 52,
+          "flightMatchedRequest": true,
+          "matchedRequest": true,
+          "worldActiveInstancesMaximum": 52,
+          "worldBuildAttempts": 7452,
+          "worldBuildFallbacks": 0,
+          "worldBuildSuccesses": 7452,
+          "worldInstancesMaximum": 52,
+          "worldMatchedRequest": true,
+          "worldStatsSupported": true
+        }
+      },
+      "fixture": {
+        "count": 300,
+        "visible": 150,
+        "humanoids": 150,
+        "creatures": 150,
+        "plannedActive": 100,
+        "fullyEquippedHumanoids": 150,
+        "fallbackEquipmentNodes": 0
+      },
+      "sample": {
+        "frameCount": 192,
+        "summary": {
+          "wallMilliseconds": {
+            "mean": 26.046,
+            "p50": 24.607,
+            "p95": 42.4,
+            "p99": 49.376,
+            "max": 55.913,
+            "samples": 192
+          },
+          "worldRenderCpuMilliseconds": null,
+          "worldRenderGpuMilliseconds": null,
+          "rootRenderCpuMilliseconds": null,
+          "rootRenderGpuMilliseconds": null,
+          "drawCalls": null,
+          "primitives": null,
+          "sceneNodes": {
+            "mean": 20592.219,
+            "p50": 20563.0,
+            "p95": 20641.0,
+            "p99": 20719.0,
+            "max": 20719.0,
+            "samples": 192
+          },
+          "resourceObjects": {
+            "mean": 171.0,
+            "p50": 171.0,
+            "p95": 171.0,
+            "p99": 171.0,
+            "max": 171.0,
+            "samples": 192
+          },
+          "transientWorldEffects": {
+            "mean": 56.87,
+            "p50": 52.0,
+            "p95": 65.0,
+            "p99": 78.0,
+            "max": 78.0,
+            "samples": 192
+          },
+          "packetDispatchInclusiveMilliseconds": {
+            "mean": 0.417,
+            "p50": 0.0,
+            "p95": 4.761,
+            "p99": 5.388,
+            "max": 5.911,
+            "samples": 192
+          },
+          "syncWorldMilliseconds": {
+            "mean": 1.065,
+            "p50": 0.0,
+            "p95": 5.012,
+            "p99": 5.842,
+            "max": 7.916,
+            "samples": 192
+          },
+          "presentMilliseconds": {
+            "mean": 0.642,
+            "p50": 0.0,
+            "p95": 3.342,
+            "p99": 3.932,
+            "max": 6.102,
+            "samples": 192
+          },
+          "groundMilliseconds": {
+            "mean": 0.106,
+            "p50": 0.0,
+            "p95": 0.449,
+            "p99": 0.518,
+            "max": 0.522,
+            "samples": 192
+          },
+          "overheadMilliseconds": {
+            "mean": 0.185,
+            "p50": 0.0,
+            "p95": 0.82,
+            "p99": 0.995,
+            "max": 1.095,
+            "samples": 192
+          },
+          "animationGateMilliseconds": {
+            "mean": 0.244,
+            "p50": 0.006,
+            "p95": 1.164,
+            "p99": 1.4,
+            "max": 1.963,
+            "samples": 192
+          }
+        },
+        "rates": {
+          "actorCommandsPerSecond": 560.606,
+          "combatPresentationEventsPerSecond": 67.384,
+          "flushesPerSecond": 9.968,
+          "packetsPerSecond": 79.944,
+          "stateUpdatesPerSecond": 627.99
+        },
+        "maximumFlushesPerFrame": 1.0
+      },
+      "spawn": {
+        "milliseconds": 4024.718,
+        "passes": 38,
+        "spawned": 300,
+        "timeoutMilliseconds": 300000
+      },
+      "despawnMilliseconds": 808.914,
+      "memory": {
+        "afterDespawn": {
+          "bufferBytes": null,
+          "nodes": 7913,
+          "objects": 21207,
+          "resources": 169,
+          "staticBytes": 637908742,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "before": {
+          "bufferBytes": null,
+          "nodes": 4430,
+          "objects": 13733,
+          "resources": 163,
+          "staticBytes": 381572846,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "retainedAfterDespawnIncludingHarnessTelemetry": {
+          "bufferBytes": null,
+          "nodes": 3483,
+          "objects": 7474,
+          "resources": 6,
+          "staticBytes": 256335896,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "spawnDelta": {
+          "bufferBytes": null,
+          "nodes": 15444,
+          "objects": 27001,
+          "resources": 7,
+          "staticBytes": 1194651434,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "spawned": {
+          "bufferBytes": null,
+          "nodes": 19874,
+          "objects": 40734,
+          "resources": 170,
+          "staticBytes": 1576224280,
+          "textureBytes": null,
+          "videoBytes": null
+        }
+      },
+      "networkIntegrity": {
+        "protocolErrorsAfter": 0,
+        "protocolErrorsBefore": 0,
+        "unchangedGearMismatches": 0
+      },
+      "processAttestation": {
+        "exitCode": 0,
+        "cleanExit": true,
+        "reportValid": true,
+        "schemaValid": true,
+        "scriptErrorsDetected": false,
+        "allObservedProcessesVerified": true,
+        "affinityMask": 15,
+        "monitoringError": "",
+        "forcedTermination": false
+      },
+      "captures": []
+    },
+    "allComponents": {
+      "report": {
+        "path": "test-artifacts/native-crowd/impact-all-smoke-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T144359818Z.json",
+        "sha256": "28ba3d288b7423caf3c3be7941fd8be68b7059236c4dfbee7df3e1715929294d",
+        "bytes": 122335
+      },
+      "process": {
+        "path": "test-artifacts/native-crowd/impact-all-smoke-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T144359818Z.process.json",
+        "sha256": "1c8a9e46f46459fbe1f781a39627ce54b20d1b4929eacfc7e2307abb2648933b",
+        "bytes": 5282
+      },
+      "label": "impact-all-smoke-v1",
+      "runId": "impact-all-smoke-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T144359818Z",
+      "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+      "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+      "dirty": false,
+      "display": "headless",
+      "headless": true,
+      "requestedRenderingMethod": "gl_compatibility",
+      "actualRenderingMethod": "gl_compatibility",
+      "renderingDevice": "",
+      "nativeBackend": "gdscript",
+      "nativeBackendActive": false,
+      "failureCount": 0,
+      "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+      "nativePresentation": {
+        "requestedMode": "all",
+        "environmentValue": "all",
+        "actual": {
+          "capeActiveInstancesMaximum": 150,
+          "capeFallbackCalls": 0,
+          "capeGdscriptBackendInstancesMaximum": 30,
+          "capeMatchedRequest": true,
+          "capeModifierInstancesMaximum": 180,
+          "capeNativeBackendInstancesMaximum": 150,
+          "capeNativeCalls": 19650,
+          "capeStatsSupportedInstancesMaximum": 180,
+          "flightActiveInstancesMaximum": 52,
+          "flightBuildAttempts": 6966,
+          "flightBuildFallbacks": 0,
+          "flightBuildSuccesses": 6966,
+          "flightInstancesMaximum": 52,
+          "flightMatchedRequest": true,
+          "matchedRequest": true,
+          "worldActiveInstancesMaximum": 52,
+          "worldBuildAttempts": 10162,
+          "worldBuildFallbacks": 0,
+          "worldBuildSuccesses": 10162,
+          "worldInstancesMaximum": 52,
+          "worldMatchedRequest": true,
+          "worldStatsSupported": true
+        }
+      },
+      "fixture": {
+        "count": 300,
+        "visible": 150,
+        "humanoids": 150,
+        "creatures": 150,
+        "plannedActive": 100,
+        "fullyEquippedHumanoids": 150,
+        "fallbackEquipmentNodes": 0
+      },
+      "sample": {
+        "frameCount": 262,
+        "summary": {
+          "wallMilliseconds": {
+            "mean": 19.061,
+            "p50": 17.716,
+            "p95": 28.793,
+            "p99": 37.321,
+            "max": 38.38,
+            "samples": 262
+          },
+          "worldRenderCpuMilliseconds": null,
+          "worldRenderGpuMilliseconds": null,
+          "rootRenderCpuMilliseconds": null,
+          "rootRenderGpuMilliseconds": null,
+          "drawCalls": null,
+          "primitives": null,
+          "sceneNodes": {
+            "mean": 20592.794,
+            "p50": 20563.0,
+            "p95": 20641.0,
+            "p99": 20719.0,
+            "max": 20719.0,
+            "samples": 262
+          },
+          "resourceObjects": {
+            "mean": 171.0,
+            "p50": 171.0,
+            "p95": 171.0,
+            "p99": 171.0,
+            "max": 171.0,
+            "samples": 262
+          },
+          "transientWorldEffects": {
+            "mean": 56.966,
+            "p50": 52.0,
+            "p95": 65.0,
+            "p99": 78.0,
+            "max": 78.0,
+            "samples": 262
+          },
+          "packetDispatchInclusiveMilliseconds": {
+            "mean": 0.299,
+            "p50": 0.0,
+            "p95": 0.436,
+            "p99": 5.554,
+            "max": 6.308,
+            "samples": 262
+          },
+          "syncWorldMilliseconds": {
+            "mean": 0.712,
+            "p50": 0.0,
+            "p95": 4.265,
+            "p99": 4.945,
+            "max": 5.292,
+            "samples": 262
+          },
+          "presentMilliseconds": {
+            "mean": 0.421,
+            "p50": 0.0,
+            "p95": 2.37,
+            "p99": 3.285,
+            "max": 3.555,
+            "samples": 262
+          },
+          "groundMilliseconds": {
+            "mean": 0.075,
+            "p50": 0.0,
+            "p95": 0.406,
+            "p99": 0.611,
+            "max": 0.642,
+            "samples": 262
+          },
+          "overheadMilliseconds": {
+            "mean": 0.128,
+            "p50": 0.0,
+            "p95": 0.715,
+            "p99": 0.875,
+            "max": 1.257,
+            "samples": 262
+          },
+          "animationGateMilliseconds": {
+            "mean": 0.163,
+            "p50": 0.005,
+            "p95": 0.923,
+            "p99": 1.362,
+            "max": 1.622,
+            "samples": 262
+          }
+        },
+        "rates": {
+          "actorCommandsPerSecond": 561.165,
+          "combatPresentationEventsPerSecond": 67.452,
+          "flushesPerSecond": 9.978,
+          "packetsPerSecond": 80.024,
+          "stateUpdatesPerSecond": 628.617
+        },
+        "maximumFlushesPerFrame": 1.0
+      },
+      "spawn": {
+        "milliseconds": 4110.4,
+        "passes": 38,
+        "spawned": 300,
+        "timeoutMilliseconds": 300000
+      },
+      "despawnMilliseconds": 749.044,
+      "memory": {
+        "afterDespawn": {
+          "bufferBytes": null,
+          "nodes": 7913,
+          "objects": 21285,
+          "resources": 169,
+          "staticBytes": 636602522,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "before": {
+          "bufferBytes": null,
+          "nodes": 4430,
+          "objects": 13735,
+          "resources": 164,
+          "staticBytes": 381605086,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "retainedAfterDespawnIncludingHarnessTelemetry": {
+          "bufferBytes": null,
+          "nodes": 3483,
+          "objects": 7550,
+          "resources": 5,
+          "staticBytes": 254997436,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "spawnDelta": {
+          "bufferBytes": null,
+          "nodes": 15444,
+          "objects": 27151,
+          "resources": 7,
+          "staticBytes": 1194832918,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "spawned": {
+          "bufferBytes": null,
+          "nodes": 19874,
+          "objects": 40886,
+          "resources": 171,
+          "staticBytes": 1576438004,
+          "textureBytes": null,
+          "videoBytes": null
+        }
+      },
+      "networkIntegrity": {
+        "protocolErrorsAfter": 0,
+        "protocolErrorsBefore": 0,
+        "unchangedGearMismatches": 0
+      },
+      "processAttestation": {
+        "exitCode": 0,
+        "cleanExit": true,
+        "reportValid": true,
+        "schemaValid": true,
+        "scriptErrorsDetected": false,
+        "allObservedProcessesVerified": true,
+        "affinityMask": 15,
+        "monitoringError": "",
+        "forcedTermination": false
+      },
+      "captures": []
+    },
+    "capeCensusExplanation": "The mixed fixture has 150 equipped humanoids. A total of 180 actors expose cape-compatible SkeletonModifier3D nodes, but only the 150 worn/configured capes initialize native kernels. The other 30 dormant, unworn modifiers retain the default gdscript backend label. Native cape calls remain 75 per sampled frame."
+  },
+  "controlledReversals": {
+    "headless": {
+      "manifest": {
+        "path": "test-artifacts/native-crowd/optimization-reversal/impact-geometry-final-headless-v1-Headless-20260919T144444647Z/reversal-session.json",
+        "sha256": "ddc8ae41b40644942d09c8fb014544b73b71c50de9791a4d932b9b61ad14ede9",
+        "bytes": 16804
+      },
+      "mode": "Headless",
+      "renderer": "gl_compatibility",
+      "sequence": [
+        "A",
+        "B",
+        "B",
+        "A",
+        "A",
+        "B"
+      ],
+      "relativePaths": [
+        "godot-client/src/actors/cape_cloth.gd",
+        "godot-client/src/actors/ranger_bow_3d.gd",
+        "godot-client/src/world/spell_flight_3d.gd",
+        "godot-client/src/world/world_effect_3d.gd"
+      ],
+      "baselineRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+      "optimizedRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+      "baselineNativePresentation": "Both",
+      "candidateNativePresentation": "All",
+      "baselineEffectiveHashes": {
+        "godot-client/src/actors/cape_cloth.gd": "b120fb4d5c6720212b6a47f618edf6909ac843670046a3d2c42cc0bc1d77f6e8",
+        "godot-client/src/actors/ranger_bow_3d.gd": "bd6f313d94fec11dad3f272e5349be39e46107dd0a2d4c2888ae90cfd96f9d71",
+        "godot-client/src/world/spell_flight_3d.gd": "188215068d879bb44c0464580a9c2225e4be65769ad2bcc050b6bd820e8837db",
+        "godot-client/src/world/world_effect_3d.gd": "2014fbc59ac1eec14bda5fa559f9ef9080b9941256a0452ffe37bb7c9b3ee32c"
+      },
+      "candidateHashes": {
+        "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+        "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+        "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+        "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+      },
+      "runner": {
+        "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\scripts\\run_crowd_benchmarks.ps1",
+        "sha256": "f88f925ea071a95137e8beca225f6d4f38341ec0dd3351641cb10527910b2257"
+      },
+      "godot": {
+        "requestedPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+        "requestedSha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+        "launchPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "launchSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424"
+      },
+      "lockAcquired": true,
+      "restored": true,
+      "restoreErrors": [],
+      "groups": {
+        "A": {
+          "runs": 3,
+          "wallMeanMillisecondsPerRun": [
+            27.93,
+            23.666,
+            22.373
+          ],
+          "medianOfRunMeansMilliseconds": 23.666,
+          "minimumRunMeanMilliseconds": 22.373,
+          "maximumRunMeanMilliseconds": 27.93
+        },
+        "B": {
+          "runs": 3,
+          "wallMeanMillisecondsPerRun": [
+            21.114,
+            21.305,
+            20.86
+          ],
+          "medianOfRunMeansMilliseconds": 21.114,
+          "minimumRunMeanMilliseconds": 20.86,
+          "maximumRunMeanMilliseconds": 21.305
+        }
+      },
+      "runs": [
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-01-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144447051Z.json",
+            "sha256": "11cbdb8dc0a0f4a6975c128a44a0cea802e99a89c029a63ac821d8a9428f41f1",
+            "bytes": 91203
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-01-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144447051Z.process.json",
+            "sha256": "eadb2b1fec17703fd7266eb05f080741d6b55e4619d28afcaffa69bd6c4538f1",
+            "bytes": 5331
+          },
+          "label": "impact-geometry-final-headless-v1-01-baseline-ef6825b9-628a784a9a58",
+          "runId": "impact-geometry-final-headless-v1-01-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144447051Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "fed43c2569e43130824beaa9d546edcd6e845504e3f1110102d37274d5e23da3",
+          "dirty": true,
+          "display": "headless",
+          "headless": true,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "both",
+            "environmentValue": "both",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 13425,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 4773,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 4773,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 0,
+              "worldBuildAttempts": 0,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 0,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": false
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 179,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 27.93,
+                "p50": 26.028,
+                "p95": 45.951,
+                "p99": 55.023,
+                "max": 59.127,
+                "samples": 179
+              },
+              "worldRenderCpuMilliseconds": null,
+              "worldRenderGpuMilliseconds": null,
+              "rootRenderCpuMilliseconds": null,
+              "rootRenderGpuMilliseconds": null,
+              "drawCalls": null,
+              "primitives": null,
+              "sceneNodes": {
+                "mean": 20592.832,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 179
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 179
+              },
+              "transientWorldEffects": {
+                "mean": 56.972,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 179
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.568,
+                "p50": 0.0,
+                "p95": 5.783,
+                "p99": 8.271,
+                "max": 8.938,
+                "samples": 179
+              },
+              "syncWorldMilliseconds": {
+                "mean": 1.385,
+                "p50": 0.0,
+                "p95": 5.844,
+                "p99": 7.121,
+                "max": 8.854,
+                "samples": 179
+              },
+              "presentMilliseconds": {
+                "mean": 0.825,
+                "p50": 0.0,
+                "p95": 3.758,
+                "p99": 4.699,
+                "max": 5.767,
+                "samples": 179
+              },
+              "groundMilliseconds": {
+                "mean": 0.149,
+                "p50": 0.0,
+                "p95": 0.611,
+                "p99": 0.835,
+                "max": 0.88,
+                "samples": 179
+              },
+              "overheadMilliseconds": {
+                "mean": 0.245,
+                "p50": 0.0,
+                "p95": 0.952,
+                "p99": 1.218,
+                "max": 1.266,
+                "samples": 179
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.317,
+                "p50": 0.007,
+                "p95": 1.387,
+                "p99": 1.51,
+                "max": 2.008,
+                "samples": 179
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 560.718,
+              "combatPresentationEventsPerSecond": 67.398,
+              "flushesPerSecond": 9.97,
+              "packetsPerSecond": 79.96,
+              "stateUpdatesPerSecond": 628.116
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 4279.964,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 916.486,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": null,
+              "nodes": 7913,
+              "objects": 21207,
+              "resources": 169,
+              "staticBytes": 637419136,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "before": {
+              "bufferBytes": null,
+              "nodes": 4430,
+              "objects": 13735,
+              "resources": 164,
+              "staticBytes": 381518676,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": null,
+              "nodes": 3483,
+              "objects": 7472,
+              "resources": 5,
+              "staticBytes": 255900460,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawnDelta": {
+              "bufferBytes": null,
+              "nodes": 15444,
+              "objects": 27151,
+              "resources": 7,
+              "staticBytes": 1194882414,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawned": {
+              "bufferBytes": null,
+              "nodes": 19874,
+              "objects": 40886,
+              "resources": 171,
+              "staticBytes": 1576401090,
+              "textureBytes": null,
+              "videoBytes": null
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [],
+          "order": 1,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "effectiveDigest": "628a784a9a5886d4597cf8e8f8996db62e3b8b61c817361689ec04d89db6a055",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "b120fb4d5c6720212b6a47f618edf6909ac843670046a3d2c42cc0bc1d77f6e8",
+            "godot-client/src/actors/ranger_bow_3d.gd": "bd6f313d94fec11dad3f272e5349be39e46107dd0a2d4c2888ae90cfd96f9d71",
+            "godot-client/src/world/spell_flight_3d.gd": "188215068d879bb44c0464580a9c2225e4be65769ad2bcc050b6bd820e8837db",
+            "godot-client/src/world/world_effect_3d.gd": "2014fbc59ac1eec14bda5fa559f9ef9080b9941256a0452ffe37bb7c9b3ee32c"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-02-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144508334Z.json",
+            "sha256": "8109f99cd337784c5059fb009efa1df00e465122b862690f084319c68b789e4f",
+            "bytes": 112661
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-02-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144508334Z.process.json",
+            "sha256": "868484f0c2b6917755fb0dbd87ddebe23c1162a6e93f42ac04dab053221415a8",
+            "bytes": 5331
+          },
+          "label": "impact-geometry-final-headless-v1-02-optimized-5b7b2ae9-748141ec890b",
+          "runId": "impact-geometry-final-headless-v1-02-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144508334Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+          "dirty": false,
+          "display": "headless",
+          "headless": true,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "all",
+            "environmentValue": "all",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 17700,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 55,
+              "flightBuildAttempts": 6333,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 6333,
+              "flightInstancesMaximum": 55,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 55,
+              "worldBuildAttempts": 9145,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 9145,
+              "worldInstancesMaximum": 55,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": true
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 236,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 21.114,
+                "p50": 19.39,
+                "p95": 35.608,
+                "p99": 41.794,
+                "max": 49.033,
+                "samples": 236
+              },
+              "worldRenderCpuMilliseconds": null,
+              "worldRenderGpuMilliseconds": null,
+              "rootRenderCpuMilliseconds": null,
+              "rootRenderGpuMilliseconds": null,
+              "drawCalls": null,
+              "primitives": null,
+              "sceneNodes": {
+                "mean": 20593.763,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 236
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 236
+              },
+              "transientWorldEffects": {
+                "mean": 57.127,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 236
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.346,
+                "p50": 0.0,
+                "p95": 4.712,
+                "p99": 5.77,
+                "max": 6.572,
+                "samples": 236
+              },
+              "syncWorldMilliseconds": {
+                "mean": 0.867,
+                "p50": 0.0,
+                "p95": 4.916,
+                "p99": 5.742,
+                "max": 5.936,
+                "samples": 236
+              },
+              "presentMilliseconds": {
+                "mean": 0.514,
+                "p50": 0.0,
+                "p95": 3.28,
+                "p99": 3.768,
+                "max": 3.998,
+                "samples": 236
+              },
+              "groundMilliseconds": {
+                "mean": 0.091,
+                "p50": 0.0,
+                "p95": 0.466,
+                "p99": 0.532,
+                "max": 0.608,
+                "samples": 236
+              },
+              "overheadMilliseconds": {
+                "mean": 0.156,
+                "p50": 0.0,
+                "p95": 0.824,
+                "p99": 0.952,
+                "max": 1.12,
+                "samples": 236
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.224,
+                "p50": 0.007,
+                "p95": 1.247,
+                "p99": 1.34,
+                "max": 1.429,
+                "samples": 236
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 562.175,
+              "combatPresentationEventsPerSecond": 67.573,
+              "flushesPerSecond": 9.996,
+              "packetsPerSecond": 80.168,
+              "stateUpdatesPerSecond": 629.748
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 4437.457,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 909.648,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": null,
+              "nodes": 7913,
+              "objects": 21285,
+              "resources": 169,
+              "staticBytes": 636698906,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "before": {
+              "bufferBytes": null,
+              "nodes": 4430,
+              "objects": 13735,
+              "resources": 164,
+              "staticBytes": 381605998,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": null,
+              "nodes": 3483,
+              "objects": 7550,
+              "resources": 5,
+              "staticBytes": 255092908,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawnDelta": {
+              "bufferBytes": null,
+              "nodes": 15444,
+              "objects": 27151,
+              "resources": 7,
+              "staticBytes": 1194936474,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawned": {
+              "bufferBytes": null,
+              "nodes": 19874,
+              "objects": 40886,
+              "resources": 171,
+              "staticBytes": 1576542472,
+              "textureBytes": null,
+              "videoBytes": null
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [],
+          "order": 2,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "effectiveDigest": "748141ec890be1c89e9a3a3569ee693b78950f8739ecfa1651952cf3185205a9",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+            "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+            "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+            "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144531449Z.json",
+            "sha256": "32297955fd9246f33d438a6f2adbf8ac7b598fd5e2cc99f8584a4dd263cdc881",
+            "bytes": 111933
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144531449Z.process.json",
+            "sha256": "574c3add37fbd95fcfc34a49a42283252d704726ff5104bec6d7a82dc44145c5",
+            "bytes": 5331
+          },
+          "label": "impact-geometry-final-headless-v1-03-optimized-5b7b2ae9-748141ec890b",
+          "runId": "impact-geometry-final-headless-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144531449Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+          "dirty": false,
+          "display": "headless",
+          "headless": true,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "all",
+            "environmentValue": "all",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 17550,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 6148,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 6148,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 52,
+              "worldBuildAttempts": 9074,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 9074,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": true
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 234,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 21.305,
+                "p50": 19.628,
+                "p95": 34.963,
+                "p99": 42.854,
+                "max": 45.833,
+                "samples": 234
+              },
+              "worldRenderCpuMilliseconds": null,
+              "worldRenderGpuMilliseconds": null,
+              "rootRenderCpuMilliseconds": null,
+              "rootRenderGpuMilliseconds": null,
+              "drawCalls": null,
+              "primitives": null,
+              "sceneNodes": {
+                "mean": 20590.615,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 234
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 234
+              },
+              "transientWorldEffects": {
+                "mean": 56.603,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 234
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.359,
+                "p50": 0.0,
+                "p95": 4.701,
+                "p99": 5.866,
+                "max": 7.107,
+                "samples": 234
+              },
+              "syncWorldMilliseconds": {
+                "mean": 0.889,
+                "p50": 0.0,
+                "p95": 4.628,
+                "p99": 5.647,
+                "max": 6.016,
+                "samples": 234
+              },
+              "presentMilliseconds": {
+                "mean": 0.529,
+                "p50": 0.0,
+                "p95": 2.908,
+                "p99": 3.772,
+                "max": 4.035,
+                "samples": 234
+              },
+              "groundMilliseconds": {
+                "mean": 0.094,
+                "p50": 0.0,
+                "p95": 0.491,
+                "p99": 0.579,
+                "max": 0.605,
+                "samples": 234
+              },
+              "overheadMilliseconds": {
+                "mean": 0.159,
+                "p50": 0.0,
+                "p95": 0.837,
+                "p99": 0.905,
+                "max": 0.99,
+                "samples": 234
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.221,
+                "p50": 0.006,
+                "p95": 1.255,
+                "p99": 1.336,
+                "max": 1.585,
+                "samples": 234
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 561.95,
+              "combatPresentationEventsPerSecond": 67.546,
+              "flushesPerSecond": 9.992,
+              "packetsPerSecond": 80.136,
+              "stateUpdatesPerSecond": 629.496
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 4087.743,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 811.157,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": null,
+              "nodes": 7913,
+              "objects": 21285,
+              "resources": 169,
+              "staticBytes": 636532874,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "before": {
+              "bufferBytes": null,
+              "nodes": 4430,
+              "objects": 13732,
+              "resources": 164,
+              "staticBytes": 380472601,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": null,
+              "nodes": 3483,
+              "objects": 7553,
+              "resources": 5,
+              "staticBytes": 256060273,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawnDelta": {
+              "bufferBytes": null,
+              "nodes": 15444,
+              "objects": 27154,
+              "resources": 7,
+              "staticBytes": 1195836263,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawned": {
+              "bufferBytes": null,
+              "nodes": 19874,
+              "objects": 40886,
+              "resources": 171,
+              "staticBytes": 1576308864,
+              "textureBytes": null,
+              "videoBytes": null
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [],
+          "order": 3,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "effectiveDigest": "748141ec890be1c89e9a3a3569ee693b78950f8739ecfa1651952cf3185205a9",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+            "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+            "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+            "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-04-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144552426Z.json",
+            "sha256": "3f60b39625aaac8f9c0f3503b1e7706147445a097ef1939f8c5b3fb82eb31eb6",
+            "bytes": 103232
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-04-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144552426Z.process.json",
+            "sha256": "4b88f87a81ff8882f76e0a87620e43b95486472bd3d83c3a7df7ba04bd4ccb59",
+            "bytes": 5331
+          },
+          "label": "impact-geometry-final-headless-v1-04-baseline-ef6825b9-628a784a9a58",
+          "runId": "impact-geometry-final-headless-v1-04-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144552426Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "fed43c2569e43130824beaa9d546edcd6e845504e3f1110102d37274d5e23da3",
+          "dirty": true,
+          "display": "headless",
+          "headless": true,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "both",
+            "environmentValue": "both",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 15825,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 5514,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 5514,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 0,
+              "worldBuildAttempts": 0,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 0,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": false
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 211,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 23.666,
+                "p50": 21.71,
+                "p95": 37.756,
+                "p99": 48.832,
+                "max": 57.837,
+                "samples": 211
+              },
+              "worldRenderCpuMilliseconds": null,
+              "worldRenderGpuMilliseconds": null,
+              "rootRenderCpuMilliseconds": null,
+              "rootRenderGpuMilliseconds": null,
+              "drawCalls": null,
+              "primitives": null,
+              "sceneNodes": {
+                "mean": 20586.716,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 211
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 211
+              },
+              "transientWorldEffects": {
+                "mean": 55.953,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 211
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.427,
+                "p50": 0.0,
+                "p95": 5.046,
+                "p99": 6.096,
+                "max": 7.793,
+                "samples": 211
+              },
+              "syncWorldMilliseconds": {
+                "mean": 0.987,
+                "p50": 0.0,
+                "p95": 4.868,
+                "p99": 5.773,
+                "max": 6.263,
+                "samples": 211
+              },
+              "presentMilliseconds": {
+                "mean": 0.586,
+                "p50": 0.0,
+                "p95": 3.13,
+                "p99": 3.78,
+                "max": 4.077,
+                "samples": 211
+              },
+              "groundMilliseconds": {
+                "mean": 0.109,
+                "p50": 0.0,
+                "p95": 0.501,
+                "p99": 0.572,
+                "max": 1.543,
+                "samples": 211
+              },
+              "overheadMilliseconds": {
+                "mean": 0.175,
+                "p50": 0.0,
+                "p95": 0.833,
+                "p99": 0.923,
+                "max": 0.942,
+                "samples": 211
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.242,
+                "p50": 0.006,
+                "p95": 1.252,
+                "p99": 1.462,
+                "max": 1.651,
+                "samples": 211
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 561.277,
+              "combatPresentationEventsPerSecond": 67.465,
+              "flushesPerSecond": 9.98,
+              "packetsPerSecond": 80.04,
+              "stateUpdatesPerSecond": 628.743
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 3807.165,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 914.911,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": null,
+              "nodes": 7913,
+              "objects": 21207,
+              "resources": 169,
+              "staticBytes": 637308760,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "before": {
+              "bufferBytes": null,
+              "nodes": 4430,
+              "objects": 13735,
+              "resources": 164,
+              "staticBytes": 381518604,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": null,
+              "nodes": 3483,
+              "objects": 7472,
+              "resources": 5,
+              "staticBytes": 255790156,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawnDelta": {
+              "bufferBytes": null,
+              "nodes": 15444,
+              "objects": 27151,
+              "resources": 7,
+              "staticBytes": 1194682802,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawned": {
+              "bufferBytes": null,
+              "nodes": 19874,
+              "objects": 40886,
+              "resources": 171,
+              "staticBytes": 1576201406,
+              "textureBytes": null,
+              "videoBytes": null
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [],
+          "order": 4,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "effectiveDigest": "628a784a9a5886d4597cf8e8f8996db62e3b8b61c817361689ec04d89db6a055",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "b120fb4d5c6720212b6a47f618edf6909ac843670046a3d2c42cc0bc1d77f6e8",
+            "godot-client/src/actors/ranger_bow_3d.gd": "bd6f313d94fec11dad3f272e5349be39e46107dd0a2d4c2888ae90cfd96f9d71",
+            "godot-client/src/world/spell_flight_3d.gd": "188215068d879bb44c0464580a9c2225e4be65769ad2bcc050b6bd820e8837db",
+            "godot-client/src/world/world_effect_3d.gd": "2014fbc59ac1eec14bda5fa559f9ef9080b9941256a0452ffe37bb7c9b3ee32c"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-05-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144613479Z.json",
+            "sha256": "acc6f2418df11e81b9efe4ee45b5ed6583f7785f1010bf3c28be6381dc757560",
+            "bytes": 107744
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-05-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144613479Z.process.json",
+            "sha256": "05b4727453298c66683fbf82879507d2bb1690ac1493fe87e651836df17ca360",
+            "bytes": 5329
+          },
+          "label": "impact-geometry-final-headless-v1-05-baseline-ef6825b9-628a784a9a58",
+          "runId": "impact-geometry-final-headless-v1-05-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-headless-trial1-20260919T144613479Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "fed43c2569e43130824beaa9d546edcd6e845504e3f1110102d37274d5e23da3",
+          "dirty": true,
+          "display": "headless",
+          "headless": true,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "both",
+            "environmentValue": "both",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 16725,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 5927,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 5927,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 0,
+              "worldBuildAttempts": 0,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 0,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": false
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 223,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 22.373,
+                "p50": 20.867,
+                "p95": 35.999,
+                "p99": 44.912,
+                "max": 45.144,
+                "samples": 223
+              },
+              "worldRenderCpuMilliseconds": null,
+              "worldRenderGpuMilliseconds": null,
+              "rootRenderCpuMilliseconds": null,
+              "rootRenderGpuMilliseconds": null,
+              "drawCalls": null,
+              "primitives": null,
+              "sceneNodes": {
+                "mean": 20592.623,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 223
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 223
+              },
+              "transientWorldEffects": {
+                "mean": 56.937,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 223
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.376,
+                "p50": 0.0,
+                "p95": 5.049,
+                "p99": 5.627,
+                "max": 6.137,
+                "samples": 223
+              },
+              "syncWorldMilliseconds": {
+                "mean": 0.892,
+                "p50": 0.0,
+                "p95": 4.752,
+                "p99": 5.513,
+                "max": 5.799,
+                "samples": 223
+              },
+              "presentMilliseconds": {
+                "mean": 0.528,
+                "p50": 0.0,
+                "p95": 3.093,
+                "p99": 3.597,
+                "max": 3.931,
+                "samples": 223
+              },
+              "groundMilliseconds": {
+                "mean": 0.1,
+                "p50": 0.0,
+                "p95": 0.502,
+                "p99": 0.559,
+                "max": 0.615,
+                "samples": 223
+              },
+              "overheadMilliseconds": {
+                "mean": 0.155,
+                "p50": 0.0,
+                "p95": 0.734,
+                "p99": 0.863,
+                "max": 1.07,
+                "samples": 223
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.206,
+                "p50": 0.006,
+                "p95": 1.136,
+                "p99": 1.299,
+                "max": 1.383,
+                "samples": 223
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 561.838,
+              "combatPresentationEventsPerSecond": 67.532,
+              "flushesPerSecond": 9.99,
+              "packetsPerSecond": 80.12,
+              "stateUpdatesPerSecond": 629.371
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 3744.743,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 791.5,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": null,
+              "nodes": 7913,
+              "objects": 21207,
+              "resources": 169,
+              "staticBytes": 637308064,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "before": {
+              "bufferBytes": null,
+              "nodes": 4430,
+              "objects": 13735,
+              "resources": 164,
+              "staticBytes": 381518604,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": null,
+              "nodes": 3483,
+              "objects": 7472,
+              "resources": 5,
+              "staticBytes": 255789460,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawnDelta": {
+              "bufferBytes": null,
+              "nodes": 15444,
+              "objects": 27151,
+              "resources": 7,
+              "staticBytes": 1194699778,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawned": {
+              "bufferBytes": null,
+              "nodes": 19874,
+              "objects": 40886,
+              "resources": 171,
+              "staticBytes": 1576218382,
+              "textureBytes": null,
+              "videoBytes": null
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [],
+          "order": 5,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "effectiveDigest": "628a784a9a5886d4597cf8e8f8996db62e3b8b61c817361689ec04d89db6a055",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "b120fb4d5c6720212b6a47f618edf6909ac843670046a3d2c42cc0bc1d77f6e8",
+            "godot-client/src/actors/ranger_bow_3d.gd": "bd6f313d94fec11dad3f272e5349be39e46107dd0a2d4c2888ae90cfd96f9d71",
+            "godot-client/src/world/spell_flight_3d.gd": "188215068d879bb44c0464580a9c2225e4be65769ad2bcc050b6bd820e8837db",
+            "godot-client/src/world/world_effect_3d.gd": "2014fbc59ac1eec14bda5fa559f9ef9080b9941256a0452ffe37bb7c9b3ee32c"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-06-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144634546Z.json",
+            "sha256": "f02fe3a6512e646cac92903521e4f832093f8a5bee5941c8548d952e13cad756",
+            "bytes": 113803
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-headless-v1-06-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144634546Z.process.json",
+            "sha256": "28d997cff08fbb0f5014e7f10dadfb71952a666229c7c9166a827db35b87c58c",
+            "bytes": 5331
+          },
+          "label": "impact-geometry-final-headless-v1-06-optimized-5b7b2ae9-748141ec890b",
+          "runId": "impact-geometry-final-headless-v1-06-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-headless-trial1-20260919T144634546Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+          "dirty": false,
+          "display": "headless",
+          "headless": true,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "all",
+            "environmentValue": "all",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 17925,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 6398,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 6398,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 52,
+              "worldBuildAttempts": 9311,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 9311,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": true
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 239,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 20.86,
+                "p50": 19.363,
+                "p95": 37.105,
+                "p99": 41.656,
+                "max": 42.999,
+                "samples": 239
+              },
+              "worldRenderCpuMilliseconds": null,
+              "worldRenderGpuMilliseconds": null,
+              "rootRenderCpuMilliseconds": null,
+              "rootRenderGpuMilliseconds": null,
+              "drawCalls": null,
+              "primitives": null,
+              "sceneNodes": {
+                "mean": 20593.552,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 239
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 239
+              },
+              "transientWorldEffects": {
+                "mean": 57.092,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 239
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.362,
+                "p50": 0.0,
+                "p95": 5.176,
+                "p99": 5.682,
+                "max": 7.73,
+                "samples": 239
+              },
+              "syncWorldMilliseconds": {
+                "mean": 0.848,
+                "p50": 0.0,
+                "p95": 4.991,
+                "p99": 5.682,
+                "max": 6.065,
+                "samples": 239
+              },
+              "presentMilliseconds": {
+                "mean": 0.51,
+                "p50": 0.0,
+                "p95": 3.232,
+                "p99": 3.609,
+                "max": 4.066,
+                "samples": 239
+              },
+              "groundMilliseconds": {
+                "mean": 0.091,
+                "p50": 0.0,
+                "p95": 0.463,
+                "p99": 0.632,
+                "max": 0.673,
+                "samples": 239
+              },
+              "overheadMilliseconds": {
+                "mean": 0.146,
+                "p50": 0.0,
+                "p95": 0.734,
+                "p99": 0.845,
+                "max": 1.055,
+                "samples": 239
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.2,
+                "p50": 0.005,
+                "p95": 1.12,
+                "p99": 1.307,
+                "max": 1.376,
+                "samples": 239
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 562.063,
+              "combatPresentationEventsPerSecond": 67.559,
+              "flushesPerSecond": 9.994,
+              "packetsPerSecond": 80.152,
+              "stateUpdatesPerSecond": 629.622
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 4024.487,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 868.703,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": null,
+              "nodes": 7913,
+              "objects": 21285,
+              "resources": 169,
+              "staticBytes": 636699050,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "before": {
+              "bufferBytes": null,
+              "nodes": 4430,
+              "objects": 13735,
+              "resources": 164,
+              "staticBytes": 381606214,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": null,
+              "nodes": 3483,
+              "objects": 7550,
+              "resources": 5,
+              "staticBytes": 255092836,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawnDelta": {
+              "bufferBytes": null,
+              "nodes": 15444,
+              "objects": 27151,
+              "resources": 7,
+              "staticBytes": 1194928786,
+              "textureBytes": null,
+              "videoBytes": null
+            },
+            "spawned": {
+              "bufferBytes": null,
+              "nodes": 19874,
+              "objects": 40886,
+              "resources": 171,
+              "staticBytes": 1576535000,
+              "textureBytes": null,
+              "videoBytes": null
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [],
+          "order": 6,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "effectiveDigest": "748141ec890be1c89e9a3a3569ee693b78950f8739ecfa1651952cf3185205a9",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+            "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+            "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+            "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+          }
+        }
+      ]
+    },
+    "glCompatibility": {
+      "manifest": {
+        "path": "test-artifacts/native-crowd/optimization-reversal/impact-geometry-final-gl-v1-Windowed-20260919T144808956Z/reversal-session.json",
+        "sha256": "5ee77d9ed76a5858e782dc3cd80bbe635846f915ceda3d81911c13b4b4c3c839",
+        "bytes": 10520
+      },
+      "mode": "Windowed",
+      "renderer": "gl_compatibility",
+      "sequence": [
+        "B",
+        "A",
+        "B"
+      ],
+      "relativePaths": [
+        "godot-client/src/actors/cape_cloth.gd",
+        "godot-client/src/actors/ranger_bow_3d.gd",
+        "godot-client/src/world/spell_flight_3d.gd",
+        "godot-client/src/world/world_effect_3d.gd"
+      ],
+      "baselineRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+      "optimizedRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+      "baselineNativePresentation": "Both",
+      "candidateNativePresentation": "All",
+      "baselineEffectiveHashes": {
+        "godot-client/src/actors/cape_cloth.gd": "b120fb4d5c6720212b6a47f618edf6909ac843670046a3d2c42cc0bc1d77f6e8",
+        "godot-client/src/actors/ranger_bow_3d.gd": "bd6f313d94fec11dad3f272e5349be39e46107dd0a2d4c2888ae90cfd96f9d71",
+        "godot-client/src/world/spell_flight_3d.gd": "188215068d879bb44c0464580a9c2225e4be65769ad2bcc050b6bd820e8837db",
+        "godot-client/src/world/world_effect_3d.gd": "2014fbc59ac1eec14bda5fa559f9ef9080b9941256a0452ffe37bb7c9b3ee32c"
+      },
+      "candidateHashes": {
+        "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+        "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+        "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+        "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+      },
+      "runner": {
+        "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\scripts\\run_crowd_benchmarks.ps1",
+        "sha256": "f88f925ea071a95137e8beca225f6d4f38341ec0dd3351641cb10527910b2257"
+      },
+      "godot": {
+        "requestedPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+        "requestedSha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+        "launchPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "launchSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424"
+      },
+      "lockAcquired": true,
+      "restored": true,
+      "restoreErrors": [],
+      "groups": {
+        "A": {
+          "runs": 1,
+          "wallMeanMillisecondsPerRun": [
+            50.54
+          ],
+          "medianOfRunMeansMilliseconds": 50.54,
+          "minimumRunMeanMilliseconds": 50.54,
+          "maximumRunMeanMilliseconds": 50.54
+        },
+        "B": {
+          "runs": 2,
+          "wallMeanMillisecondsPerRun": [
+            52.757,
+            61.847
+          ],
+          "medianOfRunMeansMilliseconds": 57.302,
+          "minimumRunMeanMilliseconds": 52.757,
+          "maximumRunMeanMilliseconds": 61.847
+        }
+      },
+      "runs": [
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144811159Z.json",
+            "sha256": "8275db0025eff3ebb469ba63a2374abd99dbd07cac18b60928f724140d45faf5",
+            "bytes": 65750
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144811159Z.process.json",
+            "sha256": "baf720c3d545f8216f7e6d55f7b61366f6ddf9be68ae7430cadbce67f8553d7b",
+            "bytes": 5325
+          },
+          "label": "impact-geometry-final-gl-v1-01-optimized-5b7b2ae9-748141ec890b",
+          "runId": "impact-geometry-final-gl-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144811159Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+          "dirty": false,
+          "display": "Windows",
+          "headless": false,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "NVIDIA GeForce RTX 5080 Laptop GPU",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "all",
+            "environmentValue": "all",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 7125,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 2515,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 2515,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 52,
+              "worldBuildAttempts": 3776,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 3776,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": true
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 95,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 52.757,
+                "p50": 50.922,
+                "p95": 74.354,
+                "p99": 90.303,
+                "max": 90.303,
+                "samples": 95
+              },
+              "worldRenderCpuMilliseconds": {
+                "mean": 17.312,
+                "p50": 16.96,
+                "p95": 21.907,
+                "p99": 24.503,
+                "max": 24.503,
+                "samples": 95
+              },
+              "worldRenderGpuMilliseconds": {
+                "mean": 15.615,
+                "p50": 15.238,
+                "p95": 19.222,
+                "p99": 20.855,
+                "max": 20.855,
+                "samples": 95
+              },
+              "rootRenderCpuMilliseconds": {
+                "mean": 0.52,
+                "p50": 0.509,
+                "p95": 0.597,
+                "p99": 0.822,
+                "max": 0.822,
+                "samples": 95
+              },
+              "rootRenderGpuMilliseconds": {
+                "mean": 0.196,
+                "p50": 0.183,
+                "p95": 0.467,
+                "p99": 0.751,
+                "max": 0.751,
+                "samples": 95
+              },
+              "drawCalls": {
+                "mean": 3675.211,
+                "p50": 3671.0,
+                "p95": 3722.0,
+                "p99": 3775.0,
+                "max": 3775.0,
+                "samples": 95
+              },
+              "primitives": {
+                "mean": 4529131.589,
+                "p50": 4529599.0,
+                "p95": 4545795.0,
+                "p99": 4560415.0,
+                "max": 4560415.0,
+                "samples": 95
+              },
+              "sceneNodes": {
+                "mean": 20589.653,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 95
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 95
+              },
+              "transientWorldEffects": {
+                "mean": 56.442,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 95
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 1.074,
+                "p50": 0.315,
+                "p95": 7.168,
+                "p99": 7.661,
+                "max": 7.661,
+                "samples": 95
+              },
+              "syncWorldMilliseconds": {
+                "mean": 2.112,
+                "p50": 3.191,
+                "p95": 5.146,
+                "p99": 5.704,
+                "max": 5.704,
+                "samples": 95
+              },
+              "presentMilliseconds": {
+                "mean": 1.278,
+                "p50": 1.828,
+                "p95": 3.512,
+                "p99": 3.645,
+                "max": 3.645,
+                "samples": 95
+              },
+              "groundMilliseconds": {
+                "mean": 0.22,
+                "p50": 0.342,
+                "p95": 0.507,
+                "p99": 0.591,
+                "max": 0.591,
+                "samples": 95
+              },
+              "overheadMilliseconds": {
+                "mean": 0.361,
+                "p50": 0.598,
+                "p95": 0.76,
+                "p99": 1.072,
+                "max": 1.072,
+                "samples": 95
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.412,
+                "p50": 0.006,
+                "p95": 1.13,
+                "p99": 1.161,
+                "max": 1.161,
+                "samples": 95
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 560.048,
+              "combatPresentationEventsPerSecond": 67.317,
+              "flushesPerSecond": 9.958,
+              "packetsPerSecond": 79.865,
+              "stateUpdatesPerSecond": 627.365
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 6367.957,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 945.618,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": 40082236,
+              "nodes": 7679,
+              "objects": 19963,
+              "resources": 169,
+              "staticBytes": 335861221,
+              "textureBytes": 368980725,
+              "videoBytes": 409062961
+            },
+            "before": {
+              "bufferBytes": 21292192,
+              "nodes": 4430,
+              "objects": 14076,
+              "resources": 164,
+              "staticBytes": 248609998,
+              "textureBytes": 189442890,
+              "videoBytes": 210735082
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": 18790044,
+              "nodes": 3249,
+              "objects": 5887,
+              "resources": 5,
+              "staticBytes": 87251223,
+              "textureBytes": 179537835,
+              "videoBytes": 198327879
+            },
+            "spawnDelta": {
+              "bufferBytes": 441133344,
+              "nodes": 15444,
+              "objects": 26422,
+              "resources": 7,
+              "staticBytes": 1039770292,
+              "textureBytes": 195299241,
+              "videoBytes": 636432585
+            },
+            "spawned": {
+              "bufferBytes": 462425536,
+              "nodes": 19874,
+              "objects": 40498,
+              "resources": 171,
+              "staticBytes": 1288380290,
+              "textureBytes": 384742131,
+              "videoBytes": 847167667
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144811159Z-acceptance-mixed300-active.png",
+              "sha256": "6d09abc834fae076348535b969a84911d42361aaf3e746accbb00ba8f92229c0",
+              "bytes": 1307144
+            },
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144811159Z-acceptance-mixed300-settled.png",
+              "sha256": "032e5b347f1896a9461ffc46c29ae0f27e87b0a9092b557aedb372a9e3c52e7f",
+              "bytes": 1233480
+            }
+          ],
+          "order": 1,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "effectiveDigest": "748141ec890be1c89e9a3a3569ee693b78950f8739ecfa1651952cf3185205a9",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+            "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+            "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+            "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144839536Z.json",
+            "sha256": "24b11bb434f3b5314485cab7f9d1380b56d713c4440ac335c04d9b25d80eedb0",
+            "bytes": 67468
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144839536Z.process.json",
+            "sha256": "71331dad3a10a601b9ce4a11cd91526fe2053095ac3d4abc659e2e84e29a86fe",
+            "bytes": 5325
+          },
+          "label": "impact-geometry-final-gl-v1-02-baseline-ef6825b9-628a784a9a58",
+          "runId": "impact-geometry-final-gl-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144839536Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "fed43c2569e43130824beaa9d546edcd6e845504e3f1110102d37274d5e23da3",
+          "dirty": true,
+          "display": "Windows",
+          "headless": false,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "NVIDIA GeForce RTX 5080 Laptop GPU",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "both",
+            "environmentValue": "both",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 7425,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 65,
+              "flightBuildAttempts": 2635,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 2635,
+              "flightInstancesMaximum": 65,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 0,
+              "worldBuildAttempts": 0,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 0,
+              "worldInstancesMaximum": 65,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": false
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 99,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 50.54,
+                "p50": 48.776,
+                "p95": 66.791,
+                "p99": 68.761,
+                "max": 68.761,
+                "samples": 99
+              },
+              "worldRenderCpuMilliseconds": {
+                "mean": 16.401,
+                "p50": 16.142,
+                "p95": 18.909,
+                "p99": 20.599,
+                "max": 20.599,
+                "samples": 99
+              },
+              "worldRenderGpuMilliseconds": {
+                "mean": 14.549,
+                "p50": 14.355,
+                "p95": 16.19,
+                "p99": 17.279,
+                "max": 17.279,
+                "samples": 99
+              },
+              "rootRenderCpuMilliseconds": {
+                "mean": 0.488,
+                "p50": 0.474,
+                "p95": 0.588,
+                "p99": 0.702,
+                "max": 0.702,
+                "samples": 99
+              },
+              "rootRenderGpuMilliseconds": {
+                "mean": 0.184,
+                "p50": 0.18,
+                "p95": 0.451,
+                "p99": 0.761,
+                "max": 0.761,
+                "samples": 99
+              },
+              "drawCalls": {
+                "mean": 3675.364,
+                "p50": 3671.0,
+                "p95": 3735.0,
+                "p99": 3775.0,
+                "max": 3775.0,
+                "samples": 99
+              },
+              "primitives": {
+                "mean": 4529057.485,
+                "p50": 4529599.0,
+                "p95": 4546339.0,
+                "p99": 4560415.0,
+                "max": 4560415.0,
+                "samples": 99
+              },
+              "sceneNodes": {
+                "mean": 20592.515,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 99
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 99
+              },
+              "transientWorldEffects": {
+                "mean": 56.919,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 99
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 1.008,
+                "p50": 0.3,
+                "p95": 6.812,
+                "p99": 7.034,
+                "max": 7.034,
+                "samples": 99
+              },
+              "syncWorldMilliseconds": {
+                "mean": 1.826,
+                "p50": 3.105,
+                "p95": 4.709,
+                "p99": 4.791,
+                "max": 4.791,
+                "samples": 99
+              },
+              "presentMilliseconds": {
+                "mean": 1.105,
+                "p50": 1.762,
+                "p95": 3.127,
+                "p99": 3.239,
+                "max": 3.239,
+                "samples": 99
+              },
+              "groundMilliseconds": {
+                "mean": 0.194,
+                "p50": 0.343,
+                "p95": 0.429,
+                "p99": 0.542,
+                "max": 0.542,
+                "samples": 99
+              },
+              "overheadMilliseconds": {
+                "mean": 0.303,
+                "p50": 0.527,
+                "p95": 0.68,
+                "p99": 0.792,
+                "max": 0.792,
+                "samples": 99
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.34,
+                "p50": 0.006,
+                "p95": 0.969,
+                "p99": 1.026,
+                "max": 1.026,
+                "samples": 99
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 561.053,
+              "combatPresentationEventsPerSecond": 67.438,
+              "flushesPerSecond": 9.976,
+              "packetsPerSecond": 80.008,
+              "stateUpdatesPerSecond": 628.492
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 6437.092,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 1118.093,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": 37952044,
+              "nodes": 7679,
+              "objects": 19963,
+              "resources": 169,
+              "staticBytes": 335757547,
+              "textureBytes": 368980725,
+              "videoBytes": 406932769
+            },
+            "before": {
+              "bufferBytes": 19162000,
+              "nodes": 4430,
+              "objects": 14064,
+              "resources": 164,
+              "staticBytes": 245040077,
+              "textureBytes": 185772879,
+              "videoBytes": 204934879
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": 18790044,
+              "nodes": 3249,
+              "objects": 5899,
+              "resources": 5,
+              "staticBytes": 90717470,
+              "textureBytes": 183207846,
+              "videoBytes": 201997890
+            },
+            "spawnDelta": {
+              "bufferBytes": 441133344,
+              "nodes": 15444,
+              "objects": 26434,
+              "resources": 7,
+              "staticBytes": 1043177039,
+              "textureBytes": 198969252,
+              "videoBytes": 640102596
+            },
+            "spawned": {
+              "bufferBytes": 460295344,
+              "nodes": 19874,
+              "objects": 40498,
+              "resources": 171,
+              "staticBytes": 1288217116,
+              "textureBytes": 384742131,
+              "videoBytes": 845037475
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144839536Z-acceptance-mixed300-active.png",
+              "sha256": "acdda9ff8e22d72ec3acd84f547d8d8cb7fd355cf9a35f0fc4fd38e0db9b5b07",
+              "bytes": 1311722
+            },
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144839536Z-acceptance-mixed300-settled.png",
+              "sha256": "141fdcdeab5766fd7893b7c2fbc5027847fd779614d5516afafcecf844491485",
+              "bytes": 1233486
+            }
+          ],
+          "order": 2,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "effectiveDigest": "628a784a9a5886d4597cf8e8f8996db62e3b8b61c817361689ec04d89db6a055",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "b120fb4d5c6720212b6a47f618edf6909ac843670046a3d2c42cc0bc1d77f6e8",
+            "godot-client/src/actors/ranger_bow_3d.gd": "bd6f313d94fec11dad3f272e5349be39e46107dd0a2d4c2888ae90cfd96f9d71",
+            "godot-client/src/world/spell_flight_3d.gd": "188215068d879bb44c0464580a9c2225e4be65769ad2bcc050b6bd820e8837db",
+            "godot-client/src/world/world_effect_3d.gd": "2014fbc59ac1eec14bda5fa559f9ef9080b9941256a0452ffe37bb7c9b3ee32c"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144908062Z.json",
+            "sha256": "02125ffdb953de5cbf45853f9d9c64df1dbadd290922a3e50434c33e38291c78",
+            "bytes": 59748
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144908062Z.process.json",
+            "sha256": "b8a62505e00b5d44d81e6d32b7047bcce25be492a4a96076c6aa3703a06c5c2f",
+            "bytes": 5325
+          },
+          "label": "impact-geometry-final-gl-v1-03-optimized-5b7b2ae9-748141ec890b",
+          "runId": "impact-geometry-final-gl-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144908062Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+          "dirty": false,
+          "display": "Windows",
+          "headless": false,
+          "requestedRenderingMethod": "gl_compatibility",
+          "actualRenderingMethod": "gl_compatibility",
+          "renderingDevice": "NVIDIA GeForce RTX 5080 Laptop GPU",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "all",
+            "environmentValue": "all",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 6075,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 2135,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 2135,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 52,
+              "worldBuildAttempts": 3246,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 3246,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": true
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 81,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 61.847,
+                "p50": 60.207,
+                "p95": 87.728,
+                "p99": 96.733,
+                "max": 96.733,
+                "samples": 81
+              },
+              "worldRenderCpuMilliseconds": {
+                "mean": 20.43,
+                "p50": 20.307,
+                "p95": 25.476,
+                "p99": 27.823,
+                "max": 27.823,
+                "samples": 81
+              },
+              "worldRenderGpuMilliseconds": {
+                "mean": 18.497,
+                "p50": 18.55,
+                "p95": 22.875,
+                "p99": 26.367,
+                "max": 26.367,
+                "samples": 81
+              },
+              "rootRenderCpuMilliseconds": {
+                "mean": 0.602,
+                "p50": 0.571,
+                "p95": 0.787,
+                "p99": 0.894,
+                "max": 0.894,
+                "samples": 81
+              },
+              "rootRenderGpuMilliseconds": {
+                "mean": 0.205,
+                "p50": 0.172,
+                "p95": 0.465,
+                "p99": 0.631,
+                "max": 0.631,
+                "samples": 81
+              },
+              "drawCalls": {
+                "mean": 3674.0,
+                "p50": 3671.0,
+                "p95": 3710.0,
+                "p99": 3775.0,
+                "max": 3775.0,
+                "samples": 81
+              },
+              "primitives": {
+                "mean": 4529105.889,
+                "p50": 4529599.0,
+                "p95": 4535697.0,
+                "p99": 4560415.0,
+                "max": 4560415.0,
+                "samples": 81
+              },
+              "sceneNodes": {
+                "mean": 20587.741,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 81
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 81
+              },
+              "transientWorldEffects": {
+                "mean": 56.123,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 81
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 1.403,
+                "p50": 0.35,
+                "p95": 8.393,
+                "p99": 9.481,
+                "max": 9.481,
+                "samples": 81
+              },
+              "syncWorldMilliseconds": {
+                "mean": 2.691,
+                "p50": 3.481,
+                "p95": 5.861,
+                "p99": 6.659,
+                "max": 6.659,
+                "samples": 81
+              },
+              "presentMilliseconds": {
+                "mean": 1.622,
+                "p50": 1.988,
+                "p95": 3.902,
+                "p99": 4.541,
+                "max": 4.541,
+                "samples": 81
+              },
+              "groundMilliseconds": {
+                "mean": 0.272,
+                "p50": 0.376,
+                "p95": 0.529,
+                "p99": 0.668,
+                "max": 0.668,
+                "samples": 81
+              },
+              "overheadMilliseconds": {
+                "mean": 0.474,
+                "p50": 0.637,
+                "p95": 0.903,
+                "p99": 0.961,
+                "max": 0.961,
+                "samples": 81
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.526,
+                "p50": 0.011,
+                "p95": 1.342,
+                "p99": 1.427,
+                "max": 1.427,
+                "samples": 81
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 560.271,
+              "combatPresentationEventsPerSecond": 67.344,
+              "flushesPerSecond": 9.962,
+              "packetsPerSecond": 79.896,
+              "stateUpdatesPerSecond": 627.615
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 6573.864,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 1008.793,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": 40082236,
+              "nodes": 7679,
+              "objects": 19963,
+              "resources": 169,
+              "staticBytes": 335704389,
+              "textureBytes": 368980725,
+              "videoBytes": 409062961
+            },
+            "before": {
+              "bufferBytes": 21292192,
+              "nodes": 4430,
+              "objects": 14094,
+              "resources": 164,
+              "staticBytes": 253947091,
+              "textureBytes": 196520769,
+              "videoBytes": 217812961
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": 18790044,
+              "nodes": 3249,
+              "objects": 5869,
+              "resources": 5,
+              "staticBytes": 81757298,
+              "textureBytes": 172459956,
+              "videoBytes": 191250000
+            },
+            "spawnDelta": {
+              "bufferBytes": 441133344,
+              "nodes": 15444,
+              "objects": 26404,
+              "resources": 7,
+              "staticBytes": 1034299859,
+              "textureBytes": 188221362,
+              "videoBytes": 629354706
+            },
+            "spawned": {
+              "bufferBytes": 462425536,
+              "nodes": 19874,
+              "objects": 40498,
+              "resources": 171,
+              "staticBytes": 1288246950,
+              "textureBytes": 384742131,
+              "videoBytes": 847167667
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144908062Z-acceptance-mixed300-active.png",
+              "sha256": "8a995624a8411b28e3311f5fb680c2a946e4755520867dca6b0cc91aa3eb994d",
+              "bytes": 1315879
+            },
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-gl-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-gl_compatibility-windowed-trial1-20260919T144908062Z-acceptance-mixed300-settled.png",
+              "sha256": "5d9cc7b2bbbc9797d081cd4a45336b470eeb2260cd12e1c66a82786a7bbad3a9",
+              "bytes": 1233554
+            }
+          ],
+          "order": 3,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "effectiveDigest": "748141ec890be1c89e9a3a3569ee693b78950f8739ecfa1651952cf3185205a9",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+            "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+            "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+            "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+          }
+        }
+      ]
+    },
+    "forwardPlus": {
+      "manifest": {
+        "path": "test-artifacts/native-crowd/optimization-reversal/impact-geometry-final-forward-plus-v1-Windowed-20260919T144956835Z/reversal-session.json",
+        "sha256": "0d314e2fa30fa65d315cf0ad193027d9ff5349adc91aeb05f4442f7bf730c976",
+        "bytes": 10610
+      },
+      "mode": "Windowed",
+      "renderer": "forward_plus",
+      "sequence": [
+        "B",
+        "A",
+        "B"
+      ],
+      "relativePaths": [
+        "godot-client/src/actors/cape_cloth.gd",
+        "godot-client/src/actors/ranger_bow_3d.gd",
+        "godot-client/src/world/spell_flight_3d.gd",
+        "godot-client/src/world/world_effect_3d.gd"
+      ],
+      "baselineRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+      "optimizedRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+      "baselineNativePresentation": "Both",
+      "candidateNativePresentation": "All",
+      "baselineEffectiveHashes": {
+        "godot-client/src/actors/cape_cloth.gd": "b120fb4d5c6720212b6a47f618edf6909ac843670046a3d2c42cc0bc1d77f6e8",
+        "godot-client/src/actors/ranger_bow_3d.gd": "bd6f313d94fec11dad3f272e5349be39e46107dd0a2d4c2888ae90cfd96f9d71",
+        "godot-client/src/world/spell_flight_3d.gd": "188215068d879bb44c0464580a9c2225e4be65769ad2bcc050b6bd820e8837db",
+        "godot-client/src/world/world_effect_3d.gd": "2014fbc59ac1eec14bda5fa559f9ef9080b9941256a0452ffe37bb7c9b3ee32c"
+      },
+      "candidateHashes": {
+        "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+        "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+        "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+        "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+      },
+      "runner": {
+        "path": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\scripts\\run_crowd_benchmarks.ps1",
+        "sha256": "f88f925ea071a95137e8beca225f6d4f38341ec0dd3351641cb10527910b2257"
+      },
+      "godot": {
+        "requestedPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64_console.exe",
+        "requestedSha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+        "launchPath": "C:\\rabbitlands\\wt-native-crowd-300\\godot-client\\Godot_v4.7.2-stable_win64.exe",
+        "launchSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424"
+      },
+      "lockAcquired": true,
+      "restored": true,
+      "restoreErrors": [],
+      "groups": {
+        "A": {
+          "runs": 1,
+          "wallMeanMillisecondsPerRun": [
+            44.496
+          ],
+          "medianOfRunMeansMilliseconds": 44.496,
+          "minimumRunMeanMilliseconds": 44.496,
+          "maximumRunMeanMilliseconds": 44.496
+        },
+        "B": {
+          "runs": 2,
+          "wallMeanMillisecondsPerRun": [
+            44.757,
+            40.346
+          ],
+          "medianOfRunMeansMilliseconds": 42.5515,
+          "minimumRunMeanMilliseconds": 40.346,
+          "maximumRunMeanMilliseconds": 44.757
+        }
+      },
+      "runs": [
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T144959372Z.json",
+            "sha256": "da31df7703057a310349e07da049b2e537ece61ae83024e70ba0cb7d7fa18af0",
+            "bytes": 73093
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T144959372Z.process.json",
+            "sha256": "be77063559d4e68d3809011974aa2482b3e22150aacb2129bd64bcd9e9db1b16",
+            "bytes": 5327
+          },
+          "label": "impact-geometry-final-forward-plus-v1-01-optimized-5b7b2ae9-748141ec890b",
+          "runId": "impact-geometry-final-forward-plus-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T144959372Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+          "dirty": false,
+          "display": "Windows",
+          "headless": false,
+          "requestedRenderingMethod": "forward_plus",
+          "actualRenderingMethod": "forward_plus",
+          "renderingDevice": "NVIDIA GeForce RTX 5080 Laptop GPU",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "all",
+            "environmentValue": "all",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 8400,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 2993,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 2993,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 52,
+              "worldBuildAttempts": 4478,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 4478,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": true
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 112,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 44.757,
+                "p50": 42.518,
+                "p95": 65.632,
+                "p99": 71.304,
+                "max": 88.863,
+                "samples": 112
+              },
+              "worldRenderCpuMilliseconds": {
+                "mean": 5.796,
+                "p50": 5.562,
+                "p95": 7.481,
+                "p99": 8.404,
+                "max": 9.683,
+                "samples": 112
+              },
+              "worldRenderGpuMilliseconds": {
+                "mean": 1.701,
+                "p50": 1.689,
+                "p95": 1.831,
+                "p99": 1.87,
+                "max": 1.887,
+                "samples": 112
+              },
+              "rootRenderCpuMilliseconds": {
+                "mean": 0.168,
+                "p50": 0.159,
+                "p95": 0.214,
+                "p99": 0.29,
+                "max": 0.361,
+                "samples": 112
+              },
+              "rootRenderGpuMilliseconds": {
+                "mean": 0.025,
+                "p50": 0.025,
+                "p95": 0.026,
+                "p99": 0.027,
+                "max": 0.029,
+                "samples": 112
+              },
+              "drawCalls": {
+                "mean": 2463.902,
+                "p50": 2458.0,
+                "p95": 2522.0,
+                "p99": 2562.0,
+                "max": 2562.0,
+                "samples": 112
+              },
+              "primitives": {
+                "mean": 4529683.554,
+                "p50": 4529623.0,
+                "p95": 4546339.0,
+                "p99": 4560415.0,
+                "max": 4560415.0,
+                "samples": 112
+              },
+              "sceneNodes": {
+                "mean": 20596.911,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 112
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 112
+              },
+              "transientWorldEffects": {
+                "mean": 57.652,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 112
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.865,
+                "p50": 0.0,
+                "p95": 6.312,
+                "p99": 6.901,
+                "max": 7.269,
+                "samples": 112
+              },
+              "syncWorldMilliseconds": {
+                "mean": 1.794,
+                "p50": 0.0,
+                "p95": 5.112,
+                "p99": 6.16,
+                "max": 6.166,
+                "samples": 112
+              },
+              "presentMilliseconds": {
+                "mean": 1.077,
+                "p50": 0.0,
+                "p95": 3.342,
+                "p99": 3.984,
+                "max": 4.182,
+                "samples": 112
+              },
+              "groundMilliseconds": {
+                "mean": 0.183,
+                "p50": 0.0,
+                "p95": 0.466,
+                "p99": 0.54,
+                "max": 0.571,
+                "samples": 112
+              },
+              "overheadMilliseconds": {
+                "mean": 0.314,
+                "p50": 0.0,
+                "p95": 0.8,
+                "p99": 1.116,
+                "max": 1.129,
+                "samples": 112
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.351,
+                "p50": 0.007,
+                "p95": 1.27,
+                "p99": 1.335,
+                "max": 1.446,
+                "samples": 112
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 559.713,
+              "combatPresentationEventsPerSecond": 67.277,
+              "flushesPerSecond": 9.952,
+              "packetsPerSecond": 79.817,
+              "stateUpdatesPerSecond": 626.99
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 11632.539,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 1009.343,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": 46521776,
+              "nodes": 7679,
+              "objects": 19970,
+              "resources": 169,
+              "staticBytes": 399366541,
+              "textureBytes": 434487296,
+              "videoBytes": 507322544
+            },
+            "before": {
+              "bufferBytes": 26961172,
+              "nodes": 4430,
+              "objects": 14114,
+              "resources": 164,
+              "staticBytes": 298351214,
+              "textureBytes": 256903168,
+              "videoBytes": 304723120
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": 19560604,
+              "nodes": 3249,
+              "objects": 5856,
+              "resources": 5,
+              "staticBytes": 101015327,
+              "textureBytes": 177584128,
+              "videoBytes": 202599424
+            },
+            "spawnDelta": {
+              "bufferBytes": 332107872,
+              "nodes": 15444,
+              "objects": 26391,
+              "resources": 7,
+              "staticBytes": 1077228222,
+              "textureBytes": 185972736,
+              "videoBytes": 523611136
+            },
+            "spawned": {
+              "bufferBytes": 359069044,
+              "nodes": 19874,
+              "objects": 40505,
+              "resources": 171,
+              "staticBytes": 1375579436,
+              "textureBytes": 442875904,
+              "videoBytes": 828334256
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T144959372Z-acceptance-mixed300-active.png",
+              "sha256": "f821e5d1cd10dbbdb4fdf1f0bd2a959a16b9fe602a649554d67e61f056d9f291",
+              "bytes": 1347010
+            },
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-01-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T144959372Z-acceptance-mixed300-settled.png",
+              "sha256": "53fa4d978ab2e965ee08f98d1cbe9d74a1250b55343875f81c0da1bedf62ede9",
+              "bytes": 1292118
+            }
+          ],
+          "order": 1,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "effectiveDigest": "748141ec890be1c89e9a3a3569ee693b78950f8739ecfa1651952cf3185205a9",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+            "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+            "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+            "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-forward_plus-windowed-trial1-20260919T145034634Z.json",
+            "sha256": "a57ca44761a089894861303d1978adf737fef18f868d4f6adeabd570b6287e6d",
+            "bytes": 73525
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-forward_plus-windowed-trial1-20260919T145034634Z.process.json",
+            "sha256": "03f158eaf48c376e43ad4dd3717abcf6c423bb7eab9ce6f70a5a3e618ed23433",
+            "bytes": 5327
+          },
+          "label": "impact-geometry-final-forward-plus-v1-02-baseline-ef6825b9-628a784a9a58",
+          "runId": "impact-geometry-final-forward-plus-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-forward_plus-windowed-trial1-20260919T145034634Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "fed43c2569e43130824beaa9d546edcd6e845504e3f1110102d37274d5e23da3",
+          "dirty": true,
+          "display": "Windows",
+          "headless": false,
+          "requestedRenderingMethod": "forward_plus",
+          "actualRenderingMethod": "forward_plus",
+          "renderingDevice": "NVIDIA GeForce RTX 5080 Laptop GPU",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "both",
+            "environmentValue": "both",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 8475,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 3054,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 3054,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 0,
+              "worldBuildAttempts": 0,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 0,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": false
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 113,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 44.496,
+                "p50": 42.726,
+                "p95": 63.881,
+                "p99": 66.165,
+                "max": 68.829,
+                "samples": 113
+              },
+              "worldRenderCpuMilliseconds": {
+                "mean": 5.657,
+                "p50": 5.456,
+                "p95": 7.243,
+                "p99": 8.018,
+                "max": 9.575,
+                "samples": 113
+              },
+              "worldRenderGpuMilliseconds": {
+                "mean": 1.699,
+                "p50": 1.69,
+                "p95": 1.828,
+                "p99": 1.861,
+                "max": 1.894,
+                "samples": 113
+              },
+              "rootRenderCpuMilliseconds": {
+                "mean": 0.16,
+                "p50": 0.152,
+                "p95": 0.202,
+                "p99": 0.209,
+                "max": 0.285,
+                "samples": 113
+              },
+              "rootRenderGpuMilliseconds": {
+                "mean": 0.026,
+                "p50": 0.025,
+                "p95": 0.027,
+                "p99": 0.028,
+                "max": 0.029,
+                "samples": 113
+              },
+              "drawCalls": {
+                "mean": 2463.664,
+                "p50": 2461.0,
+                "p95": 2522.0,
+                "p99": 2562.0,
+                "max": 2562.0,
+                "samples": 113
+              },
+              "primitives": {
+                "mean": 4529450.788,
+                "p50": 4529623.0,
+                "p95": 4546339.0,
+                "p99": 4560415.0,
+                "max": 4560415.0,
+                "samples": 113
+              },
+              "sceneNodes": {
+                "mean": 20593.85,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 113
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 113
+              },
+              "transientWorldEffects": {
+                "mean": 57.142,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 113
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.845,
+                "p50": 0.0,
+                "p95": 6.268,
+                "p99": 6.897,
+                "max": 6.966,
+                "samples": 113
+              },
+              "syncWorldMilliseconds": {
+                "mean": 1.643,
+                "p50": 0.0,
+                "p95": 4.778,
+                "p99": 5.067,
+                "max": 5.128,
+                "samples": 113
+              },
+              "presentMilliseconds": {
+                "mean": 0.995,
+                "p50": 0.0,
+                "p95": 3.226,
+                "p99": 3.332,
+                "max": 3.443,
+                "samples": 113
+              },
+              "groundMilliseconds": {
+                "mean": 0.16,
+                "p50": 0.0,
+                "p95": 0.413,
+                "p99": 0.43,
+                "max": 0.466,
+                "samples": 113
+              },
+              "overheadMilliseconds": {
+                "mean": 0.285,
+                "p50": 0.0,
+                "p95": 0.722,
+                "p99": 0.878,
+                "max": 0.896,
+                "samples": 113
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.32,
+                "p50": 0.006,
+                "p95": 1.069,
+                "p99": 1.205,
+                "max": 1.251,
+                "samples": 113
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 558.047,
+              "combatPresentationEventsPerSecond": 67.077,
+              "flushesPerSecond": 9.923,
+              "packetsPerSecond": 79.579,
+              "stateUpdatesPerSecond": 625.124
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 9909.875,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 1003.911,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": 46521776,
+              "nodes": 7679,
+              "objects": 19970,
+              "resources": 169,
+              "staticBytes": 398846911,
+              "textureBytes": 434487296,
+              "videoBytes": 507322544
+            },
+            "before": {
+              "bufferBytes": 26961172,
+              "nodes": 4430,
+              "objects": 14115,
+              "resources": 164,
+              "staticBytes": 298263444,
+              "textureBytes": 255854592,
+              "videoBytes": 303674544
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": 19560604,
+              "nodes": 3249,
+              "objects": 5855,
+              "resources": 5,
+              "staticBytes": 100583467,
+              "textureBytes": 178632704,
+              "videoBytes": 203648000
+            },
+            "spawnDelta": {
+              "bufferBytes": 332114976,
+              "nodes": 15444,
+              "objects": 26390,
+              "resources": 7,
+              "staticBytes": 1076522310,
+              "textureBytes": 187021312,
+              "videoBytes": 524666816
+            },
+            "spawned": {
+              "bufferBytes": 359076148,
+              "nodes": 19874,
+              "objects": 40505,
+              "resources": 171,
+              "staticBytes": 1374785754,
+              "textureBytes": 442875904,
+              "videoBytes": 828341360
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-forward_plus-windowed-trial1-20260919T145034634Z-acceptance-mixed300-active.png",
+              "sha256": "11ad73f1e313be9bd6225f674b67334c904d7f7f4c1195b1743909faa5768ea8",
+              "bytes": 1352044
+            },
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-02-baseline-ef6825b9-628a784a9a58-primary-gdscript-forward_plus-windowed-trial1-20260919T145034634Z-acceptance-mixed300-settled.png",
+              "sha256": "dcc95b2c1f1fb98fc4d7553b80ef474a193c66de3d6167ffdeae973620e529a7",
+              "bytes": 1292067
+            }
+          ],
+          "order": 2,
+          "variant": "A",
+          "variantName": "baseline",
+          "variantRevision": "ef6825b92a468ff275a847cc063eed115695b1b5",
+          "effectiveDigest": "628a784a9a5886d4597cf8e8f8996db62e3b8b61c817361689ec04d89db6a055",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "b120fb4d5c6720212b6a47f618edf6909ac843670046a3d2c42cc0bc1d77f6e8",
+            "godot-client/src/actors/ranger_bow_3d.gd": "bd6f313d94fec11dad3f272e5349be39e46107dd0a2d4c2888ae90cfd96f9d71",
+            "godot-client/src/world/spell_flight_3d.gd": "188215068d879bb44c0464580a9c2225e4be65769ad2bcc050b6bd820e8837db",
+            "godot-client/src/world/world_effect_3d.gd": "2014fbc59ac1eec14bda5fa559f9ef9080b9941256a0452ffe37bb7c9b3ee32c"
+          }
+        },
+        {
+          "report": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T145109799Z.json",
+            "sha256": "f5d1848dfe2272e7f80b7b6a2efcdfa972b76347ded075d8a61129a45814301d",
+            "bytes": 78262
+          },
+          "process": {
+            "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T145109799Z.process.json",
+            "sha256": "bf8f3392d1f5d3d0f8cb6a5b74fc818e609331bda5e6a83c3e0f58077d5de757",
+            "bytes": 5327
+          },
+          "label": "impact-geometry-final-forward-plus-v1-03-optimized-5b7b2ae9-748141ec890b",
+          "runId": "impact-geometry-final-forward-plus-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T145109799Z",
+          "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+          "dirty": false,
+          "display": "Windows",
+          "headless": false,
+          "requestedRenderingMethod": "forward_plus",
+          "actualRenderingMethod": "forward_plus",
+          "renderingDevice": "NVIDIA GeForce RTX 5080 Laptop GPU",
+          "nativeBackend": "gdscript",
+          "nativeBackendActive": false,
+          "failureCount": 0,
+          "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+          "nativePresentation": {
+            "requestedMode": "all",
+            "environmentValue": "all",
+            "actual": {
+              "capeActiveInstancesMaximum": 150,
+              "capeFallbackCalls": 0,
+              "capeGdscriptBackendInstancesMaximum": 30,
+              "capeMatchedRequest": true,
+              "capeModifierInstancesMaximum": 180,
+              "capeNativeBackendInstancesMaximum": 150,
+              "capeNativeCalls": 9300,
+              "capeStatsSupportedInstancesMaximum": 180,
+              "flightActiveInstancesMaximum": 52,
+              "flightBuildAttempts": 3282,
+              "flightBuildFallbacks": 0,
+              "flightBuildSuccesses": 3282,
+              "flightInstancesMaximum": 52,
+              "flightMatchedRequest": true,
+              "matchedRequest": true,
+              "worldActiveInstancesMaximum": 52,
+              "worldBuildAttempts": 4922,
+              "worldBuildFallbacks": 0,
+              "worldBuildSuccesses": 4922,
+              "worldInstancesMaximum": 52,
+              "worldMatchedRequest": true,
+              "worldStatsSupported": true
+            }
+          },
+          "fixture": {
+            "count": 300,
+            "visible": 150,
+            "humanoids": 150,
+            "creatures": 150,
+            "plannedActive": 100,
+            "fullyEquippedHumanoids": 150,
+            "fallbackEquipmentNodes": 0
+          },
+          "sample": {
+            "frameCount": 124,
+            "summary": {
+              "wallMilliseconds": {
+                "mean": 40.346,
+                "p50": 38.192,
+                "p95": 57.293,
+                "p99": 61.361,
+                "max": 63.25,
+                "samples": 124
+              },
+              "worldRenderCpuMilliseconds": {
+                "mean": 5.199,
+                "p50": 5.122,
+                "p95": 5.908,
+                "p99": 7.007,
+                "max": 8.059,
+                "samples": 124
+              },
+              "worldRenderGpuMilliseconds": {
+                "mean": 1.696,
+                "p50": 1.689,
+                "p95": 1.817,
+                "p99": 1.884,
+                "max": 1.892,
+                "samples": 124
+              },
+              "rootRenderCpuMilliseconds": {
+                "mean": 0.157,
+                "p50": 0.148,
+                "p95": 0.194,
+                "p99": 0.265,
+                "max": 0.317,
+                "samples": 124
+              },
+              "rootRenderGpuMilliseconds": {
+                "mean": 0.026,
+                "p50": 0.026,
+                "p95": 0.027,
+                "p99": 0.027,
+                "max": 0.027,
+                "samples": 124
+              },
+              "drawCalls": {
+                "mean": 2463.669,
+                "p50": 2458.0,
+                "p95": 2513.0,
+                "p99": 2562.0,
+                "max": 2562.0,
+                "samples": 124
+              },
+              "primitives": {
+                "mean": 4529528.742,
+                "p50": 4529623.0,
+                "p95": 4543405.0,
+                "p99": 4560415.0,
+                "max": 4560415.0,
+                "samples": 124
+              },
+              "sceneNodes": {
+                "mean": 20592.71,
+                "p50": 20563.0,
+                "p95": 20641.0,
+                "p99": 20719.0,
+                "max": 20719.0,
+                "samples": 124
+              },
+              "resourceObjects": {
+                "mean": 171.0,
+                "p50": 171.0,
+                "p95": 171.0,
+                "p99": 171.0,
+                "max": 171.0,
+                "samples": 124
+              },
+              "transientWorldEffects": {
+                "mean": 56.952,
+                "p50": 52.0,
+                "p95": 65.0,
+                "p99": 78.0,
+                "max": 78.0,
+                "samples": 124
+              },
+              "packetDispatchInclusiveMilliseconds": {
+                "mean": 0.744,
+                "p50": 0.0,
+                "p95": 5.994,
+                "p99": 6.602,
+                "max": 6.955,
+                "samples": 124
+              },
+              "syncWorldMilliseconds": {
+                "mean": 1.54,
+                "p50": 0.0,
+                "p95": 4.676,
+                "p99": 5.209,
+                "max": 6.908,
+                "samples": 124
+              },
+              "presentMilliseconds": {
+                "mean": 0.929,
+                "p50": 0.0,
+                "p95": 3.196,
+                "p99": 3.522,
+                "max": 4.53,
+                "samples": 124
+              },
+              "groundMilliseconds": {
+                "mean": 0.165,
+                "p50": 0.0,
+                "p95": 0.454,
+                "p99": 0.556,
+                "max": 0.653,
+                "samples": 124
+              },
+              "overheadMilliseconds": {
+                "mean": 0.261,
+                "p50": 0.0,
+                "p95": 0.718,
+                "p99": 0.811,
+                "max": 0.965,
+                "samples": 124
+              },
+              "animationGateMilliseconds": {
+                "mean": 0.3,
+                "p50": 0.006,
+                "p95": 0.968,
+                "p99": 1.027,
+                "max": 1.102,
+                "samples": 124
+              }
+            },
+            "rates": {
+              "actorCommandsPerSecond": 560.83,
+              "combatPresentationEventsPerSecond": 67.411,
+              "flushesPerSecond": 9.972,
+              "packetsPerSecond": 79.976,
+              "stateUpdatesPerSecond": 628.241
+            },
+            "maximumFlushesPerFrame": 1.0
+          },
+          "spawn": {
+            "milliseconds": 10170.623,
+            "passes": 38,
+            "spawned": 300,
+            "timeoutMilliseconds": 300000
+          },
+          "despawnMilliseconds": 966.308,
+          "memory": {
+            "afterDespawn": {
+              "bufferBytes": 46521776,
+              "nodes": 7679,
+              "objects": 19970,
+              "resources": 169,
+              "staticBytes": 399366805,
+              "textureBytes": 434487296,
+              "videoBytes": 507322544
+            },
+            "before": {
+              "bufferBytes": 26961172,
+              "nodes": 4430,
+              "objects": 14113,
+              "resources": 164,
+              "staticBytes": 297301666,
+              "textureBytes": 255854592,
+              "videoBytes": 303674544
+            },
+            "retainedAfterDespawnIncludingHarnessTelemetry": {
+              "bufferBytes": 19560604,
+              "nodes": 3249,
+              "objects": 5857,
+              "resources": 5,
+              "staticBytes": 102065139,
+              "textureBytes": 178632704,
+              "videoBytes": 203648000
+            },
+            "spawnDelta": {
+              "bufferBytes": 332107872,
+              "nodes": 15444,
+              "objects": 26392,
+              "resources": 7,
+              "staticBytes": 1078277558,
+              "textureBytes": 187021312,
+              "videoBytes": 524659712
+            },
+            "spawned": {
+              "bufferBytes": 359069044,
+              "nodes": 19874,
+              "objects": 40505,
+              "resources": 171,
+              "staticBytes": 1375579224,
+              "textureBytes": 442875904,
+              "videoBytes": 828334256
+            }
+          },
+          "networkIntegrity": {
+            "protocolErrorsAfter": 0,
+            "protocolErrorsBefore": 0,
+            "unchangedGearMismatches": 0
+          },
+          "processAttestation": {
+            "exitCode": 0,
+            "cleanExit": true,
+            "reportValid": true,
+            "schemaValid": true,
+            "scriptErrorsDetected": false,
+            "allObservedProcessesVerified": true,
+            "affinityMask": 15,
+            "monitoringError": "",
+            "forcedTermination": false
+          },
+          "captures": [
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T145109799Z-acceptance-mixed300-active.png",
+              "sha256": "d5aeb5d424dc24407fe570e141db4f5a4480464e5f2280100e044fb950461d18",
+              "bytes": 1344813
+            },
+            {
+              "path": "test-artifacts/native-crowd/impact-geometry-final-forward-plus-v1-03-optimized-5b7b2ae9-748141ec890b-primary-gdscript-forward_plus-windowed-trial1-20260919T145109799Z-acceptance-mixed300-settled.png",
+              "sha256": "1ce31055b89b5577b1b840f056a18e44db6ffd4755765787782e232cd7a1197b",
+              "bytes": 1292286
+            }
+          ],
+          "order": 3,
+          "variant": "B",
+          "variantName": "optimized",
+          "variantRevision": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+          "effectiveDigest": "748141ec890be1c89e9a3a3569ee693b78950f8739ecfa1651952cf3185205a9",
+          "effectiveHashes": {
+            "godot-client/src/actors/cape_cloth.gd": "22ee3ca040bdb833e6e6372b10ee3371e9dbdc6f467016da1a92b4d70b91b2bd",
+            "godot-client/src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+            "godot-client/src/world/spell_flight_3d.gd": "9fc9cde555d2ce4d13527055eb65566ad5c659476f54cc90caa38f7e7ac3db45",
+            "godot-client/src/world/world_effect_3d.gd": "270668c4860d57bccd84fcc4736781f16ac229838fa09d5671ce0557f016009e"
+          }
+        }
+      ]
+    },
+    "headlessMedianComparison": {
+      "baselineMilliseconds": 23.666,
+      "candidateMilliseconds": 21.114,
+      "changePercent": -10.783402349361948,
+      "targetMilliseconds": 16.67,
+      "targetMet": false
+    }
+  },
+  "finalAttributionDiagnostic": {
+    "acceptanceEligible": false,
+    "reason": "callback timers and observers add overhead",
+    "run": {
+      "report": {
+        "path": "test-artifacts/native-crowd/impact-geometry-final-attribution-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T145157599Z.json",
+        "sha256": "271b207985f0923ec4dd83240d6da59f1ff5a1f24d642613382d21500a456370",
+        "bytes": 177285
+      },
+      "process": {
+        "path": "test-artifacts/native-crowd/impact-geometry-final-attribution-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T145157599Z.process.json",
+        "sha256": "b34b6219eb3209acc458d08d5d7c3d7ddb50479170bfa10990e789383d72666e",
+        "bytes": 5298
+      },
+      "label": "impact-geometry-final-attribution-v1",
+      "runId": "impact-geometry-final-attribution-v1-primary-gdscript-gl_compatibility-headless-trial1-20260919T145157599Z",
+      "commit": "5b7b2ae9b3d1669ded429738374a5f69f89807f8",
+      "sourceHash": "157bd39644240e74786acb1411e61900247425c56f53a550d13ab4566f163b4b",
+      "dirty": false,
+      "display": "headless",
+      "headless": true,
+      "requestedRenderingMethod": "gl_compatibility",
+      "actualRenderingMethod": "gl_compatibility",
+      "renderingDevice": "",
+      "nativeBackend": "gdscript",
+      "nativeBackendActive": false,
+      "failureCount": 0,
+      "interferenceLabel": "shared host; unrelated Godot jobs authorized; activity not continuously monitored",
+      "nativePresentation": {
+        "requestedMode": "all",
+        "environmentValue": "all",
+        "actual": {
+          "capeActiveInstancesMaximum": 150,
+          "capeFallbackCalls": 0,
+          "capeGdscriptBackendInstancesMaximum": 30,
+          "capeMatchedRequest": true,
+          "capeModifierInstancesMaximum": 180,
+          "capeNativeBackendInstancesMaximum": 150,
+          "capeNativeCalls": 18825,
+          "capeStatsSupportedInstancesMaximum": 180,
+          "flightActiveInstancesMaximum": 52,
+          "flightBuildAttempts": 6722,
+          "flightBuildFallbacks": 0,
+          "flightBuildSuccesses": 6722,
+          "flightInstancesMaximum": 52,
+          "flightMatchedRequest": true,
+          "matchedRequest": true,
+          "worldActiveInstancesMaximum": 52,
+          "worldBuildAttempts": 9802,
+          "worldBuildFallbacks": 0,
+          "worldBuildSuccesses": 9802,
+          "worldInstancesMaximum": 52,
+          "worldMatchedRequest": true,
+          "worldStatsSupported": true
+        }
+      },
+      "fixture": {
+        "count": 300,
+        "visible": 150,
+        "humanoids": 150,
+        "creatures": 150,
+        "plannedActive": 100,
+        "fullyEquippedHumanoids": 150,
+        "fallbackEquipmentNodes": 0
+      },
+      "sample": {
+        "frameCount": 251,
+        "summary": {
+          "wallMilliseconds": {
+            "mean": 19.856,
+            "p50": 18.519,
+            "p95": 33.136,
+            "p99": 39.471,
+            "max": 40.836,
+            "samples": 251
+          },
+          "worldRenderCpuMilliseconds": null,
+          "worldRenderGpuMilliseconds": null,
+          "rootRenderCpuMilliseconds": null,
+          "rootRenderGpuMilliseconds": null,
+          "drawCalls": null,
+          "primitives": null,
+          "sceneNodes": {
+            "mean": 20593.861,
+            "p50": 20563.0,
+            "p95": 20641.0,
+            "p99": 20719.0,
+            "max": 20719.0,
+            "samples": 251
+          },
+          "resourceObjects": {
+            "mean": 171.0,
+            "p50": 171.0,
+            "p95": 171.0,
+            "p99": 171.0,
+            "max": 171.0,
+            "samples": 251
+          },
+          "transientWorldEffects": {
+            "mean": 57.143,
+            "p50": 52.0,
+            "p95": 65.0,
+            "p99": 78.0,
+            "max": 78.0,
+            "samples": 251
+          },
+          "packetDispatchInclusiveMilliseconds": {
+            "mean": 0.316,
+            "p50": 0.0,
+            "p95": 4.441,
+            "p99": 5.385,
+            "max": 5.646,
+            "samples": 251
+          },
+          "syncWorldMilliseconds": {
+            "mean": 0.74,
+            "p50": 0.0,
+            "p95": 4.39,
+            "p99": 5.058,
+            "max": 5.122,
+            "samples": 251
+          },
+          "presentMilliseconds": {
+            "mean": 0.445,
+            "p50": 0.0,
+            "p95": 2.897,
+            "p99": 3.376,
+            "max": 3.637,
+            "samples": 251
+          },
+          "groundMilliseconds": {
+            "mean": 0.075,
+            "p50": 0.0,
+            "p95": 0.4,
+            "p99": 0.453,
+            "max": 0.472,
+            "samples": 251
+          },
+          "overheadMilliseconds": {
+            "mean": 0.127,
+            "p50": 0.0,
+            "p95": 0.673,
+            "p99": 0.789,
+            "max": 0.833,
+            "samples": 251
+          },
+          "animationGateMilliseconds": {
+            "mean": 0.179,
+            "p50": 0.005,
+            "p95": 1.001,
+            "p99": 1.189,
+            "max": 1.316,
+            "samples": 251
+          }
+        },
+        "rates": {
+          "actorCommandsPerSecond": 561.726,
+          "combatPresentationEventsPerSecond": 67.519,
+          "flushesPerSecond": 9.988,
+          "packetsPerSecond": 80.104,
+          "stateUpdatesPerSecond": 629.245
+        },
+        "maximumFlushesPerFrame": 1.0
+      },
+      "spawn": {
+        "milliseconds": 3942.363,
+        "passes": 38,
+        "spawned": 300,
+        "timeoutMilliseconds": 300000
+      },
+      "despawnMilliseconds": 742.84,
+      "memory": {
+        "afterDespawn": {
+          "bufferBytes": null,
+          "nodes": 7913,
+          "objects": 21285,
+          "resources": 169,
+          "staticBytes": 636835182,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "before": {
+          "bufferBytes": null,
+          "nodes": 4430,
+          "objects": 13735,
+          "resources": 164,
+          "staticBytes": 381605846,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "retainedAfterDespawnIncludingHarnessTelemetry": {
+          "bufferBytes": null,
+          "nodes": 3483,
+          "objects": 7550,
+          "resources": 5,
+          "staticBytes": 255229336,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "spawnDelta": {
+          "bufferBytes": null,
+          "nodes": 15444,
+          "objects": 27151,
+          "resources": 7,
+          "staticBytes": 1194988814,
+          "textureBytes": null,
+          "videoBytes": null
+        },
+        "spawned": {
+          "bufferBytes": null,
+          "nodes": 19874,
+          "objects": 40886,
+          "resources": 171,
+          "staticBytes": 1576594660,
+          "textureBytes": null,
+          "videoBytes": null
+        }
+      },
+      "networkIntegrity": {
+        "protocolErrorsAfter": 0,
+        "protocolErrorsBefore": 0,
+        "unchangedGearMismatches": 0
+      },
+      "processAttestation": {
+        "exitCode": 0,
+        "cleanExit": true,
+        "reportValid": true,
+        "schemaValid": true,
+        "scriptErrorsDetected": false,
+        "allObservedProcessesVerified": true,
+        "affinityMask": 15,
+        "monitoringError": "",
+        "forcedTermination": false
+      },
+      "captures": []
+    },
+    "callbackMeansMilliseconds": {
+      "mainProcessInclusive": 1.082,
+      "combatPoseFromSkeleton": 2.567,
+      "skeletonUpdatesPerFrame": 150.0,
+      "uniqueSkeletonsUpdatedPerFrame": 150.0,
+      "maximumSkeletonUpdatesPerActor": 1.0
+    }
+  },
+  "visualReview": {
+    "reviewedCaptureCount": 8,
+    "retainedCaptureCount": 12,
+    "finding": "Reviewed GL and Forward+ baseline/candidate active and settled views retained dense two-band crowds, creature/equipped-humanoid identity, overhead labels, health bars and live effects. No obvious missing geometry or equipment was seen.",
+    "limitations": "Captures are asynchronous and are not pixel or animation parity evidence. Forward+ ground remained brighter and effects paler than GL in baseline and candidate; this pre-existing renderer difference still needs broader art QA."
+  },
+  "admission": {
+    "acceptedProcessCount": 15,
+    "smokes": 2,
+    "controlledReversalRuns": 12,
+    "diagnosticAttributionRuns": 1,
+    "allReportsFailureCountZero": true,
+    "allProcessSidecarsValid": true,
+    "allObservedAffinityMask15": true,
+    "allFallbackCountersZero": true,
+    "allReversalSessionsRestored": true,
+    "rejectedAttempts": []
+  }
+}

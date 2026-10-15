@@ -1,0 +1,769 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "amberwood_amber_hall",
+    "name": "The Amber Hall",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -13.55,
+        -0.56,
+        -7.55
+      ],
+      "max": [
+        39.55,
+        7.82,
+        60.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -13.55,
+        -0.4,
+        -7.55
+      ],
+      "max": [
+        39.55,
+        3.6,
+        60.55
+      ]
+    },
+    "interiorClass": "settlement",
+    "parentRegion": "amberwood",
+    "serverCells": 72
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      16.0,
+      63.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        0.0,
+        0.05,
+        -1.5
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "amber-hall-door",
+      "position": [
+        0.0,
+        0.05,
+        -1.5
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 114,
+    "height": 144,
+    "cellMetres": 0.5,
+    "originMetres": [
+      -16.0,
+      63.0
+    ],
+    "heightEncoding": {
+      "origin": -0.1,
+      "step": 0.1,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 8168,
+    "blockedCells": 8248,
+    "walkableFraction": 0.4976,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_amberwood_amber_hall",
+      "Roof_amberwood_amber_hall_timber_dark",
+      "Build_amberwood_amber_hall_amber_glass",
+      "Build_amberwood_amber_hall_amber_resin",
+      "Build_amberwood_amber_hall_ashlar",
+      "Build_amberwood_amber_hall_carved_wood",
+      "Build_amberwood_amber_hall_dark_iron",
+      "Build_amberwood_amber_hall_forest_floor",
+      "Build_amberwood_amber_hall_lime_plaster",
+      "Build_amberwood_amber_hall_rubble_stone",
+      "Build_amberwood_amber_hall_thatch_reed",
+      "Build_amberwood_amber_hall_timber_dark",
+      "Build_amberwood_amber_hall_timber_grey",
+      "Build_amberwood_amber_hall_timber_warm",
+      "Build_amberwood_amber_hall_woven_cloth"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_amberwood_amber_hall_timber_dark"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-to-amberwood",
+      "name": "Return to Amberwood",
+      "type": "map-transition",
+      "position": [
+        0.0,
+        0.05,
+        -1.5
+      ],
+      "radius": 3.0,
+      "destinationMap": "amberwood",
+      "destinationSpawn": "amber-hall-door",
+      "authority": "server"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "the-porch",
+      "name": "The Hall Porch",
+      "space": "porch",
+      "position": [
+        0.0,
+        1.6,
+        -1.5
+      ]
+    },
+    {
+      "id": "the-sorting-floor",
+      "name": "The Sorting Floor",
+      "space": "sorting",
+      "position": [
+        0.0,
+        1.2,
+        25.0
+      ]
+    },
+    {
+      "id": "the-press",
+      "name": "The Resin Press",
+      "space": "press",
+      "position": [
+        31.5,
+        1.2,
+        26.0
+      ]
+    },
+    {
+      "id": "the-common-hall",
+      "name": "The Guild Hall",
+      "space": "common",
+      "position": [
+        1.0,
+        1.2,
+        50.0
+      ]
+    },
+    {
+      "id": "the-loft",
+      "name": "The Warm Loft",
+      "space": "loft",
+      "position": [
+        31.5,
+        4.8,
+        52.0
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "cutting-bench",
+      "kind": "crafting-station",
+      "recipe": "amber_working",
+      "position": [
+        -9.0,
+        0.95,
+        32.5
+      ]
+    },
+    {
+      "id": "resin-press",
+      "kind": "crafting-station",
+      "recipe": "resin_pressing",
+      "position": [
+        31.5,
+        0.9,
+        26.0
+      ]
+    },
+    {
+      "id": "display-case",
+      "kind": "merchant",
+      "position": [
+        9.0,
+        0.95,
+        56.0
+      ]
+    },
+    {
+      "id": "notice-board",
+      "kind": "quest-board",
+      "position": [
+        -5.0,
+        1.8,
+        40.4
+      ]
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "grader",
+      "role": "artisan",
+      "position": [
+        0.0,
+        0.0,
+        25.0
+      ]
+    },
+    {
+      "id": "presser",
+      "role": "artisan",
+      "position": [
+        31.5,
+        0.0,
+        29.0
+      ]
+    },
+    {
+      "id": "hall-master",
+      "role": "merchant",
+      "position": [
+        9.0,
+        0.0,
+        54.5
+      ]
+    }
+  ],
+  "harvestables": [],
+  "lights": [
+    {
+      "id": "lantern-00",
+      "kind": "point",
+      "position": [
+        0.0,
+        2.78,
+        -3.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-01",
+      "kind": "point",
+      "position": [
+        0.0,
+        2.38,
+        9.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-02",
+      "kind": "point",
+      "position": [
+        -9.5,
+        4.78,
+        18.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-03",
+      "kind": "point",
+      "position": [
+        9.5,
+        4.78,
+        18.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-04",
+      "kind": "point",
+      "position": [
+        -9.5,
+        4.78,
+        32.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-05",
+      "kind": "point",
+      "position": [
+        9.5,
+        4.78,
+        32.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-06",
+      "kind": "point",
+      "position": [
+        0.0,
+        4.78,
+        25.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-07",
+      "kind": "point",
+      "position": [
+        26.5,
+        3.98,
+        20.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-08",
+      "kind": "point",
+      "position": [
+        37.0,
+        3.98,
+        31.5
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-09",
+      "kind": "point",
+      "position": [
+        31.5,
+        3.98,
+        26.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-10",
+      "kind": "point",
+      "position": [
+        -9.5,
+        4.38,
+        44.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-11",
+      "kind": "point",
+      "position": [
+        11.5,
+        4.38,
+        44.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-12",
+      "kind": "point",
+      "position": [
+        -9.5,
+        4.38,
+        56.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-13",
+      "kind": "point",
+      "position": [
+        11.5,
+        4.38,
+        56.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-14",
+      "kind": "point",
+      "position": [
+        1.0,
+        4.38,
+        50.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-15",
+      "kind": "point",
+      "position": [
+        26.5,
+        5.98,
+        47.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-16",
+      "kind": "point",
+      "position": [
+        37.0,
+        5.98,
+        57.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "ambient": {
+      "colour": [
+        0.3,
+        0.25,
+        0.19
+      ],
+      "energy": 0.62
+    },
+    "fog": {
+      "enabled": true,
+      "colour": [
+        0.16,
+        0.12,
+        0.09
+      ],
+      "begin": 24.0,
+      "end": 74.0
+    },
+    "audio": [
+      {
+        "id": "workshop",
+        "space": "sorting",
+        "loop": true
+      },
+      {
+        "id": "hearth",
+        "space": "common",
+        "loop": true
+      }
+    ],
+    "openToSky": [
+      "porch"
+    ]
+  },
+  "spaces": {
+    "porch": {
+      "x0": -6.0,
+      "z0": -7.0,
+      "x1": 6.0,
+      "z1": 4.0,
+      "floor": 0.0,
+      "height": 4.2
+    },
+    "sorting": {
+      "x0": -13.0,
+      "z0": 14.0,
+      "x1": 13.0,
+      "z1": 36.0,
+      "floor": 0.0,
+      "height": 6.6
+    },
+    "press": {
+      "x0": 24.0,
+      "z0": 18.0,
+      "x1": 39.0,
+      "z1": 34.0,
+      "floor": 0.0,
+      "height": 5.8
+    },
+    "common": {
+      "x0": -13.0,
+      "z0": 40.0,
+      "x1": 15.0,
+      "z1": 60.0,
+      "floor": 0.0,
+      "height": 6.2
+    },
+    "loft": {
+      "x0": 24.0,
+      "z0": 44.0,
+      "x1": 39.0,
+      "z1": 60.0,
+      "floor": 3.6,
+      "height": 3.8
+    },
+    "entryway": {
+      "x0": -2.1,
+      "z0": 1.9,
+      "x1": 2.1,
+      "z1": 16.1,
+      "floor": 0.0,
+      "height": 3.6
+    },
+    "pressway": {
+      "x0": 11.1,
+      "z0": 24.1,
+      "x1": 25.9,
+      "z1": 27.9,
+      "floor": 0.0,
+      "height": 3.6
+    },
+    "loftstair": {
+      "x0": 30.2,
+      "z0": 32.2,
+      "x1": 33.8,
+      "z1": 45.8,
+      "floor": 0.0,
+      "height": 3.8
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../../amberwood/references/00-concept-detail-board.png",
+    "role": "parent-region board; these interiors have no board of their own",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "hall entry porch",
+      "sorting floor",
+      "resin press room",
+      "carved roof trusses",
+      "amber cutting benches",
+      "polishing alcove",
+      "master's display case",
+      "warm storage loft",
+      "guild common hall",
+      "amber oak plaster iron materials"
+    ]
+  },
+  "performance": {
+    "nodes": 17,
+    "meshes": 16,
+    "materials": 14,
+    "images": 41,
+    "textures": 41,
+    "accessors": 80,
+    "bufferViews": 121,
+    "uniqueTriangles": 21408,
+    "uniqueVertices": 25682,
+    "glbBytes": 5954928,
+    "nodeNames": [
+      "Interior_amberwood_amber_hall",
+      "Roof_amberwood_amber_hall_timber_dark",
+      "Build_amberwood_amber_hall_amber_glass",
+      "Build_amberwood_amber_hall_amber_resin",
+      "Build_amberwood_amber_hall_ashlar",
+      "Build_amberwood_amber_hall_carved_wood",
+      "Build_amberwood_amber_hall_dark_iron",
+      "Build_amberwood_amber_hall_forest_floor",
+      "Build_amberwood_amber_hall_lime_plaster",
+      "Build_amberwood_amber_hall_rubble_stone",
+      "Build_amberwood_amber_hall_thatch_reed",
+      "Build_amberwood_amber_hall_timber_dark",
+      "Build_amberwood_amber_hall_timber_grey",
+      "Build_amberwood_amber_hall_timber_warm",
+      "Build_amberwood_amber_hall_woven_cloth",
+      "Walk_cobble_paving",
+      "Walk_timber_warm"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260828
+    },
+    {
+      "id": "anchor",
+      "landmark": "amber-hall",
+      "position": [
+        66.0,
+        41.81,
+        -150.0
+      ],
+      "role": "surface entrance on the Amberwood region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the Amberwood region toolkit; no scattered placement",
+    "textures": "procedural, from amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "Pale plaster infill between dark framing: an interior built only from timber reads as one uniform orange, which the region brief explicitly warns against."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Not opened in Godot: no client is installable in the build environment, so collision response, navmesh generation, portal transition, LOD and transparency sorting are unverified.",
+    "eloria-server has not registered these map keys."
+  ],
+  "externalMeshes": {
+    "../../../_shared/meshes/1fe9071d5f030bca3fabf32ce7bbe1d4076662037d541f8e953e201519e224ec.glb": "21661b9b5dfb469fc9c5baa03715267d58e10a3d48edaf806c504b90481849e2",
+    "../../../_shared/meshes/3c94ce4b279c302a6c0a2cf26c1532ab138c85ac6c232e0a69133daf9e35573f.glb": "1c04d2ef56c104bf1085ebde94e2eeab748203bd5561fedc903730bb61433fb2",
+    "../../../_shared/meshes/3ecff83b17e228bcf1451643101f0f7c8b5a467d1dc41e1e194ce1ee47efe2fe.glb": "cdee03b2d15015181ab6e6c5d08ce8626ef16e77701783a45112ac2fa8d27819",
+    "../../../_shared/meshes/49faf626ef4a36beb97fe8079c2f7540cb9d5fb5fc0d065d3addbf16910765bf.glb": "76b59d3d6e310104eefecb84e5687891a36c3b643fe1a1cdb03ede076807a0fb",
+    "../../../_shared/meshes/4d96c4b8943209f975e2f537947492dca715a90a14154de802e3b918a5cffea6.glb": "4c85759f7878ccde86c5df09ef8fc0170a0c9e22803601f25407707890d26274",
+    "../../../_shared/meshes/80e18e6f29b8d23b015c0b11b46be7af882b05d9a6bf797e5dd088c5e210e2e6.glb": "4fb45a4bdf321d43b694d648f44d5a8d6c412e147436d2364a27f4d91a0d20ab",
+    "../../../_shared/meshes/a05a348510a7b4271d3fbd3b9c80d97da70b15de7850aa296b634660a56c3d19.glb": "310bb90efa48400c3e1fae260064ec0f005d07825faf5084d0a105dce199e8b0",
+    "../../../_shared/meshes/a2890184ef60acf364cc18d4c3734b91b57f3c3e5e8e0940c445167a0054bbcd.glb": "005e0dbf4361ade5039f0eb2c293c8f34aa05479d3d7041a7efa88aa1816efbd",
+    "../../../_shared/meshes/a617ea8f31d1bcc3b13c5ce1766a4542dcb84ea6c1125cfe5268e25d2934e47d.glb": "6be7c7dddcd723cd8afb1486f55c168aa7274cc62f3143cd2e785a53cb162983",
+    "../../../_shared/meshes/bd256e36912ee37a8c63017ac335f75311c62f9e8f5a8044b98830de7edb418d.glb": "cd658d707ce256fc43e322cce0bdddccc1c70babb7e7bac245ab94fce66afbb1",
+    "../../../_shared/meshes/df2111d0b035dd3677651948f7a8f9474ed46b809d9f7e488db0fbe375cdcb68.glb": "62cb4f7a3b045fba0ec7afb6261cc46af2bb37bd597a9897095f76194a947593",
+    "../../../_shared/meshes/f1a328f9eeed6bfed597242798b76d38a71e35ed03735c507ee916f799b7275a.glb": "8d8d860dcf5d9f0c5b9c8c7fa623a9db2b79ab2386f83359ec3c8238a23a3998",
+    "../../../_shared/meshes/f892de0ac0767f058f6b74a9081c65e6cae7ec3ab11d1f5096a04d6a1fa7b0ce.glb": "347bca6071be1d1ea0b0e625891d0684d4a1e10a5737b270ba75093b430a4fba"
+  },
+  "externalResources": {
+    "../../../_shared/images/0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f.png": "0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22.png": "4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22",
+    "../../../_shared/images/80525d639f92fecd074943c8b4583049677f5eb3deda1e27deac54283a16fbf2.png": "80525d639f92fecd074943c8b4583049677f5eb3deda1e27deac54283a16fbf2",
+    "../../../_shared/images/a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e.png": "a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e",
+    "../../../_shared/images/cdb8129af7e653be1fc0e989c598d7064a068e6898fc742984f6f8b378ade2d3.png": "cdb8129af7e653be1fc0e989c598d7064a068e6898fc742984f6f8b378ade2d3",
+    "../../../_shared/images/da444272386373a231b47c6ab1d2105130aac3bfc2c84db78f3ebf4347b7ac99.png": "da444272386373a231b47c6ab1d2105130aac3bfc2c84db78f3ebf4347b7ac99",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c"
+  }
+}

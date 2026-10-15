@@ -1,0 +1,54 @@
+*.emesh binary
+*.png binary
+
+# Authored map certificates hash source bytes. Keep map inputs and manifests
+# byte-exact across Windows and Unix checkouts, including mixed line endings.
+eloria-assets/maps/** -text
+eloria-assets/maps/**/*.f32le binary
+eloria-assets/maps/**/*.rgba8 binary
+godot-client/data/maps/** -text
+godot-client/world_authoring/** -text
+godot-client/world_authoring/**/*.f32le binary
+godot-client/world_authoring/**/*.rgba8 binary
+godot-client/world_authoring/**/*.glb binary
+godot-client/assets/world/biome_blend/masks/*.png.import -text
+godot-client/src/dev/map_authoring_pilot/style/map_authoring_surface.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_pilot/style/texture_presets.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_pilot/style/object_surfaces/*.tres -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/terrain_control.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/region_snapshot.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/terrain_sculpt_layer.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/terrain_sculpt_brush.gd -text whitespace=cr-at-eol
+# Preserve the CRLF bytes already certified by the saved region snapshots.
+godot-client/src/dev/map_authoring_pilot/style/worn_path.gdshader -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/asset_control.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/asset_surface_override.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/bridge_control.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/gameplay_marker.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/path_control.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/region_control.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/water_region_control.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_region/biome_palette_entry.gd -text
+godot-client/src/world/biome_blend.gdshader -text
+godot-client/src/world/biome_blend_material.gd -text
+godot-client/src/world/object_material_refresh.gd -text
+godot-client/src/world/world_loader.gd -text whitespace=cr-at-eol
+godot-client/addons/map_authoring_workspace/reference_preview.gd -text whitespace=cr-at-eol
+godot-client/src/dev/map_authoring_pilot/style/water.gdshader -text
+godot-client/src/world/soft_ground.gdshader -text
+eloria-assets/tools/atlas_soft_ground.py -text
+eloria-assets/tools/build_continent_map.py -text
+eloria-assets/tools/render_region_cartography.py -text
+
+# Byte-exact fitter snapshots used to verify build provenance.
+eloria-assets/qa/canonical-equipment-provenance/* -text
+eloria-assets/qa/canonical-equipment/** -text
+
+# Keep evidence hashes stable across Git newline settings.
+eloria-assets/qa/shared-equipment/** -text
+
+# eloria-server's served-grid fixtures, byte copies pinned by SHA-256 in both
+# repos' tests: keep their bytes exact on every checkout.
+godot-client/tests/fixtures/*.escg binary
+godot-client/tests/fixtures/*.escg.gz binary
+godot-client/tests/fixtures/served_grid_golden.json -text

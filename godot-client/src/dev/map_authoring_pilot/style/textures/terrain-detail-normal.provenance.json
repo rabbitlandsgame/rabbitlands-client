@@ -1,0 +1,19 @@
+{
+  "schema": "eloria-generated-texture-provenance-v1",
+  "asset": "res://src/dev/map_authoring_pilot/style/textures/terrain-detail-normal.png",
+  "assetSha256": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
+  "created": "2026-10-03",
+  "tool": "work-output/continent-v2/sw_isle/editor-pass/polish/g4/make_ground_detail.py (procedural, no generation; second recipe, replaces make_detail_texture.py)",
+  "source": {
+    "asset": "res://src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v001.png",
+    "sha256": "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "role": "fine grit only, at 0.30 weight; its hue is discarded"
+  },
+  "recipe": "periodic band-limited noise on a 6.0 m tile (seed 20261003): bands [(0.9, 2.2), (0.25, 0.55), (0.08, 0.2)] m at [0.35, 0.3, 0.6]; albedo = 0.75 relief + 0.25 independent 0.5-1.4 m + 0.30 grit, about a linear median 0.86, 2nd-98th percentile -50 / +15 %; normal map from the relief at 0.045 m per unit (OpenGL +Y)",
+  "role": "normal map of the same relief",
+  "measured": {
+    "slopeMedian": 0.234,
+    "slopeP98": 0.562
+  },
+  "intendedUse": "sw_isle terrain base material (multiplied over the Meshy vertex colours), uv1_scale 0.98039 on the terrain preview UV of 0.17 per metre = a 6.0 m repeat, texture_filter 5"
+}

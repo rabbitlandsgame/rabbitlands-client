@@ -1,0 +1,341 @@
+{
+  "masterPath": "continent.glb",
+  "masterSha256": "09c0f06cc093218f821473b2ad674c850b84432645f5b73a699825aebfdb7aad",
+  "geometrySources": {
+    "build_continent.py": "ca2e393c4d73182436ebba721985830d9bc2594f8c9a6db2e0541ef9024b96dd",
+    "scene_io.py": "34be80a84b7a3761c77655381c7980d5a288c4e7b86348579c25c19fc845019d",
+    "terrain_export.py": "01064ca2d0be5d8dc23c81bbbfbb95b8d0c817b59e63434afa0991b9c96323fb",
+    "biome_blend.py": "71fa0705a0bad2c9cbb12e940a670092669fba75fa6d90cf9e25d72f6e58bded",
+    "compact_glb_images.py": "b6ce2c158c82d9129d30fa43c51a0c38a9853d0ee4e1c1a1dbc475c149fadd07",
+    "bridge_export.py": "0f3bc6385efc94411b70ad9d3fad32d46b828c41555b08e41427d5593c29f18f",
+    "bridge_profiles.py": "6a3e212582e3493da4d0ad09c537e8e813ff05c567d324dbbda7bfeeb3fd0847",
+    "sea_crossings.py": "1518cd9b6fcafb3586d4f0328416dbf7cf960a0cc983c3498052b8499b9eda15",
+    "coastal_prepare.py": "4e7b774748397f7774b4356b3c543fab496cf6fb923f97a2d8fdecae0d80fb4c",
+    "coastal_bridge_export.py": "8b62de6f17c02aecc05fc5093dd0ded1b2913e1c09c41dd3f1a890a9ce15cb30",
+    "coastal_bank_fit.py": "3006bfd29e8ade22c111ca6752787b4b4ef77dcada4818a596947e5f8d31e5d2",
+    "../_northern/requirements.txt": "35dd02e1045a2d03670812fb5096130a323d6b7bde7119a867ffb3b0db67a620",
+    "ferry_export.py": "843d735373e703fbea96275dd5d5a6f3854e09851671f79f6d044fd87d02ae0d",
+    "crossings.py": "3741ba2786b81701d194cda26c4754c4045c226e70da5f1d911a950546efa47f",
+    "amberwood_access.py": "3fd378184a32aeb054f778500063a36878f575d989cceb6551b6031d13a95291",
+    "manymouth_access.py": "2ae6adde5c7e8c55ca6d5057999fa4c546258fe601d70abe6ef5df97f8171125",
+    "manymouth_village_streets.py": "cbd222a4f89892f0b8d0cbdcfc8f9ec8850ee27dae81650c329acb04766a702d",
+    "collision_export.py": "7e8e847f6e8edd1f82800baa28018278cdf897aad9718184c75b128f61fa38a9",
+    "mirror_access_geometry.py": "adba92dd14e35d8d2a48f67ab55cf3ef36f4a47901e6a4399c69a160f28c052d",
+    "grey_crossings.py": "b02935854ce18c917ea8ceecfa3dfd092552ebba0078eabec2d59df753a92a3c",
+    "access_decks.py": "dc754974698d95e7f0489046cc17c78cf4f14b8ea72a890aae23f89c32184e01",
+    "storage_bounds.py": "b47f2bf01c8e29f29044e59d453531e8fadbe6ab149ddd7b2c0a88371585729c"
+  },
+  "geometryDependencies": {
+    "shapely": "2.1.2",
+    "geos": "3.13.1"
+  },
+  "compositionSha256": "0cfa7f85168afeac3be7842a36fbd650918c38aa36766b211841be7979f8e474",
+  "greyCrossingLandmarks": [
+    {
+      "id": "grey-boardwalk-0",
+      "node": "Walk_ContinentalBridgeUnion_001_grey_moors",
+      "crossingId": "moor_tributary@62",
+      "replacedSpan": "Landmark_boardwalk_gate",
+      "authority": "saved-scene",
+      "globalPosition": [
+        246.0996551513672,
+        25.556175231933594,
+        407.4809265136719
+      ]
+    },
+    {
+      "id": "grey-boardwalk-1",
+      "node": "Walk_ContinentalBridgeUnion_001_grey_moors",
+      "crossingId": "moor_tributary@62",
+      "replacedSpan": "Landmark_boardwalk_centre",
+      "authority": "saved-scene",
+      "globalPosition": [
+        259.1369323730469,
+        25.022619247436523,
+        408.4254455566406
+      ]
+    },
+    {
+      "id": "grey-boardwalk-6",
+      "node": "Walk_ContinentalBridgeUnion_001_grey_moors",
+      "crossingId": "moor_tributary@62",
+      "replacedSpan": "Landmark_boardwalk_south",
+      "authority": "saved-scene",
+      "globalPosition": [
+        259.4938049316406,
+        24.933813095092773,
+        416.34979248046875
+      ]
+    }
+  ],
+  "sharedTerrainImageCompaction": {
+    "schema": 2,
+    "images": 2169,
+    "uniqueImagePayloads": 15,
+    "aliasedImageBufferViews": 2154,
+    "bufferViews": 17863,
+    "uniqueBufferViewPayloads": 14502,
+    "aliasedBufferViews": 3361,
+    "beforeBinaryBytes": 2557274140,
+    "afterBinaryBytes": 787287520,
+    "savedPayloadBytes": 1769982172,
+    "beforeBytes": 2562282372,
+    "afterBytes": 792272512,
+    "beforeSha256": "035f77676d1371d3380d119aa573d104d1d60ad853d42d76744369b937fdfbbe",
+    "afterSha256": "4a80250ba84d8b31a80631446ed1524697b7ee23bdda82e7202e86b43498182e"
+  },
+  "regions": {
+    "whitehorn_range": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\whitehorn_range\\world.json",
+      "glbSha256": "cf3f6a693549a1c623faace95f1ea6c1430009b3ef4bc24f33f414a370916905",
+      "chunks": 36,
+      "storage": {
+        "serverOrigin": [
+          362,
+          360
+        ],
+        "serverCells": [
+          708,
+          708
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "2a24b74ac0cb5e82c4a03e935fd9b3ce225eb1933c13a823d2ec59ff394efa76"
+      }
+    },
+    "grey_moors": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\grey_moors\\world.json",
+      "glbSha256": "9284a239a2b36e85145dfe73f3854a1694595f957a405ca954ac6bd2604d3f30",
+      "chunks": 31,
+      "storage": {
+        "serverOrigin": [
+          224,
+          326
+        ],
+        "serverCells": [
+          750,
+          750
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "810ec91bcf212911702005916d6bc24ac405bd7fdad5b41f301e2db78181f280"
+      }
+    },
+    "amberwood": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\amberwood\\world.json",
+      "glbSha256": "39640da8a48f45769f1e3b133c08458be2f4058120d7cfa4332bca8901917ea5",
+      "chunks": 19,
+      "storage": {
+        "serverOrigin": [
+          242,
+          182
+        ],
+        "serverCells": [
+          426,
+          426
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "9810c4386f9bb2b3bfd6ef2f8369790c3ba0f7eef050f22de48cf3cfe1e5ef66"
+      }
+    },
+    "amethyst_barrens": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\amethyst_barrens\\world.json",
+      "glbSha256": "05e3ebb3175091c37e76422e10c51992c324abf2229bd5d8a6ca81d775b26cad",
+      "chunks": 41,
+      "storage": {
+        "serverOrigin": [
+          182,
+          166
+        ],
+        "serverCells": [
+          738,
+          738
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "aa4616afdc70c02502021c4d2362de76ecc310a442a974b10e719748e4c769c5"
+      }
+    },
+    "mirrorhold": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\mirrorhold\\world.json",
+      "glbSha256": "5ebd4cd09c580216a1d37e2124bf4ba0616431665a655d6fdfd6842161fb78eb",
+      "chunks": 29,
+      "storage": {
+        "serverOrigin": [
+          208,
+          350
+        ],
+        "serverCells": [
+          540,
+          540
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "5bc19765f446fc007a7ec656c13c799d64e25bca584b5b4853dee68fd65a118e"
+      }
+    },
+    "sunmane_steppe": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\sunmane_steppe\\world.json",
+      "glbSha256": "8ce452214fe5c527743d26092a3eb507e52d7679a7c821a35ff1b22774dd2c5a",
+      "chunks": 41,
+      "storage": {
+        "serverOrigin": [
+          194,
+          292
+        ],
+        "serverCells": [
+          792,
+          792
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "7b8a72a3eca2f33850ea71a43392244dcdd91cf1fca6b4d43507ef0788c4649e"
+      }
+    },
+    "four_gates": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\four-gates\\world.json",
+      "glbSha256": "40126c30dcd49eedc0250056f3e17a85aa1a96f5d13761c78a46eeb31a7a5ac2",
+      "chunks": 23,
+      "storage": {
+        "serverOrigin": [
+          310,
+          164
+        ],
+        "serverCells": [
+          594,
+          594
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "53a1b2f5adfb92b80e1c10612b1e31d0db6f7a98e4cbed96d395f287f9bbdce4"
+      }
+    },
+    "westhaven": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\westhaven\\world.json",
+      "glbSha256": "c3da164c6361ed0804786de833f1e4e5f08d1ced996281725fcb9d9823b48d91",
+      "chunks": 26,
+      "storage": {
+        "serverOrigin": [
+          174,
+          244
+        ],
+        "serverCells": [
+          588,
+          588
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "57291a2f3fed95b3797d0ec9be42170e34469171cbf20faa2866239515a9c10e"
+      }
+    },
+    "manymouth_delta": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\manymouth_delta\\world.json",
+      "glbSha256": "a268180937a1512fccb5de78ef9171044ce50db443884053840fbe4d1fe00282",
+      "chunks": 29,
+      "storage": {
+        "serverOrigin": [
+          208,
+          310
+        ],
+        "serverCells": [
+          510,
+          510
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "02669ba1ac3e3ca03598e6da33ef46b55674e99061103e140d2429f9f302b204"
+      }
+    },
+    "crownwater": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\crownwater\\world.json",
+      "glbSha256": "e906dd43bb164cd2355fed4a0e2cb8dadf692d3bcd2bccf01779bf735d9f4ed5",
+      "chunks": 40,
+      "storage": {
+        "serverOrigin": [
+          294,
+          114
+        ],
+        "serverCells": [
+          774,
+          774
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "e1e97ece194c84f80fc670f633cc34b390d67432e6f1dde20dd0b550014391d3"
+      }
+    },
+    "verdant_stair": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\verdant_stair\\world.json",
+      "glbSha256": "56788927c9dba5ace45f5e8af3f715de557ed832173d1d835d8fa4aec9de4852",
+      "chunks": 37,
+      "storage": {
+        "serverOrigin": [
+          298,
+          164
+        ],
+        "serverCells": [
+          702,
+          702
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "4493b81b5e12551a9f7396aa0f623cf6d541947800f71a45f76e2217ee0e27c1"
+      }
+    },
+    "ssarathi_ruins": {
+      "world": "C:\\rabbitlands\\work-output\\sunmane-herds-2026-09-27\\client-build\\eloria-assets\\maps\\nymara-regions\\ssarathi_ruins\\world.json",
+      "glbSha256": "84ed9e662927e1bdc5cb485d7b2fbd00afd33ce744c238197bf50e7efb87ce15",
+      "chunks": 44,
+      "storage": {
+        "serverOrigin": [
+          376,
+          244
+        ],
+        "serverCells": [
+          780,
+          780
+        ],
+        "serverStorageVersion": 1,
+        "serverTileMin": [
+          0,
+          0
+        ],
+        "authoringSpecSha256": "e493fbfbb7dce5403c66665c6bf5af68dd47b4121e3ab3ef51e459919b8aa173"
+      }
+    }
+  }
+}

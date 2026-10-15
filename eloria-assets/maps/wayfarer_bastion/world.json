@@ -1,0 +1,543 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "wayfarer_bastion",
+    "name": "Wayfarer Bastion",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "bounds": {
+      "min": [
+        -2,
+        -2,
+        -122
+      ],
+      "max": [
+        122,
+        8,
+        2
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -0.5,
+        0.4,
+        -119.5
+      ],
+      "max": [
+        119.5,
+        0.4,
+        0.5
+      ]
+    },
+    "serverCells": 120,
+    "mapBounds": {
+      "min": [
+        -2,
+        -2,
+        -122
+      ],
+      "max": [
+        122,
+        8,
+        2
+      ]
+    }
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      0,
+      0
+    ],
+    "origin": [
+      -0.5,
+      0,
+      0.5
+    ],
+    "walkingHeight": 0.4,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        55,
+        0.4,
+        -59
+      ],
+      "rotationDegrees": 0
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v2",
+    "width": 240,
+    "height": 240,
+    "cellMetres": 0.5,
+    "heightEncoding": {
+      "origin": -2.2,
+      "step": 0.2,
+      "zeroMeansBlocked": true
+    }
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45
+  },
+  "landmarks": [
+    {
+      "id": "guide",
+      "name": "Nesh",
+      "position": [
+        55,
+        0.4,
+        -69
+      ]
+    },
+    {
+      "id": "cache",
+      "name": "Practice supply cabinet",
+      "position": [
+        67,
+        0.4,
+        -68
+      ]
+    },
+    {
+      "id": "north",
+      "name": "North approach",
+      "position": [
+        60,
+        0.4,
+        -92
+      ]
+    },
+    {
+      "id": "east",
+      "name": "East approach",
+      "position": [
+        93,
+        0.4,
+        -60
+      ]
+    },
+    {
+      "id": "south",
+      "name": "South approach",
+      "position": [
+        60,
+        0.4,
+        -28
+      ]
+    },
+    {
+      "id": "west",
+      "name": "West approach",
+      "position": [
+        27,
+        0.4,
+        -60
+      ]
+    },
+    {
+      "id": "merchant",
+      "name": "Practice merchant",
+      "position": [
+        64,
+        0.4,
+        -100
+      ]
+    },
+    {
+      "id": "partner",
+      "name": "Practice partner",
+      "position": [
+        65,
+        0.4,
+        -65
+      ]
+    },
+    {
+      "id": "second",
+      "name": "Bran",
+      "position": [
+        74,
+        0.4,
+        -60
+      ]
+    },
+    {
+      "id": "rival",
+      "name": "Practice prism",
+      "position": [
+        106,
+        0.4,
+        -60
+      ]
+    },
+    {
+      "id": "enemy",
+      "name": "Road opponent",
+      "position": [
+        101,
+        0.4,
+        -65
+      ]
+    },
+    {
+      "id": "ore",
+      "name": "Iron Ore",
+      "position": [
+        50,
+        0.4,
+        -98
+      ]
+    },
+    {
+      "id": "coal",
+      "name": "Deep Coal",
+      "position": [
+        70,
+        0.4,
+        -98
+      ]
+    },
+    {
+      "id": "fork",
+      "name": "East fork gate",
+      "position": [
+        84,
+        0.4,
+        -60
+      ]
+    },
+    {
+      "id": "fork_west",
+      "name": "West fork gate",
+      "position": [
+        36,
+        0.4,
+        -60
+      ]
+    },
+    {
+      "id": "cache_reward",
+      "name": "Individual reward cache",
+      "position": [
+        60,
+        0.4,
+        -19
+      ]
+    },
+    {
+      "id": "waystone",
+      "name": "Return waystone",
+      "position": [
+        60,
+        0.4,
+        -55
+      ]
+    },
+    {
+      "id": "north_object",
+      "name": "North Rescue dispatch",
+      "position": [
+        60,
+        0.4,
+        -108
+      ]
+    },
+    {
+      "id": "east_object",
+      "name": "East Rescue dispatch",
+      "position": [
+        109,
+        0.4,
+        -60
+      ]
+    },
+    {
+      "id": "south_object",
+      "name": "South Rescue dispatch",
+      "position": [
+        60,
+        0.4,
+        -12
+      ]
+    },
+    {
+      "id": "west_object",
+      "name": "West Rescue dispatch",
+      "position": [
+        12,
+        0.4,
+        -60
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "cache",
+      "kind": "storage",
+      "objectId": 7301,
+      "position": [
+        67,
+        0.4,
+        -68
+      ],
+      "serverTile": [
+        67,
+        68
+      ],
+      "approachTile": [
+        65,
+        67
+      ],
+      "resource": ""
+    },
+    {
+      "id": "ore",
+      "kind": "harvestable",
+      "objectId": 7310,
+      "position": [
+        50,
+        0.4,
+        -98
+      ],
+      "serverTile": [
+        50,
+        98
+      ],
+      "approachTile": [
+        50,
+        96
+      ],
+      "resource": "Iron Ore"
+    },
+    {
+      "id": "coal",
+      "kind": "harvestable",
+      "objectId": 7311,
+      "position": [
+        70,
+        0.4,
+        -98
+      ],
+      "serverTile": [
+        70,
+        98
+      ],
+      "approachTile": [
+        70,
+        96
+      ],
+      "resource": "Deep Coal"
+    },
+    {
+      "id": "fork",
+      "kind": "gate",
+      "objectId": 7320,
+      "position": [
+        84,
+        0.4,
+        -60
+      ],
+      "serverTile": [
+        84,
+        60
+      ],
+      "approachTile": [
+        81,
+        60
+      ],
+      "resource": ""
+    },
+    {
+      "id": "fork_west",
+      "kind": "gate",
+      "objectId": 7321,
+      "position": [
+        36,
+        0.4,
+        -60
+      ],
+      "serverTile": [
+        36,
+        60
+      ],
+      "approachTile": [
+        39,
+        60
+      ],
+      "resource": ""
+    },
+    {
+      "id": "cache_reward",
+      "kind": "cache",
+      "objectId": 7322,
+      "position": [
+        60,
+        0.4,
+        -19
+      ],
+      "serverTile": [
+        60,
+        19
+      ],
+      "approachTile": [
+        60,
+        22
+      ],
+      "resource": ""
+    },
+    {
+      "id": "waystone",
+      "kind": "waystone",
+      "objectId": 7323,
+      "position": [
+        60,
+        0.4,
+        -55
+      ],
+      "serverTile": [
+        60,
+        55
+      ],
+      "approachTile": [
+        60,
+        57
+      ],
+      "resource": ""
+    },
+    {
+      "id": "north_object",
+      "kind": "information",
+      "objectId": 7302,
+      "position": [
+        60,
+        0.4,
+        -108
+      ],
+      "serverTile": [
+        60,
+        108
+      ],
+      "approachTile": [
+        60,
+        105
+      ],
+      "resource": ""
+    },
+    {
+      "id": "east_object",
+      "kind": "information",
+      "objectId": 7303,
+      "position": [
+        109,
+        0.4,
+        -60
+      ],
+      "serverTile": [
+        109,
+        60
+      ],
+      "approachTile": [
+        106,
+        58
+      ],
+      "resource": ""
+    },
+    {
+      "id": "south_object",
+      "kind": "information",
+      "objectId": 7304,
+      "position": [
+        60,
+        0.4,
+        -12
+      ],
+      "serverTile": [
+        60,
+        12
+      ],
+      "approachTile": [
+        60,
+        15
+      ],
+      "resource": ""
+    },
+    {
+      "id": "west_object",
+      "kind": "information",
+      "objectId": 7305,
+      "position": [
+        12,
+        0.4,
+        -60
+      ],
+      "serverTile": [
+        12,
+        60
+      ],
+      "approachTile": [
+        15,
+        60
+      ],
+      "resource": ""
+    }
+  ],
+  "tutorial": {
+    "art": "art.json",
+    "layout": "layout.json"
+  },
+  "camera": {
+    "distance": 24,
+    "minDistance": 8,
+    "maxDistance": 64,
+    "pitchDegrees": -52
+  },
+  "environment": {
+    "backgroundColor": "#18363f",
+    "ambient": {
+      "color": "#acc6cb",
+      "energy": 0.7
+    },
+    "sun": {
+      "color": "#ffe5ba",
+      "energy": 1.0,
+      "rotationDegrees": [
+        -48,
+        -28,
+        0
+      ]
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.0
+    }
+  },
+  "externalResources": {
+    "../_shared/images/1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac.png": "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac",
+    "../_shared/images/53c892178a774c350e298fab11237916f8f185e29ad033c7e99b840849b75441.png": "53c892178a774c350e298fab11237916f8f185e29ad033c7e99b840849b75441",
+    "../_shared/images/54f7c0002a2890075162a9ac3b010ace161af655d8a39b99ac53c6bb71fa9ee3.png": "54f7c0002a2890075162a9ac3b010ace161af655d8a39b99ac53c6bb71fa9ee3",
+    "../_shared/images/62bff95c8e13a206e351ef4d9b51a55a8894bb08d1e41c77b00e8297e277eab0.png": "62bff95c8e13a206e351ef4d9b51a55a8894bb08d1e41c77b00e8297e277eab0",
+    "../_shared/images/69da8391f26e20f20efb513718249107a2c82def0d583b63c50fe1e91c3dabb6.png": "69da8391f26e20f20efb513718249107a2c82def0d583b63c50fe1e91c3dabb6",
+    "../_shared/images/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7",
+    "../_shared/images/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../_shared/images/b6e3514b0710c10922611a854074b9c3643ee2469965aff2ca17afc5930b9906.png": "b6e3514b0710c10922611a854074b9c3643ee2469965aff2ca17afc5930b9906",
+    "../_shared/images/ccada634290b55490b333393c4213a30b597ed8474a08060332921e371b38760.png": "ccada634290b55490b333393c4213a30b597ed8474a08060332921e371b38760",
+    "../_shared/images/d8c2578d76c1c26df32c7d7827db41910434f86c66d0c111cb8a596efff00b78.png": "d8c2578d76c1c26df32c7d7827db41910434f86c66d0c111cb8a596efff00b78",
+    "../_shared/images/f176f3c33b51e9febc9e1c928fc101059e5d2acaa6910f96fadf49b28aba0aa3.png": "f176f3c33b51e9febc9e1c928fc101059e5d2acaa6910f96fadf49b28aba0aa3",
+    "../_shared/images/f939ab15d5a53bf71f59250439785cdca72f2446455d2088e2d5b62d8918df07.png": "f939ab15d5a53bf71f59250439785cdca72f2446455d2088e2d5b62d8918df07"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "server": {
+    "passed": 1809,
+    "subtestsPassed": 546
+  },
+  "client": {
+    "passed": 196,
+    "preExistingFailures": 88,
+    "subtestsPassed": 9296,
+    "failureIdentitiesUnchanged": true
+  },
+  "gltf": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "coplanarOverlapSquareMetres": 0,
+  "grounding": {
+    "walkableTiles": 3851,
+    "groundingMisses": 0,
+    "coverage": "Every walkable server tile checked against the exported GLB; plank seams and edges also sampled by two recipe regression cases."
+  },
+  "runtime": {
+    "errors": 0,
+    "warnings": [
+      "GROUNDING_RAY_MISS"
+    ],
+    "warningContext": "The sampler includes the blocked void around the interior rooms."
+  },
+  "determinism": {
+    "world.glb": {
+      "identical": true,
+      "sha256": "d68b29fab7f414216f054fece71976048b013c6e55a9a70cfb003af24ec3a0b2"
+    },
+    "world.json": {
+      "identical": true,
+      "sha256": "17aaf5d08659c4048932851caa4683f67bec8f5cb2dba0f60f5ad0328d471218"
+    },
+    "collision.bin": {
+      "identical": true,
+      "sha256": "9241e633c04cab7199cbfc2e76f00391d75eabe64eb9b01c4117317c0163e6ff"
+    },
+    "server-collision.bin": {
+      "identical": true,
+      "sha256": "9ebae42bb6cf119b2b59bda443f70e696490ebfb25761eee4763667488d7e3df"
+    }
+  },
+  "performance": {
+    "nodes": 291,
+    "meshes": 261,
+    "materials": 13,
+    "uniqueTriangles": 60291,
+    "uniqueVertices": 61205,
+    "glbBytes": 8615576
+  },
+  "captures": {
+    "count": 20,
+    "renderingMethod": "gl_compatibility",
+    "driver": "opengl3",
+    "environment": "manifest",
+    "declaredPointLights": 53
+  },
+  "layoutSync": {
+    "secondRunChangedFiles": 0,
+    "publishedRulesAndRosterPreserved": true,
+    "otherRoutesUnchanged": true
+  },
+  "cpuAffinityMask": 15
+}

@@ -1,0 +1,3931 @@
+{
+ "schema": "eloria-continent-v2-plan-v0",
+ "name": "Continent v2: Isles of Enchantment at 8 km",
+ "status": "draft: the south-west island group in three maps (sw_isle built; tollholms and gull_skerries bootstrapped); the rest of the continent not yet planned",
+ "frame": {
+  "bounds": [
+   0.0,
+   0.0,
+   8000.0,
+   8877.3
+  ],
+  "units": "metres",
+  "axes": "x east, z south, y up; origin = north-west corner of the Meshy model bounds",
+  "metresPerModelUnit": 4667.9267244824205,
+  "seaLevel": 0.0,
+  "seaModelY": -0.074
+ },
+ "vertical": {
+  "A": 259.0078328433769,
+  "u0": 259.0078328433769,
+  "peakMetres": 350.0,
+  "gainAtSea": 1.0,
+  "curve": "h = A ln(1 + u/u0) for u >= 0, h = (A/u0) u below sea; u = (model Y - sea model Y) x metresPerModelUnit"
+ },
+ "sources": {
+  "meshyGlb": {
+   "name": "Meshy_AI_Isles_of_Enchantment_1001145324_texture.glb",
+   "sha256": "42c887398a86d6f3675cf1e5396234d972b3544fb795e877d6cfa4771f155d30"
+  },
+  "concept": {
+   "name": "full_continent.png",
+   "sha256": "7e35e222475e42fb03c0466197c033fff9078e76929ad6e211defbee6cea00b0"
+  },
+  "approvedRoutes": {
+   "path": "work-output/continent-v2/review/routes.json",
+   "sha256": "0b31a5100bf14a79e5baa3c31d148618556f43e4950871df5c1dabde7e379097",
+   "note": "extracted at the 24 km study scale; coordinates here are x 1/3"
+  },
+  "sourceData": {
+   "path": "work-output/continent-v2/source-data/source-manifest.json",
+   "sha256": "f9ccb111215257aeba499d085c3adb58f431617e7e0e925934685cc06a91ad37"
+  },
+  "adjacentMapDesign": {
+   "path": "work-output/continent-v2/review/adjacent_map_design.md"
+  }
+ },
+ "territories": [
+  {
+   "id": "sw_isle",
+   "label": "Landfall",
+   "role": "the landing island (arrival, #beam and respawn hub on the castle-town plaza): the 2,038 m window over the main island; its terrain grid covers the whole island group",
+   "translation": [
+    1418.0,
+    0.0,
+    7270.0
+   ],
+   "ownershipPolygon": [
+    [
+     399.0,
+     6221.0
+    ],
+    [
+     2437.0,
+     6221.0
+    ],
+    [
+     2437.0,
+     8259.0
+    ],
+    [
+     399.0,
+     8259.0
+    ]
+   ],
+   "ownershipNote": "recipe decision D2: the main island is 2,080 x 2,334 m, larger than one 2,048-tile map; this is the largest window over it, moved 30 m north by D2b so it owns the north beach. East of x 2437 is tollholms', south of z 8259 and west of x 399 gull_skerries'",
+   "server": {
+    "origin": [
+     1023,
+     993
+    ],
+    "cells": [
+     2046,
+     2046
+    ],
+    "collisionOriginMetres": [
+     -1023.0,
+     993.0
+    ]
+   },
+   "terrain": {
+    "origin": [
+     -1119.0,
+     -1107.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+     1446,
+     1259
+    ],
+    "baseHeightsSha256": "71a63cc52563c71202b39bba1ab1eeff2af05179f288c5d4214982695255999d",
+    "baseColorsSha256": "35b67bacbf9c562375f5fa00a2cb57c895cebc95b0258901b00af6edad2974c4"
+   },
+   "scenePath": "godot-client/world_authoring/regions/sw_isle/sw_isle.tscn"
+  },
+  {
+   "id": "tollholms",
+   "label": "The Tollholms",
+   "role": "the second map (D2a): the SE islet with the village Tollholm, Ringholm (the east islet east of x 2437) and the outer east pier (the Toll Tower N11, B15 and the N14 ferry berth); its north-east edge follows the midline of the strait to the mainland",
+   "translation": [
+    2800.0,
+    0.0,
+    7398.0
+   ],
+   "ownershipPolygon": [
+    [
+     2437.0,
+     6453.0
+    ],
+    [
+     2517.0,
+     6499.0
+    ],
+    [
+     2637.0,
+     6511.0
+    ],
+    [
+     2717.0,
+     6547.0
+    ],
+    [
+     2797.0,
+     6627.0
+    ],
+    [
+     2877.0,
+     6713.0
+    ],
+    [
+     2957.0,
+     6797.0
+    ],
+    [
+     3037.0,
+     6863.0
+    ],
+    [
+     3161.0,
+     6959.0
+    ],
+    [
+     3161.0,
+     8343.0
+    ],
+    [
+     2437.0,
+     8343.0
+    ]
+   ],
+   "ownershipNote": "D2a: the SE islet, Ringholm and the outer east pier; the west edge is sw_isle's x 2437, the north-east edge the midline of the strait to the mainland (narrowest 111.6 m at (2913, 6833))",
+   "server": {
+    "origin": [
+     367,
+     949
+    ],
+    "cells": [
+     1902,
+     1902
+    ],
+    "collisionOriginMetres": [
+     -367.0,
+     949.0
+    ]
+   },
+   "terrain": {
+    "origin": [
+     -423.0,
+     -1005.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+     407,
+     1006
+    ],
+    "baseHeightsSha256": "29a288230f2701428a9c513111914d777258e9499e26d56ea01e92f24c81b32c",
+    "baseColorsSha256": "2df6f64f27e6232708f5c20949e5031f2d419aafaa13104a0bc00b5e53f483be",
+    "cropOf": {
+     "territory": "sw_isle",
+     "row0": 115,
+     "col0": 1039,
+     "rows": 1006,
+     "cols": 407
+    }
+   },
+   "scenePath": "godot-client/world_authoring/regions/tollholms/tollholms.tscn"
+  },
+  {
+   "id": "gull_skerries",
+   "label": "The Gull Skerries",
+   "role": "the third map (D2c): the south tip, its two islets and the west cliff strip, which no window that holds the SE islet can reach",
+   "translation": [
+    896.0,
+    0.0,
+    7876.0
+   ],
+   "ownershipPolygon": [
+    [
+     329.0,
+     7101.0
+    ],
+    [
+     399.0,
+     7101.0
+    ],
+    [
+     399.0,
+     8259.0
+    ],
+    [
+     1461.0,
+     8259.0
+    ],
+    [
+     1461.0,
+     8651.0
+    ],
+    [
+     329.0,
+     8651.0
+    ]
+   ],
+   "ownershipNote": "D2c: the south tip, islet 8 and the west cliff strip; an L round sw_isle's south-west corner",
+   "server": {
+    "origin": [
+     571,
+     779
+    ],
+    "cells": [
+     1560,
+     1560
+    ],
+    "collisionOriginMetres": [
+     -571.0,
+     779.0
+    ]
+   },
+   "terrain": {
+    "origin": [
+     -597.0,
+     -835.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+     612,
+     820
+    ],
+    "baseHeightsSha256": "16271840456529a430a475f62d799da8b79e0050751cf4c384b19777acb4ef38",
+    "baseColorsSha256": "053004ad05d0df7d8dc62394387ec3cc928e0ec3f86211447d2e313627259104",
+    "cropOf": {
+     "territory": "sw_isle",
+     "row0": 439,
+     "col0": 0,
+     "rows": 820,
+     "cols": 612
+    }
+   },
+   "scenePath": "godot-client/world_authoring/regions/gull_skerries/gull_skerries.tscn"
+  }
+ ],
+ "seams": {
+  "rule": "decks never cross a border; every crossing is on land: an open land seam, or a seam mole (a rectangular Set terrain patch declared identically in both scenes). The shared vertices (each side's owned vertices plus one ring) keep the same base bytes (crops of one array), no sculpt delta and the same patches on both sides; godot-client/tools/continent_v2_territories.py checks it",
+  "moles": [
+   {
+    "id": "seam-mole-knob",
+    "between": [
+     "sw_isle",
+     "tollholms"
+    ],
+    "x": [
+     2410.0,
+     2452.0
+    ],
+    "z": [
+     7926.0,
+     7938.0
+    ],
+    "heightMetres": 2.5,
+    "note": "R42 at the knob's north foot: sw_isle's knob quay lands on its west end, tollholms' r42-strand leaves its east end onto the gully beach"
+   },
+   {
+    "id": "seam-mole-pier",
+    "between": [
+     "sw_isle",
+     "tollholms"
+    ],
+    "x": [
+     2420.0,
+     2448.0
+    ],
+    "z": [
+     7314.0,
+     7356.0
+    ],
+    "heightMetres": 2.0,
+    "note": "the east pier at the headland tip: sw_isle's R33 quay and B25 harbour legs land on its west part, tollholms' tower pier leaves its east part"
+   }
+  ],
+  "openSeams": [
+   {
+    "between": [
+     "sw_isle",
+     "tollholms"
+    ],
+    "edge": {
+     "x": 2437.0,
+     "z": [
+      6453.0,
+      8259.0
+     ]
+    },
+    "walkableRuns": [
+     {
+      "z": [
+       6681.0,
+       6687.0
+      ],
+      "heightMetres": [
+       82.32,
+       85.57
+      ]
+     },
+     {
+      "z": [
+       6703.0,
+       6795.0
+      ],
+      "heightMetres": [
+       89.84,
+       92.63
+      ]
+     },
+     {
+      "z": [
+       6803.0,
+       6941.0
+      ],
+      "heightMetres": [
+       81.46,
+       87.91
+      ]
+     }
+    ],
+    "note": "the Ringholm plateau; R32 crosses at (2437.2, 87.41, 6815.9) on the product's graded corridor"
+   },
+   {
+    "between": [
+     "sw_isle",
+     "gull_skerries"
+    ],
+    "edge": {
+     "z": 8259.0,
+     "x": [
+      399.0,
+      1461.0
+     ]
+    },
+    "walkableRuns": [
+     {
+      "x": [
+       1093.0,
+       1103.0
+      ],
+      "heightMetres": [
+       126.15,
+       127.03
+      ]
+     },
+     {
+      "x": [
+       1111.0,
+       1323.0
+      ],
+      "heightMetres": [
+       121.04,
+       133.97
+      ]
+     }
+    ],
+    "note": "the south plateau, roadless"
+   },
+   {
+    "between": [
+     "sw_isle",
+     "gull_skerries"
+    ],
+    "edge": {
+     "x": 399.0,
+     "z": [
+      7101.0,
+      8259.0
+     ]
+    },
+    "walkableRuns": [],
+    "note": "the west cliff strip: scenery, no lanes"
+   }
+  ]
+ },
+ "approvedRoutes": [
+  {
+   "id": "R26",
+   "type": "road",
+   "approvedPolyline": [
+    [
+     1141.83,
+     6575.83
+    ],
+    [
+     1150.5,
+     6568.03
+    ],
+    [
+     1163.5,
+     6562.83
+    ],
+    [
+     1254.5,
+     6561.97
+    ],
+    [
+     1284.83,
+     6542.03
+    ],
+    [
+     1306.5,
+     6540.3
+    ],
+    [
+     1332.5,
+     6528.17
+    ],
+    [
+     1358.5,
+     6528.17
+    ],
+    [
+     1388.83,
+     6541.17
+    ],
+    [
+     1427.83,
+     6541.17
+    ],
+    [
+     1453.83,
+     6546.37
+    ],
+    [
+     1466.83,
+     6554.17
+    ],
+    [
+     1497.17,
+     6582.77
+    ],
+    [
+     1514.5,
+     6588.83
+    ],
+    [
+     1531.83,
+     6580.17
+    ],
+    [
+     1549.17,
+     6554.17
+    ],
+    [
+     1590.77,
+     6518.63
+    ],
+    [
+     1601.17,
+     6497.83
+    ]
+   ],
+   "studyLengthMetres24km": 1671,
+   "widthMetres": 8.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R27",
+   "type": "road",
+   "approvedPolyline": [
+    [
+     1384.5,
+     6541.17
+    ],
+    [
+     1394.9,
+     6571.5
+    ],
+    [
+     1398.37,
+     6610.5
+    ],
+    [
+     1413.97,
+     6653.83
+    ],
+    [
+     1406.17,
+     6665.1
+    ],
+    [
+     1375.83,
+     6684.17
+    ],
+    [
+     1365.43,
+     6701.5
+    ],
+    [
+     1362.83,
+     6714.5
+    ],
+    [
+     1362.83,
+     6809.83
+    ],
+    [
+     1368.03,
+     6822.83
+    ],
+    [
+     1389.7,
+     6847.97
+    ],
+    [
+     1414.83,
+     6859.23
+    ],
+    [
+     1458.17,
+     6891.3
+    ],
+    [
+     1492.83,
+     6896.5
+    ],
+    [
+     1540.5,
+     6896.5
+    ],
+    [
+     1614.17,
+     6912.1
+    ],
+    [
+     1640.17,
+     6932.9
+    ],
+    [
+     1666.17,
+     6942.43
+    ],
+    [
+     1683.5,
+     6957.17
+    ],
+    [
+     1700.83,
+     6977.97
+    ],
+    [
+     1735.5,
+     7004.83
+    ]
+   ],
+   "studyLengthMetres24km": 2337,
+   "widthMetres": 8.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R28",
+   "type": "road_inferred",
+   "approvedPolyline": [
+    [
+     1393.17,
+     6853.17
+    ],
+    [
+     1393.17,
+     6866.17
+    ],
+    [
+     1388.83,
+     6879.17
+    ],
+    [
+     1371.5,
+     6905.17
+    ],
+    [
+     1370.63,
+     6918.17
+    ],
+    [
+     1374.1,
+     6930.3
+    ],
+    [
+     1418.3,
+     6974.5
+    ],
+    [
+     1436.5,
+     7013.5
+    ],
+    [
+     1445.17,
+     7025.63
+    ],
+    [
+     1492.83,
+     7059.43
+    ],
+    [
+     1523.17,
+     7069.83
+    ],
+    [
+     1533.57,
+     7078.5
+    ],
+    [
+     1536.17,
+     7087.17
+    ],
+    [
+     1537.03,
+     7130.5
+    ],
+    [
+     1555.23,
+     7156.5
+    ],
+    [
+     1565.63,
+     7191.17
+    ],
+    [
+     1566.5,
+     7256.17
+    ],
+    [
+     1557.83,
+     7303.83
+    ],
+    [
+     1577.77,
+     7351.5
+    ],
+    [
+     1579.5,
+     7386.17
+    ],
+    [
+     1554.37,
+     7442.5
+    ],
+    [
+     1552.63,
+     7498.83
+    ],
+    [
+     1536.17,
+     7520.5
+    ],
+    [
+     1535.3,
+     7529.17
+    ],
+    [
+     1542.23,
+     7546.5
+    ],
+    [
+     1585.57,
+     7589.83
+    ],
+    [
+     1592.5,
+     7628.83
+    ]
+   ],
+   "studyLengthMetres24km": 2881,
+   "widthMetres": 6.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      26
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R29",
+   "type": "road",
+   "approvedPolyline": [
+    [
+     2277.17,
+     8209.5
+    ],
+    [
+     2203.5,
+     8114.17
+    ],
+    [
+     2155.83,
+     8066.5
+    ],
+    [
+     2139.37,
+     8041.37
+    ],
+    [
+     2112.5,
+     8027.5
+    ],
+    [
+     2025.83,
+     7940.83
+    ],
+    [
+     2011.1,
+     7920.9
+    ],
+    [
+     1995.5,
+     7906.17
+    ],
+    [
+     1969.5,
+     7888.83
+    ],
+    [
+     1891.5,
+     7820.37
+    ],
+    [
+     1852.5,
+     7801.3
+    ],
+    [
+     1813.5,
+     7771.83
+    ],
+    [
+     1783.17,
+     7743.23
+    ],
+    [
+     1722.5,
+     7708.57
+    ],
+    [
+     1618.5,
+     7631.43
+    ],
+    [
+     1596.83,
+     7628.83
+    ],
+    [
+     1562.17,
+     7640.97
+    ],
+    [
+     1536.17,
+     7641.83
+    ],
+    [
+     1523.17,
+     7636.63
+    ],
+    [
+     1497.17,
+     7617.57
+    ],
+    [
+     1406.17,
+     7606.3
+    ],
+    [
+     1367.17,
+     7578.57
+    ],
+    [
+     1293.5,
+     7575.97
+    ],
+    [
+     1267.5,
+     7559.5
+    ],
+    [
+     1228.5,
+     7523.1
+    ],
+    [
+     1198.17,
+     7510.97
+    ],
+    [
+     1189.5,
+     7513.57
+    ],
+    [
+     1161.77,
+     7536.1
+    ],
+    [
+     1133.17,
+     7538.7
+    ],
+    [
+     1102.83,
+     7550.83
+    ],
+    [
+     1037.83,
+     7555.17
+    ],
+    [
+     1011.83,
+     7544.77
+    ],
+    [
+     972.83,
+     7541.3
+    ],
+    [
+     959.83,
+     7533.5
+    ],
+    [
+     942.5,
+     7516.17
+    ],
+    [
+     919.97,
+     7477.17
+    ],
+    [
+     912.17,
+     7425.17
+    ],
+    [
+     912.17,
+     7394.83
+    ],
+    [
+     925.17,
+     7342.83
+    ],
+    [
+     926.9,
+     7247.5
+    ],
+    [
+     938.17,
+     7230.17
+    ],
+    [
+     959.83,
+     7208.5
+    ],
+    [
+     984.97,
+     7197.23
+    ],
+    [
+     1020.5,
+     7164.3
+    ],
+    [
+     1033.5,
+     7160.83
+    ],
+    [
+     1063.83,
+     7159.97
+    ],
+    [
+     1089.83,
+     7144.37
+    ],
+    [
+     1137.5,
+     7138.3
+    ],
+    [
+     1159.17,
+     7128.77
+    ],
+    [
+     1176.5,
+     7127.03
+    ],
+    [
+     1202.5,
+     7142.63
+    ],
+    [
+     1237.17,
+     7145.23
+    ],
+    [
+     1267.5,
+     7160.83
+    ],
+    [
+     1297.83,
+     7184.23
+    ],
+    [
+     1328.17,
+     7196.37
+    ],
+    [
+     1375.83,
+     7237.97
+    ],
+    [
+     1388.83,
+     7243.17
+    ],
+    [
+     1445.17,
+     7242.3
+    ],
+    [
+     1479.83,
+     7224.1
+    ],
+    [
+     1505.83,
+     7205.03
+    ],
+    [
+     1562.17,
+     7204.17
+    ]
+   ],
+   "studyLengthMetres24km": 8238,
+   "widthMetres": 8.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      60
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R30",
+   "type": "road",
+   "approvedPolyline": [
+    [
+     1726.83,
+     7056.83
+    ],
+    [
+     1718.17,
+     7068.97
+    ],
+    [
+     1692.17,
+     7076.77
+    ],
+    [
+     1685.23,
+     7082.83
+    ],
+    [
+     1680.9,
+     7091.5
+    ],
+    [
+     1678.3,
+     7113.17
+    ],
+    [
+     1670.5,
+     7126.17
+    ],
+    [
+     1622.83,
+     7150.43
+    ],
+    [
+     1583.83,
+     7185.97
+    ],
+    [
+     1566.5,
+     7191.17
+    ]
+   ],
+   "studyLengthMetres24km": 709,
+   "widthMetres": 8.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      9
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R31",
+   "type": "road",
+   "approvedPolyline": [
+    [
+     1726.83,
+     7056.83
+    ],
+    [
+     1735.5,
+     7035.17
+    ],
+    [
+     1735.5,
+     7004.83
+    ]
+   ],
+   "studyLengthMetres24km": 167,
+   "widthMetres": 8.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      2
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R32",
+   "type": "road",
+   "approvedPolyline": [
+    [
+     2450.5,
+     6835.83
+    ],
+    [
+     2433.17,
+     6809.83
+    ],
+    [
+     2355.17,
+     6732.7
+    ],
+    [
+     2342.17,
+     6727.5
+    ],
+    [
+     2298.83,
+     6728.37
+    ],
+    [
+     2285.83,
+     6734.43
+    ],
+    [
+     2268.5,
+     6737.03
+    ],
+    [
+     2246.83,
+     6750.03
+    ],
+    [
+     2207.83,
+     6763.03
+    ],
+    [
+     2164.5,
+     6784.7
+    ],
+    [
+     2129.83,
+     6808.1
+    ],
+    [
+     2112.5,
+     6810.7
+    ],
+    [
+     2090.83,
+     6821.97
+    ],
+    [
+     2056.17,
+     6825.43
+    ],
+    [
+     2025.83,
+     6849.7
+    ],
+    [
+     1999.83,
+     6857.5
+    ],
+    [
+     1982.5,
+     6867.9
+    ],
+    [
+     1952.17,
+     6873.1
+    ],
+    [
+     1930.5,
+     6881.77
+    ],
+    [
+     1914.03,
+     6884.37
+    ],
+    [
+     1900.17,
+     6900.83
+    ],
+    [
+     1894.97,
+     6922.5
+    ],
+    [
+     1887.17,
+     6934.63
+    ],
+    [
+     1878.5,
+     6938.97
+    ],
+    [
+     1856.83,
+     6941.57
+    ],
+    [
+     1835.17,
+     6964.97
+    ],
+    [
+     1803.1,
+     6990.1
+    ],
+    [
+     1761.5,
+     6994.43
+    ],
+    [
+     1735.5,
+     7004.83
+    ]
+   ],
+   "studyLengthMetres24km": 2730,
+   "widthMetres": 8.0,
+   "byTerritory": [
+    {
+     "territory": "tollholms",
+     "points": [
+      0,
+      0
+     ]
+    },
+    {
+     "territory": "sw_isle",
+     "points": [
+      1,
+      28
+     ]
+    }
+   ],
+   "note": "cut at the Ringholm seam: sw_isle's r32-1 ends at x 2436, tollholms' r32-east continues 54 m to the Ringholm court (2471, 92.2, 6851)"
+  },
+  {
+   "id": "R33",
+   "type": "road_inferred",
+   "approvedPolyline": [
+    [
+     2428.83,
+     7329.83
+    ],
+    [
+     2411.5,
+     7329.83
+    ],
+    [
+     2398.5,
+     7324.63
+    ],
+    [
+     2333.5,
+     7251.83
+    ],
+    [
+     2310.1,
+     7237.97
+    ],
+    [
+     2300.57,
+     7212.83
+    ],
+    [
+     2269.37,
+     7160.83
+    ],
+    [
+     2263.3,
+     7134.83
+    ],
+    [
+     2255.5,
+     7121.83
+    ],
+    [
+     2220.83,
+     7094.97
+    ],
+    [
+     2186.17,
+     7081.97
+    ],
+    [
+     2160.17,
+     7059.43
+    ],
+    [
+     2151.5,
+     7056.83
+    ],
+    [
+     2121.17,
+     7057.7
+    ],
+    [
+     2095.17,
+     7077.63
+    ],
+    [
+     2082.17,
+     7082.83
+    ],
+    [
+     2021.5,
+     7082.83
+    ],
+    [
+     1986.83,
+     7064.63
+    ],
+    [
+     1965.17,
+     7069.83
+    ],
+    [
+     1943.5,
+     7069.83
+    ],
+    [
+     1921.83,
+     7074.17
+    ],
+    [
+     1882.83,
+     7074.17
+    ],
+    [
+     1869.83,
+     7068.97
+    ],
+    [
+     1835.17,
+     7043.83
+    ],
+    [
+     1810.03,
+     7004.83
+    ],
+    [
+     1804.83,
+     6991.83
+    ]
+   ],
+   "studyLengthMetres24km": 2556,
+   "widthMetres": 6.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      25
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R41",
+   "type": "road",
+   "approvedPolyline": [
+    [
+     1150.5,
+     7537.83
+    ],
+    [
+     1145.3,
+     7555.17
+    ],
+    [
+     1088.97,
+     7615.83
+    ],
+    [
+     1049.97,
+     7676.5
+    ],
+    [
+     1024.83,
+     7691.23
+    ],
+    [
+     995.37,
+     7737.17
+    ],
+    [
+     991.9,
+     7767.5
+    ],
+    [
+     956.37,
+     7806.5
+    ],
+    [
+     951.17,
+     7819.5
+    ],
+    [
+     956.37,
+     7836.83
+    ],
+    [
+     990.17,
+     7871.5
+    ],
+    [
+     1003.17,
+     7881.03
+    ],
+    [
+     1024.83,
+     7889.7
+    ],
+    [
+     1056.9,
+     7923.5
+    ],
+    [
+     1059.5,
+     7932.17
+    ],
+    [
+     1059.5,
+     7992.83
+    ],
+    [
+     1068.17,
+     8018.83
+    ],
+    [
+     1069.03,
+     8131.5
+    ],
+    [
+     1076.83,
+     8143.63
+    ],
+    [
+     1089.83,
+     8148.83
+    ],
+    [
+     1115.83,
+     8140.17
+    ]
+   ],
+   "studyLengthMetres24km": 2410,
+   "widthMetres": 8.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R42",
+   "type": "road",
+   "approvedPolyline": [
+    [
+     2138.5,
+     8036.17
+    ],
+    [
+     2145.43,
+     8030.1
+    ],
+    [
+     2147.17,
+     8023.17
+    ],
+    [
+     2147.17,
+     7975.5
+    ],
+    [
+     2152.37,
+     7967.7
+    ],
+    [
+     2368.17,
+     7966.83
+    ],
+    [
+     2381.17,
+     7972.03
+    ],
+    [
+     2402.83,
+     7997.17
+    ],
+    [
+     2420.17,
+     8005.83
+    ],
+    [
+     2459.17,
+     7996.3
+    ],
+    [
+     2485.17,
+     7984.17
+    ],
+    [
+     2498.17,
+     7986.77
+    ],
+    [
+     2515.5,
+     7998.9
+    ],
+    [
+     2524.17,
+     8001.5
+    ],
+    [
+     2537.17,
+     8000.63
+    ],
+    [
+     2558.83,
+     7986.77
+    ],
+    [
+     2567.5,
+     7985.03
+    ],
+    [
+     2577.9,
+     7992.83
+    ],
+    [
+     2580.5,
+     8027.5
+    ],
+    [
+     2595.23,
+     8053.5
+    ],
+    [
+     2606.5,
+     8061.3
+    ],
+    [
+     2628.17,
+     8062.17
+    ]
+   ],
+   "studyLengthMetres24km": 1995,
+   "widthMetres": 8.0,
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      8
+     ]
+    },
+    {
+     "territory": "tollholms",
+     "points": [
+      9,
+      21
+     ]
+    }
+   ],
+   "note": "rerouted (owner 2026-10-02): the drawn cliff route over the knob is replaced by B24 at 2.5 m, the knob quay and seam-mole-knob (sw_isle) and r42-strand (tollholms); the drawn middle is kept as r42-overlook; its Spindle Hill end (r42-cone-way) is later"
+  }
+ ],
+ "approvedDecks": [
+  {
+   "id": "B12",
+   "type": "bridge",
+   "approvedPolyline": [
+    [
+     1571.93,
+     7335.27
+    ],
+    [
+     1563.27,
+     7333.07
+    ],
+    [
+     1563.27,
+     7313.6
+    ],
+    [
+     1554.6,
+     7296.27
+    ],
+    [
+     1561.07,
+     7278.93
+    ]
+   ],
+   "studyLengthMetres24km": 210,
+   "widthMetres": 10.0,
+   "source": "grey deck geometry in the model",
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      4
+     ]
+    }
+   ]
+  },
+  {
+   "id": "B13",
+   "type": "causeway",
+   "approvedPolyline": [
+    [
+     1600.07,
+     6496.73
+    ],
+    [
+     1593.6,
+     6498.93
+    ],
+    [
+     1587.07,
+     6509.73
+    ],
+    [
+     1584.93,
+     6527.07
+    ],
+    [
+     1606.6,
+     6527.07
+    ],
+    [
+     1639.07,
+     6518.4
+    ],
+    [
+     1665.07,
+     6505.4
+    ],
+    [
+     1673.73,
+     6494.6
+    ],
+    [
+     1688.93,
+     6485.93
+    ],
+    [
+     1706.27,
+     6483.73
+    ],
+    [
+     1712.73,
+     6475.07
+    ],
+    [
+     1723.6,
+     6475.07
+    ],
+    [
+     1740.93,
+     6462.07
+    ],
+    [
+     1756.07,
+     6459.93
+    ],
+    [
+     1784.27,
+     6444.73
+    ],
+    [
+     1803.73,
+     6440.4
+    ],
+    [
+     1827.6,
+     6425.27
+    ],
+    [
+     1840.6,
+     6423.07
+    ],
+    [
+     1855.73,
+     6388.4
+    ],
+    [
+     1870.93,
+     6373.27
+    ],
+    [
+     1860.07,
+     6314.73
+    ],
+    [
+     1868.73,
+     6293.07
+    ]
+   ],
+   "studyLengthMetres24km": 1585,
+   "widthMetres": 12.0,
+   "source": "grey deck geometry in the model",
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      21
+     ]
+    }
+   ]
+  },
+  {
+   "id": "B14",
+   "type": "causeway",
+   "approvedPolyline": [
+    [
+     1909.93,
+     6884.6
+    ],
+    [
+     1927.27,
+     6880.27
+    ],
+    [
+     1944.6,
+     6869.4
+    ],
+    [
+     1981.4,
+     6865.07
+    ],
+    [
+     1998.73,
+     6852.07
+    ],
+    [
+     2018.27,
+     6849.93
+    ],
+    [
+     2033.4,
+     6841.27
+    ],
+    [
+     2046.4,
+     6841.27
+    ],
+    [
+     2063.73,
+     6823.93
+    ],
+    [
+     2137.4,
+     6810.93
+    ],
+    [
+     2150.4,
+     6795.73
+    ],
+    [
+     2187.27,
+     6780.6
+    ],
+    [
+     2215.4,
+     6763.27
+    ],
+    [
+     2245.73,
+     6756.73
+    ],
+    [
+     2258.73,
+     6748.07
+    ],
+    [
+     2263.07,
+     6739.4
+    ],
+    [
+     2286.93,
+     6732.93
+    ],
+    [
+     2306.4,
+     6722.07
+    ]
+   ],
+   "studyLengthMetres24km": 1483,
+   "widthMetres": 12.0,
+   "source": "grey deck geometry in the model",
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      17
+     ]
+    }
+   ]
+  },
+  {
+   "id": "B15",
+   "type": "pier",
+   "approvedPolyline": [
+    [
+     2499.27,
+     7335.27
+    ],
+    [
+     2596.73,
+     7328.73
+    ]
+   ],
+   "studyLengthMetres24km": 304,
+   "widthMetres": 8.0,
+   "source": "grey deck geometry in the model",
+   "byTerritory": [
+    {
+     "territory": "tollholms",
+     "points": [
+      0,
+      1
+     ]
+    }
+   ],
+   "note": "in tollholms (th-b15, 2.5 m) from the Toll Tower platform"
+  },
+  {
+   "id": "B22",
+   "type": "causeway",
+   "approvedPolyline": [
+    [
+     2013.93,
+     7920.27
+    ],
+    [
+     1998.73,
+     7907.27
+    ],
+    [
+     1996.6,
+     7894.27
+    ],
+    [
+     1977.07,
+     7892.07
+    ],
+    [
+     1959.73,
+     7879.07
+    ],
+    [
+     1948.93,
+     7859.6
+    ],
+    [
+     1938.07,
+     7857.4
+    ],
+    [
+     1935.93,
+     7848.73
+    ],
+    [
+     1875.27,
+     7805.4
+    ],
+    [
+     1860.07,
+     7803.27
+    ],
+    [
+     1844.93,
+     7794.6
+    ],
+    [
+     1840.6,
+     7779.4
+    ],
+    [
+     1810.27,
+     7777.27
+    ],
+    [
+     1792.93,
+     7751.27
+    ],
+    [
+     1758.27,
+     7736.07
+    ],
+    [
+     1725.73,
+     7712.27
+    ],
+    [
+     1714.93,
+     7710.07
+    ],
+    [
+     1701.93,
+     7692.73
+    ],
+    [
+     1678.07,
+     7684.07
+    ],
+    [
+     1604.4,
+     7625.6
+    ],
+    [
+     1593.6,
+     7627.73
+    ]
+   ],
+   "studyLengthMetres24km": 1843,
+   "widthMetres": 12.0,
+   "source": "grey deck geometry in the model",
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "id": "B23",
+   "type": "pier",
+   "approvedPolyline": [
+    [
+     2141.07,
+     8041.07
+    ],
+    [
+     2277.73,
+     8214.4
+    ]
+   ],
+   "studyLengthMetres24km": 662,
+   "widthMetres": 8.0,
+   "source": "lighthouse pier running south-east (grey deck partly inside the lighthouse pad)",
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "id": "B24",
+   "type": "causeway",
+   "approvedPolyline": [
+    [
+     2147.73,
+     7967.73
+    ],
+    [
+     2377.73,
+     7967.73
+    ]
+   ],
+   "studyLengthMetres24km": 690,
+   "widthMetres": 12.0,
+   "source": "low stone causeway lighthouse islet -> SE islet (at/below the sea datum in the model)",
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      1
+     ]
+    }
+   ],
+   "note": "re-levelled flat at 2.5 m; it ends on the knob quay (sw_isle)"
+  },
+  {
+   "id": "B25",
+   "type": "pier",
+   "approvedPolyline": [
+    [
+     2390.93,
+     7430.6
+    ],
+    [
+     2416.93,
+     7413.27
+    ],
+    [
+     2436.4,
+     7411.07
+    ],
+    [
+     2440.73,
+     7400.27
+    ],
+    [
+     2442.93,
+     7356.93
+    ],
+    [
+     2468.93,
+     7354.73
+    ],
+    [
+     2486.27,
+     7337.4
+    ],
+    [
+     2468.93,
+     7317.93
+    ],
+    [
+     2445.07,
+     7317.93
+    ],
+    [
+     2442.93,
+     7272.4
+    ],
+    [
+     2427.73,
+     7244.27
+    ],
+    [
+     2414.73,
+     7239.93
+    ],
+    [
+     2401.73,
+     7222.6
+    ]
+   ],
+   "studyLengthMetres24km": 1062,
+   "widthMetres": 8.0,
+   "source": "grey deck geometry in the model",
+   "byTerritory": [
+    {
+     "territory": "sw_isle",
+     "points": [
+      0,
+      2
+     ]
+    },
+    {
+     "territory": "tollholms",
+     "points": [
+      3,
+      9
+     ]
+    },
+    {
+     "territory": "sw_isle",
+     "points": [
+      10,
+      12
+     ]
+    }
+   ],
+   "note": "the harbour (arms and legs at x 2423) stays in sw_isle; the drawn spine east of x 2437 is dropped; the tower pier (th-pier-north/-south) is tollholms'"
+  }
+ ],
+ "approval": "owner, 2026-10-01: R26-R33, R41, R42, B12-B15, B22-B25 approved as drawn; 2026-10-02: the R42 reroute and the B25 leg shift (see notes)",
+ "water": {
+  "seaLevel": 0.0,
+  "lakes": [
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "lake",
+     "area_m2": 30387,
+     "water_level_m": 47.57,
+     "deepest_bed_m": 46.57,
+     "centroid": [
+      1476,
+      7373
+     ],
+     "id": "L12",
+     "name": "hilltop lake L12",
+     "note": "painted like a sea cove in the concept, but the model surface stands well above the sea behind a ridge; kept as a hilltop lake (24 km study default, owner check 7). Bridge B12 spans its outlet.",
+     "territory": "sw_isle"
+    },
+    "geometry": {
+     "type": "Polygon",
+     "coordinates": [
+      [
+       [
+        1602.2,
+        7311.4
+       ],
+       [
+        1561.1,
+        7270.2
+       ],
+       [
+        1528.6,
+        7270.2
+       ],
+       [
+        1498.2,
+        7300.6
+       ],
+       [
+        1491.8,
+        7315.7
+       ],
+       [
+        1483.1,
+        7324.4
+       ],
+       [
+        1470.1,
+        7330.9
+       ],
+       [
+        1446.2,
+        7330.9
+       ],
+       [
+        1428.9,
+        7315.7
+       ],
+       [
+        1418.1,
+        7313.6
+       ],
+       [
+        1376.9,
+        7330.9
+       ],
+       [
+        1329.2,
+        7380.7
+       ],
+       [
+        1363.9,
+        7415.4
+       ],
+       [
+        1374.8,
+        7419.7
+       ],
+       [
+        1402.9,
+        7443.6
+       ],
+       [
+        1409.4,
+        7443.6
+       ],
+       [
+        1415.9,
+        7450.1
+       ],
+       [
+        1457.1,
+        7439.2
+       ],
+       [
+        1493.9,
+        7473.9
+       ],
+       [
+        1504.8,
+        7463.1
+       ],
+       [
+        1524.2,
+        7458.7
+       ],
+       [
+        1519.9,
+        7452.2
+       ],
+       [
+        1524.2,
+        7447.9
+       ],
+       [
+        1530.8,
+        7452.2
+       ],
+       [
+        1563.2,
+        7419.7
+       ],
+       [
+        1571.9,
+        7395.9
+       ],
+       [
+        1567.6,
+        7378.6
+       ],
+       [
+        1571.9,
+        7365.6
+       ],
+       [
+        1565.4,
+        7350.4
+       ],
+       [
+        1576.2,
+        7346.1
+       ],
+       [
+        1576.2,
+        7339.6
+       ],
+       [
+        1602.2,
+        7311.4
+       ]
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "lagoon_or_low_basin (sea level; owner: sea inlet or lake?)",
+     "area_m2": 13569,
+     "water_level_m": 0.0,
+     "deepest_bed_m": -1.0,
+     "centroid": [
+      2803,
+      8176
+     ],
+     "id": "L21",
+     "note": "SE islet lagoon at sea level: owner check 10 (sea inlet or lake?)",
+     "territory": "tollholms",
+     "decision": "sea inlet (owner default 2026-10-01): below sea level, the sea plane fills it and no water region is drawn; a fill-only talus at grade 2.0 against its walls (owner 2026-10-02)"
+    },
+    "geometry": {
+     "type": "Polygon",
+     "coordinates": [
+      [
+       [
+        2789.6,
+        8093.6
+       ],
+       [
+        2757.1,
+        8128.2
+       ],
+       [
+        2746.2,
+        8162.9
+       ],
+       [
+        2748.4,
+        8197.6
+       ],
+       [
+        2741.9,
+        8208.4
+       ],
+       [
+        2772.2,
+        8238.8
+       ],
+       [
+        2796.1,
+        8236.6
+       ],
+       [
+        2828.6,
+        8253.9
+       ],
+       [
+        2871.9,
+        8210.6
+       ],
+       [
+        2841.6,
+        8171.6
+       ],
+       [
+        2848.1,
+        8162.9
+       ],
+       [
+        2850.2,
+        8145.6
+       ],
+       [
+        2843.8,
+        8139.1
+       ],
+       [
+        2843.8,
+        8123.9
+       ],
+       [
+        2815.6,
+        8095.7
+       ],
+       [
+        2789.6,
+        8093.6
+       ]
+      ]
+     ]
+    }
+   }
+  ],
+  "streams": [
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 136.8,
+     "width_m_median": 11.8,
+     "water_level_m": [
+      1.74,
+      0.0
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "sea",
+     "id": "R032"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       2411.7,
+       6134.6
+      ],
+      [
+       2409.5,
+       6141.4
+      ],
+      [
+       2408.2,
+       6150.1
+      ],
+      [
+       2407.0,
+       6157.8
+      ],
+      [
+       2403.6,
+       6165.2
+      ],
+      [
+       2401.7,
+       6173.9
+      ],
+      [
+       2400.8,
+       6182.6
+      ],
+      [
+       2399.0,
+       6190.6
+      ],
+      [
+       2396.5,
+       6197.7
+      ],
+      [
+       2392.5,
+       6203.9
+      ],
+      [
+       2388.1,
+       6209.5
+      ],
+      [
+       2383.8,
+       6214.5
+      ],
+      [
+       2379.5,
+       6219.1
+      ],
+      [
+       2375.4,
+       6225.9
+      ],
+      [
+       2372.3,
+       6234.6
+      ],
+      [
+       2371.4,
+       6239.2
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       9.9,
+       1.74,
+       0.74,
+       0.99
+      ],
+      [
+       11.2,
+       1.74,
+       0.62,
+       1.12
+      ],
+      [
+       10.6,
+       1.74,
+       0.68,
+       1.06
+      ],
+      [
+       10.9,
+       1.74,
+       0.65,
+       1.09
+      ],
+      [
+       11.2,
+       1.74,
+       0.62,
+       1.12
+      ],
+      [
+       12.9,
+       1.74,
+       0.45,
+       1.29
+      ],
+      [
+       15.2,
+       1.74,
+       0.22,
+       1.52
+      ],
+      [
+       15.2,
+       1.74,
+       0.22,
+       1.52
+      ],
+      [
+       15.6,
+       1.74,
+       0.18,
+       1.56
+      ],
+      [
+       15.3,
+       1.74,
+       0.2,
+       1.53
+      ],
+      [
+       15.1,
+       1.74,
+       0.23,
+       1.51
+      ],
+      [
+       14.6,
+       1.74,
+       0.28,
+       1.46
+      ],
+      [
+       11.9,
+       1.53,
+       0.3,
+       1.23
+      ],
+      [
+       10.0,
+       0.0,
+       -1.23,
+       1.23
+      ],
+      [
+       6.2,
+       0.0,
+       -1.89,
+       1.89
+      ],
+      [
+       4.3,
+       0.0,
+       -1.97,
+       1.97
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 99.4,
+     "width_m_median": 27.7,
+     "water_level_m": [
+      0.36,
+      0.0
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "network",
+     "id": "R047"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       700.9,
+       6945.6
+      ],
+      [
+       700.9,
+       6938.7
+      ],
+      [
+       702.5,
+       6930.1
+      ],
+      [
+       705.2,
+       6922.0
+      ],
+      [
+       708.3,
+       6914.6
+      ],
+      [
+       711.1,
+       6906.2
+      ],
+      [
+       714.2,
+       6898.5
+      ],
+      [
+       717.3,
+       6892.3
+      ],
+      [
+       721.0,
+       6887.4
+      ],
+      [
+       724.1,
+       6881.8
+      ],
+      [
+       723.8,
+       6873.7
+      ],
+      [
+       722.0,
+       6869.1
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       56.4,
+       0.36,
+       -2.64,
+       3.0
+      ],
+      [
+       58.2,
+       0.36,
+       -2.64,
+       3.0
+      ],
+      [
+       51.0,
+       0.36,
+       -2.64,
+       3.0
+      ],
+      [
+       41.5,
+       0.0,
+       -3.0,
+       3.0
+      ],
+      [
+       33.1,
+       0.0,
+       -3.0,
+       3.0
+      ],
+      [
+       28.6,
+       0.0,
+       -2.86,
+       2.86
+      ],
+      [
+       26.3,
+       0.0,
+       -2.74,
+       2.74
+      ],
+      [
+       22.0,
+       0.0,
+       -2.33,
+       2.33
+      ],
+      [
+       14.6,
+       0.0,
+       -1.46,
+       1.46
+      ],
+      [
+       8.2,
+       0.0,
+       -1.15,
+       1.15
+      ],
+      [
+       9.9,
+       0.0,
+       -2.1,
+       2.1
+      ],
+      [
+       15.0,
+       0.0,
+       -3.25,
+       3.25
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 81.5,
+     "width_m_median": 27.4,
+     "water_level_m": [
+      4.17,
+      0.36
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "network",
+     "id": "R062"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       749.8,
+       6998.2
+      ],
+      [
+       745.8,
+       6992.9
+      ],
+      [
+       740.8,
+       6985.8
+      ],
+      [
+       733.7,
+       6978.4
+      ],
+      [
+       727.5,
+       6972.8
+      ],
+      [
+       722.3,
+       6966.6
+      ],
+      [
+       715.5,
+       6958.6
+      ],
+      [
+       707.4,
+       6951.8
+      ],
+      [
+       702.8,
+       6948.7
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       26.6,
+       4.17,
+       1.51,
+       2.66
+      ],
+      [
+       25.7,
+       4.17,
+       1.6,
+       2.57
+      ],
+      [
+       26.2,
+       3.54,
+       0.9,
+       2.64
+      ],
+      [
+       27.4,
+       3.54,
+       0.76,
+       2.77
+      ],
+      [
+       27.3,
+       2.48,
+       -0.26,
+       2.74
+      ],
+      [
+       30.5,
+       1.08,
+       -1.92,
+       3.0
+      ],
+      [
+       39.7,
+       0.36,
+       -2.64,
+       3.0
+      ],
+      [
+       49.1,
+       0.36,
+       -2.64,
+       3.0
+      ],
+      [
+       52.4,
+       0.36,
+       -2.64,
+       3.0
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 71.7,
+     "width_m_median": 41.6,
+     "water_level_m": [
+      47.57,
+      47.57
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "sea",
+     "id": "R070"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       1657.0,
+       7308.0
+      ],
+      [
+       1660.1,
+       7304.3
+      ],
+      [
+       1664.8,
+       7300.6
+      ],
+      [
+       1671.6,
+       7300.0
+      ],
+      [
+       1680.2,
+       7300.6
+      ],
+      [
+       1688.9,
+       7299.0
+      ],
+      [
+       1697.6,
+       7296.2
+      ],
+      [
+       1705.6,
+       7292.5
+      ],
+      [
+       1709.3,
+       7290.4
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       63.1,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       66.7,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       62.7,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       52.4,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       40.0,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       27.1,
+       47.57,
+       44.86,
+       2.71
+      ],
+      [
+       18.8,
+       47.57,
+       45.69,
+       1.88
+      ],
+      [
+       15.6,
+       47.57,
+       46.01,
+       1.56
+      ],
+      [
+       14.2,
+       47.57,
+       46.15,
+       1.42
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 66.2,
+     "width_m_median": 27.6,
+     "water_level_m": [
+      47.57,
+      47.57
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "network",
+     "id": "R075"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       1541.9,
+       7504.9
+      ],
+      [
+       1535.1,
+       7505.8
+      ],
+      [
+       1528.9,
+       7501.8
+      ],
+      [
+       1525.5,
+       7493.4
+      ],
+      [
+       1520.8,
+       7484.7
+      ],
+      [
+       1514.7,
+       7476.7
+      ],
+      [
+       1509.4,
+       7469.6
+      ],
+      [
+       1507.8,
+       7467.1
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       7.1,
+       47.57,
+       46.7,
+       0.87
+      ],
+      [
+       8.1,
+       47.57,
+       46.76,
+       0.81
+      ],
+      [
+       14.8,
+       47.57,
+       46.09,
+       1.48
+      ],
+      [
+       24.6,
+       47.57,
+       45.11,
+       2.46
+      ],
+      [
+       34.2,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       36.6,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       38.8,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       39.9,
+       47.57,
+       44.57,
+       3.0
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 56.0,
+     "width_m_median": 58.7,
+     "water_level_m": [
+      47.57,
+      47.57
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "network",
+     "id": "R093"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       1604.1,
+       7309.2
+      ],
+      [
+       1610.9,
+       7309.2
+      ],
+      [
+       1619.6,
+       7309.9
+      ],
+      [
+       1628.2,
+       7310.2
+      ],
+      [
+       1636.9,
+       7309.2
+      ],
+      [
+       1645.6,
+       7309.2
+      ],
+      [
+       1653.3,
+       7309.2
+      ],
+      [
+       1654.6,
+       7309.2
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       56.4,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       56.3,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       57.6,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       58.5,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       59.4,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       62.8,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       61.9,
+       47.57,
+       44.57,
+       3.0
+      ],
+      [
+       61.4,
+       47.57,
+       44.57,
+       3.0
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 32.1,
+     "width_m_median": 9.5,
+     "water_level_m": [
+      151.21,
+      147.17
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "network",
+     "id": "R132"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       1082.2,
+       7095.1
+      ],
+      [
+       1082.2,
+       7088.2
+      ],
+      [
+       1083.2,
+       7079.6
+      ],
+      [
+       1082.6,
+       7071.8
+      ],
+      [
+       1081.3,
+       7069.7
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       9.5,
+       151.21,
+       150.1,
+       1.1
+      ],
+      [
+       9.5,
+       151.21,
+       149.88,
+       1.33
+      ],
+      [
+       9.3,
+       148.83,
+       147.89,
+       0.93
+      ],
+      [
+       12.8,
+       147.17,
+       145.89,
+       1.28
+      ],
+      [
+       13.9,
+       147.17,
+       145.78,
+       1.39
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 30.0,
+     "width_m_median": 15.6,
+     "water_level_m": [
+      0.0,
+      0.0
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "network",
+     "id": "R140"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       718.6,
+       6868.2
+      ],
+      [
+       713.9,
+       6871.6
+      ],
+      [
+       711.8,
+       6878.1
+      ],
+      [
+       712.7,
+       6885.8
+      ],
+      [
+       713.0,
+       6887.1
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       16.7,
+       0.0,
+       -3.25,
+       3.25
+      ],
+      [
+       15.9,
+       0.0,
+       -4.39,
+       4.39
+      ],
+      [
+       14.2,
+       0.0,
+       -3.76,
+       3.76
+      ],
+      [
+       15.1,
+       0.0,
+       -2.41,
+       2.41
+      ],
+      [
+       15.8,
+       0.0,
+       -2.12,
+       2.12
+      ]
+     ]
+    }
+   },
+   {
+    "type": "Feature",
+    "properties": {
+     "kind": "river",
+     "length_m": 28.7,
+     "width_m_median": 11.1,
+     "water_level_m": [
+      144.05,
+      143.35
+     ],
+     "flows": "first point upstream -> last point downstream",
+     "to": "network",
+     "id": "R142"
+    },
+    "geometry": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       999.3,
+       7071.8
+      ],
+      [
+       1001.8,
+       7077.4
+      ],
+      [
+       1001.2,
+       7086.1
+      ],
+      [
+       998.7,
+       7092.9
+      ]
+     ]
+    },
+    "point_attrs": {
+     "columns": [
+      "width_m",
+      "water_level_m",
+      "bed_m",
+      "depth_m"
+     ],
+     "values": [
+      [
+       8.4,
+       144.05,
+       143.08,
+       0.97
+      ],
+      [
+       8.8,
+       144.05,
+       143.17,
+       0.88
+      ],
+      [
+       14.1,
+       144.04,
+       142.48,
+       1.56
+      ],
+      [
+       14.2,
+       143.35,
+       141.9,
+       1.45
+      ]
+     ]
+    }
+   }
+  ],
+  "note": "the sea is the 0 m level of the base; sea channels and coves are terrain below it"
+ },
+ "landmarks": [
+  {
+   "id": "castle_town",
+   "kind": "walled castle town (landing, #beam and respawn hub)",
+   "x": 1082.8,
+   "z": 7333.5,
+   "ground_m": 121.5,
+   "compound_outline": [
+    [
+     1223.0,
+     7255.0
+    ],
+    [
+     1211.0,
+     7249.0
+    ],
+    [
+     1179.0,
+     7255.0
+    ],
+    [
+     1157.0,
+     7231.0
+    ],
+    [
+     1141.0,
+     7223.0
+    ],
+    [
+     1137.0,
+     7205.0
+    ],
+    [
+     1125.0,
+     7199.0
+    ],
+    [
+     915.0,
+     7263.0
+    ],
+    [
+     905.0,
+     7279.0
+    ],
+    [
+     905.0,
+     7301.0
+    ],
+    [
+     925.0,
+     7363.0
+    ],
+    [
+     943.0,
+     7385.0
+    ],
+    [
+     939.0,
+     7409.0
+    ],
+    [
+     953.0,
+     7451.0
+    ],
+    [
+     971.0,
+     7461.0
+    ],
+    [
+     1067.0,
+     7455.0
+    ],
+    [
+     1113.0,
+     7433.0
+    ],
+    [
+     1159.0,
+     7425.0
+    ],
+    [
+     1185.0,
+     7427.0
+    ],
+    [
+     1209.0,
+     7399.0
+    ],
+    [
+     1245.0,
+     7383.0
+    ],
+    [
+     1257.0,
+     7371.0
+    ],
+    [
+     1257.0,
+     7353.0
+    ],
+    [
+     1223.0,
+     7255.0
+    ]
+   ],
+   "compound_size_m": [
+    324,
+    236
+   ],
+   "compound_angle_deg": -16.1,
+   "compound_area_m2": 65792,
+   "town_pad_outline": [
+    [
+     1229.0,
+     7255.0
+    ],
+    [
+     1211.0,
+     7243.0
+    ],
+    [
+     1181.0,
+     7249.0
+    ],
+    [
+     1151.0,
+     7225.0
+    ],
+    [
+     1143.0,
+     7205.0
+    ],
+    [
+     1125.0,
+     7193.0
+    ],
+    [
+     915.0,
+     7257.0
+    ],
+    [
+     899.0,
+     7279.0
+    ],
+    [
+     899.0,
+     7301.0
+    ],
+    [
+     919.0,
+     7363.0
+    ],
+    [
+     937.0,
+     7385.0
+    ],
+    [
+     933.0,
+     7409.0
+    ],
+    [
+     947.0,
+     7451.0
+    ],
+    [
+     971.0,
+     7467.0
+    ],
+    [
+     1067.0,
+     7461.0
+    ],
+    [
+     1113.0,
+     7439.0
+    ],
+    [
+     1159.0,
+     7431.0
+    ],
+    [
+     1185.0,
+     7433.0
+    ],
+    [
+     1209.0,
+     7405.0
+    ],
+    [
+     1245.0,
+     7389.0
+    ],
+    [
+     1263.0,
+     7371.0
+    ],
+    [
+     1263.0,
+     7353.0
+    ],
+    [
+     1229.0,
+     7255.0
+    ]
+   ],
+   "pad_level_m": 121.49,
+   "note": "the Meshy walled block (stands 60-170 m over its pad: landmark scale) traced at the wall line; at human scale the keep, curtain walls, gatehouse and town streets go on the level pad",
+   "territory": "sw_isle"
+  },
+  {
+   "id": "castle_plaza",
+   "kind": "plaza (proposed arrival / #beam / respawn point)",
+   "x": 975.0,
+   "z": 7391.0,
+   "ground_m": 121.5,
+   "square_m": 44,
+   "outline": [
+    [
+     947.7,
+     7375.9
+    ],
+    [
+     990.1,
+     7363.7
+    ],
+    [
+     1002.3,
+     7406.1
+    ],
+    [
+     959.9,
+     7418.3
+    ],
+    [
+     947.7,
+     7375.9
+    ]
+   ],
+   "note": "largest level open court inside the walls nearest the compound centre, near the west gate on the R29 ring road; proposed, owner to confirm",
+   "territory": "sw_isle"
+  },
+  {
+   "id": "north_tower",
+   "kind": "red-roof lighthouse tower (north)",
+   "x": 1149.0,
+   "z": 6676.7,
+   "ground_m": 87.0,
+   "complex_outline": [
+    [
+     1151.0,
+     6607.0
+    ],
+    [
+     1087.0,
+     6639.0
+    ],
+    [
+     1069.0,
+     6693.0
+    ],
+    [
+     1107.0,
+     6731.0
+    ],
+    [
+     1137.0,
+     6743.0
+    ],
+    [
+     1161.0,
+     6745.0
+    ],
+    [
+     1205.0,
+     6723.0
+    ],
+    [
+     1221.0,
+     6671.0
+    ],
+    [
+     1203.0,
+     6625.0
+    ],
+    [
+     1151.0,
+     6607.0
+    ]
+   ],
+   "pad_level_m": 87.01,
+   "complex_area_m2": 15592,
+   "lighthouse": "1 of 2 (the 24 km study read the north tower as the red-roof lighthouse; unconfirmed by the owner)",
+   "territory": "sw_isle"
+  },
+  {
+   "id": "se_lighthouse",
+   "kind": "green-roof lighthouse on its round platform",
+   "x": 2111.7,
+   "z": 8008.3,
+   "ground_m": 2.5,
+   "platform_outline": [
+    [
+     1985.0,
+     7921.0
+    ],
+    [
+     1987.0,
+     7933.0
+    ],
+    [
+     2009.0,
+     7947.0
+    ],
+    [
+     2007.0,
+     7991.0
+    ],
+    [
+     2049.0,
+     8039.0
+    ],
+    [
+     2081.0,
+     8041.0
+    ],
+    [
+     2087.0,
+     8047.0
+    ],
+    [
+     2087.0,
+     8055.0
+    ],
+    [
+     2057.0,
+     8077.0
+    ],
+    [
+     2087.0,
+     8063.0
+    ],
+    [
+     2099.0,
+     8065.0
+    ],
+    [
+     2157.0,
+     8143.0
+    ],
+    [
+     2177.0,
+     8163.0
+    ],
+    [
+     2191.0,
+     8163.0
+    ],
+    [
+     2195.0,
+     8157.0
+    ],
+    [
+     2117.0,
+     8061.0
+    ],
+    [
+     2117.0,
+     8047.0
+    ],
+    [
+     2131.0,
+     8033.0
+    ],
+    [
+     2137.0,
+     8051.0
+    ],
+    [
+     2221.0,
+     8163.0
+    ],
+    [
+     2241.0,
+     8159.0
+    ],
+    [
+     2163.0,
+     8051.0
+    ],
+    [
+     2177.0,
+     8041.0
+    ],
+    [
+     2243.0,
+     8049.0
+    ],
+    [
+     2245.0,
+     8043.0
+    ],
+    [
+     2237.0,
+     8037.0
+    ],
+    [
+     2245.0,
+     8027.0
+    ],
+    [
+     2241.0,
+     8019.0
+    ],
+    [
+     2173.0,
+     8023.0
+    ],
+    [
+     2165.0,
+     8017.0
+    ],
+    [
+     2167.0,
+     8007.0
+    ],
+    [
+     2241.0,
+     8005.0
+    ],
+    [
+     2243.0,
+     7995.0
+    ],
+    [
+     2221.0,
+     7993.0
+    ],
+    [
+     2215.0,
+     7987.0
+    ],
+    [
+     2171.0,
+     7991.0
+    ],
+    [
+     2155.0,
+     7977.0
+    ],
+    [
+     2153.0,
+     7941.0
+    ],
+    [
+     2117.0,
+     7903.0
+    ],
+    [
+     2109.0,
+     7907.0
+    ],
+    [
+     2117.0,
+     7913.0
+    ],
+    [
+     2115.0,
+     7925.0
+    ],
+    [
+     2095.0,
+     7919.0
+    ],
+    [
+     2053.0,
+     7923.0
+    ],
+    [
+     2053.0,
+     7903.0
+    ],
+    [
+     2025.0,
+     7903.0
+    ],
+    [
+     2015.0,
+     7925.0
+    ],
+    [
+     1991.0,
+     7917.0
+    ],
+    [
+     1985.0,
+     7921.0
+    ]
+   ],
+   "platform_level_m": 2.5,
+   "lighthouse": "2 of 2",
+   "decks": [
+    "B22",
+    "B23",
+    "B24"
+   ],
+   "territory": "sw_isle"
+  },
+  {
+   "id": "east_pier_tower",
+   "kind": "harbour tower at the crossing of the east pier (ferry berth)",
+   "x": 2503.3,
+   "z": 7332.0,
+   "ground_m": -4.3,
+   "decks": [
+    "B15",
+    "B25"
+   ],
+   "route": "R33",
+   "territory": "tollholms",
+   "marker": "landmark-th-east-pier-tower"
+  },
+  {
+   "id": "hamlet_east",
+   "kind": "hamlet (unconfirmed)",
+   "x": 1716.7,
+   "z": 7050.0,
+   "ground_m": 109.0,
+   "routes": [
+    "R27",
+    "R30",
+    "R31",
+    "R32",
+    "R33"
+   ],
+   "territory": "sw_isle"
+  },
+  {
+   "id": "hamlet_south",
+   "kind": "hamlet (unconfirmed)",
+   "x": 1200.0,
+   "z": 8083.3,
+   "ground_m": 131.2,
+   "routes": [
+    "R41"
+   ],
+   "territory": "sw_isle"
+  },
+  {
+   "id": "se_islet_village",
+   "kind": "islet village",
+   "x": 2740.0,
+   "z": 8026.7,
+   "ground_m": 68.5,
+   "routes": [
+    "R42"
+   ],
+   "territory": "tollholms",
+   "marker": "landmark-th-tollholm"
+  },
+  {
+   "id": "east_islet",
+   "kind": "islet with round structures (white tower in the concept)",
+   "x": 2466.7,
+   "z": 6850.0,
+   "ground_m": 91.7,
+   "routes": [
+    "R32"
+   ],
+   "territory": "tollholms",
+   "marker": "landmark-th-ringholm"
+  },
+  {
+   "id": "ne_islet",
+   "kind": "islet reached by causeway B13",
+   "x": 1946.7,
+   "z": 6376.7,
+   "ground_m": 29.3,
+   "decks": [
+    "B13"
+   ],
+   "territory": "sw_isle"
+  }
+ ],
+ "decisions": [
+  "D2a (owner 2026-10-02): The Tollholms (tollholms) is the second map: the SE islet with the village Tollholm, Ringholm (the east islet east of x 2437) and the outer east pier with the Toll Tower, B15 and the N14 ferry berth",
+  "D2b (owner 2026-10-02): sw_isle's window moved 30 m north to z 6221-8259 so it owns the north beach; its served origin is (1023, 993)",
+  "D2c (owner 2026-10-02): The Gull Skerries (gull_skerries) is a third map: the south tip, its two islets and the west cliff strip",
+  "R42 reroute (owner 2026-10-02): B24 re-levelled to 2.5 m, the knob quay QK1/QK2 and seam-mole-knob in sw_isle; r42-strand (566 m) from the mole to Tollholm square in tollholms; the approved R42 middle kept as r42-overlook",
+  "B25 legs (owner 2026-10-02): the harbour legs run 18-20 m west of the drawn line (x 2423) so the harbour stays in sw_isle; seam-mole-pier joins it to tollholms' tower pier",
+  "seam moles (owner 2026-10-02): seam-mole-knob and seam-mole-pier, each a Set terrain patch declared identically in sw_isle and tollholms",
+  "L21 (owner default 2026-10-01; talus owner 2026-10-02): a sea inlet (below sea level, the sea plane fills it; no water region), with a fill-only talus at grade 2.0 against its vertical walls in tollholms' sculpt layer",
+  "landing (owner 2026-10-02): the castle-town plaza is the arrival, #beam and respawn hub",
+  "hamlets (owner default 2026-10-01): both stay",
+  "names (owner 2026-10-02): The Tollholms, Tollholm, Ringholm, Spindle Hill, the Toll Tower, The Gull Skerries",
+  "exit ferry (owner 2026-10-02): the N10 quay ship in sw_isle (runtime-ferry-n10) is the new-player exit, to Crownwater until the v2 mainland exists; tollholms' th-ferry-berth-east waits for the mainland"
+ ],
+ "openDecisions": [
+  "Spindle Hill summit path (r42-cone-way, tollholms): later (owner 2026-10-02)",
+  "the home migration (landing, #beam and respawn on the server) needs the owner's explicit go",
+  "a future mainland map borders sw_isle's north-east corner (a mainland sliver lies inside sw_isle's window) and tollholms' strait edge"
+ ]
+}

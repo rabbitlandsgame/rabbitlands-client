@@ -1,0 +1,297 @@
+{
+  "slug": "ssarathi_female",
+  "geometry": {
+    "candidateSHA256": "550d4b55214e5da110ef3e56471d5d3527311beb54acab5923cd1db9293d8110",
+    "sourceSHA256": "3840441d1f7148c036b9b92c2d0a3566d2f38f4bb7c6ee0d9b2caf3b74f166b4",
+    "templateSHA256": "7d845c63c8f2800d873691d031e53aa7e3b5b795f8f0a4c3b46e86d5c7205bd0",
+    "errors": [],
+    "commonSourceTriangles": 15481,
+    "commonMissingOrChangedTriangles": 0,
+    "headSourceTriangles": 3015,
+    "headMissingOrChangedTriangles": 0,
+    "tailSourceTriangles": 4392,
+    "tailMissingOrChangedTriangles": 0,
+    "commonUnchangedUVTriangles": 15481,
+    "joins": [
+      {
+        "geometricEdges": 193,
+        "unmatchedEdges": 0
+      }
+    ],
+    "joinAttributes": [
+      {
+        "boundaryCopies": 514,
+        "unmatchedCopies": 0,
+        "maxPositionDeltaM": 0.0,
+        "maxNormalDelta": 0.0,
+        "maxWeightL1Delta": 0.0
+      }
+    ],
+    "trianglesByRole": {
+      "shared_body": 12572,
+      "race_head": 3156,
+      "neck_join": 705,
+      "race_tail": 7158,
+      "shared_wardrobe": 3588,
+      "head_accessory": 288
+    },
+    "totalTriangles": 27467
+  },
+  "motion": {
+    "model": "equipment-fit-build\\shared-bodies\\build-13\\bodies\\ssarathi_female.glb",
+    "sha256": "550d4b55214e5da110ef3e56471d5d3527311beb54acab5923cd1db9293d8110",
+    "library_sha256": "b37335813f0677f815a5d1b66290102b1ba88e60a6e3e7c69eef33499ed26fe1",
+    "errors": [],
+    "warnings": [],
+    "joints": 77,
+    "rest_max_matrix_error": 1.3084266458074367e-06,
+    "inverse_bind_max_error": 5.872689090580252e-08,
+    "replay": [
+      {
+        "clip": "Idle_Subtle",
+        "duration": 2.583333,
+        "frames": 156,
+        "edges": 55267,
+        "minimum_vertex_y_m": 0.002999954905471978,
+        "loop_max_vertex_delta_m": 9.310641615460591e-09,
+        "edge_max_ratio_percentiles": [
+          0.9999999988498218,
+          1.1142751797647907,
+          1.2619080711732729,
+          1.9399880503021767,
+          3.9515603741289542
+        ],
+        "edge_gain_m_percentiles": [
+          -1.1146443143483786e-11,
+          0.0024969134201209826,
+          0.005892976034927367,
+          0.01185320636035487,
+          0.02073721862826558
+        ],
+        "worst": {
+          "gain_m": 0.02073721862826558,
+          "ratio": 1.2166723118979172,
+          "time": 0.0,
+          "edge": [
+            4280,
+            4362
+          ],
+          "rest_positions": [
+            [
+              -0.12278532236814499,
+              1.3615731000900269,
+              -0.12042642384767532
+            ],
+            [
+              -0.08011740446090698,
+              1.278907299041748,
+              -0.14291612803936005
+            ]
+          ],
+          "nodes": [
+            "body",
+            "wardrobe_shirt",
+            "wardrobe_pants",
+            "wardrobe_boots"
+          ]
+        }
+      },
+      {
+        "clip": "Walk",
+        "duration": 1.666667,
+        "frames": 201,
+        "edges": 55267,
+        "minimum_vertex_y_m": 0.0021372846687923424,
+        "loop_max_vertex_delta_m": 0.0,
+        "edge_max_ratio_percentiles": [
+          1.0000000000014442,
+          1.2003493884485916,
+          1.5173191918198712,
+          2.2749263806305984,
+          5.12965555349052
+        ],
+        "edge_gain_m_percentiles": [
+          1.1525502774389906e-14,
+          0.005296295867749441,
+          0.011384474420862108,
+          0.02126610233555646,
+          0.03229308215561479
+        ],
+        "worst": {
+          "gain_m": 0.03229308215561479,
+          "ratio": 1.5626198475316617,
+          "time": 0.0,
+          "edge": [
+            6928,
+            6951
+          ],
+          "rest_positions": [
+            [
+              0.01664269156754017,
+              0.7546923160552979,
+              0.009444945491850376
+            ],
+            [
+              0.03461408615112305,
+              0.7079519033432007,
+              0.0374959371984005
+            ]
+          ],
+          "nodes": [
+            "body",
+            "wardrobe_shirt",
+            "wardrobe_pants",
+            "wardrobe_boots"
+          ]
+        }
+      },
+      {
+        "clip": "Jog",
+        "duration": 1.166667,
+        "frames": 141,
+        "edges": 55267,
+        "minimum_vertex_y_m": 0.0013909845301759705,
+        "loop_max_vertex_delta_m": 0.0,
+        "edge_max_ratio_percentiles": [
+          1.0000000000010014,
+          1.3360450243983544,
+          1.84971797057496,
+          3.241702551930785,
+          8.218211428374685
+        ],
+        "edge_gain_m_percentiles": [
+          6.338679581219253e-15,
+          0.009467501076335906,
+          0.018244295290408767,
+          0.03727948483460922,
+          0.07612263339889325
+        ],
+        "worst": {
+          "gain_m": 0.07612263339889325,
+          "ratio": 1.5314421746708382,
+          "time": 0.9,
+          "edge": [
+            7443,
+            7469
+          ],
+          "rest_positions": [
+            [
+              -0.0332622304558754,
+              0.6149970293045044,
+              -0.018098650500178337
+            ],
+            [
+              -0.017984002828598022,
+              0.754717230796814,
+              0.00950428657233715
+            ]
+          ],
+          "nodes": [
+            "body",
+            "wardrobe_shirt",
+            "wardrobe_pants",
+            "wardrobe_boots"
+          ]
+        }
+      },
+      {
+        "clip": "Run_Female",
+        "duration": 0.833333,
+        "frames": 51,
+        "edges": 55267,
+        "minimum_vertex_y_m": 0.002653561004018026,
+        "loop_max_vertex_delta_m": 3.908476099818345e-06,
+        "edge_max_ratio_percentiles": [
+          1.0000000015213442,
+          1.3029426431437399,
+          1.792192731587252,
+          2.7200738865191827,
+          6.118282685433077
+        ],
+        "edge_gain_m_percentiles": [
+          1.3962114017024296e-11,
+          0.008789459079207635,
+          0.017047783499976495,
+          0.03245313714805461,
+          0.05724859636618319
+        ],
+        "worst": {
+          "gain_m": 0.05724859636618319,
+          "ratio": 1.9974023663561462,
+          "time": 0.3,
+          "edge": [
+            6928,
+            6951
+          ],
+          "rest_positions": [
+            [
+              0.01664269156754017,
+              0.7546923160552979,
+              0.009444945491850376
+            ],
+            [
+              0.03461408615112305,
+              0.7079519033432007,
+              0.0374959371984005
+            ]
+          ],
+          "nodes": [
+            "body",
+            "wardrobe_shirt",
+            "wardrobe_pants",
+            "wardrobe_boots"
+          ]
+        }
+      },
+      {
+        "clip": "Fighting_Idle",
+        "duration": 1.708333,
+        "frames": 205,
+        "edges": 55267,
+        "minimum_vertex_y_m": -2.5202363275461945e-05,
+        "loop_max_vertex_delta_m": 5.02170408103288e-07,
+        "edge_max_ratio_percentiles": [
+          0.9999999988344417,
+          1.1012122770159936,
+          1.2881384056488538,
+          2.053318426393764,
+          4.107162359487382
+        ],
+        "edge_gain_m_percentiles": [
+          -1.1329708005103356e-11,
+          0.0024219134100814904,
+          0.008203016281888843,
+          0.021460672797140055,
+          0.038350551570716734
+        ],
+        "worst": {
+          "gain_m": 0.038350551570716734,
+          "ratio": 1.4177375992306287,
+          "time": 0.0,
+          "edge": [
+            6943,
+            6973
+          ],
+          "rest_positions": [
+            [
+              0.02013912983238697,
+              0.7589503526687622,
+              0.009397909976541996
+            ],
+            [
+              0.04086994379758835,
+              0.6715537309646606,
+              0.028379173949360847
+            ]
+          ],
+          "nodes": [
+            "body",
+            "wardrobe_shirt",
+            "wardrobe_pants",
+            "wardrobe_boots"
+          ]
+        }
+      }
+    ]
+  }
+}

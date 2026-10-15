@@ -1,0 +1,984 @@
+# Eloria region quest lines. Read by eloria/questlines.py.
+#
+# A [quest] block is one named chain. Its [stage] blocks run in file order and
+# a stage is closed by taking it back to the person it names. When every stage
+# is closed the player returns to the quest's `start` for the large reward.
+#
+# Fields on [quest]:
+#   key           the state key; never change one that has shipped
+#   id            the number HERE_IS_QUEST_ID sends; never reuse one
+#   tier          1-4, and the tier is a promise about the reward (see below)
+#   title         what the journal calls it
+#   region        where it mostly happens, for the journal's location column
+#   start         the NPC who offers it and pays it out
+#   requires      comma-separated keys of lines that must be finished first
+#   min_level     overall level before the line is offered at all
+#   summary       one line, shown when the quest is offered
+#   offer         what the start NPC says when offering
+#   accepted      what they say when the player takes it
+#   complete      what they say when they pay it out
+#   repeat        what they say afterwards, forever
+#   reward_xp     skill=amount, comma separated
+#   reward_gold   coins
+#   reward_items  Item Name=count, comma separated
+#
+# Fields on [stage]:
+#   kind          talk | kill | harvest | deliver | visit | mix | read
+#   npc           who closes the stage (blank means the quest's start NPC)
+#   target        creature type id, resource name, item name, or book title
+#   amount        how many (default 1)
+#   map, x, y     where; a visit needs all three, a harvest may name a patch
+#   objective     the journal line
+#   prompt        what the stage's NPC says while it is outstanding
+#   done          what they say as they close it
+#   xp/gold/items the small reward for closing this stage
+#
+# ---------------------------------------------------------------------------
+# REWARD SCALING
+#
+# The tier decides the size of the whole line, stage rewards included. These
+# bands are checked by tests/test_questlines.py, so a line that pays outside
+# its tier fails the build rather than quietly becoming the best quest in the
+# game. They are set against the Eternal Lands quest tables the profile is
+# modelled on: an errand pays like Granny Lorpak's, a regional chain like
+# Clogged Sewers, and a cross-region epic like the Lost Axe.
+#
+#   tier 1   errand, 2-3 stages      1,500 -   4,000 total xp,    150 -    600 gc
+#   tier 2   regional, 3-4 stages    8,000 -  20,000 total xp,    600 -  2,500 gc
+#   tier 3   chain, 5-6 stages      28,000 -  70,000 total xp,  2,000 -  7,000 gc
+#   tier 4   epic, 7+ stages       110,000 - 220,000 total xp, 10,000 - 30,000 gc
+#
+# Within a line, stages pay roughly a tenth each and the finish pays the rest,
+# so abandoning a line most of the way through costs the player most of it.
+# ---------------------------------------------------------------------------
+
+
+# ================================================================= TIER 1 ==
+
+[quest]
+key: four_gates_lamp
+id: 10
+tier: 1
+title: The Ninety-Second Lamp
+region: four_gates
+start: Lamp-Trimmer Doric Ashen
+summary: Doric keeps ninety-one lamps lit and one that will not burn.
+offer: The Stelae Court sent us a lamp as a gift, forty years ago, and it has never burned. Our oil will not take in it. I trim it every night anyway and I am tired of trimming a dead lamp. Will you find out what it wants?
+accepted: Amber resin, then. The Ssarathi seal their lamps with it and we do not. Bring me some and we will find out whether I have been a fool for forty years.
+complete: It burns. Green, and low, and it has not gone out in three nights. Ninety-two lamps. Nobody will ever notice and I have not slept so well in years.
+repeat: Ninety-two lamps, all burning. Do not tell me it is a small thing. I know exactly how small it is.
+reward_xp: alchemy=900, overall=900
+reward_gold: 400
+reward_items: Torch=3
+[stage]
+kind: harvest
+target: Resin
+amount: 12
+objective: Gather 12 Resin. Amberwood is the nearest source, but any grove that bleeds will do.
+prompt: Twelve should be enough to try. If it is not, I have wasted your afternoon and forty years of my own.
+done: That is the real thing. You can smell the west road on it.
+xp: harvesting=300
+[/stage]
+[stage]
+kind: talk
+npc: Water-Clerk Ussa-Ren
+objective: Ask Water-Clerk Ussa-Ren how a Stelae Court lamp is meant to be sealed.
+prompt: A gift lamp from the Stelae Court? Then it was sealed for river oil, not lamp oil, and the seal is resin over the wick housing rather than under it. Your trimmer has been sealing it upside down for forty years. Tell him gently.
+done: Upside down. Forty years. Tell him gently, and do not tell him I laughed.
+xp: overall=300
+[/stage]
+[/quest]
+
+[quest]
+key: whitehorn_tag
+id: 11
+tier: 1
+title: Thirteen Tags
+region: whitehorn_range
+start: Brother Kell Ivorwind
+summary: A tag has not come back, and the two who normally go looking cannot both leave the gate.
+offer: A picker went up eight days ago on a four-day tag. Sister Petch and I cannot both leave the gate and she is the one who can carry a person. Will you go and find out which kind of errand this is?
+accepted: The upper ledges, east of the cascade. Take food. I am not going to pretend that is a formality.
+complete: Alive. Bad ankle, good spirits, and extremely rude about being rescued, which is how you know. The tag goes back in the rack and not in the box. Thank you.
+repeat: Ninety-five out of a hundred and eight, now. The box has thirteen and I would like it to stay at thirteen.
+reward_xp: attack=700, defense=700, harvesting=700
+reward_gold: 350
+reward_items: Bandage=5, Bread=4
+[stage]
+kind: visit
+map: whitehorn_range
+x: 369
+y: 312
+objective: Search the upper silverleaf ledges east of the cascade, in Whitehorn Range.
+prompt: East of the cascade and up. If the weather closes, come down; the tag will keep and you will not.
+done: You found him. Half a ledge of silverleaf picked and a bad ankle.
+xp: overall=400
+[/stage]
+[stage]
+kind: talk
+npc: Silverleaf Picker Doun Ashe
+objective: Get Doun Ashe down off the ledge, or at least get his account of it.
+prompt: I am fine. I have been fine for four days. I am also not going anywhere on this ankle, so if you are going down, tell Kell it is the ankle and not the mountain. He worries about the wrong things.
+done: Tell him it is the ankle. He will write "recovered" and he will mean "not thirteen".
+xp: overall=400
+[/stage]
+[/quest]
+
+[quest]
+key: crownwater_nets
+id: 12
+tier: 1
+title: What the Deep Boats Say
+region: crownwater
+start: Net-Mender Calla Fisk
+summary: Four crews have described the same shape under the hull. Calla wants a fifth account she can trust.
+offer: Four crews, four separate tellings, one shape under the hull on the deep run. Sailors invent one story between them; four crews inventing it separately is a different animal. I want an account from somebody who is not paid by a boat.
+accepted: The deep run is north, past the last islet. Take a look and come back and tell me what you actually saw, not what you think I want.
+complete: A shadow keeping pace and no fish under it. That is the fifth account and it is the first one I would put my name to. I am going to write it down, and then I am going to go and see Chartsman Aisle, who will hate it.
+repeat: Five accounts, one shape. Aisle has stopped saying instrument drift, which for him is a conversion.
+reward_xp: ranging=800, overall=800
+reward_gold: 300
+reward_items: Bandage=4
+[stage]
+kind: visit
+map: crownwater
+x: 312
+y: 336
+objective: Walk the northern deep shore in Crownwater and look at the water.
+prompt: North, past the last islet, on a still hour. Look, do not lean.
+done: A long shadow keeping station under the surface. No fish over it. Nothing feeding on it.
+xp: overall=300
+[/stage]
+[stage]
+kind: talk
+npc: Pearl Diver Ansil Quen
+objective: Ask Ansil Quen, who has seen the lake floor, what he makes of it.
+prompt: A shadow with nothing feeding over it means it is not food. I have seen a green glow off the north deep for years and told two people about it. You are the third and you are the first who came asking.
+done: Tell Calla it is not a fish. Tell her I said so, and that I will say it to Aisle too if he ever asks.
+xp: overall=300
+[/stage]
+[/quest]
+
+
+# ================================================================= TIER 2 ==
+
+[quest]
+key: mirrorhold_cistern
+id: 13
+tier: 2
+title: Eleven Measures
+region: mirrorhold
+start: Cistern Clerk Nim Halloway
+summary: Eleven measures of water leave the cistern yard every month and nobody writes them down.
+offer: The yard balances to a measure or two, every month, for two hundred years. Since the spring it is eleven short. Exactly eleven. A leak varies; eleven exactly means eleven exactly is being drawn. I have carried this for five months and I cannot carry it further alone.
+accepted: Start with the register. Ames sees everybody who enters the Citadel and nobody has ever asked him anything.
+complete: A Barrens factor with a Mirrorhold seal, four visits, eleven measures a month, and a warden who cannot get her channel widened because the money went somewhere. It is one page and it names four people. Ames signed it. Sunna signed it. I signed it. Whatever happens now, it is not five months of me alone in a room with a number.
+repeat: The page went to the Citadel and the draws stopped the same week, which is not an answer, but it is a result.
+reward_xp: crafting=4200, harvesting=3000, overall=3000
+reward_gold: 1400
+reward_items: Quartz Lens=1
+[stage]
+kind: talk
+npc: Hall Register Sefton Ames
+objective: Ask Hall Register Sefton Ames who has been in the Citadel out of hours.
+prompt: Nobody has asked me anything in nineteen years. The night the Orrery stopped there were four in the gallery wing, and one of them was a Barrens factor with a Mirrorhold seal who signed in as a lens buyer and bought no lens.
+done: Same seal, four visits, all in the weeks the yard came up short. I have written the dates out. Take them.
+xp: overall=900
+[/stage]
+[stage]
+kind: talk
+npc: Aqueduct Warden Sunna
+objective: Take the register dates to Aqueduct Warden Sunna at the Meltwater Aqueduct.
+prompt: Four visits, and on all four the aqueduct's delivery was normal. So the water is not going missing on my side. It is being taken after it arrives, which makes it Mirrorhold's problem and not the mountain's.
+done: I have wanted this in writing for two years. Put my name on it.
+xp: overall=900
+[/stage]
+[stage]
+kind: harvest
+target: Quartz
+amount: 18
+map: mirrorhold
+objective: Gather 18 Quartz for a resonance stem to sound the cistern draw-off.
+prompt: A stem will tell you which channel is being drawn without anybody having to be caught doing it. Quartz first.
+done: Enough for a stem and a spare, which given how this is going is prudent.
+xp: harvesting=1200
+[/stage]
+[stage]
+kind: talk
+npc: Lens Grinder Ottil Wren
+objective: Have Ottil Wren cut the quartz into a sounding stem.
+prompt: A stem, not a lens. Four hours instead of four hundred, and I will do it tonight, and I will not ask what it is for because I would like to be able to say I did not know.
+done: It rings true at every depth. If a channel is being drawn, this will hear it.
+xp: crafting=1500
+[/stage]
+[/quest]
+
+[quest]
+key: steppe_wells
+id: 14
+tier: 2
+title: The Well Harun Filled In
+region: sunmane_steppe
+start: Elder Sura
+summary: A well-digger buried a good well in one night and told the camp the ground was bad.
+offer: Harun Tel has dug wells on this steppe for forty years and he has never once been wrong about ground. This season he filled one in with his own hands and told the camp it was bad. Harun does not lie to a camp. So he is frightened, and I would like to know of what.
+accepted: Ask him directly. He will not lie to a question, which is why nobody has asked him one.
+complete: A well that hummed. The banner still standing over it because he could not bring himself to take it down. And nine keepers on the southern line who each have one number and have never been asked for it.
+repeat: Nine wells, nine numbers, one page. My brother reads it every month and says nothing, which for the Khan is a great deal of noise.
+reward_xp: harvesting=5000, alchemy=3000, overall=2500
+reward_gold: 900
+reward_items: Orun Sun Amulet=1
+[stage]
+kind: talk
+npc: Well-Digger Harun Tel
+objective: Ask Harun Tel why he filled in the fourth well.
+prompt: Because the water hummed. Not the rope, not the bucket - the water, and you could feel it in the rim. Nine hundred paces east of the salt track, under a cairn I built badly on purpose.
+done: I have told one person in this world and now I have told two. Do something with it.
+xp: overall=1000
+[/stage]
+[stage]
+kind: kill
+target: dire_wolf
+amount: 8
+map: sunmane_steppe
+objective: Clear 8 Dire Wolves off the ground around the filled well in Sunmane Steppe.
+prompt: Something has moved in around that well since I closed it. Wolves den where the herds will not graze, and no herd will graze there now.
+done: Eight, and none of them in condition. They were not hunting. They were sitting on that ground.
+xp: attack=900, defense=900
+[/stage]
+[stage]
+kind: talk
+npc: Banner shrine keeper
+objective: Ask the banner shrine keeper about the banner left standing over nothing.
+prompt: When a well is filled the banner comes down and the stone stays. Harun left the banner. A banner over no water is a claim to water that is coming back, and Harun has never made a claim he could not keep.
+done: He thinks that well is going to be needed. Tell Sura that. She will understand it faster than I did.
+xp: overall=1000
+[/stage]
+[stage]
+kind: talk
+npc: Dune well keeper
+objective: Collect the southern line's water depths, starting with the dune well.
+prompt: Twenty-two feet in my mother's day, thirty-one now. Nine keepers, nine numbers, and not one of us can write or leave our well. Walk the line and you will have the best water record on this steppe by nightfall.
+done: Nine numbers. Every one of them deeper than it was. Take it to the Elder.
+xp: harvesting=1400, overall=1000
+[/stage]
+[/quest]
+
+[quest]
+key: moors_orchid
+id: 15
+tier: 2
+title: Polite About It
+region: grey_moors
+start: Orchid Gatherer Wenna Slee
+summary: The whole lake's fever medicine grows over three hundred barrows, and one gatherer walks them.
+offer: Every fever draught in Nymara has ghost orchid in it and there is no substitute and no way to farm it. My family has walked these mounds for six generations and I am the last of them who will. I would like somebody else to know how it is done before I am the only one who does.
+accepted: Read the stone before you cut. Out loud. Then take one flower and leave the rest. That is the whole method and it is not a superstition, whatever Pell Wick tells you.
+complete: You read the stones, you took one from each, and you came back. That is the sixth generation taught. The moor did not object, which after this month is worth something on its own.
+repeat: One flower per mound and read the stone first. It will keep working for as long as somebody keeps doing it.
+reward_xp: harvesting=6000, potion=3500, overall=2000
+reward_gold: 1100
+reward_items: Antidote=6, Healing Tonic=3
+[stage]
+kind: harvest
+target: Orchid
+amount: 14
+map: grey_moors
+objective: Gather 14 Orchid from the Grey Moors, one to a mound.
+prompt: One to a mound, and read the stone before you cut. Fourteen mounds is a long day and it is the correct long day.
+done: Fourteen, from fourteen mounds. You did not shortcut it. I checked.
+xp: harvesting=1800
+[/stage]
+[stage]
+kind: talk
+npc: Debt-Reader Maun Pell
+objective: Have Debt-Reader Maun Pell check your fourteen mounds against her list.
+prompt: Read me the fourteen. ... Eleven whole and three breached. You cut from three breached mounds and nothing followed you home, which is either luck or the reading-out working.
+done: I have wanted a test of that for nine years and I was never going to run it on myself.
+xp: overall=1200
+[/stage]
+[stage]
+kind: deliver
+npc: Moor Chandler Perrin Wisk
+target: Peat
+amount: 20
+objective: Deliver 20 Peat to Moor Chandler Perrin Wisk for the drying racks.
+prompt: Orchid has to be dried slow over peat or it turns to nothing in a week. Twenty loads and I will run the racks all night.
+done: Twenty. That is the whole moor's fever supply for a season, and it fits in one shed, and that ought to frighten somebody.
+xp: alchemy=2000, overall=1000
+gold: 300
+[/stage]
+[/quest]
+
+[quest]
+key: delta_stelae
+id: 16
+tier: 2
+title: Thirty-One of Forty
+region: manymouth_delta
+start: Stelae Court Scribe Ann-Sesh
+summary: Nine delta water-stones exist in the field and not in the Archive's index.
+offer: Forty stelae stand in this court. The Archive upstream indexes thirty-one. The nine missing are all new channels claimed in the last sixty years, all properly witnessed, and every household on them has no standing in law and does not know it.
+accepted: Take rubbings of the nine. A rubbing is evidence; my word is a complaint.
+complete: Nine rubbings, nine witnesses, nine dates, checked against the Archive's own index by the Archive's own copyist. It is one page and it is not a complaint any more.
+repeat: Nine households have standing that they did not have last season. Nobody has thanked either of us and both of us know exactly what we did.
+reward_xp: crafting=4000, harvesting=3000, overall=3500
+reward_gold: 1200
+reward_items: Woven Charm=2, Ssarathi Shell Amulet=1
+[stage]
+kind: deliver
+target: Cloth Roll
+amount: 6
+objective: Bring 6 Cloth Roll for taking rubbings of the nine unindexed stelae.
+prompt: Cloth and soot. Six rolls will do all nine if you are careful and four if you are not.
+done: Six. We will be careful, then.
+xp: overall=800
+[/stage]
+[stage]
+kind: talk
+npc: South Shrine Cantor Tem-Ossa
+objective: Ask South Shrine Cantor Tem-Ossa to name the channels on his departure boards.
+prompt: Four hundred and nine notches, each one a household sung out with its channel named aloud. Nine of your unindexed channels are on my walls. That is not an index. It is better - it is a public carving nobody can quietly amend.
+done: Copy the nine off my wall. If the Archive says a channel never existed, my wall says who left it.
+xp: overall=1200
+[/stage]
+[stage]
+kind: talk
+npc: Archive Copyist Uln-Sath
+objective: Take the rubbings upstream to Archive Copyist Uln-Sath at the Royal Archive.
+prompt: Field verification was suspended forty years ago and never resumed, so every copy since is a copy of a copy. Nine rubbings taken from the actual stones is the first field verification this Archive has seen in four decades.
+done: I have entered all nine. Not amended - entered, as new, with your rubbings as the source. Nobody can unenter them now.
+xp: crafting=2000, overall=1200
+[/stage]
+[/quest]
+
+[quest]
+key: cinder_east
+id: 17
+tier: 2
+title: Everything Moves East
+region: cinder_wastes
+start: Ash Cartographer Nema Quist
+summary: Two burnt places on two continents are both growing, and both toward the east.
+offer: I map ash for a living and the interesting thing is not the ash, it is the rate. This waste moves nine yards east a year. Amberwood's Cinder Field moves nine yards east in forty. Nobody will look at those two numbers together and I cannot make them.
+accepted: Marrow has been six miles in. Talk to him first; he will tell you something about the ground that I could not put in a report without being laughed at.
+complete: Ripples in the ash going east, a ninth-degree rise in the ember beds on the far side of the continent, and a scholar who has been standing at the third marker for six years without going in. Three people, three measurements, one direction. It is a map now instead of three grievances.
+repeat: East, on both continents, still moving. I send a copy to Four Gates every season and Scholar Meret writes back every season, which is one more correspondent than I had.
+reward_xp: harvesting=4000, magic=4000, overall=4000
+reward_gold: 1000
+reward_items: Stormglass=3, Portal Shard=1
+[stage]
+kind: talk
+npc: Cinder Prospector Rull Marrow
+objective: Ask Cinder Prospector Rull Marrow what is six miles inside the waste.
+prompt: Glassy ash standing in ripples like a beach. Ripples mean something moved through it at ground level, wide, going east. Four visits and they have not changed by a hair.
+done: Tell the cartographer I said ripples and not dunes. She will know the difference.
+xp: overall=1200
+[/stage]
+[stage]
+kind: talk
+npc: Ash Sister Melle Quen
+objective: Ask Ash Sister Melle Quen in Emberhaven what the ember beds are doing.
+prompt: A degree in fourteen months. On my mountain that would empty a valley. Here everyone shrugs because it is warm anyway. The beds run east from Emberhaven all the way to your waste.
+done: Take my figures. They are the only ones on this continent and I have been waiting a year for somebody to want them.
+xp: overall=1400
+[/stage]
+[stage]
+kind: talk
+npc: Ilyra
+objective: Put the three sets of figures to Ilyra at the edge of the Cinder Wastes.
+prompt: Nymara has a Cinder Field with no cause in any record and this continent has a waste with no cause in any record, and now you tell me both are moving east and the ground between is warming. That is no longer two coincidences. That is a direction.
+done: I have not gone past the third marker in six years because I did not know what I was looking at. I still do not. But now I know which way to look.
+xp: magic=1600, overall=1200
+[/stage]
+[/quest]
+
+
+# ================================================================= TIER 3 ==
+
+[quest]
+key: amberwood_ledger
+id: 18
+tier: 3
+title: The Ledger and the Spore
+region: amberwood
+start: Motherroot Voice Sillow
+summary: Amberwood remembers working the north coppice. Westhaven holds the deed. Somewhere in a cellar there is a receipt.
+offer: We are not disputing the deed. The deed is good. We are saying that four generations of my people worked the north coppice before anyone wrote a deed about it, and that the estate's own day books contain payments to them. Find the entries and this stops being what we remember and starts being what everybody can read.
+accepted: The day books are in the west cellar of the Amber Hall. The Amber will not give leave and has never had to refuse, because nobody has ever asked in a way she would have to answer.
+complete: Four entries, a bundle of tally sticks, forty years of a Mycelari on the household wage book, and a bee map that stops nine hundred feet inside Westhaven's line. It is a case. Eryn Amber read it and did not argue, which from her is a verdict.
+repeat: The coppice is worked jointly now, on the old terms, and the estate calls it a new arrangement. Let them. New arrangements do not have four generations of receipts.
+reward_xp: harvesting=12000, tailoring=8000, crafting=8000, overall=9000
+reward_gold: 3800
+reward_items: Amberwood Leaf Cape=1, Amberwood Leaf Amulet=1
+[stage]
+kind: talk
+npc: Estate Housekeeper Merrild Vane
+objective: Ask Estate Housekeeper Merrild Vane how a day book is requested from the Amber Hall.
+prompt: In writing, to the housekeeper, citing a specific year. Then it is a request to the house and not to the family, and I am obliged to produce the volume. Nobody knows that, because the rule is in the cellar and nobody may see the cellar without leave.
+done: Cite the year and I will fetch it. That is not defiance. That is the house rules, which I have waited nineteen years to be asked about.
+xp: overall=2400
+[/stage]
+[stage]
+kind: talk
+npc: Hall Steward
+objective: Ask the Hall Steward which year to cite.
+prompt: I found it by accident once, looking for a laundry account. My great-grandfather's name, a Greyhaven name, on the same page as a Mycelari coppice crew, being paid. I put the volume back and I have not slept as well since.
+done: The year is on the spine and I am not going to say it out loud in this hall. Look at the fourth volume from the end of that shelf. Now go away and let me be a coward in peace.
+xp: overall=2400
+[/stage]
+[stage]
+kind: talk
+npc: Tomas Root
+objective: Ask Tomas Root about the parcel nobody claimed from the disbanded coppice crew.
+prompt: Four tally sticks, forty years old, one notch a day. A crew's own record of days worked. It is not a receipt - but somebody was paying, and somebody was counting, and this is what the person being paid keeps.
+done: Take them. They have been on that shelf longer than the argument has been going on.
+xp: overall=2600
+gold: 400
+[/stage]
+[stage]
+kind: talk
+npc: Estate Sporewright Umber Coll
+objective: Carry word to Estate Sporewright Umber Coll, out of range in the estate cellars.
+prompt: Four decades of a Mycelari on the household wage book, entered as cellar staff so that nobody has to admit what the forest's economy is made of. It is in the same cellar as the day books and it has never been hidden. It has only never been read.
+done: Tell Sillow it exists. I have been down here since I was fourteen and I cannot tell her myself, and I have wanted somebody to carry it like a letter for twenty years.
+xp: crafting=2600, overall=1400
+[/stage]
+[stage]
+kind: talk
+npc: Skep-Keeper Runa Combe
+objective: Get Skep-Keeper Runa Combe's forage map of the north coppice.
+prompt: Four generations of bees working a boundary that the deed says does not exist. It costs three days in a field counting directions to prove and nobody has ever been willing. Bess Torrow gave me two.
+done: Here are six generations of forage maps. They stop where my people say the worked ground stops, nine hundred feet inside Westhaven's line, and the bees did not read the deed.
+xp: harvesting=3000, overall=1600
+[/stage]
+[/quest]
+
+[quest]
+key: barrens_resonance
+id: 19
+tier: 3
+title: Within Tolerance
+region: amethyst_barrens
+start: Observatory Warden Sela Prism
+summary: A whole region is drifting flat, and every instrument that can prove it belongs to somebody who is afraid to say so.
+offer: The Barrens are going flat against the reference by a hair a month and have been for two years. I have checked the reference against Whitehorn and against Mirrorhold. It is not the stone. It is the ground. And I write "within tolerance" in every hearing because the alternative is that the freight stops and the region starves.
+accepted: I cannot bring you evidence from inside my own Observatory. Everything I hand you would be my hand. Go and collect it from people who are not me.
+complete: The Ring's flat return, a count book with the two columns diverging for four years, a stem reading from inside the fence, and a countersign that is not mine on a certificate issued in my name. That is not tolerance. That is four independent instruments agreeing, and I am done writing the other word.
+repeat: The hearing sat for nine days. Two seals were suspended and the freight did not stop. I was wrong about that too and I have never been so pleased to be.
+reward_xp: magic=14000, crafting=10000, harvesting=6000, overall=8000
+reward_gold: 4200
+reward_items: Glasswarden Resonator=1, Quartz Lens=2
+[stage]
+kind: harvest
+target: Crystal
+amount: 10
+map: amethyst_barrens
+objective: Gather 10 Crystal from a licensed Barrens cluster.
+prompt: Licensed stone only. If this evidence has one unlicensed shard in it, the hearing will spend nine days on that and nothing else.
+done: Licensed, counted, certified. Now we can afford to be interesting.
+xp: harvesting=2400
+[/stage]
+[stage]
+kind: talk
+npc: Tuning Adept Ollum Ghast
+objective: Have Tuning Adept Ollum Ghast put a certified crystal through the Resonance Ring.
+prompt: Put it in at dawn and take it out at dusk and it comes out flat by very nearly the amount the whole region has drifted. The Ring is not drifting. The Ring is reporting.
+done: Everyone in this region has read that number. You are the second person to hear it. It is much worse heard.
+xp: magic=3000, overall=1600
+[/stage]
+[stage]
+kind: talk
+npc: Shard Counter Bel Ammon
+objective: Get Shard Counter Bel Ammon's two columns for the last four years.
+prompt: Dug and shipped, and they must match. One shard in two hundred four years ago, one in twenty last season, one in nine now. Thirty-one years of a book that has never been wrong.
+done: Take the book. If I am finished for it, I am finished holding the only honest arithmetic in the Barrens.
+xp: crafting=3000, overall=1800
+[/stage]
+[stage]
+kind: kill
+target: amethyst_moth
+amount: 10
+map: amethyst_barrens
+objective: Clear 10 Amethyst Moths from the fence line in the Amethyst Barrens.
+prompt: Nothing crosses that fence and comes back right, and the wisps are what the sour ground makes instead of animals. Ollo will not go in while they are thick.
+done: Ten. Marrow can work the face now, which is the only reason anybody has ever had for doing that.
+xp: attack=2000, defense=2000
+[/stage]
+[stage]
+kind: talk
+npc: Deaf Digger Ollo Marrow
+objective: Get a stem reading from inside the fence line from Ollo Marrow.
+prompt: Warden Prism gives me a stem, I take it in, I bring it back, and she reads it and says nothing. Four years of that. This is the first time anybody has asked me what the stem said, and I am the wrong person to ask, because I cannot hear it. I can only carry it.
+done: Four years of readings on one strip of wax. Whatever it says, it says it in her own instrument's hand and not in mine.
+xp: harvesting=2600, overall=2000
+[/stage]
+[stage]
+kind: talk
+npc: Watchtower Sentinel Ivar Quill
+objective: Have Watchtower Sentinel Ivar Quill identify the false countersign.
+prompt: Four wagons in three years with a certificate that is valid and is not Warden Prism's hand. Not a forgery - somebody inside the Observatory with authority to sign. That narrows it to four people and I have never written their names anywhere.
+done: I will write them now, and I will confirm every word of it to anybody who asks. That is all I have. It turns out to be enough.
+xp: magic=3000, overall=2200
+gold: 600
+[/stage]
+[/quest]
+
+[quest]
+key: moors_debt
+id: 20
+tier: 3
+title: A Blank Return Field
+region: grey_moors
+start: Grave-Debt Keeper Dorn Marrow
+summary: Eleven barrows were opened and never closed, and eleven stones were cut blank before it happened.
+offer: A breach is not a theft in law. It is a failure of the holder, and the debt sits, and the lights walk. It can be repaired - return an equivalent, have it recorded, have the court witness it. It has never been done, because it needs four people and I have been looking for four people for nineteen years.
+accepted: A mason to cut the field, a smith to make the equivalent, a Speaker to sit, and somebody willing to walk out there at night carrying something worth stealing. You are the fourth. Go and find me the other three.
+complete: The eighth barrow's return field is cut closed, witnessed, and entered on the roll. First discharge in four hundred years. Farrow slept last night, which she has not done in nine, and that is the onlyproof anybody needs.
+repeat: One closed, ten open. It took nineteen years to learn how. The next one will not take nineteen years.
+reward_xp: manufacturing=12000, crafting=9000, attack=6000, defense=6000, overall=7000
+reward_gold: 4000
+reward_items: War Hammer=1
+[stage]
+kind: talk
+npc: Debt-Reader Maun Pell
+objective: Get the breached-barrow list from Debt-Reader Maun Pell.
+prompt: Three hundred and eleven barrows. Nine discharged, two hundred and ninety-one open, eleven breached. The eleven are the trouble and the eighth is the one the lights have been walking from every night this month.
+done: The eighth, then. Its stone is the worst weathered and its neighbour is the Great Barrow, which is where the lights are going.
+xp: overall=2600
+[/stage]
+[stage]
+kind: talk
+npc: Standing-Stone Mason Colm Rethe
+objective: Ask Mason Colm Rethe whether the eighth stone's return field can be cut.
+prompt: Eleven stones with blank return fields, cut smooth and left blank on purpose by the original mason, and they are the same eleven on Pell's list. Somebody knew which eleven would be opened before it happened.
+done: I have recut two hundred stones and left those eleven alone for thirty years. If the court will sit, I will cut the eighth. That is the first time I have said that out loud.
+xp: crafting=3000, overall=1800
+[/stage]
+[stage]
+kind: harvest
+target: Bog Iron
+amount: 16
+map: grey_moors
+objective: Gather 16 Bog Iron for the equivalent that will close the debt.
+prompt: Bog iron and nothing else. A barrow blade is bog iron with the giver's line cut in the tang before the quench, so the cut goes all the way through.
+done: Sixteen. Doust will only need nine of them and she will keep the rest, and she has earned that.
+xp: harvesting=3200
+[/stage]
+[stage]
+kind: talk
+npc: Bog-Iron Smith Nella Doust
+objective: Commission the equivalent blade from Bog-Iron Smith Nella Doust.
+prompt: A line, a term and a reason. That is what a commission needs and nobody has brought me one in four hundred years. I know the whole method. I have never made one and I will not sleep for a week beforehand.
+done: It is cut through the tang and quenched. My grandmother kept nine nodules for forty years without making anything. I have made one. Take it out there.
+xp: manufacturing=3600, overall=2000
+[/stage]
+[stage]
+kind: talk
+npc: Barrow Lamplighter Ess Corrow
+objective: Have Barrow Lamplighter Ess Corrow open the eighth chamber at dusk.
+prompt: I douse nine lamps and come back to eleven. The two extra are always behind sealed walls. The eighth is one of them, and I sat outside it a whole night once, and about the fourth hour the stone got warm.
+done: It is open. I will hold the lamp and I will not go in, and you should not think less of me for that.
+xp: overall=2400
+[/stage]
+[stage]
+kind: talk
+npc: Stone-Court Speaker Hurn
+objective: Bring the case, the blade and the mason before Speaker Hurn at the Court of Standing Stones.
+prompt: The court cannot open a case. The court can only hear one that is brought, by any person of any people who can state the deposit, the depositor and the breach. I have sat on this stone for thirty-one years waiting for somebody to bring one.
+done: Stated, witnessed, and entered. The eighth is discharged. Sit down before you go; you have been standing since the moor got dark and I have four hundred years of nothing to say to you about it.
+xp: attack=2400, defense=2400, overall=2600
+gold: 800
+[/stage]
+[/quest]
+
+[quest]
+key: stair_kilns
+id: 21
+tier: 3
+title: Four Times the Price
+region: verdant_stair
+start: Tessara
+summary: The kilns are burning the slope the antidote grows on, and the only alternative costs four times as much.
+offer: Nine terraces slipping in four years where there were nine in forty. The kilns need fuel, fuel means clearing slope, and cleared slope on this hill goes. Bodri Hask is not a villain. He is a good potter with an order book and eleven families, and if he stops they starve and if he continues the whole lake loses its antidote.
+accepted: There is one way out and it is a coal contract at a price he can bear. Nobody has ever put the pieces together because the pieces will not sit in a room with each other.
+complete: A joint order, Stair kilns and delta potters together, big enough to move a Whitehorn factor on price. The wood kilns went out yesterday. Uwe has four bulb plants in the ravine and now he will have a slope to put them back on.
+repeat: The kilns burn coal, the slope is being replanted, and southern Nymara still has antidote. I would like it recorded that this was arithmetic and not a miracle.
+reward_xp: potion=13000, alchemy=9000, harvesting=7000, overall=8000
+reward_gold: 3600
+reward_items: Ssarathi Frond Cape=1, Antidote=10
+[stage]
+kind: talk
+npc: Kiln Master Bodri Hask
+objective: Ask Kiln Master Bodri Hask what it would take to stop cutting the slope.
+prompt: Emberseam coal out of Whitehorn. Hotter, cleaner, no slope at all, and four times the price - and the difference is exactly the margin my order book runs on. If somebody got me a coal contract I could bear, I would put the wood kilns out in a week and help plant the slope myself.
+done: I have said that to four people. You are the first who asked what it would take rather than telling me to stop.
+xp: overall=2600
+[/stage]
+[stage]
+kind: talk
+npc: Quay Broker Halla Prine
+objective: Ask Quay Broker Halla Prine how a bearable coal price could be reached.
+prompt: A joint contract. Stair kilns and delta potters buying together would be a big enough order for a Whitehorn factor to shift on price. Neither of them has ever spoken to the other and I have quoted Hask eleven times and stopped volunteering things.
+done: Get the delta potters to the table and I will broker it in a day and I will not charge for the introduction.
+xp: overall=2600
+[/stage]
+[stage]
+kind: talk
+npc: Long Market Broker Cass Merrow
+objective: Put the joint order to Long Market Broker Cass Merrow in the Manymouth Delta.
+prompt: The delta potters will not sit in a room with Stair people and they buy their storage jars from those kilns, which nobody enjoys pointing out. Somebody who is neither might have better luck. That appears to be you.
+done: Nine potters signed. They signed faster once I told them the antidote and the storage jars come off the same hill.
+xp: crafting=3000, overall=2000
+[/stage]
+[stage]
+kind: deliver
+npc: Korrin
+target: Coal
+amount: 30
+objective: Take 30 Coal to Korrin in Whitehorn Range as the sample firing load.
+prompt: A factor prices a contract off a sample burn. Thirty loads is a sample. I will weigh it, quote it against the joint order, and I will not pad the quote, which is more than the last four people to buy coal off this mountain can say.
+done: Quoted, and the quote holds for a season. Take it down to the Stair before somebody at Westhaven hears about it.
+xp: harvesting=3400, overall=1800
+gold: 600
+[/stage]
+[stage]
+kind: talk
+npc: Garden Physick Uwe Thal
+objective: Tell Garden Physick Uwe Thal the upper slope will be replanted.
+prompt: Nine bulb plants in the ravine below the rope crossing, on ground nobody has any use for. Four have taken. If the upper slope went, four plants were what Nymara had left, and I was the only person who knew where they were.
+done: Then I can put them back where they belong, and I can tell somebody else where the ravine bed is, which I have wanted to do for two years and could not risk.
+xp: potion=3200, overall=2000
+[/stage]
+[/quest]
+
+[quest]
+key: whitehorn_snowline
+id: 22
+tier: 3
+title: The Map Nobody Wants
+region: whitehorn_range
+start: Snowline Ranger Kestrel Vane
+summary: The mountain is holding less water every year, and every ledger downstream is a promise made against the old survey.
+offer: I map the snowline twice a year and it has moved uphill both times. Mirrorhold's allocations are set from a survey taken in my grandmother's time, and every bench, terrace and cistern down there is a promise made against it. A new map does not just say the mountain changed. It says all of those promises are lies.
+accepted: One ranger with a map is a complaint. A ranger, a cold-order, a cascade series and a warden with a channel are a case. Go and collect the other three.
+complete: Four hundred years of snow, two hundred years of a frozen cascade, nineteen days of extra melt arriving before anybody is ready for it, and a bench steward with sixteen households and a list of who moves first. The Citadel took the map. They did not thank anybody. They took it.
+repeat: The channel is being widened. Sunna did not have to cut it illegally in the eight days after the thaw, which is the entire point of everything we did.
+reward_xp: harvesting=11000, ranging=9000, crafting=7000, overall=9000
+reward_gold: 3400
+reward_items: Highland Claymore=1, Frost Distillate=4
+[stage]
+kind: talk
+npc: Sister Arel
+objective: Ask Sister Arel for her order's snow series.
+prompt: Four hundred years of one unbroken measurement, kept by eleven sisters, and it says the snow comes later and leaves earlier and has for eleven years. Nobody downstream has ever asked us a single question about it.
+done: Take the series. And understand what it shames me to say: you are the fourth person to ask, and three of them were you.
+xp: overall=2800
+[/stage]
+[stage]
+kind: talk
+npc: Cascade Watcher Ilun
+objective: Ask Cascade Watcher Ilun for the freeze-and-break dates.
+prompt: Two dates a year, from one woman, for one waterfall, unbroken for two hundred and six years including the fever winter. The freeze is later, the break is earlier, and they have moved nineteen days apart in my lifetime.
+done: Nineteen days of extra meltwater arriving before the terraces are ready. Warden Sunna is the only person downstream who has ever read this.
+xp: overall=2800
+[/stage]
+[stage]
+kind: harvest
+target: Silverleaf
+amount: 20
+map: whitehorn_range
+objective: Gather 20 Silverleaf to pay for the copying of the three series.
+prompt: A copyist wants paying and neither the orders nor I have money. Silverleaf does. Twenty from the high ledges and mind where you put your feet.
+done: Twenty, and none of them off the low ledges, which have gone to bramble in four years and which is another line in the same argument.
+xp: harvesting=3400
+[/stage]
+[stage]
+kind: talk
+npc: Aqueduct Warden Sunna
+objective: Take the three series to Aqueduct Warden Sunna in Mirrorhold.
+prompt: I have asked four times for two hundred feet of channel widened before the melt. Four times costed and four times refused. I was going to cut it myself in the eight days between the thaw and the peak, unlawfully, and let them fine me afterwards.
+done: With this I do not have to. Put my name on it and put the ninth ledge's name on it too.
+xp: crafting=3600, overall=2200
+[/stage]
+[stage]
+kind: talk
+npc: Bench Steward Aurel Fane
+objective: Take the case to Bench Steward Aurel Fane on the west bench.
+prompt: My allocation is unchanged, which is true and useless: it was set when the melt came in the fifth month and now it comes in the fourth and is gone by the sixth. Same water, wrong time, and no ledger in Mirrorhold has a column for wrong time.
+done: Sixteen households and a list of who moves first. Add us to it. If the Citadel will not read a mountain, they will read a list of names.
+xp: overall=2800
+gold: 700
+[/stage]
+[/quest]
+
+
+# ================================================================= TIER 4 ==
+
+[quest]
+key: drowned_crown
+id: 23
+tier: 4
+title: The Twin Stela
+region: crownwater
+start: Drowned-Court Claimant Sesh-Va
+requires: crownwater_nets
+min_level: 25
+summary: A water claim needs two stones. One is on an islet. The other is sixty fathoms down in a drowned court.
+offer: Every Ssarathi claim has two stelae, set at either end of the channel, so neither can be moved without the other disagreeing. Mine is the upstream stone of the First Mouth. Its twin is in the court under this lake. Raise it and the matter settles in an afternoon, which is precisely why nobody will.
+accepted: Six years of petitions. I am one man with a stone. What I need is somebody who is not counting the minutes against a price.
+complete: The twin, read, recorded, and entered. The First Mouth is the senior claim in Nymara and my line holds it, and I am going to sit down now, because I have been standing up for six years.
+repeat: Two stones, one channel, one claim. The salvage houses have stopped writing. The Basilica rang the eleventh bell and nobody has been able to explain why since.
+reward_xp: harvesting=32000, magic=28000, ranging=22000, attack=18000, defense=18000, overall=26000
+reward_gold: 16000
+reward_items: Ssarathi Shell Amulet=1, Mariner's Trident=1, Memory of Rain=2
+[stage]
+kind: talk
+npc: Sunken Court Diver Teth-Sa
+objective: Ask Sunken Court Diver Teth-Sa what is actually down at the court.
+prompt: I have been down twice, nine years apart, and both times the silt was swept - in strokes, away from the doorways. Something goes down there and keeps house. Greyhaven salvors hear a ghost story. It is not a ghost story. It is housekeeping.
+done: If a thing is kept, it is not a wreck, and salvage law does not touch it. That is the argument. Now somebody has to prove the keeping.
+xp: overall=4000
+[/stage]
+[stage]
+kind: talk
+npc: Basilica Sexton Oren Vale
+objective: Ask Basilica Sexton Oren Vale about the capped shaft in the crypt.
+prompt: A shaft from the crypt into the lake with a four-hundred-year-old Stoneborn cap on it. Twice in nine years I have found the grating open. Both times I closed it and told nobody, because there are three claimants in this building.
+done: I will show you the shaft. I will not open the cap. If somebody else opens it I will write the date and I will not stop them.
+xp: overall=4200
+[/stage]
+[stage]
+kind: talk
+npc: Customs Officer Hallon Brace
+objective: Get Customs Officer Hallon Brace's record of the deep-water pieces declared as shallows.
+prompt: Three pieces this year, all declared from the shallows, all with the patina you get at sixty fathoms and nowhere else. I stamped all three, because my job is to stamp what is declared, and I wrote a note in the margin of each, because my job is also to be a nuisance.
+done: Take the margins. Somebody is already reaching that court and they have been for at least a year.
+xp: crafting=4600, overall=3000
+[/stage]
+[stage]
+kind: talk
+npc: Vess Scale
+objective: Ask Keeper Vess Scale at the Ssarathi archive vault about the unclaimed parcels.
+prompt: Nine parcels unclaimed, the oldest a hundred and eleven years. That one is a wooden case with a First Mouth water-mark on the lid, registered to a line everybody here calls extinct. Anyone who can show the line may claim it. A keeper may not solicit a claim.
+done: You are not soliciting. You are asking. The case is yours to carry to the claimant and I have wanted somebody to ask for a very long time.
+xp: overall=4600
+[/stage]
+[stage]
+kind: talk
+npc: Lineage Reader Ssiran-Ta
+objective: Have Lineage Reader Ssiran-Ta test the First Mouth claim against the Archive.
+prompt: Eleven great lines still hold unbroken water and four of them hold channels that no longer exist. The First Mouth holds water that is under Crownwater, and if its downstream twin were ever raised it would be the senior claim in Nymara.
+done: Three findings, none published, none altered. Here they are. Sesh has never asked me to change one and has never let one out of the building, and I am going to let this one out.
+xp: magic=5000, overall=3400
+[/stage]
+[stage]
+kind: kill
+target: abyssal_armored_fish
+amount: 8
+map: crownwater
+objective: Clear 8 Abyssal Armored Fishs off the shoal above the drowned court.
+prompt: Nothing has dived that shoal in nine years and the coils have taken it over. A rope crew will not go over the side while they are down there, and they are right not to.
+done: Eight off the shoal. Gero Lund's crew stopped counting the minutes long enough to notice, which from a salvage house is respect.
+xp: attack=6000, defense=6000, ranging=5000
+[/stage]
+[stage]
+kind: harvest
+target: Pearl
+amount: 24
+objective: Gather 24 Pearl to pay a dive nobody will insure.
+prompt: No insurer on this lake will write cover for sixty fathoms, so the dive is paid in advance and in something that does not need a bank. Pearl does.
+done: Twenty-four. That will buy a rope, a crew who will hold it, and their silence, which is the expensive part.
+xp: harvesting=6000
+[/stage]
+[stage]
+kind: talk
+npc: Bilge Diver Sath-Uma
+objective: Put the dive to Bilge Diver Sath-Uma at the drowned crown.
+prompt: If a keeper of my own water asked me, yes. If a salvage house asked me, no, and I would tell the whole delta which house had asked. They have asked four other divers and all four said no, and I would like to know what happens when they run out of divers to ask.
+done: Sixty fathoms. Nine minutes down, four up, and one minute at the bottom that I do not talk about. The stone is up. Read it before I change my mind about having gone.
+xp: attack=5000, defense=5000, overall=4200
+gold: 2000
+[/stage]
+[/quest]
+
+[quest]
+key: westhaven_seal
+id: 24
+tier: 4
+title: One Honest Document
+region: westhaven
+start: Captain Iven
+requires: barrens_resonance
+min_level: 30
+summary: A Westhaven house has been issuing seals it should not, and only a notary can stop it.
+offer: Four of our great houses can issue a seal that binds the whole league and one of them has started issuing seals for things it should not. Barrens crystal with a countersign that is not the Observatory's. Crownwater salvage declared as shallows. I have both files and neither will move, because to open a house seal I need a notary, and every notary in this city is paid by a house.
+accepted: Elber Wisk will swear it. He has told me so twice. What he needs is a document he did not produce himself, from outside the league, that he can hold up in session.
+complete: A Crownwater customs stamp, a shipwright's weight book, a bell-warden's ringing book and a returned-post ledger. Four documents, none of them produced inside this house, and Wisk stood up in session and ended a house seal for the first time in ninety years. The city has been very quiet since. It suits it.
+repeat: Two seals suspended, one house dissolved into its creditors, and the Custom House post no longer goes through the Factor's House. Nobody says thank you in Westhaven. They just stop obstructing you, which is the local dialect.
+reward_xp: crafting=34000, manufacturing=26000, tailoring=20000, harvesting=16000, overall=28000
+reward_gold: 18000
+reward_items: Greyhaven Compass=1, Greyhaven Storm Cape=1, Iron Rune=2
+[stage]
+kind: talk
+npc: Guild Notary Elber Wisk
+objective: Ask Guild Notary Elber Wisk exactly what he needs to swear a seal misused.
+prompt: A document I did not produce myself, from outside the league, that I can hold up. My grudge is a matter of record - my father was moved to a warehouse for asking about a seal - so anything from inside this city is a grudge and not evidence.
+done: Bring me those and I will stand up in session and end a house. I have been ready for six years and I have been very careful never to be ready out loud.
+xp: overall=6000
+[/stage]
+[stage]
+kind: talk
+npc: Guild Archivist Wenna Skell
+objective: Ask Guild Archivist Wenna Skell what evidence has worked in past swearings.
+prompt: Four swearings in ninety years, all transcribed, with the evidence each notary held up. Two customs stamps, one shipwright's weight book, and in the earliest, a bell-warden's ringing book. Wisk has never read them. He assumes the archive is closed. It is four flights up and behind me.
+done: I am extremely bad at telling important people important things. Take the transcripts. Tell him where they came from or do not; I genuinely do not mind.
+xp: crafting=6000, overall=4000
+[/stage]
+[stage]
+kind: talk
+npc: Custom House Clerk Perrit Dole
+objective: Have Custom House Clerk Perrit Dole pull the deep-salvage entries.
+prompt: Eleven entries, pulled two years ago for a Crownwater officer who wrote to Reeve Coy about them and never got a reply. He wrote to me instead. I have kept the letter.
+done: Eleven entries and one letter from outside this league. That is the first of your four.
+xp: overall=5000
+[/stage]
+[stage]
+kind: talk
+npc: Crane Foreman Bettis Roke
+objective: Get Crane Foreman Bettis Roke's real weights for the Barrens crates.
+prompt: A third over manifest on a forty-ton lift is not a rounding, it is how you get a fifth dead man. I weigh everything myself now and chalk the real weight on the crate, and somebody follows my crates around with a bucket.
+done: My own weight book, three years of it. And if you find who pays the man with the bucket, I would like a word with him in a yard of my choosing.
+xp: manufacturing=6000, overall=4000
+[/stage]
+[stage]
+kind: talk
+npc: Bell-Warden Cathis Orr
+objective: Get Bell-Warden Cathis Orr's ringing book.
+prompt: I have shifted my ringing three years running because the tide table keeps being corrected without announcement. A bell-warden shifting his ringing is the most public thing in this city and not one person has asked me why.
+done: Every change, every date, initialled. One page proves the tables were corrected three years running in silence. I am not keeping a secret. I have been waiting to be asked, which is lazier and I am aware of it.
+xp: overall=5400
+[/stage]
+[stage]
+kind: talk
+npc: Astronomers' Hall Porter Nyle
+objective: Get the uncorrected tide plates from the Astronomers' Hall porter.
+prompt: I carry the plates to the printer. I have seen both versions, corrected and un-. They are in a cupboard nobody has ever asked me about in nine years.
+done: Take them. Put them next to the bell-warden's book and the corrections stop being a rumour and start being a subtraction.
+xp: crafting=5400, overall=4000
+[/stage]
+[stage]
+kind: talk
+npc: Factor's Clerk Ivet Somer
+objective: Ask Factor's Clerk Ivet Somer about the returned-post ledger.
+prompt: The house post passes through this office, incoming and outgoing, for six years, including the Custom House's. If a notary ever swore a house seal misused, the evidence would be in the returned-post ledger, second cupboard, and I would be the person who had to explain how a stranger got at it.
+done: Second cupboard. I have not decided anything and I am going to go and stand somewhere else for a quarter of an hour.
+xp: tailoring=5000, overall=5000
+[/stage]
+[stage]
+kind: talk
+npc: Bastion Sergeant Odo Fell
+objective: Get the seal room signing book from Bastion Sergeant Odo Fell.
+prompt: Four house seals in four boxes behind one door and one sergeant, and I have asked for a second guard for six years. My book is full of legitimate entries and no way to tell which one mattered.
+done: I will hand it over the moment somebody with the standing to ask asks. A notary in session has the standing. Nobody has ever had it before, because nobody has ever got this far.
+xp: attack=5000, defense=5000, overall=5000
+gold: 2400
+[/stage]
+[/quest]
+
+[quest]
+key: water_lineage
+id: 25
+tier: 4
+title: The Ruling Under a Rebuke
+region: manymouth_delta
+start: Tide Hall Speaker Nen-Ilsa
+requires: delta_stelae
+min_level: 30
+summary: One forty-year-old finding says a boundary follows the water. It is filed as a disciplinary matter.
+offer: Four hundred households on new channels have no standing, cannot be taxed, cannot be defended, cannot be heard. I do not need a revolution. I need one sentence: that a water claim follows the water. I have written to the Archive nine times and been told no such ruling is indexed.
+accepted: Not indexed is not the same as does not exist. I have started to suspect that difference is the whole of my problem.
+complete: A finding, forty years old, made by a priest of the Ruins, filed under a hermit's name in the disciplinary series, and cited in a live case for the first time. Four hundred households have standing this morning. The Archive has not conceded anything and does not have to. It only had to be read.
+repeat: Nine channels indexed, four hundred households standing, and the Archive still says the record is the record. It is. That was always the point - somebody just had to read all of it.
+reward_xp: magic=30000, crafting=26000, potion=18000, harvesting=18000, overall=26000
+reward_gold: 15000
+reward_items: Single Edged Glaive=1, Ssarathi Frond Cape=1, Woven Charm=4
+[stage]
+kind: talk
+npc: Lily Court Steward Aa-Nesh
+objective: Get a standing petition seal from Lily Court Steward Aa-Nesh.
+prompt: Forty cases this year and every one of them is silt - one dispute arriving forty times, and I am ruling on it one household at a time because nobody will hear it whole. I have them bundled with a summary. Nine pages, addressed to nobody.
+done: A Lily Court seal, and the bundle. Take both. The seal opens the Archive and the bundle explains why you are there.
+xp: overall=5000
+[/stage]
+[stage]
+kind: talk
+npc: Archive Marshal Ren-Kaal
+objective: Present the Lily Court seal to Archive Marshal Ren-Kaal.
+prompt: Nobody enters the galleries unaccompanied, nothing leaves, every consultation is logged. A standing petition needs a court seal, and no one has asked Lily Court for one in forty years because everyone assumes this building is closed. I have never corrected them.
+done: I will walk you to any gallery in this building myself, including the disciplinary series. I have thought about saying that every year for eleven years.
+xp: overall=5400
+[/stage]
+[stage]
+kind: talk
+npc: Marchstone Priest Osu-Val
+objective: Ask Marchstone Priest Osu-Val where the marchstone finding is filed.
+prompt: Under Oru-Ves, in the disciplinary series, third gallery. I looked it up nineteen years ago and I have never told anybody and I have never used it. Cited in a live case, every delta claim on a moved channel turns overnight. I am one priest.
+done: Third gallery, under his name, as misconduct. Go and read the finding and not the rebuke.
+xp: magic=5600, overall=4000
+[/stage]
+[stage]
+kind: talk
+npc: Marchstone Hermit Oru-Ves
+objective: Get Oru-Ves's own account of moving the marchstone.
+prompt: Nine feet, forty years ago, after the ravine cut back and the old line ran through open air. Under Ssarathi law a marchstone follows the water. I did what the law says and I did it without asking, which is the part everybody remembers.
+done: Everyone quotes the rebuke. Nobody has ever once quoted the finding. Go on, then. Quote it.
+xp: overall=5200
+[/stage]
+[stage]
+kind: talk
+npc: Archive Copyist Uln-Sath
+objective: Have Archive Copyist Uln-Sath verify the finding against the field.
+prompt: Field verification was suspended forty years ago. A finding cited from a copy of a copy will be challenged in an afternoon. Nine stelae, a rubbing kit and five weeks, and I am not permitted to leave the Archive unaccompanied.
+done: Accompanied. That is the rule and you are a person. Nine stelae verified in the field, the first in four decades, and now the citation cannot be challenged on the copy.
+xp: crafting=5600, overall=4200
+[/stage]
+[stage]
+kind: harvest
+target: Lotus
+amount: 26
+map: manymouth_delta
+objective: Gather 26 Lotus for the Tide Hall's opening rite.
+prompt: A hearing that turns four hundred households opens with the rite or it is not a hearing, it is a meeting. Lotus, and it has to be cut this season.
+done: Twenty-six. The Hall has not opened with a full rite in nineteen years.
+xp: harvesting=6000, potion=4000
+[/stage]
+[stage]
+kind: kill
+target: saltmarsh_crocodile
+amount: 6
+map: manymouth_delta
+objective: Clear 6 Saltmarsh Crocodiles out of the eastern paddies in the Manymouth Delta.
+prompt: Somebody has been cutting bunds at night and the floodmaws have followed the draining water in. Sentry Ossa-Kel walks those bunds alone.
+done: Six. Ossa-Kel can walk his round again, and whoever has been cutting will have to do it in daylight.
+xp: attack=6000, defense=6000
+[/stage]
+[stage]
+kind: talk
+npc: Water-Gate Marshal Set-Kaal
+objective: Ask Water-Gate Marshal Set-Kaal to give evidence on the flow.
+prompt: I have set the gate a hand above the mark for six years and written "at mark" in the book six years running. The delta gets its water and I am a liar in a book nobody reads. If somebody audits it I am finished.
+done: Then let it be an audit I chose. I will stand up and say what I set and why, and the mark can be re-cut in daylight for once.
+xp: overall=5600
+gold: 2000
+[/stage]
+[stage]
+kind: talk
+npc: Root Landing Elder Ba-Nuun
+objective: Enter the finding on the banyan's roots at the Root Landing.
+prompt: Four hundred and eleven roots, four hundred and eleven years, and every flood and famine and ruling recorded by which root it falls between. It is the only Ssarathi record nobody disputes.
+done: Notched, between the four hundred and tenth and the four hundred and eleventh. It is on the tree now. Nobody amends a tree.
+xp: magic=5600, overall=5000
+gold: 1200
+[/stage]
+[/quest]

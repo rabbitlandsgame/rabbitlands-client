@@ -1,0 +1,5396 @@
+{
+  "schema": "eloria-runtime-binding-seed-v1",
+  "regionId": "whitehorn_range",
+  "provenance": {
+    "sourceReportSha256": "7c4fa4a19bbb89978ae2619a6368cce1f6c90c12499d196a41326e2603c7ad83",
+    "profileFiles": [
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/harvesting.txt",
+        "sha256": "b8ad7d7e1bc89c47635f4ec772fe712a4be460de9c1fb4b3621fea2a02ef17c3",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/instances/whitehorn_gauntlet_high.def",
+        "sha256": "b427f9fac7016b5c25dbceb867bdcf3d13c126f74fb297ff3b9c112292ec1703",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/instances/whitehorn_gauntlet_low.def",
+        "sha256": "fa4e08a190552dc937e89f9487513c1169285834c14b4fc76c74980c1bd9ddde",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/interactives.txt",
+        "sha256": "8b9ec53356bc91886b4b6ed8f3c30b3f628cd5955b0f3197dc24115efee5f8d8",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/maps.txt",
+        "sha256": "874627beb1c09d24ea6761924e59bb9bd569848bf92658b70083ddbf3cd0c0c9",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/npcs.txt",
+        "sha256": "2a70b78fe7c48a8a953c94cb5ffe0d331bd404a9f07fd2d913a082713d973f21",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/spawns.txt",
+        "sha256": "cd778aa02461b74ffe00391a1d806a001eeb10aa9739a52ee87eb8f4ce69c899",
+        "role": "immutable runtime identity profile"
+      }
+    ]
+  },
+  "counts": {
+    "bindings": 199,
+    "runtimePoints": 68,
+    "existingMarkerBindings": 125
+  },
+  "bindings": [
+    {
+      "id": "[\"config/eloria/instances/whitehorn_gauntlet_high.def\",\"whitehorn_gauntlet_high\",\"exit_x\",\"exit_y\",\"whitehorn_range\"]",
+      "source": {
+        "path": "config/eloria/instances/whitehorn_gauntlet_high.def",
+        "recordId": "whitehorn_gauntlet_high",
+        "line": 19,
+        "fields": [
+          "exit_x",
+          "exit_y"
+        ],
+        "oldTile": [
+          344,
+          274
+        ],
+        "amendmentReport": {
+          "path": "godot-client/world_authoring/instance-exit-binding-amendment-v1.json",
+          "sha256": "9cb75b254e371afb89a8a59fd32a5b08a8d7f32af32a560dec5aa7f9c0e55bbd"
+        }
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-instance-return-whitehorn_range"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        26.5,
+        214.6747589111328,
+        -89.5
+      ]
+    },
+    {
+      "id": "[\"config/eloria/instances/whitehorn_gauntlet_low.def\",\"whitehorn_gauntlet_low\",\"exit_x\",\"exit_y\",\"whitehorn_range\"]",
+      "source": {
+        "path": "config/eloria/instances/whitehorn_gauntlet_low.def",
+        "recordId": "whitehorn_gauntlet_low",
+        "line": 19,
+        "fields": [
+          "exit_x",
+          "exit_y"
+        ],
+        "oldTile": [
+          344,
+          274
+        ],
+        "amendmentReport": {
+          "path": "godot-client/world_authoring/instance-exit-binding-amendment-v1.json",
+          "sha256": "9cb75b254e371afb89a8a59fd32a5b08a8d7f32af32a560dec5aa7f9c0e55bbd"
+        }
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-instance-return-whitehorn_range"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        26.5,
+        214.6747589111328,
+        -89.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:135:35@259:288",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 135,
+        "oldTile": [
+          259,
+          288
+        ],
+        "recordId": "35"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-35"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:136:36@267:319",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 136,
+        "oldTile": [
+          267,
+          319
+        ],
+        "recordId": "36"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-36"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:137:37@255:275",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 137,
+        "oldTile": [
+          255,
+          275
+        ],
+        "recordId": "37"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-37"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:138:38@52:93",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 138,
+        "oldTile": [
+          52,
+          93
+        ],
+        "recordId": "38"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-38"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:139:39@225:55",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 139,
+        "oldTile": [
+          225,
+          55
+        ],
+        "recordId": "39"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-39"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:140:40@218:60",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 140,
+        "oldTile": [
+          218,
+          60
+        ],
+        "recordId": "40"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-40"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:141:41@37:198",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 141,
+        "oldTile": [
+          37,
+          198
+        ],
+        "recordId": "41"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-41"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:142:42@49:192",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 142,
+        "oldTile": [
+          49,
+          192
+        ],
+        "recordId": "42"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-42"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:143:43@349:281",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 143,
+        "oldTile": [
+          349,
+          281
+        ],
+        "recordId": "43"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-43"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.676414287111,
+        0.0,
+        -0.347038186374
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:144:44@354:289",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 144,
+        "oldTile": [
+          354,
+          289
+        ],
+        "recordId": "44"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-44"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:145:45@368:285",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 145,
+        "oldTile": [
+          368,
+          285
+        ],
+        "recordId": "45"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-45"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:146:46@357:286",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 146,
+        "oldTile": [
+          357,
+          286
+        ],
+        "recordId": "46"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-46"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:147:47@55:101",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 147,
+        "oldTile": [
+          55,
+          101
+        ],
+        "recordId": "47"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-47"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:148:48@209:72",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 148,
+        "oldTile": [
+          209,
+          72
+        ],
+        "recordId": "48"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-48"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:149:49@191:69",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 149,
+        "oldTile": [
+          191,
+          69
+        ],
+        "recordId": "49"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-49"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:150:50@65:140",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 150,
+        "oldTile": [
+          65,
+          140
+        ],
+        "recordId": "50"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-50"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:151:51@320:84",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 151,
+        "oldTile": [
+          320,
+          84
+        ],
+        "recordId": "51"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-51"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:152:52@281:284",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 152,
+        "oldTile": [
+          281,
+          284
+        ],
+        "recordId": "52"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-52"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:153:53@373:303",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 153,
+        "oldTile": [
+          373,
+          303
+        ],
+        "recordId": "53"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-53"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:154:54@343:264",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 154,
+        "oldTile": [
+          343,
+          264
+        ],
+        "recordId": "54"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-54"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:155:55@339:285",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 155,
+        "oldTile": [
+          339,
+          285
+        ],
+        "recordId": "55"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-55"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:156:56@328:291",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 156,
+        "oldTile": [
+          328,
+          291
+        ],
+        "recordId": "56"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-56"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:157:57@46:270",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 157,
+        "oldTile": [
+          46,
+          270
+        ],
+        "recordId": "57"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-57"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:158:58@342:278",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 158,
+        "oldTile": [
+          342,
+          278
+        ],
+        "recordId": "58"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-58"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:159:59@343:310",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 159,
+        "oldTile": [
+          343,
+          310
+        ],
+        "recordId": "59"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-59"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:160:60@313:284",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 160,
+        "oldTile": [
+          313,
+          284
+        ],
+        "recordId": "60"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-60"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:161:61@322:288",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 161,
+        "oldTile": [
+          322,
+          288
+        ],
+        "recordId": "61"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-61"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:162:62@315:288",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 162,
+        "oldTile": [
+          315,
+          288
+        ],
+        "recordId": "62"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-62"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:438:63@249:294",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 438,
+        "oldTile": [
+          249,
+          294
+        ],
+        "recordId": "63"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-63"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:439:64@244:271",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 439,
+        "oldTile": [
+          244,
+          271
+        ],
+        "recordId": "64"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-64"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:440:65@243:284",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 440,
+        "oldTile": [
+          243,
+          284
+        ],
+        "recordId": "65"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-65"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:441:66@199:286",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 441,
+        "oldTile": [
+          199,
+          286
+        ],
+        "recordId": "66"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-66"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:442:67@369:312",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 442,
+        "oldTile": [
+          369,
+          312
+        ],
+        "recordId": "67"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-67"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:443:68@357:307",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 443,
+        "oldTile": [
+          357,
+          307
+        ],
+        "recordId": "68"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-68"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:444:69@358:290",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 444,
+        "oldTile": [
+          358,
+          290
+        ],
+        "recordId": "69"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-69"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:445:70@363:304",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 445,
+        "oldTile": [
+          363,
+          304
+        ],
+        "recordId": "70"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-70"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:446:71@40:322",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 446,
+        "oldTile": [
+          40,
+          322
+        ],
+        "recordId": "71"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-71"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:447:72@61:285",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 447,
+        "oldTile": [
+          61,
+          285
+        ],
+        "recordId": "72"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-72"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:448:73@47:262",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 448,
+        "oldTile": [
+          47,
+          262
+        ],
+        "recordId": "73"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-73"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:449:74@355:301",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 449,
+        "oldTile": [
+          355,
+          301
+        ],
+        "recordId": "74"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-74"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:450:75@322:283",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 450,
+        "oldTile": [
+          322,
+          283
+        ],
+        "recordId": "75"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-75"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:451:76@322:278",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 451,
+        "oldTile": [
+          322,
+          278
+        ],
+        "recordId": "76"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-76"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:452:77@343:286",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 452,
+        "oldTile": [
+          343,
+          286
+        ],
+        "recordId": "77"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-77"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:453:78@72:104",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 453,
+        "oldTile": [
+          72,
+          104
+        ],
+        "recordId": "78"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-78"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:454:79@47:94",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 454,
+        "oldTile": [
+          47,
+          94
+        ],
+        "recordId": "79"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-79"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:455:80@51:140",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 455,
+        "oldTile": [
+          51,
+          140
+        ],
+        "recordId": "80"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-80"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:456:81@309:101",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 456,
+        "oldTile": [
+          309,
+          101
+        ],
+        "recordId": "81"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-81"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:457:82@358:300",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 457,
+        "oldTile": [
+          358,
+          300
+        ],
+        "recordId": "82"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-82"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:458:83@364:285",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 458,
+        "oldTile": [
+          364,
+          285
+        ],
+        "recordId": "83"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-83"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:459:84@309:286",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 459,
+        "oldTile": [
+          309,
+          286
+        ],
+        "recordId": "84"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-84"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:460:85@30:306",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 460,
+        "oldTile": [
+          30,
+          306
+        ],
+        "recordId": "85"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-85"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:461:86@324:266",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 461,
+        "oldTile": [
+          324,
+          266
+        ],
+        "recordId": "86"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-86"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:462:87@327:287",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 462,
+        "oldTile": [
+          327,
+          287
+        ],
+        "recordId": "87"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-87"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:463:88@225:68",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 463,
+        "oldTile": [
+          225,
+          68
+        ],
+        "recordId": "88"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-88"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:464:89@216:68",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 464,
+        "oldTile": [
+          216,
+          68
+        ],
+        "recordId": "89"
+      },
+      "marker": {
+        "section": "harvestables",
+        "id": "whitehorn-resource-89"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "harvesting.txt:465:90@277:288",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 465,
+        "oldTile": [
+          277,
+          288
+        ],
+        "recordId": "90"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-90"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -11.5,
+        222.934524536,
+        -83.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:466:91@285:283",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 466,
+        "oldTile": [
+          285,
+          283
+        ],
+        "recordId": "91"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-91"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -5.5,
+        221.03793335,
+        -78.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:467:92@368:289",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 467,
+        "oldTile": [
+          368,
+          289
+        ],
+        "recordId": "92"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-92"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        36.5,
+        217.780990601,
+        -110.5
+      ]
+    },
+    {
+      "id": "interactives.txt:551:500@330:266",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 551,
+        "oldTile": [
+          330,
+          266
+        ],
+        "recordId": "500"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-adit-mouth"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        -1.6800652448,
+        0.0,
+        -0.575023750516
+      ],
+      "aliases": [
+        "maps.txt:620:door:whitehorn_range->mirrorhold_secrets@330:266",
+        "maps.txt:635:return:mirrorhold_secrets->whitehorn_range@330:266"
+      ]
+    },
+    {
+      "id": "interactives.txt:552:501@171:196",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 552,
+        "oldTile": [
+          171,
+          196
+        ],
+        "recordId": "501"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-bridge-butts"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        1.04787336906,
+        0.0,
+        -1.71370115796
+      ],
+      "aliases": [
+        "maps.txt:528:door:whitehorn_range->whitehorn_range_secrets@171:196",
+        "maps.txt:549:return:whitehorn_range_secrets->whitehorn_range@171:196"
+      ]
+    },
+    {
+      "id": "interactives.txt:553:502@60:301",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 553,
+        "oldTile": [
+          60,
+          301
+        ],
+        "recordId": "502"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cairn-focus"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.982912746224,
+        0.0,
+        0.768465262174
+      ],
+      "aliases": [
+        "maps.txt:529:door:whitehorn_range->whitehorn_range_secrets@60:301",
+        "maps.txt:552:return:whitehorn_range_secrets->whitehorn_range@60:301"
+      ]
+    },
+    {
+      "id": "interactives.txt:554:503@154:96",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 554,
+        "oldTile": [
+          154,
+          96
+        ],
+        "recordId": "503"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cairn-garden"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        1.28549313776,
+        0.0,
+        -0.197440001617
+      ],
+      "aliases": [
+        "maps.txt:530:door:whitehorn_range->whitehorn_range_secrets@154:96",
+        "maps.txt:543:return:whitehorn_range_secrets->whitehorn_range@154:96"
+      ]
+    },
+    {
+      "id": "interactives.txt:555:504@240:307",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 555,
+        "oldTile": [
+          240,
+          307
+        ],
+        "recordId": "504"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cascade-spring"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        -0.157176396842,
+        0.0,
+        7.41342355703
+      ],
+      "aliases": [
+        "maps.txt:531:door:whitehorn_range->whitehorn_range_secrets@240:307",
+        "maps.txt:548:return:whitehorn_range_secrets->whitehorn_range@240:307"
+      ]
+    },
+    {
+      "id": "interactives.txt:556:505@121:65",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 556,
+        "oldTile": [
+          121,
+          65
+        ],
+        "recordId": "505"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-gate-cache"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        -1.22293259544,
+        0.0,
+        -1.12079591725
+      ],
+      "aliases": [
+        "maps.txt:532:door:whitehorn_range->whitehorn_range_secrets@121:65",
+        "maps.txt:544:return:whitehorn_range_secrets->whitehorn_range@121:65"
+      ]
+    },
+    {
+      "id": "interactives.txt:557:506@44:182",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 557,
+        "oldTile": [
+          44,
+          182
+        ],
+        "recordId": "506"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-ice-well"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        -2.57457947756,
+        0.0,
+        -1.44842016315
+      ],
+      "aliases": [
+        "maps.txt:533:door:whitehorn_range->whitehorn_range_secrets@44:182",
+        "maps.txt:551:return:whitehorn_range_secrets->whitehorn_range@44:182"
+      ]
+    },
+    {
+      "id": "interactives.txt:558:507@173:376",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 558,
+        "oldTile": [
+          173,
+          376
+        ],
+        "recordId": "507"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-icebore"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        1.94377552399,
+        0.0,
+        1.58316973156
+      ],
+      "aliases": [
+        "maps.txt:534:door:whitehorn_range->whitehorn_range_secrets@173:376",
+        "maps.txt:553:return:whitehorn_range_secrets->whitehorn_range@173:376"
+      ]
+    },
+    {
+      "id": "interactives.txt:559:508@286:218",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 559,
+        "oldTile": [
+          286,
+          218
+        ],
+        "recordId": "508"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-ram-pit"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.898924754107,
+        0.0,
+        -2.07732418432
+      ],
+      "aliases": [
+        "maps.txt:535:door:whitehorn_range->whitehorn_range_secrets@286:218",
+        "maps.txt:546:return:whitehorn_range_secrets->whitehorn_range@286:218"
+      ]
+    },
+    {
+      "id": "interactives.txt:560:509@364:292",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 560,
+        "oldTile": [
+          364,
+          292
+        ],
+        "recordId": "509"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-shrine-school"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        -0.232525747267,
+        0.0,
+        -0.184221297301
+      ],
+      "aliases": [
+        "maps.txt:536:door:whitehorn_range->whitehorn_range_secrets@364:292",
+        "maps.txt:547:return:whitehorn_range_secrets->whitehorn_range@364:292"
+      ]
+    },
+    {
+      "id": "interactives.txt:561:510@236:289",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 561,
+        "oldTile": [
+          236,
+          289
+        ],
+        "recordId": "510"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-silver-hollow"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        1.03481095963,
+        0.0,
+        2.36484076721
+      ],
+      "aliases": [
+        "maps.txt:537:door:whitehorn_range->whitehorn_range_secrets@236:289",
+        "maps.txt:542:return:whitehorn_range_secrets->whitehorn_range@236:289"
+      ]
+    },
+    {
+      "id": "interactives.txt:562:511@209:359",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 562,
+        "oldTile": [
+          209,
+          359
+        ],
+        "recordId": "511"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-temple-eyrie"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        2.27636147592,
+        0.0,
+        -1.29353611064
+      ],
+      "aliases": [
+        "maps.txt:538:door:whitehorn_range->whitehorn_range_secrets@209:359",
+        "maps.txt:556:return:whitehorn_range_secrets->whitehorn_range@209:359"
+      ]
+    },
+    {
+      "id": "interactives.txt:563:512@243:353",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 563,
+        "oldTile": [
+          243,
+          353
+        ],
+        "recordId": "512"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-temple-vault"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        2.16465474223,
+        0.0,
+        0.0664328639371
+      ],
+      "aliases": [
+        "maps.txt:539:door:whitehorn_range->whitehorn_range_secrets@243:353",
+        "maps.txt:545:return:whitehorn_range_secrets->whitehorn_range@243:353"
+      ]
+    },
+    {
+      "id": "interactives.txt:564:513@39:263",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 564,
+        "oldTile": [
+          39,
+          263
+        ],
+        "recordId": "513"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-waystone"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        1.40421982391,
+        0.0,
+        0.10378163335
+      ],
+      "aliases": [
+        "maps.txt:540:door:whitehorn_range->whitehorn_range_secrets@39:263",
+        "maps.txt:554:return:whitehorn_range_secrets->whitehorn_range@39:263"
+      ]
+    },
+    {
+      "id": "interactives.txt:74:13@111:73",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 74,
+        "oldTile": [
+          111,
+          73
+        ],
+        "recordId": "13"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-13"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -32.5,
+        168.99319458,
+        156.5
+      ]
+    },
+    {
+      "id": "interactives.txt:75:14@94:79",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 75,
+        "oldTile": [
+          94,
+          79
+        ],
+        "recordId": "14"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-14"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -46.5,
+        168.353942871,
+        160.5
+      ]
+    },
+    {
+      "id": "interactives.txt:76:15@128:82",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 76,
+        "oldTile": [
+          128,
+          82
+        ],
+        "recordId": "15"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-15"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -25.5,
+        169.0,
+        142.5
+      ]
+    },
+    {
+      "id": "interactives.txt:77:16@129:71",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 77,
+        "oldTile": [
+          129,
+          71
+        ],
+        "recordId": "16"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-16"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -19.5,
+        169.0,
+        150.5
+      ]
+    },
+    {
+      "id": "maps.txt:1111:return:whitehorn_gauntlet->whitehorn_range@344:274",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1111,
+        "oldTile": [
+          344,
+          274
+        ],
+        "recordId": "800"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-whitehorn-gauntlets"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:1112:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1122:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1123:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1133:return:whitehorn_gauntlet_3->whitehorn_range@344:274",
+        "maps.txt:1134:return:whitehorn_gauntlet_3->whitehorn_range@344:274"
+      ],
+      "initialPosition": [
+        27.5,
+        214.649002075,
+        -89.5
+      ]
+    },
+    {
+      "id": "maps.txt:1112:return:whitehorn_gauntlet->whitehorn_range@344:274",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1112,
+        "oldTile": [
+          344,
+          274
+        ],
+        "recordId": "799"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-whitehorn-gauntlets"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:1111:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1122:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1123:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1133:return:whitehorn_gauntlet_3->whitehorn_range@344:274",
+        "maps.txt:1134:return:whitehorn_gauntlet_3->whitehorn_range@344:274"
+      ],
+      "initialPosition": [
+        27.5,
+        214.649002075,
+        -89.5
+      ]
+    },
+    {
+      "id": "maps.txt:1122:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1122,
+        "oldTile": [
+          344,
+          274
+        ],
+        "recordId": "800"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-whitehorn-gauntlets"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:1111:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1112:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1123:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1133:return:whitehorn_gauntlet_3->whitehorn_range@344:274",
+        "maps.txt:1134:return:whitehorn_gauntlet_3->whitehorn_range@344:274"
+      ],
+      "initialPosition": [
+        27.5,
+        214.649002075,
+        -89.5
+      ]
+    },
+    {
+      "id": "maps.txt:1123:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1123,
+        "oldTile": [
+          344,
+          274
+        ],
+        "recordId": "799"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-whitehorn-gauntlets"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:1111:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1112:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1122:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1133:return:whitehorn_gauntlet_3->whitehorn_range@344:274",
+        "maps.txt:1134:return:whitehorn_gauntlet_3->whitehorn_range@344:274"
+      ],
+      "initialPosition": [
+        27.5,
+        214.649002075,
+        -89.5
+      ]
+    },
+    {
+      "id": "maps.txt:1133:return:whitehorn_gauntlet_3->whitehorn_range@344:274",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1133,
+        "oldTile": [
+          344,
+          274
+        ],
+        "recordId": "800"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-whitehorn-gauntlets"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:1111:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1112:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1122:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1123:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1134:return:whitehorn_gauntlet_3->whitehorn_range@344:274"
+      ],
+      "initialPosition": [
+        27.5,
+        214.649002075,
+        -89.5
+      ]
+    },
+    {
+      "id": "maps.txt:1134:return:whitehorn_gauntlet_3->whitehorn_range@344:274",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1134,
+        "oldTile": [
+          344,
+          274
+        ],
+        "recordId": "799"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-whitehorn-gauntlets"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:1111:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1112:return:whitehorn_gauntlet->whitehorn_range@344:274",
+        "maps.txt:1122:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1123:return:whitehorn_gauntlet_2->whitehorn_range@344:274",
+        "maps.txt:1133:return:whitehorn_gauntlet_3->whitehorn_range@344:274"
+      ],
+      "initialPosition": [
+        27.5,
+        214.649002075,
+        -89.5
+      ]
+    },
+    {
+      "id": "maps.txt:513:door:whitehorn_range->whitehorn_glacier_temple@96:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 513,
+        "oldTile": [
+          96,
+          81
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "gate-store-door"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:514:return:whitehorn_glacier_temple->whitehorn_range@94:81"
+      ]
+    },
+    {
+      "id": "maps.txt:514:return:whitehorn_glacier_temple->whitehorn_range@94:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 514,
+        "oldTile": [
+          94,
+          81
+        ],
+        "recordId": "234:14"
+      },
+      "marker": {
+        "section": "portals",
+        "id": "gate-store-door"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -2.0,
+        0.0,
+        1.0
+      ],
+      "aliases": [
+        "maps.txt:513:door:whitehorn_range->whitehorn_glacier_temple@96:81"
+      ]
+    },
+    {
+      "id": "maps.txt:515:door:whitehorn_range->whitehorn_glacier_temple@374:296",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 515,
+        "oldTile": [
+          374,
+          296
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "snowline-cell-door"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:516:return:whitehorn_glacier_temple->whitehorn_range@372:296"
+      ]
+    },
+    {
+      "id": "maps.txt:516:return:whitehorn_glacier_temple->whitehorn_range@372:296",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 516,
+        "oldTile": [
+          372,
+          296
+        ],
+        "recordId": "234:85"
+      },
+      "marker": {
+        "section": "portals",
+        "id": "snowline-cell-door"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -2.0,
+        0.0,
+        1.0
+      ],
+      "aliases": [
+        "maps.txt:515:door:whitehorn_range->whitehorn_glacier_temple@374:296"
+      ]
+    },
+    {
+      "id": "maps.txt:517:door:whitehorn_range->whitehorn_glacier_temple@35:270",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 517,
+        "oldTile": [
+          35,
+          270
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "west-watch-cave-mouth"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:518:return:whitehorn_glacier_temple->whitehorn_range@35:268"
+      ]
+    },
+    {
+      "id": "maps.txt:518:return:whitehorn_glacier_temple->whitehorn_range@35:268",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 518,
+        "oldTile": [
+          35,
+          268
+        ],
+        "recordId": "234:179"
+      },
+      "marker": {
+        "section": "portals",
+        "id": "west-watch-cave-mouth"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "aliases": [
+        "maps.txt:517:door:whitehorn_range->whitehorn_glacier_temple@35:270"
+      ]
+    },
+    {
+      "id": "maps.txt:519:door:whitehorn_range->whitehorn_glacier_temple@55:304",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 519,
+        "oldTile": [
+          55,
+          304
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "whitehorn-barrow-door"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:520:return:whitehorn_glacier_temple->whitehorn_range@53:304"
+      ]
+    },
+    {
+      "id": "maps.txt:520:return:whitehorn_glacier_temple->whitehorn_range@53:304",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 520,
+        "oldTile": [
+          53,
+          304
+        ],
+        "recordId": "30:58"
+      },
+      "marker": {
+        "section": "portals",
+        "id": "whitehorn-barrow-door"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:519:door:whitehorn_range->whitehorn_glacier_temple@55:304"
+      ]
+    },
+    {
+      "id": "maps.txt:521:door:whitehorn_range->whitehorn_glacier_temple@226:358",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 521,
+        "oldTile": [
+          226,
+          358
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "whitehorn-glacier-temple-door"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:522:return:whitehorn_glacier_temple->whitehorn_range@224:358"
+      ]
+    },
+    {
+      "id": "maps.txt:522:return:whitehorn_glacier_temple->whitehorn_range@224:358",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 522,
+        "oldTile": [
+          224,
+          358
+        ],
+        "recordId": "34:191"
+      },
+      "marker": {
+        "section": "portals",
+        "id": "whitehorn-glacier-temple-door"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -2.0,
+        0.0,
+        1.0
+      ],
+      "aliases": [
+        "maps.txt:521:door:whitehorn_range->whitehorn_glacier_temple@226:358"
+      ]
+    },
+    {
+      "id": "maps.txt:523:door:whitehorn_range->whitehorn_glacier_temple@41:188",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 523,
+        "oldTile": [
+          41,
+          188
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "whitehorn-ice-cave-mouth"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:524:return:whitehorn_glacier_temple->whitehorn_range@39:188"
+      ]
+    },
+    {
+      "id": "maps.txt:524:return:whitehorn_glacier_temple->whitehorn_range@39:188",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 524,
+        "oldTile": [
+          39,
+          188
+        ],
+        "recordId": "124:92"
+      },
+      "marker": {
+        "section": "portals",
+        "id": "whitehorn-ice-cave-mouth"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -2.0,
+        0.0,
+        1.0
+      ],
+      "aliases": [
+        "maps.txt:523:door:whitehorn_range->whitehorn_glacier_temple@41:188"
+      ]
+    },
+    {
+      "id": "maps.txt:525:door:whitehorn_range->whitehorn_glacier_temple@336:269",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 525,
+        "oldTile": [
+          336,
+          269
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "whitehorn-mine-adit"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [
+        "maps.txt:526:return:whitehorn_glacier_temple->whitehorn_range@334:269"
+      ]
+    },
+    {
+      "id": "maps.txt:526:return:whitehorn_glacier_temple->whitehorn_range@334:269",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 526,
+        "oldTile": [
+          334,
+          269
+        ],
+        "recordId": "118:184"
+      },
+      "marker": {
+        "section": "portals",
+        "id": "whitehorn-mine-adit"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -1.0,
+        0.0,
+        1.0
+      ],
+      "aliases": [
+        "maps.txt:525:door:whitehorn_range->whitehorn_glacier_temple@336:269"
+      ]
+    },
+    {
+      "id": "maps.txt:528:door:whitehorn_range->whitehorn_range_secrets@171:196",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 528,
+        "oldTile": [
+          171,
+          196
+        ],
+        "recordId": "501"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-bridge-butts"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        1.04787336906,
+        0.0,
+        -1.71370115796
+      ],
+      "aliases": [
+        "interactives.txt:552:501@171:196",
+        "maps.txt:549:return:whitehorn_range_secrets->whitehorn_range@171:196"
+      ]
+    },
+    {
+      "id": "maps.txt:529:door:whitehorn_range->whitehorn_range_secrets@60:301",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 529,
+        "oldTile": [
+          60,
+          301
+        ],
+        "recordId": "502"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cairn-focus"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.982912746224,
+        0.0,
+        0.768465262174
+      ],
+      "aliases": [
+        "interactives.txt:553:502@60:301",
+        "maps.txt:552:return:whitehorn_range_secrets->whitehorn_range@60:301"
+      ]
+    },
+    {
+      "id": "maps.txt:530:door:whitehorn_range->whitehorn_range_secrets@154:96",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 530,
+        "oldTile": [
+          154,
+          96
+        ],
+        "recordId": "503"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cairn-garden"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        1.28549313776,
+        0.0,
+        -0.197440001617
+      ],
+      "aliases": [
+        "interactives.txt:554:503@154:96",
+        "maps.txt:543:return:whitehorn_range_secrets->whitehorn_range@154:96"
+      ]
+    },
+    {
+      "id": "maps.txt:531:door:whitehorn_range->whitehorn_range_secrets@240:307",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 531,
+        "oldTile": [
+          240,
+          307
+        ],
+        "recordId": "504"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cascade-spring"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        -0.157176396842,
+        0.0,
+        7.41342355703
+      ],
+      "aliases": [
+        "interactives.txt:555:504@240:307",
+        "maps.txt:548:return:whitehorn_range_secrets->whitehorn_range@240:307"
+      ]
+    },
+    {
+      "id": "maps.txt:532:door:whitehorn_range->whitehorn_range_secrets@121:65",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 532,
+        "oldTile": [
+          121,
+          65
+        ],
+        "recordId": "505"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-gate-cache"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        -1.22293259544,
+        0.0,
+        -1.12079591725
+      ],
+      "aliases": [
+        "interactives.txt:556:505@121:65",
+        "maps.txt:544:return:whitehorn_range_secrets->whitehorn_range@121:65"
+      ]
+    },
+    {
+      "id": "maps.txt:533:door:whitehorn_range->whitehorn_range_secrets@44:182",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 533,
+        "oldTile": [
+          44,
+          182
+        ],
+        "recordId": "506"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-ice-well"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        -2.57457947756,
+        0.0,
+        -1.44842016315
+      ],
+      "aliases": [
+        "interactives.txt:557:506@44:182",
+        "maps.txt:551:return:whitehorn_range_secrets->whitehorn_range@44:182"
+      ]
+    },
+    {
+      "id": "maps.txt:534:door:whitehorn_range->whitehorn_range_secrets@173:376",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 534,
+        "oldTile": [
+          173,
+          376
+        ],
+        "recordId": "507"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-icebore"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        1.94377552399,
+        0.0,
+        1.58316973156
+      ],
+      "aliases": [
+        "interactives.txt:558:507@173:376",
+        "maps.txt:553:return:whitehorn_range_secrets->whitehorn_range@173:376"
+      ]
+    },
+    {
+      "id": "maps.txt:535:door:whitehorn_range->whitehorn_range_secrets@286:218",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 535,
+        "oldTile": [
+          286,
+          218
+        ],
+        "recordId": "508"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-ram-pit"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.898924754107,
+        0.0,
+        -2.07732418432
+      ],
+      "aliases": [
+        "interactives.txt:559:508@286:218",
+        "maps.txt:546:return:whitehorn_range_secrets->whitehorn_range@286:218"
+      ]
+    },
+    {
+      "id": "maps.txt:536:door:whitehorn_range->whitehorn_range_secrets@364:292",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 536,
+        "oldTile": [
+          364,
+          292
+        ],
+        "recordId": "509"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-shrine-school"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        -0.232525747267,
+        0.0,
+        -0.184221297301
+      ],
+      "aliases": [
+        "interactives.txt:560:509@364:292",
+        "maps.txt:547:return:whitehorn_range_secrets->whitehorn_range@364:292"
+      ]
+    },
+    {
+      "id": "maps.txt:537:door:whitehorn_range->whitehorn_range_secrets@236:289",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 537,
+        "oldTile": [
+          236,
+          289
+        ],
+        "recordId": "510"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-silver-hollow"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        1.03481095963,
+        0.0,
+        2.36484076721
+      ],
+      "aliases": [
+        "interactives.txt:561:510@236:289",
+        "maps.txt:542:return:whitehorn_range_secrets->whitehorn_range@236:289"
+      ]
+    },
+    {
+      "id": "maps.txt:538:door:whitehorn_range->whitehorn_range_secrets@209:359",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 538,
+        "oldTile": [
+          209,
+          359
+        ],
+        "recordId": "511"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-temple-eyrie"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        2.27636147592,
+        0.0,
+        -1.29353611064
+      ],
+      "aliases": [
+        "interactives.txt:562:511@209:359",
+        "maps.txt:556:return:whitehorn_range_secrets->whitehorn_range@209:359"
+      ]
+    },
+    {
+      "id": "maps.txt:539:door:whitehorn_range->whitehorn_range_secrets@243:353",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 539,
+        "oldTile": [
+          243,
+          353
+        ],
+        "recordId": "512"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-temple-vault"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        2.16465474223,
+        0.0,
+        0.0664328639371
+      ],
+      "aliases": [
+        "interactives.txt:563:512@243:353",
+        "maps.txt:545:return:whitehorn_range_secrets->whitehorn_range@243:353"
+      ]
+    },
+    {
+      "id": "maps.txt:540:door:whitehorn_range->whitehorn_range_secrets@39:263",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 540,
+        "oldTile": [
+          39,
+          263
+        ],
+        "recordId": "513"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-waystone"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        1.40421982391,
+        0.0,
+        0.10378163335
+      ],
+      "aliases": [
+        "interactives.txt:564:513@39:263",
+        "maps.txt:554:return:whitehorn_range_secrets->whitehorn_range@39:263"
+      ]
+    },
+    {
+      "id": "maps.txt:542:return:whitehorn_range_secrets->whitehorn_range@236:289",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 542,
+        "oldTile": [
+          236,
+          289
+        ],
+        "recordId": "159:170"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-silver-hollow"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        1.03481095963,
+        0.0,
+        2.36484076721
+      ],
+      "aliases": [
+        "interactives.txt:561:510@236:289",
+        "maps.txt:537:door:whitehorn_range->whitehorn_range_secrets@236:289"
+      ]
+    },
+    {
+      "id": "maps.txt:543:return:whitehorn_range_secrets->whitehorn_range@154:96",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 543,
+        "oldTile": [
+          154,
+          96
+        ],
+        "recordId": "230:170"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cairn-garden"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        1.28549313776,
+        0.0,
+        -0.197440001617
+      ],
+      "aliases": [
+        "interactives.txt:554:503@154:96",
+        "maps.txt:530:door:whitehorn_range->whitehorn_range_secrets@154:96"
+      ]
+    },
+    {
+      "id": "maps.txt:544:return:whitehorn_range_secrets->whitehorn_range@121:65",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 544,
+        "oldTile": [
+          121,
+          65
+        ],
+        "recordId": "154:26"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-gate-cache"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -1.22293259544,
+        0.0,
+        -1.12079591725
+      ],
+      "aliases": [
+        "interactives.txt:556:505@121:65",
+        "maps.txt:532:door:whitehorn_range->whitehorn_range_secrets@121:65"
+      ]
+    },
+    {
+      "id": "maps.txt:545:return:whitehorn_range_secrets->whitehorn_range@243:353",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 545,
+        "oldTile": [
+          243,
+          353
+        ],
+        "recordId": "227:26"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-temple-vault"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        2.16465474223,
+        0.0,
+        0.0664328639371
+      ],
+      "aliases": [
+        "interactives.txt:563:512@243:353",
+        "maps.txt:539:door:whitehorn_range->whitehorn_range_secrets@243:353"
+      ]
+    },
+    {
+      "id": "maps.txt:546:return:whitehorn_range_secrets->whitehorn_range@286:218",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 546,
+        "oldTile": [
+          286,
+          218
+        ],
+        "recordId": "301:170"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-ram-pit"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.898924754107,
+        0.0,
+        -2.07732418432
+      ],
+      "aliases": [
+        "interactives.txt:559:508@286:218",
+        "maps.txt:535:door:whitehorn_range->whitehorn_range_secrets@286:218"
+      ]
+    },
+    {
+      "id": "maps.txt:547:return:whitehorn_range_secrets->whitehorn_range@364:292",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 547,
+        "oldTile": [
+          364,
+          292
+        ],
+        "recordId": "300:98"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-shrine-school"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -0.232525747267,
+        0.0,
+        -0.184221297301
+      ],
+      "aliases": [
+        "interactives.txt:560:509@364:292",
+        "maps.txt:536:door:whitehorn_range->whitehorn_range_secrets@364:292"
+      ]
+    },
+    {
+      "id": "maps.txt:548:return:whitehorn_range_secrets->whitehorn_range@240:307",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 548,
+        "oldTile": [
+          240,
+          307
+        ],
+        "recordId": "11:26"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cascade-spring"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -0.157176396842,
+        0.0,
+        7.41342355703
+      ],
+      "aliases": [
+        "interactives.txt:555:504@240:307",
+        "maps.txt:531:door:whitehorn_range->whitehorn_range_secrets@240:307"
+      ]
+    },
+    {
+      "id": "maps.txt:549:return:whitehorn_range_secrets->whitehorn_range@171:196",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 549,
+        "oldTile": [
+          171,
+          196
+        ],
+        "recordId": "79:170"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-bridge-butts"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        1.04787336906,
+        0.0,
+        -1.71370115796
+      ],
+      "aliases": [
+        "interactives.txt:552:501@171:196",
+        "maps.txt:528:door:whitehorn_range->whitehorn_range_secrets@171:196"
+      ]
+    },
+    {
+      "id": "maps.txt:551:return:whitehorn_range_secrets->whitehorn_range@44:182",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 551,
+        "oldTile": [
+          44,
+          182
+        ],
+        "recordId": "84:98"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-ice-well"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -2.57457947756,
+        0.0,
+        -1.44842016315
+      ],
+      "aliases": [
+        "interactives.txt:557:506@44:182",
+        "maps.txt:533:door:whitehorn_range->whitehorn_range_secrets@44:182"
+      ]
+    },
+    {
+      "id": "maps.txt:552:return:whitehorn_range_secrets->whitehorn_range@60:301",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 552,
+        "oldTile": [
+          60,
+          301
+        ],
+        "recordId": "227:98"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-cairn-focus"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.982912746224,
+        0.0,
+        0.768465262174
+      ],
+      "aliases": [
+        "interactives.txt:553:502@60:301",
+        "maps.txt:529:door:whitehorn_range->whitehorn_range_secrets@60:301"
+      ]
+    },
+    {
+      "id": "maps.txt:553:return:whitehorn_range_secrets->whitehorn_range@173:376",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 553,
+        "oldTile": [
+          173,
+          376
+        ],
+        "recordId": "6:170"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-icebore"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        1.94377552399,
+        0.0,
+        1.58316973156
+      ],
+      "aliases": [
+        "interactives.txt:558:507@173:376",
+        "maps.txt:534:door:whitehorn_range->whitehorn_range_secrets@173:376"
+      ]
+    },
+    {
+      "id": "maps.txt:554:return:whitehorn_range_secrets->whitehorn_range@39:263",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 554,
+        "oldTile": [
+          39,
+          263
+        ],
+        "recordId": "156:98"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-waystone"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        1.40421982391,
+        0.0,
+        0.10378163335
+      ],
+      "aliases": [
+        "interactives.txt:564:513@39:263",
+        "maps.txt:540:door:whitehorn_range->whitehorn_range_secrets@39:263"
+      ]
+    },
+    {
+      "id": "maps.txt:556:return:whitehorn_range_secrets->whitehorn_range@209:359",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 556,
+        "oldTile": [
+          209,
+          359
+        ],
+        "recordId": "297:26"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-temple-eyrie"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        2.27636147592,
+        0.0,
+        -1.29353611064
+      ],
+      "aliases": [
+        "interactives.txt:562:511@209:359",
+        "maps.txt:538:door:whitehorn_range->whitehorn_range_secrets@209:359"
+      ]
+    },
+    {
+      "id": "maps.txt:620:door:whitehorn_range->mirrorhold_secrets@330:266",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 620,
+        "oldTile": [
+          330,
+          266
+        ],
+        "recordId": "500"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-adit-mouth"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        -1.6800652448,
+        0.0,
+        -0.575023750516
+      ],
+      "aliases": [
+        "interactives.txt:551:500@330:266",
+        "maps.txt:635:return:mirrorhold_secrets->whitehorn_range@330:266"
+      ]
+    },
+    {
+      "id": "maps.txt:635:return:mirrorhold_secrets->whitehorn_range@330:266",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 635,
+        "oldTile": [
+          330,
+          266
+        ],
+        "recordId": "6:106"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-horn-adit-mouth"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        -1.6800652448,
+        0.0,
+        -0.575023750516
+      ],
+      "aliases": [
+        "interactives.txt:551:500@330:266",
+        "maps.txt:620:door:whitehorn_range->mirrorhold_secrets@330:266"
+      ]
+    },
+    {
+      "id": "npcs.txt:316:Hesk Varne@332:261",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 316,
+        "oldTile": [
+          332,
+          261
+        ],
+        "recordId": "Hesk Varne"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-hesk-varne"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:69:Sister Arel@102:79",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 69,
+        "oldTile": [
+          102,
+          79
+        ],
+        "recordId": "Sister Arel"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-sister-arel"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:70:Korrin@95:82",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 70,
+        "oldTile": [
+          95,
+          82
+        ],
+        "recordId": "Korrin"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-korrin"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:71:Ordinal Thrun@233:345",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 71,
+        "oldTile": [
+          233,
+          345
+        ],
+        "recordId": "Ordinal Thrun"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-ordinal-thrun"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:72:Brother Kell Ivorwind@107:68",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 72,
+        "oldTile": [
+          107,
+          68
+        ],
+        "recordId": "Brother Kell Ivorwind"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-brother-kell-ivorwind"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:73:Mine Captain Sarra Dolt@328:257",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 73,
+        "oldTile": [
+          328,
+          257
+        ],
+        "recordId": "Mine Captain Sarra Dolt"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-mine-captain-sarra-dolt"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:74:Ice-Cave Sounder Vesk@43:184",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 74,
+        "oldTile": [
+          43,
+          184
+        ],
+        "recordId": "Ice-Cave Sounder Vesk"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-ice-cave-sounder-vesk"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:75:Cascade Watcher Ilun@187:294",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 75,
+        "oldTile": [
+          187,
+          294
+        ],
+        "recordId": "Cascade Watcher Ilun"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-cascade-watcher-ilun"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:76:Rope-Bridge Keeper Adhe@211:198",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 76,
+        "oldTile": [
+          211,
+          198
+        ],
+        "recordId": "Rope-Bridge Keeper Adhe"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-rope-bridge-keeper-adhe"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:77:Shrine Sister Onwe@151:378",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 77,
+        "oldTile": [
+          151,
+          378
+        ],
+        "recordId": "Shrine Sister Onwe"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-shrine-sister-onwe"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:78:Cairn-Reader Marrow Doun@58:301",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 78,
+        "oldTile": [
+          58,
+          301
+        ],
+        "recordId": "Cairn-Reader Marrow Doun"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-cairn-reader-marrow-doun"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:79:Ration Sister Petch@91:82",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 79,
+        "oldTile": [
+          91,
+          82
+        ],
+        "recordId": "Ration Sister Petch"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-ration-sister-petch"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:80:Snowline Ranger Kestrel Vane@285:275",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 80,
+        "oldTile": [
+          285,
+          275
+        ],
+        "recordId": "Snowline Ranger Kestrel Vane"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-snowline-ranger-kestrel-vane"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "npcs.txt:81:Silverleaf Picker Doun Ashe@368:295",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 81,
+        "oldTile": [
+          368,
+          295
+        ],
+        "recordId": "Silverleaf Picker Doun Ashe"
+      },
+      "marker": {
+        "section": "npcMarkers",
+        "id": "whitehorn-silverleaf-picker-doun-ashe"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "spawns.txt:105:0@43:281",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 105,
+        "oldTile": [
+          43,
+          281
+        ],
+        "recordId": "0"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-0"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -172.5,
+        196.983032227,
+        46.5
+      ]
+    },
+    {
+      "id": "spawns.txt:106:1@235:283",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 106,
+        "oldTile": [
+          235,
+          283
+        ],
+        "recordId": "1"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-1"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -52.5,
+        193.279418945,
+        -44.5
+      ]
+    },
+    {
+      "id": "spawns.txt:107:2@357:296",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 107,
+        "oldTile": [
+          357,
+          296
+        ],
+        "recordId": "2"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-2"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        25.5,
+        219.165100098,
+        -110.5
+      ]
+    },
+    {
+      "id": "spawns.txt:108:3@53:291",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 108,
+        "oldTile": [
+          53,
+          291
+        ],
+        "recordId": "3"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-3"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -174.5,
+        217.5962677,
+        29.5
+      ]
+    },
+    {
+      "id": "spawns.txt:109:4@58:346",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 109,
+        "oldTile": [
+          58,
+          346
+        ],
+        "recordId": "4"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-4"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -178.5,
+        224.537567139,
+        -19.5
+      ]
+    },
+    {
+      "id": "spawns.txt:110:5@357:330",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 110,
+        "oldTile": [
+          357,
+          330
+        ],
+        "recordId": "5"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-5"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        8.5,
+        229.610931396,
+        -134.5
+      ]
+    },
+    {
+      "id": "spawns.txt:111:6@321:341",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 111,
+        "oldTile": [
+          321,
+          341
+        ],
+        "recordId": "6"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-6"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -20.5,
+        234.150115967,
+        -125.5
+      ]
+    },
+    {
+      "id": "spawns.txt:112:7@334:315",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 112,
+        "oldTile": [
+          334,
+          315
+        ],
+        "recordId": "7"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-7"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        0.5,
+        226.599838257,
+        -113.5
+      ]
+    },
+    {
+      "id": "spawns.txt:113:8@360:314",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 113,
+        "oldTile": [
+          360,
+          314
+        ],
+        "recordId": "8"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-8"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        18.5,
+        225.223449707,
+        -124.5
+      ]
+    },
+    {
+      "id": "spawns.txt:114:9@260:307",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 114,
+        "oldTile": [
+          260,
+          307
+        ],
+        "recordId": "9"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-9"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -56.5,
+        193.651824951,
+        -57.5
+      ]
+    },
+    {
+      "id": "spawns.txt:115:10@300:80",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 115,
+        "oldTile": [
+          300,
+          80
+        ],
+        "recordId": "10"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-10"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        89.5,
+        182.49710083,
+        67.5
+      ]
+    },
+    {
+      "id": "spawns.txt:116:11@301:96",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 116,
+        "oldTile": [
+          301,
+          96
+        ],
+        "recordId": "11"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-11"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        86.5,
+        187.500213623,
+        55.5
+      ]
+    },
+    {
+      "id": "spawns.txt:117:12@344:297",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 117,
+        "oldTile": [
+          344,
+          297
+        ],
+        "recordId": "12"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-12"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        16.5,
+        222.227584839,
+        -105.5
+      ]
+    },
+    {
+      "id": "spawns.txt:118:13@243:290",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 118,
+        "oldTile": [
+          243,
+          290
+        ],
+        "recordId": "13"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-13"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -54.5,
+        193.14263916,
+        -53.5
+      ]
+    },
+    {
+      "id": "spawns.txt:119:14@266:285",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 119,
+        "oldTile": [
+          266,
+          285
+        ],
+        "recordId": "14"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-14"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -55.5,
+        193.280822754,
+        -55.5
+      ]
+    },
+    {
+      "id": "spawns.txt:120:15@345:328",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 120,
+        "oldTile": [
+          345,
+          328
+        ],
+        "recordId": "15"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-15"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        1.5,
+        230.739730835,
+        -127.5
+      ]
+    },
+    {
+      "id": "spawns.txt:121:16@48:361",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 121,
+        "oldTile": [
+          48,
+          361
+        ],
+        "recordId": "16"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-16"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -178.5,
+        225.356933594,
+        -22.5
+      ]
+    },
+    {
+      "id": "spawns.txt:122:17@59:338",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 122,
+        "oldTile": [
+          59,
+          338
+        ],
+        "recordId": "17"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-17"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -181.5,
+        221.068145752,
+        4.5
+      ]
+    },
+    {
+      "id": "spawns.txt:123:18@251:286",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 123,
+        "oldTile": [
+          251,
+          286
+        ],
+        "recordId": "18"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-18"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -55.5,
+        193.033233643,
+        -54.5
+      ]
+    },
+    {
+      "id": "spawns.txt:124:19@221:284",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 124,
+        "oldTile": [
+          221,
+          284
+        ],
+        "recordId": "19"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-19"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -53.5,
+        193.430648804,
+        -37.5
+      ]
+    },
+    {
+      "id": "spawns.txt:125:20@241:302",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 125,
+        "oldTile": [
+          241,
+          302
+        ],
+        "recordId": "20"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-20"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -57.5,
+        193.29107666,
+        -57.5
+      ]
+    },
+    {
+      "id": "spawns.txt:126:21@337:379",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 126,
+        "oldTile": [
+          337,
+          379
+        ],
+        "recordId": "21"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-21"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -27.5,
+        238.83152771,
+        -159.5
+      ]
+    },
+    {
+      "id": "spawns.txt:127:22@278:375",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 127,
+        "oldTile": [
+          278,
+          375
+        ],
+        "recordId": "22"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-22"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -59.5,
+        237.886199951,
+        -131.5
+      ]
+    },
+    {
+      "id": "spawns.txt:128:23@358:362",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 128,
+        "oldTile": [
+          358,
+          362
+        ],
+        "recordId": "23"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-23"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -5.5,
+        236.750320435,
+        -157.5
+      ]
+    },
+    {
+      "id": "spawns.txt:129:24@331:353",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 129,
+        "oldTile": [
+          331,
+          353
+        ],
+        "recordId": "24"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-24"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -19.5,
+        236.258285522,
+        -138.5
+      ]
+    },
+    {
+      "id": "spawns.txt:130:25@216:53",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 130,
+        "oldTile": [
+          216,
+          53
+        ],
+        "recordId": "25"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-25"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        82.5,
+        159.379684448,
+        193.5
+      ]
+    },
+    {
+      "id": "spawns.txt:131:26@69:129",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 131,
+        "oldTile": [
+          69,
+          129
+        ],
+        "recordId": "26"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-26"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -33.5,
+        168.999526978,
+        144.5
+      ]
+    },
+    {
+      "id": "spawns.txt:132:27@38:307",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 132,
+        "oldTile": [
+          38,
+          307
+        ],
+        "recordId": "27"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-27"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -191.5,
+        209.934082031,
+        24.5
+      ]
+    },
+    {
+      "id": "spawns.txt:133:28@37:317",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 133,
+        "oldTile": [
+          37,
+          317
+        ],
+        "recordId": "28"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-28"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -197.5,
+        208.009338379,
+        17.5
+      ]
+    },
+    {
+      "id": "spawns.txt:134:29@60:282",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 134,
+        "oldTile": [
+          60,
+          282
+        ],
+        "recordId": "29"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-29"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -167.5,
+        218.846923828,
+        30.5
+      ]
+    },
+    {
+      "id": "spawns.txt:135:30@263:277",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 135,
+        "oldTile": [
+          263,
+          277
+        ],
+        "recordId": "30"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-30"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -53.5,
+        192.84072876,
+        -46.5
+      ]
+    },
+    {
+      "id": "spawns.txt:136:31@330:303",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 136,
+        "oldTile": [
+          330,
+          303
+        ],
+        "recordId": "31"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-31"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        4.5,
+        225.499954224,
+        -103.5
+      ]
+    },
+    {
+      "id": "spawns.txt:137:32@42:347",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 137,
+        "oldTile": [
+          42,
+          347
+        ],
+        "recordId": "32"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-32"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -195.5,
+        208.622924805,
+        17.5
+      ]
+    },
+    {
+      "id": "spawns.txt:138:33@336:339",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 138,
+        "oldTile": [
+          336,
+          339
+        ],
+        "recordId": "33"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-33"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -9.5,
+        234.077026367,
+        -131.5
+      ]
+    },
+    {
+      "id": "spawns.txt:139:34@73:349",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 139,
+        "oldTile": [
+          73,
+          349
+        ],
+        "recordId": "34"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-34"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -178.5,
+        226.093658447,
+        -25.5
+      ]
+    },
+    {
+      "id": "spawns.txt:140:35@62:327",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 140,
+        "oldTile": [
+          62,
+          327
+        ],
+        "recordId": "35"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-35"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -185.5,
+        219.02973938,
+        5.5
+      ]
+    },
+    {
+      "id": "spawns.txt:141:36@274:324",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 141,
+        "oldTile": [
+          274,
+          324
+        ],
+        "recordId": "36"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-36"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -33.5,
+        234.015274048,
+        -103.5
+      ]
+    },
+    {
+      "id": "spawns.txt:142:37@332:332",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 142,
+        "oldTile": [
+          332,
+          332
+        ],
+        "recordId": "37"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-37"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -8.5,
+        231.747421265,
+        -124.5
+      ]
+    },
+    {
+      "id": "spawns.txt:143:38@274:285",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 143,
+        "oldTile": [
+          274,
+          285
+        ],
+        "recordId": "38"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-38"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -9.5,
+        222.033935547,
+        -82.5
+      ]
+    },
+    {
+      "id": "spawns.txt:144:39@262:295",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 144,
+        "oldTile": [
+          262,
+          295
+        ],
+        "recordId": "39"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-39"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -56.5,
+        193.242507935,
+        -56.5
+      ]
+    },
+    {
+      "id": "spawns.txt:145:40@274:309",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 145,
+        "oldTile": [
+          274,
+          309
+        ],
+        "recordId": "40"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-40"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -19.5,
+        227.074493408,
+        -92.5
+      ]
+    },
+    {
+      "id": "spawns.txt:146:41@352:373",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 146,
+        "oldTile": [
+          352,
+          373
+        ],
+        "recordId": "41"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-41"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -14.5,
+        237.914520264,
+        -162.5
+      ]
+    },
+    {
+      "id": "spawns.txt:147:42@61:377",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 147,
+        "oldTile": [
+          61,
+          377
+        ],
+        "recordId": "42"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-42"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -180.5,
+        228.367675781,
+        -35.5
+      ]
+    },
+    {
+      "id": "spawns.txt:148:43@263:360",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 148,
+        "oldTile": [
+          263,
+          360
+        ],
+        "recordId": "43"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-43"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -77.5,
+        211.169494629,
+        -102.5
+      ]
+    },
+    {
+      "id": "spawns.txt:149:44@66:351",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 149,
+        "oldTile": [
+          66,
+          351
+        ],
+        "recordId": "44"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-44"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -176.5,
+        224.158126831,
+        -15.5
+      ]
+    },
+    {
+      "id": "spawns.txt:150:45@70:373",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 150,
+        "oldTile": [
+          70,
+          373
+        ],
+        "recordId": "45"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-45"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -180.5,
+        229.108398438,
+        -38.5
+      ]
+    },
+    {
+      "id": "spawns.txt:151:46@346:352",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 151,
+        "oldTile": [
+          346,
+          352
+        ],
+        "recordId": "46"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-46"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -8.5,
+        236.197341919,
+        -144.5
+      ]
+    },
+    {
+      "id": "spawns.txt:152:47@45:371",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 152,
+        "oldTile": [
+          45,
+          371
+        ],
+        "recordId": "47"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-47"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -181.5,
+        227.17376709,
+        -32.5
+      ]
+    },
+    {
+      "id": "spawns.txt:153:48@324:369",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 153,
+        "oldTile": [
+          324,
+          369
+        ],
+        "recordId": "48"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-48"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -31.5,
+        237.70123291,
+        -147.5
+      ]
+    },
+    {
+      "id": "spawns.txt:154:49@261:378",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 154,
+        "oldTile": [
+          261,
+          378
+        ],
+        "recordId": "49"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-49"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -69.5,
+        240.171844482,
+        -138.5
+      ]
+    },
+    {
+      "id": "spawns.txt:155:50@274:384",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 155,
+        "oldTile": [
+          274,
+          384
+        ],
+        "recordId": "50"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-50"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -71.5,
+        241.700805664,
+        -140.5
+      ]
+    },
+    {
+      "id": "spawns.txt:156:51@83:364",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 156,
+        "oldTile": [
+          83,
+          364
+        ],
+        "recordId": "51"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-51"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -179.5,
+        227.781188965,
+        -32.5
+      ]
+    },
+    {
+      "id": "spawns.txt:157:52@79:383",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 157,
+        "oldTile": [
+          79,
+          383
+        ],
+        "recordId": "52"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-52"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -180.5,
+        229.438339233,
+        -41.5
+      ]
+    },
+    {
+      "id": "spawns.txt:158:53@70:325",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 158,
+        "oldTile": [
+          70,
+          325
+        ],
+        "recordId": "53"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-53"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -177.5,
+        221.19078064,
+        -2.5
+      ]
+    },
+    {
+      "id": "spawns.txt:159:54@254:335",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 159,
+        "oldTile": [
+          254,
+          335
+        ],
+        "recordId": "54"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-54"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -73.5,
+        209.941040039,
+        -96.5
+      ]
+    },
+    {
+      "id": "spawns.txt:160:55@269:332",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 160,
+        "oldTile": [
+          269,
+          332
+        ],
+        "recordId": "55"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-55"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -37.5,
+        235.469055176,
+        -108.5
+      ]
+    },
+    {
+      "id": "spawns.txt:161:56@231:71",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 161,
+        "oldTile": [
+          231,
+          71
+        ],
+        "recordId": "56"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-56"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        39.5,
+        159.857620239,
+        84.5
+      ]
+    },
+    {
+      "id": "spawns.txt:162:57@314:97",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 162,
+        "oldTile": [
+          314,
+          97
+        ],
+        "recordId": "57"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-57"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        91.5,
+        187.795547485,
+        49.5
+      ]
+    },
+    {
+      "id": "spawns.txt:163:58@221:86",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 163,
+        "oldTile": [
+          221,
+          86
+        ],
+        "recordId": "58"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-58"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        27.5,
+        179.19418335,
+        100.5
+      ]
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 205,
+    "walkSurfaceTriangles": 254558,
+    "tilesSampled": 331776,
+    "groundingMisses": 0,
+    "groundingMissFraction": 0.0,
+    "surfaceDiscontinuities": 241,
+    "spawnPoints": 8
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "241 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          53,
+          483,
+          15.23
+        ],
+        [
+          53,
+          483,
+          15.22
+        ],
+        [
+          55,
+          480,
+          15.01
+        ],
+        [
+          55,
+          480,
+          15.0
+        ],
+        [
+          52,
+          485,
+          14.93
+        ],
+        [
+          52,
+          485,
+          14.92
+        ],
+        [
+          56,
+          478,
+          14.85
+        ],
+        [
+          56,
+          478,
+          14.84
+        ],
+        [
+          58,
+          477,
+          14.73
+        ],
+        [
+          57,
+          478,
+          14.73
+        ],
+        [
+          60,
+          471,
+          14.21
+        ],
+        [
+          61,
+          469,
+          14.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "SPAWN_NEIGHBOURHOOD_ROUGH",
+      "message": "spawn 'temple-quay' has uneven ground within 1.2 m",
+      "detail": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.2,
+        2.2,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "SPAWN_NEIGHBOURHOOD_ROUGH",
+      "message": "spawn 'temple-sanctum-door' has uneven ground within 1.2 m",
+      "detail": [
+        -0.11,
+        -0.09,
+        -0.03,
+        0.05,
+        13.87,
+        13.85,
+        0.0,
+        -0.06
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_BELOW_SURFACE",
+      "message": "landmark 'moot-hall' is 2.71 m below the surface",
+      "detail": [
+        30.0,
+        1.7,
+        -61.5
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "COLLISION_SURFACE_MISMATCH",
+      "message": "8 sampled walkable cells disagree with the rendered walk surface",
+      "detail": [
+        {
+          "cell": [
+            744,
+            372
+          ],
+          "encoded": 4.4,
+          "surface": 8.73
+        },
+        {
+          "cell": [
+            408,
+            480
+          ],
+          "encoded": 4.4,
+          "surface": 1.78
+        },
+        {
+          "cell": [
+            780,
+            708
+          ],
+          "encoded": 2.2,
+          "surface": -3.1
+        },
+        {
+          "cell": [
+            1020,
+            708
+          ],
+          "encoded": 0.4,
+          "surface": 3.36
+        },
+        {
+          "cell": [
+            900,
+            924
+          ],
+          "encoded": 3.2,
+          "surface": 6.57
+        },
+        {
+          "cell": [
+            912,
+            936
+          ],
+          "encoded": 3.2,
+          "surface": 11.33
+        },
+        {
+          "cell": [
+            924,
+            948
+          ],
+          "encoded": 3.2,
+          "surface": 13.55
+        },
+        {
+          "cell": [
+            936,
+            960
+          ],
+          "encoded": 3.2,
+          "surface": 14.63
+        }
+      ]
+    }
+  ]
+}

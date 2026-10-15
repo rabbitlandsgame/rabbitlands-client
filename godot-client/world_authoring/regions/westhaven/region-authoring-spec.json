@@ -1,0 +1,209 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "westhaven",
+  "label": "Westhaven",
+  "adapter": "published-generic-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/westhaven/westhaven.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/westhaven/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/westhaven/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/westhaven/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/westhaven/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/westhaven/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    170.0,
+    0.0,
+    1060.0
+  ],
+  "server": {
+    "origin": [
+      174,
+      244
+    ],
+    "cells": [
+      588,
+      588
+    ],
+    "collisionOriginMetres": [
+      -174.0,
+      244.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -170.0,
+      -412.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      191,
+      328
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        0,
+        324
+      ],
+      "previousGridSha256": "5961b8686cd067914cfa739e05c74cf7d23d5af7717c80eec692ad17184c8a45"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "crownwater--westhaven-westhaven",
+      "discovery-westhaven-826",
+      "discovery-westhaven-827",
+      "discovery-westhaven-828",
+      "discovery-westhaven-829",
+      "discovery-westhaven-830",
+      "discovery-westhaven-831",
+      "discovery-westhaven-832",
+      "discovery-westhaven-833",
+      "discovery-westhaven-834",
+      "discovery-westhaven-835",
+      "discovery-westhaven-836",
+      "discovery-westhaven-837",
+      "discovery-westhaven-838",
+      "discovery-westhaven-839",
+      "door-westhaven-bonded-vaults-door",
+      "door-westhaven-custom-house-door",
+      "door-westhaven-gullscar-farmhouse-door",
+      "door-westhaven-gullstone-door",
+      "door-westhaven-haven-undercroft-door",
+      "door-westhaven-lamp-rock-door",
+      "door-westhaven-salvage-hole-mouth",
+      "four_gates--westhaven-westhaven",
+      "grey_moors--westhaven-westhaven",
+      "manymouth_delta--westhaven-westhaven"
+    ],
+    "requiredRouteIds": [
+      "crownwater--westhaven-westhaven",
+      "door-westhaven-bonded-vaults-door",
+      "door-westhaven-custom-house-door",
+      "door-westhaven-gullscar-farmhouse-door",
+      "door-westhaven-gullstone-door",
+      "door-westhaven-haven-undercroft-door",
+      "door-westhaven-lamp-rock-door",
+      "door-westhaven-salvage-hole-mouth",
+      "four_gates--westhaven-westhaven",
+      "grey_moors--westhaven-westhaven",
+      "manymouth_delta--westhaven-westhaven"
+    ],
+    "ownedPlanFeatureIds": [],
+    "ownedFerryConnectionIds": [
+      "crownwater--westhaven"
+    ]
+  },
+  "gameplay": {
+    "runtimeBindingCount": 151,
+    "runtimePointCount": 141,
+    "existingMarkerBindingCount": 10
+  },
+  "bootstrap": {
+    "schema": "eloria-published-region-bootstrap-v1",
+    "objectCount": 521,
+    "objectIdsSha256": "9dacdc9f18911d734c2c3756e23f202decc77d8da70bf60bde1e355d6573a800",
+    "visibleGameplayCount": 142,
+    "assemblies": [
+      {
+        "id": "ferry-quay-04",
+        "kind": "access",
+        "supportNodes": [
+          "FerryQuay_westhaven_04_Fascia_-1",
+          "FerryQuay_westhaven_04_Fascia_1",
+          "FerryQuay_westhaven_04_FerrySign",
+          "FerryQuay_westhaven_04_MooringRopes",
+          "FerryQuay_westhaven_04_PilesAndPosts",
+          "FerryQuay_westhaven_04_Signpost",
+          "FerryQuay_westhaven_04_Skiff_Floor",
+          "FerryQuay_westhaven_04_Skiff_FurledSail",
+          "FerryQuay_westhaven_04_Skiff_Gunwale",
+          "FerryQuay_westhaven_04_Skiff_Hull",
+          "FerryQuay_westhaven_04_Skiff_Mast",
+          "FerryQuay_westhaven_04_Skiff_Seat_0",
+          "FerryQuay_westhaven_04_Skiff_Seat_1",
+          "FerryQuay_westhaven_04_Skiff_Seat_2"
+        ],
+        "walkNode": "Walk_FerryQuay_westhaven_04"
+      },
+      {
+        "id": "loose-503",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_503_12_1172",
+          "BridgeUnionPier_503_12_1180",
+          "BridgeUnionPier_503_12_1188",
+          "BridgeUnionPier_503_20_1156",
+          "BridgeUnionPier_503_28_1148",
+          "BridgeUnionPier_503_28_1204",
+          "BridgeUnionPier_503_36_1132",
+          "BridgeUnionTimberEdge_503_westhaven"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_503_westhaven"
+      },
+      {
+        "id": "loose-504",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_504_204_1148",
+          "BridgeUnionPier_504_212_1156",
+          "BridgeUnionPier_504_220_1172",
+          "BridgeUnionPier_504_220_1180",
+          "BridgeUnionPier_504_220_1188",
+          "BridgeUnionPier_504_220_1196",
+          "BridgeUnionPier_504_220_1204",
+          "BridgeUnionPier_504_220_1212",
+          "BridgeUnionPier_504_220_1220",
+          "BridgeUnionTimberEdge_504_westhaven"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_504_westhaven"
+      },
+      {
+        "id": "loose-505",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_505_westhaven"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_505_westhaven"
+      },
+      {
+        "id": "loose-506",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_506_116_1140",
+          "BridgeUnionPier_506_132_1148",
+          "BridgeUnionPier_506_140_1148",
+          "BridgeUnionPier_506_148_1156",
+          "BridgeUnionPier_506_156_1164",
+          "BridgeUnionTimberEdge_506_westhaven"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_506_westhaven"
+      },
+      {
+        "id": "walk-westhaven-ferrylandingstair",
+        "kind": "access",
+        "supportNodes": [
+          "AccessDeck_Edge_Westhaven_FerryLandingStair"
+        ],
+        "walkNode": "Walk_Westhaven_FerryLandingStair"
+      },
+      {
+        "id": "walk-westhaven-lampcausewaylink",
+        "kind": "access",
+        "supportNodes": [
+          "AccessDeck_Edge_Westhaven_LampCausewayLink"
+        ],
+        "walkNode": "Walk_Westhaven_LampCausewayLink"
+      }
+    ],
+    "water": [],
+    "bakedTerrainFeatures": [],
+    "previewUvMetresInverse": 0.17,
+    "baselineProofSha256": "b0fdf5a858dea76939c8d48d4dc725d9d3dd83223f5173bac3567f5fdde3b21f"
+  }
+}

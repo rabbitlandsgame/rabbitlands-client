@@ -1,0 +1,26 @@
+{
+	"id": "verdant_stair",
+	"schema": 1,
+	"ground": {
+		"path_luma_forward": 0.16,
+		"path_tint_forward": [0.72, 0.56, 0.38],
+		"path_chroma_forward": 1.25
+	},
+	"grass": {
+		"root_forward": [0.13, 0.22, 0.08],
+		"tip_forward": [0.36, 0.46, 0.2],
+		"value_forward": 1.6
+	},
+	"foliage": {
+		"crown_materials": ["foliage_green", "ssarathi_palm", "verdant_frond"]
+	},
+	"props": {
+		"keep_words": ["jade"]
+	},
+	"notes": {
+		"ground": "Warm tan earth roads rather than the default's pale cream. At the renderer defaults Verdant's roads measured 1.61 times the grass beside them at the hub and the south road (Forward+, 2026-09-30), saturation 0.19, where develop drew a brown earth track; path_luma_forward 0.19, path_tint_forward [0.8, 0.64, 0.42] and path_chroma_forward 1.25 measured 1.57 and a tan earth (display 187, 160, 115; saturation 0.38; the frame's saturation +0.03 to +0.07). The migration withdrew them because they drew a straight step across every road that runs on into Manymouth, the Sunmane Steppe and Ssarathi (shots vs_border_*); restored at integration now that region trims now fade into the neighbour's over LookProfile.BORDER_FEATHER_METRES either side of the border (LookBorders), so a trim no longer draws the border as a line. The verge stays at the defaults. Polish (2026-09-30): at 0.19 and [0.8, 0.64, 0.42] the roads read as beach sand (187, 160, 116), almost Westhaven's limestone (200, 177, 143), so jungle and coast shared a road; 0.16 and [0.72, 0.56, 0.38] lay a darker olive-brown loam (the review asked path/ground 1.3-1.4 and path saturation 0.35 or more).",
+		"grass": "Forward+ only; the compatibility renderer keeps the default palette (not measured there). Measured as tufts against a render without grass, at the same pixels: with the default palette Verdant's tufts were 0.67-0.73 of the bare painted ground under them and their darkest tenth 0.38-0.49 of it, a dark speckle that took the verge's high-frequency energy (hf95 in the ground box) from 10 without grass to 59-66. Root [0.15, 0.26, 0.09] and tip [0.45, 0.58, 0.25] at value 1.6 overshot: 1.05-1.20, darkest tenth 0.76-0.89, brightest tenth 1.31-1.47, hf95 56-58. These values scale that root by 0.855 and that tip by 0.795 (same hues, a lush jungle green), interpolated in log space between the two measured palettes to aim at 0.97 of the ground, the darkest tenth near 0.75 and the brightest near 1.15. They were not rendered themselves; check them with a no-grass render (ELORIA_LOOK_GRASS_DEBUG=none) before retuning.",
+		"foliage": "Verdant's own trees are the continent exporter's Tree_<n>__foliage_green canopies (93 surfaces, among them the 20-27 m banyans), ssarathi_palm crowns on bark_pale trunks and verdant_frond tree-fern crowns. All three are alpha-cut, double-sided leaf materials like undergrowth, so they paint as crowns; unpainted, Forward+ drew them as dark blue-black shards, painted they read as top-lit green lobes. A banyan whose crown reaches the camera still fills a frame corner with solid leaf cards where develop blended it: that is the fade, not the paint. verdant_vine (wall vines, a flat 17 x 4 m strip) is left alone: a crown's top light across a wall is not a crown's. Bark stays unpainted.",
+		"props": "The Grand Stair's jade (verdant_jade, verdant_carved_jade, the Jade masonry) keeps its chroma: under the shared grade the stair went from saturation 0.17 to 0.13, grey-white."
+	}
+}

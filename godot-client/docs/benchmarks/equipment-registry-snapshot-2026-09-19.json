@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-19",
+  "scope": "Focused CPU and Godot static-memory diagnostic for 300 equipment-registry assignments; not a frame-rate measurement.",
+  "registry": {
+    "path": "data/actors/equipment.json",
+    "bytes": 860660,
+    "models": 429,
+    "sha256": "5a5232d83a9a26b87ade9d648a2a5c4cfb52858e85eb6316617bbefb0f6104da"
+  },
+  "accepted": {
+    "design": "Main recursively freezes one JSON-only catalogue; actors acquire only an explicitly prepared snapshot by identity. All arbitrary mutable callers retain Dictionary.duplicate(true).",
+    "trials": 8,
+    "iterationsPerTrial": 300,
+    "rotatedOrder": true,
+    "deepCopyMedianMicroseconds": 1535054.0,
+    "preparedAcquireMedianMicroseconds": 90.5,
+    "oneTimePrepareMedianMicroseconds": 36255.5,
+    "acquireVsDeepCopyTimePercent": -99.9941044419284,
+    "deepCopyMedianStaticBytesDelta": 824672634.0,
+    "preparedAcquireMedianStaticBytesDelta": 7434.0,
+    "memoryInterpretation": "Deltas begin after candidate preparation, so they compare actor-acquisition allocations while 300 returned Dictionaries remain referenced. They exclude the one prepared catalogue and are not total process RSS.",
+    "raw": {
+      "path": "test-artifacts/presentation-checks/equipment-registry-snapshot-probe-v3-final-gl_compatibility-20260919T154435770Z/tests_performance_equipment_registry_snapshot_probe/equipment-registry-snapshot-probe.json",
+      "sha256": "3ff2460dad695f779cfd192cd03b4413a60c1d9b63d3e078e554256d23878d7f",
+      "processPath": "test-artifacts/presentation-checks/equipment-registry-snapshot-probe-v3-final-gl_compatibility-20260919T154435770Z/tests_performance_equipment_registry_snapshot_probe/process.json",
+      "processSha256": "b8562e2fc08c0b056e8d3345c955e9043365a06787fc7e52e91b35de51031164"
+    }
+  },
+  "rejected": {
+    "design": "Serialize and type-exactly compare the complete mutable registry on every actor lookup.",
+    "reason": "Although it removed almost all retained actor-copy allocation, repeated full-registry serialization made the 300-call median 330.91% slower than deep copying.",
+    "deepCopyMedianMicroseconds": 1274066.5,
+    "serializedInternMedianMicroseconds": 5490113.0,
+    "internVsDeepCopyTimePercent": 330.912593651901,
+    "deepCopyMedianStaticBytesDelta": 824672634.0,
+    "serializedInternMedianStaticBytesDelta": 3583626.0,
+    "sourceHashes": {
+      "helper": "515f5ce8b92889dbd3e824e657465d3dd5c04055d37e24f31e75abc8fffb1a18",
+      "probe": "c492c0acbc33dba7ce2530d844424784742724d67946f26aa59cbda8ab841c4e"
+    },
+    "raw": {
+      "path": "test-artifacts/presentation-checks/equipment-registry-snapshot-probe-v1-gl_compatibility-20260919T152556093Z/tests_performance_equipment_registry_snapshot_probe/equipment-registry-snapshot-probe.json",
+      "sha256": "1e7bc0b606104bc59b31e743e11dae86de83de034ec58fc47d5ca36c6a265245",
+      "processPath": "test-artifacts/presentation-checks/equipment-registry-snapshot-probe-v1-gl_compatibility-20260919T152556093Z/tests_performance_equipment_registry_snapshot_probe/process.json",
+      "processSha256": "d1728c339588776a97e917c26eb88e8deeb630214d88e173437ee4acfbec75e0"
+    }
+  },
+  "correctness": [
+    {
+      "name": "helper contract",
+      "result": "PASS",
+      "coverage": "recursive read-only JSON snapshot, mutable caller isolation, typed Dictionary/Array retention, int/float and String/StringName retention, packed/Object fallback, four-entry bound and eviction fallback",
+      "processPath": "test-artifacts/presentation-checks/equipment-registry-contract-v6-final-gl_compatibility-20260919T154602413Z/tests_test_equipment_registry_snapshot_cache/process.json",
+      "processSha256": "d89e460a1c2025a713d2e3920ce9da33efedb4ba5ccf523645c9ba6b897ef783"
+    },
+    {
+      "name": "shared actor exact GL parity",
+      "result": "PASS",
+      "coverage": "two rigs and two equipment sets; prepared vs mutable fallback; swaps and clearing; exact mesh surface-array hashes, transforms, skin binds/poses, active material texture/color state and visibility; node/material isolation; original and fallback caller mutation",
+      "processPath": "test-artifacts/presentation-checks/equipment-registry-shared-actor-v3-exact-gl-gl_compatibility-20260919T154547900Z/tests_integration_equipment_registry_shared_snapshot/process.json",
+      "processSha256": "aa5843d80dd8cbae683b3553a5bd08e2e1bbf884ed3ee7dcc2e11825acf3cbe9"
+    },
+    {
+      "name": "Main and crowd contract parse",
+      "result": "PASS",
+      "processPath": "test-artifacts/presentation-checks/equipment-registry-main-parse-v1-gl_compatibility-20260919T154342479Z/tests_test_crowd_benchmark/process.json",
+      "processSha256": "cb416f2fd50db0200c9d6baacdd73bfb03821b2b206347ab226a44911b9f41a7"
+    },
+    {
+      "name": "equipment_fit_profiles first attempt",
+      "result": "INCONCLUSIVE_REJECTED",
+      "reason": "It began before the new class was explicitly preloaded, produced a parse failure and cascading null errors, and did not quit. Its Godot child had exited before the wrapper was stopped. It is not correctness or performance evidence."
+    }
+  ],
+  "sourceHashes": {
+    "src/actors/equipment_registry_snapshot_cache.gd": "04f4d2802fe951e2b592f3cf6211c15acbeb0d0906f51fe3c7b466e360395e9b",
+    "src/actors/replicated_actor_3d.gd": "911508c7014b5aef1ca8b03b482a1c1a91f0a311038e01c822b7a356b1bc8479",
+    "src/app/main.gd": "e560f8e1c2c37df4bb925786c109227d0f034f98589b84ad27bc4278b1aff72a",
+    "tests/test_equipment_registry_snapshot_cache.gd": "8a31e976e47e0f1fb35f51a6a710cff8c22b662c31f632dbe694417788a4d275",
+    "tests/performance/equipment_registry_snapshot_probe.gd": "dfb13719c596d223dbf05ecf70730ea6d7f57fbb1fac137b7c28ff6e2dcd1642",
+    "tests/integration/equipment_registry_shared_snapshot.gd": "87f5e2d6b6926855e7da06c03f747631cb951c759484c5248145139ee6758882"
+  }
+}

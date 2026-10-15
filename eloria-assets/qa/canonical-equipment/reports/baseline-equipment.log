@@ -1,0 +1,89 @@
+.....F.FF.                                                               [100%]
+================================== FAILURES ===================================
+__ EquipmentFitTest.test_variants_are_present_and_authored_on_their_own_rig ___
+
+self = <test_equipment_fit.EquipmentFitTest testMethod=test_variants_are_present_and_authored_on_their_own_rig>
+
+    def test_variants_are_present_and_authored_on_their_own_rig(self) -> None:
+        seen_groups: set[str] = set()
+        for key, model in self.models.items():
+            for group, variant in (model.get("variants") or {}).items():
+                seen_groups.add(group)
+                self.assertIn(group, self._all_groups(),
+                              f"{key} offers variant {group} that no race wears")
+                path = scene_path(str(variant.get("scene", "")))
+                self.assertTrue(path.is_file(), f"{key} variant {group}: {path} missing")
+                author = str(variant.get("authoredFor", ""))
+                self.assertIn(author, self.girth,
+                              f"{key} variant {group} names unmeasured rig {author}")
+                self.assertIn(author, self._members(group),
+                              f"{key} variant {group} is authored on {author},"
+                              " which is not a member of that group")
+>       self.assertEqual(seen_groups, self._all_groups(),
+                         "a fit group exists that no garment offers a variant for")
+E       AssertionError: Items in the second set but not the first:
+E       'feminine_foot'
+E       'saurian'
+E       'bust'
+E       'feminine'
+E       'broad_foot' : a fit group exists that no garment offers a variant for
+
+tests\test_equipment_fit.py:120: AssertionError
+_______ FootgearGroundTest.test_footgear_stands_on_the_wearers_own_sole _______
+
+self = <test_equipment_fit.FootgearGroundTest testMethod=test_footgear_stands_on_the_wearers_own_sole>
+
+    def test_footgear_stands_on_the_wearers_own_sole(self) -> None:
+        try:
+            import numpy as np
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        soles: dict[str, float] = {}
+        seen = 0
+        for path, rig in sorted(set(self._footgear())):
+            self.assertTrue(path.is_file(), f"{path} missing")
+            self.assertTrue(rig, f"{path.name} does not name the rig it fits")
+            body = RACES / f"{rig}.glb"
+            self.assertTrue(body.is_file(), f"{body} missing")
+            if rig not in soles:
+                lowest = min(points[:, 1].min()
+                             for points, _ in _mesh_primitives(body))
+                soles[rig] = float(lowest)
+            boot = np.concatenate([points for points, _ in _mesh_primitives(path)])
+            sink = soles[rig] - float(boot[:, 1].min())
+>           self.assertLessEqual(
+                sink, self.MAX_SINK,
+                f"{path.name} reaches {sink * 1000:.1f} mm below the sole of "
+                f"{rig}, which puts it through the floor the actor stands on")
+E           AssertionError: 0.026162872090935707 not less than or equal to 0.008 : amberwood_woodland_boots_01.glb reaches 26.2 mm below the sole of luminous_male, which puts it through the floor the actor stands on
+
+tests\test_equipment_fit.py:246: AssertionError
+__ LegwearSeamTest.test_hems_and_waists_meet_the_seams_they_are_cut_against ___
+
+self = <test_equipment_fit.LegwearSeamTest testMethod=test_hems_and_waists_meet_the_seams_they_are_cut_against>
+
+    def test_hems_and_waists_meet_the_seams_they_are_cut_against(self) -> None:
+        try:
+            import numpy as np
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        seen = 0
+        for key, path, kind in sorted(set(self._legwear())):
+            self.assertTrue(path.is_file(), f"{path} missing")
+            points = np.concatenate([p for p, _ in _mesh_primitives(path)])
+            low, high = float(points[:, 1].min()), float(points[:, 1].max())
+            bounds = self.HEM.get(kind)
+            if bounds is None:
+                continue
+>           self.assertGreaterEqual(
+                low, bounds[0],
+                f"{key} ({kind}) hems at Y {low:.4f}, below {bounds[0]:.3f} - "
+                f"it hangs past the boot it is meant to tuck into")
+E           AssertionError: 0.049565743654966354 not greater than or equal to 0.166 : 4:171 (legs) hems at Y 0.0496, below 0.166 - it hangs past the boot it is meant to tuck into
+
+tests\test_equipment_fit.py:308: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_equipment_fit.py::EquipmentFitTest::test_variants_are_present_and_authored_on_their_own_rig
+FAILED tests/test_equipment_fit.py::FootgearGroundTest::test_footgear_stands_on_the_wearers_own_sole
+FAILED tests/test_equipment_fit.py::LegwearSeamTest::test_hems_and_waists_meet_the_seams_they_are_cut_against
+3 failed, 7 passed in 2.71s

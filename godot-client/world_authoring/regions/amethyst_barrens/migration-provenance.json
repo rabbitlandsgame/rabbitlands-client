@@ -1,0 +1,697 @@
+{
+  "counts": {
+    "crossings": 8,
+    "finalScatterObjects": 0,
+    "objects": 124,
+    "paths": 22,
+    "prototypeFamilies": 124,
+    "retiredSourcePlacements": 254,
+    "runtimeBindings": 189,
+    "runtimePoints": 130,
+    "visibleGameplay": 171
+  },
+  "crossings": [
+    {
+      "assetId": "Landmark_SurveyedBridge_1",
+      "id": "bridge_basin",
+      "walkNode": "Walk_Landmark_SurveyedBridge_1__alpine_gravel"
+    },
+    {
+      "assetId": "Landmark_SurveyedBridge_4",
+      "id": "bridge_east",
+      "walkNode": "Walk_Landmark_SurveyedBridge_4__alpine_gravel"
+    },
+    {
+      "assetId": "Landmark_SurveyedBridge_6",
+      "id": "bridge_gully_north",
+      "walkNode": "Walk_Landmark_SurveyedBridge_6__alpine_gravel"
+    },
+    {
+      "assetId": "Landmark_SurveyedBridge_5",
+      "id": "bridge_gully_west",
+      "walkNode": "Walk_Landmark_SurveyedBridge_5__alpine_gravel"
+    },
+    {
+      "assetId": "Landmark_SurveyedBridge_0",
+      "id": "bridge_massif",
+      "walkNode": "Walk_Landmark_SurveyedBridge_0__alpine_gravel"
+    },
+    {
+      "assetId": "Landmark_SurveyedBridge_2",
+      "id": "bridge_river_north",
+      "walkNode": "Walk_Landmark_SurveyedBridge_2__alpine_gravel"
+    },
+    {
+      "assetId": "Landmark_SurveyedBridge_3",
+      "id": "bridge_river_south",
+      "walkNode": "Walk_Landmark_SurveyedBridge_3__alpine_gravel"
+    },
+    {
+      "assetId": "Landmark_SurveyedBridge_7",
+      "id": "ferry_jetty",
+      "walkNode": "Walk_Landmark_SurveyedBridge_7__timber_grey"
+    }
+  ],
+  "inputs": {
+    "authoredBaseHeightsSha256": "f06b63a51f3c4ebea99d7a137aca2bbc16908c4f5bfa28782ffcc71739fab963",
+    "capturedNaturalHeightsSha256": "ece4019d426bf29b9644f226b5cbd314da9ab971ad6d6068cd9e4c982bb1af87",
+    "certifiedResolvedHeightsSha256": "f06b63a51f3c4ebea99d7a137aca2bbc16908c4f5bfa28782ffcc71739fab963",
+    "composedSha256": "a92466203318283a63ddf791a8f40a55c837806626cfbc2533195b5dfa35ab4d",
+    "compositionObjectCount": 4981,
+    "compositionPlanSha256": "54ddec547568e83ae87fcc568ac2a87ce05317cd824522a5eeeee0b477ccb97a",
+    "compositionSha256": "62c71c62468491b1d90c0c1ad3ff867a21b4cc0b895d181c7f2dd00945a3a8f0",
+    "exportLedgerSha256": "0b497efe212b2727be48c791f2546adef7b74968e88df8210de3c70a11aa938a",
+    "planSha256": "54ddec547568e83ae87fcc568ac2a87ce05317cd824522a5eeeee0b477ccb97a",
+    "publishedMasterSha256": "9d00ba21ca42123a51307bacffa18a1fc48a8f670c5b849676ec500fe2dd5ff7",
+    "roadsSha256": "8d5b753e757f89a81a6f73dcda36fc10ef9020fda954c08aac50dfc9d475a7a8",
+    "runtimeBindingSeedSha256": "b082e71a4956da4466e4356e917b94011098d6025725a54ec9a6d16a8f1e6075",
+    "sourceLibrarySha256": "497a1175b5bc72e46b6249ef2dc4161945757180c0c89cb8538c000361c93bdf",
+    "sourceManifestSha256": "3513a4254aea85bb7658884a35cb8506ade6630500aa8f423442a223fc0e181e",
+    "sourceWorldSha256": "6e497802f788cdcdc66405eeff8393e74c5929a2bccabc30ead857f80922b6bc"
+  },
+  "objects": [
+    {
+      "collisionRole": "solid",
+      "family": "crystal-massifspire-0-c1f757301d89",
+      "id": "Crystal_MassifSpire_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-massifspire-1-515e8709d903",
+      "id": "Crystal_MassifSpire_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-massifspire-2-b80023e3404a",
+      "id": "Crystal_MassifSpire_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-massifspire-3-0c605ca201c8",
+      "id": "Crystal_MassifSpire_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-massifspire-4-5283615aeda7",
+      "id": "Crystal_MassifSpire_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-massifspire-5-1cd6b43331d3",
+      "id": "Crystal_MassifSpire_5"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-massifspire-6-19304488f6d8",
+      "id": "Crystal_MassifSpire_6"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-1-c23e6820c92a",
+      "id": "Crystal_Outcrop_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-11-a52e7bdc8e04",
+      "id": "Crystal_Outcrop_11"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-13-3cf59635e574",
+      "id": "Crystal_Outcrop_13"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-15-e6a6527762f8",
+      "id": "Crystal_Outcrop_15"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-18-3e64c98496a0",
+      "id": "Crystal_Outcrop_18"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-2-752634e95e14",
+      "id": "Crystal_Outcrop_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-23-87d480449e02",
+      "id": "Crystal_Outcrop_23"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-24-affe6b49b805",
+      "id": "Crystal_Outcrop_24"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-26-92349e45865c",
+      "id": "Crystal_Outcrop_26"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-27-88f153aa58fc",
+      "id": "Crystal_Outcrop_27"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-29-8529aff81d5d",
+      "id": "Crystal_Outcrop_29"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-30-fc47cf57f824",
+      "id": "Crystal_Outcrop_30"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-32-b385e6e18661",
+      "id": "Crystal_Outcrop_32"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-34-9cef6c605671",
+      "id": "Crystal_Outcrop_34"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-36-023955bc7847",
+      "id": "Crystal_Outcrop_36"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-38-87e2dc791145",
+      "id": "Crystal_Outcrop_38"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-40-886e3a5980b8",
+      "id": "Crystal_Outcrop_40"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-43-573bddf0c63a",
+      "id": "Crystal_Outcrop_43"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-44-8670f6392335",
+      "id": "Crystal_Outcrop_44"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-45-98c64eded920",
+      "id": "Crystal_Outcrop_45"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-47-1b84631ee814",
+      "id": "Crystal_Outcrop_47"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-48-36eae7860691",
+      "id": "Crystal_Outcrop_48"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-49-2ad351f4e1e8",
+      "id": "Crystal_Outcrop_49"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-5-1f2a0f8e4ff1",
+      "id": "Crystal_Outcrop_5"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-50-1dfb251be000",
+      "id": "Crystal_Outcrop_50"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-55-283a7d1a10d4",
+      "id": "Crystal_Outcrop_55"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-56-e6a2bec14213",
+      "id": "Crystal_Outcrop_56"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-59-a3fd3a582d3c",
+      "id": "Crystal_Outcrop_59"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-6-7d9810152e06",
+      "id": "Crystal_Outcrop_6"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-60-466bead9ff44",
+      "id": "Crystal_Outcrop_60"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-61-7977f60ece1c",
+      "id": "Crystal_Outcrop_61"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-7-0a12f3c7844e",
+      "id": "Crystal_Outcrop_7"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-outcrop-8-d1f096c90e2e",
+      "id": "Crystal_Outcrop_8"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-uplandspire-0-2-a780a08e8168",
+      "id": "Crystal_UplandSpire_0_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-uplandspire-1-0-a1ec547fb412",
+      "id": "Crystal_UplandSpire_1_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-uplandspire-1-1-a6b1ebb1500e",
+      "id": "Crystal_UplandSpire_1_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-uplandspire-1-2-21785d448126",
+      "id": "Crystal_UplandSpire_1_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-uplandspire-2-1-403cb8ec1520",
+      "id": "Crystal_UplandSpire_2_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "crystal-uplandspire-2-2-804f21cc4123",
+      "id": "Crystal_UplandSpire_2_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "door-counting-house-door-46e5d24fece5",
+      "id": "Door_counting-house-door"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "door-measure-house-door-f9b2dd3d76d6",
+      "id": "Door_measure-house-door"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "freight-0-232621683b07",
+      "id": "Freight_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "freight-1-4453634ce2ba",
+      "id": "Freight_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-assayexchange-363b0ca847df",
+      "id": "Landmark_AssayExchange"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-fieldstation-0-4aca84dec60f",
+      "id": "Landmark_FieldStation_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-fieldstation-1-e6bcd181a448",
+      "id": "Landmark_FieldStation_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-fieldstation-2-03c6021bd5e6",
+      "id": "Landmark_FieldStation_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-fieldstation-3-b7ee30ad8fc4",
+      "id": "Landmark_FieldStation_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-fieldstation-4-c9fb6d68cc8c",
+      "id": "Landmark_FieldStation_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-fieldstation-5-a6780414a1f2",
+      "id": "Landmark_FieldStation_5"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-geodecave-0-18b469619ac9",
+      "id": "Landmark_GeodeCave_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-geodecave-1-b42f66b273c7",
+      "id": "Landmark_GeodeCave_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-geodecave-2-7237c2f71b60",
+      "id": "Landmark_GeodeCave_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-geodecave-3-3b74a5d243b5",
+      "id": "Landmark_GeodeCave_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-glasswardenobservatory-c4f33b8b4a64",
+      "id": "Landmark_GlasswardenObservatory"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-levitatingshards-0-56d008040c45",
+      "id": "Landmark_LevitatingShards_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-levitatingshards-1-ea67d25fbb01",
+      "id": "Landmark_LevitatingShards_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-levitatingshards-2-1b0c5374d80c",
+      "id": "Landmark_LevitatingShards_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-levitatingshards-3-4ad2aa62e84d",
+      "id": "Landmark_LevitatingShards_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-levitatingshards-4-caf6ea8cf9b7",
+      "id": "Landmark_LevitatingShards_4"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-levitatingshards-5-93f697107198",
+      "id": "Landmark_LevitatingShards_5"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-levitatingshards-6-d50b281f061e",
+      "id": "Landmark_LevitatingShards_6"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-levitatingshards-7-fcadeb211092",
+      "id": "Landmark_LevitatingShards_7"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-0-04e08e77fb84",
+      "id": "Landmark_ResonantCluster_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-1-5f12a5aa0bde",
+      "id": "Landmark_ResonantCluster_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-2-a4b3c2e621e5",
+      "id": "Landmark_ResonantCluster_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-3-9a73f4a5550b",
+      "id": "Landmark_ResonantCluster_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-4-9727542cabbd",
+      "id": "Landmark_ResonantCluster_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-5-80f1a98a1320",
+      "id": "Landmark_ResonantCluster_5"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-6-490d74fcf07b",
+      "id": "Landmark_ResonantCluster_6"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-7-2aa8e7237491",
+      "id": "Landmark_ResonantCluster_7"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-8-b469e4ec85ce",
+      "id": "Landmark_ResonantCluster_8"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-resonantcluster-9-6b125a46c3e2",
+      "id": "Landmark_ResonantCluster_9"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-stonering-5b97a5cce5e9",
+      "id": "Landmark_StoneRing"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-stormruin-0-abd021e3ff94",
+      "id": "Landmark_StormRuin_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-stormruin-1-b9970bbd0587",
+      "id": "Landmark_StormRuin_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-stormruin-2-c353055cede4",
+      "id": "Landmark_StormRuin_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-stormruin-3-5cc22ebebaae",
+      "id": "Landmark_StormRuin_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-stormruin-4-43151d9a8278",
+      "id": "Landmark_StormRuin_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-stormruin-5-73f01a72df53",
+      "id": "Landmark_StormRuin_5"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-surveyedbridge-0-4252bc4a0121",
+      "id": "Landmark_SurveyedBridge_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-surveyedbridge-1-51084bb72fcd",
+      "id": "Landmark_SurveyedBridge_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-surveyedbridge-2-2da3c79df6c6",
+      "id": "Landmark_SurveyedBridge_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-surveyedbridge-3-a37fdd382521",
+      "id": "Landmark_SurveyedBridge_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-surveyedbridge-4-6b7ab44b582b",
+      "id": "Landmark_SurveyedBridge_4"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-surveyedbridge-5-7dfe0fa309b6",
+      "id": "Landmark_SurveyedBridge_5"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-surveyedbridge-6-c73557c827c7",
+      "id": "Landmark_SurveyedBridge_6"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-surveyedbridge-7-db4c15fc0f3e",
+      "id": "Landmark_SurveyedBridge_7"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-watchtower-0-449aab7270ff",
+      "id": "Landmark_Watchtower_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-watchtower-1-06e52cfa13ac",
+      "id": "Landmark_Watchtower_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-watchtower-2-1785f871f2f0",
+      "id": "Landmark_Watchtower_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-glasswarden-bunkhouse-4646b52cdd95",
+      "id": "Landmark_glasswarden-bunkhouse"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-glasswarden-mess-476f2813ed1c",
+      "id": "Landmark_glasswarden-mess"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "lore-eleven-measures-b523c3923178",
+      "id": "Lore_eleven_measures"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "northern-grotto-abutment-0-1-e37333a2543b",
+      "id": "Northern_Grotto_Abutment_0_-1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "northern-grotto-abutment-0-1-b63c31500cd0",
+      "id": "Northern_Grotto_Abutment_0_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "northern-grotto-abutment-1-1-5751b6298694",
+      "id": "Northern_Grotto_Abutment_1_-1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "northern-grotto-abutment-1-1-68640635abec",
+      "id": "Northern_Grotto_Abutment_1_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "northern-grotto-bridge-arch-e0c8771c8f18",
+      "id": "Northern_Grotto_Bridge_Arch"
+    },
+    {
+      "collisionRole": "none",
+      "family": "packettender-5fb46d3fe551",
+      "id": "PacketTender"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-outpoststores-0-25ce6678df91",
+      "id": "Prop_OutpostStores_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-outpoststores-1-6b055b00a22c",
+      "id": "Prop_OutpostStores_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-outpoststores-2-9a413446f474",
+      "id": "Prop_OutpostStores_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-outpoststores-3-5033eb273a0d",
+      "id": "Prop_OutpostStores_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-beetle-pit-d2ed1ac3e2e1",
+      "id": "Secret_barrens_beetle_pit"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-bridge-butts-fe6e66664000",
+      "id": "Secret_barrens_bridge_butts"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-cave-eyrie-95c15ed324a5",
+      "id": "Secret_barrens_cave_eyrie"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-geode-hollow-f119c04a181a",
+      "id": "Secret_barrens_geode_hollow"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-massif-reliquary-db80a9c45f8b",
+      "id": "Secret_barrens_massif_reliquary"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-observatory-vault-309f558cf5d2",
+      "id": "Secret_barrens_observatory_vault"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-resonance-spring-960640a63a7d",
+      "id": "Secret_barrens_resonance_spring"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-sap-148a09e611e3",
+      "id": "Secret_barrens_sap"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-shard-garden-2f866e8425a1",
+      "id": "Secret_barrens_shard_garden"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-station-cache-674613230835",
+      "id": "Secret_barrens_station_cache"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-storm-well-f7766e3102d9",
+      "id": "Secret_barrens_storm_well"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-tower-school-bc9c039bcbf0",
+      "id": "Secret_barrens_tower_school"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-barrens-waystone-87e09fe8f76a",
+      "id": "Secret_barrens_waystone"
+    }
+  ],
+  "regionId": "amethyst_barrens",
+  "sceneSha256": "773c077467ec3e7287760a3eda89e3314e5520913540a99587d79f320e5ebbb7",
+  "schema": "eloria-amethyst-authoring-migration-v1"
+}

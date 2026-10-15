@@ -1,0 +1,363 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "crownwater",
+  "label": "Crownwater",
+  "adapter": "published-generic-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/crownwater/crownwater.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/crownwater/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/crownwater/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/crownwater/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/crownwater/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/crownwater/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    290.0,
+    0.0,
+    1570.0
+  ],
+  "server": {
+    "origin": [
+      294,
+      114
+    ],
+    "cells": [
+      774,
+      774
+    ],
+    "collisionOriginMetres": [
+      -294.0,
+      114.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -290.0,
+      -346.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      385,
+      229
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        0,
+        612
+      ],
+      "previousGridSha256": "11a919a24a6ae92cdcc92681e27a814451f4bec8e4d18e73fdebfb52025d036d"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "crownwater--manymouth_delta-crownwater",
+      "crownwater--ssarathi_ruins-crownwater",
+      "crownwater--westhaven-crownwater",
+      "discovery-crownwater-899",
+      "discovery-crownwater-900",
+      "discovery-crownwater-901",
+      "discovery-crownwater-902",
+      "discovery-crownwater-903",
+      "discovery-crownwater-904",
+      "discovery-crownwater-905",
+      "discovery-crownwater-906",
+      "discovery-crownwater-907",
+      "discovery-crownwater-908",
+      "discovery-crownwater-909",
+      "discovery-crownwater-910",
+      "discovery-crownwater-911",
+      "door-crownwater-basilica-undercroft",
+      "door-crownwater-campanile-door",
+      "door-crownwater-case-room-door",
+      "door-crownwater-cistern-stair",
+      "door-crownwater-customs-door",
+      "door-crownwater-eleventh-bell-door",
+      "door-crownwater-grating-mouth"
+    ],
+    "requiredRouteIds": [
+      "crownwater--manymouth_delta-crownwater",
+      "crownwater--ssarathi_ruins-crownwater",
+      "crownwater--westhaven-crownwater",
+      "door-crownwater-basilica-undercroft",
+      "door-crownwater-campanile-door",
+      "door-crownwater-case-room-door",
+      "door-crownwater-cistern-stair",
+      "door-crownwater-customs-door",
+      "door-crownwater-eleventh-bell-door",
+      "door-crownwater-grating-mouth"
+    ],
+    "ownedPlanFeatureIds": [
+      "crown_isle",
+      "harbour_isle",
+      "outer_east",
+      "outer_north",
+      "outer_northeast",
+      "outer_northwest",
+      "outer_south",
+      "outer_southeast",
+      "outer_southwest",
+      "outer_west",
+      "pavilion_east",
+      "pavilion_north",
+      "pavilion_northeast",
+      "pavilion_northwest",
+      "pavilion_south",
+      "pavilion_southeast",
+      "pavilion_west"
+    ],
+    "ownedFerryConnectionIds": [
+      "crownwater--manymouth_delta",
+      "crownwater--ssarathi_ruins",
+      "crownwater--westhaven"
+    ]
+  },
+  "gameplay": {
+    "runtimeBindingCount": 172,
+    "runtimePointCount": 164,
+    "existingMarkerBindingCount": 7
+  },
+  "bootstrap": {
+    "schema": "eloria-published-region-bootstrap-v1",
+    "objectCount": 289,
+    "objectIdsSha256": "238e2d685f04594d503f186f5b56035d2eee6283ddcfb2bb0481901e6bc8f1b1",
+    "visibleGameplayCount": 87,
+    "assemblies": [
+      {
+        "id": "ferry-quay-01",
+        "kind": "access",
+        "supportNodes": [
+          "FerryQuay_crownwater_01_Fascia_-1",
+          "FerryQuay_crownwater_01_Fascia_1",
+          "FerryQuay_crownwater_01_FerrySign",
+          "FerryQuay_crownwater_01_MooringRopes",
+          "FerryQuay_crownwater_01_PilesAndPosts",
+          "FerryQuay_crownwater_01_Signpost",
+          "FerryQuay_crownwater_01_Skiff_Floor",
+          "FerryQuay_crownwater_01_Skiff_FurledSail",
+          "FerryQuay_crownwater_01_Skiff_Gunwale",
+          "FerryQuay_crownwater_01_Skiff_Hull",
+          "FerryQuay_crownwater_01_Skiff_Mast",
+          "FerryQuay_crownwater_01_Skiff_Seat_0",
+          "FerryQuay_crownwater_01_Skiff_Seat_1",
+          "FerryQuay_crownwater_01_Skiff_Seat_2"
+        ],
+        "walkNode": "Walk_FerryQuay_crownwater_01"
+      },
+      {
+        "id": "ferry-quay-03",
+        "kind": "access",
+        "supportNodes": [
+          "FerryQuay_crownwater_03_Fascia_-1",
+          "FerryQuay_crownwater_03_Fascia_1",
+          "FerryQuay_crownwater_03_FerrySign",
+          "FerryQuay_crownwater_03_MooringRopes",
+          "FerryQuay_crownwater_03_PilesAndPosts",
+          "FerryQuay_crownwater_03_Signpost",
+          "FerryQuay_crownwater_03_Skiff_Floor",
+          "FerryQuay_crownwater_03_Skiff_FurledSail",
+          "FerryQuay_crownwater_03_Skiff_Gunwale",
+          "FerryQuay_crownwater_03_Skiff_Hull",
+          "FerryQuay_crownwater_03_Skiff_Mast",
+          "FerryQuay_crownwater_03_Skiff_Seat_0",
+          "FerryQuay_crownwater_03_Skiff_Seat_1",
+          "FerryQuay_crownwater_03_Skiff_Seat_2"
+        ],
+        "walkNode": "Walk_FerryQuay_crownwater_03"
+      },
+      {
+        "id": "ferry-quay-05",
+        "kind": "access",
+        "supportNodes": [
+          "FerryQuay_crownwater_05_Fascia_-1",
+          "FerryQuay_crownwater_05_Fascia_1",
+          "FerryQuay_crownwater_05_FerrySign",
+          "FerryQuay_crownwater_05_MooringRopes",
+          "FerryQuay_crownwater_05_PilesAndPosts",
+          "FerryQuay_crownwater_05_Signpost",
+          "FerryQuay_crownwater_05_Skiff_Floor",
+          "FerryQuay_crownwater_05_Skiff_FurledSail",
+          "FerryQuay_crownwater_05_Skiff_Gunwale",
+          "FerryQuay_crownwater_05_Skiff_Hull",
+          "FerryQuay_crownwater_05_Skiff_Mast",
+          "FerryQuay_crownwater_05_Skiff_Seat_0",
+          "FerryQuay_crownwater_05_Skiff_Seat_1",
+          "FerryQuay_crownwater_05_Skiff_Seat_2"
+        ],
+        "walkNode": "Walk_FerryQuay_crownwater_05"
+      },
+      {
+        "id": "loose-507",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_507_316_1404",
+          "BridgeUnionPier_507_324_1404",
+          "BridgeUnionPier_507_332_1404",
+          "BridgeUnionPier_507_340_1404",
+          "BridgeUnionPier_507_356_1412",
+          "BridgeUnionPier_507_364_1420",
+          "BridgeUnionPier_507_380_1412",
+          "BridgeUnionPier_507_396_1404",
+          "BridgeUnionTimberEdge_507_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_507_crownwater"
+      },
+      {
+        "id": "loose-508",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_508_460_1436",
+          "BridgeUnionTimberEdge_508_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_508_crownwater"
+      },
+      {
+        "id": "loose-510",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_510_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_510_crownwater"
+      },
+      {
+        "id": "loose-511",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_511_484_1516",
+          "BridgeUnionTimberEdge_511_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_511_crownwater"
+      },
+      {
+        "id": "loose-513",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_513_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_513_crownwater"
+      },
+      {
+        "id": "loose-514",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_514_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_514_crownwater"
+      },
+      {
+        "id": "loose-515",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_515_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_515_crownwater"
+      },
+      {
+        "id": "loose-517",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_517_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_517_crownwater"
+      },
+      {
+        "id": "loose-518",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_518_476_1572",
+          "BridgeUnionPier_518_484_1564",
+          "BridgeUnionTimberEdge_518_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_518_crownwater"
+      },
+      {
+        "id": "loose-519",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_519_316_1596",
+          "BridgeUnionPier_519_324_1612",
+          "BridgeUnionPier_519_332_1628",
+          "BridgeUnionTimberEdge_519_crownwater"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_519_crownwater"
+      }
+    ],
+    "water": [],
+    "bakedTerrainFeatures": [
+      {
+        "id": "crown_isle",
+        "kind": "island"
+      },
+      {
+        "id": "harbour_isle",
+        "kind": "island"
+      },
+      {
+        "id": "outer_east",
+        "kind": "island"
+      },
+      {
+        "id": "outer_north",
+        "kind": "island"
+      },
+      {
+        "id": "outer_northeast",
+        "kind": "island"
+      },
+      {
+        "id": "outer_northwest",
+        "kind": "island"
+      },
+      {
+        "id": "outer_south",
+        "kind": "island"
+      },
+      {
+        "id": "outer_southeast",
+        "kind": "island"
+      },
+      {
+        "id": "outer_southwest",
+        "kind": "island"
+      },
+      {
+        "id": "outer_west",
+        "kind": "island"
+      },
+      {
+        "id": "pavilion_east",
+        "kind": "island"
+      },
+      {
+        "id": "pavilion_north",
+        "kind": "island"
+      },
+      {
+        "id": "pavilion_northeast",
+        "kind": "island"
+      },
+      {
+        "id": "pavilion_northwest",
+        "kind": "island"
+      },
+      {
+        "id": "pavilion_south",
+        "kind": "island"
+      },
+      {
+        "id": "pavilion_southeast",
+        "kind": "island"
+      },
+      {
+        "id": "pavilion_west",
+        "kind": "island"
+      }
+    ],
+    "previewUvMetresInverse": 0.17,
+    "baselineProofSha256": "b0fdf5a858dea76939c8d48d4dc725d9d3dd83223f5173bac3567f5fdde3b21f"
+  }
+}

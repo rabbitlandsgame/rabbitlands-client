@@ -1,0 +1,2981 @@
+[
+  {
+    "id": "sunmane-civic-services",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          120,
+          95
+        ],
+        "label": "information",
+        "useObject": 13,
+        "capture": "sunmane-information",
+        "expectText": "The local board records"
+      },
+      {
+        "tile": [
+          112,
+          106
+        ],
+        "label": "storage",
+        "useObject": 14,
+        "capture": "sunmane-storage",
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          122,
+          103
+        ],
+        "label": "crafting_station",
+        "useObject": 15,
+        "capture": "sunmane-crafting_station",
+        "expectText": "This field station supports"
+      },
+      {
+        "tile": [
+          121,
+          100
+        ],
+        "label": "training",
+        "useObject": 16,
+        "capture": "sunmane-training",
+        "expectText": "The practice post lists"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-west-caravan",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          82,
+          90
+        ],
+        "label": "cove-landing approach"
+      },
+      {
+        "tile": [
+          33,
+          77
+        ],
+        "label": "cove-landing approach"
+      },
+      {
+        "tile": [
+          29,
+          69
+        ],
+        "label": "cove-landing",
+        "capture": "sunmane-west-caravan"
+      },
+      {
+        "tile": [
+          20,
+          113
+        ],
+        "label": "west-landing inner approach approach"
+      },
+      {
+        "tile": [
+          10,
+          116
+        ],
+        "label": "west-landing inner approach",
+        "capture": "sunmane-west-landing"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-north-caravan",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          144,
+          150
+        ],
+        "label": "north-track inner approach approach"
+      },
+      {
+        "tile": [
+          133,
+          205
+        ],
+        "label": "north-track inner approach approach"
+      },
+      {
+        "tile": [
+          133,
+          260
+        ],
+        "label": "north-track inner approach approach"
+      },
+      {
+        "tile": [
+          133,
+          315
+        ],
+        "label": "north-track inner approach approach"
+      },
+      {
+        "tile": [
+          136,
+          370
+        ],
+        "label": "north-track inner approach approach"
+      },
+      {
+        "tile": [
+          136,
+          374
+        ],
+        "label": "north-track inner approach",
+        "capture": "sunmane-north-track"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-fourth-well-and-south",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          110,
+          74
+        ],
+        "label": "fourth-well",
+        "capture": "sunmane-fourth-well-and-south"
+      },
+      {
+        "tile": [
+          158,
+          22
+        ],
+        "label": "south-track inner approach approach"
+      },
+      {
+        "tile": [
+          170,
+          10
+        ],
+        "label": "south-track inner approach",
+        "capture": "sunmane-south-track"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-working-fields-and-grazers",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          177,
+          64
+        ],
+        "label": "Seed plot",
+        "expectResource": 29,
+        "capture": "sunmane-resource-seed"
+      },
+      {
+        "tile": [
+          164,
+          71
+        ],
+        "label": "Wheat plot",
+        "expectResource": 2020,
+        "capture": "sunmane-resource-wheat"
+      },
+      {
+        "tile": [
+          185,
+          52
+        ],
+        "label": "open grazing",
+        "expectCreature": "golden_plains_horse",
+        "capture": "sunmane-grazers"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-frontier-watch",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          147,
+          110
+        ],
+        "label": "Rider Anse and retained gauntlet approach",
+        "capture": "sunmane-gauntlet-keeper"
+      },
+      {
+        "tile": [
+          202,
+          157
+        ],
+        "label": "mineral frontier apron approach"
+      },
+      {
+        "tile": [
+          255,
+          208
+        ],
+        "label": "mineral frontier apron approach"
+      },
+      {
+        "tile": [
+          310,
+          259
+        ],
+        "label": "mineral frontier apron approach"
+      },
+      {
+        "tile": [
+          322,
+          271
+        ],
+        "label": "mineral frontier apron",
+        "capture": "sunmane-frontier-apron"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-wind-caves-roundtrip",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          144,
+          150
+        ],
+        "label": "cave-wind_caves approach"
+      },
+      {
+        "tile": [
+          150,
+          205
+        ],
+        "label": "cave-wind_caves approach"
+      },
+      {
+        "tile": [
+          205,
+          260
+        ],
+        "label": "cave-wind_caves approach"
+      },
+      {
+        "tile": [
+          239,
+          294
+        ],
+        "label": "cave-wind_caves",
+        "destination": "sunmane_wind_caves",
+        "capture": "sunmane-wind-caves-roundtrip-inside"
+      },
+      {
+        "tile": [
+          43,
+          33
+        ],
+        "label": "cave working floor",
+        "capture": "sunmane-wind-caves-roundtrip-floor"
+      },
+      {
+        "tile": [
+          43,
+          27
+        ],
+        "label": "return to steppe",
+        "destination": "sunmane_steppe",
+        "capture": "sunmane-wind-caves-roundtrip-returned"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-crystal-hollow-roundtrip",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          192,
+          147
+        ],
+        "label": "cave-crystal_hollow approach"
+      },
+      {
+        "tile": [
+          245,
+          199
+        ],
+        "label": "cave-crystal_hollow approach"
+      },
+      {
+        "tile": [
+          300,
+          251
+        ],
+        "label": "cave-crystal_hollow approach"
+      },
+      {
+        "tile": [
+          322,
+          273
+        ],
+        "label": "cave-crystal_hollow",
+        "destination": "sunmane_wind_caves",
+        "capture": "sunmane-crystal-hollow-roundtrip-inside"
+      },
+      {
+        "tile": [
+          169,
+          34
+        ],
+        "label": "cave working floor",
+        "capture": "sunmane-crystal-hollow-roundtrip-floor"
+      },
+      {
+        "tile": [
+          169,
+          28
+        ],
+        "label": "return to steppe",
+        "destination": "sunmane_steppe",
+        "capture": "sunmane-crystal-hollow-roundtrip-returned"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-secret-posts-1",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          103,
+          117
+        ],
+        "label": "secret 505",
+        "capture": "sunmane-secret-505"
+      },
+      {
+        "tile": [
+          48,
+          97
+        ],
+        "label": "secret 502 approach"
+      },
+      {
+        "tile": [
+          40,
+          89
+        ],
+        "label": "secret 502",
+        "capture": "sunmane-secret-502"
+      },
+      {
+        "tile": [
+          72,
+          66
+        ],
+        "label": "secret 513 approach"
+      },
+      {
+        "tile": [
+          68,
+          56
+        ],
+        "label": "secret 513",
+        "capture": "sunmane-secret-513"
+      },
+      {
+        "tile": [
+          123,
+          54
+        ],
+        "label": "secret 500 approach"
+      },
+      {
+        "tile": [
+          155,
+          63
+        ],
+        "label": "secret 500",
+        "capture": "sunmane-secret-500"
+      },
+      {
+        "tile": [
+          141,
+          53
+        ],
+        "label": "secret 510",
+        "capture": "sunmane-secret-510"
+      },
+      {
+        "tile": [
+          171,
+          64
+        ],
+        "label": "secret 506",
+        "capture": "sunmane-secret-506"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-secret-posts-2",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          119,
+          138
+        ],
+        "label": "secret 511 approach"
+      },
+      {
+        "tile": [
+          73,
+          154
+        ],
+        "label": "secret 511 approach"
+      },
+      {
+        "tile": [
+          53,
+          188
+        ],
+        "label": "secret 511",
+        "capture": "sunmane-secret-511"
+      },
+      {
+        "tile": [
+          97,
+          227
+        ],
+        "label": "secret 501 approach"
+      },
+      {
+        "tile": [
+          100,
+          207
+        ],
+        "label": "secret 501",
+        "capture": "sunmane-secret-501"
+      },
+      {
+        "tile": [
+          65,
+          235
+        ],
+        "label": "secret 507 approach"
+      },
+      {
+        "tile": [
+          54,
+          246
+        ],
+        "label": "secret 507",
+        "capture": "sunmane-secret-507"
+      },
+      {
+        "tile": [
+          61,
+          258
+        ],
+        "label": "secret 509",
+        "capture": "sunmane-secret-509"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-secret-posts-3",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          144,
+          150
+        ],
+        "label": "secret 503 approach"
+      },
+      {
+        "tile": [
+          133,
+          205
+        ],
+        "label": "secret 503 approach"
+      },
+      {
+        "tile": [
+          133,
+          260
+        ],
+        "label": "secret 503 approach"
+      },
+      {
+        "tile": [
+          122,
+          274
+        ],
+        "label": "secret 503",
+        "capture": "sunmane-secret-503"
+      },
+      {
+        "tile": [
+          114,
+          325
+        ],
+        "label": "secret 508",
+        "capture": "sunmane-secret-508"
+      },
+      {
+        "tile": [
+          169,
+          325
+        ],
+        "label": "secret 504 approach"
+      },
+      {
+        "tile": [
+          224,
+          325
+        ],
+        "label": "secret 504 approach"
+      },
+      {
+        "tile": [
+          277,
+          303
+        ],
+        "label": "secret 504",
+        "capture": "sunmane-secret-504"
+      },
+      {
+        "tile": [
+          270,
+          248
+        ],
+        "label": "secret 512 approach"
+      },
+      {
+        "tile": [
+          270,
+          193
+        ],
+        "label": "secret 512 approach"
+      },
+      {
+        "tile": [
+          230,
+          143
+        ],
+        "label": "secret 512",
+        "capture": "sunmane-secret-512"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-secret-roundtrip-502",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          82,
+          90
+        ],
+        "label": "enter secret 502 approach"
+      },
+      {
+        "tile": [
+          40,
+          90
+        ],
+        "label": "enter secret 502",
+        "object": 502,
+        "destination": "sunmane_steppe_secrets",
+        "capture": "sunmane-secret-inside-502"
+      },
+      {
+        "tile": [
+          156,
+          91
+        ],
+        "label": "interior floor",
+        "capture": "sunmane-secret-floor-502"
+      },
+      {
+        "tile": [
+          156,
+          97
+        ],
+        "label": "return outside",
+        "destination": "sunmane_steppe",
+        "capture": "sunmane-secret-return-502"
+      }
+    ]
+  },
+  {
+    "id": "sunmane-secret-roundtrip-509",
+    "map": "sunmane_steppe",
+    "start": [
+      137,
+      95
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          144,
+          150
+        ],
+        "label": "enter secret 509 approach"
+      },
+      {
+        "tile": [
+          115,
+          205
+        ],
+        "label": "enter secret 509 approach"
+      },
+      {
+        "tile": [
+          67,
+          253
+        ],
+        "label": "enter secret 509 approach"
+      },
+      {
+        "tile": [
+          61,
+          259
+        ],
+        "label": "enter secret 509",
+        "object": 509,
+        "destination": "sunmane_steppe_secrets",
+        "capture": "sunmane-secret-inside-509"
+      },
+      {
+        "tile": [
+          87,
+          163
+        ],
+        "label": "interior floor",
+        "capture": "sunmane-secret-floor-509"
+      },
+      {
+        "tile": [
+          87,
+          169
+        ],
+        "label": "return outside",
+        "destination": "sunmane_steppe",
+        "capture": "sunmane-secret-return-509"
+      }
+    ]
+  },
+  {
+    "id": "verdant-physick-services",
+    "map": "verdant_stair",
+    "start": [
+      108,
+      108
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          117,
+          100
+        ],
+        "label": "information",
+        "capture": "verdant-information",
+        "useObject": 13,
+        "expectText": "The local board records roads, dangers, and current work in Verdant Stair."
+      },
+      {
+        "tile": [
+          122,
+          97
+        ],
+        "label": "storage",
+        "capture": "verdant-storage",
+        "useObject": 14,
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          129,
+          96
+        ],
+        "label": "crafting",
+        "capture": "verdant-crafting",
+        "useObject": 15,
+        "expectText": "This field station supports ordinary mixing and crafting."
+      },
+      {
+        "tile": [
+          135,
+          96
+        ],
+        "label": "training",
+        "capture": "verdant-training",
+        "useObject": 16,
+        "expectText": "The practice post lists your recent combat results."
+      }
+    ]
+  },
+  {
+    "id": "verdant-lagoon-to-steppe-ascent",
+    "map": "verdant_stair",
+    "start": [
+      38,
+      61
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 45,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          38,
+          61
+        ],
+        "label": "quay-climb-foot",
+        "capture": "verdant-quay-climb-foot"
+      },
+      {
+        "tile": [
+          58,
+          81
+        ],
+        "label": "quay-climb-head",
+        "capture": "verdant-quay-climb-head"
+      },
+      {
+        "tile": [
+          60,
+          62
+        ],
+        "label": "lower-climb-foot",
+        "capture": "verdant-lower-climb-foot"
+      },
+      {
+        "tile": [
+          93,
+          93
+        ],
+        "label": "lower-climb-head",
+        "capture": "verdant-lower-climb-head"
+      },
+      {
+        "tile": [
+          78,
+          105
+        ],
+        "label": "physick-public-path-south",
+        "capture": "verdant-physick-public-path-south"
+      },
+      {
+        "tile": [
+          78,
+          124
+        ],
+        "label": "physick-public-path-north",
+        "capture": "verdant-physick-public-path-north"
+      },
+      {
+        "tile": [
+          69,
+          138
+        ],
+        "label": "grand-stair-foot",
+        "capture": "verdant-grand-stair-foot"
+      },
+      {
+        "tile": [
+          114,
+          167
+        ],
+        "label": "grand-stair-head",
+        "capture": "verdant-grand-stair-head"
+      },
+      {
+        "tile": [
+          147,
+          172
+        ],
+        "label": "shrine-climb-foot",
+        "capture": "verdant-shrine-climb-foot"
+      },
+      {
+        "tile": [
+          179,
+          202
+        ],
+        "label": "shrine-climb-head",
+        "capture": "verdant-shrine-climb-head"
+      },
+      {
+        "tile": [
+          221,
+          188
+        ],
+        "label": "temple-climb-foot",
+        "capture": "verdant-temple-climb-foot"
+      },
+      {
+        "tile": [
+          252,
+          220
+        ],
+        "label": "temple-climb-head",
+        "capture": "verdant-temple-climb-head"
+      },
+      {
+        "tile": [
+          257,
+          197
+        ],
+        "label": "summit-climb-foot",
+        "capture": "verdant-summit-climb-foot"
+      },
+      {
+        "tile": [
+          288,
+          228
+        ],
+        "label": "summit-climb-head",
+        "capture": "verdant-summit-climb-head"
+      }
+    ]
+  },
+  {
+    "id": "verdant-working-quay",
+    "map": "verdant_stair",
+    "start": [
+      58,
+      81
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          59,
+          57
+        ],
+        "label": "march-stone",
+        "capture": "verdant-march-stone"
+      },
+      {
+        "tile": [
+          79,
+          49
+        ],
+        "label": "quay-station",
+        "capture": "verdant-quay-station"
+      },
+      {
+        "tile": [
+          68,
+          57
+        ],
+        "label": "quay-cargo",
+        "capture": "verdant-quay-cargo"
+      },
+      {
+        "tile": [
+          38,
+          57
+        ],
+        "label": "boat-landing",
+        "capture": "verdant-boat-landing"
+      }
+    ]
+  },
+  {
+    "id": "verdant-root_crossing",
+    "map": "verdant_stair",
+    "start": [
+      157,
+      158
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 45,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          157,
+          158
+        ],
+        "label": "root_crossing-boarding",
+        "capture": "verdant-root_crossing-boarding"
+      },
+      {
+        "tile": [
+          201,
+          146
+        ],
+        "label": "root_crossing-far-bank",
+        "capture": "verdant-root_crossing-far-bank"
+      }
+    ]
+  },
+  {
+    "id": "verdant-rope_crossing_low",
+    "map": "verdant_stair",
+    "start": [
+      212,
+      154
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 45,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          212,
+          154
+        ],
+        "label": "rope_crossing_low-boarding",
+        "capture": "verdant-rope_crossing_low-boarding"
+      },
+      {
+        "tile": [
+          195,
+          110
+        ],
+        "label": "rope_crossing_low-far-bank",
+        "capture": "verdant-rope_crossing_low-far-bank"
+      }
+    ]
+  },
+  {
+    "id": "verdant-rope_crossing_high",
+    "map": "verdant_stair",
+    "start": [
+      246,
+      128
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 45,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          246,
+          128
+        ],
+        "label": "rope_crossing_high-boarding",
+        "capture": "verdant-rope_crossing_high-boarding"
+      },
+      {
+        "tile": [
+          241,
+          82
+        ],
+        "label": "rope_crossing_high-far-bank",
+        "capture": "verdant-rope_crossing_high-far-bank"
+      }
+    ]
+  },
+  {
+    "id": "verdant-ravine_bridge",
+    "map": "verdant_stair",
+    "start": [
+      12,
+      254
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 45,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          12,
+          254
+        ],
+        "label": "ravine_bridge-boarding",
+        "capture": "verdant-ravine_bridge-boarding"
+      },
+      {
+        "tile": [
+          47,
+          244
+        ],
+        "label": "ravine_bridge-far-bank",
+        "capture": "verdant-ravine_bridge-far-bank"
+      }
+    ]
+  },
+  {
+    "id": "verdant-vine_bridge_north",
+    "map": "verdant_stair",
+    "start": [
+      36,
+      326
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 45,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          36,
+          326
+        ],
+        "label": "vine_bridge_north-boarding",
+        "capture": "verdant-vine_bridge_north-boarding"
+      },
+      {
+        "tile": [
+          78,
+          308
+        ],
+        "label": "vine_bridge_north-far-bank",
+        "capture": "verdant-vine_bridge_north-far-bank"
+      }
+    ]
+  },
+  {
+    "id": "verdant-temple-sanctum-door",
+    "map": "verdant_stair",
+    "start": [
+      252,
+      234
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          256,
+          234
+        ],
+        "label": "temple-sanctum-door-enter",
+        "capture": "verdant-temple-sanctum-door-enter",
+        "destination": "verdant_stair_insides"
+      },
+      {
+        "tile": [
+          44,
+          284
+        ],
+        "label": "temple-sanctum-door-inside-floor",
+        "capture": "verdant-temple-sanctum-door-inside-floor"
+      },
+      {
+        "tile": [
+          47,
+          284
+        ],
+        "label": "temple-sanctum-door-return",
+        "capture": "verdant-temple-sanctum-door-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-cenote-deeps-stair",
+    "map": "verdant_stair",
+    "start": [
+      102,
+      177
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          102,
+          181
+        ],
+        "label": "cenote-deeps-stair-enter",
+        "capture": "verdant-cenote-deeps-stair-enter",
+        "destination": "verdant_stair_insides"
+      },
+      {
+        "tile": [
+          194,
+          282
+        ],
+        "label": "cenote-deeps-stair-inside-floor",
+        "capture": "verdant-cenote-deeps-stair-inside-floor"
+      },
+      {
+        "tile": [
+          197,
+          282
+        ],
+        "label": "cenote-deeps-stair-return",
+        "capture": "verdant-cenote-deeps-stair-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-banyan-hollow-arch",
+    "map": "verdant_stair",
+    "start": [
+      53,
+      195
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          57,
+          195
+        ],
+        "label": "banyan-hollow-arch-enter",
+        "capture": "verdant-banyan-hollow-arch-enter",
+        "destination": "verdant_stair_insides"
+      },
+      {
+        "tile": [
+          44,
+          108
+        ],
+        "label": "banyan-hollow-arch-inside-floor",
+        "capture": "verdant-banyan-hollow-arch-inside-floor"
+      },
+      {
+        "tile": [
+          47,
+          108
+        ],
+        "label": "banyan-hollow-arch-return",
+        "capture": "verdant-banyan-hollow-arch-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-stair-quarry-adit",
+    "map": "verdant_stair",
+    "start": [
+      283,
+      241
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          287,
+          241
+        ],
+        "label": "stair-quarry-adit-enter",
+        "capture": "verdant-stair-quarry-adit-enter",
+        "destination": "verdant_stair_insides"
+      },
+      {
+        "tile": [
+          164,
+          106
+        ],
+        "label": "stair-quarry-adit-inside-floor",
+        "capture": "verdant-stair-quarry-adit-inside-floor"
+      },
+      {
+        "tile": [
+          167,
+          106
+        ],
+        "label": "stair-quarry-adit-return",
+        "capture": "verdant-stair-quarry-adit-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-physick-still-door",
+    "map": "verdant_stair",
+    "start": [
+      83,
+      115
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          87,
+          115
+        ],
+        "label": "physick-still-door-enter",
+        "capture": "verdant-physick-still-door-enter",
+        "destination": "verdant_stair_insides"
+      },
+      {
+        "tile": [
+          302,
+          141
+        ],
+        "label": "physick-still-door-inside-floor",
+        "capture": "verdant-physick-still-door-inside-floor"
+      },
+      {
+        "tile": [
+          305,
+          141
+        ],
+        "label": "physick-still-door-return",
+        "capture": "verdant-physick-still-door-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-anchor-hollow-mouth",
+    "map": "verdant_stair",
+    "start": [
+      18,
+      223
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          22,
+          223
+        ],
+        "label": "anchor-hollow-mouth-enter",
+        "capture": "verdant-anchor-hollow-mouth-enter",
+        "destination": "verdant_stair_insides"
+      },
+      {
+        "tile": [
+          302,
+          276
+        ],
+        "label": "anchor-hollow-mouth-inside-floor",
+        "capture": "verdant-anchor-hollow-mouth-inside-floor"
+      },
+      {
+        "tile": [
+          305,
+          276
+        ],
+        "label": "anchor-hollow-mouth-return",
+        "capture": "verdant-anchor-hollow-mouth-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-nine-lost-door",
+    "map": "verdant_stair",
+    "start": [
+      241,
+      29
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          245,
+          29
+        ],
+        "label": "nine-lost-door-enter",
+        "capture": "verdant-nine-lost-door-enter",
+        "destination": "verdant_stair_insides"
+      },
+      {
+        "tile": [
+          302,
+          192
+        ],
+        "label": "nine-lost-door-inside-floor",
+        "capture": "verdant-nine-lost-door-inside-floor"
+      },
+      {
+        "tile": [
+          305,
+          192
+        ],
+        "label": "nine-lost-door-return",
+        "capture": "verdant-nine-lost-door-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-west-quay-gate",
+    "map": "verdant_stair",
+    "start": [
+      13,
+      107
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          4,
+          107
+        ],
+        "label": "depart-west-quay-gate",
+        "capture": "verdant-depart-west-quay-gate",
+        "destination": "ssarathi_ruins"
+      }
+    ]
+  },
+  {
+    "id": "verdant-east-pass-gate",
+    "map": "verdant_stair",
+    "start": [
+      344,
+      202
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          353,
+          202
+        ],
+        "label": "depart-east-pass-gate",
+        "capture": "verdant-depart-east-pass-gate",
+        "destination": "sunmane_steppe"
+      }
+    ]
+  },
+  {
+    "id": "verdant-physick-resource",
+    "map": "verdant_stair",
+    "start": [
+      72,
+      108
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          77,
+          108
+        ],
+        "label": "resource-lotus",
+        "capture": "verdant-resource-lotus",
+        "expectResource": 45
+      }
+    ]
+  },
+  {
+    "id": "verdant-canopy-encounter",
+    "map": "verdant_stair",
+    "start": [
+      142,
+      143
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          146,
+          140
+        ],
+        "label": "canopy-encounter-space",
+        "capture": "verdant-canopy-encounter-space",
+        "expectCreature": 596
+      }
+    ]
+  },
+  {
+    "id": "verdant-stair-cenote-hollow",
+    "map": "verdant_stair",
+    "start": [
+      132,
+      158
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          136,
+          158
+        ],
+        "label": "stair-cenote-hollow-enter",
+        "capture": "verdant-stair-cenote-hollow-enter",
+        "destination": "verdant_stair_secrets",
+        "object": 500
+      },
+      {
+        "tile": [
+          159,
+          167
+        ],
+        "label": "stair-cenote-hollow-inside",
+        "capture": "verdant-stair-cenote-hollow-inside"
+      },
+      {
+        "tile": [
+          159,
+          170
+        ],
+        "label": "stair-cenote-hollow-return",
+        "capture": "verdant-stair-cenote-hollow-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-stair-hanging-garden",
+    "map": "verdant_stair",
+    "start": [
+      245,
+      136
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          249,
+          136
+        ],
+        "label": "stair-hanging-garden-enter",
+        "capture": "verdant-stair-hanging-garden-enter",
+        "destination": "verdant_stair_secrets",
+        "object": 503
+      },
+      {
+        "tile": [
+          230,
+          167
+        ],
+        "label": "stair-hanging-garden-inside",
+        "capture": "verdant-stair-hanging-garden-inside"
+      },
+      {
+        "tile": [
+          230,
+          170
+        ],
+        "label": "stair-hanging-garden-return",
+        "capture": "verdant-stair-hanging-garden-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "verdant-stair-water-spring",
+    "map": "verdant_stair",
+    "start": [
+      179,
+      179
+    ],
+    "startTolerance": 2,
+    "distance": 34,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          183,
+          179
+        ],
+        "label": "stair-water-spring-enter",
+        "capture": "verdant-stair-water-spring-enter",
+        "destination": "verdant_stair_secrets",
+        "object": 511
+      },
+      {
+        "tile": [
+          11,
+          23
+        ],
+        "label": "stair-water-spring-inside",
+        "capture": "verdant-stair-water-spring-inside"
+      },
+      {
+        "tile": [
+          11,
+          26
+        ],
+        "label": "stair-water-spring-return",
+        "capture": "verdant-stair-water-spring-return",
+        "destination": "verdant_stair"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-service-court",
+    "map": "ssarathi_ruins",
+    "start": [
+      116,
+      116
+    ],
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          116,
+          112
+        ],
+        "label": "information",
+        "useObject": 13,
+        "capture": "ssarathi-information",
+        "expectText": "The local board records"
+      },
+      {
+        "tile": [
+          107,
+          116
+        ],
+        "label": "storage",
+        "useObject": 14,
+        "capture": "ssarathi-storage",
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          123,
+          118
+        ],
+        "label": "crafting_station",
+        "useObject": 15,
+        "capture": "ssarathi-crafting_station",
+        "expectText": "This field station supports"
+      },
+      {
+        "tile": [
+          139,
+          120
+        ],
+        "label": "inhabited quay stores",
+        "capture": "ssarathi-inhabited-quay"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-temple-ascent",
+    "map": "ssarathi_ruins",
+    "start": [
+      156,
+      185
+    ],
+    "distance": 32,
+    "yaw": 0,
+    "steps": [
+      {
+        "tile": [
+          156,
+          216
+        ],
+        "label": "lower processional ramp",
+        "capture": "ssarathi-temple-ramp"
+      },
+      {
+        "tile": [
+          156,
+          234
+        ],
+        "label": "continuous stair foot",
+        "capture": "ssarathi-temple-foot"
+      },
+      {
+        "tile": [
+          156,
+          260
+        ],
+        "label": "temple ascent",
+        "capture": "ssarathi-temple-stair"
+      },
+      {
+        "tile": [
+          156,
+          298
+        ],
+        "label": "summit altar",
+        "capture": "ssarathi-temple-summit"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-working-market",
+    "map": "ssarathi_ruins",
+    "start": [
+      246,
+      98
+    ],
+    "distance": 32,
+    "yaw": -25,
+    "steps": [
+      {
+        "tile": [
+          262,
+          96
+        ],
+        "label": "market trading aisle",
+        "capture": "ssarathi-market"
+      },
+      {
+        "tile": [
+          279,
+          81
+        ],
+        "label": "market copyists doorstep",
+        "capture": "ssarathi-market-homes"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-coil-keeper",
+    "map": "ssarathi_ruins",
+    "start": [
+      174,
+      91
+    ],
+    "distance": 32,
+    "yaw": 0,
+    "steps": [
+      {
+        "tile": [
+          170,
+          83
+        ],
+        "label": "Ssethis the Doorkeeper",
+        "capture": "ssarathi-coil-keeper"
+      },
+      {
+        "tile": [
+          174,
+          78
+        ],
+        "label": "Coil Causeway return court",
+        "capture": "ssarathi-coil-return"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-harvesting",
+    "map": "ssarathi_ruins",
+    "start": [
+      254,
+      129
+    ],
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          239,
+          128
+        ],
+        "label": "scale moss harvest",
+        "expectResource": 38,
+        "capture": "ssarathi-harvest"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-floodplain-encounter",
+    "map": "ssarathi_ruins",
+    "start": [
+      201,
+      154
+    ],
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          202,
+          139
+        ],
+        "label": "herons beside the drowned city",
+        "expectCreature": 598,
+        "capture": "ssarathi-herons"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-cistern-secret",
+    "map": "ssarathi_ruins",
+    "start": [
+      41,
+      157
+    ],
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          39,
+          171
+        ],
+        "label": "Cistern Well secret",
+        "object": 500,
+        "destination": "ssarathi_ruins_secrets",
+        "capture": "ssarathi-cistern-secret"
+      },
+      {
+        "tile": [
+          82,
+          98
+        ],
+        "label": "clear secret threshold"
+      },
+      {
+        "tile": [
+          84,
+          98
+        ],
+        "label": "return from the Cistern Well",
+        "destination": "ssarathi_ruins",
+        "capture": "ssarathi-cistern-secret-return"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-north-stair",
+    "map": "ssarathi_ruins",
+    "start": [
+      273,
+      374
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          270,
+          381
+        ],
+        "label": "Stair to the Four Gates Causeway",
+        "destination": "four_gates",
+        "capture": "ssarathi-arrive-north-stair"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-east-causeway",
+    "map": "ssarathi_ruins",
+    "start": [
+      374,
+      207
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          381,
+          204
+        ],
+        "label": "Causeway to the Verdant Stair",
+        "destination": "verdant_stair",
+        "capture": "ssarathi-arrive-east-causeway"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-west-causeway",
+    "map": "ssarathi_ruins",
+    "start": [
+      12,
+      222
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          4,
+          224
+        ],
+        "label": "Causeway to the Manymouth Delta",
+        "destination": "manymouth_delta",
+        "capture": "ssarathi-arrive-west-causeway"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-south-gate",
+    "map": "ssarathi_ruins",
+    "start": [
+      124,
+      26
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          124,
+          42
+        ],
+        "label": "Water Gate: the Crownwater boat",
+        "destination": "crownwater",
+        "capture": "ssarathi-arrive-south-gate"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-archive-vault-door",
+    "map": "ssarathi_ruins",
+    "start": [
+      176,
+      228
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          180,
+          240
+        ],
+        "label": "The Sun Vault",
+        "destination": "ssarathi_royal_archive",
+        "capture": "ssarathi-arrive-archive-vault-door"
+      },
+      {
+        "tile": [
+          25,
+          288
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          27,
+          288
+        ],
+        "label": "return from interior",
+        "destination": "ssarathi_ruins",
+        "capture": "ssarathi-return-archive-vault-door"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-hatchery-descent",
+    "map": "ssarathi_ruins",
+    "start": [
+      236,
+      216
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          234,
+          202
+        ],
+        "label": "The Hatchery Descent",
+        "destination": "ssarathi_royal_archive",
+        "capture": "ssarathi-arrive-hatchery-descent"
+      },
+      {
+        "tile": [
+          187,
+          281
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          189,
+          281
+        ],
+        "label": "return from interior",
+        "destination": "ssarathi_ruins",
+        "capture": "ssarathi-return-hatchery-descent"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-cistern-shaft",
+    "map": "ssarathi_ruins",
+    "start": [
+      46,
+      156
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          36,
+          160
+        ],
+        "label": "The Cistern Shaft",
+        "destination": "ssarathi_royal_archive",
+        "capture": "ssarathi-arrive-cistern-shaft"
+      },
+      {
+        "tile": [
+          39,
+          69
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          41,
+          69
+        ],
+        "label": "return from interior",
+        "destination": "ssarathi_ruins",
+        "capture": "ssarathi-return-cistern-shaft"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-undercroft-mouth",
+    "map": "ssarathi_ruins",
+    "start": [
+      246,
+      48
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          254,
+          56
+        ],
+        "label": "The Undercroft Mouth",
+        "destination": "ssarathi_royal_archive",
+        "capture": "ssarathi-arrive-undercroft-mouth"
+      },
+      {
+        "tile": [
+          183,
+          63
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          185,
+          63
+        ],
+        "label": "return from interior",
+        "destination": "ssarathi_ruins",
+        "capture": "ssarathi-return-undercroft-mouth"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-tenth-mouth-door",
+    "map": "ssarathi_ruins",
+    "start": [
+      96,
+      203
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          84,
+          199
+        ],
+        "label": "The Tenth Mouth Shrine",
+        "destination": "ssarathi_royal_archive",
+        "capture": "ssarathi-arrive-tenth-mouth-door"
+      },
+      {
+        "tile": [
+          265,
+          289
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          267,
+          289
+        ],
+        "label": "return from interior",
+        "destination": "ssarathi_ruins",
+        "capture": "ssarathi-return-tenth-mouth-door"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-water-gate-undercut-mouth",
+    "map": "ssarathi_ruins",
+    "start": [
+      156,
+      65
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          156,
+          81
+        ],
+        "label": "The Water Gate Undercut",
+        "destination": "ssarathi_royal_archive",
+        "capture": "ssarathi-arrive-water-gate-undercut-mouth"
+      },
+      {
+        "tile": [
+          265,
+          217
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          267,
+          217
+        ],
+        "label": "return from interior",
+        "destination": "ssarathi_ruins",
+        "capture": "ssarathi-return-water-gate-undercut-mouth"
+      }
+    ]
+  },
+  {
+    "id": "ssarathi_ruins-lineage-house-door",
+    "map": "ssarathi_ruins",
+    "start": [
+      150,
+      131
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          166,
+          131
+        ],
+        "label": "The Lineage Reader's House",
+        "destination": "ssarathi_royal_archive",
+        "capture": "ssarathi-arrive-lineage-house-door"
+      },
+      {
+        "tile": [
+          265,
+          126
+        ],
+        "label": "clear interior threshold"
+      },
+      {
+        "tile": [
+          267,
+          126
+        ],
+        "label": "return from interior",
+        "destination": "ssarathi_ruins",
+        "capture": "ssarathi-return-lineage-house-door"
+      }
+    ]
+  },
+  {
+    "id": "four_gates-receiver-services",
+    "map": "four_gates",
+    "start": [
+      198,
+      143
+    ],
+    "startTolerance": 2,
+    "walkTimeout": 100,
+    "distance": 32,
+    "yaw": 0,
+    "steps": [
+      {
+        "tile": [
+          200,
+          142
+        ],
+        "label": "four_gates-receiver-information-13",
+        "capture": "four_gates-receiver-information-13",
+        "useObject": 13,
+        "expectText": "The local board records roads, dangers, and current work in Four Gates."
+      },
+      {
+        "tile": [
+          160,
+          138
+        ],
+        "label": "four_gates-receiver-storage-14 approach"
+      },
+      {
+        "tile": [
+          134,
+          164
+        ],
+        "label": "four_gates-receiver-storage-14",
+        "capture": "four_gates-receiver-storage-14",
+        "useObject": 14,
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          160,
+          198
+        ],
+        "label": "four_gates-receiver-crafting_station-15 approach"
+      },
+      {
+        "tile": [
+          200,
+          238
+        ],
+        "label": "four_gates-receiver-crafting_station-15 approach"
+      },
+      {
+        "tile": [
+          234,
+          264
+        ],
+        "label": "four_gates-receiver-crafting_station-15 approach"
+      },
+      {
+        "tile": [
+          239,
+          260
+        ],
+        "label": "four_gates-receiver-crafting_station-15",
+        "capture": "four_gates-receiver-crafting_station-15",
+        "useObject": 15,
+        "expectText": "This field station supports ordinary mixing and crafting."
+      }
+    ]
+  },
+  {
+    "id": "amethyst_barrens-receiver-services",
+    "map": "amethyst_barrens",
+    "start": [
+      140,
+      85
+    ],
+    "startTolerance": 2,
+    "walkTimeout": 100,
+    "distance": 32,
+    "yaw": 0,
+    "steps": [
+      {
+        "tile": [
+          136,
+          91
+        ],
+        "label": "amethyst_barrens-receiver-information-13",
+        "capture": "amethyst_barrens-receiver-information-13",
+        "useObject": 13,
+        "expectText": "The local board records roads, dangers, and current work in Amethyst Barrens."
+      },
+      {
+        "tile": [
+          147,
+          105
+        ],
+        "label": "amethyst_barrens-receiver-storage-14",
+        "capture": "amethyst_barrens-receiver-storage-14",
+        "useObject": 14,
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          153,
+          107
+        ],
+        "label": "amethyst_barrens-receiver-crafting_station-15",
+        "capture": "amethyst_barrens-receiver-crafting_station-15",
+        "useObject": 15,
+        "expectText": "This field station supports ordinary mixing and crafting."
+      },
+      {
+        "tile": [
+          156,
+          96
+        ],
+        "label": "amethyst_barrens-receiver-training-16",
+        "capture": "amethyst_barrens-receiver-training-16",
+        "useObject": 16,
+        "expectText": "The practice post lists your recent combat results."
+      }
+    ]
+  },
+  {
+    "id": "four-gates-east-receiving-avenue",
+    "map": "four_gates",
+    "start": [
+      240,
+      198
+    ],
+    "startTolerance": 2,
+    "walkTimeout": 100,
+    "distance": 32,
+    "yaw": 90,
+    "steps": [
+      {
+        "tile": [
+          276,
+          198
+        ],
+        "label": "four-east-276",
+        "capture": "four-east-276"
+      },
+      {
+        "tile": [
+          310,
+          198
+        ],
+        "label": "four-east-310",
+        "capture": "four-east-310"
+      },
+      {
+        "tile": [
+          337,
+          198
+        ],
+        "label": "four-east-337",
+        "capture": "four-east-337"
+      },
+      {
+        "tile": [
+          351,
+          198
+        ],
+        "label": "four-east-351",
+        "capture": "four-east-351"
+      },
+      {
+        "tile": [
+          370,
+          198
+        ],
+        "label": "four-east-370",
+        "capture": "four-east-370"
+      },
+      {
+        "tile": [
+          388,
+          198
+        ],
+        "label": "four-east-388",
+        "capture": "four-east-388"
+      }
+    ]
+  },
+  {
+    "id": "four-gates-south-receiving-avenue",
+    "map": "four_gates",
+    "start": [
+      198,
+      155
+    ],
+    "startTolerance": 2,
+    "walkTimeout": 100,
+    "distance": 32,
+    "yaw": 180,
+    "steps": [
+      {
+        "tile": [
+          198,
+          120
+        ],
+        "label": "four-south-120",
+        "capture": "four-south-120"
+      },
+      {
+        "tile": [
+          198,
+          86
+        ],
+        "label": "four-south-86",
+        "capture": "four-south-86"
+      },
+      {
+        "tile": [
+          198,
+          59
+        ],
+        "label": "four-south-59",
+        "capture": "four-south-59"
+      },
+      {
+        "tile": [
+          198,
+          44
+        ],
+        "label": "four-south-44",
+        "capture": "four-south-44"
+      },
+      {
+        "tile": [
+          198,
+          26
+        ],
+        "label": "four-south-26",
+        "capture": "four-south-26"
+      },
+      {
+        "tile": [
+          198,
+          8
+        ],
+        "label": "four-south-8",
+        "capture": "four-south-8"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-steppe-ascent",
+    "map": "amethyst_barrens",
+    "start": [
+      224,
+      68
+    ],
+    "startTolerance": 2,
+    "walkTimeout": 100,
+    "distance": 32,
+    "yaw": 180,
+    "steps": [
+      {
+        "tile": [
+          209,
+          61
+        ],
+        "label": "amethyst-steppe-0",
+        "capture": "amethyst-steppe-0"
+      },
+      {
+        "tile": [
+          193,
+          54
+        ],
+        "label": "amethyst-steppe-1",
+        "capture": "amethyst-steppe-1"
+      },
+      {
+        "tile": [
+          179,
+          48
+        ],
+        "label": "amethyst-steppe-2",
+        "capture": "amethyst-steppe-2"
+      },
+      {
+        "tile": [
+          170,
+          43
+        ],
+        "label": "amethyst-steppe-3",
+        "capture": "amethyst-steppe-3"
+      },
+      {
+        "tile": [
+          173,
+          33
+        ],
+        "label": "amethyst-steppe-4",
+        "capture": "amethyst-steppe-4"
+      },
+      {
+        "tile": [
+          173,
+          25
+        ],
+        "label": "amethyst-steppe-5",
+        "capture": "amethyst-steppe-5"
+      },
+      {
+        "tile": [
+          170,
+          12
+        ],
+        "label": "amethyst-steppe-6",
+        "capture": "amethyst-steppe-6"
+      },
+      {
+        "tile": [
+          170,
+          6
+        ],
+        "label": "amethyst-steppe-7",
+        "capture": "amethyst-steppe-7"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-relocated-geode-roundtrip",
+    "map": "amethyst_barrens",
+    "start": [
+      170,
+      43
+    ],
+    "startTolerance": 2,
+    "walkTimeout": 100,
+    "distance": 32,
+    "yaw": 0,
+    "steps": [
+      {
+        "tile": [
+          198,
+          34
+        ],
+        "label": "geode-new-threshold",
+        "capture": "geode-new-threshold",
+        "object": 502,
+        "destination": "amethyst_barrens_secrets"
+      },
+      {
+        "tile": [
+          298,
+          26
+        ],
+        "label": "geode-clear-interior-arrival",
+        "capture": "geode-clear-interior-arrival"
+      },
+      {
+        "tile": [
+          297,
+          26
+        ],
+        "label": "geode-return-to-ascent",
+        "capture": "geode-return-to-ascent",
+        "destination": "amethyst_barrens"
+      }
+    ]
+  },
+  {
+    "id": "amberwood-fix-secret-roundtrip-510",
+    "map": "amberwood",
+    "start": [
+      135,
+      219
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          130,
+          171
+        ],
+        "label": "enter A cairn built over nothing, or over something. approach"
+      },
+      {
+        "tile": [
+          88,
+          130
+        ],
+        "label": "enter A cairn built over nothing, or over something. approach"
+      },
+      {
+        "tile": [
+          77,
+          127
+        ],
+        "label": "enter A cairn built over nothing, or over something.",
+        "object": 510,
+        "destination": "amberwood_secrets",
+        "capture": "amberwood-secret-inside-510"
+      },
+      {
+        "tile": [
+          84,
+          92
+        ],
+        "label": "interior working floor",
+        "capture": "amberwood-secret-floor-510"
+      },
+      {
+        "tile": [
+          84,
+          98
+        ],
+        "label": "return to Amberwood",
+        "destination": "amberwood",
+        "capture": "amberwood-secret-return-510"
+      },
+      {
+        "tile": [
+          79,
+          128
+        ],
+        "label": "leave the entrance apron"
+      }
+    ]
+  },
+  {
+    "id": "amberwood-fix-secret-roundtrip-514",
+    "map": "amberwood",
+    "start": [
+      135,
+      219
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          130,
+          181
+        ],
+        "label": "enter A loose stone in the rock; something moves behind it. approach"
+      },
+      {
+        "tile": [
+          90,
+          173
+        ],
+        "label": "enter A loose stone in the rock; something moves behind it.",
+        "object": 514,
+        "destination": "amberwood_secrets",
+        "capture": "amberwood-secret-inside-514"
+      },
+      {
+        "tile": [
+          156,
+          92
+        ],
+        "label": "interior working floor",
+        "capture": "amberwood-secret-floor-514"
+      },
+      {
+        "tile": [
+          156,
+          98
+        ],
+        "label": "return to Amberwood",
+        "destination": "amberwood",
+        "capture": "amberwood-secret-return-514"
+      },
+      {
+        "tile": [
+          93,
+          176
+        ],
+        "label": "leave the entrance apron"
+      }
+    ],
+    "requiresItems": {
+      "Iron Rune": 1
+    }
+  },
+  {
+    "id": "amberwood-fix-secret-roundtrip-509",
+    "map": "amberwood",
+    "start": [
+      135,
+      219
+    ],
+    "yaw": 0,
+    "distance": 28,
+    "steps": [
+      {
+        "tile": [
+          130,
+          171
+        ],
+        "label": "enter A cave mouth the tide leaves open for an hour a day. approach"
+      },
+      {
+        "tile": [
+          88,
+          120
+        ],
+        "label": "enter A cave mouth the tide leaves open for an hour a day. approach"
+      },
+      {
+        "tile": [
+          40,
+          86
+        ],
+        "label": "enter A cave mouth the tide leaves open for an hour a day.",
+        "object": 509,
+        "destination": "westhaven_secrets",
+        "capture": "amberwood-secret-inside-509"
+      },
+      {
+        "tile": [
+          6,
+          112
+        ],
+        "label": "interior working floor",
+        "capture": "amberwood-secret-floor-509"
+      },
+      {
+        "tile": [
+          6,
+          106
+        ],
+        "label": "return to Amberwood",
+        "destination": "amberwood",
+        "capture": "amberwood-secret-return-509"
+      },
+      {
+        "tile": [
+          43,
+          89
+        ],
+        "label": "leave the entrance apron"
+      }
+    ]
+  },
+  {
+    "id": "whitehorn-fix-snowline-cell-door",
+    "map": "whitehorn_range",
+    "start": [
+      368,
+      282
+    ],
+    "startTolerance": 0,
+    "distance": 31,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          368,
+          287
+        ],
+        "label": "enter",
+        "capture": "whitehorn-fix-snowline-cell-door-enter",
+        "destination": "whitehorn_glacier_temple"
+      },
+      {
+        "tile": [
+          231,
+          85
+        ],
+        "label": "inside-clear",
+        "capture": "whitehorn-fix-snowline-cell-door-inside-clear"
+      },
+      {
+        "tile": [
+          234,
+          85
+        ],
+        "label": "return",
+        "capture": "whitehorn-fix-snowline-cell-door-return",
+        "destination": "whitehorn_range"
+      },
+      {
+        "tile": [
+          368,
+          282
+        ],
+        "label": "exterior-apron",
+        "capture": "whitehorn-fix-snowline-cell-door-exterior-apron"
+      }
+    ]
+  },
+  {
+    "id": "whitehorn-fix-west-watch-cave-mouth",
+    "map": "whitehorn_range",
+    "start": [
+      29,
+      254
+    ],
+    "startTolerance": 0,
+    "distance": 31,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          29,
+          261
+        ],
+        "label": "enter",
+        "capture": "whitehorn-fix-west-watch-cave-mouth-enter",
+        "destination": "whitehorn_glacier_temple"
+      },
+      {
+        "tile": [
+          231,
+          179
+        ],
+        "label": "inside-clear",
+        "capture": "whitehorn-fix-west-watch-cave-mouth-inside-clear"
+      },
+      {
+        "tile": [
+          234,
+          179
+        ],
+        "label": "return",
+        "capture": "whitehorn-fix-west-watch-cave-mouth-return",
+        "destination": "whitehorn_range"
+      },
+      {
+        "tile": [
+          29,
+          254
+        ],
+        "label": "exterior-apron",
+        "capture": "whitehorn-fix-west-watch-cave-mouth-exterior-apron"
+      }
+    ]
+  },
+  {
+    "id": "whitehorn-fix-whitehorn-glacier-temple-door",
+    "map": "whitehorn_range",
+    "start": [
+      220,
+      341
+    ],
+    "startTolerance": 0,
+    "distance": 31,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          220,
+          349
+        ],
+        "label": "enter",
+        "capture": "whitehorn-fix-whitehorn-glacier-temple-door-enter",
+        "destination": "whitehorn_glacier_temple"
+      },
+      {
+        "tile": [
+          31,
+          191
+        ],
+        "label": "inside-clear",
+        "capture": "whitehorn-fix-whitehorn-glacier-temple-door-inside-clear"
+      },
+      {
+        "tile": [
+          34,
+          191
+        ],
+        "label": "return",
+        "capture": "whitehorn-fix-whitehorn-glacier-temple-door-return",
+        "destination": "whitehorn_range"
+      },
+      {
+        "tile": [
+          220,
+          341
+        ],
+        "label": "exterior-apron",
+        "capture": "whitehorn-fix-whitehorn-glacier-temple-door-exterior-apron"
+      }
+    ]
+  },
+  {
+    "id": "whitehorn-fix-whitehorn-ice-cave-mouth",
+    "map": "whitehorn_range",
+    "start": [
+      40,
+      176
+    ],
+    "startTolerance": 0,
+    "distance": 31,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          35,
+          179
+        ],
+        "label": "enter",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-enter",
+        "destination": "whitehorn_glacier_temple"
+      },
+      {
+        "tile": [
+          121,
+          92
+        ],
+        "label": "inside-clear",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-inside-clear"
+      },
+      {
+        "tile": [
+          124,
+          92
+        ],
+        "label": "return",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-return",
+        "destination": "whitehorn_range"
+      },
+      {
+        "tile": [
+          33,
+          177
+        ],
+        "label": "outside-lower-tread",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-outside-lower-tread"
+      },
+      {
+        "tile": [
+          36,
+          177
+        ],
+        "label": "outside-lateral-tread",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-outside-lateral-tread"
+      },
+      {
+        "tile": [
+          40,
+          176
+        ],
+        "label": "exterior-apron",
+        "capture": "whitehorn-fix-whitehorn-ice-cave-mouth-exterior-apron"
+      }
+    ]
+  },
+  {
+    "id": "whitehorn-fix-whitehorn-mine-adit",
+    "map": "whitehorn_range",
+    "start": [
+      324,
+      254
+    ],
+    "startTolerance": 0,
+    "distance": 31,
+    "yaw": 0,
+    "walkTimeout": 90,
+    "steps": [
+      {
+        "tile": [
+          330,
+          260
+        ],
+        "label": "enter",
+        "capture": "whitehorn-fix-whitehorn-mine-adit-enter",
+        "destination": "whitehorn_glacier_temple"
+      },
+      {
+        "tile": [
+          115,
+          184
+        ],
+        "label": "inside-clear",
+        "capture": "whitehorn-fix-whitehorn-mine-adit-inside-clear"
+      },
+      {
+        "tile": [
+          118,
+          184
+        ],
+        "label": "return",
+        "capture": "whitehorn-fix-whitehorn-mine-adit-return",
+        "destination": "whitehorn_range"
+      },
+      {
+        "tile": [
+          324,
+          254
+        ],
+        "label": "exterior-apron",
+        "capture": "whitehorn-fix-whitehorn-mine-adit-exterior-apron"
+      }
+    ]
+  }
+]

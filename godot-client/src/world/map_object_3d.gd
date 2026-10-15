@@ -1,0 +1,503 @@
+class_name MapObject3D
+extends StaticBody3D
+## A clickable world object: a harvest node or an interactive.
+##
+## The world package renders the surrounding scenery as ordinary map geometry,
+## and the client has no way to tell which mesh is a resource - the legacy
+## client tried to match object basenames against a lowercase harvestable list
+## and matched nothing, because the packs wrote relative paths. So the server
+## states which object ids exist and where they are, and this places the object
+## at each one rather than guessing from the scene.
+##
+## What stands on the tile is the thing itself: the reed bed, the ore seam, the
+## notice board, the well. Both were a plain unshaded ring before, green for a
+## harvest node and blue for an interactive, which said "this is clickable" and
+## nothing else - a plaza of service points and a hillside of ore read as the
+## same row of circles. The models are authored per resource and per role in
+## `data/world/objects.json`; the ring survives only as the fallback for an
+## object the registry does not describe, and as the mark on a node the player
+## is currently harvesting.
+##
+## The map cameras keep their coloured discs. A whole map at once is too small a
+## scale for a prop to read at, and the legend names the colours.
+##
+## A continent-v2 package may present its harvest nodes (the harvest
+## presentation, owner-approved 2026-10-14; `presentation`): a node is then a
+## whole natural unit - a crop-row segment at the row's exact yaw, picked over
+## its footprint, one of its label's model variants - or promoted scenery, a
+## kit tree already standing in its chunk whose mesh is bound as its pick
+## (`bind_placement`). A grouped node leaves its map marker to its grouping,
+## which main marks once.
+
+const PICK_LAYER := 32
+## The disc's radius in metres. The full map frames 1600 metres at once, so
+## a disc sized for the world is a pixel there; this is sized for the map.
+const MAP_MARKER_RADIUS := 7.0
+## Harvest nodes and interactives are told apart on the map by colour rather
+## than by a label the player has to read before every click. The legend in the
+## full map's sidebar names both.
+const HARVEST_COLOUR := Color(0.42, 0.86, 0.44)
+const INTERACTIVE_COLOUR := Color(0.95, 0.62, 0.24)
+const ACTIVE_COLOUR := Color(1.0, 0.86, 0.36)
+## A waygate and a way off the map, the two the legend has always named and
+## neither map drew: the cyan P and the red X, in the legend's own colours.
+## Both are drawn as glyphs by the map overlays rather than as discs, so
+## they read as what they are at any zoom.
+const PORTAL_COLOUR := Color("58e1ff")
+const EXIT_COLOUR := Color("ff4747")
+const PORTAL_GLYPH := "P"
+const EXIT_GLYPH := "X"
+const STORAGE_COLOUR := Color("d6bb7a")
+## The waygate texts the continent tool writes name where the gate leads in
+## these words; the label beside the P on the full map is that name.
+const PORTAL_DESTINATION_PHRASE := "Beyond it lies "
+## The ring drawn under a node while the player is harvesting it, and under any
+## object the registry could not place a model for.
+const RING_INNER_RADIUS := 0.62
+const RING_OUTER_RADIUS := 0.78
+
+var object_id: int = -1
+var kind: int = 0
+var server_tile: Vector2i = Vector2i.ZERO
+var label: String = ""
+var detail: String = ""
+var model_id: String = ""
+## Set by map presentation when a server-owned departure is available.
+var departure_available := false
+## The ring as built, before any ground was laid under it. Kept so an object
+## re-draped after a map's walk surface arrives is shaped by the ground it
+## stands on rather than by whatever it was draped over before.
+var _ring_flat: Mesh = null
+## True when the registry hands this object's art to the map package rather
+## than standing a model on it; see `interactives.mapAuthored`.
+var _map_authored: bool = false
+## How the map's own package presents this object, scoped to that map by the
+## caller (object ids repeat across maps): the harvest presentation of a
+## continent-v2 package's `harvestables` entry (eloria-assets/.../
+## harvest_presentation.py: `variant`, `yaw` in degrees, `footprint` [length,
+## width] metres, `grouping`, `bind` {node, chunk, height}), and a lantern
+## map's authored pick (`pick` {height, radius}). Empty for every package
+## published before the harvest presentation, which keeps the random yaw and
+## scale, one model per label, the 0.9 m pick and one map mark per node.
+var presentation: Dictionary = {}
+## The harvest grouping this node belongs to, or "".
+var grouping: String = ""
+## True when the maps mark this node's grouping instead of the node: it then
+## has no map marker of its own.
+var grouped := false
+## Promoted scenery: the name of the placed kit node in the map's own chunk
+## whose mesh is this node's art (`presentation.bind.node`), or "". Nothing is
+## stood on the tile; `bind_pick_model` makes the placed mesh clickable once
+## its chunk is resident.
+var bound_node_name: String = ""
+## The yaw the model stands at (the package's, or the seeded random one), so
+## a footprint's pick box turns with it.
+var _model_yaw := 0.0
+var _bound_body: WeakRef = null
+
+## The smallest side a footprint pick box is given, so a thin hedge or a kelp
+## strand is still a target a player can hit.
+const FOOTPRINT_PICK_MINIMUM := 0.6
+
+## `catalog` is `data/world/objects.json`, whole. It has no default: this took
+## a release standing every node in the world on a bare ring because the one
+## caller left the argument off and an empty registry is a legal one.
+## `map_presentation` is this object's entry in its map's presentation (see
+## `presentation`); empty when the map's package states none.
+func configure(dto: Dictionary, adapter: CoordinateAdapter,
+		catalog: Dictionary, authored_presentation: bool = false,
+		map_presentation: Dictionary = {}) -> void:
+	object_id = int(dto.get("object_id", -1))
+	kind = int(dto.get("kind", 0))
+	server_tile = Vector2i(int(dto.get("x", 0)), int(dto.get("y", 0)))
+	label = str(dto.get("label", ""))
+	detail = str(dto.get("detail", ""))
+	name = "MapObject_%d" % object_id
+	collision_layer = PICK_LAYER
+	collision_mask = 0
+	position = adapter.tile_center(server_tile.x, server_tile.y)
+	_map_authored = authored_presentation
+	presentation = map_presentation.duplicate(true)
+	grouping = str(presentation.get("grouping", ""))
+	grouped = bool(presentation.get("grouped", false)) and not grouping.is_empty()
+	_build_visual(catalog)
+
+func is_harvestable() -> bool:
+	return kind == EloriaProtocol.MAP_OBJECT_HARVEST
+
+## A way off the map the server stated from its portal tiles. Nothing stands
+## on the tile and nothing is clicked; the tiles do the work when a player
+## walks onto them, and the maps draw the X.
+func is_exit() -> bool:
+	return kind == EloriaProtocol.MAP_OBJECT_EXIT
+
+## A waygate: the clickable object standing at a march.
+func is_portal() -> bool:
+	return not is_exit() and (label == "Portal" or model_id == "portal")
+
+func is_storage() -> bool:
+	return not is_harvestable() and not is_exit() and (label == "Storage" or model_id == "storage")
+
+func offers_map_change() -> bool:
+	return is_portal() or departure_available
+
+## Bind authored scenery to this object's normal server action. Exact mesh
+## shapes include thin sails without making the empty space around a boat
+## clickable. Parenting to the model keeps the target on moving scenery.
+func bind_pick_model(model: Node3D) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = "MapObjectPickProxy"
+	body.collision_layer = 0
+	body.collision_mask = 0
+	body.set_meta("map_object_target", weakref(self))
+	model.add_child(body)
+	var meshes: Array[Node] = model.find_children("*", "MeshInstance3D", true, false)
+	if model is MeshInstance3D:
+		meshes.append(model)
+	for node: Node in meshes:
+		var mesh_instance := node as MeshInstance3D
+		if mesh_instance.mesh == null or not _drawn(mesh_instance):
+			continue
+		var shape := mesh_instance.mesh.create_trimesh_shape()
+		if shape == null:
+			continue
+		shape.backface_collision = true
+		var collision := CollisionShape3D.new()
+		collision.shape = shape
+		body.add_child(collision)
+		collision.global_transform = mesh_instance.global_transform
+	# A refreshed server object must not leave an orphaned pick body behind.
+	tree_exiting.connect(body.queue_free)
+	return body
+
+## A mesh the world draws: visible in the tree, or a member the loader's
+## static batching hid because its MultiMesh draws it (WorldLoader.BATCH_META)
+## - a grove of one kit olive tree is batched, and its trees are still there.
+static func _drawn(mesh_instance: MeshInstance3D) -> bool:
+	if mesh_instance.is_visible_in_tree():
+		return true
+	if not mesh_instance.has_meta(WorldLoader.BATCH_META):
+		return false
+	var parent := mesh_instance.get_parent() as Node3D
+	return parent == null or parent.is_visible_in_tree()
+
+## Promoted scenery: binds this node's pick to `model`, the placed kit node its
+## package names (`bound_node_name`), and makes it clickable. Returns false
+## when there is nothing to bind. Called again whenever the model's chunk
+## comes back after being streamed out.
+func bind_placement(model: Node3D) -> bool:
+	if model == null or bound_node_name.is_empty():
+		return false
+	release_placement()
+	var body := bind_pick_model(model)
+	body.collision_layer = PICK_LAYER
+	_bound_body = weakref(body)
+	return body.get_child_count() > 0
+
+## True while the placed kit node this node presents is bound and clickable.
+func placement_bound() -> bool:
+	if _bound_body == null:
+		return false
+	var body := _bound_body.get_ref() as StaticBody3D
+	return is_instance_valid(body) and not body.is_queued_for_deletion()
+
+## Lets go of the placed kit node, as its chunk streams out.
+func release_placement() -> void:
+	if not placement_bound():
+		_bound_body = null
+		return
+	var body := _bound_body.get_ref() as StaticBody3D
+	body.collision_layer = 0
+	body.queue_free()
+	_bound_body = null
+
+static func from_pick_collider(collider: Variant) -> MapObject3D:
+	if collider is MapObject3D:
+		return collider as MapObject3D
+	if collider is StaticBody3D:
+		var target: Variant = collider.get_meta("map_object_target", null)
+		if target is WeakRef:
+			var object := target.get_ref() as MapObject3D
+			if is_instance_valid(object) and not object.is_queued_for_deletion():
+				return object
+	return null
+
+## Where this leads, as far as the server said: an exit is named for its
+## destination, and a waygate's text names it in a fixed phrase. Empty when
+## neither applies.
+func destination() -> String:
+	if is_exit():
+		return label
+	if is_portal() and detail.contains(PORTAL_DESTINATION_PHRASE):
+		return detail.get_slice(PORTAL_DESTINATION_PHRASE, 1).trim_suffix(".").strip_edges()
+	return ""
+
+## The glyph the maps draw for this object, or "" for one drawn as a disc.
+func map_glyph() -> String:
+	if is_exit():
+		return EXIT_GLYPH
+	if is_portal():
+		return PORTAL_GLYPH
+	return ""
+
+func set_surface_height(height: float) -> void:
+	global_position.y = height + 0.05
+	_drape_ring()
+
+## Marks the node the player is currently harvesting. The ring is hidden while
+## an object is merely standing there, so this is the only thing that draws it
+## on an object whose model loaded.
+func set_active(active: bool) -> void:
+	var ring: MeshInstance3D = get_node_or_null("Ring") as MeshInstance3D
+	if not is_instance_valid(ring):
+		return
+	ring.visible = active or model_id.is_empty()
+	var material: StandardMaterial3D = ring.material_override as StandardMaterial3D
+	if material == null:
+		return
+	material.albedo_color = ACTIVE_COLOUR if active else _marker_colour()
+	material.albedo_color.a = 0.75
+	_drape_ring()
+
+## Lay the ring over the ground it is drawn on.
+##
+## The ring is a flat circle a metre and a half across, and the ground under it
+## is not flat: on a region such as Whitehorn Range most of it disappeared into
+## the slope, leaving a crescent that grew and shrank as the camera moved past.
+## Draping it holds the whole circle the same height over the ground all the
+## way round, so what is drawn stays the ring the node is marked with.
+func _drape_ring() -> void:
+	var ring: MeshInstance3D = get_node_or_null("Ring") as MeshInstance3D
+	if not is_instance_valid(ring) or not ring.visible:
+		return
+	if _ring_flat == null:
+		_ring_flat = ring.mesh
+	var draped: ArrayMesh = GroundDrape.drape(ring, _ring_flat)
+	ring.mesh = _ring_flat if draped == null else draped
+
+func _marker_colour() -> Color:
+	if is_exit():
+		return EXIT_COLOUR
+	if is_portal():
+		return PORTAL_COLOUR
+	if is_storage():
+		return STORAGE_COLOUR
+	return HARVEST_COLOUR if is_harvestable() else INTERACTIVE_COLOUR
+
+## The colour this object is marked in on either map. The full map draws the
+## modelled disc below; the minimap draws its own mark and asks for the colour
+## here, so both maps mark an ore seam in one green rather than two.
+func map_dot_colour() -> Color:
+	return _marker_colour()
+
+## The registry entry for this object, or an empty dictionary.
+##
+## A harvest node is named by its resource label and an interactive by the label
+## the server derives from its role, because that is all either of them carries
+## on the wire. The registry holds both maps, written by the same generator that
+## writes the models, so a resource whose id is not its slugified name - Slate
+## and Deep Coal both keep their bootstrap model names - resolves without the
+## client guessing at a filename.
+##
+## A harvest label may also name several models (`harvestables.variants`, a
+## list per label, generated with the registry): a field of one crop-row
+## segment reads as a stamped lattice. The package's `variant` picks one
+## (modulo the list), else the object id does (`variant_index`), so every
+## client stands the same model on the same node without it being sent.
+func _catalog_entry(catalog: Dictionary) -> Dictionary:
+	var section: Dictionary = catalog.get(
+		"harvestables" if is_harvestable() else "interactives", {}) as Dictionary
+	var keys: Dictionary = section.get(
+		"resources" if is_harvestable() else "roles", {}) as Dictionary
+	var id: String = str(keys.get(label, ""))
+	var models: Dictionary = section.get("models", {}) as Dictionary
+	if is_harvestable():
+		var listed: Variant = (section.get("variants", {}) as Dictionary).get(label)
+		# Only a node laid out for them stands the variants: a label's variants
+		# are patch models shaped for a stated footprint (a crop-row segment
+		# needs its row's yaw, a seam its face), so a node that states neither a
+		# footprint nor a variant - an older lattice node, or any node of an
+		# older package - keeps the label's own model.
+		if listed is Array and not (listed as Array).is_empty() \
+				and (presentation.has("footprint") or presentation.has("variant")):
+			var choices: Array = listed as Array
+			var chosen := str(choices[variant_index(object_id, choices.size(),
+				presentation.get("variant"))])
+			# A variant the registry lists but does not describe falls back to
+			# the label's own model rather than to nothing.
+			if models.has(chosen):
+				id = chosen
+	if id.is_empty():
+		return {}
+	var entry: Dictionary = models.get(id, {}) as Dictionary
+	if entry.is_empty():
+		return {}
+	var described: Dictionary = entry.duplicate(true)
+	described["id"] = id
+	return described
+
+## Which of `count` model variants node `object_id` stands: `stated` (the
+## package's `variant`) modulo `count` when it is a number, else the third draw
+## of the generator the object id seeds, after the two that vary its yaw and
+## scale (so stating no variant leaves both where they always were).
+static func variant_index(identity: int, count: int, stated: Variant = null) -> int:
+	if count <= 1:
+		return 0
+	if stated is int or stated is float:
+		return posmod(int(stated), count)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = identity
+	rng.randf()
+	rng.randf()
+	return rng.randi_range(0, count - 1)
+
+func _build_visual(catalog: Dictionary) -> void:
+	if get_child_count() > 0:
+		return
+	if is_exit():
+		# Nothing to stand on the tile and nothing to click: the march or the
+		# doorway is already there in the world art. The maps draw the X from
+		# this node's position; see `Main._collect_map_waypoints`.
+		return
+	_map_authored = _map_authored or (catalog.get("interactives", {}) as Dictionary).get(
+		"mapAuthored", {}).has(label)
+	var entry: Dictionary = _catalog_entry(catalog)
+	# The map's own authored pick (a lantern map's layout) wins over the
+	# registry's, which is keyed by object id alone and so applies on every map.
+	var authored: Dictionary = presentation.get("pick", {}) as Dictionary
+	if authored.is_empty():
+		authored = catalog.get("authoredObjects", {}).get(str(object_id), {})
+	var bind: Dictionary = presentation.get("bind", {}) as Dictionary
+	bound_node_name = str(bind.get("node", "")) if is_harvestable() else ""
+	var height: float
+	if not authored.is_empty():
+		height = float(authored.get("height", 1.2))
+	elif not bound_node_name.is_empty():
+		# Promoted scenery: the placed kit model is the art. Nothing stands on
+		# the tile; the pick binds to the placed mesh when its chunk arrives.
+		height = float(bind.get("height", 1.2))
+		model_id = "bound_" + bound_node_name
+	else:
+		height = 0.0 if _map_authored else _add_model(entry)
+	if not authored.is_empty():
+		model_id = "map_authored_" + str(object_id)
+		# Harvest seams retain their active ring and resource map marker.
+		_map_authored = _map_authored or not is_harvestable()
+	# A role the region package authors is already standing in the world art:
+	# a secret's door is a `Secret_*` node in the region mesh, on the tile the
+	# server states. A ring under one duplicates the door and advertises it.
+	if not _map_authored:
+		_add_ring()
+	# A waygate is drawn on the maps as its glyph, not as a disc under it, and
+	# a grouped node by its grouping's one mark.
+	if map_glyph().is_empty() and not grouped:
+		_add_map_marker()
+	_add_pick_shape(height)
+	if not authored.is_empty() and $PickShape.shape is CylinderShape3D:
+		($PickShape.shape as CylinderShape3D).radius = float(authored.get("radius", .9))
+
+## Returns the height of the model that was placed, or 0.0 for none.
+func _add_model(entry: Dictionary) -> float:
+	if entry.is_empty():
+		return 0.0
+	var model: Node3D = GlbSceneCache.instantiate(
+		_external_path(str(entry.get("scene", ""))))
+	if model == null:
+		push_warning("map object %d: model %s failed to load" % [
+			object_id, entry.get("scene", "")])
+		return 0.0
+	model.name = "Model"
+	add_child(model)
+	model_id = str(entry.get("id", ""))
+	# The same node id stands on every map that declares it, so an unvaried
+	# model reads as a stamped copy wherever two are in view of each other.
+	# The object id is the server's own stable name for this one, which is what
+	# makes the variation the same on every client without being sent.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = object_id
+	var random_yaw := rng.randf() * TAU
+	var random_scale := rng.randf_range(0.92, 1.08)
+	# A package's yaw is exact: a crop-row segment follows its row. A stated
+	# footprint is the patch's size, so its model stands at scale 1, where
+	# butted row segments meet end to end.
+	_model_yaw = deg_to_rad(float(presentation.yaw)) if _stated_number("yaw") else random_yaw
+	model.rotation.y = _model_yaw
+	model.scale = Vector3.ONE * (1.0 if not _footprint().is_empty() else random_scale)
+	return float(entry.get("height", 1.0)) * model.scale.y
+
+func _stated_number(key: String) -> bool:
+	var value: Variant = presentation.get(key)
+	return value is float or value is int
+
+## The package's footprint as [length, width] metres, or [] for none.
+func _footprint() -> Array:
+	var value: Variant = presentation.get("footprint")
+	if value is not Array or (value as Array).size() != 2:
+		return []
+	var sides: Array = value as Array
+	for side: Variant in sides:
+		if (side is not float and side is not int) or float(side) <= 0.0:
+			return []
+	return [float(sides[0]), float(sides[1])]
+
+func _add_ring() -> void:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = _marker_colour()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color.a = 0.75
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = RING_INNER_RADIUS
+	ring_mesh.outer_radius = RING_OUTER_RADIUS
+	ring_mesh.rings = 24
+	ring_mesh.ring_segments = 8
+	var ring := MeshInstance3D.new()
+	ring.name = "Ring"
+	ring.mesh = ring_mesh
+	ring.material_override = material
+	ring.visible = model_id.is_empty()
+	add_child(ring)
+
+func _add_map_marker() -> void:
+	# An entrance the map package draws is found by looking, not by reading
+	# the map: it gets its pick shape and nothing on either map.
+	if _map_authored:
+		return
+	# Sized for the map cameras, not the world: 0.6 metres was a third of a
+	# pixel on the full map.
+	var map_marker: MeshInstance3D = MapMarkerDisc.build(
+		"MapMarker", MAP_MARKER_RADIUS, _marker_colour())
+	map_marker.position.y = 4.0
+	add_child(map_marker)
+
+## The click target. A pick shape cut to the ring rather than to the object was
+## fine while every object was a ring; a notice board is two metres of board a
+## player aims at, and an ore seam is knee high, so the shape follows the model
+## the registry measured.
+##
+## A patch node states its footprint, and is picked over the patch rather than
+## a 0.9 m cylinder at its centre: a box of that length and width, turned with
+## the model, so a 3 m row segment is clickable end to end and the row beside
+## it is not.
+func _add_pick_shape(height: float) -> void:
+	var standing: float = maxf(height, 1.2)
+	var collision := CollisionShape3D.new()
+	collision.name = "PickShape"
+	var footprint := _footprint()
+	if footprint.is_empty():
+		var shape := CylinderShape3D.new()
+		shape.radius = 0.9
+		shape.height = standing
+		collision.shape = shape
+	else:
+		var box := BoxShape3D.new()
+		box.size = Vector3(maxf(float(footprint[0]), FOOTPRINT_PICK_MINIMUM), standing,
+			maxf(float(footprint[1]), FOOTPRINT_PICK_MINIMUM))
+		collision.shape = box
+		collision.rotation.y = deg_to_rad(float(presentation.yaw)) if _stated_number("yaw") \
+			else _model_yaw
+	collision.position.y = standing * 0.5
+	add_child(collision)
+
+static func _external_path(path: String) -> String:
+	return ProjectSettings.globalize_path(path) if path.begins_with("res://") else path

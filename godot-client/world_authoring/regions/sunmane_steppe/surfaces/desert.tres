@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="1_surface"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/desert-basecolor.png" id="2_albedo"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-normal.png" id="3_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-orm.png" id="4_orm"]
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_desert"]
+albedo_color = Color(0.9, 0.82, 0.68, 1)
+albedo_texture = ExtResource("2_albedo")
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.5
+normal_texture = ExtResource("3_normal")
+orm_texture = ExtResource("4_orm")
+uv1_scale = Vector3(0.2, 0.2, 0.2)
+uv1_triplanar = false
+uv1_world_triplanar = false
+texture_filter = 4
+cull_mode = 2
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_surface")
+texture_preset = "Desert"
+biome_blend_enabled = true
+rotation_degrees = 0.0
+source_material = SubResource("ORMMaterial3D_desert")

@@ -1,0 +1,160 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 93,
+    "walkSurfaceTriangles": 138605,
+    "tilesSampled": 156816,
+    "groundingMisses": 384,
+    "groundingMissFraction": 0.00245,
+    "surfaceDiscontinuities": 128,
+    "spawnPoints": 3
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_RAY_MISS",
+      "message": "384 server tiles have no walk surface under them; a character there would fall back to walkingHeight=4.5",
+      "detail": [
+        [
+          391,
+          91,
+          271.0,
+          29.0
+        ],
+        [
+          392,
+          91,
+          272.0,
+          29.0
+        ],
+        [
+          393,
+          91,
+          273.0,
+          29.0
+        ],
+        [
+          394,
+          91,
+          274.0,
+          29.0
+        ],
+        [
+          395,
+          91,
+          275.0,
+          29.0
+        ],
+        [
+          391,
+          92,
+          271.0,
+          28.0
+        ],
+        [
+          392,
+          92,
+          272.0,
+          28.0
+        ],
+        [
+          393,
+          92,
+          273.0,
+          28.0
+        ],
+        [
+          394,
+          92,
+          274.0,
+          28.0
+        ],
+        [
+          395,
+          92,
+          275.0,
+          28.0
+        ],
+        [
+          391,
+          93,
+          271.0,
+          27.0
+        ],
+        [
+          392,
+          93,
+          272.0,
+          27.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "128 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          144,
+          254,
+          15.95
+        ],
+        [
+          144,
+          254,
+          15.95
+        ],
+        [
+          145,
+          253,
+          15.73
+        ],
+        [
+          145,
+          253,
+          15.73
+        ],
+        [
+          143,
+          255,
+          15.69
+        ],
+        [
+          143,
+          255,
+          15.69
+        ],
+        [
+          190,
+          118,
+          15.57
+        ],
+        [
+          190,
+          117,
+          15.18
+        ],
+        [
+          142,
+          256,
+          15.1
+        ],
+        [
+          142,
+          256,
+          15.1
+        ],
+        [
+          190,
+          116,
+          14.74
+        ],
+        [
+          190,
+          115,
+          14.31
+        ]
+      ]
+    }
+  ]
+}

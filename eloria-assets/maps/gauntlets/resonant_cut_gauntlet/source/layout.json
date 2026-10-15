@@ -1,0 +1,1398 @@
+{
+ "_note": "resonant_cut_gauntlet: trail road geometry from the concept amethyst_gauntlet (work-output/gauntlet-v2-design/regions). Plan metres, x east, y SOUTH; arenas are ellipses; paths are [x, y, elev] polylines; mouths are pockets placed along a bearing from the arena centre. `land` shapes the ground round the road (_toolkit/landforms.py) and `dressing` dresses it (_toolkit/trail_dressing.py).",
+ "schema": "eloria-trail-layout-v1",
+ "id": "resonant_cut_gauntlet",
+ "size": [
+  384,
+  384
+ ],
+ "sections": [
+  {
+   "id": "trailhead",
+   "kind": "camp",
+   "name": "Quarry Rim Camp",
+   "at": [
+    84,
+    38
+   ],
+   "rx": 18,
+   "ry": 15,
+   "rot": 0,
+   "elev": 31
+  },
+  {
+   "id": "w1",
+   "kind": "arena",
+   "name": "The Mite Cut",
+   "at": [
+    220,
+    34
+   ],
+   "rx": 34,
+   "ry": 18,
+   "rot": 0,
+   "elev": 28,
+   "order": 1,
+   "mouths": [
+    {
+     "id": "w1-south",
+     "bearing": 110,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-northeast",
+     "bearing": 330,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-southwest",
+     "bearing": 155,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "kind": "arena",
+   "name": "The Shard Gallery",
+   "at": [
+    326,
+    216
+   ],
+   "rx": 36,
+   "ry": 20,
+   "rot": 100,
+   "elev": 20,
+   "order": 2,
+   "mouths": [
+    {
+     "id": "w2-southeast",
+     "bearing": 30,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-west",
+     "bearing": 195,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-northeast",
+     "bearing": 305,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "kind": "arena",
+   "name": "The Crane Bridge",
+   "at": [
+    172,
+    302
+   ],
+   "rx": 34,
+   "ry": 18,
+   "rot": 10,
+   "elev": 12,
+   "order": 3,
+   "mouths": [
+    {
+     "id": "w3-southwest",
+     "bearing": 120,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-northeast",
+     "bearing": 300,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-southeast",
+     "bearing": 35,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "kind": "arena",
+   "name": "The Crystal Hall",
+   "at": [
+    103,
+    176
+   ],
+   "rx": 36,
+   "ry": 22,
+   "rot": -80,
+   "elev": 4,
+   "order": 4,
+   "mouths": [
+    {
+     "id": "w4-northwest",
+     "bearing": 215,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-east",
+     "bearing": 20,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-southwest",
+     "bearing": 125,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "kind": "arena",
+   "name": "The Storm Stair",
+   "at": [
+    203,
+    127
+   ],
+   "rx": 26,
+   "ry": 16,
+   "rot": 10,
+   "elev": -3,
+   "order": 5,
+   "mouths": [
+    {
+     "id": "w5-northeast",
+     "bearing": 335,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-southwest",
+     "bearing": 130,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-northwest",
+     "bearing": 235,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "kind": "court",
+   "name": "The Prism Court",
+   "at": [
+    192,
+    192
+   ],
+   "rx": 28,
+   "ry": 26,
+   "rot": 0,
+   "elev": -10,
+   "order": 6,
+   "mouths": [
+    {
+     "id": "court-south",
+     "bearing": 105,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    },
+    {
+     "id": "court-northwest",
+     "bearing": 215,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    }
+   ]
+  },
+  {
+   "id": "vault",
+   "kind": "vault",
+   "name": "The Geode",
+   "at": [
+    232,
+    200
+   ],
+   "rx": 8,
+   "ry": 8,
+   "rot": 0,
+   "elev": -10
+  }
+ ],
+ "mouthDefaults": {
+  "out": 6,
+  "radius": 7,
+  "linkWidth": 5
+ },
+ "paths": [
+  {
+   "from": "trailhead",
+   "to": "w1",
+   "width": 7,
+   "points": [
+    [
+     130,
+     30,
+     30
+    ],
+    [
+     176,
+     30,
+     29
+    ]
+   ]
+  },
+  {
+   "from": "w1",
+   "to": "w2",
+   "width": 6,
+   "points": [
+    [
+     290,
+     76,
+     25.5
+    ],
+    [
+     327,
+     143,
+     22.7
+    ]
+   ]
+  },
+  {
+   "from": "w2",
+   "to": "w3",
+   "width": 6,
+   "points": [
+    [
+     290,
+     274,
+     17.3
+    ],
+    [
+     233,
+     305,
+     14.7
+    ]
+   ]
+  },
+  {
+   "from": "w3",
+   "to": "w4",
+   "width": 6,
+   "points": [
+    [
+     124,
+     272,
+     9.3
+    ],
+    [
+     101,
+     225,
+     6.7
+    ]
+   ]
+  },
+  {
+   "from": "w4",
+   "to": "w5",
+   "width": 6,
+   "points": [
+    [
+     129,
+     139,
+     1.7
+    ],
+    [
+     167,
+     122,
+     -0.7
+    ]
+   ]
+  },
+  {
+   "from": "w5",
+   "to": "boss",
+   "width": 6,
+   "points": [
+    [
+     212,
+     146,
+     -5
+    ],
+    [
+     204,
+     166,
+     -8
+    ]
+   ]
+  },
+  {
+   "from": "boss",
+   "to": "vault",
+   "width": 4,
+   "points": [
+    [
+     222,
+     198,
+     -10
+    ]
+   ]
+  }
+ ],
+ "land": {
+  "banks": 3,
+  "hills": 2.0,
+  "cut": 9,
+  "ground": {
+   "bank": "lilac_dust",
+   "network": "lilac_dust",
+   "trail": "amethyst_resonant_road",
+   "cliff": "amethyst_storm_rock",
+   "crevasse": "amethyst_storm_rock",
+   "deck": "timber_warm",
+   "bed": "amethyst_storm_rock"
+  },
+  "crossings": [
+   {
+    "at": [
+     172,
+     302
+    ],
+    "half": [
+     20,
+     3.0
+    ],
+    "rot": 10
+   }
+  ],
+  "pits": [
+   {
+    "at": [
+     192,
+     192
+    ],
+    "r": 174,
+    "inner": 40,
+    "benches": 6,
+    "profile": [
+     [
+      40,
+      -10
+     ],
+     [
+      66,
+      -3
+     ],
+     [
+      90,
+      4
+     ],
+     [
+      112,
+      12
+     ],
+     [
+      136,
+      20
+     ],
+     [
+      160,
+      28
+     ],
+     [
+      174,
+      30
+     ]
+    ]
+   }
+  ],
+  "crevasses": [
+   {
+    "points": [
+     [
+      177,
+      268
+     ],
+     [
+      168,
+      330
+     ]
+    ],
+    "width": 9,
+    "depth": 10
+   }
+  ]
+ },
+ "checkpoints": [
+  {
+   "id": "cp1",
+   "name": "The surveyors' fire",
+   "at": [
+    289.7,
+    262.1
+   ],
+   "elev": 17.7,
+   "after": "w2",
+   "reach": 12.0
+  },
+  {
+   "id": "cp2",
+   "name": "The hall fire",
+   "at": [
+    135.4,
+    143.3
+   ],
+   "elev": 1.47,
+   "after": "w4",
+   "reach": 12.0
+  }
+ ],
+ "sides": [
+  {
+   "id": "humming-ledge",
+   "name": "The Humming Ledge",
+   "from": [
+    114.2,
+    251.9,
+    8.19
+   ],
+   "at": [
+    128.5,
+    244.9
+   ],
+   "radius": 7,
+   "elev": 8.49,
+   "width": 4
+  }
+ ],
+ "floors": {
+  "w4": "amethyst_crystal_field",
+  "boss": "amethyst_vault_floor",
+  "vault": "amethyst_crystal_field"
+ },
+ "environment": {
+  "sky": {
+   "topColor": [
+    0.3,
+    0.22,
+    0.48
+   ],
+   "horizonColor": [
+    0.78,
+    0.62,
+    0.82
+   ],
+   "groundBottomColor": [
+    0.18,
+    0.14,
+    0.22
+   ],
+   "groundHorizonColor": [
+    0.56,
+    0.46,
+    0.62
+   ]
+  },
+  "sun": {
+   "enabled": true,
+   "direction": [
+    0.55,
+    -0.58,
+    0.6
+   ],
+   "color": [
+    0.98,
+    0.86,
+    1.0
+   ],
+   "energy": 1.45
+  },
+  "ambient": {
+   "color": [
+    0.7,
+    0.62,
+    0.82
+   ],
+   "energy": 0.95,
+   "skyContribution": 0.4
+  },
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.7,
+    0.6,
+    0.8
+   ],
+   "density": 0.0011
+  },
+  "tonemap": {
+   "mode": "filmic",
+   "exposure": 1.02,
+   "white": 4.0
+  }
+ },
+ "dressing": {
+  "woods": {
+   "count": 200,
+   "far": 0.4,
+   "maxSlope": 1.4,
+   "scale": [
+    2.0,
+    4.5
+   ],
+   "solid": "trunk",
+   "mix": [
+    [
+     "growth1",
+     1
+    ],
+    [
+     "growth2",
+     1
+    ],
+    [
+     "growth3",
+     1
+    ],
+    [
+     "growth4",
+     1
+    ]
+   ]
+  },
+  "cover": {
+   "count": 360,
+   "mix": [
+    [
+     "brush1",
+     1
+    ],
+    [
+     "brush2",
+     1
+    ],
+    [
+     "deadthorn",
+     0.5
+    ],
+    [
+     "lichen",
+     0.8
+    ],
+    [
+     "growth5",
+     0.8
+    ]
+   ]
+  },
+  "rocks": {
+   "count": 150,
+   "mix": [
+    [
+     "vboulder1",
+     1
+    ],
+    [
+     "vboulder2",
+     1
+    ],
+    [
+     "vboulder3",
+     1
+    ],
+    [
+     "vscree1",
+     0.7
+    ],
+    [
+     "vscree2",
+     0.7
+    ],
+    [
+     "rubble",
+     0.7
+    ]
+   ]
+  },
+  "frame": {
+   "count": 22,
+   "mix": [
+    [
+     "crag1",
+     1
+    ],
+    [
+     "crag2",
+     1
+    ],
+    [
+     "crag3",
+     1
+    ]
+   ],
+   "sink": 3.0
+  },
+  "camp": {
+   "tents": "leanto",
+   "fire": "firepit",
+   "shelter": "bench",
+   "crates": [
+    "crate3",
+    "toolrack",
+    "tripod"
+   ],
+   "tentScale": 1.5
+  },
+  "lantern": {
+   "key": "brazier",
+   "every": 38
+  },
+  "objects": {
+   "waystone": "waystone",
+   "cache": "cache",
+   "plaque": "signpost"
+  },
+  "kits": {
+   "waystone": "whitehorn_range/kit-horn-waystone-1",
+   "cache": "four_gates/kit-crate-stack-1",
+   "notice": "amberwood/kit-notice-board-1",
+   "firepit": "sunmane_steppe/kit-fire-pit",
+   "shelter": "whitehorn_range/kit-firewood-shelter-1",
+   "crate1": "whitehorn_range/kit-supply-crate-1",
+   "crate2": "whitehorn_range/kit-supply-crate-2",
+   "barrels": "four_gates/kit-barrel-stack-1",
+   "growth1": "amethyst_barrens/kit-crystal-growth-1",
+   "growth2": "amethyst_barrens/kit-crystal-growth-2",
+   "growth3": "amethyst_barrens/kit-crystal-growth-3",
+   "growth4": "amethyst_barrens/kit-crystal-growth-4",
+   "growth5": "amethyst_barrens/kit-crystal-growth-5",
+   "geode1": "amethyst_barrens/kit-split-geode-1",
+   "geode3": "amethyst_barrens/kit-split-geode-3",
+   "crag1": "amethyst_barrens/kit-veined-crag-1",
+   "crag2": "amethyst_barrens/kit-veined-crag-2",
+   "crag3": "amethyst_barrens/kit-veined-crag-3",
+   "vboulder1": "amethyst_barrens/kit-veined-boulder-1",
+   "vboulder2": "amethyst_barrens/kit-veined-boulder-2",
+   "vboulder3": "amethyst_barrens/kit-veined-boulder-3",
+   "vscree1": "amethyst_barrens/kit-vein-scree-1",
+   "vscree2": "amethyst_barrens/kit-vein-scree-2",
+   "rubble": "amethyst_barrens/kit-rubble-scree-0",
+   "brush1": "amethyst_barrens/kit-ashen-brush-1",
+   "brush2": "amethyst_barrens/kit-ashen-brush-2",
+   "deadthorn": "amethyst_barrens/kit-dead-thorn-1",
+   "lichen": "amethyst_barrens/kit-lichen-stone-mat-1",
+   "orecart": "amethyst_barrens/kit-ore-cart-1",
+   "rail": "amethyst_barrens/kit-mine-rail-straight-1",
+   "leanto": "amethyst_barrens/kit-prospector-lean-to-1",
+   "bench": "amethyst_barrens/kit-prospector-workbench",
+   "signpost": "amethyst_barrens/kit-survey-signpost",
+   "tripod": "amethyst_barrens/kit-surveyor-tripod-1",
+   "toolrack": "amethyst_barrens/kit-tool-rack-1",
+   "brazier": "amethyst_barrens/kit-glow-brazier",
+   "vent": "amethyst_barrens/kit-crystal-vent-1",
+   "basalt": "amethyst_barrens/kit-basalt-columns-1",
+   "arch": "amethyst_barrens/kit-crystal-rock-arch-1",
+   "lantern": "amethyst_barrens/kit-lantern-post-1",
+   "crate3": "amethyst_barrens/kit-supply-crate-3",
+   "RT1": "@kit/kit-rt-crystal-spires.glb",
+   "RT2": "@kit/kit-rt-crane-gantry.glb",
+   "RT3": "@kit/kit-rt-bench-wall.glb",
+   "RT4": "@kit/kit-rt-giant-geode.glb",
+   "RT5": "@kit/kit-rt-ore-scaffold.glb",
+   "RT6": "@kit/kit-rt-quarry-stair.glb"
+  },
+  "landmarks": [
+   {
+    "kit": "vent",
+    "at": [
+     200,
+     28
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "vent",
+    "at": [
+     212,
+     42
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 37
+   },
+   {
+    "kit": "vent",
+    "at": [
+     226,
+     26
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 74
+   },
+   {
+    "kit": "vent",
+    "at": [
+     238,
+     40
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 111
+   },
+   {
+    "kit": "vent",
+    "at": [
+     246,
+     32
+    ],
+    "scale": 1.4,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 148
+   },
+   {
+    "kit": "orecart",
+    "at": [
+     194,
+     44
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 30
+   },
+   {
+    "kit": "signpost",
+    "at": [
+     250,
+     46
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "RT5",
+    "at": [
+     217.36,
+     19.03
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     220,
+     34
+    ]
+   },
+   {
+    "kit": "RT5",
+    "at": [
+     225.41,
+     48.86
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     220,
+     34
+    ]
+   },
+   {
+    "ring": {
+     "kit": "RT1",
+     "scale": 0.6,
+     "around": [
+      326,
+      216
+     ],
+     "radius": [
+      40,
+      24
+     ],
+     "rotDeg": 100,
+     "n": 7,
+     "phase": 0.2
+    }
+   },
+   {
+    "kit": "RT2",
+    "at": [
+     172,
+     302
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "fitLength": 44,
+    "rot": 10
+   },
+   {
+    "kit": "orecart",
+    "at": [
+     186,
+     299
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 10
+   },
+   {
+    "kit": "toolrack",
+    "at": [
+     158,
+     309
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     172,
+     302
+    ]
+   },
+   {
+    "kit": "RT5",
+    "at": [
+     147.71,
+     308.51
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     172,
+     302
+    ]
+   },
+   {
+    "ring": {
+     "kit": "RT1",
+     "scale": 0.85,
+     "around": [
+      103,
+      176
+     ],
+     "radius": [
+      44,
+      28
+     ],
+     "rotDeg": -80,
+     "n": 6,
+     "phase": 0.4
+    }
+   },
+   {
+    "kit": "geode1",
+    "at": [
+     109,
+     170
+    ],
+    "scale": 1.6,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "basalt",
+    "at": [
+     93,
+     184
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "rot": 20
+   },
+   {
+    "kit": "RT6",
+    "at": [
+     208.0,
+     156.0
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "rot": 111.80140948635182
+   },
+   {
+    "shape": "box",
+    "at": [
+     183.3,
+     123.53
+    ],
+    "mat": "amethyst_storm_rock",
+    "group": "arena",
+    "size": [
+     4,
+     14,
+     0.8
+    ],
+    "rot": 10,
+    "solid": false
+   },
+   {
+    "shape": "box",
+    "at": [
+     193.15,
+     125.26
+    ],
+    "mat": "amethyst_storm_rock",
+    "group": "arena",
+    "size": [
+     4,
+     14,
+     1.2000000000000002
+    ],
+    "rot": 10,
+    "solid": false
+   },
+   {
+    "shape": "box",
+    "at": [
+     212.85,
+     128.74
+    ],
+    "mat": "amethyst_storm_rock",
+    "group": "arena",
+    "size": [
+     4,
+     14,
+     1.6
+    ],
+    "rot": 10,
+    "solid": false
+   },
+   {
+    "shape": "box",
+    "at": [
+     222.7,
+     130.47
+    ],
+    "mat": "amethyst_storm_rock",
+    "group": "arena",
+    "size": [
+     4,
+     14,
+     2.0
+    ],
+    "rot": 10,
+    "solid": false
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     213.75,
+     244.51
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 157.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     170.25,
+     244.51
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 202.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     139.49,
+     213.75
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 247.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     139.49,
+     170.25
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 292.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     244.51,
+     170.25
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 427.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     271.17,
+     192.0
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 90.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     247.98,
+     247.98
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 135.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     192.0,
+     271.17
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 180.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     136.02,
+     247.98
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 225.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     136.02,
+     136.02
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 315.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     247.98,
+     136.02
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 405.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     285.77,
+     230.84
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 112.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     230.84,
+     285.77
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 157.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     153.16,
+     98.23
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 337.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     230.84,
+     98.23
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 382.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     285.77,
+     153.16
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 427.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     279.56,
+     279.56
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 135.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     104.44,
+     279.56
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 225.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     68.17,
+     192.0
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 270.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     104.44,
+     104.44
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 315.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     192.0,
+     68.17
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 360.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     279.56,
+     104.44
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 405.0
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     247.94,
+     327.04
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 157.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     136.06,
+     327.04
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 202.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     56.96,
+     247.94
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 247.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     56.96,
+     136.06
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 292.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     136.06,
+     56.96
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 337.5
+   },
+   {
+    "kit": "RT3",
+    "at": [
+     327.04,
+     136.06
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "rot": 427.5
+   },
+   {
+    "kit": "RT4",
+    "at": [
+     232,
+     200
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "encloses": true,
+    "face": [
+     192,
+     192
+    ]
+   },
+   {
+    "kit": "arch",
+    "at": [
+     192,
+     170
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "scenery",
+    "face": [
+     192,
+     192
+    ]
+   },
+   {
+    "ring": {
+     "kit": "brazier",
+     "solid": null,
+     "around": [
+      192,
+      192
+     ],
+     "radius": [
+      20,
+      18
+     ],
+     "rotDeg": 0.0,
+     "n": 6,
+     "phase": 0.5
+    }
+   }
+  ],
+  "meshyKit": [
+   "RT1",
+   "RT2",
+   "RT3",
+   "RT4",
+   "RT5",
+   "RT6"
+  ],
+  "labels": {
+   "plaque": [
+    "Rules of the cut",
+    "One party at a time. The cut sends them to you; the benches behind stay quiet once you have cleared them. Fall and you rise at the last fire you passed. The waystones count you out."
+   ],
+   "cache": "The lens-grinders' strongbox",
+   "side": [
+    "The grinders' ledge",
+    "The lens grinders tuned their hammers here. Strike the rock and it still answers."
+   ]
+  }
+ }
+}

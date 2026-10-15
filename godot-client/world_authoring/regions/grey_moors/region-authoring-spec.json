@@ -1,0 +1,172 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "grey_moors",
+  "label": "Grey Moors",
+  "adapter": "published-generic-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/grey_moors/grey_moors.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/grey_moors/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/grey_moors/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/grey_moors/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/grey_moors/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/grey_moors/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    220.0,
+    0.0,
+    420.0
+  ],
+  "server": {
+    "origin": [
+      224,
+      326
+    ],
+    "cells": [
+      750,
+      750
+    ],
+    "collisionOriginMetres": [
+      -224.0,
+      326.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -220.0,
+      -420.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      196,
+      372
+    ]
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "amberwood--grey_moors-grey_moors",
+      "discovery-grey_moors-1001",
+      "discovery-grey_moors-1177",
+      "discovery-grey_moors-764",
+      "discovery-grey_moors-765",
+      "discovery-grey_moors-766",
+      "discovery-grey_moors-767",
+      "discovery-grey_moors-768",
+      "discovery-grey_moors-769",
+      "discovery-grey_moors-770",
+      "discovery-grey_moors-771",
+      "discovery-grey_moors-772",
+      "discovery-grey_moors-773",
+      "discovery-grey_moors-774",
+      "discovery-grey_moors-775",
+      "discovery-grey_moors-776",
+      "discovery-grey_moors-777",
+      "door-grey_moors-east-crypt-stair",
+      "door-grey_moors-fifth-chamber-mouth",
+      "door-grey_moors-great-barrow-mouth",
+      "door-grey_moors-peat-croft-door",
+      "door-grey_moors-south-crypt-stair",
+      "door-grey_moors-warm-stone-door",
+      "door-grey_moors-west-crypt-stair",
+      "grey_moors--westhaven-grey_moors",
+      "grey_moors--whitehorn_range-grey_moors",
+      "trail-grey_moors-0"
+    ],
+    "requiredRouteIds": [
+      "amberwood--grey_moors-grey_moors",
+      "door-grey_moors-east-crypt-stair",
+      "door-grey_moors-fifth-chamber-mouth",
+      "door-grey_moors-great-barrow-mouth",
+      "door-grey_moors-peat-croft-door",
+      "door-grey_moors-south-crypt-stair",
+      "door-grey_moors-warm-stone-door",
+      "door-grey_moors-west-crypt-stair",
+      "grey_moors--westhaven-grey_moors",
+      "grey_moors--whitehorn_range-grey_moors"
+    ],
+    "ownedPlanFeatureIds": [
+      "moor_headwater_tarn",
+      "moor_tributary",
+      "moorwater_pool"
+    ],
+    "ownedFerryConnectionIds": []
+  },
+  "gameplay": {
+    "runtimeBindingCount": 212,
+    "runtimePointCount": 204,
+    "existingMarkerBindingCount": 7
+  },
+  "bootstrap": {
+    "schema": "eloria-published-region-bootstrap-v1",
+    "objectCount": 253,
+    "objectIdsSha256": "24b587d4d83540ccd598849626d8b10200d37160a69dd6a2a830ecdc17ca67c7",
+    "visibleGameplayCount": 170,
+    "assemblies": [
+      {
+        "id": "moor_tributary@196",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_004_276_540",
+          "BridgeUnionPier_004_284_540",
+          "BridgeUnionTimberEdge_004_grey_moors"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_004_grey_moors"
+      },
+      {
+        "id": "moor_tributary@62",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionPier_001_244_412",
+          "BridgeUnionPier_001_252_412",
+          "BridgeUnionTimberEdge_001_grey_moors"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_001_grey_moors"
+      }
+    ],
+    "water": [
+      {
+        "id": "moor_headwater_tarn",
+        "kind": "lake",
+        "planFeatureId": "moor_headwater_tarn",
+        "sourceName": "Moor headwater tarn",
+        "displayName": "Moor headwater tarn",
+        "localCenter": [
+          35.0,
+          27,
+          -70.0
+        ],
+        "radii": [
+          25,
+          18
+        ],
+        "baselinePlanDepth": 2.5
+      },
+      {
+        "id": "moor_tributary",
+        "kind": "river",
+        "planFeatureId": "moor_tributary"
+      },
+      {
+        "id": "moorwater_pool",
+        "kind": "lake",
+        "planFeatureId": "moorwater_pool",
+        "sourceName": "Moorwater pool",
+        "displayName": "Moorwater pool",
+        "localCenter": [
+          30.0,
+          22,
+          50.0
+        ],
+        "radii": [
+          21,
+          32
+        ],
+        "baselinePlanDepth": 2.3
+      }
+    ],
+    "bakedTerrainFeatures": [],
+    "previewUvMetresInverse": 0.17,
+    "baselineProofSha256": "b0fdf5a858dea76939c8d48d4dc725d9d3dd83223f5173bac3567f5fdde3b21f"
+  }
+}

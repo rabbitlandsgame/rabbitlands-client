@@ -1,0 +1,31 @@
+{
+	"id": "ssarathi_ruins",
+	"schema": 1,
+	"ground": {
+		"path_luma": 0.1,
+		"path_tint": [0.86, 0.64, 0.44],
+		"path_chroma": 1.15,
+		"verge_value_earth_forward": 0.9,
+		"verge_value_green_forward": 0.66,
+		"verge_saturation_forward": 1.08
+	},
+	"grass": {
+		"root": [0.05, 0.14, 0.07],
+		"tip": [0.42, 0.6, 0.27],
+		"value_forward": 1.1
+	},
+	"foliage": {
+		"crown_materials": ["foliage_green", "ssarathi_palm", "verdant_frond"],
+		"shrub_words": ["grass"]
+	},
+	"props": {
+		"keep_words": ["jade"],
+		"keep_chroma_forward": 1.8
+	},
+	"notes": {
+		"ground": "Ssarathi's floor is dark (the hub's verge measures luminance 74 in Forward+ with the defaults, against Verdant's 105), so the default road value (path_luma 0.27 in Forward+) painted its roads as cream decals 2.42-2.53 times the grass beside them (sr_hub, sr_road; develop 0.93). At path_luma 0.1 they measure 1.54 and 1.61 (Forward+, 2026-09-30, mig_ssarathi_ruins_3). They are painted in the region's own warm laterite (tint 30 degrees, chroma 1.15): display about (154, 118, 78), saturation 0.49, where the default tint read as pale sand (195, 179, 157; saturation 0.20). The earthy verge is deepened less than the default (0.9 against 0.8) and the green verge less (0.66 against 0.55), which lifts the hub's grass from 74 to 78. The verge keeps more chroma (1.08 against 0.92): the ground's saturation goes from 0.38-0.41 to 0.49-0.54, and the frame's from 0.32-0.34 to 0.43-0.46. path_luma, path_tint and path_chroma are bare keys, so the compatibility renderer takes them too, but they were not measured there; the verge trims are Forward+ only. BORDER: the north road to Verdant Stair (z -160, x -31) used to step at the border from this tan to Verdant's cream (road luminance 128 against 150; develop 98 against 100). Region trims now fade into the neighbour's over LookProfile.BORDER_FEATHER_METRES either side of the border (LookBorders), so a trim no longer draws the border as a line. Keep the trims.",
+		"grass": "A lush tropical green, deeper and bluer than the default. Not measured against the ground under it: the hub grows only about 530 tufts (the grass builder counts 68 % of its rays near the hub as path), and too few stand on open verge in any shot to measure. Verdant measured its tufts at 0.67-0.73 of their ground with a similar dark root and lifted its roots (value_forward 1.6); this palette probably needs the same check.",
+		"foliage": "The region's authored trees are the continent exporter's Tree_<n>__foliage_green canopies (the region's main leaf material, shared with Verdant's species), ssarathi_palm crowns on bark_pale trunks and verdant_frond tree-fern crowns. Painted, the jungle frames lose most of their near-black (sr_border 43 % to 9 %, sr_border_wide 19 % to 4 %). kit-dune-grass (81 beach clumps) is painted as a shrub by the word grass, like the river reeds; none is in a survey frame, so that is unverified. ssarathi_vine (wall vines on the ruins, flat sheets up to 10 m tall) is left alone: a crown's top light and sway belong to a crown, not a wall. Bark stays unpainted.",
+		"props": "The serpent ruins' jade (ssarathi_jade_scale, the Jade masonry) keeps its chroma: under the shared grade the jade court at sr_wild went from saturation 0.23 to 0.12, hue 147 to 88, a neutral grey. keep_chroma_forward 1.8: at the default 1.45 the jade court came back only to saturation 0.17 (develop 0.23)."
+	}
+}

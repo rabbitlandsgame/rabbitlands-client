@@ -1,0 +1,1696 @@
+{
+ "_note": "Rules of the run - everything a run of barrow_run_gauntlet needs except geometry (source/layout.json). Written by work-output/gauntlet-v2-design/regions/tools/author_routes.py from the approved concept: three bands by the run's level, five waves of two variants each and a court. Counts are for a party of four; the server multiplies by partyScale (leaders and bosses never multiply).",
+ "schema": "eloria-trail-design-v1",
+ "id": "barrow_run_gauntlet",
+ "route": "barrow_run",
+ "name": "The Barrow Run",
+ "short": "barrowrun",
+ "region": "grey_moors",
+ "flavour": "The visitation road crosses the misty moor from barrow to barrow: the peat cut, the ringed first barrow, the bog boardwalk, the barrow cemetery round the ruined chapel and the split barrow, to the forecourt of the Great Barrow, where the Barrow Reeve keeps his hall.",
+ "copies": 3,
+ "timeLimitSeconds": 2700,
+ "cooldownHours": 6,
+ "minPlayers": 1,
+ "maxPlayers": 6,
+ "wipeSeconds": 90,
+ "broker": {
+  "npc": "Rellan",
+  "map": "landfall"
+ },
+ "partyScale": {
+  "1": 0.6,
+  "2": 0.75,
+  "3": 0.9,
+  "4": 1.0,
+  "5": 1.15,
+  "6": 1.3
+ },
+ "pulse": {
+  "releaseAliveFraction": 0.34,
+  "releaseSeconds": 45
+ },
+ "leash": {
+  "marginMetres": 10,
+  "evadeSeconds": 8
+ },
+ "checkpointDelaySeconds": 10,
+ "shapes": {
+  "pack": 1.0,
+  "swarm": 0.8,
+  "heavies": 1.25,
+  "leader": 1.25
+ },
+ "mutators": [
+  [
+   "none",
+   5
+  ],
+  [
+   "frenzy",
+   2
+  ],
+  [
+   "hunted",
+   2
+  ],
+  [
+   "bounty",
+   1
+  ],
+  [
+   "swift",
+   1
+  ]
+ ],
+ "cache": [
+  [
+   "Potion of Great Healing",
+   "3-5",
+   "1"
+  ],
+  [
+   "Gold Coins",
+   "150-400",
+   "1"
+  ],
+  [
+   "Bones",
+   "6-12",
+   "1"
+  ]
+ ],
+ "cacheRare": [],
+ "bonus": {
+  "section": "mourners-well",
+  "note": "one harvest node of an existing herb (the server tool's bonus resource)"
+ },
+ "lore": [
+  {
+   "at": "trailhead",
+   "title": "Rules of the run",
+   "text": "One party at a time. The dead come to you; the road behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+  },
+  {
+   "at": "mourners-well",
+   "title": "The mourners' well",
+   "text": "Mourners left a coin here for the walk back. The coins are gone. The walk back is still long."
+  }
+ ],
+ "bands": [
+  {
+   "id": "mourners",
+   "label": "The Mourners",
+   "minLevel": 1,
+   "maxLevel": 24,
+   "story": "The moor's small hunters and the first of the restless dead.",
+   "roster": [
+    "giant_mole",
+    "mossbound_hound",
+    "moor_heron",
+    "crawling_hand",
+    "shadow_warg",
+    "zombie"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "mole",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moss-hound",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "mossbound_hound",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "mossbound_hound",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "mossbound_hound",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "moor-heron",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "moor_heron",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "moor_heron",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "moor_heron",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "crawling-hand",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "crawling_hand",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "crawling_hand",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "crawling_hand",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "crawling_hand",
+          11,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "shadow-warg",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "shadow_warg",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "shadow_warg",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "shadow_warg",
+          12,
+          "pack"
+         ],
+         [
+          "zombie",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mole",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          12,
+          "pack"
+         ],
+         [
+          "zombie",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "moss-hound",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "mossbound_hound",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "mossbound_hound",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "mossbound_hound",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moor-heron",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "moor_heron",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "moor_heron",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "moor_heron",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "crawling-hand",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "crawling_hand",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "crawling_hand",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "crawling_hand",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "crawling_hand",
+          14,
+          "swarm"
+         ],
+         [
+          "zombie",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "shadow-warg",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "shadow_warg",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "shadow_warg",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "shadow_warg",
+          15,
+          "pack"
+         ],
+         [
+          "zombie",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "inline",
+    "creature": "moss_armored_hound",
+    "name": "the Barrow Hound",
+    "health": 6.0,
+    "strength": [
+     0.9,
+     1.4
+    ],
+    "adds": [
+     [
+      "giant_mole",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "hollow",
+   "label": "The Hollow",
+   "minLevel": 20,
+   "maxLevel": 44,
+   "story": "The hollow dead of the cemetery and the hounds that run with them.",
+   "roster": [
+    "skeleton",
+    "moorland_dire_wolf",
+    "hobgoblin",
+    "ghoul",
+    "spectral_forest_duelist"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "skeleton",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moorland-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          6,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "hobgoblin",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "hobgoblin",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "hobgoblin",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "hobgoblin",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ghoul",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "ghoul",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "ghoul",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "ghoul",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "skeleton",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          12,
+          "swarm"
+         ],
+         [
+          "spectral_forest_duelist",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moorland-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          7,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          7,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          7,
+          "heavies"
+         ],
+         [
+          "spectral_forest_duelist",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "hobgoblin",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "hobgoblin",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "hobgoblin",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "hobgoblin",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ghoul",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "ghoul",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "ghoul",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "ghoul",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "skeleton",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "skeleton",
+          14,
+          "swarm"
+         ],
+         [
+          "spectral_forest_duelist",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moorland-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          8,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          8,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "moorland_dire_wolf",
+          8,
+          "heavies"
+         ],
+         [
+          "spectral_forest_duelist",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "barrow_reeve",
+    "existing": true,
+    "name": "Barrow Reeve",
+    "adds": [
+     [
+      "skeleton",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "host",
+   "label": "The Reeve's Host",
+   "minLevel": 40,
+   "maxLevel": 0,
+   "story": "The Reeve's own household: knights in spectral mail, and worse.",
+   "roster": [
+    "moors_spectral_knight",
+    "spectral_moors_knight",
+    "black_iron_death_knight",
+    "gloom_wyvern",
+    "mummy",
+    "living_armor"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "moor-knight",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "moors_spectral_knight",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "moors_spectral_knight",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "moors_spectral_knight",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moor-revenant",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north"
+        ],
+        "groups": [
+         [
+          "spectral_moors_knight",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "spectral_moors_knight",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-north",
+         "w1-west"
+        ],
+        "groups": [
+         [
+          "spectral_moors_knight",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "death-knight",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "black_iron_death_knight",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "black_iron_death_knight",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "black_iron_death_knight",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "gloom-wyvern",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "gloom_wyvern",
+          2,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "gloom_wyvern",
+          2,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-east"
+        ],
+        "groups": [
+         [
+          "gloom_wyvern",
+          2,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "mummy",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "mummy",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "mummy",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "mummy",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "mummy",
+          12,
+          "swarm"
+         ],
+         [
+          "living_armor",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "moor-knight",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "moors_spectral_knight",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "moors_spectral_knight",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "moors_spectral_knight",
+          12,
+          "pack"
+         ],
+         [
+          "living_armor",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "moor-revenant",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "spectral_moors_knight",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "spectral_moors_knight",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "spectral_moors_knight",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "death-knight",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "black_iron_death_knight",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "black_iron_death_knight",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "black_iron_death_knight",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "gloom-wyvern",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "gloom_wyvern",
+          2,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "gloom_wyvern",
+          2,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "gloom_wyvern",
+          2,
+          "heavies"
+         ],
+         [
+          "living_armor",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mummy",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "mummy",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "mummy",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "mummy",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-west"
+        ],
+        "groups": [
+         [
+          "mummy",
+          14,
+          "swarm"
+         ],
+         [
+          "living_armor",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "barrow_reeve",
+    "existing": true,
+    "name": "Barrow Reeve",
+    "adds": [
+     [
+      "moors_spectral_knight",
+      6
+     ]
+    ]
+   }
+  }
+ ]
+}

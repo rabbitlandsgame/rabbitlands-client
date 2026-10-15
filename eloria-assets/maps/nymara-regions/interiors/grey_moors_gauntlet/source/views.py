@@ -1,0 +1,38 @@
+"""Repeatable eye-level and isometric views of the Grey Moors Barrow Run."""
+import argparse
+import json
+from pathlib import Path
+
+def views(manifest):
+    spaces = manifest["spaces"]
+    keys = ["staging", "peat-cut", "first-barrow", "bog-board", "fifth-chamber",
+            "split-barrow-hub", "split-barrow-east-passage", "split-barrow-west-passage",
+            "reeve-stair", "reeve-hall", "vault"]
+    out = []
+    for key in keys:
+        s = spaces[key]
+        x, z = (s["x0"] + s["x1"]) / 2, (s["z0"] + s["z1"]) / 2
+        y = s["floor"] + (3 if key == "bog-board" else 0)
+        out.append({"id": key, "title": key.replace("-", " ").title(),
+                    "eye": [x, y + 2.1, s["z0"] + 2.4],
+                    "target": [x, y + 2, s["z1"] - 2], "fov": 66})
+        if key not in ("peat-cut", "bog-board", "reeve-stair", "vault"):
+            out.append({"id": key + "-iso", "title": key.replace("-", " ").title() + " / isometric",
+                        "eye": [x + 15, y + 21, z - 18], "target": [x, y, z], "fov": 62})
+    s = spaces["first-barrow"]
+    out.append({"id": "burial-cists", "title": "Family cists and candle niches", "fov": 62,
+                "eye": [s["x0"] + 8, s["floor"] + 2.4, s["z0"] + 3],
+                "target": [s["x0"] + 2.5, s["floor"] + 1.1, s["z0"] + 7]})
+    s = spaces["bog-board"]
+    out.append({"id": "bog-piles", "title": "Piles under the flooded crossing", "fov": 66,
+                "eye": [s["x1"] - 2, s["floor"] + 5.1, s["z0"] + 2],
+                "target": [(s["x0"] + s["x1"]) / 2, s["floor"] + 2, s["z0"] + 11]})
+    return out
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--package", type=Path, default=Path(__file__).resolve().parents[1])
+    args = ap.parse_args()
+    target = args.package / "references/captures/index.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes((json.dumps(views(json.loads((args.package / "world.json").read_bytes())), indent=2) + "\n").encode())

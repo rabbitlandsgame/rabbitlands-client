@@ -1,0 +1,437 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "0.2.0",
+  "asset": {
+    "id": "lantern_reach",
+    "name": "Lantern Reach \u2014 draft",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "bounds": {
+      "min": [
+        -190,
+        -2,
+        -310
+      ],
+      "max": [
+        310,
+        20,
+        190
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -0.5,
+        0.4,
+        -119.5
+      ],
+      "max": [
+        119.5,
+        4,
+        0.5
+      ]
+    },
+    "serverCells": 120
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      0,
+      0
+    ],
+    "origin": [
+      -0.5,
+      0,
+      0.5
+    ],
+    "walkingHeight": 0.4,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        17,
+        0.4,
+        -20
+      ],
+      "rotationDegrees": 0
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v2",
+    "width": 240,
+    "height": 240,
+    "cellMetres": 0.5,
+    "heightEncoding": {
+      "origin": -2.2,
+      "step": 0.2,
+      "zeroMeansBlocked": true
+    }
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45
+  },
+  "landmarks": [
+    {
+      "id": "arrival",
+      "name": "Grounded ferry",
+      "position": [
+        17,
+        0.4,
+        -19
+      ]
+    },
+    {
+      "id": "shelter",
+      "name": "Caldus's boathouse",
+      "position": [
+        32,
+        0.4,
+        -32
+      ]
+    },
+    {
+      "id": "garden",
+      "name": "Tidal garden",
+      "position": [
+        24,
+        0.4,
+        -54
+      ]
+    },
+    {
+      "id": "workshop",
+      "name": "Repair shed",
+      "position": [
+        46,
+        0.6000000000000001,
+        -70
+      ]
+    },
+    {
+      "id": "causeway",
+      "name": "Hold the path",
+      "position": [
+        67,
+        0.4,
+        -53
+      ]
+    },
+    {
+      "id": "rest",
+      "name": "Beacon steps",
+      "position": [
+        83,
+        0.6000000000000001,
+        -70
+      ]
+    },
+    {
+      "id": "beacon",
+      "name": "Lantern room",
+      "position": [
+        95,
+        2.8000000000000003,
+        -96
+      ]
+    },
+    {
+      "id": "dock",
+      "name": "Return dock",
+      "position": [
+        102,
+        0.4,
+        -24
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "nesh",
+      "kind": "guide",
+      "objectId": null,
+      "position": [
+        22,
+        0.4,
+        -24
+      ],
+      "serverTile": [
+        22,
+        24
+      ],
+      "approachTile": [
+        21,
+        23
+      ]
+    },
+    {
+      "id": "caldus",
+      "kind": "npc",
+      "objectId": null,
+      "position": [
+        34,
+        0.4,
+        -34
+      ],
+      "serverTile": [
+        34,
+        34
+      ],
+      "approachTile": [
+        33,
+        32
+      ]
+    },
+    {
+      "id": "chart",
+      "kind": "information",
+      "objectId": null,
+      "position": [
+        36,
+        0.4,
+        -37
+      ],
+      "serverTile": [
+        36,
+        37
+      ],
+      "approachTile": [
+        36,
+        35
+      ]
+    },
+    {
+      "id": "reed",
+      "kind": "harvest",
+      "objectId": 7001,
+      "position": [
+        21,
+        0.4,
+        -54
+      ],
+      "serverTile": [
+        21,
+        54
+      ],
+      "approachTile": [
+        23,
+        54
+      ]
+    },
+    {
+      "id": "quartz",
+      "kind": "harvest",
+      "objectId": 7002,
+      "position": [
+        28,
+        0.4,
+        -59
+      ],
+      "serverTile": [
+        28,
+        59
+      ],
+      "approachTile": [
+        27,
+        57
+      ]
+    },
+    {
+      "id": "lower_cache",
+      "kind": "storage",
+      "objectId": 7010,
+      "position": [
+        44,
+        0.8,
+        -72
+      ],
+      "serverTile": [
+        44,
+        72
+      ],
+      "approachTile": [
+        44,
+        70
+      ]
+    },
+    {
+      "id": "bench",
+      "kind": "manufacturing",
+      "objectId": 7011,
+      "position": [
+        49,
+        1.0,
+        -73
+      ],
+      "serverTile": [
+        49,
+        73
+      ],
+      "approachTile": [
+        49,
+        71
+      ]
+    },
+    {
+      "id": "boar",
+      "kind": "combat",
+      "objectId": 7020,
+      "position": [
+        68,
+        0.4,
+        -54
+      ],
+      "serverTile": [
+        68,
+        54
+      ],
+      "approachTile": [
+        66,
+        53
+      ]
+    },
+    {
+      "id": "bag",
+      "kind": "loot",
+      "objectId": 7021,
+      "position": [
+        68,
+        0.4,
+        -54
+      ],
+      "serverTile": [
+        68,
+        54
+      ],
+      "approachTile": [
+        66,
+        53
+      ]
+    },
+    {
+      "id": "rest",
+      "kind": "rest",
+      "objectId": null,
+      "position": [
+        83,
+        0.6000000000000001,
+        -70
+      ],
+      "serverTile": [
+        83,
+        70
+      ],
+      "approachTile": [
+        82,
+        70
+      ]
+    },
+    {
+      "id": "upper_cache",
+      "kind": "storage",
+      "objectId": 7030,
+      "position": [
+        91,
+        2.8000000000000003,
+        -95
+      ],
+      "serverTile": [
+        91,
+        95
+      ],
+      "approachTile": [
+        89,
+        94
+      ]
+    },
+    {
+      "id": "housing",
+      "kind": "beacon",
+      "objectId": 7031,
+      "position": [
+        97,
+        3.0,
+        -98
+      ],
+      "serverTile": [
+        97,
+        98
+      ],
+      "approachTile": [
+        95,
+        97
+      ]
+    },
+    {
+      "id": "dock",
+      "kind": "merchant",
+      "objectId": 7040,
+      "position": [
+        103,
+        0.4,
+        -26
+      ],
+      "serverTile": [
+        103,
+        26
+      ],
+      "approachTile": [
+        101,
+        26
+      ]
+    },
+    {
+      "id": "dock_cache",
+      "kind": "storage",
+      "objectId": 7042,
+      "position": [
+        105,
+        0.4,
+        -29
+      ],
+      "serverTile": [
+        105,
+        29
+      ],
+      "approachTile": [
+        103,
+        28
+      ]
+    },
+    {
+      "id": "ferry",
+      "kind": "departure",
+      "objectId": 7041,
+      "position": [
+        106,
+        0.4,
+        -21
+      ],
+      "serverTile": [
+        106,
+        21
+      ],
+      "approachTile": [
+        104,
+        22
+      ]
+    }
+  ],
+  "draft": {
+    "quest": "quest.json",
+    "layout": "layout.json",
+    "runtimeRegistration": false,
+    "collisionNote": "Native half-metre EWCG-v2. Four authored cells per one-metre server tile."
+  }
+}

@@ -1,0 +1,71 @@
+{
+ "schema": "eloria-region-authoring-spec-v1",
+ "regionId": "saltsound",
+ "label": "Saltsound",
+ "adapter": "continent-v2-meshy-v1",
+ "paths": {
+  "scene": "godot-client/world_authoring/regions/saltsound/saltsound.tscn",
+  "manifest": "eloria-assets/maps/continent-v2/saltsound/world.json",
+  "snapshot": "eloria-assets/maps/continent-v2/saltsound/authoring/continent-authoring.json"
+ },
+ "inputs": {
+  "baseHeights": "godot-client/world_authoring/regions/saltsound/base-heights.f32le",
+  "baseColors": "godot-client/world_authoring/regions/saltsound/base-colors.rgba8"
+ },
+ "continentTranslation": [
+  2059.0,
+  0.0,
+  6521.0
+ ],
+ "server": {
+  "origin": [
+   604,
+   304
+  ],
+  "cells": [
+   1212,
+   1212
+  ],
+  "collisionOriginMetres": [
+   -604.0,
+   304.0
+  ]
+ },
+ "terrain": {
+  "origin": [
+   -660.0,
+   -358.0
+  ],
+  "cellMetres": 2.0,
+  "vertices": [
+   661,
+   360
+  ]
+ },
+ "authority": {
+  "ownedRouteIds": [],
+  "requiredRouteIds": [],
+  "ownedPlanFeatureIds": [],
+  "ownedFerryConnectionIds": []
+ },
+ "gameplay": {
+  "runtimeBindingCount": 0,
+  "runtimePointCount": 0,
+  "existingMarkerBindingCount": 0,
+  "generatedArrival": {
+   "path": "eloria-assets/maps/continent-v2/saltsound/content/arrival.json",
+   "sha256": "df4a310aaa5de363da6de055848f98bb62462feea3d4dd27674906d57ad71a79"
+  },
+  "authoredMarkerCount": 42
+ },
+ "continentV2": {
+  "planPath": "eloria-assets/maps/continent-v2/_continent_v2/continent-v2-plan.json",
+  "vertical": {
+   "A": 259.0078328433769,
+   "u0": 259.0078328433769,
+   "peakMetres": 350.0,
+   "gainAtSea": 1.0
+  },
+  "planSha256": "731d24f05084b5893d91f0f5d54f7d7e4f7183e3396b850a2f9da3d7c4f7d392"
+ }
+}

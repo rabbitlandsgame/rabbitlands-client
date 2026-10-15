@@ -1,0 +1,57 @@
+{
+  "schema": "eloria-texture-pack-entry-v1",
+  "assetId": "alpine-scree-lichen",
+  "version": "v001",
+  "generator": "OpenAI built-in image_gen",
+  "generationId": "exec-e3747b8e-9082-446e-ae39-81b023ffc35a",
+  "generationLineage": [
+    {
+      "inputImages": [],
+      "generationId": "exec-241831fe-c8fe-4559-a85a-135c0712ddca"
+    },
+    {
+      "inputImages": [
+        {
+          "role": "edit target",
+          "path": "C:/rabbitlands/private-inputs\\.codex\\generated_images\\01a0d202-9e5e-7430-9e95-399455b48aea\\exec-241831fe-c8fe-4559-a85a-135c0712ddca.png",
+          "sha256": "6ed4dec16f37afa45bbdd6e7c177e339c0fc38123a1a24980ee6d8e30f61c392"
+        }
+      ],
+      "generationId": "exec-e3747b8e-9082-446e-ae39-81b023ffc35a"
+    }
+  ],
+  "generatedSource": "C:/rabbitlands/private-inputs\\.codex\\generated_images\\01a0d202-9e5e-7430-9e95-399455b48aea\\exec-e3747b8e-9082-446e-ae39-81b023ffc35a.png",
+  "integrationAsset": "C:\\rabbitlands\\work-output\\region-materials-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\texture_packs\\alpine-scree-lichen\\alpine-scree-lichen-v001.png",
+  "assetSha256": "e578ca6c6df0db5bb4c9086e31905bb2708f618e16f6e2ee968a0d5109023fac",
+  "generatedSourceSha256": "e578ca6c6df0db5bb4c9086e31905bb2708f618e16f6e2ee968a0d5109023fac",
+  "designReferences": [
+    {
+      "role": "design reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\textures\\ground-basecolor.png",
+      "sha256": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805"
+    },
+    {
+      "role": "design reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\textures\\desert-basecolor.png",
+      "sha256": "5d3d975e645bf4fd460f1022d0522c29b3dbc7b4e281bf0deb9559062fc9570a"
+    },
+    {
+      "role": "gameplay-scale style reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\prototypes\\last-lantern\\previews\\garden.png",
+      "sha256": "0f2041f063f534eed49c812183b7e2ebf651c530b5b1fc338df4fde33584686e"
+    }
+  ],
+  "generationInputImages": [],
+  "generationPrompts": [
+    "Use case: stylized-concept\nAsset type: square seamless albedo-only source tile for a low-poly fantasy alpine terrain material\nPrimary request: Create a repeatable alpine scree with sparse lichen ground texture for high mountain shoulders and exposed rocky slopes.\nStyle/medium: restrained painterly low-poly fantasy terrain, soft medium-scale detail consistent with Eloria's approved stylized ground textures.\nComposition/framing: flat orthographic square tile, evenly distributed fine scree and small angular chips; both opposite horizontal edges and opposite vertical edges join seamlessly on repetition; no frame, directional streak or focal stone.\nColor palette: cool medium grey and muted blue-grey rock dust, sparse subdued olive lichen and a few warm-grey mineral grains.\nMaterials/textures: weathered small fractured scree and fine gritty dust with very restrained low-contrast lichen spotting; pattern should read at a 4 metre world repeat and remain calm at gameplay distance.\nLighting/mood: uniform neutral diffuse albedo, no directional variation or baked light.\nConstraints: tile wraps seamlessly on both axes; color/albedo only, no height or relief shading; texture has moderate surface detail, not a rock prop.\nAvoid: large boulders, centerpiece rock, mountain scene, layered cliff, high-contrast stripes, dense speckles, sharp cracks, snow, plants, directional shadows, highlights, gradients, perspective, horizon, edge frame, text, logo, watermark.",
+    "Use case: style-transfer\nAsset type: square seamless diffuse albedo-only terrain texture\nInput images: Image 1: edit target; keep the same cool grey-blue alpine scree palette and rare muted olive lichen color.\nPrimary request: Reduce the overall rock fragmentation again to make a calm gameplay-scale scree albedo. Let a soft fine-grained dusty grey-blue base occupy most of the tile; retain sparse small low-contrast chips and very rare lichen stains only. Remove the dense tiny-pebble speckle field and all prominent larger stones.\nComposition/framing: flat orthographic square material tile with no framing; preserve seamless wrap on left-right and top-bottom edges, distributing details naturally across all edges.\nStyle/medium: restrained painterly low-poly fantasy material, broad quiet mottling with moderate detail.\nLighting/mood: uniform neutral diffuse base colour, no directional or baked lighting.\nConstraints: preserve square both-axis tiling, cool grey-blue palette and albedo-only use; adjust fragmentation density and feature size only.\nAvoid: dense gravel field, large centerpiece, large stones, dense tiny speckles, sharp fracture outlines, strong contrast, white marks, directional bands, cracks, snow, plants, shadows, highlights, gradients, scene/perspective, border, frame, text, logos, watermark."
+  ],
+  "intendedRole": "ground",
+  "worldRepeat": "4 m",
+  "roughnessScalarSuggestion": 0.93,
+  "metallicScalarSuggestion": 0.0,
+  "normalMapStatus": "not generated; any reuse of compatible existing map requires separate validation",
+  "ormMapStatus": "not generated; use scalar settings unless an existing compatible map is separately validated",
+  "seamReview": "visual prototype only; tile continuity remains to be checked with repeated-plane preview",
+  "approvalStatus": "approved for integration as an asset; not yet product-assigned"
+}

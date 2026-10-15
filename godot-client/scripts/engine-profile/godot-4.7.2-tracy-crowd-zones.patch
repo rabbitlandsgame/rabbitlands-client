@@ -1,0 +1,222 @@
+--- a/core/config/project_settings.cpp
++++ b/core/config/project_settings.cpp
+@@ -27,6 +27,10 @@
+ /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+ /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+ /**************************************************************************/
++
++#if defined(WINDOWS_ENABLED) && !defined(OVERRIDE_PATH_ENABLED)
++#define OVERRIDE_PATH_ENABLED
++#endif
+ 
+ #include "project_settings.h"
+ 
+--- a/core/profiling/SCsub
++++ b/core/profiling/SCsub
+@@ -62,7 +62,14 @@
+         env.Prepend(CPPPATH=[str(profiler_path.absolute())])
+ 
+         env_tracy = env.Clone()
+-        env_tracy.Append(CPPDEFINES=["TRACY_ENABLE"])
++        env_tracy.Append(
++            CPPDEFINES=["TRACY_ENABLE", "TRACY_NO_CALLSTACK", "TRACY_NO_SYSTEM_TRACING"]
++        )
++        if env["platform"] == "windows":
++            # Tracy's Windows client references DbgHelp even when per-zone
++            # callstack capture is disabled. Production templates do not
++            # otherwise link this debug-only Godot dependency.
++            env.AppendUnique(LIBS=["dbghelp"])
+         if env["profiler_sample_callstack"]:
+             if env["platform"] not in ("windows", "linuxbsd", "android"):
+                 # Reference the feature matrix in the tracy documentation.
+--- a/core/profiling/profiling.h
++++ b/core/profiling/profiling.h
+@@ -60,6 +60,7 @@
+ 
+ // Define tracing macros.
+ #define GodotProfileFrameMark FrameMark
++#define GodotProfileMessage(m_message, m_size) TracyMessage(m_message, m_size)
+ #define GodotProfileZone(m_zone_name) ZoneNamedN(GD_UNIQUE_NAME(__godot_tracy_szone_), m_zone_name, true)
+ #define GodotProfileZoneGroupedFirst(m_group_name, m_zone_name) ZoneNamedN(__godot_tracy_zone_##m_group_name, m_zone_name, true)
+ #define GodotProfileZoneGroupedEndEarly(m_group_name, m_zone_name) __godot_tracy_zone_##m_group_name.~ScopedZone();
+@@ -123,6 +124,7 @@
+ #define GodotProfileFrameMark \
+ 	perfetto::CounterTrack __frame_time_track = perfetto::CounterTrack("Frame time", "ms").set_unit_multiplier(1000); \
+ 	TRACE_COUNTER("godot", __frame_time_track, Performance::get_singleton()->get_monitor(Performance::Monitor::TIME_PROCESS));
++#define GodotProfileMessage(m_message, m_size)
+ #define GodotProfileZone(m_zone_name) TRACE_EVENT("godot", m_zone_name);
+ #define GodotProfileZoneGroupedFirst(m_group_name, m_zone_name) \
+ 	TRACE_EVENT_BEGIN("godot", m_zone_name); \
+@@ -206,6 +208,7 @@
+ 
+ #define GodotProfileFrameMark \
+ 	os_signpost_event_emit(apple::instruments::LOG, OS_SIGNPOST_ID_EXCLUSIVE, "Frame");
++#define GodotProfileMessage(m_message, m_size)
+ 
+ #define GodotProfileZoneGroupedFirst(m_group_name, m_zone_name) \
+ 	os_signpost_interval_begin(apple::instruments::LOG_TRACING, OS_SIGNPOST_ID_EXCLUSIVE, m_zone_name); \
+@@ -246,6 +249,8 @@
+ 
+ // Tell the profiling backend that a new frame has started.
+ #define GodotProfileFrameMark
++// Add a textual profiler marker. m_message is UTF-8 and m_size excludes NUL.
++#define GodotProfileMessage(m_message, m_size)
+ // Defines a profile zone from here to the end of the scope.
+ #define GodotProfileZone(m_zone_name)
+ // Defines a profile zone group. The first profile zone starts immediately,
+--- a/core/string/print_string.cpp
++++ b/core/string/print_string.cpp
+@@ -32,6 +32,7 @@
+ 
+ #include "core/core_globals.h"
+ #include "core/os/os.h"
++#include "core/profiling/profiling.h"
+ 
+ #include <cstdio>
+ 
+@@ -80,6 +81,10 @@
+ void __print_line(const String &p_string) {
+ 	if (!CoreGlobals::print_line_enabled) {
+ 		return;
++	}
++	if (p_string.begins_with("ELORIA_CROWD_ENGINE_PROFILE ")) {
++		CharString marker = p_string.utf8();
++		GodotProfileMessage(marker.get_data(), marker.length());
+ 	}
+ 
+ 	if (!CoreGlobals::print_ready) {
+--- a/main/main.cpp
++++ b/main/main.cpp
+@@ -27,6 +27,10 @@
+ /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+ /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+ /**************************************************************************/
++
++#if defined(WINDOWS_ENABLED) && !defined(OVERRIDE_PATH_ENABLED)
++#define OVERRIDE_PATH_ENABLED
++#endif
+ 
+ #include "main.h"
+ 
+--- a/scene/animation/animation_mixer.cpp
++++ b/scene/animation/animation_mixer.cpp
+@@ -35,6 +35,7 @@
+ #include "core/config/project_settings.h"
+ #include "core/object/callable_mp.h"
+ #include "core/object/class_db.h"
++#include "core/profiling/profiling.h"
+ #include "core/string/string_name.h"
+ #include "scene/2d/audio_stream_player_2d.h"
+ #include "scene/animation/animation_player.h"
+@@ -1013,6 +1014,8 @@
+ /* -------------------------------------------- */
+ 
+ void AnimationMixer::_process_animation(double p_delta, bool p_update_only) {
++	GodotProfileZone("AnimationMixer::_process_animation");
++
+ 	_blend_init();
+ 	if (cache_valid && _blend_pre_process(p_delta, track_count, track_map)) {
+ 		_blend_capture(p_delta);
+@@ -1221,6 +1224,8 @@
+ }
+ 
+ void AnimationMixer::_blend_process(double p_delta, bool p_update_only) {
++	GodotProfileZone("AnimationMixer::_blend_process");
++
+ 	// Apply value/transform/blend/bezier blends to track caches and execute method/audio/animation tracks.
+ #ifdef TOOLS_ENABLED
+ 	bool can_call = is_inside_tree() && !Engine::get_singleton()->is_editor_hint();
+@@ -1900,6 +1905,8 @@
+ }
+ 
+ void AnimationMixer::_blend_apply() {
++	GodotProfileZone("AnimationMixer::_blend_apply");
++
+ 	// Finally, set the tracks.
+ 	for (const KeyValue<Animation::TrackCacheID, TrackCache *> &K : track_cache) {
+ 		TrackCache *track = K.value;
+--- a/scene/3d/skeleton_3d.cpp
++++ b/scene/3d/skeleton_3d.cpp
+@@ -33,6 +33,7 @@
+ 
+ #include "core/object/callable_mp.h"
+ #include "core/object/class_db.h"
++#include "core/profiling/profiling.h"
+ #include "scene/3d/skeleton_modifier_3d.h"
+ #if !defined(DISABLE_DEPRECATED) && !defined(PHYSICS_3D_DISABLED)
+ #include "scene/3d/physics/physical_bone_simulator_3d.h"
+@@ -312,6 +313,8 @@
+ 		} break;
+ #endif // TOOLS_ENABLED
+ 		case NOTIFICATION_UPDATE_SKELETON: {
++			GodotProfileZone("Skeleton3D::NOTIFICATION_UPDATE_SKELETON");
++
+ 			// Update bone transforms to apply unprocessed poses.
+ 			force_update_all_dirty_bones();
+ 
+@@ -347,11 +350,16 @@
+ 				return;
+ 			}
+ 
+-			emit_signal(SceneStringName(skeleton_updated));
++			{
++				GodotProfileZone("Skeleton3D::emit_skeleton_updated");
++				emit_signal(SceneStringName(skeleton_updated));
++			}
+ 
+ 			// Update skins.
+-			RenderingServer *rs = RenderingServer::get_singleton();
+-			for (SkinReference *E : skin_bindings) {
++			{
++				GodotProfileZone("Skeleton3D::update_skins");
++				RenderingServer *rs = RenderingServer::get_singleton();
++				for (SkinReference *E : skin_bindings) {
+ 				const Skin *skin = E->skin.operator->();
+ 				RID skeleton = E->skeleton;
+ 				uint32_t bind_count = skin->get_bind_count();
+@@ -404,6 +412,7 @@
+ 					ERR_CONTINUE(bone_index >= (uint32_t)len);
+ 					rs->skeleton_bone_set_transform(skeleton, i, bonesptr[bone_index].global_pose * skin->get_bind_pose(i));
+ 				}
++				}
+ 			}
+ 
+ 			if (!modifiers.is_empty()) {
+@@ -1071,6 +1080,8 @@
+ }
+ 
+ void Skeleton3D::_force_update_all_bone_transforms() const {
++	GodotProfileZone("Skeleton3D::_force_update_all_bone_transforms");
++
+ 	_update_process_order();
+ 	for (int i = 0; i < parentless_bones.size(); i++) {
+ 		_force_update_bone_children_transforms(parentless_bones[i]);
+@@ -1175,6 +1186,8 @@
+ }
+ 
+ void Skeleton3D::_process_modifiers() {
++	GodotProfileZone("Skeleton3D::_process_modifiers");
++
+ 	for (const ObjectID &oid : modifiers) {
+ 		Object *t_obj = ObjectDB::get_instance(oid);
+ 		if (!t_obj) {
+--- a/scene/main/scene_tree.cpp
++++ b/scene/main/scene_tree.cpp
+@@ -1175,6 +1175,8 @@
+ }
+ 
+ void SceneTree::_process_group(ProcessGroup *p_group, bool p_physics) {
++	GodotProfileZone("SceneTree::_process_group");
++
+ 	// When reading this function, keep in mind that this code must work in a way where
+ 	// if any node is removed, this needs to continue working.
+ 
+@@ -1242,6 +1244,8 @@
+ }
+ 
+ void SceneTree::_process(bool p_physics) {
++	GodotProfileZone("SceneTree::_process");
++
+ 	if (process_groups_dirty) {
+ 		{
+ 			// First, remove dirty groups.

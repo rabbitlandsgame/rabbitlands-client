@@ -1,0 +1,103 @@
+__pycache__/
+*.py[cod]
+godot-client/.godot/
+godot-client/test-artifacts/
+# Short Windows junction to the ignored engine-profile build, avoiding MAX_PATH.
+/ep/
+godot-client/**/*.import
+godot-client/**/*.uid
+godot-client/assets/actors/native/races/* *.png
+godot-client/assets/actors/native/hair/* *.png
+
+# macOS Specific
+.DS_Store
+.DS_Store?
+xcuserdata/
+
+# CLion workspace files
+.idea/
+
+# The Godot editor/runtime binary, kept beside the project for local runs. It
+# is 180 MB and must never enter a commit.
+godot-client/Godot_v*.exe
+godot-client/Godot_v*
+
+# Godot editor artefacts. The godot-client project is imported by CI
+# ("godot --headless --path godot-client --editor --quit"), which regenerates
+# all of these, so none of them belong in the tree.
+godot-client/.godot/
+*.import
+# Biome masks encode four independent numeric weights, including alpha.
+# Keep their import settings so Godot never bleeds RGB under zero alpha.
+!godot-client/assets/world/biome_blend/masks/*.png.import
+*.uid
+godot-client/assets/actors/native/creatures/*-basecolor.png
+godot-client/assets/actors/native/races/*Atlas.png
+godot-client/**/*.glb.report.json
+# Textures extracted by Godot from the self-contained Meshy storage GLB.
+godot-client/assets/world/interactives/storage_[0-9].jpg
+
+# Rendered test evidence. CI uploads it as a build artifact.
+godot-client/test-artifacts/
+
+# Validator reports written beside the map packages they describe.
+eloria-assets/maps/*/world.glb.report.json
+
+# VRAM-compressed sidecars of the shared map images, and their encode cache:
+# built by godot-client/tools/build_vram_textures.py at package time, never
+# tracked (the package stage gets its own copy).
+eloria-assets/maps/**/shared-assets/vram/
+/.vram-encode-cache/
+# The tool's per-image quality numbers (also beside the committed test sidecars).
+**/shared-assets/vram/report.json
+
+# The Godot editor/runtime binary. Sessions copy it into godot-client/ to run
+# the capture and client-check harnesses; at 172 MB it is over GitHub's file
+# size limit and must never be committed.
+godot-client/Godot_v*.exe
+
+# Generated beside strings.csv by the CSV translation importer.
+godot-client/**/*.translation
+
+# T-pose pipeline snapshots, intermediate models and render evidence.
+/tpose-body-build/
+# Textures extracted by Godot while importing self-contained body GLBs.
+godot-client/assets/actors/native/races/*_texture_0.png
+godot-client/assets/actors/native/races/*_wardrobe_grey.png
+godot-client/assets/actors/native/races/*_base_color.jpg
+godot-client/assets/actors/native/races/*_metallic_roughness.jpg
+godot-client/assets/actors/native/races/*_normal.jpg
+godot-client/assets/actors/native/races/*_[0-9].png
+godot-client/assets/actors/native/equipment/*_[0-9].png
+godot-client/assets/actors/native/equipment/*_[0-9].jpg
+
+# Additional textures extracted by Godot 4.7 from the embedded actor GLBs.
+# Keep these generated sidecars beside the imports without staging them.
+godot-client/assets/actors/native/**/*_base_color.jpg
+godot-client/assets/actors/native/**/*_basecolor.jpg
+godot-client/assets/actors/native/**/*_normal.jpg
+godot-client/assets/actors/native/**/*_metallic_roughness.jpg
+godot-client/assets/actors/native/**/*_Image_0.jpg
+godot-client/assets/actors/native/creatures/*_base_color_[0-9].jpg
+godot-client/assets/actors/native/creatures/*_metallic_roughness_[0-9].jpg
+godot-client/assets/actors/native/creatures/*_normal_[0-9].jpg
+godot-client/assets/actors/native/races/*_[0-9].jpg
+godot-client/assets/actors/native/races/*_texture_0.jpg
+godot-client/assets/actors/native/races/luminous_*_basecolor.png
+godot-client/assets/actors/native/hair/**/*_Native Hair * Base Color.jpg
+godot-client/assets/actors/native/hair/**/*_Native Hair * Normal.jpg
+
+# pytest caches (any directory)
+.pytest_cache/
+
+# Native crowd prototype outputs and its fetched, pinned godot-cpp checkout.
+# Source and build metadata live in godot-client/native/native_crowd; generated
+# binaries are copied into the project only for an explicit benchmark run.
+godot-client/native/native_crowd/build/
+godot-client/native/native_crowd/.deps/
+godot-client/bin/native_crowd*
+godot-client/bin/**/native_crowd*
+
+# A checkout's own project-settings override. The continent-v2 viewer launcher and the editor-pass runners
+# write godot-client/override.cfg to bind the v2 territory catalog there (serve plan CV12a).
+godot-client/override.cfg

@@ -1,0 +1,104 @@
+{
+  "server": {
+    "passed": 1809,
+    "subtestsPassed": 546
+  },
+  "client": {
+    "passed": 199,
+    "preExistingFailures": 88,
+    "subtestsPassed": 9296,
+    "failureIdentitiesUnchanged": true
+  },
+  "gltf": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "coplanarOverlapSquareMetres": 0,
+  "grounding": {
+    "walkableTiles": 3637,
+    "groundingMisses": 0,
+    "coverage": "Every walkable server tile checked against the exported GLB; both branches, every gate and the vault checked by the route contract."
+  },
+  "runtime": {
+    "errors": 0,
+    "warnings": [
+      "GROUNDING_RAY_MISS"
+    ],
+    "warningContext": "The sampler includes the blocked void around the interior rooms."
+  },
+  "determinism": {
+    "world.glb": {
+      "identical": true,
+      "sha256": "c3a2798566998053684eca8af5bd081ed362993a0c1f646153477f09af7c9a1f"
+    },
+    "world.json": {
+      "identical": true,
+      "sha256": "083abb42637e2fd266ed881fa86a41dcc718ea63f7cd01a3eac35c81d128741b"
+    },
+    "collision.bin": {
+      "identical": true,
+      "sha256": "efe88a5eb2d4187987864e535a5a0141bada8e493ec1601c9f70401325bf8e1c"
+    },
+    "server-collision.bin": {
+      "identical": true,
+      "sha256": "0cad25b64325fb6de8d83b082f3f283815d660901084dcc4d1fa26b64a7371af"
+    }
+  },
+  "materialMigration": {
+    "textureArraysIdentical": 18,
+    "materialSpecsIdentical": true,
+    "defaultFullSizeSha256": {
+      "crownwater_marble": {
+        "base_color": "a878778366db70fbdc21060b61c4a2af589654b3ed43e4c4d478b4a04a44f83a",
+        "orm": "6382e8e9918c1a91de021768ee8d99a4434b9987f392aceae61bf6b61c6d1b98",
+        "normal": "1ba7e86e897a7bdac74ce213a81e91e61e15e3cc10758ae5b0eaa2bbf629f5e1"
+      },
+      "crownwater_verdigris": {
+        "base_color": "32ebf2ba3eb5dbb84dfa9d6dd5446e4e06a7b5a6061c3078b0ef246281295d76",
+        "orm": "35ac4c41698cf272e5158e7c3a808755468fd0a4aa7d153af8c4b39b69e60cb1",
+        "normal": "42eba04018947154de797c9af7ff4aa9497524f65e418fe93c4b11f519137c9c"
+      },
+      "crownwater_gilt": {
+        "base_color": "40cf87a89fa3ef4be487c20414f05f9c827a155dbb63874b3bf44d7a38fb5f94",
+        "orm": "31a925ae5260214bcd67530383a667c706964bb1cde00da8a571528d0ff7b153",
+        "normal": "cbe1bd269b869c01eefc5e24f144364a153cb194713edee5a58088be8df4befd"
+      },
+      "crownwater_mosaic": {
+        "base_color": "a2b1a4a310e51d08c9ba9f7c778b206290b7e781b97998aeebeb0a3cee22ebf4",
+        "orm": "17aa7ee8340754080d1e7f068728b76c68dc4f5e5615c11aab47ca0ea786b838",
+        "normal": "2a2b375a60ea88f241004b6d02ecbda821851a4c0d877551e707c77df50c169c"
+      },
+      "crownwater_sand": {
+        "base_color": "f688d5ada15e7de0d361ad83edd71cef280762bcc9aa61451952612c8590d996",
+        "orm": "0a7f935e9971f5ffbcd1146765b65e3adea392e9e4e7011dc99c01c41e8aee96",
+        "normal": "ce8610ae46a54f05ba2de4bab465c416c384ba655dde21123f5857aeb6d312b7"
+      },
+      "crownwater_lagoon_water": {
+        "base_color": "45acb1c88db1196296786da804c055ac8dec2178c749567bdf615d1a6a223b63",
+        "orm": "97ba5a76470f4ba11c3b485fa3b786fd843456a7b5d99e17dd6d59d2f8b5f62a",
+        "normal": "e624ba2ffda63d6b2c49713eb8114dad339ca2d92d9479908b24b2129b08cdea"
+      }
+    }
+  },
+  "performance": {
+    "nodes": 286,
+    "meshes": 256,
+    "materials": 12,
+    "uniqueTriangles": 64393,
+    "uniqueVertices": 65418,
+    "glbBytes": 7412640
+  },
+  "captures": {
+    "count": 22,
+    "renderingMethod": "gl_compatibility",
+    "driver": "opengl3",
+    "environment": "manifest",
+    "declaredPointLights": 61
+  },
+  "layoutSync": {
+    "secondRunChangedFiles": 0,
+    "publishedRulesAndRosterPreserved": true,
+    "otherRoutesUnchanged": true
+  },
+  "cpuAffinityMask": 15
+}

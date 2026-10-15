@@ -1,0 +1,1335 @@
+# Original Eloria testing maps.
+map | lantern_reach | Lantern Reach | maps/lantern_reach.elm | LR
+map | bellwatch | Bellwatch | maps/bellwatch.elm | BW
+map | emberhaven | Emberhaven | maps/emberhaven.elm | EH
+map | glasswind | Glasswind Expanse | maps/glasswind.elm | GW
+map | frostmere | Frostmere Shelf | maps/frostmere.elm | FM
+map | mirefen | Mirefen Basin | maps/mirefen.elm | MF
+map | verdant_reach | Verdant Reach | maps/verdant_reach.elm | VR
+map | cinder_wastes | Cinder Wastes | maps/cinder_wastes.elm | CW
+
+# Original Nymara exterior maps. `file` is this server's own height map,
+# written by tools/generate_nymara_maps.py; the client is told the map id.
+map | mirrorhold | Mirrorhold | maps/nymara/mirrorhold.elm | MH
+map | crownwater | Crownwater | maps/nymara/crownwater.elm | CR
+map | four_gates | Four Gates | maps/nymara/four_gates.elm | FG
+map | four-gates-lantern-row | Lantern Row | maps/nymara/four-gates-lantern-row.elm | FGL
+map | four-gates-reedworks | The Reedworks | maps/nymara/four-gates-reedworks.elm | FGR
+map | four-gates-stormglass-house | The Stormglass House | maps/nymara/four-gates-stormglass-house.elm | FGH
+map | four-gates-mirrorsmith-forge | Mirrorsmith's Forge | maps/nymara/four-gates-mirrorsmith-forge.elm | FGF
+map | four-gates-ferrymans-rest | The Ferryman's Rest | maps/nymara/four-gates-ferrymans-rest.elm | FGI
+map | four-gates-deposit-four-keys | The Deposit of Four Keys | maps/nymara/four-gates-deposit-four-keys.elm | FGK
+map | whitehorn_range | Whitehorn Range | maps/nymara/whitehorn_range.elm | WR
+map | amethyst_barrens | Amethyst Barrens | maps/nymara/amethyst_barrens.elm | AB
+map | sunmane_steppe | Sunmane Steppe | maps/nymara/sunmane_steppe.elm | SS
+map | amberwood | Amberwood | maps/nymara/amberwood.elm | AW
+map | grey_moors | Grey Moors | maps/nymara/grey_moors.elm | GM
+map | westhaven | Westhaven | maps/nymara/westhaven.elm | WH
+map | verdant_stair | Verdant Stair | maps/nymara/verdant_stair.elm | VS
+map | verdant_stair_insides | Verdant Stair Insides | maps/nymara/verdant_stair_insides.elm | VI
+map | ssarathi_ruins | Ssarathi Ruins | maps/nymara/ssarathi_ruins.elm | SR
+map | manymouth_delta | Manymouth Delta | maps/nymara/manymouth_delta.elm | MD
+
+# Original Nymara landmark interiors.
+map | drowned_crown | Crownwater Insides | maps/nymara/drowned_crown.elm | DC
+map | whitehorn_glacier_temple | Whitehorn Glacier Temple | maps/nymara/whitehorn_glacier_temple.elm | WGT
+map | resonant_vault | Amethyst Barrens Insides | maps/nymara/resonant_vault.elm | RV
+map | amberwood_estate | Amberwood Estate | maps/nymara/amberwood_estate.elm | AE
+map | grey_moor_barrows | Grey Moor Barrows | maps/nymara/grey_moor_barrows.elm | GMB
+map | ssarathi_royal_archive | Ssarathi Royal Archive | maps/nymara/ssarathi_royal_archive.elm | SRA
+map | westhaven_insides | Westhaven Insides | maps/nymara/westhaven_insides.elm | WHI
+map | ssarathi_royal_archive | Ssarathi Insides | maps/nymara/ssarathi_royal_archive.elm | SRA
+map | manymouth_flooded_labyrinth | Manymouth Flooded Labyrinth | maps/nymara/manymouth_flooded_labyrinth.elm | MFL
+map | sunmane_wind_caves | Sunmane Insides | maps/nymara/sunmane_wind_caves.elm | SWC
+map | mirrorhold_interiors | Mirrorhold Interiors | maps/nymara/mirrorhold_interiors.elm | MI
+# One secrets map per exterior: the hidden rooms a region keeps behind its
+# scenery, entered by using a feature of the ground (see CONTINENT.md).
+map | amberwood_secrets | Amberwood Secrets | maps/nymara/amberwood_secrets.elm | AWS
+map | mirrorhold_secrets | Mirrorhold Secrets | maps/nymara/mirrorhold_secrets.elm | MHS
+map | amethyst_barrens_secrets | Amethyst Barrens Secrets | maps/nymara/amethyst_barrens_secrets.elm | ABS
+map | crownwater_secrets | Crownwater Secrets | maps/nymara/crownwater_secrets.elm | CWS
+map | westhaven_secrets | Westhaven Secrets | maps/nymara/westhaven_secrets.elm | WHS
+map | grey_moors_secrets | Grey Moors Secrets | maps/nymara/grey_moors_secrets.elm | GMS
+map | manymouth_delta_secrets | Manymouth Delta Secrets | maps/nymara/manymouth_delta_secrets.elm | MDS
+map | verdant_stair_secrets | Verdant Stair Secrets | maps/nymara/verdant_stair_secrets.elm | VSS
+map | whitehorn_range_secrets | Whitehorn Range Secrets | maps/nymara/whitehorn_range_secrets.elm | WRS
+map | ssarathi_ruins_secrets | Ssarathi Ruins Secrets | maps/nymara/ssarathi_ruins_secrets.elm | SRS
+map | sunmane_steppe_secrets | Sunmane Steppe Secrets | maps/nymara/sunmane_steppe_secrets.elm | SSS
+map | four_gates_secrets | Four Gates Secrets | maps/nymara/four_gates_secrets.elm | FGS
+
+# Bootstrap-region graph. Arrivals are offset from trigger tiles.
+portal | emberhaven | 94 | 58 | glasswind | 58 | 58
+portal | glasswind | 24 | 58 | emberhaven | 58 | 58
+portal | glasswind | 94 | 58 | cinder_wastes | 58 | 58
+portal | cinder_wastes | 24 | 58 | glasswind | 58 | 58
+portal | emberhaven | 58 | 94 | frostmere | 56 | 58
+portal | frostmere | 58 | 24 | emberhaven | 58 | 58
+portal | emberhaven | 24 | 58 | mirefen | 58 | 58
+portal | mirefen | 94 | 58 | emberhaven | 58 | 58
+portal | mirefen | 24 | 58 | verdant_reach | 58 | 58
+portal | verdant_reach | 94 | 58 | mirefen | 58 | 58
+
+# Bridge between the bootstrap regions and the independently generated Nymara graph.
+portal | emberhaven | 58 | 24 | mirrorhold | 40 | 18
+portal | mirrorhold | 40 | 18 | emberhaven | 58 | 26
+
+# Every other Nymara portal - the crossings between regions and the doors into
+# their insides maps - is derived from the client packages by
+# eloria-assets/tools/continent_portals.py and written between the markers
+# below. Edit the packages or region-connections.json, not this file.
+
+# Sunmane cave transitions transcribed from server-integration.md.
+# Sunmane's two cave systems share one map with blackspace between them:
+# sunmane_wind_caves.elm carries both and the section is chosen by which mouth
+# was used, so there is one portal pair per door rather than one per system.
+# Same shape as crownwater's drowned_crown and ssarathi's royal archive.
+#
+# This retires sunmane_crystal_hollow as a served map. Both mouths on the
+# steppe keep the tiles they always had; only their destination changes. The
+# arrival tiles are taken from the built package rather than scaled by hand.
+
+# --- Nymara exterior crossings: written by eloria-assets/tools/continent_portals.py ---
+# One line per direction of every link in region-connections.json. The
+# trigger is the package's portal tile; the arrival is the first tile a
+# player can stand on, two or more tiles in from the far portal, so a
+# crossing never lands anyone back on the tile that sent them.
+
+# whitehorn_range <-> mirrorhold (walk): the pilgrim road down from the Whitehorn Gate to the citadel's north pass
+
+# whitehorn_range <-> amberwood (walk): the ice-cave pass west into the autumn woods
+
+# whitehorn_range <-> amethyst_barrens (walk): the mine road east over the saddle into the barrens
+
+# mirrorhold <-> four_gates (walk): the shore road to the sanctuary stair on the north causeway
+
+# mirrorhold <-> amethyst_barrens (walk): the Glasswarden road along the lake's north shore
+
+# mirrorhold <-> amberwood (walk): the gorge road west into the burnt country
+
+# mirrorhold <-> crownwater (ferry): the Crownwater packet from the citadel's harbour
+
+# amethyst_barrens <-> sunmane_steppe (walk): the Sunmane track down through the desert and the badlands
+
+# amethyst_barrens <-> crownwater (ferry): the Crownwater packet from the barrens' east landing
+
+# sunmane_steppe <-> four_gates (causeway): the east causeway of Four Gates lands on the steppe shore
+
+# sunmane_steppe <-> verdant_stair (walk): the shore road south over the ridge into the jungle
+
+# verdant_stair <-> ssarathi_ruins (walk): the quay road west along the coast to the temple causeway
+
+# ssarathi_ruins <-> four_gates (walk): the south causeway of Four Gates lands at the temple stair
+
+# ssarathi_ruins <-> manymouth_delta (walk): the west causeway runs out onto the delta's east bar
+
+# ssarathi_ruins <-> crownwater (ferry): the temple boat to the Crown court
+
+# manymouth_delta <-> crownwater (ferry): the packet up the main channel to the lake
+
+# manymouth_delta <-> grey_moors (walk): the drain track up onto the moor
+
+# manymouth_delta <-> westhaven (walk): the coast road west to the haven
+
+# westhaven <-> grey_moors (walk): the upland road onto the moor
+
+# westhaven <-> crownwater (ferry): the Crownwater packet from the west quay
+
+# westhaven <-> amberwood (ferry): the Greyhaven packet up the coast to the Amberwood harbour
+
+# grey_moors <-> crownwater (ferry): the moor jetty's boat to the lake islands
+
+# grey_moors <-> amberwood (walk): the north track off the moor into the woods
+
+# four_gates <-> crownwater (causeway): the west causeway of Four Gates lands on the Crownwater islets
+
+# --- the doors: one pair per door a region declares into its insides map ---
+# The region's door tile lands on the insides arrival the door names, and
+# that arrival tile - where the insides package puts its return portal -
+# lands two tiles from the door outside. Combined insides maps carry every
+# section of a region on one map; which section you get is which door you
+# used.
+
+# amethyst_barrens <-> resonant_vault (7 doors)
+
+# grey_moors <-> grey_moor_barrows (7 doors)
+
+# westhaven <-> westhaven_insides (7 doors)
+
+# verdant_stair <-> verdant_stair_insides (7 doors)
+
+# manymouth_delta <-> manymouth_flooded_labyrinth (8 doors)
+
+# whitehorn_range <-> whitehorn_glacier_temple (7 doors)
+
+# ssarathi_ruins <-> ssarathi_royal_archive (7 doors)
+
+# crownwater <-> drowned_crown (7 doors)
+
+# mirrorhold <-> mirrorhold_interiors (3 doors)
+
+# amberwood <-> amberwood_estate (4 doors)
+
+# --- the secrets: use-to-enter doors bound to their objects ---
+# `portal | map | object | x | y | dest | ax | ay`: a portal with an object
+# id fires only for the player who used that object, so a secret stays
+# secret from anyone walking over its tile. Written from the packages by
+# eloria-assets/tools/secret_doors.py; the same tool numbers the objects
+# the content tool declares in interactives.txt.
+
+# amberwood: 15 entrances
+
+# amethyst_barrens: 13 entrances
+
+# crownwater: 13 entrances
+
+# drowned_crown: 1 entrances
+
+# four_gates: 14 entrances
+
+# grey_moor_barrows: 1 entrances
+
+# grey_moors: 15 entrances
+
+# manymouth_delta: 14 entrances
+
+# manymouth_flooded_labyrinth: 1 entrances
+
+# mirrorhold: 14 entrances
+
+# mirrorhold_interiors: 1 entrances
+
+# resonant_vault: 1 entrances
+
+# ssarathi_royal_archive: 1 entrances
+
+# ssarathi_ruins: 14 entrances
+
+# sunmane_steppe: 14 entrances
+
+# verdant_stair: 13 entrances
+
+# verdant_stair_insides: 1 entrances
+
+# westhaven: 14 entrances
+
+# westhaven_insides: 1 entrances
+
+# whitehorn_glacier_temple: 1 entrances
+
+# whitehorn_range: 14 entrances
+
+# amberwood_secrets: exits and links
+
+# amethyst_barrens_secrets: exits and links
+
+# crownwater_secrets: exits and links
+
+# four_gates_secrets: exits and links
+
+# grey_moors_secrets: exits and links
+
+# manymouth_delta_secrets: exits and links
+
+# mirrorhold_secrets: exits and links
+
+# ssarathi_ruins_secrets: exits and links
+
+# sunmane_steppe_secrets: exits and links
+
+# verdant_stair_secrets: exits and links
+
+# westhaven_secrets: exits and links
+
+# whitehorn_range_secrets: exits and links
+
+portal | four_gates | 128 | 172 | four-gates-deposit-four-keys | 12 | 10
+portal | four-gates-deposit-four-keys | 12 | 7 | four_gates | 131 | 172
+portal | four_gates | 124 | 249 | four-gates-ferrymans-rest | 15 | 13
+portal | four-gates-ferrymans-rest | 15 | 10 | four_gates | 127 | 249
+portal | four_gates | 168 | 135 | four-gates-lantern-row | 18 | 16
+portal | four-gates-lantern-row | 18 | 13 | four_gates | 168 | 139
+portal | four_gates | 258 | 284 | four-gates-mirrorsmith-forge | 12 | 10
+portal | four-gates-mirrorsmith-forge | 12 | 7 | four_gates | 258 | 281
+portal | four_gates | 267 | 136 | four-gates-reedworks | 15 | 13
+portal | four-gates-reedworks | 15 | 10 | four_gates | 267 | 140
+portal | four_gates | 148 | 282 | four-gates-stormglass-house | 12 | 11
+portal | four-gates-stormglass-house | 12 | 8 | four_gates | 148 | 280
+portal | four_gates | 500 | 184 | 186 | four_gates_secrets | 83 | 97
+portal | four_gates | 501 | 127 | 162 | four_gates_secrets | 83 | 25
+portal | four_gates | 503 | 123 | 235 | four_gates_secrets | 7 | 169
+portal | four_gates | 504 | 175 | 136 | four_gates_secrets | 10 | 25
+portal | four_gates | 505 | 246 | 283 | four_gates_secrets | 300 | 169
+portal | four_gates | 506 | 336 | 69 | four_gates_secrets | 229 | 169
+portal | four_gates | 507 | 219 | 192 | four_gates_secrets | 227 | 97
+portal | four_gates | 508 | 277 | 135 | four_gates_secrets | 158 | 169
+portal | four_gates | 509 | 103 | 353 | four_gates_secrets | 298 | 97
+portal | four_gates | 510 | 156 | 282 | four_gates_secrets | 156 | 97
+portal | four_gates | 511 | 287 | 166 | four_gates_secrets | 87 | 169
+portal | four_gates | 512 | 309 | 240 | four_gates_secrets | 153 | 25
+portal | four_gates | 513 | 210 | 144 | four_gates_secrets | 12 | 97
+portal | four_gates_secrets | 87 | 169 | four_gates | 287 | 166
+portal | four_gates_secrets | 158 | 169 | four_gates | 277 | 135
+portal | four_gates_secrets | 10 | 25 | four_gates | 175 | 136
+portal | four_gates_secrets | 83 | 25 | four_gates | 127 | 162
+portal | four_gates_secrets | 229 | 169 | four_gates | 336 | 69
+portal | four_gates_secrets | 156 | 97 | four_gates | 156 | 282
+portal | four_gates_secrets | 227 | 97 | four_gates | 219 | 192
+portal | four_gates_secrets | 7 | 169 | four_gates | 123 | 235
+portal | four_gates_secrets | 298 | 97 | four_gates | 103 | 353
+portal | four_gates_secrets | 300 | 169 | four_gates | 246 | 283
+portal | four_gates_secrets | 83 | 97 | four_gates | 184 | 186
+portal | four_gates_secrets | 12 | 97 | four_gates | 210 | 144
+portal | four_gates_secrets | 153 | 25 | four_gates | 309 | 240
+portal | sunmane_steppe | 2 | 160 | four_gates | 405 | 169
+portal | sunmane_steppe | 2 | 161 | four_gates | 405 | 170
+portal | sunmane_steppe | 2 | 162 | four_gates | 405 | 171
+portal | sunmane_steppe | 2 | 163 | four_gates | 405 | 172
+portal | sunmane_steppe | 2 | 164 | four_gates | 405 | 173
+portal | sunmane_steppe | 2 | 165 | four_gates | 405 | 174
+portal | sunmane_steppe | 2 | 166 | four_gates | 405 | 175
+portal | four_gates | 407 | 175 | sunmane_steppe | 4 | 166
+portal | four_gates | 407 | 174 | sunmane_steppe | 4 | 165
+portal | four_gates | 407 | 173 | sunmane_steppe | 4 | 164
+portal | four_gates | 407 | 172 | sunmane_steppe | 4 | 163
+portal | four_gates | 407 | 171 | sunmane_steppe | 4 | 162
+portal | four_gates | 407 | 170 | sunmane_steppe | 4 | 161
+portal | four_gates | 407 | 169 | sunmane_steppe | 4 | 160
+portal | sunmane_steppe | 330 | 282 | sunmane_wind_caves | 169 | 28
+portal | sunmane_wind_caves | 169 | 28 | sunmane_steppe | 327 | 283
+portal | sunmane_steppe | 247 | 303 | sunmane_wind_caves | 43 | 27
+portal | sunmane_wind_caves | 43 | 27 | sunmane_steppe | 247 | 300
+portal | sunmane_steppe | 500 | 163 | 73 | sunmane_steppe_secrets | 83 | 97
+portal | sunmane_steppe | 501 | 108 | 217 | sunmane_steppe_secrets | 298 | 97
+portal | sunmane_steppe | 502 | 48 | 99 | sunmane_steppe_secrets | 156 | 97
+portal | sunmane_steppe | 503 | 130 | 284 | sunmane_steppe_secrets | 153 | 25
+portal | sunmane_steppe | 504 | 285 | 313 | sunmane_steppe_secrets | 229 | 169
+portal | sunmane_steppe | 505 | 111 | 127 | sunmane_steppe_secrets | 83 | 25
+portal | sunmane_steppe | 506 | 179 | 74 | sunmane_steppe_secrets | 10 | 25
+portal | sunmane_steppe | 507 | 62 | 256 | sunmane_steppe_secrets | 7 | 169
+portal | sunmane_steppe | 509 | 69 | 268 | sunmane_steppe_secrets | 87 | 169
+portal | sunmane_steppe | 510 | 149 | 63 | sunmane_steppe_secrets | 227 | 97
+portal | sunmane_steppe | 511 | 61 | 198 | sunmane_steppe_secrets | 300 | 169
+portal | sunmane_steppe | 512 | 238 | 153 | sunmane_steppe_secrets | 12 | 97
+portal | sunmane_steppe | 513 | 76 | 66 | sunmane_steppe_secrets | 158 | 169
+portal | four_gates_secrets | 17 | 80 | sunmane_steppe_secrets | 12 | 97
+portal | sunmane_steppe_secrets | 87 | 169 | sunmane_steppe | 69 | 268
+portal | sunmane_steppe_secrets | 158 | 169 | sunmane_steppe | 76 | 66
+portal | sunmane_steppe_secrets | 10 | 25 | sunmane_steppe | 179 | 74
+portal | sunmane_steppe_secrets | 83 | 25 | sunmane_steppe | 111 | 127
+portal | sunmane_steppe_secrets | 229 | 169 | sunmane_steppe | 285 | 313
+portal | sunmane_steppe_secrets | 156 | 97 | sunmane_steppe | 48 | 99
+portal | sunmane_steppe_secrets | 227 | 97 | sunmane_steppe | 149 | 63
+portal | sunmane_steppe_secrets | 7 | 169 | sunmane_steppe | 62 | 256
+portal | sunmane_steppe_secrets | 298 | 97 | sunmane_steppe | 108 | 217
+portal | sunmane_steppe_secrets | 300 | 169 | sunmane_steppe | 61 | 198
+portal | sunmane_steppe_secrets | 83 | 97 | sunmane_steppe | 163 | 73
+portal | sunmane_steppe_secrets | 12 | 97 | sunmane_steppe | 238 | 153
+portal | sunmane_steppe_secrets | 13 | 83 | four_gates_secrets | 12 | 97
+portal | sunmane_steppe_secrets | 153 | 25 | sunmane_steppe | 130 | 284
+portal | sunmane_steppe | 293 | 2 | verdant_stair | 133 | 363
+portal | sunmane_steppe | 292 | 2 | verdant_stair | 132 | 363
+portal | sunmane_steppe | 291 | 2 | verdant_stair | 131 | 363
+portal | sunmane_steppe | 290 | 2 | verdant_stair | 130 | 363
+portal | sunmane_steppe | 289 | 2 | verdant_stair | 129 | 363
+portal | sunmane_steppe | 288 | 2 | verdant_stair | 128 | 363
+portal | sunmane_steppe | 287 | 2 | verdant_stair | 127 | 363
+portal | verdant_stair | 127 | 365 | sunmane_steppe | 287 | 4
+portal | verdant_stair | 128 | 365 | sunmane_steppe | 288 | 4
+portal | verdant_stair | 129 | 365 | sunmane_steppe | 289 | 4
+portal | verdant_stair | 130 | 365 | sunmane_steppe | 290 | 4
+portal | verdant_stair | 131 | 365 | sunmane_steppe | 291 | 4
+portal | verdant_stair | 132 | 365 | sunmane_steppe | 292 | 4
+portal | verdant_stair | 133 | 365 | sunmane_steppe | 293 | 4
+portal | verdant_stair | 27 | 223 | verdant_stair_insides | 305 | 276
+portal | verdant_stair_insides | 305 | 276 | verdant_stair | 25 | 223
+portal | verdant_stair | 62 | 195 | verdant_stair_insides | 47 | 108
+portal | verdant_stair_insides | 47 | 108 | verdant_stair | 60 | 195
+portal | verdant_stair | 107 | 181 | verdant_stair_insides | 197 | 282
+portal | verdant_stair_insides | 197 | 282 | verdant_stair | 107 | 179
+portal | verdant_stair | 250 | 29 | verdant_stair_insides | 305 | 192
+portal | verdant_stair_insides | 305 | 192 | verdant_stair | 248 | 29
+portal | verdant_stair | 92 | 115 | verdant_stair_insides | 305 | 141
+portal | verdant_stair_insides | 305 | 141 | verdant_stair | 90 | 115
+portal | verdant_stair | 292 | 241 | verdant_stair_insides | 167 | 106
+portal | verdant_stair_insides | 167 | 106 | verdant_stair | 290 | 241
+portal | verdant_stair | 261 | 234 | verdant_stair_insides | 47 | 284
+portal | verdant_stair_insides | 47 | 284 | verdant_stair | 259 | 234
+portal | verdant_stair | 500 | 141 | 158 | verdant_stair_secrets | 159 | 170
+portal | verdant_stair | 501 | 105 | 199 | verdant_stair_secrets | 84 | 98
+portal | verdant_stair | 502 | 309 | 281 | verdant_stair_secrets | 6 | 170
+portal | verdant_stair | 503 | 254 | 136 | verdant_stair_secrets | 230 | 170
+portal | verdant_stair | 504 | 138 | 113 | verdant_stair_secrets | 300 | 98
+portal | verdant_stair | 505 | 214 | 106 | verdant_stair_secrets | 79 | 170
+portal | verdant_stair | 506 | 281 | 267 | verdant_stair_secrets | 301 | 170
+portal | verdant_stair | 507 | 328 | 234 | verdant_stair_secrets | 82 | 26
+portal | verdant_stair | 508 | 283 | 302 | verdant_stair_secrets | 297 | 26
+portal | verdant_stair | 509 | 257 | 270 | verdant_stair_secrets | 227 | 98
+portal | verdant_stair | 510 | 268 | 259 | verdant_stair_secrets | 227 | 26
+portal | verdant_stair | 511 | 188 | 179 | verdant_stair_secrets | 11 | 26
+portal | verdant_stair | 512 | 243 | 160 | verdant_stair_secrets | 156 | 98
+portal | verdant_stair_insides | 500 | 130 | 59 | verdant_stair_secrets | 154 | 26
+portal | sunmane_steppe_secrets | 13 | 71 | verdant_stair_secrets | 156 | 98
+portal | verdant_stair_secrets | 159 | 170 | verdant_stair | 141 | 158
+portal | verdant_stair_secrets | 230 | 170 | verdant_stair | 254 | 136
+portal | verdant_stair_secrets | 154 | 26 | verdant_stair_insides | 130 | 59
+portal | verdant_stair_secrets | 227 | 26 | verdant_stair | 268 | 259
+portal | verdant_stair_secrets | 301 | 170 | verdant_stair | 281 | 267
+portal | verdant_stair_secrets | 300 | 98 | verdant_stair | 138 | 113
+portal | verdant_stair_secrets | 11 | 26 | verdant_stair | 188 | 179
+portal | verdant_stair_secrets | 79 | 170 | verdant_stair | 214 | 106
+portal | verdant_stair_secrets | 82 | 26 | verdant_stair | 328 | 234
+portal | verdant_stair_secrets | 84 | 98 | verdant_stair | 105 | 199
+portal | verdant_stair_secrets | 227 | 98 | verdant_stair | 257 | 270
+portal | verdant_stair_secrets | 6 | 170 | verdant_stair | 309 | 281
+portal | verdant_stair_secrets | 156 | 98 | verdant_stair | 243 | 160
+portal | verdant_stair_secrets | 157 | 84 | sunmane_steppe_secrets | 12 | 97
+portal | verdant_stair_secrets | 297 | 26 | verdant_stair | 283 | 302
+portal | verdant_stair | 2 | 133 | ssarathi_ruins | 421 | 171
+portal | verdant_stair | 2 | 134 | ssarathi_ruins | 421 | 172
+portal | verdant_stair | 2 | 135 | ssarathi_ruins | 421 | 173
+portal | verdant_stair | 2 | 136 | ssarathi_ruins | 421 | 174
+portal | verdant_stair | 2 | 137 | ssarathi_ruins | 421 | 175
+portal | verdant_stair | 2 | 138 | ssarathi_ruins | 421 | 176
+portal | verdant_stair | 2 | 139 | ssarathi_ruins | 421 | 177
+portal | ssarathi_ruins | 423 | 177 | verdant_stair | 4 | 139
+portal | ssarathi_ruins | 423 | 176 | verdant_stair | 4 | 138
+portal | ssarathi_ruins | 423 | 175 | verdant_stair | 4 | 137
+portal | ssarathi_ruins | 423 | 174 | verdant_stair | 4 | 136
+portal | ssarathi_ruins | 423 | 173 | verdant_stair | 4 | 135
+portal | ssarathi_ruins | 423 | 172 | verdant_stair | 4 | 134
+portal | ssarathi_ruins | 423 | 171 | verdant_stair | 4 | 133
+portal | ssarathi_ruins | 180 | 394 | four_gates | 324 | 4
+portal | ssarathi_ruins | 181 | 394 | four_gates | 325 | 4
+portal | ssarathi_ruins | 182 | 394 | four_gates | 326 | 4
+portal | ssarathi_ruins | 183 | 394 | four_gates | 327 | 4
+portal | ssarathi_ruins | 184 | 394 | four_gates | 328 | 4
+portal | ssarathi_ruins | 185 | 394 | four_gates | 329 | 4
+portal | ssarathi_ruins | 186 | 394 | four_gates | 330 | 4
+portal | four_gates | 330 | 2 | ssarathi_ruins | 186 | 392
+portal | four_gates | 329 | 2 | ssarathi_ruins | 185 | 392
+portal | four_gates | 328 | 2 | ssarathi_ruins | 184 | 392
+portal | four_gates | 327 | 2 | ssarathi_ruins | 183 | 392
+portal | four_gates | 326 | 2 | ssarathi_ruins | 182 | 392
+portal | four_gates | 325 | 2 | ssarathi_ruins | 181 | 392
+portal | four_gates | 324 | 2 | ssarathi_ruins | 180 | 392
+portal | ssarathi_ruins | 217 | 240 | ssarathi_royal_archive | 27 | 288
+portal | ssarathi_royal_archive | 27 | 288 | ssarathi_ruins | 215 | 240
+portal | ssarathi_ruins | 73 | 160 | ssarathi_royal_archive | 41 | 69
+portal | ssarathi_royal_archive | 41 | 69 | ssarathi_ruins | 71 | 160
+portal | ssarathi_ruins | 271 | 202 | ssarathi_royal_archive | 189 | 281
+portal | ssarathi_royal_archive | 189 | 281 | ssarathi_ruins | 271 | 200
+portal | ssarathi_ruins | 203 | 131 | ssarathi_royal_archive | 267 | 126
+portal | ssarathi_royal_archive | 267 | 126 | ssarathi_ruins | 201 | 131
+portal | ssarathi_ruins | 121 | 199 | ssarathi_royal_archive | 267 | 289
+portal | ssarathi_royal_archive | 267 | 289 | ssarathi_ruins | 119 | 199
+portal | ssarathi_ruins | 291 | 56 | ssarathi_royal_archive | 185 | 63
+portal | ssarathi_royal_archive | 185 | 63 | ssarathi_ruins | 289 | 56
+portal | ssarathi_ruins | 193 | 81 | ssarathi_royal_archive | 267 | 217
+portal | ssarathi_royal_archive | 267 | 217 | ssarathi_ruins | 191 | 81
+portal | ssarathi_royal_archive | 500 | 29 | 174 | ssarathi_ruins_secrets | 227 | 26
+portal | ssarathi_ruins | 500 | 77 | 171 | ssarathi_ruins_secrets | 84 | 98
+portal | ssarathi_ruins | 501 | 143 | 362 | verdant_stair_secrets | 6 | 106
+portal | ssarathi_ruins | 502 | 338 | 315 | ssarathi_ruins_secrets | 11 | 26
+portal | ssarathi_ruins | 503 | 181 | 137 | ssarathi_ruins_secrets | 154 | 26
+portal | ssarathi_ruins | 504 | 272 | 201 | ssarathi_ruins_secrets | 301 | 170
+portal | ssarathi_ruins | 505 | 111 | 212 | ssarathi_ruins_secrets | 230 | 170
+portal | ssarathi_ruins | 506 | 317 | 30 | ssarathi_ruins_secrets | 159 | 170
+portal | ssarathi_ruins | 507 | 271 | 189 | ssarathi_ruins_secrets | 300 | 98
+portal | ssarathi_ruins | 508 | 304 | 30 | ssarathi_ruins_secrets | 6 | 170
+portal | ssarathi_ruins | 509 | 89 | 234 | ssarathi_ruins_secrets | 79 | 170
+portal | ssarathi_ruins | 510 | 346 | 196 | ssarathi_ruins_secrets | 297 | 26
+portal | ssarathi_ruins | 511 | 305 | 258 | ssarathi_ruins_secrets | 82 | 26
+portal | ssarathi_ruins | 512 | 179 | 238 | ssarathi_ruins_secrets | 227 | 98
+portal | ssarathi_ruins | 513 | 204 | 173 | ssarathi_ruins_secrets | 156 | 98
+portal | four_gates_secrets | 17 | 75 | ssarathi_ruins_secrets | 156 | 98
+portal | ssarathi_ruins_secrets | 159 | 170 | ssarathi_ruins | 317 | 30
+portal | ssarathi_ruins_secrets | 230 | 170 | ssarathi_ruins | 111 | 212
+portal | ssarathi_ruins_secrets | 154 | 26 | ssarathi_ruins | 181 | 137
+portal | ssarathi_ruins_secrets | 227 | 26 | ssarathi_royal_archive | 29 | 174
+portal | ssarathi_ruins_secrets | 301 | 170 | ssarathi_ruins | 272 | 201
+portal | ssarathi_ruins_secrets | 300 | 98 | ssarathi_ruins | 271 | 189
+portal | ssarathi_ruins_secrets | 11 | 26 | ssarathi_ruins | 338 | 315
+portal | ssarathi_ruins_secrets | 79 | 170 | ssarathi_ruins | 89 | 234
+portal | ssarathi_ruins_secrets | 82 | 26 | ssarathi_ruins | 305 | 258
+portal | ssarathi_ruins_secrets | 84 | 98 | ssarathi_ruins | 77 | 171
+portal | ssarathi_ruins_secrets | 227 | 98 | ssarathi_ruins | 179 | 238
+portal | ssarathi_ruins_secrets | 6 | 170 | ssarathi_ruins | 304 | 30
+portal | ssarathi_ruins_secrets | 156 | 98 | ssarathi_ruins | 204 | 173
+portal | ssarathi_ruins_secrets | 153 | 83 | four_gates_secrets | 12 | 97
+portal | ssarathi_ruins_secrets | 159 | 82 | verdant_stair_secrets | 156 | 98
+portal | ssarathi_ruins_secrets | 297 | 26 | ssarathi_ruins | 346 | 196
+portal | verdant_stair_secrets | 6 | 106 | ssarathi_ruins | 143 | 362
+portal | verdant_stair_secrets | 159 | 74 | ssarathi_ruins_secrets | 156 | 98
+portal | amberwood | 198 | 228 | amberwood_estate | 32 | 80
+portal | amberwood_estate | 32 | 80 | amberwood | 198 | 226
+portal | amberwood | 362 | 291 | amberwood_estate | 224 | 88
+portal | amberwood_estate | 224 | 88 | amberwood | 362 | 289
+portal | amberwood | 288 | 187 | amberwood_estate | 33 | 289
+portal | amberwood_estate | 33 | 289 | amberwood | 286 | 187
+portal | amberwood | 221 | 320 | amberwood_estate | 263 | 303
+portal | amberwood_estate | 263 | 303 | amberwood | 221 | 318
+portal | amberwood | 500 | 294 | 185 | amberwood_secrets | 82 | 26
+portal | amberwood | 501 | 245 | 84 | amberwood_secrets | 230 | 170
+portal | amberwood | 502 | 278 | 390 | amberwood_secrets | 301 | 170
+portal | amberwood | 503 | 336 | 118 | amberwood_secrets | 154 | 26
+portal | amberwood | 504 | 113 | 360 | amberwood_secrets | 300 | 98
+portal | amberwood | 505 | 93 | 84 | amberwood_secrets | 297 | 26
+portal | amberwood | 506 | 252 | 52 | amberwood_secrets | 79 | 170
+portal | amberwood | 507 | 155 | 299 | amberwood_secrets | 227 | 26
+portal | amberwood | 508 | 80 | 342 | amberwood_secrets | 159 | 170
+portal | amberwood | 510 | 107 | 157 | amberwood_secrets | 84 | 98
+portal | amberwood | 511 | 341 | 331 | amberwood_secrets | 6 | 170
+portal | amberwood | 512 | 187 | 385 | amberwood_secrets | 11 | 26
+portal | amberwood | 513 | 242 | 152 | amberwood_secrets | 227 | 98
+portal | amberwood | 514 | 120 | 203 | amberwood_secrets | 156 | 98
+portal | amberwood_secrets | 159 | 170 | amberwood | 80 | 342
+portal | amberwood_secrets | 230 | 170 | amberwood | 245 | 84
+portal | amberwood_secrets | 154 | 26 | amberwood | 336 | 118
+portal | amberwood_secrets | 227 | 26 | amberwood | 155 | 299
+portal | amberwood_secrets | 301 | 170 | amberwood | 278 | 390
+portal | amberwood_secrets | 300 | 98 | amberwood | 113 | 360
+portal | amberwood_secrets | 11 | 26 | amberwood | 187 | 385
+portal | amberwood_secrets | 79 | 170 | amberwood | 252 | 52
+portal | amberwood_secrets | 82 | 26 | amberwood | 294 | 185
+portal | amberwood_secrets | 84 | 98 | amberwood | 107 | 157
+portal | amberwood_secrets | 227 | 98 | amberwood | 242 | 152
+portal | amberwood_secrets | 6 | 170 | amberwood | 341 | 331
+portal | amberwood_secrets | 156 | 98 | amberwood | 120 | 203
+portal | amberwood_secrets | 297 | 26 | amberwood | 93 | 84
+portal | whitehorn_range | 2 | 23 | amberwood | 415 | 392
+portal | whitehorn_range | 2 | 24 | amberwood | 415 | 393
+portal | whitehorn_range | 2 | 25 | amberwood | 415 | 394
+portal | whitehorn_range | 2 | 26 | amberwood | 415 | 395
+portal | whitehorn_range | 2 | 27 | amberwood | 415 | 396
+portal | whitehorn_range | 2 | 28 | amberwood | 415 | 397
+portal | whitehorn_range | 2 | 29 | amberwood | 415 | 398
+portal | amberwood | 417 | 398 | whitehorn_range | 4 | 29
+portal | amberwood | 417 | 397 | whitehorn_range | 4 | 28
+portal | amberwood | 417 | 396 | whitehorn_range | 4 | 27
+portal | amberwood | 417 | 395 | whitehorn_range | 4 | 26
+portal | amberwood | 417 | 394 | whitehorn_range | 4 | 25
+portal | amberwood | 417 | 393 | whitehorn_range | 4 | 24
+portal | amberwood | 417 | 392 | whitehorn_range | 4 | 23
+portal | whitehorn_range | 96 | 81 | whitehorn_glacier_temple | 234 | 14
+portal | whitehorn_glacier_temple | 234 | 14 | whitehorn_range | 94 | 81
+portal | whitehorn_range | 374 | 296 | whitehorn_glacier_temple | 234 | 85
+portal | whitehorn_glacier_temple | 234 | 85 | whitehorn_range | 372 | 296
+portal | whitehorn_range | 35 | 270 | whitehorn_glacier_temple | 234 | 179
+portal | whitehorn_glacier_temple | 234 | 179 | whitehorn_range | 35 | 268
+portal | whitehorn_range | 55 | 304 | whitehorn_glacier_temple | 30 | 58
+portal | whitehorn_glacier_temple | 30 | 58 | whitehorn_range | 53 | 304
+portal | whitehorn_range | 226 | 358 | whitehorn_glacier_temple | 34 | 191
+portal | whitehorn_glacier_temple | 34 | 191 | whitehorn_range | 224 | 358
+portal | whitehorn_range | 41 | 188 | whitehorn_glacier_temple | 124 | 92
+portal | whitehorn_glacier_temple | 124 | 92 | whitehorn_range | 39 | 188
+portal | whitehorn_range | 336 | 269 | whitehorn_glacier_temple | 118 | 184
+portal | whitehorn_glacier_temple | 118 | 184 | whitehorn_range | 334 | 269
+portal | whitehorn_glacier_temple | 500 | 167 | 179 | whitehorn_range_secrets | 82 | 26
+portal | whitehorn_range | 501 | 171 | 196 | whitehorn_range_secrets | 79 | 170
+portal | whitehorn_range | 502 | 60 | 301 | whitehorn_range_secrets | 227 | 98
+portal | whitehorn_range | 503 | 154 | 96 | whitehorn_range_secrets | 230 | 170
+portal | whitehorn_range | 504 | 240 | 307 | whitehorn_range_secrets | 11 | 26
+portal | whitehorn_range | 505 | 121 | 65 | whitehorn_range_secrets | 154 | 26
+portal | whitehorn_range | 506 | 44 | 182 | whitehorn_range_secrets | 84 | 98
+portal | whitehorn_range | 507 | 173 | 376 | whitehorn_range_secrets | 6 | 170
+portal | whitehorn_range | 508 | 286 | 218 | whitehorn_range_secrets | 301 | 170
+portal | whitehorn_range | 509 | 364 | 292 | whitehorn_range_secrets | 300 | 98
+portal | whitehorn_range | 510 | 236 | 289 | whitehorn_range_secrets | 159 | 170
+portal | whitehorn_range | 511 | 209 | 359 | whitehorn_range_secrets | 297 | 26
+portal | whitehorn_range | 512 | 243 | 353 | whitehorn_range_secrets | 227 | 26
+portal | whitehorn_range | 513 | 39 | 263 | whitehorn_range_secrets | 156 | 98
+portal | amberwood_secrets | 153 | 83 | whitehorn_range_secrets | 156 | 98
+portal | whitehorn_range_secrets | 159 | 170 | whitehorn_range | 236 | 289
+portal | whitehorn_range_secrets | 230 | 170 | whitehorn_range | 154 | 96
+portal | whitehorn_range_secrets | 154 | 26 | whitehorn_range | 121 | 65
+portal | whitehorn_range_secrets | 227 | 26 | whitehorn_range | 243 | 353
+portal | whitehorn_range_secrets | 301 | 170 | whitehorn_range | 286 | 218
+portal | whitehorn_range_secrets | 300 | 98 | whitehorn_range | 364 | 292
+portal | whitehorn_range_secrets | 11 | 26 | whitehorn_range | 240 | 307
+portal | whitehorn_range_secrets | 79 | 170 | whitehorn_range | 171 | 196
+portal | whitehorn_range_secrets | 82 | 26 | whitehorn_glacier_temple | 167 | 179
+portal | whitehorn_range_secrets | 84 | 98 | whitehorn_range | 44 | 182
+portal | whitehorn_range_secrets | 227 | 98 | whitehorn_range | 60 | 301
+portal | whitehorn_range_secrets | 6 | 170 | whitehorn_range | 173 | 376
+portal | whitehorn_range_secrets | 156 | 98 | whitehorn_range | 39 | 263
+portal | whitehorn_range_secrets | 161 | 79 | amberwood_secrets | 156 | 98
+portal | whitehorn_range_secrets | 297 | 26 | whitehorn_range | 209 | 359
+portal | whitehorn_range | 73 | 2 | mirrorhold | 70 | 394
+portal | whitehorn_range | 72 | 2 | mirrorhold | 69 | 394
+portal | whitehorn_range | 71 | 2 | mirrorhold | 68 | 394
+portal | whitehorn_range | 70 | 2 | mirrorhold | 67 | 394
+portal | whitehorn_range | 69 | 2 | mirrorhold | 66 | 394
+portal | whitehorn_range | 68 | 2 | mirrorhold | 65 | 394
+portal | whitehorn_range | 67 | 2 | mirrorhold | 64 | 394
+portal | mirrorhold | 64 | 396 | whitehorn_range | 67 | 4
+portal | mirrorhold | 65 | 396 | whitehorn_range | 68 | 4
+portal | mirrorhold | 66 | 396 | whitehorn_range | 69 | 4
+portal | mirrorhold | 67 | 396 | whitehorn_range | 70 | 4
+portal | mirrorhold | 68 | 396 | whitehorn_range | 71 | 4
+portal | mirrorhold | 69 | 396 | whitehorn_range | 72 | 4
+portal | mirrorhold | 70 | 396 | whitehorn_range | 73 | 4
+portal | mirrorhold | 256 | 2 | four_gates | 258 | 409
+portal | mirrorhold | 255 | 2 | four_gates | 257 | 409
+portal | mirrorhold | 254 | 2 | four_gates | 256 | 409
+portal | mirrorhold | 253 | 2 | four_gates | 255 | 409
+portal | mirrorhold | 252 | 2 | four_gates | 254 | 409
+portal | mirrorhold | 251 | 2 | four_gates | 253 | 409
+portal | mirrorhold | 250 | 2 | four_gates | 252 | 409
+portal | four_gates | 252 | 411 | mirrorhold | 250 | 4
+portal | four_gates | 253 | 411 | mirrorhold | 251 | 4
+portal | four_gates | 254 | 411 | mirrorhold | 252 | 4
+portal | four_gates | 255 | 411 | mirrorhold | 253 | 4
+portal | four_gates | 256 | 411 | mirrorhold | 254 | 4
+portal | four_gates | 257 | 411 | mirrorhold | 255 | 4
+portal | four_gates | 258 | 411 | mirrorhold | 256 | 4
+portal | mirrorhold | 2 | 136 | amberwood | 418 | 113
+portal | mirrorhold | 2 | 137 | amberwood | 418 | 114
+portal | mirrorhold | 2 | 138 | amberwood | 418 | 115
+portal | mirrorhold | 2 | 139 | amberwood | 418 | 116
+portal | mirrorhold | 2 | 140 | amberwood | 418 | 117
+portal | mirrorhold | 2 | 141 | amberwood | 418 | 118
+portal | mirrorhold | 2 | 142 | amberwood | 418 | 119
+portal | amberwood | 420 | 119 | mirrorhold | 4 | 142
+portal | amberwood | 420 | 118 | mirrorhold | 4 | 141
+portal | amberwood | 420 | 117 | mirrorhold | 4 | 140
+portal | amberwood | 420 | 116 | mirrorhold | 4 | 139
+portal | amberwood | 420 | 115 | mirrorhold | 4 | 138
+portal | amberwood | 420 | 114 | mirrorhold | 4 | 137
+portal | amberwood | 420 | 113 | mirrorhold | 4 | 136
+portal | mirrorhold | 218 | 133 | mirrorhold_interiors | 154 | 182
+portal | mirrorhold_interiors | 154 | 182 | mirrorhold | 216 | 133
+portal | mirrorhold | 196 | 298 | mirrorhold_interiors | 47 | 187
+portal | mirrorhold_interiors | 47 | 187 | mirrorhold | 194 | 298
+portal | mirrorhold | 76 | 109 | mirrorhold_interiors | 39 | 96
+portal | mirrorhold_interiors | 39 | 96 | mirrorhold | 74 | 109
+portal | mirrorhold | 500 | 339 | 215 | mirrorhold_secrets | 6 | 170
+portal | mirrorhold | 501 | 216 | 212 | mirrorhold_secrets | 11 | 26
+portal | mirrorhold | 502 | 177 | 94 | mirrorhold_secrets | 84 | 98
+portal | mirrorhold | 503 | 266 | 230 | mirrorhold_secrets | 82 | 26
+portal | mirrorhold | 504 | 163 | 229 | whitehorn_range_secrets | 6 | 106
+portal | mirrorhold | 505 | 168 | 268 | mirrorhold_secrets | 227 | 98
+portal | mirrorhold | 506 | 271 | 141 | mirrorhold_secrets | 230 | 170
+portal | mirrorhold | 507 | 190 | 296 | mirrorhold_secrets | 227 | 26
+portal | mirrorhold | 508 | 290 | 167 | mirrorhold_secrets | 297 | 26
+portal | mirrorhold | 509 | 159 | 73 | mirrorhold_secrets | 159 | 170
+portal | mirrorhold | 510 | 168 | 201 | mirrorhold_secrets | 300 | 98
+portal | mirrorhold | 511 | 319 | 136 | mirrorhold_secrets | 301 | 170
+portal | mirrorhold | 512 | 194 | 21 | mirrorhold_secrets | 79 | 170
+portal | mirrorhold | 513 | 184 | 129 | mirrorhold_secrets | 156 | 98
+portal | mirrorhold_interiors | 500 | 178 | 155 | mirrorhold_secrets | 154 | 26
+portal | whitehorn_range | 500 | 330 | 266 | mirrorhold_secrets | 6 | 106
+portal | amberwood_secrets | 159 | 82 | mirrorhold_secrets | 156 | 98
+portal | four_gates_secrets | 11 | 83 | mirrorhold_secrets | 156 | 98
+portal | mirrorhold_secrets | 159 | 170 | mirrorhold | 159 | 73
+portal | mirrorhold_secrets | 230 | 170 | mirrorhold | 271 | 141
+portal | mirrorhold_secrets | 154 | 26 | mirrorhold_interiors | 178 | 155
+portal | mirrorhold_secrets | 227 | 26 | mirrorhold | 190 | 296
+portal | mirrorhold_secrets | 301 | 170 | mirrorhold | 319 | 136
+portal | mirrorhold_secrets | 300 | 98 | mirrorhold | 168 | 201
+portal | mirrorhold_secrets | 11 | 26 | mirrorhold | 216 | 212
+portal | mirrorhold_secrets | 79 | 170 | mirrorhold | 194 | 21
+portal | mirrorhold_secrets | 82 | 26 | mirrorhold | 266 | 230
+portal | mirrorhold_secrets | 84 | 98 | mirrorhold | 177 | 94
+portal | mirrorhold_secrets | 227 | 98 | mirrorhold | 168 | 268
+portal | mirrorhold_secrets | 6 | 170 | mirrorhold | 339 | 215
+portal | mirrorhold_secrets | 6 | 106 | whitehorn_range | 330 | 266
+portal | mirrorhold_secrets | 156 | 98 | mirrorhold | 184 | 129
+portal | mirrorhold_secrets | 153 | 83 | whitehorn_range_secrets | 156 | 98
+portal | mirrorhold_secrets | 161 | 77 | amberwood_secrets | 156 | 98
+portal | mirrorhold_secrets | 159 | 74 | four_gates_secrets | 12 | 97
+portal | mirrorhold_secrets | 297 | 26 | mirrorhold | 290 | 167
+portal | whitehorn_range_secrets | 6 | 106 | mirrorhold | 163 | 229
+portal | whitehorn_range_secrets | 156 | 84 | mirrorhold_secrets | 156 | 98
+portal | whitehorn_range | 407 | 2 | amethyst_barrens | 9 | 397
+portal | whitehorn_range | 406 | 2 | amethyst_barrens | 8 | 397
+portal | whitehorn_range | 405 | 2 | amethyst_barrens | 7 | 397
+portal | whitehorn_range | 404 | 2 | amethyst_barrens | 6 | 397
+portal | whitehorn_range | 403 | 2 | amethyst_barrens | 5 | 397
+portal | whitehorn_range | 402 | 2 | amethyst_barrens | 4 | 397
+portal | whitehorn_range | 401 | 2 | amethyst_barrens | 3 | 397
+portal | amethyst_barrens | 3 | 399 | whitehorn_range | 401 | 4
+portal | amethyst_barrens | 4 | 399 | whitehorn_range | 402 | 4
+portal | amethyst_barrens | 5 | 399 | whitehorn_range | 403 | 4
+portal | amethyst_barrens | 6 | 399 | whitehorn_range | 404 | 4
+portal | amethyst_barrens | 7 | 399 | whitehorn_range | 405 | 4
+portal | amethyst_barrens | 8 | 399 | whitehorn_range | 406 | 4
+portal | amethyst_barrens | 9 | 399 | whitehorn_range | 407 | 4
+portal | mirrorhold | 399 | 352 | amethyst_barrens | 4 | 355
+portal | mirrorhold | 399 | 351 | amethyst_barrens | 4 | 354
+portal | mirrorhold | 399 | 350 | amethyst_barrens | 4 | 353
+portal | mirrorhold | 399 | 349 | amethyst_barrens | 4 | 352
+portal | mirrorhold | 399 | 348 | amethyst_barrens | 4 | 351
+portal | mirrorhold | 399 | 347 | amethyst_barrens | 4 | 350
+portal | mirrorhold | 399 | 346 | amethyst_barrens | 4 | 349
+portal | amethyst_barrens | 2 | 349 | mirrorhold | 397 | 346
+portal | amethyst_barrens | 2 | 350 | mirrorhold | 397 | 347
+portal | amethyst_barrens | 2 | 351 | mirrorhold | 397 | 348
+portal | amethyst_barrens | 2 | 352 | mirrorhold | 397 | 349
+portal | amethyst_barrens | 2 | 353 | mirrorhold | 397 | 350
+portal | amethyst_barrens | 2 | 354 | mirrorhold | 397 | 351
+portal | amethyst_barrens | 2 | 355 | mirrorhold | 397 | 352
+portal | amethyst_barrens | 168 | 2 | sunmane_steppe | 162 | 397
+portal | amethyst_barrens | 167 | 2 | sunmane_steppe | 161 | 397
+portal | amethyst_barrens | 166 | 2 | sunmane_steppe | 160 | 397
+portal | amethyst_barrens | 165 | 2 | sunmane_steppe | 159 | 397
+portal | amethyst_barrens | 164 | 2 | sunmane_steppe | 158 | 397
+portal | amethyst_barrens | 163 | 2 | sunmane_steppe | 157 | 397
+portal | amethyst_barrens | 162 | 2 | sunmane_steppe | 156 | 397
+portal | sunmane_steppe | 156 | 399 | amethyst_barrens | 162 | 4
+portal | sunmane_steppe | 157 | 399 | amethyst_barrens | 163 | 4
+portal | sunmane_steppe | 158 | 399 | amethyst_barrens | 164 | 4
+portal | sunmane_steppe | 159 | 399 | amethyst_barrens | 165 | 4
+portal | sunmane_steppe | 160 | 399 | amethyst_barrens | 166 | 4
+portal | sunmane_steppe | 161 | 399 | amethyst_barrens | 167 | 4
+portal | sunmane_steppe | 162 | 399 | amethyst_barrens | 168 | 4
+portal | amethyst_barrens | 320 | 175 | resonant_vault | 255 | 166
+portal | resonant_vault | 255 | 166 | amethyst_barrens | 318 | 175
+portal | amethyst_barrens | 353 | 194 | resonant_vault | 165 | 307
+portal | resonant_vault | 165 | 307 | amethyst_barrens | 353 | 192
+portal | amethyst_barrens | 244 | 153 | resonant_vault | 255 | 217
+portal | resonant_vault | 255 | 217 | amethyst_barrens | 242 | 153
+portal | amethyst_barrens | 71 | 291 | resonant_vault | 25 | 307
+portal | resonant_vault | 25 | 307 | amethyst_barrens | 69 | 291
+portal | amethyst_barrens | 232 | 137 | resonant_vault | 55 | 117
+portal | resonant_vault | 55 | 117 | amethyst_barrens | 230 | 137
+portal | amethyst_barrens | 272 | 327 | resonant_vault | 255 | 301
+portal | resonant_vault | 255 | 301 | amethyst_barrens | 270 | 327
+portal | amethyst_barrens | 286 | 242 | resonant_vault | 190 | 116
+portal | resonant_vault | 190 | 116 | amethyst_barrens | 284 | 242
+portal | amethyst_barrens | 500 | 299 | 268 | amethyst_barrens_secrets | 301 | 170
+portal | amethyst_barrens | 501 | 332 | 70 | amethyst_barrens_secrets | 79 | 170
+portal | amethyst_barrens | 502 | 207 | 44 | amethyst_barrens_secrets | 297 | 26
+portal | amethyst_barrens | 503 | 353 | 182 | amethyst_barrens_secrets | 159 | 170
+portal | amethyst_barrens | 504 | 260 | 329 | amethyst_barrens_secrets | 82 | 26
+portal | amethyst_barrens | 505 | 99 | 291 | amethyst_barrens_secrets | 227 | 26
+portal | amethyst_barrens | 506 | 338 | 37 | amethyst_barrens_secrets | 11 | 26
+portal | amethyst_barrens | 507 | 210 | 54 | amethyst_barrens_secrets | 6 | 170
+portal | amethyst_barrens | 508 | 252 | 43 | amethyst_barrens_secrets | 230 | 170
+portal | amethyst_barrens | 509 | 261 | 232 | amethyst_barrens_secrets | 154 | 26
+portal | amethyst_barrens | 510 | 217 | 55 | amethyst_barrens_secrets | 84 | 98
+portal | amethyst_barrens | 511 | 227 | 24 | amethyst_barrens_secrets | 300 | 98
+portal | amethyst_barrens | 512 | 200 | 55 | amethyst_barrens_secrets | 156 | 98
+portal | resonant_vault | 500 | 69 | 231 | amethyst_barrens_secrets | 227 | 98
+portal | sunmane_steppe | 508 | 122 | 335 | amethyst_barrens_secrets | 6 | 106
+portal | amethyst_barrens_secrets | 159 | 170 | amethyst_barrens | 353 | 182
+portal | amethyst_barrens_secrets | 230 | 170 | amethyst_barrens | 252 | 43
+portal | amethyst_barrens_secrets | 154 | 26 | amethyst_barrens | 261 | 232
+portal | amethyst_barrens_secrets | 227 | 26 | amethyst_barrens | 99 | 291
+portal | amethyst_barrens_secrets | 301 | 170 | amethyst_barrens | 299 | 268
+portal | amethyst_barrens_secrets | 300 | 98 | amethyst_barrens | 227 | 24
+portal | amethyst_barrens_secrets | 11 | 26 | amethyst_barrens | 338 | 37
+portal | amethyst_barrens_secrets | 79 | 170 | amethyst_barrens | 332 | 70
+portal | amethyst_barrens_secrets | 82 | 26 | amethyst_barrens | 260 | 329
+portal | amethyst_barrens_secrets | 84 | 98 | amethyst_barrens | 217 | 55
+portal | amethyst_barrens_secrets | 227 | 98 | resonant_vault | 69 | 231
+portal | amethyst_barrens_secrets | 6 | 170 | amethyst_barrens | 210 | 54
+portal | amethyst_barrens_secrets | 6 | 106 | sunmane_steppe | 122 | 335
+portal | amethyst_barrens_secrets | 156 | 98 | amethyst_barrens | 200 | 55
+portal | amethyst_barrens_secrets | 153 | 83 | whitehorn_range_secrets | 156 | 98
+portal | amethyst_barrens_secrets | 159 | 82 | mirrorhold_secrets | 156 | 98
+portal | amethyst_barrens_secrets | 161 | 76 | sunmane_steppe_secrets | 12 | 97
+portal | amethyst_barrens_secrets | 297 | 26 | amethyst_barrens | 207 | 44
+portal | mirrorhold_secrets | 157 | 84 | amethyst_barrens_secrets | 156 | 98
+portal | sunmane_steppe_secrets | 17 | 75 | amethyst_barrens_secrets | 156 | 98
+portal | whitehorn_range_secrets | 157 | 72 | amethyst_barrens_secrets | 156 | 98
+portal | grey_moors | 377 | 422 | amberwood | 2 | 4
+portal | grey_moors | 378 | 422 | amberwood | 3 | 4
+portal | grey_moors | 379 | 422 | amberwood | 4 | 4
+portal | grey_moors | 380 | 422 | amberwood | 5 | 4
+portal | grey_moors | 381 | 422 | amberwood | 6 | 4
+portal | grey_moors | 382 | 422 | amberwood | 7 | 4
+portal | grey_moors | 383 | 422 | amberwood | 8 | 4
+portal | amberwood | 8 | 2 | grey_moors | 383 | 420
+portal | amberwood | 7 | 2 | grey_moors | 382 | 420
+portal | amberwood | 6 | 2 | grey_moors | 381 | 420
+portal | amberwood | 5 | 2 | grey_moors | 380 | 420
+portal | amberwood | 4 | 2 | grey_moors | 379 | 420
+portal | amberwood | 3 | 2 | grey_moors | 378 | 420
+portal | amberwood | 2 | 2 | grey_moors | 377 | 420
+portal | grey_moors | 318 | 247 | grey_moor_barrows | 10 | 58
+portal | grey_moor_barrows | 10 | 58 | grey_moors | 316 | 247
+portal | grey_moors | 366 | 241 | grey_moor_barrows | 168 | 160
+portal | grey_moor_barrows | 168 | 160 | grey_moors | 364 | 241
+portal | grey_moors | 204 | 274 | grey_moor_barrows | 12 | 162
+portal | grey_moor_barrows | 12 | 162 | grey_moors | 202 | 274
+portal | grey_moors | 214 | 65 | grey_moor_barrows | 168 | 25
+portal | grey_moor_barrows | 168 | 25 | grey_moors | 212 | 65
+portal | grey_moors | 194 | 103 | grey_moor_barrows | 105 | 58
+portal | grey_moor_barrows | 105 | 58 | grey_moors | 192 | 103
+portal | grey_moors | 208 | 261 | grey_moor_barrows | 168 | 76
+portal | grey_moor_barrows | 168 | 76 | grey_moors | 206 | 261
+portal | grey_moors | 50 | 293 | grey_moor_barrows | 105 | 163
+portal | grey_moor_barrows | 105 | 163 | grey_moors | 48 | 293
+portal | grey_moor_barrows | 500 | 12 | 28 | grey_moors_secrets | 82 | 26
+portal | grey_moors | 500 | 295 | 247 | grey_moors_secrets | 84 | 98
+portal | grey_moors | 501 | 197 | 205 | grey_moors_secrets | 154 | 26
+portal | grey_moors | 503 | 221 | 312 | grey_moors_secrets | 227 | 26
+portal | grey_moors | 504 | 225 | 66 | grey_moors_secrets | 230 | 170
+portal | grey_moors | 505 | 171 | 230 | grey_moors_secrets | 11 | 26
+portal | grey_moors | 506 | 267 | 36 | grey_moors_secrets | 301 | 170
+portal | grey_moors | 507 | 143 | 248 | grey_moors_secrets | 159 | 170
+portal | grey_moors | 508 | 304 | 149 | grey_moors_secrets | 6 | 170
+portal | grey_moors | 509 | 250 | 79 | grey_moors_secrets | 79 | 170
+portal | grey_moors | 510 | 173 | 154 | grey_moors_secrets | 300 | 98
+portal | grey_moors | 511 | 376 | 239 | grey_moors_secrets | 297 | 26
+portal | grey_moors | 512 | 342 | 332 | amberwood_secrets | 6 | 106
+portal | grey_moors | 513 | 171 | 177 | grey_moors_secrets | 156 | 98
+portal | grey_moors | 514 | 315 | 217 | grey_moors_secrets | 227 | 98
+portal | amberwood_secrets | 6 | 106 | grey_moors | 342 | 332
+portal | amberwood_secrets | 161 | 76 | grey_moors_secrets | 156 | 98
+portal | grey_moors_secrets | 159 | 170 | grey_moors | 143 | 248
+portal | grey_moors_secrets | 230 | 170 | grey_moors | 225 | 66
+portal | grey_moors_secrets | 154 | 26 | grey_moors | 197 | 205
+portal | grey_moors_secrets | 227 | 26 | grey_moors | 221 | 312
+portal | grey_moors_secrets | 301 | 170 | grey_moors | 267 | 36
+portal | grey_moors_secrets | 300 | 98 | grey_moors | 173 | 154
+portal | grey_moors_secrets | 11 | 26 | grey_moors | 171 | 230
+portal | grey_moors_secrets | 79 | 170 | grey_moors | 250 | 79
+portal | grey_moors_secrets | 82 | 26 | grey_moor_barrows | 12 | 28
+portal | grey_moors_secrets | 84 | 98 | grey_moors | 295 | 247
+portal | grey_moors_secrets | 227 | 98 | grey_moors | 315 | 217
+portal | grey_moors_secrets | 6 | 170 | grey_moors | 304 | 149
+portal | grey_moors_secrets | 156 | 98 | grey_moors | 171 | 177
+portal | grey_moors_secrets | 161 | 76 | amberwood_secrets | 156 | 98
+portal | grey_moors_secrets | 297 | 26 | grey_moors | 376 | 239
+portal | westhaven | 180 | 396 | grey_moors | 134 | 12
+portal | westhaven | 181 | 396 | grey_moors | 135 | 12
+portal | westhaven | 182 | 396 | grey_moors | 136 | 12
+portal | westhaven | 183 | 396 | grey_moors | 137 | 12
+portal | westhaven | 184 | 396 | grey_moors | 138 | 12
+portal | westhaven | 185 | 396 | grey_moors | 139 | 12
+portal | westhaven | 186 | 396 | grey_moors | 140 | 12
+portal | grey_moors | 140 | 10 | westhaven | 186 | 394
+portal | grey_moors | 139 | 10 | westhaven | 185 | 394
+portal | grey_moors | 138 | 10 | westhaven | 184 | 394
+portal | grey_moors | 137 | 10 | westhaven | 183 | 394
+portal | grey_moors | 136 | 10 | westhaven | 182 | 394
+portal | grey_moors | 135 | 10 | westhaven | 181 | 394
+portal | grey_moors | 134 | 10 | westhaven | 180 | 394
+portal | westhaven | 188 | 157 | amberwood | 58 | 119
+portal | amberwood | 56 | 119 | westhaven | 188 | 159
+portal | westhaven | 91 | 193 | westhaven_insides | 145 | 236
+portal | westhaven_insides | 145 | 236 | westhaven | 89 | 193
+portal | westhaven | 69 | 180 | westhaven_insides | 35 | 235
+portal | westhaven_insides | 35 | 235 | westhaven | 67 | 180
+portal | westhaven | 271 | 280 | westhaven_insides | 213 | 94
+portal | westhaven_insides | 213 | 94 | westhaven | 269 | 280
+portal | westhaven | 53 | 99 | westhaven_insides | 35 | 95
+portal | westhaven_insides | 35 | 95 | westhaven | 51 | 99
+portal | westhaven | 173 | 249 | westhaven_insides | 213 | 145
+portal | westhaven_insides | 213 | 145 | westhaven | 171 | 249
+portal | westhaven | 335 | 92 | westhaven_insides | 155 | 95
+portal | westhaven_insides | 155 | 95 | westhaven | 333 | 92
+portal | westhaven | 355 | 258 | westhaven_insides | 213 | 229
+portal | westhaven_insides | 213 | 229 | westhaven | 353 | 258
+portal | amberwood | 509 | 70 | 116 | westhaven_secrets | 6 | 106
+portal | westhaven | 500 | 96 | 255 | westhaven_secrets | 300 | 98
+portal | westhaven | 501 | 200 | 271 | westhaven_secrets | 82 | 26
+portal | westhaven | 502 | 113 | 220 | westhaven_secrets | 84 | 98
+portal | westhaven | 503 | 199 | 215 | westhaven_secrets | 227 | 26
+portal | westhaven | 504 | 53 | 116 | westhaven_secrets | 11 | 26
+portal | westhaven | 505 | 335 | 82 | westhaven_secrets | 297 | 26
+portal | westhaven | 506 | 51 | 159 | westhaven_secrets | 301 | 170
+portal | westhaven | 507 | 257 | 291 | grey_moors_secrets | 6 | 106
+portal | westhaven | 508 | 272 | 196 | westhaven_secrets | 230 | 170
+portal | westhaven | 509 | 299 | 176 | westhaven_secrets | 79 | 170
+portal | westhaven | 510 | 126 | 65 | westhaven_secrets | 6 | 170
+portal | westhaven | 511 | 241 | 289 | westhaven_secrets | 227 | 98
+portal | westhaven | 512 | 89 | 183 | westhaven_secrets | 156 | 98
+portal | westhaven | 513 | 70 | 85 | westhaven_secrets | 159 | 170
+portal | westhaven_insides | 500 | 146 | 189 | westhaven_secrets | 154 | 26
+portal | amberwood_secrets | 153 | 73 | westhaven_secrets | 156 | 98
+portal | grey_moors_secrets | 6 | 106 | westhaven | 257 | 291
+portal | grey_moors_secrets | 153 | 83 | westhaven_secrets | 156 | 98
+portal | westhaven_secrets | 159 | 170 | westhaven | 70 | 85
+portal | westhaven_secrets | 230 | 170 | westhaven | 272 | 196
+portal | westhaven_secrets | 154 | 26 | westhaven_insides | 146 | 189
+portal | westhaven_secrets | 227 | 26 | westhaven | 199 | 215
+portal | westhaven_secrets | 301 | 170 | westhaven | 51 | 159
+portal | westhaven_secrets | 300 | 98 | westhaven | 96 | 255
+portal | westhaven_secrets | 11 | 26 | westhaven | 53 | 116
+portal | westhaven_secrets | 79 | 170 | westhaven | 299 | 176
+portal | westhaven_secrets | 82 | 26 | westhaven | 200 | 271
+portal | westhaven_secrets | 84 | 98 | westhaven | 113 | 220
+portal | westhaven_secrets | 227 | 98 | westhaven | 241 | 289
+portal | westhaven_secrets | 6 | 170 | westhaven | 126 | 65
+portal | westhaven_secrets | 6 | 106 | amberwood | 70 | 116
+portal | westhaven_secrets | 156 | 98 | westhaven | 89 | 183
+portal | westhaven_secrets | 153 | 83 | grey_moors_secrets | 156 | 98
+portal | westhaven_secrets | 153 | 73 | amberwood_secrets | 156 | 98
+portal | westhaven_secrets | 297 | 26 | westhaven | 335 | 82
+portal | mirrorhold | 264 | 97 | crownwater | 265 | 381
+portal | crownwater | 265 | 383 | mirrorhold | 264 | 99
+portal | amethyst_barrens | 362 | 38 | crownwater | 275 | 381
+portal | crownwater | 275 | 383 | amethyst_barrens | 362 | 40
+portal | ssarathi_ruins | 161 | 42 | crownwater | 142 | 14
+portal | crownwater | 142 | 12 | ssarathi_ruins | 161 | 44
+portal | westhaven | 53 | 172 | crownwater | 14 | 265
+portal | crownwater | 12 | 265 | westhaven | 55 | 172
+portal | grey_moors | 65 | 63 | crownwater | 14 | 255
+portal | crownwater | 12 | 255 | grey_moors | 65 | 65
+portal | four_gates | 2 | 199 | crownwater | 397 | 135
+portal | four_gates | 2 | 200 | crownwater | 397 | 136
+portal | four_gates | 2 | 201 | crownwater | 397 | 137
+portal | four_gates | 2 | 202 | crownwater | 397 | 138
+portal | four_gates | 2 | 203 | crownwater | 397 | 139
+portal | four_gates | 2 | 204 | crownwater | 397 | 140
+portal | four_gates | 2 | 205 | crownwater | 397 | 141
+portal | crownwater | 399 | 141 | four_gates | 4 | 205
+portal | crownwater | 399 | 140 | four_gates | 4 | 204
+portal | crownwater | 399 | 139 | four_gates | 4 | 203
+portal | crownwater | 399 | 138 | four_gates | 4 | 202
+portal | crownwater | 399 | 137 | four_gates | 4 | 201
+portal | crownwater | 399 | 136 | four_gates | 4 | 200
+portal | crownwater | 399 | 135 | four_gates | 4 | 199
+portal | crownwater | 223 | 193 | drowned_crown | 43 | 277
+portal | drowned_crown | 43 | 277 | crownwater | 221 | 193
+portal | crownwater | 246 | 230 | drowned_crown | 53 | 37
+portal | drowned_crown | 53 | 37 | crownwater | 244 | 230
+portal | crownwater | 298 | 192 | drowned_crown | 331 | 216
+portal | drowned_crown | 331 | 216 | crownwater | 296 | 192
+portal | crownwater | 78 | 192 | drowned_crown | 253 | 277
+portal | drowned_crown | 253 | 277 | crownwater | 76 | 192
+portal | crownwater | 130 | 112 | drowned_crown | 243 | 76
+portal | drowned_crown | 243 | 76 | crownwater | 128 | 112
+portal | crownwater | 292 | 278 | drowned_crown | 331 | 277
+portal | drowned_crown | 331 | 277 | crownwater | 290 | 278
+portal | crownwater | 190 | 64 | drowned_crown | 331 | 157
+portal | drowned_crown | 331 | 157 | crownwater | 188 | 64
+portal | crownwater | 500 | 232 | 237 | crownwater_secrets | 297 | 26
+portal | crownwater | 501 | 252 | 220 | crownwater_secrets | 227 | 26
+portal | crownwater | 502 | 169 | 216 | crownwater_secrets | 300 | 98
+portal | crownwater | 503 | 116 | 96 | crownwater_secrets | 84 | 98
+portal | crownwater | 504 | 91 | 135 | crownwater_secrets | 82 | 26
+portal | crownwater | 505 | 281 | 267 | crownwater_secrets | 301 | 170
+portal | crownwater | 506 | 284 | 210 | crownwater_secrets | 6 | 170
+portal | crownwater | 507 | 173 | 69 | crownwater_secrets | 230 | 170
+portal | crownwater | 508 | 284 | 107 | crownwater_secrets | 227 | 98
+portal | crownwater | 509 | 218 | 292 | crownwater_secrets | 79 | 170
+portal | crownwater | 510 | 308 | 190 | crownwater_secrets | 159 | 170
+portal | crownwater | 511 | 89 | 206 | crownwater_secrets | 11 | 26
+portal | crownwater | 512 | 135 | 277 | crownwater_secrets | 156 | 98
+portal | drowned_crown | 500 | 245 | 42 | crownwater_secrets | 154 | 26
+portal | four_gates | 502 | 95 | 187 | crownwater_secrets | 6 | 106
+portal | amethyst_barrens_secrets | 153 | 73 | crownwater_secrets | 156 | 98
+portal | crownwater_secrets | 159 | 170 | crownwater | 308 | 190
+portal | crownwater_secrets | 230 | 170 | crownwater | 173 | 69
+portal | crownwater_secrets | 154 | 26 | drowned_crown | 245 | 42
+portal | crownwater_secrets | 227 | 26 | crownwater | 252 | 220
+portal | crownwater_secrets | 301 | 170 | crownwater | 281 | 267
+portal | crownwater_secrets | 300 | 98 | crownwater | 169 | 216
+portal | crownwater_secrets | 11 | 26 | crownwater | 89 | 206
+portal | crownwater_secrets | 79 | 170 | crownwater | 218 | 292
+portal | crownwater_secrets | 82 | 26 | crownwater | 91 | 135
+portal | crownwater_secrets | 84 | 98 | crownwater | 116 | 96
+portal | crownwater_secrets | 227 | 98 | crownwater | 284 | 107
+portal | crownwater_secrets | 6 | 170 | crownwater | 284 | 210
+portal | crownwater_secrets | 6 | 106 | four_gates | 95 | 187
+portal | crownwater_secrets | 156 | 98 | crownwater | 135 | 277
+portal | crownwater_secrets | 152 | 83 | mirrorhold_secrets | 156 | 98
+portal | crownwater_secrets | 156 | 84 | four_gates_secrets | 12 | 97
+portal | crownwater_secrets | 161 | 77 | westhaven_secrets | 156 | 98
+portal | crownwater_secrets | 160 | 75 | amethyst_barrens_secrets | 156 | 98
+portal | crownwater_secrets | 157 | 72 | grey_moors_secrets | 156 | 98
+portal | crownwater_secrets | 150 | 75 | ssarathi_ruins_secrets | 156 | 98
+portal | crownwater_secrets | 297 | 26 | crownwater | 232 | 237
+portal | four_gates_secrets | 9 | 72 | crownwater_secrets | 156 | 98
+portal | grey_moors_secrets | 159 | 82 | crownwater_secrets | 156 | 98
+portal | mirrorhold_secrets | 153 | 73 | crownwater_secrets | 156 | 98
+portal | ssarathi_ruins_secrets | 153 | 73 | crownwater_secrets | 156 | 98
+portal | westhaven_secrets | 161 | 76 | crownwater_secrets | 156 | 98
+portal | ssarathi_ruins | 2 | 186 | manymouth_delta | 552 | 180
+portal | ssarathi_ruins | 2 | 187 | manymouth_delta | 552 | 181
+portal | ssarathi_ruins | 2 | 188 | manymouth_delta | 552 | 182
+portal | ssarathi_ruins | 2 | 189 | manymouth_delta | 552 | 183
+portal | ssarathi_ruins | 2 | 190 | manymouth_delta | 552 | 184
+portal | ssarathi_ruins | 2 | 191 | manymouth_delta | 552 | 185
+portal | ssarathi_ruins | 2 | 192 | manymouth_delta | 552 | 186
+portal | manymouth_delta | 554 | 186 | ssarathi_ruins | 4 | 192
+portal | manymouth_delta | 554 | 185 | ssarathi_ruins | 4 | 191
+portal | manymouth_delta | 554 | 184 | ssarathi_ruins | 4 | 190
+portal | manymouth_delta | 554 | 183 | ssarathi_ruins | 4 | 189
+portal | manymouth_delta | 554 | 182 | ssarathi_ruins | 4 | 188
+portal | manymouth_delta | 554 | 181 | ssarathi_ruins | 4 | 187
+portal | manymouth_delta | 554 | 180 | ssarathi_ruins | 4 | 186
+portal | manymouth_delta | 286 | 364 | crownwater | 132 | 14
+portal | crownwater | 132 | 12 | manymouth_delta | 286 | 362
+portal | manymouth_delta | 20 | 398 | grey_moors | 403 | 2
+portal | manymouth_delta | 20 | 399 | grey_moors | 403 | 3
+portal | manymouth_delta | 20 | 400 | grey_moors | 403 | 4
+portal | manymouth_delta | 20 | 401 | grey_moors | 403 | 5
+portal | manymouth_delta | 20 | 402 | grey_moors | 403 | 6
+portal | manymouth_delta | 20 | 403 | grey_moors | 403 | 7
+portal | manymouth_delta | 20 | 404 | grey_moors | 403 | 8
+portal | grey_moors | 405 | 8 | manymouth_delta | 22 | 404
+portal | grey_moors | 405 | 7 | manymouth_delta | 22 | 403
+portal | grey_moors | 405 | 6 | manymouth_delta | 22 | 402
+portal | grey_moors | 405 | 5 | manymouth_delta | 22 | 401
+portal | grey_moors | 405 | 4 | manymouth_delta | 22 | 400
+portal | grey_moors | 405 | 3 | manymouth_delta | 22 | 399
+portal | grey_moors | 405 | 2 | manymouth_delta | 22 | 398
+portal | manymouth_delta | 2 | 116 | westhaven | 431 | 104
+portal | manymouth_delta | 2 | 117 | westhaven | 431 | 105
+portal | manymouth_delta | 2 | 118 | westhaven | 431 | 106
+portal | manymouth_delta | 2 | 119 | westhaven | 431 | 107
+portal | manymouth_delta | 2 | 120 | westhaven | 431 | 108
+portal | manymouth_delta | 2 | 121 | westhaven | 431 | 109
+portal | manymouth_delta | 2 | 122 | westhaven | 431 | 110
+portal | westhaven | 433 | 110 | manymouth_delta | 4 | 122
+portal | westhaven | 433 | 109 | manymouth_delta | 4 | 121
+portal | westhaven | 433 | 108 | manymouth_delta | 4 | 120
+portal | westhaven | 433 | 107 | manymouth_delta | 4 | 119
+portal | westhaven | 433 | 106 | manymouth_delta | 4 | 118
+portal | westhaven | 433 | 105 | manymouth_delta | 4 | 117
+portal | westhaven | 433 | 104 | manymouth_delta | 4 | 116
+portal | manymouth_delta | 258 | 31 | manymouth_flooded_labyrinth | 215 | 253
+portal | manymouth_flooded_labyrinth | 215 | 253 | manymouth_delta | 256 | 31
+portal | manymouth_delta | 108 | 292 | manymouth_flooded_labyrinth | 215 | 202
+portal | manymouth_flooded_labyrinth | 215 | 202 | manymouth_delta | 106 | 292
+portal | manymouth_delta | 296 | 219 | manymouth_flooded_labyrinth | 23 | 198
+portal | manymouth_flooded_labyrinth | 23 | 198 | manymouth_delta | 294 | 219
+portal | manymouth_delta | 366 | 116 | manymouth_flooded_labyrinth | 23 | 344
+portal | manymouth_flooded_labyrinth | 23 | 344 | manymouth_delta | 364 | 116
+portal | manymouth_delta | 174 | 318 | manymouth_flooded_labyrinth | 215 | 337
+portal | manymouth_flooded_labyrinth | 215 | 337 | manymouth_delta | 172 | 318
+portal | manymouth_delta | 421 | 322 | manymouth_flooded_labyrinth | 128 | 154
+portal | manymouth_flooded_labyrinth | 128 | 154 | manymouth_delta | 419 | 322
+portal | manymouth_delta | 217 | 171 | manymouth_flooded_labyrinth | 23 | 145
+portal | manymouth_flooded_labyrinth | 23 | 145 | manymouth_delta | 215 | 171
+portal | manymouth_delta | 240 | 146 | manymouth_flooded_labyrinth | 133 | 344
+portal | manymouth_flooded_labyrinth | 133 | 344 | manymouth_delta | 238 | 146
+portal | grey_moors | 502 | 268 | 150 | manymouth_delta_secrets | 6 | 106
+portal | manymouth_delta | 500 | 320 | 240 | manymouth_delta_secrets | 227 | 98
+portal | manymouth_delta | 501 | 228 | 267 | manymouth_delta_secrets | 297 | 26
+portal | manymouth_delta | 502 | 170 | 303 | manymouth_delta_secrets | 6 | 170
+portal | manymouth_delta | 503 | 336 | 87 | manymouth_delta_secrets | 301 | 170
+portal | manymouth_delta | 504 | 298 | 261 | manymouth_delta_secrets | 159 | 170
+portal | manymouth_delta | 505 | 233 | 168 | manymouth_delta_secrets | 227 | 26
+portal | manymouth_delta | 506 | 179 | 301 | manymouth_delta_secrets | 230 | 170
+portal | manymouth_delta | 507 | 250 | 286 | ssarathi_ruins_secrets | 6 | 106
+portal | manymouth_delta | 508 | 272 | 23 | manymouth_delta_secrets | 84 | 98
+portal | manymouth_delta | 509 | 424 | 286 | manymouth_delta_secrets | 82 | 26
+portal | manymouth_delta | 510 | 337 | 215 | manymouth_delta_secrets | 300 | 98
+portal | manymouth_delta | 511 | 409 | 323 | manymouth_delta_secrets | 11 | 26
+portal | manymouth_delta | 512 | 488 | 138 | manymouth_delta_secrets | 79 | 170
+portal | manymouth_delta | 513 | 371 | 138 | manymouth_delta_secrets | 156 | 98
+portal | manymouth_flooded_labyrinth | 500 | 173 | 254 | manymouth_delta_secrets | 154 | 26
+portal | crownwater_secrets | 158 | 83 | manymouth_delta_secrets | 156 | 98
+portal | grey_moors_secrets | 153 | 73 | manymouth_delta_secrets | 156 | 98
+portal | manymouth_delta_secrets | 159 | 170 | manymouth_delta | 298 | 261
+portal | manymouth_delta_secrets | 230 | 170 | manymouth_delta | 179 | 301
+portal | manymouth_delta_secrets | 154 | 26 | manymouth_flooded_labyrinth | 173 | 254
+portal | manymouth_delta_secrets | 227 | 26 | manymouth_delta | 233 | 168
+portal | manymouth_delta_secrets | 301 | 170 | manymouth_delta | 336 | 87
+portal | manymouth_delta_secrets | 300 | 98 | manymouth_delta | 337 | 215
+portal | manymouth_delta_secrets | 11 | 26 | manymouth_delta | 409 | 323
+portal | manymouth_delta_secrets | 79 | 170 | manymouth_delta | 488 | 138
+portal | manymouth_delta_secrets | 82 | 26 | manymouth_delta | 424 | 286
+portal | manymouth_delta_secrets | 84 | 98 | manymouth_delta | 272 | 23
+portal | manymouth_delta_secrets | 227 | 98 | manymouth_delta | 320 | 240
+portal | manymouth_delta_secrets | 6 | 170 | manymouth_delta | 170 | 303
+portal | manymouth_delta_secrets | 6 | 106 | grey_moors | 268 | 150
+portal | manymouth_delta_secrets | 156 | 98 | manymouth_delta | 371 | 138
+portal | manymouth_delta_secrets | 153 | 83 | crownwater_secrets | 156 | 98
+portal | manymouth_delta_secrets | 159 | 82 | ssarathi_ruins_secrets | 156 | 98
+portal | manymouth_delta_secrets | 161 | 76 | grey_moors_secrets | 156 | 98
+portal | manymouth_delta_secrets | 153 | 73 | westhaven_secrets | 156 | 98
+portal | manymouth_delta_secrets | 297 | 26 | manymouth_delta | 228 | 267
+portal | ssarathi_ruins_secrets | 6 | 106 | manymouth_delta | 250 | 286
+portal | ssarathi_ruins_secrets | 161 | 76 | manymouth_delta_secrets | 156 | 98
+portal | westhaven_secrets | 159 | 82 | manymouth_delta_secrets | 156 | 98
+# --- end of the exterior crossings ---
+
+# --- Nymara gauntlets, written by tools/author_gauntlets.py ---
+map | amberwood_gauntlet | The Resin Road | maps/nymara/amberwood_gauntlet.elm | AWG1
+map | amberwood_gauntlet_2 | The Resin Road (2) | maps/nymara/amberwood_gauntlet_2.elm | AWG2
+map | amberwood_gauntlet_3 | The Resin Road (3) | maps/nymara/amberwood_gauntlet_3.elm | AWG3
+map | whitehorn_gauntlet | The Ice Stair | maps/nymara/whitehorn_gauntlet.elm | WHG1
+map | whitehorn_gauntlet_2 | The Ice Stair (2) | maps/nymara/whitehorn_gauntlet_2.elm | WHG2
+map | whitehorn_gauntlet_3 | The Ice Stair (3) | maps/nymara/whitehorn_gauntlet_3.elm | WHG3
+map | ssarathi_gauntlet | The Coil Causeway | maps/nymara/ssarathi_gauntlet.elm | SRG1
+map | ssarathi_gauntlet_2 | The Coil Causeway (2) | maps/nymara/ssarathi_gauntlet_2.elm | SRG2
+map | ssarathi_gauntlet_3 | The Coil Causeway (3) | maps/nymara/ssarathi_gauntlet_3.elm | SRG3
+map | grey_moors_gauntlet | The Barrow Run | maps/nymara/grey_moors_gauntlet.elm | GMG1
+map | grey_moors_gauntlet_2 | The Barrow Run (2) | maps/nymara/grey_moors_gauntlet_2.elm | GMG2
+map | grey_moors_gauntlet_3 | The Barrow Run (3) | maps/nymara/grey_moors_gauntlet_3.elm | GMG3
+map | crownwater_gauntlet | The Drowned Arcades | maps/nymara/crownwater_gauntlet.elm | CWG1
+map | crownwater_gauntlet_2 | The Drowned Arcades (2) | maps/nymara/crownwater_gauntlet_2.elm | CWG2
+map | crownwater_gauntlet_3 | The Drowned Arcades (3) | maps/nymara/crownwater_gauntlet_3.elm | CWG3
+map | sunmane_gauntlet | The Red Canyon | maps/nymara/sunmane_gauntlet.elm | SSG1
+map | sunmane_gauntlet_2 | The Red Canyon (2) | maps/nymara/sunmane_gauntlet_2.elm | SSG2
+map | sunmane_gauntlet_3 | The Red Canyon (3) | maps/nymara/sunmane_gauntlet_3.elm | SSG3
+map | amethyst_gauntlet | The Resonant Cut | maps/nymara/amethyst_gauntlet.elm | ABG1
+map | amethyst_gauntlet_2 | The Resonant Cut (2) | maps/nymara/amethyst_gauntlet_2.elm | ABG2
+map | amethyst_gauntlet_3 | The Resonant Cut (3) | maps/nymara/amethyst_gauntlet_3.elm | ABG3
+map | manymouth_gauntlet | The Bund Run | maps/nymara/manymouth_gauntlet.elm | MDG1
+map | manymouth_gauntlet_2 | The Bund Run (2) | maps/nymara/manymouth_gauntlet_2.elm | MDG2
+map | manymouth_gauntlet_3 | The Bund Run (3) | maps/nymara/manymouth_gauntlet_3.elm | MDG3
+
+portal | amberwood_gauntlet | 801 | 26 | 312 | amberwood_gauntlet | 26 | 306
+portal | amberwood_gauntlet | 802 | 29 | 284 | amberwood_gauntlet | 29 | 278
+portal | amberwood_gauntlet | 803 | 25 | 252 | amberwood_gauntlet | 25 | 246
+portal | amberwood_gauntlet | 804 | 25 | 210 | amberwood_gauntlet | 25 | 204
+portal | amberwood_gauntlet | 805 | 22 | 170 | amberwood_gauntlet | 22 | 164
+portal | amberwood_gauntlet | 806 | 11 | 148 | amberwood_gauntlet | 11 | 142
+portal | amberwood_gauntlet | 807 | 33 | 148 | amberwood_gauntlet | 33 | 142
+portal | amberwood_gauntlet | 808 | 22 | 100 | amberwood_gauntlet | 22 | 94
+portal | amberwood_gauntlet | 809 | 22 | 60 | amberwood_gauntlet | 22 | 54
+portal | amberwood_gauntlet | 800 | 32 | 316 | amberwood | 329 |  117
+portal | amberwood_gauntlet | 799 | 27 | 12 | amberwood | 329 |  117
+portal | amberwood_gauntlet_2 | 801 | 26 | 312 | amberwood_gauntlet_2 | 26 | 306
+portal | amberwood_gauntlet_2 | 802 | 29 | 284 | amberwood_gauntlet_2 | 29 | 278
+portal | amberwood_gauntlet_2 | 803 | 25 | 252 | amberwood_gauntlet_2 | 25 | 246
+portal | amberwood_gauntlet_2 | 804 | 25 | 210 | amberwood_gauntlet_2 | 25 | 204
+portal | amberwood_gauntlet_2 | 805 | 22 | 170 | amberwood_gauntlet_2 | 22 | 164
+portal | amberwood_gauntlet_2 | 806 | 11 | 148 | amberwood_gauntlet_2 | 11 | 142
+portal | amberwood_gauntlet_2 | 807 | 33 | 148 | amberwood_gauntlet_2 | 33 | 142
+portal | amberwood_gauntlet_2 | 808 | 22 | 100 | amberwood_gauntlet_2 | 22 | 94
+portal | amberwood_gauntlet_2 | 809 | 22 | 60 | amberwood_gauntlet_2 | 22 | 54
+portal | amberwood_gauntlet_2 | 800 | 32 | 316 | amberwood | 329 |  117
+portal | amberwood_gauntlet_2 | 799 | 27 | 12 | amberwood | 329 |  117
+portal | amberwood_gauntlet_3 | 801 | 26 | 312 | amberwood_gauntlet_3 | 26 | 306
+portal | amberwood_gauntlet_3 | 802 | 29 | 284 | amberwood_gauntlet_3 | 29 | 278
+portal | amberwood_gauntlet_3 | 803 | 25 | 252 | amberwood_gauntlet_3 | 25 | 246
+portal | amberwood_gauntlet_3 | 804 | 25 | 210 | amberwood_gauntlet_3 | 25 | 204
+portal | amberwood_gauntlet_3 | 805 | 22 | 170 | amberwood_gauntlet_3 | 22 | 164
+portal | amberwood_gauntlet_3 | 806 | 11 | 148 | amberwood_gauntlet_3 | 11 | 142
+portal | amberwood_gauntlet_3 | 807 | 33 | 148 | amberwood_gauntlet_3 | 33 | 142
+portal | amberwood_gauntlet_3 | 808 | 22 | 100 | amberwood_gauntlet_3 | 22 | 94
+portal | amberwood_gauntlet_3 | 809 | 22 | 60 | amberwood_gauntlet_3 | 22 | 54
+portal | amberwood_gauntlet_3 | 800 | 32 | 316 | amberwood | 329 |  117
+portal | amberwood_gauntlet_3 | 799 | 27 | 12 | amberwood | 329 |  117
+portal | whitehorn_gauntlet | 801 | 24 | 312 | whitehorn_gauntlet | 24 | 306
+portal | whitehorn_gauntlet | 802 | 28 | 280 | whitehorn_gauntlet | 28 | 274
+portal | whitehorn_gauntlet | 803 | 25 | 240 | whitehorn_gauntlet | 25 | 234
+portal | whitehorn_gauntlet | 804 | 25 | 198 | whitehorn_gauntlet | 25 | 192
+portal | whitehorn_gauntlet | 805 | 22 | 170 | whitehorn_gauntlet | 22 | 164
+portal | whitehorn_gauntlet | 806 | 11 | 148 | whitehorn_gauntlet | 11 | 142
+portal | whitehorn_gauntlet | 807 | 33 | 148 | whitehorn_gauntlet | 33 | 142
+portal | whitehorn_gauntlet | 808 | 22 | 100 | whitehorn_gauntlet | 22 | 94
+portal | whitehorn_gauntlet | 809 | 19 | 60 | whitehorn_gauntlet | 19 | 54
+portal | whitehorn_gauntlet | 800 | 30 | 316 | whitehorn_range | 344 | 274
+portal | whitehorn_gauntlet | 799 | 24 | 12 | whitehorn_range | 344 | 274
+portal | whitehorn_gauntlet_2 | 801 | 24 | 312 | whitehorn_gauntlet_2 | 24 | 306
+portal | whitehorn_gauntlet_2 | 802 | 28 | 280 | whitehorn_gauntlet_2 | 28 | 274
+portal | whitehorn_gauntlet_2 | 803 | 25 | 240 | whitehorn_gauntlet_2 | 25 | 234
+portal | whitehorn_gauntlet_2 | 804 | 25 | 198 | whitehorn_gauntlet_2 | 25 | 192
+portal | whitehorn_gauntlet_2 | 805 | 22 | 170 | whitehorn_gauntlet_2 | 22 | 164
+portal | whitehorn_gauntlet_2 | 806 | 11 | 148 | whitehorn_gauntlet_2 | 11 | 142
+portal | whitehorn_gauntlet_2 | 807 | 33 | 148 | whitehorn_gauntlet_2 | 33 | 142
+portal | whitehorn_gauntlet_2 | 808 | 22 | 100 | whitehorn_gauntlet_2 | 22 | 94
+portal | whitehorn_gauntlet_2 | 809 | 19 | 60 | whitehorn_gauntlet_2 | 19 | 54
+portal | whitehorn_gauntlet_2 | 800 | 30 | 316 | whitehorn_range | 344 | 274
+portal | whitehorn_gauntlet_2 | 799 | 24 | 12 | whitehorn_range | 344 | 274
+portal | whitehorn_gauntlet_3 | 801 | 24 | 312 | whitehorn_gauntlet_3 | 24 | 306
+portal | whitehorn_gauntlet_3 | 802 | 28 | 280 | whitehorn_gauntlet_3 | 28 | 274
+portal | whitehorn_gauntlet_3 | 803 | 25 | 240 | whitehorn_gauntlet_3 | 25 | 234
+portal | whitehorn_gauntlet_3 | 804 | 25 | 198 | whitehorn_gauntlet_3 | 25 | 192
+portal | whitehorn_gauntlet_3 | 805 | 22 | 170 | whitehorn_gauntlet_3 | 22 | 164
+portal | whitehorn_gauntlet_3 | 806 | 11 | 148 | whitehorn_gauntlet_3 | 11 | 142
+portal | whitehorn_gauntlet_3 | 807 | 33 | 148 | whitehorn_gauntlet_3 | 33 | 142
+portal | whitehorn_gauntlet_3 | 808 | 22 | 100 | whitehorn_gauntlet_3 | 22 | 94
+portal | whitehorn_gauntlet_3 | 809 | 19 | 60 | whitehorn_gauntlet_3 | 19 | 54
+portal | whitehorn_gauntlet_3 | 800 | 30 | 316 | whitehorn_range | 344 | 274
+portal | whitehorn_gauntlet_3 | 799 | 24 | 12 | whitehorn_range | 344 | 274
+portal | ssarathi_gauntlet | 801 | 15 | 312 | ssarathi_gauntlet | 15 | 306
+portal | ssarathi_gauntlet | 802 | 18 | 284 | ssarathi_gauntlet | 18 | 278
+portal | ssarathi_gauntlet | 803 | 18 | 242 | ssarathi_gauntlet | 18 | 236
+portal | ssarathi_gauntlet | 804 | 22 | 210 | ssarathi_gauntlet | 22 | 204
+portal | ssarathi_gauntlet | 805 | 22 | 170 | ssarathi_gauntlet | 22 | 164
+portal | ssarathi_gauntlet | 806 | 11 | 148 | ssarathi_gauntlet | 11 | 142
+portal | ssarathi_gauntlet | 807 | 33 | 148 | ssarathi_gauntlet | 33 | 142
+portal | ssarathi_gauntlet | 808 | 22 | 100 | ssarathi_gauntlet | 22 | 94
+portal | ssarathi_gauntlet | 809 | 19 | 60 | ssarathi_gauntlet | 19 | 54
+portal | ssarathi_gauntlet | 800 | 21 | 316 | ssarathi_ruins | 198 |  81
+portal | ssarathi_gauntlet | 799 | 24 | 12 | ssarathi_ruins | 198 |  81
+portal | ssarathi_gauntlet_2 | 801 | 15 | 312 | ssarathi_gauntlet_2 | 15 | 306
+portal | ssarathi_gauntlet_2 | 802 | 18 | 284 | ssarathi_gauntlet_2 | 18 | 278
+portal | ssarathi_gauntlet_2 | 803 | 18 | 242 | ssarathi_gauntlet_2 | 18 | 236
+portal | ssarathi_gauntlet_2 | 804 | 22 | 210 | ssarathi_gauntlet_2 | 22 | 204
+portal | ssarathi_gauntlet_2 | 805 | 22 | 170 | ssarathi_gauntlet_2 | 22 | 164
+portal | ssarathi_gauntlet_2 | 806 | 11 | 148 | ssarathi_gauntlet_2 | 11 | 142
+portal | ssarathi_gauntlet_2 | 807 | 33 | 148 | ssarathi_gauntlet_2 | 33 | 142
+portal | ssarathi_gauntlet_2 | 808 | 22 | 100 | ssarathi_gauntlet_2 | 22 | 94
+portal | ssarathi_gauntlet_2 | 809 | 19 | 60 | ssarathi_gauntlet_2 | 19 | 54
+portal | ssarathi_gauntlet_2 | 800 | 21 | 316 | ssarathi_ruins | 198 |  81
+portal | ssarathi_gauntlet_2 | 799 | 24 | 12 | ssarathi_ruins | 198 |  81
+portal | ssarathi_gauntlet_3 | 801 | 15 | 312 | ssarathi_gauntlet_3 | 15 | 306
+portal | ssarathi_gauntlet_3 | 802 | 18 | 284 | ssarathi_gauntlet_3 | 18 | 278
+portal | ssarathi_gauntlet_3 | 803 | 18 | 242 | ssarathi_gauntlet_3 | 18 | 236
+portal | ssarathi_gauntlet_3 | 804 | 22 | 210 | ssarathi_gauntlet_3 | 22 | 204
+portal | ssarathi_gauntlet_3 | 805 | 22 | 170 | ssarathi_gauntlet_3 | 22 | 164
+portal | ssarathi_gauntlet_3 | 806 | 11 | 148 | ssarathi_gauntlet_3 | 11 | 142
+portal | ssarathi_gauntlet_3 | 807 | 33 | 148 | ssarathi_gauntlet_3 | 33 | 142
+portal | ssarathi_gauntlet_3 | 808 | 22 | 100 | ssarathi_gauntlet_3 | 22 | 94
+portal | ssarathi_gauntlet_3 | 809 | 19 | 60 | ssarathi_gauntlet_3 | 19 | 54
+portal | ssarathi_gauntlet_3 | 800 | 21 | 316 | ssarathi_ruins | 198 |  81
+portal | ssarathi_gauntlet_3 | 799 | 24 | 12 | ssarathi_ruins | 198 |  81
+portal | grey_moors_gauntlet | 801 | 29 | 312 | grey_moors_gauntlet | 29 | 306
+portal | grey_moors_gauntlet | 802 | 29 | 272 | grey_moors_gauntlet | 29 | 266
+portal | grey_moors_gauntlet | 803 | 25 | 240 | grey_moors_gauntlet | 25 | 234
+portal | grey_moors_gauntlet | 804 | 25 | 198 | grey_moors_gauntlet | 25 | 192
+portal | grey_moors_gauntlet | 805 | 22 | 170 | grey_moors_gauntlet | 22 | 164
+portal | grey_moors_gauntlet | 806 | 11 | 148 | grey_moors_gauntlet | 11 | 142
+portal | grey_moors_gauntlet | 807 | 33 | 148 | grey_moors_gauntlet | 33 | 142
+portal | grey_moors_gauntlet | 808 | 22 | 100 | grey_moors_gauntlet | 22 | 94
+portal | grey_moors_gauntlet | 809 | 19 | 60 | grey_moors_gauntlet | 19 | 54
+portal | grey_moors_gauntlet | 800 | 35 | 316 | grey_moors | 244 | 278
+portal | grey_moors_gauntlet | 799 | 24 | 12 | grey_moors | 244 | 278
+portal | grey_moors_gauntlet_2 | 801 | 29 | 312 | grey_moors_gauntlet_2 | 29 | 306
+portal | grey_moors_gauntlet_2 | 802 | 29 | 272 | grey_moors_gauntlet_2 | 29 | 266
+portal | grey_moors_gauntlet_2 | 803 | 25 | 240 | grey_moors_gauntlet_2 | 25 | 234
+portal | grey_moors_gauntlet_2 | 804 | 25 | 198 | grey_moors_gauntlet_2 | 25 | 192
+portal | grey_moors_gauntlet_2 | 805 | 22 | 170 | grey_moors_gauntlet_2 | 22 | 164
+portal | grey_moors_gauntlet_2 | 806 | 11 | 148 | grey_moors_gauntlet_2 | 11 | 142
+portal | grey_moors_gauntlet_2 | 807 | 33 | 148 | grey_moors_gauntlet_2 | 33 | 142
+portal | grey_moors_gauntlet_2 | 808 | 22 | 100 | grey_moors_gauntlet_2 | 22 | 94
+portal | grey_moors_gauntlet_2 | 809 | 19 | 60 | grey_moors_gauntlet_2 | 19 | 54
+portal | grey_moors_gauntlet_2 | 800 | 35 | 316 | grey_moors | 244 | 278
+portal | grey_moors_gauntlet_2 | 799 | 24 | 12 | grey_moors | 244 | 278
+portal | grey_moors_gauntlet_3 | 801 | 29 | 312 | grey_moors_gauntlet_3 | 29 | 306
+portal | grey_moors_gauntlet_3 | 802 | 29 | 272 | grey_moors_gauntlet_3 | 29 | 266
+portal | grey_moors_gauntlet_3 | 803 | 25 | 240 | grey_moors_gauntlet_3 | 25 | 234
+portal | grey_moors_gauntlet_3 | 804 | 25 | 198 | grey_moors_gauntlet_3 | 25 | 192
+portal | grey_moors_gauntlet_3 | 805 | 22 | 170 | grey_moors_gauntlet_3 | 22 | 164
+portal | grey_moors_gauntlet_3 | 806 | 11 | 148 | grey_moors_gauntlet_3 | 11 | 142
+portal | grey_moors_gauntlet_3 | 807 | 33 | 148 | grey_moors_gauntlet_3 | 33 | 142
+portal | grey_moors_gauntlet_3 | 808 | 22 | 100 | grey_moors_gauntlet_3 | 22 | 94
+portal | grey_moors_gauntlet_3 | 809 | 19 | 60 | grey_moors_gauntlet_3 | 19 | 54
+portal | grey_moors_gauntlet_3 | 800 | 35 | 316 | grey_moors | 244 | 278
+portal | grey_moors_gauntlet_3 | 799 | 24 | 12 | grey_moors | 244 | 278
+portal | crownwater_gauntlet | 801 | 15 | 312 | crownwater_gauntlet | 15 | 306
+portal | crownwater_gauntlet | 802 | 18 | 284 | crownwater_gauntlet | 18 | 278
+portal | crownwater_gauntlet | 803 | 18 | 242 | crownwater_gauntlet | 18 | 236
+portal | crownwater_gauntlet | 804 | 22 | 210 | crownwater_gauntlet | 22 | 204
+portal | crownwater_gauntlet | 805 | 22 | 170 | crownwater_gauntlet | 22 | 164
+portal | crownwater_gauntlet | 806 | 11 | 148 | crownwater_gauntlet | 11 | 142
+portal | crownwater_gauntlet | 807 | 33 | 148 | crownwater_gauntlet | 33 | 142
+portal | crownwater_gauntlet | 808 | 22 | 100 | crownwater_gauntlet | 22 | 94
+portal | crownwater_gauntlet | 809 | 19 | 60 | crownwater_gauntlet | 19 | 54
+portal | crownwater_gauntlet | 800 | 21 | 316 | crownwater | 152 | 122
+portal | crownwater_gauntlet | 799 | 24 | 12 | crownwater | 152 | 122
+portal | crownwater_gauntlet_2 | 801 | 15 | 312 | crownwater_gauntlet_2 | 15 | 306
+portal | crownwater_gauntlet_2 | 802 | 18 | 284 | crownwater_gauntlet_2 | 18 | 278
+portal | crownwater_gauntlet_2 | 803 | 18 | 242 | crownwater_gauntlet_2 | 18 | 236
+portal | crownwater_gauntlet_2 | 804 | 22 | 210 | crownwater_gauntlet_2 | 22 | 204
+portal | crownwater_gauntlet_2 | 805 | 22 | 170 | crownwater_gauntlet_2 | 22 | 164
+portal | crownwater_gauntlet_2 | 806 | 11 | 148 | crownwater_gauntlet_2 | 11 | 142
+portal | crownwater_gauntlet_2 | 807 | 33 | 148 | crownwater_gauntlet_2 | 33 | 142
+portal | crownwater_gauntlet_2 | 808 | 22 | 100 | crownwater_gauntlet_2 | 22 | 94
+portal | crownwater_gauntlet_2 | 809 | 19 | 60 | crownwater_gauntlet_2 | 19 | 54
+portal | crownwater_gauntlet_2 | 800 | 21 | 316 | crownwater | 152 | 122
+portal | crownwater_gauntlet_2 | 799 | 24 | 12 | crownwater | 152 | 122
+portal | crownwater_gauntlet_3 | 801 | 15 | 312 | crownwater_gauntlet_3 | 15 | 306
+portal | crownwater_gauntlet_3 | 802 | 18 | 284 | crownwater_gauntlet_3 | 18 | 278
+portal | crownwater_gauntlet_3 | 803 | 18 | 242 | crownwater_gauntlet_3 | 18 | 236
+portal | crownwater_gauntlet_3 | 804 | 22 | 210 | crownwater_gauntlet_3 | 22 | 204
+portal | crownwater_gauntlet_3 | 805 | 22 | 170 | crownwater_gauntlet_3 | 22 | 164
+portal | crownwater_gauntlet_3 | 806 | 11 | 148 | crownwater_gauntlet_3 | 11 | 142
+portal | crownwater_gauntlet_3 | 807 | 33 | 148 | crownwater_gauntlet_3 | 33 | 142
+portal | crownwater_gauntlet_3 | 808 | 22 | 100 | crownwater_gauntlet_3 | 22 | 94
+portal | crownwater_gauntlet_3 | 809 | 19 | 60 | crownwater_gauntlet_3 | 19 | 54
+portal | crownwater_gauntlet_3 | 800 | 21 | 316 | crownwater | 152 | 122
+portal | crownwater_gauntlet_3 | 799 | 24 | 12 | crownwater | 152 | 122
+portal | sunmane_gauntlet | 801 | 25 | 311 | sunmane_gauntlet | 25 | 305
+portal | sunmane_gauntlet | 802 | 28 | 283 | sunmane_gauntlet | 28 | 277
+portal | sunmane_gauntlet | 803 | 24 | 251 | sunmane_gauntlet | 24 | 245
+portal | sunmane_gauntlet | 804 | 24 | 209 | sunmane_gauntlet | 24 | 203
+portal | sunmane_gauntlet | 805 | 21 | 169 | sunmane_gauntlet | 21 | 163
+portal | sunmane_gauntlet | 806 | 10 | 147 | sunmane_gauntlet | 10 | 141
+portal | sunmane_gauntlet | 807 | 32 | 147 | sunmane_gauntlet | 32 | 141
+portal | sunmane_gauntlet | 808 | 21 | 99 | sunmane_gauntlet | 21 | 93
+portal | sunmane_gauntlet | 809 | 21 | 59 | sunmane_gauntlet | 21 | 53
+portal | sunmane_gauntlet | 800 | 31 | 315 | sunmane_steppe | 183 | 142
+portal | sunmane_gauntlet | 799 | 26 | 11 | sunmane_steppe | 183 | 142
+portal | sunmane_gauntlet_2 | 801 | 25 | 311 | sunmane_gauntlet_2 | 25 | 305
+portal | sunmane_gauntlet_2 | 802 | 28 | 283 | sunmane_gauntlet_2 | 28 | 277
+portal | sunmane_gauntlet_2 | 803 | 24 | 251 | sunmane_gauntlet_2 | 24 | 245
+portal | sunmane_gauntlet_2 | 804 | 24 | 209 | sunmane_gauntlet_2 | 24 | 203
+portal | sunmane_gauntlet_2 | 805 | 21 | 169 | sunmane_gauntlet_2 | 21 | 163
+portal | sunmane_gauntlet_2 | 806 | 10 | 147 | sunmane_gauntlet_2 | 10 | 141
+portal | sunmane_gauntlet_2 | 807 | 32 | 147 | sunmane_gauntlet_2 | 32 | 141
+portal | sunmane_gauntlet_2 | 808 | 21 | 99 | sunmane_gauntlet_2 | 21 | 93
+portal | sunmane_gauntlet_2 | 809 | 21 | 59 | sunmane_gauntlet_2 | 21 | 53
+portal | sunmane_gauntlet_2 | 800 | 31 | 315 | sunmane_steppe | 183 | 142
+portal | sunmane_gauntlet_2 | 799 | 26 | 11 | sunmane_steppe | 183 | 142
+portal | sunmane_gauntlet_3 | 801 | 25 | 311 | sunmane_gauntlet_3 | 25 | 305
+portal | sunmane_gauntlet_3 | 802 | 28 | 283 | sunmane_gauntlet_3 | 28 | 277
+portal | sunmane_gauntlet_3 | 803 | 24 | 251 | sunmane_gauntlet_3 | 24 | 245
+portal | sunmane_gauntlet_3 | 804 | 24 | 209 | sunmane_gauntlet_3 | 24 | 203
+portal | sunmane_gauntlet_3 | 805 | 21 | 169 | sunmane_gauntlet_3 | 21 | 163
+portal | sunmane_gauntlet_3 | 806 | 10 | 147 | sunmane_gauntlet_3 | 10 | 141
+portal | sunmane_gauntlet_3 | 807 | 32 | 147 | sunmane_gauntlet_3 | 32 | 141
+portal | sunmane_gauntlet_3 | 808 | 21 | 99 | sunmane_gauntlet_3 | 21 | 93
+portal | sunmane_gauntlet_3 | 809 | 21 | 59 | sunmane_gauntlet_3 | 21 | 53
+portal | sunmane_gauntlet_3 | 800 | 31 | 315 | sunmane_steppe | 183 | 142
+portal | sunmane_gauntlet_3 | 799 | 26 | 11 | sunmane_steppe | 183 | 142
+portal | amethyst_gauntlet | 801 | 21 | 346 | amethyst_gauntlet | 21 | 340
+portal | amethyst_gauntlet | 802 | 25 | 310 | amethyst_gauntlet | 25 | 304
+portal | amethyst_gauntlet | 803 | 25 | 266 | amethyst_gauntlet | 25 | 260
+portal | amethyst_gauntlet | 804 | 25 | 220 | amethyst_gauntlet | 25 | 214
+portal | amethyst_gauntlet | 805 | 22 | 188 | amethyst_gauntlet | 22 | 182
+portal | amethyst_gauntlet | 806 | 11 | 162 | amethyst_gauntlet | 11 | 156
+portal | amethyst_gauntlet | 807 | 33 | 162 | amethyst_gauntlet | 33 | 156
+portal | amethyst_gauntlet | 808 | 22 | 106 | amethyst_gauntlet | 22 | 100
+portal | amethyst_gauntlet | 809 | 19 | 62 | amethyst_gauntlet | 19 | 56
+portal | amethyst_gauntlet | 800 | 27 | 352 | amethyst_barrens | 50 | 343
+portal | amethyst_gauntlet | 799 | 24 | 12 | amethyst_barrens | 50 | 343
+portal | amethyst_gauntlet_2 | 801 | 21 | 346 | amethyst_gauntlet_2 | 21 | 340
+portal | amethyst_gauntlet_2 | 802 | 25 | 310 | amethyst_gauntlet_2 | 25 | 304
+portal | amethyst_gauntlet_2 | 803 | 25 | 266 | amethyst_gauntlet_2 | 25 | 260
+portal | amethyst_gauntlet_2 | 804 | 25 | 220 | amethyst_gauntlet_2 | 25 | 214
+portal | amethyst_gauntlet_2 | 805 | 22 | 188 | amethyst_gauntlet_2 | 22 | 182
+portal | amethyst_gauntlet_2 | 806 | 11 | 162 | amethyst_gauntlet_2 | 11 | 156
+portal | amethyst_gauntlet_2 | 807 | 33 | 162 | amethyst_gauntlet_2 | 33 | 156
+portal | amethyst_gauntlet_2 | 808 | 22 | 106 | amethyst_gauntlet_2 | 22 | 100
+portal | amethyst_gauntlet_2 | 809 | 19 | 62 | amethyst_gauntlet_2 | 19 | 56
+portal | amethyst_gauntlet_2 | 800 | 27 | 352 | amethyst_barrens | 50 | 343
+portal | amethyst_gauntlet_2 | 799 | 24 | 12 | amethyst_barrens | 50 | 343
+portal | amethyst_gauntlet_3 | 801 | 21 | 346 | amethyst_gauntlet_3 | 21 | 340
+portal | amethyst_gauntlet_3 | 802 | 25 | 310 | amethyst_gauntlet_3 | 25 | 304
+portal | amethyst_gauntlet_3 | 803 | 25 | 266 | amethyst_gauntlet_3 | 25 | 260
+portal | amethyst_gauntlet_3 | 804 | 25 | 220 | amethyst_gauntlet_3 | 25 | 214
+portal | amethyst_gauntlet_3 | 805 | 22 | 188 | amethyst_gauntlet_3 | 22 | 182
+portal | amethyst_gauntlet_3 | 806 | 11 | 162 | amethyst_gauntlet_3 | 11 | 156
+portal | amethyst_gauntlet_3 | 807 | 33 | 162 | amethyst_gauntlet_3 | 33 | 156
+portal | amethyst_gauntlet_3 | 808 | 22 | 106 | amethyst_gauntlet_3 | 22 | 100
+portal | amethyst_gauntlet_3 | 809 | 19 | 62 | amethyst_gauntlet_3 | 19 | 56
+portal | amethyst_gauntlet_3 | 800 | 27 | 352 | amethyst_barrens | 50 | 343
+portal | amethyst_gauntlet_3 | 799 | 24 | 12 | amethyst_barrens | 50 | 343
+portal | manymouth_gauntlet | 801 | 15 | 346 | manymouth_gauntlet | 15 | 340
+portal | manymouth_gauntlet | 802 | 18 | 314 | manymouth_gauntlet | 18 | 308
+portal | manymouth_gauntlet | 803 | 18 | 268 | manymouth_gauntlet | 18 | 262
+portal | manymouth_gauntlet | 804 | 22 | 232 | manymouth_gauntlet | 22 | 226
+portal | manymouth_gauntlet | 805 | 22 | 188 | manymouth_gauntlet | 22 | 182
+portal | manymouth_gauntlet | 806 | 11 | 162 | manymouth_gauntlet | 11 | 156
+portal | manymouth_gauntlet | 807 | 33 | 162 | manymouth_gauntlet | 33 | 156
+portal | manymouth_gauntlet | 808 | 22 | 106 | manymouth_gauntlet | 22 | 100
+portal | manymouth_gauntlet | 809 | 19 | 62 | manymouth_gauntlet | 19 | 56
+portal | manymouth_gauntlet | 800 | 21 | 352 | manymouth_delta | 179 | 317
+portal | manymouth_gauntlet | 799 | 24 | 12 | manymouth_delta | 179 | 317
+portal | manymouth_gauntlet_2 | 801 | 15 | 346 | manymouth_gauntlet_2 | 15 | 340
+portal | manymouth_gauntlet_2 | 802 | 18 | 314 | manymouth_gauntlet_2 | 18 | 308
+portal | manymouth_gauntlet_2 | 803 | 18 | 268 | manymouth_gauntlet_2 | 18 | 262
+portal | manymouth_gauntlet_2 | 804 | 22 | 232 | manymouth_gauntlet_2 | 22 | 226
+portal | manymouth_gauntlet_2 | 805 | 22 | 188 | manymouth_gauntlet_2 | 22 | 182
+portal | manymouth_gauntlet_2 | 806 | 11 | 162 | manymouth_gauntlet_2 | 11 | 156
+portal | manymouth_gauntlet_2 | 807 | 33 | 162 | manymouth_gauntlet_2 | 33 | 156
+portal | manymouth_gauntlet_2 | 808 | 22 | 106 | manymouth_gauntlet_2 | 22 | 100
+portal | manymouth_gauntlet_2 | 809 | 19 | 62 | manymouth_gauntlet_2 | 19 | 56
+portal | manymouth_gauntlet_2 | 800 | 21 | 352 | manymouth_delta | 179 | 317
+portal | manymouth_gauntlet_2 | 799 | 24 | 12 | manymouth_delta | 179 | 317
+portal | manymouth_gauntlet_3 | 801 | 15 | 346 | manymouth_gauntlet_3 | 15 | 340
+portal | manymouth_gauntlet_3 | 802 | 18 | 314 | manymouth_gauntlet_3 | 18 | 308
+portal | manymouth_gauntlet_3 | 803 | 18 | 268 | manymouth_gauntlet_3 | 18 | 262
+portal | manymouth_gauntlet_3 | 804 | 22 | 232 | manymouth_gauntlet_3 | 22 | 226
+portal | manymouth_gauntlet_3 | 805 | 22 | 188 | manymouth_gauntlet_3 | 22 | 182
+portal | manymouth_gauntlet_3 | 806 | 11 | 162 | manymouth_gauntlet_3 | 11 | 156
+portal | manymouth_gauntlet_3 | 807 | 33 | 162 | manymouth_gauntlet_3 | 33 | 156
+portal | manymouth_gauntlet_3 | 808 | 22 | 106 | manymouth_gauntlet_3 | 22 | 100
+portal | manymouth_gauntlet_3 | 809 | 19 | 62 | manymouth_gauntlet_3 | 19 | 56
+portal | manymouth_gauntlet_3 | 800 | 21 | 352 | manymouth_delta | 179 | 317
+portal | manymouth_gauntlet_3 | 799 | 24 | 12 | manymouth_delta | 179 | 317
+# --- end of the Nymara gauntlets ---
+
+map | stillglass | Stillglass Observatory | maps/stillglass.elm

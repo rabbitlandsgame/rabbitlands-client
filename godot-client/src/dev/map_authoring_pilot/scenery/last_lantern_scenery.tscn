@@ -1,0 +1,307 @@
+[gd_scene load_steps=38 format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/scenery/last_lantern_scenery.gd" id="1_script"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="2_surface"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/object_surface.gd" id="3_object"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-basecolor.png" id="4_timber_color"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-normal.png" id="5_timber_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/timber-orm.png" id="6_timber_orm"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-basecolor.png" id="7_stone_color"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-normal.png" id="8_stone_normal"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/stone-orm.png" id="9_stone_orm"]
+
+[sub_resource type="ORMMaterial3D" id="Material_timber"]
+albedo_color = Color(0.65, 0.64, 0.59, 1)
+albedo_texture = ExtResource("4_timber_color")
+roughness = 0.86
+normal_enabled = true
+normal_scale = 0.8
+normal_texture = ExtResource("5_timber_normal")
+orm_texture = ExtResource("6_timber_orm")
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="ORMMaterial3D" id="Material_stone"]
+albedo_color = Color(0.48, 0.56, 0.56, 1)
+albedo_texture = ExtResource("7_stone_color")
+roughness = 1.0
+normal_enabled = true
+normal_scale = 0.72
+normal_texture = ExtResource("8_stone_normal")
+orm_texture = ExtResource("9_stone_orm")
+uv1_scale = Vector3(0.8, 0.8, 0.8)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 4
+cull_mode = 2
+
+[sub_resource type="Resource" id="Surface_lantern_post"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+texture_preset = "Timber"
+source_material = SubResource("Material_timber")
+
+[sub_resource type="Resource" id="Surface_lantern_arm"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+texture_preset = "Timber"
+source_material = SubResource("Material_timber")
+
+[sub_resource type="Resource" id="Surface_rock_west"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+texture_preset = "Stone"
+source_material = SubResource("Material_stone")
+
+[sub_resource type="Resource" id="Surface_rock_east"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+texture_preset = "Stone"
+source_material = SubResource("Material_stone")
+
+[sub_resource type="Resource" id="Surface_trunk"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+texture_preset = "Timber"
+source_material = SubResource("Material_timber")
+
+[sub_resource type="Resource" id="Surface_sign_post"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+texture_preset = "Timber"
+source_material = SubResource("Material_timber")
+
+[sub_resource type="Resource" id="Surface_sign_board"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+texture_preset = "Timber"
+source_material = SubResource("Material_timber")
+
+[sub_resource type="BoxMesh" id="BoxMesh_post"]
+size = Vector3(0.18, 2.8, 0.18)
+
+[sub_resource type="BoxMesh" id="BoxMesh_arm"]
+size = Vector3(0.8, 0.12, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lantern"]
+size = Vector3(0.34, 0.44, 0.34)
+
+[sub_resource type="StandardMaterial3D" id="Material_amber"]
+transparency = 1
+albedo_color = Color(1, 0.43, 0.08, 0.78)
+emission_enabled = true
+emission = Color(1, 0.24, 0.03, 1)
+emission_energy_multiplier = 3.2
+roughness = 0.24
+
+[sub_resource type="Resource" id="Surface_glass"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+source_material = SubResource("Material_amber")
+
+[sub_resource type="SphereMesh" id="SphereMesh_rock"]
+radius = 0.75
+height = 1.5
+radial_segments = 12
+rings = 6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_trunk"]
+top_radius = 0.18
+bottom_radius = 0.28
+height = 3.7
+radial_segments = 8
+
+[sub_resource type="StandardMaterial3D" id="Material_needles"]
+albedo_color = Color(0.055, 0.16, 0.105, 1)
+roughness = 0.96
+
+[sub_resource type="Resource" id="Surface_needles_lower"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+source_material = SubResource("Material_needles")
+
+[sub_resource type="Resource" id="Surface_needles_upper"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+source_material = SubResource("Material_needles")
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_needles_large"]
+top_radius = 0.08
+bottom_radius = 1.35
+height = 2.4
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_needles_small"]
+top_radius = 0.05
+bottom_radius = 1.0
+height = 1.9
+radial_segments = 10
+
+[sub_resource type="StandardMaterial3D" id="Material_grass"]
+albedo_color = Color(0.16, 0.26, 0.11, 1)
+roughness = 1.0
+cull_mode = 2
+
+[sub_resource type="Resource" id="Surface_grass_north_a"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+source_material = SubResource("Material_grass")
+
+[sub_resource type="Resource" id="Surface_grass_north_b"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+source_material = SubResource("Material_grass")
+
+[sub_resource type="Resource" id="Surface_grass_south_a"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+source_material = SubResource("Material_grass")
+
+[sub_resource type="Resource" id="Surface_grass_south_b"]
+resource_local_to_scene = true
+script = ExtResource("2_surface")
+source_material = SubResource("Material_grass")
+
+[sub_resource type="BoxMesh" id="QuadMesh_grass"]
+material = SubResource("Material_grass")
+size = Vector3(0.09, 1.0, 0.09)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sign"]
+size = Vector3(1.05, 0.5, 0.11)
+
+[node name="LastLanternScenery" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="CabinLantern" type="Node3D" parent="."]
+position = Vector3(18.4, 2.2, 10.5)
+rotation_degrees = Vector3(0, -12, 0)
+
+[node name="Post" type="MeshInstance3D" parent="CabinLantern"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_lantern_post")
+position = Vector3(0, 1.4, 0)
+mesh = SubResource("BoxMesh_post")
+metadata/style_slot = "timber"
+
+[node name="Arm" type="MeshInstance3D" parent="CabinLantern"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_lantern_arm")
+position = Vector3(-0.31, 2.68, 0)
+mesh = SubResource("BoxMesh_arm")
+metadata/style_slot = "timber"
+
+[node name="Glass" type="MeshInstance3D" parent="CabinLantern"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_glass")
+position = Vector3(-0.66, 2.35, 0)
+mesh = SubResource("BoxMesh_lantern")
+material_override = SubResource("Material_amber")
+
+[node name="WarmLight" type="OmniLight3D" parent="CabinLantern"]
+position = Vector3(-0.66, 2.35, 0)
+light_color = Color(1, 0.52, 0.2, 1)
+light_energy = 4.2
+omni_range = 7.5
+shadow_enabled = true
+
+[node name="ShoreRockWest" type="MeshInstance3D" parent="."]
+script = ExtResource("3_object")
+surface = SubResource("Surface_rock_west")
+position = Vector3(-6.7, 2.15, 10.2)
+rotation_degrees = Vector3(4, 26, -5)
+scale = Vector3(1.45, 0.72, 1.05)
+mesh = SubResource("SphereMesh_rock")
+metadata/style_slot = "stone"
+
+[node name="ShoreRockEast" type="MeshInstance3D" parent="."]
+script = ExtResource("3_object")
+surface = SubResource("Surface_rock_east")
+position = Vector3(6.4, 2.1, -11.3)
+rotation_degrees = Vector3(-3, -17, 6)
+scale = Vector3(1.05, 0.58, 0.82)
+mesh = SubResource("SphereMesh_rock")
+metadata/style_slot = "stone"
+
+[node name="WindPine" type="Node3D" parent="."]
+position = Vector3(-15.2, 1.6, 13.0)
+rotation_degrees = Vector3(0, 0, -7)
+
+[node name="Trunk" type="MeshInstance3D" parent="WindPine"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_trunk")
+position = Vector3(0, 1.85, 0)
+mesh = SubResource("CylinderMesh_trunk")
+metadata/style_slot = "timber"
+
+[node name="LowerNeedles" type="MeshInstance3D" parent="WindPine"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_needles_lower")
+position = Vector3(0.3, 3.15, 0)
+rotation_degrees = Vector3(0, 0, -12)
+mesh = SubResource("CylinderMesh_needles_large")
+material_override = SubResource("Material_needles")
+
+[node name="UpperNeedles" type="MeshInstance3D" parent="WindPine"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_needles_upper")
+position = Vector3(0.55, 4.45, 0)
+rotation_degrees = Vector3(0, 0, -16)
+mesh = SubResource("CylinderMesh_needles_small")
+material_override = SubResource("Material_needles")
+
+[node name="GrassClumpNorth" type="Node3D" parent="."]
+position = Vector3(-9.2, 2.0, 15.4)
+
+[node name="BladeA" type="MeshInstance3D" parent="GrassClumpNorth"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_grass_north_a")
+position = Vector3(0, 0.45, 0)
+rotation_degrees = Vector3(0, 0, -12)
+mesh = SubResource("QuadMesh_grass")
+
+[node name="BladeB" type="MeshInstance3D" parent="GrassClumpNorth"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_grass_north_b")
+position = Vector3(0.2, 0.38, 0.04)
+rotation_degrees = Vector3(18, 42, 16)
+mesh = SubResource("QuadMesh_grass")
+
+[node name="GrassClumpSouth" type="Node3D" parent="."]
+position = Vector3(10.5, 1.6, -15.2)
+scale = Vector3(1.25, 0.9, 1.25)
+
+[node name="BladeA" type="MeshInstance3D" parent="GrassClumpSouth"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_grass_south_a")
+position = Vector3(0, 0.45, 0)
+rotation_degrees = Vector3(-8, 0, 14)
+mesh = SubResource("QuadMesh_grass")
+
+[node name="BladeB" type="MeshInstance3D" parent="GrassClumpSouth"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_grass_south_b")
+position = Vector3(-0.2, 0.4, 0.08)
+rotation_degrees = Vector3(12, 52, -16)
+mesh = SubResource("QuadMesh_grass")
+
+[node name="WeatheredSign" type="Node3D" parent="."]
+position = Vector3(13.7, 2.0, 12.2)
+rotation_degrees = Vector3(0, -28, 0)
+
+[node name="Post" type="MeshInstance3D" parent="WeatheredSign"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_sign_post")
+position = Vector3(0, 0.9, 0)
+scale = Vector3(0.8, 0.7, 0.8)
+mesh = SubResource("BoxMesh_post")
+metadata/style_slot = "timber"
+
+[node name="Board" type="MeshInstance3D" parent="WeatheredSign"]
+script = ExtResource("3_object")
+surface = SubResource("Surface_sign_board")
+position = Vector3(0, 1.7, 0)
+mesh = SubResource("BoxMesh_sign")
+metadata/style_slot = "timber"

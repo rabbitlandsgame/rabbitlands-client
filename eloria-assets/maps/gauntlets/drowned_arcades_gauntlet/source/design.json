@@ -1,0 +1,1707 @@
+{
+ "_note": "Rules of the arcades - everything a run of drowned_arcades_gauntlet needs except geometry (source/layout.json). Written by work-output/gauntlet-v2-design/regions/tools/author_routes.py from the approved concept: three bands by the run's level, five waves of two variants each and a court. Counts are for a party of four; the server multiplies by partyScale (leaders and bosses never multiply).",
+ "schema": "eloria-trail-design-v1",
+ "id": "drowned_arcades_gauntlet",
+ "route": "drowned_arcades",
+ "name": "The Drowned Arcades",
+ "short": "drownedarcades",
+ "region": "crownwater",
+ "flavour": "Knee-deep water fills the old customs quarter. The road wades from the quay through the customs square, over the grand canal on the bell walk, through the cistern square and the long arcade, across the sluice locks to the piazza under the drowned campanile, where the Bell Warden still rings.",
+ "copies": 3,
+ "timeLimitSeconds": 2700,
+ "cooldownHours": 6,
+ "minPlayers": 1,
+ "maxPlayers": 6,
+ "wipeSeconds": 90,
+ "broker": {
+  "npc": "Rellan",
+  "map": "landfall"
+ },
+ "partyScale": {
+  "1": 0.6,
+  "2": 0.75,
+  "3": 0.9,
+  "4": 1.0,
+  "5": 1.15,
+  "6": 1.3
+ },
+ "pulse": {
+  "releaseAliveFraction": 0.34,
+  "releaseSeconds": 45
+ },
+ "leash": {
+  "marginMetres": 10,
+  "evadeSeconds": 8
+ },
+ "checkpointDelaySeconds": 10,
+ "shapes": {
+  "pack": 1.0,
+  "swarm": 0.8,
+  "heavies": 1.25,
+  "leader": 1.25
+ },
+ "mutators": [
+  [
+   "none",
+   5
+  ],
+  [
+   "frenzy",
+   2
+  ],
+  [
+   "hunted",
+   2
+  ],
+  [
+   "bounty",
+   1
+  ],
+  [
+   "swift",
+   1
+  ]
+ ],
+ "cache": [
+  [
+   "Potion of Great Healing",
+   "3-5",
+   "1"
+  ],
+  [
+   "Gold Coins",
+   "150-400",
+   "1"
+  ],
+  [
+   "Bones",
+   "6-12",
+   "1"
+  ]
+ ],
+ "cacheRare": [],
+ "bonus": {
+  "section": "bell-steps",
+  "note": "one harvest node of an existing herb (the server tool's bonus resource)"
+ },
+ "lore": [
+  {
+   "at": "trailhead",
+   "title": "Rules of the arcades",
+   "text": "One party at a time. The tide brings them to you; the streets behind stay quiet once you have cleared them. Fall and you rise at the last fire you passed. The waystones count you out."
+  },
+  {
+   "at": "bell-steps",
+   "title": "The bell-ringers' steps",
+   "text": "The ringers climbed out of the flood here to dry their ropes. One rope is still tied to the rail."
+  }
+ ],
+ "bands": [
+  {
+   "id": "tide",
+   "label": "The Tide",
+   "minLevel": 1,
+   "maxLevel": 24,
+   "story": "What the tide carries into the streets: crabs, rays and slime.",
+   "roster": [
+    "coralcrest_heron",
+    "bronze_tide_crab",
+    "crystal_shore_crab",
+    "luminous_manta_ray",
+    "giant_leech",
+    "slime"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "coralcrest-heron",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "coralcrest_heron",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "coralcrest_heron",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "coralcrest_heron",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "bronze-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "bronze_tide_crab",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "bronze_tide_crab",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "bronze_tide_crab",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "shore-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_shore_crab",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "crystal_shore_crab",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "crystal_shore_crab",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "manta-ray",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest"
+        ],
+        "groups": [
+         [
+          "luminous_manta_ray",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "luminous_manta_ray",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "luminous_manta_ray",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "giant-leech",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          12,
+          "swarm"
+         ],
+         [
+          "slime",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "coralcrest-heron",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "coralcrest_heron",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "coralcrest_heron",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "coralcrest_heron",
+          12,
+          "pack"
+         ],
+         [
+          "slime",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "bronze-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "bronze_tide_crab",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "bronze_tide_crab",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "bronze_tide_crab",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "shore-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "crystal_shore_crab",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_shore_crab",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_shore_crab",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "manta-ray",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "luminous_manta_ray",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "luminous_manta_ray",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "luminous_manta_ray",
+          15,
+          "pack"
+         ],
+         [
+          "slime",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "giant-leech",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "swarm"
+         ],
+         [
+          "slime",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "inline",
+    "creature": "abyssal_armored_fish",
+    "name": "the Sluice Serpent",
+    "health": 6.0,
+    "strength": [
+     0.9,
+     1.4
+    ],
+    "adds": [
+     [
+      "coralcrest_heron",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "undertow",
+   "label": "The Undertow",
+   "minLevel": 20,
+   "maxLevel": 44,
+   "story": "The drowned quarter's own: pirates, constructs and the ogres of the old docks.",
+   "roster": [
+    "drowned_pirate",
+    "octopus",
+    "abyssal_armored_fish",
+    "tidal_claw_construct",
+    "mire_kelpie",
+    "barnacle_ogre",
+    "crownwater_temple_guard"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "drowned-pirate",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "drowned_pirate",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "drowned_pirate",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "drowned_pirate",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "octopus",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "octopus",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "octopus",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "octopus",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "octopus",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "abyssal-armored-fish",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest"
+        ],
+        "groups": [
+         [
+          "abyssal_armored_fish",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "abyssal_armored_fish",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "abyssal_armored_fish",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "tidal-construct",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest"
+        ],
+        "groups": [
+         [
+          "tidal_claw_construct",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "tidal_claw_construct",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "tidal_claw_construct",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "mire-kelpie",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          12,
+          "pack"
+         ],
+         [
+          "crownwater_temple_guard",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "barnacle-ogre",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "barnacle_ogre",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "barnacle_ogre",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "barnacle_ogre",
+          12,
+          "pack"
+         ],
+         [
+          "crownwater_temple_guard",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "drowned-pirate",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "drowned_pirate",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "drowned_pirate",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "drowned_pirate",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "octopus",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "octopus",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "octopus",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "octopus",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "octopus",
+          13,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "abyssal-armored-fish",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "abyssal_armored_fish",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "abyssal_armored_fish",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "abyssal_armored_fish",
+          15,
+          "pack"
+         ],
+         [
+          "crownwater_temple_guard",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "tidal-construct",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "tidal_claw_construct",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "tidal_claw_construct",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "tidal_claw_construct",
+          15,
+          "pack"
+         ],
+         [
+          "crownwater_temple_guard",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "bell_warden",
+    "existing": true,
+    "name": "Bell Warden",
+    "adds": [
+     [
+      "drowned_pirate",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "crown",
+   "label": "The Drowned Crown",
+   "minLevel": 40,
+   "maxLevel": 0,
+   "story": "The court of the drowned: the lich who wears the crown, and its guard.",
+   "roster": [
+    "levitating_jellyfish",
+    "merfolk",
+    "tidal_crystal_lion",
+    "hammerhead_shark",
+    "sunken_stone_colossus",
+    "drowned_lich_king"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "levitating-jellyfish",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "levitating_jellyfish",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "levitating_jellyfish",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "levitating_jellyfish",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "levitating_jellyfish",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "merfolk",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "merfolk",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "merfolk",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast"
+        ],
+        "groups": [
+         [
+          "merfolk",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-southeast",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "merfolk",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "tidal-lion",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest"
+        ],
+        "groups": [
+         [
+          "tidal_crystal_lion",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "tidal_crystal_lion",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "tidal_crystal_lion",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "hammerhead-shark",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest"
+        ],
+        "groups": [
+         [
+          "hammerhead_shark",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "hammerhead_shark",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-east",
+         "w2-northwest",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "hammerhead_shark",
+          4,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "sunken-colossus",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "sunken_stone_colossus",
+          3,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "sunken_stone_colossus",
+          3,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "sunken_stone_colossus",
+          3,
+          "heavies"
+         ],
+         [
+          "drowned_lich_king",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "levitating-jellyfish",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "levitating_jellyfish",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "levitating_jellyfish",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest"
+        ],
+        "groups": [
+         [
+          "levitating_jellyfish",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast",
+         "w3-northwest",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "levitating_jellyfish",
+          12,
+          "swarm"
+         ],
+         [
+          "drowned_lich_king",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "merfolk",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "merfolk",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "merfolk",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "merfolk",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "merfolk",
+          13,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "tidal-lion",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west"
+        ],
+        "groups": [
+         [
+          "tidal_crystal_lion",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "tidal_crystal_lion",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east",
+         "w4-west",
+         "w4-northeast"
+        ],
+        "groups": [
+         [
+          "tidal_crystal_lion",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "hammerhead-shark",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "hammerhead_shark",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "hammerhead_shark",
+          6,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "hammerhead_shark",
+          6,
+          "heavies"
+         ],
+         [
+          "drowned_lich_king",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "sunken-colossus",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "sunken_stone_colossus",
+          3,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "sunken_stone_colossus",
+          3,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "sunken_stone_colossus",
+          3,
+          "heavies"
+         ],
+         [
+          "drowned_lich_king",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "bell_warden",
+    "existing": true,
+    "name": "Bell Warden",
+    "adds": [
+     [
+      "levitating_jellyfish",
+      6
+     ]
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,390 @@
+{
+  "schema": 1,
+  "assets": [
+    {
+      "path": "actors/playable/luminous_*",
+      "source": "source/player_models/luminous_*.emesh",
+      "author": "Quaternius",
+      "license": "CC0-1.0",
+      "description": "Universal Base Characters male and female geometry converted to Eloria Cal3D player sections"
+    },
+    {
+      "path": "animations/playable/luminous_*/*",
+      "source": "source/player_models/luminous_universal.eanim",
+      "author": "Quaternius",
+      "license": "CC0-1.0",
+      "description": "Supported player actions retargeted from the Universal Animation Library"
+    },
+    {
+      "path": "maps/nymara-regions/sunmane_steppe/world.glb",
+      "source": "maps/nymara-regions/sunmane_steppe/source/build_sunmane.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Sunmane Steppe production region: sculpted terrain, coastline, encampment, kit architecture, props and vegetation, exported as self-contained glTF 2.0"
+    },
+    {
+      "path": "maps/nymara-regions/sunmane_steppe/world-lod2.glb",
+      "source": "maps/nymara-regions/sunmane_steppe/source/build_sunmane.py --lod 2",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Reduced Sunmane Steppe package: ground clutter and road dressing removed, textures at half resolution"
+    },
+    {
+      "path": "maps/nymara-regions/sunmane_steppe/textures/*.png",
+      "source": "maps/nymara-regions/sunmane_steppe/source/textures.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Original tileable PBR kit generated from periodic noise: canvas, timber, ground, stone, thatch, hide, leather, textile, metal and bone"
+    },
+    {
+      "path": "maps/nymara-regions/sunmane_steppe/minimap.webp",
+      "source": "godot-client/tests/integration/sunmane_minimap.gd",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Minimap and full-map images rendered orthographically from the exported world.glb through the client's own world loader"
+    },
+    {
+      "path": "maps/nymara-regions/sunmane_steppe/references/*.png",
+      "source": "supplied regional concept art",
+      "author": "Eloria project (OpenAI ImageGen)",
+      "license": "CC-BY-4.0",
+      "description": "Aerial overview and ten-panel player-scale detail board used as the visual authority for this region"
+    },
+    {
+      "path": "maps/nymara-regions/sunmane_steppe/comparison/*.png",
+      "source": "maps/nymara-regions/sunmane_steppe/source/comparison.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Side-by-side sheets pairing each concept panel with the matching Godot client capture"
+    },
+    {
+      "path": "../godot-client/assets/actors/native/creatures/*.glb",
+      "source": "tools/build_native_nymara_glbs.py, tools/creature_anatomy.py, tools/creature_families.py, tools/creature_roster.py, tools/creature_surfaces.py, tools/concept_sheet_index.py, tools/concept_figures.py, tools/extract_concept_palettes.py, tools/apply_concept_palettes.py, tools/concept_proportions.py, tools/concept_growth_tints.py, tools/concept_value_gains.py, tools/concept_compare.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Original Nymara creatures authored to production anatomy from the supplied Eloria concept art: thirty-two quadrupeds plus a further one hundred and forty covering every distinct design across the sixteen concept sheets, one of which (the Verdant Crown King) is authored to its name rather than measured from a figure and is marked as such, across eight skeleton families, with smooth multi-bone skinning, procedurally generated full-colour albedo and tangent-space normal maps across twenty-six surface kinds, per-creature humanoid equipment, and original idle, walk, jog, combat, attack, hit and death clips. A subsequent fidelity pass added the geometry the artwork requires and the generators could not express: forking branch systems and strand-woven trunks for the treants and dryads, coiling ribbons for the wisps and krakens, flat-faceted shells over a lit interior for the crystal fauna, overlapping masonry plating and banded trim for the golems and constructs, layered flight feathers for the birds, and shaped faces, open cowls and flared robes for the humanoids, on a sixth material slot carrying whatever is lit from inside. Palettes, silhouette proportions, surface-growth placement, foliage colour, core-glow colour and albedo value range are all measured from the supplied concept figures rather than authored by hand"
+    },
+    {
+      "path": "../godot-client/assets/actors/native/creatures/sunmane_*.glb",
+      "source": "maps/nymara-regions/sunmane_steppe/source/creatures.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Original steppe horse, dun mare and tacked grey pony authored to equine proportions on the shared Eloria creature rig, with full-colour coat, mane, hoof and tack maps and matching normal maps"
+    },
+    {
+      "path": "maps/four-gates/world.glb",
+      "source": "tools/four_gates/build_four_gates.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Original Four Gates production environment: sculpted terrain, modular architecture kits, landmarks, vegetation and props"
+    },
+    {
+      "path": "maps/four-gates/world.json",
+      "source": "tools/four_gates/manifest.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Four Gates world manifest: landmarks, spawns, portals, navigation, environment and gameplay metadata"
+    },
+    {
+      "path": "maps/four-gates/collision.bin",
+      "source": "tools/four_gates/build_four_gates.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Four Gates EWCG walk grid derived from the authored terrain field and collision proxies"
+    },
+    {
+      "path": "maps/four-gates/minimap.webp",
+      "source": "godot-client/tests/integration/rendered_four_gates_minimap.gd",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Four Gates cartography rendered orthographically from the shipped world.glb"
+    },
+    {
+      "path": "maps/four-gates/references/*",
+      "source": "godot-client/tests/integration/rendered_four_gates_views.gd",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Four Gates client comparison screenshots captured from the running Godot client"
+    },
+    {
+      "path": "tools/four_gates/*",
+      "source": "authored for the Eloria project",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Four Gates authoring pipeline: glTF writer, mesh toolkit, procedural PBR synthesis, kits, landmarks, terrain and layout"
+    },
+    {
+      "path": "tools/build_native_sounds.py",
+      "source": "authored",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Offline conversion and processing of licensed source audio; writes credits and per-file provenance"
+    },
+    {
+      "path": "concepts/item-icons/*.png",
+      "source": "OpenAI ImageGen contact sheets packed cell-by-cell with godot-client/tools/pack_ui_icon_sheet.py",
+      "author": "Eloria project (OpenAI ImageGen)",
+      "license": "CC-BY-4.0",
+      "description": "Twenty themed 5-by-5 concept sheets containing 500 unregistered potential item icons, with row-major names documented in concepts/item-icons/manifest.json"
+    },
+    {
+      "path": "godot-client/assets/actors/native/races/*",
+      "source": "source/player_models/native/Superhero_{Male,Female}_FullBody.gltf",
+      "author": "Quaternius",
+      "license": "CC0-1.0",
+      "description": "Universal Base Characters geometry retargeted per race and, for the Glasswarden, re-proportioned onto the derived slim base body; integrated race features and all feature, wardrobe and eye textures are generated procedurally by build_native_nymara_glbs.py"
+    },
+    {
+      "path": "../godot-client/assets/ui/items/items*.png",
+      "source": "tools/build_item_icon_atlases.py, tools/paint_material_icons.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Inventory item icon atlases, packed from the rendered equipment, weapon and potion sets"
+    },
+    {
+      "path": "maps/nymara-regions/server-collision/*.bin",
+      "source": "maps/nymara-regions/*/source/export_insides_collision.py",
+      "author": "Eloria project",
+      "license": "CC-BY-4.0",
+      "description": "Server walk grids for the composed interior maps, resampled from each package's own collision.bin"
+    },
+    {
+      "path": "../godot-client/assets/audio/civic_crowd.wav",
+      "source": "source/audio/crowd-outdoor/2969.mp3",
+      "author": "Joseph SARDIN - BigSoundBank.com",
+      "license": "CC0-1.0",
+      "description": "Outside Talks #2; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/combat_hit.wav",
+      "source": "source/audio/impact/Audio/impactPunch_heavy_000.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "Impact Sounds; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/combat_miss.wav",
+      "source": "source/audio/rpg/RPG Sound Pack/battle/swing.wav",
+      "author": "artisticdude",
+      "license": "CC0-1.0",
+      "description": "RPG Sound Pack; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep.wav",
+      "source": "source/audio/kenney_rpg/Audio/footstep04.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "RPG Audio; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_dirt_1.wav",
+      "source": "source/audio/kenney_rpg/Audio/footstep04.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "RPG Audio; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_dirt_2.wav",
+      "source": "source/audio/kenney_rpg/Audio/footstep05.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "RPG Audio; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_dirt_3.wav",
+      "source": "source/audio/kenney_rpg/Audio/footstep06.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "RPG Audio; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_grass_1.wav",
+      "source": "source/audio/steps/leaves01.ogg",
+      "author": "TinyWorlds",
+      "license": "CC0-1.0",
+      "description": "Different steps on wood, stone, leaves, gravel and mud; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_grass_2.wav",
+      "source": "source/audio/steps/leaves02.ogg",
+      "author": "TinyWorlds",
+      "license": "CC0-1.0",
+      "description": "Different steps on wood, stone, leaves, gravel and mud; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_grass_3.wav",
+      "source": "source/audio/sand/Fantozzi-footsteps/flac/Fantozzi-SandR1.flac",
+      "author": "Fantozzi; sliced and submitted by qubodup (Iwan Gabovitch)",
+      "license": "CC0-1.0",
+      "description": "Fantozzi's Footsteps (Grass/Sand & Stone); source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_sand_1.wav",
+      "source": "source/audio/sand/Fantozzi-footsteps/flac/Fantozzi-SandL1.flac",
+      "author": "Fantozzi; sliced and submitted by qubodup (Iwan Gabovitch)",
+      "license": "CC0-1.0",
+      "description": "Fantozzi's Footsteps (Grass/Sand & Stone); source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_sand_2.wav",
+      "source": "source/audio/sand/Fantozzi-footsteps/flac/Fantozzi-SandL2.flac",
+      "author": "Fantozzi; sliced and submitted by qubodup (Iwan Gabovitch)",
+      "license": "CC0-1.0",
+      "description": "Fantozzi's Footsteps (Grass/Sand & Stone); source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_sand_3.wav",
+      "source": "source/audio/sand/Fantozzi-footsteps/flac/Fantozzi-SandL3.flac",
+      "author": "Fantozzi; sliced and submitted by qubodup (Iwan Gabovitch)",
+      "license": "CC0-1.0",
+      "description": "Fantozzi's Footsteps (Grass/Sand & Stone); source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_snow_1.wav",
+      "source": "source/audio/snow/Corsica_S-Walking_in_Snow/Corsica_S-Walking_on_snow_covered_gravel_01.flac",
+      "author": "Corsica_S; extracted by Iwan Gabovitch (qubodup)",
+      "license": "CC0-1.0",
+      "description": "42 Snow and Gravel Footsteps; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_snow_2.wav",
+      "source": "source/audio/snow/Corsica_S-Walking_in_Snow/Corsica_S-Walking_on_snow_covered_gravel_02.flac",
+      "author": "Corsica_S; extracted by Iwan Gabovitch (qubodup)",
+      "license": "CC0-1.0",
+      "description": "42 Snow and Gravel Footsteps; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_snow_3.wav",
+      "source": "source/audio/snow/Corsica_S-Walking_in_Snow/Corsica_S-Walking_on_snow_covered_gravel_03.flac",
+      "author": "Corsica_S; extracted by Iwan Gabovitch (qubodup)",
+      "license": "CC0-1.0",
+      "description": "42 Snow and Gravel Footsteps; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_stone_1.wav",
+      "source": "source/audio/sand/Fantozzi-footsteps/flac/Fantozzi-StoneL1.flac",
+      "author": "Fantozzi; sliced and submitted by qubodup (Iwan Gabovitch)",
+      "license": "CC0-1.0",
+      "description": "Fantozzi's Footsteps (Grass/Sand & Stone); source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_stone_2.wav",
+      "source": "source/audio/sand/Fantozzi-footsteps/flac/Fantozzi-StoneL2.flac",
+      "author": "Fantozzi; sliced and submitted by qubodup (Iwan Gabovitch)",
+      "license": "CC0-1.0",
+      "description": "Fantozzi's Footsteps (Grass/Sand & Stone); source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_stone_3.wav",
+      "source": "source/audio/sand/Fantozzi-footsteps/flac/Fantozzi-StoneL3.flac",
+      "author": "Fantozzi; sliced and submitted by qubodup (Iwan Gabovitch)",
+      "license": "CC0-1.0",
+      "description": "Fantozzi's Footsteps (Grass/Sand & Stone); source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_wood_1.wav",
+      "source": "source/audio/steps/wood01.ogg",
+      "author": "TinyWorlds",
+      "license": "CC0-1.0",
+      "description": "Different steps on wood, stone, leaves, gravel and mud; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_wood_2.wav",
+      "source": "source/audio/steps/wood02.ogg",
+      "author": "TinyWorlds",
+      "license": "CC0-1.0",
+      "description": "Different steps on wood, stone, leaves, gravel and mud; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/footstep_wood_3.wav",
+      "source": "source/audio/steps/wood03.ogg",
+      "author": "TinyWorlds",
+      "license": "CC0-1.0",
+      "description": "Different steps on wood, stone, leaves, gravel and mud; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/harvest_gather.wav",
+      "source": "source/audio/kenney_rpg/Audio/cloth1.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "RPG Audio; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/harvest_start.wav",
+      "source": "source/audio/kenney_rpg/Audio/chop.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "RPG Audio; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/item_pickup.wav",
+      "source": "source/audio/kenney_rpg/Audio/handleCoins.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "RPG Audio; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/level_up.wav",
+      "source": "source/audio/kenney_interface/Audio/confirmation_002.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "Interface Sounds; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/music_depths.ogg",
+      "source": "source/audio/depths/Creepy Dungeon.flac",
+      "author": "Karate Studios (KarateStudios)",
+      "license": "CC0-1.0",
+      "description": "Inside the Overlords Domain; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/music_settlement.ogg",
+      "source": "source/audio/settlement/025_A_New_Town.mp3",
+      "author": "The Cynic Project / pixelsphere.org / cynicmusic.com",
+      "license": "CC0-1.0",
+      "description": "A New Town (RPG Theme); source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/music_wilds.ogg",
+      "source": "source/audio/wilds/the_field_of_dreams.mp3",
+      "author": "pauliuw",
+      "license": "CC0-1.0",
+      "description": "The Field Of Dreams; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/spell_cast.wav",
+      "source": "source/audio/rpg/RPG Sound Pack/battle/magic1.wav",
+      "author": "artisticdude",
+      "license": "CC0-1.0",
+      "description": "RPG Sound Pack; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/ui_click.wav",
+      "source": "source/audio/kenney_interface/Audio/click_001.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "Interface Sounds; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/ui_close.wav",
+      "source": "source/audio/kenney_interface/Audio/close_001.ogg",
+      "author": "Kenney (Kenney.nl)",
+      "license": "CC0-1.0",
+      "description": "Interface Sounds; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/waterfall.wav",
+      "source": "source/audio/water/stream-waterfall/waterfall2.ogg",
+      "author": "kurt",
+      "license": "CC-BY-3.0",
+      "description": "Stream Sounds; source links and changes in godot-client/assets/audio/provenance.json"
+    },
+    {
+      "path": "../godot-client/assets/audio/world_effect.wav",
+      "source": "source/audio/rpg/RPG Sound Pack/battle/spell.wav",
+      "author": "artisticdude",
+      "license": "CC0-1.0",
+      "description": "RPG Sound Pack; source links and changes in godot-client/assets/audio/provenance.json"
+    }
+  ]
+}

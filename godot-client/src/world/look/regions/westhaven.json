@@ -1,0 +1,23 @@
+{
+	"id": "westhaven",
+	"schema": 1,
+	"ground": {
+		"path_luma_forward": 0.24,
+		"path_tint_forward": [0.84, 0.7, 0.5],
+		"path_chroma_forward": 1.4
+	},
+	"grass": {
+		"root": [0.09, 0.17, 0.06],
+		"tip": [0.52, 0.62, 0.28],
+		"value_forward": 1.45
+	},
+	"foliage": {
+		"untamed_words": ["bougainvillea", "lemon"]
+	},
+	"notes": {
+		"grade": "None: a continent region, so a grade section would be ignored. Its manifest's saturation 1.34 already gives it more of the grade's chroma than Four Gates (adjustment 0.77 against 0.69).",
+		"ground": "Sun-baked limestone roads. The defaults' roads were chalk, display (201, 185, 168), luma 187, saturation 0.165, greyed by AgX's shoulder; path_luma_forward 0.24, path_tint_forward [0.84, 0.7, 0.5] and path_chroma_forward 1.4 painted them (199, 177, 143) at saturation 0.29, path/ground 1.65 / 1.56 / 1.45 at hub / road / wild (defaults 1.73 / 1.64 / 1.51). The migration withdrew them because the Four Gates and Manymouth roads run on untrimmed and the border drew a cell-stepped patch (luma 177-179 against 186; wh_border_fg, wh_border_md); restored at integration now that region trims now fade into the neighbour's over LookProfile.BORDER_FEATHER_METRES either side of the border (LookBorders), so a trim no longer draws the border as a line. No verge trims: its turf was retinted as Four Gates' at the life pass. Its beaches (#fff5d1) are sand now, not paving (LookProfile.SAND_TINT): the brown band along the quay was the road-under-paving branch.",
+		"grass": "Four Gates' palette (the same retinted turf) at Westhaven's own value. At the default value its tufts stood at 0.72-0.75 of the ground under them (luma 85 over 115), dark olive-brown speckle; at 1.7 at 1.09-1.15, pale straw; at 1.45 at 0.95-1.03. Measured against a render with ELORIA_LOOK_GRASS_DEBUG=none, over the pixels the beds change. At the Four Gates border its tufts stand at about 1.0 and Four Gates' (1.2) at 0.86 of the same turf.",
+		"foliage": "Blossom and fruit keep their colour. The crown tame reaches hue 60, so the bougainvillea's magenta was walked to crimson (wh_wild: 153 pink pixels at hue 350, against develop's 1,291 at 342; untamed, 761 at 346), and about half of the lemon tree's atlas is saturated yellow at hue 40-62, which the tame would walk towards amber. Olive, cypress, umbrella pine and lemon crowns are painted by the generic tree words. Dune grass, vineyard rows and the flower meadows are left as they are."
+	}
+}

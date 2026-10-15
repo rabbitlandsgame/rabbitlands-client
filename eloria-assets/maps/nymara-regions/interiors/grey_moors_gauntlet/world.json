@@ -1,0 +1,4438 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "grey_moors_gauntlet",
+    "name": "The Barrow Run",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -26.55,
+        -6.2,
+        -0.55
+      ],
+      "max": [
+        13.55,
+        16.65,
+        324.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -26.55,
+        -0.4,
+        -0.55
+      ],
+      "max": [
+        13.55,
+        3.5,
+        324.55
+      ]
+    },
+    "interiorClass": "gauntlet",
+    "parentRegion": "grey_moors",
+    "serverCells": 384
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      29.0,
+      327.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        0.0,
+        0.05,
+        7.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "vault",
+      "position": [
+        -10.0,
+        3.05,
+        318.0
+      ],
+      "rotationDegrees": 180,
+      "surface": "Walk"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 90,
+    "height": 660,
+    "cellMetres": 0.5,
+    "originMetres": [
+      -29.0,
+      327.0
+    ],
+    "heightEncoding": {
+      "origin": -0.24,
+      "step": 0.2,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true
+    },
+    "walkableCells": 16673,
+    "blockedCells": 42727,
+    "walkableFraction": 0.2807,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Secrets_grey_moors_gauntlet",
+      "Section_grey_moors_gauntlet_band_-001",
+      "Roof_grey_moors_gauntlet_band_-001_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_-001_grey_drystone",
+      "Section_grey_moors_gauntlet_band_+000",
+      "Roof_grey_moors_gauntlet_band_+000_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+000_amber_resin",
+      "Build_grey_moors_gauntlet_band_+000_dark_iron",
+      "Build_grey_moors_gauntlet_band_+000_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+000_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+000_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+000_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+000_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+001",
+      "Roof_grey_moors_gauntlet_band_+001_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+001_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+001_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+001_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+001_grey_moor_granite",
+      "Section_grey_moors_gauntlet_band_+002",
+      "Roof_grey_moors_gauntlet_band_+002_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+002_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+002_amber_resin",
+      "Build_grey_moors_gauntlet_band_+002_dark_iron",
+      "Build_grey_moors_gauntlet_band_+002_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+002_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+002_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+002_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+002_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+002_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+003",
+      "Roof_grey_moors_gauntlet_band_+003_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+003_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+003_amber_resin",
+      "Build_grey_moors_gauntlet_band_+003_dark_iron",
+      "Build_grey_moors_gauntlet_band_+003_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+003_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+003_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+003_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+003_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+003_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+004",
+      "Roof_grey_moors_gauntlet_band_+004_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+004_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+004_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+004_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+004_grey_moor_granite",
+      "Section_grey_moors_gauntlet_band_+005",
+      "Roof_grey_moors_gauntlet_band_+005_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+005_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+005_amber_resin",
+      "Build_grey_moors_gauntlet_band_+005_dark_iron",
+      "Build_grey_moors_gauntlet_band_+005_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+005_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+005_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+005_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+005_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+006",
+      "Roof_grey_moors_gauntlet_band_+006_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+006_amber_resin",
+      "Build_grey_moors_gauntlet_band_+006_dark_iron",
+      "Build_grey_moors_gauntlet_band_+006_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+006_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+006_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+006_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+006_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+007",
+      "Roof_grey_moors_gauntlet_band_+007_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+007_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+007_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+007_dark_iron",
+      "Build_grey_moors_gauntlet_band_+007_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+007_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+007_grey_moor_granite",
+      "Section_grey_moors_gauntlet_band_+008",
+      "Roof_grey_moors_gauntlet_band_+008_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+008_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+008_amber_resin",
+      "Build_grey_moors_gauntlet_band_+008_dark_iron",
+      "Build_grey_moors_gauntlet_band_+008_grey_barrow_turf",
+      "Build_grey_moors_gauntlet_band_+008_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+008_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+008_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+008_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+008_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+008_timber_grey",
+      "Section_grey_moors_gauntlet_band_+009",
+      "Roof_grey_moors_gauntlet_band_+009_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+009_amber_resin",
+      "Build_grey_moors_gauntlet_band_+009_dark_iron",
+      "Build_grey_moors_gauntlet_band_+009_grey_barrow_turf",
+      "Build_grey_moors_gauntlet_band_+009_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+009_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+009_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+009_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+009_timber_grey",
+      "Section_grey_moors_gauntlet_band_+010",
+      "Roof_grey_moors_gauntlet_band_+010_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+010_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+010_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+010_amber_resin",
+      "Build_grey_moors_gauntlet_band_+010_dark_iron",
+      "Build_grey_moors_gauntlet_band_+010_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+010_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+010_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+010_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+010_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+010_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+010_timber_grey",
+      "Section_grey_moors_gauntlet_band_+011",
+      "Roof_grey_moors_gauntlet_band_+011_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+011_amber_resin",
+      "Build_grey_moors_gauntlet_band_+011_dark_iron",
+      "Build_grey_moors_gauntlet_band_+011_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+011_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+011_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+011_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+011_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+012",
+      "Roof_grey_moors_gauntlet_band_+012_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+012_amber_resin",
+      "Build_grey_moors_gauntlet_band_+012_dark_iron",
+      "Build_grey_moors_gauntlet_band_+012_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+012_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+012_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+012_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+012_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+013",
+      "Roof_grey_moors_gauntlet_band_+013_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+013_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+013_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+013_grey_moor_granite",
+      "Section_grey_moors_gauntlet_band_+014",
+      "Roof_grey_moors_gauntlet_band_+014_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+014_amber_resin",
+      "Build_grey_moors_gauntlet_band_+014_dark_iron",
+      "Build_grey_moors_gauntlet_band_+014_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+014_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+014_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+014_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+014_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+014_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+015",
+      "Roof_grey_moors_gauntlet_band_+015_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+015_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+015_amber_resin",
+      "Build_grey_moors_gauntlet_band_+015_dark_iron",
+      "Build_grey_moors_gauntlet_band_+015_grey_barrow_turf",
+      "Build_grey_moors_gauntlet_band_+015_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+015_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+015_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+015_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+015_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+015_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+015_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+016",
+      "Roof_grey_moors_gauntlet_band_+016_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+016_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+016_amber_resin",
+      "Build_grey_moors_gauntlet_band_+016_dark_iron",
+      "Build_grey_moors_gauntlet_band_+016_grey_barrow_turf",
+      "Build_grey_moors_gauntlet_band_+016_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+016_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+016_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+016_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+016_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+016_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+016_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+017",
+      "Roof_grey_moors_gauntlet_band_+017_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+017_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+017_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+017_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+017_grey_moor_granite",
+      "Section_grey_moors_gauntlet_band_+018",
+      "Roof_grey_moors_gauntlet_band_+018_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+018_amber_resin",
+      "Build_grey_moors_gauntlet_band_+018_dark_iron",
+      "Build_grey_moors_gauntlet_band_+018_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+018_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+018_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+018_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+019",
+      "Roof_grey_moors_gauntlet_band_+019_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+019_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+019_dark_iron",
+      "Build_grey_moors_gauntlet_band_+019_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+019_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+019_grey_moor_granite",
+      "Section_grey_moors_gauntlet_band_+020",
+      "Roof_grey_moors_gauntlet_band_+020_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+020_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+020_amber_resin",
+      "Build_grey_moors_gauntlet_band_+020_dark_iron",
+      "Build_grey_moors_gauntlet_band_+020_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+020_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+020_grey_moor_granite",
+      "Section_grey_moors_gauntlet_band_+021",
+      "Roof_grey_moors_gauntlet_band_+021_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+021_amber_resin",
+      "Build_grey_moors_gauntlet_band_+021_dark_iron",
+      "Build_grey_moors_gauntlet_band_+021_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+021_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+021_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+021_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+022",
+      "Roof_grey_moors_gauntlet_band_+022_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+022_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+022_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+022_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+022_grey_moor_granite",
+      "Section_grey_moors_gauntlet_band_+023",
+      "Roof_grey_moors_gauntlet_band_+023_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+023_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+023_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+023_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+023_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+023_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+024",
+      "Roof_grey_moors_gauntlet_band_+024_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+024_amber_resin",
+      "Build_grey_moors_gauntlet_band_+024_dark_iron",
+      "Build_grey_moors_gauntlet_band_+024_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+024_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+024_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+024_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+024_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+025",
+      "Roof_grey_moors_gauntlet_band_+025_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+025_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+025_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+025_amber_resin",
+      "Build_grey_moors_gauntlet_band_+025_dark_iron",
+      "Build_grey_moors_gauntlet_band_+025_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+025_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+025_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+025_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+025_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+026",
+      "Roof_grey_moors_gauntlet_band_+026_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+026_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+026_amber_resin",
+      "Build_grey_moors_gauntlet_band_+026_dark_iron",
+      "Build_grey_moors_gauntlet_band_+026_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+026_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+026_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+026_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+026_lime_plaster",
+      "Section_grey_moors_gauntlet_band_+027",
+      "Roof_grey_moors_gauntlet_band_+027_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+027_grey_carved_stone"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_grey_moors_gauntlet_band_-001_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+000_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+001_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+002_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+002_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+003_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+003_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+004_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+004_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+005_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+005_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+006_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+007_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+007_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+007_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+008_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+008_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+009_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+010_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+010_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+010_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+011_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+012_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+013_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+014_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+015_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+015_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+016_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+016_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+017_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+017_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+018_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+019_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+019_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+020_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+020_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+021_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+022_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+022_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+023_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+024_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+025_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+025_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+025_grey_moor_granite",
+      "Roof_grey_moors_gauntlet_band_+026_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+026_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+027_grey_carved_stone"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    }
+  },
+  "portals": [],
+  "landmarks": [
+    {
+      "id": "grey_moors_gauntlet-staging",
+      "name": "The Barrow Run",
+      "space": "staging",
+      "position": [
+        0.0,
+        1.6,
+        7.0
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "plaque-staging-0",
+      "kind": "information",
+      "target": "lore",
+      "label": "Rules of the run",
+      "text": "One party at a time. The dead wake at the barrow field. Waystones count you out. The hall is the end of it.",
+      "position": [
+        -6.8,
+        1.0,
+        12.6
+      ],
+      "serverTile": [
+        22,
+        314
+      ],
+      "objectId": 861
+    },
+    {
+      "id": "exit-staging",
+      "kind": "waystone",
+      "target": "home",
+      "label": "Waystone",
+      "text": "The waystone home. Using it counts you out of the run.",
+      "position": [
+        5.8,
+        1.0,
+        11.0
+      ],
+      "serverTile": [
+        35,
+        316
+      ],
+      "objectId": 800
+    },
+    {
+      "id": "plaque-peat-cut",
+      "kind": "information",
+      "target": "lore",
+      "label": "The joined barrows",
+      "text": "Nine barrows and one road between them under the peat, dug so the families could visit their dead without crossing the moor at night.",
+      "position": [
+        -4.1,
+        1.0,
+        24.0
+      ],
+      "serverTile": [
+        25,
+        303
+      ],
+      "objectId": 862
+    },
+    {
+      "id": "cache",
+      "kind": "cache",
+      "target": "run",
+      "label": "Reward cache",
+      "text": "The run's cache. It opens once for each of you when the court is quiet.",
+      "position": [
+        -10.0,
+        3.6,
+        320.5
+      ],
+      "serverTile": [
+        19,
+        6
+      ],
+      "objectId": 798
+    },
+    {
+      "id": "exit-vault",
+      "kind": "waystone",
+      "target": "home",
+      "label": "Waystone",
+      "text": "The waystone home.",
+      "position": [
+        -5.0,
+        4.0,
+        315.0
+      ],
+      "serverTile": [
+        24,
+        12
+      ],
+      "objectId": 799
+    },
+    {
+      "id": "plaque-vault",
+      "kind": "information",
+      "target": "lore",
+      "label": "The court is quiet",
+      "text": "Whoever reads this walked the whole road. The cache is yours; the waystone is the way home.",
+      "position": [
+        -15.6,
+        4.0,
+        322.0
+      ],
+      "serverTile": [
+        13,
+        5
+      ],
+      "objectId": 863
+    }
+  ],
+  "npcMarkers": [],
+  "harvestables": [
+    {
+      "id": "peat-cut-bonus",
+      "resource": "Moss",
+      "position": [
+        8.5,
+        0.0,
+        38.0
+      ],
+      "serverTile": [
+        38,
+        289
+      ]
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "backgroundColor": [
+      0.025,
+      0.03,
+      0.034
+    ],
+    "sun": {
+      "enabled": false
+    },
+    "ambient": {
+      "color": [
+        0.43,
+        0.47,
+        0.5
+      ],
+      "energy": 1.05
+    },
+    "fog": {
+      "enabled": true,
+      "color": [
+        0.04,
+        0.05,
+        0.055
+      ],
+      "density": 0.004
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.3,
+      "white": 3.5
+    },
+    "openToSky": [],
+    "lights": [
+      {
+        "id": "lamp-000",
+        "kind": "point",
+        "position": [
+          -6.0,
+          0.98,
+          3.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-001",
+        "kind": "point",
+        "position": [
+          6.0,
+          0.98,
+          3.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-002",
+        "kind": "point",
+        "position": [
+          0.0,
+          3.38,
+          38.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-003",
+        "kind": "point",
+        "position": [
+          0.0,
+          4.38,
+          74.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-004",
+        "kind": "point",
+        "position": [
+          -4.0,
+          3.38,
+          146.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-005",
+        "kind": "point",
+        "position": [
+          -7.0,
+          3.38,
+          171.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-006",
+        "kind": "point",
+        "position": [
+          -18.0,
+          3.38,
+          196.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-007",
+        "kind": "point",
+        "position": [
+          4.0,
+          3.38,
+          196.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-008",
+        "kind": "point",
+        "position": [
+          -7.0,
+          3.38,
+          220.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-009",
+        "kind": "point",
+        "position": [
+          -7.0,
+          6.38,
+          257.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-010",
+        "kind": "point",
+        "position": [
+          2.47,
+          3.98,
+          294.45
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-011",
+        "kind": "point",
+        "position": [
+          -1.42,
+          3.98,
+          298.48
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-012",
+        "kind": "point",
+        "position": [
+          -6.95,
+          3.98,
+          300.71
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-013",
+        "kind": "point",
+        "position": [
+          -13.05,
+          3.98,
+          300.71
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-014",
+        "kind": "point",
+        "position": [
+          -18.58,
+          3.98,
+          298.48
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-015",
+        "kind": "point",
+        "position": [
+          -22.47,
+          3.98,
+          294.45
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-016",
+        "kind": "point",
+        "position": [
+          -15.0,
+          3.98,
+          315.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-017",
+        "kind": "point",
+        "position": [
+          -2.6,
+          2.68,
+          7.6
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-018",
+        "kind": "point",
+        "position": [
+          -4.6,
+          2.18,
+          7.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-019",
+        "kind": "point",
+        "position": [
+          -2.9,
+          2.78,
+          26.3
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-020",
+        "kind": "point",
+        "position": [
+          -2.9,
+          2.78,
+          36.3
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-021",
+        "kind": "point",
+        "position": [
+          -2.9,
+          2.78,
+          46.3
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-022",
+        "kind": "point",
+        "position": [
+          8.5,
+          2.68,
+          26.5
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-023",
+        "kind": "point",
+        "position": [
+          8.5,
+          2.68,
+          46.5
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-024",
+        "kind": "point",
+        "position": [
+          -10.7,
+          2.18,
+          72.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-025",
+        "kind": "point",
+        "position": [
+          10.7,
+          2.18,
+          72.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-026",
+        "kind": "point",
+        "position": [
+          -3.4,
+          3.68,
+          65.3
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-027",
+        "kind": "point",
+        "position": [
+          -3.4,
+          3.68,
+          81.3
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-028",
+        "kind": "point",
+        "position": [
+          -5.5,
+          2.38,
+          98.6
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-029",
+        "kind": "point",
+        "position": [
+          -5.5,
+          2.38,
+          110.6
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-030",
+        "kind": "point",
+        "position": [
+          -5.5,
+          2.38,
+          122.6
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-031",
+        "kind": "point",
+        "position": [
+          -12.8,
+          2.18,
+          141.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-032",
+        "kind": "point",
+        "position": [
+          -12.8,
+          2.18,
+          150.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-033",
+        "kind": "point",
+        "position": [
+          4.8,
+          2.18,
+          141.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-034",
+        "kind": "point",
+        "position": [
+          4.8,
+          2.18,
+          150.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-035",
+        "kind": "point",
+        "position": [
+          -6.85,
+          2.98,
+          152.3
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-036",
+        "kind": "point",
+        "position": [
+          -19.6,
+          2.78,
+          175.2
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-037",
+        "kind": "point",
+        "position": [
+          -7.0,
+          2.18,
+          176.1
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-038",
+        "kind": "point",
+        "position": [
+          -20.15,
+          2.88,
+          202.3
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-039",
+        "kind": "point",
+        "position": [
+          6.5,
+          3.18,
+          190.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-040",
+        "kind": "point",
+        "position": [
+          6.5,
+          3.18,
+          202.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-041",
+        "kind": "point",
+        "position": [
+          -13.0,
+          3.18,
+          220.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-042",
+        "kind": "point",
+        "position": [
+          -1.0,
+          3.18,
+          220.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-043",
+        "kind": "point",
+        "position": [
+          -9.9,
+          5.98,
+          250.3
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-044",
+        "kind": "point",
+        "position": [
+          -15.7,
+          5.18,
+          258.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-045",
+        "kind": "point",
+        "position": [
+          1.7,
+          5.18,
+          258.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-046",
+        "kind": "point",
+        "position": [
+          -13.4,
+          8.68,
+          302.1
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-047",
+        "kind": "point",
+        "position": [
+          -21.0,
+          5.18,
+          300.7
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-048",
+        "kind": "point",
+        "position": [
+          -15.2,
+          7.98,
+          299.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-049",
+        "kind": "point",
+        "position": [
+          1.0,
+          5.18,
+          300.7
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-050",
+        "kind": "point",
+        "position": [
+          -4.8,
+          7.98,
+          299.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-051",
+        "kind": "point",
+        "position": [
+          -14.9,
+          5.18,
+          319.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      },
+      {
+        "id": "lamp-052",
+        "kind": "point",
+        "position": [
+          -10.0,
+          5.88,
+          321.0
+        ],
+        "color": [
+          1.0,
+          0.66,
+          0.32
+        ],
+        "range": 14.0,
+        "energy": 3.2,
+        "attenuation": 1.2
+      }
+    ]
+  },
+  "spaces": {
+    "staging": {
+      "x0": -8.0,
+      "z0": 0.0,
+      "x1": 8.0,
+      "z1": 14.0,
+      "floor": 0.0,
+      "height": 5.2
+    },
+    "peat-cut-way-a": {
+      "x0": -1.8,
+      "z0": 12.2,
+      "x1": 1.8,
+      "z1": 18.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "peat-cut-way-b": {
+      "x0": -1.8,
+      "z0": 17.6,
+      "x1": 1.8,
+      "z1": 23.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "peat-cut": {
+      "x0": -5.5,
+      "z0": 22.0,
+      "x1": 5.5,
+      "z1": 54.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "peat-cut-alcove-0": {
+      "x0": 5.5,
+      "z0": 25.5,
+      "x1": 11.5,
+      "z1": 30.5,
+      "floor": 0.0,
+      "height": 4.0
+    },
+    "peat-cut-alcove-1": {
+      "x0": 5.5,
+      "z0": 35.5,
+      "x1": 11.5,
+      "z1": 40.5,
+      "floor": 0.0,
+      "height": 4.0
+    },
+    "peat-cut-alcove-2": {
+      "x0": 5.5,
+      "z0": 45.5,
+      "x1": 11.5,
+      "z1": 50.5,
+      "floor": 0.0,
+      "height": 4.0
+    },
+    "first-barrow-way-a": {
+      "x0": -1.8,
+      "z0": 52.2,
+      "x1": 1.8,
+      "z1": 58.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "first-barrow-way-b": {
+      "x0": -1.8,
+      "z0": 57.6,
+      "x1": 1.8,
+      "z1": 63.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "first-barrow": {
+      "x0": -13.0,
+      "z0": 62.0,
+      "x1": 13.0,
+      "z1": 86.0,
+      "floor": 0.0,
+      "height": 8.0
+    },
+    "bog-board-way-a": {
+      "x0": -5.8,
+      "z0": 84.2,
+      "x1": -2.2,
+      "z1": 90.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "bog-board-way-b": {
+      "x0": -5.8,
+      "z0": 89.6,
+      "x1": -2.2,
+      "z1": 95.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "bog-board-in": {
+      "x0": -7.0,
+      "z0": 94.0,
+      "x1": -1.0,
+      "z1": 97.0,
+      "floor": 0.0,
+      "height": 4.4
+    },
+    "bog-board-out": {
+      "x0": -7.0,
+      "z0": 125.0,
+      "x1": -1.0,
+      "z1": 128.0,
+      "floor": 0.0,
+      "height": 4.4
+    },
+    "bog-board": {
+      "x0": -13.0,
+      "z0": 97.0,
+      "x1": 5.0,
+      "z1": 125.0,
+      "floor": -3.0,
+      "height": 9.0
+    },
+    "fifth-chamber-way-a": {
+      "x0": -5.8,
+      "z0": 126.2,
+      "x1": -2.2,
+      "z1": 132.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "fifth-chamber-way-b": {
+      "x0": -5.8,
+      "z0": 131.6,
+      "x1": -2.2,
+      "z1": 137.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "fifth-chamber": {
+      "x0": -15.2,
+      "z0": 136.0,
+      "x1": 7.2,
+      "z1": 156.0,
+      "floor": 0.0,
+      "height": 5.6
+    },
+    "split-barrow-way-a": {
+      "x0": -8.8,
+      "z0": 154.2,
+      "x1": -5.2,
+      "z1": 160.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "split-barrow-way-b": {
+      "x0": -8.8,
+      "z0": 159.6,
+      "x1": -5.2,
+      "z1": 165.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "split-barrow-hub": {
+      "x0": -22.0,
+      "z0": 164.0,
+      "x1": 8.0,
+      "z1": 178.0,
+      "floor": 0.0,
+      "height": 5.6
+    },
+    "split-barrow-east-passage": {
+      "x0": -26.0,
+      "z0": 186.0,
+      "x1": -10.0,
+      "z1": 206.0,
+      "floor": 0.0,
+      "height": 6.0
+    },
+    "split-barrow-west-passage": {
+      "x0": -4.0,
+      "z0": 186.0,
+      "x1": 12.0,
+      "z1": 206.0,
+      "floor": 0.0,
+      "height": 6.0
+    },
+    "split-barrow-merge": {
+      "x0": -22.0,
+      "z0": 214.0,
+      "x1": 8.0,
+      "z1": 226.0,
+      "floor": 0.0,
+      "height": 5.6
+    },
+    "split-barrow-east-passage-out": {
+      "x0": -19.8,
+      "z0": 204.2,
+      "x1": -16.2,
+      "z1": 215.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "split-barrow-west-passage-out": {
+      "x0": 2.2,
+      "z0": 204.2,
+      "x1": 5.8,
+      "z1": 215.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "split-barrow-east-passage-way-a": {
+      "x0": -19.8,
+      "z0": 176.2,
+      "x1": -16.2,
+      "z1": 182.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "split-barrow-east-passage-way-b": {
+      "x0": -19.8,
+      "z0": 181.6,
+      "x1": -16.2,
+      "z1": 187.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "split-barrow-west-passage-way-a": {
+      "x0": 2.2,
+      "z0": 176.2,
+      "x1": 5.8,
+      "z1": 182.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "split-barrow-west-passage-way-b": {
+      "x0": 2.2,
+      "z0": 181.6,
+      "x1": 5.8,
+      "z1": 187.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "reeve-stair-way-a": {
+      "x0": -8.8,
+      "z0": 224.2,
+      "x1": -5.2,
+      "z1": 230.4,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "reeve-stair-way-b": {
+      "x0": -8.8,
+      "z0": 229.6,
+      "x1": -5.2,
+      "z1": 235.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "reeve-stair-climb": {
+      "x0": -8.8,
+      "z0": 232.2,
+      "x1": -5.2,
+      "z1": 249.8,
+      "floor": 0.0,
+      "height": 3.8
+    },
+    "reeve-stair": {
+      "x0": -18.4,
+      "z0": 248.0,
+      "x1": 4.4,
+      "z1": 266.0,
+      "floor": 3.0,
+      "height": 5.6
+    },
+    "reeve-hall-way-a": {
+      "x0": -11.8,
+      "z0": 264.2,
+      "x1": -8.2,
+      "z1": 270.4,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "reeve-hall-way-b": {
+      "x0": -11.8,
+      "z0": 269.6,
+      "x1": -8.2,
+      "z1": 275.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "reeve-hall": {
+      "x0": -26.0,
+      "z0": 274.0,
+      "x1": 6.0,
+      "z1": 304.0,
+      "floor": 3.0,
+      "height": 9.0
+    },
+    "vault-way": {
+      "x0": -11.8,
+      "z0": 302.2,
+      "x1": -8.2,
+      "z1": 313.8,
+      "floor": 3.0,
+      "height": 3.8
+    },
+    "vault": {
+      "x0": -17.0,
+      "z0": 312.0,
+      "x1": -3.0,
+      "z1": 324.0,
+      "floor": 3.0,
+      "height": 5.0
+    }
+  },
+  "gauntlet": {
+    "id": "grey_moors_gauntlet",
+    "region": "grey_moors",
+    "name": "The Barrow Run",
+    "short": "barrow",
+    "flavour": "Nine barrows joined under the peat by the people who dug them, so the dead could visit. They still do.",
+    "staging": {
+      "room": "staging",
+      "boundsTiles": {
+        "min": [
+          21,
+          313
+        ],
+        "max": [
+          37,
+          327
+        ]
+      },
+      "arrival": [
+        0.0,
+        0.05,
+        7.0
+      ],
+      "arrivalTile": [
+        29,
+        320
+      ],
+      "exit": {
+        "id": "exit-staging",
+        "kind": "waystone",
+        "target": "home",
+        "label": "Waystone",
+        "text": "The waystone home. Using it counts you out of the run.",
+        "position": [
+          5.8,
+          1.0,
+          11.0
+        ],
+        "serverTile": [
+          35,
+          316
+        ],
+        "objectId": 800
+      }
+    },
+    "legs": [
+      {
+        "id": "peat-cut",
+        "name": "The Peat Cut",
+        "kind": "gallery",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 0.8,
+        "late": 0.0,
+        "gate": {
+          "id": "gate-peat-cut",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            0.0,
+            1.2,
+            18.0
+          ],
+          "before": [
+            0.0,
+            0.0,
+            15.0
+          ],
+          "beyond": [
+            0.0,
+            0.0,
+            21.1
+          ],
+          "tile": [
+            29,
+            312
+          ],
+          "beyondTile": [
+            29,
+            306
+          ],
+          "objectId": 801
+        },
+        "bonus": "node:Moss",
+        "room": "peat-cut",
+        "bounds": [
+          -5.5,
+          22.0,
+          5.5,
+          54.0
+        ],
+        "spawns": [
+          [
+            -3.1,
+            0.0,
+            26.0
+          ],
+          [
+            0.1,
+            0.0,
+            26.0
+          ],
+          [
+            -3.1,
+            0.0,
+            29.2
+          ],
+          [
+            0.1,
+            0.0,
+            29.2
+          ],
+          [
+            -3.1,
+            0.0,
+            32.4
+          ],
+          [
+            0.1,
+            0.0,
+            32.4
+          ],
+          [
+            -3.1,
+            0.0,
+            35.6
+          ],
+          [
+            0.1,
+            0.0,
+            35.6
+          ],
+          [
+            -3.1,
+            0.0,
+            38.8
+          ],
+          [
+            0.1,
+            0.0,
+            38.8
+          ],
+          [
+            -3.1,
+            0.0,
+            42.0
+          ],
+          [
+            0.1,
+            0.0,
+            42.0
+          ],
+          [
+            -3.1,
+            0.0,
+            45.2
+          ],
+          [
+            0.1,
+            0.0,
+            45.2
+          ],
+          [
+            -3.1,
+            0.0,
+            48.4
+          ],
+          [
+            0.1,
+            0.0,
+            48.4
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            24,
+            273
+          ],
+          "max": [
+            34,
+            305
+          ]
+        },
+        "spawnTiles": [
+          [
+            29,
+            301
+          ],
+          [
+            26,
+            298
+          ],
+          [
+            29,
+            298
+          ],
+          [
+            26,
+            295
+          ],
+          [
+            29,
+            295
+          ],
+          [
+            29,
+            291
+          ],
+          [
+            26,
+            288
+          ],
+          [
+            29,
+            288
+          ],
+          [
+            26,
+            285
+          ],
+          [
+            29,
+            285
+          ],
+          [
+            26,
+            282
+          ],
+          [
+            29,
+            282
+          ],
+          [
+            26,
+            279
+          ],
+          [
+            29,
+            279
+          ]
+        ]
+      },
+      {
+        "id": "first-barrow",
+        "name": "The First Barrow",
+        "kind": "cavern",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.0,
+        "late": 0.2,
+        "gate": {
+          "id": "gate-first-barrow",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            0.0,
+            1.2,
+            58.0
+          ],
+          "before": [
+            0.0,
+            0.0,
+            55.0
+          ],
+          "beyond": [
+            0.0,
+            0.0,
+            61.1
+          ],
+          "tile": [
+            29,
+            272
+          ],
+          "beyondTile": [
+            29,
+            266
+          ],
+          "objectId": 802
+        },
+        "bonus": "",
+        "room": "first-barrow",
+        "bounds": [
+          -13.0,
+          62.0,
+          13.0,
+          86.0
+        ],
+        "spawns": [
+          [
+            -10.6,
+            0.0,
+            66.0
+          ],
+          [
+            -7.1,
+            0.0,
+            66.0
+          ],
+          [
+            -3.6,
+            0.0,
+            66.0
+          ],
+          [
+            -0.1,
+            0.0,
+            66.0
+          ],
+          [
+            3.4,
+            0.0,
+            66.0
+          ],
+          [
+            6.9,
+            0.0,
+            66.0
+          ],
+          [
+            10.4,
+            0.0,
+            66.0
+          ],
+          [
+            -10.6,
+            0.0,
+            69.5
+          ],
+          [
+            -7.1,
+            0.0,
+            69.5
+          ],
+          [
+            -3.6,
+            0.0,
+            69.5
+          ],
+          [
+            -0.1,
+            0.0,
+            69.5
+          ],
+          [
+            3.4,
+            0.0,
+            69.5
+          ],
+          [
+            6.9,
+            0.0,
+            69.5
+          ],
+          [
+            10.4,
+            0.0,
+            69.5
+          ],
+          [
+            -10.6,
+            0.0,
+            73.0
+          ],
+          [
+            -7.1,
+            0.0,
+            73.0
+          ],
+          [
+            -3.6,
+            0.0,
+            73.0
+          ],
+          [
+            -0.1,
+            0.0,
+            73.0
+          ],
+          [
+            3.4,
+            0.0,
+            73.0
+          ],
+          [
+            6.9,
+            0.0,
+            73.0
+          ],
+          [
+            10.4,
+            0.0,
+            73.0
+          ],
+          [
+            -10.6,
+            0.0,
+            76.5
+          ],
+          [
+            -7.1,
+            0.0,
+            76.5
+          ],
+          [
+            -3.6,
+            0.0,
+            76.5
+          ],
+          [
+            -0.1,
+            0.0,
+            76.5
+          ],
+          [
+            3.4,
+            0.0,
+            76.5
+          ],
+          [
+            6.9,
+            0.0,
+            76.5
+          ],
+          [
+            10.4,
+            0.0,
+            76.5
+          ],
+          [
+            -10.6,
+            0.0,
+            80.0
+          ],
+          [
+            -7.1,
+            0.0,
+            80.0
+          ],
+          [
+            -3.6,
+            0.0,
+            80.0
+          ],
+          [
+            -0.1,
+            0.0,
+            80.0
+          ],
+          [
+            3.4,
+            0.0,
+            80.0
+          ],
+          [
+            6.9,
+            0.0,
+            80.0
+          ],
+          [
+            10.4,
+            0.0,
+            80.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            16,
+            241
+          ],
+          "max": [
+            42,
+            265
+          ]
+        },
+        "spawnTiles": [
+          [
+            18,
+            261
+          ],
+          [
+            22,
+            261
+          ],
+          [
+            29,
+            261
+          ],
+          [
+            32,
+            261
+          ],
+          [
+            36,
+            261
+          ],
+          [
+            18,
+            258
+          ],
+          [
+            22,
+            258
+          ],
+          [
+            25,
+            258
+          ],
+          [
+            29,
+            258
+          ],
+          [
+            32,
+            258
+          ],
+          [
+            36,
+            258
+          ],
+          [
+            22,
+            254
+          ],
+          [
+            25,
+            254
+          ],
+          [
+            29,
+            254
+          ],
+          [
+            32,
+            254
+          ],
+          [
+            36,
+            254
+          ],
+          [
+            39,
+            254
+          ],
+          [
+            18,
+            250
+          ],
+          [
+            22,
+            250
+          ],
+          [
+            25,
+            250
+          ],
+          [
+            29,
+            250
+          ],
+          [
+            32,
+            250
+          ],
+          [
+            36,
+            250
+          ],
+          [
+            18,
+            247
+          ],
+          [
+            22,
+            247
+          ],
+          [
+            25,
+            247
+          ],
+          [
+            29,
+            247
+          ],
+          [
+            32,
+            247
+          ],
+          [
+            36,
+            247
+          ],
+          [
+            39,
+            247
+          ]
+        ]
+      },
+      {
+        "id": "bog-board",
+        "name": "The Bog Board",
+        "kind": "bridge",
+        "advance": "time:150",
+        "trigger": "enter",
+        "pressure": 0.9,
+        "late": 0.3,
+        "gate": {
+          "id": "gate-bog-board",
+          "kind": "bars",
+          "label": "An iron bar gate. It opens when the way behind you is quiet.",
+          "position": [
+            -4.0,
+            1.2,
+            90.0
+          ],
+          "before": [
+            -4.0,
+            0.0,
+            87.0
+          ],
+          "beyond": [
+            -4.0,
+            0.0,
+            93.1
+          ],
+          "tile": [
+            25,
+            240
+          ],
+          "beyondTile": [
+            25,
+            234
+          ],
+          "objectId": 803
+        },
+        "bonus": "",
+        "room": "bog-board",
+        "bounds": [
+          -6.2,
+          97.0,
+          -1.7999999999999998,
+          125.0
+        ],
+        "spawns": [
+          [
+            -5.1,
+            0.0,
+            101.0
+          ],
+          [
+            -2.9,
+            0.0,
+            101.0
+          ],
+          [
+            -5.1,
+            0.0,
+            104.2
+          ],
+          [
+            -2.9,
+            0.0,
+            104.2
+          ],
+          [
+            -5.1,
+            0.0,
+            107.4
+          ],
+          [
+            -2.9,
+            0.0,
+            107.4
+          ],
+          [
+            -5.1,
+            0.0,
+            110.6
+          ],
+          [
+            -2.9,
+            0.0,
+            110.6
+          ],
+          [
+            -5.1,
+            0.0,
+            113.8
+          ],
+          [
+            -2.9,
+            0.0,
+            113.8
+          ],
+          [
+            -5.1,
+            0.0,
+            117.0
+          ],
+          [
+            -2.9,
+            0.0,
+            117.0
+          ],
+          [
+            -5.1,
+            0.0,
+            120.2
+          ],
+          [
+            -2.9,
+            0.0,
+            120.2
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            23,
+            202
+          ],
+          "max": [
+            27,
+            230
+          ]
+        },
+        "spawnTiles": [
+          [
+            24,
+            226
+          ],
+          [
+            26,
+            226
+          ],
+          [
+            24,
+            223
+          ],
+          [
+            26,
+            223
+          ],
+          [
+            24,
+            220
+          ],
+          [
+            26,
+            220
+          ],
+          [
+            24,
+            213
+          ],
+          [
+            26,
+            213
+          ],
+          [
+            24,
+            210
+          ],
+          [
+            26,
+            210
+          ],
+          [
+            24,
+            207
+          ],
+          [
+            26,
+            207
+          ]
+        ]
+      },
+      {
+        "id": "fifth-chamber",
+        "name": "The Fifth Chamber",
+        "kind": "hall",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.1,
+        "late": 0.5,
+        "gate": {
+          "id": "gate-fifth-chamber",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            -4.0,
+            1.2,
+            132.0
+          ],
+          "before": [
+            -4.0,
+            0.0,
+            129.0
+          ],
+          "beyond": [
+            -4.0,
+            0.0,
+            135.1
+          ],
+          "tile": [
+            25,
+            198
+          ],
+          "beyondTile": [
+            25,
+            192
+          ],
+          "objectId": 804
+        },
+        "bonus": "",
+        "room": "fifth-chamber",
+        "bounds": [
+          -15.2,
+          136.0,
+          7.199999999999999,
+          156.0
+        ],
+        "spawns": [
+          [
+            -12.8,
+            0.0,
+            140.0
+          ],
+          [
+            -9.8,
+            0.0,
+            140.0
+          ],
+          [
+            -6.8,
+            0.0,
+            140.0
+          ],
+          [
+            -3.8,
+            0.0,
+            140.0
+          ],
+          [
+            -0.8,
+            0.0,
+            140.0
+          ],
+          [
+            2.2,
+            0.0,
+            140.0
+          ],
+          [
+            -12.8,
+            0.0,
+            143.0
+          ],
+          [
+            -9.8,
+            0.0,
+            143.0
+          ],
+          [
+            -6.8,
+            0.0,
+            143.0
+          ],
+          [
+            -3.8,
+            0.0,
+            143.0
+          ],
+          [
+            -0.8,
+            0.0,
+            143.0
+          ],
+          [
+            2.2,
+            0.0,
+            143.0
+          ],
+          [
+            -12.8,
+            0.0,
+            146.0
+          ],
+          [
+            -9.8,
+            0.0,
+            146.0
+          ],
+          [
+            -6.8,
+            0.0,
+            146.0
+          ],
+          [
+            -3.8,
+            0.0,
+            146.0
+          ],
+          [
+            -0.8,
+            0.0,
+            146.0
+          ],
+          [
+            2.2,
+            0.0,
+            146.0
+          ],
+          [
+            -12.8,
+            0.0,
+            149.0
+          ],
+          [
+            -9.8,
+            0.0,
+            149.0
+          ],
+          [
+            -6.8,
+            0.0,
+            149.0
+          ],
+          [
+            -3.8,
+            0.0,
+            149.0
+          ],
+          [
+            -0.8,
+            0.0,
+            149.0
+          ],
+          [
+            2.2,
+            0.0,
+            149.0
+          ],
+          [
+            -12.8,
+            0.0,
+            152.0
+          ],
+          [
+            -9.8,
+            0.0,
+            152.0
+          ],
+          [
+            -6.8,
+            0.0,
+            152.0
+          ],
+          [
+            -3.8,
+            0.0,
+            152.0
+          ],
+          [
+            -0.8,
+            0.0,
+            152.0
+          ],
+          [
+            2.2,
+            0.0,
+            152.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            14,
+            171
+          ],
+          "max": [
+            36,
+            191
+          ]
+        },
+        "spawnTiles": [
+          [
+            19,
+            187
+          ],
+          [
+            22,
+            187
+          ],
+          [
+            25,
+            187
+          ],
+          [
+            28,
+            187
+          ],
+          [
+            31,
+            187
+          ],
+          [
+            22,
+            184
+          ],
+          [
+            25,
+            184
+          ],
+          [
+            28,
+            184
+          ],
+          [
+            16,
+            181
+          ],
+          [
+            19,
+            181
+          ],
+          [
+            22,
+            181
+          ],
+          [
+            25,
+            181
+          ],
+          [
+            28,
+            181
+          ],
+          [
+            31,
+            181
+          ],
+          [
+            22,
+            178
+          ],
+          [
+            25,
+            178
+          ],
+          [
+            28,
+            178
+          ],
+          [
+            19,
+            175
+          ],
+          [
+            25,
+            175
+          ],
+          [
+            31,
+            175
+          ]
+        ]
+      },
+      {
+        "id": "split-barrow",
+        "name": "The Split Barrow",
+        "kind": "fork",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.1,
+        "late": 0.6,
+        "gate": {
+          "id": "gate-split-barrow",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            -7.0,
+            1.2,
+            160.0
+          ],
+          "before": [
+            -7.0,
+            0.0,
+            157.0
+          ],
+          "beyond": [
+            -7.0,
+            0.0,
+            163.1
+          ],
+          "tile": [
+            22,
+            170
+          ],
+          "beyondTile": [
+            22,
+            164
+          ],
+          "objectId": 805
+        },
+        "bonus": "",
+        "room": "split-barrow-hub",
+        "bounds": [
+          -22.0,
+          164.0,
+          8.0,
+          178.0
+        ],
+        "spawns": [
+          [
+            -19.6,
+            0.0,
+            167.5
+          ],
+          [
+            -16.1,
+            0.0,
+            167.5
+          ],
+          [
+            -12.6,
+            0.0,
+            167.5
+          ],
+          [
+            -9.1,
+            0.0,
+            167.5
+          ],
+          [
+            -5.6,
+            0.0,
+            167.5
+          ],
+          [
+            -2.1,
+            0.0,
+            167.5
+          ],
+          [
+            1.4,
+            0.0,
+            167.5
+          ],
+          [
+            4.9,
+            0.0,
+            167.5
+          ],
+          [
+            -19.6,
+            0.0,
+            171.0
+          ],
+          [
+            -16.1,
+            0.0,
+            171.0
+          ],
+          [
+            -12.6,
+            0.0,
+            171.0
+          ],
+          [
+            -9.1,
+            0.0,
+            171.0
+          ],
+          [
+            -5.6,
+            0.0,
+            171.0
+          ],
+          [
+            -2.1,
+            0.0,
+            171.0
+          ],
+          [
+            1.4,
+            0.0,
+            171.0
+          ],
+          [
+            4.9,
+            0.0,
+            171.0
+          ],
+          [
+            -19.6,
+            0.0,
+            174.5
+          ],
+          [
+            -16.1,
+            0.0,
+            174.5
+          ],
+          [
+            -12.6,
+            0.0,
+            174.5
+          ],
+          [
+            -9.1,
+            0.0,
+            174.5
+          ],
+          [
+            -5.6,
+            0.0,
+            174.5
+          ],
+          [
+            -2.1,
+            0.0,
+            174.5
+          ],
+          [
+            1.4,
+            0.0,
+            174.5
+          ],
+          [
+            4.9,
+            0.0,
+            174.5
+          ]
+        ],
+        "branches": [
+          {
+            "id": "east-passage",
+            "name": "The East Passage",
+            "kind": "hall",
+            "room": "split-barrow-east-passage",
+            "bounds": [
+              -26.0,
+              186.0,
+              -10.0,
+              206.0
+            ],
+            "spawns": [
+              [
+                -23.6,
+                0.0,
+                190.0
+              ],
+              [
+                -20.6,
+                0.0,
+                190.0
+              ],
+              [
+                -17.6,
+                0.0,
+                190.0
+              ],
+              [
+                -14.6,
+                0.0,
+                190.0
+              ],
+              [
+                -23.6,
+                0.0,
+                193.0
+              ],
+              [
+                -20.6,
+                0.0,
+                193.0
+              ],
+              [
+                -17.6,
+                0.0,
+                193.0
+              ],
+              [
+                -14.6,
+                0.0,
+                193.0
+              ],
+              [
+                -23.6,
+                0.0,
+                196.0
+              ],
+              [
+                -20.6,
+                0.0,
+                196.0
+              ],
+              [
+                -17.6,
+                0.0,
+                196.0
+              ],
+              [
+                -14.6,
+                0.0,
+                196.0
+              ],
+              [
+                -23.6,
+                0.0,
+                199.0
+              ],
+              [
+                -20.6,
+                0.0,
+                199.0
+              ],
+              [
+                -17.6,
+                0.0,
+                199.0
+              ],
+              [
+                -14.6,
+                0.0,
+                199.0
+              ],
+              [
+                -23.6,
+                0.0,
+                202.0
+              ],
+              [
+                -20.6,
+                0.0,
+                202.0
+              ],
+              [
+                -17.6,
+                0.0,
+                202.0
+              ],
+              [
+                -14.6,
+                0.0,
+                202.0
+              ]
+            ],
+            "gate": {
+              "id": "gate-split-barrow-east-passage",
+              "kind": "slab",
+              "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+              "position": [
+                -18.0,
+                1.2,
+                182.0
+              ],
+              "before": [
+                -18.0,
+                0.0,
+                179.0
+              ],
+              "beyond": [
+                -18.0,
+                0.0,
+                185.1
+              ],
+              "tile": [
+                11,
+                148
+              ],
+              "beyondTile": [
+                11,
+                142
+              ],
+              "objectId": 806
+            },
+            "boundsTiles": {
+              "min": [
+                3,
+                121
+              ],
+              "max": [
+                19,
+                141
+              ]
+            },
+            "spawnTiles": [
+              [
+                8,
+                137
+              ],
+              [
+                11,
+                137
+              ],
+              [
+                14,
+                137
+              ],
+              [
+                8,
+                134
+              ],
+              [
+                11,
+                134
+              ],
+              [
+                14,
+                134
+              ],
+              [
+                5,
+                131
+              ],
+              [
+                8,
+                131
+              ],
+              [
+                11,
+                131
+              ],
+              [
+                14,
+                131
+              ],
+              [
+                8,
+                128
+              ],
+              [
+                11,
+                128
+              ],
+              [
+                14,
+                128
+              ],
+              [
+                11,
+                125
+              ]
+            ]
+          },
+          {
+            "id": "west-passage",
+            "name": "The West Passage",
+            "kind": "cavern",
+            "room": "split-barrow-west-passage",
+            "bounds": [
+              -4.0,
+              186.0,
+              12.0,
+              206.0
+            ],
+            "spawns": [
+              [
+                -1.6,
+                0.0,
+                190.0
+              ],
+              [
+                1.4,
+                0.0,
+                190.0
+              ],
+              [
+                4.4,
+                0.0,
+                190.0
+              ],
+              [
+                7.4,
+                0.0,
+                190.0
+              ],
+              [
+                -1.6,
+                0.0,
+                193.0
+              ],
+              [
+                1.4,
+                0.0,
+                193.0
+              ],
+              [
+                4.4,
+                0.0,
+                193.0
+              ],
+              [
+                7.4,
+                0.0,
+                193.0
+              ],
+              [
+                -1.6,
+                0.0,
+                196.0
+              ],
+              [
+                1.4,
+                0.0,
+                196.0
+              ],
+              [
+                4.4,
+                0.0,
+                196.0
+              ],
+              [
+                7.4,
+                0.0,
+                196.0
+              ],
+              [
+                -1.6,
+                0.0,
+                199.0
+              ],
+              [
+                1.4,
+                0.0,
+                199.0
+              ],
+              [
+                4.4,
+                0.0,
+                199.0
+              ],
+              [
+                7.4,
+                0.0,
+                199.0
+              ],
+              [
+                -1.6,
+                0.0,
+                202.0
+              ],
+              [
+                1.4,
+                0.0,
+                202.0
+              ],
+              [
+                4.4,
+                0.0,
+                202.0
+              ],
+              [
+                7.4,
+                0.0,
+                202.0
+              ]
+            ],
+            "gate": {
+              "id": "gate-split-barrow-west-passage",
+              "kind": "slab",
+              "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+              "position": [
+                4.0,
+                1.2,
+                182.0
+              ],
+              "before": [
+                4.0,
+                0.0,
+                179.0
+              ],
+              "beyond": [
+                4.0,
+                0.0,
+                185.1
+              ],
+              "tile": [
+                33,
+                148
+              ],
+              "beyondTile": [
+                33,
+                142
+              ],
+              "objectId": 807
+            },
+            "boundsTiles": {
+              "min": [
+                25,
+                121
+              ],
+              "max": [
+                41,
+                141
+              ]
+            },
+            "spawnTiles": [
+              [
+                30,
+                137
+              ],
+              [
+                33,
+                137
+              ],
+              [
+                30,
+                134
+              ],
+              [
+                33,
+                134
+              ],
+              [
+                36,
+                134
+              ],
+              [
+                27,
+                131
+              ],
+              [
+                30,
+                131
+              ],
+              [
+                33,
+                131
+              ],
+              [
+                36,
+                131
+              ],
+              [
+                27,
+                128
+              ],
+              [
+                30,
+                128
+              ],
+              [
+                33,
+                128
+              ],
+              [
+                36,
+                128
+              ],
+              [
+                30,
+                125
+              ],
+              [
+                33,
+                125
+              ]
+            ]
+          }
+        ],
+        "merge": {
+          "room": "split-barrow-merge",
+          "bounds": [
+            -22.0,
+            214.0,
+            8.0,
+            226.0
+          ],
+          "boundsTiles": {
+            "min": [
+              7,
+              101
+            ],
+            "max": [
+              37,
+              113
+            ]
+          }
+        },
+        "boundsTiles": {
+          "min": [
+            7,
+            149
+          ],
+          "max": [
+            37,
+            163
+          ]
+        },
+        "spawnTiles": [
+          [
+            9,
+            160
+          ],
+          [
+            13,
+            160
+          ],
+          [
+            16,
+            160
+          ],
+          [
+            20,
+            160
+          ],
+          [
+            23,
+            160
+          ],
+          [
+            27,
+            160
+          ],
+          [
+            30,
+            160
+          ],
+          [
+            34,
+            160
+          ],
+          [
+            9,
+            156
+          ],
+          [
+            13,
+            156
+          ],
+          [
+            16,
+            156
+          ],
+          [
+            20,
+            156
+          ],
+          [
+            23,
+            156
+          ],
+          [
+            27,
+            156
+          ],
+          [
+            30,
+            156
+          ],
+          [
+            34,
+            156
+          ],
+          [
+            16,
+            152
+          ],
+          [
+            20,
+            152
+          ],
+          [
+            23,
+            152
+          ],
+          [
+            27,
+            152
+          ],
+          [
+            34,
+            152
+          ]
+        ]
+      },
+      {
+        "id": "reeve-stair",
+        "name": "The Reeve's Stair",
+        "kind": "stair",
+        "advance": "cleared",
+        "trigger": "at_gate",
+        "pressure": 1.2,
+        "late": 0.85,
+        "gate": {
+          "id": "gate-reeve-stair",
+          "kind": "bars",
+          "label": "An iron bar gate. It opens when the way behind you is quiet.",
+          "position": [
+            -7.0,
+            1.2,
+            230.0
+          ],
+          "before": [
+            -7.0,
+            0.0,
+            227.0
+          ],
+          "beyond": [
+            -7.0,
+            0.0,
+            233.1
+          ],
+          "tile": [
+            22,
+            100
+          ],
+          "beyondTile": [
+            22,
+            94
+          ],
+          "objectId": 808
+        },
+        "bonus": "",
+        "room": "reeve-stair",
+        "bounds": [
+          -18.4,
+          248.0,
+          4.4,
+          266.0
+        ],
+        "spawns": [
+          [
+            -16.0,
+            3.0,
+            252.0
+          ],
+          [
+            -13.0,
+            3.0,
+            252.0
+          ],
+          [
+            -10.0,
+            3.0,
+            252.0
+          ],
+          [
+            -7.0,
+            3.0,
+            252.0
+          ],
+          [
+            -4.0,
+            3.0,
+            252.0
+          ],
+          [
+            -1.0,
+            3.0,
+            252.0
+          ],
+          [
+            -16.0,
+            3.0,
+            255.0
+          ],
+          [
+            -13.0,
+            3.0,
+            255.0
+          ],
+          [
+            -10.0,
+            3.0,
+            255.0
+          ],
+          [
+            -7.0,
+            3.0,
+            255.0
+          ],
+          [
+            -4.0,
+            3.0,
+            255.0
+          ],
+          [
+            -1.0,
+            3.0,
+            255.0
+          ],
+          [
+            -16.0,
+            3.0,
+            258.0
+          ],
+          [
+            -13.0,
+            3.0,
+            258.0
+          ],
+          [
+            -10.0,
+            3.0,
+            258.0
+          ],
+          [
+            -7.0,
+            3.0,
+            258.0
+          ],
+          [
+            -4.0,
+            3.0,
+            258.0
+          ],
+          [
+            -1.0,
+            3.0,
+            258.0
+          ],
+          [
+            -16.0,
+            3.0,
+            261.0
+          ],
+          [
+            -13.0,
+            3.0,
+            261.0
+          ],
+          [
+            -10.0,
+            3.0,
+            261.0
+          ],
+          [
+            -7.0,
+            3.0,
+            261.0
+          ],
+          [
+            -4.0,
+            3.0,
+            261.0
+          ],
+          [
+            -1.0,
+            3.0,
+            261.0
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            11,
+            61
+          ],
+          "max": [
+            33,
+            79
+          ]
+        },
+        "spawnTiles": [
+          [
+            13,
+            75
+          ],
+          [
+            16,
+            75
+          ],
+          [
+            22,
+            75
+          ],
+          [
+            28,
+            75
+          ],
+          [
+            13,
+            72
+          ],
+          [
+            16,
+            72
+          ],
+          [
+            19,
+            72
+          ],
+          [
+            22,
+            72
+          ],
+          [
+            25,
+            72
+          ],
+          [
+            28,
+            72
+          ],
+          [
+            16,
+            69
+          ],
+          [
+            19,
+            69
+          ],
+          [
+            22,
+            69
+          ],
+          [
+            25,
+            69
+          ],
+          [
+            28,
+            69
+          ],
+          [
+            13,
+            66
+          ],
+          [
+            16,
+            66
+          ],
+          [
+            19,
+            66
+          ],
+          [
+            22,
+            66
+          ],
+          [
+            25,
+            66
+          ],
+          [
+            28,
+            66
+          ]
+        ]
+      },
+      {
+        "id": "reeve-hall",
+        "name": "The Reeve's Hall",
+        "kind": "court",
+        "advance": "cleared",
+        "trigger": "enter",
+        "pressure": 1.0,
+        "late": 1.0,
+        "gate": {
+          "id": "gate-reeve-hall",
+          "kind": "slab",
+          "label": "A stone slab across the way. It slides when the way behind you is quiet.",
+          "position": [
+            -10.0,
+            4.2,
+            270.0
+          ],
+          "before": [
+            -10.0,
+            3.0,
+            267.0
+          ],
+          "beyond": [
+            -10.0,
+            3.0,
+            273.1
+          ],
+          "tile": [
+            19,
+            60
+          ],
+          "beyondTile": [
+            19,
+            54
+          ],
+          "objectId": 809
+        },
+        "bonus": "",
+        "boss": [
+          -10.0,
+          3.5,
+          297.0
+        ],
+        "room": "reeve-hall",
+        "bounds": [
+          -26.0,
+          274.0,
+          6.0,
+          304.0
+        ],
+        "spawns": [
+          [
+            -3.0,
+            3.0,
+            289.0
+          ],
+          [
+            -5.05,
+            3.0,
+            293.24
+          ],
+          [
+            -10.0,
+            3.0,
+            295.0
+          ],
+          [
+            -14.95,
+            3.0,
+            293.24
+          ],
+          [
+            -17.0,
+            3.0,
+            289.0
+          ],
+          [
+            -14.95,
+            3.0,
+            284.76
+          ],
+          [
+            -10.0,
+            3.0,
+            283.0
+          ],
+          [
+            -5.05,
+            3.0,
+            284.76
+          ]
+        ],
+        "boundsTiles": {
+          "min": [
+            3,
+            23
+          ],
+          "max": [
+            35,
+            53
+          ]
+        },
+        "spawnTiles": [
+          [
+            26,
+            38
+          ],
+          [
+            24,
+            34
+          ],
+          [
+            19,
+            32
+          ],
+          [
+            14,
+            34
+          ],
+          [
+            12,
+            38
+          ],
+          [
+            14,
+            42
+          ],
+          [
+            19,
+            44
+          ],
+          [
+            24,
+            42
+          ]
+        ],
+        "bossTile": [
+          19,
+          30
+        ]
+      }
+    ],
+    "vault": {
+      "room": "vault",
+      "boundsTiles": {
+        "min": [
+          12,
+          3
+        ],
+        "max": [
+          26,
+          15
+        ]
+      },
+      "spot": [
+        -10.0,
+        3.05,
+        318.0
+      ],
+      "spotTile": [
+        19,
+        9
+      ],
+      "cache": {
+        "id": "cache",
+        "kind": "cache",
+        "target": "run",
+        "label": "Reward cache",
+        "text": "The run's cache. It opens once for each of you when the court is quiet.",
+        "position": [
+          -10.0,
+          3.6,
+          320.5
+        ],
+        "serverTile": [
+          19,
+          6
+        ],
+        "objectId": 798
+      },
+      "exit": {
+        "id": "exit-vault",
+        "kind": "waystone",
+        "target": "home",
+        "label": "Waystone",
+        "text": "The waystone home.",
+        "position": [
+          -5.0,
+          4.0,
+          315.0
+        ],
+        "serverTile": [
+          24,
+          12
+        ],
+        "objectId": 799
+      }
+    },
+    "keeper": {
+      "name": "Widow Carrow",
+      "at": "breached-barrows",
+      "offset": [
+        6.0,
+        2.0
+      ],
+      "actorType": 341
+    },
+    "maxPlayers": 6,
+    "bands": [
+      {
+        "id": "low",
+        "label": "The Barrow Run (8-30)",
+        "minAd": 8,
+        "maxAd": 30,
+        "timeLimit": 2400,
+        "cooldownHours": 6
+      },
+      {
+        "id": "mid",
+        "label": "The Barrow Run (25-60)",
+        "minAd": 25,
+        "maxAd": 60,
+        "timeLimit": 2700,
+        "cooldownHours": 6
+      }
+    ]
+  },
+  "performance": {
+    "nodes": 291,
+    "meshes": 261,
+    "materials": 13,
+    "images": 39,
+    "textures": 39,
+    "accessors": 1305,
+    "bufferViews": 1344,
+    "uniqueTriangles": 60291,
+    "uniqueVertices": 61205,
+    "glbBytes": 8615576,
+    "nodeNames": [
+      "Secrets_grey_moors_gauntlet",
+      "Section_grey_moors_gauntlet_band_-001",
+      "Roof_grey_moors_gauntlet_band_-001_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_-001_grey_drystone",
+      "Walk_grey_moors_gauntlet_band_-001_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+000",
+      "Roof_grey_moors_gauntlet_band_+000_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+000_amber_resin",
+      "Build_grey_moors_gauntlet_band_+000_dark_iron",
+      "Build_grey_moors_gauntlet_band_+000_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+000_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+000_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+000_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+000_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+000_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+001",
+      "Roof_grey_moors_gauntlet_band_+001_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+001_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+001_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+001_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+001_grey_moor_granite",
+      "Walk_grey_moors_gauntlet_band_+001_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+002",
+      "Roof_grey_moors_gauntlet_band_+002_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+002_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+002_amber_resin",
+      "Build_grey_moors_gauntlet_band_+002_dark_iron",
+      "Build_grey_moors_gauntlet_band_+002_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+002_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+002_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+002_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+002_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+002_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+002_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+003",
+      "Roof_grey_moors_gauntlet_band_+003_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+003_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+003_amber_resin",
+      "Build_grey_moors_gauntlet_band_+003_dark_iron",
+      "Build_grey_moors_gauntlet_band_+003_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+003_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+003_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+003_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+003_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+003_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+003_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+004",
+      "Roof_grey_moors_gauntlet_band_+004_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+004_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+004_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+004_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+004_grey_moor_granite",
+      "Walk_grey_moors_gauntlet_band_+004_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+005",
+      "Roof_grey_moors_gauntlet_band_+005_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+005_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+005_amber_resin",
+      "Build_grey_moors_gauntlet_band_+005_dark_iron",
+      "Build_grey_moors_gauntlet_band_+005_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+005_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+005_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+005_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+005_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+005_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+006",
+      "Roof_grey_moors_gauntlet_band_+006_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+006_amber_resin",
+      "Build_grey_moors_gauntlet_band_+006_dark_iron",
+      "Build_grey_moors_gauntlet_band_+006_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+006_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+006_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+006_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+006_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+006_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+007",
+      "Roof_grey_moors_gauntlet_band_+007_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+007_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+007_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+007_dark_iron",
+      "Build_grey_moors_gauntlet_band_+007_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+007_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+007_grey_moor_granite",
+      "Walk_grey_moors_gauntlet_band_+007_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+008",
+      "Roof_grey_moors_gauntlet_band_+008_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+008_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+008_amber_resin",
+      "Build_grey_moors_gauntlet_band_+008_dark_iron",
+      "Build_grey_moors_gauntlet_band_+008_grey_barrow_turf",
+      "Build_grey_moors_gauntlet_band_+008_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+008_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+008_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+008_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+008_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+008_timber_grey",
+      "Walk_grey_moors_gauntlet_band_+008_grey_bog_timber",
+      "Walk_grey_moors_gauntlet_band_+008_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+009",
+      "Roof_grey_moors_gauntlet_band_+009_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+009_amber_resin",
+      "Build_grey_moors_gauntlet_band_+009_dark_iron",
+      "Build_grey_moors_gauntlet_band_+009_grey_barrow_turf",
+      "Build_grey_moors_gauntlet_band_+009_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+009_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+009_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+009_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+009_timber_grey",
+      "Walk_grey_moors_gauntlet_band_+009_grey_bog_timber",
+      "Section_grey_moors_gauntlet_band_+010",
+      "Roof_grey_moors_gauntlet_band_+010_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+010_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+010_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+010_amber_resin",
+      "Build_grey_moors_gauntlet_band_+010_dark_iron",
+      "Build_grey_moors_gauntlet_band_+010_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+010_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+010_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+010_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+010_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+010_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+010_timber_grey",
+      "Walk_grey_moors_gauntlet_band_+010_grey_bog_timber",
+      "Walk_grey_moors_gauntlet_band_+010_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+011",
+      "Roof_grey_moors_gauntlet_band_+011_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+011_amber_resin",
+      "Build_grey_moors_gauntlet_band_+011_dark_iron",
+      "Build_grey_moors_gauntlet_band_+011_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+011_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+011_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+011_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+011_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+011_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+012",
+      "Roof_grey_moors_gauntlet_band_+012_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+012_amber_resin",
+      "Build_grey_moors_gauntlet_band_+012_dark_iron",
+      "Build_grey_moors_gauntlet_band_+012_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+012_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+012_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+012_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+012_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+012_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+013",
+      "Roof_grey_moors_gauntlet_band_+013_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+013_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+013_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+013_grey_moor_granite",
+      "Walk_grey_moors_gauntlet_band_+013_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+014",
+      "Roof_grey_moors_gauntlet_band_+014_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+014_amber_resin",
+      "Build_grey_moors_gauntlet_band_+014_dark_iron",
+      "Build_grey_moors_gauntlet_band_+014_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+014_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+014_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+014_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+014_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+014_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+014_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+015",
+      "Roof_grey_moors_gauntlet_band_+015_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+015_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+015_amber_resin",
+      "Build_grey_moors_gauntlet_band_+015_dark_iron",
+      "Build_grey_moors_gauntlet_band_+015_grey_barrow_turf",
+      "Build_grey_moors_gauntlet_band_+015_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+015_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+015_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+015_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+015_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+015_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+015_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+015_grey_barrow_turf",
+      "Walk_grey_moors_gauntlet_band_+015_grey_carved_stone",
+      "Walk_grey_moors_gauntlet_band_+015_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+016",
+      "Roof_grey_moors_gauntlet_band_+016_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+016_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+016_amber_resin",
+      "Build_grey_moors_gauntlet_band_+016_dark_iron",
+      "Build_grey_moors_gauntlet_band_+016_grey_barrow_turf",
+      "Build_grey_moors_gauntlet_band_+016_grey_bog_water",
+      "Build_grey_moors_gauntlet_band_+016_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+016_grey_dead_bark",
+      "Build_grey_moors_gauntlet_band_+016_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+016_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+016_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+016_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+016_grey_barrow_turf",
+      "Walk_grey_moors_gauntlet_band_+016_grey_carved_stone",
+      "Section_grey_moors_gauntlet_band_+017",
+      "Roof_grey_moors_gauntlet_band_+017_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+017_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+017_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+017_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+017_grey_moor_granite",
+      "Walk_grey_moors_gauntlet_band_+017_grey_barrow_turf",
+      "Walk_grey_moors_gauntlet_band_+017_grey_carved_stone",
+      "Walk_grey_moors_gauntlet_band_+017_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+018",
+      "Roof_grey_moors_gauntlet_band_+018_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+018_amber_resin",
+      "Build_grey_moors_gauntlet_band_+018_dark_iron",
+      "Build_grey_moors_gauntlet_band_+018_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+018_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+018_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+018_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+018_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+019",
+      "Roof_grey_moors_gauntlet_band_+019_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+019_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+019_dark_iron",
+      "Build_grey_moors_gauntlet_band_+019_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+019_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+019_grey_moor_granite",
+      "Walk_grey_moors_gauntlet_band_+019_grey_carved_stone",
+      "Walk_grey_moors_gauntlet_band_+019_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+020",
+      "Roof_grey_moors_gauntlet_band_+020_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+020_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+020_amber_resin",
+      "Build_grey_moors_gauntlet_band_+020_dark_iron",
+      "Build_grey_moors_gauntlet_band_+020_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+020_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+020_grey_moor_granite",
+      "Walk_grey_moors_gauntlet_band_+020_grey_carved_stone",
+      "Walk_grey_moors_gauntlet_band_+020_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+021",
+      "Roof_grey_moors_gauntlet_band_+021_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+021_amber_resin",
+      "Build_grey_moors_gauntlet_band_+021_dark_iron",
+      "Build_grey_moors_gauntlet_band_+021_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+021_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+021_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+021_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+021_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+022",
+      "Roof_grey_moors_gauntlet_band_+022_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+022_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+022_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+022_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+022_grey_moor_granite",
+      "Walk_grey_moors_gauntlet_band_+022_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+023",
+      "Roof_grey_moors_gauntlet_band_+023_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+023_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+023_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+023_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+023_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+023_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+023_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+024",
+      "Roof_grey_moors_gauntlet_band_+024_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+024_amber_resin",
+      "Build_grey_moors_gauntlet_band_+024_dark_iron",
+      "Build_grey_moors_gauntlet_band_+024_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+024_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+024_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+024_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+024_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+024_grey_carved_stone",
+      "Walk_grey_moors_gauntlet_band_+024_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+025",
+      "Roof_grey_moors_gauntlet_band_+025_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+025_grey_carved_stone",
+      "Roof_grey_moors_gauntlet_band_+025_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+025_amber_resin",
+      "Build_grey_moors_gauntlet_band_+025_dark_iron",
+      "Build_grey_moors_gauntlet_band_+025_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+025_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+025_grey_moor_granite",
+      "Build_grey_moors_gauntlet_band_+025_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+025_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+025_grey_carved_stone",
+      "Walk_grey_moors_gauntlet_band_+025_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+026",
+      "Roof_grey_moors_gauntlet_band_+026_grey_bog_timber",
+      "Roof_grey_moors_gauntlet_band_+026_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+026_amber_resin",
+      "Build_grey_moors_gauntlet_band_+026_dark_iron",
+      "Build_grey_moors_gauntlet_band_+026_grey_bog_timber",
+      "Build_grey_moors_gauntlet_band_+026_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+026_grey_drystone",
+      "Build_grey_moors_gauntlet_band_+026_grey_votive_flame",
+      "Build_grey_moors_gauntlet_band_+026_lime_plaster",
+      "Walk_grey_moors_gauntlet_band_+026_grey_moor_track",
+      "Section_grey_moors_gauntlet_band_+027",
+      "Roof_grey_moors_gauntlet_band_+027_grey_carved_stone",
+      "Build_grey_moors_gauntlet_band_+027_grey_carved_stone",
+      "Walk_grey_moors_gauntlet_band_+027_grey_moor_track"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "_toolkit/gauntlets/build.py",
+      "role": "reproducible-build",
+      "design": "_toolkit/gauntlets/designs.py"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the gauntlet rooms over the shared toolkit",
+    "license": "CC-BY-4.0"
+  },
+  "productionStatus": "authored-geometry-materials-population",
+  "notes": [
+    "The Barrow Run: a linear instanced route of 7 legs under grey_moors; the server runs it as an instance and opens each gate when the leg before it is quiet."
+  ],
+  "externalResources": {
+    "../../../_shared/images/02c681c6ccdfc850312b1610a650ed4313e1a08d2088b257a1aef0322e445a81.png": "02c681c6ccdfc850312b1610a650ed4313e1a08d2088b257a1aef0322e445a81",
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d.png": "06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d",
+    "../../../_shared/images/0c1aed45b209f5f7b000e4c9cc9ffc8412ccc84bba1fb1ef72aec0cae1f6716e.png": "0c1aed45b209f5f7b000e4c9cc9ffc8412ccc84bba1fb1ef72aec0cae1f6716e",
+    "../../../_shared/images/0fd678eaad187a9ef55851858660cc40eb0acbdf695ab50123f4b59fef574786.png": "0fd678eaad187a9ef55851858660cc40eb0acbdf695ab50123f4b59fef574786",
+    "../../../_shared/images/1af8ff2467a2da589fd588011db8e7e4b344fae101a5d8d5d3c048a923a05c44.png": "1af8ff2467a2da589fd588011db8e7e4b344fae101a5d8d5d3c048a923a05c44",
+    "../../../_shared/images/1b4c9eca577a9dda258aab140b14f10b48b82daf441c875121f2b7b6d4097f69.png": "1b4c9eca577a9dda258aab140b14f10b48b82daf441c875121f2b7b6d4097f69",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/387c5c4aff2e9d2db39d9b0e96f5c811358794e02e515c1cf21abcc3e785ea09.png": "387c5c4aff2e9d2db39d9b0e96f5c811358794e02e515c1cf21abcc3e785ea09",
+    "../../../_shared/images/44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348.png": "44edfd6066248a44ac562198244e75187b0d61c96553599935bdd63e53ee0348",
+    "../../../_shared/images/4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4.png": "4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4",
+    "../../../_shared/images/475ef8281cbbcd2725103e11e0c83e3078a3126128609801c9e59ae4314a4d19.png": "475ef8281cbbcd2725103e11e0c83e3078a3126128609801c9e59ae4314a4d19",
+    "../../../_shared/images/5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843.png": "5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843",
+    "../../../_shared/images/5cead44ee1afc9dde131220bab5509c26b0840822061e613a5a186083c2002be.png": "5cead44ee1afc9dde131220bab5509c26b0840822061e613a5a186083c2002be",
+    "../../../_shared/images/68fa4b2219a3e1883fcb9004fc075b68116d974b376f5ad52cf8ab0162291c18.png": "68fa4b2219a3e1883fcb9004fc075b68116d974b376f5ad52cf8ab0162291c18",
+    "../../../_shared/images/6c7d42b83efdeb9448806a8ffd79f5d4632ddfabbe4b479bfda9661e7628afa7.png": "6c7d42b83efdeb9448806a8ffd79f5d4632ddfabbe4b479bfda9661e7628afa7",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/81fed653d8c9495e4ee98c7c2697dec3f400fd69ffa19c4e60fa3acdb8c2f85c.png": "81fed653d8c9495e4ee98c7c2697dec3f400fd69ffa19c4e60fa3acdb8c2f85c",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/867d994537f2718358bee73b254cdba31eb84a14e9681c424980b81be5bd9b8c.png": "867d994537f2718358bee73b254cdba31eb84a14e9681c424980b81be5bd9b8c",
+    "../../../_shared/images/8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c.png": "8de79cf5ad5c44afa9f4a32e6be009d734961c5c71188ac53007b1d271b37d3c",
+    "../../../_shared/images/9263b1a86f813677ba63b20095d1ee097fe25b35000684b55edf193f8a648ef6.png": "9263b1a86f813677ba63b20095d1ee097fe25b35000684b55edf193f8a648ef6",
+    "../../../_shared/images/9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be.png": "9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be",
+    "../../../_shared/images/9fc3cdd90397d333805c3a3da24f9826f722f04f1d0daa9cc5e30d844513cd6d.png": "9fc3cdd90397d333805c3a3da24f9826f722f04f1d0daa9cc5e30d844513cd6d",
+    "../../../_shared/images/a269fe3db242a9e5d0fbec4e228233fb11366e9abaf31a34f74225716351bf39.png": "a269fe3db242a9e5d0fbec4e228233fb11366e9abaf31a34f74225716351bf39",
+    "../../../_shared/images/ab0428a356a76b3a552ccb820522238387733cf9da3a7f9303d5f03f750949fb.png": "ab0428a356a76b3a552ccb820522238387733cf9da3a7f9303d5f03f750949fb",
+    "../../../_shared/images/ab5881fb0f1107266d0692b9c22bb22d3fd692dffa94c058823a27a2dd937b35.png": "ab5881fb0f1107266d0692b9c22bb22d3fd692dffa94c058823a27a2dd937b35",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/af88423acff80eed376f0f57a1e0695a48881367a5927380fd81e54b65d006ac.png": "af88423acff80eed376f0f57a1e0695a48881367a5927380fd81e54b65d006ac",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/bcfa1f748f8242d1d883d0cd12b86a18d1c149ae0b5f637346ff60a9f071c6b0.png": "bcfa1f748f8242d1d883d0cd12b86a18d1c149ae0b5f637346ff60a9f071c6b0",
+    "../../../_shared/images/be1a174e067789b8594a372a9396536d32f9fd93738dd44aee0d7ac99a06c968.png": "be1a174e067789b8594a372a9396536d32f9fd93738dd44aee0d7ac99a06c968",
+    "../../../_shared/images/c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd.png": "c83c927a93c8bac0d5bdc0d0a147e211fe1e2de8bed8e84b124bb9fed5c4b7cd",
+    "../../../_shared/images/d749d5bf9ceb2018ea2bde2a7cb43c6ef9ec8fc6a5f2803d4dc40e26d04d4009.png": "d749d5bf9ceb2018ea2bde2a7cb43c6ef9ec8fc6a5f2803d4dc40e26d04d4009",
+    "../../../_shared/images/d901334c8d05c924ad4229c9b8089148b9056f6d22c2334f69740f3f15c5e775.png": "d901334c8d05c924ad4229c9b8089148b9056f6d22c2334f69740f3f15c5e775",
+    "../../../_shared/images/e8f97efde3427c94b434e001e599125494ed8a60b462097d319b2a7d3e12628f.png": "e8f97efde3427c94b434e001e599125494ed8a60b462097d319b2a7d3e12628f",
+    "../../../_shared/images/eb7c4e4ed32c33c210c92a16000d0170bd11d21d561b7011f6d40a56e9758f16.png": "eb7c4e4ed32c33c210c92a16000d0170bd11d21d561b7011f6d40a56e9758f16"
+  }
+}

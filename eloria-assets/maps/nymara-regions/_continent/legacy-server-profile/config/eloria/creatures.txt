@@ -1,0 +1,9148 @@
+# Nymara creature catalog: 234 normal creatures with distinct updated models
+# and seven named bosses sharing their retained base models. The client's production creature catalog is the
+# other half of this contract; tests/test_native_actor_model_contract.py holds
+# the two together.
+#
+# level is an explicit balance tier. Attack, defense, attributes, health,
+# damage, armor, aggression and respawn values are server-authoritative.
+#
+# attributes: the twelve cross attributes - matter, toughness, carry, charm,
+#   reaction, perception, rationality, magic_offense, magic_defense,
+#   dexterity, ethereality, might - by the same names a player carries them
+#   under. Each is stated outright, the way a player owns theirs since the six
+#   base attributes were deleted.
+#
+#   Creatures used to be written in those six, and the combat code averaged a
+#   pair of them at every read: Might out of physique and coordination,
+#   Toughness out of physique and vitality, Dexterity out of coordination and
+#   reasoning, Reaction out of coordination and instinct. Every block here was
+#   converted through exactly those pairs, so no creature's numbers moved -
+#   what moved is that the number the combat code reads is now the number you
+#   edit. A block still written in the six is still read, converted the same
+#   way, so an old profile or a generator that has not been taught the new
+#   names keeps working.
+#
+#   Five of the twelve are read today: Dexterity to land a hit, Reaction to
+#   avoid one, Might behind the damage, Toughness against it, and Magic
+#   Defense when a player casts at the creature - the same attribute a player
+#   resists a spell with. That last one was Rationality until the creature
+#   side caught up with the magic split; each creature's resist number was
+#   carried across unchanged, which is why a block's Rationality and Magic
+#   Defense start out equal. They are independent numbers from here, and only
+#   Magic Defense is read.
+#
+#   The remaining seven are carried so a creature and a player are described
+#   by one set, and are there to be read when something reads them.
+#
+# footprint: how many tiles the creature stands on, as a box laid around the
+#   tile it reports. One number is a square (footprint: 3), two are a
+#   rectangle (footprint: 4x2), and the ceiling is 10. Omitted means one tile.
+#   These are MEASURED, not chosen - `tools/measure_creature_footprints.py`
+#   reads each model's bounding box and writes the value here. Do not hand-edit
+#   one without a reason; re-run the tool instead, and it will tell you every
+#   creature whose value no longer matches its model.
+#
+# scale: how large the model is drawn, as a multiple of the GLB as authored.
+#   Omitted means 1.0, the model at its own size. For a species that should be
+#   a bigger or smaller version of another without a second model to maintain.
+#   Between 1/128 and 128. The actor packet carries it as a 16-bit field
+#   holding the base-two logarithm of the scale, so every power of two in
+#   that range is exact and everything else is within a sixtieth of a
+#   percent.
+#
+#   A creature much past about 10x will be drawn larger than the ground it
+#   can be given: footprints stop at 10x10, because a path search places a
+#   body by its area and a hundred-tile creature is scenery rather than
+#   something that walks. The tool says so when it happens.
+#
+# variant_of / variant_chance: this block is an occasional elevated version
+#   of another creature - one spawn in `variant_chance` of that creature is
+#   this instead. It inherits every field it does not state, so a variant
+#   block is a name, a rarity and the few numbers that make it worth
+#   meeting. It needs its own drop table, it counts in the roster, and it
+#   is never placed in spawns.txt - it appears by rolling in place of the
+#   creature it elevates, including on respawn.
+#
+#   It wears its base's body, so it may not disagree about actor_type or
+#   footprint: the client is told one footprint per actor type, and the two
+#   would be drawn standing on different ground.
+#
+#   A scale change is not complete until the tool has been re-run: the
+#   footprint is measured from the model INCLUDING its scale, so a creature
+#   drawn twice as large must also hold four times the ground, or it is the
+#   same bug this whole feature exists to fix. The container build re-runs
+#   it, so an image is never wrong - but the committed profile can be, and
+#   `tests/test_creature_extents.py` is what says so.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[monster]
+type: mossback_boar
+name: Moss Boar
+actor_type: 205
+attack: 14
+defense: 12
+matter: 9
+toughness: 14
+carry: 12
+charm: 12
+reaction: 11
+perception: 7
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+dexterity: 7
+ethereality: 9
+might: 12
+material_points: 55
+ethereal_points: 0
+damage_min: 4
+damage_max: 9
+armor_min: 1
+armor_max: 2
+wander_chance: 4200
+time_to_respawn: 45
+combat_engage_distance: 1
+aggressive: 0
+id: 205
+actor_height: 100
+actor_length: 1
+model: final
+[/monster]
+
+
+
+
+
+
+
+[monster]
+type: red_fox
+name: Red Fox
+actor_type: 212
+scale: 2
+attack: 7
+defense: 7
+matter: 5
+toughness: 7
+carry: 9
+charm: 9
+reaction: 11
+perception: 7
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+dexterity: 7
+ethereality: 5
+might: 9
+material_points: 28
+ethereal_points: 0
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 4400
+time_to_respawn: 45
+combat_engage_distance: 1
+aggressive: 0
+id: 212
+actor_height: 100
+actor_length: 1
+model: final
+[/monster]
+
+
+
+
+
+
+[monster]
+type: dire_wolf
+name: Dire Wolf
+actor_type: 218
+level: 55
+attack: 62
+defense: 60
+matter: 19
+toughness: 29
+carry: 31
+charm: 31
+reaction: 34
+perception: 22
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 22
+ethereality: 19
+might: 31
+material_points: 305
+ethereal_points: 0
+damage_min: 7
+damage_max: 22
+armor_min: 3
+armor_max: 5
+wander_chance: 3600
+time_to_respawn: 90
+combat_engage_distance: 1
+aggressive: 1
+id: 218
+actor_height: 100
+actor_length: 1
+model: final
+[/monster]
+
+
+
+
+[monster]
+type: thunder_ram
+name: Thunder Ram
+actor_type: 222
+attack: 58
+defense: 52
+matter: 35
+toughness: 54
+carry: 48
+charm: 48
+reaction: 42
+perception: 30
+rationality: 18
+magic_offense: 18
+magic_defense: 18
+dexterity: 30
+ethereality: 35
+might: 48
+material_points: 280
+ethereal_points: 0
+damage_min: 22
+damage_max: 28
+armor_min: 6
+armor_max: 10
+wander_chance: 3600
+time_to_respawn: 150
+combat_engage_distance: 1
+aggressive: 1
+id: 222
+actor_height: 100
+actor_length: 1
+model: final
+[/monster]
+
+
+
+[monster]
+type: river_otter
+name: Otter
+actor_type: 225
+attack: 5
+defense: 5
+matter: 3
+toughness: 3
+carry: 3
+charm: 3
+reaction: 3
+perception: 3
+rationality: 3
+magic_offense: 3
+magic_defense: 3
+dexterity: 3
+ethereality: 3
+might: 3
+material_points: 22
+ethereal_points: 5
+damage_min: 1
+damage_max: 4
+armor_min: 0
+armor_max: 1
+wander_chance: 4500
+time_to_respawn: 40
+combat_engage_distance: 1
+aggressive: 0
+id: 225
+actor_height: 100
+actor_length: 1
+model: final
+level: 1
+[/monster]
+
+
+
+
+
+
+
+
+
+
+
+[monster]
+type: amethyst_scorpion
+name: Amethyst Scorpion
+actor_type: 428
+level: 6
+attack: 13
+defense: 11
+matter: 4
+toughness: 4
+carry: 4
+charm: 4
+reaction: 4
+perception: 3
+rationality: 3
+magic_offense: 3
+magic_defense: 3
+dexterity: 3
+ethereality: 4
+might: 4
+material_points: 60
+ethereal_points: 22
+damage_min: 1
+damage_max: 6
+armor_min: 0
+armor_max: 1
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[monster]
+type: crimson_duelist
+name: Crimson Duelist
+actor_type: 446
+level: 76
+attack: 83
+defense: 81
+matter: 13
+toughness: 14
+carry: 13
+charm: 14
+reaction: 13
+perception: 13
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 12
+ethereality: 13
+might: 13
+material_points: 410
+ethereal_points: 162
+damage_min: 10
+damage_max: 29
+armor_min: 3
+armor_max: 7
+wander_chance: 18
+time_to_respawn: 180
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 380
+model: final
+[/monster]
+
+
+
+
+
+
+
+
+
+
+[monster]
+type: stormmane_lion
+name: Stormmane Lion
+actor_type: 456
+level: 22
+attack: 29
+defense: 27
+matter: 6
+toughness: 7
+carry: 6
+charm: 7
+reaction: 6
+perception: 6
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+dexterity: 5
+ethereality: 6
+might: 6
+material_points: 140
+ethereal_points: 54
+damage_min: 3
+damage_max: 11
+armor_min: 0
+armor_max: 2
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 110
+model: final
+[/monster]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[monster]
+type: saltmarsh_crocodile
+name: Saltmarsh Crocodile
+actor_type: 490
+level: 26
+attack: 33
+defense: 31
+matter: 6
+toughness: 7
+carry: 6
+charm: 7
+reaction: 6
+perception: 6
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+dexterity: 5
+ethereality: 6
+might: 6
+material_points: 160
+ethereal_points: 62
+damage_min: 4
+damage_max: 12
+armor_min: 1
+armor_max: 3
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 130
+[/monster]
+
+
+
+
+
+
+
+[monster]
+type: moor_pony
+name: Moor Pony
+actor_type: 497
+level: 6
+attack: 13
+defense: 11
+matter: 4
+toughness: 4
+carry: 4
+charm: 4
+reaction: 4
+perception: 3
+rationality: 3
+magic_offense: 3
+magic_defense: 3
+dexterity: 3
+ethereality: 4
+might: 4
+material_points: 60
+ethereal_points: 22
+damage_min: 1
+damage_max: 6
+armor_min: 0
+armor_max: 1
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+
+[monster]
+type: moor_heron
+name: Moor Heron
+actor_type: 499
+level: 14
+attack: 21
+defense: 19
+matter: 5
+toughness: 6
+carry: 5
+charm: 6
+reaction: 5
+perception: 5
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+dexterity: 4
+ethereality: 5
+might: 5
+material_points: 100
+ethereal_points: 38
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 2
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[monster]
+type: whitehorn_yak
+name: Whitehorn Yak
+actor_type: 544
+footprint: 2
+level: 14
+attack: 21
+defense: 19
+matter: 5
+toughness: 6
+carry: 5
+charm: 6
+reaction: 5
+perception: 5
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+dexterity: 4
+ethereality: 5
+might: 5
+material_points: 100
+ethereal_points: 38
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 2
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+
+
+
+
+
+[monster]
+type: amberwood_owl
+name: Owl
+actor_type: 550
+level: 10
+attack: 17
+defense: 15
+matter: 4
+toughness: 5
+carry: 4
+charm: 5
+reaction: 4
+perception: 4
+rationality: 3
+magic_offense: 3
+magic_defense: 3
+dexterity: 3
+ethereality: 4
+might: 4
+material_points: 80
+ethereal_points: 30
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+
+
+
+
+
+
+[monster]
+type: lantern_stag
+name: Lantern Stag
+actor_type: 557
+level: 38
+attack: 45
+defense: 43
+matter: 8
+toughness: 9
+carry: 8
+charm: 9
+reaction: 8
+perception: 8
+rationality: 7
+magic_offense: 7
+magic_defense: 7
+dexterity: 7
+ethereality: 8
+might: 8
+material_points: 220
+ethereal_points: 86
+damage_min: 5
+damage_max: 16
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 190
+model: final
+[/monster]
+
+[monster]
+type: moss_badger
+name: Moss Badger
+actor_type: 558
+level: 42
+attack: 49
+defense: 47
+matter: 9
+toughness: 10
+carry: 9
+charm: 10
+reaction: 9
+perception: 9
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 8
+ethereality: 9
+might: 9
+material_points: 240
+ethereal_points: 94
+damage_min: 6
+damage_max: 18
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 210
+model: final
+[/monster]
+
+
+
+
+
+
+[monster]
+type: moss_bear
+name: Moss Bear
+actor_type: 564
+footprint: 2
+level: 60
+attack: 67
+defense: 65
+matter: 11
+toughness: 12
+carry: 11
+charm: 12
+reaction: 11
+perception: 11
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 10
+ethereality: 11
+might: 11
+material_points: 330
+ethereal_points: 130
+damage_min: 8
+damage_max: 24
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 300
+model: final
+[/monster]
+
+
+
+[monster]
+type: abyssal_armored_fish
+name: Abyssal Armored Fish
+actor_type: 567
+level: 29
+attack: 36
+defense: 34
+matter: 14
+toughness: 14
+carry: 15
+charm: 12
+reaction: 13
+perception: 11
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 12
+ethereality: 12
+might: 15
+material_points: 175
+ethereal_points: 51
+damage_min: 4
+damage_max: 14
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 132
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 145
+[/monster]
+
+[monster]
+type: amber_lantern_moth
+name: Amber Lantern Moth
+actor_type: 568
+level: 9
+attack: 16
+defense: 14
+matter: 6
+toughness: 6
+carry: 7
+charm: 6
+reaction: 6
+perception: 5
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+dexterity: 6
+ethereality: 6
+might: 7
+material_points: 75
+ethereal_points: 19
+damage_min: 1
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 72
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: amethyst_moth
+name: Amethyst Moth
+actor_type: 569
+level: 9
+attack: 16
+defense: 14
+matter: 6
+toughness: 6
+carry: 7
+charm: 6
+reaction: 6
+perception: 5
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+dexterity: 6
+ethereality: 6
+might: 7
+material_points: 75
+ethereal_points: 19
+damage_min: 1
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 72
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: autumn_bramble_boar
+name: Autumn Boar
+actor_type: 570
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: berry_bramble_boar
+name: Berry Boar
+actor_type: 571
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: brambleback_boar
+name: Bramble Boar
+actor_type: 572
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: briarhide_wolf
+name: Briar Wolf
+actor_type: 573
+level: 13
+attack: 20
+defense: 18
+matter: 8
+toughness: 8
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 95
+ethereal_points: 26
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 84
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: bronze_diving_beetle
+name: Diving Beetle
+actor_type: 574
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: bronze_tide_crab
+name: Bronze Crab
+actor_type: 575
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: crystal_carapace_beetle
+name: Crystal Beetle
+actor_type: 576
+level: 18
+attack: 25
+defense: 23
+matter: 9
+toughness: 10
+carry: 10
+charm: 9
+reaction: 9
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 9
+ethereality: 8
+might: 10
+material_points: 120
+ethereal_points: 34
+damage_min: 3
+damage_max: 10
+armor_min: 0
+armor_max: 2
+wander_chance: 38
+time_to_respawn: 99
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 90
+[/monster]
+
+[monster]
+type: crystal_cave_spider
+name: Cave Spider
+actor_type: 577
+level: 18
+attack: 25
+defense: 23
+matter: 9
+toughness: 10
+carry: 10
+charm: 9
+reaction: 9
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 9
+ethereality: 8
+might: 10
+material_points: 120
+ethereal_points: 34
+damage_min: 3
+damage_max: 10
+armor_min: 0
+armor_max: 2
+wander_chance: 38
+time_to_respawn: 99
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 90
+[/monster]
+
+[monster]
+type: crystal_dire_wolf
+name: Crystal Wolf
+actor_type: 578
+level: 30
+attack: 37
+defense: 35
+matter: 14
+toughness: 15
+carry: 15
+charm: 13
+reaction: 14
+perception: 11
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 12
+ethereality: 13
+might: 15
+material_points: 180
+ethereal_points: 53
+damage_min: 4
+damage_max: 14
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 135
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 150
+[/monster]
+
+[monster]
+type: crystal_shore_crab
+name: Shore Crab
+actor_type: 579
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: crystal_wing_griffin
+name: Crystal Griffin
+actor_type: 580
+level: 34
+attack: 41
+defense: 39
+matter: 15
+toughness: 16
+carry: 17
+charm: 14
+reaction: 15
+perception: 13
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 14
+ethereality: 14
+might: 17
+material_points: 200
+ethereal_points: 59
+damage_min: 5
+damage_max: 15
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 147
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 170
+[/monster]
+
+[monster]
+type: delta_mud_crab
+name: Mud Crab
+actor_type: 581
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: elderwood_stag
+name: Elderwood Stag
+actor_type: 582
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: giant_amber_moth
+name: Giant Amber Moth
+actor_type: 583
+level: 20
+attack: 27
+defense: 25
+matter: 10
+toughness: 11
+carry: 11
+charm: 9
+reaction: 10
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 9
+ethereality: 9
+might: 11
+material_points: 130
+ethereal_points: 37
+damage_min: 3
+damage_max: 11
+armor_min: 0
+armor_max: 2
+wander_chance: 30
+time_to_respawn: 105
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 100
+[/monster]
+
+[monster]
+type: glacier_crab
+name: Glacier Crab
+actor_type: 584
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: golden_bison
+name: Golden Bison
+actor_type: 585
+footprint: 3
+level: 28
+attack: 35
+defense: 33
+matter: 13
+toughness: 14
+carry: 15
+charm: 12
+reaction: 13
+perception: 11
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 12
+ethereality: 12
+might: 15
+material_points: 170
+ethereal_points: 50
+damage_min: 4
+damage_max: 13
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 129
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 140
+[/monster]
+
+[monster]
+type: golden_plains_horse
+name: Golden Plains Horse
+actor_type: 586
+footprint: 2
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: luminous_manta_ray
+name: Manta Ray
+actor_type: 587
+footprint: 2
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: manymouth_crab
+name: Manymouth Crab
+actor_type: 588
+level: 18
+attack: 25
+defense: 23
+matter: 9
+toughness: 10
+carry: 10
+charm: 9
+reaction: 9
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 9
+ethereality: 8
+might: 10
+material_points: 120
+ethereal_points: 34
+damage_min: 3
+damage_max: 10
+armor_min: 0
+armor_max: 2
+wander_chance: 38
+time_to_respawn: 99
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 90
+[/monster]
+
+[monster]
+type: amberwood_great_owl
+name: Great Owl
+actor_type: 589
+level: 35
+attack: 42
+defense: 40
+matter: 16
+toughness: 17
+carry: 18
+charm: 14
+reaction: 15
+perception: 13
+rationality: 13
+magic_offense: 13
+magic_defense: 13
+dexterity: 14
+ethereality: 14
+might: 18
+material_points: 205
+ethereal_points: 61
+damage_min: 5
+damage_max: 16
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 150
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 175
+[/monster]
+
+[monster]
+type: autumn_antler_stag
+name: Antler Stag
+actor_type: 590
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: autumn_crown_stag
+name: Autumn Stag
+actor_type: 591
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: coralcrest_heron
+name: Coralcrest Heron
+actor_type: 592
+level: 10
+attack: 17
+defense: 15
+matter: 7
+toughness: 7
+carry: 7
+charm: 6
+reaction: 6
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 6
+ethereality: 6
+might: 7
+material_points: 80
+ethereal_points: 21
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: crown_antler_stag
+name: Crown Stag
+actor_type: 593
+level: 6
+attack: 10
+defense: 10
+matter: 4
+toughness: 4
+carry: 4
+charm: 4
+reaction: 4
+perception: 4
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+dexterity: 4
+ethereality: 4
+might: 4
+material_points: 43
+ethereal_points: 10
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: crystal_polar_bear
+name: Polar Bear
+actor_type: 594
+footprint: 3
+level: 36
+attack: 43
+defense: 41
+matter: 16
+toughness: 17
+carry: 18
+charm: 15
+reaction: 16
+perception: 13
+rationality: 13
+magic_offense: 13
+magic_defense: 13
+dexterity: 14
+ethereality: 15
+might: 18
+material_points: 210
+ethereal_points: 63
+damage_min: 5
+damage_max: 16
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 153
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 180
+[/monster]
+
+[monster]
+type: giant_mole
+name: Mole
+actor_type: 595
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: leafwing_owl
+name: Leafwing Owl
+actor_type: 596
+level: 10
+attack: 17
+defense: 15
+matter: 7
+toughness: 7
+carry: 7
+charm: 6
+reaction: 6
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 6
+ethereality: 6
+might: 7
+material_points: 80
+ethereal_points: 21
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: suncrest_heron
+name: Suncrest Heron
+actor_type: 597
+level: 10
+attack: 17
+defense: 15
+matter: 7
+toughness: 7
+carry: 7
+charm: 6
+reaction: 6
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 6
+ethereality: 6
+might: 7
+material_points: 80
+ethereal_points: 21
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: swamp_heron
+name: Heron
+actor_type: 598
+level: 10
+attack: 17
+defense: 15
+matter: 7
+toughness: 7
+carry: 7
+charm: 6
+reaction: 6
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 6
+ethereality: 6
+might: 7
+material_points: 80
+ethereal_points: 21
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: thornhide_wolf
+name: Thorn Wolf
+actor_type: 599
+level: 13
+attack: 20
+defense: 18
+matter: 8
+toughness: 8
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 95
+ethereal_points: 26
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 84
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: moorland_dire_wolf
+name: Moorland Wolf
+actor_type: 600
+level: 30
+attack: 37
+defense: 35
+matter: 14
+toughness: 15
+carry: 15
+charm: 13
+reaction: 14
+perception: 11
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 12
+ethereality: 13
+might: 15
+material_points: 180
+ethereal_points: 53
+damage_min: 4
+damage_max: 14
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 135
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 150
+[/monster]
+
+[monster]
+type: moss_armored_hound
+name: Bark Hound
+actor_type: 601
+level: 13
+attack: 20
+defense: 18
+matter: 8
+toughness: 8
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 95
+ethereal_points: 26
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 84
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: moss_horn_ram
+name: Moss Ram
+actor_type: 602
+level: 12
+attack: 19
+defense: 17
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 90
+ethereal_points: 24
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: mossback_badger
+name: Badger
+actor_type: 603
+level: 10
+attack: 17
+defense: 15
+matter: 7
+toughness: 7
+carry: 7
+charm: 6
+reaction: 6
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 6
+ethereality: 6
+might: 7
+material_points: 80
+ethereal_points: 21
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: mossbound_hound
+name: Moss Hound
+actor_type: 604
+level: 13
+attack: 20
+defense: 18
+matter: 8
+toughness: 8
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 95
+ethereal_points: 26
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 84
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: mossbound_stone_golem
+name: Moss Golem
+actor_type: 605
+footprint: 2
+level: 21
+attack: 28
+defense: 26
+matter: 10
+toughness: 11
+carry: 11
+charm: 10
+reaction: 10
+perception: 9
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 9
+ethereality: 9
+might: 11
+material_points: 135
+ethereal_points: 39
+damage_min: 3
+damage_max: 11
+armor_min: 0
+armor_max: 2
+wander_chance: 30
+time_to_respawn: 108
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 105
+[/monster]
+
+[monster]
+type: plains_griffin
+name: Plains Griffin
+actor_type: 606
+level: 34
+attack: 41
+defense: 39
+matter: 15
+toughness: 16
+carry: 17
+charm: 14
+reaction: 15
+perception: 13
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 14
+ethereality: 14
+might: 17
+material_points: 200
+ethereal_points: 59
+damage_min: 5
+damage_max: 15
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 147
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 170
+[/monster]
+
+[monster]
+type: sapling_sprite
+name: Sapling Sprite
+actor_type: 607
+level: 11
+attack: 18
+defense: 16
+matter: 7
+toughness: 7
+carry: 7
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 6
+ethereality: 6
+might: 7
+material_points: 85
+ethereal_points: 23
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 78
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: thornbark_wolf
+name: Bark Wolf
+actor_type: 608
+level: 13
+attack: 20
+defense: 18
+matter: 8
+toughness: 8
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 7
+might: 8
+material_points: 95
+ethereal_points: 26
+damage_min: 2
+damage_max: 8
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 84
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: thornwood_dryad_queen
+name: Thorn Dryad
+actor_type: 609
+footprint: 3
+level: 28
+attack: 35
+defense: 33
+matter: 13
+toughness: 14
+carry: 15
+charm: 12
+reaction: 13
+perception: 11
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 12
+ethereality: 12
+might: 15
+material_points: 170
+ethereal_points: 50
+damage_min: 4
+damage_max: 13
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 129
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 140
+[/monster]
+
+[monster]
+type: tidal_crystal_lion
+name: Tidal Lion
+actor_type: 610
+footprint: 2
+level: 45
+attack: 52
+defense: 50
+matter: 19
+toughness: 21
+carry: 22
+charm: 18
+reaction: 19
+perception: 15
+rationality: 15
+magic_offense: 15
+magic_defense: 15
+dexterity: 17
+ethereality: 17
+might: 22
+material_points: 255
+ethereal_points: 77
+damage_min: 6
+damage_max: 19
+armor_min: 0
+armor_max: 4
+wander_chance: 30
+time_to_respawn: 180
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 225
+[/monster]
+
+[monster]
+type: whitehorn_ice_griffin
+name: Ice Griffin
+actor_type: 611
+level: 35
+attack: 42
+defense: 40
+matter: 16
+toughness: 17
+carry: 18
+charm: 14
+reaction: 15
+perception: 13
+rationality: 13
+magic_offense: 13
+magic_defense: 13
+dexterity: 14
+ethereality: 14
+might: 18
+material_points: 205
+ethereal_points: 61
+damage_min: 5
+damage_max: 16
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 150
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 175
+[/monster]
+
+# --- Batch 2: reviewed rigged art (actor types 612-621) ----------------------
+#
+# Stats are peer-informed: each block was scaled from the closest existing
+# creature named beside it, keeping this batch's tiering
+# (attack = level + 7, defense = level + 5, material_points = 30 + level*5,
+# ignore_combat = level*5 for aggressors, time_to_respawn = 45 + level*3).
+#
+# footprint: 2 on every block below is a PLACEHOLDER. Footprints are measured
+# from the model, not chosen - re-run tools/measure_creature_footprints.py once
+# the client art lands and it will overwrite each with the real size (and
+# tests/test_creature_extents.py flags any that still disagree).
+
+[monster]
+type: cobalt_ibex
+name: Cobalt Ibex
+actor_type: 612
+level: 16
+attack: 23
+defense: 21
+matter: 9
+toughness: 11
+carry: 11
+charm: 11
+reaction: 11
+perception: 8
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 8
+ethereality: 9
+might: 11
+material_points: 110
+ethereal_points: 31
+damage_min: 3
+damage_max: 9
+armor_min: 1
+armor_max: 3
+wander_chance: 36
+time_to_respawn: 93
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: amethyst_stag_beetle
+name: Stag Beetle
+actor_type: 613
+level: 22
+attack: 29
+defense: 27
+matter: 11
+toughness: 12
+carry: 11
+charm: 11
+reaction: 10
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 8
+ethereality: 10
+might: 11
+material_points: 140
+ethereal_points: 41
+damage_min: 3
+damage_max: 11
+armor_min: 1
+armor_max: 4
+wander_chance: 30
+time_to_respawn: 111
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 110
+[/monster]
+
+[monster]
+type: emerald_canopy_dragon
+name: Emerald Dragon
+actor_type: 614
+footprint: 6
+level: 55
+attack: 62
+defense: 60
+matter: 19
+toughness: 21
+carry: 19
+charm: 18
+reaction: 17
+perception: 15
+rationality: 16
+magic_offense: 16
+magic_defense: 16
+dexterity: 16
+ethereality: 19
+might: 19
+material_points: 305
+ethereal_points: 100
+damage_min: 8
+damage_max: 22
+armor_min: 2
+armor_max: 6
+wander_chance: 24
+time_to_respawn: 210
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 275
+[/monster]
+
+[monster]
+type: ice_snow_leopard
+name: Ice Snow Leopard
+actor_type: 615
+level: 28
+attack: 35
+defense: 33
+matter: 13
+toughness: 14
+carry: 16
+charm: 16
+reaction: 18
+perception: 13
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 13
+ethereality: 12
+might: 16
+material_points: 170
+ethereal_points: 52
+damage_min: 4
+damage_max: 13
+armor_min: 0
+armor_max: 3
+wander_chance: 30
+time_to_respawn: 129
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 140
+[/monster]
+
+[monster]
+type: whitehorn_ice_ram
+name: Ice Ram
+actor_type: 616
+level: 20
+attack: 27
+defense: 25
+matter: 10
+toughness: 13
+carry: 12
+charm: 12
+reaction: 11
+perception: 8
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 8
+ethereality: 10
+might: 12
+material_points: 130
+ethereal_points: 38
+damage_min: 3
+damage_max: 10
+armor_min: 1
+armor_max: 3
+wander_chance: 36
+time_to_respawn: 105
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: frosthorn_elk
+name: Frosthorn Elk
+actor_type: 617
+level: 18
+attack: 25
+defense: 23
+matter: 9
+toughness: 12
+carry: 12
+charm: 12
+reaction: 12
+perception: 8
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 9
+ethereality: 9
+might: 12
+material_points: 120
+ethereal_points: 34
+damage_min: 3
+damage_max: 10
+armor_min: 0
+armor_max: 2
+wander_chance: 36
+time_to_respawn: 99
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: riverglass_otter
+name: Riverglass Otter
+actor_type: 618
+level: 4
+attack: 11
+defense: 9
+matter: 4
+toughness: 4
+carry: 6
+charm: 6
+reaction: 8
+perception: 6
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+dexterity: 6
+ethereality: 4
+might: 6
+material_points: 50
+ethereal_points: 10
+damage_min: 1
+damage_max: 5
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 57
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+[monster]
+type: moonshadow_lynx
+name: Moonshadow Lynx
+actor_type: 619
+level: 22
+attack: 29
+defense: 27
+matter: 11
+toughness: 12
+carry: 14
+charm: 14
+reaction: 16
+perception: 12
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 12
+ethereality: 11
+might: 14
+material_points: 140
+ethereal_points: 41
+damage_min: 3
+damage_max: 11
+armor_min: 0
+armor_max: 2
+wander_chance: 30
+time_to_respawn: 111
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 110
+[/monster]
+
+[monster]
+type: glacier_harpy
+name: Glacier Harpy
+actor_type: 620
+footprint: 2
+level: 24
+attack: 31
+defense: 29
+matter: 11
+toughness: 12
+carry: 14
+charm: 13
+reaction: 15
+perception: 12
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 12
+ethereality: 11
+might: 14
+material_points: 150
+ethereal_points: 45
+damage_min: 4
+damage_max: 12
+armor_min: 0
+armor_max: 2
+wander_chance: 30
+time_to_respawn: 117
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 120
+[/monster]
+
+[monster]
+type: spectral_forest_knight
+name: Forest Knight
+actor_type: 621
+level: 40
+attack: 47
+defense: 45
+matter: 17
+toughness: 18
+carry: 17
+charm: 16
+reaction: 15
+perception: 14
+rationality: 15
+magic_offense: 15
+magic_defense: 15
+dexterity: 15
+ethereality: 17
+might: 17
+material_points: 230
+ethereal_points: 73
+damage_min: 6
+damage_max: 17
+armor_min: 2
+armor_max: 5
+wander_chance: 30
+time_to_respawn: 165
+combat_engage_distance: 2
+aggressive: 1
+model: final
+ignore_combat: 200
+[/monster]
+
+
+# --- Batch 3: reviewed rigged art (actor types 622-659) ----------------------
+#
+# Thirty-eight creatures whose rigs came out of lowpoly_rigged with every clip
+# accepted. Stats follow the batch-2 relations - attack level+7, defense
+# level+5, material_points 30+level*5, respawn 45+level*3, ignore_combat
+# level*5 on the aggressors - which put that batch inside its neighbours on
+# every band it touched. The twelve attributes are a level base tilted by
+# archetype: a brute carries its weight in toughness and might, a construct
+# the same but with no charm to speak of, a fey creature in the magical three,
+# a beast in carry and reaction. Levels are the creature, not the art: a
+# 0.5 m axolotl sits at 3 and a 3.6 m titan at 56.
+
+# A pack hunter with a jade crest, fast enough that the steppe herds post sentries.
+[monster]
+type: jadefeather_raptor
+name: Jadefeather Raptor
+actor_type: 622
+footprint: 2
+level: 22
+attack: 29
+defense: 27
+matter: 13
+toughness: 14
+carry: 15
+charm: 12
+reaction: 13
+perception: 10
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 11
+ethereality: 12
+might: 15
+material_points: 140
+ethereal_points: 40
+damage_min: 4
+damage_max: 11
+armor_min: 1
+armor_max: 3
+wander_chance: 34
+time_to_respawn: 111
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 110
+[/monster]
+
+# Steppe sheep whose horns hold the last of the daylight. Harmless, and knows it.
+[monster]
+type: glowhorn_sheep
+name: Glowhorn Sheep
+actor_type: 623
+level: 6
+attack: 13
+defense: 11
+matter: 9
+toughness: 10
+carry: 11
+charm: 8
+reaction: 9
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 8
+might: 11
+material_points: 60
+ethereal_points: 11
+damage_min: 2
+damage_max: 6
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 63
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# Moor goblins who fish the peat pools with barbed poles and rob whoever passes.
+[monster]
+type: mire_goblin
+name: Mire Goblin
+actor_type: 624
+level: 12
+attack: 19
+defense: 17
+matter: 11
+toughness: 12
+carry: 11
+charm: 10
+reaction: 9
+perception: 8
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 9
+ethereality: 11
+might: 11
+material_points: 90
+ethereal_points: 22
+damage_min: 3
+damage_max: 8
+armor_min: 0
+armor_max: 2
+wander_chance: 34
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 60
+[/monster]
+
+# A raider off the high steppe, armoured in whatever its last fight was carrying.
+[monster]
+type: highland_orc
+name: Highland Orc
+actor_type: 625
+level: 24
+attack: 31
+defense: 29
+matter: 13
+toughness: 15
+carry: 15
+charm: 11
+reaction: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 10
+ethereality: 12
+might: 16
+material_points: 150
+ethereal_points: 43
+damage_min: 4
+damage_max: 12
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 117
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 120
+[/monster]
+
+# Rockfall with an appetite. It sleeps in the scree and wakes for footsteps.
+[monster]
+type: crag_ogre
+name: Crag Ogre
+actor_type: 626
+footprint: 2
+level: 32
+attack: 39
+defense: 37
+matter: 15
+toughness: 17
+carry: 17
+charm: 13
+reaction: 14
+perception: 11
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 12
+ethereality: 14
+might: 18
+material_points: 190
+ethereal_points: 58
+damage_min: 6
+damage_max: 14
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 141
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 160
+[/monster]
+
+# Ice-blooded and slow to anger, but it does not stop once it has started.
+[monster]
+type: glacier_troll
+name: Glacier Troll
+actor_type: 627
+footprint: 3
+level: 40
+attack: 47
+defense: 45
+matter: 17
+toughness: 19
+carry: 19
+charm: 15
+reaction: 16
+perception: 13
+rationality: 13
+magic_offense: 13
+magic_defense: 13
+dexterity: 14
+ethereality: 16
+might: 20
+material_points: 230
+ethereal_points: 72
+damage_min: 7
+damage_max: 16
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 165
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 200
+[/monster]
+
+# One eye, three centuries of moss, and a club cut from a living stair-tree.
+[monster]
+type: verdant_cyclops
+name: Verdant Cyclops
+actor_type: 628
+footprint: 3
+level: 44
+attack: 51
+defense: 49
+matter: 18
+toughness: 20
+carry: 20
+charm: 16
+reaction: 17
+perception: 14
+rationality: 14
+magic_offense: 14
+magic_defense: 14
+dexterity: 15
+ethereality: 17
+might: 21
+material_points: 250
+ethereal_points: 79
+damage_min: 7
+damage_max: 18
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 177
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 220
+[/monster]
+
+# A woodland faun that keeps to the amber light and bolts from anything armed.
+[monster]
+type: russet_faun
+name: Russet Faun
+actor_type: 629
+level: 8
+attack: 15
+defense: 13
+matter: 9
+toughness: 9
+carry: 9
+charm: 11
+reaction: 10
+perception: 8
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 9
+ethereality: 11
+might: 8
+material_points: 70
+ethereal_points: 14
+damage_min: 2
+damage_max: 6
+armor_min: 0
+armor_max: 2
+wander_chance: 38
+time_to_respawn: 69
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# Barrens kobolds who mine the coal seams and defend them out of all proportion.
+[monster]
+type: coal_kobold
+name: Coal Kobold
+actor_type: 630
+level: 10
+attack: 17
+defense: 15
+matter: 10
+toughness: 11
+carry: 10
+charm: 9
+reaction: 8
+perception: 7
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 8
+ethereality: 10
+might: 10
+material_points: 80
+ethereal_points: 18
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 2
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 50
+[/monster]
+
+# Crownwater lizardfolk, spear-fishers who count the river as theirs.
+[monster]
+type: river_lizardfolk
+name: River Lizardfolk
+actor_type: 631
+footprint: 2
+level: 20
+attack: 27
+defense: 25
+matter: 12
+toughness: 13
+carry: 12
+charm: 11
+reaction: 10
+perception: 9
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 10
+ethereality: 12
+might: 12
+material_points: 130
+ethereal_points: 36
+damage_min: 4
+damage_max: 10
+armor_min: 1
+armor_max: 3
+wander_chance: 34
+time_to_respawn: 105
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 100
+[/monster]
+
+# Its horns are shod in iron and it has learned exactly what that is worth.
+[monster]
+type: ironhorn_minotaur
+name: Ironhorn Minotaur
+actor_type: 632
+footprint: 2
+level: 36
+attack: 43
+defense: 41
+matter: 16
+toughness: 18
+carry: 18
+charm: 14
+reaction: 15
+perception: 12
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 13
+ethereality: 15
+might: 19
+material_points: 210
+ethereal_points: 65
+damage_min: 6
+damage_max: 15
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 153
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 180
+[/monster]
+
+# A green basilisk of the delta reeds. Look away, and keep looking away.
+[monster]
+type: viridian_basilisk
+name: Viridian Basilisk
+actor_type: 633
+footprint: 2
+level: 20
+attack: 27
+defense: 25
+matter: 12
+toughness: 13
+carry: 14
+charm: 11
+reaction: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 10
+ethereality: 11
+might: 14
+material_points: 130
+ethereal_points: 36
+damage_min: 4
+damage_max: 10
+armor_min: 1
+armor_max: 3
+wander_chance: 34
+time_to_respawn: 105
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 100
+[/monster]
+
+# Three heads, one temper, and a storm that follows it across the steppe.
+[monster]
+type: storm_chimera
+name: Storm Chimera
+actor_type: 634
+footprint: 3
+level: 46
+attack: 53
+defense: 51
+matter: 18
+toughness: 19
+carry: 20
+charm: 17
+reaction: 18
+perception: 15
+rationality: 15
+magic_offense: 15
+magic_defense: 15
+dexterity: 16
+ethereality: 17
+might: 20
+material_points: 260
+ethereal_points: 83
+damage_min: 8
+damage_max: 18
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 183
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 230
+[/monster]
+
+# It grazes the moor by moonlight and is gone before you have finished looking.
+[monster]
+type: moonlit_unicorn
+name: Moonlit Unicorn
+actor_type: 635
+level: 16
+attack: 23
+defense: 21
+matter: 11
+toughness: 11
+carry: 11
+charm: 13
+reaction: 12
+perception: 10
+rationality: 13
+magic_offense: 13
+magic_defense: 13
+dexterity: 11
+ethereality: 13
+might: 10
+material_points: 110
+ethereal_points: 29
+damage_min: 3
+damage_max: 9
+armor_min: 0
+armor_max: 3
+wander_chance: 38
+time_to_respawn: 93
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# A moor warg the colour of a covered lantern. It hunts the edges of firelight.
+[monster]
+type: shadow_warg
+name: Shadow Warg
+actor_type: 636
+footprint: 2
+level: 18
+attack: 25
+defense: 23
+matter: 12
+toughness: 13
+carry: 14
+charm: 11
+reaction: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 10
+ethereality: 11
+might: 14
+material_points: 120
+ethereal_points: 32
+damage_min: 4
+damage_max: 10
+armor_min: 0
+armor_max: 3
+wander_chance: 34
+time_to_respawn: 99
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 90
+[/monster]
+
+# Whitehorn's oldest rumour, and the one that leaves tracks.
+[monster]
+type: snow_yeti
+name: Snow Yeti
+actor_type: 637
+footprint: 2
+level: 34
+attack: 41
+defense: 39
+matter: 15
+toughness: 17
+carry: 17
+charm: 13
+reaction: 14
+perception: 11
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 12
+ethereality: 14
+might: 18
+material_points: 200
+ethereal_points: 61
+damage_min: 6
+damage_max: 15
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 147
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 170
+[/monster]
+
+# A bugbear grown over with amberwood moss. It waits where the light is worst.
+[monster]
+type: moss_bugbear
+name: Moss Bugbear
+actor_type: 638
+footprint: 2
+level: 26
+attack: 33
+defense: 31
+matter: 14
+toughness: 16
+carry: 16
+charm: 12
+reaction: 13
+perception: 10
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 11
+ethereality: 13
+might: 17
+material_points: 160
+ethereal_points: 47
+damage_min: 5
+damage_max: 12
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 123
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 130
+[/monster]
+
+# Walking fungus that resents being walked past.
+[monster]
+type: sporefolk
+name: Sporefolk
+actor_type: 639
+level: 12
+attack: 19
+defense: 17
+matter: 10
+toughness: 10
+carry: 10
+charm: 12
+reaction: 11
+perception: 9
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 10
+ethereality: 12
+might: 9
+material_points: 90
+ethereal_points: 22
+damage_min: 3
+damage_max: 8
+armor_min: 0
+armor_max: 2
+wander_chance: 34
+time_to_respawn: 81
+combat_engage_distance: 10
+aggressive: 1
+model: final
+attack_range: 8
+preferred_distance: 8
+missile: spore
+poison_damage: 4
+[/monster]
+
+# Beak, claws, and the disposition of neither parent improved.
+[monster]
+type: owlbear
+name: Owlbear
+actor_type: 640
+footprint: 3
+level: 30
+attack: 37
+defense: 35
+matter: 15
+toughness: 16
+carry: 17
+charm: 14
+reaction: 15
+perception: 12
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 13
+ethereality: 14
+might: 17
+material_points: 180
+ethereal_points: 54
+damage_min: 5
+damage_max: 13
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 135
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 150
+[/monster]
+
+# Placid, enormous, and entirely uninterested in you.
+[monster]
+type: river_capybara
+name: River Capybara
+actor_type: 641
+level: 4
+attack: 11
+defense: 9
+matter: 9
+toughness: 10
+carry: 11
+charm: 8
+reaction: 9
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 8
+might: 11
+material_points: 50
+ethereal_points: 7
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 57
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# A blue axolotl of the shallows, smiling at nothing in particular.
+[monster]
+type: azure_axolotl
+name: Azure Axolotl
+actor_type: 642
+level: 3
+attack: 10
+defense: 8
+matter: 9
+toughness: 10
+carry: 11
+charm: 8
+reaction: 9
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+dexterity: 7
+ethereality: 8
+might: 11
+material_points: 45
+ethereal_points: 5
+damage_min: 1
+damage_max: 5
+armor_min: 0
+armor_max: 1
+wander_chance: 38
+time_to_respawn: 54
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# Barrens stock, watered once a week and resentful about the schedule.
+[monster]
+type: dusk_camel
+name: Dusk Camel
+actor_type: 643
+footprint: 2
+level: 10
+attack: 17
+defense: 15
+matter: 10
+toughness: 11
+carry: 12
+charm: 9
+reaction: 10
+perception: 7
+rationality: 7
+magic_offense: 7
+magic_defense: 7
+dexterity: 8
+ethereality: 9
+might: 12
+material_points: 80
+ethereal_points: 18
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 2
+wander_chance: 38
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# Small, and it will fight the whole party about it.
+[monster]
+type: ice_wolverine
+name: Ice Wolverine
+actor_type: 644
+level: 10
+attack: 17
+defense: 15
+matter: 10
+toughness: 11
+carry: 12
+charm: 9
+reaction: 10
+perception: 7
+rationality: 7
+magic_offense: 7
+magic_defense: 7
+dexterity: 8
+ethereality: 9
+might: 12
+material_points: 80
+ethereal_points: 18
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 2
+wander_chance: 34
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 50
+[/monster]
+
+# Its web crosses the moor paths at exactly throat height.
+[monster]
+type: nightweave_spider
+name: Nightweave Spider
+actor_type: 645
+level: 14
+attack: 21
+defense: 19
+matter: 11
+toughness: 12
+carry: 13
+charm: 10
+reaction: 11
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 9
+ethereality: 10
+might: 13
+material_points: 100
+ethereal_points: 25
+damage_min: 3
+damage_max: 8
+armor_min: 0
+armor_max: 2
+wander_chance: 34
+time_to_respawn: 87
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 70
+[/monster]
+
+# Barrens stone grown through with amethyst, and animate about it.
+[monster]
+type: amethyst_stone_golem
+name: Geode Golem
+actor_type: 646
+footprint: 4
+level: 38
+attack: 45
+defense: 43
+matter: 17
+toughness: 19
+carry: 18
+charm: 12
+reaction: 13
+perception: 12
+rationality: 13
+magic_offense: 13
+magic_defense: 15
+dexterity: 12
+ethereality: 16
+might: 19
+material_points: 220
+ethereal_points: 68
+damage_min: 6
+damage_max: 16
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 159
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 190
+[/monster]
+
+# Something old still runs in its chest, and it still has orders.
+[monster]
+type: arcane_core_colossus
+name: Arcane Colossus
+actor_type: 647
+footprint: 3
+level: 52
+attack: 59
+defense: 57
+matter: 20
+toughness: 22
+carry: 21
+charm: 15
+reaction: 16
+perception: 15
+rationality: 16
+magic_offense: 16
+magic_defense: 18
+dexterity: 15
+ethereality: 19
+might: 22
+material_points: 290
+ethereal_points: 94
+damage_min: 8
+damage_max: 20
+armor_min: 2
+armor_max: 7
+wander_chance: 34
+time_to_respawn: 201
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 260
+[/monster]
+
+# A made thing, patient, and unwilling to explain itself.
+[monster]
+type: arcane_crystal_automaton
+name: Arcane Crystal Automaton
+actor_type: 648
+level: 34
+attack: 41
+defense: 39
+matter: 16
+toughness: 18
+carry: 17
+charm: 11
+reaction: 12
+perception: 11
+rationality: 12
+magic_offense: 12
+magic_defense: 14
+dexterity: 11
+ethereality: 15
+might: 18
+material_points: 200
+ethereal_points: 61
+damage_min: 6
+damage_max: 15
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 147
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 170
+[/monster]
+
+# Black iron, a green blade, and nothing at all behind the visor.
+[monster]
+type: black_iron_death_knight
+name: Death Knight
+actor_type: 649
+footprint: 2
+level: 44
+attack: 51
+defense: 49
+matter: 18
+toughness: 19
+carry: 18
+charm: 17
+reaction: 16
+perception: 15
+rationality: 16
+magic_offense: 16
+magic_defense: 16
+dexterity: 16
+ethereality: 18
+might: 18
+material_points: 250
+ethereal_points: 79
+damage_min: 7
+damage_max: 18
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 177
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 220
+[/monster]
+
+# An amberwood tree that has decided to take an interest in trespassers.
+[monster]
+type: autumn_bark_treant
+name: Autumn Bark Treant
+actor_type: 650
+footprint: 2
+level: 40
+attack: 47
+defense: 45
+matter: 16
+toughness: 16
+carry: 16
+charm: 18
+reaction: 17
+perception: 15
+rationality: 18
+magic_offense: 18
+magic_defense: 18
+dexterity: 16
+ethereality: 18
+might: 15
+material_points: 230
+ethereal_points: 72
+damage_min: 7
+damage_max: 16
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 165
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 200
+[/monster]
+
+# She holds court in the elderwood and does not care for petitioners.
+[monster]
+type: elderwood_dryad_queen
+name: Dryad Queen
+actor_type: 651
+footprint: 3
+level: 42
+attack: 49
+defense: 47
+matter: 16
+toughness: 16
+carry: 16
+charm: 18
+reaction: 17
+perception: 15
+rationality: 18
+magic_offense: 18
+magic_defense: 18
+dexterity: 16
+ethereality: 18
+might: 15
+material_points: 240
+ethereal_points: 76
+damage_min: 7
+damage_max: 17
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 171
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 210
+[/monster]
+
+# Whitehorn granite, iced through, walking the glacier line.
+[monster]
+type: frost_stone_golem
+name: Frost Golem
+actor_type: 652
+footprint: 3
+level: 38
+attack: 45
+defense: 43
+matter: 17
+toughness: 19
+carry: 18
+charm: 12
+reaction: 13
+perception: 12
+rationality: 13
+magic_offense: 13
+magic_defense: 15
+dexterity: 12
+ethereality: 16
+might: 19
+material_points: 220
+ethereal_points: 68
+damage_min: 6
+damage_max: 16
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 159
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 190
+[/monster]
+
+# The mountain gets up. That is the whole of the warning.
+[monster]
+type: glacier_titan
+name: Glacier Titan
+actor_type: 653
+footprint: 4
+level: 56
+attack: 63
+defense: 61
+matter: 21
+toughness: 23
+carry: 22
+charm: 16
+reaction: 17
+perception: 16
+rationality: 17
+magic_offense: 17
+magic_defense: 19
+dexterity: 16
+ethereality: 20
+might: 23
+material_points: 310
+ethereal_points: 101
+damage_min: 9
+damage_max: 22
+armor_min: 2
+armor_max: 8
+wander_chance: 34
+time_to_respawn: 213
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 280
+[/monster]
+
+# Its heartwood is older than the stair it stands on.
+[monster]
+type: heartwood_treant
+name: Heartwood Treant
+actor_type: 654
+footprint: 3
+level: 46
+attack: 53
+defense: 51
+matter: 17
+toughness: 17
+carry: 17
+charm: 19
+reaction: 18
+perception: 16
+rationality: 19
+magic_offense: 19
+magic_defense: 19
+dexterity: 17
+ethereality: 19
+might: 16
+material_points: 260
+ethereal_points: 83
+damage_min: 8
+damage_max: 18
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 183
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 230
+[/monster]
+
+# Mirrorhold stone with a troll asleep inside it, until it is not.
+[monster]
+type: moss_stone_troll
+name: Moss Stone Troll
+actor_type: 655
+footprint: 2
+level: 36
+attack: 43
+defense: 41
+matter: 16
+toughness: 18
+carry: 18
+charm: 14
+reaction: 15
+perception: 12
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 13
+ethereality: 15
+might: 19
+material_points: 210
+ethereal_points: 65
+damage_min: 6
+damage_max: 15
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 153
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 180
+[/monster]
+
+# River-rounded boulders, stacked by nobody, walking upstream.
+[monster]
+type: river_stone_golem
+name: River Golem
+actor_type: 656
+footprint: 3
+level: 34
+attack: 41
+defense: 39
+matter: 16
+toughness: 18
+carry: 17
+charm: 11
+reaction: 12
+perception: 11
+rationality: 12
+magic_offense: 12
+magic_defense: 14
+dexterity: 11
+ethereality: 15
+might: 18
+material_points: 200
+ethereal_points: 61
+damage_min: 6
+damage_max: 15
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 147
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 170
+[/monster]
+
+# Ssarathi work. The runes are still lit and still counting.
+[monster]
+type: rune_stone_golem
+name: Rune Golem
+actor_type: 657
+footprint: 3
+level: 40
+attack: 47
+defense: 45
+matter: 18
+toughness: 20
+carry: 19
+charm: 13
+reaction: 14
+perception: 13
+rationality: 14
+magic_offense: 14
+magic_defense: 16
+dexterity: 13
+ethereality: 17
+might: 20
+material_points: 230
+ethereal_points: 72
+damage_min: 7
+damage_max: 16
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 165
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 200
+[/monster]
+
+# It walked into the water a long time ago and has now finished thinking.
+[monster]
+type: sunken_stone_colossus
+name: Sunken Colossus
+actor_type: 658
+footprint: 4
+level: 48
+attack: 55
+defense: 53
+matter: 20
+toughness: 22
+carry: 21
+charm: 15
+reaction: 16
+perception: 15
+rationality: 16
+magic_offense: 16
+magic_defense: 18
+dexterity: 15
+ethereality: 19
+might: 22
+material_points: 270
+ethereal_points: 86
+damage_min: 8
+damage_max: 19
+armor_min: 2
+armor_max: 7
+wander_chance: 34
+time_to_respawn: 189
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 240
+[/monster]
+
+# Green to the core and rooted in the terraces of the stair.
+[monster]
+type: verdant_treant
+name: Verdant Treant
+actor_type: 659
+footprint: 2
+level: 38
+attack: 45
+defense: 43
+matter: 15
+toughness: 15
+carry: 15
+charm: 17
+reaction: 16
+perception: 14
+rationality: 17
+magic_offense: 17
+magic_defense: 17
+dexterity: 15
+ethereality: 17
+might: 14
+material_points: 220
+ethereal_points: 68
+damage_min: 6
+damage_max: 16
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 159
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 190
+[/monster]
+
+# --- end of batch 3 ---
+
+# --- Batch 4: reviewed rigged art (actor types 660-671) ----------------------
+#
+# The armed humanoids and three constructs whose animation sets the user
+# supplied by hand. Same relations as batches 2 and 3 - attack level+7,
+# defense level+5, material_points 30+level*5, respawn 45+level*3,
+# ignore_combat level*5 - and the twelve attributes are a level base tilted
+# by archetype. These are elites: an armed spectre sits above an ordinary
+# creature of its size, which is why the band runs 26 to 58 rather than
+# tracking height the way batch 3 did.
+
+# Two metres of patience with blades on the front. It sweeps outward, not down.
+[monster]
+type: giant_praying_mantis
+name: Praying Mantis
+actor_type: 660
+level: 28
+attack: 35
+defense: 33
+matter: 14
+toughness: 15
+carry: 16
+charm: 13
+reaction: 14
+perception: 11
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 12
+ethereality: 13
+might: 16
+material_points: 170
+ethereal_points: 50
+damage_min: 5
+damage_max: 13
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 129
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 140
+[/monster]
+
+# Temple work, still bailing a flooded hall. It lifts the claw overhead first.
+[monster]
+type: tidal_claw_construct
+name: Tidal Construct
+actor_type: 661
+level: 30
+attack: 37
+defense: 35
+matter: 16
+toughness: 18
+carry: 17
+charm: 11
+reaction: 12
+perception: 11
+rationality: 12
+magic_offense: 12
+magic_defense: 14
+dexterity: 11
+ethereality: 15
+might: 18
+material_points: 180
+ethereal_points: 54
+damage_min: 5
+damage_max: 13
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 135
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 150
+[/monster]
+
+# Ssarathi made it to hold something shut. The tentacles are the lock.
+[monster]
+type: void_tentacle_construct
+name: Void Construct
+actor_type: 662
+footprint: 2
+level: 50
+attack: 57
+defense: 55
+matter: 20
+toughness: 22
+carry: 21
+charm: 15
+reaction: 16
+perception: 15
+rationality: 16
+magic_offense: 16
+magic_defense: 18
+dexterity: 15
+ethereality: 19
+might: 22
+material_points: 280
+ethereal_points: 90
+damage_min: 8
+damage_max: 20
+armor_min: 2
+armor_max: 7
+wander_chance: 34
+time_to_respawn: 195
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 250
+[/monster]
+
+# Spear and shield, posted at a door that has not existed for a century.
+[monster]
+type: crownwater_temple_guard
+name: Temple Guard
+actor_type: 663
+footprint: 2
+level: 38
+attack: 45
+defense: 43
+matter: 16
+toughness: 17
+carry: 16
+charm: 15
+reaction: 14
+perception: 13
+rationality: 14
+magic_offense: 14
+magic_defense: 14
+dexterity: 14
+ethereality: 16
+might: 16
+material_points: 220
+ethereal_points: 68
+damage_min: 6
+damage_max: 16
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 159
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 190
+[/monster]
+
+# Came up the delta with the tide and has not yet noticed it drowned.
+[monster]
+type: drowned_pirate
+name: Drowned Pirate
+actor_type: 664
+level: 26
+attack: 33
+defense: 31
+matter: 14
+toughness: 15
+carry: 14
+charm: 13
+reaction: 12
+perception: 11
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 12
+ethereality: 14
+might: 14
+material_points: 160
+ethereal_points: 47
+damage_min: 5
+damage_max: 12
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 123
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 130
+[/monster]
+
+# She holds the pass by standing in it. The cold is her, not the season.
+[monster]
+type: frost_wraith_queen
+name: Frost Wraith Queen
+actor_type: 665
+footprint: 2
+level: 54
+attack: 61
+defense: 59
+matter: 19
+toughness: 19
+carry: 19
+charm: 21
+reaction: 20
+perception: 18
+rationality: 21
+magic_offense: 21
+magic_defense: 21
+dexterity: 19
+ethereality: 21
+might: 18
+material_points: 300
+ethereal_points: 97
+damage_min: 9
+damage_max: 21
+armor_min: 2
+armor_max: 7
+wander_chance: 34
+time_to_respawn: 207
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 270
+[/monster]
+
+# Axe and shield, still keeping an oath to an order that is under the ice.
+[monster]
+type: glacier_paladin
+name: Glacier Paladin
+actor_type: 666
+footprint: 2
+level: 46
+attack: 53
+defense: 51
+matter: 18
+toughness: 19
+carry: 18
+charm: 17
+reaction: 16
+perception: 15
+rationality: 16
+magic_offense: 16
+magic_defense: 16
+dexterity: 16
+ethereality: 18
+might: 18
+material_points: 260
+ethereal_points: 83
+damage_min: 8
+damage_max: 18
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 183
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 230
+[/monster]
+
+# A knight of the moor courts, riding nothing, going nowhere, in the way.
+[monster]
+type: moors_spectral_knight
+name: Moor Knight
+actor_type: 667
+footprint: 2
+level: 42
+attack: 49
+defense: 47
+matter: 17
+toughness: 18
+carry: 17
+charm: 16
+reaction: 15
+perception: 14
+rationality: 15
+magic_offense: 15
+magic_defense: 15
+dexterity: 15
+ethereality: 17
+might: 17
+material_points: 240
+ethereal_points: 76
+damage_min: 7
+damage_max: 17
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 171
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 210
+[/monster]
+
+# Reeds for a face and a spear held level. You will hear it after.
+[monster]
+type: reed_mask_hunter
+name: Reed Mask Hunter
+actor_type: 668
+footprint: 2
+level: 28
+attack: 35
+defense: 33
+matter: 14
+toughness: 15
+carry: 14
+charm: 13
+reaction: 12
+perception: 11
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 12
+ethereality: 14
+might: 14
+material_points: 170
+ethereal_points: 50
+damage_min: 5
+damage_max: 13
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 129
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 140
+[/monster]
+
+# It still fences the amberwood paths, and still expects a salute.
+[monster]
+type: spectral_forest_duelist
+name: Forest Duelist
+actor_type: 669
+level: 36
+attack: 43
+defense: 41
+matter: 16
+toughness: 17
+carry: 16
+charm: 15
+reaction: 14
+perception: 13
+rationality: 14
+magic_offense: 14
+magic_defense: 14
+dexterity: 14
+ethereality: 16
+might: 16
+material_points: 210
+ethereal_points: 65
+damage_min: 6
+damage_max: 15
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 153
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 180
+[/monster]
+
+# Sword and shield both, and the patience of something with no appointments.
+[monster]
+type: spectral_moors_knight
+name: Moor Revenant
+actor_type: 670
+footprint: 2
+level: 44
+attack: 51
+defense: 49
+matter: 18
+toughness: 19
+carry: 18
+charm: 17
+reaction: 16
+perception: 15
+rationality: 16
+magic_offense: 16
+magic_defense: 16
+dexterity: 16
+ethereality: 18
+might: 18
+material_points: 250
+ethereal_points: 79
+damage_min: 7
+damage_max: 18
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 177
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 220
+[/monster]
+
+# A crown under the silt, and a staff that still answers to it.
+[monster]
+type: drowned_lich_king
+name: Lich King
+actor_type: 671
+footprint: 2
+level: 58
+attack: 65
+defense: 63
+matter: 20
+toughness: 20
+carry: 20
+charm: 22
+reaction: 21
+perception: 19
+rationality: 22
+magic_offense: 22
+magic_defense: 22
+dexterity: 20
+ethereality: 22
+might: 19
+material_points: 320
+ethereal_points: 104
+damage_min: 9
+damage_max: 22
+armor_min: 2
+armor_max: 8
+wander_chance: 34
+time_to_respawn: 219
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 290
+[/monster]
+
+
+# A hunched giant grown over with amberwood moss, carrying a club it has
+# clearly had a long time. It swings two-handed and steps like the weight is real.
+[monster]
+type: moss_bearded_giant
+name: Moss-Bearded Giant
+actor_type: 672
+footprint: 3
+level: 36
+attack: 43
+defense: 41
+matter: 16
+toughness: 18
+carry: 18
+charm: 14
+reaction: 15
+perception: 12
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 13
+ethereality: 15
+might: 19
+material_points: 210
+ethereal_points: 65
+damage_min: 6
+damage_max: 15
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 153
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 180
+[/monster]
+
+# --- end of batch 4 ---
+
+# --- Batch 5: accepted hand-authored wildlife (actor types 673-685) ----------
+#
+# The eleven creatures that were sent out as rigged meshes with no clips and
+# came back animated, plus the barnacle ogre and ember leaf spirit, all
+# accepted in review. Same relations as batches 2 to 4 - attack level+7,
+# defense level+5, material_points 30+level*5, respawn 45+level*3,
+# ignore_combat level*5 - with the twelve attributes a level base tilted by
+# archetype.
+#
+# Most of this batch is WILDLIFE rather than monsters, so the grazers and the
+# tortoise carry aggressive: 0 and the river capybara's wander_chance of 38.
+# An antelope that charges the player would be the odd one out on this roster,
+# not the peaceful one.
+#
+# The thunder ram from this delivery has no block of its own. Actor type 222
+# was already a Thunder Ram - a procedurally built one out of
+# eloria-assets/tools/build_native_nymara_glbs.py, 2715 vertices against this
+# one's 5064 - so the new art replaced it in the client instead, keeping its
+# stats and its actor type. It had never been placed, which is true of 29 of
+# the 33 native creatures, so it is given three whitehorn spawns here: art
+# nobody can meet is not fielded.
+
+# Black glass for a coat and no reverse gear. It rears before it swings.
+[monster]
+type: obsidian_bear
+name: Obsidian Bear
+actor_type: 673
+footprint: 2
+level: 34
+attack: 41
+defense: 39
+matter: 15
+toughness: 16
+carry: 17
+charm: 14
+reaction: 15
+perception: 12
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+dexterity: 13
+ethereality: 14
+might: 17
+material_points: 200
+ethereal_points: 61
+damage_min: 6
+damage_max: 15
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 147
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 170
+[/monster]
+
+# Runs the open steppe in banded pairs and is gone before you decide.
+[monster]
+type: skystripe_antelope
+name: Skystripe Antelope
+actor_type: 674
+level: 18
+attack: 25
+defense: 23
+matter: 12
+toughness: 13
+carry: 14
+charm: 11
+reaction: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 10
+ethereality: 11
+might: 14
+material_points: 120
+ethereal_points: 32
+damage_min: 4
+damage_max: 10
+armor_min: 0
+armor_max: 3
+wander_chance: 38
+time_to_respawn: 99
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# Waist high, entirely certain of itself, and it saw you first.
+[monster]
+type: giant_badger
+name: Giant Badger
+actor_type: 675
+level: 16
+attack: 23
+defense: 21
+matter: 12
+toughness: 13
+carry: 14
+charm: 11
+reaction: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 10
+ethereality: 11
+might: 14
+material_points: 110
+ethereal_points: 29
+damage_min: 3
+damage_max: 9
+armor_min: 0
+armor_max: 3
+wander_chance: 34
+time_to_respawn: 93
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 80
+[/monster]
+
+# The barrens grow on its shell. It has been here longer than the road.
+[monster]
+type: crystalback_tortoise
+name: Crystalback Tortoise
+actor_type: 676
+level: 24
+attack: 31
+defense: 29
+matter: 13
+toughness: 14
+carry: 15
+charm: 12
+reaction: 13
+perception: 10
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 11
+ethereality: 12
+might: 15
+material_points: 150
+ethereal_points: 43
+damage_min: 4
+damage_max: 12
+armor_min: 1
+armor_max: 4
+wander_chance: 38
+time_to_respawn: 117
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# Blue in the flank and it laughs going downhill. They hunt in threes.
+[monster]
+type: azure_hyena
+name: Azure Hyena
+actor_type: 677
+level: 20
+attack: 27
+defense: 25
+matter: 12
+toughness: 13
+carry: 14
+charm: 11
+reaction: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 10
+ethereality: 11
+might: 14
+material_points: 130
+ethereal_points: 36
+damage_min: 4
+damage_max: 10
+armor_min: 1
+armor_max: 3
+wander_chance: 34
+time_to_respawn: 105
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 100
+[/monster]
+
+# Grey on grey until it moves. The moors give it nothing to stand out against.
+[monster]
+type: ashen_wolf
+name: Ashen Wolf
+actor_type: 678
+level: 19
+attack: 26
+defense: 24
+matter: 12
+toughness: 13
+carry: 14
+charm: 11
+reaction: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+dexterity: 10
+ethereality: 11
+might: 14
+material_points: 125
+ethereal_points: 34
+damage_min: 4
+damage_max: 10
+armor_min: 0
+armor_max: 3
+wander_chance: 34
+time_to_respawn: 102
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 95
+[/monster]
+
+# Lives where the crystal seams sweat. Slow above ground and knows it.
+[monster]
+type: cave_salamander
+name: Cave Salamander
+actor_type: 679
+level: 21
+attack: 28
+defense: 26
+matter: 13
+toughness: 14
+carry: 15
+charm: 12
+reaction: 13
+perception: 10
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 11
+ethereality: 12
+might: 15
+material_points: 135
+ethereal_points: 38
+damage_min: 4
+damage_max: 11
+armor_min: 1
+armor_max: 3
+wander_chance: 38
+time_to_respawn: 108
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# The display is the whole animal. It will not move for you and does not need to.
+[monster]
+type: sapphire_peafowl
+name: Sapphire Peafowl
+actor_type: 680
+level: 15
+attack: 22
+defense: 20
+matter: 11
+toughness: 12
+carry: 13
+charm: 10
+reaction: 11
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+dexterity: 9
+ethereality: 10
+might: 13
+material_points: 105
+ethereal_points: 27
+damage_min: 3
+damage_max: 9
+armor_min: 0
+armor_max: 2
+wander_chance: 38
+time_to_respawn: 90
+combat_engage_distance: 1
+aggressive: 0
+model: final
+[/monster]
+
+# It does not land so much as stop. The ruins are its perch and its larder.
+[monster]
+type: gloom_wyvern
+name: Gloom Wyvern
+actor_type: 681
+footprint: 5
+level: 44
+attack: 51
+defense: 49
+matter: 18
+toughness: 19
+carry: 20
+charm: 17
+reaction: 18
+perception: 15
+rationality: 15
+magic_offense: 15
+magic_defense: 15
+dexterity: 16
+ethereality: 17
+might: 20
+material_points: 250
+ethereal_points: 79
+damage_min: 7
+damage_max: 18
+armor_min: 2
+armor_max: 6
+wander_chance: 34
+time_to_respawn: 177
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 220
+[/monster]
+
+# A horse until you are on its back and the water closes over.
+[monster]
+type: mire_kelpie
+name: Mire Kelpie
+actor_type: 682
+footprint: 2
+level: 30
+attack: 37
+defense: 35
+matter: 14
+toughness: 14
+carry: 14
+charm: 16
+reaction: 15
+perception: 13
+rationality: 16
+magic_offense: 16
+magic_defense: 16
+dexterity: 14
+ethereality: 16
+might: 13
+material_points: 180
+ethereal_points: 54
+damage_min: 5
+damage_max: 13
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 135
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 150
+[/monster]
+
+# Came in with the tide a long time ago and let the harbour grow on it.
+[monster]
+type: barnacle_ogre
+name: Barnacle Ogre
+actor_type: 683
+footprint: 2
+level: 32
+attack: 39
+defense: 37
+matter: 15
+toughness: 17
+carry: 17
+charm: 13
+reaction: 14
+perception: 11
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 12
+ethereality: 14
+might: 18
+material_points: 190
+ethereal_points: 58
+damage_min: 6
+damage_max: 14
+armor_min: 1
+armor_max: 5
+wander_chance: 34
+time_to_respawn: 141
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 160
+[/monster]
+
+# Autumn that did not go out. It drifts the paths where the canopy is thinnest.
+[monster]
+type: ember_leaf_spirit
+name: Ember Leaf Spirit
+actor_type: 684
+level: 26
+attack: 33
+defense: 31
+matter: 13
+toughness: 13
+carry: 13
+charm: 15
+reaction: 14
+perception: 12
+rationality: 15
+magic_offense: 15
+magic_defense: 15
+dexterity: 13
+ethereality: 15
+might: 12
+material_points: 160
+ethereal_points: 47
+damage_min: 5
+damage_max: 12
+armor_min: 1
+armor_max: 4
+wander_chance: 34
+time_to_respawn: 123
+combat_engage_distance: 1
+aggressive: 1
+model: final
+ignore_combat: 130
+[/monster]
+
+# --- end of batch 5 ---
+
+# --- Named variants -----------------------------------------------------------
+#
+# Occasional elevated versions of ordinary creatures. A variant states only
+# what differs from the creature it elevates; everything else - actor type,
+# footprint, aggression, respawn, the lot - is inherited from that block.
+#
+#   variant_of:     the ordinary creature this is a version of
+#   variant_chance: one spawn in this many is this instead
+#
+# A variant is a whole creature: it needs its own drop table in drops.txt, and
+# it counts in the roster. It shares its base's body, so it may not disagree
+# with it about actor_type or footprint - the client is told one footprint per
+# actor type, and the two would draw on different ground.
+#
+# Deliberately spread across the whole level range rather than sitting at the
+# top: the point is that any creature you fight might turn out to be the
+# famous one, not that there is more to do at the ceiling.
+
+
+
+
+
+
+# --- Bosses -------------------------------------------------------------------
+#
+# A creature that exists only to be a boss. The other kind of boss - a bigger,
+# tougher one of an ordinary species - needs nothing here: an invasion group
+# names the species and multiplies its numbers. This is for a boss that is its
+# own animal, with its own level, its own numbers and its own drop table.
+#
+#   boss: 1     never spawned by spawns.txt and never rolled as a variant
+#
+# Being a boss is what makes it bigger, not this file: an invasion draws its
+# boss enlarged, and larger again for a strong strength roll. `scale` here is
+# what the model is, and it is bound by the same rule as everywhere else - the
+# footprint is measured from the model including it.
+#
+# It shares a body with the species whose actor_type it wears, so like a
+# variant it may not disagree with that body about footprint - the client is
+# told one footprint per actor type. What makes it a boss rather than a
+# variant is where it comes from: a variant is rolled wherever its base
+# spawns, and a boss is placed by an invasion when the invasion earns one.
+
+
+# --- Gauntlet bosses, written by the gauntlet authoring pass ---
+# A boss that is its own animal, for a gauntlet court: the numbers are its
+# species' with the bar and the blows lifted, so it sits in the neighbourhood
+# the road's band already fights. `boss: 1` keeps it out of spawns.txt and
+# out of the variant roll; bosses.def carries what it does about losing.
+
+# The oldest boar under the forest, rooted to the road it keeps. It calls the sounder when it bleeds.
+[monster]
+type: boar_king
+name: Boar King of the Resin Road
+actor_type: 205
+boss: 1
+level: 40
+attack: 39
+defense: 44
+matter: 12
+toughness: 14
+carry: 12
+charm: 12
+reaction: 11
+perception: 10
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+dexterity: 10
+ethereality: 12
+might: 12
+material_points: 895
+ethereal_points: 66
+damage_min: 6
+damage_max: 14
+armor_min: 2
+armor_max: 6
+wander_chance: 8
+time_to_respawn: 600
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 250
+model: final
+[/monster]
+
+# A white bear the size of a hut, old enough to know what a party is. The leopards come when she calls.
+[monster]
+type: rime_matriarch
+name: Rime Matriarch
+actor_type: 594
+footprint: 3
+boss: 1
+level: 52
+attack: 59
+defense: 57
+matter: 20
+toughness: 21
+carry: 22
+charm: 19
+reaction: 20
+perception: 17
+rationality: 17
+magic_offense: 17
+magic_defense: 17
+dexterity: 18
+ethereality: 19
+might: 22
+material_points: 1050
+ethereal_points: 126
+damage_min: 8
+damage_max: 24
+armor_min: 1
+armor_max: 5
+wander_chance: 8
+time_to_respawn: 600
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 280
+model: final
+[/monster]
+
+# A basilisk fed a hundred years of offerings under the temple. It calls the stalkers when it bleeds.
+[monster]
+type: sunscale_sovereign
+name: Sunscale Sovereign
+actor_type: 614
+footprint: 6
+boss: 1
+level: 74
+attack: 76
+defense: 71
+matter: 19
+toughness: 17
+carry: 18
+charm: 19
+reaction: 19
+perception: 20
+rationality: 20
+magic_offense: 20
+magic_defense: 20
+dexterity: 19
+ethereality: 19
+might: 18
+material_points: 1578
+ethereal_points: 366
+damage_min: 14
+damage_max: 27
+armor_min: 2
+armor_max: 6
+wander_chance: 8
+time_to_respawn: 600
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 380
+model: final
+[/monster]
+
+# A magistrate of the old moor court, still in his mail, still holding sessions. The hounds answer him.
+[monster]
+type: barrow_reeve
+name: Barrow Reeve
+actor_type: 621
+boss: 1
+level: 54
+attack: 61
+defense: 59
+matter: 21
+toughness: 22
+carry: 21
+charm: 20
+reaction: 19
+perception: 18
+rationality: 19
+magic_offense: 19
+magic_defense: 19
+dexterity: 19
+ethereality: 21
+might: 21
+material_points: 1150
+ethereal_points: 146
+damage_min: 8
+damage_max: 24
+armor_min: 3
+armor_max: 7
+wander_chance: 8
+time_to_respawn: 600
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 300
+model: final
+[/monster]
+
+# An armoured fish the size of a barge that learned to leave the water. It rings, and the serpents answer.
+[monster]
+type: bell_warden
+name: Bell Warden
+actor_type: 567
+boss: 1
+level: 43
+attack: 50
+defense: 48
+matter: 18
+toughness: 18
+carry: 19
+charm: 16
+reaction: 17
+perception: 15
+rationality: 15
+magic_offense: 15
+magic_defense: 15
+dexterity: 16
+ethereality: 16
+might: 19
+material_points: 875
+ethereal_points: 102
+damage_min: 6
+damage_max: 21
+armor_min: 1
+armor_max: 5
+wander_chance: 8
+time_to_respawn: 600
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 250
+model: final
+[/monster]
+
+# A cat, at first. Bigger each time it is seen. The pride comes when it is hurt.
+[monster]
+type: duskmane
+name: Duskmane
+actor_type: 456
+boss: 1
+level: 48
+attack: 55
+defense: 48
+matter: 13
+toughness: 14
+carry: 14
+charm: 15
+reaction: 15
+perception: 13
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+dexterity: 13
+ethereality: 13
+might: 14
+material_points: 877
+ethereal_points: 96
+damage_min: 9
+damage_max: 20
+armor_min: 2
+armor_max: 5
+wander_chance: 8
+time_to_respawn: 600
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 270
+model: final
+[/monster]
+
+# A wyrm grown up inside the singing rock. It calls the wolves when it is hurt, and it hurts slowly.
+
+# A floodmaw grown fat on a decade of drowned paddies. There is no shortage of crocodiles to call.
+[monster]
+type: bund_tyrant
+name: Bund Tyrant
+actor_type: 490
+boss: 1
+level: 78
+attack: 90
+defense: 83
+matter: 22
+toughness: 24
+carry: 23
+charm: 24
+reaction: 23
+perception: 21
+rationality: 20
+magic_offense: 20
+magic_defense: 20
+dexterity: 20
+ethereality: 22
+might: 23
+material_points: 2415
+ethereal_points: 380
+damage_min: 16
+damage_max: 33
+armor_min: 3
+armor_max: 10
+wander_chance: 8
+time_to_respawn: 600
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 410
+model: final
+[/monster]
+
+# --- end of the gauntlet bosses ---
+
+# --- Basic Creature Expansion 100: reviewed Revision 15; catalog only ---
+# Eighteen of them carry `spawn_mode: starter_isle` instead: the wildlife the
+# continent-v2 landing isle's spawn plan places. They may stand in spawns.txt
+# (none does yet); like catalog_only they stay out of tools/generate_drops.py's
+# gear deal, so making them spawnable reshuffles no other creature's loot.
+
+# Direct rabbit counterpart; minimum explicit damage for server combat.
+[monster]
+type: rabbit
+name: Rabbit
+actor_type: 685
+footprint: 1
+scale: 1
+level: 1
+attack: 1
+defense: 2
+matter: 2
+toughness: 1
+dexterity: 1
+might: 1
+reaction: 1
+carry: 1
+charm: 1
+perception: 1
+rationality: 1
+magic_offense: 1
+magic_defense: 1
+ethereality: 1
+material_points: 10
+ethereal_points: 8
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Direct beaver counterpart; small defensive bite.
+[monster]
+type: beaver
+name: Beaver
+actor_type: 686
+footprint: 1
+scale: 1
+level: 1
+attack: 6
+defense: 6
+matter: 3
+toughness: 1
+dexterity: 1
+might: 1
+reaction: 1
+carry: 1
+charm: 1
+perception: 1
+rationality: 1
+magic_offense: 1
+magic_defense: 1
+ethereality: 1
+material_points: 15
+ethereal_points: 8
+damage_min: 1
+damage_max: 3
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Direct skunk counterpart; weak close combat.
+[monster]
+type: skunk
+name: Skunk
+actor_type: 687
+footprint: 1
+scale: 1
+level: 2
+attack: 7
+defense: 7
+matter: 4
+toughness: 4
+dexterity: 4
+might: 4
+reaction: 4
+carry: 4
+charm: 3
+perception: 4
+rationality: 4
+magic_offense: 4
+magic_defense: 3
+ethereality: 3
+material_points: 18
+ethereal_points: 24
+damage_min: 1
+damage_max: 3
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 53
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Rat-sized prey with defensive spines.
+[monster]
+type: hedgehog
+name: Hedgehog
+actor_type: 688
+footprint: 1
+scale: 1
+level: 1
+attack: 4
+defense: 6
+matter: 4
+toughness: 3
+dexterity: 3
+might: 3
+reaction: 3
+carry: 3
+charm: 3
+perception: 3
+rationality: 3
+magic_offense: 3
+magic_defense: 3
+ethereality: 3
+material_points: 15
+ethereal_points: 27
+damage_min: 1
+damage_max: 2
+armor_min: 1
+armor_max: 2
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Small agile prey slightly harder to hit than a rat.
+[monster]
+type: squirrel
+name: Squirrel
+actor_type: 689
+footprint: 1
+scale: 1
+level: 1
+attack: 4
+defense: 5
+matter: 4
+toughness: 3
+dexterity: 3
+might: 3
+reaction: 3
+carry: 3
+charm: 3
+perception: 3
+rationality: 3
+magic_offense: 3
+magic_defense: 3
+ethereality: 3
+material_points: 12
+ethereal_points: 24
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Tiny harmless prey below rabbit durability.
+[monster]
+type: dormouse
+name: Dormouse
+actor_type: 690
+footprint: 1
+scale: 1
+level: 1
+attack: 1
+defense: 2
+matter: 2
+toughness: 1
+dexterity: 1
+might: 1
+reaction: 1
+carry: 1
+charm: 1
+perception: 1
+rationality: 1
+magic_offense: 1
+magic_defense: 1
+ethereality: 1
+material_points: 8
+ethereal_points: 8
+damage_min: 1
+damage_max: 1
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Rat-level bite with less health.
+[monster]
+type: shrew
+name: Shrew
+actor_type: 691
+footprint: 1
+scale: 1
+level: 1
+attack: 3
+defense: 3
+matter: 3
+toughness: 2
+dexterity: 2
+might: 2
+reaction: 2
+carry: 2
+charm: 2
+perception: 2
+rationality: 2
+magic_offense: 2
+magic_defense: 2
+ethereality: 2
+material_points: 10
+ethereal_points: 16
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Small predator below a fox.
+[monster]
+type: stoat
+name: Stoat
+actor_type: 692
+footprint: 1
+scale: 1
+level: 6
+attack: 10
+defense: 12
+matter: 5
+toughness: 4
+dexterity: 5
+might: 5
+reaction: 6
+carry: 5
+charm: 5
+perception: 5
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+ethereality: 5
+material_points: 20
+ethereal_points: 38
+damage_min: 2
+damage_max: 4
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 69
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Nimble snake hunter slightly above a fox.
+[monster]
+type: mongoose
+name: Mongoose
+actor_type: 693
+footprint: 1
+scale: 1
+level: 11
+attack: 14
+defense: 18
+matter: 7
+toughness: 5
+dexterity: 7
+might: 7
+reaction: 9
+carry: 7
+charm: 7
+perception: 7
+rationality: 7
+magic_offense: 7
+magic_defense: 7
+ethereality: 7
+material_points: 28
+ethereal_points: 55
+damage_min: 3
+damage_max: 5
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 89
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Raccoon-sized prey protected by a shell.
+[monster]
+type: armadillo
+name: Armadillo
+actor_type: 694
+footprint: 1
+scale: 1
+level: 5
+attack: 8
+defense: 12
+matter: 5
+toughness: 5
+dexterity: 6
+might: 6
+reaction: 5
+carry: 6
+charm: 4
+perception: 4
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+ethereality: 4
+material_points: 30
+ethereal_points: 30
+damage_min: 1
+damage_max: 3
+armor_min: 2
+armor_max: 4
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 65
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Raccoon-level scavenger.
+[monster]
+type: opossum
+name: Opossum
+actor_type: 695
+footprint: 1
+scale: 1
+level: 3
+attack: 8
+defense: 8
+matter: 4
+toughness: 4
+dexterity: 5
+might: 5
+reaction: 4
+carry: 5
+charm: 3
+perception: 4
+rationality: 4
+magic_offense: 4
+magic_defense: 3
+ethereality: 3
+material_points: 22
+ethereal_points: 24
+damage_min: 1
+damage_max: 3
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 57
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small semiaquatic animal near beaver difficulty.
+[monster]
+type: platypus
+name: Platypus
+actor_type: 696
+footprint: 1
+scale: 1
+level: 2
+attack: 6
+defense: 8
+matter: 3
+toughness: 1
+dexterity: 1
+might: 1
+reaction: 1
+carry: 1
+charm: 1
+perception: 1
+rationality: 1
+magic_offense: 1
+magic_defense: 1
+ethereality: 1
+material_points: 18
+ethereal_points: 9
+damage_min: 1
+damage_max: 3
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 53
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Stocky burrower near boar difficulty with more endurance.
+[monster]
+type: wombat
+name: Wombat
+actor_type: 697
+footprint: 1
+scale: 1
+level: 15
+attack: 18
+defense: 22
+matter: 8
+toughness: 7
+dexterity: 5
+might: 7
+reaction: 6
+carry: 7
+charm: 6
+perception: 5
+rationality: 6
+magic_offense: 6
+magic_defense: 7
+ethereality: 7
+material_points: 55
+ethereal_points: 56
+damage_min: 3
+damage_max: 6
+armor_min: 1
+armor_max: 2
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 105
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Direct puma counterpart.
+[monster]
+type: puma
+name: Puma
+actor_type: 698
+footprint: 1
+scale: 1
+level: 27
+attack: 34
+defense: 30
+matter: 11
+toughness: 11
+dexterity: 11
+might: 15
+reaction: 14
+carry: 15
+charm: 10
+perception: 9
+rationality: 7
+magic_offense: 7
+magic_defense: 8
+ethereality: 8
+material_points: 45
+ethereal_points: 64
+damage_min: 4
+damage_max: 7
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 153
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 148
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Closest Eternal Lands leopard counterpart.
+[monster]
+type: leopard
+name: Leopard
+actor_type: 699
+footprint: 1
+scale: 1
+level: 55
+attack: 60
+defense: 60
+matter: 18
+toughness: 16
+dexterity: 14
+might: 12
+reaction: 16
+carry: 18
+charm: 14
+perception: 14
+rationality: 14
+magic_offense: 14
+magic_defense: 14
+ethereality: 14
+material_points: 45
+ethereal_points: 112
+damage_min: 3
+damage_max: 20
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 265
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 260
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Faster and more evasive than a puma but lightly built.
+[monster]
+type: cheetah
+name: Cheetah
+actor_type: 700
+footprint: 1
+scale: 1
+level: 34
+attack: 36
+defense: 42
+matter: 13
+toughness: 13
+dexterity: 13
+might: 18
+reaction: 17
+carry: 18
+charm: 12
+perception: 10
+rationality: 8
+magic_offense: 8
+magic_defense: 10
+ethereality: 10
+material_points: 42
+ethereal_points: 78
+damage_min: 4
+damage_max: 8
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 181
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 176
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Sturdier than a deer; defensive kick.
+[monster]
+type: donkey
+name: Donkey
+actor_type: 701
+footprint: 1
+scale: 1
+level: 8
+attack: 14
+defense: 12
+matter: 9
+toughness: 7
+dexterity: 7
+might: 8
+reaction: 7
+carry: 8
+charm: 6
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 7
+ethereality: 7
+material_points: 55
+ethereal_points: 50
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 77
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Boar-like bulk with more health.
+[monster]
+type: tapir
+name: Tapir
+actor_type: 702
+footprint: 1
+scale: 1
+level: 16
+attack: 22
+defense: 20
+matter: 8
+toughness: 7
+dexterity: 5
+might: 7
+reaction: 6
+carry: 7
+charm: 6
+perception: 5
+rationality: 6
+magic_offense: 6
+magic_defense: 7
+ethereality: 7
+material_points: 65
+ethereal_points: 59
+damage_min: 3
+damage_max: 6
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 109
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Great bulk and trampling strength above bear difficulty; below giants.
+[monster]
+type: elephant
+name: Elephant
+actor_type: 703
+footprint: 3
+scale: 1
+level: 68
+attack: 80
+defense: 65
+matter: 32
+toughness: 26
+dexterity: 15
+might: 22
+reaction: 20
+carry: 26
+charm: 20
+perception: 17
+rationality: 20
+magic_offense: 20
+magic_defense: 23
+ethereality: 23
+material_points: 320
+ethereal_points: 44
+damage_min: 14
+damage_max: 24
+armor_min: 3
+armor_max: 6
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 317
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Territorial heavy animal with a strong bite.
+[monster]
+type: hippopotamus
+name: Hippopotamus
+actor_type: 704
+footprint: 1
+scale: 1
+level: 60
+attack: 75
+defense: 55
+matter: 29
+toughness: 23
+dexterity: 13
+might: 20
+reaction: 18
+carry: 23
+charm: 18
+perception: 16
+rationality: 18
+magic_offense: 18
+magic_defense: 21
+ethereality: 21
+material_points: 240
+ethereal_points: 39
+damage_min: 14
+damage_max: 22
+armor_min: 2
+armor_max: 5
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 285
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 280
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Large herbivore with a powerful defensive kick.
+[monster]
+type: giraffe
+name: Giraffe
+actor_type: 705
+footprint: 3
+scale: 1
+level: 28
+attack: 35
+defense: 30
+matter: 23
+toughness: 17
+dexterity: 17
+might: 20
+reaction: 19
+carry: 20
+charm: 15
+perception: 14
+rationality: 15
+magic_offense: 15
+magic_defense: 17
+ethereality: 17
+material_points: 140
+ethereal_points: 124
+damage_min: 7
+damage_max: 13
+armor_min: 0
+armor_max: 2
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 157
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Stronger and tougher than a deer.
+[monster]
+type: zebra
+name: Zebra
+actor_type: 706
+footprint: 1
+scale: 1
+level: 18
+attack: 24
+defense: 22
+matter: 16
+toughness: 12
+dexterity: 12
+might: 14
+reaction: 13
+carry: 14
+charm: 11
+perception: 10
+rationality: 11
+magic_offense: 11
+magic_defense: 12
+ethereality: 12
+material_points: 85
+ethereal_points: 88
+damage_min: 4
+damage_max: 8
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 117
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Mobile herbivore with strong hind-leg kicks.
+[monster]
+type: kangaroo
+name: Kangaroo
+actor_type: 707
+footprint: 1
+scale: 1
+level: 24
+attack: 28
+defense: 30
+matter: 12
+toughness: 10
+dexterity: 7
+might: 10
+reaction: 9
+carry: 10
+charm: 9
+perception: 7
+rationality: 9
+magic_offense: 9
+magic_defense: 10
+ethereality: 10
+material_points: 65
+ethereal_points: 81
+damage_min: 5
+damage_max: 9
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 141
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Strong grappler below bear difficulty.
+[monster]
+type: orangutan
+name: Orangutan
+actor_type: 708
+footprint: 1
+scale: 1
+level: 39
+attack: 45
+defense: 42
+matter: 19
+toughness: 15
+dexterity: 8
+might: 9
+reaction: 10
+carry: 15
+charm: 10
+perception: 10
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+ethereality: 12
+material_points: 100
+ethereal_points: 29
+damage_min: 6
+damage_max: 12
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 201
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Aggressive primate slightly above wolf difficulty.
+[monster]
+type: baboon
+name: Baboon
+actor_type: 709
+footprint: 1
+scale: 1
+level: 24
+attack: 30
+defense: 27
+matter: 10
+toughness: 9
+dexterity: 7
+might: 9
+reaction: 9
+carry: 9
+charm: 9
+perception: 7
+rationality: 7
+magic_offense: 7
+magic_defense: 9
+ethereality: 9
+material_points: 50
+ethereal_points: 69
+damage_min: 4
+damage_max: 8
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 141
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 134
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Heavy hide and tusks; below a large bear in accuracy.
+[monster]
+type: walrus
+name: Walrus
+actor_type: 710
+footprint: 1
+scale: 1
+level: 44
+attack: 55
+defense: 42
+matter: 22
+toughness: 17
+dexterity: 9
+might: 10
+reaction: 11
+carry: 17
+charm: 11
+perception: 11
+rationality: 13
+magic_offense: 13
+magic_defense: 13
+ethereality: 13
+material_points: 190
+ethereal_points: 32
+damage_min: 9
+damage_max: 16
+armor_min: 1
+armor_max: 3
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 221
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Durable but weakly offensive aquatic herbivore.
+[monster]
+type: manatee
+name: Manatee
+actor_type: 711
+footprint: 2
+scale: 1
+level: 11
+attack: 15
+defense: 16
+matter: 11
+toughness: 8
+dexterity: 8
+might: 10
+reaction: 9
+carry: 10
+charm: 7
+perception: 7
+rationality: 7
+magic_offense: 7
+magic_defense: 8
+ethereality: 8
+material_points: 130
+ethereal_points: 59
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 89
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Agile medium aquatic animal.
+[monster]
+type: dolphin
+name: Dolphin
+actor_type: 712
+footprint: 2
+scale: 1
+level: 28
+attack: 30
+defense: 35
+matter: 11
+toughness: 10
+dexterity: 8
+might: 11
+reaction: 11
+carry: 11
+charm: 10
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 10
+ethereality: 10
+material_points: 85
+ethereal_points: 79
+damage_min: 4
+damage_max: 8
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 157
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small intelligent bird; evasive but fragile.
+[monster]
+type: raven
+name: Raven
+actor_type: 713
+footprint: 1
+scale: 1
+level: 7
+attack: 9
+defense: 15
+matter: 6
+toughness: 6
+dexterity: 7
+might: 8
+reaction: 6
+carry: 8
+charm: 5
+perception: 5
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+ethereality: 5
+material_points: 18
+ethereal_points: 36
+damage_min: 1
+damage_max: 4
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 73
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Smaller and weaker than a raven.
+[monster]
+type: magpie
+name: Magpie
+actor_type: 714
+footprint: 1
+scale: 1
+level: 5
+attack: 7
+defense: 13
+matter: 5
+toughness: 5
+dexterity: 6
+might: 6
+reaction: 5
+carry: 6
+charm: 4
+perception: 4
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+ethereality: 4
+material_points: 15
+ethereal_points: 30
+damage_min: 1
+damage_max: 3
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 65
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Low-threat waterfowl near beaver difficulty.
+[monster]
+type: mallard_duck
+name: Mallard Duck
+actor_type: 715
+footprint: 1
+scale: 1
+level: 1
+attack: 5
+defense: 6
+matter: 2
+toughness: 1
+dexterity: 1
+might: 1
+reaction: 1
+carry: 1
+charm: 1
+perception: 1
+rationality: 1
+magic_offense: 1
+magic_defense: 1
+ethereality: 1
+material_points: 18
+ethereal_points: 7
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Defensive waterfowl with a modest bite.
+[monster]
+type: goose
+name: Goose
+actor_type: 716
+footprint: 1
+scale: 1
+level: 6
+attack: 12
+defense: 10
+matter: 5
+toughness: 4
+dexterity: 5
+might: 5
+reaction: 6
+carry: 5
+charm: 5
+perception: 5
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+ethereality: 5
+material_points: 30
+ethereal_points: 38
+damage_min: 2
+damage_max: 4
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 69
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Larger and stronger than a goose.
+[monster]
+type: swan
+name: Swan
+actor_type: 717
+footprint: 1
+scale: 1
+level: 12
+attack: 18
+defense: 16
+matter: 7
+toughness: 5
+dexterity: 8
+might: 7
+reaction: 10
+carry: 7
+charm: 8
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+ethereality: 8
+material_points: 45
+ethereal_points: 58
+damage_min: 3
+damage_max: 6
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 93
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small defensive bird with spurs.
+[monster]
+type: rooster
+name: Rooster
+actor_type: 718
+footprint: 1
+scale: 1
+level: 3
+attack: 8
+defense: 7
+matter: 4
+toughness: 4
+dexterity: 4
+might: 4
+reaction: 4
+carry: 4
+charm: 3
+perception: 4
+rationality: 4
+magic_offense: 4
+magic_defense: 3
+ethereality: 3
+material_points: 20
+ethereal_points: 26
+damage_min: 2
+damage_max: 4
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 57
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Heavier poultry with low combat skill.
+[monster]
+type: turkey
+name: Turkey
+actor_type: 719
+footprint: 1
+scale: 1
+level: 5
+attack: 10
+defense: 10
+matter: 4
+toughness: 3
+dexterity: 5
+might: 4
+reaction: 6
+carry: 4
+charm: 5
+perception: 5
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+ethereality: 5
+material_points: 32
+ethereal_points: 34
+damage_min: 2
+damage_max: 4
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 65
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Light evasive game bird.
+[monster]
+type: pheasant
+name: Pheasant
+actor_type: 720
+footprint: 1
+scale: 1
+level: 3
+attack: 6
+defense: 10
+matter: 4
+toughness: 4
+dexterity: 5
+might: 5
+reaction: 4
+carry: 5
+charm: 3
+perception: 4
+rationality: 4
+magic_offense: 4
+magic_defense: 3
+ethereality: 3
+material_points: 20
+ethereal_points: 27
+damage_min: 1
+damage_max: 3
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 57
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Large flightless bird with a dangerous kick.
+[monster]
+type: ostrich
+name: Ostrich
+actor_type: 721
+footprint: 2
+scale: 1
+level: 25
+attack: 32
+defense: 28
+matter: 10
+toughness: 9
+dexterity: 7
+might: 10
+reaction: 10
+carry: 10
+charm: 9
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 9
+ethereality: 9
+material_points: 100
+ethereal_points: 73
+damage_min: 6
+damage_max: 11
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 145
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Closest Eternal Lands penguin counterpart; explicit damage derived from might.
+[monster]
+type: penguin
+name: Penguin
+actor_type: 722
+footprint: 1
+scale: 1
+level: 27
+attack: 32
+defense: 32
+matter: 15
+toughness: 10
+dexterity: 9
+might: 10
+reaction: 9
+carry: 10
+charm: 9
+perception: 8
+rationality: 14
+magic_offense: 14
+magic_defense: 15
+ethereality: 15
+material_points: 35
+ethereal_points: 112
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 153
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Large water bird with modest bite strength.
+[monster]
+type: pelican
+name: Pelican
+actor_type: 723
+footprint: 1
+scale: 1
+level: 9
+attack: 12
+defense: 16
+matter: 6
+toughness: 5
+dexterity: 7
+might: 6
+reaction: 8
+carry: 6
+charm: 7
+perception: 7
+rationality: 7
+magic_offense: 7
+magic_defense: 7
+ethereality: 7
+material_points: 40
+ethereal_points: 48
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Agile parrot with a strong beak for its size.
+[monster]
+type: macaw
+name: Macaw
+actor_type: 724
+footprint: 1
+scale: 1
+level: 9
+attack: 10
+defense: 18
+matter: 7
+toughness: 7
+dexterity: 8
+might: 9
+reaction: 7
+carry: 9
+charm: 5
+perception: 6
+rationality: 6
+magic_offense: 6
+magic_defense: 5
+ethereality: 5
+material_points: 25
+ethereal_points: 42
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Venomous snake slightly above the brown snake; modest damage over time.
+[monster]
+type: cobra
+name: Cobra
+actor_type: 725
+footprint: 1
+scale: 1
+level: 16
+attack: 24
+defense: 18
+matter: 9
+toughness: 8
+dexterity: 9
+might: 8
+reaction: 8
+carry: 8
+charm: 8
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+ethereality: 9
+material_points: 35
+ethereal_points: 65
+damage_min: 3
+damage_max: 6
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 2
+wander_chance: 8
+time_to_respawn: 109
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 104
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small slow lizard with low attack threat.
+[monster]
+type: chameleon
+name: Chameleon
+actor_type: 726
+footprint: 1
+scale: 1
+level: 4
+attack: 6
+defense: 12
+matter: 5
+toughness: 5
+dexterity: 5
+might: 5
+reaction: 5
+carry: 5
+charm: 5
+perception: 5
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+ethereality: 5
+material_points: 18
+ethereal_points: 37
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 61
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Tiny evasive lizard.
+[monster]
+type: gecko
+name: Gecko
+actor_type: 727
+footprint: 1
+scale: 1
+level: 1
+attack: 3
+defense: 8
+matter: 5
+toughness: 4
+dexterity: 4
+might: 4
+reaction: 4
+carry: 4
+charm: 4
+perception: 4
+rationality: 4
+magic_offense: 4
+magic_defense: 4
+ethereality: 4
+material_points: 10
+ethereal_points: 29
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Defensive medium lizard below dangerous snakes.
+[monster]
+type: frilled_lizard
+name: Frilled Lizard
+actor_type: 728
+footprint: 1
+scale: 1
+level: 8
+attack: 12
+defense: 14
+matter: 7
+toughness: 7
+dexterity: 7
+might: 7
+reaction: 7
+carry: 7
+charm: 7
+perception: 7
+rationality: 8
+magic_offense: 8
+magic_defense: 7
+ethereality: 7
+material_points: 25
+ethereal_points: 54
+damage_min: 2
+damage_max: 4
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 77
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Sturdy herbivorous lizard.
+[monster]
+type: iguana
+name: Iguana
+actor_type: 729
+footprint: 1
+scale: 1
+level: 12
+attack: 16
+defense: 18
+matter: 7
+toughness: 7
+dexterity: 7
+might: 7
+reaction: 7
+carry: 7
+charm: 7
+perception: 7
+rationality: 8
+magic_offense: 8
+magic_defense: 7
+ethereality: 7
+material_points: 40
+ethereal_points: 53
+damage_min: 2
+damage_max: 5
+armor_min: 1
+armor_max: 2
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 93
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small burrowing amphibian with little combat ability.
+[monster]
+type: caecilian
+name: Caecilian
+actor_type: 730
+footprint: 1
+scale: 1
+level: 1
+attack: 3
+defense: 4
+matter: 3
+toughness: 2
+dexterity: 2
+might: 2
+reaction: 2
+carry: 2
+charm: 2
+perception: 2
+rationality: 2
+magic_offense: 2
+magic_defense: 2
+ethereality: 2
+material_points: 12
+ethereal_points: 19
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small amphibious fish.
+[monster]
+type: mudskipper
+name: Mudskipper
+actor_type: 731
+footprint: 1
+scale: 1
+level: 1
+attack: 3
+defense: 5
+matter: 3
+toughness: 3
+dexterity: 3
+might: 3
+reaction: 3
+carry: 3
+charm: 3
+perception: 3
+rationality: 3
+magic_offense: 3
+magic_defense: 3
+ethereality: 3
+material_points: 12
+ethereal_points: 21
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Strong defensive bite and a protective shell.
+[monster]
+type: snapping_turtle
+name: Snapping Turtle
+actor_type: 732
+footprint: 1
+scale: 1
+level: 22
+attack: 24
+defense: 30
+matter: 11
+toughness: 9
+dexterity: 7
+might: 9
+reaction: 8
+carry: 9
+charm: 8
+perception: 7
+rationality: 8
+magic_offense: 8
+magic_defense: 9
+ethereality: 9
+material_points: 65
+ethereal_points: 76
+damage_min: 5
+damage_max: 9
+armor_min: 3
+armor_max: 6
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 133
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Large aquatic predator above a panther in endurance.
+[monster]
+type: hammerhead_shark
+name: Hammerhead Shark
+actor_type: 733
+footprint: 3
+scale: 1
+level: 45
+attack: 55
+defense: 45
+matter: 26
+toughness: 21
+dexterity: 18
+might: 31
+reaction: 21
+carry: 31
+charm: 11
+perception: 11
+rationality: 13
+magic_offense: 13
+magic_defense: 13
+ethereality: 13
+material_points: 150
+ethereal_points: 107
+damage_min: 10
+damage_max: 17
+armor_min: 1
+armor_max: 3
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 225
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 220
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Large fish with bony protective scutes.
+[monster]
+type: sturgeon
+name: Sturgeon
+actor_type: 734
+footprint: 1
+scale: 1
+level: 17
+attack: 20
+defense: 24
+matter: 9
+toughness: 8
+dexterity: 6
+might: 8
+reaction: 7
+carry: 8
+charm: 7
+perception: 6
+rationality: 7
+magic_offense: 7
+magic_defense: 8
+ethereality: 8
+material_points: 85
+ethereal_points: 62
+damage_min: 3
+damage_max: 6
+armor_min: 2
+armor_max: 4
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 113
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Tiny low-threat aquatic creature.
+[monster]
+type: seahorse
+name: Seahorse
+actor_type: 735
+footprint: 1
+scale: 1
+level: 1
+attack: 1
+defense: 3
+matter: 2
+toughness: 1
+dexterity: 1
+might: 1
+reaction: 1
+carry: 1
+charm: 1
+perception: 1
+rationality: 1
+magic_offense: 1
+magic_defense: 1
+ethereality: 1
+material_points: 8
+ethereal_points: 11
+damage_min: 1
+damage_max: 1
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 49
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Flexible grappler near wolf difficulty.
+[monster]
+type: octopus
+name: Octopus
+actor_type: 736
+footprint: 1
+scale: 1
+level: 27
+attack: 28
+defense: 35
+matter: 11
+toughness: 10
+dexterity: 8
+might: 10
+reaction: 10
+carry: 10
+charm: 10
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 10
+ethereality: 10
+material_points: 70
+ethereal_points: 77
+damage_min: 4
+damage_max: 8
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 153
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small evasive cephalopod.
+[monster]
+type: cuttlefish
+name: Cuttlefish
+actor_type: 737
+footprint: 1
+scale: 1
+level: 12
+attack: 14
+defense: 20
+matter: 7
+toughness: 5
+dexterity: 8
+might: 7
+reaction: 10
+carry: 7
+charm: 8
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+ethereality: 8
+material_points: 30
+ethereal_points: 58
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 93
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Weak aquatic creature protected by a shell.
+[monster]
+type: nautilus
+name: Nautilus
+actor_type: 738
+footprint: 1
+scale: 1
+level: 4
+attack: 5
+defense: 12
+matter: 4
+toughness: 1
+dexterity: 1
+might: 1
+reaction: 1
+carry: 1
+charm: 1
+perception: 1
+rationality: 1
+magic_offense: 1
+magic_defense: 1
+ethereality: 1
+material_points: 25
+ethereal_points: 11
+damage_min: 1
+damage_max: 3
+armor_min: 2
+armor_max: 4
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 61
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Armored crustacean with strong pincers.
+[monster]
+type: lobster
+name: Lobster
+actor_type: 739
+footprint: 1
+scale: 1
+level: 16
+attack: 18
+defense: 24
+matter: 12
+toughness: 11
+dexterity: 12
+might: 11
+reaction: 11
+carry: 11
+charm: 11
+perception: 12
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+ethereality: 12
+material_points: 40
+ethereal_points: 87
+damage_min: 3
+damage_max: 6
+armor_min: 2
+armor_max: 4
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 109
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Larger venomous crawler above a large spider.
+[monster]
+type: giant_centipede
+name: Giant Centipede
+actor_type: 740
+footprint: 1
+scale: 1
+level: 28
+attack: 36
+defense: 30
+matter: 11
+toughness: 11
+dexterity: 11
+might: 8
+reaction: 11
+carry: 11
+charm: 11
+perception: 11
+rationality: 11
+magic_offense: 11
+magic_defense: 11
+ethereality: 11
+material_points: 65
+ethereal_points: 33
+damage_min: 5
+damage_max: 10
+armor_min: 1
+armor_max: 3
+attack_range: 1
+poison_damage: 2
+wander_chance: 8
+time_to_respawn: 157
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 152
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Slow heavily protected invertebrate.
+[monster]
+type: giant_snail
+name: Giant Snail
+actor_type: 741
+footprint: 1
+scale: 1
+level: 16
+attack: 12
+defense: 30
+matter: 8
+toughness: 7
+dexterity: 5
+might: 7
+reaction: 6
+carry: 7
+charm: 6
+perception: 5
+rationality: 6
+magic_offense: 6
+magic_defense: 7
+ethereality: 7
+material_points: 90
+ethereal_points: 59
+damage_min: 2
+damage_max: 5
+armor_min: 4
+armor_max: 8
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 109
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Low-tier blood-feeding ambusher with soft skin.
+[monster]
+type: giant_leech
+name: Giant Leech
+actor_type: 742
+footprint: 1
+scale: 1
+level: 12
+attack: 18
+defense: 16
+matter: 7
+toughness: 7
+dexterity: 7
+might: 7
+reaction: 7
+carry: 7
+charm: 7
+perception: 7
+rationality: 8
+magic_offense: 8
+magic_defense: 7
+ethereality: 7
+material_points: 45
+ethereal_points: 53
+damage_min: 3
+damage_max: 6
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 93
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 88
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Airborne insect trading durability for evasion and a sting.
+[monster]
+type: giant_wasp
+name: Giant Wasp
+actor_type: 743
+footprint: 1
+scale: 1
+level: 30
+attack: 32
+defense: 38
+matter: 12
+toughness: 12
+dexterity: 12
+might: 9
+reaction: 12
+carry: 12
+charm: 12
+perception: 12
+rationality: 12
+magic_offense: 12
+magic_defense: 12
+ethereality: 12
+material_points: 45
+ethereal_points: 35
+damage_min: 5
+damage_max: 9
+armor_min: 0
+armor_max: 2
+attack_range: 1
+poison_damage: 1
+wander_chance: 8
+time_to_respawn: 165
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 160
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Armored insect close to large spider difficulty.
+[monster]
+type: giant_ant
+name: Giant Ant
+actor_type: 744
+footprint: 1
+scale: 1
+level: 26
+attack: 30
+defense: 32
+matter: 10
+toughness: 10
+dexterity: 10
+might: 8
+reaction: 10
+carry: 10
+charm: 10
+perception: 10
+rationality: 10
+magic_offense: 10
+magic_defense: 10
+ethereality: 10
+material_points: 60
+ethereal_points: 31
+damage_min: 5
+damage_max: 9
+armor_min: 2
+armor_max: 4
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 149
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 144
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Direct unarmed skeleton counterpart.
+[monster]
+type: skeleton
+name: Skeleton
+actor_type: 745
+footprint: 1
+scale: 1
+level: 26
+attack: 33
+defense: 28
+matter: 13
+toughness: 11
+dexterity: 8
+might: 7
+reaction: 8
+carry: 9
+charm: 11
+perception: 9
+rationality: 12
+magic_offense: 12
+magic_defense: 14
+ethereality: 14
+material_points: 25
+ethereal_points: 104
+damage_min: 5
+damage_max: 8
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 149
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 142
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Slower less skilled undead with much more endurance.
+[monster]
+type: zombie
+name: Zombie
+actor_type: 746
+footprint: 1
+scale: 1
+level: 22
+attack: 30
+defense: 24
+matter: 11
+toughness: 10
+dexterity: 7
+might: 6
+reaction: 7
+carry: 8
+charm: 9
+perception: 8
+rationality: 10
+magic_offense: 10
+magic_defense: 12
+ethereality: 12
+material_points: 70
+ethereal_points: 92
+damage_min: 5
+damage_max: 9
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 133
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 128
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Fast clawing undead above skeleton difficulty.
+[monster]
+type: ghoul
+name: Ghoul
+actor_type: 747
+footprint: 1
+scale: 1
+level: 36
+attack: 44
+defense: 38
+matter: 16
+toughness: 15
+dexterity: 14
+might: 11
+reaction: 14
+carry: 16
+charm: 12
+perception: 11
+rationality: 14
+magic_offense: 14
+magic_defense: 15
+ethereality: 15
+material_points: 70
+ethereal_points: 114
+damage_min: 7
+damage_max: 12
+armor_min: 0
+armor_max: 2
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 189
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 184
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Durable slow undead near troll difficulty.
+[monster]
+type: mummy
+name: Mummy
+actor_type: 748
+footprint: 1
+scale: 1
+level: 49
+attack: 58
+defense: 50
+matter: 19
+toughness: 17
+dexterity: 7
+might: 10
+reaction: 8
+carry: 15
+charm: 10
+perception: 8
+rationality: 11
+magic_offense: 11
+magic_defense: 13
+ethereality: 13
+material_points: 130
+ethereal_points: 98
+damage_min: 8
+damage_max: 14
+armor_min: 3
+armor_max: 5
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 241
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 236
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Elite agile undead above armed orcs; below chimerans.
+[monster]
+type: vampire
+name: Vampire
+actor_type: 749
+footprint: 1
+scale: 1
+level: 82
+attack: 85
+defense: 88
+matter: 28
+toughness: 25
+dexterity: 28
+might: 33
+reaction: 25
+carry: 33
+charm: 18
+perception: 21
+rationality: 24
+magic_offense: 32
+magic_defense: 28
+ethereality: 28
+material_points: 180
+ethereal_points: 216
+damage_min: 12
+damage_max: 20
+armor_min: 3
+armor_max: 8
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 373
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 366
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Direct imp counterpart; explicit small melee strike.
+[monster]
+type: imp
+name: Imp
+actor_type: 750
+footprint: 1
+scale: 1
+level: 7
+attack: 12
+defense: 12
+matter: 7
+toughness: 6
+dexterity: 6
+might: 7
+reaction: 6
+carry: 7
+charm: 5
+perception: 5
+rationality: 6
+magic_offense: 6
+magic_defense: 6
+ethereality: 6
+material_points: 24
+ethereal_points: 40
+damage_min: 1
+damage_max: 4
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 73
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 68
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Direct medium gargoyle counterpart.
+[monster]
+type: gargoyle
+name: Gargoyle
+actor_type: 751
+footprint: 1
+scale: 1
+level: 29
+attack: 34
+defense: 34
+matter: 20
+toughness: 19
+dexterity: 8
+might: 16
+reaction: 8
+carry: 16
+charm: 11
+perception: 9
+rationality: 12
+magic_offense: 12
+magic_defense: 14
+ethereality: 14
+material_points: 35
+ethereal_points: 104
+damage_min: 7
+damage_max: 8
+armor_min: 3
+armor_max: 5
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 161
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 156
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# More physically capable trickster than an imp.
+[monster]
+type: gremlin
+name: Gremlin
+actor_type: 752
+footprint: 1
+scale: 1
+level: 14
+attack: 18
+defense: 20
+matter: 10
+toughness: 10
+dexterity: 10
+might: 11
+reaction: 10
+carry: 11
+charm: 8
+perception: 8
+rationality: 9
+magic_offense: 9
+magic_defense: 9
+ethereality: 9
+material_points: 32
+ethereal_points: 63
+damage_min: 3
+damage_max: 6
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 101
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 96
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Direct hobgoblin counterpart.
+[monster]
+type: hobgoblin
+name: Hobgoblin
+actor_type: 753
+footprint: 1
+scale: 1
+level: 33
+attack: 36
+defense: 40
+matter: 16
+toughness: 8
+dexterity: 17
+might: 13
+reaction: 17
+carry: 17
+charm: 15
+perception: 16
+rationality: 17
+magic_offense: 17
+magic_defense: 16
+ethereality: 16
+material_points: 70
+ethereal_points: 120
+damage_min: 11
+damage_max: 14
+armor_min: 6
+armor_max: 10
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 177
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 172
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Predatory humanoid near male orc difficulty.
+[monster]
+type: gnoll
+name: Gnoll
+actor_type: 754
+footprint: 2
+scale: 1
+level: 49
+attack: 58
+defense: 50
+matter: 16
+toughness: 15
+dexterity: 8
+might: 8
+reaction: 12
+carry: 15
+charm: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 12
+ethereality: 12
+material_points: 90
+ethereal_points: 98
+damage_min: 7
+damage_max: 12
+armor_min: 1
+armor_max: 3
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 241
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 236
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Mobile large humanoid below the armed orc tier in accuracy.
+[monster]
+type: centaur
+name: Centaur
+actor_type: 755
+footprint: 2
+scale: 1
+level: 63
+attack: 70
+defense: 65
+matter: 22
+toughness: 20
+dexterity: 22
+might: 26
+reaction: 20
+carry: 26
+charm: 14
+perception: 16
+rationality: 18
+magic_offense: 18
+magic_defense: 16
+ethereality: 16
+material_points: 160
+ethereal_points: 125
+damage_min: 9
+damage_max: 15
+armor_min: 2
+armor_max: 5
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 297
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Mid-tier aquatic humanoid.
+[monster]
+type: merfolk
+name: Merfolk
+actor_type: 756
+footprint: 1
+scale: 1
+level: 40
+attack: 42
+defense: 48
+matter: 13
+toughness: 12
+dexterity: 9
+might: 14
+reaction: 13
+carry: 14
+charm: 11
+perception: 9
+rationality: 8
+magic_offense: 8
+magic_defense: 10
+ethereality: 10
+material_points: 85
+ethereal_points: 83
+damage_min: 6
+damage_max: 10
+armor_min: 1
+armor_max: 3
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 205
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Agile winged martial humanoid near armed orc difficulty.
+[monster]
+type: tengu
+name: Tengu
+actor_type: 757
+footprint: 2
+scale: 1
+level: 66
+attack: 68
+defense: 74
+matter: 23
+toughness: 21
+dexterity: 23
+might: 27
+reaction: 21
+carry: 27
+charm: 14
+perception: 17
+rationality: 19
+magic_offense: 19
+magic_defense: 17
+ethereality: 17
+material_points: 120
+ethereal_points: 131
+damage_min: 8
+damage_max: 14
+armor_min: 2
+armor_max: 4
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 309
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 304
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Large spider-humanoid hybrid above an armed orc in durability.
+[monster]
+type: arachne
+name: Arachne
+actor_type: 758
+footprint: 2
+scale: 1
+level: 69
+attack: 78
+defense: 70
+matter: 24
+toughness: 22
+dexterity: 24
+might: 28
+reaction: 22
+carry: 28
+charm: 15
+perception: 18
+rationality: 20
+magic_offense: 20
+magic_defense: 18
+ethereality: 18
+material_points: 170
+ethereal_points: 137
+damage_min: 10
+damage_max: 17
+armor_min: 3
+armor_max: 6
+attack_range: 1
+poison_damage: 3
+wander_chance: 8
+time_to_respawn: 321
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 316
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Large dangerous hybrid near desert chimeran difficulty.
+[monster]
+type: manticore
+name: Manticore
+actor_type: 759
+footprint: 1
+scale: 1
+level: 93
+attack: 100
+defense: 95
+matter: 41
+toughness: 34
+dexterity: 27
+might: 15
+reaction: 32
+carry: 27
+charm: 39
+perception: 34
+rationality: 29
+magic_offense: 29
+magic_defense: 34
+ethereality: 34
+material_points: 260
+ethereal_points: 49
+damage_min: 14
+damage_max: 23
+armor_min: 5
+armor_max: 12
+attack_range: 1
+poison_damage: 3
+wander_chance: 8
+time_to_respawn: 417
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 410
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Direct Eternal Lands cockatrice counterpart; retains its high-tier combat role.
+[monster]
+type: cockatrice
+name: Cockatrice
+actor_type: 760
+footprint: 1
+scale: 1
+level: 135
+attack: 140
+defense: 140
+matter: 58
+toughness: 30
+dexterity: 30
+might: 50
+reaction: 30
+carry: 25
+charm: 38
+perception: 40
+rationality: 38
+magic_offense: 38
+magic_defense: 36
+ethereality: 36
+material_points: 350
+ethereal_points: 288
+damage_min: 40
+damage_max: 60
+armor_min: 20
+armor_max: 40
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 585
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 580
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Predatory winged deer near lion difficulty.
+[monster]
+type: peryton
+name: Peryton
+actor_type: 761
+footprint: 1
+scale: 1
+level: 73
+attack: 78
+defense: 78
+matter: 25
+toughness: 26
+dexterity: 21
+might: 15
+reaction: 19
+carry: 20
+charm: 24
+perception: 24
+rationality: 26
+magic_offense: 26
+magic_defense: 26
+ethereality: 26
+material_points: 150
+ethereal_points: 211
+damage_min: 11
+damage_max: 19
+armor_min: 3
+armor_max: 7
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 337
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 332
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Low-tier magical rabbit; far below a fluffy rabbit.
+[monster]
+type: jackalope
+name: Jackalope
+actor_type: 762
+footprint: 1
+scale: 1
+level: 7
+attack: 10
+defense: 14
+matter: 6
+toughness: 6
+dexterity: 7
+might: 8
+reaction: 6
+carry: 8
+charm: 5
+perception: 5
+rationality: 5
+magic_offense: 5
+magic_defense: 5
+ethereality: 5
+material_points: 25
+ethereal_points: 36
+damage_min: 2
+damage_max: 5
+armor_min: 0
+armor_max: 1
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 73
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: starter_isle
+[/monster]
+
+# Strong benevolent mythical beast; chimeran tier avoids the reference unicorn's extreme immunity stats.
+[monster]
+type: qilin
+name: Qilin
+actor_type: 763
+footprint: 1
+scale: 1
+level: 98
+attack: 100
+defense: 105
+matter: 41
+toughness: 34
+dexterity: 34
+might: 34
+reaction: 39
+carry: 34
+charm: 39
+perception: 34
+rationality: 24
+magic_offense: 32
+magic_defense: 39
+ethereality: 39
+material_points: 240
+ethereal_points: 66
+damage_min: 12
+damage_max: 20
+armor_min: 6
+armor_max: 12
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 437
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Slow heavily armored hybrid; below true dragons.
+[monster]
+type: dragon_turtle
+name: Dragon Turtle
+actor_type: 764
+footprint: 1
+scale: 1
+level: 113
+attack: 110
+defense: 125
+matter: 46
+toughness: 48
+dexterity: 41
+might: 43
+reaction: 46
+carry: 43
+charm: 51
+perception: 46
+rationality: 41
+magic_offense: 41
+magic_defense: 45
+ethereality: 45
+material_points: 450
+ethereal_points: 360
+damage_min: 17
+damage_max: 28
+armor_min: 14
+armor_max: 22
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 497
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 490
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Armored ambush predator slightly below Feros skill.
+[monster]
+type: burrowing_landshark
+name: Burrowing Landshark
+actor_type: 765
+footprint: 1
+scale: 1
+level: 85
+attack: 95
+defense: 85
+matter: 45
+toughness: 23
+dexterity: 18
+might: 13
+reaction: 18
+carry: 23
+charm: 18
+perception: 18
+rationality: 18
+magic_offense: 18
+magic_defense: 18
+ethereality: 18
+material_points: 280
+ethereal_points: 144
+damage_min: 13
+damage_max: 22
+armor_min: 6
+armor_max: 12
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 385
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 380
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Compact mineral-eating beast with strong natural armor.
+[monster]
+type: iron_eater
+name: Iron Eater
+actor_type: 766
+footprint: 1
+scale: 1
+level: 49
+attack: 48
+defense: 60
+matter: 19
+toughness: 17
+dexterity: 7
+might: 10
+reaction: 8
+carry: 15
+charm: 10
+perception: 8
+rationality: 11
+magic_offense: 11
+magic_defense: 13
+ethereality: 13
+material_points: 150
+ethereal_points: 98
+damage_min: 7
+damage_max: 12
+armor_min: 8
+armor_max: 14
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 241
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Stationary rock ambusher trading mobility for a strong bite.
+[monster]
+type: stalactite_maw
+name: Stalactite Maw
+actor_type: 767
+footprint: 1
+scale: 1
+level: 55
+attack: 65
+defense: 55
+matter: 15
+toughness: 18
+dexterity: 8
+might: 10
+reaction: 11
+carry: 16
+charm: 14
+perception: 7
+rationality: 7
+magic_offense: 7
+magic_defense: 14
+ethereality: 14
+material_points: 170
+ethereal_points: 111
+damage_min: 12
+damage_max: 19
+armor_min: 5
+armor_max: 10
+attack_range: 1
+poison_damage: 0
+wander_chance: 0
+time_to_respawn: 265
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 260
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Mid-tier disguised ambusher with a powerful jaw.
+[monster]
+type: mimic
+name: Mimic
+actor_type: 768
+footprint: 1
+scale: 1
+level: 47
+attack: 55
+defense: 48
+matter: 15
+toughness: 14
+dexterity: 8
+might: 7
+reaction: 12
+carry: 14
+charm: 12
+perception: 9
+rationality: 9
+magic_offense: 9
+magic_defense: 12
+ethereality: 12
+material_points: 130
+ethereal_points: 93
+damage_min: 8
+damage_max: 14
+armor_min: 3
+armor_max: 6
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 233
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 226
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Armored construct near armed orc skill with extra protection.
+[monster]
+type: living_armor
+name: Living Armor
+actor_type: 769
+footprint: 1
+scale: 1
+level: 74
+attack: 75
+defense: 82
+matter: 26
+toughness: 23
+dexterity: 26
+might: 30
+reaction: 23
+carry: 30
+charm: 16
+perception: 19
+rationality: 21
+magic_offense: 21
+magic_defense: 19
+ethereality: 19
+material_points: 170
+ethereal_points: 145
+damage_min: 10
+damage_max: 17
+armor_min: 10
+armor_max: 16
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 341
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 334
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Heavy punching construct above cyclops durability but below giant skill.
+[monster]
+type: flesh_golem
+name: Flesh Golem
+actor_type: 770
+footprint: 2
+scale: 1
+level: 75
+attack: 85
+defense: 75
+matter: 33
+toughness: 34
+dexterity: 18
+might: 30
+reaction: 18
+carry: 30
+charm: 22
+perception: 11
+rationality: 18
+magic_offense: 18
+magic_defense: 29
+ethereality: 29
+material_points: 350
+ethereal_points: 224
+damage_min: 14
+damage_max: 24
+armor_min: 4
+armor_max: 8
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 345
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 340
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Low-tier slow amorphous enemy with a large health pool.
+[monster]
+type: slime
+name: Slime
+actor_type: 771
+footprint: 1
+scale: 1
+level: 18
+attack: 25
+defense: 20
+matter: 8
+toughness: 8
+dexterity: 8
+might: 6
+reaction: 8
+carry: 8
+charm: 8
+perception: 8
+rationality: 8
+magic_offense: 8
+magic_defense: 8
+ethereality: 8
+material_points: 95
+ethereal_points: 23
+damage_min: 3
+damage_max: 7
+armor_min: 1
+armor_max: 3
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 117
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 110
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Fragile animated magical object with strong magical attributes.
+[monster]
+type: living_spellbook
+name: Living Spellbook
+actor_type: 772
+footprint: 1
+scale: 1
+level: 32
+attack: 32
+defense: 42
+matter: 12
+toughness: 11
+dexterity: 11
+might: 13
+reaction: 11
+carry: 13
+charm: 9
+perception: 9
+rationality: 10
+magic_offense: 14
+magic_defense: 14
+ethereality: 14
+material_points: 60
+ethereal_points: 100
+damage_min: 5
+damage_max: 10
+armor_min: 0
+armor_max: 3
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 173
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 168
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small disembodied undead below skeleton strength.
+[monster]
+type: crawling_hand
+name: Crawling Hand
+actor_type: 773
+footprint: 1
+scale: 1
+level: 17
+attack: 20
+defense: 24
+matter: 9
+toughness: 8
+dexterity: 5
+might: 5
+reaction: 6
+carry: 6
+charm: 8
+perception: 6
+rationality: 8
+magic_offense: 8
+magic_defense: 10
+ethereality: 10
+material_points: 30
+ethereal_points: 75
+damage_min: 3
+damage_max: 6
+armor_min: 0
+armor_max: 0
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 113
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 108
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Fragile hovering magical foe with good perception.
+[monster]
+type: floating_eye
+name: Floating Eye
+actor_type: 774
+footprint: 1
+scale: 1
+level: 40
+attack: 40
+defense: 50
+matter: 15
+toughness: 14
+dexterity: 14
+might: 16
+reaction: 14
+carry: 16
+charm: 11
+perception: 11
+rationality: 12
+magic_offense: 16
+magic_defense: 16
+ethereality: 16
+material_points: 70
+ethereal_points: 122
+damage_min: 6
+damage_max: 11
+armor_min: 0
+armor_max: 3
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 205
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 200
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Hovering stinging enemy above a large spider.
+[monster]
+type: levitating_jellyfish
+name: Levitating Jellyfish
+actor_type: 775
+footprint: 1
+scale: 1
+level: 39
+attack: 42
+defense: 46
+matter: 15
+toughness: 15
+dexterity: 15
+might: 11
+reaction: 15
+carry: 15
+charm: 15
+perception: 15
+rationality: 15
+magic_offense: 15
+magic_defense: 15
+ethereality: 15
+material_points: 90
+ethereal_points: 44
+damage_min: 6
+damage_max: 11
+armor_min: 0
+armor_max: 2
+attack_range: 1
+poison_damage: 2
+wander_chance: 8
+time_to_respawn: 201
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 196
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Large burrowing predator with heavy endurance.
+[monster]
+type: giant_worm
+name: Giant Worm
+actor_type: 776
+footprint: 2
+scale: 1
+level: 73
+attack: 85
+defense: 70
+matter: 32
+toughness: 32
+dexterity: 17
+might: 29
+reaction: 17
+carry: 29
+charm: 21
+perception: 10
+rationality: 17
+magic_offense: 17
+magic_defense: 28
+ethereality: 28
+material_points: 340
+ethereal_points: 217
+damage_min: 14
+damage_max: 23
+armor_min: 5
+armor_max: 10
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 337
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 330
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Three-headed infernal hound near desert chimeran difficulty.
+[monster]
+type: cerberus
+name: Cerberus
+actor_type: 777
+footprint: 1
+scale: 1
+level: 95
+attack: 105
+defense: 95
+matter: 42
+toughness: 35
+dexterity: 28
+might: 15
+reaction: 33
+carry: 28
+charm: 40
+perception: 35
+rationality: 30
+magic_offense: 30
+magic_defense: 35
+ethereality: 35
+material_points: 280
+ethereal_points: 50
+damage_min: 16
+damage_max: 26
+armor_min: 6
+armor_max: 12
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 425
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 420
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Giant counterpart with extra endurance and alternating punches.
+[monster]
+type: two_headed_giant
+name: Two Headed Giant
+actor_type: 778
+footprint: 2
+scale: 1
+level: 138
+attack: 145
+defense: 140
+matter: 106
+toughness: 49
+dexterity: 49
+might: 39
+reaction: 54
+carry: 54
+charm: 48
+perception: 43
+rationality: 38
+magic_offense: 38
+magic_defense: 43
+ethereality: 43
+material_points: 750
+ethereal_points: 49
+damage_min: 24
+damage_max: 60
+armor_min: 15
+armor_max: 25
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 597
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 590
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Agile flying serpent below desert chimeran bulk.
+[monster]
+type: winged_serpent
+name: Winged Serpent
+actor_type: 779
+footprint: 2
+scale: 1
+level: 90
+attack: 92
+defense: 98
+matter: 40
+toughness: 33
+dexterity: 26
+might: 14
+reaction: 31
+carry: 26
+charm: 38
+perception: 33
+rationality: 29
+magic_offense: 29
+magic_defense: 33
+ethereality: 33
+material_points: 230
+ethereal_points: 48
+damage_min: 12
+damage_max: 21
+armor_min: 5
+armor_max: 10
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 405
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 400
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Elite multi-armed guardian above Feros difficulty.
+[monster]
+type: four_armed_guardian
+name: Four Armed Guardian
+actor_type: 780
+footprint: 2
+scale: 1
+level: 108
+attack: 110
+defense: 115
+matter: 56
+toughness: 28
+dexterity: 23
+might: 16
+reaction: 23
+carry: 28
+charm: 23
+perception: 23
+rationality: 23
+magic_offense: 23
+magic_defense: 23
+ethereality: 23
+material_points: 380
+ethereal_points: 180
+damage_min: 16
+damage_max: 26
+armor_min: 8
+armor_max: 14
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 477
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 470
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Small agile animated weapon above armed skeleton difficulty.
+[monster]
+type: animated_sword
+name: Animated Sword
+actor_type: 781
+footprint: 1
+scale: 1
+level: 42
+attack: 45
+defense: 48
+matter: 19
+toughness: 17
+dexterity: 16
+might: 12
+reaction: 16
+carry: 19
+charm: 14
+perception: 12
+rationality: 16
+magic_offense: 16
+magic_defense: 17
+ethereality: 17
+material_points: 65
+ethereal_points: 129
+damage_min: 8
+damage_max: 13
+armor_min: 5
+armor_max: 9
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 213
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 206
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Heavy pincer ambusher above Feran difficulty.
+[monster]
+type: giant_antlion
+name: Giant Antlion
+actor_type: 782
+footprint: 1
+scale: 1
+level: 38
+attack: 45
+defense: 40
+matter: 25
+toughness: 21
+dexterity: 18
+might: 30
+reaction: 20
+carry: 30
+charm: 11
+perception: 11
+rationality: 13
+magic_offense: 13
+magic_defense: 13
+ethereality: 13
+material_points: 105
+ethereal_points: 105
+damage_min: 8
+damage_max: 13
+armor_min: 3
+armor_max: 6
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 197
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 190
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Intelligent winged guardian near mountain chimeran difficulty.
+[monster]
+type: sphinx
+name: Sphinx
+actor_type: 783
+footprint: 2
+scale: 1
+level: 110
+attack: 115
+defense: 115
+matter: 45
+toughness: 47
+dexterity: 40
+might: 43
+reaction: 46
+carry: 43
+charm: 50
+perception: 46
+rationality: 40
+magic_offense: 54
+magic_defense: 59
+ethereality: 59
+material_points: 310
+ethereal_points: 475
+damage_min: 16
+damage_max: 26
+armor_min: 10
+armor_max: 18
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 485
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# High-tier mobile elemental with a multi-punch attack and strong magical attributes.
+[monster]
+type: air_elemental
+name: Air Elemental
+actor_type: 784
+footprint: 2
+scale: 1
+level: 98
+attack: 100
+defense: 105
+matter: 43
+toughness: 36
+dexterity: 28
+might: 15
+reaction: 33
+carry: 28
+charm: 41
+perception: 36
+rationality: 31
+magic_offense: 42
+magic_defense: 49
+ethereality: 49
+material_points: 300
+ethereal_points: 69
+damage_min: 13
+damage_max: 23
+armor_min: 6
+armor_max: 14
+attack_range: 1
+poison_damage: 0
+wander_chance: 8
+time_to_respawn: 437
+combat_engage_distance: 1
+aggressive: 1
+ignore_combat: 430
+model: final
+spawn_mode: catalog_only
+[/monster]
+
+# Sunmane livestock: the camps' own horses, stood in pens and at hitching posts
+# by `tame` rows in spawns.txt (eloria/livestock.py). Nobody can attack them, so
+# the combat figures are only what a horse of the steppe would be, and
+# `spawn_mode: livestock` keeps them out of the gear the drop tables deal.
+[monster]
+type: sunmane_steppe_horse
+name: Steppe Horse
+actor_type: 785
+footprint: 2
+level: 10
+attack: 16
+defense: 15
+matter: 7
+toughness: 7
+carry: 8
+charm: 7
+reaction: 7
+perception: 6
+rationality: 6
+magic_offense: 5
+magic_defense: 5
+dexterity: 7
+ethereality: 6
+might: 8
+material_points: 80
+ethereal_points: 20
+damage_min: 2
+damage_max: 7
+armor_min: 0
+armor_max: 1
+wander_chance: 30
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: livestock
+[/monster]
+
+[monster]
+type: sunmane_dun_mare
+name: Dun Mare
+actor_type: 786
+footprint: 2
+level: 9
+attack: 15
+defense: 15
+matter: 7
+toughness: 7
+carry: 8
+charm: 8
+reaction: 7
+perception: 7
+rationality: 6
+magic_offense: 5
+magic_defense: 5
+dexterity: 7
+ethereality: 6
+might: 7
+material_points: 76
+ethereal_points: 20
+damage_min: 2
+damage_max: 6
+armor_min: 0
+armor_max: 1
+wander_chance: 30
+time_to_respawn: 81
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: livestock
+[/monster]
+
+[monster]
+type: sunmane_grey_pony
+name: Grey Pony
+actor_type: 787
+footprint: 2
+level: 6
+attack: 11
+defense: 12
+matter: 6
+toughness: 6
+carry: 7
+charm: 8
+reaction: 6
+perception: 6
+rationality: 5
+magic_offense: 4
+magic_defense: 4
+dexterity: 6
+ethereality: 5
+might: 6
+material_points: 60
+ethereal_points: 16
+damage_min: 1
+damage_max: 5
+armor_min: 0
+armor_max: 1
+wander_chance: 30
+time_to_respawn: 75
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: livestock
+[/monster]
+
+# Their foals, kept in the camps' pens beside the mares (same `tame` rows).
+[monster]
+type: sunmane_foal_dun
+name: Dun Foal
+actor_type: 788
+footprint: 1
+level: 3
+attack: 6
+defense: 7
+matter: 4
+toughness: 4
+carry: 3
+charm: 9
+reaction: 6
+perception: 6
+rationality: 3
+magic_offense: 2
+magic_defense: 2
+dexterity: 6
+ethereality: 3
+might: 3
+material_points: 30
+ethereal_points: 8
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+wander_chance: 40
+time_to_respawn: 60
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: livestock
+[/monster]
+
+[monster]
+type: sunmane_foal_grey
+name: Grey Foal
+actor_type: 789
+footprint: 1
+level: 3
+attack: 6
+defense: 7
+matter: 4
+toughness: 4
+carry: 3
+charm: 9
+reaction: 6
+perception: 6
+rationality: 3
+magic_offense: 2
+magic_defense: 2
+dexterity: 6
+ethereality: 3
+might: 3
+material_points: 30
+ethereal_points: 8
+damage_min: 1
+damage_max: 2
+armor_min: 0
+armor_max: 0
+wander_chance: 40
+time_to_respawn: 60
+combat_engage_distance: 1
+aggressive: 0
+model: final
+spawn_mode: livestock
+[/monster]

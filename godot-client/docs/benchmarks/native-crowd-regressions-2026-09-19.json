@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-19",
+  "startingCommit": "05596ec5cfb3c3a363b55973dbe8611af42eecbb",
+  "nativeImplementationCommit": "9f24fbb582b14fea58a05403fea485f331c04e9a",
+  "evidenceHead": "018265a2e17819f3ad7227963d260312675411f7",
+  "execution": {
+    "godotVersion": "4.7.2.stable.official.ed1daf0bf",
+    "affinityMaskDecimal": 15,
+    "affinityMaskHex": "0x0000000f",
+    "workerLimit": 4,
+    "serial": true,
+    "allProcessAffinityChecksPassed": true,
+    "userdataExpected": "test-artifacts/native-crowd/regression/runtime/appdata/Godot/app_userdata/Eloria",
+    "userdataProbeMatched": true,
+    "timeouts": 0,
+    "scriptErrors": 0,
+    "ignoredArtifactSummary": "test-artifacts/native-crowd/regression/suite-summary.json",
+    "ignoredArtifactSummarySha256": "19209D9F3930ACAACE506058D3C30FC834C82FCAE8C3370F1D60B3465C2456AA",
+    "ignoredOffReproSummary": "test-artifacts/native-crowd/regression/off-repro-summary.json",
+    "ignoredOffReproSummarySha256": "960B5211F4B5FD12BA3EABA3B71CD42DBAC2BF535BE888D0672B560809BF8A50"
+  },
+  "focusedSuite": {
+    "testCount": 16,
+    "passedCount": 12,
+    "failedCount": 4,
+    "allPassed": false,
+    "results": [
+      {"name": "gdscript-reference-guard", "native": null, "exitCode": 1, "status": "fail", "elapsedMs": 1724.0},
+      {"name": "runtime-performance-gdscript", "native": false, "exitCode": 0, "status": "pass", "elapsedMs": 4546.0},
+      {"name": "adjacent-actors-gdscript", "native": false, "exitCode": 0, "status": "pass", "elapsedMs": 3227.0},
+      {"name": "native-crowd-core", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 810.7},
+      {"name": "native-crowd-app-state", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 812.2},
+      {"name": "native-crowd-edges", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 817.2},
+      {"name": "protocol", "native": true, "exitCode": 3, "status": "fail", "elapsedMs": 1348.1},
+      {"name": "runtime-performance-native", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 3741.3},
+      {"name": "adjacent-actors-native", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 2917.1},
+      {"name": "actor-draw-distance", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 1077.8},
+      {"name": "animation-gate", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 1066.8},
+      {"name": "animation-looping", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 1326.8},
+      {"name": "combat-presentation", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 3209.3},
+      {"name": "actor-facing", "native": true, "exitCode": 1, "status": "fail", "elapsedMs": 96489.3},
+      {"name": "equipment-fit-profiles", "native": true, "exitCode": 0, "status": "pass", "elapsedMs": 3473.5},
+      {"name": "sunmane-grounding", "native": true, "exitCode": 1, "status": "fail", "elapsedMs": 2385.2}
+    ]
+  },
+  "nativeCoverageConclusion": {
+    "status": "pass",
+    "evidence": [
+      "The native reducer/store core, AppState integration, and edge suites passed.",
+      "Runtime-performance and adjacent-actor suites passed with native reduction both disabled and enabled.",
+      "Draw distance, animation gating and looping, combat presentation, and equipment fit passed with native reduction enabled."
+    ]
+  },
+  "guardFix": {
+    "change": "tests/test_gdscript_references.py discovers names exported by ClassDB::bind_method(D_METHOD(...)) in native/native_crowd/src/*.cpp and adds them to the project-defined method set.",
+    "blanketAllowlist": false,
+    "extractorUnitTestPassed": true,
+    "nativeFalsePositivesRemaining": [],
+    "fullGuardExitCodeAfterFix": 1,
+    "remainingFailureGroups": 7,
+    "remainingFailureFiles": [
+      "src/actors/replicated_actor_3d.gd",
+      "src/ui/quick_spell_ring.gd",
+      "tests/integration/rendered_exterior_streaming.gd",
+      "tests/test_cape_idle.gd",
+      "tests/test_perk_tiers.gd",
+      "tests/test_statistics_window.gd",
+      "tests/integration/rendered_interface_honesty.gd"
+    ],
+    "classification": "inherited_out_of_scope",
+    "reason": "All seven remaining target files match their blobs at the starting commit. The native call names reduce_packet, reduce_packets, snapshot_dirty, remove, has, and size no longer appear as unresolved."
+  },
+  "failedExistingSuites": [
+    {
+      "name": "protocol",
+      "nativeOnExitCode": 3,
+      "nativeOffExitCode": 3,
+      "sameFailure": true,
+      "failure": [
+        "advertised capability tutorial_rewards_v1 is one this suite knows the client decodes",
+        "advertised capability spell_ring_v1 is one this suite knows the client decodes",
+        "Four Gates actors stand above the authored y=31 walk surface"
+      ],
+      "classification": "inherited_out_of_scope"
+    },
+    {
+      "name": "actor-facing",
+      "nativeOnExitCode": 1,
+      "nativeOffExitCode": 1,
+      "sameFailure": true,
+      "failure": "walking turns the model back onto its travel (0.0 deg from idle)",
+      "classification": "inherited_out_of_scope"
+    },
+    {
+      "name": "sunmane-grounding",
+      "nativeOnExitCode": 1,
+      "nativeOffExitCode": 1,
+      "sameFailure": true,
+      "failure": "navigation-surface bodies created: 32 (suite expects at least 64); datum, all portal approaches, and all 2809 sampled columns passed",
+      "classification": "inherited_out_of_scope"
+    }
+  ],
+  "classificationLimit": "The three existing Godot failures were reproduced in the current tree with ELORIA_NATIVE_CROWD=0, and their relevant source/test blobs match the starting commit. A clean checkout of the starting commit was not executed, so 'inherited_out_of_scope' is supported by the off-path reproduction and blob identity rather than a second historical checkout run.",
+  "startingCommitBlobEvidence": [
+    {"path": "godot-client/src/network/protocol.gd", "blob": "5411f2a441b040980bcb375725e2268dbd82b8d4", "matchesStartingCommit": true},
+    {"path": "godot-client/tests/test_protocol.gd", "blob": "091c5b44c51b517ec4d9ef807a608439c971645a", "matchesStartingCommit": true},
+    {"path": "godot-client/src/actors/replicated_actor_3d.gd", "blob": "e8d70314bdbefdc134366e044c2a7d595d42c414", "matchesStartingCommit": true},
+    {"path": "godot-client/tests/integration/actor_facing.gd", "blob": "f53b5cbe5bd0d59ea5c6aea09c0d890d7ba33552", "matchesStartingCommit": true},
+    {"path": "godot-client/src/world/world_loader.gd", "blob": "aa6825e312c497d259af17ec3020fd3b98333353", "matchesStartingCommit": true},
+    {"path": "godot-client/src/world/coordinate_adapter.gd", "blob": "e141929875716f7924cc2d001d9803c49ab92d3c", "matchesStartingCommit": true},
+    {"path": "godot-client/src/world/framed_coordinate_adapter.gd", "blob": "340ae781c40a537dd5ec9bae6a9d67cb5c3fde21", "matchesStartingCommit": true},
+    {"path": "godot-client/tests/integration/sunmane_grounding.gd", "blob": "0d5b6f6c34a8f40dd87ebfd5ff97a258d7b4c265", "matchesStartingCommit": true}
+  ]
+}

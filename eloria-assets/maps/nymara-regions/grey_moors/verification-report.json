@@ -1,0 +1,170 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 86,
+    "walkSurfaceTriangles": 340143,
+    "tilesSampled": 147456,
+    "groundingMisses": 1728,
+    "groundingMissFraction": 0.01172,
+    "surfaceDiscontinuities": 0,
+    "spawnPoints": 10
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_RAY_MISS",
+      "message": "1728 server tiles have no walk surface under them; a character there would fall back to walkingHeight=2.73",
+      "detail": [
+        [
+          0,
+          70,
+          -116.0,
+          46.0
+        ],
+        [
+          1,
+          70,
+          -115.0,
+          46.0
+        ],
+        [
+          2,
+          70,
+          -114.0,
+          46.0
+        ],
+        [
+          3,
+          70,
+          -113.0,
+          46.0
+        ],
+        [
+          4,
+          70,
+          -112.0,
+          46.0
+        ],
+        [
+          5,
+          70,
+          -111.0,
+          46.0
+        ],
+        [
+          6,
+          70,
+          -110.0,
+          46.0
+        ],
+        [
+          7,
+          70,
+          -109.0,
+          46.0
+        ],
+        [
+          8,
+          70,
+          -108.0,
+          46.0
+        ],
+        [
+          9,
+          70,
+          -107.0,
+          46.0
+        ],
+        [
+          10,
+          70,
+          -106.0,
+          46.0
+        ],
+        [
+          0,
+          71,
+          -116.0,
+          45.0
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "COLLISION_SURFACE_MISMATCH",
+      "message": "13 sampled walkable cells disagree with the rendered walk surface",
+      "detail": [
+        {
+          "cell": [
+            0,
+            144
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            156
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            168
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            180
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            192
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            204
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            216
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            228
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            240
+          ],
+          "issue": "no-surface"
+        },
+        {
+          "cell": [
+            0,
+            252
+          ],
+          "issue": "no-surface"
+        }
+      ]
+    }
+  ]
+}

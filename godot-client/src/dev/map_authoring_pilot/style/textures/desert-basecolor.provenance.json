@@ -1,0 +1,18 @@
+{
+  "schema": "eloria-generated-texture-provenance-v1",
+  "asset": "res://src/dev/map_authoring_pilot/style/textures/desert-basecolor.png",
+  "assetSha256": "5d3d975e645bf4fd460f1022d0522c29b3dbc7b4e281bf0deb9559062fc9570a",
+  "created": "2026-09-22",
+  "tool": "OpenAI built-in image_gen",
+  "reference": {
+    "asset": "res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png",
+    "role": "style, painterly scale, and texture-density reference only",
+    "sha256": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: seamless square albedo texture for a stylized 3D game terrain material\nInput image: the supplied ground-basecolor.png is a style, painterly scale, and texture-density reference only\nPrimary request: create a new warm Sunmane desert sandy-soil albedo that matches the reference's soft hand-painted mottling and feature scale\nComposition/framing: orthographic flat surface filling a square canvas; truly seamless/tileable across every edge; no focal point\nColor palette: warm ochre sand, muted terracotta-brown soil, restrained pale sandstone accents\nMaterials/textures: fine grain with sparse subtle small embedded stone flecks; broad low-contrast painterly variation; natural irregularity\nLighting/mood: pure diffuse albedo with uniform neutral illumination\nConstraints: opaque RGB image; preserve the reference's painterly scale; texture should repeat cleanly; terrain only\nAvoid: grass or green hues, dunes, ripples, cracks, large rocks, distinct objects, footprints, tracks, horizon, perspective, directional shadows, ambient occlusion, specular highlights, baked lighting, borders, text, logos, watermark",
+  "pbrSupport": {
+    "normal": "res://src/dev/map_authoring_pilot/style/textures/ground-normal.png",
+    "orm": "res://src/dev/map_authoring_pilot/style/textures/ground-orm.png",
+    "note": "Existing neutral ground micro-detail maps are reused; no generated height, normal, or ORM data."
+  }
+}

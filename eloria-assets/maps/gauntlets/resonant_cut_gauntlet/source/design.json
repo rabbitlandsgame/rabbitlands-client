@@ -1,0 +1,1766 @@
+{
+ "_note": "Rules of the cut - everything a run of resonant_cut_gauntlet needs except geometry (source/layout.json). Written by work-output/gauntlet-v2-design/regions/tools/author_routes.py from the approved concept: three bands by the run's level, five waves of two variants each and a court. Counts are for a party of four; the server multiplies by partyScale (leaders and bosses never multiply).",
+ "schema": "eloria-trail-design-v1",
+ "id": "resonant_cut_gauntlet",
+ "route": "resonant_cut",
+ "name": "The Resonant Cut",
+ "short": "resonantcut",
+ "region": "amethyst_barrens",
+ "flavour": "The quarry road spirals down the benches of a great open pit cut into the singing rock: the mite cut on the rim, the shard gallery, the crane bridge over the deep cut, the crystal hall and the storm stair, to the pit floor, where a giant geode hums round the Songstone Tyrant.",
+ "copies": 3,
+ "timeLimitSeconds": 2700,
+ "cooldownHours": 6,
+ "minPlayers": 1,
+ "maxPlayers": 6,
+ "wipeSeconds": 90,
+ "broker": {
+  "npc": "Rellan",
+  "map": "landfall"
+ },
+ "partyScale": {
+  "1": 0.6,
+  "2": 0.75,
+  "3": 0.9,
+  "4": 1.0,
+  "5": 1.15,
+  "6": 1.3
+ },
+ "pulse": {
+  "releaseAliveFraction": 0.34,
+  "releaseSeconds": 45
+ },
+ "leash": {
+  "marginMetres": 10,
+  "evadeSeconds": 8
+ },
+ "checkpointDelaySeconds": 10,
+ "shapes": {
+  "pack": 1.0,
+  "swarm": 0.8,
+  "heavies": 1.25,
+  "leader": 1.25
+ },
+ "mutators": [
+  [
+   "none",
+   5
+  ],
+  [
+   "frenzy",
+   2
+  ],
+  [
+   "hunted",
+   2
+  ],
+  [
+   "bounty",
+   1
+  ],
+  [
+   "swift",
+   1
+  ]
+ ],
+ "cache": [
+  [
+   "Potion of Great Healing",
+   "3-5",
+   "1"
+  ],
+  [
+   "Gold Coins",
+   "150-400",
+   "1"
+  ],
+  [
+   "Bones",
+   "6-12",
+   "1"
+  ]
+ ],
+ "cacheRare": [],
+ "bonus": {
+  "section": "humming-ledge",
+  "note": "one harvest node of an existing herb (the server tool's bonus resource)"
+ },
+ "lore": [
+  {
+   "at": "trailhead",
+   "title": "Rules of the cut",
+   "text": "One party at a time. The cut sends them to you; the benches behind stay quiet once you have cleared them. Fall and you rise at the last fire you passed. The waystones count you out."
+  },
+  {
+   "at": "humming-ledge",
+   "title": "The grinders' ledge",
+   "text": "The lens grinders tuned their hammers here. Strike the rock and it still answers."
+  }
+ ],
+ "bands": [
+  {
+   "id": "swarm",
+   "label": "The Swarm",
+   "minLevel": 1,
+   "maxLevel": 24,
+   "story": "The mites and crawlers that live in the cut's crystal.",
+   "roster": [
+    "amethyst_scorpion",
+    "imp",
+    "amethyst_moth",
+    "crystal_carapace_beetle",
+    "crystal_cave_spider",
+    "amethyst_stag_beetle"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "amethyst-scorpion",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "amethyst_scorpion",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "amethyst_scorpion",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "amethyst_scorpion",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast",
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "amethyst_scorpion",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "imp",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "imp",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "imp",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "imp",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast",
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "imp",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "amethyst-moth",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west"
+        ],
+        "groups": [
+         [
+          "amethyst_moth",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "amethyst_moth",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "amethyst_moth",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "crystal-beetle",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west"
+        ],
+        "groups": [
+         [
+          "crystal_carapace_beetle",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_carapace_beetle",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_carapace_beetle",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "cave-spider",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_cave_spider",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "crystal_cave_spider",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast",
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "crystal_cave_spider",
+          12,
+          "pack"
+         ],
+         [
+          "amethyst_stag_beetle",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "amethyst-scorpion",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "amethyst_scorpion",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "amethyst_scorpion",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "amethyst_scorpion",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast",
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "amethyst_scorpion",
+          12,
+          "swarm"
+         ],
+         [
+          "amethyst_stag_beetle",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "imp",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "imp",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "imp",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "imp",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "imp",
+          13,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "amethyst-moth",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "amethyst_moth",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "amethyst_moth",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "amethyst_moth",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "crystal-beetle",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "crystal_carapace_beetle",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_carapace_beetle",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_carapace_beetle",
+          15,
+          "pack"
+         ],
+         [
+          "amethyst_stag_beetle",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "cave-spider",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "crystal_cave_spider",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_cave_spider",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_cave_spider",
+          15,
+          "pack"
+         ],
+         [
+          "amethyst_stag_beetle",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "inline",
+    "creature": "crystal_dire_wolf",
+    "name": "the Chord",
+    "health": 6.0,
+    "strength": [
+     0.9,
+     1.4
+    ],
+    "adds": [
+     [
+      "amethyst_scorpion",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "chord",
+   "label": "The Chord",
+   "minLevel": 20,
+   "maxLevel": 44,
+   "story": "The cut's answer to the hammers: crystal wolves and the automatons the grinders left.",
+   "roster": [
+    "giant_ant",
+    "gargoyle",
+    "crystal_dire_wolf",
+    "arcane_crystal_automaton",
+    "crystal_wing_griffin",
+    "amethyst_stone_golem"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "giant-ant",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "giant_ant",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "giant_ant",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "giant_ant",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast",
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "giant_ant",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "gargoyle",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "gargoyle",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "gargoyle",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "gargoyle",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast",
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "gargoyle",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "crystal-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west"
+        ],
+        "groups": [
+         [
+          "crystal_dire_wolf",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_dire_wolf",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_dire_wolf",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "arcane-crystal-automaton",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west"
+        ],
+        "groups": [
+         [
+          "arcane_crystal_automaton",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "arcane_crystal_automaton",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "arcane_crystal_automaton",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "crystal-griffin",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "crystal_wing_griffin",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "crystal_wing_griffin",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast",
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "crystal_wing_griffin",
+          12,
+          "pack"
+         ],
+         [
+          "amethyst_stone_golem",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "giant-ant",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "giant_ant",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "giant_ant",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "giant_ant",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast",
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "giant_ant",
+          12,
+          "swarm"
+         ],
+         [
+          "amethyst_stone_golem",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "gargoyle",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "gargoyle",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "gargoyle",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "gargoyle",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "gargoyle",
+          13,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "crystal-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "crystal_dire_wolf",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "crystal_dire_wolf",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "crystal_dire_wolf",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "arcane-crystal-automaton",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "arcane_crystal_automaton",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "arcane_crystal_automaton",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "arcane_crystal_automaton",
+          15,
+          "pack"
+         ],
+         [
+          "amethyst_stone_golem",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "crystal-griffin",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "crystal_wing_griffin",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_wing_griffin",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "crystal_wing_griffin",
+          15,
+          "pack"
+         ],
+         [
+          "amethyst_stone_golem",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "resonant_tyrant",
+    "body": "amethyst_stone_golem",
+    "name": "The Songstone Tyrant",
+    "adds": [
+     [
+      "giant_ant",
+      6
+     ]
+    ],
+    "calls": {
+     "creature": "arcane_crystal_automaton",
+     "stages": [
+      [
+       0.75,
+       6
+      ],
+      [
+       0.45,
+       6
+      ],
+      [
+       0.2,
+       9
+      ]
+     ]
+    }
+   }
+  },
+  {
+   "id": "song",
+   "label": "The Song",
+   "minLevel": 40,
+   "maxLevel": 0,
+   "story": "The song itself: the colossi and storm-beasts the pit woke.",
+   "roster": [
+    "rune_stone_golem",
+    "floating_eye",
+    "storm_chimera",
+    "iron_eater",
+    "void_tentacle_construct",
+    "arcane_core_colossus"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "rune-golem",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "rune_stone_golem",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "rune_stone_golem",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast",
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "rune_stone_golem",
+          4,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "floating-eye",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "floating_eye",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "floating_eye",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "floating_eye",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-south",
+         "w1-northeast",
+         "w1-southwest"
+        ],
+        "groups": [
+         [
+          "floating_eye",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "storm-chimera",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west"
+        ],
+        "groups": [
+         [
+          "storm_chimera",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "storm_chimera",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "storm_chimera",
+          4,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "iron-eater",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west"
+        ],
+        "groups": [
+         [
+          "iron_eater",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "iron_eater",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-west",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "iron_eater",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "void-construct",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast",
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          12,
+          "pack"
+         ],
+         [
+          "arcane_core_colossus",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "rune-golem",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "rune_stone_golem",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "rune_stone_golem",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-southwest",
+         "w3-northeast",
+         "w3-southeast"
+        ],
+        "groups": [
+         [
+          "rune_stone_golem",
+          5,
+          "heavies"
+         ],
+         [
+          "arcane_core_colossus",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "floating-eye",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "floating_eye",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "floating_eye",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "floating_eye",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "floating_eye",
+          13,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "storm-chimera",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "storm_chimera",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "storm_chimera",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest",
+         "w4-east",
+         "w4-southwest"
+        ],
+        "groups": [
+         [
+          "storm_chimera",
+          5,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "iron-eater",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "iron_eater",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "iron_eater",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "iron_eater",
+          15,
+          "pack"
+         ],
+         [
+          "arcane_core_colossus",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "void-construct",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-northeast",
+         "w5-southwest",
+         "w5-northwest"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          15,
+          "pack"
+         ],
+         [
+          "arcane_core_colossus",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "resonant_tyrant",
+    "body": "amethyst_stone_golem",
+    "name": "The Songstone Tyrant",
+    "adds": [
+     [
+      "floating_eye",
+      6
+     ]
+    ],
+    "calls": {
+     "creature": "arcane_crystal_automaton",
+     "stages": [
+      [
+       0.75,
+       6
+      ],
+      [
+       0.45,
+       6
+      ],
+      [
+       0.2,
+       9
+      ]
+     ]
+    }
+   }
+  }
+ ]
+}

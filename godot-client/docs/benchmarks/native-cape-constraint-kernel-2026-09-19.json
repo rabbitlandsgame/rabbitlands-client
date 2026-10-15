@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "status": "accepted focused component evidence; controlled whole-scene comparison pending",
+  "comparison": "frozen 459fb27b3 capsule-cache GDScript solver versus optional native all-chain constraint kernel",
+  "timingScope": "complete CapeCloth modifier call including Godot-to-GDExtension boundary, packed-array validation/copy/writeback, unchanged skeleton reads/rest construction, and unchanged 12 bone writes; excludes whole-frame and GPU timing",
+  "baseCommitBeforeCapePrototype": "20c10bacd",
+  "nativeOptIn": {
+    "environment": "ELORIA_NATIVE_PRESENTATION",
+    "capeValues": [
+      "cape",
+      "both",
+      "1"
+    ],
+    "default": "GDScript fallback"
+  },
+  "sources": {
+    "native/native_crowd/src/native_cape_constraint_kernel.cpp": "d428d1b58a017c914ff2a820ba1278c7dbfa18f9fc5c78f5e38ef930af0cb7c2",
+    "native/native_crowd/src/native_cape_constraint_kernel.h": "2302202ad7d4ced38fbd87a9f19577d9dbd05cf6a65883ae57343d5e33d195cc",
+    "src/actors/cape_cloth.gd": "069db6ce5d491c196319e94fa5bb1121d4d006a3406e8e91a50a3b031a9f4183",
+    "tests/test_cape_cloth_native_constraint.gd": "b7d7c270d8283f9f49ab5ddc0fab960a753aa42ec3d660f6df4ca4d24d3c88b8",
+    "tests/fixtures/cape_cloth_capsule_cache_baseline.gd": "be2e56b7d49e726eab86cb33c44ef01e34a72a16d617bbd0c5e84e02a7e4bf74",
+    "native/native_crowd/CMakeLists.txt": "efead46669a731179b1e963d92193aa15329e76f7f887122111fed11e0e67424",
+    "native/native_crowd/src/register_types.cpp": "a4349193340f9e72d4951543a0ea19190822948bd748e1c2566b36c901561adc",
+    "bin/native_crowd.gdextension": "c5cc550d96e2eef8d8ac55318802de980abc56e0e56b6a10ef64237a073d1ea9",
+    "scripts/run_presentation_checks.ps1": "9f0248669a39cdfc3bba23ad91d729995638ecd26f654c2f717dea471ab9ce52"
+  },
+  "nativeDll": {
+    "path": "bin/windows/native_crowd.windows.template_release.x86_64.dll",
+    "sha256": "ae9db9a49cc967ec4ba1d5327952957de207e126f8c73436ca308d8f3184591b",
+    "bytes": 947200
+  },
+  "build": {
+    "accepted": {
+      "command": "PATH=C:/msys64/mingw64/bin;%PATH% C:/msys64/mingw64/bin/cmake.exe --build native/native_crowd/build/windows-release --parallel 2",
+      "affinityMask": 15,
+      "parallelJobs": 2,
+      "result": "PASS",
+      "rawLog": null,
+      "note": "Build output was captured by the task runner but was not redirected to a repository artifact."
+    },
+    "rejectedSetupAttempts": [
+      {
+        "command": "C:/msys64/mingw64/bin/cmake.exe --build native/native_crowd/build/windows-release --parallel 2",
+        "result": "REJECTED",
+        "reason": "Process PATH omitted C:/msys64/mingw64/bin. The driver started by absolute path, but subordinate cc1plus could not resolve MinGW runtime DLLs; generated godot-cpp compilation failed before the cape object. An unsandboxed retry failed identically. No timing result was produced.",
+        "rawLog": null
+      }
+    ]
+  },
+  "parity": {
+    "tolerance": 1e-06,
+    "coverage": [
+      "real Walk and Sword_Attack clips",
+      "translation and rotation",
+      "teleport and reset",
+      "negative/zero/hitch delta",
+      "armour reach changes",
+      "missing optional capsules",
+      "body input immutability",
+      "point and previous state",
+      "12 cape bone transforms",
+      "native active and successful-call attestation",
+      "malformed and read-only atomic rejection",
+      "native false-return exact GDScript wrapper fallback"
+    ],
+    "nativeStatsRequired": {
+      "active": true,
+      "backend": "native",
+      "nativeCalls": ">0",
+      "fallbackCalls": 0
+    }
+  },
+  "focusedTiming": {
+    "gateMinimumSavedMicrosecondsPerCompleteCall": 10.0,
+    "gatePassed": true,
+    "iterationsPerMeasurement": 1500,
+    "warmupCallsPerSolver": 20,
+    "orderedTrials": [
+      {
+        "baselineMicrosecondsPerCall": 69.86,
+        "optimizedMicrosecondsPerCall": 23.2306666666667,
+        "order": "baseline_first",
+        "trial": 0
+      },
+      {
+        "baselineMicrosecondsPerCall": 66.08,
+        "optimizedMicrosecondsPerCall": 24.2826666666667,
+        "order": "optimized_first",
+        "trial": 1
+      },
+      {
+        "baselineMicrosecondsPerCall": 66.7146666666667,
+        "optimizedMicrosecondsPerCall": 27.2273333333333,
+        "order": "baseline_first",
+        "trial": 2
+      },
+      {
+        "baselineMicrosecondsPerCall": 73.4226666666667,
+        "optimizedMicrosecondsPerCall": 29.2086666666667,
+        "order": "optimized_first",
+        "trial": 3
+      },
+      {
+        "baselineMicrosecondsPerCall": 70.5693333333333,
+        "optimizedMicrosecondsPerCall": 30.234,
+        "order": "baseline_first",
+        "trial": 4
+      },
+      {
+        "baselineMicrosecondsPerCall": 81.1213333333333,
+        "optimizedMicrosecondsPerCall": 33.8093333333333,
+        "order": "optimized_first",
+        "trial": 5
+      },
+      {
+        "baselineMicrosecondsPerCall": 70.928,
+        "optimizedMicrosecondsPerCall": 28.4,
+        "order": "baseline_first",
+        "trial": 6
+      }
+    ],
+    "median": {
+      "gdscriptMicrosecondsPerCall": 70.5693333333333,
+      "nativeMicrosecondsPerCall": 28.4,
+      "savedMicrosecondsPerCall": 42.169333333333306,
+      "reductionPercent": 59.75589018837265,
+      "nativeToGdscriptRatio": 0.4024410981162735
+    },
+    "rawReport": {
+      "path": "test-artifacts/presentation-checks/cape-native-perf-forward_plus-20260919T133433050Z/tests_test_cape_cloth_native_constraint/cape-solver-paired.json",
+      "sha256": "efc3f641be5e483645ba52be213d6f85a6e8c583b76a08be28a57205ce9897e2"
+    }
+  },
+  "acceptedRuns": [
+    {
+      "kind": "cape correctness and parity",
+      "result": "PASS",
+      "artifactRoot": "test-artifacts/presentation-checks/cape-native-correctness-forward_plus-20260919T133414315Z",
+      "evidenceFiles": [
+        {
+          "path": "test-artifacts/presentation-checks/cape-native-correctness-forward_plus-20260919T133414315Z/checks.json",
+          "sha256": "e078f4bc282b77394fc1af6b0363ba691cc1bc03343b4af617ecc94d5b72d7f8"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/cape-native-correctness-forward_plus-20260919T133414315Z/tests_test_cape_cloth/process.json",
+          "sha256": "a87f3f30bcac46d3c5f52f81429b25d6c2523d078d4835f982ce110919d47a09"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/cape-native-correctness-forward_plus-20260919T133414315Z/tests_test_cape_cloth_native_constraint/process.json",
+          "sha256": "b18c217d05e2bffbf774734fddf449d0be6c28a7cbd4c01e9dab5a53a29a5c11"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/cape-native-correctness-forward_plus-20260919T133414315Z/tests_test_cape_idle/process.json",
+          "sha256": "43ac242cb49e00a6d40bd0ea9c8322b0e64a2eb95cb9f7e3f3e032a061bee868"
+        }
+      ]
+    },
+    {
+      "kind": "cape interface-inclusive paired timing",
+      "result": "PASS",
+      "artifactRoot": "test-artifacts/presentation-checks/cape-native-perf-forward_plus-20260919T133433050Z",
+      "evidenceFiles": [
+        {
+          "path": "test-artifacts/presentation-checks/cape-native-perf-forward_plus-20260919T133433050Z/checks.json",
+          "sha256": "6227f1c813c09060a0d132a2a4a91a9125577424003fa8e460a21f08ea28a6b8"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/cape-native-perf-forward_plus-20260919T133433050Z/tests_test_cape_cloth_native_constraint/process.json",
+          "sha256": "6227f1c813c09060a0d132a2a4a91a9125577424003fa8e460a21f08ea28a6b8"
+        }
+      ]
+    },
+    {
+      "kind": "combined DLL flight production contract GL",
+      "result": "PASS",
+      "artifactRoot": "test-artifacts/presentation-checks/spell-flight-final-dll-contract-gl-gl_compatibility-20260919T133530176Z",
+      "evidenceFiles": [
+        {
+          "path": "test-artifacts/presentation-checks/spell-flight-final-dll-contract-gl-gl_compatibility-20260919T133530176Z/checks.json",
+          "sha256": "74aaca85dadc6ba1c269d36e7333539c10e3ff816ea6eb63237eaab1e96d6c07"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/spell-flight-final-dll-contract-gl-gl_compatibility-20260919T133530176Z/tests_test_spell_flight_native_presentation/process.json",
+          "sha256": "74aaca85dadc6ba1c269d36e7333539c10e3ff816ea6eb63237eaab1e96d6c07"
+        }
+      ]
+    },
+    {
+      "kind": "combined DLL flight production contract Forward+",
+      "result": "PASS",
+      "artifactRoot": "test-artifacts/presentation-checks/spell-flight-final-dll-contract-fp-forward_plus-20260919T133533393Z",
+      "evidenceFiles": [
+        {
+          "path": "test-artifacts/presentation-checks/spell-flight-final-dll-contract-fp-forward_plus-20260919T133533393Z/checks.json",
+          "sha256": "0bb453f8271c51fcc9904a449c89c1d99f5e6f15eeeb934e7b9da30a6eb6cfe6"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/spell-flight-final-dll-contract-fp-forward_plus-20260919T133533393Z/tests_test_spell_flight_native_presentation/process.json",
+          "sha256": "0bb453f8271c51fcc9904a449c89c1d99f5e6f15eeeb934e7b9da30a6eb6cfe6"
+        }
+      ]
+    },
+    {
+      "kind": "combined DLL reducer smoke",
+      "result": "PASS",
+      "artifactRoot": "test-artifacts/presentation-checks/native-reducer-final-dll-smoke-valid-20260919T133638995Z",
+      "evidenceFiles": [
+        {
+          "path": "test-artifacts/presentation-checks/native-reducer-final-dll-smoke-valid-20260919T133638995Z/checks.json",
+          "sha256": "4d4bf8dd4402e690ab361fe2854d2414602787da9505dcffd7d54b6391dbc4d8"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/native-reducer-final-dll-smoke-valid-20260919T133638995Z/test_native_crowd/process.json",
+          "sha256": "f86e8b3e4540c43145bc22a7219c2dd0df1fffa1d2802b58a682cbcf7fb8a781"
+        },
+        {
+          "path": "test-artifacts/presentation-checks/native-reducer-final-dll-smoke-valid-20260919T133638995Z/test_native_crowd_edges/process.json",
+          "sha256": "c3fe0a2ba8f1bededa3cd1aab9c222ed0f35a3ebf76147e085262b55fc4f2be4"
+        }
+      ]
+    }
+  ],
+  "rejectedRuns": [
+    {
+      "kind": "combined DLL reducer smoke monitor attempt",
+      "artifactRoot": "test-artifacts/presentation-checks/native-reducer-final-dll-smoke-20260919T133605386Z",
+      "checks": {
+        "path": "test-artifacts/presentation-checks/native-reducer-final-dll-smoke-20260919T133605386Z/checks.json",
+        "sha256": "f737d272da4cc53a75b5e1e49a031a5ac58b91036aa7f4a74a6c51ce4963b476"
+      },
+      "reason": "PowerShell emitted a nonterminating null process-path error during the second fast-exit identity check, then incorrectly continued and wrote passing metadata. Entire attempt excluded; both scripts were rerun with terminating errors and exit-race handling in the accepted smoke run."
+    }
+  ],
+  "caveats": [
+    "Focused timing is CPU component evidence and does not establish 60 FPS.",
+    "Runs were collected on a shared host, serially, with process affinity 0xF.",
+    "The whole-scene controlled GDScript/native comparison is required before enabling the kernel by default.",
+    "The native path remains opt-in and every unavailable or rejected native step uses the reviewed GDScript solver."
+  ],
+  "reproduction": {
+    "workingDirectory": "godot-client",
+    "environment": {
+      "ELORIA_NATIVE_PRESENTATION": "cape",
+      "ELORIA_CAPE_PERF": "1"
+    },
+    "command": ".\\scripts\\run_presentation_checks.ps1 -GodotPath '.\\Godot_v4.7.2-stable_win64_console.exe' -Scripts @('res://tests/test_cape_cloth_native_constraint.gd') -Headless -Renderer forward_plus -Label cape-native-perf -TimeoutMinutes 10",
+    "resourceIsolation": "run_presentation_checks.ps1 creates task-local APPDATA, LOCALAPPDATA, USERPROFILE, TEMP, explicit log/artifact roots, captured process identity, and affinity mask 0xF"
+  }
+}

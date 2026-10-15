@@ -1,0 +1,206 @@
+{
+  "_note": "The Harrowcrag Road: everything a run needs except geometry. The client builder reads layout.json; the server's tools/author_trail_gauntlet.py reads this file and the built package's world.json `gauntlet` block. Counts are for a party of four; the server multiplies by partyScale at run time (leaders and bosses never multiply). A band is picked by the run's level exactly as today's rosters are (gauntlets.roster_for): the strongest member's (attack+defense)//2 times the challenge step the party chose. Approved 2026-10-12 with the owner's change: three times the drafted counts, and band-scaled rosters and bosses.",
+  "schema": "eloria-trail-design-v1",
+  "id": "harrowcrag_gauntlet",
+  "route": "harrowcrag",
+  "name": "The Harrowcrag Road",
+  "short": "harrowcrag",
+  "flavour": "An old pilgrim road climbs round a wooded crag to the hill fort of Harrowcrag. The fort fell twice: first to a warband, then to its own dead.",
+  "copies": 3,
+  "timeLimitSeconds": 2700,
+  "cooldownHours": 6,
+  "minPlayers": 1,
+  "maxPlayers": 6,
+  "wipeSeconds": 90,
+  "broker": {"npc": "Rellan", "map": "landfall"},
+  "partyScale": {"1": 0.6, "2": 0.75, "3": 0.9, "4": 1.0, "5": 1.15, "6": 1.3},
+  "pulse": {"releaseAliveFraction": 0.34, "releaseSeconds": 45},
+  "leash": {"marginMetres": 10, "evadeSeconds": 8},
+  "checkpointDelaySeconds": 10,
+  "shapes": {"pack": 1.0, "swarm": 0.8, "heavies": 1.25, "leader": 1.25},
+  "mutators": [["none", 5], ["frenzy", 2], ["hunted", 2], ["bounty", 1], ["swift", 1]],
+  "cache": [["Potion of Great Healing", "3-5", "1"], ["Gold Coins", "150-400", "1"], ["Bones", "6-12", "1"]],
+  "cacheRare": [],
+  "bonus": {"section": "heron-pool", "note": "one harvest node of an existing herb, chosen by the server tool from the resources the old gauntlet bonuses already use"},
+  "lore": [
+    {"at": "trailhead", "title": "Rules of the road", "text": "One party at a time. The waves come to you; the road behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."},
+    {"at": "heron-pool", "title": "The pilgrims' pool", "text": "Pilgrims washed here before the last climb to Harrowcrag. The herons still fish it. Nothing else of the pilgrims is left."}
+  ],
+  "bands": [
+    {
+      "id": "outriders",
+      "label": "The Outriders",
+      "minLevel": 1,
+      "maxLevel": 24,
+      "story": "The warband's outriders and the beasts that run with them hold the road below the fort.",
+      "waves": {
+        "w1": [
+          {"id": "wolves", "pulses": [
+            {"mouths": ["w1-west", "w1-east"], "groups": [["ashen_wolf", 13, "pack"]]},
+            {"mouths": ["w1-barn"], "groups": [["ashen_wolf", 13, "pack"]]},
+            {"mouths": ["w1-west", "w1-east", "w1-barn"], "groups": [["ashen_wolf", 12, "pack"], ["shadow_warg", 1, "leader"]]}]},
+          {"id": "hyenas", "pulses": [
+            {"mouths": ["w1-west", "w1-east"], "groups": [["azure_hyena", 13, "pack"]]},
+            {"mouths": ["w1-barn"], "groups": [["azure_hyena", 13, "pack"]]},
+            {"mouths": ["w1-west", "w1-east", "w1-barn"], "groups": [["azure_hyena", 12, "pack"], ["shadow_warg", 1, "leader"]]}]}
+        ],
+        "w2": [
+          {"id": "leeches", "pulses": [
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["giant_leech", 12, "swarm"]]},
+            {"mouths": ["w2-west-bank"], "groups": [["giant_leech", 12, "swarm"]]},
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["giant_leech", 12, "swarm"]]},
+            {"mouths": ["w2-west-bank", "w2-upstream"], "groups": [["giant_leech", 12, "swarm"]]}]},
+          {"id": "centipedes", "pulses": [
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["giant_centipede", 12, "swarm"]]},
+            {"mouths": ["w2-west-bank"], "groups": [["giant_centipede", 12, "swarm"]]},
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["giant_centipede", 12, "swarm"]]},
+            {"mouths": ["w2-west-bank", "w2-upstream"], "groups": [["giant_centipede", 12, "swarm"]]}]}
+        ],
+        "w3": [
+          {"id": "bugbears", "pulses": [
+            {"mouths": ["w3-northeast", "w3-southeast"], "groups": [["moss_bugbear", 8, "heavies"]]},
+            {"mouths": ["w3-northwest"], "groups": [["moss_bugbear", 8, "heavies"]]},
+            {"mouths": ["w3-northeast", "w3-southeast", "w3-northwest"], "groups": [["moss_bugbear", 8, "heavies"]]}]},
+          {"id": "owlbears", "pulses": [
+            {"mouths": ["w3-northeast", "w3-southeast"], "groups": [["owlbear", 6, "heavies"]]},
+            {"mouths": ["w3-northwest"], "groups": [["owlbear", 6, "heavies"]]},
+            {"mouths": ["w3-northeast", "w3-southeast", "w3-northwest"], "groups": [["owlbear", 6, "heavies"]]}]}
+        ],
+        "w4": [
+          {"id": "wasps-kobolds", "pulses": [
+            {"mouths": ["w4-ledge-south-1", "w4-ledge-south-2", "w4-ledge-north"], "groups": [["giant_wasp", 18, "pack"]]},
+            {"mouths": ["w4-east-cleft"], "groups": [["coal_kobold", 15, "swarm"]]},
+            {"mouths": ["w4-west-cleft"], "groups": [["coal_kobold", 15, "swarm"]]}]},
+          {"id": "imps-kobolds", "pulses": [
+            {"mouths": ["w4-ledge-south-1", "w4-ledge-south-2", "w4-ledge-north"], "groups": [["imp", 18, "pack"]]},
+            {"mouths": ["w4-east-cleft"], "groups": [["coal_kobold", 15, "swarm"]]},
+            {"mouths": ["w4-west-cleft"], "groups": [["coal_kobold", 15, "swarm"]]}]}
+        ],
+        "w5": [
+          {"id": "goblins", "pulses": [
+            {"mouths": ["w5-tower", "w5-breach"], "groups": [["mire_goblin", 18, "swarm"]]},
+            {"mouths": ["w5-barracks", "w5-breach"], "groups": [["mire_goblin", 18, "swarm"]]},
+            {"mouths": ["w5-tower", "w5-barracks"], "groups": [["gremlin", 18, "swarm"], ["highland_orc", 1, "leader"]]}]}
+        ]
+      },
+      "boss": {"kind": "inline", "creature": "shadow_warg", "name": "Ragjaw the Huntmaster", "health": 6.0, "strength": [0.9, 1.4],
+               "adds": [["ashen_wolf", 6]]}
+    },
+    {
+      "id": "warband",
+      "label": "The Warband",
+      "minLevel": 20,
+      "maxLevel": 44,
+      "story": "Grashk's warband took Harrowcrag and holds it with goblinkin, war beasts and an ogre's patience.",
+      "waves": {
+        "w1": [
+          {"id": "wargs", "pulses": [
+            {"mouths": ["w1-west", "w1-east"], "groups": [["shadow_warg", 13, "pack"]]},
+            {"mouths": ["w1-barn"], "groups": [["shadow_warg", 13, "pack"]]},
+            {"mouths": ["w1-west", "w1-east", "w1-barn"], "groups": [["shadow_warg", 12, "pack"], ["highland_orc", 1, "leader"]]}]},
+          {"id": "hyenas", "pulses": [
+            {"mouths": ["w1-west", "w1-east"], "groups": [["azure_hyena", 13, "pack"]]},
+            {"mouths": ["w1-barn"], "groups": [["azure_hyena", 13, "pack"]]},
+            {"mouths": ["w1-west", "w1-east", "w1-barn"], "groups": [["azure_hyena", 12, "pack"], ["highland_orc", 1, "leader"]]}]}
+        ],
+        "w2": [
+          {"id": "centipedes", "pulses": [
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["giant_centipede", 12, "swarm"]]},
+            {"mouths": ["w2-west-bank"], "groups": [["giant_centipede", 12, "swarm"]]},
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["giant_centipede", 12, "swarm"]]},
+            {"mouths": ["w2-west-bank", "w2-upstream"], "groups": [["giant_centipede", 12, "swarm"]]}]},
+          {"id": "ants", "pulses": [
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["giant_ant", 12, "swarm"]]},
+            {"mouths": ["w2-west-bank"], "groups": [["giant_ant", 12, "swarm"]]},
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["giant_ant", 12, "swarm"]]},
+            {"mouths": ["w2-west-bank", "w2-upstream"], "groups": [["giant_ant", 12, "swarm"]]}]}
+        ],
+        "w3": [
+          {"id": "owlbears", "pulses": [
+            {"mouths": ["w3-northeast", "w3-southeast"], "groups": [["owlbear", 8, "heavies"]]},
+            {"mouths": ["w3-northwest"], "groups": [["owlbear", 8, "heavies"]]},
+            {"mouths": ["w3-northeast", "w3-southeast", "w3-northwest"], "groups": [["owlbear", 8, "heavies"]]}]},
+          {"id": "minotaurs", "pulses": [
+            {"mouths": ["w3-northeast", "w3-southeast"], "groups": [["ironhorn_minotaur", 8, "heavies"]]},
+            {"mouths": ["w3-northwest"], "groups": [["ironhorn_minotaur", 8, "heavies"]]},
+            {"mouths": ["w3-northeast", "w3-southeast", "w3-northwest"], "groups": [["ironhorn_minotaur", 8, "heavies"]]}]}
+        ],
+        "w4": [
+          {"id": "wasps-orcs", "pulses": [
+            {"mouths": ["w4-ledge-south-1", "w4-ledge-south-2", "w4-ledge-north"], "groups": [["giant_wasp", 18, "pack"]]},
+            {"mouths": ["w4-east-cleft"], "groups": [["highland_orc", 15, "pack"]]},
+            {"mouths": ["w4-west-cleft"], "groups": [["highland_orc", 15, "pack"]]}]},
+          {"id": "wasps-gnolls", "pulses": [
+            {"mouths": ["w4-ledge-south-1", "w4-ledge-south-2", "w4-ledge-north"], "groups": [["giant_wasp", 18, "pack"]]},
+            {"mouths": ["w4-east-cleft"], "groups": [["gnoll", 12, "pack"]]},
+            {"mouths": ["w4-west-cleft"], "groups": [["gnoll", 12, "pack"]]}]}
+        ],
+        "w5": [
+          {"id": "goblins-hobgoblins", "pulses": [
+            {"mouths": ["w5-tower", "w5-breach"], "groups": [["mire_goblin", 18, "swarm"]]},
+            {"mouths": ["w5-barracks", "w5-breach"], "groups": [["hobgoblin", 18, "pack"]]},
+            {"mouths": ["w5-tower", "w5-barracks"], "groups": [["mire_goblin", 12, "swarm"], ["hobgoblin", 6, "pack"], ["crag_ogre", 1, "leader"]]}]},
+          {"id": "kobolds-hobgoblins", "pulses": [
+            {"mouths": ["w5-tower", "w5-breach"], "groups": [["coal_kobold", 18, "swarm"]]},
+            {"mouths": ["w5-barracks", "w5-breach"], "groups": [["hobgoblin", 18, "pack"]]},
+            {"mouths": ["w5-tower", "w5-barracks"], "groups": [["coal_kobold", 12, "swarm"], ["hobgoblin", 6, "pack"], ["crag_ogre", 1, "leader"]]}]}
+        ]
+      },
+      "boss": {"kind": "fight", "creature": "grashk_the_warlord", "body": "crag_ogre", "name": "Grashk the Warlord",
+               "adds": [["highland_orc", 6]],
+               "calls": {"creature": "hobgoblin", "stages": [[0.75, 9], [0.45, 9], [0.2, 12]]}}
+    },
+    {
+      "id": "garrison",
+      "label": "The Risen Garrison",
+      "minLevel": 40,
+      "maxLevel": 0,
+      "story": "Under the warband's camp the fort's own dead woke, and the Castellan walks the keep again.",
+      "waves": {
+        "w1": [
+          {"id": "ghouls", "pulses": [
+            {"mouths": ["w1-west", "w1-east"], "groups": [["ghoul", 13, "pack"]]},
+            {"mouths": ["w1-barn"], "groups": [["ghoul", 13, "pack"]]},
+            {"mouths": ["w1-west", "w1-east", "w1-barn"], "groups": [["ghoul", 12, "pack"], ["ghoul", 1, "leader"]]}]},
+          {"id": "corpse-hounds", "pulses": [
+            {"mouths": ["w1-west", "w1-east"], "groups": [["dire_wolf", 13, "pack"]]},
+            {"mouths": ["w1-barn"], "groups": [["dire_wolf", 13, "pack"]]},
+            {"mouths": ["w1-west", "w1-east", "w1-barn"], "groups": [["dire_wolf", 12, "pack"], ["ghoul", 1, "leader"]]}]}
+        ],
+        "w2": [
+          {"id": "hands", "pulses": [
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["crawling_hand", 14, "swarm"]]},
+            {"mouths": ["w2-west-bank"], "groups": [["crawling_hand", 13, "swarm"]]},
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["crawling_hand", 14, "swarm"]]},
+            {"mouths": ["w2-west-bank", "w2-upstream"], "groups": [["crawling_hand", 13, "swarm"]]}]},
+          {"id": "drowned", "pulses": [
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["zombie", 9, "pack"]]},
+            {"mouths": ["w2-west-bank"], "groups": [["zombie", 9, "pack"]]},
+            {"mouths": ["w2-upstream", "w2-downstream"], "groups": [["zombie", 9, "pack"]]},
+            {"mouths": ["w2-west-bank", "w2-upstream"], "groups": [["zombie", 9, "pack"]]}]}
+        ],
+        "w3": [
+          {"id": "gargoyles", "pulses": [
+            {"mouths": ["w3-stones"], "groups": [["gargoyle", 10, "pack"]]},
+            {"mouths": ["w3-stones"], "groups": [["gargoyle", 10, "pack"]]},
+            {"mouths": ["w3-stones", "w3-northeast"], "groups": [["gargoyle", 10, "pack"]]}]}
+        ],
+        "w4": [
+          {"id": "blades-mummies", "pulses": [
+            {"mouths": ["w4-ledge-south-1", "w4-ledge-south-2", "w4-ledge-north"], "groups": [["animated_sword", 18, "pack"]]},
+            {"mouths": ["w4-east-cleft"], "groups": [["mummy", 11, "heavies"]]},
+            {"mouths": ["w4-west-cleft"], "groups": [["mummy", 10, "heavies"]]}]}
+        ],
+        "w5": [
+          {"id": "skeletons", "pulses": [
+            {"mouths": ["w5-tower", "w5-breach"], "groups": [["skeleton", 18, "pack"]]},
+            {"mouths": ["w5-barracks", "w5-breach"], "groups": [["skeleton", 18, "pack"]]},
+            {"mouths": ["w5-tower", "w5-barracks"], "groups": [["skeleton", 6, "pack"], ["living_armor", 12, "heavies"], ["black_iron_death_knight", 1, "leader"]]}]}
+        ]
+      },
+      "boss": {"kind": "fight", "creature": "hollow_castellan", "body": "black_iron_death_knight", "name": "The Hollow Castellan",
+               "adds": [["living_armor", 6]],
+               "calls": {"creature": "skeleton", "stages": [[0.75, 9], [0.45, 9], [0.2, 12]]}}
+    }
+  ]
+}

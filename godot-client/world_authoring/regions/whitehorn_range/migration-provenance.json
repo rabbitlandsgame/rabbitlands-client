@@ -1,0 +1,1979 @@
+{
+  "counts": {
+    "objects": 380,
+    "paths": 23,
+    "prototypeFamilies": 383,
+    "publishedBridgeAssemblies": 3,
+    "retiredSourcePlacements": 517,
+    "riverControlPoints": 45,
+    "riverCurvePoints": 265,
+    "runtimeBindings": 197,
+    "runtimePoints": 67,
+    "savedAssetControls": 383,
+    "visibleGameplay": 125
+  },
+  "crossings": [
+    {
+      "assetId": "published-bridge-horn-tributary-124",
+      "id": "horn_tributary@124",
+      "walkNode": "Walk_ContinentalBridgeUnion_013_whitehorn_range"
+    },
+    {
+      "assetId": "published-bridge-horn-tributary-24",
+      "id": "horn_tributary@24",
+      "walkNode": "Walk_ContinentalBridgeUnion_014_whitehorn_range"
+    },
+    {
+      "assetId": "published-bridge-horn-tributary-292",
+      "id": "horn_tributary@292",
+      "walkNode": "Walk_ContinentalBridgeUnion_003_whitehorn_range"
+    }
+  ],
+  "inputs": {
+    "authoredBaseHeightsSha256": "6b25ba0f7bbd5ae21ff8eede5498afee207541471fd08f026842ac1d0e55fd79",
+    "baseColors": {
+      "encoding": "rgba8-srgb",
+      "maximumPublishedUvError": 1.52587890625e-05,
+      "path": "base-colors.rgba8",
+      "publishedVerticesCompared": 64134,
+      "sha256": "9ec380cebc2dd7ff53a6adefd37714a2af1458aa6cb7c0db4517a0ede483ee5b",
+      "texturePath": "assets/textures/continental-ground.png",
+      "textureSha256": "884fe4c3eca79b4492bc9d6baefe1f14965e1ceebbcbad1a0676314117542035",
+      "waterTexturePath": "assets/textures/continental-water.png",
+      "waterTextureSha256": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac"
+    },
+    "certifiedBootstrapHeightsSha256": "6b25ba0f7bbd5ae21ff8eede5498afee207541471fd08f026842ac1d0e55fd79",
+    "certifiedResolvedHeightsSha256": "6b25ba0f7bbd5ae21ff8eede5498afee207541471fd08f026842ac1d0e55fd79",
+    "composedSha256": "c65f38d7446a1408b3911f00d0e6e72a857f4ce1b5717fe922a87340699132f7",
+    "compositionObjectCount": 4981,
+    "compositionPlanSha256": "54ddec547568e83ae87fcc568ac2a87ce05317cd824522a5eeeee0b477ccb97a",
+    "compositionSha256": "36ec1e4ed285ccd28b751014ec8c13a30ad86434120a15a354c543b4251cd86a",
+    "exportLedgerSha256": "ad020186972517b1c5710792731ce96f79d84db3d2ae70586d646781b6d082b6",
+    "planSha256": "f500793c2e9e2a48f0189a0443287a5c3aa315f3e79ecf48139eef75cb1bdb5e",
+    "publishedMasterSha256": "af8fd0db996aa05f8b3e840d30d823ca918f841c552ee9dc2367458027c8b634",
+    "roadsSha256": "6ec5f505abce4f8b219bfa4278d59d7b8d9d8038a65cddf461b422a7986463f8",
+    "runtimeBindingSeedSha256": "db9435e040c6b6f3a3ed429af471b308e1d94e7d1261890acc785ecef08a1dfd",
+    "sourceManifestSha256": "b90d2c7b2be7ef9837922a5568e493669af719572486d6ff6a067e7d5d1cac7d",
+    "sourceWorldSha256": "7eddf612ac9d7711b6db51d98f4e321704d1b24ea2fbb8137ecf7514721e9e8e"
+  },
+  "objects": [
+    {
+      "collisionRole": "none",
+      "family": "landmark-bridgewatch-a111df2dd767",
+      "id": "Landmark_BridgeWatch"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-eastcamp-2478cc90715e",
+      "id": "Landmark_EastCamp"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-gatestore-cf333c3cb109",
+      "id": "Landmark_GateStore"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-gateworkshop-eec155550f2d",
+      "id": "Landmark_GateWorkshop"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-highoverlook-ad54d06c136a",
+      "id": "Landmark_HighOverlook"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-lowercamp-433632b78dd0",
+      "id": "Landmark_LowerCamp"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-mineyard-bacf42868ab4",
+      "id": "Landmark_MineYard"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-templepinnacle0-411d18d2c1aa",
+      "id": "Landmark_TemplePinnacle0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-templepinnacle1-51194c36347f",
+      "id": "Landmark_TemplePinnacle1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-templepinnacle2-51b46224ffd6",
+      "id": "Landmark_TemplePinnacle2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-templerest-9f7f7d5e49d6",
+      "id": "Landmark_TempleRest"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-watchcave-be31166473e9",
+      "id": "Landmark_WatchCave"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-frozen-cascade-00-2218d6ace83a",
+      "id": "Landmark_frozen_cascade_00"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-frozen-cascade-01-efc5a11c17b7",
+      "id": "Landmark_frozen_cascade_01"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-glacier-temple-35b3b32a0edc",
+      "id": "Landmark_glacier_temple"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-ice-cave-29c6932abdaf",
+      "id": "Landmark_ice_cave"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-mine-portal-b3fad7b21f87",
+      "id": "Landmark_mine_portal"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-shrine-00-8add73848fca",
+      "id": "Landmark_shrine_00"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-shrine-02-1c635e4f526e",
+      "id": "Landmark_shrine_02"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-south-gate-5b41bc5f27b6",
+      "id": "Landmark_south_gate"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "lore-snowline-stones-164eeb7514e6",
+      "id": "Lore_snowline_stones"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0001-0-de50123f269e",
+      "id": "Outcrop_0001_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0001-1-6fe04620cc2f",
+      "id": "Outcrop_0001_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0001-2-6fe04620cc2f",
+      "id": "Outcrop_0001_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0002-0-d94f1deb22a3",
+      "id": "Outcrop_0002_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0002-1-0271d5a2800b",
+      "id": "Outcrop_0002_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0003-0-b279d3da7e1a",
+      "id": "Outcrop_0003_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0003-1-6fe04620cc2f",
+      "id": "Outcrop_0003_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0003-2-6fe04620cc2f",
+      "id": "Outcrop_0003_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0003-3-6fe04620cc2f",
+      "id": "Outcrop_0003_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0004-0-a1423c27012f",
+      "id": "Outcrop_0004_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0004-1-4a21a83ab3fc",
+      "id": "Outcrop_0004_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0004-2-4a21a83ab3fc",
+      "id": "Outcrop_0004_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0004-3-4a21a83ab3fc",
+      "id": "Outcrop_0004_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0005-0-f946733ff492",
+      "id": "Outcrop_0005_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0005-1-17d3224b643c",
+      "id": "Outcrop_0005_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0005-2-17d3224b643c",
+      "id": "Outcrop_0005_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0006-0-031515106f2b",
+      "id": "Outcrop_0006_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0006-1-11d0c7f8fe96",
+      "id": "Outcrop_0006_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0006-2-11d0c7f8fe96",
+      "id": "Outcrop_0006_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0006-3-11d0c7f8fe96",
+      "id": "Outcrop_0006_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0007-0-b7598deeb9c9",
+      "id": "Outcrop_0007_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0007-1-e60b65d12645",
+      "id": "Outcrop_0007_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0007-2-e60b65d12645",
+      "id": "Outcrop_0007_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0007-3-e60b65d12645",
+      "id": "Outcrop_0007_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0008-0-c723380214c7",
+      "id": "Outcrop_0008_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0008-1-2d7a4621b8ba",
+      "id": "Outcrop_0008_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0008-2-2d7a4621b8ba",
+      "id": "Outcrop_0008_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0009-0-c77af853c3c8",
+      "id": "Outcrop_0009_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0009-1-1ce01d7e8ac1",
+      "id": "Outcrop_0009_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0010-0-47eb7b7e302b",
+      "id": "Outcrop_0010_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0010-1-0f88628b3d0a",
+      "id": "Outcrop_0010_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0011-0-a239f258e5d1",
+      "id": "Outcrop_0011_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0011-1-4a21a83ab3fc",
+      "id": "Outcrop_0011_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0012-0-962b48dda936",
+      "id": "Outcrop_0012_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0012-1-ad9482040ecb",
+      "id": "Outcrop_0012_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0013-0-bd431d0aefb4",
+      "id": "Outcrop_0013_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0013-1-e732283d738a",
+      "id": "Outcrop_0013_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0014-0-602b4fee2f88",
+      "id": "Outcrop_0014_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0014-1-0271d5a2800b",
+      "id": "Outcrop_0014_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0014-2-0271d5a2800b",
+      "id": "Outcrop_0014_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0014-3-0271d5a2800b",
+      "id": "Outcrop_0014_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0015-0-76f91a4a400e",
+      "id": "Outcrop_0015_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0015-1-083d28ae75ac",
+      "id": "Outcrop_0015_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0016-0-5513169c262a",
+      "id": "Outcrop_0016_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0016-1-add5c2474d7f",
+      "id": "Outcrop_0016_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0016-2-add5c2474d7f",
+      "id": "Outcrop_0016_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0016-3-add5c2474d7f",
+      "id": "Outcrop_0016_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0017-0-d94f1deb22a3",
+      "id": "Outcrop_0017_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0017-1-f0004acf23c7",
+      "id": "Outcrop_0017_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0017-2-f0004acf23c7",
+      "id": "Outcrop_0017_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0017-3-f0004acf23c7",
+      "id": "Outcrop_0017_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0018-0-4a7a2065ac26",
+      "id": "Outcrop_0018_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0018-1-85e70eab2326",
+      "id": "Outcrop_0018_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0019-0-d8a4e4be27e5",
+      "id": "Outcrop_0019_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0019-1-bb8f31dadc54",
+      "id": "Outcrop_0019_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0019-2-bb8f31dadc54",
+      "id": "Outcrop_0019_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0019-3-bb8f31dadc54",
+      "id": "Outcrop_0019_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0020-0-e4300adf7d30",
+      "id": "Outcrop_0020_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0020-1-fa49d4091136",
+      "id": "Outcrop_0020_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0020-2-fa49d4091136",
+      "id": "Outcrop_0020_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0020-3-fa49d4091136",
+      "id": "Outcrop_0020_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0021-0-7d7cd511b490",
+      "id": "Outcrop_0021_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0021-1-3d6218ea6766",
+      "id": "Outcrop_0021_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0021-2-3d6218ea6766",
+      "id": "Outcrop_0021_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0021-3-3d6218ea6766",
+      "id": "Outcrop_0021_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0022-0-7d7cd511b490",
+      "id": "Outcrop_0022_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0022-1-ef0fc65f38a1",
+      "id": "Outcrop_0022_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0022-2-ef0fc65f38a1",
+      "id": "Outcrop_0022_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0022-3-ef0fc65f38a1",
+      "id": "Outcrop_0022_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0023-0-b3aeaf30b536",
+      "id": "Outcrop_0023_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0023-1-16cdc96d0f7c",
+      "id": "Outcrop_0023_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0023-2-16cdc96d0f7c",
+      "id": "Outcrop_0023_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0023-3-16cdc96d0f7c",
+      "id": "Outcrop_0023_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0024-0-f1c658b305e4",
+      "id": "Outcrop_0024_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0024-1-932ded513634",
+      "id": "Outcrop_0024_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0025-0-c276cfcf08e3",
+      "id": "Outcrop_0025_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0025-1-74e75b5fad22",
+      "id": "Outcrop_0025_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0025-2-74e75b5fad22",
+      "id": "Outcrop_0025_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0025-3-74e75b5fad22",
+      "id": "Outcrop_0025_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0026-0-1518d9db6ff6",
+      "id": "Outcrop_0026_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0026-1-e60b65d12645",
+      "id": "Outcrop_0026_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0027-0-d94f1deb22a3",
+      "id": "Outcrop_0027_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0027-1-ab5e8cf5877b",
+      "id": "Outcrop_0027_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0027-2-ab5e8cf5877b",
+      "id": "Outcrop_0027_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0028-0-391b3af25026",
+      "id": "Outcrop_0028_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0028-1-6fe04620cc2f",
+      "id": "Outcrop_0028_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0028-2-6fe04620cc2f",
+      "id": "Outcrop_0028_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0029-0-af44355d7831",
+      "id": "Outcrop_0029_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0029-1-1d159002c73f",
+      "id": "Outcrop_0029_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "outcrop-0029-3-1d159002c73f",
+      "id": "Outcrop_0029_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-haulsledge1-e7eda3d77d6f",
+      "id": "Prop_HaulSledge1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-haulsledge2-5676767d18e5",
+      "id": "Prop_HaulSledge2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-haulsledge3-7a9ea3dec364",
+      "id": "Prop_HaulSledge3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefire0-e5601ac99d37",
+      "id": "Prop_RefugeFire0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefire1-8d76bed79421",
+      "id": "Prop_RefugeFire1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefire2-55ed14d1207c",
+      "id": "Prop_RefugeFire2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefire3-79e03cba0c82",
+      "id": "Prop_RefugeFire3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefire4-2f39d51bd9e0",
+      "id": "Prop_RefugeFire4"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefire5-41ba29941fef",
+      "id": "Prop_RefugeFire5"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefire6-d77077bf008c",
+      "id": "Prop_RefugeFire6"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefire7-3b64b65b9db9",
+      "id": "Prop_RefugeFire7"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefuel0-491d94d9d4db",
+      "id": "Prop_RefugeFuel0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefuel1-102303cd270e",
+      "id": "Prop_RefugeFuel1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefuel2-7843ffa1eb38",
+      "id": "Prop_RefugeFuel2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefuel3-fd86bb095225",
+      "id": "Prop_RefugeFuel3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugefuel4-bff5e28580a8",
+      "id": "Prop_RefugeFuel4"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugestores-0-aa001c2fddbe",
+      "id": "Prop_RefugeStores_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugestores-1-6a2ba730cbc2",
+      "id": "Prop_RefugeStores_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugestores-2-efc4fb272309",
+      "id": "Prop_RefugeStores_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-refugestores-3-99b245562acc",
+      "id": "Prop_RefugeStores_3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-routesign0-0273f40d8de2",
+      "id": "Prop_RouteSign0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-routesign1-8fae2abd359e",
+      "id": "Prop_RouteSign1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-routesign2-2eccf89b968a",
+      "id": "Prop_RouteSign2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-routesign3-23add41fab09",
+      "id": "Prop_RouteSign3"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-routesign4-875e03588427",
+      "id": "Prop_RouteSign4"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-routesign5-4fe2be39fd2d",
+      "id": "Prop_RouteSign5"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0000-2628c678fad6",
+      "id": "Prop_cairn_0000"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0002-0ce2fc7a983d",
+      "id": "Prop_cairn_0002"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0003-8ed73ceb704f",
+      "id": "Prop_cairn_0003"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0004-41705b818d97",
+      "id": "Prop_cairn_0004"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0005-540e79fc0086",
+      "id": "Prop_cairn_0005"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0006-9538bdf24c61",
+      "id": "Prop_cairn_0006"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0007-d233d787d41d",
+      "id": "Prop_cairn_0007"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0008-d8db0b9505e3",
+      "id": "Prop_cairn_0008"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0009-9909646536c1",
+      "id": "Prop_cairn_0009"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0010-a15424a89dd7",
+      "id": "Prop_cairn_0010"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0011-ced137a487e1",
+      "id": "Prop_cairn_0011"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0012-74a35190dd30",
+      "id": "Prop_cairn_0012"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0013-40167a97d1e3",
+      "id": "Prop_cairn_0013"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0014-63967b85bf58",
+      "id": "Prop_cairn_0014"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0015-e88251d7014d",
+      "id": "Prop_cairn_0015"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0016-2cad3e613d85",
+      "id": "Prop_cairn_0016"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0017-c8676191e1d8",
+      "id": "Prop_cairn_0017"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0018-45771d763b8e",
+      "id": "Prop_cairn_0018"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0019-055e189d8563",
+      "id": "Prop_cairn_0019"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0020-ad05b776bbbe",
+      "id": "Prop_cairn_0020"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0021-3d40adfadba2",
+      "id": "Prop_cairn_0021"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0022-c79923534dad",
+      "id": "Prop_cairn_0022"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0023-402a65a09e9a",
+      "id": "Prop_cairn_0023"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0024-74657122b3ad",
+      "id": "Prop_cairn_0024"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0025-0fb283203791",
+      "id": "Prop_cairn_0025"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0026-95e683715ba1",
+      "id": "Prop_cairn_0026"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0027-75c82da4c5a4",
+      "id": "Prop_cairn_0027"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0028-941f31433968",
+      "id": "Prop_cairn_0028"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0029-7f24c9f640d6",
+      "id": "Prop_cairn_0029"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0030-e2d1f73033c5",
+      "id": "Prop_cairn_0030"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0031-2d59a485dc0d",
+      "id": "Prop_cairn_0031"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0032-115c727df1a9",
+      "id": "Prop_cairn_0032"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0033-bd0a0a5a389b",
+      "id": "Prop_cairn_0033"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0034-248a33f01d5e",
+      "id": "Prop_cairn_0034"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0035-6cca2e37433e",
+      "id": "Prop_cairn_0035"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0036-0b6b71f6847c",
+      "id": "Prop_cairn_0036"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0037-c4aa8759e1fc",
+      "id": "Prop_cairn_0037"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0038-7deeb2f534d5",
+      "id": "Prop_cairn_0038"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0039-e9bd9a557114",
+      "id": "Prop_cairn_0039"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0040-a6546b5683fa",
+      "id": "Prop_cairn_0040"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0041-9aa0d7debf13",
+      "id": "Prop_cairn_0041"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0042-4e3a5ce643b1",
+      "id": "Prop_cairn_0042"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0043-a17d97ad2441",
+      "id": "Prop_cairn_0043"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0044-6c10d0b64b5a",
+      "id": "Prop_cairn_0044"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0045-392b47a5522b",
+      "id": "Prop_cairn_0045"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0046-7e6a6a3174ef",
+      "id": "Prop_cairn_0046"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0047-cbd3c4577f9b",
+      "id": "Prop_cairn_0047"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0048-de232a2e3bb7",
+      "id": "Prop_cairn_0048"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0049-624765bb8256",
+      "id": "Prop_cairn_0049"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0050-85cc3e043611",
+      "id": "Prop_cairn_0050"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0051-85b88837d782",
+      "id": "Prop_cairn_0051"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0052-28827870fcab",
+      "id": "Prop_cairn_0052"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0053-37c6f811728f",
+      "id": "Prop_cairn_0053"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0054-b263eef091f4",
+      "id": "Prop_cairn_0054"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0055-0aae6541e7d7",
+      "id": "Prop_cairn_0055"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0056-05d3f908f318",
+      "id": "Prop_cairn_0056"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0057-407681cda52c",
+      "id": "Prop_cairn_0057"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0058-1bcdabc04e51",
+      "id": "Prop_cairn_0058"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0059-bc3611f507de",
+      "id": "Prop_cairn_0059"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0060-798014d31b97",
+      "id": "Prop_cairn_0060"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0061-28fd4efa653e",
+      "id": "Prop_cairn_0061"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0062-ef2867648c3c",
+      "id": "Prop_cairn_0062"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0063-4eea637f319c",
+      "id": "Prop_cairn_0063"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0064-6c6cee708f5b",
+      "id": "Prop_cairn_0064"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0065-1699370239f9",
+      "id": "Prop_cairn_0065"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0066-5d994d624dfc",
+      "id": "Prop_cairn_0066"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0067-a262e2014bf5",
+      "id": "Prop_cairn_0067"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0068-176b2559f3af",
+      "id": "Prop_cairn_0068"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0069-0516c0ef900b",
+      "id": "Prop_cairn_0069"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0070-63d07c943456",
+      "id": "Prop_cairn_0070"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0071-9ecf1a1d69b7",
+      "id": "Prop_cairn_0071"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0072-c31d8fad4d4c",
+      "id": "Prop_cairn_0072"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0073-7687d4872612",
+      "id": "Prop_cairn_0073"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0074-c156f103659c",
+      "id": "Prop_cairn_0074"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0075-69cf52242552",
+      "id": "Prop_cairn_0075"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0076-12358068f538",
+      "id": "Prop_cairn_0076"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0077-03f96d87b750",
+      "id": "Prop_cairn_0077"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0078-871190be2734",
+      "id": "Prop_cairn_0078"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0080-d78fb4e83dd0",
+      "id": "Prop_cairn_0080"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0081-7be97d48148a",
+      "id": "Prop_cairn_0081"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0082-f7f9392747af",
+      "id": "Prop_cairn_0082"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0083-f43d3f6ffc74",
+      "id": "Prop_cairn_0083"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0084-ba8764b87e45",
+      "id": "Prop_cairn_0084"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0085-14c56b260b15",
+      "id": "Prop_cairn_0085"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0086-c02888187471",
+      "id": "Prop_cairn_0086"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0087-60f7ce748b66",
+      "id": "Prop_cairn_0087"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0088-1c05f04ae450",
+      "id": "Prop_cairn_0088"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0089-c0e48200d487",
+      "id": "Prop_cairn_0089"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0090-e80f3eff0aa7",
+      "id": "Prop_cairn_0090"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0091-2671bca01b24",
+      "id": "Prop_cairn_0091"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0092-a846c5f28a79",
+      "id": "Prop_cairn_0092"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0093-578112ce54cc",
+      "id": "Prop_cairn_0093"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0094-c2f2d131abdd",
+      "id": "Prop_cairn_0094"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0095-32ecb15058c9",
+      "id": "Prop_cairn_0095"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0096-65495176324b",
+      "id": "Prop_cairn_0096"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0097-43d68177b829",
+      "id": "Prop_cairn_0097"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0098-5e7cf2b2a2e0",
+      "id": "Prop_cairn_0098"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0099-4db71fe05b82",
+      "id": "Prop_cairn_0099"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0100-32aa7b3d46fd",
+      "id": "Prop_cairn_0100"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0101-ab42fa3ec9a0",
+      "id": "Prop_cairn_0101"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0102-722f5e4024b9",
+      "id": "Prop_cairn_0102"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0103-9650939c3711",
+      "id": "Prop_cairn_0103"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0104-5ea0abfc1e56",
+      "id": "Prop_cairn_0104"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0105-c61fd4679f83",
+      "id": "Prop_cairn_0105"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0106-f6e3bdf29a75",
+      "id": "Prop_cairn_0106"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0107-3e4c0d1f5cb7",
+      "id": "Prop_cairn_0107"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0108-9389b89d240b",
+      "id": "Prop_cairn_0108"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0109-a7e28404ec0a",
+      "id": "Prop_cairn_0109"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0110-a5234ac07b9f",
+      "id": "Prop_cairn_0110"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0111-e87c5472897d",
+      "id": "Prop_cairn_0111"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0112-042058c2c6ef",
+      "id": "Prop_cairn_0112"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0113-635ebea42e59",
+      "id": "Prop_cairn_0113"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0114-d9ba6609a559",
+      "id": "Prop_cairn_0114"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0115-178429446478",
+      "id": "Prop_cairn_0115"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0116-3a4e935dbb2d",
+      "id": "Prop_cairn_0116"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0117-b80f0f7c6531",
+      "id": "Prop_cairn_0117"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0118-be9d3e2e0153",
+      "id": "Prop_cairn_0118"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0119-34b6bb065575",
+      "id": "Prop_cairn_0119"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0120-e565ec19c7ab",
+      "id": "Prop_cairn_0120"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0121-554c826eeaf4",
+      "id": "Prop_cairn_0121"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0122-7e3b2d2eadb1",
+      "id": "Prop_cairn_0122"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0123-cc5e599ab02b",
+      "id": "Prop_cairn_0123"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0124-273ca97dff4d",
+      "id": "Prop_cairn_0124"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0125-c22823adadea",
+      "id": "Prop_cairn_0125"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0126-6f76408d3f02",
+      "id": "Prop_cairn_0126"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0127-40f20ecf0b03",
+      "id": "Prop_cairn_0127"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0128-eda031b7b2e9",
+      "id": "Prop_cairn_0128"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0129-8c5f43a47677",
+      "id": "Prop_cairn_0129"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0130-0f2ec9a48eed",
+      "id": "Prop_cairn_0130"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0131-319c93c438f8",
+      "id": "Prop_cairn_0131"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0132-a0cad9730429",
+      "id": "Prop_cairn_0132"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0133-1aec1cff7ab1",
+      "id": "Prop_cairn_0133"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0134-05ede0a6ef86",
+      "id": "Prop_cairn_0134"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0135-4dd5e47d462a",
+      "id": "Prop_cairn_0135"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0136-b47813f048ce",
+      "id": "Prop_cairn_0136"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0137-8d25df77e9e6",
+      "id": "Prop_cairn_0137"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0138-373153ff1c59",
+      "id": "Prop_cairn_0138"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0139-5aa828a621fc",
+      "id": "Prop_cairn_0139"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0140-4104e82daecf",
+      "id": "Prop_cairn_0140"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0141-feb273b76579",
+      "id": "Prop_cairn_0141"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0142-9f210b0c417d",
+      "id": "Prop_cairn_0142"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0143-c653b2c4dcda",
+      "id": "Prop_cairn_0143"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0144-4a23cf8fcefc",
+      "id": "Prop_cairn_0144"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0145-be7080597e82",
+      "id": "Prop_cairn_0145"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0146-fb0cc62fee7d",
+      "id": "Prop_cairn_0146"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0147-09ee8f4b55a0",
+      "id": "Prop_cairn_0147"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0148-7a12a9fca9bb",
+      "id": "Prop_cairn_0148"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0149-5de228e2cfe0",
+      "id": "Prop_cairn_0149"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0150-f0cc004f41f1",
+      "id": "Prop_cairn_0150"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0151-19e057d010e7",
+      "id": "Prop_cairn_0151"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0152-eacbeea12475",
+      "id": "Prop_cairn_0152"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0153-43f2264a98ac",
+      "id": "Prop_cairn_0153"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0154-93017174e5b0",
+      "id": "Prop_cairn_0154"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0155-6c6d3c7a81ac",
+      "id": "Prop_cairn_0155"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0156-71a28ba50c86",
+      "id": "Prop_cairn_0156"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0157-e9e6f6b2213c",
+      "id": "Prop_cairn_0157"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0158-9428df0a09f0",
+      "id": "Prop_cairn_0158"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0159-b3c824eb418b",
+      "id": "Prop_cairn_0159"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0160-bb33038bb64e",
+      "id": "Prop_cairn_0160"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0161-d62f4c75cbc7",
+      "id": "Prop_cairn_0161"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0162-00ec384bede5",
+      "id": "Prop_cairn_0162"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0163-0b65e9ee01e7",
+      "id": "Prop_cairn_0163"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0164-b883aba7b1af",
+      "id": "Prop_cairn_0164"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0165-74a546d5fdba",
+      "id": "Prop_cairn_0165"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0166-8c249c10b30f",
+      "id": "Prop_cairn_0166"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0167-2d246ee80828",
+      "id": "Prop_cairn_0167"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0168-d4823a772398",
+      "id": "Prop_cairn_0168"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0169-7e6ec7e0771c",
+      "id": "Prop_cairn_0169"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0170-34929a2ffab6",
+      "id": "Prop_cairn_0170"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0171-f1fa422dec06",
+      "id": "Prop_cairn_0171"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0172-3f22ea1e00a0",
+      "id": "Prop_cairn_0172"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0173-62e4a2c090d8",
+      "id": "Prop_cairn_0173"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0174-bf72a34f2da7",
+      "id": "Prop_cairn_0174"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0175-0554082480c8",
+      "id": "Prop_cairn_0175"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0176-70c1cecf5f3c",
+      "id": "Prop_cairn_0176"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0177-11df0f320762",
+      "id": "Prop_cairn_0177"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0178-754b2fe83e67",
+      "id": "Prop_cairn_0178"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0179-8945b7a9e5b7",
+      "id": "Prop_cairn_0179"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0180-1429ca502858",
+      "id": "Prop_cairn_0180"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0181-6875c7ee5599",
+      "id": "Prop_cairn_0181"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0182-a0a39a71f5a3",
+      "id": "Prop_cairn_0182"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0183-9f0b14fb5053",
+      "id": "Prop_cairn_0183"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0184-b70e262b0d49",
+      "id": "Prop_cairn_0184"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0185-9eec90050bca",
+      "id": "Prop_cairn_0185"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0186-3b34887776fb",
+      "id": "Prop_cairn_0186"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0187-451d9b86a3d5",
+      "id": "Prop_cairn_0187"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0188-b16f4ba21764",
+      "id": "Prop_cairn_0188"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0189-78c5c9223f60",
+      "id": "Prop_cairn_0189"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0190-96e7c785d090",
+      "id": "Prop_cairn_0190"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0191-7cf783318506",
+      "id": "Prop_cairn_0191"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0192-2e84832b3a58",
+      "id": "Prop_cairn_0192"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0193-db63d96be422",
+      "id": "Prop_cairn_0193"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0194-aa57ba9f0b99",
+      "id": "Prop_cairn_0194"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0195-e6aa357b55dd",
+      "id": "Prop_cairn_0195"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0196-da95ecbb4fd3",
+      "id": "Prop_cairn_0196"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0197-178aff17cb87",
+      "id": "Prop_cairn_0197"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-cairn-0198-cee8ad398be7",
+      "id": "Prop_cairn_0198"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-brazier-00-c3e16f446e67",
+      "id": "Prop_camp_brazier_00"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-brazier-01-a5e3774e3efc",
+      "id": "Prop_camp_brazier_01"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-brazier-02-c719bc6f35c2",
+      "id": "Prop_camp_brazier_02"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-00-0-cae15f764065",
+      "id": "Prop_camp_crate_00_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-00-1-a00d29e67862",
+      "id": "Prop_camp_crate_00_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-00-2-4a62e302de34",
+      "id": "Prop_camp_crate_00_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-01-0-c984b6e924ee",
+      "id": "Prop_camp_crate_01_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-01-1-7023abd8609a",
+      "id": "Prop_camp_crate_01_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-01-2-8925e5fe9a25",
+      "id": "Prop_camp_crate_01_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-02-0-f5e2c415364b",
+      "id": "Prop_camp_crate_02_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-02-1-8617706af566",
+      "id": "Prop_camp_crate_02_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "prop-camp-crate-02-2-a9e582c4d0f6",
+      "id": "Prop_camp_crate_02_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-000-994c85063d13",
+      "id": "Prop_waystone_000"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-001-79524c67cf5c",
+      "id": "Prop_waystone_001"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-002-7e6dffcf0568",
+      "id": "Prop_waystone_002"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-003-393811e95081",
+      "id": "Prop_waystone_003"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-004-6f0667b93dee",
+      "id": "Prop_waystone_004"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-005-ada8364127cf",
+      "id": "Prop_waystone_005"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-006-3a51f17683c9",
+      "id": "Prop_waystone_006"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-007-e33940a25b35",
+      "id": "Prop_waystone_007"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-008-4d5c04f52744",
+      "id": "Prop_waystone_008"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-009-232c87ec61eb",
+      "id": "Prop_waystone_009"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-010-91ca73a1fd17",
+      "id": "Prop_waystone_010"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-011-f287567a9c55",
+      "id": "Prop_waystone_011"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-012-53e8fe5477e9",
+      "id": "Prop_waystone_012"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-013-be2b99b284a0",
+      "id": "Prop_waystone_013"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-014-d1e2e410ff6f",
+      "id": "Prop_waystone_014"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-015-c4aea8d7309e",
+      "id": "Prop_waystone_015"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-waystone-016-16b7c984c3cd",
+      "id": "Prop_waystone_016"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-adit-mouth-96fbf53a02f9",
+      "id": "Secret_horn_adit_mouth"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-bridge-butts-9dbf5deac239",
+      "id": "Secret_horn_bridge_butts"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-cairn-focus-37b04dd498e2",
+      "id": "Secret_horn_cairn_focus"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-cairn-garden-393b64c39506",
+      "id": "Secret_horn_cairn_garden"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-cascade-spring-8043e8434494",
+      "id": "Secret_horn_cascade_spring"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-gate-cache-f40e4e15c07c",
+      "id": "Secret_horn_gate_cache"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-ice-well-dd60663f6336",
+      "id": "Secret_horn_ice_well"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-icebore-94aed22ebdc0",
+      "id": "Secret_horn_icebore"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-ram-pit-796e841577c3",
+      "id": "Secret_horn_ram_pit"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-shrine-school-051aaf5c93ba",
+      "id": "Secret_horn_shrine_school"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-silver-hollow-dc99f8956d8a",
+      "id": "Secret_horn_silver_hollow"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-temple-eyrie-d5d978434fbc",
+      "id": "Secret_horn_temple_eyrie"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-temple-vault-a2a16cf9ac28",
+      "id": "Secret_horn_temple_vault"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "secret-horn-waystone-72bd02daf20e",
+      "id": "Secret_horn_waystone"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "structure-watch-00-5680b680f94b",
+      "id": "Structure_watch_00"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "structure-watch-01-69c2ae7734aa",
+      "id": "Structure_watch_01"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "structure-watch-02-d1478794bd7f",
+      "id": "Structure_watch_02"
+    },
+    {
+      "collisionRole": "walk_surface",
+      "family": "published-bridge-horn-tributary-124",
+      "id": "published-bridge-horn-tributary-124"
+    },
+    {
+      "collisionRole": "walk_surface",
+      "family": "published-bridge-horn-tributary-24",
+      "id": "published-bridge-horn-tributary-24"
+    },
+    {
+      "collisionRole": "walk_surface",
+      "family": "published-bridge-horn-tributary-292",
+      "id": "published-bridge-horn-tributary-292"
+    }
+  ],
+  "regionId": "whitehorn_range",
+  "sceneSha256": "3c052d8538d501d36c395c1a54fc3fc9bbafb58a62e6138de55d357ac0886de7",
+  "schema": "eloria-whitehorn-authoring-migration-v1"
+}

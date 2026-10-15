@@ -1,0 +1,292 @@
+{
+ "schemaVersion": 1,
+ "asset": {
+  "id": "ringholm",
+  "name": "Ringholm",
+  "glb": "world.glb",
+  "units": "meters",
+  "seaLevel": 0.0
+ },
+ "productionStatus": "continent-v2-editor-source",
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   2710.0,
+   0.0,
+   6841.0
+  ],
+  "ownershipPolygon": [
+   [
+    2479,
+    7171
+   ],
+   [
+    2729,
+    7171
+   ],
+   [
+    3161,
+    7171
+   ],
+   [
+    3161,
+    6959
+   ],
+   [
+    3037,
+    6863
+   ],
+   [
+    2957,
+    6797
+   ],
+   [
+    2877,
+    6713
+   ],
+   [
+    2797,
+    6627
+   ],
+   [
+    2717,
+    6547
+   ],
+   [
+    2637,
+    6511
+   ],
+   [
+    2659,
+    6521
+   ],
+   [
+    2259,
+    6521
+   ],
+   [
+    2259,
+    6717
+   ],
+   [
+    2321,
+    6691
+   ],
+   [
+    2321,
+    6761
+   ],
+   [
+    2259,
+    6789
+   ],
+   [
+    2259,
+    6921
+   ],
+   [
+    2289,
+    6981
+   ],
+   [
+    2409,
+    7101
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     2479,
+     7171
+    ],
+    [
+     2729,
+     7171
+    ],
+    [
+     3161,
+     7171
+    ],
+    [
+     3161,
+     6959
+    ],
+    [
+     3037,
+     6863
+    ],
+    [
+     2957,
+     6797
+    ],
+    [
+     2877,
+     6713
+    ],
+    [
+     2797,
+     6627
+    ],
+    [
+     2717,
+     6547
+    ],
+    [
+     2637,
+     6511
+    ],
+    [
+     2659,
+     6521
+    ],
+    [
+     2259,
+     6521
+    ],
+    [
+     2259,
+     6717
+    ],
+    [
+     2321,
+     6691
+    ],
+    [
+     2321,
+     6761
+    ],
+    [
+     2259,
+     6789
+    ],
+    [
+     2259,
+     6921
+    ],
+    [
+     2289,
+     6981
+    ],
+    [
+     2409,
+     7101
+    ]
+   ]
+  ],
+  "geometryMode": "continent-v2-editor-source"
+ },
+ "server": {
+  "origin": [
+   455,
+   334
+  ],
+  "cells": [
+   912,
+   912
+  ],
+  "collisionOriginMetres": [
+   -455.0,
+   334.0
+  ]
+ },
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.2,
+    0.48,
+    0.82
+   ],
+   "horizon": [
+    0.84,
+    0.9,
+    0.94
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.42,
+    0.62,
+    0.66
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    1.0,
+    0.94,
+    0.83
+   ],
+   "energy": 1.1
+  },
+  "ambient": {
+   "color": [
+    0.6,
+    0.67,
+    0.72
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.25,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.82,
+    0.88,
+    0.9
+   ],
+   "density": 0.0003,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  }
+ }
+}

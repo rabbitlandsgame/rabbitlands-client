@@ -1,0 +1,365 @@
+{
+ "schema": "eloria-continent-v2-frozen-group-terrain-v1",
+ "sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
+ "sourceCatalog": "godot-client/world_authoring/continent-v2/territories.json",
+ "method": "Parent float32 base plus disjoint sparse sculpt layers; patches remain authored in scenes",
+ "parentSourceId": "sw_isle",
+ "grid": {
+  "continentFirstVertex": [
+   299.0,
+   6163.0
+  ],
+  "gridSize": [
+   1446,
+   1259
+  ],
+  "cellMetres": 2.0
+ },
+ "sourceFiles": {
+  "eloria-assets/maps/continent-v2/gull_skerries/world.json": {
+   "sha256": "0770f29fad367c47454228ff579ec3693e0c1b68d3cdbc93387db12e3a72138e",
+   "bytes": 2381
+  },
+  "eloria-assets/maps/continent-v2/sw_isle/world.json": {
+   "sha256": "ec18295ea07b0975832e3e19b142db3560a2ba81eeff81b18ce373a633142342",
+   "bytes": 2303
+  },
+  "eloria-assets/maps/continent-v2/tollholms/world.json": {
+   "sha256": "7b0ead295ab29a493e4b476877988e323ce5d04621a61999b359ee4ce9e82e21",
+   "bytes": 2548
+  },
+  "godot-client/src/dev/map_authoring_region/terrain_control.gd": {
+   "sha256": "cc3a5a7c39b8334310b5411fe70756dc0d77a2d122e074a1ae86229cacfdb78f",
+   "bytes": 45486
+  },
+  "godot-client/src/dev/map_authoring_region/terrain_sculpt_layer.gd": {
+   "sha256": "dafcd5ef89b830e61f0c93fa844b3a0e26c22446b4a7917906bcf41e2d9c3e05",
+   "bytes": 3477
+  },
+  "godot-client/world_authoring/continent-v2/territories.json": {
+   "sha256": "da8faf86b73cfcdd41cce7b263af3b547ad20e643034ce96c95af2fc77e11e9a",
+   "bytes": 1314
+  },
+  "godot-client/world_authoring/regions/gull_skerries/base-colors.rgba8": {
+   "sha256": "053004ad05d0df7d8dc62394387ec3cc928e0ec3f86211447d2e313627259104",
+   "bytes": 2007360
+  },
+  "godot-client/world_authoring/regions/gull_skerries/base-heights.f32le": {
+   "sha256": "16271840456529a430a475f62d799da8b79e0050751cf4c384b19777acb4ef38",
+   "bytes": 2007360
+  },
+  "godot-client/world_authoring/regions/gull_skerries/gull_skerries.tscn": {
+   "sha256": "0ad21f70113aee75ff95e03ce882947457b75265b5f447e87865a689057d046a",
+   "bytes": 841604
+  },
+  "godot-client/world_authoring/regions/gull_skerries/region-authoring-spec.json": {
+   "sha256": "e5d1b111e323017fafa2d24a1204fcd1fc7b84d56e7099af84c4254978718465",
+   "bytes": 1469
+  },
+  "godot-client/world_authoring/regions/gull_skerries/terrain-provenance.json": {
+   "sha256": "a1cf8907ff4acd37a2ab3e3e41514327f2d304041edf65a99d14dc572e9e700f",
+   "bytes": 2189
+  },
+  "godot-client/world_authoring/regions/sw_isle/base-colors.rgba8": {
+   "sha256": "35b67bacbf9c562375f5fa00a2cb57c895cebc95b0258901b00af6edad2974c4",
+   "bytes": 7282056
+  },
+  "godot-client/world_authoring/regions/sw_isle/base-heights.f32le": {
+   "sha256": "71a63cc52563c71202b39bba1ab1eeff2af05179f288c5d4214982695255999d",
+   "bytes": 7282056
+  },
+  "godot-client/world_authoring/regions/sw_isle/region-authoring-spec.json": {
+   "sha256": "ac7beeecb9fc6a4bda4e3cfb5e59125b644bb5cad52e3a49b6f1f3837bf2ad26",
+   "bytes": 1425
+  },
+  "godot-client/world_authoring/regions/sw_isle/sw_isle.tscn": {
+   "sha256": "4e61457d63f7effb4f74d4ad53ce8bf13c90c06c14409bfddb7812706307eb08",
+   "bytes": 14760349
+  },
+  "godot-client/world_authoring/regions/sw_isle/terrain-provenance.json": {
+   "sha256": "496ddeba006a1faa43971b713d2ac2192493cab2307b0bf6086ff7edde8498f4",
+   "bytes": 17833
+  },
+  "godot-client/world_authoring/regions/tollholms/base-colors.rgba8": {
+   "sha256": "2df6f64f27e6232708f5c20949e5031f2d419aafaa13104a0bc00b5e53f483be",
+   "bytes": 1637768
+  },
+  "godot-client/world_authoring/regions/tollholms/base-heights.f32le": {
+   "sha256": "29a288230f2701428a9c513111914d777258e9499e26d56ea01e92f24c81b32c",
+   "bytes": 1637768
+  },
+  "godot-client/world_authoring/regions/tollholms/region-authoring-spec.json": {
+   "sha256": "a9738a31ca258617088175ff1d9e2656f3c4f754fa626f473ce4d6840d04cbb5",
+   "bytes": 1440
+  },
+  "godot-client/world_authoring/regions/tollholms/terrain-provenance.json": {
+   "sha256": "0b90bc5a377c711098012a1a90a875ba08509ab6b3a585645a376501d138fb53",
+   "bytes": 2197
+  },
+  "godot-client/world_authoring/regions/tollholms/tollholms.tscn": {
+   "sha256": "96341027aee45d5c3a0298bae966c1e62a668237eebd2e07eab092c2652720e2",
+   "bytes": 4134752
+  }
+ },
+ "sources": [
+  {
+   "id": "sw_isle",
+   "label": "Landfall",
+   "paths": {
+    "scene": "godot-client/world_authoring/regions/sw_isle/sw_isle.tscn",
+    "manifest": "eloria-assets/maps/continent-v2/sw_isle/world.json",
+    "authoringSpec": "godot-client/world_authoring/regions/sw_isle/region-authoring-spec.json",
+    "baseHeights": "godot-client/world_authoring/regions/sw_isle/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/sw_isle/base-colors.rgba8",
+    "terrainProvenance": "godot-client/world_authoring/regions/sw_isle/terrain-provenance.json"
+   },
+   "frame": {
+    "translation": [
+     1418.0,
+     0.0,
+     7270.0
+    ],
+    "continentFirstVertex": [
+     299.0,
+     6163.0
+    ],
+    "gridSize": [
+     1446,
+     1259
+    ],
+    "cellMetres": 2.0,
+    "server": {
+     "origin": [
+      1023,
+      993
+     ],
+     "cells": [
+      2046,
+      2046
+     ],
+     "collisionOriginMetres": [
+      -1023.0,
+      993.0
+     ]
+    }
+   },
+   "nonzeroSculptVertices": 39337,
+   "ownedVerticesVerifiedByteExact": 1040400,
+   "sceneSidePatches": [
+    {
+     "id": "seam-mole-knob",
+     "shape": 1,
+     "operation": 1,
+     "size": [
+      42.0,
+      12.0
+     ],
+     "feather": 0.0,
+     "enabled": true,
+     "basis": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "continentOrigin": [
+      2431.0,
+      2.5,
+      7932.0
+     ]
+    },
+    {
+     "id": "seam-mole-pier",
+     "shape": 1,
+     "operation": 1,
+     "size": [
+      28.0,
+      42.0
+     ],
+     "feather": 0.0,
+     "enabled": true,
+     "basis": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "continentOrigin": [
+      2434.0,
+      2.0,
+      7335.0
+     ]
+    }
+   ],
+   "terrainShapingPaths": []
+  },
+  {
+   "id": "gull_skerries",
+   "label": "The Gull Skerries",
+   "paths": {
+    "scene": "godot-client/world_authoring/regions/gull_skerries/gull_skerries.tscn",
+    "manifest": "eloria-assets/maps/continent-v2/gull_skerries/world.json",
+    "authoringSpec": "godot-client/world_authoring/regions/gull_skerries/region-authoring-spec.json",
+    "baseHeights": "godot-client/world_authoring/regions/gull_skerries/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/gull_skerries/base-colors.rgba8",
+    "terrainProvenance": "godot-client/world_authoring/regions/gull_skerries/terrain-provenance.json"
+   },
+   "frame": {
+    "translation": [
+     896.0,
+     0.0,
+     7876.0
+    ],
+    "continentFirstVertex": [
+     299.0,
+     7041.0
+    ],
+    "gridSize": [
+     612,
+     820
+    ],
+    "cellMetres": 2.0,
+    "server": {
+     "origin": [
+      571,
+      779
+     ],
+     "cells": [
+      1560,
+      1560
+     ],
+     "collisionOriginMetres": [
+      -571.0,
+      779.0
+     ]
+    }
+   },
+   "nonzeroSculptVertices": 164,
+   "ownedVerticesVerifiedByteExact": 132543,
+   "sceneSidePatches": [],
+   "terrainShapingPaths": []
+  },
+  {
+   "id": "tollholms",
+   "label": "The Tollholms",
+   "paths": {
+    "scene": "godot-client/world_authoring/regions/tollholms/tollholms.tscn",
+    "manifest": "eloria-assets/maps/continent-v2/tollholms/world.json",
+    "authoringSpec": "godot-client/world_authoring/regions/tollholms/region-authoring-spec.json",
+    "baseHeights": "godot-client/world_authoring/regions/tollholms/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/tollholms/base-colors.rgba8",
+    "terrainProvenance": "godot-client/world_authoring/regions/tollholms/terrain-provenance.json"
+   },
+   "frame": {
+    "translation": [
+     2800.0,
+     0.0,
+     7398.0
+    ],
+    "continentFirstVertex": [
+     2377.0,
+     6393.0
+    ],
+    "gridSize": [
+     407,
+     1006
+    ],
+    "cellMetres": 2.0,
+    "server": {
+     "origin": [
+      367,
+      949
+     ],
+     "cells": [
+      1902,
+      1902
+     ],
+     "collisionOriginMetres": [
+      -367.0,
+      949.0
+     ]
+    }
+   },
+   "nonzeroSculptVertices": 8100,
+   "ownedVerticesVerifiedByteExact": 304780,
+   "sceneSidePatches": [
+    {
+     "id": "seam-mole-knob",
+     "shape": 1,
+     "operation": 1,
+     "size": [
+      42.0,
+      12.0
+     ],
+     "feather": 0.0,
+     "enabled": true,
+     "basis": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "continentOrigin": [
+      2431.0,
+      2.5,
+      7932.0
+     ]
+    },
+    {
+     "id": "seam-mole-pier",
+     "shape": 1,
+     "operation": 1,
+     "size": [
+      28.0,
+      42.0
+     ],
+     "feather": 0.0,
+     "enabled": true,
+     "basis": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "continentOrigin": [
+      2434.0,
+      2.0,
+      7335.0
+     ]
+    }
+   ],
+   "terrainShapingPaths": []
+  }
+ ],
+ "nonzeroSculptVertices": 47601,
+ "outputs": {
+  "base-heights.f32le": {
+   "sha256": "176b536762632e57bc40a1298f9a6ccf304a2c27bd420ec9e0f7191314ed69ec",
+   "bytes": 7282056
+  },
+  "base-colors.rgba8": {
+   "sha256": "35b67bacbf9c562375f5fa00a2cb57c895cebc95b0258901b00af6edad2974c4",
+   "bytes": 7282056
+  }
+ }
+}

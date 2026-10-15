@@ -1,0 +1,921 @@
+{
+  "accessAssemblies": [
+    {
+      "assetId": "published-mirror-mirror-bank-ramp-quay",
+      "id": "mirror-bank-ramp-quay",
+      "walkNode": "Walk_Mirror_BankRamp_Quay"
+    },
+    {
+      "assetId": "published-mirror-mirror-bank-ramp-sanctuary",
+      "id": "mirror-bank-ramp-sanctuary",
+      "walkNode": "Walk_Mirror_BankRamp_Sanctuary"
+    }
+  ],
+  "counts": {
+    "objects": 168,
+    "paths": 48,
+    "prototypeFamilies": 171,
+    "publishedAssemblies": 3,
+    "retiredSourcePlacements": 333,
+    "riverControlPoints": 4,
+    "riverCurvePoints": 19,
+    "runtimeBindings": 139,
+    "runtimePoints": 93,
+    "savedAssetControls": 171,
+    "visibleGameplay": 129
+  },
+  "crossings": [
+    {
+      "assetId": "published-mirror-mirror-outlet-16",
+      "id": "mirror_outlet@16",
+      "walkNode": "Walk_ContinentalBridgeUnion_008_mirrorhold"
+    }
+  ],
+  "inputs": {
+    "authoredBaseHeightsSha256": "0511c783876d44444e27a435cb3f78f88f1f9fa2869907102cfa628aebff12ab",
+    "baseColors": {
+      "encoding": "rgba8-srgb",
+      "maximumPublishedUvError": 1.52587890625e-05,
+      "path": "base-colors.rgba8",
+      "publishedVerticesCompared": 39392,
+      "sha256": "b2c3f7a7a7c087836140962686e0ec72dc04ae6b336acdcb832041f522a4ea3d",
+      "texturePath": "assets/textures/continental-ground.png",
+      "textureSha256": "884fe4c3eca79b4492bc9d6baefe1f14965e1ceebbcbad1a0676314117542035",
+      "waterTexturePath": "assets/textures/continental-water.png",
+      "waterTextureSha256": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac"
+    },
+    "certifiedBootstrapHeightsSha256": "0511c783876d44444e27a435cb3f78f88f1f9fa2869907102cfa628aebff12ab",
+    "certifiedResolvedHeightsSha256": "0511c783876d44444e27a435cb3f78f88f1f9fa2869907102cfa628aebff12ab",
+    "composedSha256": "c65f38d7446a1408b3911f00d0e6e72a857f4ce1b5717fe922a87340699132f7",
+    "compositionObjectCount": 4981,
+    "compositionPlanSha256": "54ddec547568e83ae87fcc568ac2a87ce05317cd824522a5eeeee0b477ccb97a",
+    "compositionSha256": "36ec1e4ed285ccd28b751014ec8c13a30ad86434120a15a354c543b4251cd86a",
+    "exportLedgerSha256": "ad020186972517b1c5710792731ce96f79d84db3d2ae70586d646781b6d082b6",
+    "planSha256": "f500793c2e9e2a48f0189a0443287a5c3aa315f3e79ecf48139eef75cb1bdb5e",
+    "publishedMasterSha256": "af8fd0db996aa05f8b3e840d30d823ca918f841c552ee9dc2367458027c8b634",
+    "roadsSha256": "6ec5f505abce4f8b219bfa4278d59d7b8d9d8038a65cddf461b422a7986463f8",
+    "runtimeBindingSeedSha256": "20c282cdb16475873f6a8600f862ffb4a53c3cec25829b96ea22d828137857dd",
+    "sourceManifestSha256": "05c503ea8fe2d33dff4ac376f7b46b87b528c9a3e20c50be5e2b1b9aae2361cc",
+    "sourceWorldSha256": "bb6d3d5f6fafb5f3f40d0a36df22f38e932ee90b0ed3cde5ac528dc54012ca32"
+  },
+  "objects": [
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-0-b38c3f3d03b0",
+      "id": "Building_CliffHouse_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-1-d52077c3788d",
+      "id": "Building_CliffHouse_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-10-d708fd454857",
+      "id": "Building_CliffHouse_10"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-11-491843acea6a",
+      "id": "Building_CliffHouse_11"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-12-25ce5b82ed07",
+      "id": "Building_CliffHouse_12"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-13-5dc380778379",
+      "id": "Building_CliffHouse_13"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-14-39cb6dcd8c54",
+      "id": "Building_CliffHouse_14"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-2-6ca150029744",
+      "id": "Building_CliffHouse_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-3-e5f64b5cb0b9",
+      "id": "Building_CliffHouse_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-4-8db769b8c1ef",
+      "id": "Building_CliffHouse_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-5-4ce43c5fae17",
+      "id": "Building_CliffHouse_5"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-6-a50f60a30936",
+      "id": "Building_CliffHouse_6"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-7-516d4230681a",
+      "id": "Building_CliffHouse_7"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-8-c9db33689c69",
+      "id": "Building_CliffHouse_8"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-cliffhouse-9-efdf372c96a4",
+      "id": "Building_CliffHouse_9"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-vaultentry-cistern-door-90baf44abde1",
+      "id": "Building_VaultEntry_cistern-door"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-vaultentry-lens-vault-stair-9d17a94f2cba",
+      "id": "Building_VaultEntry_lens-vault-stair"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-vaultentry-stair-cellars-door-da92c0530fbe",
+      "id": "Building_VaultEntry_stair-cellars-door"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-east-bench-0-fe05694dc041",
+      "id": "Building_east-bench_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-east-bench-1-99741b7ceea9",
+      "id": "Building_east-bench_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-lake-north-0-cc38a6f581ac",
+      "id": "Building_lake-north_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-lake-north-1-b4a2df615d1d",
+      "id": "Building_lake-north_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-lower-terrace-0-6591d0187c68",
+      "id": "Building_lower-terrace_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-lower-terrace-1-b4593cb7d1c8",
+      "id": "Building_lower-terrace_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-mid-bench-0-951a1dbe52ca",
+      "id": "Building_mid-bench_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-mid-bench-1-038f3856710b",
+      "id": "Building_mid-bench_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-west-bench-0-9065e64afb4f",
+      "id": "Building_west-bench_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-west-bench-1-049debea50f9",
+      "id": "Building_west-bench_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-west-shore-0-f9a831a081aa",
+      "id": "Building_west-shore_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "building-west-shore-1-8f0bf0017117",
+      "id": "Building_west-shore_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "grove-00032-4085fed0ea9d",
+      "id": "Grove_00032"
+    },
+    {
+      "collisionRole": "none",
+      "family": "grove-00035-d5801f613678",
+      "id": "Grove_00035"
+    },
+    {
+      "collisionRole": "none",
+      "family": "grove-00061-2d5975cd77cc",
+      "id": "Grove_00061"
+    },
+    {
+      "collisionRole": "none",
+      "family": "grove-00083-ff7b717a8791",
+      "id": "Grove_00083"
+    },
+    {
+      "collisionRole": "none",
+      "family": "grove-00091-611515103c6f",
+      "id": "Grove_00091"
+    },
+    {
+      "collisionRole": "none",
+      "family": "grove-00101-8644c14ccd6a",
+      "id": "Grove_00101"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-aqueduct-8e71be2abb86",
+      "id": "Landmark_Aqueduct"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-basin-0-c51c5a2b63ba",
+      "id": "Landmark_Basin_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-basin-1-6b40ee6ba6d1",
+      "id": "Landmark_Basin_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-basin-2-4f97022df55d",
+      "id": "Landmark_Basin_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-channel-0-534ad37fc109",
+      "id": "Landmark_Channel_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-channel-1-d29711e3b18f",
+      "id": "Landmark_Channel_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-channel-2-ce64ad52b062",
+      "id": "Landmark_Channel_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-channel-3-29b40946cab4",
+      "id": "Landmark_Channel_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-channel-4-ce40573d4a5c",
+      "id": "Landmark_Channel_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-citadelcourt-a0022902c03d",
+      "id": "Landmark_CitadelCourt"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-citadelhigh-ac8fed78073b",
+      "id": "Landmark_CitadelHigh"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-dock-0-200bf02861ff",
+      "id": "Landmark_Dock_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-dock-1-de3c1b164ee0",
+      "id": "Landmark_Dock_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-fall-0-ce6be4515b5f",
+      "id": "Landmark_Fall_0"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-fall-1-84a3c3cc295a",
+      "id": "Landmark_Fall_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-fall-2-0c2f07ff5705",
+      "id": "Landmark_Fall_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-fountain-a55fe8bcfe01",
+      "id": "Landmark_Fountain"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-gallery-d2b1ec2c787a",
+      "id": "Landmark_Gallery"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-gatewall-290cd5179d6c",
+      "id": "Landmark_GateWall"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-gatewing-1-0f00b953aa03",
+      "id": "Landmark_GateWing_-1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-gatewing-1-5ca98e0b78b3",
+      "id": "Landmark_GateWing_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-lakelink-city-639164acd117",
+      "id": "Landmark_LakeLink_City"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-lakelink-eastpier-8d486377e925",
+      "id": "Landmark_LakeLink_EastPier"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-lakelink-sanctuary-be74ff6b683e",
+      "id": "Landmark_LakeLink_Sanctuary"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-lakelink-westpier-37c620082fe7",
+      "id": "Landmark_LakeLink_WestPier"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-orrery-bd49ebc3db37",
+      "id": "Landmark_Orrery"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-orrerydrum-c36a88ba94aa",
+      "id": "Landmark_OrreryDrum"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-overlook-c6dabf261646",
+      "id": "Landmark_Overlook"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-plazastatue-0-43420afc5d9a",
+      "id": "Landmark_PlazaStatue_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-plazastatue-1-35109ce5dc77",
+      "id": "Landmark_PlazaStatue_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-plazastatue-2-48b514e0a760",
+      "id": "Landmark_PlazaStatue_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-plazastatue-3-8ee9988021c8",
+      "id": "Landmark_PlazaStatue_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-quay-9105617cba21",
+      "id": "Landmark_Quay"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-retaining-1-82c21f63baa4",
+      "id": "Landmark_Retaining_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-retaining-3-a96f8bcfff4c",
+      "id": "Landmark_Retaining_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-ring-f88fda7dd4a0",
+      "id": "Landmark_Ring"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-roadwall-1-3a1d2f2255b4",
+      "id": "Landmark_RoadWall_1"
+    },
+    {
+      "collisionRole": "none",
+      "family": "landmark-rosewindow-63295dac59f2",
+      "id": "Landmark_RoseWindow"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-southwatch-4c8ecba80812",
+      "id": "Landmark_SouthWatch"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-cistern-yard-b4fe21dc7963",
+      "id": "Landmark_cistern-yard"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-east-post-2bd0cafb5e90",
+      "id": "Landmark_east-post"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-east-islet-e75e432f6c26",
+      "id": "Landmark_east_islet"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-far-west-90a29c0e49d3",
+      "id": "Landmark_far-west"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-gorge-head-083f881a10be",
+      "id": "Landmark_gorge-head"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-lens-works-16f6458e3f24",
+      "id": "Landmark_lens-works"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-lens-tower-east-67d54255ef4b",
+      "id": "Landmark_lens_tower_east"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-lens-tower-west-7c64dcac756e",
+      "id": "Landmark_lens_tower_west"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-north-post-976d31ad01bb",
+      "id": "Landmark_north-post"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-quarry-shelf-6830913bd735",
+      "id": "Landmark_quarry-shelf"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-upper-shrine-230d6b58e830",
+      "id": "Landmark_upper-shrine"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-west-shrine-083fd4fc5100",
+      "id": "Landmark_west-shrine"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "landmark-west-islet-e3ff7ae41780",
+      "id": "Landmark_west_islet"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "lore-ringing-quarry-3cd9a3294120",
+      "id": "Lore_ringing_quarry"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-boat-0-6343d311cca6",
+      "id": "Prop_Boat_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-boat-1-d373a3b5c5c3",
+      "id": "Prop_Boat_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-boat-2-10befe628c7d",
+      "id": "Prop_Boat_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-0-1-7c49c247c460",
+      "id": "Prop_Brazier_0_-1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-0-1-31244c516362",
+      "id": "Prop_Brazier_0_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-1-1-ede9b04fc545",
+      "id": "Prop_Brazier_1_-1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-1-1-7ca3a6ae3165",
+      "id": "Prop_Brazier_1_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-2-1-d6fcee505489",
+      "id": "Prop_Brazier_2_-1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-2-1-f223ebdabfdb",
+      "id": "Prop_Brazier_2_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-3-1-47795c32b25f",
+      "id": "Prop_Brazier_3_-1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-3-1-e1424f205212",
+      "id": "Prop_Brazier_3_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-4-1-f3c242cffc0c",
+      "id": "Prop_Brazier_4_-1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-brazier-4-1-ff100772fad8",
+      "id": "Prop_Brazier_4_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-0-c270cb18f6a6",
+      "id": "Prop_HarbourGoods_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-1-870ce13429c2",
+      "id": "Prop_HarbourGoods_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-10-46442f6fbba5",
+      "id": "Prop_HarbourGoods_10"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-11-954e9f60dc74",
+      "id": "Prop_HarbourGoods_11"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-12-5c9e883316db",
+      "id": "Prop_HarbourGoods_12"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-13-7265da769004",
+      "id": "Prop_HarbourGoods_13"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-2-a845224b2b1f",
+      "id": "Prop_HarbourGoods_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-3-0e82c7346dad",
+      "id": "Prop_HarbourGoods_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-4-c0015b4faa7d",
+      "id": "Prop_HarbourGoods_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-5-9ef6901d30a7",
+      "id": "Prop_HarbourGoods_5"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-6-7a50c726f6c3",
+      "id": "Prop_HarbourGoods_6"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-7-8e86f6b96b38",
+      "id": "Prop_HarbourGoods_7"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-8-56c7e3b5f908",
+      "id": "Prop_HarbourGoods_8"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-harbourgoods-9-5c40b6f1ac44",
+      "id": "Prop_HarbourGoods_9"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-overlookrail-0-d573f5b5841b",
+      "id": "Prop_OverlookRail_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-overlookrail-1-7a957c931a24",
+      "id": "Prop_OverlookRail_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-piercrate-0-e3e8f7c17fc4",
+      "id": "Prop_PierCrate_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-piercrate-1-4a58279feefa",
+      "id": "Prop_PierCrate_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-pierskiff-0-7dcde9c4148b",
+      "id": "Prop_PierSkiff_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-pierskiff-1-6bf7ff37dee9",
+      "id": "Prop_PierSkiff_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-plazalamp-0-2162a43c35c5",
+      "id": "Prop_PlazaLamp_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-plazalamp-1-425f6712a392",
+      "id": "Prop_PlazaLamp_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-plazalamp-2-b2e45b2090d9",
+      "id": "Prop_PlazaLamp_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-plazalamp-3-7dc7274b64bf",
+      "id": "Prop_PlazaLamp_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-plazalamp-4-3c7698c7b0ab",
+      "id": "Prop_PlazaLamp_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-plazalamp-5-c050e6fb6e88",
+      "id": "Prop_PlazaLamp_5"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-plazalamp-6-fa639febd004",
+      "id": "Prop_PlazaLamp_6"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-plazalamp-7-c01305653557",
+      "id": "Prop_PlazaLamp_7"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-roadlamp-0-10a6f8ca8aae",
+      "id": "Prop_RoadLamp_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-signpost-0-4346435833fa",
+      "id": "Prop_Signpost_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-signpost-1-aa80c67891b8",
+      "id": "Prop_Signpost_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-signpost-2-d828dd6930ee",
+      "id": "Prop_Signpost_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-0-f903ee775803",
+      "id": "Prop_WorkingStores_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-1-aabd30a8407e",
+      "id": "Prop_WorkingStores_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-2-35868404c494",
+      "id": "Prop_WorkingStores_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-3-8aaae26fe3ad",
+      "id": "Prop_WorkingStores_3"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-4-de4ad1ba19e5",
+      "id": "Prop_WorkingStores_4"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-5-e854ea483ca7",
+      "id": "Prop_WorkingStores_5"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-6-842093403e32",
+      "id": "Prop_WorkingStores_6"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-7-094d46306d9d",
+      "id": "Prop_WorkingStores_7"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-8-b3abff32a7d5",
+      "id": "Prop_WorkingStores_8"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-workingstores-9-3d5315e6e661",
+      "id": "Prop_WorkingStores_9"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-cistern-yard-bollard-0-4ab5edcd469c",
+      "id": "Prop_cistern-yard_bollard_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-cistern-yard-bollard-1-aa9ffc5af638",
+      "id": "Prop_cistern-yard_bollard_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-lens-works-bollard-0-a2a1bd51f8c2",
+      "id": "Prop_lens-works_bollard_0"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-lens-works-bollard-1-25ebec531b17",
+      "id": "Prop_lens-works_bollard_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-lens-works-bollard-2-b0f6f6850ba0",
+      "id": "Prop_lens-works_bollard_2"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-quarry-shelf-bollard-1-ea3d57b482a6",
+      "id": "Prop_quarry-shelf_bollard_1"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "prop-quarry-shelf-bollard-2-be61c838a3dc",
+      "id": "Prop_quarry-shelf_bollard_2"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-adit-58d24494f1fd",
+      "id": "Secret_mirror_adit"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-basin-spring-86f453c51e8a",
+      "id": "Secret_mirror_basin_spring"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-cistern-well-fc3176a88232",
+      "id": "Secret_mirror_cistern_well"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-citadel-reliquary-64d0552690bf",
+      "id": "Secret_mirror_citadel_reliquary"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-icebore-mouth-b235722a4338",
+      "id": "Secret_mirror_icebore_mouth"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-lens-focus-b69ce2db88de",
+      "id": "Secret_mirror_lens_focus"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-lens-garden-7799b6c7f83b",
+      "id": "Secret_mirror_lens_garden"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-orrery-vault-114b20626e32",
+      "id": "Secret_mirror_orrery_vault"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-overlook-eyrie-12e7f1a89f51",
+      "id": "Secret_mirror_overlook_eyrie"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-reed-cut-c78c615c5b68",
+      "id": "Secret_mirror_reed_cut"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-rose-school-fea763770d19",
+      "id": "Secret_mirror_rose_school"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-stair-pit-34ee4587ff38",
+      "id": "Secret_mirror_stair_pit"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-watch-butts-47222df434d4",
+      "id": "Secret_mirror_watch_butts"
+    },
+    {
+      "collisionRole": "none",
+      "family": "secret-mirror-waystone-2198ae930bb3",
+      "id": "Secret_mirror_waystone"
+    },
+    {
+      "collisionRole": "solid",
+      "family": "walk-landmark-eaststair-da75459b6e96",
+      "id": "Walk_Landmark_EastStair"
+    },
+    {
+      "collisionRole": "none",
+      "family": "woodlandfloor-0061-df4562dc8c04",
+      "id": "WoodlandFloor_0061"
+    },
+    {
+      "collisionRole": "none",
+      "family": "woodlandfloor-0148-b54c4092e465",
+      "id": "WoodlandFloor_0148"
+    },
+    {
+      "collisionRole": "walk_surface",
+      "family": "published-mirror-mirror-bank-ramp-quay",
+      "id": "published-mirror-mirror-bank-ramp-quay"
+    },
+    {
+      "collisionRole": "walk_surface",
+      "family": "published-mirror-mirror-bank-ramp-sanctuary",
+      "id": "published-mirror-mirror-bank-ramp-sanctuary"
+    },
+    {
+      "collisionRole": "walk_surface",
+      "family": "published-mirror-mirror-outlet-16",
+      "id": "published-mirror-mirror-outlet-16"
+    }
+  ],
+  "regionId": "mirrorhold",
+  "sceneSha256": "17fe6d4b49e2ac4768e20d2df66c343474327891aea94d044114bfb940da7c34",
+  "schema": "eloria-mirrorhold-authoring-migration-v1"
+}

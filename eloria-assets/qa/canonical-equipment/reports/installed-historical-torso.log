@@ -1,0 +1,1074 @@
+....F.                                       [100%]
+================================== FAILURES ===================================
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoShellTest.test_every_torso_shell_is_closed_and_encloses_volume (scene='eloria_arcane_armor_05.glb') _
+
+self = <test_torso_coverage.TorsoShellTest testMethod=test_every_torso_shell_is_closed_and_encloses_volume>
+
+    def test_every_torso_shell_is_closed_and_encloses_volume(self) -> None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:  # pragma: no cover - numpy is a build requirement
+            self.skipTest("numpy is required to read garment geometry")
+        fit = _fit()
+        seen = 0
+        for key, path in sorted(set(self._scenes()), key=lambda pair: pair[1]):
+            with self.subTest(scene=path.name):
+                self.assertTrue(path.is_file(), f"{path} missing")
+                primitives, _rig, _names = fit.load(str(path))
+                shells = [shell for primitive in primitives
+                          for shell in fit.components(primitive.points,
+                                                      primitive.triangles)]
+                self.assertTrue(shells, f"{path.name} has no geometry")
+                closed = [shell for shell in shells if shell.closed]
+                self.assertTrue(
+                    closed,
+                    f"{path.name} ({key}) encloses nothing: none of its "
+                    f"{len(shells)} shells is closed, so no body vertex can "
+                    f"ever be inside it")
+                for shell in closed:
+>                   self.assertGreater(
+                        shell.volume, 0.0,
+                        f"{path.name} has a closed shell wound inside out; the "
+                        f"renderer culls the near wall and it goes transparent")
+E                   AssertionError: 0.0 not greater than 0.0 : eloria_arcane_armor_05.glb has a closed shell wound inside out; the renderer culls the near wall and it goes transparent
+
+tests\test_torso_coverage.py:102: AssertionError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_on_bare_legs (visual='5:120', kind='coat') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_on_bare_legs>
+
+    def test_torso_garments_cover_the_body_on_bare_legs(self) -> None:
+        # The waist seam has to hold without the trousers as well: a hem long
+        # enough only because something else is over it is not a hem.
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=False)
+
+tests\test_torso_coverage.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:120', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:120'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_on_bare_legs (visual='5:128', kind='cuirass') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_on_bare_legs>
+
+    def test_torso_garments_cover_the_body_on_bare_legs(self) -> None:
+        # The waist seam has to hold without the trousers as well: a hem long
+        # enough only because something else is over it is not a hem.
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=False)
+
+tests\test_torso_coverage.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:128', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:128'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_on_bare_legs (visual='5:168', kind='shirt') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_on_bare_legs>
+
+    def test_torso_garments_cover_the_body_on_bare_legs(self) -> None:
+        # The waist seam has to hold without the trousers as well: a hem long
+        # enough only because something else is over it is not a hem.
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=False)
+
+tests\test_torso_coverage.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:168', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:168'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_on_bare_legs (visual='5:137', kind='robe') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_on_bare_legs>
+
+    def test_torso_garments_cover_the_body_on_bare_legs(self) -> None:
+        # The waist seam has to hold without the trousers as well: a hem long
+        # enough only because something else is over it is not a hem.
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=False)
+
+tests\test_torso_coverage.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:137', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:137'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_on_bare_legs (visual='5:0', kind='generic shirt') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_on_bare_legs>
+
+    def test_torso_garments_cover_the_body_on_bare_legs(self) -> None:
+        # The waist seam has to hold without the trousers as well: a hem long
+        # enough only because something else is over it is not a hem.
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=False)
+
+tests\test_torso_coverage.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:0', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:0'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_on_bare_legs (visual='5:16', kind='generic plate') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_on_bare_legs>
+
+    def test_torso_garments_cover_the_body_on_bare_legs(self) -> None:
+        # The waist seam has to hold without the trousers as well: a hem long
+        # enough only because something else is over it is not a hem.
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=False)
+
+tests\test_torso_coverage.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:16', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:16'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_over_trousers (visual='5:120', kind='coat') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_over_trousers>
+
+    def test_torso_garments_cover_the_body_over_trousers(self) -> None:
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=True)
+
+tests\test_torso_coverage.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:120', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:120'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_over_trousers (visual='5:128', kind='cuirass') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_over_trousers>
+
+    def test_torso_garments_cover_the_body_over_trousers(self) -> None:
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=True)
+
+tests\test_torso_coverage.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:128', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:128'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_over_trousers (visual='5:168', kind='shirt') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_over_trousers>
+
+    def test_torso_garments_cover_the_body_over_trousers(self) -> None:
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=True)
+
+tests\test_torso_coverage.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:168', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:168'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_over_trousers (visual='5:137', kind='robe') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_over_trousers>
+
+    def test_torso_garments_cover_the_body_over_trousers(self) -> None:
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=True)
+
+tests\test_torso_coverage.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:137', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:137'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_over_trousers (visual='5:0', kind='generic shirt') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_over_trousers>
+
+    def test_torso_garments_cover_the_body_over_trousers(self) -> None:
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=True)
+
+tests\test_torso_coverage.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:0', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:0'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+_ TorsoCoverageTest.test_torso_garments_cover_the_body_over_trousers (visual='5:16', kind='generic plate') _
+
+self = <test_torso_coverage.TorsoCoverageTest testMethod=test_torso_garments_cover_the_body_over_trousers>
+
+    def test_torso_garments_cover_the_body_over_trousers(self) -> None:
+        for key, kind in SAMPLE.items():
+            with self.subTest(visual=key, kind=kind):
+>               self._assert_covered(key, kind, dressed=True)
+
+tests\test_torso_coverage.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:150: in _assert_covered
+    for result in self._measure(key, dressed):
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_torso_coverage.py:139: in _measure
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '5:16', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '5:16'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+____ TorsoWaistDatumTest.test_the_torso_layer_is_inside_the_trouser_layer _____
+
+self = <test_torso_coverage.TorsoWaistDatumTest testMethod=test_the_torso_layer_is_inside_the_trouser_layer>
+
+    def test_the_torso_layer_is_inside_the_trouser_layer(self) -> None:
+        """Long enough is not sufficient: it has to be *under*, too.
+    
+        A hem that reaches inside the waistband but is cut wider than it pushes
+        straight back out through it, and on screen that is indistinguishable
+        from a gap.
+    
+        This used to compare two declared constants - the torso construction's
+        ``thickness`` against the leg pipeline's ``SHELL_STANDOFF`` - and passed
+        while the meshes failed by 30 mm.  Both pipelines size their rings from
+        a slab that reaches the hips, so at the narrow waist both are hip-sized
+        and the gap between them is nothing like the gap between the two
+        numbers.  It now measures the built garments against the built trousers,
+        per race, which is the only comparison that can see the defect.
+        """
+        import numpy as np
+        fit = self.fit
+        sides = 36
+    
+        def shells(key: str, race: str):
+            """The garment's closed components, skinned onto this wearer."""
+            scene, author = fit.resolve(self.registry, key, race)
+            pieces, rig, _ = fit.load(str(CLIENT / scene.removeprefix("res://")))
+            _body, wearer, _names = fit.load(str(RACES / f"{race}.glb"))
+            binds = fit.bone_binds(rig, wearer,
+                                   fit.girth_ratios(self.registry, author, race))
+            matrices = {b: wearer.rest[b] @ binds[b] for b in binds if b in wearer.rest}
+            out = []
+            for piece in pieces:
+                if piece.joints is None:
+                    continue
+                moved = fit.skin(piece.points, piece.joints, piece.weights,
+                                 rig.names, matrices)
+                out.extend(fit.components(moved, piece.triangles))
+            return out
+    
+        def tucking(parts):
+            """The one component that tucks in, chosen once for the garment.
+    
+            A coat's skirt and a cuirass's fauld are in here too, and both hang
+            *outside* the trousers on purpose - a fauld is hip armour, it is
+            meant to be seen.  The one that tucks is the body shell, and what
+            separates them is that the shell carries on up to the collar while a
+            skirt stops at the waist.
+    
+            Chosen once rather than per height: the shell's rings are 26 mm
+            apart, so at some heights it has no vertices within a sampling
+            window at all and a per-height choice silently picked the fauld -
+            then reported the fauld's 21 mm as the shell's.
+            """
+            reaching = [s for s in parts
+                        if s.points[:, 1].min() <= high
+                        and s.points[:, 1].max() > 1.25]
+            if not reaching:
+                return None
+            return max(reaching, key=lambda s: s.points[:, 1].max()).points
+    
+        def ring(points, height: float, window: float = .016):
+            # Wide enough to catch a ring of the body shell, whose rows are
+            # 26 mm apart; both layers are sampled the same way.
+            here = points[np.abs(points[:, 1] - height) < window]
+            if len(here) < sides // 3:
+                return None
+            angle = np.arctan2(here[:, 2], here[:, 0]) % (2 * np.pi)
+            radius = np.hypot(here[:, 0], here[:, 2])
+            slot = np.minimum((angle / (2 * np.pi) * sides).astype(int), sides - 1)
+            out = np.full(sides, np.nan)
+            for index in range(sides):
+                found = radius[slot == index]
+                if len(found):
+                    out[index] = found.max()
+            return out
+    
+        low, high = self.TUCK_ZONE
+        heights = [low + (high - low) * step / 4 for step in range(5)]
+        checked = 0
+        for race in self.races:
+>           trouser_parts = shells("4:0", race)
+                            ^^^^^^^^^^^^^^^^^^^
+
+tests\test_torso_coverage.py:330: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_torso_coverage.py:274: in shells
+    scene, author = fit.resolve(self.registry, key, race)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+registry = {'schemaVersion': 3, 'canonicalHeadRestY': 1.568490028858185, 'parts': {'0': {'name': 'weapon', 'attachment': 'right_h...0, 0.0, 0.0]}, '7': {'bone': 'spine_03', 'offset': [0.0, 0.16492, 0.10644], 'rotationDegrees': [-0.0, 0.0, 0.0]}}, ...}
+key = '4:0', wearer = 'glasswarden_female'
+
+    def resolve(registry: dict, key: str, wearer: str) -> tuple[str, str]:
+        """The scene and authoring rig one race resolves a registry entry to.
+    
+        Mirrors ``_fit_variant``: a race in a fit group wears the variant built on
+        its own rig where the piece ships one, and the reference piece otherwise.
+        """
+>       model = dict(registry["models"][key])
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '4:0'
+
+..\eloria-assets\tools\garment_coverage.py:798: KeyError
+=========================== short test summary info ===========================
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(scene='eloria_arcane_armor_05.glb') tests/test_torso_coverage.py::TorsoShellTest::test_every_torso_shell_is_closed_and_encloses_volume
+SUBFAILED(visual='5:120', kind='coat') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_on_bare_legs
+SUBFAILED(visual='5:128', kind='cuirass') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_on_bare_legs
+SUBFAILED(visual='5:168', kind='shirt') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_on_bare_legs
+SUBFAILED(visual='5:137', kind='robe') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_on_bare_legs
+SUBFAILED(visual='5:0', kind='generic shirt') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_on_bare_legs
+SUBFAILED(visual='5:16', kind='generic plate') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_on_bare_legs
+SUBFAILED(visual='5:120', kind='coat') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_over_trousers
+SUBFAILED(visual='5:128', kind='cuirass') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_over_trousers
+SUBFAILED(visual='5:168', kind='shirt') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_over_trousers
+SUBFAILED(visual='5:137', kind='robe') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_over_trousers
+SUBFAILED(visual='5:0', kind='generic shirt') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_over_trousers
+SUBFAILED(visual='5:16', kind='generic plate') tests/test_torso_coverage.py::TorsoCoverageTest::test_torso_garments_cover_the_body_over_trousers
+FAILED tests/test_torso_coverage.py::TorsoWaistDatumTest::test_the_torso_layer_is_inside_the_trouser_layer
+29 failed, 5 passed, 1008 subtests passed in 162.15s (0:02:42)

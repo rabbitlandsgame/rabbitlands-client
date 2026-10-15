@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="1_surface"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_water"]
+transparency = 1
+albedo_color = Color(0.24, 0.54, 0.62, 0.9)
+metallic = 0.0
+roughness = 0.45
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_surface")
+texture_preset = "Custom"
+rotation_degrees = 0.0
+source_material = SubResource("StandardMaterial3D_water")

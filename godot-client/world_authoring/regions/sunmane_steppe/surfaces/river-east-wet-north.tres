@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="1_670ne"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/texture_packs/delta-silt/delta-silt-v001.png" id="2_g0vi3"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-normal.png" id="3_yl0ws"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-orm.png" id="4_6yqoy"]
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_p30di"]
+cull_mode = 2
+albedo_texture = ExtResource("2_g0vi3")
+orm_texture = ExtResource("4_6yqoy")
+normal_enabled = true
+normal_scale = 0.45
+normal_texture = ExtResource("3_yl0ws")
+uv1_scale = Vector3(1.0416667, 1.0416667, 0.25)
+texture_filter = 5
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_670ne")
+texture_preset = "Delta silt"
+rotation_degrees = 7.0
+source_material = SubResource("ORMMaterial3D_p30di")

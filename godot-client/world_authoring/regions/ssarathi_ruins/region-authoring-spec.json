@@ -1,0 +1,189 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "ssarathi_ruins",
+  "label": "Ssarathi Ruins",
+  "adapter": "published-generic-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/ssarathi_ruins/ssarathi_ruins.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/ssarathi_ruins/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/ssarathi_ruins/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/ssarathi_ruins/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/ssarathi_ruins/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/ssarathi_ruins/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    1100.0,
+    0.0,
+    1440.0
+  ],
+  "server": {
+    "origin": [
+      376,
+      244
+    ],
+    "cells": [
+      780,
+      780
+    ],
+    "collisionOriginMetres": [
+      -376.0,
+      244.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -374.0,
+      -162.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      388,
+      202
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        363,
+        639
+      ],
+      "previousGridSha256": "55e672b870767b6eab095e45e76c6fb368b078e2e37e2fd4c7c422f28021a8f2"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "crownwater--ssarathi_ruins-ssarathi_ruins",
+      "discovery-ssarathi_ruins-1144",
+      "discovery-ssarathi_ruins-431",
+      "discovery-ssarathi_ruins-432",
+      "discovery-ssarathi_ruins-433",
+      "discovery-ssarathi_ruins-435",
+      "discovery-ssarathi_ruins-436",
+      "discovery-ssarathi_ruins-437",
+      "discovery-ssarathi_ruins-438",
+      "discovery-ssarathi_ruins-439",
+      "discovery-ssarathi_ruins-440",
+      "discovery-ssarathi_ruins-441",
+      "discovery-ssarathi_ruins-442",
+      "door-ssarathi_ruins-archive-vault-door",
+      "door-ssarathi_ruins-cistern-shaft",
+      "door-ssarathi_ruins-hatchery-descent",
+      "door-ssarathi_ruins-lineage-house-door",
+      "door-ssarathi_ruins-tenth-mouth-door",
+      "door-ssarathi_ruins-undercroft-mouth",
+      "door-ssarathi_ruins-water-gate-undercut-mouth",
+      "ssarathi_ruins--verdant_stair-ssarathi_ruins"
+    ],
+    "requiredRouteIds": [
+      "crownwater--ssarathi_ruins-ssarathi_ruins",
+      "door-ssarathi_ruins-archive-vault-door",
+      "door-ssarathi_ruins-cistern-shaft",
+      "door-ssarathi_ruins-hatchery-descent",
+      "door-ssarathi_ruins-lineage-house-door",
+      "door-ssarathi_ruins-tenth-mouth-door",
+      "door-ssarathi_ruins-undercroft-mouth",
+      "door-ssarathi_ruins-water-gate-undercut-mouth",
+      "ssarathi_ruins--verdant_stair-ssarathi_ruins"
+    ],
+    "ownedPlanFeatureIds": [],
+    "ownedFerryConnectionIds": [
+      "crownwater--ssarathi_ruins"
+    ]
+  },
+  "gameplay": {
+    "runtimeBindingCount": 147,
+    "runtimePointCount": 136,
+    "existingMarkerBindingCount": 10
+  },
+  "bootstrap": {
+    "schema": "eloria-published-region-bootstrap-v1",
+    "objectCount": 735,
+    "objectIdsSha256": "79089b78afc813900687d89e90469ca6821bbe8c56d96f155006b33b5b3b043e",
+    "visibleGameplayCount": 105,
+    "assemblies": [
+      {
+        "id": "ferry-quay-02",
+        "kind": "access",
+        "supportNodes": [
+          "FerryQuay_ssarathi_ruins_02_Fascia_-1",
+          "FerryQuay_ssarathi_ruins_02_Fascia_1",
+          "FerryQuay_ssarathi_ruins_02_FerrySign",
+          "FerryQuay_ssarathi_ruins_02_MooringRopes",
+          "FerryQuay_ssarathi_ruins_02_PilesAndPosts",
+          "FerryQuay_ssarathi_ruins_02_Signpost",
+          "FerryQuay_ssarathi_ruins_02_Skiff_Floor",
+          "FerryQuay_ssarathi_ruins_02_Skiff_FurledSail",
+          "FerryQuay_ssarathi_ruins_02_Skiff_Gunwale",
+          "FerryQuay_ssarathi_ruins_02_Skiff_Hull",
+          "FerryQuay_ssarathi_ruins_02_Skiff_Mast",
+          "FerryQuay_ssarathi_ruins_02_Skiff_Seat_0",
+          "FerryQuay_ssarathi_ruins_02_Skiff_Seat_1",
+          "FerryQuay_ssarathi_ruins_02_Skiff_Seat_2"
+        ],
+        "walkNode": "Walk_FerryQuay_ssarathi_ruins_02"
+      },
+      {
+        "id": "loose-509",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_509_ssarathi_ruins"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_509_ssarathi_ruins"
+      },
+      {
+        "id": "loose-512",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_512_ssarathi_ruins"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_512_ssarathi_ruins"
+      },
+      {
+        "id": "loose-516",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_516_ssarathi_ruins"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_516_ssarathi_ruins"
+      },
+      {
+        "id": "loose-520",
+        "kind": "access",
+        "supportNodes": [
+          "BridgeUnionPier_520_1164_1604",
+          "BridgeUnionPier_520_1180_1620",
+          "BridgeUnionPier_520_1204_1660",
+          "BridgeUnionPier_520_1212_1660",
+          "BridgeUnionPier_520_1220_1660",
+          "BridgeUnionPier_520_1228_1652",
+          "BridgeUnionPier_520_1236_1628",
+          "BridgeUnionTimberEdge_520_ssarathi_ruins"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_520_ssarathi_ruins"
+      },
+      {
+        "id": "southern_river@1152",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_017_ssarathi_ruins"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_017_ssarathi_ruins"
+      },
+      {
+        "id": "southern_river@960",
+        "kind": "crossing",
+        "supportNodes": [
+          "BridgeUnionTimberEdge_018_ssarathi_ruins"
+        ],
+        "walkNode": "Walk_ContinentalBridgeUnion_018_ssarathi_ruins"
+      }
+    ],
+    "water": [],
+    "bakedTerrainFeatures": [],
+    "previewUvMetresInverse": 0.17,
+    "baselineProofSha256": "b0fdf5a858dea76939c8d48d4dc725d9d3dd83223f5173bac3567f5fdde3b21f"
+  }
+}

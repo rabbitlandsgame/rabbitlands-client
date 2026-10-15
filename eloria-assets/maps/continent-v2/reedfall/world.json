@@ -1,0 +1,276 @@
+{
+ "schemaVersion": 1,
+ "asset": {
+  "id": "reedfall",
+  "name": "Reedfall",
+  "glb": "world.glb",
+  "units": "meters",
+  "seaLevel": 0.0
+ },
+ "productionStatus": "continent-v2-editor-source",
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   1606.0,
+   0.0,
+   7404.0
+  ],
+  "ownershipPolygon": [
+   [
+    1307,
+    7421
+   ],
+   [
+    1263,
+    7601
+   ],
+   [
+    1341,
+    7621
+   ],
+   [
+    1379,
+    7651
+   ],
+   [
+    1499,
+    7667
+   ],
+   [
+    1575,
+    7655
+   ],
+   [
+    1575,
+    7601
+   ],
+   [
+    1699,
+    7581
+   ],
+   [
+    1849,
+    7371
+   ],
+   [
+    1949,
+    7221
+   ],
+   [
+    1729,
+    7201
+   ],
+   [
+    1689,
+    7151
+   ],
+   [
+    1609,
+    7151
+   ],
+   [
+    1479,
+    7141
+   ],
+   [
+    1365,
+    7171
+   ],
+   [
+    1405,
+    7271
+   ],
+   [
+    1311,
+    7323
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     1307,
+     7421
+    ],
+    [
+     1263,
+     7601
+    ],
+    [
+     1341,
+     7621
+    ],
+    [
+     1379,
+     7651
+    ],
+    [
+     1499,
+     7667
+    ],
+    [
+     1575,
+     7655
+    ],
+    [
+     1575,
+     7601
+    ],
+    [
+     1699,
+     7581
+    ],
+    [
+     1849,
+     7371
+    ],
+    [
+     1949,
+     7221
+    ],
+    [
+     1729,
+     7201
+    ],
+    [
+     1689,
+     7151
+    ],
+    [
+     1609,
+     7151
+    ],
+    [
+     1479,
+     7141
+    ],
+    [
+     1365,
+     7171
+    ],
+    [
+     1405,
+     7271
+    ],
+    [
+     1311,
+     7323
+    ]
+   ]
+  ],
+  "geometryMode": "continent-v2-editor-source"
+ },
+ "server": {
+  "origin": [
+   347,
+   267
+  ],
+  "cells": [
+   696,
+   696
+  ],
+  "collisionOriginMetres": [
+   -347.0,
+   267.0
+  ]
+ },
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.24,
+    0.44,
+    0.66
+   ],
+   "horizon": [
+    0.78,
+    0.86,
+    0.88
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.42,
+    0.62,
+    0.66
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    1.0,
+    0.94,
+    0.83
+   ],
+   "energy": 1.1
+  },
+  "ambient": {
+   "color": [
+    0.6,
+    0.67,
+    0.72
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.15,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.74,
+    0.82,
+    0.84
+   ],
+   "density": 0.0009,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  }
+ }
+}

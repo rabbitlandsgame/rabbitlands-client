@@ -1,0 +1,356 @@
+{
+  "schema": "eloria-terrain-shared-field-v1",
+  "revision": "legacy-authority-preserving-2026-09-26-v1",
+  "lattice": {
+    "originMetres": [
+      0,
+      0
+    ],
+    "spacing": 2,
+    "globalVertexMin": [
+      0,
+      0
+    ],
+    "vertices": [
+      751,
+      841
+    ],
+    "order": "row-major-x-fast"
+  },
+  "heights": {
+    "path": "godot-client/world_authoring/terrain/shared-field-v1/resolved-heights.f32le",
+    "sha256": "f8569fac42ac47e3145a68b2df54e74821021d7ae98ef06debb5fb45acebc8bd",
+    "encoding": "float32-little-endian"
+  },
+  "colors": {
+    "path": "godot-client/world_authoring/terrain/shared-field-v1/legacy-colors.rgba8",
+    "sha256": "a5862f256274a35b164923e1b7d6fd4201e2e5b485aa1e5634cee110157cd145",
+    "encoding": "rgba8"
+  },
+  "provenance": {
+    "planSha256": "54ddec547568e83ae87fcc568ac2a87ce05317cd824522a5eeeee0b477ccb97a",
+    "oldOwnerI32LESha256": "917b623f208c45eaa8b711defa4b591528cc042cd68e42184718bbaef9df1b19",
+    "newOwnerI32LESha256": "60d28b97d0532924a7b456b631f1a2d60104f35bd5affefc720aca3f3355f0eb",
+    "ownerRegionOrder": [
+      "whitehorn_range",
+      "grey_moors",
+      "amberwood",
+      "amethyst_barrens",
+      "mirrorhold",
+      "sunmane_steppe",
+      "four_gates",
+      "westhaven",
+      "manymouth_delta",
+      "crownwater",
+      "verdant_stair",
+      "ssarathi_ruins"
+    ],
+    "approvedBoundaryCandidateSha256": "30356aca59906ccd2ec8ee01c5051eb369a61564b4a3de10d484b2ec0d1c6a09",
+    "planPath": "eloria-assets/maps/nymara-regions/_continent/diagonal-plan.json",
+    "sourceRecordsAreHistorical": true,
+    "heightRule": "Saved normal resolved grids under old owned-cell incident+3x3-ring masks. Duplicate claims are bit-identical. Raw rectangle conflicts are excluded.",
+    "colorRule": "Saved authoring RGBA8 under the same masks; missing identities use hash-frozen publication raw uint8 COLOR_0 through the existing glb_reader importer path, no gamma or material multiplication.",
+    "sources": [
+      {
+        "region": "whitehorn_range",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/whitehorn_range/whitehorn_range.tscn",
+          "sha256": "41da055e67a95460efbf5719257c690159126a53d7918a3659a89deb58f408b1"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/whitehorn_range/region-authoring-spec.json",
+          "sha256": "4cc79c9da9948b51dc8cd87178d104c12fabdd35245636fef85a85cafed1019a"
+        },
+        "baseHeightsSha256": "6b25ba0f7bbd5ae21ff8eede5498afee207541471fd08f026842ac1d0e55fd79",
+        "baseColorsSha256": "9ec380cebc2dd7ff53a6adefd37714a2af1458aa6cb7c0db4517a0ede483ee5b",
+        "resolvedHeightsSha256": "6b25ba0f7bbd5ae21ff8eede5498afee207541471fd08f026842ac1d0e55fd79",
+        "normalSourceExportSha256": "dc25a15eea437eea914ae67514d6fc427929f50b184d4bc02c3e47ad13cc215b",
+        "oldOrigin": [
+          -358.0,
+          -220.0
+        ],
+        "oldVertices": [
+          350,
+          289
+        ]
+      },
+      {
+        "region": "grey_moors",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/grey_moors/grey_moors.tscn",
+          "sha256": "6914cb8460fdacdccd994b5aac0ce822a157d922dabf89ceef4ff66d670cf43b"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/grey_moors/region-authoring-spec.json",
+          "sha256": "2f1f89be160a6e730eb862519b5ca0802a99211b73983fed9cd0ef311b731e55"
+        },
+        "baseHeightsSha256": "bf5e190d3e2749b604b6e251c56f021edab2280a16373220f0cf2235bf75e2b4",
+        "baseColorsSha256": "c29a4a763355c295b4b5e5d090b2c6b0e490999b473000805afacb06ae47b737",
+        "resolvedHeightsSha256": "bf5e190d3e2749b604b6e251c56f021edab2280a16373220f0cf2235bf75e2b4",
+        "normalSourceExportSha256": "c455841d09f52982a5d2e71ece6204d8c0acfec8730cec3502aa654bdbf67118",
+        "oldOrigin": [
+          -220.0,
+          -420.0
+        ],
+        "oldVertices": [
+          196,
+          372
+        ]
+      },
+      {
+        "region": "amberwood",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/amberwood/amberwood.tscn",
+          "sha256": "5c13ef7e151469e3967c8aca6a5c10736582cfb1864996054b8a4573343dd7fb"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/amberwood/region-authoring-spec.json",
+          "sha256": "da84ab68261c42528289202b55e8d7eb38f4b6aaafb372e83df53fc17906a755"
+        },
+        "baseHeightsSha256": "f7f0d87bc489c449b0fe4fc3515da4158eb6b54d770c4c477ce0ebe0e84aa896",
+        "baseColorsSha256": "e16085eba6e9cde214b882b424e65c5b739aa8734f5d48f90b5e5293901b0136",
+        "resolvedHeightsSha256": "f7f0d87bc489c449b0fe4fc3515da4158eb6b54d770c4c477ce0ebe0e84aa896",
+        "normalSourceExportSha256": "cf18d0e58c65c1c024ca16c41f072f5a26adf98a8acb9824d62509ac4a6c1a04",
+        "oldOrigin": [
+          -238.0,
+          -118.0
+        ],
+        "oldVertices": [
+          209,
+          149
+        ]
+      },
+      {
+        "region": "amethyst_barrens",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/amethyst_barrens/amethyst_barrens.tscn",
+          "sha256": "65a3a22db51e5f0b5d8bb9061a8f8c77757a90bcd563e566e2c9f72461b9e00e"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/amethyst_barrens/region-authoring-spec.json",
+          "sha256": "7fbcf26b7a108bf617728339730c4fc10a21ab372bc3b7ca552c348ad3b9d04c"
+        },
+        "baseHeightsSha256": "f06b63a51f3c4ebea99d7a137aca2bbc16908c4f5bfa28782ffcc71739fab963",
+        "baseColorsSha256": null,
+        "resolvedHeightsSha256": "f06b63a51f3c4ebea99d7a137aca2bbc16908c4f5bfa28782ffcc71739fab963",
+        "normalSourceExportSha256": "7365af2fa09cc8c64b2471105a5d89acc2c947743e8dc0732e4c248a05630825",
+        "oldOrigin": [
+          -182.0,
+          -572.0
+        ],
+        "oldVertices": [
+          370,
+          370
+        ]
+      },
+      {
+        "region": "mirrorhold",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/mirrorhold/mirrorhold.tscn",
+          "sha256": "dab101661e68517a1cbbe199d05f57f0402cba7692a2289e07061ac229ac168f"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/mirrorhold/region-authoring-spec.json",
+          "sha256": "4c8728b6af26fbf2fd23cf6368e636e6e6d8c220a08de3b32abbad83b46f9c1e"
+        },
+        "baseHeightsSha256": "0511c783876d44444e27a435cb3f78f88f1f9fa2869907102cfa628aebff12ab",
+        "baseColorsSha256": "b2c3f7a7a7c087836140962686e0ec72dc04ae6b336acdcb832041f522a4ea3d",
+        "resolvedHeightsSha256": "0511c783876d44444e27a435cb3f78f88f1f9fa2869907102cfa628aebff12ab",
+        "normalSourceExportSha256": "b016d15810ec1b8ffac2b2b0c4660d99809b410b72db980b359079558f02e65f",
+        "oldOrigin": [
+          -208.0,
+          -190.0
+        ],
+        "oldVertices": [
+          271,
+          271
+        ]
+      },
+      {
+        "region": "sunmane_steppe",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/sunmane_steppe/sunmane_steppe.tscn",
+          "sha256": "a00b5d9404245b716bd7975d23ef55862b00e8236607263f3b5a4a9188a68a8a"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/sunmane_steppe/region-authoring-spec.json",
+          "sha256": "61b06d0bf6ef156666e20c5283ca5190bece1fcd9a771d24f295b2ace95a0e08"
+        },
+        "baseHeightsSha256": "bb18a189f0b6ccc7ed3d1e47eaa83cb953cb7b6422a04f91be4ae57c938eedf3",
+        "baseColorsSha256": null,
+        "resolvedHeightsSha256": "08727d41423269ff9d8bca5d1ff42e5253009ecd30801a6961b6e979776cdd22",
+        "normalSourceExportSha256": "99637460337a0bed0bb312369f5a65f8650fbacc4111f4518639432f952f8086",
+        "oldOrigin": [
+          -194.0,
+          -500.0
+        ],
+        "oldVertices": [
+          397,
+          397
+        ],
+        "sculpt": {
+          "path": "godot-client/world_authoring/regions/sunmane_steppe/civic-river-sculpt.tres",
+          "entries": 6280,
+          "nonzero": 6280,
+          "sha256": "3be6f9d6933cf5eb8db611783630c878db856e2a7c41016ca29f204fc0e4fa94"
+        }
+      },
+      {
+        "region": "four_gates",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/four_gates/four_gates.tscn",
+          "sha256": "2017502f7438763a574ef40b22556480c91d039f427175b48fafc36f3eb94567"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/four_gates/region-authoring-spec.json",
+          "sha256": "4a0047cf2b4ba4b2fb68760abf1350d3a3d92af40c85b89c0ec8d094ef154663"
+        },
+        "baseHeightsSha256": "198e61cb323ecfa08440ddc647860775917d1b465c7b7c3be46333820b845ed2",
+        "baseColorsSha256": "e3c16e2819056b3abf815a71c39e08bdb7dfd19e1c9eb3acc231e7552201f617",
+        "resolvedHeightsSha256": "198e61cb323ecfa08440ddc647860775917d1b465c7b7c3be46333820b845ed2",
+        "normalSourceExportSha256": "7d3acffaf3f46ff8f2b818fed6bd1db9b6660cbb64c82d1ecda3b1806b2389a6",
+        "oldOrigin": [
+          -306.0,
+          -150.0
+        ],
+        "oldVertices": [
+          292,
+          156
+        ]
+      },
+      {
+        "region": "westhaven",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/westhaven/westhaven.tscn",
+          "sha256": "22259439a62c999258081d08d7c34d4dda9ba1b06ad39a06b507097a2bec41a7"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/westhaven/region-authoring-spec.json",
+          "sha256": "0fb446a43ab585f864e603b6e0658942866ef035aa41f5e215d88a0f7ffb5233"
+        },
+        "baseHeightsSha256": "5961b8686cd067914cfa739e05c74cf7d23d5af7717c80eec692ad17184c8a45",
+        "baseColorsSha256": "87274a1dc991714173592bf2bb0d90ec82016db7b07136a2e2f22396fc1df254",
+        "resolvedHeightsSha256": "5961b8686cd067914cfa739e05c74cf7d23d5af7717c80eec692ad17184c8a45",
+        "normalSourceExportSha256": "61f3bca2c9ab4d8c30eb292b1a1cc2a45241fc642ecb860c0034c1a34c55a7b0",
+        "oldOrigin": [
+          -170.0,
+          -336.0
+        ],
+        "oldVertices": [
+          187,
+          289
+        ]
+      },
+      {
+        "region": "manymouth_delta",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/manymouth_delta/manymouth_delta.tscn",
+          "sha256": "36352121f6eab782c30f58950c704b9d38c8940df514603ba073ba40f2c3560e"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/manymouth_delta/region-authoring-spec.json",
+          "sha256": "887952a36d0f94c0e803a4433e84465737a5310c93206862040bb5ce0a539f30"
+        },
+        "baseHeightsSha256": "d09754f04ddf39c99782b7f79ebeee7cbad4fa3e0701af486fd57c93fb2c0fa6",
+        "baseColorsSha256": "f818bd63c66ba74dba622cdd3891ba477d84d00b3293a807a69e7a347751cd34",
+        "resolvedHeightsSha256": "d09754f04ddf39c99782b7f79ebeee7cbad4fa3e0701af486fd57c93fb2c0fa6",
+        "normalSourceExportSha256": "d74e061b2b9372722ed5fc33591ff28a05ad479e0219aca4a7a01db8ec2685f9",
+        "oldOrigin": [
+          -204.0,
+          -156.0
+        ],
+        "oldVertices": [
+          251,
+          232
+        ]
+      },
+      {
+        "region": "crownwater",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/crownwater/crownwater.tscn",
+          "sha256": "f9b335fab21c874716f0eaf4038d96ce80bbcd9f8964c76089a7cbfccdc43460"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/crownwater/region-authoring-spec.json",
+          "sha256": "46de62fe9f3ac46ed3b039232d1c85751df1a8f61c789f5dfc5f93c0cb9b5afb"
+        },
+        "baseHeightsSha256": "11a919a24a6ae92cdcc92681e27a814451f4bec8e4d18e73fdebfb52025d036d",
+        "baseColorsSha256": "a45ec14851f01bec497cde7e4dce180e99eb3e860873b66d9de057bbc2998e88",
+        "resolvedHeightsSha256": "11a919a24a6ae92cdcc92681e27a814451f4bec8e4d18e73fdebfb52025d036d",
+        "normalSourceExportSha256": "74ecb2cda73a454bc80720b7eb4408fd38bbb880705f6da02631b727179b4964",
+        "oldOrigin": [
+          -290.0,
+          -344.0
+        ],
+        "oldVertices": [
+          384,
+          228
+        ]
+      },
+      {
+        "region": "verdant_stair",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/verdant_stair/verdant_stair.tscn",
+          "sha256": "f66312cc4c10b9e14070a889917e2c4a7de1a13d5f84beca0c6eeb8df50e0b42"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/verdant_stair/region-authoring-spec.json",
+          "sha256": "9ad4107a2a5525c8094c32f52ab0011cafb8337dd97d939063dcf31773a4a8cc"
+        },
+        "baseHeightsSha256": "3aec53295391668ac0cc48bfd44de91bf916ae045546be58487c910e4dfa18f9",
+        "baseColorsSha256": "591ca7e6f827f0d4883c1a125cb5ce5e304d226c518ad668c7e75ca2f2bc05e7",
+        "resolvedHeightsSha256": "3aec53295391668ac0cc48bfd44de91bf916ae045546be58487c910e4dfa18f9",
+        "normalSourceExportSha256": "d03d5beaae561c96b04de17bd906dce1ac8120e28deb3231c3bc13d93c11c39c",
+        "oldOrigin": [
+          -294.0,
+          -236.0
+        ],
+        "oldVertices": [
+          348,
+          199
+        ]
+      },
+      {
+        "region": "ssarathi_ruins",
+        "scene": {
+          "path": "godot-client/world_authoring/regions/ssarathi_ruins/ssarathi_ruins.tscn",
+          "sha256": "345aaff77ddda500be2cd49a9607bf46c3d04470fcc982c50d2da88c96c74817"
+        },
+        "spec": {
+          "path": "godot-client/world_authoring/regions/ssarathi_ruins/region-authoring-spec.json",
+          "sha256": "471d3418f7d143596b7e2445de1f678cd83cb1981c3ea7283030753d6a9cf36f"
+        },
+        "baseHeightsSha256": "55e672b870767b6eab095e45e76c6fb368b078e2e37e2fd4c7c422f28021a8f2",
+        "baseColorsSha256": "cd9a4ce6b4cb5e568eeb44d12994344e17568000bdf3b70104965b640585e783",
+        "resolvedHeightsSha256": "55e672b870767b6eab095e45e76c6fb368b078e2e37e2fd4c7c422f28021a8f2",
+        "normalSourceExportSha256": "ef294a55ad2cfb4c85d4e523846a9252035cbe7b72c009f7438b309b7468487e",
+        "oldOrigin": [
+          -372.0,
+          -160.0
+        ],
+        "oldVertices": [
+          387,
+          201
+        ]
+      }
+    ],
+    "frozenPublication": {
+      "revision": "f837588815f165bc5d62e40650d56fc90c9cafc3",
+      "freezeSha256": "dd9e412d89d4c74b039d939f47cdeccf6a2f8eb774d9475d774a52d2d433b22c",
+      "existingComparableColors": 1975,
+      "differences": 0,
+      "sources": [
+        {
+          "path": "eloria-assets/maps/nymara-regions/amethyst_barrens/world.glb",
+          "sha256": "527149d8ed3c2398fca1689e2347fd332c21df51aa6ada52e95ea0224949199a",
+          "bytes": 46248624
+        },
+        {
+          "path": "eloria-assets/maps/nymara-regions/sunmane_steppe/world.glb",
+          "sha256": "747cff35208eaf2374aa0669797fe013bc250b7b1c8591e668d2b06a4b424075",
+          "bytes": 38238276
+        }
+      ]
+    }
+  }
+}

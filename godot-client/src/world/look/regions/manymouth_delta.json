@@ -1,0 +1,24 @@
+{
+	"id": "manymouth_delta",
+	"schema": 1,
+	"ground": {
+		"verge_green_red_forward": 0.55,
+		"verge_saturation_forward": 1.0
+	},
+	"grass": {
+		"root": [0.07, 0.16, 0.05],
+		"tip": [0.45, 0.65, 0.25],
+		"value_forward": 1.9,
+		"layers": {
+			"delta-silt": 0.0
+		}
+	},
+	"notes": {
+		"ground": "No path trims: the region's roads run on unchanged into Four Gates, Westhaven and Verdant Stair, and at the defaults they already stand 1.4-1.7 times their ground (md_hub 1.40, md_wild 1.67; develop 0.70). md_road measured 0.99 at the migration because LookGround took the sand banks (coastal-limestone-gravel patches tinted fff5d1) for pale paving and painted the road through a bank's bounding box as dark brick cobble; since the integration they are sand (LookProfile.SAND_TINT), a glaze with no grass, and md_road measures about 1.44. The verge trims are Forward+ only and small. verge_green_red_forward 0.55 (default 0.66) takes the delta's green meadows back to develop's hue (md_wild's grass 78 degrees, develop 79; 75 at the default, 83 at 0.42), and verge_saturation_forward 1.0 (default 0.92) gives that grass its chroma back (ground saturation 0.40 to 0.46 in md_wild's box). Neither moves the hub's khaki ground (hue 52-56 at every setting): that is silt-weighted ground the verge treats as earth. Shots across the Four Gates, Westhaven and Verdant Stair borders (md_border_*, on each road) show no straight line, and the Crownwater border (md_border_cw) is open sea; on the Four Gates and Westhaven sides the neighbour's grass is already greener than Manymouth's silt ground, so the trims narrow the difference.",
+		"grass": "Fresh paddy green, a little greener and more saturated than Four Gates' lush green. At the default value its tufts stood at about 0.55 of the pale silt-and-grass ground under them (Y 70-80 on 133), dark specks that took md_hub's high-frequency energy (hf95) from 40 to 62; at value_forward 1.9 the ground box runs Y 105-162 around a median of 135 and hf95 is 50. At 2.2 the tips stood 1.25 times brighter than the ground, a paler carpet. delta-silt is the region's base layer (mud flats and banks under the meadows), weighed like gravel (0.12) rather than the default 0.3: at 0.3 the silt carried a speckle of dark tufts (3 % of md_wild's silt area deviates by more than 12 levels from its neighbourhood; 1.5 % now, and md_wild draws about 770 fewer tufts). The authored grass meadows (the 36 ground-basecolor patches tinted b3eb80) grew no tufts at the migration (every patch kept LookProfile.GRASS_ON_PATCH, 0); since the integration a green meadow patch grows grass whatever lies under it (GRASS_PATCH_GREEN). The value was measured before that: check the meadows' tufts against a no-grass render. Polish (2026-09-30): delta-silt 0 (was 0.12): at 0.12 the bare silt carried single lime tufts, confetti over the mud (md_border_wh and md_road hf95 +19 to +21 over develop), which LookProfile.GRASS_DENSITY_FLOOR would drop anyway; the meadows are meadow patches now (LookGround.is_meadow).",
+		"foliage": "No additions. Every Manymouth tree and shrub in the kit is already painted by its species word (banyan, mangrove, palm, lemon, flame and sapling trees, reeds, jungle undergrowth); the authored ground cover draws with undergrowth. foliage_green here is on market-stall produce (1.9 x 0.2 x 0.8 m), a deck study's leaf mat and two small ground mounds: listing it would paint the stalls' produce as swaying crowns, since crown_materials is matched by material across the whole region. Teak, bamboo, carved wood and bark_dark are houses and trunks and stay unpainted. kit-reed-raft used to be painted as a shrub by its word 'reed'; since the integration LookProfile.KIT_NOT_FOLIAGE_WORDS keeps rafts, boats and carts out of the crowns.",
+		"grade": "None: a continent region, so a grade trim would step at every crossing.",
+		"sky": "None: the map declares its own sky.",
+		"water": "None: the continent sea is decoded for the whole continent (LookProfile.CONTINENT_SEA_VALUE)."
+	}
+}

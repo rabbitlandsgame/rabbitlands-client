@@ -1,0 +1,30 @@
+{
+	"id": "mirrorhold",
+	"schema": 1,
+	"ground": {
+		"path_luma_forward": 0.19,
+		"path_luma_compat": 0.17,
+		"path_chroma": 1.1,
+		"path_detail_forward": 1.3,
+		"verge_value_earth_forward": 0.8,
+		"verge_saturation_forward": 1.1,
+		"meadow_value_forward": 0.7
+	},
+	"grass": {
+		"root": [0.09, 0.13, 0.08],
+		"tip": [0.58, 0.62, 0.38],
+		"value_forward": 1.6,
+		"layers": {
+			"coastal-limestone-gravel": 0.0
+		}
+	},
+	"foliage": {
+		"crown_materials": ["foliage_green"]
+	},
+	"notes": {
+		"grade": "None: a continent region, so a grade trim is ignored. Its frames are brighter and greyer than develop (luminance 102 to about 137, saturation 0.35 to 0.20 over the five survey shots in Forward+), because its ground is pale grey scree (the life pass lifted the base scree tint to 0.84) and the shared grade takes chroma out; nothing in this file can put that chroma back without a seam.",
+		"ground": "Honey-sand roads. At the default Forward+ path_luma (0.27) its roads stood 1.51 (hub), 1.97 (a road through a deep-green meadow) and 1.75 (the wild scree) times the ground beside them, over the 1.7 ceiling; path_luma_forward 0.19, path_luma_compat 0.17 and path_chroma 1.3 measured 1.34 / 1.75 / 1.57 and saturation 0.20 to 0.26 (2026-09-30, run mig_mirrorhold_1). The migration withdrew them because every road that leaves the region stepped at the ownership line (Four Gates -20.5 luminance levels, Sunmane -31); restored at integration now that region trims now fade into the neighbour's over LookProfile.BORDER_FEATHER_METRES either side of the border (LookBorders), so a trim no longer draws the border as a line. No verge trims: the grey scree is the region's own and reads as it should. Polish (2026-09-30): the honey-sand roads read as a leopard mottle of dark-brown spots on cream (mh_hub hf95 14 to 28, mh_road 17 to 31): path_chroma 1.1 (was 1.3) and path_detail_forward 1.3 (LookProfile.PATH_DETAIL 1.8) flatten the texture's dark flecks. path_detail is not faded across a border, so check mh_border_* after changing it. verge_value_earth_forward 0.8 and verge_saturation_forward 1.1 (polish): the hub read as flat beige on grey (mh_hub luminance 139 against develop's 96, saturation 0.26 against 0.44, its darkest percentile 80); the scree is a biome verge, which PALE_LUMA does not shield, so these take it back towards develop's value, and path_luma_forward 0.16 (was 0.19) keeps the roads 1.3-1.5 times it. The verge trims fade into the neighbours' across the borders (LookBorders). Measured after the polish's render: the hub's pale scree is terrain the paint leaves as it is (pale ground), so the verge trims do not reach it (mh_hub ground unchanged at 122, 116, 108), and path_luma_forward 0.16 only took the roads down (mh_hub path/ground 1.25); it is 0.19 again. The #b3eb80 meadows are meadow patches now, and at the default value 1 they came out (129, 127, 72) beside mh_road, brighter than the scree and the roads (path/ground 1.14): meadow_value_forward 0.7.",
+		"grass": "Alpine sage and straw rather than Four Gates' lush green. At the migration most of the region's tufts (2,859 of 4,078) were verge rows strung along roads and patch rims over bare grey scree, and the meadows (the life pass's 28 Grass-preset patches) grew nothing; there the default palette drew dark green specks at 0.55-0.6 of the scree, and value_forward 1.6 took them to 0.68-0.79. Since the integration a green meadow patch grows grass whatever the biome under it (LookProfile.GRASS_PATCH_GREEN) and a rim over scree keeps only GRASS_BARE_RIM of its verge, so most tufts now stand on the meadows: retune the value against them (measure tufts on a meadow against a no-grass render) if they read pale. The coastal limestone gravel is the city core's pale paving layer; it grows no grass here.",
+		"foliage": "foliage_green is the authored pines' needle material (Tree_pine_<n>__foliage_green, 5 near the hub), unpainted by the generic list. The pines' alpine_snowfield caps and bark_dark trunks are left alone: a snowfield material may also be ground, and bark is never painted."
+	}
+}

@@ -1,0 +1,184 @@
+// Bosses that are creatures in their own right.
+//
+// A spawn group can name a boss inline - boss_type names a species and
+// boss_health multiplies its numbers - and most of them do. That kind of boss
+// is a bigger, tougher one of something already in the group.
+//
+// A block here is the other kind: a boss with its own creature definition in
+// creatures.txt, marked `boss: 1` there so nothing else can spawn it. A group
+// reaches it by naming the block rather than a species.
+//
+//   type:          the creature in creatures.txt
+//   health:        multiplies that creature's own health
+//   strength_min,
+//   strength_max:  register 023. How powerful a version of itself this one
+//                  turns out to be, rolled once per spawn and applied to its
+//                  health, both combat levels, its damage and its drawn size.
+//                  Equal values are a fixed statblock.
+//
+// The rest of a block is the fight - what the boss does about losing it. A
+// boss with none of it is a statblock with a large health bar, which is a
+// long fight rather than a hard one. These are what make it answer back, and
+// both of them run out, because a boss that could heal or summon forever is
+// a wall rather than a fight:
+//
+//   weapon:        one line per piece of gear, worn in the order written
+//                  instead of the random loadout every other creature rolls.
+//                  More weapons than there are hands is allowed and is the
+//                  reason this is a list: the first takes the slot its kind
+//                  wears and the rest go into slots that name nothing on the
+//                  body, so they still count for damage and still fire their
+//                  on-hit effects. Ordinary equipment validation is on the
+//                  path where a *player* equips something and never sees
+//                  these, so nothing has to be relaxed to allow it.
+//   heal:          health restored each time a blow lands on it, and
+//   heal_charges:  how many times it can do that. The amount moves with the
+//                  strength roll like everything else; the charges do not,
+//                  so a bigger Warden is not a longer stalemate.
+//   summon:        the creature it calls, and
+//   summon_at:     `<share of its health> | <how many>`, one line per stage
+//                  of the fight. Shares of the bar rather than amounts of
+//                  it, because the bar is not known until the boss rolls -
+//                  an amount would name a different moment every spawn.
+//                  Each stage fires once, highest share first.
+//   summon_budget: the pool every stage draws from. Defaults to exactly
+//                  enough for all of them, so it is worth writing only to
+//                  make the last stage a real one that can come up short.
+//
+// A second boss is a second block. Nothing here is reached by name in the
+// server: a group that wants this behaviour names a block instead of a
+// species, and a block that wants it writes these lines.
+
+
+// --- Gauntlet bosses ---
+// The eight gauntlet courts. Each heals on the blow and calls its region
+// up out of the ground in three stages, the biggest kept for the end.
+
+[boss]
+name: Boar King of the Resin Road
+type: boar_king
+health: 1.0
+strength_min: 0.9
+strength_max: 1.6
+difficulty: 44
+
+heal: 18
+heal_charges: 30
+
+summon: brambleback_boar
+summon_at: 0.75 | 3
+summon_at: 0.45 | 3
+summon_at: 0.2 | 4
+summon_budget: 10
+[/boss]
+
+[boss]
+name: Rime Matriarch
+type: rime_matriarch
+health: 1.0
+strength_min: 0.9
+strength_max: 1.6
+difficulty: 58
+
+heal: 30
+heal_charges: 30
+
+summon: ice_snow_leopard
+summon_at: 0.7 | 2
+summon_at: 0.4 | 2
+summon_at: 0.15 | 3
+summon_budget: 7
+[/boss]
+
+[boss]
+name: Sunscale Sovereign
+type: sunscale_sovereign
+health: 1.0
+strength_min: 0.9
+strength_max: 1.7
+difficulty: 78
+
+heal: 40
+heal_charges: 25
+
+summon: emerald_canopy_dragon
+summon_at: 0.75 | 2
+summon_at: 0.5 | 3
+summon_at: 0.25 | 3
+summon_budget: 8
+[/boss]
+
+[boss]
+name: Barrow Reeve
+type: barrow_reeve
+health: 1.0
+strength_min: 0.9
+strength_max: 1.6
+difficulty: 58
+
+heal: 28
+heal_charges: 30
+
+summon: mossbound_hound
+summon_at: 0.7 | 3
+summon_at: 0.4 | 3
+summon_at: 0.15 | 3
+summon_budget: 9
+[/boss]
+
+[boss]
+name: Bell Warden
+type: bell_warden
+health: 1.0
+strength_min: 0.9
+strength_max: 1.6
+difficulty: 48
+
+heal: 26
+heal_charges: 30
+
+summon: abyssal_armored_fish
+summon_at: 0.75 | 3
+summon_at: 0.45 | 3
+summon_at: 0.2 | 3
+summon_budget: 9
+[/boss]
+
+[boss]
+name: Duskmane
+type: duskmane
+health: 1.0
+strength_min: 0.9
+strength_max: 1.6
+difficulty: 52
+
+heal: 24
+heal_charges: 30
+
+summon: stormmane_lion
+summon_at: 0.7 | 2
+summon_at: 0.4 | 3
+summon_at: 0.15 | 3
+summon_budget: 8
+[/boss]
+
+
+[boss]
+name: Bund Tyrant
+type: bund_tyrant
+health: 1.0
+strength_min: 0.9
+strength_max: 1.7
+difficulty: 84
+
+heal: 44
+heal_charges: 25
+
+summon: saltmarsh_crocodile
+summon_at: 0.75 | 2
+summon_at: 0.5 | 2
+summon_at: 0.25 | 3
+summon_budget: 7
+[/boss]
+
+// --- end of the gauntlet bosses ---

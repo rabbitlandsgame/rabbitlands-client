@@ -1,0 +1,1730 @@
+{
+ "_note": "Rules of the canyon - everything a run of red_canyon_gauntlet needs except geometry (source/layout.json). Written by work-output/gauntlet-v2-design/regions/tools/author_routes.py from the approved concept: three bands by the run's level, five waves of two variants each and a court. Counts are for a party of four; the server multiplies by partyScale (leaders and bosses never multiply).",
+ "schema": "eloria-trail-design-v1",
+ "id": "red_canyon_gauntlet",
+ "route": "red_canyon",
+ "name": "The Red Canyon",
+ "short": "redcanyon",
+ "region": "sunmane_steppe",
+ "flavour": "The herd wash winds through the red rock from the riders' camp at its mouth: the wind cut, the horse caves, the rock arch over the dry ravine, the long wash and the scree stair onto the mesa, where two split pillars frame the Sun Court and Duskmane waits.",
+ "copies": 3,
+ "timeLimitSeconds": 2700,
+ "cooldownHours": 6,
+ "minPlayers": 1,
+ "maxPlayers": 6,
+ "wipeSeconds": 90,
+ "broker": {
+  "npc": "Rellan",
+  "map": "landfall"
+ },
+ "partyScale": {
+  "1": 0.6,
+  "2": 0.75,
+  "3": 0.9,
+  "4": 1.0,
+  "5": 1.15,
+  "6": 1.3
+ },
+ "pulse": {
+  "releaseAliveFraction": 0.34,
+  "releaseSeconds": 45
+ },
+ "leash": {
+  "marginMetres": 10,
+  "evadeSeconds": 8
+ },
+ "checkpointDelaySeconds": 10,
+ "shapes": {
+  "pack": 1.0,
+  "swarm": 0.8,
+  "heavies": 1.25,
+  "leader": 1.25
+ },
+ "mutators": [
+  [
+   "none",
+   5
+  ],
+  [
+   "frenzy",
+   2
+  ],
+  [
+   "hunted",
+   2
+  ],
+  [
+   "bounty",
+   1
+  ],
+  [
+   "swift",
+   1
+  ]
+ ],
+ "cache": [
+  [
+   "Potion of Great Healing",
+   "3-5",
+   "1"
+  ],
+  [
+   "Gold Coins",
+   "150-400",
+   "1"
+  ],
+  [
+   "Bones",
+   "6-12",
+   "1"
+  ]
+ ],
+ "cacheRare": [],
+ "bonus": {
+  "section": "seep-spring",
+  "note": "one harvest node of an existing herb (the server tool's bonus resource)"
+ },
+ "lore": [
+  {
+   "at": "trailhead",
+   "title": "Rules of the canyon",
+   "text": "One party at a time. The pride comes to you; the wash behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+  },
+  {
+   "at": "seep-spring",
+   "title": "The riders' seep",
+   "text": "The only water in the canyon. The riders' horses found it first; the lions found the horses."
+  }
+ ],
+ "bands": [
+  {
+   "id": "herd",
+   "label": "The Herd",
+   "minLevel": 1,
+   "maxLevel": 24,
+   "story": "The canyon's grazers and the scavengers that follow the herd.",
+   "roster": [
+    "jackalope",
+    "giant_mole",
+    "skystripe_antelope",
+    "ashen_wolf",
+    "azure_hyena"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "jackalope",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mole",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "skystripe-antelope",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "skystripe_antelope",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "skystripe_antelope",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "skystripe_antelope",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ashen-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "ashen_wolf",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "ashen_wolf",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "ashen_wolf",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "jackalope",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          12,
+          "swarm"
+         ],
+         [
+          "azure_hyena",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mole",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          12,
+          "pack"
+         ],
+         [
+          "azure_hyena",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "skystripe-antelope",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "skystripe_antelope",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "skystripe_antelope",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east",
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "skystripe_antelope",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ashen-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "ashen_wolf",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "ashen_wolf",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east",
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "ashen_wolf",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "jackalope",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "jackalope",
+          14,
+          "swarm"
+         ],
+         [
+          "azure_hyena",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mole",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "giant_mole",
+          15,
+          "pack"
+         ],
+         [
+          "azure_hyena",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "inline",
+    "creature": "stormmane_lion",
+    "name": "Duskmane's Get",
+    "health": 6.0,
+    "strength": [
+     0.9,
+     1.4
+    ],
+    "adds": [
+     [
+      "jackalope",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "pride",
+   "label": "The Pride",
+   "minLevel": 20,
+   "maxLevel": 44,
+   "story": "Duskmane's pride and the hunters that share the canyon with it.",
+   "roster": [
+    "stormmane_lion",
+    "puma",
+    "golden_bison",
+    "cheetah",
+    "plains_griffin",
+    "giant_antlion"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "stormmane-lion",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "stormmane_lion",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "stormmane_lion",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "stormmane_lion",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "puma",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "puma",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "puma",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "puma",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "puma",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "golden-bison",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "golden_bison",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "golden_bison",
+          4,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "golden_bison",
+          4,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "cheetah",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "cheetah",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "cheetah",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "cheetah",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "cheetah",
+          11,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "plains-griffin",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "plains_griffin",
+          7,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "plains_griffin",
+          7,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "plains_griffin",
+          7,
+          "heavies"
+         ],
+         [
+          "giant_antlion",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "stormmane-lion",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "stormmane_lion",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "stormmane_lion",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "stormmane_lion",
+          12,
+          "pack"
+         ],
+         [
+          "giant_antlion",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "puma",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "puma",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "puma",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "puma",
+          13,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east",
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "puma",
+          13,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "golden-bison",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "golden_bison",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "golden_bison",
+          5,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east",
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "golden_bison",
+          5,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "cheetah",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "cheetah",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "cheetah",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "cheetah",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "cheetah",
+          14,
+          "swarm"
+         ],
+         [
+          "giant_antlion",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "plains-griffin",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "plains_griffin",
+          8,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "plains_griffin",
+          8,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "plains_griffin",
+          8,
+          "heavies"
+         ],
+         [
+          "giant_antlion",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "duskmane",
+    "existing": true,
+    "name": "Duskmane",
+    "adds": [
+     [
+      "stormmane_lion",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "suncourt",
+   "label": "The Sun Court",
+   "minLevel": 40,
+   "maxLevel": 0,
+   "story": "The Sun Court's old guard: centaurs, gnolls and the stag that should not fly.",
+   "roster": [
+    "gnoll",
+    "leopard",
+    "dire_wolf",
+    "centaur",
+    "peryton"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "gnoll",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "leopard",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "leopard",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "leopard",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "leopard",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-north",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "leopard",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "dire-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          7,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          7,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          7,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "centaur",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south"
+        ],
+        "groups": [
+         [
+          "centaur",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "centaur",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-north",
+         "w2-south",
+         "w2-northeast"
+        ],
+        "groups": [
+         [
+          "centaur",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "gnoll",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          12,
+          "pack"
+         ],
+         [
+          "peryton",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "leopard",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "leopard",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "leopard",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest"
+        ],
+        "groups": [
+         [
+          "leopard",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast",
+         "w3-southwest",
+         "w3-east"
+        ],
+        "groups": [
+         [
+          "leopard",
+          12,
+          "swarm"
+         ],
+         [
+          "peryton",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "dire-wolf",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          8,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          8,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east",
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "dire_wolf",
+          8,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "centaur",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "centaur",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "centaur",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-west",
+         "w4-east",
+         "w4-northwest"
+        ],
+        "groups": [
+         [
+          "centaur",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "gnoll",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "gnoll",
+          15,
+          "pack"
+         ],
+         [
+          "peryton",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "leopard",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "leopard",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "leopard",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "leopard",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-south",
+         "w5-north",
+         "w5-southwest"
+        ],
+        "groups": [
+         [
+          "leopard",
+          14,
+          "swarm"
+         ],
+         [
+          "peryton",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "duskmane",
+    "existing": true,
+    "name": "Duskmane",
+    "adds": [
+     [
+      "gnoll",
+      6
+     ]
+    ]
+   }
+  }
+ ]
+}

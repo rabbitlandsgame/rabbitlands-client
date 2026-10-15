@@ -1,0 +1,22 @@
+{
+	"id": "wayfarer_bastion",
+	"schema": 1,
+	"grade": {
+		"saturation_forward": 1.1
+	},
+	"ground": {
+		"deck_path": 0,
+		"deck_tint_forward": [0.562, 0.831, 0.846],
+		"deck_tint_compat": [1.253, 1.401, 1.171]
+	},
+	"sky": {
+		"top": [0.08, 0.22, 0.34],
+		"horizon": [0.2, 0.3, 0.34],
+		"clear": 0.3
+	},
+	"notes": {
+		"grade": "A tutorial map never streamed beside another, so it may take its own grade. Saturation 1.1 over SATURATION_FORWARD (0.69 to 0.76) gives back some of the chroma the shared grade takes from its props, sea and court; the court keeps its own colour (`ground`).",
+		"ground": "Its courts and yards are Walk_ decks from wall to wall, which LookGround paints as roads unless the region says otherwise: path_tint x path_luma x the texture's grain, dropping each deck's own colour. At the defaults every tutorial court came out one road beige (echo_court, wayfarer_bastion, lantern_exchange and waystone_yard drew identical frames). The migration worked round it with a path tint matched to develop's court (path_tint [0.734, 1.0, 0.781], path_luma_forward 0.086), which could give the map only one colour and dropped the flagstones' own tone variation (court world std 21 against develop's 30). deck_path 0 (integration) paints its decks as its own ground: each keeps its own colour with the yard lift, whatever its hue, and none is edged like a road. deck_tint multiplies each deck's own linear colour: the grade warms and greys a kept court (Reedway's meadow came out olive-brown, Bellwatch's cream grey), so it was solved from develop's court colour over three Forward+ renders (integration runs int_small_2 to int_small_4, ground box in boxes_small_maps). Court now (99, 112, 95) luminance 108 against develop's (98, 111, 94) 107. Forward+ only in effect: the compatibility renderer was not measured and keeps the tint too. Polish: deck_tint is now deck_tint_forward. It was solved in Forward+ only, but as a bare key it ran in the compatibility renderer too, where Echo Court's court came out (82, 72, 82), luminance 81 against develop's 104, and purple; compat keeps each deck's own colour. deck_tint_compat (polish): with no tint the compatibility renderer's grade drew the court 12-17 % darker than develop (Echo Court 99, 88, 89 against 115, 101, 99); solved against develop's court in three compat renders (scratch polish/solve_compat_tint.py, runs cSM1-cSM3, a blown-out develop court aimed at 185 as in Forward+), now within 1-4 levels.",
+		"sky": "Polish (2026-09-30): the map declares only a background colour (#18363f), so the painted sky fell back to SKY_FALLBACK, and every low view drew a flat off-white band (220, 217, 212) brighter than the court, a paper wall behind the island. A deep sea-teal sky derived from that void (top and horizon here, half as clear as the painted day) keeps a gradient and sits below the court's value. Measured after the first sea sky: its haze band still drew 182 over courts of 105-118 in the low views (the sky takes the grade's exposure); a darker sea-teal (top [0.1, 0.26, 0.4], horizon [0.26, 0.38, 0.42], clear 0.3) puts it under the court. Its court is darker than Bellwatch's (luminance 105-118): at the islands' shared sea-teal the sky band measured 146 in the low view, still over the court; a deeper one sits it under."
+	}
+}

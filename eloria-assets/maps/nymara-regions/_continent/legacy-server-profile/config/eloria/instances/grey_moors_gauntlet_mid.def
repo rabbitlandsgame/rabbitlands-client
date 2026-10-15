@@ -1,0 +1,201 @@
+[instance]
+spawn_type: instance
+spawn_name: grey_moors_gauntlet_mid
+spawn_desc: The Barrow Run
+short_name: barrow_mid
+map_id: ./maps/nymara/grey_moors_gauntlet.elm
+route: grey_moors_gauntlet
+band: mid
+keeper: Widow Carrow
+minimum_ad: 25
+maximum_ad: 60
+cooldown_hours: 6
+minimum_players: 1
+maximum_players: 6
+time_limit_seconds: 2700
+entry_x: 29
+entry_y: 320
+exit_map: grey_moors
+exit_x: 244
+exit_y: 278
+copies: grey_moors_gauntlet, grey_moors_gauntlet_2, grey_moors_gauntlet_3
+cache_object: 798
+cache_table: cache_grey_moors_gauntlet
+staging_exit: 800
+vault_exit: 799
+mutators: none:5, frenzy:2, hunted:2, bounty:1, swift:1
+wipe_seconds: 90
+
+[leg]
+id: peat-cut
+name: The Peat Cut
+kind: gallery
+gate: 801 | 29 | 312 | 29 | 306
+trigger: enter
+advance: cleared
+bounds: 24 | 273 | 34 | 305
+[variant]
+g_barrow_mid_peat_cut_0
+[/variant]
+[variant]
+g_barrow_mid_peat_cut_1
+g_barrow_mid_peat_cut_1_lead
+[/variant]
+[variant]
+g_barrow_mid_peat_cut_2
+[/variant]
+[/leg]
+
+[leg]
+id: first-barrow
+name: The First Barrow
+kind: cavern
+gate: 802 | 29 | 272 | 29 | 266
+trigger: enter
+advance: cleared
+bounds: 16 | 241 | 42 | 265
+[variant]
+g_barrow_mid_first_barrow_0
+[/variant]
+[variant]
+g_barrow_mid_first_barrow_1
+[/variant]
+[variant]
+g_barrow_mid_first_barrow_2
+g_barrow_mid_first_barrow_2_lead
+[/variant]
+[/leg]
+
+[leg]
+id: bog-board
+name: The Bog Board
+kind: bridge
+gate: 803 | 25 | 240 | 25 | 234
+trigger: enter
+advance: time:150
+bounds: 23 | 202 | 27 | 230
+[variant]
+g_barrow_mid_bog_board_0
+[/variant]
+[variant]
+g_barrow_mid_bog_board_1
+[/variant]
+[variant]
+g_barrow_mid_bog_board_2
+[/variant]
+[/leg]
+
+[leg]
+id: fifth-chamber
+name: The Fifth Chamber
+kind: hall
+gate: 804 | 25 | 198 | 25 | 192
+trigger: enter
+advance: cleared
+bounds: 14 | 171 | 36 | 191
+[variant]
+g_barrow_mid_fifth_chamber_0
+[/variant]
+[variant]
+g_barrow_mid_fifth_chamber_1
+[/variant]
+[variant]
+g_barrow_mid_fifth_chamber_2
+[/variant]
+[/leg]
+
+[leg]
+id: split-barrow
+name: The Split Barrow
+kind: fork
+gate: 805 | 22 | 170 | 22 | 164
+trigger: enter
+advance: cleared
+bounds: 7 | 149 | 37 | 163
+[variant]
+g_barrow_mid_split_barrow_0
+[/variant]
+[variant]
+g_barrow_mid_split_barrow_1
+[/variant]
+[variant]
+g_barrow_mid_split_barrow_2
+[/variant]
+[branch]
+id: east-passage
+name: The East Passage
+kind: hall
+gate: 806 | 11 | 148 | 11 | 142
+trigger: enter
+advance: cleared
+bounds: 3 | 121 | 19 | 141
+[variant]
+g_barrow_mid_east_passage_0
+[/variant]
+[variant]
+g_barrow_mid_east_passage_1
+[/variant]
+[variant]
+g_barrow_mid_east_passage_2
+[/variant]
+[/branch]
+
+[branch]
+id: west-passage
+name: The West Passage
+kind: cavern
+gate: 807 | 33 | 148 | 33 | 142
+trigger: enter
+advance: cleared
+bounds: 25 | 121 | 41 | 141
+[variant]
+g_barrow_mid_west_passage_0
+[/variant]
+[variant]
+g_barrow_mid_west_passage_1
+[/variant]
+[variant]
+g_barrow_mid_west_passage_2
+g_barrow_mid_west_passage_2_lead
+[/variant]
+[/branch]
+
+[/leg]
+
+[leg]
+id: reeve-stair
+name: The Reeve's Stair
+kind: stair
+gate: 808 | 22 | 100 | 22 | 94
+trigger: at_gate
+advance: cleared
+bounds: 11 | 61 | 33 | 79
+[variant]
+g_barrow_mid_reeve_stair_0
+[/variant]
+[variant]
+g_barrow_mid_reeve_stair_1
+[/variant]
+[variant]
+g_barrow_mid_reeve_stair_2
+g_barrow_mid_reeve_stair_2_lead
+[/variant]
+[/leg]
+
+[leg]
+id: reeve-hall
+name: The Reeve's Hall
+kind: court
+gate: 809 | 19 | 60 | 19 | 54
+trigger: enter
+advance: cleared
+bounds: 3 | 23 | 35 | 53
+[variant]
+g_barrow_mid_reeve_hall_court_0
+[/variant]
+[variant]
+g_barrow_mid_reeve_hall_court_1
+[/variant]
+[/leg]
+
+[/instance]

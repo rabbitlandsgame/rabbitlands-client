@@ -1,0 +1,130 @@
+# Landfall's three side errands (Signed Ashore's companions): the template publish_server.py fills.
+#
+# Source: review/serve_inputs/tutorial/questlines_draft.txt (2026-10-02, the owner-accepted tutorial draft), with the
+# placeholders the draft named resolved as the serve plan decided: the profile quest ids 26, 27 and 28 (the next free
+# after the base profile's 25; serve plan S14), and every stage's tile left as a TX/TY placeholder naming a marker's record id, the x
+# and y of that runtime-point marker in their owning scenes (CV2's opt-* markers), which publish_server.py reads from the bake
+# through _continent_v2/frames.py when it writes config/eloria/continent-v2/questlines.txt. Never type a tile here.
+#
+# Format: the server's config/eloria/questlines.txt (eloria/questlines.py). The overlay loader refuses a row that
+# carries a '#' anywhere but at the start of a whole-line comment, so no text below may hold one.
+
+[quest]
+key: isle_unsigned_line
+id: 26
+tier: 1
+title: The Unsigned Line
+region: <NPCMAP:Register Clerk Hemmen>
+start: Register Clerk Hemmen
+summary: The line above yours has waited nine days for its first countersign.
+offer: Nine days that line has been open. Tavi Unhar, Orun, road the sea, and not one countersign under it. The ferry master has asked me twice to strike it and I have said no twice. Will you find out whether I am being kind or only stubborn?
+accepted: The grove-keeper saw him last, going north. North is the red light and not much else. Take food; it is further than it looks from the wall.
+complete: He came down. He walked in with a light-keeper's chit in his hand and asked to be countersigned, and I have never been so pleased to be asked for anything. Nine days. The book does not mind. Neither do I.
+repeat: Two lines, both countersigned. If you meet Tavi on the mainland, do not mention the olives.
+reward_xp: overall=900, harvesting=300
+reward_gold: 250
+reward_items: Bread=4
+[stage]
+kind: visit
+npc: Marta Quell
+map: <MAP:stagheath--opt-north-light-court>
+x: <TX:stagheath--opt-north-light-court>
+y: <TY:stagheath--opt-north-light-court>
+objective: Look for Tavi Unhar at the red light on the north cliffs, and ask the light-keeper.
+prompt: Somebody has been counting hulls out loud from my gallery for nine days. If he is yours, take him. If he is not, take him anyway; the dog is losing sleep.
+done: That is the one. He is on the gallery. Go gently; he thinks he owes the isle a debt, and he is Orun, so he will pay it whether it exists or not.
+xp: overall=300
+[/stage]
+[stage]
+kind: talk
+npc: Tavi Unhar
+objective: Tell Tavi Unhar the register is still open for him, then take the news back to Hemmen.
+prompt: Forty-one hulls since dawn. I am not hiding. I am counting.
+done: He kept it open? Then that is the house saying otherwise. I will go down. Tell the grove-keeper I will pay for the olives anyway, and tell her in front of somebody.
+xp: overall=300
+[/stage]
+[/quest]
+
+[quest]
+key: isle_brook_dam
+id: 27
+tier: 1
+title: The Sluice and the Beavers
+region: <NPCMAP:Odo Fenn>
+start: Odo Fenn
+summary: Three beavers have been at the castle sluice since spring, and Odo wants them off it, not out of the world.
+offer: The castle pays me to keep this brook running and the beavers pay me nothing and do most of the work. Three of them have been at my sluice since spring. Move them on. They come back; that is the arrangement. Then I will show you why a Ssarathi on a cold brook wears a cap.
+accepted: Upstream of the sluice, in the reeds. They bite like clerks. Come back when the sluice is clear.
+complete: A cap you made yourself, on a brook you cleared yourself. That is standing, where I come from. Wear it to the mainland and tell them a Ssarathi on a ditch taught you.
+repeat: The beavers came back on the fourth day. The sluice is clear. We have an understanding.
+reward_xp: tailoring=600, attack=300, defense=300
+reward_gold: 300
+[stage]
+kind: kill
+target: beaver
+amount: 3
+map: <MAP:twinbrook--opt-castle-brook-reed>
+objective: Drive three beavers off the castle sluice.
+prompt: Three. Not thirty. I want the sluice clear, not the brook empty.
+done: Clear. They will be back on the fourth day; build nothing you cannot rebuild.
+xp: attack=250, defense=250
+[/stage]
+[stage]
+kind: harvest
+target: Reed
+amount: 3
+map: <MAP:twinbrook--opt-castle-brook-reed>
+x: <TX:twinbrook--opt-castle-brook-reed>
+y: <TY:twinbrook--opt-castle-brook-reed>
+objective: Cut three Reed at the castle brook so Odo can pack the sluice the beavers stripped.
+prompt: Three reeds, cut low. The beavers took my packing for their dam; I am taking it back for mine.
+done: Good reed. Here is a needle, thread and cloth for your trouble. That is everything you need to sew the cap.
+xp: harvesting=300
+items: Needle=1, Thread=1, Cloth Roll=2
+[/stage]
+[stage]
+kind: mix
+target: Earflap Cap
+objective: Make an Earflap Cap: two Cloth Roll and a Thread, with the Needle.
+prompt: Open your manufacture window and choose Earflap Cap under tailoring. If it comes out wrong, try the seam again.
+done: Put it on. No, the flaps go down. There.
+xp: tailoring=300
+[/stage]
+[/quest]
+
+[quest]
+key: isle_tideline
+id: 28
+tier: 1
+title: Floats and Lime
+region: <NPCMAP:Ferryman Caldus>
+start: Ferryman Caldus
+summary: Caldus's nets want kelp floats, and the quay wall wants shell for its lime.
+offer: You have a pickaxe and an hour before the tide turns. My nets want kelp floats and the quay wants shell for the lime. The beach below the green light has both, and nobody else on this isle will get their boots wet for it.
+accepted: Below the light, on the south beach. Shell first; it takes the pickaxe. Mind the pelicans; they think the beach is theirs and they are mostly right.
+complete: Floats on the nets and lime in the bucket. You will not see the difference and I will see it every night for a year. Thank you.
+repeat: The nets float. The quay holds. The pelicans have filed a complaint.
+reward_xp: harvesting=700, overall=500
+reward_gold: 350
+[stage]
+kind: harvest
+target: Shell
+amount: 5
+map: <MAP:greenlight--opt-tideline-shell>
+x: <TX:greenlight--opt-tideline-shell>
+y: <TY:greenlight--opt-tideline-shell>
+objective: Break five Shell from the drift below the green light. It takes a Pickaxe.
+prompt: Five. The white ones; the pink ones are somebody's breakfast.
+done: Good lime shell. Now the kelp, while the tide is still out.
+xp: harvesting=300
+[/stage]
+[stage]
+kind: deliver
+target: Kelp
+amount: 5
+objective: Bring Ferryman Caldus five Kelp from the wrack line for his nets.
+prompt: Five lengths of kelp, from the wrack line, not the water. Dry floats rot; wet ones float.
+done: That will float a net through the winter. I will tie them on tonight.
+xp: harvesting=300
+[/stage]
+[/quest]

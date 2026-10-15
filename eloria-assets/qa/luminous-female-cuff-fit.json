@@ -1,0 +1,413 @@
+{
+  "schema": "eloria-luminous-female-cuff-fit-v2",
+  "status": "retired",
+  "retiredAt": "2026-10-08",
+  "reviewedAt": "2026-10-03",
+  "authority": {
+    "fileName": "human_female_components.glb",
+    "sourceSHA256": "39a4dbc151d6f04813fa843803ef5e8c71eca61e59b700d9c876274a9c7f9d66",
+    "meshCount": 12,
+    "targetStatureM": 1.67,
+    "outerBootMeshIndices": [0, 3],
+    "lowerBodyMeshIndices": [1, 2],
+    "hiddenOverlapRangeMm": [
+      1.93677412328858,
+      4.89287166927216
+    ]
+  },
+  "inputs": {
+    "body": {
+      "canonicalRace": "luminous_female",
+      "pathAtCapture": "godot-client/assets/actors/native/races/luminous_female.glb",
+      "acceptedSourceSHA256": [
+        "963726cc3180a57d8a8921c51a8695828d77bdac633a5bcf6f075472d6890dc7"
+      ],
+      "provenance": {
+        "kind": "git-tree-snapshot",
+        "commit": "2df789a02abc591cc8730758cb6d4526f3efaa17",
+        "path": "godot-client/assets/actors/native/races/luminous_female.glb",
+        "blobOID": "01b08fe18c8d0b5f7fd38555a75b6e5682d69500"
+      },
+      "semanticMeshes": {
+        "wardrobe_pants": {
+          "sha256": "d84bb1ebbc1a25b40c92e02e9bd6e2520515f52130888572a5840d7415cec1e2",
+          "vertices": 4828,
+          "triangles": 6733,
+          "material": "wardrobe_pants"
+        },
+        "wardrobe_boots": {
+          "sha256": "0bc2ed61dbe444a66cdee295ae3535643ce82a2d5f44905af7694c0afce6bcd9",
+          "vertices": 4625,
+          "triangles": 6558,
+          "material": "wardrobe_boots"
+        }
+      }
+    },
+    "arcanistLegs": {
+      "pathAtCapture": "godot-client/assets/actors/native/equipment/variants/luminous_female/arcane_leg_armor_01.glb",
+      "sourceSHA256": "d327a783f54888a7797a3e7c8340324f7da5e49ceef9c8fe590d6fae2defdd51",
+      "provenance": {
+        "kind": "producer-manifest-output",
+        "manifest": "eloria-assets/qa/class-equipment-fit-baseline.json",
+        "section": "output",
+        "key": "variants/luminous_female/arcane_leg_armor_01.glb"
+      },
+      "mesh": "Warded Legguards",
+      "semanticMesh": {
+        "sha256": "34f91c0769c61cfc5789b8d5ced9cb40c5953f17e0d5c7e5c2ad530bad88b312",
+        "vertices": 2043,
+        "triangles": 1603,
+        "material": "Warded Legguards Base"
+      }
+    },
+    "arcanistBoots": {
+      "pathAtCapture": "godot-client/assets/actors/native/equipment/variants/luminous_female/arcane_fantasy_boots_01.glb",
+      "sourceSHA256": "b5eeab7ac31cf5ceaf9c5d7644108db6d0eb0c0c7872a7c05ec4d2efd05d7131",
+      "provenance": {
+        "kind": "producer-manifest-output",
+        "manifest": "eloria-assets/qa/class-equipment-fit-baseline.json",
+        "section": "output",
+        "key": "variants/luminous_female/arcane_fantasy_boots_01.glb"
+      },
+      "mesh": "Warded Boots",
+      "semanticMesh": {
+        "sha256": "58b7cc21b87323a42d736534926cb7ecf16683c53882cc1719e38b865d95415a",
+        "vertices": 1883,
+        "triangles": 1533,
+        "material": "Warded Boots Base"
+      }
+    },
+    "rangerLegs": {
+      "pathAtCapture": "godot-client/assets/actors/native/equipment/variants/luminous_female/rugged_ranger_legwear_04.glb",
+      "sourceSHA256": "8996903ddee50a4e1fe1dde58f298f2d998860bcb8db9b70b670e0c012144b30",
+      "provenance": {
+        "kind": "git-tree-snapshot",
+        "commit": "2df789a02abc591cc8730758cb6d4526f3efaa17",
+        "path": "godot-client/assets/actors/native/equipment/variants/luminous_female/rugged_ranger_legwear_04.glb",
+        "blobOID": "0e378eb9c3edb803761f556ccb782cc781009315"
+      },
+      "semanticMeshes": {
+        "Sidelace Breeches": {
+          "sha256": "667eb83fce89f2b31ee6ab21ef47f966be326c9a217c8fcdd46ca9ab8719baf6",
+          "vertices": 1754,
+          "triangles": 1640,
+          "material": "Sidelace Breeches Base"
+        },
+        "GeneratedLegBacking": {
+          "sha256": "307c3533076b0747a812e618169b8b3eed02a94309d2509e30ca1a49db60a200",
+          "vertices": 5492,
+          "triangles": 10992,
+          "material": "Sidelace Breeches Backing"
+        },
+        "GeneratedLegBackingWithBoots": {
+          "sha256": "bcc9c5dca26c67ebe255eae78d4fb4ea299a40da513c6c3d98a086f1e3aca6ed",
+          "vertices": 5492,
+          "triangles": 10992,
+          "material": "Sidelace Breeches Backing"
+        }
+      }
+    },
+    "rangerBoots": {
+      "pathAtCapture": "godot-client/assets/actors/native/equipment/variants/luminous_female/frontier_boots_01.glb",
+      "sourceSHA256": "33ae5bb3a6a04ddcf14129900cefdf4031d4bb99c793ad07f922e65f8abee6ff",
+      "provenance": {
+        "kind": "git-tree-snapshot",
+        "commit": "2df789a02abc591cc8730758cb6d4526f3efaa17",
+        "path": "godot-client/assets/actors/native/equipment/variants/luminous_female/frontier_boots_01.glb",
+        "blobOID": "d38c00b92212a0de61db28e8dd06d4da14fb7f5a"
+      },
+      "semanticMeshes": {
+        "Ankle Boots": {
+          "sha256": "72ee2b6a3a4122bd28261e4c95c331691c06bf926f60d93bc0fe243b5cd794d8",
+          "vertices": 1913,
+          "triangles": 1488,
+          "material": "Ankle Boots Base"
+        },
+        "GeneratedBootBacking": {
+          "sha256": "18a322e91510767b200f38732d5556c44a3ac42eaca182f2e2769fdb57da09eb",
+          "vertices": 2000,
+          "triangles": 3984,
+          "material": "Ankle Boots Backing"
+        },
+        "GeneratedBootBackingWithLegs": {
+          "sha256": "f76cdb3905df2df7a2e8498acc120b9cf312c68db8c584a663ede832151af7ad",
+          "vertices": 2000,
+          "triangles": 3984,
+          "material": "Ankle Boots Backing"
+        }
+      }
+    },
+    "equipmentConfig": {
+      "path": "godot-client/data/actors/equipment.json",
+      "sourceSHA256": "0ec6117ee7be83be48b2b5e9929e19a5e9f1926331d723587a03f066aa3d01e1",
+      "provenance": {
+        "kind": "git-tree-snapshot",
+        "commit": "c29866f34aab26ffeaad728b9574a96a441c7747",
+        "path": "godot-client/data/actors/equipment.json",
+        "blobOID": "30c6585b669858e47747e6e9d6f306c41f9a38fb"
+      },
+      "semanticBindings": {
+        "4:179": "res://assets/actors/native/equipment/variants/luminous_female/arcane_leg_armor_01.glb",
+        "6:192": "res://assets/actors/native/equipment/variants/luminous_female/arcane_fantasy_boots_01.glb",
+        "4:230": "res://assets/actors/native/equipment/variants/luminous_female/rugged_ranger_legwear_04.glb",
+        "6:224": "res://assets/actors/native/equipment/variants/luminous_female/frontier_boots_01.glb"
+      }
+    }
+  },
+  "contract": {
+    "selectedHiddenOverlapMm": 3.0,
+    "arcanistRadialInsetMm": 1.5,
+    "openHiddenBoundary": true,
+    "capTriangles": 0,
+    "maximumInfluences": 4,
+    "additionalDraws": 0,
+    "additionalMaterials": 0,
+    "additionalBones": 0,
+    "perFrameOperations": 0
+  },
+  "installation": {
+    "mode": "reviewed-byte-copy",
+    "inputsAreHistorical": true,
+    "productionConfigChanged": false,
+    "mappings": [],
+    "retiredMappings": [
+      {
+        "inputKey": "body",
+        "reviewedOutputKey": "body",
+        "targetPath": "godot-client/assets/actors/native/races/luminous_female.glb",
+        "retiredAt": "2026-10-05",
+        "reason": "The 2026-10-05 Human regeneration replaced races/luminous_female.glb with a new Meshy body packed by eloria-assets/tools/pack_human_body.py; this cuff pass no longer produces the installed body, so its byte-copy mapping is retired. The reviewed output stays below as history: the seven derived female races still carry its cuffed pants and boots (luminous-female-cuff-derived-propagation.json)."
+      },
+      {
+        "inputKey": "arcanistLegs",
+        "reviewedOutputKey": "arcanistLegs",
+        "targetPath": "godot-client/assets/actors/native/equipment/variants/luminous_female/arcane_leg_armor_01.glb",
+        "retiredAt": "2026-10-08",
+        "reason": "The race programme's P7 cleanup (2026-10) deleted every variants/luminous_female scene: no body resolved to the canonical_luminous_female group any more (the Human female wears canonical_human_female and every race falls back to it). The reviewed output stays below as history."
+      },
+      {
+        "inputKey": "arcanistBoots",
+        "reviewedOutputKey": "arcanistBoots",
+        "targetPath": "godot-client/assets/actors/native/equipment/variants/luminous_female/arcane_fantasy_boots_01.glb",
+        "retiredAt": "2026-10-08",
+        "reason": "The race programme's P7 cleanup (2026-10) deleted every variants/luminous_female scene: no body resolved to the canonical_luminous_female group any more (the Human female wears canonical_human_female and every race falls back to it). The reviewed output stays below as history."
+      },
+      {
+        "inputKey": "rangerLegs",
+        "reviewedOutputKey": "rangerLegs",
+        "targetPath": "godot-client/assets/actors/native/equipment/variants/luminous_female/rugged_ranger_legwear_04.glb",
+        "retiredAt": "2026-10-08",
+        "reason": "The race programme's P7 cleanup (2026-10) deleted every variants/luminous_female scene: no body resolved to the canonical_luminous_female group any more (the Human female wears canonical_human_female and every race falls back to it). The reviewed output stays below as history."
+      },
+      {
+        "inputKey": "rangerBoots",
+        "reviewedOutputKey": "rangerBoots",
+        "targetPath": "godot-client/assets/actors/native/equipment/variants/luminous_female/frontier_boots_01.glb",
+        "retiredAt": "2026-10-08",
+        "reason": "The race programme's P7 cleanup (2026-10) deleted every variants/luminous_female scene: no body resolved to the canonical_luminous_female group any more (the Human female wears canonical_human_female and every race falls back to it). The reviewed output stays below as history."
+      }
+    ]
+  },
+  "authoringEvidence": {
+    "toolPath": "eloria-assets/tools/author_luminous_cuff_fit.py",
+    "producerToolGitCommit": "c29866f34aab26ffeaad728b9574a96a441c7747",
+    "producerToolGitBlob": "fa5bf59cb1560fa66549bc9a4752695c7e017c1d",
+    "producerToolSHA256": "61e783a8ccb531f3f143d19ecb5d5222348e72340a1036c8b5aac579b1b1e3e2",
+    "verifierToolCanonicalLfSHA256": "d9009d2b3168402ebbb7e4de61a4539d583ece68e4ceb3ec26ed602119cb6b8b",
+    "deterministicRuns": 2,
+    "byteIdentical": true,
+    "revisions": [
+      {
+        "revisedAt": "2026-10-04",
+        "reviewedOutputKey": "rangerLegs",
+        "mesh": "GeneratedLegBackingWithBoots",
+        "reason": "The cuff cut opened the boot-paired lining's leg tubes; a generated lining is one closed solid (test_equipment_fit LegwearSeamTest). The cut is now sealed in its own plane, 3 mm below the boot rim, inside the boot shaft. The visible breeches keep their open hidden cut.",
+        "previousOutputSHA256": "8cf5b088655df8fae22ca0049073e62926ac43e2a00d9451b5468849138a980f",
+        "producerToolCanonicalLfSHA256": "d9009d2b3168402ebbb7e4de61a4539d583ece68e4ceb3ec26ed602119cb6b8b",
+        "producerToolGitBlob": "c8746cc99ffaf67348114885ee94a8358b99cc9b",
+        "inputsUnchanged": true,
+        "otherReviewedOutputsByteIdentical": ["body", "arcanistLegs", "arcanistBoots", "rangerBoots"],
+        "deterministicRuns": 2,
+        "byteIdentical": true
+      }
+    ]
+  },
+  "reviewedOutputs": {
+    "body": {
+      "sourceSHA256": "963726cc3180a57d8a8921c51a8695828d77bdac633a5bcf6f075472d6890dc7",
+      "outputSHA256": "b95921cd99da9f69009c5bc8295bae164ccf84189aefcaab6b6b13cb693a5552",
+      "installed": false,
+      "supersededAt": "2026-10-05",
+      "supersededBy": "2026-10-05 Human body regeneration (see installation.retiredMappings)",
+      "semanticMeshes": {
+        "wardrobe_pants": {
+          "sha256": "318477d09a732d50c68ea2b8289f76a1a2a148a9f7857e9004bdb9ffa842cebb",
+          "vertices": 4601,
+          "triangles": 6432,
+          "material": "wardrobe_pants"
+        },
+        "wardrobe_boots": {
+          "sha256": "0bc2ed61dbe444a66cdee295ae3535643ce82a2d5f44905af7694c0afce6bcd9",
+          "vertices": 4625,
+          "triangles": 6558,
+          "material": "wardrobe_boots"
+        }
+      },
+      "geometry": {
+        "sourceVertices": 4828,
+        "outputVertices": 4601,
+        "sourceTriangles": 6733,
+        "outputTriangles": 6432,
+        "boundaryEdges": 114,
+        "boundaryVertices": 124
+      }
+    },
+    "arcanistLegs": {
+      "outputSHA256": "ce6921784b77be6d0e78f53dbb25a1149675ba01860706cedc7eec722adf86ce",
+      "installed": false,
+      "semanticMesh": {
+        "sha256": "5a14c430308958e0e050831515ded91ebc2ffdd8f18bc02674b3feeae6f345a4",
+        "vertices": 2050,
+        "triangles": 1623,
+        "material": "Warded Legguards Base"
+      },
+      "geometry": {
+        "sourceVertices": 2043,
+        "outputVertices": 2050,
+        "sourceTriangles": 1603,
+        "outputTriangles": 1623,
+        "boundaryEdges": 36,
+        "boundaryVertices": 44
+      }
+    },
+    "arcanistBoots": {
+      "outputSHA256": "4977b1fd06a690a885f54e17557e6e0efd52e8b344c77055ed6887890aaba8c3",
+      "installed": false,
+      "semanticMesh": {
+        "sha256": "3c48009013a470e42932bf3459d71260cfe47bc2ab8f2ee9f042f272fee6f037",
+        "vertices": 1296,
+        "triangles": 1049,
+        "material": "Warded Boots Base"
+      },
+      "removedComponentLabels": [413, 834]
+    },
+    "rangerLegs": {
+      "outputSHA256": "5068ab6ea0ae85b4ab96f9c7cc9c136b28e0d67755c7a5e7620dea4cb19d2fff",
+      "installed": false,
+      "semanticMeshes": {
+        "Sidelace Breeches": {
+          "sha256": "b7cf2a8f25c0a136e7bb1333e33d40b246c34591665fe081d9f107f9e54de908",
+          "vertices": 1590,
+          "triangles": 1452,
+          "material": "Sidelace Breeches Base"
+        },
+        "GeneratedLegBacking": {
+          "sha256": "307c3533076b0747a812e618169b8b3eed02a94309d2509e30ca1a49db60a200",
+          "vertices": 5492,
+          "triangles": 10992,
+          "material": "Sidelace Breeches Backing"
+        },
+        "GeneratedLegBackingWithBoots": {
+          "sha256": "c085d025b0b97d3fc32ee0705d156dff9fc8f0114b0a54df95008e2a9180eece",
+          "vertices": 5762,
+          "triangles": 10870,
+          "material": "Sidelace Breeches Backing"
+        }
+      },
+      "geometry": {
+        "visibleBreeches": {
+          "sourceVertices": 1754,
+          "outputVertices": 1590,
+          "sourceTriangles": 1640,
+          "outputTriangles": 1452,
+          "boundaryEdges": 44,
+          "boundaryVertices": 70
+        },
+        "pairedLegBacking": {
+          "sourceVertices": 5492,
+          "outputVertices": 5762,
+          "sourceTriangles": 10992,
+          "outputTriangles": 10870,
+          "boundaryEdges": 0,
+          "boundaryVertices": 0,
+          "cutBoundaryEdges": 327,
+          "cutBoundaryVertices": 327,
+          "sealedCutLoops": 10,
+          "sealVertices": 334,
+          "sealTriangles": 327
+        }
+      }
+    },
+    "rangerBoots": {
+      "outputSHA256": "4718179c54452c28a8031ae0e704e58bd5e7d7952b1eb490ae7fca802cdf0237",
+      "installed": false,
+      "semanticMeshes": {
+        "Ankle Boots": {
+          "sha256": "72ee2b6a3a4122bd28261e4c95c331691c06bf926f60d93bc0fe243b5cd794d8",
+          "vertices": 1913,
+          "triangles": 1488,
+          "material": "Ankle Boots Base"
+        },
+        "GeneratedBootBacking": {
+          "sha256": "18a322e91510767b200f38732d5556c44a3ac42eaca182f2e2769fdb57da09eb",
+          "vertices": 2000,
+          "triangles": 3984,
+          "material": "Ankle Boots Backing"
+        },
+        "GeneratedBootBackingWithLegs": {
+          "sha256": "9f5401e5433d50f1ebf9db33e1e493e10002e7ed1bdc2bd820e004164d55ea99",
+          "vertices": 2116,
+          "triangles": 4019,
+          "material": "Ankle Boots Backing"
+        }
+      },
+      "geometry": {
+        "pairedBootBacking": {
+          "sourceVertices": 2000,
+          "outputVertices": 2116,
+          "sourceTriangles": 3984,
+          "outputTriangles": 4019,
+          "boundaryEdges": 215,
+          "boundaryVertices": 215
+        }
+      },
+      "visibleBootComponentCount": 10,
+      "removedComponentLabels": []
+    }
+  },
+  "clientReview": {
+    "quality": "high",
+    "animation": "Idle_Subtle",
+    "animationTime": 0.3,
+    "region": "boots",
+    "angles": ["front", "side", "back"],
+    "baseCandidateNoWorseThanProductionBaseline": true,
+    "arcanistCandidateMatchesOriginalLegsControlOutsideBootInterior": true,
+    "arcanistSideDiamond": "pre-existing authored Warded Boots main-shell detail",
+    "ranger": {
+      "reviewBundle": "godot-client/test-artifacts/luminous-cuff-ranger-review-v1",
+      "baselineRenders": [
+        "renders/baseline-ranger-front.png",
+        "renders/baseline-ranger-side.png",
+        "renders/baseline-ranger-back.png"
+      ],
+      "candidateRenders": [
+        "renders/candidate-ranger-front.png",
+        "renders/candidate-ranger-side.png",
+        "renders/candidate-ranger-back.png"
+      ],
+      "matchedControls": [
+        "renders/control-original-legs-ranger-front.png",
+        "renders/control-original-legs-ranger-side.png",
+        "renders/control-original-legs-ranger-back.png",
+        "renders/control-original-boots-ranger-front.png",
+        "renders/control-original-boots-ranger-side.png",
+        "renders/control-original-boots-ranger-back.png"
+      ],
+      "candidateImprovesFrontSideBack": true,
+      "visibleBootSemanticMeshUnchanged": true,
+      "detachedBootComponentsPruned": false,
+      "detachedBootComponentDisposition": "paired authored soles, straps and pull tabs retained"
+    }
+  }
+}

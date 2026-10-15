@@ -1,0 +1,516 @@
+{
+  "_note": "The Harrowcrag Road's geometry. Plan coordinates in metres: x east, y SOUTH, origin at the north-west corner (the builder flips y into server tiles, y north). elev is the walking surface in metres above the valley floor. Arenas are ellipses (rx, ry, rot in degrees). Paths are polylines [x, y, elev] walked in order. A mouth is a hidden walkable pocket joined to its arena only, placed along a bearing from the arena centre (degrees, 0 = east, 90 = south), `out` metres beyond the rim; a ledge is a mouth raised `rise` metres with a ramp down. A floor mouth is a ring of open tiles inside the arena. Square (384 x 384) like every served map; the woods run on south of the camp. Approved 2026-10-12 (plan page https://claude.ai/artifact/5HSA9eENVNMSFB4vK86fVk).",
+  "schema": "eloria-trail-layout-v1",
+  "size": [
+    384,
+    384
+  ],
+  "crag": {
+    "centre": [
+      183,
+      160
+    ],
+    "rx": 86,
+    "ry": 56,
+    "top": 34
+  },
+  "river": {
+    "points": [
+      [
+        326,
+        204
+      ],
+      [
+        300,
+        240
+      ],
+      [
+        272,
+        280
+      ],
+      [
+        252,
+        304
+      ],
+      [
+        244,
+        336
+      ]
+    ],
+    "width": 9,
+    "fall": {
+      "at": [
+        328,
+        196
+      ],
+      "from": 10,
+      "to": -3.2
+    },
+    "ford": "w2",
+    "note": "Rises as a fall off the Stone Ring shelf and leaves by the south edge; the road crosses it only at the ford."
+  },
+  "sections": [
+    {
+      "id": "trailhead",
+      "kind": "camp",
+      "name": "Trailhead Camp",
+      "at": [
+        44,
+        300
+      ],
+      "rx": 20,
+      "ry": 16,
+      "rot": 0,
+      "elev": 0
+    },
+    {
+      "id": "w1",
+      "kind": "arena",
+      "order": 1,
+      "name": "Hollow Meadow",
+      "at": [
+        134,
+        276
+      ],
+      "rx": 36,
+      "ry": 25,
+      "rot": -8,
+      "elev": 1,
+      "mouths": [
+        {
+          "id": "w1-west",
+          "bearing": 205
+        },
+        {
+          "id": "w1-east",
+          "bearing": 320
+        },
+        {
+          "id": "w1-barn",
+          "bearing": 75
+        }
+      ]
+    },
+    {
+      "id": "w2",
+      "kind": "arena",
+      "order": 2,
+      "name": "The Old Ford",
+      "at": [
+        270,
+        282
+      ],
+      "rx": 38,
+      "ry": 23,
+      "rot": -30,
+      "elev": -2.5,
+      "mouths": [
+        {
+          "id": "w2-upstream",
+          "bearing": 290
+        },
+        {
+          "id": "w2-downstream",
+          "bearing": 95
+        },
+        {
+          "id": "w2-west-bank",
+          "bearing": 215
+        }
+      ]
+    },
+    {
+      "id": "w3",
+      "kind": "arena",
+      "order": 3,
+      "name": "The Stone Ring",
+      "at": [
+        334,
+        150
+      ],
+      "rx": 30,
+      "ry": 29,
+      "rot": 0,
+      "elev": 10,
+      "mouths": [
+        {
+          "id": "w3-northeast",
+          "bearing": 320
+        },
+        {
+          "id": "w3-southeast",
+          "bearing": 30
+        },
+        {
+          "id": "w3-northwest",
+          "bearing": 228
+        },
+        {
+          "id": "w3-stones",
+          "kind": "floor",
+          "ring": [
+            13,
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "id": "w4",
+      "kind": "arena",
+      "order": 4,
+      "name": "Raven Gorge",
+      "at": [
+        220,
+        52
+      ],
+      "rx": 44,
+      "ry": 18,
+      "rot": 0,
+      "elev": 16,
+      "mouths": [
+        {
+          "id": "w4-east-cleft",
+          "bearing": 318
+        },
+        {
+          "id": "w4-west-cleft",
+          "bearing": 218
+        },
+        {
+          "id": "w4-ledge-north",
+          "bearing": 268,
+          "kind": "ledge",
+          "rise": 4
+        },
+        {
+          "id": "w4-ledge-south-1",
+          "bearing": 128,
+          "kind": "ledge",
+          "rise": 4
+        },
+        {
+          "id": "w4-ledge-south-2",
+          "bearing": 52,
+          "kind": "ledge",
+          "rise": 4
+        }
+      ]
+    },
+    {
+      "id": "w5",
+      "kind": "arena",
+      "order": 5,
+      "name": "The Outer Bailey",
+      "at": [
+        142,
+        162
+      ],
+      "rx": 32,
+      "ry": 24,
+      "rot": 0,
+      "elev": 34,
+      "mouths": [
+        {
+          "id": "w5-tower",
+          "bearing": 255,
+          "out": 2,
+          "radius": 6
+        },
+        {
+          "id": "w5-breach",
+          "bearing": 100,
+          "out": 2,
+          "radius": 6
+        },
+        {
+          "id": "w5-barracks",
+          "bearing": 303,
+          "out": 2,
+          "radius": 6
+        }
+      ]
+    },
+    {
+      "id": "boss",
+      "kind": "court",
+      "order": 6,
+      "name": "The Keep Court",
+      "at": [
+        216,
+        162
+      ],
+      "rx": 25,
+      "ry": 24,
+      "rot": 0,
+      "elev": 37,
+      "mouths": [
+        {
+          "id": "court-north",
+          "bearing": 300,
+          "out": 3,
+          "radius": 6
+        },
+        {
+          "id": "court-south",
+          "bearing": 60,
+          "out": 2,
+          "radius": 6
+        }
+      ]
+    },
+    {
+      "id": "vault",
+      "kind": "vault",
+      "name": "The Undercroft",
+      "at": [
+        252,
+        162
+      ],
+      "rx": 9,
+      "ry": 8,
+      "rot": 0,
+      "elev": 37.5
+    }
+  ],
+  "mouthDefaults": {
+    "out": 6,
+    "radius": 7,
+    "linkWidth": 5
+  },
+  "paths": [
+    {
+      "from": "trailhead",
+      "to": "w1",
+      "width": 7,
+      "points": [
+        [
+          60,
+          296,
+          0
+        ],
+        [
+          82,
+          292,
+          0.3
+        ],
+        [
+          102,
+          284,
+          0.8
+        ]
+      ]
+    },
+    {
+      "from": "w1",
+      "to": "w2",
+      "width": 6,
+      "points": [
+        [
+          168,
+          286,
+          0.8
+        ],
+        [
+          186,
+          298,
+          0.2
+        ],
+        [
+          206,
+          304,
+          -0.6
+        ],
+        [
+          228,
+          298,
+          -1.6
+        ],
+        [
+          240,
+          292,
+          -2.3
+        ]
+      ]
+    },
+    {
+      "from": "w2",
+      "to": "w3",
+      "width": 6,
+      "points": [
+        [
+          300,
+          280,
+          -1.5
+        ],
+        [
+          318,
+          266,
+          0.5
+        ],
+        [
+          340,
+          250,
+          2.5
+        ],
+        [
+          326,
+          232,
+          4.5
+        ],
+        [
+          348,
+          214,
+          6.5
+        ],
+        [
+          344,
+          192,
+          8.5
+        ],
+        [
+          338,
+          180,
+          9.5
+        ]
+      ]
+    },
+    {
+      "from": "w3",
+      "to": "w4",
+      "width": 6,
+      "points": [
+        [
+          338,
+          120,
+          11
+        ],
+        [
+          330,
+          96,
+          13
+        ],
+        [
+          308,
+          76,
+          14.5
+        ],
+        [
+          276,
+          60,
+          15.5
+        ]
+      ]
+    },
+    {
+      "from": "w4",
+      "to": "w5",
+      "width": 7,
+      "points": [
+        [
+          174,
+          48,
+          16.5
+        ],
+        [
+          130,
+          50,
+          18
+        ],
+        [
+          96,
+          66,
+          21
+        ],
+        [
+          78,
+          94,
+          25
+        ],
+        [
+          80,
+          124,
+          29.5
+        ],
+        [
+          94,
+          146,
+          33
+        ]
+      ]
+    },
+    {
+      "from": "w5",
+      "to": "boss",
+      "width": 6,
+      "points": [
+        [
+          174,
+          162,
+          34.5
+        ],
+        [
+          192,
+          160,
+          36
+        ]
+      ]
+    },
+    {
+      "from": "boss",
+      "to": "vault",
+      "width": 4,
+      "points": [
+        [
+          240,
+          162,
+          37.2
+        ]
+      ]
+    }
+  ],
+  "sides": [
+    {
+      "id": "heron-pool",
+      "name": "Heron Pool",
+      "from": [
+        340,
+        250,
+        2.5
+      ],
+      "at": [
+        360,
+        238
+      ],
+      "radius": 7,
+      "elev": 3,
+      "width": 4
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "cp1",
+      "name": "The look-out fire",
+      "at": [
+        330,
+        258
+      ],
+      "elev": 1.6,
+      "after": "w2"
+    },
+    {
+      "id": "cp2",
+      "name": "The watch post fire",
+      "at": [
+        86,
+        110
+      ],
+      "elev": 27.5,
+      "after": "w4"
+    }
+  ],
+  "floors": {
+    "w4": "packed_earth",
+    "trailhead": "packed_earth"
+  }
+}

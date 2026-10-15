@@ -1,0 +1,11 @@
+{
+	"id": "sunmane_insides",
+	"schema": 1,
+	"sky": {
+		"paint": 0
+	},
+	"notes": {
+		"grade": "No trims, on purpose. The Sunmane wind caves (registry sunmane_wind_caves, alias sunmane_crystal_hollow) declare a weak sun, so the look grades them, but their floor already comes out at develop's value: luma 54 and 61 at the spawn (43, -27), pitch -60 and -30, against develop's 50 and 63. exposure_forward 0.85 took it to 47 and 54, closer at one pitch and further at the other, so it was dropped.",
+		"sky": "sky.paint 0 (integration): the painted sky and its haze are off here, so the void keeps the binder's own sky; the grade still runs. The map declares a near-black sky for a cave (environment profile cave-interior), and with the sky layer on the void round the caves was painted as a lit sky and haze: near-black from 70 % of the frame to under 1 % at the play camera, and a pale haze band of luma 145 across the top of the low view where develop draws black."
+	}
+}

@@ -1,0 +1,3819 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "manymouth_delta_insides",
+    "name": "Manymouth Delta Insides",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        38.04,
+        -8.82,
+        32.45
+      ],
+      "max": [
+        268.55,
+        23.13,
+        380.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        39.45,
+        -8.4,
+        32.45
+      ],
+      "max": [
+        268.55,
+        4.2,
+        380.55
+      ]
+    },
+    "interiorClass": "insides",
+    "parentRegion": "manymouth_delta",
+    "serverCells": 351
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      -37.0,
+      383.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        60.0,
+        0.05,
+        39.5
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "labyrinth-mouth",
+      "name": "The Flooded Labyrinth",
+      "position": [
+        60.0,
+        0.05,
+        39.5
+      ],
+      "rotationDegrees": 0.0,
+      "surface": "Walk",
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "gate-descent",
+      "name": "The Submerged Gate",
+      "position": [
+        60.0,
+        -2.75,
+        185.0
+      ],
+      "rotationDegrees": 180.0,
+      "surface": "Walk",
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "underdeck-hatch",
+      "name": "The Underdeck",
+      "position": [
+        170.0,
+        -1.55,
+        39.5
+      ],
+      "rotationDegrees": 0.0,
+      "surface": "Walk",
+      "section": "smugglers_warren"
+    },
+    {
+      "id": "tide-hall-door",
+      "name": "The Tide Hall",
+      "position": [
+        60.0,
+        0.05,
+        238.0
+      ],
+      "rotationDegrees": 0.0,
+      "surface": "Walk",
+      "section": "tide_hall"
+    },
+    {
+      "id": "temple-sanctum-door",
+      "name": "The Sanctum",
+      "position": [
+        165.0,
+        0.05,
+        229.0
+      ],
+      "rotationDegrees": 0.0,
+      "surface": "Walk",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "paddy-sump-mouth",
+      "name": "The Paddy Watch Sump",
+      "position": [
+        252.0,
+        0.05,
+        46.0
+      ],
+      "rotationDegrees": 0.0,
+      "surface": "Walk",
+      "section": "paddy_sump"
+    },
+    {
+      "id": "bund-shrine-door",
+      "name": "The Bund Shrine",
+      "position": [
+        252.0,
+        0.05,
+        130.0
+      ],
+      "rotationDegrees": 0.0,
+      "surface": "Walk",
+      "section": "bund_shrine"
+    },
+    {
+      "id": "bund-warden-door",
+      "name": "The Bund Warden's House",
+      "position": [
+        252.0,
+        0.05,
+        181.0
+      ],
+      "rotationDegrees": 0.0,
+      "surface": "Walk",
+      "section": "bund_warden"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 468,
+    "height": 702,
+    "cellMetres": 0.5,
+    "originMetres": [
+      37.0,
+      383.0
+    ],
+    "heightEncoding": {
+      "origin": -8.2,
+      "step": 0.2,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 63308,
+    "blockedCells": 265228,
+    "walkableFraction": 0.1927,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_manymouth_delta_insides",
+      "Roof_manymouth_delta_insides_bark_dark",
+      "Roof_manymouth_delta_insides_cliff_rock",
+      "Roof_manymouth_delta_insides_manymouth_teak",
+      "Roof_manymouth_delta_insides_rubble_stone",
+      "Roof_manymouth_delta_insides_thatch_reed",
+      "Build_manymouth_delta_insides_amber_resin",
+      "Build_manymouth_delta_insides_amethyst_verdigris",
+      "Build_manymouth_delta_insides_ashlar",
+      "Build_manymouth_delta_insides_bark_dark",
+      "Build_manymouth_delta_insides_canvas_awning",
+      "Build_manymouth_delta_insides_carved_wood",
+      "Build_manymouth_delta_insides_cliff_rock",
+      "Build_manymouth_delta_insides_dark_iron",
+      "Build_manymouth_delta_insides_foliage_green",
+      "Build_manymouth_delta_insides_manymouth_bamboo",
+      "Build_manymouth_delta_insides_manymouth_delta_deep",
+      "Build_manymouth_delta_insides_manymouth_delta_shallow",
+      "Build_manymouth_delta_insides_manymouth_glyph_stone",
+      "Build_manymouth_delta_insides_manymouth_silt",
+      "Build_manymouth_delta_insides_manymouth_teak",
+      "Build_manymouth_delta_insides_pale_ashlar",
+      "Build_manymouth_delta_insides_rubble_stone",
+      "Build_manymouth_delta_insides_thatch_reed",
+      "Build_manymouth_delta_insides_timber_dark",
+      "Build_manymouth_delta_insides_timber_grey",
+      "Build_manymouth_delta_insides_timber_warm",
+      "Build_manymouth_delta_insides_water_deep",
+      "Build_manymouth_delta_insides_woven_cloth"
+    ]
+  },
+  "cutaway": {
+    "hideNodes": [
+      "Roof_manymouth_delta_insides_bark_dark",
+      "Roof_manymouth_delta_insides_cliff_rock",
+      "Roof_manymouth_delta_insides_manymouth_teak",
+      "Roof_manymouth_delta_insides_rubble_stone",
+      "Roof_manymouth_delta_insides_thatch_reed"
+    ],
+    "reason": "interior lids; the isometric rig frames the floor, not the roof"
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-labyrinth-mouth",
+      "name": "Return to Manymouth Delta",
+      "type": "map-transition",
+      "position": [
+        60.0,
+        0.05,
+        39.5
+      ],
+      "radius": 3.0,
+      "destinationMap": "manymouth_delta",
+      "destinationSpawn": "labyrinth-mouth",
+      "section": "flooded_labyrinth",
+      "authority": "server"
+    },
+    {
+      "id": "exit-gate-descent",
+      "name": "Return to Manymouth Delta",
+      "type": "map-transition",
+      "position": [
+        60.0,
+        -2.75,
+        185.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "manymouth_delta",
+      "destinationSpawn": "gate-descent",
+      "section": "flooded_labyrinth",
+      "authority": "server"
+    },
+    {
+      "id": "exit-underdeck-hatch",
+      "name": "Return to Manymouth Delta",
+      "type": "map-transition",
+      "position": [
+        170.0,
+        -1.55,
+        39.5
+      ],
+      "radius": 3.0,
+      "destinationMap": "manymouth_delta",
+      "destinationSpawn": "underdeck-hatch",
+      "section": "smugglers_warren",
+      "authority": "server"
+    },
+    {
+      "id": "exit-tide-hall-door",
+      "name": "Return to Manymouth Delta",
+      "type": "map-transition",
+      "position": [
+        60.0,
+        0.05,
+        238.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "manymouth_delta",
+      "destinationSpawn": "tide-hall-door",
+      "section": "tide_hall",
+      "authority": "server"
+    },
+    {
+      "id": "exit-temple-sanctum-door",
+      "name": "Return to Manymouth Delta",
+      "type": "map-transition",
+      "position": [
+        165.0,
+        0.05,
+        229.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "manymouth_delta",
+      "destinationSpawn": "temple-sanctum-door",
+      "section": "temple_sanctum",
+      "authority": "server"
+    },
+    {
+      "id": "exit-paddy-sump-mouth",
+      "name": "Return to Manymouth Delta",
+      "type": "map-transition",
+      "position": [
+        252.0,
+        0.05,
+        46.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "manymouth_delta",
+      "destinationSpawn": "paddy-sump-mouth",
+      "section": "paddy_sump",
+      "authority": "server"
+    },
+    {
+      "id": "exit-bund-shrine-door",
+      "name": "Return to Manymouth Delta",
+      "type": "map-transition",
+      "position": [
+        252.0,
+        0.05,
+        130.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "manymouth_delta",
+      "destinationSpawn": "bund-shrine-door",
+      "section": "bund_shrine",
+      "authority": "server"
+    },
+    {
+      "id": "exit-bund-warden-door",
+      "name": "Return to Manymouth Delta",
+      "type": "map-transition",
+      "position": [
+        252.0,
+        0.05,
+        181.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "manymouth_delta",
+      "destinationSpawn": "bund-warden-door",
+      "section": "bund_warden",
+      "authority": "server"
+    }
+  ],
+  "sections": [
+    {
+      "id": "flooded_labyrinth",
+      "name": "The Flooded Labyrinth",
+      "class": "drowned-ruin",
+      "offset": [
+        60.0,
+        0.0,
+        40.0
+      ],
+      "arrival": [
+        60.0,
+        0.05,
+        39.5
+      ],
+      "spaces": [
+        "flooded_labyrinth.threshold",
+        "flooded_labyrinth.wading_hall",
+        "flooded_labyrinth.root_chamber",
+        "flooded_labyrinth.stelae_walk",
+        "flooded_labyrinth.gate_chamber",
+        "flooded_labyrinth.descent",
+        "flooded_labyrinth.rootway",
+        "flooded_labyrinth.processional",
+        "flooded_labyrinth.gateway"
+      ],
+      "notes": [
+        "The gate chamber holds the lower half of the same ring that stands out of the whirlpool on the region map. The exterior arch is its top.",
+        "Floors step down while the water line stays at y = 0, so the player wades progressively deeper without a single depth being authored."
+      ]
+    },
+    {
+      "id": "smugglers_warren",
+      "name": "The Underdeck",
+      "class": "warren",
+      "offset": [
+        170.0,
+        0.0,
+        40.0
+      ],
+      "arrival": [
+        170.0,
+        -1.55,
+        39.5
+      ],
+      "spaces": [
+        "smugglers_warren.hatch",
+        "smugglers_warren.stilt_corridor",
+        "smugglers_warren.boardwalk_maze",
+        "smugglers_warren.cache",
+        "smugglers_warren.crate_workroom",
+        "smugglers_warren.ladderway",
+        "smugglers_warren.mazeway",
+        "smugglers_warren.cacheway",
+        "smugglers_warren.workway"
+      ],
+      "notes": [
+        "Every ceiling here is plank decking: the warren's roof is the town's floor, and its columns are the piles you moor against on the surface.",
+        "The maze crossings sit at four different levels and are deliberately not aligned, so a player under one can see the others overhead."
+      ]
+    },
+    {
+      "id": "tide_hall",
+      "name": "The Tide Hall",
+      "class": "hall",
+      "offset": [
+        60.0,
+        0.0,
+        240.0
+      ],
+      "arrival": [
+        60.0,
+        0.05,
+        238.0
+      ],
+      "spaces": [
+        "tide_hall.porch",
+        "tide_hall.hall",
+        "tide_hall.strongroom",
+        "tide_hall.gallery",
+        "tide_hall.entry",
+        "tide_hall.vaultway",
+        "tide_hall.stair"
+      ],
+      "notes": [
+        "The only dry, inhabited, warm interior of the four, and the only one with fire and textiles in it.",
+        "The tide post is a carved post banded in bronze at every flood the village remembers - a delta village's history is how high the water came."
+      ]
+    },
+    {
+      "id": "temple_sanctum",
+      "name": "The Sanctum",
+      "class": "sanctum",
+      "offset": [
+        165.0,
+        0.0,
+        230.0
+      ],
+      "arrival": [
+        165.0,
+        0.05,
+        229.0
+      ],
+      "spaces": [
+        "temple_sanctum.shrine_head",
+        "temple_sanctum.ambulatory",
+        "temple_sanctum.oculus_court",
+        "temple_sanctum.crypt",
+        "temple_sanctum.descent",
+        "temple_sanctum.courtway",
+        "temple_sanctum.cryptway"
+      ],
+      "notes": [
+        "The oculus court is declared open to the sky, so the client keeps a hole in the roof and the region's weather falls into the pool.",
+        "The only stone interior, and deliberately the only one with no timber in it at all - it is the counterweight to the warren."
+      ]
+    },
+    {
+      "id": "paddy_sump",
+      "name": "The Paddy Watch Sump",
+      "class": "cave",
+      "offset": [
+        252.0,
+        0.0,
+        46.0
+      ],
+      "arrival": [
+        252.0,
+        0.05,
+        46.0
+      ],
+      "spaces": [
+        "paddy_sump.mouth",
+        "paddy_sump.throat",
+        "paddy_sump.chamber",
+        "paddy_sump.descent",
+        "paddy_sump.gullet"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: mouth, throat and chamber, dressed for the region above it."
+      ]
+    },
+    {
+      "id": "bund_shrine",
+      "name": "The Bund Shrine",
+      "class": "shrine",
+      "offset": [
+        252.0,
+        0.0,
+        130.0
+      ],
+      "arrival": [
+        252.0,
+        0.05,
+        130.0
+      ],
+      "spaces": [
+        "bund_shrine.porch",
+        "bund_shrine.nave",
+        "bund_shrine.aisle"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: a cut sanctuary in the water manner."
+      ]
+    },
+    {
+      "id": "bund_warden",
+      "name": "The Bund Warden's House",
+      "class": "dwelling",
+      "offset": [
+        252.0,
+        0.0,
+        180.0
+      ],
+      "arrival": [
+        252.0,
+        0.05,
+        181.0
+      ],
+      "spaces": [
+        "bund_warden.hall",
+        "bund_warden.back"
+      ],
+      "notes": [
+        "Built from the shared small-room kit: a hall with a hearth and a back room for its trade (hearth)."
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "submerged-gate",
+      "name": "The Submerged Gate",
+      "space": "flooded_labyrinth.gate_chamber",
+      "position": [
+        60.0,
+        -1.2,
+        170.0
+      ],
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "root-chamber",
+      "name": "The Root Chamber",
+      "space": "flooded_labyrinth.root_chamber",
+      "position": [
+        93.0,
+        1.3,
+        76.0
+      ],
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "smuggler-cache",
+      "name": "The Cache",
+      "space": "smugglers_warren.cache",
+      "position": [
+        209.0,
+        0.8,
+        126.0
+      ],
+      "section": "smugglers_warren"
+    },
+    {
+      "id": "crate-workroom",
+      "name": "The Workroom",
+      "space": "smugglers_warren.crate_workroom",
+      "position": [
+        170.0,
+        0.4,
+        173.0
+      ],
+      "section": "smugglers_warren"
+    },
+    {
+      "id": "tide-post",
+      "name": "The Tide Post",
+      "space": "tide_hall.hall",
+      "position": [
+        60.0,
+        1.8,
+        270.0
+      ],
+      "section": "tide_hall"
+    },
+    {
+      "id": "hall-gallery",
+      "name": "The Gallery",
+      "space": "tide_hall.gallery",
+      "position": [
+        60.0,
+        5.8,
+        309.0
+      ],
+      "section": "tide_hall"
+    },
+    {
+      "id": "oculus-pool",
+      "name": "The Rain Pool",
+      "space": "temple_sanctum.oculus_court",
+      "position": [
+        165.0,
+        -1.4,
+        322.0
+      ],
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "temple-crypt",
+      "name": "The Founders' Crypt",
+      "space": "temple_sanctum.crypt",
+      "position": [
+        165.0,
+        -6.4,
+        366.0
+      ],
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "manymouth_paddy_sump-chamber",
+      "name": "The Paddy Watch Sump",
+      "space": "paddy_sump.chamber",
+      "position": [
+        252.0,
+        -4.0,
+        97.0
+      ],
+      "section": "paddy_sump"
+    },
+    {
+      "id": "manymouth_bund_shrine-sanctuary",
+      "name": "The Bund Shrine",
+      "space": "bund_shrine.nave",
+      "position": [
+        252.0,
+        0.4,
+        152.0
+      ],
+      "section": "bund_shrine"
+    },
+    {
+      "id": "manymouth_bund_warden-hearth",
+      "name": "The Bund Warden's House",
+      "space": "bund_warden.hall",
+      "position": [
+        252.0,
+        1.4,
+        181.0
+      ],
+      "section": "bund_warden"
+    }
+  ],
+  "interactives": [
+    {
+      "id": "gate-focus",
+      "name": "The Submerged Gate",
+      "type": "portal-focus",
+      "position": [
+        60.0,
+        -2.2,
+        170.0
+      ],
+      "authority": "server",
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "cargo-hoist",
+      "name": "Cargo Hoist",
+      "type": "mechanism",
+      "position": [
+        170.0,
+        -1.1,
+        179.0
+      ],
+      "authority": "server",
+      "section": "smugglers_warren"
+    },
+    {
+      "id": "tide-post-read",
+      "name": "The Tide Post",
+      "type": "lore",
+      "position": [
+        53.5,
+        1.6,
+        279.0
+      ],
+      "authority": "server",
+      "section": "tide_hall"
+    },
+    {
+      "id": "hall-hearth",
+      "name": "The Hall Hearth",
+      "type": "fire",
+      "position": [
+        60.0,
+        0.9,
+        270.0
+      ],
+      "authority": "server",
+      "section": "tide_hall"
+    },
+    {
+      "id": "sanctum-altar",
+      "name": "The Rain Pool",
+      "type": "shrine",
+      "position": [
+        165.0,
+        -3.0,
+        322.0
+      ],
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "secret-delta-market-cache",
+      "kind": "secret",
+      "secret": "delta-market-cache",
+      "name": "The Market Cache",
+      "label": "A cellar hatch under the leaves.",
+      "prop": "cellar_hatch",
+      "key": "",
+      "destinationMap": "manymouth_delta_secrets",
+      "destinationSpawn": "delta-market-cache",
+      "position": [
+        211.5,
+        -0.6,
+        128.5
+      ],
+      "space": "smugglers_warren.cache",
+      "authority": "server"
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "underdeck-smuggler-0",
+      "role": "smuggler",
+      "position": [
+        169.02,
+        -1.2,
+        175.61
+      ],
+      "authority": "server",
+      "section": "smugglers_warren"
+    },
+    {
+      "id": "underdeck-smuggler-1",
+      "role": "smuggler",
+      "position": [
+        178.76,
+        -1.2,
+        168.75
+      ],
+      "authority": "server",
+      "section": "smugglers_warren"
+    },
+    {
+      "id": "underdeck-fence-2",
+      "role": "fence",
+      "position": [
+        171.45,
+        -1.2,
+        180.95
+      ],
+      "authority": "server",
+      "section": "smugglers_warren"
+    },
+    {
+      "id": "underdeck-lookout-3",
+      "role": "lookout",
+      "position": [
+        177.87,
+        -1.2,
+        180.52
+      ],
+      "authority": "server",
+      "section": "smugglers_warren"
+    },
+    {
+      "id": "tide-hall-elder-0",
+      "role": "elder",
+      "position": [
+        49.87,
+        0.0,
+        264.14
+      ],
+      "authority": "server",
+      "section": "tide_hall"
+    },
+    {
+      "id": "tide-hall-steward-1",
+      "role": "steward",
+      "position": [
+        60.57,
+        0.0,
+        283.38
+      ],
+      "authority": "server",
+      "section": "tide_hall"
+    },
+    {
+      "id": "tide-hall-villager-2",
+      "role": "villager",
+      "position": [
+        65.25,
+        0.0,
+        267.97
+      ],
+      "authority": "server",
+      "section": "tide_hall"
+    },
+    {
+      "id": "tide-hall-villager-3",
+      "role": "villager",
+      "position": [
+        64.53,
+        0.0,
+        271.7
+      ],
+      "authority": "server",
+      "section": "tide_hall"
+    },
+    {
+      "id": "tide-hall-trader-4",
+      "role": "trader",
+      "position": [
+        67.18,
+        0.0,
+        273.53
+      ],
+      "authority": "server",
+      "section": "tide_hall"
+    },
+    {
+      "id": "sanctum-acolyte-0",
+      "role": "acolyte",
+      "position": [
+        176.32,
+        -3.4,
+        313.88
+      ],
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "sanctum-acolyte-1",
+      "role": "acolyte",
+      "position": [
+        170.57,
+        -3.4,
+        317.49
+      ],
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "sanctum-acolyte-2",
+      "role": "acolyte",
+      "position": [
+        160.98,
+        -3.4,
+        319.34
+      ],
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "manymouth_paddy_sump-den",
+      "name": "Manymouth Crab",
+      "kind": "creature-zone",
+      "position": [
+        252.0,
+        -6.0,
+        97.0
+      ],
+      "radius": 12.0,
+      "section": "paddy_sump"
+    },
+    {
+      "id": "served-staff-labyrinth-sounder-ath-rulu",
+      "name": "Labyrinth Sounder Ath-Rulu",
+      "map": "manymouth_flooded_labyrinth",
+      "role": "dialogue",
+      "authority": "server",
+      "serverTile": [
+        20,
+        344
+      ],
+      "position": [
+        57.5,
+        0.0,
+        38.5
+      ],
+      "placementSource": "publish_interior_staff.py",
+      "placementReason": "Flooded Labyrinth dry entry verge"
+    }
+  ],
+  "harvestables": [
+    {
+      "id": "drowned-glyphstone-0",
+      "resource": "glyph-shard",
+      "position": [
+        57.01,
+        -1.9,
+        123.26
+      ],
+      "authority": "server",
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "drowned-glyphstone-1",
+      "resource": "glyph-shard",
+      "position": [
+        56.25,
+        -1.9,
+        124.12
+      ],
+      "authority": "server",
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "drowned-glyphstone-2",
+      "resource": "glyph-shard",
+      "position": [
+        53.08,
+        -1.9,
+        109.56
+      ],
+      "authority": "server",
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "drowned-glyphstone-3",
+      "resource": "glyph-shard",
+      "position": [
+        63.34,
+        -1.9,
+        126.78
+      ],
+      "authority": "server",
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "sanctum-lotus-0",
+      "resource": "lotus-root",
+      "position": [
+        163.34,
+        -3.0,
+        323.16
+      ],
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "sanctum-lotus-1",
+      "resource": "lotus-root",
+      "position": [
+        162.92,
+        -3.0,
+        323.47
+      ],
+      "authority": "server",
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "sanctum-lotus-2",
+      "resource": "lotus-root",
+      "position": [
+        161.15,
+        -3.0,
+        318.27
+      ],
+      "authority": "server",
+      "section": "temple_sanctum"
+    }
+  ],
+  "lights": [
+    {
+      "id": "lantern-00",
+      "kind": "point",
+      "position": [
+        60.0,
+        2.38,
+        36.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-01",
+      "kind": "point",
+      "position": [
+        56.6,
+        2.38,
+        40.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-02",
+      "kind": "point",
+      "position": [
+        63.4,
+        2.38,
+        42.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-03",
+      "kind": "point",
+      "position": [
+        60.0,
+        1.58,
+        52.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-04",
+      "kind": "point",
+      "position": [
+        51.0,
+        3.58,
+        63.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-05",
+      "kind": "point",
+      "position": [
+        69.0,
+        3.58,
+        63.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-06",
+      "kind": "point",
+      "position": [
+        51.0,
+        3.58,
+        71.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-07",
+      "kind": "point",
+      "position": [
+        69.0,
+        3.58,
+        71.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-08",
+      "kind": "point",
+      "position": [
+        51.0,
+        3.58,
+        79.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-09",
+      "kind": "point",
+      "position": [
+        69.0,
+        3.58,
+        79.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-10",
+      "kind": "point",
+      "position": [
+        51.0,
+        3.58,
+        87.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-11",
+      "kind": "point",
+      "position": [
+        69.0,
+        3.58,
+        87.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-12",
+      "kind": "point",
+      "position": [
+        60.0,
+        3.98,
+        75.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-13",
+      "kind": "point",
+      "position": [
+        86.0,
+        4.58,
+        70.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-14",
+      "kind": "point",
+      "position": [
+        100.0,
+        4.58,
+        70.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-15",
+      "kind": "point",
+      "position": [
+        86.0,
+        4.58,
+        82.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-16",
+      "kind": "point",
+      "position": [
+        100.0,
+        4.58,
+        82.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-17",
+      "kind": "point",
+      "position": [
+        93.0,
+        5.38,
+        76.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-18",
+      "kind": "point",
+      "position": [
+        60.0,
+        1.78,
+        97.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-19",
+      "kind": "point",
+      "position": [
+        53.4,
+        2.98,
+        108.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-20",
+      "kind": "point",
+      "position": [
+        66.6,
+        2.98,
+        108.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-21",
+      "kind": "point",
+      "position": [
+        53.4,
+        2.98,
+        118.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-22",
+      "kind": "point",
+      "position": [
+        66.6,
+        2.98,
+        118.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-23",
+      "kind": "point",
+      "position": [
+        53.4,
+        2.98,
+        128.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-24",
+      "kind": "point",
+      "position": [
+        66.6,
+        2.98,
+        128.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-25",
+      "kind": "point",
+      "position": [
+        60.0,
+        2.38,
+        143.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-26",
+      "kind": "point",
+      "position": [
+        45.0,
+        5.38,
+        158.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-27",
+      "kind": "point",
+      "position": [
+        75.0,
+        5.38,
+        158.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-28",
+      "kind": "point",
+      "position": [
+        45.0,
+        5.38,
+        170.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-29",
+      "kind": "point",
+      "position": [
+        75.0,
+        5.38,
+        170.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-30",
+      "kind": "point",
+      "position": [
+        45.0,
+        5.38,
+        182.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-31",
+      "kind": "point",
+      "position": [
+        75.0,
+        5.38,
+        182.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-32",
+      "kind": "point",
+      "position": [
+        60.0,
+        8.38,
+        162.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-33",
+      "kind": "point",
+      "position": [
+        60.0,
+        8.38,
+        182.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-34",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.98,
+        38.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-35",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.98,
+        42.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-36",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.48,
+        60.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-37",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.48,
+        68.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-38",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.48,
+        76.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-39",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.48,
+        84.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-40",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.48,
+        92.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-41",
+      "kind": "point",
+      "position": [
+        153.0,
+        0.78,
+        110.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-42",
+      "kind": "point",
+      "position": [
+        187.0,
+        0.78,
+        110.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-43",
+      "kind": "point",
+      "position": [
+        153.0,
+        2.38,
+        120.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-44",
+      "kind": "point",
+      "position": [
+        187.0,
+        2.38,
+        120.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-45",
+      "kind": "point",
+      "position": [
+        153.0,
+        1.38,
+        130.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-46",
+      "kind": "point",
+      "position": [
+        187.0,
+        1.38,
+        130.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-47",
+      "kind": "point",
+      "position": [
+        153.0,
+        3.18,
+        139.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-48",
+      "kind": "point",
+      "position": [
+        187.0,
+        3.18,
+        139.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-49",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.58,
+        112.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-50",
+      "kind": "point",
+      "position": [
+        170.0,
+        2.08,
+        120.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-51",
+      "kind": "point",
+      "position": [
+        170.0,
+        1.18,
+        128.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-52",
+      "kind": "point",
+      "position": [
+        170.0,
+        2.88,
+        136.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-53",
+      "kind": "point",
+      "position": [
+        161.0,
+        3.38,
+        124.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-54",
+      "kind": "point",
+      "position": [
+        179.0,
+        3.38,
+        124.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-55",
+      "kind": "point",
+      "position": [
+        196.0,
+        0.58,
+        126.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-56",
+      "kind": "point",
+      "position": [
+        204.0,
+        0.98,
+        122.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-57",
+      "kind": "point",
+      "position": [
+        212.0,
+        0.98,
+        130.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-58",
+      "kind": "point",
+      "position": [
+        170.0,
+        0.78,
+        152.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-59",
+      "kind": "point",
+      "position": [
+        158.0,
+        1.78,
+        164.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-60",
+      "kind": "point",
+      "position": [
+        182.0,
+        1.78,
+        164.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-61",
+      "kind": "point",
+      "position": [
+        158.0,
+        1.78,
+        176.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-62",
+      "kind": "point",
+      "position": [
+        182.0,
+        1.78,
+        176.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-63",
+      "kind": "point",
+      "position": [
+        170.0,
+        2.18,
+        170.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-64",
+      "kind": "point",
+      "position": [
+        170.0,
+        2.18,
+        184.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-65",
+      "kind": "point",
+      "position": [
+        60.0,
+        1.78,
+        237.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-66",
+      "kind": "point",
+      "position": [
+        60.0,
+        1.78,
+        240.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-67",
+      "kind": "point",
+      "position": [
+        60.0,
+        1.78,
+        248.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-68",
+      "kind": "point",
+      "position": [
+        50.0,
+        3.98,
+        258.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-69",
+      "kind": "point",
+      "position": [
+        70.0,
+        3.98,
+        258.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-70",
+      "kind": "point",
+      "position": [
+        50.0,
+        3.98,
+        266.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-71",
+      "kind": "point",
+      "position": [
+        70.0,
+        3.98,
+        266.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-72",
+      "kind": "point",
+      "position": [
+        50.0,
+        3.98,
+        274.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-73",
+      "kind": "point",
+      "position": [
+        70.0,
+        3.98,
+        274.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-74",
+      "kind": "point",
+      "position": [
+        50.0,
+        3.98,
+        282.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-75",
+      "kind": "point",
+      "position": [
+        70.0,
+        3.98,
+        282.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-76",
+      "kind": "point",
+      "position": [
+        60.0,
+        4.78,
+        264.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-77",
+      "kind": "point",
+      "position": [
+        60.0,
+        4.78,
+        278.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-78",
+      "kind": "point",
+      "position": [
+        86.0,
+        1.58,
+        274.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-79",
+      "kind": "point",
+      "position": [
+        90.0,
+        1.58,
+        282.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-80",
+      "kind": "point",
+      "position": [
+        60.0,
+        1.98,
+        292.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-81",
+      "kind": "point",
+      "position": [
+        52.0,
+        6.58,
+        302.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-82",
+      "kind": "point",
+      "position": [
+        68.0,
+        6.58,
+        302.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-83",
+      "kind": "point",
+      "position": [
+        52.0,
+        6.58,
+        312.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-84",
+      "kind": "point",
+      "position": [
+        68.0,
+        6.58,
+        312.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-85",
+      "kind": "point",
+      "position": [
+        60.0,
+        6.98,
+        308.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-86",
+      "kind": "point",
+      "position": [
+        60.0,
+        6.98,
+        318.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-87",
+      "kind": "point",
+      "position": [
+        165.0,
+        2.58,
+        226.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-88",
+      "kind": "point",
+      "position": [
+        165.0,
+        2.58,
+        232.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-89",
+      "kind": "point",
+      "position": [
+        165.0,
+        1.78,
+        242.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-90",
+      "kind": "point",
+      "position": [
+        149.0,
+        2.98,
+        254.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-91",
+      "kind": "point",
+      "position": [
+        181.0,
+        2.98,
+        254.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-92",
+      "kind": "point",
+      "position": [
+        149.0,
+        2.98,
+        264.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-93",
+      "kind": "point",
+      "position": [
+        181.0,
+        2.98,
+        264.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-94",
+      "kind": "point",
+      "position": [
+        149.0,
+        2.98,
+        274.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-95",
+      "kind": "point",
+      "position": [
+        181.0,
+        2.98,
+        274.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-96",
+      "kind": "point",
+      "position": [
+        149.0,
+        2.98,
+        286.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-97",
+      "kind": "point",
+      "position": [
+        181.0,
+        2.98,
+        286.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-98",
+      "kind": "point",
+      "position": [
+        165.0,
+        2.98,
+        252.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-99",
+      "kind": "point",
+      "position": [
+        165.0,
+        2.98,
+        288.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-100",
+      "kind": "point",
+      "position": [
+        165.0,
+        1.98,
+        299.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-101",
+      "kind": "point",
+      "position": [
+        152.0,
+        3.78,
+        310.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-102",
+      "kind": "point",
+      "position": [
+        178.0,
+        3.78,
+        310.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-103",
+      "kind": "point",
+      "position": [
+        152.0,
+        3.78,
+        322.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-104",
+      "kind": "point",
+      "position": [
+        178.0,
+        3.78,
+        322.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-105",
+      "kind": "point",
+      "position": [
+        152.0,
+        3.78,
+        334.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-106",
+      "kind": "point",
+      "position": [
+        178.0,
+        3.78,
+        334.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-107",
+      "kind": "point",
+      "position": [
+        165.0,
+        2.18,
+        345.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-108",
+      "kind": "point",
+      "position": [
+        155.0,
+        2.58,
+        356.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-109",
+      "kind": "point",
+      "position": [
+        175.0,
+        2.58,
+        356.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-110",
+      "kind": "point",
+      "position": [
+        155.0,
+        2.58,
+        366.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-111",
+      "kind": "point",
+      "position": [
+        175.0,
+        2.58,
+        366.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-112",
+      "kind": "point",
+      "position": [
+        155.0,
+        2.58,
+        376.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-113",
+      "kind": "point",
+      "position": [
+        175.0,
+        2.58,
+        376.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-114",
+      "kind": "point",
+      "position": [
+        165.0,
+        2.78,
+        361.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-115",
+      "kind": "point",
+      "position": [
+        165.0,
+        2.78,
+        373.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-116",
+      "kind": "point",
+      "position": [
+        252.0,
+        2.58,
+        44.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-117",
+      "kind": "point",
+      "position": [
+        252.0,
+        -0.82,
+        67.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-118",
+      "kind": "point",
+      "position": [
+        244.0,
+        -2.42,
+        97.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-119",
+      "kind": "point",
+      "position": [
+        260.0,
+        -2.42,
+        97.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-120",
+      "kind": "point",
+      "position": [
+        252.0,
+        2.78,
+        130.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-121",
+      "kind": "point",
+      "position": [
+        247.0,
+        2.98,
+        146.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-122",
+      "kind": "point",
+      "position": [
+        257.0,
+        2.98,
+        152.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-123",
+      "kind": "point",
+      "position": [
+        252.0,
+        3.38,
+        159.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-124",
+      "kind": "point",
+      "position": [
+        252.0,
+        2.28,
+        181.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-125",
+      "kind": "point",
+      "position": [
+        253.0,
+        1.98,
+        189.28
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "shaft-00",
+      "kind": "point",
+      "position": [
+        60.0,
+        0.5,
+        170.0
+      ],
+      "colour": [
+        0.34,
+        0.92,
+        0.82
+      ],
+      "range": 44.0,
+      "energy": 6.5,
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "shaft-01",
+      "kind": "point",
+      "position": [
+        60.0,
+        -1.9,
+        164.0
+      ],
+      "colour": [
+        0.34,
+        0.92,
+        0.82
+      ],
+      "range": 30.0,
+      "energy": 3.4,
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "shaft-02",
+      "kind": "point",
+      "position": [
+        51.0,
+        4.0,
+        170.0
+      ],
+      "colour": [
+        0.34,
+        0.92,
+        0.82
+      ],
+      "range": 30.0,
+      "energy": 4.0,
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "shaft-03",
+      "kind": "point",
+      "position": [
+        69.0,
+        4.0,
+        170.0
+      ],
+      "colour": [
+        0.34,
+        0.92,
+        0.82
+      ],
+      "range": 30.0,
+      "energy": 4.0,
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "shaft-04",
+      "kind": "point",
+      "position": [
+        60.0,
+        8.0,
+        160.0
+      ],
+      "colour": [
+        0.34,
+        0.92,
+        0.82
+      ],
+      "range": 30.0,
+      "energy": 4.0,
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "shaft-05",
+      "kind": "point",
+      "position": [
+        60.0,
+        8.0,
+        180.0
+      ],
+      "colour": [
+        0.34,
+        0.92,
+        0.82
+      ],
+      "range": 30.0,
+      "energy": 4.0,
+      "section": "flooded_labyrinth"
+    },
+    {
+      "id": "shaft-06",
+      "kind": "point",
+      "position": [
+        165.0,
+        12.0,
+        322.0
+      ],
+      "colour": [
+        0.62,
+        0.82,
+        0.86
+      ],
+      "range": 46.0,
+      "energy": 5.0,
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "shaft-07",
+      "kind": "point",
+      "position": [
+        158.0,
+        6.0,
+        322.0
+      ],
+      "colour": [
+        0.62,
+        0.82,
+        0.86
+      ],
+      "range": 34.0,
+      "energy": 3.2,
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "shaft-08",
+      "kind": "point",
+      "position": [
+        172.0,
+        6.0,
+        322.0
+      ],
+      "colour": [
+        0.62,
+        0.82,
+        0.86
+      ],
+      "range": 34.0,
+      "energy": 3.2,
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "shaft-09",
+      "kind": "point",
+      "position": [
+        165.0,
+        6.0,
+        314.0
+      ],
+      "colour": [
+        0.62,
+        0.82,
+        0.86
+      ],
+      "range": 34.0,
+      "energy": 3.2,
+      "section": "temple_sanctum"
+    },
+    {
+      "id": "shaft-10",
+      "kind": "point",
+      "position": [
+        165.0,
+        6.0,
+        330.0
+      ],
+      "colour": [
+        0.62,
+        0.82,
+        0.86
+      ],
+      "range": 34.0,
+      "energy": 3.2,
+      "section": "temple_sanctum"
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "ambient": {
+      "colour": [
+        0.11,
+        0.15,
+        0.16
+      ],
+      "energy": 0.42
+    },
+    "fog": {
+      "enabled": true,
+      "colour": [
+        0.05,
+        0.08,
+        0.08
+      ],
+      "begin": 14.0,
+      "end": 48.0
+    },
+    "audio": [
+      {
+        "id": "drip",
+        "space": "flooded_labyrinth.wading_hall",
+        "loop": true
+      },
+      {
+        "id": "gate-hum",
+        "space": "flooded_labyrinth.gate_chamber",
+        "loop": true
+      },
+      {
+        "id": "wading",
+        "space": "flooded_labyrinth.stelae_walk",
+        "loop": true
+      },
+      {
+        "id": "hull-creak",
+        "space": "smugglers_warren.stilt_corridor",
+        "loop": true
+      },
+      {
+        "id": "water-lap",
+        "space": "smugglers_warren.boardwalk_maze",
+        "loop": true
+      },
+      {
+        "id": "hall-murmur",
+        "space": "tide_hall.hall",
+        "loop": true
+      },
+      {
+        "id": "hearth-fire",
+        "space": "tide_hall.hall",
+        "loop": true
+      },
+      {
+        "id": "rain-on-stone",
+        "space": "temple_sanctum.oculus_court",
+        "loop": true
+      },
+      {
+        "id": "crypt-silence",
+        "space": "temple_sanctum.crypt",
+        "loop": true
+      }
+    ],
+    "openToSky": [
+      "temple_sanctum.oculus_court"
+    ]
+  },
+  "spaces": {
+    "flooded_labyrinth.threshold": {
+      "x0": 54.0,
+      "x1": 66.0,
+      "z0": 33.0,
+      "z1": 46.0,
+      "floor": 0.0,
+      "height": 5.0
+    },
+    "flooded_labyrinth.wading_hall": {
+      "x0": 47.0,
+      "x1": 73.0,
+      "z0": 60.0,
+      "z1": 90.0,
+      "floor": -1.1,
+      "height": 7.5
+    },
+    "flooded_labyrinth.root_chamber": {
+      "x0": 82.0,
+      "x1": 104.0,
+      "z0": 66.0,
+      "z1": 86.0,
+      "floor": -0.7,
+      "height": 8.5
+    },
+    "flooded_labyrinth.stelae_walk": {
+      "x0": 50.0,
+      "x1": 70.0,
+      "z0": 104.0,
+      "z1": 136.0,
+      "floor": -1.9,
+      "height": 7.0
+    },
+    "flooded_labyrinth.gate_chamber": {
+      "x0": 40.0,
+      "x1": 80.0,
+      "z0": 150.0,
+      "z1": 190.0,
+      "floor": -2.8,
+      "height": 15.0
+    },
+    "flooded_labyrinth.descent": {
+      "x0": 58.0,
+      "x1": 62.0,
+      "z0": 44.0,
+      "z1": 62.0,
+      "floor": -1.1,
+      "height": 3.6
+    },
+    "flooded_labyrinth.rootway": {
+      "x0": 71.3,
+      "x1": 83.7,
+      "z0": 74.3,
+      "z1": 77.7,
+      "floor": -1.1,
+      "height": 3.2
+    },
+    "flooded_labyrinth.processional": {
+      "x0": 57.8,
+      "x1": 62.2,
+      "z0": 87.8,
+      "z1": 106.2,
+      "floor": -1.9,
+      "height": 3.6
+    },
+    "flooded_labyrinth.gateway": {
+      "x0": 57.5,
+      "x1": 62.5,
+      "z0": 133.5,
+      "z1": 152.5,
+      "floor": -2.8,
+      "height": 4.2
+    },
+    "smugglers_warren.hatch": {
+      "x0": 166.0,
+      "x1": 174.0,
+      "z0": 35.0,
+      "z1": 44.0,
+      "floor": -1.6,
+      "height": 4.2
+    },
+    "smugglers_warren.stilt_corridor": {
+      "x0": 166.0,
+      "x1": 174.0,
+      "z0": 56.0,
+      "z1": 94.0,
+      "floor": -1.6,
+      "height": 3.2
+    },
+    "smugglers_warren.boardwalk_maze": {
+      "x0": 148.0,
+      "x1": 192.0,
+      "z0": 106.0,
+      "z1": 144.0,
+      "floor": -1.6,
+      "height": 6.4
+    },
+    "smugglers_warren.cache": {
+      "x0": 200.0,
+      "x1": 218.0,
+      "z0": 116.0,
+      "z1": 136.0,
+      "floor": -0.6,
+      "height": 3.0
+    },
+    "smugglers_warren.crate_workroom": {
+      "x0": 154.0,
+      "x1": 186.0,
+      "z0": 158.0,
+      "z1": 188.0,
+      "floor": -1.2,
+      "height": 4.6
+    },
+    "smugglers_warren.ladderway": {
+      "x0": 168.5,
+      "x1": 171.5,
+      "z0": 42.5,
+      "z1": 57.5,
+      "floor": -1.6,
+      "height": 3.0
+    },
+    "smugglers_warren.mazeway": {
+      "x0": 168.3,
+      "x1": 171.7,
+      "z0": 92.3,
+      "z1": 107.7,
+      "floor": -1.6,
+      "height": 3.0
+    },
+    "smugglers_warren.cacheway": {
+      "x0": 190.4,
+      "x1": 201.6,
+      "z0": 124.4,
+      "z1": 127.6,
+      "floor": -1.6,
+      "height": 2.8
+    },
+    "smugglers_warren.workway": {
+      "x0": 168.3,
+      "x1": 171.7,
+      "z0": 142.3,
+      "z1": 159.7,
+      "floor": -1.6,
+      "height": 3.0
+    },
+    "tide_hall.porch": {
+      "x0": 55.0,
+      "x1": 65.0,
+      "z0": 234.0,
+      "z1": 242.0,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "tide_hall.hall": {
+      "x0": 46.0,
+      "x1": 74.0,
+      "z0": 254.0,
+      "z1": 286.0,
+      "floor": 0.0,
+      "height": 6.8
+    },
+    "tide_hall.strongroom": {
+      "x0": 82.0,
+      "x1": 94.0,
+      "z0": 272.0,
+      "z1": 284.0,
+      "floor": 0.0,
+      "height": 3.2
+    },
+    "tide_hall.gallery": {
+      "x0": 49.0,
+      "x1": 71.0,
+      "z0": 298.0,
+      "z1": 320.0,
+      "floor": 4.2,
+      "height": 4.4
+    },
+    "tide_hall.entry": {
+      "x0": 58.4,
+      "x1": 61.6,
+      "z0": 240.4,
+      "z1": 255.6,
+      "floor": 0.0,
+      "height": 3.2
+    },
+    "tide_hall.vaultway": {
+      "x0": 72.7,
+      "x1": 83.3,
+      "z0": 278.7,
+      "z1": 281.3,
+      "floor": 0.0,
+      "height": 2.8
+    },
+    "tide_hall.stair": {
+      "x0": 58.5,
+      "x1": 61.5,
+      "z0": 284.5,
+      "z1": 299.5,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "temple_sanctum.shrine_head": {
+      "x0": 159.0,
+      "x1": 171.0,
+      "z0": 223.0,
+      "z1": 235.0,
+      "floor": 0.0,
+      "height": 5.2
+    },
+    "temple_sanctum.ambulatory": {
+      "x0": 143.0,
+      "x1": 187.0,
+      "z0": 250.0,
+      "z1": 292.0,
+      "floor": -2.2,
+      "height": 7.0
+    },
+    "temple_sanctum.oculus_court": {
+      "x0": 149.0,
+      "x1": 181.0,
+      "z0": 306.0,
+      "z1": 338.0,
+      "floor": -3.4,
+      "height": 18.0
+    },
+    "temple_sanctum.crypt": {
+      "x0": 152.0,
+      "x1": 178.0,
+      "z0": 352.0,
+      "z1": 380.0,
+      "floor": -8.0,
+      "height": 5.4
+    },
+    "temple_sanctum.descent": {
+      "x0": 163.2,
+      "x1": 166.8,
+      "z0": 233.2,
+      "z1": 251.8,
+      "floor": -2.2,
+      "height": 3.6
+    },
+    "temple_sanctum.courtway": {
+      "x0": 162.9,
+      "x1": 167.1,
+      "z0": 289.9,
+      "z1": 308.1,
+      "floor": -3.4,
+      "height": 4.0
+    },
+    "temple_sanctum.cryptway": {
+      "x0": 163.2,
+      "x1": 166.8,
+      "z0": 336.2,
+      "z1": 353.8,
+      "floor": -8.0,
+      "height": 3.4
+    },
+    "paddy_sump.mouth": {
+      "x0": 246.0,
+      "x1": 258.0,
+      "z0": 40.0,
+      "z1": 52.0,
+      "floor": 0.0,
+      "height": 5.4
+    },
+    "paddy_sump.throat": {
+      "x0": 247.0,
+      "x1": 257.0,
+      "z0": 62.0,
+      "z1": 72.0,
+      "floor": -3.6,
+      "height": 5.6
+    },
+    "paddy_sump.chamber": {
+      "x0": 236.0,
+      "x1": 268.0,
+      "z0": 82.0,
+      "z1": 112.0,
+      "floor": -6.0,
+      "height": 11.0
+    },
+    "paddy_sump.descent": {
+      "x0": 249.6,
+      "x1": 254.4,
+      "z0": 49.6,
+      "z1": 64.4,
+      "floor": -3.6,
+      "height": 4.4
+    },
+    "paddy_sump.gullet": {
+      "x0": 249.7,
+      "x1": 254.3,
+      "z0": 69.7,
+      "z1": 84.3,
+      "floor": -6.0,
+      "height": 4.4
+    },
+    "bund_shrine.porch": {
+      "x0": 248.0,
+      "x1": 256.0,
+      "z0": 126.0,
+      "z1": 134.0,
+      "floor": 0.0,
+      "height": 4.2
+    },
+    "bund_shrine.nave": {
+      "x0": 244.0,
+      "x1": 260.0,
+      "z0": 142.0,
+      "z1": 162.0,
+      "floor": -1.2,
+      "height": 7.0
+    },
+    "bund_shrine.aisle": {
+      "x0": 250.4,
+      "x1": 253.6,
+      "z0": 132.4,
+      "z1": 143.6,
+      "floor": -1.2,
+      "height": 3.6
+    },
+    "bund_warden.hall": {
+      "x0": 247.0,
+      "x1": 257.0,
+      "z0": 176.0,
+      "z1": 186.0,
+      "floor": 0.0,
+      "height": 3.4
+    },
+    "bund_warden.back": {
+      "x0": 249.0,
+      "x1": 257.0,
+      "z0": 186.55,
+      "z1": 192.0,
+      "floor": 0.0,
+      "height": 3.0
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../../manymouth_delta/references/00-concept-detail-board.png",
+    "role": "parent-region board; these interiors have no board of their own",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "The Flooded Labyrinth: the hidden entry, cut and root-hung",
+      "The Flooded Labyrinth: the flood channel through the wading hall",
+      "The Flooded Labyrinth: the root chamber",
+      "The Flooded Labyrinth: the drowned processional",
+      "The Flooded Labyrinth: the submerged gate from beneath",
+      "The Underdeck: the stilt corridor",
+      "The Underdeck: the boardwalk maze at three levels",
+      "The Underdeck: the smuggler cache",
+      "The Underdeck: the crate workroom",
+      "The Underdeck: reed, rope and mangrove on the bench",
+      "The Tide Hall: the hall from the porch",
+      "The Tide Hall: the hearth basin",
+      "The Tide Hall: the tide post",
+      "The Tide Hall: the strongroom",
+      "The Tide Hall: the gallery over the hall",
+      "The Sanctum: the shrine head and the descent",
+      "The Sanctum: the ambulatory around the core",
+      "The Sanctum: the oculus court and its rain pool",
+      "The Sanctum: the ring of stelae",
+      "The Sanctum: the founders' crypt",
+      "The Paddy Watch Sump: cave mouth from within",
+      "The Paddy Watch Sump: the descent",
+      "The Paddy Watch Sump: the chamber",
+      "The Bund Shrine: the porch",
+      "The Bund Shrine: the nave",
+      "The Bund Shrine: the sanctuary",
+      "The Bund Warden's House: the hall and hearth",
+      "The Bund Warden's House: the hearth"
+    ]
+  },
+  "performance": {
+    "nodes": 37,
+    "meshes": 36,
+    "materials": 26,
+    "images": 72,
+    "textures": 72,
+    "accessors": 180,
+    "bufferViews": 252,
+    "uniqueTriangles": 96370,
+    "uniqueVertices": 103630,
+    "glbBytes": 13892484,
+    "nodeNames": [
+      "Interior_manymouth_delta_insides",
+      "Roof_manymouth_delta_insides_bark_dark",
+      "Roof_manymouth_delta_insides_cliff_rock",
+      "Roof_manymouth_delta_insides_manymouth_teak",
+      "Roof_manymouth_delta_insides_rubble_stone",
+      "Roof_manymouth_delta_insides_thatch_reed",
+      "Build_manymouth_delta_insides_amber_resin",
+      "Build_manymouth_delta_insides_amethyst_verdigris",
+      "Build_manymouth_delta_insides_ashlar",
+      "Build_manymouth_delta_insides_bark_dark",
+      "Build_manymouth_delta_insides_canvas_awning",
+      "Build_manymouth_delta_insides_carved_wood",
+      "Build_manymouth_delta_insides_cliff_rock",
+      "Build_manymouth_delta_insides_dark_iron",
+      "Build_manymouth_delta_insides_foliage_green",
+      "Build_manymouth_delta_insides_manymouth_bamboo",
+      "Build_manymouth_delta_insides_manymouth_delta_deep",
+      "Build_manymouth_delta_insides_manymouth_delta_shallow",
+      "Build_manymouth_delta_insides_manymouth_glyph_stone",
+      "Build_manymouth_delta_insides_manymouth_silt",
+      "Build_manymouth_delta_insides_manymouth_teak",
+      "Build_manymouth_delta_insides_pale_ashlar",
+      "Build_manymouth_delta_insides_rubble_stone",
+      "Build_manymouth_delta_insides_thatch_reed",
+      "Build_manymouth_delta_insides_timber_dark",
+      "Build_manymouth_delta_insides_timber_grey",
+      "Build_manymouth_delta_insides_timber_warm",
+      "Build_manymouth_delta_insides_water_deep",
+      "Build_manymouth_delta_insides_woven_cloth",
+      "Walk_cliff_rock",
+      "Walk_manymouth_bamboo",
+      "Walk_manymouth_sandbar",
+      "Walk_manymouth_silt",
+      "Walk_manymouth_teak",
+      "Walk_packed_earth",
+      "Walk_timber_dark",
+      "Walk_verdant_terrace_stone"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260830
+    },
+    {
+      "id": "anchor",
+      "landmark": "labyrinth-mouth",
+      "position": [
+        198.0,
+        9.32,
+        -3.0
+      ],
+      "role": "surface entrance on the Manymouth Delta region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the shared Nymara toolkit; no scattered placement",
+    "textures": "procedural, from _toolkit/amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "Four interiors on one map with blackspace between them, in the Eternal Lands convention: one GLB, one manifest, one collision grid, one server map key, and an arrival point per surface door.",
+    "The blackspace is not drawn. The collision grid is built only where a Walk_ surface exists, so the gutters between sections are blocked by construction rather than by a mask that could drift out of step.",
+    "Sections are spaced so no two come within about forty metres, which is what keeps one section's lamps and cameras out of the next.",
+    "The Flooded Labyrinth's gate chamber holds the lower half of the same ring-arch that stands out of the whirlpool on the region map."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Portal transition, navmesh generation and LOD are unverified: the frames captured for this package are real Godot renders of the GLB through GLTFDocument, but no server was run, so no transition was actually taken.",
+    "The interior concept board is truncated to 786,446 bytes and only the top tenth of each panel decodes. These four compositions are authored from its ten named subjects, the QA layout brief, the region board's intact panel 8, and the region itself."
+  ],
+  "externalResources": {
+    "../../../_shared/images/0088705c749944accfc5e907afde6c239e24f335d96545a7be5fc8dbd791d2d0.png": "0088705c749944accfc5e907afde6c239e24f335d96545a7be5fc8dbd791d2d0",
+    "../../../_shared/images/018671435a95b7c86b0d29b83763ea7fa04f36d1850ba3cbaf9c625ab6730aab.png": "018671435a95b7c86b0d29b83763ea7fa04f36d1850ba3cbaf9c625ab6730aab",
+    "../../../_shared/images/0376c0996dd904442cc0b9cacb303cbd8f2d4e984ef415a0f2f9c85e42fd2267.png": "0376c0996dd904442cc0b9cacb303cbd8f2d4e984ef415a0f2f9c85e42fd2267",
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d.png": "06b2238495c21e9f2f051941c8bafb10fdcb9900dfa855367b918c6de44d770d",
+    "../../../_shared/images/0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0.png": "0e64c22065fd8019dfb3c741966a4cb3b507cd0122f027e53e5e2dc055ffcde0",
+    "../../../_shared/images/0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f.png": "0f3d3b4aaae613ef1ff908c258ab3745b50b6a72cce44b2780946aa176e2c94f",
+    "../../../_shared/images/12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1.png": "12d2387773c5ceac3ed1a808604396c78973aa076c9c541a3852ff1852b962a1",
+    "../../../_shared/images/147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed.png": "147ebf3f2164e849202b63a314495a8a3323d2e06deed26d447536a550dcd1ed",
+    "../../../_shared/images/172b9b3a78cf649e588a90cb24e15dfdfa508765d43cd46da2d33ca83327cad9.png": "172b9b3a78cf649e588a90cb24e15dfdfa508765d43cd46da2d33ca83327cad9",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1e46e611766f1ff771876959dfe9b23cbb2fb1858a68fe635a584f5d03759314.png": "1e46e611766f1ff771876959dfe9b23cbb2fb1858a68fe635a584f5d03759314",
+    "../../../_shared/images/1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621.png": "1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621",
+    "../../../_shared/images/1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853.png": "1e6b239197eac3a1739bc300dd9080bf78ae31955ac6c1ddb347ae65492be853",
+    "../../../_shared/images/23e8b32184c4a24b6734834fdde87a8ede6670fad182798138b515ea9b52c8b1.png": "23e8b32184c4a24b6734834fdde87a8ede6670fad182798138b515ea9b52c8b1",
+    "../../../_shared/images/257cc3cce001ab62cf7fa8a3ae50ebcfa26a7088d87681cfccc76391842b8bda.png": "257cc3cce001ab62cf7fa8a3ae50ebcfa26a7088d87681cfccc76391842b8bda",
+    "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
+    "../../../_shared/images/303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0.png": "303ecf8c51d60613a51b5703ce82f22bc604ddf79336d60948f8105b8cb1c3d0",
+    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/34fa19bc673a860ed576c0d698a8b9058c6f70a18ea26847a6cf11a97b8704fd.png": "34fa19bc673a860ed576c0d698a8b9058c6f70a18ea26847a6cf11a97b8704fd",
+    "../../../_shared/images/374375a66523f050aba6dd6de74293ccd268211420390232c4f674fc130a2669.png": "374375a66523f050aba6dd6de74293ccd268211420390232c4f674fc130a2669",
+    "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
+    "../../../_shared/images/43a4d49c456eadf66cb0609fee113728af46a65ba59ed48b2fc3f272eee09820.png": "43a4d49c456eadf66cb0609fee113728af46a65ba59ed48b2fc3f272eee09820",
+    "../../../_shared/images/45edbf4edaedded49424f8157956562e37c4c30db5847782f1290bd625a463c3.png": "45edbf4edaedded49424f8157956562e37c4c30db5847782f1290bd625a463c3",
+    "../../../_shared/images/4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4.png": "4680650bcb14d3a120707e93004c4fe7db2ebdc8d57e8c567d360d65ac0836a4",
+    "../../../_shared/images/48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed.png": "48a64c8578faa7e669b0d00a1feeae3535ee5288a78b6cb8b43836fa5bffd4ed",
+    "../../../_shared/images/4a94b1614cda42c42a66fa7237ad9d38fec320503f1cfc0779c4c617dd841690.png": "4a94b1614cda42c42a66fa7237ad9d38fec320503f1cfc0779c4c617dd841690",
+    "../../../_shared/images/4d2b6f27be220e450bcb89dbffba0b651ad081621c0db5e675f45b5b0e4ea3b2.png": "4d2b6f27be220e450bcb89dbffba0b651ad081621c0db5e675f45b5b0e4ea3b2",
+    "../../../_shared/images/4e3adbd13a3f22fe6d723cc8f8b4477cc8e250b37f75e829013339e951deaa6f.png": "4e3adbd13a3f22fe6d723cc8f8b4477cc8e250b37f75e829013339e951deaa6f",
+    "../../../_shared/images/4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22.png": "4ede901fad7604256f79ec12fec84fae91c2947e5b05b0984b1b95ddb7927a22",
+    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
+    "../../../_shared/images/5567382363d22f17a2870f87552ea7e235fd70c5d0616481dc961e29f279ac77.png": "5567382363d22f17a2870f87552ea7e235fd70c5d0616481dc961e29f279ac77",
+    "../../../_shared/images/579f02c4192b9fbf78d17a1070b250350c6493698a7d130d4598298531ad864e.png": "579f02c4192b9fbf78d17a1070b250350c6493698a7d130d4598298531ad864e",
+    "../../../_shared/images/5b7a93a3f5763c18543cee2f6e29aebda01531d85331e6e5be14e019401d05c3.png": "5b7a93a3f5763c18543cee2f6e29aebda01531d85331e6e5be14e019401d05c3",
+    "../../../_shared/images/5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03.png": "5b9a55bfb012826a8507fb79136439bdb06608eb3d66a4bb6ae4b726b6581c03",
+    "../../../_shared/images/5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843.png": "5c251b120fbd8281588540fbc638e75fb1907dd36ca116792202a9ac42342843",
+    "../../../_shared/images/70fc5d26c53ab75ccb13cc730db31e3295527dbd4ca3bc7504c180b4a4722f0b.png": "70fc5d26c53ab75ccb13cc730db31e3295527dbd4ca3bc7504c180b4a4722f0b",
+    "../../../_shared/images/71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac.png": "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac",
+    "../../../_shared/images/7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2.png": "7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2",
+    "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
+    "../../../_shared/images/82736d82fba986d686509bdd605754afcc9a88302d139dbcfb1b3d4675c3766e.png": "82736d82fba986d686509bdd605754afcc9a88302d139dbcfb1b3d4675c3766e",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/861c0b82c1bfeb753dbc6ee5a65f0e408beb984ef7481509703f05eaca6a2355.png": "861c0b82c1bfeb753dbc6ee5a65f0e408beb984ef7481509703f05eaca6a2355",
+    "../../../_shared/images/8e5bb7eac252d5a7c9794989ae89f3ffddee812918be4b2f36e9dae0ff02142c.png": "8e5bb7eac252d5a7c9794989ae89f3ffddee812918be4b2f36e9dae0ff02142c",
+    "../../../_shared/images/8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9.png": "8e92dbe343e1dcdbfef1fe4be5dfb6b26902a6826903344aa598f3418beee3d9",
+    "../../../_shared/images/90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a.png": "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a",
+    "../../../_shared/images/9471f8f39f1114e0cbcc5a54b169611a71f35b61ad652e68f8dae328d52cb4e9.png": "9471f8f39f1114e0cbcc5a54b169611a71f35b61ad652e68f8dae328d52cb4e9",
+    "../../../_shared/images/9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6.png": "9820fe56c04ba3933f8cfd219b728bb1521504eedf685a1691e1eac7df128dd6",
+    "../../../_shared/images/9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be.png": "9e840c611ba957b1cb1421eca2a4eab4884aea934ef633bb5ac65cacfe8df0be",
+    "../../../_shared/images/a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e.png": "a0f97fec99a1074575ac09be0db99ff713525a43797abc6c2f99a6481c0c672e",
+    "../../../_shared/images/a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392.png": "a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392",
+    "../../../_shared/images/a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0.png": "a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0",
+    "../../../_shared/images/a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c.png": "a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e.png": "ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e",
+    "../../../_shared/images/af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2.png": "af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b76413450e6d90d34e856e427ed39776029e1ee53a86029e3250cab77ddd53e5.png": "b76413450e6d90d34e856e427ed39776029e1ee53a86029e3250cab77ddd53e5",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/c82e738b161ff19b2ccbbaf8f2359a8c54b3853637df2aa0bc4264a58d7bb77a.png": "c82e738b161ff19b2ccbbaf8f2359a8c54b3853637df2aa0bc4264a58d7bb77a",
+    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0.png": "ccb2144527be090a9f3ea30be4e302cee8c09dc1f2c301ec40d1b6ea8334d5b0",
+    "../../../_shared/images/cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae.png": "cf5e93f99689c4e46e705e395f8f09e59814848f787ed52007e47047d4c423ae",
+    "../../../_shared/images/d125e8797c3c361afc071eb336f8fa1b80bec5abbcdc8a630887924c41681226.png": "d125e8797c3c361afc071eb336f8fa1b80bec5abbcdc8a630887924c41681226",
+    "../../../_shared/images/db2c7c74f2b18000a04770fac433094201dad4e3d233403ea217511199ff82b5.png": "db2c7c74f2b18000a04770fac433094201dad4e3d233403ea217511199ff82b5",
+    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
+    "../../../_shared/images/e2ef48724ab2c555a368e68b6619aab4052c7158a7bf5894e38909bad3c2c0d5.png": "e2ef48724ab2c555a368e68b6619aab4052c7158a7bf5894e38909bad3c2c0d5",
+    "../../../_shared/images/e86209e3b965a6c5c3aaf2951dd53883e57eb459403110d96d6f72c6d600978e.png": "e86209e3b965a6c5c3aaf2951dd53883e57eb459403110d96d6f72c6d600978e",
+    "../../../_shared/images/fac30e6bfb6cefa8fc04a3719ff83def7184f1c1a4ba1e2ebb18d4c25e8023fe.png": "fac30e6bfb6cefa8fc04a3719ff83def7184f1c1a4ba1e2ebb18d4c25e8023fe",
+    "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c",
+    "../../../_shared/images/ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65.png": "ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65",
+    "../../../_shared/images/ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247.png": "ffba82620cd47918727ce5fa95e57a325611200780bad2dfb883aad77acc4247"
+  }
+}

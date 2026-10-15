@@ -1,0 +1,10 @@
+[configuration]
+
+entry_symbol = "native_crowd_library_init"
+compatibility_minimum = "4.7"
+reloadable = false
+
+[libraries]
+
+windows.x86_64 = "res://bin/windows/native_crowd.windows.template_release.x86_64.dll"
+linux.x86_64 = "res://bin/linux/native_crowd.linux.template_release.x86_64.so"

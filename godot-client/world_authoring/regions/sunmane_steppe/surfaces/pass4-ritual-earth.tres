@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="MapAuthoringSurface" format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="1_b5klu"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-basecolor.png" id="2_y54il"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-normal.png" id="3_ef8u8"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/ground-orm.png" id="4_b1ud4"]
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_vkvnf"]
+cull_mode = 2
+albedo_color = Color(0.5, 0.43, 0.31, 1)
+albedo_texture = ExtResource("2_y54il")
+orm_texture = ExtResource("4_b1ud4")
+normal_enabled = true
+normal_scale = 0.72
+normal_texture = ExtResource("3_ef8u8")
+uv1_scale = Vector3(0.24, 0.24, 0.24)
+texture_filter = 5
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_b5klu")
+texture_preset = "Worn earth"
+rotation_degrees = 9.0
+source_material = SubResource("ORMMaterial3D_vkvnf")

@@ -1,0 +1,1426 @@
+[
+  {
+    "id": "mirrorhold-main-to-four-gates",
+    "map": "mirrorhold",
+    "start": [
+      93,
+      82
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          138,
+          14
+        ],
+        "label": "south-shore-yard",
+        "walkTimeout": 54
+      },
+      {
+        "tile": [
+          159,
+          23
+        ],
+        "label": "watchtower-north-road",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          175,
+          20
+        ],
+        "label": "watchtower-east-bend",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          178,
+          3
+        ],
+        "destination": "four_gates",
+        "capture": "mirrorhold-four-gates-connected",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-watch-secret-return",
+    "map": "mirrorhold",
+    "start": [
+      93,
+      82
+    ],
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          138,
+          14
+        ],
+        "label": "south-shore-yard",
+        "walkTimeout": 54
+      },
+      {
+        "tile": [
+          159,
+          23
+        ],
+        "label": "watchtower-north-road",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          175,
+          20
+        ],
+        "label": "watchtower-east-bend",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          185,
+          14
+        ],
+        "object": 512,
+        "destination": "mirrorhold_secrets",
+        "capture": "mirrorhold-watch-secret-inside",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          77,
+          168
+        ],
+        "label": "watch-butts-room",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          79,
+          170
+        ],
+        "destination": "mirrorhold",
+        "capture": "mirrorhold-watch-secret-return",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-civic-services",
+    "map": "mirrorhold",
+    "start": [
+      92,
+      81
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          120,
+          95
+        ],
+        "label": "0",
+        "capture": "mirrorhold-civic-services-0",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          135,
+          112
+        ],
+        "label": "1",
+        "capture": "mirrorhold-civic-services-1",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          148,
+          125
+        ],
+        "label": "2",
+        "capture": "mirrorhold-civic-services-2",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          164,
+          117
+        ],
+        "label": "3",
+        "capture": "mirrorhold-civic-services-3",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          178,
+          121
+        ],
+        "label": "4",
+        "capture": "mirrorhold-civic-services-4",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          179,
+          122
+        ],
+        "label": "information",
+        "capture": "service-information",
+        "walkTimeout": 45,
+        "useObject": 13,
+        "expectText": "The local board records roads, dangers, and current work in Mirrorhold."
+      },
+      {
+        "tile": [
+          184,
+          120
+        ],
+        "label": "storage",
+        "capture": "service-storage",
+        "walkTimeout": 45,
+        "useObject": 14,
+        "expectStorage": true
+      },
+      {
+        "tile": [
+          191,
+          121
+        ],
+        "label": "crafting_station",
+        "capture": "service-crafting_station",
+        "walkTimeout": 45,
+        "useObject": 15,
+        "expectText": "This field station supports ordinary mixing and crafting."
+      },
+      {
+        "tile": [
+          196,
+          119
+        ],
+        "label": "training",
+        "capture": "service-training",
+        "walkTimeout": 45,
+        "useObject": 16,
+        "expectText": "The practice post lists your recent combat results."
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-quarry-resource-approach",
+    "map": "mirrorhold",
+    "start": [
+      240,
+      90
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          249,
+          87
+        ],
+        "label": "packet-quay-south-bypass",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          262,
+          87
+        ],
+        "label": "packet-quay-east-bypass",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          273,
+          84
+        ],
+        "label": "0",
+        "capture": "mirrorhold-quarry-resource-approach-0",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          299,
+          95
+        ],
+        "label": "eastern-yard-front",
+        "capture": "mirrorhold-quarry-resource-approach-1",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          315,
+          109
+        ],
+        "label": "2",
+        "capture": "mirrorhold-quarry-resource-approach-2",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          314,
+          135
+        ],
+        "label": "3",
+        "capture": "mirrorhold-quarry-resource-approach-3",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          323,
+          164
+        ],
+        "label": "4",
+        "capture": "mirrorhold-quarry-resource-approach-4",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          302,
+          191
+        ],
+        "label": "quarry-road-bend",
+        "capture": "mirrorhold-quarry-resource-approach-5",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          282,
+          206
+        ],
+        "label": "6",
+        "capture": "mirrorhold-quarry-resource-approach-6",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          318,
+          202
+        ],
+        "label": "7",
+        "capture": "mirrorhold-quarry-resource-approach-7",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          311,
+          221
+        ],
+        "label": "8",
+        "capture": "mirrorhold-quarry-resource-approach-8",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-lens-vault",
+    "map": "mirrorhold",
+    "start": [
+      236,
+      166
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          234,
+          188
+        ],
+        "label": "citadel-west-approach",
+        "capture": "mirrorhold-lens-vault-0",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          262,
+          218
+        ],
+        "label": "1",
+        "capture": "mirrorhold-lens-vault-1",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          263,
+          258
+        ],
+        "label": "2",
+        "capture": "mirrorhold-lens-vault-2",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          255,
+          291
+        ],
+        "label": "3",
+        "capture": "mirrorhold-lens-vault-3",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          194,
+          294
+        ],
+        "label": "4",
+        "capture": "mirrorhold-lens-vault-4",
+        "walkTimeout": 48
+      },
+      {
+        "tile": [
+          195,
+          298
+        ],
+        "destination": "mirrorhold_interiors",
+        "label": "lens-vault-stair",
+        "capture": "lens-vault-arrival",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirror-east-stair-pit-access",
+    "map": "mirrorhold",
+    "start": [
+      93,
+      82
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          180,
+          123
+        ],
+        "label": "civic-court",
+        "walkTimeout": 65
+      },
+      {
+        "tile": [
+          256,
+          166
+        ],
+        "label": "east-working-road",
+        "walkTimeout": 58
+      },
+      {
+        "tile": [
+          310,
+          129
+        ],
+        "object": 511,
+        "destination": "mirrorhold_secrets",
+        "capture": "mirror-east-stair-pit-access-inside",
+        "walkTimeout": 66
+      }
+    ]
+  },
+  {
+    "id": "mirror-icebore-access",
+    "map": "mirrorhold",
+    "start": [
+      93,
+      82
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          180,
+          123
+        ],
+        "label": "civic-court",
+        "walkTimeout": 65
+      },
+      {
+        "tile": [
+          236,
+          166
+        ],
+        "label": "upper-service-road",
+        "walkTimeout": 47
+      },
+      {
+        "tile": [
+          262,
+          218
+        ],
+        "label": "gallery-road-junction",
+        "walkTimeout": 51
+      },
+      {
+        "tile": [
+          159,
+          218
+        ],
+        "label": "rose-gallery-road",
+        "walkTimeout": 75
+      },
+      {
+        "tile": [
+          154,
+          222
+        ],
+        "object": 504,
+        "destination": "whitehorn_range_secrets",
+        "capture": "mirror-icebore-access-inside",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "grey-east-waygate",
+    "map": "grey_moors",
+    "start": [
+      74,
+      61
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          66,
+          60
+        ],
+        "label": "approach",
+        "capture": "grey-approach-east-waygate"
+      },
+      {
+        "tile": [
+          66,
+          52
+        ],
+        "destination": "crownwater",
+        "label": "enter",
+        "capture": "grey-enter-east-waygate"
+      }
+    ]
+  },
+  {
+    "id": "grey-refuge-services",
+    "map": "grey_moors",
+    "start": [
+      119,
+      109
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          112,
+          104
+        ],
+        "label": "refuge-information",
+        "capture": "grey-refuge-information"
+      },
+      {
+        "tile": [
+          99,
+          117
+        ],
+        "label": "refuge-storage",
+        "capture": "grey-refuge-storage"
+      },
+      {
+        "tile": [
+          107,
+          117
+        ],
+        "label": "refuge-crafting_station",
+        "capture": "grey-refuge-crafting_station"
+      },
+      {
+        "tile": [
+          94,
+          103
+        ],
+        "label": "refuge-training",
+        "capture": "grey-refuge-training"
+      }
+    ]
+  },
+  {
+    "id": "grey-habitat-peat",
+    "map": "grey_moors",
+    "start": [
+      41,
+      127
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          51,
+          127
+        ],
+        "label": "peat-workings",
+        "capture": "grey-peat-workings"
+      }
+    ]
+  },
+  {
+    "id": "grey-habitat-orchid",
+    "map": "grey_moors",
+    "start": [
+      48,
+      72
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          58,
+          72
+        ],
+        "label": "orchid-workings",
+        "capture": "grey-orchid-workings"
+      }
+    ]
+  },
+  {
+    "id": "grey-encounter-moor-hounds",
+    "map": "grey_moors",
+    "start": [
+      88,
+      226
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          76,
+          226
+        ],
+        "label": "moor-hound-ground",
+        "capture": "grey-moor-hound-ground"
+      }
+    ]
+  },
+  {
+    "id": "grey-west-waygate",
+    "map": "grey_moors",
+    "start": [
+      22,
+      110
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          16,
+          110
+        ],
+        "label": "approach",
+        "capture": "grey-approach-west-waygate"
+      },
+      {
+        "tile": [
+          10,
+          110
+        ],
+        "destination": "westhaven",
+        "label": "enter",
+        "capture": "grey-enter-west-waygate"
+      }
+    ]
+  },
+  {
+    "id": "grey-north-gate",
+    "map": "grey_moors",
+    "start": [
+      107,
+      361
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          107,
+          367
+        ],
+        "label": "approach",
+        "capture": "grey-approach-north-gate"
+      },
+      {
+        "tile": [
+          107,
+          373
+        ],
+        "destination": "amberwood",
+        "label": "enter",
+        "capture": "grey-enter-north-gate"
+      }
+    ]
+  },
+  {
+    "id": "grey-south-gate",
+    "map": "grey_moors",
+    "start": [
+      257,
+      22
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          262,
+          18
+        ],
+        "label": "approach",
+        "capture": "grey-approach-south-gate"
+      },
+      {
+        "tile": [
+          266,
+          14
+        ],
+        "destination": "manymouth_delta",
+        "label": "enter",
+        "capture": "grey-enter-south-gate"
+      }
+    ]
+  },
+  {
+    "id": "grey-great-barrow-mouth",
+    "map": "grey_moors",
+    "start": [
+      199,
+      251
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          202,
+          256
+        ],
+        "label": "approach",
+        "capture": "grey-approach-great-barrow-mouth"
+      },
+      {
+        "tile": [
+          204,
+          262
+        ],
+        "destination": "grey_moor_barrows",
+        "label": "enter",
+        "capture": "grey-enter-great-barrow-mouth"
+      }
+    ]
+  },
+  {
+    "id": "grey-west-crypt-stair",
+    "map": "grey_moors",
+    "start": [
+      55,
+      270
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          52,
+          276
+        ],
+        "label": "approach",
+        "capture": "grey-approach-west-crypt-stair"
+      },
+      {
+        "tile": [
+          50,
+          281
+        ],
+        "destination": "grey_moor_barrows",
+        "label": "enter",
+        "capture": "grey-enter-west-crypt-stair"
+      }
+    ]
+  },
+  {
+    "id": "grey-east-crypt-stair",
+    "map": "grey_moors",
+    "start": [
+      309,
+      227
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          314,
+          231
+        ],
+        "label": "approach",
+        "capture": "grey-approach-east-crypt-stair"
+      },
+      {
+        "tile": [
+          318,
+          235
+        ],
+        "destination": "grey_moor_barrows",
+        "label": "enter",
+        "capture": "grey-enter-east-crypt-stair"
+      }
+    ]
+  },
+  {
+    "id": "grey-south-crypt-stair",
+    "map": "grey_moors",
+    "start": [
+      182,
+      92
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          188,
+          92
+        ],
+        "label": "approach",
+        "capture": "grey-approach-south-crypt-stair"
+      },
+      {
+        "tile": [
+          194,
+          91
+        ],
+        "destination": "grey_moor_barrows",
+        "label": "enter",
+        "capture": "grey-enter-south-crypt-stair"
+      }
+    ]
+  },
+  {
+    "id": "grey-fifth-chamber-mouth",
+    "map": "grey_moors",
+    "start": [
+      355,
+      224
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          360,
+          226
+        ],
+        "label": "approach",
+        "capture": "grey-approach-fifth-chamber-mouth"
+      },
+      {
+        "tile": [
+          366,
+          229
+        ],
+        "destination": "grey_moor_barrows",
+        "label": "enter",
+        "capture": "grey-enter-fifth-chamber-mouth"
+      }
+    ]
+  },
+  {
+    "id": "grey-peat-croft-door",
+    "map": "grey_moors",
+    "start": [
+      203,
+      58
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          207,
+          56
+        ],
+        "label": "approach",
+        "capture": "grey-approach-peat-croft-door"
+      },
+      {
+        "tile": [
+          214,
+          53
+        ],
+        "destination": "grey_moor_barrows",
+        "label": "enter",
+        "capture": "grey-enter-peat-croft-door"
+      }
+    ]
+  },
+  {
+    "id": "grey-warm-stone-door",
+    "map": "grey_moors",
+    "start": [
+      200,
+      240
+    ],
+    "startTolerance": 3,
+    "yaw": 0,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          204,
+          244
+        ],
+        "label": "approach",
+        "capture": "grey-approach-warm-stone-door"
+      },
+      {
+        "tile": [
+          208,
+          249
+        ],
+        "destination": "grey_moor_barrows",
+        "label": "enter",
+        "capture": "grey-enter-warm-stone-door"
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-stair-cellars",
+    "map": "mirrorhold",
+    "start": [
+      92,
+      81
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          73,
+          92
+        ],
+        "label": "0",
+        "capture": "mirrorhold-stair-cellars-0",
+        "walkTimeout": 45
+      },
+      {
+        "tile": [
+          67,
+          102
+        ],
+        "destination": "mirrorhold_interiors",
+        "label": "stair-cellars-door",
+        "capture": "stair-cellars-arrival",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-mirror-cistern",
+    "map": "mirrorhold",
+    "start": [
+      189,
+      123
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          209,
+          126
+        ],
+        "destination": "mirrorhold_interiors",
+        "label": "cistern-door",
+        "capture": "mirror-cistern-arrival",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-whitehorn-pass",
+    "map": "mirrorhold",
+    "start": [
+      45,
+      341
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          43,
+          378
+        ],
+        "destination": "whitehorn_range",
+        "label": "north-pass",
+        "capture": "whitehorn-pass-arrival",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-barrens-road",
+    "map": "mirrorhold",
+    "start": [
+      131,
+      359
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          130,
+          378
+        ],
+        "destination": "amethyst_barrens",
+        "label": "east-road",
+        "capture": "barrens-road-arrival",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-amber-gorge",
+    "map": "mirrorhold",
+    "start": [
+      35,
+      76
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          8,
+          75
+        ],
+        "destination": "amberwood",
+        "label": "west-gorge",
+        "capture": "amber-gorge-arrival",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-sanctuary-road",
+    "map": "mirrorhold",
+    "start": [
+      177,
+      7
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          178,
+          3
+        ],
+        "destination": "four_gates",
+        "label": "south-road",
+        "capture": "sanctuary-road-arrival",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "mirrorhold-crownwater-packet",
+    "map": "mirrorhold",
+    "start": [
+      240,
+      90
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          256,
+          90
+        ],
+        "destination": "crownwater",
+        "label": "lake-quay",
+        "capture": "crownwater-packet-arrival",
+        "walkTimeout": 45
+      }
+    ]
+  },
+  {
+    "id": "amethyst-service-court",
+    "map": "amethyst_barrens",
+    "start": [
+      140,
+      85
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          137,
+          98
+        ],
+        "label": "information-and-cook",
+        "capture": "amethyst-cook-court"
+      },
+      {
+        "tile": [
+          147,
+          101
+        ],
+        "label": "storage-exchange",
+        "capture": "amethyst-storage"
+      },
+      {
+        "tile": [
+          155,
+          101
+        ],
+        "label": "crafting-bench",
+        "capture": "amethyst-crafting"
+      },
+      {
+        "tile": [
+          146,
+          114
+        ],
+        "label": "inhabited-fronts",
+        "capture": "amethyst-bunkhouse"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-worked-seam",
+    "map": "amethyst_barrens",
+    "start": [
+      210,
+      115
+    ],
+    "startTolerance": 2,
+    "yaw": 70,
+    "distance": 34,
+    "steps": [
+      {
+        "tile": [
+          217,
+          124
+        ],
+        "label": "quarry-approach",
+        "capture": "amethyst-seam-approach"
+      },
+      {
+        "tile": [
+          225,
+          128
+        ],
+        "label": "crystal-workings",
+        "capture": "amethyst-crystal-workings"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-quiet-basin",
+    "map": "amethyst_barrens",
+    "start": [
+      164,
+      65
+    ],
+    "startTolerance": 2,
+    "distance": 32,
+    "steps": [
+      {
+        "tile": [
+          173,
+          55
+        ],
+        "label": "lee-habitat",
+        "capture": "amethyst-lee-habitat"
+      },
+      {
+        "tile": [
+          188,
+          50
+        ],
+        "label": "open-encounter-ground",
+        "capture": "amethyst-open-basin"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-west-road",
+    "map": "amethyst_barrens",
+    "start": [
+      22,
+      308
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          4,
+          308
+        ],
+        "destination": "mirrorhold",
+        "label": "Mirror Road to Mirrorhold",
+        "capture": "amethyst-arrive-west-road"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-north-pass",
+    "map": "amethyst_barrens",
+    "start": [
+      170,
+      360
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          170,
+          378
+        ],
+        "destination": "whitehorn_range",
+        "label": "Whitehorn Pass",
+        "capture": "amethyst-arrive-north-pass"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-east-shore",
+    "map": "amethyst_barrens",
+    "start": [
+      341,
+      56
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          345,
+          48
+        ],
+        "label": "surveyed-packet-bank",
+        "capture": "amethyst-packet-bank"
+      },
+      {
+        "tile": [
+          350,
+          38
+        ],
+        "label": "packet-jetty-deck",
+        "capture": "amethyst-packet-deck"
+      },
+      {
+        "tile": [
+          354,
+          29
+        ],
+        "destination": "crownwater",
+        "label": "Crownwater Landing",
+        "capture": "amethyst-arrive-east-shore"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-south-road",
+    "map": "amethyst_barrens",
+    "start": [
+      174,
+      12
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          170,
+          6
+        ],
+        "destination": "sunmane_steppe",
+        "label": "Sunmane Track",
+        "capture": "amethyst-arrive-south-road"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-resonant-vault-stair",
+    "map": "amethyst_barrens",
+    "start": [
+      60,
+      273
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          62,
+          281
+        ],
+        "destination": "resonant_vault",
+        "label": "The Resonant Vault",
+        "capture": "amethyst-arrive-resonant-vault-stair"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-geode-hollow-mouth",
+    "map": "amethyst_barrens",
+    "start": [
+      344,
+      170
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          344,
+          184
+        ],
+        "destination": "resonant_vault",
+        "label": "The Geode Hollow",
+        "capture": "amethyst-arrive-geode-hollow-mouth"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-shardworks-headframe",
+    "map": "amethyst_barrens",
+    "start": [
+      223,
+      113
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          223,
+          127
+        ],
+        "destination": "resonant_vault",
+        "label": "The Shardworks",
+        "capture": "amethyst-arrive-shardworks-headframe"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-storm-barrow-stair",
+    "map": "amethyst_barrens",
+    "start": [
+      277,
+      218
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          277,
+          232
+        ],
+        "destination": "resonant_vault",
+        "label": "The Storm Barrow",
+        "capture": "amethyst-arrive-storm-barrow-stair"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-sour-cut-mouth",
+    "map": "amethyst_barrens",
+    "start": [
+      263,
+      303
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          263,
+          317
+        ],
+        "destination": "resonant_vault",
+        "label": "The Sour Cut",
+        "capture": "amethyst-arrive-sour-cut-mouth"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-measure-house-door",
+    "map": "amethyst_barrens",
+    "start": [
+      238,
+      130
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          235,
+          143
+        ],
+        "destination": "resonant_vault",
+        "label": "The Measure House",
+        "capture": "amethyst-arrive-measure-house-door"
+      }
+    ]
+  },
+  {
+    "id": "amethyst-counting-house-door",
+    "map": "amethyst_barrens",
+    "start": [
+      311,
+      151
+    ],
+    "startTolerance": 2,
+    "distance": 30,
+    "steps": [
+      {
+        "tile": [
+          311,
+          165
+        ],
+        "destination": "resonant_vault",
+        "label": "The Shard Counter's House",
+        "capture": "amethyst-arrive-counting-house-door"
+      }
+    ]
+  }
+]

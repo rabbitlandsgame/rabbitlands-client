@@ -1,0 +1,104 @@
+{
+  "schema": "eloria-lightened-kit-v1",
+  "tool": "lighten_kit.py",
+  "blender": "Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)",
+  "models": {
+    "vineyard-rows-1-light": {
+      "variant_of": "vineyard-rows-1",
+      "operation": "lighten",
+      "input": "53cd84fca32fcec6e4d47197ddb9f0814c2f8e5e7cc71071f4316ce54865cd64",
+      "output": "b9d5853e8c56860320005cbf35561cded99738cb8be37bfb9cc286f02bc762ca",
+      "triangles": {
+        "source": 4432,
+        "culled": 3803,
+        "collapsed": 2214,
+        "final": 2212
+      },
+      "vertices": {
+        "source": 7989,
+        "final": 5182
+      },
+      "cull": {
+        "elevations_deg": [
+          15,
+          20,
+          30,
+          45,
+          60,
+          75,
+          80
+        ],
+        "yaws": 12,
+        "plus_top": true,
+        "samples_per_triangle": 4,
+        "neighbours": "none (a field's edge row)",
+        "dropped": 629
+      },
+      "collapse": {
+        "ratio": 0.5824,
+        "triangulate": true,
+        "import_merge_vertices": true,
+        "intermediate_sha256": "07e1537f3195c0d932c409d13ab4d380bf6000e77aeb6b0e9c13b3bdbd9d1554"
+      },
+      "clamp": {
+        "vertices_outside_source_box": 22,
+        "largest_overshoot_m": 0.1867
+      },
+      "slivers": {
+        "longest_edge_over_m": 2.0,
+        "dropped": 2,
+        "dropped_longest_m": [
+          2.76,
+          2.76
+        ],
+        "longest_edge_kept_m": 1.606,
+        "source_longest_edge_m": 1.529
+      },
+      "winding": {
+        "opposed_after_collapse": 130,
+        "turned": 45,
+        "opposed_share": 0.0384,
+        "source_opposed_share": 0.0309
+      },
+      "bounds_m": [
+        [
+          -4.0,
+          0.0,
+          -2.5
+        ],
+        [
+          4.0,
+          1.6,
+          2.5
+        ]
+      ],
+      "source_bounds_m": [
+        [
+          -4.0,
+          0.0,
+          -2.5
+        ],
+        [
+          4.0,
+          1.6,
+          2.5
+        ]
+      ],
+      "uv_range": [
+        [
+          0.0,
+          0.0104
+        ],
+        [
+          0.9798,
+          1.0
+        ]
+      ],
+      "uv_zero_area_triangles": 0,
+      "mesh_bytes": 179096,
+      "source_mesh_bytes": 282240,
+      "glb_bytes": 181352,
+      "source_glb_bytes": 284088
+    }
+  }
+}

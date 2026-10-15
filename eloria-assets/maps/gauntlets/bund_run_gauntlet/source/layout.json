@@ -1,0 +1,1072 @@
+{
+ "_note": "bund_run_gauntlet: trail road geometry from the concept manymouth_gauntlet (work-output/gauntlet-v2-design/regions). Plan metres, x east, y SOUTH; arenas are ellipses; paths are [x, y, elev] polylines; mouths are pockets placed along a bearing from the arena centre. `land` shapes the ground round the road (_toolkit/landforms.py) and `dressing` dresses it (_toolkit/trail_dressing.py).",
+ "schema": "eloria-trail-layout-v1",
+ "id": "bund_run_gauntlet",
+ "size": [
+  384,
+  384
+ ],
+ "sections": [
+  {
+   "id": "trailhead",
+   "kind": "camp",
+   "name": "Watchtower Camp",
+   "at": [
+    44,
+    46
+   ],
+   "rx": 18,
+   "ry": 15,
+   "rot": 0,
+   "elev": 2
+  },
+  {
+   "id": "w1",
+   "kind": "arena",
+   "name": "The Sluice House",
+   "at": [
+    116,
+    96
+   ],
+   "rx": 30,
+   "ry": 24,
+   "rot": 0,
+   "elev": 2,
+   "order": 1,
+   "mouths": [
+    {
+     "id": "w1-south",
+     "bearing": 80,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-north",
+     "bearing": 280,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w1-west",
+     "bearing": 175,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "kind": "arena",
+   "name": "The Great Bund",
+   "at": [
+    236,
+    66
+   ],
+   "rx": 46,
+   "ry": 13,
+   "rot": -6,
+   "elev": 2.4,
+   "order": 2,
+   "mouths": [
+    {
+     "id": "w2-north",
+     "bearing": 265,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-south",
+     "bearing": 90,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w2-northeast",
+     "bearing": 330,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "kind": "arena",
+   "name": "The Paddy Sump",
+   "at": [
+    322,
+    168
+   ],
+   "rx": 28,
+   "ry": 30,
+   "rot": 0,
+   "elev": 1.2,
+   "order": 3,
+   "mouths": [
+    {
+     "id": "w3-west",
+     "bearing": 190,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-northeast",
+     "bearing": 335,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w3-south",
+     "bearing": 70,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "kind": "arena",
+   "name": "The Reed Gallery",
+   "at": [
+    228,
+    252
+   ],
+   "rx": 38,
+   "ry": 24,
+   "rot": 8,
+   "elev": 1.6,
+   "order": 4,
+   "mouths": [
+    {
+     "id": "w4-south",
+     "bearing": 75,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-north",
+     "bearing": 255,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w4-east",
+     "bearing": 15,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "kind": "arena",
+   "name": "The Two Channels",
+   "at": [
+    104,
+    292
+   ],
+   "rx": 32,
+   "ry": 24,
+   "rot": 0,
+   "elev": 1.8,
+   "order": 5,
+   "mouths": [
+    {
+     "id": "w5-southwest",
+     "bearing": 140,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-north",
+     "bearing": 260,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    },
+    {
+     "id": "w5-northwest",
+     "bearing": 205,
+     "out": 6,
+     "radius": 7,
+     "linkWidth": 5
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "kind": "court",
+   "name": "The Weir Pool",
+   "at": [
+    262,
+    336
+   ],
+   "rx": 30,
+   "ry": 22,
+   "rot": 0,
+   "elev": 0.8,
+   "order": 6,
+   "mouths": [
+    {
+     "id": "court-southeast",
+     "bearing": 55,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    },
+    {
+     "id": "court-north",
+     "bearing": 250,
+     "out": 3,
+     "radius": 6,
+     "linkWidth": 4
+    }
+   ]
+  },
+  {
+   "id": "vault",
+   "kind": "vault",
+   "name": "The Weir House",
+   "at": [
+    300,
+    304
+   ],
+   "rx": 7,
+   "ry": 6,
+   "rot": 0,
+   "elev": 2.4
+  }
+ ],
+ "mouthDefaults": {
+  "out": 6,
+  "radius": 7,
+  "linkWidth": 5
+ },
+ "paths": [
+  {
+   "from": "trailhead",
+   "to": "w1",
+   "width": 6,
+   "points": [
+    [
+     66,
+     62,
+     2
+    ],
+    [
+     90,
+     82,
+     2
+    ]
+   ]
+  },
+  {
+   "from": "w1",
+   "to": "w2",
+   "width": 6,
+   "points": [
+    [
+     150,
+     90,
+     2.2
+    ],
+    [
+     186,
+     74,
+     2.4
+    ]
+   ]
+  },
+  {
+   "from": "w2",
+   "to": "w3",
+   "width": 6,
+   "points": [
+    [
+     286,
+     70,
+     2.4
+    ],
+    [
+     318,
+     92,
+     2.2
+    ],
+    [
+     326,
+     132,
+     1.6
+    ]
+   ]
+  },
+  {
+   "from": "w3",
+   "to": "w4",
+   "width": 6,
+   "points": [
+    [
+     312,
+     204,
+     1.6
+    ],
+    [
+     284,
+     228,
+     1.6
+    ],
+    [
+     264,
+     240,
+     1.6
+    ]
+   ]
+  },
+  {
+   "from": "w4",
+   "to": "w5",
+   "width": 6,
+   "points": [
+    [
+     190,
+     262,
+     1.8
+    ],
+    [
+     152,
+     276,
+     1.8
+    ],
+    [
+     132,
+     286,
+     1.8
+    ]
+   ]
+  },
+  {
+   "from": "w5",
+   "to": "boss",
+   "width": 6,
+   "points": [
+    [
+     130,
+     320,
+     1.4
+    ],
+    [
+     180,
+     338,
+     1.0
+    ],
+    [
+     226,
+     340,
+     0.9
+    ]
+   ]
+  },
+  {
+   "from": "boss",
+   "to": "vault",
+   "width": 4,
+   "points": [
+    [
+     284,
+     318,
+     1.6
+    ]
+   ]
+  }
+ ],
+ "land": {
+  "hills": 0.4,
+  "floor": 0.2,
+  "waterLevel": 0.9,
+  "paddies": true,
+  "water": "water_pool",
+  "ground": {
+   "bank": "meadow_grass",
+   "network": "meadow_grass",
+   "trail": "packed_earth",
+   "bund": "meadow_grass",
+   "bed": "grey_peat_bog",
+   "deck": "timber_warm"
+  },
+  "rivers": [
+   {
+    "points": [
+     [
+      384,
+      120
+     ],
+     [
+      362,
+      220
+     ],
+     [
+      346,
+      290
+     ],
+     [
+      322,
+      330
+     ],
+     [
+      318,
+      384
+     ]
+    ],
+    "width": 22
+   }
+  ],
+  "canals": [
+   {
+    "points": [
+     [
+      75,
+      283
+     ],
+     [
+      133,
+      301
+     ]
+    ],
+    "width": 7,
+    "depth": 2
+   }
+  ],
+  "crossings": [
+   {
+    "at": [
+     104,
+     292
+    ],
+    "half": [
+     7,
+     2.6
+    ],
+    "rot": 107
+   }
+  ]
+ },
+ "checkpoints": [
+  {
+   "id": "cp1",
+   "name": "The bund fire",
+   "at": [
+    295.7,
+    84.6
+   ],
+   "elev": 2.32,
+   "after": "w2",
+   "reach": 12.0
+  },
+  {
+   "id": "cp2",
+   "name": "The gallery fire",
+   "at": [
+    180.0,
+    272.6
+   ],
+   "elev": 1.8,
+   "after": "w4",
+   "reach": 12.0
+  }
+ ],
+ "sides": [
+  {
+   "id": "rice-store",
+   "name": "The Rice Store",
+   "from": [
+    288.9,
+    223.8,
+    1.6
+   ],
+   "at": [
+    278.5,
+    211.6
+   ],
+   "radius": 7,
+   "elev": 1.9,
+   "width": 4
+  }
+ ],
+ "floors": {
+  "w1": "packed_earth",
+  "boss": "grey_peat_bog",
+  "vault": "timber_warm",
+  "trailhead": "packed_earth"
+ },
+ "environment": {
+  "sky": {
+   "topColor": [
+    0.3,
+    0.52,
+    0.76
+   ],
+   "horizonColor": [
+    0.88,
+    0.86,
+    0.72
+   ],
+   "groundBottomColor": [
+    0.18,
+    0.22,
+    0.14
+   ],
+   "groundHorizonColor": [
+    0.58,
+    0.62,
+    0.44
+   ]
+  },
+  "sun": {
+   "enabled": true,
+   "direction": [
+    0.5,
+    -0.7,
+    0.5
+   ],
+   "color": [
+    1.0,
+    0.93,
+    0.78
+   ],
+   "energy": 1.7
+  },
+  "ambient": {
+   "color": [
+    0.68,
+    0.72,
+    0.66
+   ],
+   "energy": 0.9,
+   "skyContribution": 0.4
+  },
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.82,
+    0.84,
+    0.74
+   ],
+   "density": 0.0009
+  },
+  "tonemap": {
+   "mode": "filmic",
+   "exposure": 1.0,
+   "white": 4.0
+  }
+ },
+ "dressing": {
+  "woods": {
+   "count": 240,
+   "minElev": 1.15,
+   "near": 2.5,
+   "far": 0.5,
+   "mix": [
+    [
+     "fanpalm",
+     0.25
+    ],
+    [
+     "palm1",
+     0.15
+    ],
+    [
+     "palm2",
+     0.15
+    ],
+    [
+     "bamboo",
+     0.25
+    ],
+    [
+     "flame",
+     0.08
+    ],
+    [
+     "banyan",
+     0.04
+    ],
+    [
+     "sapling",
+     0.08
+    ]
+   ]
+  },
+  "cover": {
+   "count": 420,
+   "mix": [
+    [
+     "papyrus",
+     1
+    ],
+    [
+     "reed",
+     1
+    ],
+    [
+     "lagoonreed",
+     1
+    ],
+    [
+     "jungle1",
+     0.5
+    ],
+    [
+     "jungle2",
+     0.5
+    ],
+    [
+     "flowers",
+     0.4
+    ]
+   ]
+  },
+  "camp": {
+   "tents": "netshed",
+   "fire": "hearth",
+   "shelter": "ricestore",
+   "crates": [
+    "jars",
+    "baskets",
+    "crate1"
+   ],
+   "tentScale": 1.0
+  },
+  "lantern": {
+   "key": "stonelamp",
+   "every": 34
+  },
+  "objects": {
+   "waystone": "waystone",
+   "cache": "cache",
+   "plaque": "notice"
+  },
+  "kits": {
+   "waystone": "whitehorn_range/kit-horn-waystone-1",
+   "cache": "four_gates/kit-crate-stack-1",
+   "notice": "amberwood/kit-notice-board-1",
+   "firepit": "sunmane_steppe/kit-fire-pit",
+   "shelter": "whitehorn_range/kit-firewood-shelter-1",
+   "crate1": "whitehorn_range/kit-supply-crate-1",
+   "crate2": "whitehorn_range/kit-supply-crate-2",
+   "barrels": "four_gates/kit-barrel-stack-1",
+   "fanpalm": "manymouth_delta/kit-fan-palm-tree-1",
+   "palm1": "manymouth_delta/kit-beach-palm-tree-1",
+   "palm2": "manymouth_delta/kit-beach-palm-tree-2",
+   "banyan": "manymouth_delta/kit-banyan-tree-1",
+   "bamboo": "manymouth_delta/kit-bamboo-clump-1",
+   "flame": "manymouth_delta/kit-flame-tree-1",
+   "sapling": "manymouth_delta/kit-sapling-tree-1",
+   "papyrus": "manymouth_delta/kit-papyrus-reeds-1",
+   "reed": "manymouth_delta/kit-river-reed-1",
+   "lagoonreed": "manymouth_delta/kit-lagoon-reed-1",
+   "jungle1": "manymouth_delta/kit-jungle-undergrowth-1",
+   "jungle2": "manymouth_delta/kit-jungle-undergrowth-2",
+   "flowers": "manymouth_delta/kit-flower-shrub-1",
+   "lilies": "manymouth_delta/kit-water-lilies-1",
+   "paddy1": "manymouth_delta/kit-rice-paddy-1",
+   "paddy2": "manymouth_delta/kit-rice-paddy-2",
+   "sheaves": "manymouth_delta/kit-rice-sheaves-1",
+   "ricestore": "manymouth_delta/kit-rice-store-1",
+   "stilthouse1": "manymouth_delta/kit-stilt-house-1",
+   "stilthouse2": "manymouth_delta/kit-stilt-house-2",
+   "stiltplat": "manymouth_delta/kit-stilt-fishing-platform-1",
+   "fishweir": "manymouth_delta/kit-bamboo-fish-weir-1",
+   "gatearch": "manymouth_delta/kit-bamboo-gate-arch-1",
+   "spirit": "manymouth_delta/kit-spirit-shrine-1",
+   "stonelamp": "manymouth_delta/kit-stone-lantern-1",
+   "scarecrow": "manymouth_delta/kit-scarecrow-1",
+   "decoys": "manymouth_delta/kit-heron-decoy-posts-1",
+   "jars": "manymouth_delta/kit-clay-water-jars-1",
+   "hearth": "manymouth_delta/kit-cooking-hearth-1",
+   "sampan": "manymouth_delta/kit-sampan-1",
+   "netshed": "manymouth_delta/kit-net-shed-1",
+   "watchtower": "sunmane_steppe/kit-watchtower",
+   "baskets": "manymouth_delta/kit-harvest-baskets-1",
+   "boulder": "ssarathi_ruins/kit-mossy-boulder-1",
+   "BU1": "@kit/kit-bu-watchtower.glb",
+   "BU2": "@kit/kit-bu-sluice-house.glb",
+   "BU3": "@kit/kit-bu-weir-section.glb",
+   "BU4": "@kit/kit-bu-weir-house.glb",
+   "BU5": "@kit/kit-bu-footbridge.glb"
+  },
+  "landmarks": [
+   {
+    "kit": "BU1",
+    "at": [
+     32,
+     38
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "camp",
+    "face": [
+     44,
+     46
+    ]
+   },
+   {
+    "kit": "BU2",
+    "at": [
+     141.03,
+     113.53
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     116,
+     96
+    ]
+   },
+   {
+    "kit": "sheaves",
+    "at": [
+     126,
+     104
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "scarecrow",
+    "at": [
+     102,
+     106
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     192.24,
+     61.6
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": -160
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     203.18,
+     78.45
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": -120
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     214.12,
+     59.3
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": -80
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     225.06,
+     76.15
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": -40
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     236.0,
+     57.0
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": 0
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     246.94,
+     73.85
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": 40
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     257.88,
+     54.7
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": 80
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     268.82,
+     71.55
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": 120
+   },
+   {
+    "kit": "bamboo",
+    "at": [
+     279.76,
+     52.4
+    ],
+    "scale": 0.8,
+    "solid": "trunk",
+    "group": "arena",
+    "rot": 160
+   },
+   {
+    "kit": "paddy1",
+    "at": [
+     196,
+     34
+    ],
+    "scale": 1.5,
+    "solid": null,
+    "group": "scenery",
+    "rot": -6
+   },
+   {
+    "kit": "paddy1",
+    "at": [
+     268,
+     96
+    ],
+    "scale": 1.5,
+    "solid": null,
+    "group": "scenery",
+    "rot": -6
+   },
+   {
+    "kit": "paddy1",
+    "at": [
+     242,
+     30
+    ],
+    "scale": 1.5,
+    "solid": null,
+    "group": "scenery",
+    "rot": -6
+   },
+   {
+    "ring": {
+     "kit": "stiltplat",
+     "solid": null,
+     "around": [
+      322,
+      168
+     ],
+     "radius": [
+      36,
+      38
+     ],
+     "rotDeg": 0.0,
+     "n": 6,
+     "phase": 0.3
+    }
+   },
+   {
+    "kit": "fishweir",
+    "at": [
+     328,
+     176
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "decoys",
+    "at": [
+     312,
+     162
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "ring": {
+     "kit": "stilthouse1",
+     "around": [
+      228,
+      252
+     ],
+     "radius": [
+      46,
+      32
+     ],
+     "rotDeg": 8,
+     "n": 6,
+     "phase": 0.25
+    }
+   },
+   {
+    "kit": "spirit",
+    "at": [
+     232,
+     254
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena",
+    "face": [
+     228,
+     252
+    ]
+   },
+   {
+    "kit": "papyrus",
+    "at": [
+     216,
+     258
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena"
+   },
+   {
+    "kit": "BU5",
+    "at": [
+     104,
+     292
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "road",
+    "deck": true,
+    "fitLength": 15,
+    "rot": 107
+   },
+   {
+    "kit": "gatearch",
+    "at": [
+     101.37,
+     300.61
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "arena",
+    "rot": 17
+   },
+   {
+    "kit": "sampan",
+    "at": [
+     86,
+     284
+    ],
+    "scale": 1.0,
+    "solid": null,
+    "group": "scenery",
+    "rot": 17
+   },
+   {
+    "line": {
+     "kit": "BU3",
+     "solid": null,
+     "z": -0.6,
+     "group": "scenery",
+     "from": [
+      311.4279847831493,
+      293.6390862021587
+     ],
+     "to": [
+      352.5720152168507,
+      318.3609137978413
+     ],
+     "step": "auto"
+    }
+   },
+   {
+    "kit": "BU4",
+    "at": [
+     311.47,
+     294.34
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "scenery",
+    "face": [
+     262,
+     336
+    ]
+   },
+   {
+    "kit": "stonelamp",
+    "at": [
+     246,
+     324
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   },
+   {
+    "kit": "stonelamp",
+    "at": [
+     278,
+     324
+    ],
+    "scale": 1.0,
+    "solid": "footprint",
+    "group": "arena"
+   }
+  ],
+  "meshyKit": [
+   "BU1",
+   "BU2",
+   "BU3",
+   "BU4",
+   "BU5"
+  ],
+  "labels": {
+   "plaque": [
+    "Rules of the bunds",
+    "One party at a time. The flood brings them to you; the bunds behind stay quiet once you have cleared them. Fall and you rise at the last fire you passed. The waystones count you out."
+   ],
+   "cache": "The weir-keeper's chest",
+   "side": [
+    "The seed store",
+    "The delta's seed rice was kept dry here. What the floods could not reach, the crabs did."
+   ]
+  }
+ }
+}

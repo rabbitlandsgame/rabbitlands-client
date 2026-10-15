@@ -1,0 +1,44 @@
+{
+  "schema": "eloria-canonical-warded-boots-fit-v1",
+  "status": "retired",
+  "retiredAt": "2026-10-08",
+  "retiredReason": "The race programme's P7 cleanup (2026-10) deleted the old-male base scene equipment/arcane_fantasy_boots_01.glb this pass wrote: no body wore it (the Human male wears canonical_human_male, which is now the model's base). The output numbers stay as history.",
+  "reviewedAt": "2026-10-03",
+  "source": {
+    "path": "godot-client/assets/actors/native/equipment/arcane_fantasy_boots_01.glb",
+    "sha256": "6c943363ea1256a70780ed21c4bdf8419691c8845165344f35f438a97488b936",
+    "provenance": {
+      "kind": "producer-manifest-output",
+      "manifest": "eloria-assets/qa/class-equipment-fit-baseline.json",
+      "section": "output",
+      "key": "arcane_fantasy_boots_01.glb"
+    }
+  },
+  "output": {
+    "path": "godot-client/assets/actors/native/equipment/arcane_fantasy_boots_01.glb",
+    "sha256": "9a672084d89b434a628cbc99197abac8d9f9c8348d291ca1ca0a15ac715984e7",
+    "mesh": "Warded Boots",
+    "sourceVertices": 1883,
+    "outputVertices": 1296,
+    "sourceTriangles": 1533,
+    "outputTriangles": 1049,
+    "removedComponentLabels": [
+      413,
+      834
+    ],
+    "removedTriangles": 484,
+    "degenerateTriangles": 0
+  },
+  "contract": {
+    "removedRole": "detached inverted upper-shin guards",
+    "drawsBefore": 3,
+    "drawsAfter": 3,
+    "materialsBefore": 2,
+    "materialsAfter": 2,
+    "jointsBefore": 77,
+    "jointsAfter": 77,
+    "additionalPerFrameOperations": 0,
+    "authoringTool": "eloria-assets/tools/author_luminous_cuff_fit.py",
+    "authoringFunction": "pruned_arcanist_boot_copy"
+  }
+}

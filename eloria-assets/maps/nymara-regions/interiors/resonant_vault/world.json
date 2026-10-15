@@ -1,0 +1,991 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "1.0.0",
+  "asset": {
+    "id": "resonant_vault",
+    "name": "The Resonant Vault",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "bounds": {
+      "min": [
+        -22.55,
+        -9.4,
+        -8.55
+      ],
+      "max": [
+        52.55,
+        9.95,
+        136.55
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -22.55,
+        -9.4,
+        -8.55
+      ],
+      "max": [
+        52.55,
+        0.0,
+        136.55
+      ]
+    },
+    "interiorClass": "dungeon",
+    "parentRegion": "amethyst_barrens",
+    "serverCells": 150
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      25.0,
+      139.0
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "walkingHeight": 0.0,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        0.0,
+        0.05,
+        0.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    },
+    {
+      "id": "resonant-vault-stair",
+      "position": [
+        0.0,
+        0.05,
+        0.0
+      ],
+      "rotationDegrees": 0,
+      "surface": "Walk"
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v1",
+    "width": 156,
+    "height": 300,
+    "cellMetres": 0.5,
+    "originMetres": [
+      -25.0,
+      139.0
+    ],
+    "heightEncoding": {
+      "origin": -9.148,
+      "step": 0.1475,
+      "range": [
+        1,
+        63
+      ],
+      "zeroMeansBlocked": true,
+      "note": "Step is fitted to this interior's own vertical range, so the six-bit field spans it without clamping. The Godot loader still takes elevation from the rendered Walk_ surfaces; this grid is authoritative only for walkability."
+    },
+    "walkableCells": 18876,
+    "blockedCells": 27924,
+    "walkableFraction": 0.4033,
+    "rowOrder": "server-tile-y (row 0 is the +Z southern edge)",
+    "columnOrder": "server-tile-x (column 0 is the -X western edge)",
+    "nodeNames": [
+      "Interior_resonant_vault",
+      "Build_resonant_vault_amber_resin",
+      "Build_resonant_vault_amethyst_brass",
+      "Build_resonant_vault_amethyst_crystal",
+      "Build_resonant_vault_amethyst_pale_stone",
+      "Build_resonant_vault_amethyst_storm_rock",
+      "Build_resonant_vault_blue_crystal",
+      "Build_resonant_vault_dark_iron",
+      "Build_resonant_vault_pale_ashlar",
+      "Build_resonant_vault_timber_dark",
+      "Build_resonant_vault_veined_marble"
+    ]
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45,
+    "navmesh": {
+      "format": "surface-prefix-v1",
+      "polygons": []
+    },
+    "notes": [
+      "Every standable surface is a Walk_<material> node, matching the region's contract: the client turns navigation.surfaceNodePrefixes into the layer its downward grounding ray tests."
+    ]
+  },
+  "portals": [
+    {
+      "id": "exit-to-amethyst_barrens",
+      "name": "Return to Amethyst Barrens",
+      "type": "map-transition",
+      "position": [
+        0.0,
+        0.05,
+        0.0
+      ],
+      "radius": 3.0,
+      "destinationMap": "amethyst_barrens",
+      "destinationSpawn": "resonant-vault-stair",
+      "authority": "server"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "the-sealed-door",
+      "name": "The Sealed Door",
+      "space": "approach",
+      "position": [
+        0.0,
+        2.6,
+        0.0
+      ]
+    },
+    {
+      "id": "the-gallery",
+      "name": "The Laboratory Gallery",
+      "space": "gallery",
+      "position": [
+        0.0,
+        -2.8,
+        33.0
+      ]
+    },
+    {
+      "id": "the-archive",
+      "name": "The Archive Aisle",
+      "space": "archive",
+      "position": [
+        35.0,
+        -2.8,
+        39.0
+      ]
+    },
+    {
+      "id": "the-brazier",
+      "name": "The Crystal Brazier",
+      "space": "brazier",
+      "position": [
+        -8.0,
+        -4.0,
+        69.0
+      ]
+    },
+    {
+      "id": "the-lens",
+      "name": "The Lens Room",
+      "space": "lens",
+      "position": [
+        41.0,
+        -2.0,
+        73.0
+      ]
+    },
+    {
+      "id": "the-research-hall",
+      "name": "The Research Hall",
+      "space": "hall",
+      "position": [
+        0.0,
+        -6.6,
+        116.0
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "vault-door-wheel",
+      "kind": "mechanism",
+      "position": [
+        0.0,
+        2.6,
+        7.6
+      ]
+    },
+    {
+      "id": "experiment-table",
+      "kind": "crafting",
+      "position": [
+        -7.6,
+        -3.0,
+        29.2
+      ]
+    },
+    {
+      "id": "archive-index",
+      "kind": "lore",
+      "position": [
+        35.0,
+        -3.0,
+        50.0
+      ]
+    },
+    {
+      "id": "containment-cell",
+      "kind": "mechanism",
+      "position": [
+        18.0,
+        -5.4,
+        72.0
+      ]
+    },
+    {
+      "id": "resonance-engine",
+      "kind": "mechanism",
+      "position": [
+        0.0,
+        -7.2,
+        116.0
+      ]
+    }
+  ],
+  "npcMarkers": [
+    {
+      "id": "vault-warden",
+      "name": "Vault Warden",
+      "position": [
+        0.0,
+        -3.9,
+        24.0
+      ]
+    },
+    {
+      "id": "resonance-adept",
+      "name": "Resonance Adept",
+      "position": [
+        35.0,
+        -3.9,
+        40.0
+      ]
+    },
+    {
+      "id": "lens-keeper",
+      "name": "Lens Keeper",
+      "position": [
+        41.0,
+        -3.9,
+        74.0
+      ]
+    }
+  ],
+  "harvestables": [
+    {
+      "id": "vault-shard-01",
+      "resource": "resonant-shard",
+      "position": [
+        -8.0,
+        -6.2,
+        69.0
+      ]
+    },
+    {
+      "id": "vault-shard-02",
+      "resource": "resonant-shard",
+      "position": [
+        -6.0,
+        -6.2,
+        74.0
+      ]
+    }
+  ],
+  "lights": [
+    {
+      "id": "lantern-00",
+      "kind": "point",
+      "position": [
+        -4.2,
+        2.58,
+        -3.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-01",
+      "kind": "point",
+      "position": [
+        4.2,
+        2.58,
+        3.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-02",
+      "kind": "point",
+      "position": [
+        0.0,
+        -0.22,
+        14.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-03",
+      "kind": "point",
+      "position": [
+        0.0,
+        -2.22,
+        19.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-04",
+      "kind": "point",
+      "position": [
+        -9.0,
+        -1.22,
+        26.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-05",
+      "kind": "point",
+      "position": [
+        9.0,
+        -1.22,
+        34.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-06",
+      "kind": "point",
+      "position": [
+        0.0,
+        -1.22,
+        30.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-07",
+      "kind": "point",
+      "position": [
+        0.0,
+        -1.22,
+        40.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-08",
+      "kind": "point",
+      "position": [
+        30.0,
+        -1.22,
+        30.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-09",
+      "kind": "point",
+      "position": [
+        40.0,
+        -1.22,
+        40.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-10",
+      "kind": "point",
+      "position": [
+        35.0,
+        -1.22,
+        48.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-11",
+      "kind": "point",
+      "position": [
+        -4.0,
+        -1.62,
+        50.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-12",
+      "kind": "point",
+      "position": [
+        -16.0,
+        -3.02,
+        62.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-13",
+      "kind": "point",
+      "position": [
+        0.0,
+        -3.02,
+        76.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-14",
+      "kind": "point",
+      "position": [
+        -8.0,
+        -3.02,
+        70.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-15",
+      "kind": "point",
+      "position": [
+        36.0,
+        -1.22,
+        58.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-16",
+      "kind": "point",
+      "position": [
+        36.0,
+        -1.22,
+        68.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-17",
+      "kind": "point",
+      "position": [
+        46.0,
+        -1.22,
+        78.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-18",
+      "kind": "point",
+      "position": [
+        40.0,
+        -1.22,
+        74.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-19",
+      "kind": "point",
+      "position": [
+        14.0,
+        -3.22,
+        71.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-20",
+      "kind": "point",
+      "position": [
+        24.0,
+        -2.22,
+        73.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-21",
+      "kind": "point",
+      "position": [
+        0.0,
+        -3.62,
+        88.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-22",
+      "kind": "point",
+      "position": [
+        -12.0,
+        -4.22,
+        104.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-23",
+      "kind": "point",
+      "position": [
+        12.0,
+        -4.22,
+        128.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-24",
+      "kind": "point",
+      "position": [
+        0.0,
+        -4.22,
+        116.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-25",
+      "kind": "point",
+      "position": [
+        -14.0,
+        -4.22,
+        126.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    },
+    {
+      "id": "lantern-26",
+      "kind": "point",
+      "position": [
+        14.0,
+        -4.22,
+        106.0
+      ],
+      "colour": [
+        1.0,
+        0.66,
+        0.32
+      ],
+      "range": 9.0,
+      "energy": 1.5
+    }
+  ],
+  "environment": {
+    "sky": "none",
+    "ambient": {
+      "colour": [
+        0.13,
+        0.11,
+        0.18
+      ],
+      "energy": 0.42
+    },
+    "fog": {
+      "enabled": true,
+      "colour": [
+        0.05,
+        0.05,
+        0.08
+      ],
+      "begin": 16.0,
+      "end": 54.0
+    },
+    "audio": [
+      {
+        "id": "resonance-hum",
+        "space": "hall",
+        "loop": true
+      },
+      {
+        "id": "arc-crackle",
+        "space": "crossing",
+        "loop": true
+      }
+    ],
+    "openToSky": []
+  },
+  "spaces": {
+    "approach": {
+      "x0": -6.0,
+      "z0": -8.0,
+      "x1": 6.0,
+      "z1": 8.0,
+      "floor": 0.0,
+      "height": 5.2
+    },
+    "gallery": {
+      "x0": -13.0,
+      "z0": 22.0,
+      "x1": 13.0,
+      "z1": 44.0,
+      "floor": -4.0,
+      "height": 7.0
+    },
+    "archive": {
+      "x0": 26.0,
+      "z0": 26.0,
+      "x1": 44.0,
+      "z1": 52.0,
+      "floor": -4.0,
+      "height": 8.2
+    },
+    "brazier": {
+      "x0": -22.0,
+      "z0": 56.0,
+      "x1": 6.0,
+      "z1": 82.0,
+      "floor": -6.4,
+      "height": 9.0
+    },
+    "lens": {
+      "x0": 30.0,
+      "z0": 62.0,
+      "x1": 52.0,
+      "z1": 84.0,
+      "floor": -4.0,
+      "height": 8.6
+    },
+    "hall": {
+      "x0": -20.0,
+      "z0": 96.0,
+      "x1": 20.0,
+      "z1": 136.0,
+      "floor": -9.0,
+      "height": 12.5
+    },
+    "stairhead": {
+      "x0": -2.2,
+      "z0": 5.8,
+      "x1": 2.2,
+      "z1": 24.2,
+      "floor": -4.0,
+      "height": 4.2
+    },
+    "archiveway": {
+      "x0": 11.0,
+      "z0": 31.0,
+      "x1": 28.0,
+      "z1": 35.0,
+      "floor": -4.0,
+      "height": 3.8
+    },
+    "brazierway": {
+      "x0": -6.0,
+      "z0": 42.0,
+      "x1": -2.0,
+      "z1": 58.0,
+      "floor": -6.4,
+      "height": 3.8
+    },
+    "lensway": {
+      "x0": 33.0,
+      "z0": 50.0,
+      "x1": 37.0,
+      "z1": 64.0,
+      "floor": -4.0,
+      "height": 3.8
+    },
+    "crossing": {
+      "x0": 3.7,
+      "z0": 67.7,
+      "x1": 32.3,
+      "z1": 76.3,
+      "floor": -6.4,
+      "height": 4.4
+    },
+    "hallway": {
+      "x0": -2.5,
+      "z0": 79.5,
+      "x1": 2.5,
+      "z1": 98.5,
+      "floor": -9.0,
+      "height": 4.6
+    }
+  },
+  "conceptArt": {
+    "detailBoard": "../../amethyst_barrens/references/00-concept-detail-board.png",
+    "role": "parent-region board; these interiors have no board of their own",
+    "panelGrid": [
+      5,
+      2
+    ],
+    "viewCount": 10,
+    "subjects": [
+      "sealed approach",
+      "laboratory gallery",
+      "archive aisle",
+      "crystal brazier",
+      "experiment table",
+      "lens room",
+      "containment cell",
+      "energy crossing",
+      "research hall",
+      "amethyst brass machinery materials"
+    ]
+  },
+  "performance": {
+    "nodes": 12,
+    "meshes": 11,
+    "materials": 11,
+    "images": 33,
+    "textures": 33,
+    "accessors": 55,
+    "bufferViews": 88,
+    "uniqueTriangles": 82360,
+    "uniqueVertices": 72990,
+    "glbBytes": 6679820,
+    "nodeNames": [
+      "Interior_resonant_vault",
+      "Build_resonant_vault_amber_resin",
+      "Build_resonant_vault_amethyst_brass",
+      "Build_resonant_vault_amethyst_crystal",
+      "Build_resonant_vault_amethyst_pale_stone",
+      "Build_resonant_vault_amethyst_storm_rock",
+      "Build_resonant_vault_blue_crystal",
+      "Build_resonant_vault_dark_iron",
+      "Build_resonant_vault_pale_ashlar",
+      "Build_resonant_vault_timber_dark",
+      "Build_resonant_vault_veined_marble",
+      "Walk_amethyst_vault_floor"
+    ]
+  },
+  "sources": [
+    {
+      "id": "generator",
+      "file": "source/build_interiors.py",
+      "role": "reproducible-build",
+      "seed": 20260901
+    },
+    {
+      "id": "anchor",
+      "landmark": "glasswarden-observatory",
+      "position": [
+        -78.0,
+        8.15,
+        -204.0
+      ],
+      "role": "surface entrance on the Amethyst Barrens region map"
+    }
+  ],
+  "provenance": {
+    "geometry": "authored with the shared Nymara toolkit; no scattered placement",
+    "textures": "procedural, from _toolkit/amberwood/textures.py",
+    "thirdParty": "none"
+  },
+  "notes": [
+    "Dressed slate and brass throughout, against the ochre dust of the region above: the Glasswardens built down away from the storm.",
+    "The gallery walkways are scenery, not walk surfaces. They are reachable from nowhere, and marking them walkable would let the grounding ray stand an actor two metres above the bench floor."
+  ],
+  "productionStatus": "authored-geometry-materials-population",
+  "knownLimitations": [
+    "Not opened in Godot: no client is installable in the build environment, so collision response, navmesh generation, portal transition, LOD and transparency sorting are unverified.",
+    "eloria-server has not registered these map keys."
+  ],
+  "externalResources": {
+    "../../../_shared/images/065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb.png": "065f2a2b95ffc068cc94556d4c1b40516a546f4f317cf8aa8bd371a61d5493bb",
+    "../../../_shared/images/1b416116cedf6854f49e1d4c7365f60e193d6384cf3875ff8de99ab9808f754e.png": "1b416116cedf6854f49e1d4c7365f60e193d6384cf3875ff8de99ab9808f754e",
+    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+    "../../../_shared/images/1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621.png": "1e5f12e87291a8ad077f017e3a2715de967e545db77ca342953e258b04512621",
+    "../../../_shared/images/2b6d7dece02ce78f3fc4cf3a421473357486dad0583d52de66db16c64fee3776.png": "2b6d7dece02ce78f3fc4cf3a421473357486dad0583d52de66db16c64fee3776",
+    "../../../_shared/images/46bf0c9395b0db44479d3a2ab168e5c7c16fae3a52e461be506420ecbf19e9e1.png": "46bf0c9395b0db44479d3a2ab168e5c7c16fae3a52e461be506420ecbf19e9e1",
+    "../../../_shared/images/4e2da3431b7682a3cf9b420c5c870a0c0e848c231654f27937e38f9edc11bb91.png": "4e2da3431b7682a3cf9b420c5c870a0c0e848c231654f27937e38f9edc11bb91",
+    "../../../_shared/images/4ef4f3c1fbc8871123d7d8ae329644481a4563779a1afbafea9e4b2e33602748.png": "4ef4f3c1fbc8871123d7d8ae329644481a4563779a1afbafea9e4b2e33602748",
+    "../../../_shared/images/50c00d127d279501874ccb99fde85c0a2f5d72bd2f6ca72fecd220e0fd31c959.png": "50c00d127d279501874ccb99fde85c0a2f5d72bd2f6ca72fecd220e0fd31c959",
+    "../../../_shared/images/6c72a20af3c3a103a45d58f1b58a483dd550705958963cc508ae7c187df5eaf3.png": "6c72a20af3c3a103a45d58f1b58a483dd550705958963cc508ae7c187df5eaf3",
+    "../../../_shared/images/6fff540a6fe89e81d4ad635f8feefc5f634417d37d6269f32053c446375a6343.png": "6fff540a6fe89e81d4ad635f8feefc5f634417d37d6269f32053c446375a6343",
+    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+    "../../../_shared/images/859f15f656a2a726c56d0759e9af284f64755998518b14ac351f84c142538cfe.png": "859f15f656a2a726c56d0759e9af284f64755998518b14ac351f84c142538cfe",
+    "../../../_shared/images/8610c4b74d4e15639b36579b58967a03eca3c1c41ec168d82fd67d66f79f089e.png": "8610c4b74d4e15639b36579b58967a03eca3c1c41ec168d82fd67d66f79f089e",
+    "../../../_shared/images/8fbf5131beac2985809dbbf14978eb206f89bf4287d6acd06d332e8cffd5a8da.png": "8fbf5131beac2985809dbbf14978eb206f89bf4287d6acd06d332e8cffd5a8da",
+    "../../../_shared/images/962f4cd3b1ca9883a0f7dc6e150b9aa098e00140bc7788108f308abfe2ffccb0.png": "962f4cd3b1ca9883a0f7dc6e150b9aa098e00140bc7788108f308abfe2ffccb0",
+    "../../../_shared/images/a20fba3965dfb7221686317ecd09383be431cf595192daacab2430e23cad1be1.png": "a20fba3965dfb7221686317ecd09383be431cf595192daacab2430e23cad1be1",
+    "../../../_shared/images/a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0.png": "a545ebc294647e97a941081dde15a9b610e40393f9fb417f7b523e787935e4b0",
+    "../../../_shared/images/a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c.png": "a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c",
+    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+    "../../../_shared/images/ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e.png": "ac13bbd1da6bf69614719d9c5f7acc495a08dbf494baf3ad7a8bcae8042d972e",
+    "../../../_shared/images/af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2.png": "af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2",
+    "../../../_shared/images/b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255.png": "b554815218ab58f3d7d4b5158ea732f4907141c79f92fffaa62083993ca56255",
+    "../../../_shared/images/b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01.png": "b9f06a04c8563b9e12cd19ea15756c736b33aa34639f8d9ad32359dd2ba48a01",
+    "../../../_shared/images/bbb5e3280ae009b5d4661df689d7fd6f308bf4a13b78a6cb1e6b87340c72ca8a.png": "bbb5e3280ae009b5d4661df689d7fd6f308bf4a13b78a6cb1e6b87340c72ca8a",
+    "../../../_shared/images/c35fd097da43f1be248f33482091876f21814feca22d5eaecd72010c2eaa3024.png": "c35fd097da43f1be248f33482091876f21814feca22d5eaecd72010c2eaa3024",
+    "../../../_shared/images/c7a5783de549df31ae6d34299e65553254f46b9ac19350dd079a3e9f179fcee4.png": "c7a5783de549df31ae6d34299e65553254f46b9ac19350dd079a3e9f179fcee4",
+    "../../../_shared/images/da1849e60f770ad20c0d322317679ae7865bf70332882ab5e4c57e3dbc7b71a0.png": "da1849e60f770ad20c0d322317679ae7865bf70332882ab5e4c57e3dbc7b71a0",
+    "../../../_shared/images/e353fad467123931b67a85a250604c22f64dd5738be04a19aab7eb51246ed2ef.png": "e353fad467123931b67a85a250604c22f64dd5738be04a19aab7eb51246ed2ef",
+    "../../../_shared/images/e647d4c50834c8494055c8975010b5246b205298839a6589552dc0aeb571cc13.png": "e647d4c50834c8494055c8975010b5246b205298839a6589552dc0aeb571cc13",
+    "../../../_shared/images/f9b24a696205ffb0451d2c53705d79ba0cf4c8491305dc5ccd9810465fbb9a4a.png": "f9b24a696205ffb0451d2c53705d79ba0cf4c8491305dc5ccd9810465fbb9a4a",
+    "../../../_shared/images/ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65.png": "ff74f94ec5d2fc41f89f7beac812f127e6612f64a2ba1b5f814de9639792fe65",
+    "../../../_shared/images/ffc87ec7d1c1a19c1077592f968adc86475a1d47ca17e0fbcec477d1f3fbb8d0.png": "ffc87ec7d1c1a19c1077592f968adc86475a1d47ca17e0fbcec477d1f3fbb8d0"
+  }
+}

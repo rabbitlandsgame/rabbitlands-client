@@ -1,0 +1,589 @@
+{
+  "schemaVersion": 1,
+  "about": "Single source for how each headwear piece meets the race head features (Votary horns, Stoneborn crown, Glasswarden crystals) and the race ears. raceFeatures is copied into godot-client/data/actors/equipment.json models[\"3:N\"].raceFeatures for the runtime hide policy, and the P5 headwear refit reads kind, ears and horns from here, so the clearance and the hide policy cannot drift apart. Authored piece by piece from the names on 2026-10-07 and reviewed against a Human-fit measurement of the side shell at the ear.",
+  "fields": {
+    "kind": "helm | hood | cap | hat | coif | wrap | turban | veil | band. Kettle Hat counts as a helm; Mail Coif and Padded Coif are coifs.",
+    "raceFeatures": "show: the race_feature_head node stays visible and the piece hides hair only, so the feature-free scalp stays drawn. hide: hair, scalp and race_feature_head are hidden. A model with no raceFeatures hides the features when the piece coversHair.",
+    "ears": "tuck: on the Human fit the piece reaches over the ears (its side shell ends 3.9 to 26 cm below the eye line at the ear; only the right side of the female Drover Hat stops above it), so a race refit keeps the race ears inside it. none: an open band; the ears stay free.",
+    "horns": "passThrough: a show piece that closes over the crown; Votary horns rise through it and the refit opens a rimmed hole at each horn root. none: the piece hides the features, or leaves the crown open.",
+    "shoulders": "hide: the piece reaches the Mycelari shoulder growths (race_feature_shoulders): it cuts 5 mm or more into a growth on either Mycelari body in some played clip (the action map clips and the combat recipe sources, sampled at 10 fps; the canonical variant rigid on the Head bone, the growths skinned), so the runtime hides them under it. none: it stays clear in every played clip. Measured 2026-10-07 (race programme R2 in Idle_Subtle; the batch B review over every played clip); equipment.json carries it as models[\"3:N\"].raceShoulders \"hide\"."
+  },
+  "pieces": {
+    "3:109": {
+      "name": "Warded Turban",
+      "scene": "arcane_ethereal_circlet_01",
+      "kind": "turban",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:110": {
+      "name": "Glowline Hood",
+      "scene": "arcane_ethereal_circlet_02",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "none"
+    },
+    "3:111": {
+      "name": "Palesteel Circlet",
+      "scene": "arcane_ethereal_circlet_03",
+      "kind": "band",
+      "raceFeatures": "show",
+      "ears": "none",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:112": {
+      "name": "Starglass Circlet",
+      "scene": "arcane_ethereal_circlet_04",
+      "kind": "band",
+      "raceFeatures": "show",
+      "ears": "none",
+      "horns": "none",
+      "shoulders": "none"
+    },
+    "3:113": {
+      "name": "Twilight Helm",
+      "scene": "arcane_ethereal_circlet_05",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:114": {
+      "name": "Seawrap Veil",
+      "scene": "arcane_ethereal_circlet_06",
+      "kind": "veil",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:115": {
+      "name": "Acolyte Hood",
+      "scene": "arcane_ethereal_circlet_07",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:116": {
+      "name": "Crystalward Helm",
+      "scene": "arcane_ethereal_circlet_08",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:117": {
+      "name": "Bark Hood",
+      "scene": "amberwood_forest_helm_01",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:118": {
+      "name": "Mossbound Cap",
+      "scene": "amberwood_forest_helm_02",
+      "kind": "cap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:119": {
+      "name": "Rootwrap Circlet",
+      "scene": "amberwood_forest_helm_03",
+      "kind": "band",
+      "raceFeatures": "show",
+      "ears": "none",
+      "horns": "none",
+      "shoulders": "none"
+    },
+    "3:120": {
+      "name": "Leafscale Hood",
+      "scene": "amberwood_forest_helm_04",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:121": {
+      "name": "Heartwood Helm",
+      "scene": "amberwood_forest_helm_05",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:122": {
+      "name": "Antler Hood",
+      "scene": "amberwood_forest_helm_06",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:123": {
+      "name": "Amberglass Helm",
+      "scene": "amberwood_forest_helm_07",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:124": {
+      "name": "Ivory Vine Helm",
+      "scene": "amberwood_forest_helm_08",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:125": {
+      "name": "Phoenix Helm",
+      "scene": "legendary_eloria_helm_01",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:126": {
+      "name": "Glacier Helm",
+      "scene": "legendary_eloria_helm_02",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:127": {
+      "name": "Nightstorm Helm",
+      "scene": "legendary_eloria_helm_03",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:128": {
+      "name": "Dragonbone Helm",
+      "scene": "legendary_eloria_helm_04",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:129": {
+      "name": "Sunburst Helm",
+      "scene": "legendary_eloria_helm_05",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:130": {
+      "name": "Amethyst Helm",
+      "scene": "legendary_eloria_helm_06",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:131": {
+      "name": "Knotwork Helm",
+      "scene": "legendary_eloria_helm_07",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:132": {
+      "name": "Lion Helm",
+      "scene": "legendary_eloria_helm_08",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:133": {
+      "name": "Padded Coif",
+      "scene": "militia_helmet_01",
+      "kind": "coif",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:134": {
+      "name": "Leather Helm",
+      "scene": "militia_helmet_02",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:135": {
+      "name": "Kettle Hat",
+      "scene": "militia_helmet_03",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:136": {
+      "name": "Spangenhelm",
+      "scene": "militia_helmet_04",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:137": {
+      "name": "Mail Coif",
+      "scene": "militia_helmet_05",
+      "kind": "coif",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:138": {
+      "name": "Cheekguard Helm",
+      "scene": "militia_helmet_06",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:139": {
+      "name": "Brass Helm",
+      "scene": "militia_helmet_07",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:140": {
+      "name": "Crimson Helm",
+      "scene": "militia_helmet_08",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:141": {
+      "name": "Gilt Bascinet",
+      "scene": "knightly_headgear_01",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:142": {
+      "name": "Visored Bascinet",
+      "scene": "knightly_headgear_02",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:143": {
+      "name": "Great Helm",
+      "scene": "knightly_headgear_03",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:144": {
+      "name": "Knight Sallet",
+      "scene": "knightly_headgear_04",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:145": {
+      "name": "Winged Helm",
+      "scene": "knightly_headgear_05",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:146": {
+      "name": "Crowned Helm",
+      "scene": "knightly_headgear_06",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:147": {
+      "name": "Crested Helm",
+      "scene": "knightly_headgear_07",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:148": {
+      "name": "Masked Helm",
+      "scene": "knightly_headgear_08",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:149": {
+      "name": "Wool Cap",
+      "scene": "frontier_hat_01",
+      "kind": "cap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "none"
+    },
+    "3:150": {
+      "name": "Drover Hat",
+      "scene": "frontier_hat_02",
+      "kind": "hat",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:151": {
+      "name": "Patched Sunhat",
+      "scene": "frontier_hat_03",
+      "kind": "hat",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:152": {
+      "name": "Earflap Cap",
+      "scene": "frontier_hat_04",
+      "kind": "cap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:153": {
+      "name": "Linen Kerchief",
+      "scene": "frontier_hat_05",
+      "kind": "wrap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:154": {
+      "name": "Felt Hat",
+      "scene": "frontier_hat_06",
+      "kind": "hat",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:155": {
+      "name": "Field Hood",
+      "scene": "frontier_hat_07",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:156": {
+      "name": "Fur Cap",
+      "scene": "frontier_hat_08",
+      "kind": "cap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:157": {
+      "name": "Fang Hood",
+      "scene": "adventurer_headwear_01",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:158": {
+      "name": "Feathered Cap",
+      "scene": "adventurer_headwear_02",
+      "kind": "cap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:159": {
+      "name": "Buckled Hood",
+      "scene": "adventurer_headwear_03",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:160": {
+      "name": "Plumed Hat",
+      "scene": "adventurer_headwear_04",
+      "kind": "hat",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:161": {
+      "name": "Charm Hood",
+      "scene": "adventurer_headwear_05",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:162": {
+      "name": "Studded Cap",
+      "scene": "adventurer_headwear_06",
+      "kind": "cap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:163": {
+      "name": "Banded Cap",
+      "scene": "adventurer_headwear_07",
+      "kind": "cap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:164": {
+      "name": "Fur Hood",
+      "scene": "adventurer_headwear_08",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:165": {
+      "name": "Riding Hat",
+      "scene": "sunmane_steppe_headgear_01",
+      "kind": "hat",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:166": {
+      "name": "Steppe Headcloth",
+      "scene": "sunmane_steppe_headgear_02",
+      "kind": "wrap",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:167": {
+      "name": "Rider Helm",
+      "scene": "sunmane_steppe_headgear_03",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:168": {
+      "name": "Steppe Turban",
+      "scene": "sunmane_steppe_headgear_04",
+      "kind": "turban",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:169": {
+      "name": "Sundisc Helm",
+      "scene": "sunmane_steppe_headgear_05",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:170": {
+      "name": "Sun Headband",
+      "scene": "sunmane_steppe_headgear_06",
+      "kind": "band",
+      "raceFeatures": "show",
+      "ears": "none",
+      "horns": "none",
+      "shoulders": "hide"
+    },
+    "3:171": {
+      "name": "Scarf Hood",
+      "scene": "sunmane_steppe_headgear_07",
+      "kind": "hood",
+      "raceFeatures": "show",
+      "ears": "tuck",
+      "horns": "passThrough",
+      "shoulders": "hide"
+    },
+    "3:172": {
+      "name": "Redplume Helm",
+      "scene": "sunmane_steppe_headgear_08",
+      "kind": "helm",
+      "raceFeatures": "hide",
+      "ears": "tuck",
+      "horns": "none",
+      "shoulders": "hide"
+    }
+  }
+}

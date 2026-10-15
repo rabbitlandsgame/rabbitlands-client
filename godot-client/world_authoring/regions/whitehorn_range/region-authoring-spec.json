@@ -1,0 +1,103 @@
+{
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "whitehorn_range",
+  "label": "Whitehorn Range",
+  "adapter": "whitehorn-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/whitehorn_range/whitehorn_range.tscn",
+    "manifest": "eloria-assets/maps/nymara-regions/whitehorn_range/world.json",
+    "snapshot": "eloria-assets/maps/nymara-regions/whitehorn_range/authoring/continent-authoring.json"
+  },
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/whitehorn_range/base-heights.f32le",
+    "resolvedHeights": "godot-client/world_authoring/regions/whitehorn_range/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/whitehorn_range/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    550.0,
+    0.0,
+    220.0
+  ],
+  "server": {
+    "origin": [
+      362,
+      360
+    ],
+    "cells": [
+      708,
+      708
+    ],
+    "collisionOriginMetres": [
+      -362.0,
+      360.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -360.0,
+      -220.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      352,
+      289
+    ],
+    "migration": {
+      "revision": "global-lattice-envelope-v1",
+      "sharedFieldPath": "godot-client/world_authoring/terrain/shared-field-v1/manifest.json",
+      "sharedFieldSha256": "5d2613a84f95a5351a48666c3cf9a3eedc8ea4f65fd801320a82720e48c62ed2",
+      "globalVertexMin": [
+        95,
+        0
+      ],
+      "previousGridSha256": "6b25ba0f7bbd5ae21ff8eede5498afee207541471fd08f026842ac1d0e55fd79"
+    }
+  },
+  "authority": {
+    "ownedRouteIds": [
+      "amberwood--whitehorn_range-whitehorn_range",
+      "amethyst_barrens--whitehorn_range-whitehorn_range",
+      "discovery-whitehorn_range-1111",
+      "discovery-whitehorn_range-516",
+      "discovery-whitehorn_range-528",
+      "discovery-whitehorn_range-530",
+      "discovery-whitehorn_range-531",
+      "discovery-whitehorn_range-532",
+      "discovery-whitehorn_range-534",
+      "discovery-whitehorn_range-535",
+      "discovery-whitehorn_range-537",
+      "discovery-whitehorn_range-538",
+      "discovery-whitehorn_range-539",
+      "discovery-whitehorn_range-620",
+      "door-whitehorn_range-gate-store-door",
+      "door-whitehorn_range-snowline-cell-door",
+      "door-whitehorn_range-west-watch-cave-mouth",
+      "door-whitehorn_range-whitehorn-barrow-door",
+      "door-whitehorn_range-whitehorn-glacier-temple-door",
+      "door-whitehorn_range-whitehorn-ice-cave-mouth",
+      "door-whitehorn_range-whitehorn-mine-adit",
+      "grey_moors--whitehorn_range-whitehorn_range",
+      "trail-whitehorn_range-0"
+    ],
+    "requiredRouteIds": [
+      "amberwood--whitehorn_range-whitehorn_range",
+      "amethyst_barrens--whitehorn_range-whitehorn_range",
+      "door-whitehorn_range-gate-store-door",
+      "door-whitehorn_range-snowline-cell-door",
+      "door-whitehorn_range-west-watch-cave-mouth",
+      "door-whitehorn_range-whitehorn-barrow-door",
+      "door-whitehorn_range-whitehorn-glacier-temple-door",
+      "door-whitehorn_range-whitehorn-ice-cave-mouth",
+      "door-whitehorn_range-whitehorn-mine-adit",
+      "grey_moors--whitehorn_range-whitehorn_range"
+    ],
+    "ownedPlanFeatureIds": [
+      "horn_tributary"
+    ]
+  },
+  "gameplay": {
+    "runtimeBindingCount": 199,
+    "runtimePointCount": 68,
+    "existingMarkerBindingCount": 125
+  }
+}

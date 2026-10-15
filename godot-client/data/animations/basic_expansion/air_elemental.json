@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "fallbackAction": "idle",
+  "playbackSpeeds": {
+    "walk": 1.15,
+    "run": 1.25
+  },
+  "actions": {
+    "idle": "Idle_A",
+    "alternate_idle": "Idle_A",
+    "combat_idle": "Fighting_Idle",
+    "walk": "Walk",
+    "run": "Jog",
+    "turn": "Idle_A",
+    "sit": "Idle_A",
+    "seated_idle": "Idle_A",
+    "stand": "Idle_A",
+    "death": "Death_A",
+    "pain": "Hit_Chest",
+    "attack_primary": "Sword_Attack",
+    "ranged_attack": "Sword_Attack",
+    "cast": "Sword_Attack",
+    "harvest": "Sword_Attack",
+    "pickup": "Idle_A",
+    "drop": "Idle_A",
+    "emote_greeting": "Idle_A"
+  },
+  "serverCommands": {
+    "3": "death",
+    "5": "pain",
+    "7": "idle",
+    "13": "sit",
+    "14": "stand",
+    "15": "combat_idle",
+    "18": "combat_idle",
+    "19": "idle",
+    "20": "walk",
+    "21": "walk",
+    "22": "walk",
+    "23": "walk",
+    "24": "walk",
+    "25": "walk",
+    "26": "walk",
+    "27": "walk",
+    "30": "run",
+    "31": "run",
+    "32": "run",
+    "33": "run",
+    "34": "run",
+    "35": "run",
+    "36": "run",
+    "37": "run",
+    "38": "turn",
+    "39": "turn",
+    "40": "turn",
+    "41": "turn",
+    "42": "turn",
+    "43": "turn",
+    "44": "turn",
+    "45": "turn",
+    "46": "attack_primary"
+  },
+  "bodyPlan": "elemental",
+  "locomotionStyle": "vortex_hover",
+  "notes": "Walk and Jog are runtime clip names; motion follows the creature body (swim, slither, crawl, hover or grounded gait).",
+  "primary_attack": {
+    "id": 100,
+    "slug": "100_air_elemental",
+    "name": "Air Elemental",
+    "motion": "four_punch",
+    "label": "Alternating four-punch combination",
+    "duration_seconds": 1.45,
+    "source_key": "fantasy",
+    "source_title": "Wizards of the Coast: SRD 5.2.1 creature actions",
+    "source_url": "https://media.dndbeyond.com/compendium-images/srd/5.2/SRD_CC_v5.2.1.pdf",
+    "interpretation": "Game choreography inferred from anatomy or fantasy archetype; timing and amplitude are authored for readability.",
+    "revision": 15,
+    "generator": "work-output/generate_elemental_attack_r15.py",
+    "revision_15_motion": "Revision 15: alternating right-left-right-left punches match the two-headed giant, with forward-aligned visible hands and floating torso drive. Attack duration is 1.45 seconds. Preserve all 97 attack POSITION/NORMAL shapes and reset tracks. All non-attack posed surfaces remain unchanged."
+  },
+  "locomotion_retiming": {
+    "walk": 1.35,
+    "jog": 1.5,
+    "baked_into_clip_timestamps": true
+  },
+  "revision": 15,
+  "corrective_clips": [
+    "Sword_Attack"
+  ],
+  "surface_correctives": {
+    "morph_targets": 97,
+    "clips": [
+      "Sword_Attack"
+    ],
+    "reset_unrelated_shapes": true,
+    "preserve_on_export": true
+  },
+  "loopingClips": [
+    "Idle_A",
+    "Fighting_Idle",
+    "Walk",
+    "Jog"
+  ]
+}

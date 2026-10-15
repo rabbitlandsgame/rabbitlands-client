@@ -1,0 +1,196 @@
+{
+ "schemaVersion": 1,
+ "asset": {
+  "id": "stagheath",
+  "name": "Stagheath",
+  "glb": "world.glb",
+  "units": "meters",
+  "seaLevel": 0.0
+ },
+ "productionStatus": "continent-v2-editor-source",
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   929.0,
+   0.0,
+   6517.0
+  ],
+  "ownershipPolygon": [
+   [
+    959,
+    6741
+   ],
+   [
+    1159,
+    6761
+   ],
+   [
+    1459,
+    6761
+   ],
+   [
+    1459,
+    6221
+   ],
+   [
+    399,
+    6221
+   ],
+   [
+    399,
+    6813
+   ],
+   [
+    699,
+    6781
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     959,
+     6741
+    ],
+    [
+     1159,
+     6761
+    ],
+    [
+     1459,
+     6761
+    ],
+    [
+     1459,
+     6221
+    ],
+    [
+     399,
+     6221
+    ],
+    [
+     399,
+     6813
+    ],
+    [
+     699,
+     6781
+    ]
+   ]
+  ],
+  "geometryMode": "continent-v2-editor-source"
+ },
+ "server": {
+  "origin": [
+   534,
+   300
+  ],
+  "cells": [
+   1068,
+   1068
+  ],
+  "collisionOriginMetres": [
+   -534.0,
+   300.0
+  ]
+ },
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.2,
+    0.45,
+    0.76
+   ],
+   "horizon": [
+    0.8,
+    0.87,
+    0.9
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.5,
+    0.58,
+    0.6
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    1.0,
+    0.93,
+    0.8
+   ],
+   "energy": 1.1
+  },
+  "ambient": {
+   "color": [
+    0.63,
+    0.64,
+    0.67
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.16,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.76,
+    0.8,
+    0.82
+   ],
+   "density": 0.0004,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  }
+ }
+}

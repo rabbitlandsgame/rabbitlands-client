@@ -1,0 +1,1897 @@
+{
+  "schemaVersion": 1,
+  "title": "Ranger bow retained local geometry focused evidence",
+  "generatedUtc": "2026-09-19T14:39:51.4644421Z",
+  "conclusion": "When exact local draw point and flex are unchanged, retaining bowstring geometry and cached limb nodes preserves reviewed output and reduces the complete equipped-bow update_pose callback by about 40-46% in the focused repeated-pose workload.",
+  "sourceBasis": {
+    "frozenCommit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+    "frozenRangerBowSha256": "226f071167863f41278bf3ec15bf0e30fde6742d0d07a498de1731a2f7c9e81e",
+    "frozenCombatPresentationBodySha256": "27484eab2c764c01154ee38d7edc46410bd2aebf13b56979e4e768bc40688a4f",
+    "productionSourceHashes": {
+      "src/actors/ranger_bow_3d.gd": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+      "tests/performance/combat_pose_probe.gd": "8c0fc3fb57602dc850332930dd8374d8a3772a15a5c0524d63c83df4e38df540",
+      "tests/fixtures/combat_presentation_967744_baseline.gd": "e9e0d2449ddd7aa70c464e1b0994026b53ccda5b33916ff64f6b3c19cc1cda5e",
+      "tests/fixtures/ranger_bow_pose_967744_baseline.gd": "89d5a919f5e4ed9dfbf2089537912d44afda15927510c7dbf73b5b88347d9aef",
+      "tests/fixtures/ranger_bow_pose_cache_candidate.gd": "1528b5d21f1719abaafb7731d7729d22052239de82ea94195f98d1042317e2d6"
+    },
+    "postRunNormalization": "The frozen bow fixture final file removes one trailing blank line and the probe updates that file-hash constant. The frozen pose function bytes and runtime semantics are unchanged; per-session manifests retain the exact measured file hashes."
+  },
+  "controlledResults": {
+    "windowedCompatibility": {
+      "idleBow": {
+        "frozenMedianMicroseconds": 32.9583333333333,
+        "productionMedianMicroseconds": 17.6916666666667,
+        "changePercent": -46.3211125158028
+      },
+      "rangedHold": {
+        "frozenMedianMicroseconds": 31.8833333333333,
+        "productionMedianMicroseconds": 17.2491666666667,
+        "changePercent": -45.8991113434396
+      }
+    },
+    "headlessCompatibility": {
+      "idleBow": {
+        "frozenMedianMicroseconds": 26.4033333333333,
+        "productionMedianMicroseconds": 15.625,
+        "changePercent": -40.8218659260194
+      },
+      "rangedHold": {
+        "frozenMedianMicroseconds": 25.0266666666667,
+        "productionMedianMicroseconds": 14.94,
+        "changePercent": -40.3036760788492
+      }
+    }
+  },
+  "correctness": {
+    "windowedExactParity": "19 actor presentation states plus 11-step dynamic bow sequence; zero failures",
+    "dynamicCases": [
+      "idle world motion with retained local geometry",
+      "draw and repeated hold",
+      "changed draw point and size",
+      "release recoil at 0, 0.01, 0.08, and 0.16 seconds",
+      "return to idle",
+      "Sunmane asset/tip replacement"
+    ],
+    "regression": "test_combat_presentation.gd PASS for 16 player rigs"
+  },
+  "sessions": [
+    {
+      "id": "combat-pose-baseline-967744-gl-v8-gl_compatibility-20260919T142400952Z",
+      "phase": "frozen-baseline-windowed",
+      "renderer": "gl_compatibility",
+      "headless": false,
+      "reportStatus": "PASS",
+      "parityFailures": 0,
+      "candidateEnabled": false,
+      "sourceCommit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+      "scriptSha256": "5c93779c0eb27916c5c5722cb050fe2268b5753b598b633c7a15b84c69b13af1",
+      "rangerBowSha256": "226f071167863f41278bf3ec15bf0e30fde6742d0d07a498de1731a2f7c9e81e",
+      "combatPresentationSha256": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+      "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+      "affinityMask": 15,
+      "requestedWorkers": 2,
+      "identityVerified": true,
+      "exitCode": 0,
+      "forcedTermination": false,
+      "scriptErrorsDetected": false,
+      "monitoringError": "",
+      "passed": true,
+      "summary": {
+        "casting": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 239.571666666667,
+            "medianMicrosecondsPerCallback": 129.129166666667,
+            "minimumMicrosecondsPerCallback": 107.535
+          },
+          "currentVersusFrozenMedianPercent": 1.31419791428291,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 145.308333333333,
+            "medianMicrosecondsPerCallback": 127.454166666667,
+            "minimumMicrosecondsPerCallback": 106.393333333333
+          }
+        },
+        "idle_bow": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 41.1733333333333,
+            "medianMicrosecondsPerCallback": 39.3275,
+            "minimumMicrosecondsPerCallback": 26.565
+          },
+          "currentVersusFrozenMedianPercent": 0.783752616068001,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 51.8466666666667,
+            "medianMicrosecondsPerCallback": 39.0216666666667,
+            "minimumMicrosecondsPerCallback": 26.4983333333333
+          }
+        },
+        "idle_no_cue": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 1.99666666666667,
+            "medianMicrosecondsPerCallback": 1.45166666666667,
+            "minimumMicrosecondsPerCallback": 1.35
+          },
+          "currentVersusFrozenMedianPercent": -1.19115144639819,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 1.52333333333333,
+            "medianMicrosecondsPerCallback": 1.46916666666667,
+            "minimumMicrosecondsPerCallback": 1.33333333333333
+          }
+        },
+        "melee": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 27.005,
+            "medianMicrosecondsPerCallback": 24.9866666666667,
+            "minimumMicrosecondsPerCallback": 17.2066666666667
+          },
+          "currentVersusFrozenMedianPercent": -1.55947339045932,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 28.9033333333333,
+            "medianMicrosecondsPerCallback": 25.3825,
+            "minimumMicrosecondsPerCallback": 17.47
+          }
+        },
+        "ranged_hold": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 40.5616666666667,
+            "medianMicrosecondsPerCallback": 37.8541666666667,
+            "minimumMicrosecondsPerCallback": 36.7083333333333
+          },
+          "currentVersusFrozenMedianPercent": -0.0791887551967685,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 40.6566666666667,
+            "medianMicrosecondsPerCallback": 37.8841666666667,
+            "minimumMicrosecondsPerCallback": 35.8966666666667
+          }
+        }
+      },
+      "callbackCallTrace": {
+        "casting": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "idle_bow": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        },
+        "idle_no_cue": {
+          "equipmentModelLookups": 0,
+          "handPropCalls": 0,
+          "handPropNodesVisited": 0,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 0
+        },
+        "melee": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "ranged_hold": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        }
+      },
+      "snapshots": {
+        "attack_primary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "frozenSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "trailPoints": 4
+        },
+        "attack_secondary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "frozenSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "trailPoints": 4
+        },
+        "cast": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "frozenSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "trailPoints": 0
+        },
+        "cast_aggressive": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "frozenSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "trailPoints": 0
+        },
+        "cast_channel": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "frozenSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "trailPoints": 0
+        },
+        "cast_channel_enter": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "frozenSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "trailPoints": 0
+        },
+        "cast_defensive": {
+          "actionSurfaceVertices": 2568,
+          "bowStringVertices": 0,
+          "currentSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "frozenSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "trailPoints": 0
+        },
+        "effects_disabled_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "frozenSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "trailPoints": 0
+        },
+        "equipment_bow_to_sword": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "frozenSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "trailPoints": 0
+        },
+        "heal": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "frozenSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "trailPoints": 0
+        },
+        "hidden_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "frozenSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "trailPoints": 0
+        },
+        "idle_bow": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "frozenSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "trailPoints": 0
+        },
+        "idle_no_cue": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "frozenSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "trailPoints": 0
+        },
+        "legacy_ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "frozenSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "trailPoints": 0
+        },
+        "melee_rewind": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "frozenSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "trailPoints": 1
+        },
+        "ranged_attack": {
+          "actionSurfaceVertices": 12,
+          "bowStringVertices": 12,
+          "currentSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "frozenSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "trailPoints": 0
+        },
+        "ranged_draw": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "frozenSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "trailPoints": 0
+        },
+        "ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "frozenSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "trailPoints": 0
+        },
+        "transition_cast_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "frozenSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "trailPoints": 0
+        },
+        "transition_ranged_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "frozenSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "trailPoints": 0
+        }
+      },
+      "dynamicBowSequence": null,
+      "rawManifestSha256": {
+        "checks.json": "3df3a54a029c792552534b78587fbc4395f4349abca9d1edce50b665c561eee9",
+        "tests_performance_combat_pose_probe/combat-pose-probe.json": "ea24d2dfef02e45a837f2641b0a30fb02464724ba44356890e5fc852238ac505",
+        "tests_performance_combat_pose_probe/process.json": "3df3a54a029c792552534b78587fbc4395f4349abca9d1edce50b665c561eee9",
+        "tests_performance_combat_pose_probe/stdout.log": "b143e03770772868e8f657eacc05a6b1ed2d011ce0723fc992d95f290819d165",
+        "tests_performance_combat_pose_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "tests_performance_combat_pose_probe/godot.log": "e8df516b8c509526fd76c72b610f6036ffd90c3bfe59f1db8c8e06820232d9e4"
+      }
+    },
+    {
+      "id": "combat-pose-baseline-967744-headless-gl_compatibility-20260919T142414304Z",
+      "phase": "frozen-baseline-headless",
+      "renderer": "gl_compatibility",
+      "headless": true,
+      "reportStatus": "PASS",
+      "parityFailures": 0,
+      "candidateEnabled": false,
+      "sourceCommit": "ef6825b92a468ff275a847cc063eed115695b1b5",
+      "scriptSha256": "5c93779c0eb27916c5c5722cb050fe2268b5753b598b633c7a15b84c69b13af1",
+      "rangerBowSha256": "226f071167863f41278bf3ec15bf0e30fde6742d0d07a498de1731a2f7c9e81e",
+      "combatPresentationSha256": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+      "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+      "affinityMask": 15,
+      "requestedWorkers": 2,
+      "identityVerified": true,
+      "exitCode": 0,
+      "forcedTermination": false,
+      "scriptErrorsDetected": false,
+      "monitoringError": "",
+      "passed": true,
+      "summary": {
+        "casting": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 133.138333333333,
+            "medianMicrosecondsPerCallback": 120.544166666667,
+            "minimumMicrosecondsPerCallback": 104.38
+          },
+          "currentVersusFrozenMedianPercent": -3.7481867905194,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 134.435,
+            "medianMicrosecondsPerCallback": 125.238333333333,
+            "minimumMicrosecondsPerCallback": 117.801666666667
+          }
+        },
+        "idle_bow": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 34.4633333333333,
+            "medianMicrosecondsPerCallback": 30.8566666666667,
+            "minimumMicrosecondsPerCallback": 25.4616666666667
+          },
+          "currentVersusFrozenMedianPercent": -5.06614706183982,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 34.1316666666667,
+            "medianMicrosecondsPerCallback": 32.5033333333333,
+            "minimumMicrosecondsPerCallback": 30.1
+          }
+        },
+        "idle_no_cue": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 1.445,
+            "medianMicrosecondsPerCallback": 1.42,
+            "minimumMicrosecondsPerCallback": 1.32166666666667
+          },
+          "currentVersusFrozenMedianPercent": 2.28091236494599,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 1.46166666666667,
+            "medianMicrosecondsPerCallback": 1.38833333333333,
+            "minimumMicrosecondsPerCallback": 1.33333333333333
+          }
+        },
+        "melee": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 21.745,
+            "medianMicrosecondsPerCallback": 20.085,
+            "minimumMicrosecondsPerCallback": 13.5816666666667
+          },
+          "currentVersusFrozenMedianPercent": 4.33314575126618,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 21.995,
+            "medianMicrosecondsPerCallback": 19.2508333333333,
+            "minimumMicrosecondsPerCallback": 12.92
+          }
+        },
+        "ranged_hold": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 36.925,
+            "medianMicrosecondsPerCallback": 28.3533333333333,
+            "minimumMicrosecondsPerCallback": 20.615
+          },
+          "currentVersusFrozenMedianPercent": 0.484347312463074,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 35.1933333333333,
+            "medianMicrosecondsPerCallback": 28.2166666666667,
+            "minimumMicrosecondsPerCallback": 21.2633333333333
+          }
+        }
+      },
+      "callbackCallTrace": {
+        "casting": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "idle_bow": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        },
+        "idle_no_cue": {
+          "equipmentModelLookups": 0,
+          "handPropCalls": 0,
+          "handPropNodesVisited": 0,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 0
+        },
+        "melee": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "ranged_hold": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        }
+      },
+      "snapshots": {
+        "attack_primary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "frozenSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "trailPoints": 4
+        },
+        "attack_secondary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "frozenSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "trailPoints": 4
+        },
+        "cast": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "frozenSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "trailPoints": 0
+        },
+        "cast_aggressive": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "frozenSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "trailPoints": 0
+        },
+        "cast_channel": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "frozenSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "trailPoints": 0
+        },
+        "cast_channel_enter": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "frozenSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "trailPoints": 0
+        },
+        "cast_defensive": {
+          "actionSurfaceVertices": 2568,
+          "bowStringVertices": 0,
+          "currentSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "frozenSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "trailPoints": 0
+        },
+        "effects_disabled_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "frozenSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "trailPoints": 0
+        },
+        "equipment_bow_to_sword": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "frozenSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "trailPoints": 0
+        },
+        "heal": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "frozenSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "trailPoints": 0
+        },
+        "hidden_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "frozenSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "trailPoints": 0
+        },
+        "idle_bow": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "frozenSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "trailPoints": 0
+        },
+        "idle_no_cue": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "frozenSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "trailPoints": 0
+        },
+        "legacy_ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "frozenSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "trailPoints": 0
+        },
+        "melee_rewind": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "frozenSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "trailPoints": 1
+        },
+        "ranged_attack": {
+          "actionSurfaceVertices": 12,
+          "bowStringVertices": 12,
+          "currentSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "frozenSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "trailPoints": 0
+        },
+        "ranged_draw": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "frozenSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "trailPoints": 0
+        },
+        "ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "frozenSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "trailPoints": 0
+        },
+        "transition_cast_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "frozenSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "trailPoints": 0
+        },
+        "transition_ranged_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "frozenSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "trailPoints": 0
+        }
+      },
+      "dynamicBowSequence": null,
+      "rawManifestSha256": {
+        "checks.json": "7d2c54383b7eb80b2d13a4a3164cdb4fb5a10714725c0bc3217ab623973a8da4",
+        "tests_performance_combat_pose_probe/combat-pose-probe.json": "8a70011be70e0fc8e561aec944a3d72a095e3197c2bc44c6ea106a066918d0ae",
+        "tests_performance_combat_pose_probe/process.json": "7d2c54383b7eb80b2d13a4a3164cdb4fb5a10714725c0bc3217ab623973a8da4",
+        "tests_performance_combat_pose_probe/stdout.log": "6bc7ce0c749cfd6d8971c7d8dc4daecc419ee9ebafdf30ee6961f7866dd74b67",
+        "tests_performance_combat_pose_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "tests_performance_combat_pose_probe/godot.log": "f01f120d315ef4ff5e4baa14fb74ecbd9abcd2e6811660ea7aedcf1801874010"
+      }
+    },
+    {
+      "id": "combat-pose-bow-cache-candidate-gl-gl_compatibility-20260919T143508297Z",
+      "phase": "test-only-candidate-windowed",
+      "renderer": "gl_compatibility",
+      "headless": false,
+      "reportStatus": "PASS",
+      "parityFailures": 0,
+      "candidateEnabled": true,
+      "sourceCommit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+      "scriptSha256": "0ee95ac0d69b36b4c717e78a360529ccc6fe5e33b24f358cf3fdfb4cc03f199e",
+      "rangerBowSha256": "226f071167863f41278bf3ec15bf0e30fde6742d0d07a498de1731a2f7c9e81e",
+      "combatPresentationSha256": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+      "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+      "affinityMask": 15,
+      "requestedWorkers": 2,
+      "identityVerified": true,
+      "exitCode": 0,
+      "forcedTermination": false,
+      "scriptErrorsDetected": false,
+      "monitoringError": "",
+      "passed": true,
+      "summary": {
+        "casting": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 128.553333333333,
+            "medianMicrosecondsPerCallback": 120.715833333333,
+            "minimumMicrosecondsPerCallback": 109.525
+          },
+          "currentVersusFrozenMedianPercent": 3.71815617258315,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 126.278333333333,
+            "medianMicrosecondsPerCallback": 116.388333333333,
+            "minimumMicrosecondsPerCallback": 114.75
+          }
+        },
+        "idle_bow": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 18.2766666666667,
+            "medianMicrosecondsPerCallback": 16.81,
+            "minimumMicrosecondsPerCallback": 14.35
+          },
+          "currentVersusFrozenMedianPercent": -46.1275504753766,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 32.3266666666667,
+            "medianMicrosecondsPerCallback": 31.2033333333333,
+            "minimumMicrosecondsPerCallback": 27.4266666666667
+          }
+        },
+        "idle_no_cue": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 1.60166666666667,
+            "medianMicrosecondsPerCallback": 1.275,
+            "minimumMicrosecondsPerCallback": 1.09166666666667
+          },
+          "currentVersusFrozenMedianPercent": -0.584795321637432,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 1.54333333333333,
+            "medianMicrosecondsPerCallback": 1.2825,
+            "minimumMicrosecondsPerCallback": 1.07666666666667
+          }
+        },
+        "melee": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 20.955,
+            "medianMicrosecondsPerCallback": 19.9308333333333,
+            "minimumMicrosecondsPerCallback": 18.2583333333333
+          },
+          "currentVersusFrozenMedianPercent": -4.46574795286599,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 21.9266666666667,
+            "medianMicrosecondsPerCallback": 20.8625,
+            "minimumMicrosecondsPerCallback": 18.59
+          }
+        },
+        "ranged_hold": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 18.11,
+            "medianMicrosecondsPerCallback": 16.7808333333333,
+            "minimumMicrosecondsPerCallback": 14.9683333333333
+          },
+          "currentVersusFrozenMedianPercent": -43.7089424985324,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 37.1133333333333,
+            "medianMicrosecondsPerCallback": 29.8108333333333,
+            "minimumMicrosecondsPerCallback": 27.0533333333333
+          }
+        }
+      },
+      "callbackCallTrace": {
+        "casting": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "idle_bow": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        },
+        "idle_no_cue": {
+          "equipmentModelLookups": 0,
+          "handPropCalls": 0,
+          "handPropNodesVisited": 0,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 0
+        },
+        "melee": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "ranged_hold": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        }
+      },
+      "snapshots": {
+        "attack_primary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "frozenSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "trailPoints": 4
+        },
+        "attack_secondary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "frozenSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "trailPoints": 4
+        },
+        "cast": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "frozenSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "trailPoints": 0
+        },
+        "cast_aggressive": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "frozenSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "trailPoints": 0
+        },
+        "cast_channel": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "frozenSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "trailPoints": 0
+        },
+        "cast_channel_enter": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "frozenSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "trailPoints": 0
+        },
+        "cast_defensive": {
+          "actionSurfaceVertices": 2568,
+          "bowStringVertices": 0,
+          "currentSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "frozenSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "trailPoints": 0
+        },
+        "effects_disabled_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "frozenSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "trailPoints": 0
+        },
+        "equipment_bow_to_sword": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "frozenSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "trailPoints": 0
+        },
+        "heal": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "frozenSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "trailPoints": 0
+        },
+        "hidden_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "frozenSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "trailPoints": 0
+        },
+        "idle_bow": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "frozenSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "trailPoints": 0
+        },
+        "idle_no_cue": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "frozenSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "trailPoints": 0
+        },
+        "legacy_ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "frozenSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "trailPoints": 0
+        },
+        "melee_rewind": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "frozenSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "trailPoints": 1
+        },
+        "ranged_attack": {
+          "actionSurfaceVertices": 12,
+          "bowStringVertices": 12,
+          "currentSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "frozenSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "trailPoints": 0
+        },
+        "ranged_draw": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "frozenSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "trailPoints": 0
+        },
+        "ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "frozenSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "trailPoints": 0
+        },
+        "transition_cast_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "frozenSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "trailPoints": 0
+        },
+        "transition_ranged_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "frozenSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "trailPoints": 0
+        }
+      },
+      "dynamicBowSequence": null,
+      "rawManifestSha256": {
+        "checks.json": "ef0f39f8d9a0e75fc4b2beb68514ee9bb498c496de5bc0092d921cddea7ee07d",
+        "tests_performance_combat_pose_probe/combat-pose-probe.json": "5270b8f65934fa872c70cde4c2c1b3694a4bf6b5d658c72892c75eeccec19d73",
+        "tests_performance_combat_pose_probe/process.json": "ef0f39f8d9a0e75fc4b2beb68514ee9bb498c496de5bc0092d921cddea7ee07d",
+        "tests_performance_combat_pose_probe/stdout.log": "4c87f29efde96c627a508ab4f11ea86391fb0fbc280a2c4603987af4a41d6a1b",
+        "tests_performance_combat_pose_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "tests_performance_combat_pose_probe/godot.log": "6aae13d91b7b302497ad53deb5e9411b50606f7fb7858e260e4d714950a85b1d"
+      }
+    },
+    {
+      "id": "combat-pose-bow-cache-candidate-headless-gl_compatibility-20260919T143521636Z",
+      "phase": "test-only-candidate-headless",
+      "renderer": "gl_compatibility",
+      "headless": true,
+      "reportStatus": "PASS",
+      "parityFailures": 0,
+      "candidateEnabled": true,
+      "sourceCommit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+      "scriptSha256": "0ee95ac0d69b36b4c717e78a360529ccc6fe5e33b24f358cf3fdfb4cc03f199e",
+      "rangerBowSha256": "226f071167863f41278bf3ec15bf0e30fde6742d0d07a498de1731a2f7c9e81e",
+      "combatPresentationSha256": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+      "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+      "affinityMask": 15,
+      "requestedWorkers": 2,
+      "identityVerified": true,
+      "exitCode": 0,
+      "forcedTermination": false,
+      "scriptErrorsDetected": false,
+      "monitoringError": "",
+      "passed": true,
+      "summary": {
+        "casting": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 122.068333333333,
+            "medianMicrosecondsPerCallback": 112.091666666667,
+            "minimumMicrosecondsPerCallback": 103.145
+          },
+          "currentVersusFrozenMedianPercent": 4.44782655961238,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 123.998333333333,
+            "medianMicrosecondsPerCallback": 107.318333333333,
+            "minimumMicrosecondsPerCallback": 103.39
+          }
+        },
+        "idle_bow": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 17.5583333333333,
+            "medianMicrosecondsPerCallback": 14.8275,
+            "minimumMicrosecondsPerCallback": 14.1366666666667
+          },
+          "currentVersusFrozenMedianPercent": -39.0212138866993,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 26.3683333333333,
+            "medianMicrosecondsPerCallback": 24.3158333333333,
+            "minimumMicrosecondsPerCallback": 22.3183333333333
+          }
+        },
+        "idle_no_cue": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 1.42833333333333,
+            "medianMicrosecondsPerCallback": 1.15416666666667,
+            "minimumMicrosecondsPerCallback": 1.02
+          },
+          "currentVersusFrozenMedianPercent": 1.09489051094893,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 1.435,
+            "medianMicrosecondsPerCallback": 1.14166666666667,
+            "minimumMicrosecondsPerCallback": 0.996666666666667
+          }
+        },
+        "melee": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 16.9116666666667,
+            "medianMicrosecondsPerCallback": 15.3466666666667,
+            "minimumMicrosecondsPerCallback": 14.1733333333333
+          },
+          "currentVersusFrozenMedianPercent": 4.92251595259801,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 17.2383333333333,
+            "medianMicrosecondsPerCallback": 14.6266666666667,
+            "minimumMicrosecondsPerCallback": 14.35
+          }
+        },
+        "ranged_hold": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 18.3016666666667,
+            "medianMicrosecondsPerCallback": 17.1241666666667,
+            "minimumMicrosecondsPerCallback": 14.6333333333333
+          },
+          "currentVersusFrozenMedianPercent": -32.6902289626257,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 26.9533333333333,
+            "medianMicrosecondsPerCallback": 25.4408333333333,
+            "minimumMicrosecondsPerCallback": 22.7483333333333
+          }
+        }
+      },
+      "callbackCallTrace": {
+        "casting": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "idle_bow": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        },
+        "idle_no_cue": {
+          "equipmentModelLookups": 0,
+          "handPropCalls": 0,
+          "handPropNodesVisited": 0,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 0
+        },
+        "melee": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "ranged_hold": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        }
+      },
+      "snapshots": {
+        "attack_primary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "frozenSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "trailPoints": 4
+        },
+        "attack_secondary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "frozenSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "trailPoints": 4
+        },
+        "cast": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "frozenSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "trailPoints": 0
+        },
+        "cast_aggressive": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "frozenSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "trailPoints": 0
+        },
+        "cast_channel": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "frozenSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "trailPoints": 0
+        },
+        "cast_channel_enter": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "frozenSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "trailPoints": 0
+        },
+        "cast_defensive": {
+          "actionSurfaceVertices": 2568,
+          "bowStringVertices": 0,
+          "currentSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "frozenSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "trailPoints": 0
+        },
+        "effects_disabled_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "frozenSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "trailPoints": 0
+        },
+        "equipment_bow_to_sword": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "frozenSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "trailPoints": 0
+        },
+        "heal": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "frozenSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "trailPoints": 0
+        },
+        "hidden_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "frozenSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "trailPoints": 0
+        },
+        "idle_bow": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "frozenSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "trailPoints": 0
+        },
+        "idle_no_cue": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "frozenSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "trailPoints": 0
+        },
+        "legacy_ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "frozenSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "trailPoints": 0
+        },
+        "melee_rewind": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "frozenSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "trailPoints": 1
+        },
+        "ranged_attack": {
+          "actionSurfaceVertices": 12,
+          "bowStringVertices": 12,
+          "currentSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "frozenSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "trailPoints": 0
+        },
+        "ranged_draw": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "frozenSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "trailPoints": 0
+        },
+        "ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "frozenSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "trailPoints": 0
+        },
+        "transition_cast_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "frozenSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "trailPoints": 0
+        },
+        "transition_ranged_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "frozenSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "trailPoints": 0
+        }
+      },
+      "dynamicBowSequence": null,
+      "rawManifestSha256": {
+        "checks.json": "71bcd47842e2e854ab2feb51abbaa80e54b48f6b8fdee6532e843054f6a0a48f",
+        "tests_performance_combat_pose_probe/combat-pose-probe.json": "b1fec90e70ee98138edbd9fc8d308cdcbbb7ec434ee145317b6e86c97cf433bd",
+        "tests_performance_combat_pose_probe/process.json": "71bcd47842e2e854ab2feb51abbaa80e54b48f6b8fdee6532e843054f6a0a48f",
+        "tests_performance_combat_pose_probe/stdout.log": "387690c82551ee136ee3d22fb10cfe1bbfddcc117a12ac29a430a2113b239614",
+        "tests_performance_combat_pose_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "tests_performance_combat_pose_probe/godot.log": "2504d050980de7ed97267a3bf481753c0101da1fd3d5f94ff63500b485ab8740"
+      }
+    },
+    {
+      "id": "combat-pose-bow-cache-production-gl-v2-gl_compatibility-20260919T143720417Z",
+      "phase": "production-windowed",
+      "renderer": "gl_compatibility",
+      "headless": false,
+      "reportStatus": "PASS",
+      "parityFailures": 0,
+      "candidateEnabled": false,
+      "sourceCommit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+      "scriptSha256": "a4791f788fe6ecdd163e43ed7f7684320d9d67235e166e2b7bd42df58c5669d1",
+      "rangerBowSha256": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+      "combatPresentationSha256": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+      "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+      "affinityMask": 15,
+      "requestedWorkers": 2,
+      "identityVerified": true,
+      "exitCode": 0,
+      "forcedTermination": false,
+      "scriptErrorsDetected": false,
+      "monitoringError": "",
+      "passed": true,
+      "summary": {
+        "casting": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 141.721666666667,
+            "medianMicrosecondsPerCallback": 121.458333333333,
+            "minimumMicrosecondsPerCallback": 110.381666666667
+          },
+          "currentVersusFrozenMedianPercent": -4.90885603559638,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 150.678333333333,
+            "medianMicrosecondsPerCallback": 127.728333333333,
+            "minimumMicrosecondsPerCallback": 109.376666666667
+          }
+        },
+        "idle_bow": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 18.785,
+            "medianMicrosecondsPerCallback": 17.6916666666667,
+            "minimumMicrosecondsPerCallback": 14.925
+          },
+          "currentVersusFrozenMedianPercent": -46.3211125158028,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 33.735,
+            "medianMicrosecondsPerCallback": 32.9583333333333,
+            "minimumMicrosecondsPerCallback": 27.78
+          }
+        },
+        "idle_no_cue": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 1.95833333333333,
+            "medianMicrosecondsPerCallback": 1.2575,
+            "minimumMicrosecondsPerCallback": 1.07666666666667
+          },
+          "currentVersusFrozenMedianPercent": 0.86898395721926,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 1.61166666666667,
+            "medianMicrosecondsPerCallback": 1.24666666666667,
+            "minimumMicrosecondsPerCallback": 1.085
+          }
+        },
+        "melee": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 27.17,
+            "medianMicrosecondsPerCallback": 21.1291666666667,
+            "minimumMicrosecondsPerCallback": 17.8533333333333
+          },
+          "currentVersusFrozenMedianPercent": 15.3076538269135,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 23.4,
+            "medianMicrosecondsPerCallback": 18.3241666666667,
+            "minimumMicrosecondsPerCallback": 17.3133333333333
+          }
+        },
+        "ranged_hold": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 18.2666666666667,
+            "medianMicrosecondsPerCallback": 17.2491666666667,
+            "minimumMicrosecondsPerCallback": 13.785
+          },
+          "currentVersusFrozenMedianPercent": -45.8991113434396,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 33.695,
+            "medianMicrosecondsPerCallback": 31.8833333333333,
+            "minimumMicrosecondsPerCallback": 26.7366666666667
+          }
+        }
+      },
+      "callbackCallTrace": {
+        "casting": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "idle_bow": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        },
+        "idle_no_cue": {
+          "equipmentModelLookups": 0,
+          "handPropCalls": 0,
+          "handPropNodesVisited": 0,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 0
+        },
+        "melee": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "ranged_hold": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        }
+      },
+      "snapshots": {
+        "attack_primary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "frozenSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "trailPoints": 4
+        },
+        "attack_secondary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "frozenSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "trailPoints": 4
+        },
+        "cast": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "frozenSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "trailPoints": 0
+        },
+        "cast_aggressive": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "frozenSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "trailPoints": 0
+        },
+        "cast_channel": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "frozenSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "trailPoints": 0
+        },
+        "cast_channel_enter": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "frozenSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "trailPoints": 0
+        },
+        "cast_defensive": {
+          "actionSurfaceVertices": 2568,
+          "bowStringVertices": 0,
+          "currentSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "frozenSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "trailPoints": 0
+        },
+        "effects_disabled_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "frozenSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "trailPoints": 0
+        },
+        "equipment_bow_to_sword": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "frozenSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "trailPoints": 0
+        },
+        "heal": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "frozenSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "trailPoints": 0
+        },
+        "hidden_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "frozenSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "trailPoints": 0
+        },
+        "idle_bow": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "frozenSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "trailPoints": 0
+        },
+        "idle_no_cue": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "frozenSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "trailPoints": 0
+        },
+        "legacy_ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "frozenSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "trailPoints": 0
+        },
+        "melee_rewind": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "frozenSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "trailPoints": 1
+        },
+        "ranged_attack": {
+          "actionSurfaceVertices": 12,
+          "bowStringVertices": 12,
+          "currentSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "frozenSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "trailPoints": 0
+        },
+        "ranged_draw": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "frozenSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "trailPoints": 0
+        },
+        "ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "frozenSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "trailPoints": 0
+        },
+        "transition_cast_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "frozenSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "trailPoints": 0
+        },
+        "transition_ranged_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "frozenSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "trailPoints": 0
+        }
+      },
+      "dynamicBowSequence": {
+        "finalStringVertices": 12,
+        "geometryRebuilds": -1,
+        "poseCalls": 11,
+        "steps": [
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "daed791305c36aee0f2e2b46ca196aef2dce76da6afa808dc8083a4462c2e01a",
+            "step": "idle_initial"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "1a441477f948402c05ae66057c6518ee7ef7069696660f3d887ff842eef208e2",
+            "step": "idle_world_motion"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "58b1616bc31d1a2b5e14bd85041e5dea97169b93ca86ddc8d7a4ff60baaf84a9",
+            "step": "hold_initial"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "58b1616bc31d1a2b5e14bd85041e5dea97169b93ca86ddc8d7a4ff60baaf84a9",
+            "step": "hold_repeat"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "86ab90e3c183d74d6020afbb5c32579e080341328b2cd8e60e43abef3736386b",
+            "step": "hold_drawpoint_change"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "f57ef4ac2d66c13070b274324bcea94864674ecad82f4c394fc9c517cfceba64",
+            "step": "release_0"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "a32cabf195caa83bfae4e6148dd82853d0bbb957929e3ec6b2ea14199ac3f5b7",
+            "step": "release_001"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "f43bb0c1ef5775337e978590a3aa71c92a84814383c7701651f099e6f7a811e9",
+            "step": "release_008"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "67f6caac23ef8cc605c7b2f3635ffec5128fdec947d023bcaf15de492103335e",
+            "step": "release_016"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "17b034e72d8c817dd1c0cfbf34364c2be6fd4600d9e8d76e8343c2e54d603bed",
+            "step": "return_idle"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "bcda38ba8d82c7160e19fc494a6733bdce4d03658ac5acbe3846cd47523288e7",
+            "step": "sunmane_asset_change"
+          }
+        ]
+      },
+      "rawManifestSha256": {
+        "checks.json": "4c9c22c8f289af3d7450c25a8b1ecd0d8a3da52cfc44df5e5befeb4dac2f959d",
+        "tests_performance_combat_pose_probe/combat-pose-probe.json": "b30effb452ec3026e1454b0c8d661d621b9acc389a345f5dc32b4c49a925f5b6",
+        "tests_performance_combat_pose_probe/process.json": "4c9c22c8f289af3d7450c25a8b1ecd0d8a3da52cfc44df5e5befeb4dac2f959d",
+        "tests_performance_combat_pose_probe/stdout.log": "0722e61c7c663e09f5fed1468285938191eb45732cb84c859516a09d42b3d9d8",
+        "tests_performance_combat_pose_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "tests_performance_combat_pose_probe/godot.log": "8d9f5a0ed83b21fad7304eb526ba498576d5479200ea4c2ce5f98f72b121b74f"
+      }
+    },
+    {
+      "id": "combat-pose-bow-cache-production-headless-gl_compatibility-20260919T143734463Z",
+      "phase": "production-headless",
+      "renderer": "gl_compatibility",
+      "headless": true,
+      "reportStatus": "PASS",
+      "parityFailures": 0,
+      "candidateEnabled": false,
+      "sourceCommit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+      "scriptSha256": "a4791f788fe6ecdd163e43ed7f7684320d9d67235e166e2b7bd42df58c5669d1",
+      "rangerBowSha256": "ed39b78ca6d1332ada53ef9417650ec4a91bc87524ae742f90d8f581c652cc6a",
+      "combatPresentationSha256": "8be910a4d83b86f8cb94aaeb5f02d5e6a5bdfb8b050d4607755719112ea552b6",
+      "executableSha256": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+      "affinityMask": 15,
+      "requestedWorkers": 2,
+      "identityVerified": true,
+      "exitCode": 0,
+      "forcedTermination": false,
+      "scriptErrorsDetected": false,
+      "monitoringError": "",
+      "passed": true,
+      "summary": {
+        "casting": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 132.423333333333,
+            "medianMicrosecondsPerCallback": 126.005833333333,
+            "minimumMicrosecondsPerCallback": 117.235
+          },
+          "currentVersusFrozenMedianPercent": 7.27628750416811,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 145.388333333333,
+            "medianMicrosecondsPerCallback": 117.459166666667,
+            "minimumMicrosecondsPerCallback": 104.386666666667
+          }
+        },
+        "idle_bow": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 18.1,
+            "medianMicrosecondsPerCallback": 15.625,
+            "minimumMicrosecondsPerCallback": 14.5616666666667
+          },
+          "currentVersusFrozenMedianPercent": -40.8218659260194,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 29.8183333333333,
+            "medianMicrosecondsPerCallback": 26.4033333333333,
+            "minimumMicrosecondsPerCallback": 22.85
+          }
+        },
+        "idle_no_cue": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 1.49833333333333,
+            "medianMicrosecondsPerCallback": 1.25,
+            "minimumMicrosecondsPerCallback": 1.05
+          },
+          "currentVersusFrozenMedianPercent": -8.03188228080932,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 1.54666666666667,
+            "medianMicrosecondsPerCallback": 1.35916666666667,
+            "minimumMicrosecondsPerCallback": 1.12333333333333
+          }
+        },
+        "melee": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 17.9,
+            "medianMicrosecondsPerCallback": 14.9358333333333,
+            "minimumMicrosecondsPerCallback": 14.465
+          },
+          "currentVersusFrozenMedianPercent": -11.3381152609448,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 17.8983333333333,
+            "medianMicrosecondsPerCallback": 16.8458333333333,
+            "minimumMicrosecondsPerCallback": 14.2983333333333
+          }
+        },
+        "ranged_hold": {
+          "current": {
+            "maximumMicrosecondsPerCallback": 17.4866666666667,
+            "medianMicrosecondsPerCallback": 14.94,
+            "minimumMicrosecondsPerCallback": 14.4016666666667
+          },
+          "currentVersusFrozenMedianPercent": -40.3036760788492,
+          "frozen": {
+            "maximumMicrosecondsPerCallback": 32.7066666666667,
+            "medianMicrosecondsPerCallback": 25.0266666666667,
+            "minimumMicrosecondsPerCallback": 22.2916666666667
+          }
+        }
+      },
+      "callbackCallTrace": {
+        "casting": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "idle_bow": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        },
+        "idle_no_cue": {
+          "equipmentModelLookups": 0,
+          "handPropCalls": 0,
+          "handPropNodesVisited": 0,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 0
+        },
+        "melee": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 2
+        },
+        "ranged_hold": {
+          "equipmentModelLookups": 2,
+          "handPropCalls": 1,
+          "handPropNodesVisited": 2,
+          "handPropVisibilityChanges": 0,
+          "skeletonGets": 3
+        }
+      },
+      "snapshots": {
+        "attack_primary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "frozenSha256": "dad854bb8473f000edfad2a13c26c595a0c5d5431f2ea3c2de653307dbf62584",
+          "trailPoints": 4
+        },
+        "attack_secondary": {
+          "actionSurfaceVertices": 18,
+          "bowStringVertices": 0,
+          "currentSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "frozenSha256": "889c6dcb4c6fb25b106eb9c431216d41a8cec2cb2ffa9f5786d6057e2f6f01d0",
+          "trailPoints": 4
+        },
+        "cast": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "frozenSha256": "7fa9d053e3d6bb5f8a041559367aed1c601042ffb0d04a6d7e841dbd9c2828ab",
+          "trailPoints": 0
+        },
+        "cast_aggressive": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "frozenSha256": "254d9a2378f5bdf11f09b40a61abb39db14529bb32c01a049d7c595ed2eb5396",
+          "trailPoints": 0
+        },
+        "cast_channel": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "frozenSha256": "7ce13bafeb3d8dd52e887da27a4da6bdd589043e426df64f0e9460be12086833",
+          "trailPoints": 0
+        },
+        "cast_channel_enter": {
+          "actionSurfaceVertices": 1164,
+          "bowStringVertices": 0,
+          "currentSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "frozenSha256": "bb3d4c964b177c26022bc6ea1f36f67745f87e7a80f456cede680d753bc7a6c3",
+          "trailPoints": 0
+        },
+        "cast_defensive": {
+          "actionSurfaceVertices": 2568,
+          "bowStringVertices": 0,
+          "currentSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "frozenSha256": "52e68313cac5c36c39c30aad453b272f889db49cee71c793c81c7afe748dfc21",
+          "trailPoints": 0
+        },
+        "effects_disabled_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "frozenSha256": "2dc0a546b3d38b2ad11d3174da91005a8cc9e5bd681c9c6df3f8816f79d9a04a",
+          "trailPoints": 0
+        },
+        "equipment_bow_to_sword": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "frozenSha256": "27dfb208420f08ac563056d590ab384e745c04c3f8601b07834dbf801a9491f5",
+          "trailPoints": 0
+        },
+        "heal": {
+          "actionSurfaceVertices": 2178,
+          "bowStringVertices": 0,
+          "currentSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "frozenSha256": "dd51f52a50a962212f1cace71b1dc87b29a3c09a7147d037080913237bfd1aad",
+          "trailPoints": 0
+        },
+        "hidden_casting": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "frozenSha256": "8330aae480657513fb095af36bd909264d0a28b56659ec8245fe529a928d0bbc",
+          "trailPoints": 0
+        },
+        "idle_bow": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "frozenSha256": "8496b78723adf9c85f7f43cde109f983b074b42c1ed78146d108c6419cc530cc",
+          "trailPoints": 0
+        },
+        "idle_no_cue": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "frozenSha256": "c091d8f47e7005cca61d1d8485a400b6b37d8800070e8c646ace3877fa46abd4",
+          "trailPoints": 0
+        },
+        "legacy_ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "frozenSha256": "b85d2a5df3466bc57670240f76b18b8d18451c5d53c7c3809539bb8a35ff9b0d",
+          "trailPoints": 0
+        },
+        "melee_rewind": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "frozenSha256": "b19f1d986a3a608d603f05c67cafd5e0f0592bc7b84bc5a1a073370ab55a031f",
+          "trailPoints": 1
+        },
+        "ranged_attack": {
+          "actionSurfaceVertices": 12,
+          "bowStringVertices": 12,
+          "currentSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "frozenSha256": "affe415f431e3548561034e0b0402685b3ba892f156e78b97ff909b2ecca5350",
+          "trailPoints": 0
+        },
+        "ranged_draw": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "frozenSha256": "f15592a0d284bf02e9f67c1a0dd5af202b541caebd950d0012b7074f33d16246",
+          "trailPoints": 0
+        },
+        "ranged_hold": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "frozenSha256": "d075873562be0232d4e1d677eca7d7fc54d5fe7792c2efd960338d0d51e5ecc3",
+          "trailPoints": 0
+        },
+        "transition_cast_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 0,
+          "currentSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "frozenSha256": "56e5ee3bc8606782c0d816a66db0a0aab0e8b0ff6b9211debab8cfe06af5c3ba",
+          "trailPoints": 0
+        },
+        "transition_ranged_to_idle": {
+          "actionSurfaceVertices": 0,
+          "bowStringVertices": 12,
+          "currentSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "frozenSha256": "73c948c8b8c44d0af96d212faadd034a7a716f8edcfa51e890330485b97fe6bd",
+          "trailPoints": 0
+        }
+      },
+      "dynamicBowSequence": {
+        "finalStringVertices": 12,
+        "geometryRebuilds": -1,
+        "poseCalls": 11,
+        "steps": [
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "daed791305c36aee0f2e2b46ca196aef2dce76da6afa808dc8083a4462c2e01a",
+            "step": "idle_initial"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "1a441477f948402c05ae66057c6518ee7ef7069696660f3d887ff842eef208e2",
+            "step": "idle_world_motion"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "58b1616bc31d1a2b5e14bd85041e5dea97169b93ca86ddc8d7a4ff60baaf84a9",
+            "step": "hold_initial"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "58b1616bc31d1a2b5e14bd85041e5dea97169b93ca86ddc8d7a4ff60baaf84a9",
+            "step": "hold_repeat"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "86ab90e3c183d74d6020afbb5c32579e080341328b2cd8e60e43abef3736386b",
+            "step": "hold_drawpoint_change"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "f57ef4ac2d66c13070b274324bcea94864674ecad82f4c394fc9c517cfceba64",
+            "step": "release_0"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "a32cabf195caa83bfae4e6148dd82853d0bbb957929e3ec6b2ea14199ac3f5b7",
+            "step": "release_001"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "f43bb0c1ef5775337e978590a3aa71c92a84814383c7701651f099e6f7a811e9",
+            "step": "release_008"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "67f6caac23ef8cc605c7b2f3635ffec5128fdec947d023bcaf15de492103335e",
+            "step": "release_016"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "17b034e72d8c817dd1c0cfbf34364c2be6fd4600d9e8d76e8343c2e54d603bed",
+            "step": "return_idle"
+          },
+          {
+            "candidateGeometryRebuilds": -1,
+            "snapshotSha256": "bcda38ba8d82c7160e19fc494a6733bdce4d03658ac5acbe3846cd47523288e7",
+            "step": "sunmane_asset_change"
+          }
+        ]
+      },
+      "rawManifestSha256": {
+        "checks.json": "8b4bb0d04b6a9027c5acb16365e8885a9794ef15a37764a536ae84e7aac8e843",
+        "tests_performance_combat_pose_probe/combat-pose-probe.json": "cd9f5c65b6c8d800d3a0bc4366963818d71b8267cbff111eb2883ff8508295c3",
+        "tests_performance_combat_pose_probe/process.json": "ad5c8905e2a23b6953ba2518b6c6e5e8ee04f3b557604836488930ccea563856",
+        "tests_performance_combat_pose_probe/stdout.log": "befa2ad3e39a6e3ce28820d329f238140e7824723261e3285d2d245b3592e101",
+        "tests_performance_combat_pose_probe/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+        "tests_performance_combat_pose_probe/godot.log": "7573eb81f3495c2d85eca851ffa6c7f0d2596c2dd7d4d779a529ab3553eae865"
+      }
+    }
+  ],
+  "regression": {
+    "session": "combat-pose-bow-cache-production-headless-gl_compatibility-20260919T143734463Z",
+    "script": "res://tests/test_combat_presentation.gd",
+    "scriptSha256": "833cb32d2be8fc7074563f93928e74721913963f020cb09633dfa71a746886aa",
+    "sourceCommit": "cbe44368b8f4a96e8cda26b0f76f6b4df00243e4",
+    "passed": true,
+    "exitCode": 0,
+    "identityVerified": true,
+    "affinityMask": 15,
+    "forcedTermination": false,
+    "scriptErrorsDetected": false,
+    "rawManifestSha256": {
+      "tests_test_combat_presentation/process.json": "db9fb0f900532331a6fccdda323390955499b190cb5221bae9e673b64939d847",
+      "tests_test_combat_presentation/stdout.log": "d9e9939b5adfe4391b72305bec02d9c0f4c16b761a7d216eb8414e2fa67a1ecd",
+      "tests_test_combat_presentation/stderr.log": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+      "tests_test_combat_presentation/godot.log": "e25ae9af6f12ce6625818eae9b2e1c653a94177545b912e16c7046a5ecccfa32"
+    }
+  },
+  "rejectedAttempts": [
+    {
+      "labels": [
+        "combat-pose-baseline-967744-gl",
+        "combat-pose-baseline-967744-gl-v2"
+      ],
+      "reason": "probe parse/API errors; excluded"
+    },
+    {
+      "labels": [
+        "combat-pose-baseline-967744-gl-v3",
+        "combat-pose-baseline-967744-gl-v4"
+      ],
+      "reason": "invalid post-timing state comparison and diagnostic iteration; excluded"
+    },
+    {
+      "labels": [
+        "combat-pose-baseline-967744-gl-v5",
+        "combat-pose-baseline-967744-gl-v6",
+        "combat-pose-baseline-967744-gl-v7"
+      ],
+      "reason": "snapshot included autogenerated node names; excluded"
+    },
+    {
+      "labels": [
+        "combat-pose-bow-cache-production-gl"
+      ],
+      "reason": "test reset cleared retained string without invalidating cache; excluded"
+    }
+  ],
+  "limitations": [
+    "Focused callback timings repeatedly invoke update_pose at a stable sampled animation time; they include called engine APIs and mesh submission but exclude skeleton evaluation, signal dispatch, GPU work, and whole-frame pacing.",
+    "The retained fast path applies only when exact local draw point and flex are unchanged. Advancing draw or recoil poses rebuild geometry.",
+    "Windowed exact mesh and pose parity was established with Compatibility rendering. Forward+ and whole-scene frame-rate effects were not measured in this focused bundle.",
+    "Unchanged melee, casting, and unequipped-idle timing differences are measurement noise and are not attributed to this bow-only patch."
+  ]
+}

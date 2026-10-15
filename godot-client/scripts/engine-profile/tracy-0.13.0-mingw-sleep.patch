@@ -1,0 +1,150 @@
+--- a/public/client/TracyProfiler.cpp
++++ b/public/client/TracyProfiler.cpp
+@@ -139,6 +139,15 @@
+ 
+ namespace tracy
+ {
++
++static inline void ProfilerSleepMilliseconds( uint32_t milliseconds )
++{
++#ifdef _WIN32
++    Sleep( milliseconds );
++#else
++    std::this_thread::sleep_for( std::chrono::milliseconds( milliseconds ) );
++#endif
++}
+ 
+ #ifdef __ANDROID__
+ // Implementation helpers of EnsureReadable(address).
+@@ -910,9 +919,9 @@
+         TracyLfqCommit;
+     }
+ 
+-    std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
++    ProfilerSleepMilliseconds( 500 );
+     GetProfiler().RequestShutdown();
+-    while( !GetProfiler().HasShutdownFinished() ) { std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) ); };
++    while( !GetProfiler().HasShutdownFinished() ) { ProfilerSleepMilliseconds( 10 ); };
+ 
+     return EXCEPTION_CONTINUE_SEARCH;
+ }
+@@ -1163,9 +1172,9 @@
+     TracyLfqPrepare( QueueType::Crash );
+     TracyLfqCommit;
+ 
+-    std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
++    ProfilerSleepMilliseconds( 500 );
+     GetProfiler().RequestShutdown();
+-    while( !GetProfiler().HasShutdownFinished() ) { std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) ); };
++    while( !GetProfiler().HasShutdownFinished() ) { ProfilerSleepMilliseconds( 10 ); };
+ 
+     abort();
+ }
+@@ -1188,7 +1197,7 @@
+     {
+         s_sysTraceThread = (Thread*)tracy_malloc( sizeof( Thread ) );
+         new(s_sysTraceThread) Thread( SysTraceWorker, nullptr );
+-        std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
++        ProfilerSleepMilliseconds( 1 );
+     }
+ }
+ 
+@@ -1737,7 +1746,7 @@
+     const auto broadcastPort = 8086;
+ #endif
+ 
+-    while( m_timeBegin.load( std::memory_order_relaxed ) == 0 ) std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
++    while( m_timeBegin.load( std::memory_order_relaxed ) == 0 ) ProfilerSleepMilliseconds( 10 );
+ 
+ #ifdef TRACY_USE_RPMALLOC
+     rpmalloc_thread_initialize();
+@@ -1856,7 +1865,7 @@
+             }
+ 
+             ClearQueues( token );
+-            std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
++            ProfilerSleepMilliseconds( 10 );
+         }
+     }
+ 
+@@ -2068,7 +2077,7 @@
+                 else if( !m_sock->HasData() )
+                 {
+                     keepAlive++;
+-                    std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
++                    ProfilerSleepMilliseconds( 10 );
+                 }
+             }
+             else
+@@ -2241,7 +2250,7 @@
+ {
+     ThreadExitHandler threadExitHandler;
+     SetThreadName( "Tracy DXT1" );
+-    while( m_timeBegin.load( std::memory_order_relaxed ) == 0 ) std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
++    while( m_timeBegin.load( std::memory_order_relaxed ) == 0 ) ProfilerSleepMilliseconds( 10 );
+ 
+ #ifdef TRACY_USE_RPMALLOC
+     rpmalloc_thread_initialize();
+@@ -2297,7 +2306,7 @@
+         }
+         else
+         {
+-            std::this_thread::sleep_for( std::chrono::milliseconds( 20 ) );
++            ProfilerSleepMilliseconds( 20 );
+         }
+ 
+         if( shouldExit )
+@@ -3611,7 +3620,7 @@
+     InitRpmalloc();
+ #endif
+     InitCallstack();
+-    while( m_timeBegin.load( std::memory_order_relaxed ) == 0 ) std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
++    while( m_timeBegin.load( std::memory_order_relaxed ) == 0 ) ProfilerSleepMilliseconds( 10 );
+ 
+     for(;;)
+     {
+@@ -3625,7 +3634,7 @@
+                 return;
+             }
+             while( m_symbolQueue.front() ) m_symbolQueue.pop();
+-            std::this_thread::sleep_for( std::chrono::milliseconds( 20 ) );
++            ProfilerSleepMilliseconds( 20 );
+             m_symbolsBusy.store( false, std::memory_order_release );
+             continue;
+         }
+@@ -3643,7 +3652,7 @@
+                 s_symbolThreadGone.store( true, std::memory_order_release );
+                 return;
+             }
+-            std::this_thread::sleep_for( std::chrono::milliseconds( 20 ) );
++            ProfilerSleepMilliseconds( 20 );
+         }
+     }
+ }
+@@ -3801,7 +3810,7 @@
+                 {
+                     if( !CommitData() ) return;
+                 }
+-                std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
++                ProfilerSleepMilliseconds( 10 );
+             }
+         }
+     }
+@@ -3830,7 +3839,7 @@
+             {
+                 if( !CommitData() ) return;
+             }
+-            std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
++            ProfilerSleepMilliseconds( 10 );
+         }
+     }
+ }
+@@ -3852,7 +3861,7 @@
+         const auto t0 = std::chrono::high_resolution_clock::now();
+         const auto r0 = GetTime();
+         std::atomic_signal_fence( std::memory_order_acq_rel );
+-        std::this_thread::sleep_for( std::chrono::milliseconds( 200 ) );
++        ProfilerSleepMilliseconds( 200 );
+         std::atomic_signal_fence( std::memory_order_acq_rel );
+         const auto t1 = std::chrono::high_resolution_clock::now();
+         const auto r1 = GetTime();

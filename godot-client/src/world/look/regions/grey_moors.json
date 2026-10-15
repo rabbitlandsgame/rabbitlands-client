@@ -1,0 +1,27 @@
+{
+	"id": "grey_moors",
+	"schema": 1,
+	"ground": {
+		"path_luma": 0.13,
+		"path_luma_forward": 0.15,
+		"path_tint": [0.76, 0.64, 0.5],
+		"meadow_value_forward": 0.5
+	},
+	"grass": {
+		"root": [0.18, 0.17, 0.09],
+		"tip": [0.46, 0.43, 0.27],
+		"value_forward": 1.3,
+		"layers": {
+			"moor-peat": 0.25
+		}
+	},
+	"foliage": {
+		"shrub_words": ["gorse"],
+		"tree_words": ["snag"]
+	},
+	"notes": {
+		"ground": "The moor's verge (peat, heather and moor grass) is dark: luminance about 80 beside the roads in Forward+, against about 105 for Four Gates' grass. At the renderer default (path_luma 0.27, PATH_TINT) its roads were cream strips 2.08 times the moor beside them (gm_road). At 0.15 they measure 1.65 (gm_road), 1.63 (Amberwood lane) and 1.41 (gm_snag). The value and tint are Whitehorn's (whitehorn_range.json draft 3: 0.15 in Forward+, 0.13 in compat, 0.76/0.64/0.5), because the Whitehorn lane runs on across the border unchanged: a greyer moor tint (0.78/0.71/0.61, chroma 0.8) drew the border as a straight grey-to-tan line across that road (gm_border_wh), and matching removes it (both sides luminance 145-153, saturation 0.30-0.33). If Whitehorn's road changes, change this with it. The Amberwood lane still steps where it crosses (Amberwood's 0.1 is darker: about 141 to 125), and so does the Westhaven lane (Westhaven's 0.24 gold is brighter: about 150 to 170). Grey Moors cannot match all three; see the migration report. The compat value (0.13) is scaled from the Forward+ one and was not rendered. No verge trims: the moor's biome ground runs on into Whitehorn's and Amberwood's, so any verge trim would draw their borders as seams, and the defaults already keep it an olive-brown moor. The hub's dark red-brown roads are not this file: the 39 'Grass' ground regions (tint 0.72/0.92/0.66) pass LookGround.is_paving, so the roads inside their bounds are painted as ROAD_UNDER_PAVING (see the migration report). Since the integration region trims now fade into the neighbour's over LookProfile.BORDER_FEATHER_METRES either side of the border (LookBorders), so a trim no longer draws the border as a line. The Whitehorn match is no longer needed to hide the lane's seam, but the values suit the moor and are kept. The hub's roads were dark red-brown and its moor-grass patches lime and bare because the pale green Grass regions (#b8eba8) were taken for paving; they are grass now (LookProfile.STONE_TINT_LEAD, GRASS_PATCH_GREEN). meadow_value_forward 0.62 (polish): the moor-grass patches (#b8eba8, 39 round the hub) are meadows now (LookGround.is_meadow), drawn solid in their own colour; at the default value 1 their pale green came out (156, 150, 106), brighter than the gravel roads through them (gm_hub path/ground 0.98). At 0.62 they sit under the roads as the moor's lighter grass. At 0.62 gm_hub's path/ground was 1.15 (target 1.25 or more); 0.5.",
+		"grass": "Dry moor grass: straw and olive, root to tip, rather than the default's green. The moor's ground ranges from about 80 (peat, heather) to about 115 (the lighter moor grass near Westhaven), so the palette's root and tip sit close together: with a dark root (0.1/0.12/0.06) the tufts on the lighter moor were dark speckle (0.74-0.81 of the ground under them, 18 % of gm_border_wv's field dark), and with a bright tip at value 1.45 they were pale straw speckle on the peat (1.33, gm_border_aw). Polish (2026-09-30): the peat (moor-peat-heather, 0.6 by the generic 'heather') carried beds at even density across the open moor, speckle rather than framing (gm_gorse hf95 16 to 47): weighed 0.25 here it grows beds only where the moor grass is, and the tip is pulled towards the peat's value (tip [0.46, 0.43, 0.27], value_forward 1.3).",
+		"foliage": "kit-gorse-bush (9 in the region) and kit-raven-snag (2) are one-surface kit pieces the generic words do not name. Gorse is a shrub (crown from the ground up). It stays tamed: its atlas is golden (hue 42, saturation 0.57, value 0.6), and left untamed AgX paled it to cream puffs, where the tame keeps it golden. The snag is a dead tree (grey, saturation 0.09), painted as a kit tree so it takes the top light and wind the other trees do. grey_dead_bark (Landmark_DeadTree, HangedOak), bark_dark trunks and grey_wisp (0.3 m wisp props) are not crowns and are left alone."
+	}
+}

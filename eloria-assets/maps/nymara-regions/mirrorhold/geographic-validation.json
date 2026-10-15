@@ -1,0 +1,97 @@
+{
+  "summary": {
+    "walkSurfaceNodes": 214,
+    "walkSurfaceTriangles": 1504077,
+    "tilesSampled": 85420,
+    "actorTileOffset": [
+      0.5,
+      0.5
+    ],
+    "walkableServerTiles": 85420,
+    "groundingMisses": 0,
+    "groundingMissFraction": 0.0,
+    "surfaceDiscontinuities": 57,
+    "spawnPoints": 3
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "warning",
+      "code": "GROUNDING_DISCONTINUITY",
+      "message": "57 adjacent tile pairs differ by more than 6 m of surface height (expected at cliffs and under bridges)",
+      "detail": [
+        [
+          206,
+          269,
+          15.16
+        ],
+        [
+          206,
+          270,
+          15.16
+        ],
+        [
+          206,
+          271,
+          15.16
+        ],
+        [
+          206,
+          272,
+          15.16
+        ],
+        [
+          206,
+          273,
+          15.16
+        ],
+        [
+          206,
+          274,
+          15.16
+        ],
+        [
+          206,
+          275,
+          15.16
+        ],
+        [
+          206,
+          276,
+          15.16
+        ],
+        [
+          206,
+          277,
+          15.16
+        ],
+        [
+          206,
+          278,
+          15.16
+        ],
+        [
+          206,
+          279,
+          15.16
+        ],
+        [
+          206,
+          280,
+          15.16
+        ]
+      ]
+    },
+    {
+      "severity": "warning",
+      "code": "LANDMARK_FLOATING",
+      "message": "1 landmarks sit more than 3 m above the walk surface",
+      "detail": [
+        {
+          "id": "orrery",
+          "gap": 9.63
+        }
+      ]
+    }
+  ]
+}

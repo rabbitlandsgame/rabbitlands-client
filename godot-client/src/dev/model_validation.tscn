@@ -1,0 +1,72 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource path="res://src/dev/model_validation.gd" type="Script" id="1"]
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.12, 0.16, 0.22, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.65, 0.72, 0.82, 1)
+ambient_light_energy = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Material_floor"]
+albedo_color = Color(0.18, 0.2, 0.23, 1)
+roughness = 0.9
+
+[sub_resource type="PlaneMesh" id="Plane_floor"]
+material = SubResource("Material_floor")
+size = Vector2(12, 12)
+
+[node name="ModelValidation" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("Plane_floor")
+
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 1.8, 5.5)
+current = true
+
+[node name="LightPivot" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Sun" type="DirectionalLight3D" parent="LightPivot"]
+rotation_degrees = Vector3(-50, -35, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="PanelContainer" parent="UI"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 510.0
+offset_bottom = 210.0
+
+[node name="Rows" type="VBoxContainer" parent="UI/Panel"]
+
+[node name="Status" type="Label" parent="UI/Panel/Rows"]
+unique_name_in_owner = true
+text = "Loading…"
+
+[node name="Clip" type="Label" parent="UI/Panel/Rows"]
+unique_name_in_owner = true
+text = "Clip"
+
+[node name="Buttons" type="HBoxContainer" parent="UI/Panel/Rows"]
+
+[node name="Previous" type="Button" parent="UI/Panel/Rows/Buttons"]
+text = "Previous"
+
+[node name="Next" type="Button" parent="UI/Panel/Rows/Buttons"]
+text = "Next"
+
+[node name="Model" type="Button" parent="UI/Panel/Rows/Buttons"]
+text = "Next Model"
+
+[connection signal="pressed" from="UI/Panel/Rows/Buttons/Previous" to="." method="_on_previous_pressed"]
+[connection signal="pressed" from="UI/Panel/Rows/Buttons/Next" to="." method="_on_next_pressed"]
+[connection signal="pressed" from="UI/Panel/Rows/Buttons/Model" to="." method="_on_model_pressed"]

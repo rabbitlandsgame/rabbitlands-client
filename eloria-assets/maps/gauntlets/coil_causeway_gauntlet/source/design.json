@@ -1,0 +1,1696 @@
+{
+ "_note": "Rules of the causeway - everything a run of coil_causeway_gauntlet needs except geometry (source/layout.json). Written by work-output/gauntlet-v2-design/regions/tools/author_routes.py from the approved concept: three bands by the run's level, five waves of two variants each and a court. Counts are for a party of four; the server multiplies by partyScale (leaders and bosses never multiply).",
+ "schema": "eloria-trail-design-v1",
+ "id": "coil_causeway_gauntlet",
+ "route": "coil_causeway",
+ "name": "The Coil Causeway",
+ "short": "coilcauseway",
+ "region": "ssarathi_ruins",
+ "flavour": "Stone causeways coil island to island across the temple lagoon: the water gate, the lily hatchery, the serpent colonnade, the two stone mouths and the sun stair, and last the step pyramid at the centre of the coil, where the Sunscale Sovereign is fed.",
+ "copies": 3,
+ "timeLimitSeconds": 2700,
+ "cooldownHours": 6,
+ "minPlayers": 1,
+ "maxPlayers": 6,
+ "wipeSeconds": 90,
+ "broker": {
+  "npc": "Rellan",
+  "map": "landfall"
+ },
+ "partyScale": {
+  "1": 0.6,
+  "2": 0.75,
+  "3": 0.9,
+  "4": 1.0,
+  "5": 1.15,
+  "6": 1.3
+ },
+ "pulse": {
+  "releaseAliveFraction": 0.34,
+  "releaseSeconds": 45
+ },
+ "leash": {
+  "marginMetres": 10,
+  "evadeSeconds": 8
+ },
+ "checkpointDelaySeconds": 10,
+ "shapes": {
+  "pack": 1.0,
+  "swarm": 0.8,
+  "heavies": 1.25,
+  "leader": 1.25
+ },
+ "mutators": [
+  [
+   "none",
+   5
+  ],
+  [
+   "frenzy",
+   2
+  ],
+  [
+   "hunted",
+   2
+  ],
+  [
+   "bounty",
+   1
+  ],
+  [
+   "swift",
+   1
+  ]
+ ],
+ "cache": [
+  [
+   "Potion of Great Healing",
+   "3-5",
+   "1"
+  ],
+  [
+   "Gold Coins",
+   "150-400",
+   "1"
+  ],
+  [
+   "Bones",
+   "6-12",
+   "1"
+  ]
+ ],
+ "cacheRare": [],
+ "bonus": {
+  "section": "lotus-steps",
+  "note": "one harvest node of an existing herb (the server tool's bonus resource)"
+ },
+ "lore": [
+  {
+   "at": "trailhead",
+   "title": "Rules of the causeway",
+   "text": "One party at a time. The brood comes to you; the causeway behind stays quiet once you have cleared it. Fall and you rise at the last fire you passed. The waystones count you out."
+  },
+  {
+   "at": "lotus-steps",
+   "title": "The lotus steps",
+   "text": "The priests came down these steps at dawn to cut lotus for the court. The lotus still grows."
+  }
+ ],
+ "bands": [
+  {
+   "id": "shallows",
+   "label": "The Shallows",
+   "minLevel": 1,
+   "maxLevel": 24,
+   "story": "What lives in the lagoon's shallows: lizardfolk, crabs and the snakes in the reeds.",
+   "roster": [
+    "swamp_heron",
+    "giant_leech",
+    "delta_mud_crab",
+    "iguana",
+    "cobra",
+    "river_lizardfolk"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "heron",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "swamp_heron",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "swamp_heron",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "swamp_heron",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "giant-leech",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "mud-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "delta_mud_crab",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "delta_mud_crab",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "delta_mud_crab",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "iguana",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "iguana",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "iguana",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "iguana",
+          11,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "iguana",
+          11,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "cobra",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "cobra",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "cobra",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "cobra",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "cobra",
+          12,
+          "swarm"
+         ],
+         [
+          "river_lizardfolk",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "heron",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "swamp_heron",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "swamp_heron",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "swamp_heron",
+          12,
+          "pack"
+         ],
+         [
+          "river_lizardfolk",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "giant-leech",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "giant_leech",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mud-crab",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "delta_mud_crab",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "delta_mud_crab",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "delta_mud_crab",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "iguana",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "iguana",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "iguana",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "iguana",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "iguana",
+          14,
+          "swarm"
+         ],
+         [
+          "river_lizardfolk",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "cobra",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "cobra",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "cobra",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "cobra",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "cobra",
+          14,
+          "swarm"
+         ],
+         [
+          "river_lizardfolk",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "inline",
+    "creature": "saltmarsh_crocodile",
+    "name": "the Broodmother",
+    "health": 6.0,
+    "strength": [
+     0.9,
+     1.4
+    ],
+    "adds": [
+     [
+      "swamp_heron",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "brood",
+   "label": "The Brood",
+   "minLevel": 20,
+   "maxLevel": 44,
+   "story": "The Sovereign's brood: crocodiles, basilisks and the reed-masked hunters who feed them.",
+   "roster": [
+    "viridian_basilisk",
+    "saltmarsh_crocodile",
+    "giant_praying_mantis",
+    "reed_mask_hunter",
+    "mire_kelpie",
+    "merfolk"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "viridian-basilisk",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "viridian_basilisk",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "viridian_basilisk",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "viridian_basilisk",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "saltmarsh-crocodile",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "saltmarsh_crocodile",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "saltmarsh_crocodile",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "saltmarsh_crocodile",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "praying-mantis",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "giant_praying_mantis",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "giant_praying_mantis",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "giant_praying_mantis",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "reed-mask-hunter",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "reed_mask_hunter",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "reed_mask_hunter",
+          12,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "reed_mask_hunter",
+          11,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "mire-kelpie",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          12,
+          "pack"
+         ],
+         [
+          "merfolk",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "viridian-basilisk",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "viridian_basilisk",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "viridian_basilisk",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "viridian_basilisk",
+          12,
+          "pack"
+         ],
+         [
+          "merfolk",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "saltmarsh-crocodile",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "saltmarsh_crocodile",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "saltmarsh_crocodile",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "saltmarsh_crocodile",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "praying-mantis",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "giant_praying_mantis",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "giant_praying_mantis",
+          14,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "giant_praying_mantis",
+          13,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "reed-mask-hunter",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "reed_mask_hunter",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "reed_mask_hunter",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "reed_mask_hunter",
+          15,
+          "pack"
+         ],
+         [
+          "merfolk",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mire-kelpie",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "mire_kelpie",
+          15,
+          "pack"
+         ],
+         [
+          "merfolk",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "sunscale_sovereign",
+    "existing": true,
+    "name": "Sunscale Sovereign",
+    "adds": [
+     [
+      "viridian_basilisk",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "id": "temple",
+   "label": "The Temple",
+   "minLevel": 40,
+   "maxLevel": 0,
+   "story": "The temple's own guardians, and the old dead the temple keeps.",
+   "roster": [
+    "animated_sword",
+    "mummy",
+    "void_tentacle_construct",
+    "emerald_canopy_dragon",
+    "arachne"
+   ],
+   "waves": {
+    "w1": [
+     {
+      "id": "animated-sword",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          10,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          10,
+          "swarm"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mummy",
+      "pulses": [
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south"
+        ],
+        "groups": [
+         [
+          "mummy",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "mummy",
+          11,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w1-northwest",
+         "w1-south",
+         "w1-northeast"
+        ],
+        "groups": [
+         [
+          "mummy",
+          10,
+          "pack"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w2": [
+     {
+      "id": "void-construct",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          7,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          7,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          7,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "emerald-dragon",
+      "pulses": [
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north"
+        ],
+        "groups": [
+         [
+          "emerald_canopy_dragon",
+          2,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "emerald_canopy_dragon",
+          2,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w2-southeast",
+         "w2-north",
+         "w2-southwest"
+        ],
+        "groups": [
+         [
+          "emerald_canopy_dragon",
+          2,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w3": [
+     {
+      "id": "animated-sword",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          12,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          12,
+          "swarm"
+         ],
+         [
+          "arachne",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mummy",
+      "pulses": [
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west"
+        ],
+        "groups": [
+         [
+          "mummy",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "mummy",
+          13,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w3-east",
+         "w3-west",
+         "w3-northeast"
+        ],
+        "groups": [
+         [
+          "mummy",
+          12,
+          "pack"
+         ],
+         [
+          "arachne",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w4": [
+     {
+      "id": "void-construct",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          8,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          8,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "void_tentacle_construct",
+          8,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "emerald-dragon",
+      "pulses": [
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south"
+        ],
+        "groups": [
+         [
+          "emerald_canopy_dragon",
+          2,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "emerald_canopy_dragon",
+          2,
+          "heavies"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w4-north",
+         "w4-south",
+         "w4-east"
+        ],
+        "groups": [
+         [
+          "emerald_canopy_dragon",
+          2,
+          "heavies"
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "w5": [
+     {
+      "id": "animated-sword",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          14,
+          "swarm"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "animated_sword",
+          14,
+          "swarm"
+         ],
+         [
+          "arachne",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "mummy",
+      "pulses": [
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north"
+        ],
+        "groups": [
+         [
+          "mummy",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "mummy",
+          16,
+          "pack"
+         ]
+        ]
+       },
+       {
+        "mouths": [
+         "w5-southwest",
+         "w5-north",
+         "w5-southeast"
+        ],
+        "groups": [
+         [
+          "mummy",
+          15,
+          "pack"
+         ],
+         [
+          "arachne",
+          1,
+          "leader"
+         ]
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "boss": {
+    "kind": "fight",
+    "creature": "sunscale_sovereign",
+    "existing": true,
+    "name": "Sunscale Sovereign",
+    "adds": [
+     [
+      "animated_sword",
+      6
+     ]
+    ]
+   }
+  }
+ ]
+}

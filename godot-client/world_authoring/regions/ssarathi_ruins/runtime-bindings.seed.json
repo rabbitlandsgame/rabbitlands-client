@@ -1,0 +1,4261 @@
+{
+  "schema": "eloria-runtime-binding-seed-v1",
+  "regionId": "ssarathi_ruins",
+  "provenance": {
+    "sourceReportSha256": "27aadab44f53f8db304652b67935276af0456f33cca8dc4dd260c201aba10d0a",
+    "profileFiles": [
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/harvesting.txt",
+        "sha256": "b8ad7d7e1bc89c47635f4ec772fe712a4be460de9c1fb4b3621fea2a02ef17c3",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/instances/ssarathi_gauntlet_high.def",
+        "sha256": "8c072f94d95139459c5d497c9bc2870cbfff0bfb945c10561d90a2a24e513b9e",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/instances/ssarathi_gauntlet_mid.def",
+        "sha256": "86bbed379f46291e1dbaf8241c0884215a0c89dcd9991aec8bf8b083dcfa188e",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/interactives.txt",
+        "sha256": "8b9ec53356bc91886b4b6ed8f3c30b3f628cd5955b0f3197dc24115efee5f8d8",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/maps.txt",
+        "sha256": "874627beb1c09d24ea6761924e59bb9bd569848bf92658b70083ddbf3cd0c0c9",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/npcs.txt",
+        "sha256": "2a70b78fe7c48a8a953c94cb5ffe0d331bd404a9f07fd2d913a082713d973f21",
+        "role": "immutable runtime identity profile"
+      },
+      {
+        "path": "eloria-assets/maps/nymara-regions/_continent/legacy-server-profile/config/eloria/spawns.txt",
+        "sha256": "cd778aa02461b74ffe00391a1d806a001eeb10aa9739a52ee87eb8f4ce69c899",
+        "role": "immutable runtime identity profile"
+      }
+    ]
+  },
+  "counts": {
+    "bindings": 147,
+    "runtimePoints": 136,
+    "existingMarkerBindings": 10
+  },
+  "bindings": [
+    {
+      "id": "[\"config/eloria/instances/ssarathi_gauntlet_high.def\",\"ssarathi_gauntlet_high\",\"exit_x\",\"exit_y\",\"ssarathi_ruins\"]",
+      "source": {
+        "path": "config/eloria/instances/ssarathi_gauntlet_high.def",
+        "recordId": "ssarathi_gauntlet_high",
+        "line": 19,
+        "fields": [
+          "exit_x",
+          "exit_y"
+        ],
+        "oldTile": [
+          198,
+          81
+        ],
+        "amendmentReport": {
+          "path": "godot-client/world_authoring/instance-exit-binding-amendment-v1.json",
+          "sha256": "9cb75b254e371afb89a8a59fd32a5b08a8d7f32af32a560dec5aa7f9c0e55bbd"
+        }
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-instance-return-ssarathi_ruins"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        4.5,
+        2.7594932317733765,
+        156.5
+      ]
+    },
+    {
+      "id": "[\"config/eloria/instances/ssarathi_gauntlet_mid.def\",\"ssarathi_gauntlet_mid\",\"exit_x\",\"exit_y\",\"ssarathi_ruins\"]",
+      "source": {
+        "path": "config/eloria/instances/ssarathi_gauntlet_mid.def",
+        "recordId": "ssarathi_gauntlet_mid",
+        "line": 19,
+        "fields": [
+          "exit_x",
+          "exit_y"
+        ],
+        "oldTile": [
+          198,
+          81
+        ],
+        "amendmentReport": {
+          "path": "godot-client/world_authoring/instance-exit-binding-amendment-v1.json",
+          "sha256": "9cb75b254e371afb89a8a59fd32a5b08a8d7f32af32a560dec5aa7f9c0e55bbd"
+        }
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-instance-return-ssarathi_ruins"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        4.5,
+        2.7594932317733765,
+        156.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:273:36@258:133",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 273,
+        "oldTile": [
+          258,
+          133
+        ],
+        "recordId": "36"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-273-36-258-133"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        65.5,
+        2.25,
+        105.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:274:37@273:138",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 274,
+        "oldTile": [
+          273,
+          138
+        ],
+        "recordId": "37"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-274-37-273-138"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        80.5,
+        2.30809211731,
+        100.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:275:38@278:128",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 275,
+        "oldTile": [
+          278,
+          128
+        ],
+        "recordId": "38"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-275-38-278-128"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        85.5,
+        2.28848671913,
+        110.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:276:39@259:127",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 276,
+        "oldTile": [
+          259,
+          127
+        ],
+        "recordId": "39"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-276-39-259-127"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        66.5,
+        2.25,
+        111.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:277:40@314:47",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 277,
+        "oldTile": [
+          314,
+          47
+        ],
+        "recordId": "40"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-277-40-314-47"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        121.5,
+        0.5124579072,
+        191.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:278:41@293:68",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 278,
+        "oldTile": [
+          293,
+          68
+        ],
+        "recordId": "41"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-278-41-293-68"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        100.5,
+        3.50124263763,
+        170.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:279:42@272:268",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 279,
+        "oldTile": [
+          272,
+          268
+        ],
+        "recordId": "42"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-279-42-272-268"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        79.5,
+        5.79374647141,
+        -29.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:280:43@295:270",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 280,
+        "oldTile": [
+          295,
+          270
+        ],
+        "recordId": "43"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-280-43-295-270"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        102.5,
+        14.8000001907,
+        -31.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:281:44@353:206",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 281,
+        "oldTile": [
+          353,
+          206
+        ],
+        "recordId": "44"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-281-44-353-206"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        153.5,
+        5.35834932327,
+        38.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:282:45@356:200",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 282,
+        "oldTile": [
+          356,
+          200
+        ],
+        "recordId": "45"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-282-45-356-200"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        156.5,
+        5.36536359787,
+        42.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:283:46@87:215",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 283,
+        "oldTile": [
+          87,
+          215
+        ],
+        "recordId": "46"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-283-46-87-215"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -105.5,
+        2.03337216377,
+        23.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:284:47@67:221",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 284,
+        "oldTile": [
+          67,
+          221
+        ],
+        "recordId": "47"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-284-47-67-221"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -125.5,
+        3.20186710358,
+        17.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:285:48@58:227",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 285,
+        "oldTile": [
+          58,
+          227
+        ],
+        "recordId": "48"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-285-48-58-227"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -134.5,
+        4.50697994232,
+        11.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:286:49@118:132",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 286,
+        "oldTile": [
+          118,
+          132
+        ],
+        "recordId": "49"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-286-49-118-132"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -74.5,
+        1.14457058907,
+        107.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:287:50@123:131",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 287,
+        "oldTile": [
+          123,
+          131
+        ],
+        "recordId": "50"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-287-50-123-131"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -69.5,
+        1.18127894402,
+        107.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:288:51@127:132",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 288,
+        "oldTile": [
+          127,
+          132
+        ],
+        "recordId": "51"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-288-51-127-132"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -65.5,
+        0.643849730492,
+        106.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:667:52@118:128",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 667,
+        "oldTile": [
+          118,
+          128
+        ],
+        "recordId": "52"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-667-52-118-128"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -74.5,
+        1.45039987564,
+        110.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:668:53@265:134",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 668,
+        "oldTile": [
+          265,
+          134
+        ],
+        "recordId": "53"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-668-53-265-134"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        72.5,
+        2.25,
+        104.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:669:54@254:126",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 669,
+        "oldTile": [
+          254,
+          126
+        ],
+        "recordId": "54"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-669-54-254-126"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        61.5,
+        2.25,
+        112.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:670:55@264:128",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 670,
+        "oldTile": [
+          264,
+          128
+        ],
+        "recordId": "55"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-670-55-264-128"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        71.5,
+        2.25,
+        110.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:671:56@280:133",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 671,
+        "oldTile": [
+          280,
+          133
+        ],
+        "recordId": "56"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-671-56-280-133"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        87.5,
+        2.47609138489,
+        105.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:672:57@278:139",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 672,
+        "oldTile": [
+          278,
+          139
+        ],
+        "recordId": "57"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-672-57-278-139"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        85.5,
+        2.56698656082,
+        99.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:673:58@296:78",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 673,
+        "oldTile": [
+          296,
+          78
+        ],
+        "recordId": "58"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-673-58-296-78"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        103.5,
+        3.58359289169,
+        160.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:674:59@300:38",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 674,
+        "oldTile": [
+          300,
+          38
+        ],
+        "recordId": "59"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-674-59-300-38"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        107.5,
+        0.182544127107,
+        197.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:675:60@294:75",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 675,
+        "oldTile": [
+          294,
+          75
+        ],
+        "recordId": "60"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-675-60-294-75"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        101.5,
+        3.68550229073,
+        163.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:676:61@266:137",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 676,
+        "oldTile": [
+          266,
+          137
+        ],
+        "recordId": "61"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-676-61-266-137"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        73.5,
+        2.25,
+        101.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:677:62@248:143",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 677,
+        "oldTile": [
+          248,
+          143
+        ],
+        "recordId": "62"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-677-62-248-143"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        55.5,
+        2.25,
+        96.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:678:63@277:135",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 678,
+        "oldTile": [
+          277,
+          135
+        ],
+        "recordId": "63"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-678-63-277-135"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        84.5,
+        2.39651632309,
+        103.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:679:64@118:125",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 679,
+        "oldTile": [
+          118,
+          125
+        ],
+        "recordId": "64"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-679-64-118-125"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -74.5,
+        1.45021724701,
+        113.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:680:65@121:126",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 680,
+        "oldTile": [
+          121,
+          126
+        ],
+        "recordId": "65"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-680-65-121-126"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -72.5,
+        1.45000004768,
+        112.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:681:66@114:125",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 681,
+        "oldTile": [
+          114,
+          125
+        ],
+        "recordId": "66"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-681-66-114-125"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -78.5,
+        1.22629463673,
+        113.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:682:67@357:208",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 682,
+        "oldTile": [
+          357,
+          208
+        ],
+        "recordId": "67"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-682-67-357-208"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        155.5,
+        5.20626449585,
+        40.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:683:68@370:195",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 683,
+        "oldTile": [
+          370,
+          195
+        ],
+        "recordId": "68"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-683-68-370-195"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        182.5,
+        20.6074085236,
+        48.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:684:69@308:259",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 684,
+        "oldTile": [
+          308,
+          259
+        ],
+        "recordId": "69"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-684-69-308-259"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        115.5,
+        11.8931570053,
+        -20.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:685:70@287:249",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 685,
+        "oldTile": [
+          287,
+          249
+        ],
+        "recordId": "70"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-685-70-287-249"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        93.5,
+        6.01140451431,
+        -7.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:686:71@63:222",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 686,
+        "oldTile": [
+          63,
+          222
+        ],
+        "recordId": "71"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-686-71-63-222"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -129.5,
+        4.31109619141,
+        16.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:687:72@74:210",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 687,
+        "oldTile": [
+          74,
+          210
+        ],
+        "recordId": "72"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-687-72-74-210"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -118.5,
+        2.77982926369,
+        28.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:688:73@282:127",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 688,
+        "oldTile": [
+          282,
+          127
+        ],
+        "recordId": "73"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-688-73-282-127"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        89.5,
+        2.37726616859,
+        112.5
+      ]
+    },
+    {
+      "id": "harvesting.txt:689:74@262:122",
+      "source": {
+        "path": "config/eloria/harvesting.txt",
+        "line": 689,
+        "oldTile": [
+          262,
+          122
+        ],
+        "recordId": "74"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-harvest-harvesting-txt-689-74-262-122"
+      },
+      "role": "harvest",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        69.5,
+        2.25030374527,
+        116.5
+      ]
+    },
+    {
+      "id": "interactives.txt:126:13@153:110",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 126,
+        "oldTile": [
+          153,
+          110
+        ],
+        "recordId": "13"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-126-13-153-110"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -39.5,
+        3.16813397408,
+        128.5
+      ]
+    },
+    {
+      "id": "interactives.txt:127:14@144:118",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 127,
+        "oldTile": [
+          144,
+          118
+        ],
+        "recordId": "14"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-127-14-144-118"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -46.5,
+        2.44030451775,
+        122.5
+      ]
+    },
+    {
+      "id": "interactives.txt:128:15@162:118",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 128,
+        "oldTile": [
+          162,
+          118
+        ],
+        "recordId": "15"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-128-15-162-118"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -28.5,
+        1.46194982529,
+        120.5
+      ]
+    },
+    {
+      "id": "interactives.txt:129:16@165:109",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 129,
+        "oldTile": [
+          165,
+          109
+        ],
+        "recordId": "16"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-129-16-165-109"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -27.5,
+        3.62077617645,
+        129.5
+      ]
+    },
+    {
+      "id": "interactives.txt:406:500@77:171",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 406,
+        "oldTile": [
+          77,
+          171
+        ],
+        "recordId": "500"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-406-500-77-171"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -115.5,
+        3.30214595795,
+        67.5
+      ]
+    },
+    {
+      "id": "interactives.txt:407:501@143:362",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 407,
+        "oldTile": [
+          143,
+          362
+        ],
+        "recordId": "501"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-407-501-143-362"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -49.5,
+        33.4490280151,
+        -123.5
+      ]
+    },
+    {
+      "id": "interactives.txt:408:502@338:315",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 408,
+        "oldTile": [
+          338,
+          315
+        ],
+        "recordId": "502"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-408-502-338-315"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        145.5,
+        0.366363584995,
+        -76.5
+      ]
+    },
+    {
+      "id": "interactives.txt:409:503@181:137",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 409,
+        "oldTile": [
+          181,
+          137
+        ],
+        "recordId": "503"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-409-503-181-137"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -11.5,
+        3.82073688507,
+        101.5
+      ]
+    },
+    {
+      "id": "interactives.txt:410:504@272:201",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 410,
+        "oldTile": [
+          272,
+          201
+        ],
+        "recordId": "504"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-410-504-272-201"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        79.5,
+        2.27272319794,
+        37.5
+      ]
+    },
+    {
+      "id": "interactives.txt:411:505@111:212",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 411,
+        "oldTile": [
+          111,
+          212
+        ],
+        "recordId": "505"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-411-505-111-212"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -81.5,
+        4.17924833298,
+        25.5
+      ]
+    },
+    {
+      "id": "interactives.txt:412:506@317:30",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 412,
+        "oldTile": [
+          317,
+          30
+        ],
+        "recordId": "506"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-412-506-317-30"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        125.5,
+        0.850000023842,
+        210.5
+      ]
+    },
+    {
+      "id": "interactives.txt:413:507@271:189",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 413,
+        "oldTile": [
+          271,
+          189
+        ],
+        "recordId": "507"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-413-507-271-189"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        78.5,
+        1.61130976677,
+        49.5
+      ]
+    },
+    {
+      "id": "interactives.txt:414:508@304:30",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 414,
+        "oldTile": [
+          304,
+          30
+        ],
+        "recordId": "508"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-414-508-304-30"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        111.5,
+        0.850000023842,
+        208.5
+      ]
+    },
+    {
+      "id": "interactives.txt:415:509@89:234",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 415,
+        "oldTile": [
+          89,
+          234
+        ],
+        "recordId": "509"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-415-509-89-234"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -103.5,
+        9.50792694092,
+        4.5
+      ]
+    },
+    {
+      "id": "interactives.txt:416:510@346:196",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 416,
+        "oldTile": [
+          346,
+          196
+        ],
+        "recordId": "510"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-416-510-346-196"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        153.5,
+        5.92194747925,
+        42.5
+      ]
+    },
+    {
+      "id": "interactives.txt:417:511@305:258",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 417,
+        "oldTile": [
+          305,
+          258
+        ],
+        "recordId": "511"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-417-511-305-258"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        111.5,
+        10.8553924561,
+        -19.5
+      ]
+    },
+    {
+      "id": "interactives.txt:418:512@179:238",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 418,
+        "oldTile": [
+          179,
+          238
+        ],
+        "recordId": "512"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-interactive-interactives-txt-418-512-179-238"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        13.5,
+        13.0,
+        -8.5
+      ]
+    },
+    {
+      "id": "interactives.txt:419:513@204:173",
+      "source": {
+        "path": "config/eloria/interactives.txt",
+        "line": 419,
+        "oldTile": [
+          204,
+          173
+        ],
+        "recordId": "513"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-ruins-waystone"
+      },
+      "role": "interactive",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        -0.0999999999999
+      ],
+      "aliases": [
+        "maps.txt:443:513@204:173",
+        "maps.txt:457:return@204:173"
+      ]
+    },
+    {
+      "id": "maps.txt:1144:800@198:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1144,
+        "oldTile": [
+          198,
+          81
+        ],
+        "recordId": "800"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-1144-800-198-81"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        5.5,
+        2.69680213928,
+        157.5
+      ]
+    },
+    {
+      "id": "maps.txt:1145:799@198:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1145,
+        "oldTile": [
+          198,
+          81
+        ],
+        "recordId": "799"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-1145-799-198-81"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        5.5,
+        2.69680213928,
+        157.5
+      ]
+    },
+    {
+      "id": "maps.txt:1155:800@198:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1155,
+        "oldTile": [
+          198,
+          81
+        ],
+        "recordId": "800"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-1155-800-198-81"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        5.5,
+        2.69680213928,
+        157.5
+      ]
+    },
+    {
+      "id": "maps.txt:1156:799@198:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1156,
+        "oldTile": [
+          198,
+          81
+        ],
+        "recordId": "799"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-1156-799-198-81"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        5.5,
+        2.69680213928,
+        157.5
+      ]
+    },
+    {
+      "id": "maps.txt:1166:800@198:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1166,
+        "oldTile": [
+          198,
+          81
+        ],
+        "recordId": "800"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-1166-800-198-81"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        5.5,
+        2.69680213928,
+        157.5
+      ]
+    },
+    {
+      "id": "maps.txt:1167:799@198:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 1167,
+        "oldTile": [
+          198,
+          81
+        ],
+        "recordId": "799"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-1167-799-198-81"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        5.5,
+        2.69680213928,
+        157.5
+      ]
+    },
+    {
+      "id": "maps.txt:415:door@217:240",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 415,
+        "oldTile": [
+          217,
+          240
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "archive-vault-door"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "maps.txt:416:return@215:240",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 416,
+        "oldTile": [
+          215,
+          240
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-416-return-215-240"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        22.5,
+        13.3000001907,
+        -1.5
+      ]
+    },
+    {
+      "id": "maps.txt:417:door@73:160",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 417,
+        "oldTile": [
+          73,
+          160
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "cistern-shaft"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "maps.txt:418:return@71:160",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 418,
+        "oldTile": [
+          71,
+          160
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-418-return-71-160"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -121.5,
+        2.0,
+        78.5
+      ]
+    },
+    {
+      "id": "maps.txt:419:door@271:202",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 419,
+        "oldTile": [
+          271,
+          202
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "hatchery-descent"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "maps.txt:420:return@271:200",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 420,
+        "oldTile": [
+          271,
+          200
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-420-return-271-200"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        78.5,
+        2.24581027031,
+        38.5
+      ]
+    },
+    {
+      "id": "maps.txt:421:door@203:131",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 421,
+        "oldTile": [
+          203,
+          131
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "lineage-house-door"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "maps.txt:422:return@201:131",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 422,
+        "oldTile": [
+          201,
+          131
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-422-return-201-131"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        8.5,
+        1.95000004768,
+        107.5
+      ]
+    },
+    {
+      "id": "maps.txt:423:door@121:199",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 423,
+        "oldTile": [
+          121,
+          199
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "tenth-mouth-door"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "maps.txt:424:return@119:199",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 424,
+        "oldTile": [
+          119,
+          199
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-424-return-119-199"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -73.5,
+        2.04999995232,
+        39.5
+      ]
+    },
+    {
+      "id": "maps.txt:425:door@291:56",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 425,
+        "oldTile": [
+          291,
+          56
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "undercroft-mouth"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "maps.txt:426:return@289:56",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 426,
+        "oldTile": [
+          289,
+          56
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-426-return-289-56"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        96.5,
+        3.41156554222,
+        182.5
+      ]
+    },
+    {
+      "id": "maps.txt:427:door@193:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 427,
+        "oldTile": [
+          193,
+          81
+        ]
+      },
+      "marker": {
+        "section": "portals",
+        "id": "water-gate-undercut-mouth"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": []
+    },
+    {
+      "id": "maps.txt:428:return@191:81",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 428,
+        "oldTile": [
+          191,
+          81
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-428-return-191-81"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -1.5,
+        2.77073764801,
+        157.5
+      ]
+    },
+    {
+      "id": "maps.txt:430:500@77:171",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 430,
+        "oldTile": [
+          77,
+          171
+        ],
+        "recordId": "500"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-430-500-77-171"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -115.5,
+        3.30214595795,
+        67.5
+      ]
+    },
+    {
+      "id": "maps.txt:431:501@143:362",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 431,
+        "oldTile": [
+          143,
+          362
+        ],
+        "recordId": "501"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-431-501-143-362"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -49.5,
+        33.4490280151,
+        -123.5
+      ]
+    },
+    {
+      "id": "maps.txt:432:502@338:315",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 432,
+        "oldTile": [
+          338,
+          315
+        ],
+        "recordId": "502"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-432-502-338-315"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        145.5,
+        0.366363584995,
+        -76.5
+      ]
+    },
+    {
+      "id": "maps.txt:433:503@181:137",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 433,
+        "oldTile": [
+          181,
+          137
+        ],
+        "recordId": "503"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-433-503-181-137"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -11.5,
+        3.82073688507,
+        101.5
+      ]
+    },
+    {
+      "id": "maps.txt:434:504@272:201",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 434,
+        "oldTile": [
+          272,
+          201
+        ],
+        "recordId": "504"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-434-504-272-201"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        79.5,
+        2.27272319794,
+        37.5
+      ]
+    },
+    {
+      "id": "maps.txt:435:505@111:212",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 435,
+        "oldTile": [
+          111,
+          212
+        ],
+        "recordId": "505"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-435-505-111-212"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -81.5,
+        4.17924833298,
+        25.5
+      ]
+    },
+    {
+      "id": "maps.txt:436:506@317:30",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 436,
+        "oldTile": [
+          317,
+          30
+        ],
+        "recordId": "506"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-436-506-317-30"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        125.5,
+        0.850000023842,
+        210.5
+      ]
+    },
+    {
+      "id": "maps.txt:437:507@271:189",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 437,
+        "oldTile": [
+          271,
+          189
+        ],
+        "recordId": "507"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-437-507-271-189"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        78.5,
+        1.61130976677,
+        49.5
+      ]
+    },
+    {
+      "id": "maps.txt:438:508@304:30",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 438,
+        "oldTile": [
+          304,
+          30
+        ],
+        "recordId": "508"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-438-508-304-30"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        111.5,
+        0.850000023842,
+        208.5
+      ]
+    },
+    {
+      "id": "maps.txt:439:509@89:234",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 439,
+        "oldTile": [
+          89,
+          234
+        ],
+        "recordId": "509"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-439-509-89-234"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -103.5,
+        9.50792694092,
+        4.5
+      ]
+    },
+    {
+      "id": "maps.txt:440:510@346:196",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 440,
+        "oldTile": [
+          346,
+          196
+        ],
+        "recordId": "510"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-440-510-346-196"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        153.5,
+        5.92194747925,
+        42.5
+      ]
+    },
+    {
+      "id": "maps.txt:441:511@305:258",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 441,
+        "oldTile": [
+          305,
+          258
+        ],
+        "recordId": "511"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-441-511-305-258"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        111.5,
+        10.8553924561,
+        -19.5
+      ]
+    },
+    {
+      "id": "maps.txt:442:512@179:238",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 442,
+        "oldTile": [
+          179,
+          238
+        ],
+        "recordId": "512"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-door-maps-txt-442-512-179-238"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        13.5,
+        13.0,
+        -8.5
+      ]
+    },
+    {
+      "id": "maps.txt:443:513@204:173",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 443,
+        "oldTile": [
+          204,
+          173
+        ],
+        "recordId": "513"
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-ruins-waystone"
+      },
+      "role": "door",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        -0.0999999999999
+      ],
+      "aliases": [
+        "interactives.txt:419:513@204:173",
+        "maps.txt:457:return@204:173"
+      ]
+    },
+    {
+      "id": "maps.txt:445:return@317:30",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 445,
+        "oldTile": [
+          317,
+          30
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-445-return-317-30"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        125.5,
+        0.850000023842,
+        210.5
+      ]
+    },
+    {
+      "id": "maps.txt:446:return@111:212",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 446,
+        "oldTile": [
+          111,
+          212
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-446-return-111-212"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -81.5,
+        4.17924833298,
+        25.5
+      ]
+    },
+    {
+      "id": "maps.txt:447:return@181:137",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 447,
+        "oldTile": [
+          181,
+          137
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-447-return-181-137"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -11.5,
+        3.82073688507,
+        101.5
+      ]
+    },
+    {
+      "id": "maps.txt:449:return@272:201",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 449,
+        "oldTile": [
+          272,
+          201
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-449-return-272-201"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        79.5,
+        2.27272319794,
+        37.5
+      ]
+    },
+    {
+      "id": "maps.txt:450:return@271:189",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 450,
+        "oldTile": [
+          271,
+          189
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-450-return-271-189"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        78.5,
+        1.61130976677,
+        49.5
+      ]
+    },
+    {
+      "id": "maps.txt:451:return@338:315",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 451,
+        "oldTile": [
+          338,
+          315
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-451-return-338-315"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        145.5,
+        0.366363584995,
+        -76.5
+      ]
+    },
+    {
+      "id": "maps.txt:452:return@89:234",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 452,
+        "oldTile": [
+          89,
+          234
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-452-return-89-234"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -103.5,
+        9.50792694092,
+        4.5
+      ]
+    },
+    {
+      "id": "maps.txt:453:return@305:258",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 453,
+        "oldTile": [
+          305,
+          258
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-453-return-305-258"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        111.5,
+        10.8553924561,
+        -19.5
+      ]
+    },
+    {
+      "id": "maps.txt:454:return@77:171",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 454,
+        "oldTile": [
+          77,
+          171
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-454-return-77-171"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -115.5,
+        3.30214595795,
+        67.5
+      ]
+    },
+    {
+      "id": "maps.txt:455:return@179:238",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 455,
+        "oldTile": [
+          179,
+          238
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-455-return-179-238"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        13.5,
+        13.0,
+        -8.5
+      ]
+    },
+    {
+      "id": "maps.txt:456:return@304:30",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 456,
+        "oldTile": [
+          304,
+          30
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-456-return-304-30"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        111.5,
+        0.850000023842,
+        208.5
+      ]
+    },
+    {
+      "id": "maps.txt:457:return@204:173",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 457,
+        "oldTile": [
+          204,
+          173
+        ]
+      },
+      "marker": {
+        "section": "interactives",
+        "id": "secret-ruins-waystone"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        -0.0999999999999
+      ],
+      "aliases": [
+        "interactives.txt:419:513@204:173",
+        "maps.txt:443:513@204:173"
+      ]
+    },
+    {
+      "id": "maps.txt:460:return@346:196",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 460,
+        "oldTile": [
+          346,
+          196
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-460-return-346-196"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        153.5,
+        5.92194747925,
+        42.5
+      ]
+    },
+    {
+      "id": "maps.txt:461:return@143:362",
+      "source": {
+        "path": "config/eloria/maps.txt",
+        "line": 461,
+        "oldTile": [
+          143,
+          362
+        ]
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-return-maps-txt-461-return-143-362"
+      },
+      "role": "return",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -49.5,
+        33.4490280151,
+        -123.5
+      ]
+    },
+    {
+      "id": "npcs.txt:189:Archivist Sesh@145:111",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 189,
+        "oldTile": [
+          145,
+          111
+        ],
+        "recordId": "Archivist Sesh"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-189-archivist-sesh-145-111"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -47.5,
+        3.37483882904,
+        127.5
+      ]
+    },
+    {
+      "id": "npcs.txt:190:Vess Scale@142:123",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 190,
+        "oldTile": [
+          142,
+          123
+        ],
+        "recordId": "Vess Scale"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-190-vess-scale-142-123"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -50.5,
+        1.45000004768,
+        115.5
+      ]
+    },
+    {
+      "id": "npcs.txt:191:Sun-Vault Warden Hass-Ile@226:236",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 191,
+        "oldTile": [
+          226,
+          236
+        ],
+        "recordId": "Sun-Vault Warden Hass-Ile"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-191-sun-vault-warden-hass-ile-226-236"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        33.5,
+        13.0,
+        2.5
+      ]
+    },
+    {
+      "id": "npcs.txt:192:Lineage Reader Ssiran-Ta@209:130",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 192,
+        "oldTile": [
+          209,
+          130
+        ],
+        "recordId": "Lineage Reader Ssiran-Ta"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-192-lineage-reader-ssiran-ta-209-130"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        16.5,
+        2.07219934464,
+        108.5
+      ]
+    },
+    {
+      "id": "npcs.txt:193:Hatchery Keeper Nuu-Sesh@273:207",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 193,
+        "oldTile": [
+          273,
+          207
+        ],
+        "recordId": "Hatchery Keeper Nuu-Sesh"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-193-hatchery-keeper-nuu-sesh-273-207"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        80.5,
+        2.41924977303,
+        31.5
+      ]
+    },
+    {
+      "id": "npcs.txt:194:Cistern Sounder Vek-Ora@79:166",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 194,
+        "oldTile": [
+          79,
+          166
+        ],
+        "recordId": "Cistern Sounder Vek-Ora"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-194-cistern-sounder-vek-ora-79-166"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -113.5,
+        2.39476084709,
+        72.5
+      ]
+    },
+    {
+      "id": "npcs.txt:195:Stela Copyist Ilhu-Ren@301:263",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 195,
+        "oldTile": [
+          301,
+          263
+        ],
+        "recordId": "Stela Copyist Ilhu-Ren"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-195-stela-copyist-ilhu-ren-301-263"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        108.5,
+        14.1999998093,
+        -24.5
+      ]
+    },
+    {
+      "id": "npcs.txt:196:Water-Gate Marshal Set-Kaal@161:24",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 196,
+        "oldTile": [
+          161,
+          24
+        ],
+        "recordId": "Water-Gate Marshal Set-Kaal"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-196-water-gate-marshal-set-kaal-161-24"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -31.5,
+        1.26927065849,
+        214.5
+      ]
+    },
+    {
+      "id": "npcs.txt:197:Lily Court Steward Aa-Nesh@132:206",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 197,
+        "oldTile": [
+          132,
+          206
+        ],
+        "recordId": "Lily Court Steward Aa-Nesh"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-197-lily-court-steward-aa-nesh-132-206"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -60.5,
+        2.04999995232,
+        32.5
+      ]
+    },
+    {
+      "id": "npcs.txt:198:Marchstone Priest Osu-Val@347:198",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 198,
+        "oldTile": [
+          347,
+          198
+        ],
+        "recordId": "Marchstone Priest Osu-Val"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-198-marchstone-priest-osu-val-347-198"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        154.5,
+        5.36536359787,
+        40.5
+      ]
+    },
+    {
+      "id": "npcs.txt:199:Undercroft Digger Rell Marrow@289:60",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 199,
+        "oldTile": [
+          289,
+          60
+        ],
+        "recordId": "Undercroft Digger Rell Marrow"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-199-undercroft-digger-rell-marrow-289-60"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        96.5,
+        3.62277364731,
+        178.5
+      ]
+    },
+    {
+      "id": "npcs.txt:200:Falls Measurer Ith-Anu@340:312",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 200,
+        "oldTile": [
+          340,
+          312
+        ],
+        "recordId": "Falls Measurer Ith-Anu"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-200-falls-measurer-ith-anu-340-312"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        147.5,
+        0.948928236961,
+        -73.5
+      ]
+    },
+    {
+      "id": "npcs.txt:201:Coil Bridge Toll-Taker Ude-Sar@203:165",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 201,
+        "oldTile": [
+          203,
+          165
+        ],
+        "recordId": "Coil Bridge Toll-Taker Ude-Sar"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-201-coil-bridge-toll-taker-ude-sar-203-165"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        10.5,
+        2.09806776047,
+        73.5
+      ]
+    },
+    {
+      "id": "npcs.txt:317:Ssethis the Doorkeeper@207:82",
+      "source": {
+        "path": "config/eloria/npcs.txt",
+        "line": 317,
+        "oldTile": [
+          207,
+          82
+        ],
+        "recordId": "Ssethis the Doorkeeper"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-npc-npcs-txt-317-ssethis-the-doorkeeper-207-82"
+      },
+      "role": "npc",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        14.5,
+        2.2692360878,
+        156.5
+      ]
+    },
+    {
+      "id": "spawns.txt:477:0@326:63",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 477,
+        "oldTile": [
+          326,
+          63
+        ],
+        "recordId": "0"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-477-0-326-63"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        133.5,
+        2.89632940292,
+        175.5
+      ]
+    },
+    {
+      "id": "spawns.txt:478:1@306:55",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 478,
+        "oldTile": [
+          306,
+          55
+        ],
+        "recordId": "1"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-478-1-306-55"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        113.5,
+        3.16899657249,
+        183.5
+      ]
+    },
+    {
+      "id": "spawns.txt:479:2@290:84",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 479,
+        "oldTile": [
+          290,
+          84
+        ],
+        "recordId": "2"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-479-2-290-84"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        97.5,
+        1.90030288696,
+        154.5
+      ]
+    },
+    {
+      "id": "spawns.txt:480:3@323:84",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 480,
+        "oldTile": [
+          323,
+          84
+        ],
+        "recordId": "3"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-480-3-323-84"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        130.5,
+        1.89801120758,
+        154.5
+      ]
+    },
+    {
+      "id": "spawns.txt:481:4@65:247",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 481,
+        "oldTile": [
+          65,
+          247
+        ],
+        "recordId": "4"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-481-4-65-247"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -131.5,
+        17.481048584,
+        -14.5
+      ]
+    },
+    {
+      "id": "spawns.txt:482:5@321:52",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 482,
+        "oldTile": [
+          321,
+          52
+        ],
+        "recordId": "5"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-482-5-321-52"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        128.5,
+        1.40382313728,
+        186.5
+      ]
+    },
+    {
+      "id": "spawns.txt:483:6@274:306",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 483,
+        "oldTile": [
+          274,
+          306
+        ],
+        "recordId": "6"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-483-6-274-306"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        66.5,
+        4.10132217407,
+        -60.5
+      ]
+    },
+    {
+      "id": "spawns.txt:484:7@263:297",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 484,
+        "oldTile": [
+          263,
+          297
+        ],
+        "recordId": "7"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-484-7-263-297"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        68.5,
+        3.9445810318,
+        -54.5
+      ]
+    },
+    {
+      "id": "spawns.txt:485:8@255:308",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 485,
+        "oldTile": [
+          255,
+          308
+        ],
+        "recordId": "8"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-485-8-255-308"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        62.5,
+        4.23426914215,
+        -69.5
+      ]
+    },
+    {
+      "id": "spawns.txt:486:9@247:139",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 486,
+        "oldTile": [
+          247,
+          139
+        ],
+        "recordId": "9"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-486-9-247-139"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        54.5,
+        2.25,
+        99.5
+      ]
+    },
+    {
+      "id": "spawns.txt:487:10@271:127",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 487,
+        "oldTile": [
+          271,
+          127
+        ],
+        "recordId": "10"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-487-10-271-127"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        78.5,
+        2.25,
+        111.5
+      ]
+    },
+    {
+      "id": "spawns.txt:488:11@240:134",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 488,
+        "oldTile": [
+          240,
+          134
+        ],
+        "recordId": "11"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-488-11-240-134"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        47.5,
+        2.25,
+        104.5
+      ]
+    },
+    {
+      "id": "spawns.txt:489:12@245:323",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 489,
+        "oldTile": [
+          245,
+          323
+        ],
+        "recordId": "12"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-489-12-245-323"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        56.5,
+        5.08252239227,
+        -84.5
+      ]
+    },
+    {
+      "id": "spawns.txt:490:13@328:94",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 490,
+        "oldTile": [
+          328,
+          94
+        ],
+        "recordId": "13"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-490-13-328-94"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        135.5,
+        1.74609494209,
+        144.5
+      ]
+    },
+    {
+      "id": "spawns.txt:491:14@340:115",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 491,
+        "oldTile": [
+          340,
+          115
+        ],
+        "recordId": "14"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-491-14-340-115"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        139.5,
+        0.129068538547,
+        129.5
+      ]
+    },
+    {
+      "id": "spawns.txt:492:15@59:208",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 492,
+        "oldTile": [
+          59,
+          208
+        ],
+        "recordId": "15"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-492-15-59-208"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -133.5,
+        2.1912689209,
+        30.5
+      ]
+    },
+    {
+      "id": "spawns.txt:493:16@67:206",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 493,
+        "oldTile": [
+          67,
+          206
+        ],
+        "recordId": "16"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-493-16-67-206"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -125.5,
+        2.98019742966,
+        32.5
+      ]
+    },
+    {
+      "id": "spawns.txt:494:17@112:276",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 494,
+        "oldTile": [
+          112,
+          276
+        ],
+        "recordId": "17"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-494-17-112-276"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -62.5,
+        20.476978302,
+        -43.5
+      ]
+    },
+    {
+      "id": "spawns.txt:495:18@291:321",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 495,
+        "oldTile": [
+          291,
+          321
+        ],
+        "recordId": "18"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-495-18-291-321"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        98.5,
+        35.4692955017,
+        -82.5
+      ]
+    },
+    {
+      "id": "spawns.txt:496:19@125:303",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 496,
+        "oldTile": [
+          125,
+          303
+        ],
+        "recordId": "19"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-496-19-125-303"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -67.5,
+        25.5154571533,
+        -64.5
+      ]
+    },
+    {
+      "id": "spawns.txt:497:20@81:223",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 497,
+        "oldTile": [
+          81,
+          223
+        ],
+        "recordId": "20"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-497-20-81-223"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -111.5,
+        1.82565975189,
+        15.5
+      ]
+    },
+    {
+      "id": "spawns.txt:498:21@63:234",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 498,
+        "oldTile": [
+          63,
+          234
+        ],
+        "recordId": "21"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-498-21-63-234"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -128.5,
+        2.84818387032,
+        6.5
+      ]
+    },
+    {
+      "id": "spawns.txt:499:22@54:243",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 499,
+        "oldTile": [
+          54,
+          243
+        ],
+        "recordId": "22"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-499-22-54-243"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -139.5,
+        16.0028266907,
+        -4.5
+      ]
+    },
+    {
+      "id": "spawns.txt:500:23@62:318",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 500,
+        "oldTile": [
+          62,
+          318
+        ],
+        "recordId": "23"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-500-23-62-318"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -130.5,
+        23.0928115845,
+        -79.5
+      ]
+    },
+    {
+      "id": "spawns.txt:501:24@148:301",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 501,
+        "oldTile": [
+          148,
+          301
+        ],
+        "recordId": "24"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-501-24-148-301"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -44.5,
+        20.9524612427,
+        -62.5
+      ]
+    },
+    {
+      "id": "spawns.txt:502:25@128:328",
+      "source": {
+        "path": "config/eloria/spawns.txt",
+        "line": 502,
+        "oldTile": [
+          128,
+          328
+        ],
+        "recordId": "25"
+      },
+      "marker": {
+        "section": "runtimePoints",
+        "id": "runtime-spawn-spawns-txt-502-25-128-328"
+      },
+      "role": "spawn",
+      "roads": "marker",
+      "targetOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "aliases": [],
+      "initialPosition": [
+        -66.5,
+        26.3172492981,
+        -89.5
+      ]
+    }
+  ]
+}

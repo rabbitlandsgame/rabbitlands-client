@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-09-19",
+  "conclusion": {
+    "status": "experimental_target_not_met",
+    "target": "Reduce the exact legacy 300-packet, 2400-command actor workload to 1-3 ms without changing observable AppState behavior.",
+    "targetMet": false,
+    "reason": "Native Dictionary reduction materially lowers actor-command time, but the parity-preserving Dictionary boundary remains well above 3 ms. The mixed 500-packet whole-burst samples do not establish an end-to-end win."
+  },
+  "isolation": {
+    "verified": true,
+    "probeLog": "godot-client/test-artifacts/native-crowd/native-isolated/results/user-dir-probe.log",
+    "expectedUserRoot": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated",
+    "actualUserDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+    "environment": {
+      "appData": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata",
+      "expectedUserRoot": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated",
+      "localAppData": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/localappdata",
+      "temp": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/temp",
+      "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+      "userProfile": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/userprofile"
+    }
+  },
+  "build": {
+    "godot": "4.7.2.stable.official.ed1daf0bf",
+    "godotCppCommit": "507ed9d840c01a3c5b2a39af8bb4000bfac30bf5",
+    "compiler": "GNU C++ 16.2.0 (MinGW-w64)",
+    "target": "windows.template_release.x86_64",
+    "parallelJobs": 2,
+    "processorAffinity": "logical CPUs 0-3",
+    "dllRuntimeImports": [
+      "KERNEL32.dll",
+      "msvcrt.dll"
+    ],
+    "sha256": {
+      "appState": "beb724243e9622d777c1bc957c764d773626aef3f21d7a5842aa9f55203125e2",
+      "nativeReducerCpp": "3393c3c67053f17f3158a76b0734531f36751d08484c02a9a0803e2d5ea7c429",
+      "integratedBenchmark": "f7040e3c3fe71232da128e1f345d180afecd69a741900efb6871845118c977b1",
+      "reducerBenchmark": "a6c4abd926f2b4849d0218197986a0ff5bb31cc81d6b914899e1f1b0cf6c02dd",
+      "windowsReleaseDll": "b3af98d7c04702f59f14626dff1a71090f3b34da54dae4a1f61d87a2cb52bab1"
+    }
+  },
+  "parity": {
+    "allPassed": true,
+    "tests": [
+      {
+        "name": "test_native_crowd",
+        "result": "PASS",
+        "log": "godot-client/test-artifacts/native-crowd/native-isolated/results/test_native_crowd.log"
+      },
+      {
+        "name": "test_native_crowd_app_state",
+        "result": "PASS",
+        "log": "godot-client/test-artifacts/native-crowd/native-isolated/results/test_native_crowd_app_state.log"
+      },
+      {
+        "name": "test_native_crowd_edges",
+        "result": "PASS",
+        "log": "godot-client/test-artifacts/native-crowd/native-isolated/results/test_native_crowd_edges.log"
+      }
+    ],
+    "stderrCaveat": "Godot reported that the Windows root certificate store could not be read; every listed test exited 0 and no network operation is part of these tests."
+  },
+  "reducerMicrobenchmark": {
+    "artifact": "godot-client/test-artifacts/native-crowd/native-isolated/results/native-crowd-reducer.json",
+    "methodology": {
+      "totalModeTrialCount": 9,
+      "initialModeOrder": [
+        "gdscript",
+        "nativeDictionary",
+        "nativeCompactPerPacket",
+        "nativeCompactDeferred"
+      ],
+      "orderRule": "For trial t, start at initialModeOrder[t mod 4] and wrap, so first position rotates across modes.",
+      "components": "Compact reset, native reduction, and materialization are measured in a separate pass after the four total modes; component clock reads do not inflate total-mode timing.",
+      "compactDeferredEquivalent": false
+    },
+    "exactLegacySummaryMilliseconds": {
+      "gdscriptMedian": 12.904,
+      "nativeDictionaryMedian": 8.726,
+      "nativeDictionaryImprovement": 4.178,
+      "nativeDictionaryImprovementPercent": 32.376,
+      "nativeCompactPerPacketMedian": 7.749,
+      "nativeCompactDeferredMedian": 0.244,
+      "compactPerPacketComponentsMedian": {
+        "reset": 0.077,
+        "reduce": 0.765,
+        "materialize": 7.385
+      },
+      "compactDeferredComponentsMedian": {
+        "reset": 0.078,
+        "reduce": 0.085,
+        "materialize": 0.062
+      }
+    },
+    "rawReport": {
+      "environment": {
+        "appData": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata",
+        "expectedUserRoot": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated",
+        "localAppData": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/localappdata",
+        "temp": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/temp",
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+        "userProfile": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/userprofile"
+      },
+      "nativeCompactDeferredEquivalent": false,
+      "scenarios": {
+        "crowd100Commands": {
+          "activeActorsPerPacket": 100,
+          "actors": 300,
+          "commands": 12000,
+          "modes": {
+            "gdscript": {
+              "maximumMilliseconds": 61.907,
+              "medianAbsoluteDeviationMilliseconds": 3.32,
+              "medianMicrosecondsPerCommand": 4.779,
+              "medianMicrosecondsPerPacket": 477.93,
+              "medianMilliseconds": 57.351,
+              "microseconds": [
+                60023.0,
+                58590.0,
+                50673.0,
+                60879.0,
+                57351.0,
+                61907.0,
+                55942.0,
+                50325.0,
+                54031.0
+              ],
+              "minimumMilliseconds": 50.325,
+              "trials": 9
+            },
+            "nativeCompactDeferred": {
+              "components": {
+                "materialize": {
+                  "maximumMilliseconds": 0.41,
+                  "medianAbsoluteDeviationMilliseconds": 0.048,
+                  "medianMilliseconds": 0.362,
+                  "minimumMilliseconds": 0.26
+                },
+                "reduce": {
+                  "maximumMilliseconds": 0.377,
+                  "medianAbsoluteDeviationMilliseconds": 0.039,
+                  "medianMilliseconds": 0.309,
+                  "minimumMilliseconds": 0.236
+                },
+                "reset": {
+                  "maximumMilliseconds": 0.518,
+                  "medianAbsoluteDeviationMilliseconds": 0.028,
+                  "medianMilliseconds": 0.328,
+                  "minimumMilliseconds": 0.25
+                }
+              },
+              "maximumMilliseconds": 1.563,
+              "medianAbsoluteDeviationMilliseconds": 0.045,
+              "medianMicrosecondsPerCommand": 0.068,
+              "medianMicrosecondsPerPacket": 6.82,
+              "medianMilliseconds": 0.818,
+              "microseconds": [
+                741.0,
+                818.0,
+                815.0,
+                872.0,
+                773.0,
+                1563.0,
+                1203.0,
+                810.0,
+                845.0
+              ],
+              "minimumMilliseconds": 0.741,
+              "trials": 9
+            },
+            "nativeCompactPerPacket": {
+              "components": {
+                "materialize": {
+                  "maximumMilliseconds": 44.931,
+                  "medianAbsoluteDeviationMilliseconds": 1.632,
+                  "medianMilliseconds": 33.364,
+                  "minimumMilliseconds": 31.732
+                },
+                "reduce": {
+                  "maximumMilliseconds": 0.89,
+                  "medianAbsoluteDeviationMilliseconds": 0.02,
+                  "medianMilliseconds": 0.641,
+                  "minimumMilliseconds": 0.586
+                },
+                "reset": {
+                  "maximumMilliseconds": 0.511,
+                  "medianAbsoluteDeviationMilliseconds": 0.048,
+                  "medianMilliseconds": 0.319,
+                  "minimumMilliseconds": 0.233
+                }
+              },
+              "maximumMilliseconds": 46.288,
+              "medianAbsoluteDeviationMilliseconds": 3.478,
+              "medianMicrosecondsPerCommand": 3.111,
+              "medianMicrosecondsPerPacket": 311.08,
+              "medianMilliseconds": 37.329,
+              "microseconds": [
+                35928.0,
+                33851.0,
+                37329.0,
+                42297.0,
+                34934.0,
+                46288.0,
+                40942.0,
+                37608.0,
+                32453.0
+              ],
+              "minimumMilliseconds": 32.453,
+              "trials": 9
+            },
+            "nativeDictionary": {
+              "maximumMilliseconds": 46.403,
+              "medianAbsoluteDeviationMilliseconds": 1.764,
+              "medianMicrosecondsPerCommand": 3.306,
+              "medianMicrosecondsPerPacket": 330.58,
+              "medianMilliseconds": 39.669,
+              "microseconds": [
+                40289.0,
+                39669.0,
+                46403.0,
+                43949.0,
+                38184.0,
+                41589.0,
+                39068.0,
+                37905.0,
+                34795.0
+              ],
+              "minimumMilliseconds": 34.795,
+              "trials": 9
+            }
+          },
+          "packets": 120
+        },
+        "legacyActorPackets": {
+          "activeActorsPerPacket": 8,
+          "actors": 24,
+          "commands": 2400,
+          "modes": {
+            "gdscript": {
+              "maximumMilliseconds": 16.385,
+              "medianAbsoluteDeviationMilliseconds": 2.283,
+              "medianMicrosecondsPerCommand": 5.377,
+              "medianMicrosecondsPerPacket": 43.01,
+              "medianMilliseconds": 12.904,
+              "microseconds": [
+                15757.0,
+                10903.0,
+                12904.0,
+                12952.0,
+                16232.0,
+                16385.0,
+                10621.0,
+                10762.0,
+                9841.0
+              ],
+              "minimumMilliseconds": 9.841,
+              "trials": 9
+            },
+            "nativeCompactDeferred": {
+              "components": {
+                "materialize": {
+                  "maximumMilliseconds": 0.124,
+                  "medianAbsoluteDeviationMilliseconds": 0.012,
+                  "medianMilliseconds": 0.062,
+                  "minimumMilliseconds": 0.05
+                },
+                "reduce": {
+                  "maximumMilliseconds": 0.145,
+                  "medianAbsoluteDeviationMilliseconds": 0.022,
+                  "medianMilliseconds": 0.085,
+                  "minimumMilliseconds": 0.058
+                },
+                "reset": {
+                  "maximumMilliseconds": 0.144,
+                  "medianAbsoluteDeviationMilliseconds": 0.012,
+                  "medianMilliseconds": 0.078,
+                  "minimumMilliseconds": 0.057
+                }
+              },
+              "maximumMilliseconds": 0.361,
+              "medianAbsoluteDeviationMilliseconds": 0.043,
+              "medianMicrosecondsPerCommand": 0.102,
+              "medianMicrosecondsPerPacket": 0.81,
+              "medianMilliseconds": 0.244,
+              "microseconds": [
+                361.0,
+                339.0,
+                244.0,
+                205.0,
+                206.0,
+                359.0,
+                281.0,
+                178.0,
+                201.0
+              ],
+              "minimumMilliseconds": 0.178,
+              "trials": 9
+            },
+            "nativeCompactPerPacket": {
+              "components": {
+                "materialize": {
+                  "maximumMilliseconds": 10.372,
+                  "medianAbsoluteDeviationMilliseconds": 0.857,
+                  "medianMilliseconds": 7.385,
+                  "minimumMilliseconds": 6.085
+                },
+                "reduce": {
+                  "maximumMilliseconds": 1.217,
+                  "medianAbsoluteDeviationMilliseconds": 0.102,
+                  "medianMilliseconds": 0.765,
+                  "minimumMilliseconds": 0.535
+                },
+                "reset": {
+                  "maximumMilliseconds": 0.108,
+                  "medianAbsoluteDeviationMilliseconds": 0.01,
+                  "medianMilliseconds": 0.077,
+                  "minimumMilliseconds": 0.051
+                }
+              },
+              "maximumMilliseconds": 11.226,
+              "medianAbsoluteDeviationMilliseconds": 0.601,
+              "medianMicrosecondsPerCommand": 3.229,
+              "medianMicrosecondsPerPacket": 25.83,
+              "medianMilliseconds": 7.749,
+              "microseconds": [
+                7749.0,
+                6242.0,
+                7005.0,
+                11226.0,
+                7274.0,
+                9138.0,
+                7267.0,
+                8350.0,
+                7861.0
+              ],
+              "minimumMilliseconds": 6.242,
+              "trials": 9
+            },
+            "nativeDictionary": {
+              "maximumMilliseconds": 10.462,
+              "medianAbsoluteDeviationMilliseconds": 1.213,
+              "medianMicrosecondsPerCommand": 3.636,
+              "medianMicrosecondsPerPacket": 29.09,
+              "medianMilliseconds": 8.726,
+              "microseconds": [
+                9491.0,
+                7513.0,
+                10202.0,
+                8726.0,
+                10462.0,
+                7399.0,
+                9880.0,
+                8447.0,
+                7312.0
+              ],
+              "minimumMilliseconds": 7.312,
+              "trials": 9
+            }
+          },
+          "packets": 300
+        }
+      },
+      "scope": "protocol decode plus reducer and Dictionary output; no actor presentation"
+    }
+  },
+  "integrated500Packet": {
+    "methodology": {
+      "freshProcessesPerMode": 3,
+      "internalRepeatsPerProcess": 3,
+      "runOrder": [
+        "off-1",
+        "off-2",
+        "off-3",
+        "on-1",
+        "on-2",
+        "on-3"
+      ],
+      "randomized": false,
+      "workload": {
+        "packets": 500,
+        "bytes": 14478,
+        "actorCommandPackets": 300,
+        "actorCommandsPerPacket": 8,
+        "actorCommands": 2400,
+        "activeActorIds": 24,
+        "partialStatPackets": 100,
+        "chatPackets": 100
+      },
+      "fullTiming": "Each process separately measures three complete decode-only passes and three complete interleaved decode-plus-AppState passes.",
+      "branchTiming": "Each branch estimate separately scans and decodes the complete 500-packet buffer, invokes AppState only for the selected command kind, then subtracts the separately measured decode time."
+    },
+    "mediansMilliseconds": {
+      "off": {
+        "decodeAndReduce": 11.926,
+        "reduce": 11.324,
+        "actorCommandBranch": 9.255
+      },
+      "on": {
+        "decodeAndReduce": 12.914,
+        "reduce": 12.306,
+        "actorCommandBranch": 6.84
+      },
+      "onMinusOff": {
+        "decodeAndReduce": 0.988,
+        "reduce": 0.982,
+        "actorCommandBranch": -2.415
+      },
+      "actorCommandBranchImprovementPercent": 26.094
+    },
+    "offRuns": [
+      {
+        "run": 1,
+        "label": "native-crowd-off-isolated-1",
+        "unixTime": 1789807896,
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+        "packets": {
+          "bytes": 14478,
+          "decodeAndReduceMilliseconds": 11.926,
+          "decodeMilliseconds": 0.602,
+          "microsecondsPerPacket": 23.85,
+          "mix": {
+            "actor_commands": 300,
+            "chat": 100,
+            "partial_stats": 100
+          },
+          "nativeCrowdReducerActive": false,
+          "packets": 500,
+          "reduceMilliseconds": 11.324,
+          "reduceMillisecondsByKind": {
+            "actor_commands": 9.255,
+            "chat": 1.683,
+            "partial_stats": 1.134
+          },
+          "repeats": 3
+        }
+      },
+      {
+        "run": 2,
+        "label": "native-crowd-off-isolated-2",
+        "unixTime": 1789807897,
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+        "packets": {
+          "bytes": 14478,
+          "decodeAndReduceMilliseconds": 11.721,
+          "decodeMilliseconds": 0.487,
+          "microsecondsPerPacket": 23.44,
+          "mix": {
+            "actor_commands": 300,
+            "chat": 100,
+            "partial_stats": 100
+          },
+          "nativeCrowdReducerActive": false,
+          "packets": 500,
+          "reduceMilliseconds": 11.234,
+          "reduceMillisecondsByKind": {
+            "actor_commands": 8.914,
+            "chat": 1.795,
+            "partial_stats": 0.94
+          },
+          "repeats": 3
+        }
+      },
+      {
+        "run": 3,
+        "label": "native-crowd-off-isolated-3",
+        "unixTime": 1789807898,
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+        "packets": {
+          "bytes": 14478,
+          "decodeAndReduceMilliseconds": 14.84,
+          "decodeMilliseconds": 0.618,
+          "microsecondsPerPacket": 29.68,
+          "mix": {
+            "actor_commands": 300,
+            "chat": 100,
+            "partial_stats": 100
+          },
+          "nativeCrowdReducerActive": false,
+          "packets": 500,
+          "reduceMilliseconds": 14.222,
+          "reduceMillisecondsByKind": {
+            "actor_commands": 10.585,
+            "chat": 1.449,
+            "partial_stats": 1.2
+          },
+          "repeats": 3
+        }
+      }
+    ],
+    "onRuns": [
+      {
+        "run": 1,
+        "label": "native-crowd-on-isolated-1",
+        "unixTime": 1789807899,
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+        "packets": {
+          "bytes": 14478,
+          "decodeAndReduceMilliseconds": 14.023,
+          "decodeMilliseconds": 0.562,
+          "microsecondsPerPacket": 28.05,
+          "mix": {
+            "actor_commands": 300,
+            "chat": 100,
+            "partial_stats": 100
+          },
+          "nativeCrowdReducerActive": true,
+          "packets": 500,
+          "reduceMilliseconds": 13.461,
+          "reduceMillisecondsByKind": {
+            "actor_commands": 6.84,
+            "chat": 1.374,
+            "partial_stats": 0.782
+          },
+          "repeats": 3
+        }
+      },
+      {
+        "run": 2,
+        "label": "native-crowd-on-isolated-2",
+        "unixTime": 1789807900,
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+        "packets": {
+          "bytes": 14478,
+          "decodeAndReduceMilliseconds": 12.914,
+          "decodeMilliseconds": 0.608,
+          "microsecondsPerPacket": 25.83,
+          "mix": {
+            "actor_commands": 300,
+            "chat": 100,
+            "partial_stats": 100
+          },
+          "nativeCrowdReducerActive": true,
+          "packets": 500,
+          "reduceMilliseconds": 12.306,
+          "reduceMillisecondsByKind": {
+            "actor_commands": 8.544,
+            "chat": 1.439,
+            "partial_stats": 1.157
+          },
+          "repeats": 3
+        }
+      },
+      {
+        "run": 3,
+        "label": "native-crowd-on-isolated-3",
+        "unixTime": 1789807901,
+        "userDataDir": "C:/rabbitlands/wt-native-crowd-300/godot-client/test-artifacts/native-crowd/native-isolated/appdata/Godot/app_userdata/Eloria",
+        "packets": {
+          "bytes": 14478,
+          "decodeAndReduceMilliseconds": 12.168,
+          "decodeMilliseconds": 0.524,
+          "microsecondsPerPacket": 24.34,
+          "mix": {
+            "actor_commands": 300,
+            "chat": 100,
+            "partial_stats": 100
+          },
+          "nativeCrowdReducerActive": true,
+          "packets": 500,
+          "reduceMilliseconds": 11.644,
+          "reduceMillisecondsByKind": {
+            "actor_commands": 6.285,
+            "chat": 1.698,
+            "partial_stats": 1.209
+          },
+          "repeats": 3
+        }
+      }
+    ],
+    "interpretation": [
+      "Every run used the same encoded 500-packet burst, seed actors, repeat count, and packet schedule; ON artifacts report nativeCrowdReducerActive=true and OFF artifacts report false.",
+      "The actor-command branch ranges do not overlap in these samples: OFF 8.914-10.585 ms; ON 6.285-8.544 ms. This supports a material actor-reducer improvement, while its 6.840 ms median still misses the 1-3 ms target.",
+      "The whole-burst ranges overlap: OFF 11.721-14.840 ms; ON 12.168-14.023 ms. The 0.988 ms median regression is smaller than observed cross-process spread and does not establish that native actor reduction makes the mixed workload slower.",
+      "Branch estimates are not additive: they come from separate full-buffer scans, subtract a separately timed decode pass, and exclude nonlinear effects from interleaving packet kinds, allocation, cache state, and garbage collection.",
+      "Runs were grouped OFF then ON rather than randomized. Shared-host scheduling and temporal drift can affect the three-process medians. No end-to-end speed claim is made from this sample."
+    ]
+  },
+  "retainedDecision": "Keep the production hook opt-in and keep the packed store benchmark-only. Do not expand native state ownership or port interpolation based on these results."
+}

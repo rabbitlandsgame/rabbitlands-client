@@ -1,0 +1,435 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetVersion": "0.3.0",
+  "asset": {
+    "id": "lantern_reach",
+    "name": "Lantern Reach",
+    "glb": "world.glb",
+    "units": "meters",
+    "coordinateSystem": {
+      "handedness": "right",
+      "upAxis": "Y",
+      "northAxis": "-Z"
+    },
+    "bounds": {
+      "min": [
+        -190,
+        -2,
+        -310
+      ],
+      "max": [
+        310,
+        20,
+        190
+      ]
+    },
+    "playableBounds": {
+      "min": [
+        -0.5,
+        0.4,
+        -119.5
+      ],
+      "max": [
+        119.5,
+        4,
+        0.5
+      ]
+    },
+    "serverCells": 120,
+    "mapBounds": {
+      "min": [
+        -4,
+        -2,
+        -124
+      ],
+      "max": [
+        124,
+        20,
+        4
+      ]
+    }
+  },
+  "coordinateTransform": {
+    "metresPerTile": 1.0,
+    "serverOrigin": [
+      0,
+      0
+    ],
+    "origin": [
+      -0.5,
+      0,
+      0.5
+    ],
+    "walkingHeight": 0.4,
+    "invertServerY": true
+  },
+  "spawnPoints": [
+    {
+      "id": "default",
+      "position": [
+        17,
+        0.4,
+        -20
+      ],
+      "rotationDegrees": 0
+    }
+  ],
+  "collision": {
+    "binary": "collision.bin",
+    "format": "EWCG-v2",
+    "width": 240,
+    "height": 240,
+    "cellMetres": 0.5,
+    "heightEncoding": {
+      "origin": -2.2,
+      "step": 0.2,
+      "zeroMeansBlocked": true
+    }
+  },
+  "navigation": {
+    "surfaceNodePrefixes": [
+      "Walk_"
+    ],
+    "agentRadius": 0.4,
+    "agentHeight": 1.9,
+    "maxSlopeDegrees": 45
+  },
+  "landmarks": [
+    {
+      "id": "arrival",
+      "name": "Grounded ferry",
+      "position": [
+        17,
+        0.4,
+        -19
+      ]
+    },
+    {
+      "id": "shelter",
+      "name": "Caldus's boathouse",
+      "position": [
+        32,
+        0.4,
+        -32
+      ]
+    },
+    {
+      "id": "garden",
+      "name": "Tidal garden",
+      "position": [
+        24,
+        0.4,
+        -54
+      ]
+    },
+    {
+      "id": "workshop",
+      "name": "Repair shed",
+      "position": [
+        46,
+        0.6000000000000001,
+        -70
+      ]
+    },
+    {
+      "id": "causeway",
+      "name": "Hold the path",
+      "position": [
+        67,
+        0.4,
+        -53
+      ]
+    },
+    {
+      "id": "rest",
+      "name": "Beacon steps",
+      "position": [
+        83,
+        0.6000000000000001,
+        -70
+      ]
+    },
+    {
+      "id": "beacon",
+      "name": "Lantern room",
+      "position": [
+        95,
+        2.8000000000000003,
+        -96
+      ]
+    },
+    {
+      "id": "dock",
+      "name": "Return dock",
+      "position": [
+        102,
+        0.4,
+        -24
+      ]
+    }
+  ],
+  "interactives": [
+    {
+      "id": "nesh",
+      "label": "Nesh's lantern",
+      "kind": "guide",
+      "tile": [
+        22,
+        24
+      ],
+      "approach": [
+        21,
+        23
+      ]
+    },
+    {
+      "id": "caldus",
+      "label": "Ferryman Caldus",
+      "kind": "npc",
+      "tile": [
+        34,
+        34
+      ],
+      "approach": [
+        33,
+        32
+      ]
+    },
+    {
+      "id": "chart",
+      "label": "The keeper's chart",
+      "kind": "information",
+      "tile": [
+        36,
+        37
+      ],
+      "approach": [
+        36,
+        35
+      ],
+      "objectId": 61002
+    },
+    {
+      "id": "reed",
+      "label": "Reed",
+      "kind": "harvest",
+      "tile": [
+        21,
+        54
+      ],
+      "approach": [
+        23,
+        54
+      ],
+      "item": "Reed",
+      "quota": 3,
+      "objectId": 61003
+    },
+    {
+      "id": "quartz",
+      "label": "Quartz",
+      "kind": "harvest",
+      "tile": [
+        28,
+        59
+      ],
+      "approach": [
+        27,
+        57
+      ],
+      "item": "Quartz",
+      "quota": 1,
+      "objectId": 61004
+    },
+    {
+      "id": "lower_cache",
+      "label": "Keeper's cache",
+      "kind": "storage",
+      "tile": [
+        44,
+        72
+      ],
+      "approach": [
+        44,
+        70
+      ],
+      "objectId": 61005
+    },
+    {
+      "id": "bench",
+      "label": "Repair bench",
+      "kind": "manufacturing",
+      "tile": [
+        49,
+        73
+      ],
+      "approach": [
+        49,
+        71
+      ],
+      "objectId": 61006
+    },
+    {
+      "id": "boar",
+      "label": "Storm-frightened otter",
+      "kind": "combat",
+      "tile": [
+        68,
+        54
+      ],
+      "approach": [
+        66,
+        53
+      ],
+      "objectId": 7020
+    },
+    {
+      "id": "bag",
+      "label": "Supplies on the path",
+      "kind": "loot",
+      "tile": [
+        68,
+        54
+      ],
+      "approach": [
+        66,
+        53
+      ],
+      "objectId": 61008
+    },
+    {
+      "id": "rest",
+      "label": "Catch your breath",
+      "kind": "rest",
+      "tile": [
+        83,
+        70
+      ],
+      "approach": [
+        82,
+        70
+      ],
+      "objectId": 61009
+    },
+    {
+      "id": "upper_cache",
+      "label": "Lantern cache",
+      "kind": "storage",
+      "tile": [
+        91,
+        95
+      ],
+      "approach": [
+        90,
+        94
+      ],
+      "objectId": 61010
+    },
+    {
+      "id": "housing",
+      "label": "The dark beacon",
+      "kind": "beacon",
+      "tile": [
+        97,
+        98
+      ],
+      "approach": [
+        95,
+        97
+      ],
+      "objectId": 61011
+    },
+    {
+      "id": "dock",
+      "label": "Caldus's galley counter",
+      "kind": "merchant",
+      "tile": [
+        103,
+        26
+      ],
+      "approach": [
+        101,
+        26
+      ],
+      "objectId": 61012
+    },
+    {
+      "id": "dock_cache",
+      "label": "Dock cache",
+      "kind": "storage",
+      "tile": [
+        105,
+        29
+      ],
+      "approach": [
+        104,
+        28
+      ],
+      "objectId": 61013
+    },
+    {
+      "id": "ferry",
+      "label": "The boat you saved",
+      "kind": "departure",
+      "tile": [
+        106,
+        21
+      ],
+      "approach": [
+        104,
+        22
+      ],
+      "objectId": 61014
+    }
+  ],
+  "draft": {
+    "quest": "quest.json",
+    "layout": "layout.json",
+    "runtimeRegistration": false,
+    "collisionNote": "Native half-metre EWCG-v2. Four authored cells per one-metre server tile."
+  },
+  "tutorial": {
+    "art": "art.json",
+    "layout": "layout.json"
+  },
+  "camera": {
+    "distance": 24,
+    "minDistance": 8,
+    "maxDistance": 64,
+    "pitchDegrees": -52
+  },
+  "environment": {
+    "backgroundColor": "#18363f",
+    "ambient": {
+      "color": "#acc6cb",
+      "energy": 0.7
+    },
+    "sun": {
+      "color": "#ffe5ba",
+      "energy": 1.0,
+      "rotationDegrees": [
+        -48,
+        -28,
+        0
+      ]
+    },
+    "tonemap": {
+      "mode": "filmic",
+      "exposure": 1.0
+    }
+  },
+  "externalResources": {
+    "../_shared/images/1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac.png": "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac",
+    "../_shared/images/53c892178a774c350e298fab11237916f8f185e29ad033c7e99b840849b75441.png": "53c892178a774c350e298fab11237916f8f185e29ad033c7e99b840849b75441",
+    "../_shared/images/54f7c0002a2890075162a9ac3b010ace161af655d8a39b99ac53c6bb71fa9ee3.png": "54f7c0002a2890075162a9ac3b010ace161af655d8a39b99ac53c6bb71fa9ee3",
+    "../_shared/images/62bff95c8e13a206e351ef4d9b51a55a8894bb08d1e41c77b00e8297e277eab0.png": "62bff95c8e13a206e351ef4d9b51a55a8894bb08d1e41c77b00e8297e277eab0",
+    "../_shared/images/69da8391f26e20f20efb513718249107a2c82def0d583b63c50fe1e91c3dabb6.png": "69da8391f26e20f20efb513718249107a2c82def0d583b63c50fe1e91c3dabb6",
+    "../_shared/images/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7",
+    "../_shared/images/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../_shared/images/b6e3514b0710c10922611a854074b9c3643ee2469965aff2ca17afc5930b9906.png": "b6e3514b0710c10922611a854074b9c3643ee2469965aff2ca17afc5930b9906",
+    "../_shared/images/ccada634290b55490b333393c4213a30b597ed8474a08060332921e371b38760.png": "ccada634290b55490b333393c4213a30b597ed8474a08060332921e371b38760",
+    "../_shared/images/d8c2578d76c1c26df32c7d7827db41910434f86c66d0c111cb8a596efff00b78.png": "d8c2578d76c1c26df32c7d7827db41910434f86c66d0c111cb8a596efff00b78",
+    "../_shared/images/f176f3c33b51e9febc9e1c928fc101059e5d2acaa6910f96fadf49b28aba0aa3.png": "f176f3c33b51e9febc9e1c928fc101059e5d2acaa6910f96fadf49b28aba0aa3",
+    "../_shared/images/f939ab15d5a53bf71f59250439785cdca72f2446455d2088e2d5b62d8918df07.png": "f939ab15d5a53bf71f59250439785cdca72f2446455d2088e2d5b62d8918df07"
+  }
+}
