@@ -4,7 +4,7 @@ The Missing Caravan now has a dedicated woodland caravan camp in the native clie
 
 ## Play
 
-Run the updated client and `dev-server`, then choose **Help → Practice adventures → The Missing Caravan**, or enter `#tutorial summoning`. The 19 main objectives and three optional exercises remain playable through ordinary gameplay controls. Existing progress resumes.
+Run the updated client and `rabbitlands-server`, then choose **Help → Practice adventures → The Missing Caravan**, or enter `#tutorial summoning`. The 19 main objectives and three optional exercises remain playable through ordinary gameplay controls. Existing progress resumes.
 
 ## A caravan worth bringing home
 
@@ -41,7 +41,7 @@ The overview below uses the production WorldLoader with completed presentation f
 
 ## Verification and remaining work
 
-- `dev-server/tests/test_roads.py`: **40 passed**, including all six core routes, their optional exercises, saved wagon outcomes, resume after the first wagon, and legacy-position recovery for both polished maps.
+- `rabbitlands-server/tests/test_roads.py`: **40 passed**, including all six core routes, their optional exercises, saved wagon outcomes, resume after the first wagon, and legacy-position recovery for both polished maps.
 - `tests/test_reedway_map.py`: **3 passed**. Checks include client/server coordinates and collision parity, reachable open approaches, closed gates, a short companion-sized North route, both West bypasses and clear encounter positions.
 - `tests/test_cinderbank_map.py`: **3 passed**, retaining the workshop coordinate and footprint checks.
 - Native protocol: **56 checks passed**, including validation of the four optional caravan outcome flags.
@@ -52,7 +52,9 @@ Automated server routes control timers and successful mix rolls; the TCP smoke u
 
 ## Source and provenance
 
-Rebuild with `python tools/build_followup_maps.py --adventure summoning` from `eloria-client`. Full six-map regeneration also selects the Reedway generator.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+Rebuild with `python tools/build_followup_maps.py --adventure summoning` from `rabbitlands-client`. Full six-map regeneration also selects the Reedway generator.
 
 `tools/build_reedway.py` authors the environment, footprints and markers. Its small-prop helpers reuse `build_cinderbank.py`; bitmap materials reuse the existing Sunmane Steppe texture set. No externally sourced art was added. The map has **89 batched meshes**, **66 recorded footprints** and **4,434 walkable tiles**.
 

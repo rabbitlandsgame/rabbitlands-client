@@ -1,6 +1,6 @@
 # Six playable follow-up adventures
 
-The first six storyboards are implemented in the native client and `dev-server`: 103 main objectives and 22 optional exercises with 74 further objectives. Worship and PvP remain proposals. The duration estimates in the storyboards still need novice playtesting.
+The first six storyboards are implemented in the native client and `rabbitlands-server`: 103 main objectives and 22 optional exercises with 74 further objectives. Worship and PvP remain proposals. The duration estimates in the storyboards still need novice playtesting.
 
 Cinderbank and Reedway now have dedicated environment polish passes. The workshop has distinct work areas and saved machinery changes; the caravan camp has woodland pens, detailed wagons and saved rescues. See the [Cinderbank art review](crafting/polish.md) and [Reedway art review](summoning/polish.md). The other four follow-ups retain their initial shared environment kit; gameplay implementation does not imply final environment art.
 
@@ -71,15 +71,17 @@ Practice databases live beside the configured server database in `<database file
 
 ## Source and regeneration
 
-`dev-server/eloria/road_lessons.py` contains the objective sequences. `roads.py` owns lifecycle and packet routing; `road_content.py` observes outcomes and configures encounters; `road_partners.py` drives scripted participants; `road_duo.py` handles the optional guest. Actual mutations remain in the normal gameplay handlers.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
 
-Run `python tools/build_followup_maps.py` from `eloria-client` to regenerate all six GLBs, manifests, client/server collision grids and shared target layouts. Client layout and server harvest nodes use the same authored coordinates. The native guide validates the `followup` state and teaches existing controls.
+`rabbitlands-server/eloria/road_lessons.py` contains the objective sequences. `roads.py` owns lifecycle and packet routing; `road_content.py` observes outcomes and configures encounters; `road_partners.py` drives scripted participants; `road_duo.py` handles the optional guest. Actual mutations remain in the normal gameplay handlers.
+
+Run `python tools/build_followup_maps.py` from `rabbitlands-client` to regenerate all six GLBs, manifests, client/server collision grids and shared target layouts. Client layout and server harvest nodes use the same authored coordinates. The native guide validates the `followup` state and teaches existing controls.
 
 Use `python tools/build_followup_maps.py --adventure crafting` for Cinderbank alone. Its dedicated generator is `tools/build_cinderbank.py`; full regeneration also calls it. It authors prop footprints and native picking dimensions alongside the art. Older crafting checkpoints inside a new prop or a closed court return to the refuge without resetting the lesson or inventory.
 
 Use `python tools/build_followup_maps.py --adventure summoning` for Reedway alone. `tools/build_reedway.py` supplies its woodland camp, wagon tableaux, companion course, encounter positions and matching latch approaches. Older summoning checkpoints receive the same safe-position recovery. The North calling circle stages the player before summoning; the lesson uses the real wandering leash and decay.
 
-After item changes, regenerate the recipe and knowledge catalogs with `tools/generate_manufacturing_catalog.py` against `../dev-server`, update the server content manifest hashes, and run `dev-server/tools/generate_perk_reference.py` for equipment-granted perks. Borrowed practice gear is explicitly excluded from generated public crafting and loot tables.
+After item changes, regenerate the recipe and knowledge catalogs with `tools/generate_manufacturing_catalog.py` against `../rabbitlands-server`, update the server content manifest hashes, and run `rabbitlands-server/tools/generate_perk_reference.py` for equipment-granted perks. Borrowed practice gear is explicitly excluded from generated public crafting and loot tables.
 
 ## Verification
 

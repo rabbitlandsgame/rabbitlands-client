@@ -89,8 +89,10 @@ A PASS label is evidence of source/runtime loading only. Record screenshots and 
 
 ## Branding and local settings
 
-The temporary typographic Rabbit Lands/RL wordmark replaces the old visible
-logo without altering gameplay artwork. Final logo artwork remains future work.
+The login logo, compact HUD mark, application/updater icons and startup splash
+use the Rabbit Lands artwork adapted from the selected Discord crest. See
+[`assets/branding/README.md`](assets/branding/README.md) for the canonical kit,
+usage and provenance. Other gameplay artwork is unchanged.
 The application title is Rabbit Lands, while the existing Godot user directory
 `Godot/app_userdata/Eloria` (Linux: `godot/app_userdata/Eloria`) is retained so
 settings, notes and trusted local certificates continue to work. Internal

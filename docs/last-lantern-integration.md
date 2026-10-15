@@ -1,7 +1,7 @@
 # The Last Lantern: native client integration
 
 Lantern Reach is now an opening adventure in the main Godot client and the
-matching `dev-server` checkout. New characters enter a private island, complete
+matching `rabbitlands-server` checkout. New characters enter a private island, complete
 25 server-owned objectives across eight scenes, and sail into Four Gates with
 their actual inventory, equipment and storage. The final objective is a real
 conversation with Gate Warden Ilyon.
@@ -13,6 +13,8 @@ launcher prepares local terrain, starts a loopback server on port 2008 and runs
 server. `-Fresh` creates another profile; it does not erase existing characters.
 Existing characters on a matching server can opt in once with `#tutorial lantern`.
 The original prototype's `project.godot` remains available for design reference.
+
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
 
 ## What is integrated
 
@@ -138,7 +140,7 @@ the boarding object, and sailing still uses the native confirmation.
 
 ## State and map ownership
 
-- `dev-server/eloria/lantern.py` defines the sequence and listens to ordinary
+- `rabbitlands-server/eloria/lantern.py` defines the sequence and listens to ordinary
   gameplay outcomes. `last_lantern` and `lantern_*` quest fields are persisted
   with the character. The client cannot grant items or advance gameplay lessons.
 - Capability `lantern_tutorial_v1` enables server packet 207, a validated JSON
@@ -204,10 +206,10 @@ checks pass. The rendered run also verifies real object picking and that the
 highlighted Mix Now button and manufacturing window remain on screen. A separate
 rendered map check passes with the island framing and smaller marker discs.
 
-- `dev-server/tests/test_lantern.py`: complete real-handler playthroughs with and
+- `rabbitlands-server/tests/test_lantern.py`: complete real-handler playthroughs with and
   without auto-gather and early equipment, persistence, private-copy isolation,
   defeat, crafting recovery, lost loot, older-character opt-in and marker arrivals.
-- `dev-server/tests/test_lantern_rewards.py`: reward totals, skill/Overall level
+- `rabbitlands-server/tests/test_lantern_rewards.py`: reward totals, skill/Overall level
   updates, caps, persistence before notification, early and previously paid kills,
   and protection against duplicate or unearned XP.
 - `godot-client/tests/integration/rendered_lantern.gd`: creates a real character

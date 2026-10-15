@@ -2,6 +2,8 @@
 
 Branch: `feature/magic-casting-prototype`, based on develop at `98b3f9e5c`.
 
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
 ## Selected approach and tutorial
 
 **Quick is the default live ring.** Hold Left Shift, hover a class, then choose
@@ -27,7 +29,7 @@ the requested size. Scrolling over an open ring still changes spell power.
 Run **`test-magic-tutorial.bat`** for the real Borrowed Sky tutorial with a
 separate local server and saved practice account. Log in as **RingStudent**
 with password **ringpractice**, then type **`#tutorial magic`** in chat.
-The matching server is the sibling `dev-server` checkout with the ring tutorial
+The matching server is the sibling `rabbitlands-server` checkout with the ring tutorial
 updates. Pass `-ServerRoot` to use another matching server checkout.
 Port 2013 is local only; `-Port` chooses another. `-Fresh` makes
 a new practice profile without deleting the previous one. `-Check` runs a
@@ -201,7 +203,7 @@ server's current allowed power when casting. All comparison modes share the
 same loadout so changing mode does not change the spells being compared.
 
 This local worktree shares artwork and imported textures with the existing
-`eloria-client` checkout. The `.bat` files run the game directly; use those
+`rabbitlands-client` checkout. The `.bat` files run the game directly; use those
 launchers rather than importing the shared artwork through the editor.
 The PowerShell launcher also accepts `-GodotPath` for a different installation
 of the pinned Godot 4.7.2 runtime.

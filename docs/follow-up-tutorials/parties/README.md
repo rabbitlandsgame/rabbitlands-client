@@ -198,6 +198,8 @@ Target 5/6 assembling the intended roster and locating a hurt member, and 4/6 co
 
 ## Source audit
 
-- [Parties](../../../../dev-server/eloria/parties.py), [server party commands/state](../../../../dev-server/eloria/server.py), [native Party window](../../../godot-client/src/ui/extension_windows.gd): actual invitations, roster, leadership and grace periods.
-- [Gauntlets](../../../../dev-server/eloria/gauntlets.py), [instance definitions](../../../../dev-server/eloria/spawn_groups.py): participant capture, strongest-member scale, forks, limits, cache behavior and exits.
-- [Magic runtime](../../../../dev-server/eloria/magic_runtime.py), [world](../../../../dev-server/eloria/world.py): real support eligibility and player-session behavior.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+- [Parties](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/parties.py), [server party commands/state](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/server.py), [native Party window](../../../godot-client/src/ui/extension_windows.gd): actual invitations, roster, leadership and grace periods.
+- [Gauntlets](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/gauntlets.py), [instance definitions](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/spawn_groups.py): participant capture, strongest-member scale, forks, limits, cache behavior and exits.
+- [Magic runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/magic_runtime.py), [world](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py): real support eligibility and player-session behavior.

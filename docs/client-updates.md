@@ -20,27 +20,33 @@ an anti-cheat attestation of executable code.
 
 ## Build machine setup
 
-The initial RSA signing key pair for this workspace has been generated:
+Signed release builds require the existing release private key matching
+`godot-client/data/update_public.pem`. The private key is not included in a
+clone. Keep it and its backup outside both repositories, never upload it, and
+select its actual private location with `--update-signing-key`. Moving a
+checkout does not create or replace that key.
 
-- Public key: `godot-client/data/update_public.pem` (commit this).
-- Private key: `../work-output/client-updates/signing-private.pem` (keep private,
-  back it up outside the repositories, never upload it).
-
-Future builds must use that same signing key. Players pin its public half in
-the initial client and restart launcher. To create a key pair in another
-workspace, use Godot's `tools/sign_client_release.gd` with arguments
+Players pin the public key in their initial client and restart launcher. Reuse
+that signing key for their updates. For a new distribution without an installed
+trust key, Godot's `tools/sign_client_release.gd` can generate a pair with
 `-- generate <private.pem> <public.pem>`; it refuses to overwrite existing keys.
-`--update-signing-key` and `--update-public-key` select a different pair at
-package time. The packaging tool verifies that the two keys match.
+`--update-public-key` selects the matching public key if needed. Packaging
+checks that the pair matches. A newly generated key is not trusted by existing
+installations; changing their trust root requires an initial installer upgrade.
 
-Godot 4.7.2 and its matching Windows/Linux export templates are required.
-Run the packaging commands from the client repository root (`rabbitlands-client/`
-or `clean_client/` in this workspace).
+Godot 4.7.2 and its matching Windows/Linux export templates are required. Run
+packaging from the final `rabbitlandsgame/rabbitlands-client` checkout, normally
+`C:\rabbitlands\rabbitlands-client`. Private source archives and retired
+migration or clean-stage checkouts are not release sources: builds record the
+Git history of the checkout they package.
 
-Commit the client changes, then run from that repository:
+Commit the client changes, then run from that repository, replacing the private
+key placeholder and using the verified server endpoint for the deployment:
 
 ```powershell
-python godot-client/tools/package_client.py --ref HEAD --server "YOUR_PUBLIC_HOST:2000"
+python godot-client/tools/package_client.py --ref HEAD `
+  --server "game.rabbitlandsgame.com:2000" `
+  --update-signing-key "C:\path\to\private\signing-private.pem"
 ```
 
 The default build includes the restart launcher and signed update artifacts.
@@ -55,7 +61,7 @@ shortcuts launch through the updater.
 
 ## Publish on GitHub
 
-The release repository is configured as `rabbitlandsgame/rabbitlands-client`; make it public before publishing player releases. Players need no
+The public release repository is `rabbitlandsgame/rabbitlands-client`. Publish player releases there using the project account. Players need no
 GitHub credentials, and no credentials are embedded in the client.
 
 The packaging tool writes a `*-github-release.txt` file listing the exact
@@ -130,15 +136,22 @@ requires an initial installer upgrade.
 Existing installations without this updater require one manual upgrade.
 Building artifacts does not upload them or change any live server policy.
 
-## Verification
+## Optional manual verification
 
-- Server: `python -m pytest tests/test_client_updates.py`
-- Payload/launchers: `python -m pytest godot-client/tests/test_client_release.py`
-- Runtime: `tests/test_client_updates.gd` verifies signatures, restart install,
-  corrupted data, archive paths, ancestry, backups and interrupted recovery.
-- Runtime and real local HTTPS downloads/retry:
-  `python godot-client/tests/run_client_update_tests.py --godot <godot-path>`.
+Choose the minimum checks for the behavior being changed. For example:
+
+- Launcher shortcut changes, from the client repository:
+  `python -m pytest -q godot-client/tests/test_client_release.py::test_updating_shortcuts_use_restart_launcher_for_both_platforms`.
+- Login enforcement changes, from the sibling server repository:
+  `python -m pytest -q tests/test_client_updates.py::test_login_denied_before_password_or_world_processing`.
+
+The older full modules above remain available manually when broader coverage is
+needed. `godot-client/tests/test_client_updates.gd` covers runtime signatures,
+restart install, corrupted data, archive paths, ancestry, backups and recovery.
+For relevant download/retry changes, the optional local HTTPS harness is
+`python godot-client/tests/run_client_update_tests.py --godot <godot-path>`.
 
 The runtime runner creates an isolated project, test keys, HTTPS server and
 certificate. Its fixtures never change an installed game or the production
-signing keys. The GitHub workflow runs these checks on client changes.
+signing keys. No GitHub Actions workflows ship in this repository; these checks
+are manual and the full historical suites are not release gates.

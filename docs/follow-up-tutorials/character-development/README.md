@@ -196,6 +196,8 @@ Use the shared protocol. Target 5/6 distinguishing skill practice from nexus acc
 
 ## Source audit
 
-- [Perks, point spending and removal](../../../../dev-server/eloria/perks.py), [character model](../../../../dev-server/eloria/models.py), [statistics](../../../../dev-server/eloria/stats.py): costs, tiers, derived effects and ownership.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+- [Perks, point spending and removal](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/perks.py), [character model](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/models.py), [statistics](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/stats.py): costs, tiers, derived effects and ownership.
 - [Native Statistics/Perks controls](../../../godot-client/src/app/main.gd): actual confirmation, cancellation and catalog presentation.
-- [World](../../../../dev-server/eloria/world.py), [recipes](../../../../dev-server/config/eloria/recipes.txt): real activity/XP, equipment and eligibility effects.
+- [World](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py), [recipes](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/config/eloria/recipes.txt): real activity/XP, equipment and eligibility effects.

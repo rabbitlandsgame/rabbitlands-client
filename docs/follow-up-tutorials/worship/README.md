@@ -207,6 +207,8 @@ Target 5/6 demonstrating the correct offering source and recognizing negative in
 
 ## Source audit
 
-- [God definitions and transitions](../../../../dev-server/eloria/gods.py): twelve patrons, rank -2 through 5, offerings, conflicts, cap and blessing parameters.
-- [Priest and XP runtime](../../../../dev-server/eloria/world.py): actual dialogue responses, generic services, XP modifiers and temporary skill lifecycle.
-- [Native Statistics/dialogue](../../../godot-client/src/app/main.gd), [item instances](../../../../dev-server/eloria/item_instances.py): display and exact ownership requirements.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+- [God definitions and transitions](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/gods.py): twelve patrons, rank -2 through 5, offerings, conflicts, cap and blessing parameters.
+- [Priest and XP runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py): actual dialogue responses, generic services, XP modifiers and temporary skill lifecycle.
+- [Native Statistics/dialogue](../../../godot-client/src/app/main.gd), [item instances](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/item_instances.py): display and exact ownership requirements.

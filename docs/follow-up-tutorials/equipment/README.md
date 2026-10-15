@@ -196,7 +196,9 @@ Apply the shared protocol. Target 5/6 assembling a compatible kit and repairing 
 
 ## Source audit
 
-- [Items](../../../../dev-server/eloria/items.py), [instances](../../../../dev-server/eloria/item_instances.py), [rarity](../../../../dev-server/eloria/rarity.py): equipment definitions, identity and modifiers.
-- [World runtime](../../../../dev-server/eloria/world.py): equipment swaps, wear, typed attacks and direct `repair_item` behavior.
-- [Perks](../../../../dev-server/eloria/perks.py), [ranging](../../../../dev-server/eloria/ranging.py): conditional weapon effects and ranged rules.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+- [Items](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/items.py), [instances](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/item_instances.py), [rarity](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/rarity.py): equipment definitions, identity and modifiers.
+- [World runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py): equipment swaps, wear, typed attacks and direct `repair_item` behavior.
+- [Perks](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/perks.py), [ranging](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/ranging.py): conditional weapon effects and ranged rules.
 - [Native client](../../../godot-client/src/app/main.gd): inventory inspection, equipment controls and feedback.

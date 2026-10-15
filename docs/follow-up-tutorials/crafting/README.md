@@ -198,7 +198,9 @@ Apply the shared six-newcomer protocol. Target 5/6 diagnosing a real recipe bloc
 
 ## Source audit
 
-- [Recipe catalog](../../../../dev-server/config/eloria/recipes.txt), [recipe outcomes](../../../../dev-server/eloria/recipes.py), [knowledge](../../../../dev-server/eloria/knowledge.py), [book tuning](../../../../dev-server/config/eloria/books.txt): actual chains, research and failure definitions.
-- [World runtime](../../../../dev-server/eloria/world.py): storage-source checks, tools, resource costs, mixing loops and research ticks.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+- [Recipe catalog](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/config/eloria/recipes.txt), [recipe outcomes](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/recipes.py), [knowledge](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/knowledge.py), [book tuning](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/config/eloria/books.txt): actual chains, research and failure definitions.
+- [World runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py): storage-source checks, tools, resource costs, mixing loops and research ticks.
 - [Native client](../../../godot-client/src/app/main.gd): Manufacturing controls, client-local queue, source toggle and research display.
-- [Rare mixes](../../../../dev-server/eloria/rare_mixes.py), [perks](../../../../dev-server/eloria/perks.py): specialist outcomes without mandatory random rolls.
+- [Rare mixes](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/rare_mixes.py), [perks](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/perks.py): specialist outcomes without mandatory random rolls.

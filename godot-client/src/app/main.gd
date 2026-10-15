@@ -13105,33 +13105,21 @@ func _cursor_context_at(viewport_position: Vector2) -> Dictionary:
 			context["target"] = "interactive"
 	return context
 
-## Temporary typographic branding; keep the original scene controls and art paths
-## stable until the final Rabbit Lands visual identity is commissioned.
-func _apply_rabbitlands_wordmark() -> void:
+## Rabbit Lands artwork derived from the selected Discord identity.
+## Preserve existing scene controls and compatibility-sensitive resource paths.
+func _apply_rabbitlands_branding() -> void:
+	login_logo.texture = _external_texture("res://assets/branding/rabbitlands-logo.png")
+	hud_logo.texture = _external_texture("res://assets/branding/rabbitlands-mark.png")
 	for target: TextureRect in [login_logo, hud_logo]:
-		target.texture = null
 		target.tooltip_text = "Rabbit Lands"
-		var wordmark := target.get_node_or_null("RabbitLandsWordmark") as Label
-		if wordmark == null:
-			wordmark = Label.new()
-			wordmark.name = "RabbitLandsWordmark"
-			target.add_child(wordmark)
-		wordmark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		wordmark.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		wordmark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		wordmark.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		wordmark.text = "RABBIT\nLANDS" if target == login_logo else "RL"
-		wordmark.add_theme_font_size_override("font_size", 36 if target == login_logo else 23)
-		wordmark.add_theme_color_override("font_color", Color("e5c68c"))
-		wordmark.add_theme_color_override("font_outline_color", Color("211a13"))
-		wordmark.add_theme_constant_override("outline_size", 5 if target == login_logo else 3)
+
 
 func _apply_eloria_art() -> void:
 	login_background.texture = _external_texture(
 		"res://assets/ui/eloria_login_landfall_background.png")
 	%CreationBackdrop.texture = _external_texture(
 		"res://assets/ui/eloria_character_creation_background.jpg")
-	_apply_rabbitlands_wordmark()
+	_apply_rabbitlands_branding()
 	_hud_active_atlas = _external_texture("res://assets/ui/eloria_gamebuttons.png")
 	_hud_inactive_atlas = _external_texture("res://assets/ui/eloria_gamebuttons_inactive.png")
 	if _hud_active_atlas != null:

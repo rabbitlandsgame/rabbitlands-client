@@ -1,15 +1,17 @@
 # The Borrowed Sky: playable client integration
 
 Stillglass Observatory is implemented in the main Godot client and sibling
-`dev-server`. Its private 120 × 120 map has four gates, 39 saved core objectives
+`rabbitlands-server`. Its private 120 × 120 map has four gates, 39 saved core objectives
 and 31 objectives across four optional experiments. Players use the normal
 Left Shift spell ring, spellbook, quick slots, actor and ground targeting, inventory,
 storage, merchant, active effects and dialogue.
 
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
 ## Play
 
 For this branch, run **[`test-magic-tutorial.bat`](../../test-magic-tutorial.bat)**.
-It starts the matching sibling `dev-server` checkout on localhost:2013
+It starts the matching sibling `rabbitlands-server` checkout on localhost:2013
 with a separate database. Log in as **RingStudent**, password **ringpractice**,
 then enter **`#tutorial magic`**. `-Fresh` starts another local profile without
 deleting saved progress; `-ServerRoot` selects another matching server checkout.
@@ -158,7 +160,7 @@ The authored geometry, client collision and server terrain come from
 courts reject Blink bypasses. The gap and Recall annex require real movement
 spells. Markers follow current actor positions and provide a nearby approach.
 
-The server content lives in `dev-server/eloria/sky.py` and `sky_lessons.py`.
+The server content lives in `rabbitlands-server/eloria/sky.py` and `sky_lessons.py`.
 The client uses `src/world/sky_scene.gd`, the existing quest guide and native
 spell UI. The implementation also fixes creature spell damage stopping at 1 HP,
 includes Cripple's evasion modifier in creature melee checks, cancels timed magic

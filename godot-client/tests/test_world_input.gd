@@ -443,8 +443,8 @@ func _run() -> void:
 		"legacy clock and compass use the existing Eloria HUD atlas")
 	_expect(clock_face.gui_input.is_connected(Callable(main, "_on_clock_gui_input"))
 		and compass_face.gui_input.is_connected(Callable(main, "_on_compass_gui_input"))
-		and main.get_node_or_null("GameView/EloriaLogoFrame/HudLogo/RabbitLandsWordmark") is Label,
-		"clock, compass, and top-right Rabbit Lands wordmark are interactive/present")
+		and (main.get_node("%HudLogo") as TextureRect).texture != null,
+		"clock, compass, and top-right Rabbit Lands crest are interactive/present")
 	_expect(InputMap.has_action("toggle_console")
 		and InputMap.has_action("toggle_inventory")
 		and InputMap.has_action("recenter_viewport")

@@ -2,15 +2,15 @@
 
 ## Magic tutorial storyboard
 
-**Implemented storyboard · 9 September 2026 · Native Eloria client · Solo · Target: 45–55 minutes**
+**Implemented storyboard · 9 September 2026 · Native Rabbit Lands client · Solo · Target: 45–55 minutes**
 
 [Open the illustrated storyboard](storyboard.html) or the
 [play instructions and implementation notes](implementation.md).
 The core rescue and four experiments now run in the native client with the
-matching `dev-server`; enter `#tutorial magic` after leaving The Last Lantern.
+matching `rabbitlands-server`; enter `#tutorial magic` after leaving The Last Lantern.
 This document retains the design and human playtest specification. It follows the four-gate structure and
 show → practice → independent application rhythm of [The Second Bell](../invasion-tutorial/README.md).
-Mechanics below were checked against the current client and sibling `dev-server`.
+Mechanics below were checked against the current client and sibling `rabbitlands-server`.
 Session lengths and learning targets are hypotheses for human testing.
 
 The supplies brought through Bellwatch have reached **Stillglass Observatory**.
@@ -505,15 +505,17 @@ coordination or all live-server behavior.
 
 ## Source audit
 
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
 | Source | Basis for this design |
 | --- | --- |
-| [Current spellbook definitions](../../../dev-server/config/eloria/magic_book.json) and [reference](../../../dev-server/docs/spellbook.md) | 31 families / 86 variants, scopes, names, requirements and utility rules |
-| [Magic runtime](../../../dev-server/eloria/magic_runtime.py) | Actual target eligibility, validation/spending, area geometry, Transmute/Recall, damage and timed effects |
-| [Magic costs and power](../../../dev-server/eloria/magic.py) | Sigils, per-family limits, charges/foci, success/fizzle costs, Magic Offense/Defense scaling |
-| [World behavior](../../../dev-server/eloria/world.py) and [potions](../../../dev-server/eloria/potions.py) | Creature detection, physical/elemental bonuses, food regeneration, potion effects/cooldowns |
+| [Current spellbook definitions](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/config/eloria/magic_book.json) and [reference](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/docs/spellbook.md) | 31 families / 86 variants, scopes, names, requirements and utility rules |
+| [Magic runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/magic_runtime.py) | Actual target eligibility, validation/spending, area geometry, Transmute/Recall, damage and timed effects |
+| [Magic costs and power](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/magic.py) | Sigils, per-family limits, charges/foci, success/fizzle costs, Magic Offense/Defense scaling |
+| [World behavior](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py) and [potions](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/potions.py) | Creature detection, physical/elemental bonuses, food regeneration, potion effects/cooldowns |
 | [Spellbook UI](../../godot-client/src/ui/spells_window.gd), [selection](../../godot-client/src/ui/magic_selection.gd), [catalog](../../godot-client/src/ui/spell_catalog.gd) | Actual controls, filters, missing-requirement display, actor/ground selection, Escape, utility confirmation |
 | [Main client](../../godot-client/src/app/main.gd) and [bindings](../../godot-client/project.godot) | Quick slots, power stepper, effect feedback and current default keys |
-| [Magic book tests](../../../dev-server/tests/test_magic_book.py) and [UI tests](../../godot-client/tests/test_magic_book_ui.gd) | Existing test coverage for family contracts and target/utility behavior; not evidence this proposed tutorial was played |
+| [Magic book tests](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/tests/test_magic_book.py) and [UI tests](../../godot-client/tests/test_magic_book_ui.gd) | Existing test coverage for family contracts and target/utility behavior; not evidence this proposed tutorial was played |
 | [Second Bell implementation](../invasion-tutorial/implementation.md) | Four-gate native presentation, reliable markers, saved progress and real-action precedent |
 
 The following coverage table is generated from the audited spellbook. **Core**

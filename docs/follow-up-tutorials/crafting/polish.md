@@ -4,7 +4,7 @@ The Broken Workshop now uses its own environment kit in the native client. This 
 
 ## Play
 
-Run the updated client and `dev-server`, then choose **Help → Practice adventures → The Broken Workshop**, or enter `#tutorial crafting`. An existing checkpoint resumes. The first core playthrough begins with a cold workshop; completed optional exercises use the restored workshop.
+Run the updated client and `rabbitlands-server`, then choose **Help → Practice adventures → The Broken Workshop**, or enter `#tutorial crafting`. An existing checkpoint resumes. The first core playthrough begins with a cold workshop; completed optional exercises use the restored workshop.
 
 ## What changed
 
@@ -36,7 +36,7 @@ These are native renderer captures through the production WorldLoader. The art h
 
 ## Verification and remaining work
 
-- `dev-server/tests/test_roads.py`: **38 passed**, covering the tutorial paths and saved workshop outcomes, including old-position recovery.
+- `rabbitlands-server/tests/test_roads.py`: **38 passed**, covering the tutorial paths and saved workshop outcomes, including old-position recovery.
 - `tests/test_cinderbank_map.py`: **3 tests / 7 subtests passed**, checking coordinate parity, binary collision parity, prop footprints, reachable open-court approaches and closed-court isolation.
 - Native protocol: **48 checks passed**. World object placement tests pass, including authored resource picking and active highlights.
 - `rendered_cinderbank.gd`: **10 captures**, zero failures; verifies restoration visibility, moving machinery and geometry surviving a cached reload.
@@ -45,6 +45,8 @@ These are native renderer captures through the production WorldLoader. The art h
 The renderer was reviewed at normal gameplay scale as well as wider art views. A novice playtest is still needed for comprehension, pacing and camera preferences. Bespoke character art, richer ambience, and further narrative staging remain future quality work. Reedway has since received its own [caravan environment pass](../summoning/polish.md); the other four tutorial environments still use the initial kit.
 
 ## Source and provenance
+
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
 
 Rebuild with `python tools/build_followup_maps.py --adventure crafting` from the client repository. The workshop geometry is authored in `tools/build_cinderbank.py`; materials reuse existing Eloria stone, timber and ground textures from the Sunmane Steppe palette. No externally sourced art was added. Geometry batches by named assembly and material (110 mesh nodes); local lamps do not cast additional dynamic shadows.
 

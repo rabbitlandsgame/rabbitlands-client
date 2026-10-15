@@ -2,12 +2,12 @@
 
 ## Invasion tutorial storyboard
 
-**Design draft · 9 September 2026 · Native Eloria client · Solo · 30–40 minutes**
+**Design draft · 9 September 2026 · Native Rabbit Lands client · Solo · 30–40 minutes**
 
 [Open the visual storyboard](storyboard.html). The native client implementation
 is now playable; see [implementation, launch instructions and verification](implementation.md).
 This document preserves the design and human playtest plan. Mechanics were checked
-against the client and `dev-server` source. Times and learning targets below remain
+against the client and `rabbitlands-server` source. Times and learning targets below remain
 hypotheses for human testing.
 
 After **The Last Lantern**, Ilyon sends the player to Bellwatch, a small outpost
@@ -482,6 +482,8 @@ shared kill credit or team coordination.
 
 ## Source audit
 
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
 Paths below are relative to this folder. Code takes precedence over older prose;
 some README descriptions and command-help labels are stale. For example, the
 current `#lb` handler lists nearby bags, despite a help label calling it a
@@ -493,13 +495,13 @@ leaderboard. This storyboard therefore does not teach a leaderboard command.
 | [Client controls](../../godot-client/project.godot) and [main client](../../godot-client/src/app/main.gd) | Map, chat, inventory, statistics, ranging and world targeting |
 | [Ranging window](../../godot-client/src/ui/ranging_window.gd) | Real shot/session measurements and unavailable critical rate |
 | [Invasion Assistant UI](../../godot-client/src/ui/invasion_assistant.gd) | Maps, group builder, monsters, privileged operational controls |
-| [Server world](../../../dev-server/eloria/world.py) | Spawn groups, boss response/strength/dispersal, flee, actor AI, drops and public totals |
-| [Chat handlers](../../../dev-server/eloria/server.py) and [IM commands](../../../dev-server/eloria/im_commands.py) | `#il`, `#ii`, permissions, broadcasts, temporary groups and operational commands |
-| [Spawn definitions](../../../dev-server/eloria/spawn_groups.py) | Respawn window semantics, quantity scaling, boss fields and instance distinctions |
-| [Boss content](../../../dev-server/config/eloria/spawn_groups/invasion/bosses.def) | Actual authored gear, healing and summon budgets |
-| [Settings](../../../dev-server/eloria/settings.py), [served settings](../../../dev-server/config/eloria/server.txt), [potions](../../../dev-server/eloria/potions.py) | Pursuit default, flee behavior and recovery item values |
-| [Wander tests](../../../dev-server/tests/test_invasion_wander.py), [spread tests](../../../dev-server/tests/test_invasion_spread.py), [boss tests](../../../dev-server/tests/test_boss_fight.py) | Behavioral evidence for the lesson assumptions |
-| [Gauntlets](../../../dev-server/eloria/gauntlets.py), [territory raids](../../../dev-server/eloria/territory_raids.py), [specialty events](../../../dev-server/docs/special-events.md) | Adjacent systems with distinct lifecycles |
+| [Server world](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py) | Spawn groups, boss response/strength/dispersal, flee, actor AI, drops and public totals |
+| [Chat handlers](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/server.py) and [IM commands](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/im_commands.py) | `#il`, `#ii`, permissions, broadcasts, temporary groups and operational commands |
+| [Spawn definitions](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/spawn_groups.py) | Respawn window semantics, quantity scaling, boss fields and instance distinctions |
+| [Boss content](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/config/eloria/spawn_groups/invasion/bosses.def) | Actual authored gear, healing and summon budgets |
+| [Settings](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/settings.py), [served settings](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/config/eloria/server.txt), [potions](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/potions.py) | Pursuit default, flee behavior and recovery item values |
+| [Wander tests](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/tests/test_invasion_wander.py), [spread tests](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/tests/test_invasion_spread.py), [boss tests](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/tests/test_boss_fight.py) | Behavioral evidence for the lesson assumptions |
+| [Gauntlets](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/gauntlets.py), [territory raids](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/territory_raids.py), [specialty events](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/docs/special-events.md) | Adjacent systems with distinct lifecycles |
 
 The automated completion and rendered-client results are recorded in
 [implementation.md](implementation.md). The human learning study above remains

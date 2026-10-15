@@ -1,5 +1,9 @@
 # Rabbit Lands Client
 
+<img src="godot-client/assets/branding/rabbitlands-logo.png" alt="Rabbit Lands rabbit-ear RL logo" width="320">
+
+[Brand artwork and usage](godot-client/assets/branding/README.md)
+
 **Rabbit Lands (RL)** is an independently developed fantasy MMORPG featuring
 exploration, combat, crafting, magic, character progression and a persistent
 multiplayer world. Its name is a lighthearted nod to classic MMORPG traditions;

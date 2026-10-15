@@ -335,8 +335,8 @@ texture_format/s3tc_bptc=true
 texture_format/etc2_astc=false
 binary_format/architecture="x86_64"
 application/modify_resources=true
-application/icon=""
-application/console_wrapper_icon=""
+application/icon="res://assets/branding/rabbitlands-icon.ico"
+application/console_wrapper_icon="res://assets/branding/rabbitlands-icon.ico"
 application/icon_interpolation=4
 application/file_version=""
 application/product_version=""
@@ -1321,7 +1321,8 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path) -> None:
             continue
         inside = PurePosixPath(relative).relative_to("godot-client")
         if (str(inside) in packed and inside.parts[0] not in ("data", "schemas")
-                and inside.suffix.lower() not in (".json", ".txt", ".csv")):
+                and inside.suffix.lower() not in (".json", ".txt", ".csv")
+                and str(inside) != "assets/branding/rabbitlands-icon.ico"):
             packed_only += 1
             packed_bytes += (build_dir / relative).stat().st_size
             continue
@@ -2588,6 +2589,7 @@ SolidCompression=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={{app}}\\app\\RabbitLands.exe
+SetupIconFile={stage}\\app\\assets\\branding\\rabbitlands-icon.ico
 {"DiskSpanning=yes" + chr(10) + "DiskSliceSize=max" if spanning else ""}
 
 [Tasks]
@@ -2604,9 +2606,9 @@ Source: "{stage}\\*"; DestDir: "{{app}}"; Excludes: "{MARKER}"; Flags: recursesu
 
 [Icons]
 Name: "{{group}}\\RabbitLands"; Filename: "{{app}}\\{launch_binary}"; Parameters: "{launch_parameters}"; WorkingDir: "{{app}}\\app"
-Name: "{{group}}\\RabbitLands (debug console)"; Filename: "{{app}}\\RabbitLands (debug console).bat"; WorkingDir: "{{app}}\\app"
-Name: "{{group}}\\RabbitLands (compatibility)"; Filename: "{{app}}\\RabbitLands (compatibility).bat"; WorkingDir: "{{app}}\\app"
-Name: "{{group}}\\RabbitLands (safe mode)"; Filename: "{{app}}\\RabbitLands (safe mode).bat"; WorkingDir: "{{app}}\\app"
+Name: "{{group}}\\RabbitLands (debug console)"; Filename: "{{app}}\\RabbitLands (debug console).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
+Name: "{{group}}\\RabbitLands (compatibility)"; Filename: "{{app}}\\RabbitLands (compatibility).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
+Name: "{{group}}\\RabbitLands (safe mode)"; Filename: "{{app}}\\RabbitLands (safe mode).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
 Name: "{{userdesktop}}\\RabbitLands"; Filename: "{{app}}\\{launch_binary}"; Parameters: "{launch_parameters}"; WorkingDir: "{{app}}\\app"; Tasks: desktopicon
 
 [Run]
@@ -2631,7 +2633,7 @@ def main() -> int:
     parser.add_argument("--godot", help="Godot console exe (default: the one in the client checkout)")
     parser.add_argument("--build-dir", type=Path, default=DIST / ".build" / "client-src",
                         help="persistent build worktree (default dist/.build/client-src)")
-    parser.add_argument("--out", type=Path, default=DIST, help="output folder (default eloria-project/dist)")
+    parser.add_argument("--out", type=Path, default=DIST, help="output folder (default: workspace dist/ beside the client repository)")
     parser.add_argument("--server", help="bake HOST[:PORT] into the launchers instead of the login default")
     parser.add_argument("--force", action="store_true", help="replace an existing package for this commit")
     parser.add_argument("--no-smoke", action="store_true", help="skip the headless launch check")

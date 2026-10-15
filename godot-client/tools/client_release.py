@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import zipfile
 from pathlib import Path
@@ -96,8 +97,12 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
         (scripts / name).write_bytes((source / "src" / "updates" / name).read_bytes())
     (project / "data").mkdir(exist_ok=True)
     (project / "data" / "client_release.json").write_text(json.dumps(metadata), encoding="utf-8")
+    branding = project / "assets" / "branding"
+    branding.mkdir(parents=True, exist_ok=True)
+    for name in ("rabbitlands-icon.png", "rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
+        shutil.copyfile(source / "assets" / "branding" / name, branding / name)
     (project / "project.godot").write_text(
-        'config_version=5\n[application]\nconfig/name="Rabbit Lands"\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\nconfig/custom_user_dir_name.linuxbsd="godot/app_userdata/Eloria"\nrun/main_scene="res://main.tscn"\n'
+        'config_version=5\n[application]\nconfig/name="Rabbit Lands"\nconfig/icon="res://assets/branding/rabbitlands-icon.png"\nboot_splash/image="res://assets/branding/rabbitlands-mark-64.png"\nboot_splash/bg_color=Color(0.035, 0.043, 0.055, 1)\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\nconfig/custom_user_dir_name.linuxbsd="godot/app_userdata/Eloria"\nrun/main_scene="res://main.tscn"\n'
         '[display]\nwindow/size/viewport_width=440\nwindow/size/viewport_height=100\n'
         '[rendering]\nrenderer/rendering_method="gl_compatibility"\n', encoding="utf-8")
     (project / "main.tscn").write_text(

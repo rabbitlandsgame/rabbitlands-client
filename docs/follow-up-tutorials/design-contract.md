@@ -4,7 +4,7 @@
 
 ## Teach through an ordinary action
 
-Use the native client with the matching sibling `dev-server`. Reuse its actual inventory, storage, manufacturing, Summoning, Statistics, Perks, trade, party and dialogue controls. When a capability currently uses chat, teach the real command and its response. A proposed convenience button must dispatch the same validated request and is listed as new UI work; a storyboard cannot assume it exists.
+Use the native client with the matching sibling `rabbitlands-server`. Reuse its actual inventory, storage, manufacturing, Summoning, Statistics, Perks, trade, party and dialogue controls. When a capability currently uses chat, teach the real command and its response. A proposed convenience button must dispatch the same validated request and is listed as new UI work; a storyboard cannot assume it exists.
 
 Each lesson follows a cause-and-effect sequence: show a need in the world; expose the relevant control; let the player perform it; show the result; change one condition and let them adapt. Opening a window is valid orientation evidence, but never substitutes for a successful transaction, useful effect or combat action. Guide dialogue is short and can be revisited. One active objective names the intended outcome and, only when needed, one suggested control.
 
@@ -70,4 +70,6 @@ The party, trade and PvP stories additionally require two normal client sessions
 
 ## Audited baseline
 
-The existing [magic practice](../../../dev-server/eloria/sky.py), [invasion practice](../../../dev-server/eloria/bell.py), [client guide](../../godot-client/src/ui/lantern_guide.gd), [world runtime](../../../dev-server/eloria/world.py) and [native client](../../godot-client/src/app/main.gd) provide precedents. Individual specifications link the relevant feature modules and identify gaps. Source inspection establishes design feasibility, not proof that these eight proposed adventures work.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+The existing [magic practice](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/sky.py), [invasion practice](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/bell.py), [client guide](../../godot-client/src/ui/lantern_guide.gd), [world runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py) and [native client](../../godot-client/src/app/main.gd) provide precedents. Individual specifications link the relevant feature modules and identify gaps. Source inspection establishes design feasibility, not proof that these eight proposed adventures work.

@@ -3,7 +3,7 @@ extends RefCounted
 ## Low-cost entry-screen styling inspired by Oldcraft's fantasy materials and
 ## open, scenic login composition.
 ##
-## The screens keep Eloria's logo, world painting, controls and navigation.
+## The screens keep the Rabbit Lands logo, world painting, controls and navigation.
 ## This helper supplies the visual language: a restrained floating login card,
 ## warm brass edges, burgundy action buttons, inset fields and a moonlit
 ## preview stage. Character creation keeps its heavier carved-stone treatment.
