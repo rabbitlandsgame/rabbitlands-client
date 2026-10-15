@@ -45,7 +45,7 @@ const BINDABLE := {
 		"toggle_mail", "toggle_party", "toggle_guild", "toggle_achievements"],
 	"Actions": ["attack_selected", "combat_target", "summon_behavior",
 		"toggle_sit", "toggle_show_through_obstacles", "screenshot", "cancel",
-		"connect", "disconnect"],
+		"connect", "disconnect", "open_last_url"],
 	"Items": ["quick_item_1", "quick_item_2", "quick_item_3", "quick_item_4",
 		"quick_item_5", "quick_item_6", "quick_item_7", "quick_item_8"],
 	"Spells": ["quick_spell_1", "quick_spell_2", "quick_spell_3",

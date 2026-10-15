@@ -8,8 +8,8 @@ extends Control
 ##   so it can never drift from what the keys and commands actually are. A
 ##   help page maintained by hand goes stale the first time a key moves.
 ## * **Notes** is the player's own notepad, kept in the client's settings file.
-## * **Links** collects the addresses the server has said in chat, so a URL
-##   scrolling past is not lost. It reads what arrived; it invents nothing.
+## * **URLs** keeps links encountered in visible chat for the current session,
+##   independently of the bounded message log. Nothing is fetched automatically.
 ## * **Encyclopedia** is laid out the way Eternal Lands lays its own out - an
 ##   index of categories, a page of links per category and a page per entry -
 ##   and lives in its own script. Half of it is original Eloria reference text
@@ -36,8 +36,10 @@ extends Control
 ## autoload singletons are registered, and this reads `AppState` directly.
 
 const PANEL_SIZE := Vector2(640.0, 460.0)
+const ChatMessages := preload("res://src/ui/chat_messages.gd")
 ## The tab the encyclopedia icon and Ctrl+E open on.
 const ENCYCLOPEDIA_TAB := 3
+const URLS_TAB := 2
 ## Nothing may cover the fixed resource rail down the right-hand edge.
 const RESERVED_RIGHT_RAIL := 96.0
 
@@ -50,6 +52,13 @@ var tabs: TabContainer
 var help_text: RichTextLabel
 var notes_edit: TextEdit
 var links_list: ItemList
+var selected_url: LineEdit
+var links_status: Label
+var open_link_button: Button
+var copy_link_button: Button
+var session_urls: Array[String] = []
+## Injectable for tests, so checking an explicit open never launches a browser.
+var url_opener: Callable = func(url: String) -> Error: return OS.shell_open(url)
 var encyclopedia: EncyclopediaView
 var almanac_text: RichTextLabel
 var buddy_list: ItemList
@@ -72,6 +81,9 @@ func configure(commands: ConsoleCommands, bindable_actions: Dictionary,
 	notes_edit.text = notes
 	encyclopedia.set_bookmarks(bookmarks)
 	_refresh_help()
+	for line: Dictionary in AppState.chat_lines:
+		_observe_links(line)
+	_refresh_links()
 
 ## The catalogues the encyclopedia builds its generated pages from. They are
 ## read after this window is built, so they arrive separately.
@@ -112,6 +124,27 @@ func toggle() -> void:
 func close() -> void:
 	panel.hide()
 
+func open_urls() -> void:
+	panel.show()
+	panel.z_index = 30 # Stay reachable above the full chat log and both feeds.
+	panel.move_to_front()
+	tabs.current_tab = URLS_TAB
+	_refresh_links()
+
+func open_last_url() -> Error:
+	if session_urls.is_empty():
+		return ERR_DOES_NOT_EXIST
+	return _open_url(session_urls.back())
+
+func _open_url(address: String) -> Error:
+	var url := ConsoleCommands.web_url(address)
+	if url.is_empty():
+		return ERR_INVALID_PARAMETER
+	var result: Error = url_opener.call(url)
+	if result != OK:
+		links_status.text = "Could not open the browser. Select the URL and copy it."
+	return result
+
 func tab_titles() -> Array[String]:
 	var titles: Array[String] = []
 	for index: int in range(tabs.get_tab_count()):
@@ -125,18 +158,29 @@ func entry_count() -> int:
 func almanac_day_count() -> int:
 	return (AppState.almanac.get("catalogue", []) as Array).size()
 
-## Every address the server has said, oldest first and each one only once.
+## Each address once, in order of its most recent appearance in this session.
 func known_links() -> Array[String]:
-	var found: Array[String] = []
-	for line_value: Variant in AppState.chat_lines:
-		for url: String in ConsoleCommands.urls_in(
-				str((line_value as Dictionary).get("text", ""))):
-			if not found.has(url):
-				found.append(url)
-	return found
+	return session_urls.duplicate()
+
+func _observe_links(line: Dictionary) -> bool:
+	# Use the chat log's ignore/filter decisions, including private messages.
+	if console_commands != null and ChatMessages.kind(line) != "system" \
+			and not console_commands.allows(ChatMessages.speaker(line), str(line.get("text", ""))):
+		return false
+	var urls := ConsoleCommands.urls_in(str(line.get("text", "")))
+	for url: String in urls:
+		session_urls.erase(url)
+		session_urls.append(url)
+	return not urls.is_empty()
 
 func _on_state_changed(path: StringName) -> void:
-	if path == &"chat" and panel.visible:
+	if path == &"chat":
+		if not AppState.chat_lines.is_empty():
+			var changed := _observe_links(AppState.chat_lines.back())
+			if changed and panel.visible:
+				_refresh_links()
+	elif path == &"connection" and AppState.connection_state == "disconnected":
+		session_urls.clear()
 		_refresh_links()
 	elif path == &"almanac":
 		_refresh_almanac()
@@ -272,15 +316,38 @@ static func _trimmed(value: float) -> String:
 	return "%.2f" % value
 
 func _refresh_links() -> void:
-	var links: Array[String] = known_links()
-	if links.size() == links_list.item_count:
-		return
+	var keep := selected_url.text
 	links_list.clear()
-	for url: String in links:
+	for index: int in range(session_urls.size() - 1, -1, -1):
+		var url := session_urls[index]
 		links_list.add_item(url)
-	if links.is_empty():
-		links_list.add_item("Nothing has been linked yet.")
+		links_list.set_item_metadata(links_list.item_count - 1, url)
+		links_list.set_item_tooltip(links_list.item_count - 1, url)
+		if url == keep:
+			links_list.select(links_list.item_count - 1)
+	if session_urls.is_empty():
+		links_list.add_item("No URLs have appeared in chat this session.")
 		links_list.set_item_disabled(0, true)
+		selected_url.clear()
+	elif keep.is_empty() or not session_urls.has(keep):
+		links_list.select(0)
+		selected_url.text = session_urls.back()
+	open_link_button.disabled = session_urls.is_empty()
+	copy_link_button.disabled = session_urls.is_empty()
+	links_status.text = "%d URL%s this session · newest first · F2 opens the latest" % [
+		session_urls.size(), "" if session_urls.size() == 1 else "s"]
+
+func _on_link_selected(index: int) -> void:
+	selected_url.text = str(links_list.get_item_metadata(index))
+	selected_url.caret_column = 0
+
+func _on_link_activated(index: int) -> void:
+	_on_link_selected(index)
+	_open_url(selected_url.text)
+
+func _copy_link() -> void:
+	if not selected_url.text.is_empty():
+		DisplayServer.clipboard_set(selected_url.text)
 
 ## Kept because the reference window's own tests reach the encyclopedia this
 ## way: the nth entry across every category, in index order.
@@ -363,10 +430,34 @@ func _build() -> void:
 	var links_page := VBoxContainer.new()
 	links_page.name = "Links"
 	tabs.add_child(links_page)
+	tabs.set_tab_title(URLS_TAB, "URLs")
+	links_status = Label.new()
+	links_status.name = "URLStatus"
+	links_page.add_child(links_status)
 	links_list = ItemList.new()
 	links_list.name = "LinksList"
 	links_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	links_page.add_child(links_list)
+	links_list.item_selected.connect(_on_link_selected)
+	links_list.item_activated.connect(_on_link_activated)
+	selected_url = LineEdit.new()
+	selected_url.name = "SelectedURL"
+	selected_url.editable = false
+	selected_url.placeholder_text = "Select a URL to open or copy"
+	links_page.add_child(selected_url)
+	var link_actions := HBoxContainer.new()
+	links_page.add_child(link_actions)
+	open_link_button = Button.new()
+	open_link_button.name = "OpenURL"
+	open_link_button.text = "Open in browser"
+	open_link_button.pressed.connect(func() -> void: _open_url(selected_url.text))
+	link_actions.add_child(open_link_button)
+	copy_link_button = Button.new()
+	copy_link_button.name = "CopyURL"
+	copy_link_button.text = "Copy URL"
+	copy_link_button.pressed.connect(_copy_link)
+	link_actions.add_child(copy_link_button)
+	_refresh_links()
 
 	encyclopedia = EncyclopediaView.new()
 	# Named before it is added: the tab container reads the child's name for

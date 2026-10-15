@@ -29,7 +29,7 @@ func _run() -> void:
 	await process_frame
 	_expect(panel.visible, "the button opens it")
 	_expect((window.call("tab_titles") as Array)
-			== ["Help", "Notes", "Links", "Encyclopedia", "Almanac", "Buddies"],
+			== ["Help", "Notes", "URLs", "Encyclopedia", "Almanac", "Buddies"],
 		"it carries the six pages: %s" % str(window.call("tab_titles")))
 	var rect: Rect2 = panel.get_global_rect()
 	_expect(rect.position.x >= 0.0 and rect.position.y >= 0.0

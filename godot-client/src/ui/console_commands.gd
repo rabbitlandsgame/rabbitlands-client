@@ -75,13 +75,39 @@ var current_tile: Variant = null
 ## nothing is fetched, and the text is left exactly as it arrived.
 static func urls_in(text: String) -> Array[String]:
 	var found: Array[String] = []
-	for word: String in text.replace("	", " ").split(" ", false):
-		var candidate: String = word.strip_edges().trim_suffix(".").trim_suffix(",")
-		var lowered: String = candidate.to_lower()
-		if (lowered.begins_with("http://") or lowered.begins_with("https://")
-				or lowered.begins_with("www.")) and candidate.length() > 8:
+	var pattern := RegEx.create_from_string(
+		"(?i)(?<![a-z0-9_@/:])(?:https?://|www\\.)[^\\s<>\"\\x00-\\x1f]+")
+	for match_value: RegExMatch in pattern.search_all(text):
+		var candidate := match_value.get_string()
+		# Keep balanced parentheses that belong to a path, while removing
+		# surrounding chat/PM brackets and sentence punctuation.
+		while not candidate.is_empty():
+			var last := candidate.right(1)
+			if last in [".", ",", ";", ":", "!", "?", "'", "’", "”"]:
+				candidate = candidate.left(-1)
+			elif (last == ")" and candidate.count(")") > candidate.count("(")) \
+					or (last == "]" and candidate.count("]") > candidate.count("[")) \
+					or (last == "}" and candidate.count("}") > candidate.count("{")):
+				candidate = candidate.left(-1)
+			else:
+				break
+		if not web_url(candidate).is_empty():
 			found.append(candidate)
 	return found
+
+## The only addresses we hand to the system browser. Bare www links use HTTPS.
+static func web_url(address: String) -> String:
+	var url := address.strip_edges()
+	if url.to_lower().begins_with("www."):
+		url = "https://" + url
+	var scheme_end := url.find("://")
+	if scheme_end < 0 or url.left(scheme_end).to_lower() not in ["http", "https"]:
+		return ""
+	var authority := url.substr(scheme_end + 3).get_slice("/", 0).get_slice("?", 0).get_slice("#", 0)
+	var host := RegEx.create_from_string("^(?:\\[[0-9a-fA-F:.]+\\]|[\\p{L}\\p{N}_.-]+)(?::[0-9]{1,5})?$")
+	if authority.is_empty() or host.search(authority) == null:
+		return ""
+	return url.left(scheme_end).to_lower() + url.substr(scheme_end)
 
 ## Whether a chat line survives the player's own ignore and filter lists.
 func allows(speaker: String, text: String) -> bool:

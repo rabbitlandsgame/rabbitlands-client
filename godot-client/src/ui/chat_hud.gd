@@ -9,6 +9,7 @@ signal tab_selected(key: String)
 signal channel_selected(slot: int)
 signal options_requested
 signal log_requested
+signal urls_requested
 signal configuration_changed(key: String, value: Variant)
 var preferences_path := WindowPreferences.SETTINGS_PATH
 var feed_role := "chat"
@@ -94,6 +95,14 @@ func _ready() -> void:
 	_header.add_child(log_button)
 	_header.move_child(log_button, 1)
 	log_button.pressed.connect(func() -> void: log_requested.emit())
+	var urls_button := Button.new()
+	urls_button.name = "URLs"
+	urls_button.text = "URLs"
+	urls_button.tooltip_text = "Links seen this session; F2 opens the latest"
+	_style_control(urls_button)
+	_header.add_child(urls_button)
+	_header.move_child(urls_button, 2)
+	urls_button.pressed.connect(func() -> void: urls_requested.emit())
 	_style_control(options_button)
 	options_button.tooltip_text = "Configure chat and system windows"
 	options_button.pressed.connect(func() -> void: options_requested.emit())
@@ -102,6 +111,11 @@ func _ready() -> void:
 	close.pressed.connect(dismiss)
 	_style_input()
 	output.selection_enabled = true
+	output.focus_mode = Control.FOCUS_ALL
+	output.mouse_default_cursor_shape = Control.CURSOR_IBEAM
+	output.context_menu_enabled = true
+	output.shortcut_keys_enabled = true
+	output.tooltip_text = "Drag to select text. Ctrl+C or right-click → Copy."
 	output.add_theme_color_override("default_color", Color("eee3c8"))
 	output.add_theme_constant_override("outline_size", 2)
 	output.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
@@ -189,6 +203,9 @@ func _style_control(control: Button) -> void:
 
 func _style_input() -> void:
 	input.placeholder_text = "Type a message…"
+	input.selecting_enabled = true
+	input.context_menu_enabled = true
+	input.shortcut_keys_enabled = true
 	for state: String in ["normal", "focus"]:
 		var underline := StyleBoxFlat.new()
 		underline.bg_color = Color.TRANSPARENT

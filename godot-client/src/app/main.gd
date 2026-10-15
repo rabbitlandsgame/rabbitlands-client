@@ -2166,6 +2166,7 @@ func _build_chat_surfaces() -> void:
 		surface.z_index = 20
 		surface.options_requested.connect(func() -> void: settings_window.open_tab("Chat"))
 		surface.configuration_changed.connect(_on_chat_configuration_changed)
+		surface.urls_requested.connect(func() -> void: reference_window.call("open_urls"))
 		surface.log_requested.connect(func() -> void:
 			if not console_panel.visible:
 				_toggle_console()
@@ -2173,6 +2174,18 @@ func _build_chat_surfaces() -> void:
 			_sync_console())
 	chat_log_tabs = ChatLogTabsScript.new()
 	var content := console_panel.get_node("Content")
+	console_output.context_menu_enabled = true
+	console_output.shortcut_keys_enabled = true
+	console_output.mouse_default_cursor_shape = Control.CURSOR_IBEAM
+	console_output.tooltip_text = "Drag to select text. Ctrl+C or right-click → Copy."
+	var urls_button := Button.new()
+	urls_button.name = "URLs"
+	urls_button.text = "URLs"
+	urls_button.tooltip_text = "Links seen this session; F2 opens the latest"
+	urls_button.pressed.connect(func() -> void: reference_window.call("open_urls"))
+	var log_header := content.get_node("Header")
+	log_header.add_child(urls_button)
+	log_header.move_child(urls_button, 1)
 	content.add_child(chat_log_tabs)
 	content.move_child(chat_log_tabs, 1)
 	chat_log_tabs.tab_selected.connect(func(_key: String) -> void: _sync_console())
@@ -3496,6 +3509,23 @@ func _notification(what: int) -> void:
 ## and `toggle_console` were resolved twice - once by keycode here and once by
 ## action in _unhandled_input(). Returns true when the event was consumed.
 func _handle_bound_action(event: InputEvent) -> bool:
+	if settings_window != null and not str(settings_window.get("capturing")).is_empty():
+		return false
+	var focus := get_viewport().gui_get_focus_owner()
+	if (focus is LineEdit or focus is TextEdit or focus is RichTextLabel) \
+			and (event.is_action_pressed("ui_copy", false, true) \
+			or event.is_action_pressed("ui_cut", false, true) \
+			or event.is_action_pressed("ui_paste", false, true) \
+			or event.is_action_pressed("ui_text_select_all", false, true)):
+		return false # Text controls own clipboard shortcuts, even if rebound.
+	# F2 is useful while composing a reply too, and never opens on key repeat.
+	if game_view.visible and event.is_action_pressed("open_last_url", false, true):
+		var result: Error = reference_window.call("open_last_url")
+		if result == ERR_DOES_NOT_EXIST:
+			AppState.append_local_message("No URLs have appeared in chat this session.")
+		elif result != OK:
+			AppState.append_local_message("Could not open the browser. Use URLs to copy the link.")
+		return true
 	# A focused text field owns its own characters and its own clipboard
 	# shortcuts. Several of these actions default to bare printable keys, so
 	# without this a backtick typed into chat would also open the console.
