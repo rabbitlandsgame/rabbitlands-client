@@ -73,6 +73,7 @@ const EmotesWindowScript := preload("res://src/ui/emotes_window.gd")
 const RangingWindowScript := preload("res://src/ui/ranging_window.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
+const ChatMessages := preload("res://src/ui/chat_messages.gd")
 const LoginBackdropScript := preload("res://src/ui/login_backdrop.gd")
 const ReferenceWindowScript := preload("res://src/ui/reference_window.gd")
 const ActiveBuffBarScript := preload("res://src/ui/active_buff_bar.gd")
@@ -3756,6 +3757,8 @@ func _capture_speech_bubble_from_chat() -> void:
 	if not _banner_option("speech_bubbles") or AppState.chat_lines.is_empty():
 		return
 	var line: Dictionary = AppState.chat_lines.back() as Dictionary
+	if not _chat_line_allowed(line):
+		return
 	if int(line.get("channel", -1)) != 0:
 		return
 	var text: String = str(line.get("text", ""))
@@ -7551,7 +7554,9 @@ func _sync_chat() -> void:
 func _sync_console() -> void:
 	console_output.clear()
 	for line_value: Variant in AppState.chat_lines:
-		_append_chat_text(console_output, line_value as Dictionary)
+		var line := line_value as Dictionary
+		if _chat_line_allowed(line):
+			_append_chat_text(console_output, line)
 	_console_tail = _last_chat_line()
 
 func _last_chat_line() -> Dictionary:
@@ -7608,7 +7613,8 @@ func _append_chat_line() -> void:
 		_sync_chat()
 	if count >= 2 and is_same(previous, _console_tail):
 		_console_tail = line
-		_append_chat_text(console_output, line)
+		if _chat_line_allowed(line):
+			_append_chat_text(console_output, line)
 		while console_output.get_paragraph_count() > AppState.CHAT_LINE_LIMIT + 1:
 			console_output.remove_paragraph(0, true)
 	else:
@@ -7632,15 +7638,12 @@ func _hold_mix_report_in_window() -> void:
 				or manufacturing_panel.is_visible_in_tree())):
 		line["in_window"] = true
 
-## The player's own ignore and filter lists. The line still arrived and is
-## still in state - this only decides whether they are shown it - so nothing
-## the server said is lost, and the console tab still shows everything.
+## Both chat displays honor the player's ignore and filter lists. The
+## original messages remain in session state so #unignore can restore them.
 func _chat_line_allowed(line: Dictionary) -> bool:
-	if int(line.get("channel", 0)) == AppState.LOCAL_CHAT_CHANNEL:
+	if ChatMessages.kind(line) == "system":
 		return true
-	var text: String = str(line.get("text", ""))
-	var speaker: String = text.split(":", false, 1)[0] if text.contains(":") else ""
-	return console_commands.allows(speaker, text)
+	return console_commands.allows(ChatMessages.speaker(line), str(line.get("text", "")))
 
 func _chat_line_visible(channel: int) -> bool:
 	# `#gm` arrives on the legacy CHAT_GM channel and used to be findable only
@@ -11753,6 +11756,9 @@ func _on_chat_submitted(text: String) -> void:
 		if local.changed:
 			_save_hud_settings()
 			_sync_map_markers()
+			# Apply ignore/unignore and word-filter changes to existing lines too.
+			_sync_chat()
+			_sync_console()
 		if local.send_on:
 			var sent: Error = Network.send_chat("#help")
 			if sent != OK:
