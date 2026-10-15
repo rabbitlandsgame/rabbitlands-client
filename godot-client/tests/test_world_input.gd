@@ -1636,17 +1636,23 @@ func _run() -> void:
 	var right_down: InputEventMouseButton = InputEventMouseButton.new()
 	right_down.button_index = MOUSE_BUTTON_RIGHT
 	right_down.pressed = true
+	main.set("_interaction_mode", "walk")
 	main.call("_on_world_gui_input", right_down)
+	_expect(str(main.get("_interaction_mode")) == "trade",
+		"right click cycles the selected world action")
 	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
 	motion.relative = Vector2(40.0, 12.0)
 	var initial_yaw: float = camera_rig.yaw_degrees
 	main.call("_on_world_gui_input", motion)
-	_expect(not is_equal_approx(camera_rig.yaw_degrees, initial_yaw),
-		"right drag rotates camera")
+	_expect(is_equal_approx(camera_rig.yaw_degrees, initial_yaw),
+		"right drag never rotates or pans the camera")
 	var right_up: InputEventMouseButton = InputEventMouseButton.new()
 	right_up.button_index = MOUSE_BUTTON_RIGHT
 	right_up.pressed = false
 	main.call("_on_world_gui_input", right_up)
+	_expect(str(main.get("_interaction_mode")) == "trade",
+		"right release does not cycle a second time")
+	main.set("_interaction_mode", "walk")
 
 	var wheel: InputEventMouseButton = InputEventMouseButton.new()
 	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
@@ -1659,10 +1665,19 @@ func _run() -> void:
 	middle_down.button_index = MOUSE_BUTTON_MIDDLE
 	middle_down.pressed = true
 	main.call("_on_world_gui_input", middle_down)
-	var pan_motion: InputEventMouseMotion = InputEventMouseMotion.new()
-	pan_motion.relative = Vector2(25.0, -10.0)
-	main.call("_on_world_gui_input", pan_motion)
-	_expect(camera_rig.pan_offset.length() > 0.0, "middle drag pans camera")
+	var rotate_motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	rotate_motion.relative = Vector2(25.0, -10.0)
+	main.call("_on_world_gui_input", rotate_motion)
+	_expect(not is_equal_approx(camera_rig.yaw_degrees, initial_yaw)
+		and camera_rig.global_position.is_equal_approx(camera_rig.focus),
+		"middle drag rotates around the focus without panning")
+	var middle_up: InputEventMouseButton = middle_down.duplicate() as InputEventMouseButton
+	middle_up.pressed = false
+	main.call("_input", middle_up)
+	var released_yaw: float = camera_rig.yaw_degrees
+	main.call("_on_world_gui_input", rotate_motion)
+	_expect(is_equal_approx(camera_rig.yaw_degrees, released_yaw),
+		"middle release outside the world ends rotation")
 	var follow_actor: Node3D = Node3D.new()
 	world_viewport.get_node("WorldRoot").add_child(follow_actor)
 	follow_actor.global_position = Vector3(18.0, 47.0, -9.0)
@@ -1671,12 +1686,11 @@ func _run() -> void:
 	app_state.set("local_actor_id", 9001)
 	var fixture_actors: Dictionary = {9001: follow_actor}
 	main.set("actor_nodes", fixture_actors)
-	var saved_pan: Vector3 = camera_rig.pan_offset
 	main.call("_update_local_actor_follow")
 	_expect(camera_rig.focus.is_equal_approx(follow_actor.global_position),
 		"camera continuously follows the rendered local actor")
-	_expect(camera_rig.pan_offset.is_equal_approx(saved_pan),
-		"camera follow preserves the user pan offset")
+	_expect(camera_rig.global_position.is_equal_approx(follow_actor.global_position),
+		"camera focus never gains a pan offset")
 	main.set("_minimap_orientation", "viewport_up")
 	camera_rig.yaw_degrees = 37.0
 	main.call("_update_local_actor_follow")
@@ -1687,7 +1701,7 @@ func _run() -> void:
 	recenter_key.pressed = true
 	recenter_key.physical_keycode = KEY_SPACE
 	main.call("_input", recenter_key)
-	_expect(camera_rig.pan_offset.is_zero_approx(),
+	_expect(camera_rig.global_position.is_equal_approx(follow_actor.global_position),
 		"Space recenters the viewport on the local player when chat is inactive")
 	main.set("_minimap_orientation", "north_up")
 	app_state.set("local_actor_id", previous_local_actor_id)
@@ -3113,8 +3127,8 @@ func _check_actor_click_actions(main: Control) -> void:
 	_expect(str(main.call("_actor_click_action", 66, summon, false)) == "attack"
 		and str(main.call("_actor_click_action", 88, player, false)) == "attack",
 		"attack mode still reaches everything that can be attacked")
-	_expect(str(main.call("_actor_click_action", 99, npc, false)) == "talk",
-		"an NPC talks even in attack mode, the way the pointer says")
+	_expect(str(main.call("_actor_click_action", 99, npc, false)) == "none",
+		"the selected attack tool does not greet an NPC")
 	main.set("_interaction_mode", "walk")
 	# The promise and the delivery, side by side, for the same actor: the
 	# pointer may only draw the sword where the click sends ATTACK_SOMEONE.
@@ -3357,8 +3371,7 @@ func _check_trade_mode(main: Control) -> void:
 		and str(main.get("_interaction_mode")) == "trade",
 		"with a player selected the icon sends TRADE_WITH straight away")
 
-	# Every way out puts the mode down, and a plain click on a player is then
-	# a look again rather than a trade request.
+	# Escape puts the tool down; right-click advances to the next tool.
 	var escape: InputEventKey = InputMap.action_get_events(
 		"cancel")[0].duplicate() as InputEventKey
 	escape.pressed = true
@@ -3370,8 +3383,24 @@ func _check_trade_mode(main: Control) -> void:
 	state.set("selected_actor_id", -1)
 	_click(at, true, false, MOUSE_BUTTON_RIGHT)
 	_click(at, false, false, MOUSE_BUTTON_RIGHT)
-	_expect(str(main.get("_interaction_mode")) == "walk" and _take(receiver).is_empty(),
-		"a right click on the world puts an armed trade down")
+	_expect(str(main.get("_interaction_mode")) == "attack" and _take(receiver).is_empty(),
+		"a right click cycles trade to attack without issuing a command")
+	main.set("_interaction_mode", "walk")
+	for index: int in MouseCursors.WORLD_ACTIONS.size():
+		var wanted: String = MouseCursors.WORLD_ACTIONS[
+			(index + 1) % MouseCursors.WORLD_ACTIONS.size()]
+		_click(at, true, false, MOUSE_BUTTON_RIGHT)
+		_click(at, false, false, MOUSE_BUTTON_RIGHT)
+		_expect(str(main.get("_interaction_mode")) == wanted and _take(receiver).is_empty(),
+			"right-click selects %s without activating the selected player" % wanted)
+		if wanted == "use":
+			_expect(str(main.get("_inventory_tool")) == "use",
+				"the world use mode also arms the inventory use-item tool")
+		elif wanted == "look":
+			_expect(str(main.get("_inventory_tool")) == "inspect",
+				"the look mode also arms the inventory inspect tool")
+	_expect(str(main.get("_inventory_tool")) == "grab",
+		"cycling back to Move restores the item grab tool")
 	main.call("_on_trade_button_pressed")
 	main.call("_on_walk_button_pressed")
 	_expect(str(main.get("_interaction_mode")) == "walk",

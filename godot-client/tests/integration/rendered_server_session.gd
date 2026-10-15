@@ -417,43 +417,45 @@ func _run() -> void:
 	var default_yaw: float = camera_rig.yaw_degrees
 	var default_pitch: float = camera_rig.pitch_degrees
 	var default_distance: float = camera_rig.distance
-	var default_pan: Vector3 = camera_rig.pan_offset
-	var right_down: InputEventMouseButton = InputEventMouseButton.new()
-	right_down.button_index = MOUSE_BUTTON_RIGHT
-	right_down.pressed = true
-	main.call("_on_world_gui_input", right_down)
+	var rotate_down: InputEventMouseButton = InputEventMouseButton.new()
+	rotate_down.button_index = MOUSE_BUTTON_MIDDLE
+	rotate_down.pressed = true
+	main.call("_on_world_gui_input", rotate_down)
 	var rotate_motion: InputEventMouseMotion = InputEventMouseMotion.new()
 	rotate_motion.relative = Vector2(120.0, -16.0)
 	main.call("_on_world_gui_input", rotate_motion)
-	var right_up: InputEventMouseButton = InputEventMouseButton.new()
-	right_up.button_index = MOUSE_BUTTON_RIGHT
-	right_up.pressed = false
-	main.call("_on_world_gui_input", right_up)
+	var rotate_up: InputEventMouseButton = rotate_down.duplicate() as InputEventMouseButton
+	rotate_up.pressed = false
+	main.call("_on_world_gui_input", rotate_up)
 	_expect(not is_equal_approx(camera_rig.yaw_degrees, default_yaw)
 		and not is_equal_approx(camera_rig.pitch_degrees, default_pitch),
-		"right drag changes camera yaw and pitch in the rendered session")
+		"middle drag changes camera yaw and pitch in the rendered session")
 	_expect(_actor_is_in_frame(camera, actor.global_position),
 		"rotated camera keeps the local actor in frame")
 	var rotated_camera: Dictionary = _json_safe(camera_rig.camera_diagnostics()) as Dictionary
 	await _capture("world-rotated.png")
 
-	var middle_down: InputEventMouseButton = InputEventMouseButton.new()
-	middle_down.button_index = MOUSE_BUTTON_MIDDLE
-	middle_down.pressed = true
-	main.call("_on_world_gui_input", middle_down)
-	var pan_motion: InputEventMouseMotion = InputEventMouseMotion.new()
-	pan_motion.relative = Vector2(-18.0, 6.0)
-	main.call("_on_world_gui_input", pan_motion)
-	var middle_up: InputEventMouseButton = InputEventMouseButton.new()
-	middle_up.button_index = MOUSE_BUTTON_MIDDLE
-	middle_up.pressed = false
-	main.call("_on_world_gui_input", middle_up)
-	_expect(camera_rig.pan_offset.distance_to(default_pan) > 0.1,
-		"middle drag changes the intentional camera pan offset")
+	var yaw_before_cycle: float = camera_rig.yaw_degrees
+	var cycle_down: InputEventMouseButton = InputEventMouseButton.new()
+	cycle_down.button_index = MOUSE_BUTTON_RIGHT
+	cycle_down.pressed = true
+	main.set("_interaction_mode", "walk")
+	main.call("_on_world_gui_input", cycle_down)
+	var cursor_motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	cursor_motion.relative = Vector2(-18.0, 6.0)
+	main.call("_on_world_gui_input", cursor_motion)
+	var cycle_up: InputEventMouseButton = cycle_down.duplicate() as InputEventMouseButton
+	cycle_up.pressed = false
+	main.call("_on_world_gui_input", cycle_up)
+	_expect(is_equal_approx(camera_rig.yaw_degrees, yaw_before_cycle)
+		and camera_rig.global_position.is_equal_approx(actor.global_position)
+		and str(main.get("_interaction_mode")) == "trade",
+		"right click cycles the action while the camera stays focused on the player")
 	_expect(_actor_is_in_frame(camera, actor.global_position),
-		"panned camera keeps the local actor in frame")
-	var panned_camera: Dictionary = _json_safe(camera_rig.camera_diagnostics()) as Dictionary
-	await _capture("world-panned.png")
+		"action cycling keeps the local actor in frame")
+	var action_camera: Dictionary = _json_safe(camera_rig.camera_diagnostics()) as Dictionary
+	await _capture("world-action-cycle.png")
+	main.set("_interaction_mode", "walk")
 
 	for unused_zoom_step: int in range(3):
 		var wheel_up: InputEventMouseButton = InputEventMouseButton.new()
@@ -469,7 +471,7 @@ func _run() -> void:
 	_write_json("camera-states.json", {
 		"default": evidence.get("camera", {}),
 		"rotated": rotated_camera,
-		"panned": panned_camera,
+		"action_cycle": action_camera,
 		"zoomed": zoomed_camera,
 		"credentials": "REDACTED",
 	})
@@ -479,9 +481,8 @@ func _run() -> void:
 	camera_rig.yaw_degrees = default_yaw
 	camera_rig.pitch_degrees = default_pitch
 	camera_rig.distance = default_distance
-	camera_rig.reset_pan()
 	camera_rig.set_focus(actor.global_position)
-	_expect(camera_rig.pan_offset.is_equal_approx(default_pan)
+	_expect(camera_rig.global_position.is_equal_approx(actor.global_position)
 		and camera_rig.focus.is_equal_approx(actor.global_position),
 		"default camera framing restores without losing actor follow")
 

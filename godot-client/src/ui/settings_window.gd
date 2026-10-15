@@ -559,8 +559,6 @@ func _refresh_map_cache() -> void:
 func _build_camera() -> void:
 	var page := _new_page("Camera", tr("ELORIA_SETTINGS_CAMERA"))
 	_add_slider(page, "rotation_sensitivity", tr("ELORIA_SETTINGS_ROTATION"), 0.05, 1.0, 0.25)
-	_add_slider(page, "pan_sensitivity", tr("ELORIA_SETTINGS_PAN"), 0.004, 0.05, 0.012)
-	_add_toggle(page, "follow_player", tr("ELORIA_SETTINGS_FOLLOW"), true)
 
 func _build_gameplay() -> void:
 	var page := _new_page("Gameplay", tr("ELORIA_SETTINGS_GAMEPLAY"))
@@ -631,7 +629,7 @@ func _add_slider(page: VBoxContainer, key: String, label: String,
 	slider.name = key
 	slider.min_value = minimum
 	slider.max_value = maximum
-	slider.step = 0.001 if key == "pan_sensitivity" else 0.01
+	slider.step = 0.01
 	slider.value = value
 	slider.custom_minimum_size = Vector2(220.0, 0.0)
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL

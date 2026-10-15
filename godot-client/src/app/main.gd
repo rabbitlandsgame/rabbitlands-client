@@ -356,7 +356,6 @@ var _effects_enabled := true
 var _nameplates_enabled := true
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
 var _fps_limit := 0
-var _camera_follows_player := true
 var _player_notes := ""
 ## True while the loaded package lets the hour drive its environment. An
 ## interior does not, and neither does a package that opts out.
@@ -643,8 +642,6 @@ var stats_skills: VBoxContainer
 var stats_overall: HBoxContainer
 var stats_perk_line: Label
 var counter_body: VBoxContainer
-var _right_mouse_down := false
-var _right_mouse_dragged := false
 var _interaction_mode := "walk"
 ## Alt held down. While it is, an ordinary click attacks whatever it lands on,
 ## so the move icon shows the attack icon to say so. It is a preview and not a
@@ -2121,7 +2118,7 @@ func _on_look_button_pressed() -> void:
 ## pointer turns to the trade glyph over players, and the next click on one
 ## asks them (`_actor_click_action`). A player already selected is asked at
 ## once. It used to be greyed out until a player was selected, which read as
-## broken. Esc, a right click, or the walk or attack icon puts the mode down.
+## broken. Esc or the walk icon puts the mode down; right-click cycles onward.
 func _on_trade_button_pressed() -> void:
 	_interaction_mode = "trade"
 	_cursor_refresh_msec = 0
@@ -2135,9 +2132,25 @@ func _on_trade_button_pressed() -> void:
 			push_warning("TRADE_WITH failed: " + error_string(error))
 	_sync_hud_button_states(true)
 
-func _disarm_trade_mode() -> void:
+func _reset_world_action() -> void:
 	_interaction_mode = "walk"
+	_set_inventory_tool("grab")
 	_cursor_refresh_msec = 0
+	_sync_hud_button_states(true)
+
+func _cycle_world_action() -> void:
+	var index: int = MouseCursors.WORLD_ACTIONS.find(_interaction_mode)
+	_interaction_mode = MouseCursors.WORLD_ACTIONS[
+		(index + 1) % MouseCursors.WORLD_ACTIONS.size()]
+	match _interaction_mode:
+		"use":
+			_set_inventory_tool("use")
+		"look":
+			_set_inventory_tool("inspect")
+		"walk":
+			_set_inventory_tool("grab")
+	_cursor_refresh_msec = 0
+	_update_action_cursor()
 	_sync_hud_button_states(true)
 
 func _on_chat_button_pressed() -> void:
@@ -2353,7 +2366,8 @@ func _configure_unified_settings() -> void:
 	var actor_hud_menu := get_node("%BannerControls") as Control
 	(actor_hud_menu.get_node("Options") as Control).reparent(
 		settings_window.page_body("Banners"), false)
-	(%DisableMenu as CheckBox).text = "Disable right-click banner shortcut"
+	# Retain the stored option for compatibility; world right-click now cycles tools.
+	(%DisableMenu as CheckBox).hide()
 	actor_hud_menu.queue_free()
 	settings_panel = settings_window.panel
 	old_panel.queue_free()
@@ -2439,7 +2453,6 @@ func _refresh_unified_settings() -> void:
 		"spell_bar_docked": casting_bar.docked, "spell_bar_expanded": casting_bar.panel.visible,
 		"shadows": _shadows_enabled, "particles": _effects_enabled,
 		"nameplates": _nameplates_enabled, "rotation_sensitivity": camera_rig.rotation_sensitivity,
-		"pan_sensitivity": camera_rig.pan_sensitivity, "follow_player": _camera_follows_player,
 		"secure": secure_check.button_pressed, "start_backdrop": start_screen_backdrop.selected_id,
 		"start_animated": start_screen_backdrop.animation_enabled,
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
@@ -3415,6 +3428,10 @@ func _clear_world_presentation() -> void:
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	# A drag can end over a window that consumes the release before gui_input.
+	if event is InputEventMouseButton and not event.pressed \
+			and event.button_index == MOUSE_BUTTON_MIDDLE:
+		camera_rig.handle_mouse_button(event as InputEventMouseButton)
 	if spell_wheel != null:
 		if spell_wheel.handle_event(event):
 			_set_attack_modifier(false)
@@ -3467,6 +3484,8 @@ func _set_attack_modifier(held: bool) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT 			or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		_set_attack_modifier(false)
+		if is_instance_valid(camera_rig):
+			camera_rig.cancel_rotation()
 
 ## Bindings that have to beat a focused HUD control, which is why they are
 ## resolved here instead of in _unhandled_input().
@@ -3528,7 +3547,6 @@ func _handle_bound_action(event: InputEvent) -> bool:
 	return false
 
 func _recenter_viewport_on_player() -> void:
-	camera_rig.reset_pan()
 	_update_local_actor_follow()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -3637,8 +3655,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			reference_window.close()
 		elif _has_carry():
 			_cancel_carry()
-		elif _interaction_mode == "trade" and not bool(AppState.trade.get("open", false)):
-			_disarm_trade_mode()
+		elif _interaction_mode != "walk" and not bool(AppState.trade.get("open", false)):
+			_reset_world_action()
 		elif chat_input.has_focus():
 			_hide_chat_input()
 		elif settings_panel.visible:
@@ -3675,6 +3693,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 func _on_world_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and not event.pressed \
+			and event.button_index == MOUSE_BUTTON_MIDDLE:
+		camera_rig.handle_mouse_button(event as InputEventMouseButton)
 	if (not game_view.visible or full_map.visible or dialogue_panel.visible
 			or trade_panel.visible or storage_panel.visible
 			or manufacturing_panel.visible):
@@ -3689,27 +3710,13 @@ func _on_world_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 		if mouse_button.button_index == MOUSE_BUTTON_RIGHT:
-			if mouse_button.pressed and not magic_selection.pending.is_empty():
-				magic_selection.cancel()
-				viewport_container.accept_event()
-				return
 			if mouse_button.pressed:
-				_right_mouse_down = true
-				_right_mouse_dragged = false
-			camera_rig.handle_mouse_button(mouse_button)
-			if not mouse_button.pressed:
-				_right_mouse_down = false
-				# A right click - not a drag of the camera - puts back the
-				# item in hand before it opens anything, then puts down an
-				# armed trade.
-				if not _right_mouse_dragged and _has_carry():
+				if not magic_selection.pending.is_empty():
+					magic_selection.cancel()
+				elif _has_carry():
 					_cancel_carry()
-				elif not _right_mouse_dragged and _interaction_mode == "trade":
-					_disarm_trade_mode()
-				elif not _right_mouse_dragged:
-					var local_position: Vector2 = _local_viewport_position(mouse_button.position)
-					if _pick_actor(local_position) == AppState.local_actor_id:
-						_open_actor_hud_menu(mouse_button.position + viewport_container.position)
+				else:
+					_cycle_world_action()
 			viewport_container.accept_event()
 			return
 		if camera_rig.handle_mouse_button(mouse_button):
@@ -3720,8 +3727,6 @@ func _on_world_gui_input(event: InputEvent) -> void:
 			viewport_container.accept_event()
 	elif event is InputEventMouseMotion:
 		var mouse_motion: InputEventMouseMotion = event as InputEventMouseMotion
-		if _right_mouse_down and mouse_motion.relative.length_squared() > 4.0:
-			_right_mouse_dragged = true
 		if camera_rig.handle_mouse_motion(mouse_motion):
 			viewport_container.accept_event()
 
@@ -4287,7 +4292,8 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 		# over. A pending actor spell still wins - clicking yourself casts
 		# at yourself.
 		if (picked_actor_id == AppState.local_actor_id
-				and AppState.pending_spell_target != "actor"):
+				and AppState.pending_spell_target != "actor"
+				and _interaction_mode in ["walk", "pick"]):
 			var bag_below: int = _ground_bag_below_player()
 			if bag_below >= 0:
 				_open_ground_bag(bag_below)
@@ -4309,16 +4315,27 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 				var touch_error: Error = Network.touch_actor(picked_actor_id)
 				if touch_error != OK:
 					push_warning("TOUCH_PLAYER failed: " + error_string(touch_error))
+			"look":
+				var look_error: Error = Network.look_at_player(picked_actor_id)
+				if look_error != OK:
+					push_warning("GET_PLAYER_INFO failed: " + error_string(look_error))
 		return
 	var picked_bag_id: int = _pick_ground_bag(viewport_position)
 	if AppState.pending_spell_target == "actor":
 		return
 	if picked_bag_id >= 0:
-		_open_ground_bag(picked_bag_id)
+		if _interaction_mode in ["walk", "pick"]:
+			_open_ground_bag(picked_bag_id)
 		return
 	var picked_object: MapObject3D = _pick_map_object(viewport_position)
 	if picked_object != null:
-		_activate_map_object(picked_object, event.alt_pressed)
+		if (_interaction_mode in ["walk", "look"]
+				or (_interaction_mode == "harvest" and picked_object.is_harvestable())
+				or (_interaction_mode == "use" and not picked_object.is_harvestable())):
+			_activate_map_object(picked_object, event.alt_pressed or _interaction_mode == "look")
+		return
+	# Other tools never turn a missed target into a movement order.
+	if _interaction_mode != "walk":
 		return
 	var ray_origin: Vector3 = camera_rig.ray_origin(viewport_position)
 	var ray_direction: Vector3 = camera_rig.ray_direction(viewport_position)
@@ -6794,10 +6811,6 @@ func _load_hud_settings() -> void:
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
-		camera_rig.pan_sensitivity = float(config.get_value(
-			"camera", "pan_sensitivity", camera_rig.pan_sensitivity))
-		_camera_follows_player = bool(
-			config.get_value("camera", "follow_player", true))
 		var stored_bindings: Variant = config.get_value("controls", "bindings", {})
 		if stored_bindings is Dictionary:
 			settings_window.call("restore_bindings", stored_bindings)
@@ -6929,9 +6942,6 @@ func _save_hud_settings() -> void:
 	config.set_value("hud", "spell_quickbar", casting_bar.hud_layout())
 	config.set_value("camera", "rotation_sensitivity",
 		float(camera_rig.rotation_sensitivity))
-	config.set_value("camera", "pan_sensitivity",
-		float(camera_rig.pan_sensitivity))
-	config.set_value("camera", "follow_player", _camera_follows_player)
 	config.set_value("controls", "bindings",
 		settings_window.call("stored_bindings"))
 	config.set_value("console", "marks", console_commands.marks)
@@ -9756,7 +9766,7 @@ func _sync_hud_button_states(force := false) -> void:
 		sitting,
 		_interaction_mode == "attack",
 		_interaction_mode == "trade" or bool(AppState.trade.get("open", false)),
-		bool(AppState.player_info.get("open", false)),
+		_interaction_mode == "look" or bool(AppState.player_info.get("open", false)),
 		inventory_panel.visible,
 		stats_open and stats_tab != 1,
 		stats_open and stats_tab == 1,
@@ -10682,10 +10692,6 @@ func _on_client_setting_changed(section: String, key: String,
 			extension_windows.call("set_combat_hud_enabled", bool(value))
 		"rotation_sensitivity":
 			camera_rig.rotation_sensitivity = float(value)
-		"pan_sensitivity":
-			camera_rig.pan_sensitivity = float(value)
-		"follow_player":
-			_camera_follows_player = bool(value)
 		"target_mode_strong":
 			Network.send_chat("#targetmode strong")
 		"target_mode_weak":
@@ -12253,14 +12259,23 @@ func _actor_click_action(actor_id: int, dto: Dictionary,
 	# included; every other action here is about somebody else.
 	if AppState.pending_spell_target == "actor":
 		return "spell"
+	if _interaction_mode == "look" and int(dto.get("kind", 0)) in [1, 4] \
+			and not alt_pressed:
+		return "look"
 	if actor_id == AppState.local_actor_id:
 		return "none"
-	if _interaction_mode == "attack" and _is_attackable_actor(actor_id, dto):
-		return "attack"
-	if _interaction_mode == "trade" and _is_tradeable_player(actor_id, dto):
-		return "trade"
 	if alt_pressed and _is_attackable_actor(actor_id, dto):
 		return "attack"
+	match _interaction_mode:
+		"attack":
+			return "attack" if _is_attackable_actor(actor_id, dto) else "none"
+		"trade":
+			return "trade" if _is_tradeable_player(actor_id, dto) else "none"
+		"use", "pick", "harvest", "look":
+			return "none"
+		"talk":
+			return "talk" if (int(dto.get("kind", 0)) == 2 \
+				or _is_tutorial_companion(actor_id) or ReplicatedActor3D.is_summon(dto)) else "none"
 	# NPCs and summons are the two actors a plain click talks to. TOUCH_PLAYER
 	# on your own summon is how the server opens the behaviour popup, so it
 	# has to outrank the attack below - a summon is a creature kind.
@@ -13146,6 +13161,7 @@ func _cursor_context_at(viewport_position: Vector2) -> Dictionary:
 			# same way. A pending actor spell still claims you - clicking
 			# yourself casts at yourself.
 			if AppState.pending_spell_target != "actor" \
+					and _interaction_mode in ["walk", "pick"] \
 					and _ground_bag_below_player() >= 0:
 				context["target"] = "bag"
 				return context

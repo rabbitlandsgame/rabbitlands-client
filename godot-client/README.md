@@ -25,6 +25,8 @@ The initial screen defaults to `game.rabbitlandsgame.com:2000`, connects over re
 
 - `W`/`S`: move forward/backward relative to facing. `A`/`D`: strafe without turning; combine keys for diagonal movement and hold Shift to run.
 - `Q`/`E`: turn the local character. `Space`: recenter the viewport on your character.
+- Hold the mouse wheel button and drag to rotate the view; scroll to zoom. The camera always stays focused on your player.
+- Right-click the world to cycle Move → Trade → Fight → Use → Pick up → Harvest → Talk → Look. Left-click applies the selected action. Move retains contextual interactions on hover; other tools ignore incompatible targets. Use also selects the inventory's use-item tool. Right-click first cancels a carried item or pending spell; `Esc` returns to Move.
 - `Ctrl+I`: toggle inventory. Drag its title bar to move it and its lower-right grip to scale the whole window proportionally. Right-click Sto All or Drop All to protect individual edge rows/columns; Get All opens and empties the ground bag on your tile subject to server slot/load validation.
 - `Tab`: toggle the full map. `Alt+M`: toggle the minimap; drag its thick compass border and right-click it for north-up, player-up, or viewport-up orientation.
 - `T`: open and focus conversations; `Esc`: release typing focus. Conversations start upper left and system messages lower left, with a soft, borderless fade behind the text. Drag either header to move that window and its bottom-right corner to resize it; both layouts are saved independently. Settings → Chat configures each window's visibility, lock, text size, background opacity, line spacing and idle dimming, or combines both feeds in the conversation window. The visible **To:** selector identifies the send destination; Private needs a selected player or `/name message`. Party/Guild/channel tabs select that destination, while reading the full log never retargets a draft. Backtick/tilde or either window's Log button opens session history with All, System, Chat, Local, Party, Guild, Private, numbered-channel and individual private-conversation filters.
@@ -37,16 +39,16 @@ The initial screen defaults to `game.rabbitlandsgame.com:2000`, connects over re
 
 ## Settings inventory
 
-The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scroll independently; tab arrows keep every category reachable on smaller screens. Right-clicking your character opens its Banners tab, right-clicking the lower HUD opens HUD, and the spell bar's settings shortcut opens Spells. Preferences apply immediately and retain their existing settings-file keys.
+The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scroll independently; tab arrows keep every category reachable on smaller screens. Right-clicking the lower HUD opens HUD, and the spell bar's settings shortcut opens Spells. Preferences apply immediately and retain their existing settings-file keys.
 
 | Tab | Available preferences |
 | --- | --- |
 | HUD | UI scale; FPS, clocks, seconds, knowledge, timer, stats, indicators and chat timestamps; combat HUD visibility and pinning; countdown duration and stopwatch mode; lower HUD bar order and visibility; watched experience skill; invasion assistant scale. |
 | Chat | Separate or combined feeds; independent visibility, movement/resize lock, text size, soft-fade opacity, line spacing, idle dimming and layout reset for the conversation and system windows. |
 | Minimap | Visibility, size, orientation, shape, border, map range, marker size, and all eleven marker categories. |
-| Banners | Names; health, ether, food and action bars and numbers; instance mode; speech bubbles; background; sit and ranging locks; right-click shortcut. |
+| Banners | Names; health, ether, food and action bars and numbers; instance mode; speech bubbles; background; sit and ranging locks. |
 | Graphics | Frame limit, painted look, quality, shadows, particles, nameplates and distance, character visibility through obstacles, map cache usage and clearing. |
-| Camera | Rotation sensitivity, pan sensitivity and player following. |
+| Camera | Rotation sensitivity. The camera stays focused on the player. |
 | Audio | Sound enablement and volume, with offline attribution credits. |
 | Inventory | Equipment side, inventory and ground bag scales, storage docking, six editable quantity shortcuts and active quantity, plus all eight Store All/Drop All protection switches. |
 | Spells | Spell bar visibility and docking, casting mode, number of visible shortcuts, and magic ring size. |

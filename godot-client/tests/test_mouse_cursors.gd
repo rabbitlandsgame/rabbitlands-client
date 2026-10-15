@@ -45,17 +45,17 @@ func _check_decision_table() -> void:
 		"a hover that is not over the world never picks an action cursor")
 	# Bare ground.
 	_choice({"over_world": true}, MouseCursors.WALK, "bare ground walks")
-	_choice({"over_world": true, "mode": "attack"}, MouseCursors.WALK,
-		"attack mode still walks on bare ground, as the reference does")
-	_choice({"over_world": true, "mode": "trade"}, MouseCursors.WALK,
-		"trade mode still walks on bare ground")
+	_choice({"over_world": true, "mode": "attack"}, MouseCursors.ATTACK,
+		"attack mode keeps the selected sword on bare ground")
+	_choice({"over_world": true, "mode": "trade"}, MouseCursors.TRADE,
+		"trade mode keeps the selected trade tool on bare ground")
 	_choice({"over_world": true, "spell_target": "location"}, MouseCursors.WAND,
 		"a spell waiting for ground shows the wand over ground")
 	# NPCs.
 	_choice({"over_world": true, "target": "npc"}, MouseCursors.TALK,
 		"an NPC talks")
 	_choice({"over_world": true, "target": "npc", "mode": "attack"},
-		MouseCursors.TALK, "an NPC talks even in attack mode")
+		MouseCursors.ARROW, "attack mode cannot greet or attack an NPC")
 	_choice({"over_world": true, "target": "npc", "spell_target": "actor"},
 		MouseCursors.WAND, "a spell waiting for an actor claims the NPC")
 	# Creatures: alive defaults to attack in every mode, dead is scenery.
@@ -83,10 +83,10 @@ func _check_decision_table() -> void:
 	_choice({"over_world": true, "target": "player", "alt": true},
 		MouseCursors.ATTACK, "held Alt previews the attack over a player")
 	_choice({"over_world": true, "target": "player", "mode": "attack",
-		"alive": false}, MouseCursors.EYE,
+		"alive": false}, MouseCursors.ARROW,
 		"a dead player cannot be attacked, so the pointer does not offer it")
 	_choice({"over_world": true, "target": "player", "mode": "trade",
-		"alive": false}, MouseCursors.EYE,
+		"alive": false}, MouseCursors.ARROW,
 		"a dead player cannot be traded with either")
 	_choice({"over_world": true, "target": "self"}, MouseCursors.EYE,
 		"your own actor reads as a look")
@@ -98,7 +98,16 @@ func _check_decision_table() -> void:
 	_choice({"over_world": true, "target": "harvest"}, MouseCursors.HARVEST,
 		"a harvest node offers the harvest")
 	_choice({"over_world": true, "target": "harvest", "mode": "attack"},
-		MouseCursors.HARVEST, "attack mode does not hide a harvest node")
+		MouseCursors.ARROW, "attack mode cannot harvest a node")
+	for mode: String in MouseCursors.WORLD_ACTIONS:
+		_choice({"over_world": true, "mode": mode},
+			int(MouseCursors.ACTION_CURSORS[mode]), "selected %s tool has its cursor" % mode)
+	for pair: Array in [["use", "interactive"], ["use", "portal"], ["pick", "bag"],
+			["harvest", "harvest"], ["talk", "npc"], ["look", "player"]]:
+		_choice({"over_world": true, "mode": pair[0], "target": pair[1]},
+			int(MouseCursors.ACTION_CURSORS[pair[0]]), "%s tool acts on %s" % pair)
+	_choice({"over_world": true, "mode": "pick", "target": "creature"},
+		MouseCursors.ARROW, "pick up never promises an attack on a creature")
 	_choice({"over_world": true, "target": "portal"}, MouseCursors.ENTER,
 		"a portal offers an entrance")
 	_choice({"over_world": true, "target": "portal", "alt": true}, MouseCursors.EYE,

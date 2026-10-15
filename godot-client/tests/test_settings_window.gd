@@ -351,7 +351,10 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 		"ground_bag_scale", "storage_docked", "selected_quantity", "spell_bar_expanded",
 		"spell_bar_docked", "CastingMode", "QuickSlotCount", "RingSize", "secure", "start_backdrop",
 		"start_animated", "invasion_assistant_scale", "rotation_sensitivity",
-		"pan_sensitivity", "follow_player", "shadows", "particles", "nameplates"]
+		"shadows", "particles", "nameplates"]
+	_expect(window.find_child("pan_sensitivity", true, false) == null
+		and window.find_child("follow_player", true, false) == null,
+		"camera settings cannot detach the view from the player")
 	for key: String in (main.get("BANNER_OPTION_NODES") as Dictionary).values():
 		keys.append(key)
 	for type: StringName in main.get("MINIMAP_MARKER_TYPES"):
