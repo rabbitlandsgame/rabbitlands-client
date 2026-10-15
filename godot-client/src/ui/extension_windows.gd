@@ -2004,7 +2004,10 @@ func _build() -> void:
 	party_panel = _window("PartyWindow", "Party")
 	party_panel.z_index = 20
 	party_panel.add_theme_stylebox_override("panel", HUD_STYLE.box())
-	var party_saved := WindowPreferences.stored_rect("party_hud", Rect2(Vector2(12, 56), Vector2(PARTY_WIDTH, 100)), preferences_path)
+	# Leave the upper-left conversation feed clear on a fresh layout. Explicit
+	# player positions still restore unchanged.
+	var party_default := Vector2(maxf(12, get_viewport_rect().size.x - WindowDrag.RESERVED_RIGHT_RAIL - PARTY_WIDTH - 18), 56)
+	var party_saved := WindowPreferences.stored_rect("party_hud", Rect2(party_default, Vector2(PARTY_WIDTH, 100)), preferences_path)
 	party_panel.position = party_saved.position
 	_party_collapsed = WindowPreferences.stored_collapsed("party_hud", false, preferences_path)
 	var party_saved_options := WindowPreferences.stored_options("party_hud", {}, preferences_path)

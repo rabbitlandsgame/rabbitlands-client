@@ -1080,8 +1080,11 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"active_channels":
 			active_channels = [0, 0, 0]
 			var incoming_channels: Array = event.channels as Array
-			for index: int in range(mini(3, incoming_channels.size())):
-				active_channels[index] = int(incoming_channels[index])
+			for index: int in incoming_channels.size():
+				if index < active_channels.size():
+					active_channels[index] = int(incoming_channels[index])
+				else:
+					active_channels.append(int(incoming_channels[index]))
 			active_channel_index = clampi(int(event.active_index), 0, 2)
 			state_changed.emit(&"channels")
 		"chat":
@@ -1089,6 +1092,13 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			# stamps every chat line as it lands; rendering may show or hide it.
 			var slot := int(event.channel) - 5
 			var channel_number := int(active_channels[slot]) if slot >= 0 and slot < active_channels.size() else 0
+			# A fourth membership shares legacy display slot 7. The server's
+			# explicit numeric header is authoritative, not that display slot.
+			if int(event.channel) in [5, 6, 7]:
+				var text := str(event.text)
+				var end := text.find("] ")
+				if text.begins_with("[") and end > 1 and text.substr(1, end - 1).is_valid_int():
+					channel_number = int(text.substr(1, end - 1))
 			chat_lines.append({"channel": event.channel, "channel_number": channel_number, "text": event.text,
 				"colour": int(event.get("colour", 0)),
 				"stamp": Time.get_time_string_from_system()})

@@ -73,7 +73,9 @@ const EmotesWindowScript := preload("res://src/ui/emotes_window.gd")
 const RangingWindowScript := preload("res://src/ui/ranging_window.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
+const ChatHudScript := preload("res://src/ui/chat_hud.gd")
 const ChatMessages := preload("res://src/ui/chat_messages.gd")
+const ChatLogTabsScript := preload("res://src/ui/chat_log_tabs.gd")
 const LoginBackdropScript := preload("res://src/ui/login_backdrop.gd")
 const ReferenceWindowScript := preload("res://src/ui/reference_window.gd")
 const ActiveBuffBarScript := preload("res://src/ui/active_buff_bar.gd")
@@ -267,6 +269,8 @@ var _pending_purchase: Array[String] = []
 @onready var chat_input: LineEdit = %ChatInput
 @onready var chat_panel: PanelContainer = %ChatPanel
 @onready var chat_hud: PanelContainer = %ChatWindow
+var system_chat_hud: PanelContainer
+var chat_log_tabs: HFlowContainer
 @onready var console_panel: PanelContainer = %ConsolePanel
 @onready var connection_banner: Label = %ConnectionBanner
 @onready var harvest_banner: Label = %HarvestBanner
@@ -1301,7 +1305,7 @@ func _ready() -> void:
 	_build_manufacturing_window()
 	chat_hud.tab_selected.connect(_on_chat_tab_pressed)
 	chat_hud.channel_selected.connect(_on_channel_tab_pressed)
-	chat_hud.options_requested.connect(_on_options_pressed)
+	_build_chat_surfaces()
 	_build_hud_layout_menu()
 	_configure_unified_settings()
 	_load_hud_layout()
@@ -2139,6 +2143,40 @@ func _disarm_trade_mode() -> void:
 func _on_chat_button_pressed() -> void:
 	_show_chat_input()
 
+func _build_chat_surfaces() -> void:
+	system_chat_hud = ChatHudScript.new()
+	system_chat_hud.name = "SystemChatWindow"
+	system_chat_hud.feed_role = "system"
+	system_chat_hud.preferences_path = chat_hud.preferences_path
+	game_view.add_child(system_chat_hud)
+	for surface: PanelContainer in [chat_hud, system_chat_hud]:
+		surface.z_index = 20
+		surface.options_requested.connect(func() -> void: settings_window.open_tab("Chat"))
+		surface.configuration_changed.connect(_on_chat_configuration_changed)
+		surface.log_requested.connect(func() -> void:
+			if not console_panel.visible:
+				_toggle_console()
+			chat_log_tabs.select("system" if surface == system_chat_hud else "chat")
+			_sync_console())
+	chat_log_tabs = ChatLogTabsScript.new()
+	var content := console_panel.get_node("Content")
+	content.add_child(chat_log_tabs)
+	content.move_child(chat_log_tabs, 1)
+	chat_log_tabs.tab_selected.connect(func(_key: String) -> void: _sync_console())
+	chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
+	for line: Dictionary in AppState.chat_lines:
+		chat_hud.remember_peer(ChatMessages.peer(line))
+	_on_chat_configuration_changed("", null)
+
+func _on_chat_configuration_changed(key: String, _value: Variant) -> void:
+	var combined := bool(chat_hud.options.get("combined", false))
+	if key == "combined":
+		_chat_tab = "all"
+		chat_hud.select_tab("all")
+	system_chat_hud.visible = not combined and not system_chat_hud.user_closed
+	_sync_chat()
+	_refresh_unified_settings()
+
 func _on_invasion_assistant_command_requested(command: String) -> void:
 	var error := Network.send_chat(command)
 	if error != OK:
@@ -2197,10 +2235,13 @@ func _toggle_console() -> void:
 		return
 	full_map.hide()
 	_close_settings()
+	console_diagnostics_button.set_pressed_no_signal(false)
+	_on_console_diagnostics_toggled(false)
 	_sync_console()
 	_sync_diagnostics()
 	console_panel.show()
 	console_panel.move_to_front()
+	chat_hud.input.release_focus()
 
 ## The console panel shows either the session message history or the protocol
 ## diagnostics. Undecoded packets and decode errors were reduced into AppState
@@ -2209,6 +2250,7 @@ func _toggle_console() -> void:
 func _on_console_diagnostics_toggled(enabled: bool) -> void:
 	console_output.visible = not enabled
 	diagnostics_output.visible = enabled
+	chat_log_tabs.visible = not enabled
 	if enabled:
 		_sync_diagnostics()
 
@@ -2403,6 +2445,11 @@ func _refresh_unified_settings() -> void:
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
 	}
 	values.merge(_hud_element_options)
+	for option: String in chat_hud.options:
+		values["chat_" + option] = chat_hud.options[option]
+	if system_chat_hud != null:
+		for option: String in system_chat_hud.options:
+			values["system_chat_" + option] = system_chat_hud.options[option]
 	for type: StringName in MINIMAP_MARKER_TYPES:
 		values["minimap_marker_" + str(type)] = bool(_minimap_marker_types.get(type, true))
 	for index: int in _inventory_quantities.size():
@@ -3357,7 +3404,14 @@ func _clear_world_presentation() -> void:
 	_close_settings()
 	minimap_frame.hide()
 	chat_output.clear()
+	system_chat_hud.output.clear()
+	console_output.clear()
+	chat_hud.reset_destinations()
+	chat_log_tabs.sync([], [])
+	chat_log_tabs.select("all")
+	_chat_tab = "all"
 	_chat_tail = {}
+	_console_tail = {}
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
@@ -3881,28 +3935,41 @@ func _layout_actor_resource_overlay() -> void:
 func _on_chat_tab_pressed(tab: String) -> void:
 	_chat_tab = tab
 	chat_hud.select_tab(tab)
+	if tab in ["general", "local"]:
+		chat_hud.set_destination("local")
+	elif tab in ["party", "guild", "private"] or tab.begins_with("channel:"):
+		chat_hud.set_destination(tab)
 	_sync_chat()
-	_reveal_chat_messages()
+	chat_hud.open_chat()
 
 func _on_channel_tab_pressed(channel_index: int) -> void:
 	if channel_index < 0 or channel_index >= AppState.active_channels.size():
 		return
 	if int(AppState.active_channels[channel_index]) <= 0:
 		return
-	var error: Error = Network.set_active_channel(channel_index)
-	if error != OK:
-		push_warning("SET_ACTIVE_CHANNEL failed: " + error_string(error))
-	AppState.active_channel_index = channel_index
+	# The legacy selection packet has only three slots. Native sends address
+	# the channel number explicitly, including the fourth membership.
+	if channel_index < 3:
+		var error: Error = Network.set_active_channel(channel_index)
+		if error != OK:
+			push_warning("SET_ACTIVE_CHANNEL failed: " + error_string(error))
+		AppState.active_channel_index = channel_index
 	_on_chat_tab_pressed("channel:%d" % int(AppState.active_channels[channel_index]))
 
 func _sync_channel_tabs() -> void:
 	_chat_tab = chat_hud.sync_channels(AppState.active_channels, _chat_tab)
+	if chat_log_tabs != null:
+		chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
 	_sync_chat()
 
 func _reveal_chat_messages() -> void:
-	chat_panel.modulate.a = 1.0
-	chat_panel.show()
-	chat_hud.reveal_message()
+	var line := _last_chat_line()
+	if line.is_empty() or not _chat_line_allowed(line):
+		return
+	if _chat_line_shown(line):
+		chat_hud.reveal_message()
+	if ChatMessages.kind(line) == "system" and not bool(chat_hud.options.get("combined", false)):
+		system_chat_hud.reveal_message()
 
 func _on_minimap_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -7541,159 +7608,149 @@ func _make_scene_windows_draggable() -> void:
 		WindowDrag.attach(panel, handle)
 
 func _sync_chat() -> void:
-	chat_output.clear()
-	chat_output.scroll_following = true
-	var matching: Array = AppState.chat_lines.filter(func(line: Dictionary) -> bool: return _chat_line_shown(line))
-	var first_line: int = (0 if _chat_tab == "history" else maxi(0, matching.size() - CHAT_PANEL_LINES))
-	for line_value: Variant in matching.slice(first_line):
-		var line: Dictionary = line_value as Dictionary
-		_append_chat_text(chat_output, line)
-	chat_output.scroll_to_line(maxi(0, chat_output.get_line_count() - 1))
+	_render_chat_feed(chat_output, AppState.chat_lines.filter(
+		func(line: Dictionary) -> bool: return _chat_line_shown(line)), CHAT_PANEL_LINES)
+	if system_chat_hud != null:
+		_render_chat_feed(system_chat_hud.output, AppState.chat_lines.filter(
+			func(line: Dictionary) -> bool: return _system_line_shown(line)), CHAT_PANEL_LINES)
 	_chat_tail = _last_chat_line()
 
+func _render_chat_feed(target: RichTextLabel, lines: Array, cap: int) -> void:
+	target.clear()
+	target.scroll_following = true
+	for line: Dictionary in lines.slice(maxi(0, lines.size() - cap)):
+		_append_chat_text(target, line)
+	target.scroll_to_line(maxi(0, target.get_line_count() - 1))
+
 func _sync_console() -> void:
-	console_output.clear()
-	for line_value: Variant in AppState.chat_lines:
-		var line := line_value as Dictionary
-		if _chat_line_allowed(line):
-			_append_chat_text(console_output, line)
+	if chat_log_tabs == null:
+		return
+	chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
+	_render_chat_feed(console_output, AppState.chat_lines.filter(
+		func(line: Dictionary) -> bool: return _console_line_shown(line)),
+		AppState.CHAT_LINE_LIMIT)
 	_console_tail = _last_chat_line()
 
 func _last_chat_line() -> Dictionary:
-	if AppState.chat_lines.is_empty():
-		return {}
-	return AppState.chat_lines.back() as Dictionary
+	return {} if AppState.chat_lines.is_empty() else AppState.chat_lines.back() as Dictionary
 
 func _chat_line_shown(line: Dictionary) -> bool:
 	if not _chat_line_allowed(line) or bool(line.get("in_window", false)):
 		return false
-	var is_party := str(line.get("text", "")).begins_with("[Party]")
-	if _chat_tab == "party":
-		return is_party
-	if _chat_tab == "general":
-		return int(line.get("channel", 0)) == 0 and not is_party
-	if _chat_tab.begins_with("channel:"):
-		return _chat_channel_number(line) == int(_chat_tab.trim_prefix("channel:"))
-	return _chat_line_visible(int(line.get("channel", 0)))
+	if ChatMessages.kind(line) == "system" and not bool(chat_hud.options.get("combined", false)):
+		return false
+	return ChatMessages.matches(line, _chat_tab)
+
+func _system_line_shown(line: Dictionary) -> bool:
+	return ChatMessages.kind(line) == "system" and _chat_line_allowed(line) and not bool(line.get("in_window", false))
+
+func _console_line_shown(line: Dictionary) -> bool:
+	return _chat_line_allowed(line) and ChatMessages.matches(line, chat_log_tabs.selected)
 
 func _chat_channel_number(line: Dictionary) -> int:
-	if line.has("channel_number"):
-		return int(line.channel_number)
-	var slot := int(line.get("channel", 0)) - 5
-	return int(AppState.active_channels[slot]) if slot >= 0 and slot < AppState.active_channels.size() else 0
+	return ChatMessages.channel_number(line)
 
-## One line arrived. Both logs used to be cleared and rebuilt for it - the
-## panel's hundred lines and the console's thousand, most of eight
-## milliseconds a line once the buffer was full, several times a second in a
-## fight. The line is appended to each instead, and the oldest paragraph
-## dropped once the log is past its cap. A log whose last rendered line is
-## no longer the line before this one - a reconnect cleared the buffer, a
-## fixture replaced it - is rebuilt, which keeps the two paths from ever
-## disagreeing about what is shown.
+## Append only the new matching line, preserving a reader's scroll position.
+## Filter and history changes rebuild deliberately; normal traffic does not.
 func _append_chat_line() -> void:
 	var lines: Array = AppState.chat_lines
-	var count: int = lines.size()
+	var count := lines.size()
 	var line: Dictionary = lines.back() as Dictionary if count > 0 else {}
 	var previous: Dictionary = lines[count - 2] as Dictionary if count >= 2 else {}
+	if chat_log_tabs != null:
+		chat_log_tabs.observe(line)
+	chat_hud.remember_peer(ChatMessages.peer(line))
 	if count >= 2 and is_same(previous, _chat_tail):
 		_chat_tail = line
 		if _chat_line_shown(line):
-			var scroll := chat_output.get_v_scroll_bar()
-			var following := scroll.value >= scroll.max_value - scroll.page - 2
-			chat_output.scroll_following = following
-			_append_chat_text(chat_output, line)
-			var cap: int = (AppState.CHAT_LINE_LIMIT if _chat_tab == "history"
-				else CHAT_PANEL_LINES)
-			# The paragraph after the last newline is empty, hence the one over.
-			while chat_output.get_paragraph_count() > cap + 1:
-				chat_output.remove_paragraph(0, true)
-			if following:
-				chat_output.scroll_to_line(maxi(0, chat_output.get_line_count() - 1))
+			_append_to_chat_feed(chat_output, line, CHAT_PANEL_LINES)
+		if _system_line_shown(line):
+			_append_to_chat_feed(system_chat_hud.output, line, CHAT_PANEL_LINES)
 	else:
 		_sync_chat()
 	if count >= 2 and is_same(previous, _console_tail):
 		_console_tail = line
-		if _chat_line_allowed(line):
-			_append_chat_text(console_output, line)
-		while console_output.get_paragraph_count() > AppState.CHAT_LINE_LIMIT + 1:
-			console_output.remove_paragraph(0, true)
+		if _console_line_shown(line):
+			_append_to_chat_feed(console_output, line, AppState.CHAT_LINE_LIMIT)
 	else:
 		_sync_console()
 
-## The server writes every finished mix to chat as well as to the item text
-## the inventory and manufacturing windows show, so with either window open a
-## batch reports each item twice and scrolls everything anyone said off the
-## chat. Eternal Lands kept its mix reports out of chat while the items or
-## manufacture window was showing them (multiplayer.c, INVENTORY_ITEM_TEXT).
-## The line is marked as it arrives rather than judged when drawn, so closing
-## the window afterwards does not bring a whole run's worth back; the console
-## still keeps every one.
+func _append_to_chat_feed(target: RichTextLabel, line: Dictionary, cap: int) -> void:
+	var scroll := target.get_v_scroll_bar()
+	var following := scroll.value >= scroll.max_value - scroll.page - 2
+	target.scroll_following = following
+	_append_chat_text(target, line)
+	while target.get_paragraph_count() > cap + 1:
+		target.remove_paragraph(0, true)
+	if following:
+		target.scroll_to_line(maxi(0, target.get_line_count() - 1))
+
 const MIX_REPORT_PREFIX := "You successfully mixed "
 
 func _hold_mix_report_in_window() -> void:
-	var line: Dictionary = _last_chat_line()
+	var line := _last_chat_line()
 	if (int(line.get("channel", -1)) == 0
 			and str(line.get("text", "")).begins_with(MIX_REPORT_PREFIX)
-			and (inventory_panel.is_visible_in_tree()
-				or manufacturing_panel.is_visible_in_tree())):
+			and (inventory_panel.is_visible_in_tree() or manufacturing_panel.is_visible_in_tree())):
 		line["in_window"] = true
 
-## Both chat displays honor the player's ignore and filter lists. The
-## original messages remain in session state so #unignore can restore them.
 func _chat_line_allowed(line: Dictionary) -> bool:
 	if ChatMessages.kind(line) == "system":
 		return true
 	return console_commands.allows(ChatMessages.speaker(line), str(line.get("text", "")))
 
 func _chat_line_visible(channel: int) -> bool:
-	# `#gm` arrives on the legacy CHAT_GM channel and used to be findable only
-	# by reading past everything else in View All.
-	if _chat_tab == "guild":
-		return channel == AppState.GUILD_CHAT_CHANNEL
-	if _chat_tab == "private":
-		return channel == 1
-	if _chat_tab == "system":
-		return channel in [3, 4, 255, AppState.LOCAL_CHAT_CHANNEL]
-	return true
+	return ChatMessages.matches({"channel": channel}, _chat_tab)
 
 func _formatted_chat_line(line: Dictionary) -> String:
-	var channel: int = int(line.get("channel", 0))
-	var prefix: String = ""
-	match channel:
-		1: prefix = "[PM] "
-		AppState.GUILD_CHAT_CHANNEL: prefix = "[Guild] "
-		3, 255: prefix = "[System] "
-		AppState.LOCAL_CHAT_CHANNEL: prefix = "[Client] "
-		5, 6, 7:
-			var channel_number: int = _chat_channel_number(line)
-			prefix = ("[#%d] " % channel_number
-				if channel_number > 0 else "[Channel] ")
-	# Eternal Lands stamps every line "[12:14:49]", ahead of any tag. A line
-	# from before the stamps existed simply has none.
+	var category := ChatMessages.kind(line)
+	var prefix := ""
+	var text := str(line.get("text", ""))
+	match category:
+		"private":
+			prefix = "[Private] "
+			if text.begins_with("[PM from "):
+				text = text.trim_prefix("[PM from ").trim_suffix("]")
+			elif text.begins_with("[PM to "):
+				prefix = "[To %s] " % ChatMessages.peer(line)
+				text = text.substr(text.find(": ") + 2).trim_suffix("]")
+		"guild": prefix = "[Guild] "
+		"system": prefix = "[Client] " if int(line.get("channel", 0)) == AppState.LOCAL_CHAT_CHANNEL else "[System] "
+		"local": prefix = "[Local] "
+		"channel":
+			var number := _chat_channel_number(line)
+			prefix = "[#%d] " % number if number > 0 else "[Channel] "
+			text = text.trim_prefix("[%d] " % number)
 	if bool(_hud_element_options.get("chat_timestamps", true)):
-		var stamp: String = str(line.get("stamp", ""))
+		var stamp := str(line.get("stamp", ""))
 		if not stamp.is_empty():
 			prefix = "[%s] %s" % [stamp, prefix]
-	var body: String = prefix + str(line.get("text", ""))
-	return body
+	return prefix + text
 
 func _append_chat_text(target: RichTextLabel, line: Dictionary) -> void:
-	# Programmatic colour keeps names and message text literal and safe,
-	# including strings that happen to contain BBCode delimiters.
+	# Literal text prevents player-supplied BBCode from becoming UI markup.
+	var palette := {"local": Color("eee3c8"), "party": Color("9bdff1"),
+		"private": Color("d2b4f4"), "guild": Color("e1cf92"), "channel": Color("b3dfad")}
 	var colour := int(line.get("colour", 0))
-	target.push_color(EloriaProtocol.el_text_colour(colour) if colour > 0 else Color("eee3c8"))
+	var category := ChatMessages.kind(line)
+	target.push_color(palette.get(category,
+		EloriaProtocol.el_text_colour(colour) if colour > 0 else Color("d6cbaa")))
 	target.add_text(_formatted_chat_line(line) + "\n")
 	target.pop()
 
 func _chat_message_for_tab(message: String) -> String:
 	if message.begins_with("/") or message.begins_with("#") or message.begins_with("@"):
 		return message
-	if _chat_tab.begins_with("channel:"):
-		return "@" + message
-	if _chat_tab == "party":
-		return "#p " + message
-	if _chat_tab == "guild":
-		return "#gm " + message
+	var target := str(chat_hud.destination_key)
+	if target.begins_with("channel:"):
+		var number := int(target.trim_prefix("channel:"))
+		return "@@%d %s" % [number, message] if number in AppState.active_channels else ""
+	if target.begins_with("pm:"):
+		return "/%s %s" % [target.trim_prefix("pm:"), message]
+	match target:
+		"party": return "#p " + message
+		"guild": return "#gm " + message
+		"private": return ""
 	return message
 
 func _sync_stats() -> void:
@@ -10514,6 +10571,14 @@ func _set_name_distance(value: Variant) -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if section == "Chat":
+		var surface: PanelContainer = system_chat_hud if key.begins_with("system_chat_") else chat_hud
+		var option := key.trim_prefix("system_chat_") if key.begins_with("system_chat_") else key.trim_prefix("chat_")
+		if option == "reset_layout":
+			surface.reset_layout()
+		else:
+			surface.set_option(option, value)
+		return
 	if key.begins_with("minimap_marker_") and key != "minimap_marker_scale":
 		var type := StringName(key.trim_prefix("minimap_marker_"))
 		if type in MINIMAP_MARKER_TYPES:
@@ -11779,21 +11844,11 @@ func _on_chat_submitted(text: String) -> void:
 			else:
 				push_warning("DO_EMOTE failed: " + error_string(emote_error))
 			return
-	var is_private: bool = message.begins_with("/") and message.length() > 1
-	# Joined slots can move, and the server can report another active slot.
-	# Reassert this tab's destination before sending ordinary channel text.
-	if _chat_tab.begins_with("channel:") and not is_private and not message.begins_with("#"):
-		var selected_slot := AppState.active_channels.find(int(_chat_tab.trim_prefix("channel:")))
-		if selected_slot < 0:
-			_sync_channel_tabs()
-			return
-		if selected_slot != AppState.active_channel_index:
-			var channel_error := Network.set_active_channel(selected_slot)
-			if channel_error != OK:
-				push_warning("SET_ACTIVE_CHANNEL failed: " + error_string(channel_error))
-				return
-			AppState.active_channel_index = selected_slot
 	message = _chat_message_for_tab(message)
+	if message.is_empty():
+		AppState.append_local_message("Choose a private recipient or an available joined channel before sending.")
+		return
+	var is_private := message.begins_with("/") and message.length() > 1
 	var error: Error = (Network.send_private_message(message.substr(1))
 		if is_private else Network.send_chat(message))
 	if error == OK:

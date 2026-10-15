@@ -281,6 +281,7 @@ func _build() -> void:
 	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(tabs)
 	_build_hud()
+	_build_chat()
 	_new_page("Minimap", "Minimap")
 	_new_page("Banners", "Banners")
 	_build_graphics()
@@ -357,6 +358,26 @@ func _build_hud() -> void:
 			row.reparent(switches, false)
 	page.resized.connect(func() -> void:
 		switches.columns = 2 if page.size.x >= 700.0 else 1)
+
+func _build_chat() -> void:
+	var page := _new_page("Chat", "Chat")
+	_add_toggle(page, "chat_combined", "Combine system messages and conversations", false)
+	for prefix: String in ["chat_", "system_chat_"]:
+		var caption := Label.new()
+		caption.text = "Conversation window" if prefix == "chat_" else "System window"
+		caption.add_theme_font_size_override("font_size", 18)
+		page.add_child(caption)
+		_add_toggle(page, prefix + "visible", "Show this window", true)
+		_add_toggle(page, prefix + "locked", "Lock position and size", false)
+		_add_number(page, prefix + "font_size", "Text size", 10, 28, 16 if prefix == "chat_" else 14)
+		_add_number(page, prefix + "background_opacity", "Soft-fade opacity (0 = transparent)", 0, 0.8, 0.30 if prefix == "chat_" else 0.25, 0.05)
+		_add_number(page, prefix + "line_spacing", "Line spacing", 0, 12, 2)
+		_add_number(page, prefix + "idle_fade", "Dim after idle seconds (0 = never)", 0, 120, 0)
+		_add_button(page, prefix + "reset_layout", "Reset position and size")
+	var hint := Label.new()
+	hint.text = "Drag either header to move it; drag its corner to resize. Each layout is saved.\nThe system window returns to its saved position when you separate the feeds."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(hint)
 
 func _build_graphics() -> void:
 	var page := _new_page("Graphics", tr("ELORIA_SETTINGS_GRAPHICS"))

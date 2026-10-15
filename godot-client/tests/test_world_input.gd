@@ -322,9 +322,9 @@ func _run() -> void:
 		PackedByteArray([1, 128, 91, 80, 77, 32, 102, 114, 111, 109, 32, 65, 108,
 			105, 99, 101, 58, 32, 104, 105, 93, 0]))
 	main.call("_sync_chat")
-	_expect(chat_output.get_parsed_text().contains("[PM] [PM from Alice: hi]"),
+	_expect(chat_output.get_parsed_text().contains("[Private] Alice: hi"),
 		"private chat receives its personal-channel label")
-	_expect(not chat_output.bbcode_enabled and chat_input.placeholder_text.contains("/name"),
+	_expect(not chat_output.bbcode_enabled and chat_input.tooltip_text.contains("/name"),
 		"chat remains markup-safe and exposes legacy addressing syntax")
 	app_state_inventory.call("_on_packet", 71,
 		PackedByteArray([1, 1, 0, 0, 0, 4, 0, 0, 0, 12, 0, 0, 0]))
