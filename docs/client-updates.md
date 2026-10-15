@@ -59,6 +59,86 @@ client and updater. No Python or external updater runtime is required on
 player computers. `--installer` also builds an Inno Setup installer whose
 shortcuts launch through the updater.
 
+## Build both desktop downloads
+
+Maintainers can build a complete release with
+`godot-client/tools/build_release.py`. Run it on **Windows** with Python 3.11+
+and `numpy`, `Pillow`, and `zstandard` installed in that Python environment.
+Install Godot **4.7.2-stable** and both matching x86_64 export templates,
+[Inno Setup 6](https://jrsoftware.org/isdl.php), and **WSL Ubuntu-24.04**.
+The Linux executable is exported by Godot on Windows and smoke-tested in WSL;
+the Windows executable is smoke-tested directly. Missing prerequisites stop
+the release before either platform is built.
+
+From the final client repository:
+
+```powershell
+python godot-client/tools/build_release.py build --ref master `
+  --update-signing-key "C:\path\to\private\signing-private.pem"
+```
+
+Use `--godot` or `--iscc` to select tools outside their usual locations.
+`--server HOST:PORT` bakes the same server into both platforms' launchers.
+The default ref is **local master**; the script does not fetch, promote a
+branch, or include uncommitted changes. Deliberately select and commit the
+client revision before building. Both targets use the same resolved full hash.
+
+The output is `../dist/releases/client-<full-client-commit>/`:
+
+- **Windows:** a per-user `*-setup.exe` installer and, for larger games,
+  accompanying `*-setup-*.bin` files with 1 GiB slices. Shortcuts start the
+  restart updater. Download all installer files into one folder before setup.
+- **Linux:** a `.tar.gz` containing the native executable, updater and launch
+  scripts with executable permissions. An archive at or above GitHub's 2 GiB
+  limit is split into `.tar.gz.001`, `.002`, etc., each at most 1 GiB. The
+  generated release notes give the exact reassembly/extraction command.
+- Both signed update manifests and their bounded `.update.zip.###` downloads.
+- `SHA256SUMS` and `RELEASE-NOTES.md` for players, `release.json` listing exactly
+  the upload assets, and a combined **local** `client_updates.json` policy.
+
+Only the listed player downloads, signed manifests, update parts and checksums
+are uploaded. Build folders, logs, signing keys and server policy stay local.
+The initial Windows ZIP is omitted because the installer handles large games.
+Every upload asset is checked against GitHub's limit and hashed. If a build
+fails, fix the cause and use a fresh `--out` directory; existing release output
+is never silently overwritten. The packager's shared import/texture cache is
+reused across builds.
+
+## Upload a complete desktop release
+
+First push the selected client commit through the repository's configured SSH
+identity. Uploads require GitHub CLI authenticated as **rabbitlandsgame** with
+write access. SSH authentication and CLI authentication are separate; the
+script checks the actual API account and refuses another account.
+
+```powershell
+$RabbitLandsRelease = "C:\rabbitlands\dist\releases\client-<full-client-commit>\release.json"
+python godot-client/tools/build_release.py upload --bundle $RabbitLandsRelease
+```
+
+This creates or resumes a **draft** at `client-<full-client-commit>`, using
+`RELEASE-NOTES.md` as its description. It verifies the commit exists in the
+public client repository and refuses a conflicting tag or an already published
+release. No local Git history is pushed by the upload script.
+
+Review the draft and installation instructions. To publish it after all assets
+are present:
+
+```powershell
+python godot-client/tools/build_release.py upload --bundle $RabbitLandsRelease --publish
+```
+
+An interrupted draft can use the same command again. Downloads already recorded
+by GitHub with the expected size and SHA-256 are reused. The script checks the
+remote asset list, sizes and available checksums before publication; failures
+leave the draft unpublished. `--publish` marks the completed release as latest.
+Players can find it on the [client Releases page](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
+No GitHub Actions workflow is required.
+
+After publishing, verify anonymous downloads and deploy the generated combined
+`client_updates.json` to the served server profile when ready to roll out the
+client. Building and uploading do not change the live server policy.
+
 ## Publish on GitHub
 
 The public release repository is `rabbitlandsgame/rabbitlands-client`. Publish player releases there using the project account. Players need no
@@ -74,8 +154,8 @@ server being deployed.
 2. Upload the signed platform manifest and every `.update.zip.###` part listed
    in the instructions. These parts are each at most 1 GiB, below GitHub's
    release asset limit. The regular standalone ZIP/tarball is an initial
-   install artifact; if it exceeds 2 GiB, use the optional Windows installer
-   with its `.bin` slices or another initial-download distribution method.
+   install artifact; if it reaches 2 GiB, use `build_release.py` to prepare the
+   Windows installer slices and split Linux download described above.
 3. Publish the release and confirm its assets download without signing in.
 4. Put the generated policy into the **served server profile** as
    `client_updates.json`. If both platforms are published, combine their two

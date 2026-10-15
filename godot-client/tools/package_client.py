@@ -2590,7 +2590,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={{app}}\\app\\RabbitLands.exe
 SetupIconFile={stage}\\app\\assets\\branding\\rabbitlands-icon.ico
-{"DiskSpanning=yes" + chr(10) + "DiskSliceSize=max" if spanning else ""}
+{"DiskSpanning=yes" + chr(10) + "DiskSliceSize=1073741824" if spanning else ""}
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; Flags: unchecked
