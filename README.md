@@ -38,11 +38,18 @@ so the two directories are checked out together and move together.
 godot --path godot-client
 ```
 
-The client needs `rabbitlands-server` on direct TCP 2000. Point it at one with the login
-screen's server field, or `-- --server=127.0.0.1 --port=2000`. The default
-host is `game.rabbitlandsgame.com`. For a configured TLS listener, select port
-2001 and check **Encrypted connection (TLS)**; certificates and the hostname
-are verified. DNS, hosting and certificates must be configured separately;
+The client defaults to verified TLS at `game.rabbitlandsgame.com:2001`.
+Certificates and the hostname are verified, and failed TLS connections never
+fall back to plain TCP. Older saved settings are migrated to enable TLS;
+there is no player-facing encryption switch. Point at another TLS server with
+the login screen's server field, or `-- --server=HOST --port=PORT`.
+
+For a local `rabbitlands-server` without TLS, launch with
+`-- --dev-plain-tcp`. This developer option defaults to `127.0.0.1:2000`;
+`--server` and `--port` can override that address. It applies only to this
+launch and is never saved as a player preference. Local integration fixtures
+that use an unencrypted server also need this option unless they opt in directly.
+DNS, hosting and certificates must be configured separately;
 these names are configuration defaults, not a claim of live service.
 
 Player downloads are built with `godot-client/tools/package_client.py`.

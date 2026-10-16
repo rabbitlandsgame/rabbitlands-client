@@ -89,7 +89,7 @@ func run() -> void:
 	await process_frame
 	state=root.get_node("AppState");net=root.get_node("Network")
 	main.host_edit.text="127.0.0.1";main.port_edit.value=int(OS.get_environment("ELORIA_INTEGRATION_PORT"))
-	main.secure_check.button_pressed=false;main._on_connect_pressed()
+	main._dev_plain_tcp=true;main._on_connect_pressed()
 	if not await wait_until(func():return state.connection_state=="connected","connect"):return
 	main.user_edit.text="SkyQA";main.password_edit.text="SkyReview42";main._on_login_pressed()
 	if not await wait_until(func():return state.authenticated,"login"):return

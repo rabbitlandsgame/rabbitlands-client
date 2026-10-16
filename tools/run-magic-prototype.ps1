@@ -3,9 +3,10 @@ param(
     [ValidateSet('baseline', 'quick', 'orbit')][string]$WheelVariant = 'baseline',
     [switch]$Live,
     [switch]$Check,
+    [switch]$PlainTcp,
     [string]$GodotPath = '',
     [string]$Server = '',
-    [int]$Port = 2000
+    [int]$Port = 2001
 )
 $ErrorActionPreference = 'Stop'
 if ($Live -and $WheelVariant -eq 'orbit') { throw 'Orbit is a practice comparison. The live client uses the Quick ring.' }
@@ -67,7 +68,12 @@ if ($Check) {
     $launchArguments += 'res://src/dev/magic_practice.tscn'
 }
 $launchArguments += @('--', "--magic-mode=$Mode", "--wheel-variant=$WheelVariant")
-if ($Server) { $launchArguments += @("--server=$Server", "--port=$Port") }
+if ($PlainTcp) {
+    $launchArguments += '--dev-plain-tcp'
+    if (-not $PSBoundParameters.ContainsKey('Port')) { $Port = 2000 }
+}
+if ($Server) { $launchArguments += "--server=$Server" }
+if ($Server -or $PSBoundParameters.ContainsKey('Port')) { $launchArguments += "--port=$Port" }
 Write-Host "Magic casting prototype: $Mode"
 Write-Host $(if ($Live) { 'Live client: log in through the normal login screen.' } else { 'Offline practice: simulated outcomes; no login required.' })
 $savedAppData = $env:APPDATA

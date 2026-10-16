@@ -229,7 +229,7 @@ func execute(c: Dictionary) -> void:
 		"cancel_spell":main.magic_selection.cancel()
 		"test_login":
 			net.disconnect_from_server();await create_timer(.6).timeout
-			main.host_edit.text="127.0.0.1";main.port_edit.value=int(OS.get_environment("ELORIA_PLAYTEST_PORT")) if not OS.get_environment("ELORIA_PLAYTEST_PORT").is_empty() else 2036;main.secure_check.button_pressed=false
+			main.host_edit.text="127.0.0.1";main.port_edit.value=int(OS.get_environment("ELORIA_PLAYTEST_PORT")) if not OS.get_environment("ELORIA_PLAYTEST_PORT").is_empty() else 2036;main._dev_plain_tcp=true
 			main._on_connect_pressed()
 			ok=await wait_soft(func():return state.connection_state=="connected",30)
 			if ok:
@@ -279,7 +279,7 @@ func run() -> void:
 	await process_frame
 	state=root.get_node("AppState");net=root.get_node("Network")
 	main.host_edit.text="127.0.0.1";main.port_edit.value=int(OS.get_environment("ELORIA_PLAYTEST_PORT")) if not OS.get_environment("ELORIA_PLAYTEST_PORT").is_empty() else 2036
-	main.secure_check.button_pressed=false;main._on_connect_pressed()
+	main._dev_plain_tcp=true;main._on_connect_pressed()
 	if not await wait_until(func():return state.connection_state=="connected","connect"):return
 	var login_name:=OS.get_environment("ELORIA_PLAYTEST_USER")
 	if login_name.is_empty():login_name="PaceStudent"

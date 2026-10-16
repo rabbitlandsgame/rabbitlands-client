@@ -154,7 +154,7 @@ var _last_heartbeat_msec := 0
 ## Whether this session wraps the socket in TLS. The protocol is identical
 ## either way: only the bytes between this client and the socket change, so
 ## nothing above `send_frame` and `_drain_packets` knows the difference.
-var _secure := false
+var _secure := true
 ## A certificate to trust in addition to the system store. A development
 ## server signs its own certificate, which no trust store will ever accept;
 ## pointing at that file is what lets a laptop connect without turning
@@ -172,7 +172,7 @@ func _link_ready() -> bool:
 func _link() -> StreamPeer:
 	return _tls if _secure else _peer
 
-func connect_to_server(host: String, port: int, secure := false,
+func connect_to_server(host: String, port: int, secure := true,
 		trusted_certificate_path := "") -> Error:
 	Diagnostics.record("connection_requested", {"host": host, "port": port, "tls": secure})
 	_reset_coordinate_session()

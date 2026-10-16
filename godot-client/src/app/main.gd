@@ -43,7 +43,8 @@ const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
 @onready var preview_rim_light: DirectionalLight3D = %RimLight
 @onready var host_edit: LineEdit = %Host
 @onready var port_edit: SpinBox = %Port
-@onready var secure_check: CheckBox = %Secure
+## A launch-only override for local developer servers; never saved as a preference.
+var _dev_plain_tcp := false
 @onready var user_edit: LineEdit = %Username
 @onready var password_edit: LineEdit = %Password
 @onready var connect_button: Button = %Connect
@@ -1256,13 +1257,7 @@ func _ready() -> void:
 	_configure_cartography()
 	_load_hud_settings()
 	# Explicit launch options select a server without changing saved settings.
-	for argument in OS.get_cmdline_user_args():
-		if argument.begins_with("--server="):
-			host_edit.text = argument.trim_prefix("--server=")
-		elif argument.begins_with("--port="):
-			var value := argument.trim_prefix("--port=")
-			if value.is_valid_int() and int(value) > 0 and int(value) <= 65535:
-				port_edit.value = int(value)
+	_apply_connection_launch_options(OS.get_cmdline_user_args())
 	_configure_inventory_menus()
 	_configure_minimap_menu()
 	_build_inventory_slots()
@@ -1649,6 +1644,18 @@ func _turn_local_actor(left: bool) -> void:
 	if actor_value is ReplicatedActor3D and is_instance_valid(actor_value as ReplicatedActor3D):
 		(actor_value as ReplicatedActor3D).predict_turn(PI / 4.0 if left else -PI / 4.0)
 
+func _apply_connection_launch_options(arguments: PackedStringArray) -> void:
+	_dev_plain_tcp = arguments.has("--dev-plain-tcp")
+	host_edit.text = "127.0.0.1" if _dev_plain_tcp else "game.rabbitlandsgame.com"
+	port_edit.value = 2000 if _dev_plain_tcp else 2001
+	for argument: String in arguments:
+		if argument.begins_with("--server="):
+			host_edit.text = argument.trim_prefix("--server=")
+		elif argument.begins_with("--port="):
+			var value := argument.trim_prefix("--port=")
+			if value.is_valid_int() and int(value) > 0 and int(value) <= 65535:
+				port_edit.value = int(value)
+
 func _on_connect_pressed() -> void:
 	if AppState.connection_state != "disconnected":
 		Network.disconnect_from_server()
@@ -1656,12 +1663,10 @@ func _on_connect_pressed() -> void:
 	connect_button.disabled = true
 	login_button.disabled = true
 	status_label.text = "Connecting…"
-	# Remembered per player rather than per session: someone who connects to a
-	# server that speaks TLS should not have to re-tick the box every launch.
 	_save_hud_settings()
 	var error := Network.connect_to_server(
 		host_edit.text.strip_edges(), int(port_edit.value),
-		secure_check.button_pressed, _trusted_certificate_path())
+		not _dev_plain_tcp, _trusted_certificate_path())
 	if error != OK:
 		status_label.text = "Connection failed: " + error_string(error)
 		connect_button.disabled = false
@@ -2494,7 +2499,7 @@ func _refresh_unified_settings() -> void:
 		"spell_bar_docked": casting_bar.docked, "spell_bar_expanded": casting_bar.panel.visible,
 		"shadows": _shadows_enabled, "particles": _effects_enabled,
 		"nameplates": _nameplates_enabled, "rotation_sensitivity": camera_rig.rotation_sensitivity,
-		"secure": secure_check.button_pressed, "start_backdrop": start_screen_backdrop.selected_id,
+		"start_backdrop": start_screen_backdrop.selected_id,
 		"start_animated": start_screen_backdrop.animation_enabled,
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
 	}
@@ -6773,9 +6778,14 @@ func _load_hud_settings() -> void:
 		var spell_bar_layout: Variant = config.get_value("hud", "spell_quickbar", {})
 		if spell_bar_layout is Dictionary:
 			casting_bar.restore_hud_layout(spell_bar_layout)
-		if secure_check != null:
-			secure_check.button_pressed = bool(config.get_value(
-				"connection", "secure", false))
+		# Older clients saved an opt-in TLS switch. Migrate it immediately so
+		# returning players use TLS too, even before changing any preferences.
+		# Host and port were never saved; the scene now defaults to TLS/2001.
+		if config.get_value("connection", "secure", false) != true:
+			config.set_value("connection", "secure", true)
+			var migration_error := config.save(SETTINGS_PATH)
+			if migration_error != OK:
+				push_warning("Could not migrate connection settings: " + error_string(migration_error))
 		_minimap_scale = clampf(float(config.get_value(
 			"hud", "minimap_scale", 1.0)), 0.75, 1.75)
 		_ui_scale = clampf(float(config.get_value(
@@ -6981,8 +6991,8 @@ func _save_hud_settings() -> void:
 	var config: ConfigFile = ConfigFile.new()
 	config.load(SETTINGS_PATH)
 	config.set_value("notes", "text", _player_notes)
-	config.set_value("connection", "secure",
-		secure_check != null and secure_check.button_pressed)
+	# A developer's plain TCP session must never become a saved player default.
+	config.set_value("connection", "secure", true)
 	config.set_value("encyclopedia", "bookmarks", _encyclopedia_bookmarks)
 	config.set_value("graphics", "shadows", _shadows_enabled)
 	config.set_value("graphics", "particles", _effects_enabled)
@@ -10718,8 +10728,6 @@ func _on_client_setting_changed(section: String, key: String,
 			_hud_timer_running = false
 			_hud_timer_seconds = 0 if _hud_timer_stopwatch else _hud_timer_start_seconds
 			_sync_hud_timer_label()
-		"secure":
-			secure_check.button_pressed = bool(value)
 		"start_backdrop":
 			start_screen_backdrop.select_backdrop(str(value))
 		"start_animated":
@@ -10762,7 +10770,7 @@ func _on_client_setting_changed(section: String, key: String,
 		"autogather":
 			Network.send_chat("#autogather")
 	# Commands on Gameplay belong to the server; its local preferences still
-	# save immediately, including the secure connection choice for next login.
+	# save immediately.
 	if key not in ["target_mode_strong", "target_mode_weak", "autogather"]:
 		_save_hud_settings()
 

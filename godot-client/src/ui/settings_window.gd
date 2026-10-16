@@ -569,7 +569,6 @@ func _build_gameplay() -> void:
 	_add_button(page, "target_mode_strong", tr("ELORIA_SETTINGS_TARGET_STRONG"))
 	_add_button(page, "target_mode_weak", tr("ELORIA_SETTINGS_TARGET_WEAK"))
 	_add_button(page, "autogather", tr("ELORIA_SETTINGS_AUTOGATHER"))
-	_add_toggle(page, "secure", "Secure connection (next login)", false)
 
 func _build_controls() -> void:
 	var list := _new_page("Controls", tr("ELORIA_SETTINGS_CONTROLS"))

@@ -56,10 +56,10 @@ try {
     if ($Check) {
         if (-not $GodotPath) { $GodotPath = Join-Path $env:USERPROFILE 'Downloads/godot47/Godot_v4.7.2-stable_win64_console.exe' }
         $clientLog = Join-Path $profile 'client-check.log'
-        & $GodotPath --headless --path (Join-Path $clientRoot 'godot-client') --script res://tests/test_magic_ring_tutorial_live.gd --log-file $clientLog --quit-after 20000 -- "--server=127.0.0.1" "--port=$Port"
+        & $GodotPath --headless --path (Join-Path $clientRoot 'godot-client') --script res://tests/test_magic_ring_tutorial_live.gd --log-file $clientLog --quit-after 20000 -- --dev-plain-tcp "--server=127.0.0.1" "--port=$Port"
         if ($LASTEXITCODE -ne 0 -or (Get-Content -LiteralPath $clientLog -Raw) -notmatch 'live magic ring tutorial: PASS') { throw "Live tutorial check failed. See $clientLog" }
     } else {
-        & (Join-Path $PSScriptRoot 'run-magic-prototype.ps1') -Live -Mode wheel -GodotPath $GodotPath -Server '127.0.0.1' -Port $Port
+        & (Join-Path $PSScriptRoot 'run-magic-prototype.ps1') -Live -PlainTcp -Mode wheel -GodotPath $GodotPath -Server '127.0.0.1' -Port $Port
         if ($LASTEXITCODE -ne 0) { throw "Client exited with code $LASTEXITCODE" }
     }
 } finally {

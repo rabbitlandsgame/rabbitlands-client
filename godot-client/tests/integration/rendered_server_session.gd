@@ -42,6 +42,7 @@ func _run() -> void:
 	var port_edit: SpinBox = main.get_node("LoginPanel/Content/Port") as SpinBox
 	host_edit.text = host
 	port_edit.value = port
+	main.set("_dev_plain_tcp", true)
 	main.call("_on_connect_pressed")
 	var connected: Callable = func() -> bool:
 		return str(_app_state.get("connection_state")) == "connected"
@@ -138,7 +139,7 @@ func _run() -> void:
 					EloriaProtocol.ClientMessage.PING_RESPONSE))
 	helper_network.packet_received.connect(helper_packet_handler)
 	root.add_child(helper_network)
-	var helper_connect_error: Error = helper_network.connect_to_server(host, port)
+	var helper_connect_error: Error = helper_network.connect_to_server(host, port, false)
 	_expect(helper_connect_error == OK, "remote-player helper begins a real TCP connection")
 	var helper_connected: Callable = func() -> bool:
 		return str(helper_state.get("connection", "")) == "connected"
