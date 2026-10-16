@@ -51,4 +51,4 @@ Use only after the user authorizes paid submission. Increase concurrency conserv
 
 When the [hybrid routing guide](hybrid-production-routing.md) selects the hero/bake-down route, run a separately named high-detail pilot rather than changing the established Smart Topology batch in place. Inspect the current client help and Meshy API before choosing standard-generation fields; do not assume the direct-route settings produce a high-detail source. Preserve that source, then create later retopology, UV, and bake stages. A decimated file is not game-ready until silhouette, deformation topology, UVs, materials, baked maps, and Godot rendering have been reviewed.
 
-Never put a key in a command that will be copied into documentation or committed. Prefer `MESHY_API_KEY` in the process environment or the ignored local key file.
+Never put a key in a command that will be copied into documentation or committed. Use `MESHY_API_KEY` in the process environment (or `--api-key` for a single run); do not keep a key file in the checkout.
