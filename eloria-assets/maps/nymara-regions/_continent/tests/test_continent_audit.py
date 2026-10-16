@@ -18,7 +18,7 @@ from amberwood import mesh as M, gltf as G
 POLYGONS = {'west':[[0,0],[2,0],[2,4],[0,4]], 'east':[[2,0],[4,0],[4,4],[2,4]]}
 
 
-def scene(path, *, color=.4, reverse=False, missing=False, regions=('west','east'),translation=(0,0,0)):
+def scene(path, *, color=.4, reverse=False, missing=False, regions=('west','east'),translation=(0,0,0),normal=(-.1,1.,-.2)):
     builder = G.GltfBuilder('independent audit fixture')
     builder.add_material(G.Material('continental_ground',roughness=.95))
     for region,x0 in (('west',0),('east',2)):
@@ -28,7 +28,7 @@ def scene(path, *, color=.4, reverse=False, missing=False, regions=('west','east
         indices = np.array([[0,2,1],[1,2,3],[2,4,3],[3,4,5]])
         if reverse: indices = indices[:,::-1]
         if missing and region == 'east': indices = indices[:-1]
-        normals = np.tile([-.1,1.,-.2],(6,1));normals/=np.linalg.norm(normals,axis=1,keepdims=True)
+        normals = np.tile(normal,(6,1));normals/=np.linalg.norm(normals,axis=1,keepdims=True)
         mesh = M.Mesh(positions=vertices-np.asarray(translation),normals=normals,uvs=vertices[:,[0,2]]*.17,
                       colors=np.tile([.3,color,.2,1],(6,1)),indices=indices.ravel(),material='continental_ground')
         name = f'Terrain_{region}_00_00'
@@ -52,6 +52,36 @@ class EmittedPartitionTests(unittest.TestCase):
             target=folder/'target.glb';scene(target)
             counts=np.zeros_like(s.source_counts);s.read(target,counts);s.complete(counts,'target')
             self.assertEqual(int(counts.sum()),8)
+
+    def test_byte_stored_normals_pass_and_a_turned_normal_still_fails(self):
+        """What the published packages hold: a normal as a normalized byte.
+
+        quantise_geometry.py stores terrain normals as bytes, so a package can
+        no longer match the float source to 2e-6. Half a step of 1/127 is the
+        whole difference that encoding can make; a normal turned further than
+        that has to stay an audit failure, or the check stops meaning anything.
+        """
+        sys.path.insert(0,str(HERE.parents[3]/'godot-client'/'tools'))
+        import quantise_geometry as QG
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp);s=self.reference(folder)
+            target=folder/'quantised.glb';scene(target)
+            result=QG.process(target,False,True)
+            self.assertIsNotNone(result,'the fixture must have normals to store as bytes')
+            self.assertEqual(result['counts'].get('NORMAL'),2,'both terrain primitives')
+            target.write_bytes(result['data'])
+            counts=np.zeros_like(s.source_counts);s.read(target,counts);s.complete(counts,'target')
+            self.assertEqual(int(counts.sum()),8)
+            self.assertLessEqual(s.max_error['normal'],A.BYTE_NORMAL_TOLERANCE)
+            # 0.57 degrees: a quarter of a degree more than the encoding explains.
+            turned=folder/'turned.glb';scene(turned,normal=(-.1,1.,-.19))
+            with self.assertRaisesRegex(A.AuditError,'normal changed'):
+                s.read(turned,np.zeros_like(s.source_counts))
+            quantised_turn=folder/'turned-quantised.glb';scene(quantised_turn,normal=(-.1,1.,-.19))
+            turned_result=QG.process(quantised_turn,False,True)
+            quantised_turn.write_bytes(turned_result['data'])
+            with self.assertRaisesRegex(A.AuditError,'normal changed'):
+                s.read(quantised_turn,np.zeros_like(s.source_counts))
 
     def test_changed_biome_vertex_colors_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -28,6 +28,14 @@ sys.path.insert(0, str(HERE.parent / '_toolkit'))
 import glb_reader as GR
 from world_layout import triangle_sample
 
+# A published package stores a terrain normal as a normalized signed byte
+# (godot-client/tools/quantise_geometry.py); the shared source surface it is
+# compared against is float. Half a step of 1/127 is the whole difference that
+# encoding can make, and that is all this allows: measured over the published
+# terrain, a component moves 0.00385 and a direction 0.31 degrees. A float
+# normal keeps the tight tolerance, so drift is still caught where it can be.
+BYTE_NORMAL_TOLERANCE = 1 / 254 + 1e-6
+
 SHAPING_SOURCES=('landscape.py','world_layout.py','content.py','assemblies.py','crown_support.py','westhaven_support.py','ferry_export.py','ferry_support.py','mirror_support.py','manymouth_support.py','mirror_streets.py','four_gates_support.py','amberwood_support.py','amberwood_access.py','mirror_lake_support.py','ssarathi_bank_support.py','manymouth_boats.py','terrain_export.py','scene_io.py','grey_crossings.py','four_gates_sage.py','door_approaches.py','hull_settle.py','resource_trails.py','object_edits.py','winding.py','river_crossings.py','reach_links.py','authored_points.py','authoring.py','authoring_catalog.py','saved_seam_profile.py','saved-seam-grey-whitehorn-v1.json','saved_post_support_profile.py','saved-seam-post-support-v1.json','bridge_export.py','bridge_prepare.py','coastal_prepare.py','coastal_bridge_export.py','bridge_profiles.py','sea_crossings.py','coastal_bank_fit.py','../_northern/requirements.txt')
 EXPORT_SOURCES={'build_continent.py','scene_io.py','terrain_export.py','biome_blend.py','compact_glb_images.py','bridge_export.py','coastal_prepare.py','coastal_bridge_export.py','bridge_profiles.py','sea_crossings.py','coastal_bank_fit.py','../_northern/requirements.txt','ferry_export.py','crossings.py','amberwood_access.py','manymouth_access.py','manymouth_village_streets.py','collision_export.py','mirror_access_geometry.py','grey_crossings.py','access_decks.py'}
 SHAPING_SOURCES+=('storage_bounds.py',)
@@ -243,7 +251,8 @@ class Surface:
                     self.attributes[vertices] = values
                 else:
                     difference = np.abs(self.attributes[vertices] - values)
-                    for label, lo, hi, tolerance in (('position',0,3,.0001),('normal',3,6,.000002),('UV',6,8,.000002),('color',8,12,.000002)):
+                    normal_tolerance = BYTE_NORMAL_TOLERANCE if doc['accessors'][attrs['NORMAL']].get('normalized') else .000002
+                    for label, lo, hi, tolerance in (('position',0,3,.0001),('normal',3,6,normal_tolerance),('UV',6,8,.000002),('color',8,12,.000002)):
                         error = float(difference[:, lo:hi].max(initial=0))
                         self.max_error[label] = max(self.max_error[label], error)
                         require(np.isfinite(error) and error <= tolerance, f'{path}: shared {label} changed by {error}')
