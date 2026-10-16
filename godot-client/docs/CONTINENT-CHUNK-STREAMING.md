@@ -138,6 +138,37 @@ model cache, and normal chunk retirement frees the instance. Territory adoption
 retains the same wildlife controller and instances. Legacy unchunked maps keep
 their existing population behavior.
 
+### Threading and handoff rules
+
+A worker never holds a lock across a RenderingServer call. Texture creation is
+a round trip that only the main thread serves, so a main thread waiting for
+that lock would deadlock the client. `src/world/external_texture_pool.gd`
+decodes and uploads outside its `Mutex` and only publishes under it; the first
+publisher of a hash wins and later ones adopt its texture
+(`tests/test_external_texture_pool.gd`).
+
+The main thread never joins a live import worker. `_release_worker` orphans it,
+and `reap_orphans()` frees it once it reports finished
+(`src/world/continent_chunk_stream.gd`, `tests/test_continent_chunk_orphans.gd`).
+The known exception is `src/actors/native_animation_importer.gd`, whose
+`_source_scene` joins its prewarm thread; that is safe only while the animation
+library names no image by URI that a package imports.
+
+A script that quits after loading maps through main must stop the neighbour
+region stream first: `exterior_stream.clear()`, await `is_idle()`, then
+`ContinentChunkStream.drain_workers(tree)`, as
+`tests/integration/rendered_action_cursors.gd` does. `drain_workers` alone does
+not wait for the `ExteriorRegionStream` worker.
+
+Nothing that loads, decodes, uploads or compiles belongs inside a seamless
+handoff. Diagnose a handoff stall with `exterior_stream.last_handoff`, whose
+`binding_ms` and `binding_steps` `src/app/main.gd` records while it binds the
+adopted map, and by counting `arrival_reprime` and
+`world_load stage=manifest_open` lines in the client log against a passing run.
+Actors and map objects in cells that attach later are grounded again on
+`cell_ready` (`main.gd` `_on_chunk_surface_ready`;
+`tests/test_map_object_regrounding.gd`).
+
 ## Validation
 
 The real `rendered_landscape_walk.gd` ferry proof requires `travelMode: "ferry"`

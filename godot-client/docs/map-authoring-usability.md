@@ -10,6 +10,8 @@ The map team's answers on what each tool may write are in [map-team-editor-contr
 
 Everything in this document works in production region scenes, and everything except the terrain-based tools works in the pilot. None of it changes the save, snapshot, or bake contracts. Ghosts, grids, pins, the walker and every other helper are ownerless nodes, so they are never packed into a scene. The only new thing a scene saves besides ordinary controls is the group tag on grouped objects; the snapshot's geometry and gameplay records ignore it, although saving the scene changes its source hash as any save does. Review notes live in a separate file beside the scene that nothing references (see [Review notes](#review-notes)). Every edit goes through Godot's normal undo history, which you can see and jump through in the **History** dock next to FileSystem.
 
+An editor save can also stamp `uid="uid://..."` attributes on a scene's `ext_resource` lines. The `.uid` sidecars are git-ignored and no committed region scene carries those attributes, so strip any that a save adds before committing.
+
 ## Toolbar
 
 The 3D toolbar has one-click toggles next to **Map tools** and **Time**:
@@ -374,7 +376,8 @@ The walker, its route line, goal ring and tint are never saved. Starting placeme
 - **Turn:** Q and E turn the next shape 15° (5° with Shift). The region keeps that yaw, and the dragged corner sets its size along the turned sides.
 - **Paint along a stroke** (the **Mode** option): press and drag to lay a region of the **Brush size** every 60% of the brush along the drag. The whole stroke is one undo step. Stamps outside the owned land are left out, and the stroke stops at the 127-region limit; the message says how many were placed.
 
-- A shared surface file is reused as it is, so later edits to it change every region using it; a surface embedded in another region is copied, and a preset makes a new local surface.
+- The new region keeps its own copy of the chosen surface, and a preset makes a new local surface. Region surfaces, like the terrain's `base_surface`, are `resource_local_to_scene` copies (`sync_surface_binding` in `src/dev/map_authoring_pilot/ground_region.gd`, `_sync_surface` in `src/dev/map_authoring_region/terrain_control.gd`): in the editor they have no `resource_path`, and saving embeds them in the scene, as in every committed region scene. A script that retints ground walks the nodes (`Terrain`'s `base_surface` and each region's `surface`), never a `surfaces/*.tres` path.
+- A region draws nothing when its surface's source material sets a property the region shader cannot keep, such as `vertex_color_use_as_albedo`, which all the `continental-ground` and `biome-*` surfaces under `world_authoring/regions/*/surfaces/` set. The editor warns "Ground region material was not created: the source uses material features the region shader cannot preserve" (`MapAuthoringGroundRegionMaterial.create`, refused by `MapAuthoringTexturePresets._has_only_supported_base_features`; both in `src/dev/map_authoring_pilot/style/`). Turn the property off on the region's own copy.
 - The region and its feather must stay inside the land the territory owns.
 - A territory holds at most 127 ground regions, the most the terrain preview draws; the tool refuses more.
 
@@ -452,7 +455,7 @@ The display is read-only: nothing edits the plan, and shared topology, mouths, j
 
 Press and drag in the 3D view.
 
-- **Where copies go.** A stamp is taken where the stroke starts and every brush radius along it. Each stamp tries density × area spots spread over the brush and keeps those at least the spacing from every copy already kept and from placed copies of the same asset, inside the owned land.
+- **Where copies go.** A stamp is taken where the stroke starts and every brush radius along it. Each stamp tries round(density × π r² / 100) spots spread over the brush and keeps those at least the spacing from every copy already kept and from placed copies of the same asset, inside the owned land. Below half a spot a stamp places nothing (0.12 per 100 m² with an 8 m radius rounds to none), so place sparse pieces by hand.
 - **Undo.** A stroke is one undo step.
 - **Seeds.** The same seed gives the same spots, and each committed stroke moves to the next seed.
 - **Keys.** `[` / `]` change the radius, Page Up and Page Down the density. Esc discards a stroke; right-click stops.
@@ -580,6 +583,18 @@ godot --headless --path godot-client --script res://tests/test_map_authoring_ser
 ```
 
 `tests/test_terrain_sculpt_editor.gd` now uses an isolated catalog, manifest and authoring spec under `test-artifacts/terrain-sculpt/`, checks that the edited scene is exactly its fixture before any input or save, and stops without saving otherwise.
+
+**Editor test hazards.**
+
+- A windowed editor run records its open scenes in `.godot/editor/editor_layout.cfg` (`open_scenes`, `current_scene`), and the next `--editor --headless` launch reopens them. The sculpt test refuses such a scene, but an earlier version saved it over a real region scene. Clear those two entries after a windowed run, and check `git status -- godot-client/world_authoring` after a batch of editor tests.
+- Windowed `--editor --script` capture runs were often seen to crash in teardown after `quit()`. Judge them by their own completion line and the log, not the exit code.
+
+**Plugin traps (Godot 4.7.2).**
+
+- A plugin that consumes a key must call `get_viewport().set_input_as_handled()`. Returning `AFTER_GUI_INPUT_STOP` does not stop the 3D viewport's own shortcut for that key (Ctrl+G grouping, F focus, Q/E tool modes), as the Map Assets and Map Authoring Usability `plugin.gd` files note.
+- A parse error in one of a plugin's scripts was seen to disable the whole plugin, with only an error in the output. Its tests then fail as though the plugin were not enabled. A constant named after a native class, such as `Performance`, is one such error.
+- `EditorResourcePreview` returns nothing for imported `.glb` scenes, so `addons/map_asset_palette/thumbnail_renderer.gd` renders its own thumbnails.
+- GDScript lambdas capture packed arrays by value, so writes made inside a callback are lost (`addons/map_authoring_usability/walkability_overlay.gd` keeps such loops inline). `(x as PackedStringArray).append()` was seen to append to a copy; use an `Array` there.
 
 ## Not in this editor yet
 

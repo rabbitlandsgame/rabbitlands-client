@@ -581,6 +581,13 @@ hit polygons. It never uses a concept image as the playable atlas.
    additionally checks canonical/client/server publication and height alignment.
    Pipeline `verify` also checks the Tab-map build; it does not run all the
    independent tests or the live walking harness.
+   After `publish`, diff the paired server: removed portal lines in
+   `config/eloria/maps.txt` or a changed `exterior_connections.json` mean the
+   lane survey (`crossings.prune_lanes`) withdrew crossing lanes, although
+   `contracts` still reports ready. Compare `withdrawnLanes` in
+   `generated/contract-placement-report.json` with the previous publication's;
+   the cause seen so far is a solid placed on or within a few metres of the
+   ownership edge.
 5. Generate fixtures with
    `eloria-assets/tools/generate_continent_walk_proof.py --server <paired-server> --data <ELM-directory> --output <review>/walk`.
    Require its package, geographic adjacency, reciprocal lane, ferry and
@@ -689,6 +696,27 @@ relief source's crop rectangle, in the order `x0z0`, `x1z0`, `x1z1`, `x0z1`,
 carried by that source's own translation and squeeze (the whole sampled extent
 when it declares no `crop`). The plan editor draws that polygon instead of
 repeating the retained transform's arithmetic.
+
+**Neighbouring territories.** A territory scene's saved terrain is authoritative
+over the vertices its territory owns plus one 3x3 seam ring
+(`authoring.required_terrain_vertices`), which reaches a few metres past the
+border. Where two authorities overlap, their saved heights must agree within
+1e-5 m, or compose refuses with "authored terrain conflicts with [...] on N
+shared ownership-ring vertices" (`authoring.apply_terrain`). A road with
+**Shape Terrain** on (`terrainConform`) grades half its width plus its
+`terrainFeather` round every point, ends included
+(`godot-client/src/dev/map_authoring_region/terrain_control.gd`), so a graded
+road near a border breaks compose even where both sides meet at the same
+height. In practice that meant keeping graded road centres at least 10.5 m from
+the border for an 8 m road, or crossing the band on a road with
+`terrainConform` false. A bridge landing inside the band needs an identical
+rectangular Set terrain patch (feather 0) declared in both scenes, so both save
+the same heights. Authored water regions become plan lakes, and an authored
+seam crossing's stations at -9, -4, 0, 4 and 9 m along its outward normal must
+stay farther than the river setback from that water, or compose raises
+"authored crossing puts a seam road terminal in river water or its setback"
+(`world_layout.py`). A bridge deck is baked only into its declaring territory
+(`bridge_export.py`), so keep each bridge inside one territory.
 
 ## Reach links
 

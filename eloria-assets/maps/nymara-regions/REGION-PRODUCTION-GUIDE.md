@@ -177,7 +177,14 @@ The three rules that matter most:
 2. **Establish scale and coordinates before modelling.** Read the region's entry
    in `godot-client/data/maps/registry.json` — `coordinateTransform` is what
    puts the server's tiles on your geometry — and the `collision` block of the
-   package's `world.json`. Decide the extent with the user —
+   package's `world.json`. The client builds the active map's
+   `CoordinateAdapter` from that registry entry (`godot-client/src/app/main.gd`,
+   `_load_server_map`), while the world loader, a resident neighbour's actors
+   and clicks past a seam read the package's own `coordinateTransform`
+   (`WorldManifest.coordinate_adapter()`), so change both and compare them.
+   Anything addressed by a server tile goes at `CoordinateAdapter.tile_center()`
+   (`godot-client/src/world/coordinate_adapter.gd`); bare `server_to_godot` on
+   a tile's integers is its corner. Decide the extent with the user —
    Amberwood went to 576 m on a 96x96-tile server map at one metre per tile,
    which required a server-side change they agreed to.
 3. **Terrain first, and prove grounding on it** before any detail work. Build
