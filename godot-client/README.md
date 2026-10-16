@@ -35,8 +35,10 @@ The initial screen defaults to `game.rabbitlandsgame.com:2000`, connects over re
 - `Alt+A`: attack the selected target. `Alt+S`: sit or stand.
 - The Eternal Lands window keys: `Ctrl+S` spells, `Ctrl+M` manufacture, `Ctrl+J` emotes, `Ctrl+G` quest journal, `Ctrl+B` buddies, `Ctrl+A` stats, `Ctrl+T` ranging, `Ctrl+H` help, `Ctrl+N` notepad, `Ctrl+O` options, `Ctrl+L` mail, `Ctrl+E` encyclopedia. All rebindable in Settings → Controls.
 - Every window moves by its title bar, and stays inside the viewport and clear of the right rail. The inventory and ground bag also scale from their lower-right grip and remember where they were left.
-- A HUD icon is drawn in colour whenever its action is available and greyed only when it is not; an open window is marked by the lit frame around its icon. The sit icon becomes the stand icon while you are seated.
+- A HUD icon is drawn in colour whenever its action is available and greyed only when it is not. An open window or armed mode is not marked yet: the quickbar icons are flat buttons, so the lit pressed frame set for them never draws. The sit icon becomes the stand icon while you are seated.
 - The right rail carries the legacy misc-window column: skill rows (click one to watch it on the experience bar), the countdown/stopwatch timer (click to start/stop, Shift+click for stopwatch, wheel to set), the knowledge bar, the digital and analog clocks, and the compass. The settings window's HUD tab shows or hides each, plus the FPS readout and the S H P M R G A indicator letters.
+
+The click, item-carry and movement-pacing contracts behind these controls are in [input and movement contracts](../docs/input-and-movement-contracts.md).
 
 ## Settings inventory
 
@@ -90,6 +92,11 @@ Open and run these scenes in Godot 4.7.2:
 - `src/dev/world_validation.tscn`: loads Four Gates through the production `WorldLoader`, including manifest validation and declared collision.
 
 A PASS label is evidence of source/runtime loading only. Record screenshots and review skeletons, materials, attachments, navigation, and coordinate placement before changing traceability to VERIFIED.
+
+Look and lighting checks:
+
+- `ELORIA_LOOK=0` or `1` forces the painted look off or on, and `ELORIA_LOOK_QUALITY=low`, `medium` or `high` forces the graphics quality, over the saved Settings → Graphics choices; the overridden control is greyed out (`src/world/look/look_profile.gd`, presets in `QUALITY_PRESETS`). Per-map look data lives in `src/world/look/regions/`, whose README covers the schema.
+- Check shadow and sun-elevation changes on vertical casters, such as Four Gates' walls in `src/dev/world_validation.tscn`: at grazing sun angles flat ground already faces away from the light (N·L ≤ 0) and shows no difference. Shadow strength is a package's `environment.sun.shadowOpacity`, or else `WorldEnvironmentBinder.sun_shadow_opacity` lets `SUN_SHADOW_LEAK_ENERGY` through. `ambient_light_energy` does not change sky-sourced ambient (see the comments in `src/world/world_environment_binder.gd`).
 
 ## Branding and local settings
 
