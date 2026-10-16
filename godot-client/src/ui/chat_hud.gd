@@ -319,7 +319,9 @@ func _layout_key() -> String:
 	return "system_chat_soft" if feed_role == "system" else "chat_soft"
 
 func _sync_backdrop() -> void:
-	(_fade.material as ShaderMaterial).set_shader_parameter("panel_width", size.x)
+	var material := _fade.material as ShaderMaterial
+	material.set_shader_parameter("panel_width", size.x)
+	material.set_shader_parameter("panel_height", size.y)
 
 func _default_rect() -> Rect2:
 	var requested := Vector2(440, 160) if feed_role == "system" else DEFAULT_SIZE
