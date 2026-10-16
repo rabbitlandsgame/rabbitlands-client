@@ -1319,6 +1319,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				"marker_id": int(event.marker_id), "x": int(event.x),
 				"y": int(event.y), "map_id": str(event.map_id),
 				"label": str(event.label)}
+			if event.has("actor_id"):
+				marker["actor_id"] = int(event.actor_id)
 			if map_markers.get(marker_id) == marker:
 				return
 			map_markers[marker_id] = marker

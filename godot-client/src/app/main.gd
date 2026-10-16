@@ -1444,6 +1444,7 @@ func _process(delta: float) -> void:
 		_queue_world_sync()
 	if game_view.visible:
 		_update_carried_item()
+		_update_attached_map_markers()
 		_update_map_viewports()
 		_update_local_actor_follow()
 		if AppState.actors.has(AppState.local_actor_id):
@@ -1504,6 +1505,7 @@ func _update_map_viewports() -> void:
 		# Refresh projected markers alongside the terrain, including visibility
 		# changes when the player enters a different secret section.
 		map_marker_overlay.set_live_marks(_collect_minimap_marks())
+		map_marker_overlay.set_markers(_current_map_markers())
 		map_marker_overlay.set_waypoints(_collect_map_waypoints())
 		map_marker_overlay.queue_redraw()
 
@@ -12946,9 +12948,27 @@ func _sync_map_markers() -> void:
 		marker.configure(dto, adapter)
 		_fit_lantern_map_marker(marker, "Pin")
 		_place_map_marker_on_surface(marker)
+	_update_attached_map_markers()
 	_sync_player_mark_nodes()
 	_sync_map_marker_list()
 	_request_map_redraw()
+
+func _update_attached_map_markers() -> void:
+	for raw_marker: Variant in map_marker_nodes.values():
+		if not is_instance_valid(raw_marker):
+			continue
+		var marker := raw_marker as MapMarker3D
+		if marker.target_actor_id < 0:
+			continue
+		var dto: Dictionary = AppState.actors.get(marker.target_actor_id, {})
+		if dto.is_empty() or str(dto.get("map", AppState.current_map)) != AppState.current_map:
+			continue
+		var actor_value: Variant = actor_nodes.get(marker.target_actor_id)
+		if not is_instance_valid(actor_value):
+			continue
+		var actor := actor_value as Node3D
+		if actor != null and not actor.is_queued_for_deletion():
+			marker.follow_actor(actor.global_position)
 
 func _sync_player_mark_nodes() -> void:
 	var wanted: Dictionary = {}
@@ -13018,7 +13038,11 @@ func _current_map_markers() -> Array[Dictionary]:
 			continue
 		var marker: Dictionary = marker_value as Dictionary
 		if str(marker.get("map_id", "")) == here:
-			markers.append(marker)
+			var projected: Dictionary = marker.duplicate()
+			var node: Variant = map_marker_nodes.get(int(marker.marker_id))
+			if is_instance_valid(node):
+				projected["position"] = (node as MapMarker3D).global_position
+			markers.append(projected)
 	return markers
 
 func _place_map_marker_on_surface(marker: MapMarker3D) -> void:

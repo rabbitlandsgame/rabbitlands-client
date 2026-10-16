@@ -94,8 +94,7 @@ func label_at(position: Vector2) -> String:
 	var label := ""
 	var marks: Array[Dictionary] = _waypoints.duplicate()
 	for marker: Dictionary in _markers + _player_marks:
-		marks.append({"position": _adapter.tile_center(int(marker.get("x", 0)),
-			int(marker.get("y", 0))), "label": marker.get("label", "")})
+		marks.append({"position": _marker_position(marker), "label": marker.get("label", "")})
 	for mark: Dictionary in marks:
 		var world: Vector3 = mark.get("position", Vector3.ZERO)
 		if _camera.is_position_behind(world):
@@ -148,8 +147,7 @@ func _draw_waypoints(font: Font) -> void:
 
 func _draw_set(marks: Array[Dictionary], colour: Color) -> void:
 	for marker: Dictionary in marks:
-		var world: Vector3 = _adapter.tile_center(
-			int(marker.get("x", 0)), int(marker.get("y", 0)))
+		var world: Vector3 = _marker_position(marker)
 		if _camera.is_position_behind(world):
 			continue
 		var point_value: Variant = _texture_position(
@@ -162,6 +160,10 @@ func _draw_set(marks: Array[Dictionary], colour: Color) -> void:
 			point + Vector2(MARKER_RADIUS, 0.0),
 			point + Vector2(0.0, MARKER_RADIUS),
 			point + Vector2(-MARKER_RADIUS, 0.0)]), colour)
+
+func _marker_position(marker: Dictionary) -> Vector3:
+	return marker.get("position", _adapter.tile_center(
+		int(marker.get("x", 0)), int(marker.get("y", 0))))
 
 ## Viewport pixels to a position on this control, matching the map image's
 ## keep-aspect-centred stretch. Returns null for a point off the drawn image.

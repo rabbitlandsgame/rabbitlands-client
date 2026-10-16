@@ -263,6 +263,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"merchant_weights_v1",
 	"merchant_descriptions_v1",
 	"navigation_hud_v1",
+	"map_marker_actor_v1",
 	"party_window_v1",
 	"perk_catalog_v3",
 	"player_info_v1",
@@ -2353,18 +2354,24 @@ static func decode_player_info(payload: PackedByteArray) -> Dictionary:
 ## a tutorial pointer. The map arrives as the server's own file reference, which
 ## is still an Eternal Lands map path (`./maps/four_gates.elm`); the marker
 ## belongs to that map and no other.
+## map_marker_actor_v1 adds a uint16 actor id after the two NUL-terminated
+## strings so a creature beacon can follow rendered motion between packets.
 static func decode_map_marker(payload: PackedByteArray) -> Dictionary:
 	if payload.size() < 6:
 		return {"type": "invalid", "error": "map_marker_length"}
 	var text: Dictionary = _nul_run(payload, 6, 2)
 	if text.is_empty():
 		return {"type": "invalid", "error": "map_marker_text"}
-	if int(text.offset) != payload.size():
+	var remaining: int = payload.size() - int(text.offset)
+	if remaining != 0 and remaining != 2:
 		return {"type": "invalid", "error": "map_marker_trailing"}
 	var values: Array = text.values as Array
-	return {"type": "map_marker", "marker_id": u16(payload),
+	var marker := {"type": "map_marker", "marker_id": u16(payload),
 		"x": u16(payload, 2), "y": u16(payload, 4),
 		"map_id": map_id_from_reference(str(values[0])), "map_reference": str(values[0]), "label": str(values[1])}
+	if remaining == 2:
+		marker["actor_id"] = u16(payload, int(text.offset))
+	return marker
 
 ## `./maps/four_gates.elm` is the map id `four_gates`. The server names its own
 ## maps this way in every marker; matching on the reference itself would tie the

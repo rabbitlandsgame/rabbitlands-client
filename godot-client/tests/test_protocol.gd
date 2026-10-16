@@ -54,6 +54,7 @@ func _init() -> void:
 		"merchant_weights_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"merchant_descriptions_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"navigation_hud_v1": EloriaProtocol.ServerMessage.ELORIA_NAVIGATION_STATE,
+		"map_marker_actor_v1": EloriaProtocol.ServerMessage.SEND_MAP_MARKER,
 		"achievements_window_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACHIEVEMENTS_STATE,
 		"achievements_catalog_v1":
@@ -87,6 +88,7 @@ func _init() -> void:
 		# continent-v2 map, which this client can draw (checked below).
 		"continent_v2_maps_v1": EloriaProtocol.ServerMessage.CHANGE_MAP}
 	var capability_probes: Dictionary = {
+		EloriaProtocol.ServerMessage.SEND_MAP_MARKER: "ea010c03e1012e2f6d6170732f666f75725f67617465732e656c6d00526565642062616e6b0060ea",
 		EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE: '{"version":1,"active":false}'.to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.ELORIA_ADJACENT_MAPS: "010100" + "whitehorn_range".to_utf8_buffer().hex_encode() + "00",
 		EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE: '{"kind":"recall","id":9,"entries":[]}'.to_utf8_buffer().hex_encode(),
@@ -2293,6 +2295,11 @@ func _init() -> void:
 		and str(marker.map_id) == "four_gates"
 		and str(marker.label) == "Reed bank",
 		"a map marker decodes its id, tile, map and label")
+	var attached: Dictionary = EloriaProtocol.decode_server(90, _hex(
+		"ea010c03e1012e2f6d6170732f666f75725f67617465732e656c6d00"
+		+ "526565642062616e6b0060ea"))
+	_expect(attached.type == "map_marker" and attached.actor_id == 60000,
+		"a creature marker decodes its explicit 16-bit actor identity")
 	_expect(EloriaProtocol.map_id_from_reference("./maps/four_gates.elm")
 			== "four_gates"
 		and EloriaProtocol.map_id_from_reference("four_gates") == "four_gates",

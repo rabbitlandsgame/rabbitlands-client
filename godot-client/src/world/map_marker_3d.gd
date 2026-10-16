@@ -13,18 +13,22 @@ const MARKER_COLOUR := Color(0.98, 0.78, 0.22)
 const GAMEPLAY_LAYER := 2
 const WORLD_COLOUR := Color(0.4, 1.0, 0.08)
 const WORLD_RANGE := 90.0
+const REDRAPE_METRES := 0.15
 
 var marker_id: int = -1
 var server_tile: Vector2i = Vector2i.ZERO
 var label: String = ""
+var target_actor_id: int = -1
 var _ground_glow: MeshInstance3D
 var _flat_glow: ArrayMesh
 var _world_label: Label3D
+var _draped_at := Vector3(NAN, NAN, NAN)
 
 func configure(dto: Dictionary, adapter: CoordinateAdapter, draw_map_pin := true) -> void:
 	marker_id = int(dto.get("marker_id", -1))
 	server_tile = Vector2i(int(dto.get("x", 0)), int(dto.get("y", 0)))
 	label = str(dto.get("label", ""))
+	target_actor_id = int(dto.get("actor_id", -1))
 	name = "MapMarker_%d" % marker_id
 	position = adapter.tile_center(server_tile.x, server_tile.y)
 	if _world_label == null:
@@ -35,8 +39,18 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter, draw_map_pin := true
 
 func set_surface_height(height: float) -> void:
 	global_position.y = height
+	_ground_glow.position.y = 0.0
 	var draped: ArrayMesh = GroundDrape.drape(_ground_glow, _flat_glow)
 	_ground_glow.mesh = draped if draped != null else _flat_glow
+	_ground_glow.position.y = 0.0 if draped != null else GroundDrape.CLEARANCE
+	_draped_at = global_position if draped != null else Vector3(NAN, NAN, NAN)
+
+## Follow the actor's rendered feet, including interpolation between packets.
+## Keep the marker in world space so facing and model scale cannot distort it.
+func follow_actor(feet: Vector3) -> void:
+	global_position = feet
+	if not _draped_at.is_finite() or feet.distance_to(_draped_at) >= REDRAPE_METRES:
+		set_surface_height(feet.y)
 
 func _build_map_pin() -> void:
 	var material := StandardMaterial3D.new()
