@@ -262,8 +262,11 @@ func _run() -> void:
 	_expect(windows._merchant_trade_command() == "#shop buy 91 0 37",
 		"buy sends an exact typed quantity outside the old preset ladder")
 	windows._on_merchant_mode("sell")
+	_expect(windows.merchant_quantity.text == "1",
+		"switching to a backpack selection resets the previous buy quantity")
+	windows.merchant_quantity.text = "37"
 	_expect(windows._merchant_trade_command() == "#shop sell 91 0 37",
-		"sell uses the same exact typed quantity")
+		"sell sends the exact quantity typed for the backpack selection")
 	for invalid: String in ["", "0", "-3", "2.5", "abc", "1000001"]:
 		windows.merchant_quantity.text = invalid
 		_expect(windows._merchant_trade_command().is_empty(),

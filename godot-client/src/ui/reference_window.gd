@@ -126,7 +126,6 @@ func close() -> void:
 
 func open_urls() -> void:
 	panel.show()
-	panel.z_index = 30 # Stay reachable above the full chat log and both feeds.
 	panel.move_to_front()
 	tabs.current_tab = URLS_TAB
 	_refresh_links()

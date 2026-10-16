@@ -154,11 +154,12 @@ static func layout(main: Control) -> void:
 	panel.position = Vector2(left, top)
 	panel.size = Vector2(width, height)
 	# The paper sibling follows the established draggable content panel.
-	if backdrop != null:
-		backdrop.z_index = 19
-	if frame_art != null:
-		frame_art.z_index = 20
-	panel.z_index = 21
+	if not panel.has_meta(&"rabbitlands_window_stack"):
+		if backdrop != null:
+			backdrop.z_index = 19
+		if frame_art != null:
+			frame_art.z_index = 20
+		panel.z_index = 21
 	_sync_decoration_rects(panel, backdrop, frame_art)
 	layout_content(main)
 
@@ -209,12 +210,13 @@ static func sync_visibility(main: Control, visible: bool) -> void:
 	var panel := main.get_node_or_null("%DialoguePanel") as PanelContainer
 	var backdrop := main.get_node_or_null("%DialogueBackdrop") as Panel
 	if frame_art != null:
-		if panel != null:
+		if panel != null and not panel.has_meta(&"rabbitlands_window_stack"):
 			panel.z_index = 21
 			frame_art.z_index = 20
 		frame_art.hide()
 	if backdrop != null:
-		backdrop.z_index = 19
+		if panel == null or not panel.has_meta(&"rabbitlands_window_stack"):
+			backdrop.z_index = 19
 		backdrop.visible = visible
 
 

@@ -610,7 +610,7 @@ func _build_controls() -> void:
 ## panel opens showing what the client actually has rather than the default it
 ## was built with.
 func restore_toggle(key: String, value: bool) -> bool:
-	var toggle: CheckBox = find_child(key, true, false) as CheckBox
+	var toggle: CheckBox = panel.find_child(key, true, false) as CheckBox
 	if toggle == null:
 		return false
 	toggle.set_pressed_no_signal(value)
@@ -699,7 +699,7 @@ func add_choice(section: String, key: String, label: String,
 ## Refreshing controls never saves or emits a change. This also covers values
 ## changed by a HUD shortcut while the settings window was closed.
 func restore_value(key: String, value: Variant) -> void:
-	var control := find_child(key, true, false)
+	var control := panel.find_child(key, true, false)
 	if control is OptionButton:
 		var option := control as OptionButton
 		for index: int in option.item_count:
@@ -710,7 +710,7 @@ func restore_value(key: String, value: Variant) -> void:
 		(control as BaseButton).set_pressed_no_signal(bool(value))
 	elif control is Range:
 		(control as Range).set_value_no_signal(float(value))
-		var reading := find_child(key + "_value", true, false) as Label
+		var reading := panel.find_child(key + "_value", true, false) as Label
 		if reading != null:
 			reading.text = "%.3f" % float(value)
 

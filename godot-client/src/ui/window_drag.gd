@@ -69,7 +69,7 @@ func _on_handle_input(event: InputEvent, handle: Control) -> void:
 			return
 		_dragging = click.pressed
 		if click.pressed:
-			window.move_to_front()
+			preload("res://src/ui/window_stack.gd").activate(window)
 			_grab_offset = click.global_position - window.global_position
 		else:
 			moved.emit(window.position)

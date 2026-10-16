@@ -18,11 +18,14 @@ var manufacturing_rect := Rect2()
 
 func configure(owner_ui: Control) -> void:
 	main = owner_ui
-	z_index = 90
+	# The highlight is decorative; only the card participates in hit testing.
+	z_index = 240
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	card = PanelContainer.new()
 	card.name = "TutorialInstruction"
+	card.z_as_relative = false
+	card.z_index = 8
 	card.position = Vector2(maxf(16, get_viewport_rect().size.x-310-96), 62)
 	card.custom_minimum_size.x = 310
 	var style := StyleBoxFlat.new()
@@ -196,13 +199,13 @@ func control_for_step() -> Control:
 		"dialogue": return _node("DialogueOptions")
 		"merchant":
 			var ext: Control = main.get("extension_windows")
-			var panel := ext.find_child("MerchantWindow", true, false) as Control
+			var panel := ext.get("merchant_panel") as Control
 			if not _visible(panel): return null
 			var desired := "sell" if str(state.get("key", "")) == "sell" else "buy"
 			if str(ext.get("_merchant_mode")) != desired:
-				return ext.find_child("MerchantSellMode" if desired=="sell" else "MerchantBuyMode",true,false) as Control
-			var list := ext.find_child("MerchantBackpack" if desired == "sell" else "MerchantList",true,false) as ItemList
-			return ext.find_child("MerchantTrade",true,false) as Control if _selected_item(list).contains(str(state.get("item",""))) else list
+				return panel.find_child("MerchantSellMode" if desired=="sell" else "MerchantBuyMode",true,false) as Control
+			var list := panel.find_child("MerchantBackpack" if desired == "sell" else "MerchantList",true,false) as ItemList
+			return panel.find_child("MerchantTrade",true,false) as Control if _selected_item(list).contains(str(state.get("item",""))) else list
 	return null
 
 func _process(_delta: float) -> void:
@@ -215,10 +218,14 @@ func _process(_delta: float) -> void:
 			var side: VBoxContainer = main.get("manufacturing_side")
 			manufacturing_rect = manufacturing.get_rect()
 			card.reparent(side)
+			card.z_as_relative = true
+			card.z_index = 0
 			side.move_child(card, 0)
 			detail.custom_minimum_size.y = 120
 		else:
 			card.reparent(self)
+			card.z_as_relative = false
+			card.z_index = 8
 			detail.custom_minimum_size.y = 120
 			manufacturing.position = manufacturing_rect.position
 			manufacturing.size = manufacturing_rect.size
@@ -255,7 +262,7 @@ func _process(_delta: float) -> void:
 	var ext: Control = main.get("extension_windows")
 	var summons: Control = main.get("summoning_window")
 	panels.append_array([summons.panel, ext.get("detail_panel"), ext.get("party_panel"),
-		ext.get("market_panel"), ext.find_child("MerchantWindow",true,false) as Control])
+		ext.get("market_panel"), ext.get("merchant_panel")])
 	for panel: Control in panels:
 		if not _visible(panel): continue
 		var bounds := panel.get_global_rect()

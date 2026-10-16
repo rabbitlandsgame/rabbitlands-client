@@ -3,12 +3,14 @@ extends Control
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const LanternGuideScript = preload("res://src/ui/lantern_guide.gd")
+const WindowStackScript = preload("res://src/ui/window_stack.gd")
 const LanternSceneScript = preload("res://src/world/lantern_scene.gd")
 const BellSceneScript = preload("res://src/world/bell_scene.gd")
 const RoadSceneScript = preload("res://src/world/road_scene.gd")
 const SkySceneScript = preload("res://src/world/sky_scene.gd")
 const CartographyOwnershipGeometry = preload("res://addons/map_authoring_workspace/ownership_geometry.gd")
 var lantern_guide: Control
+var window_stack: Node
 var lantern_scene: Node3D
 
 const AppearanceChoices = preload("res://src/actors/appearance_choices.gd")
@@ -1022,7 +1024,7 @@ func _ready() -> void:
 	# extension edits a list that a worker import iterates (vram_textures.gd).
 	VramTextures.ensure_registered()
 	lantern_guide = LanternGuideScript.new()
-	add_child(lantern_guide)
+	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
@@ -1155,10 +1157,11 @@ func _ready() -> void:
 	spell_wheel.tutorial_action.connect(_magic_ring_ui)
 	spell_wheel.anchor_provider = _spell_wheel_anchor
 	spell_wheel.can_open = _can_open_spell_wheel
-	spell_wheel.z_index = 20
+	spell_wheel.z_index = 250
 	game_view.add_child(spell_wheel)
 	spell_wheel.spell_chosen.connect(_begin_prepared_cast)
 	spell_wheel.opened.connect(func():
+		spell_wheel.move_to_front()
 		magic_selection.cancel()
 		spells_window.close()
 		_stop_keyboard_movement()
@@ -1352,6 +1355,7 @@ func _ready() -> void:
 	_sync_saved_item_lists()
 	_sync_channel_tabs()
 	_sync_stats()
+	_configure_window_stack()
 	_start_client_diagnostics()
 
 func _start_client_diagnostics() -> void:
@@ -3489,6 +3493,8 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		if spell_wheel.visible: return
+	if window_stack != null:
+		window_stack.handle_pointer(event)
 	if event is InputEventKey and (event as InputEventKey).echo:
 		return
 	_track_attack_modifier(event)
@@ -3497,6 +3503,7 @@ func _input(event: InputEvent) -> void:
 
 func _can_open_spell_wheel() -> bool:
 	return game_view.visible and not _text_entry_active() \
+		and not popup_panel.visible and not purchase_confirm.visible \
 		and not dialogue_panel.visible and not trade_panel.visible \
 		and not storage_panel.visible and not full_map.visible \
 		and not console_panel.visible and not settings_panel.visible \
@@ -7654,23 +7661,35 @@ func _layout_minimap_cardinals() -> void:
 
 func _configure_window_layers() -> void:
 	actor_resource_overlay.z_index = 1
+	carried_item.z_index = 400
+	_make_scene_windows_draggable()
+
+func _configure_window_stack() -> void:
+	window_stack = WindowStackScript.new()
+	window_stack.name = "WindowStack"
+	game_view.add_child(window_stack)
+	window_stack.configure(game_view)
+	# Reminder cards are HUD surfaces below all windows, including for input.
+	game_view.move_child(lantern_guide, viewport_container.get_index() + 1)
+	var tracker: Control = extension_windows.get("tracked_quest")
+	tracker.reparent(game_view)
+	tracker.z_index = 8
+	game_view.move_child(tracker, lantern_guide.get_index() + 1)
 	for panel: Control in [full_map, stats_panel, inventory_panel, dialogue_panel,
-		trade_panel, storage_panel, ground_bag_panel, manufacturing_panel]:
-		panel.z_index = 20
-	carried_item.z_index = 40
-	item_lists_panel.z_index = 25
-	console_panel.z_index = 25
-	settings_panel.z_index = 30
-	# Every code-created window joins this list: the actor banner above draws
-	# at z 1 so it can clear the world viewport, and a window left at the
-	# default 0 slides underneath the local player's name and bars, which
-	# follow the player around the middle of the screen.
-	for window_layer: Control in [spells_window, summoning_window, emotes_window,
+			trade_panel, storage_panel, ground_bag_panel, manufacturing_panel,
+			item_lists_panel, console_panel, reading_panel, chat_hud, system_chat_hud]:
+		window_stack.register(panel)
+	for controller: Control in [spells_window, summoning_window, emotes_window,
 			ranging_window, guild_window, settings_window, reference_window,
 			player_info_panel]:
-		if window_layer != null:
-			window_layer.z_index = 26
-	_make_scene_windows_draggable()
+		window_stack.register(controller.get("panel"))
+	for panel: Control in extension_windows._cascade():
+		window_stack.register(panel)
+	window_stack.decorate(dialogue_panel, [get_node("%DialogueBackdrop"),
+		get_node("%DialogueFrameTexture")])
+	window_stack.attach_overlay(inventory_panel, inventory_quantity_edit)
+	window_stack.register(purchase_confirm, true)
+	window_stack.register(popup_panel, true)
 
 ## Every window moves by its title bar, as Eternal Lands moves all of its own.
 ## The inventory and the ground bag keep their own handlers: those two also
