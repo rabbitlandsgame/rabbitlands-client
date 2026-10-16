@@ -49,7 +49,8 @@ Player downloads are built with `godot-client/tools/package_client.py`.
 The package includes signed background updates and a restart installer;
 see [building and publishing client updates](docs/client-updates.md).
 Maintainers can use `godot-client/tools/build_release.py` to build both Windows
-and Linux downloads and upload a complete GitHub release, starting as a draft.
+and Linux downloads and replace the current GitHub release, starting as a draft.
+Only the latest compiled build is retained on GitHub.
 
 For the integrated **Last Lantern** opening adventure, run
 [`prototypes/last-lantern/play.cmd`](prototypes/last-lantern/play.cmd). It starts

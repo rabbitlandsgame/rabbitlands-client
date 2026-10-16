@@ -148,6 +148,7 @@ def release_notes(sha: str, stages: dict[str, Path], linux_assets: list[Path]) -
     return f"""# Rabbit Lands desktop downloads
 
 Client commit: `{sha}`. Use the server settings announced for your testing round.
+Only the current compiled client build is kept in GitHub Releases.
 
 ## Windows x86_64
 
@@ -185,7 +186,6 @@ def build(options) -> Path:
     if any(root.is_relative_to(repo) for repo in (REPO, REPO.parent / "rabbitlands-server")):
         raise ValueError("Place release outputs outside both repositories.")
     root.mkdir(parents=True, exist_ok=False)
-    assets, stages, manifests = [], {}, {}
     for platform in ("windows", "linux"):
         folder = root / platform
         folder.mkdir()
@@ -197,7 +197,14 @@ def build(options) -> Path:
         if platform == "windows":
             command.extend(["--installer", "--iscc", str(iscc), "--no-zip"])
         run(command)
-        found, policy, stage = platform_assets(folder, sha, platform)
+    return assemble(root, sha)
+
+
+def assemble(root: Path, sha: str) -> Path:
+    """Collect two completed platform builds, including after an installer retry."""
+    assets, stages, manifests = [], {}, {}
+    for platform in ("windows", "linux"):
+        found, policy, stage = platform_assets(root / platform, sha, platform)
         assets.extend(found)
         stages[platform] = stage
         manifests.update(policy["manifests"])
@@ -221,9 +228,13 @@ def gh(*args: str) -> str:
     return run(["gh", *args], capture=True)
 
 
-def github_release(tag: str) -> dict | None:
+def github_releases() -> list[dict]:
     pages = json.loads(gh("api", "--paginate", "--slurp", f"repos/{REPOSITORY}/releases?per_page=100"))
-    return next((release for page in pages for release in page if release["tag_name"] == tag), None)
+    return [release for page in pages for release in page]
+
+
+def github_release(tag: str) -> dict | None:
+    return next((release for release in github_releases() if release["tag_name"] == tag), None)
 
 
 def github_assets(release_id: int) -> list[dict]:
@@ -261,15 +272,21 @@ def upload(bundle: Path, publish: bool = False) -> None:
             obj = json.loads(gh("api", f"repos/{REPOSITORY}/git/tags/{obj['sha']}"))["object"]
         if obj["type"] != "commit" or obj["sha"] != sha:
             raise ValueError("The remote release tag points to a different commit.")
-    existing = github_release(tag)
-    if existing and not existing["draft"]:
-        raise ValueError("This release is already public; published assets will not be replaced.")
+    releases = github_releases()
+    client_releases = [release for release in releases if re.fullmatch(r"client-[0-9a-f]{40}", release["tag_name"])]
+    existing = next((release for release in client_releases if release["tag_name"] == tag), None)
+    if not existing and client_releases:
+        existing = max(client_releases, key=lambda release: release["id"])
     if not existing:
         gh("release", "create", tag, "--repo", REPOSITORY, "--target", sha, "--draft",
            "--title", f"Rabbit Lands {sha[:9]}", "--notes-file", str(notes))
         existing = github_release(tag)
     else:
-        gh("release", "edit", tag, "--repo", REPOSITORY, "--target", sha, "--notes-file", str(notes))
+        # Reuse one release entry. Its commit-specific tag keeps signed update
+        # URLs tied to the actual build while compiled history is replaced.
+        gh("release", "edit", existing["tag_name"], "--repo", REPOSITORY, "--draft", "--tag", tag,
+           "--target", sha, "--title", f"Rabbit Lands {sha[:9]}", "--notes-file", str(notes))
+        existing = github_release(tag)
     if not existing or not existing["draft"]:
         raise ValueError("Could not find the expected draft release.")
     # Fetch drafts by their release ID; the tag endpoint is for published releases.
@@ -283,11 +300,20 @@ def upload(bundle: Path, publish: bool = False) -> None:
         gh("release", "upload", tag, str(path), "--repo", REPOSITORY, "--clobber")
     uploaded = github_assets(existing["id"])
     expected = {path.name: path.stat().st_size for path in paths}
-    if {asset["name"]: asset["size"] for asset in uploaded} != expected:
+    remote_sizes = {asset["name"]: asset["size"] for asset in uploaded}
+    if any(remote_sizes.get(name) != size for name, size in expected.items()):
         raise ValueError("Remote assets do not match the bundle; the release remains a draft.")
     digests = {Path(row["path"]).name: "sha256:" + row["sha256"] for row in data["assets"]}
-    if any(asset.get("digest") and asset["digest"] != digests[asset["name"]] for asset in uploaded):
+    if any(asset["name"] in digests and asset.get("digest") and asset["digest"] != digests[asset["name"]] for asset in uploaded):
         raise ValueError("A remote download checksum differs; the release remains a draft.")
+    # Prune only after every replacement download is uploaded and verified.
+    for name in remote_sizes.keys() - expected.keys():
+        gh("release", "delete-asset", tag, name, "--repo", REPOSITORY, "--yes")
+    if {asset["name"]: asset["size"] for asset in github_assets(existing["id"])} != expected:
+        raise ValueError("Old release assets could not be removed; the release remains a draft.")
+    for other in client_releases:
+        if other["id"] != existing["id"]:
+            gh("release", "delete", other["tag_name"], "--repo", REPOSITORY, "--yes")
     if publish:
         gh("release", "edit", tag, "--repo", REPOSITORY, "--draft=false", "--latest")
     print(f"{'Published' if publish else 'Draft ready'}: https://github.com/{REPOSITORY}/releases/tag/{tag}")

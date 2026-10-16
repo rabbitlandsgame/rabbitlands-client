@@ -116,10 +116,17 @@ $RabbitLandsRelease = "C:\rabbitlands\dist\releases\client-<full-client-commit>\
 python godot-client/tools/build_release.py upload --bundle $RabbitLandsRelease
 ```
 
-This creates or resumes a **draft** at `client-<full-client-commit>`, using
-`RELEASE-NOTES.md` as its description. It verifies the commit exists in the
-public client repository and refuses a conflicting tag or an already published
-release. No local Git history is pushed by the upload script.
+This creates or reuses the **one current client release entry**, using
+`RELEASE-NOTES.md` as its description. Replacing a published build first returns
+that entry to **draft**, updates its tag to `client-<full-client-commit>`, then
+uploads the replacement files. After the replacement downloads pass verification,
+the previous compiled files are removed. Older generated client-release entries,
+if any, are also removed. GitHub keeps only the current compiled build.
+
+The commit-specific tag keeps signed update URLs tied to the actual build. The
+script verifies that commit exists in the public client repository and refuses
+a conflicting tag. Source history and tags remain available independently of
+the compiled downloads. No local Git history is pushed by the upload script.
 
 Review the draft and installation instructions. To publish it after all assets
 are present:
@@ -150,13 +157,15 @@ release tag and assets to upload, and a `*-server-policy.json` file. The tag is
 than GitHub's moving “latest release.” This keeps the chosen client tied to the
 server being deployed.
 
-1. Create a GitHub Release at the packaged client commit using that tag.
+1. Reuse the current client release entry as a draft, targeting the packaged
+   client commit with that build's tag. Create an entry if none exists yet.
 2. Upload the signed platform manifest and every `.update.zip.###` part listed
    in the instructions. These parts are each at most 1 GiB, below GitHub's
    release asset limit. The regular standalone ZIP/tarball is an initial
    install artifact; if it reaches 2 GiB, use `build_release.py` to prepare the
    Windows installer slices and split Linux download described above.
-3. Publish the release and confirm its assets download without signing in.
+3. After verifying all replacement assets, remove the previous compiled files,
+   publish the release and confirm its assets download without signing in.
 4. Put the generated policy into the **served server profile** as
    `client_updates.json`. If both platforms are published, combine their two
    `manifests` rows and keep the same `required_commit`.

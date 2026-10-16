@@ -121,13 +121,14 @@ def upload_fixture(tmp_path):
     return bundle, asset
 
 
-def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_tag=False, fail_upload=False, remote_digest=None, exists=True, stored_assets=None):
+def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_tag=False, fail_upload=False, remote_digest=None, exists=True, stored_assets=None, old_tag=None):
     calls, remote_assets = [], []
+    current_tag = old_tag or f"client-{SHA}"
     if stored_assets:
         remote_assets.extend(stored_assets)
 
     def gh(*args):
-        nonlocal exists
+        nonlocal exists, public, current_tag
         calls.append(args)
         if args[:2] == ("api", "user"):
             return account
@@ -142,13 +143,23 @@ def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_t
             if "/assets?" in args[3]:
                 # Use two pages to cover the asset-list pagination.
                 return json.dumps([remote_assets[:1], remote_assets[1:]])
-            return json.dumps([[{"id": 123, "tag_name": f"client-{SHA}", "draft": not public}]] if exists else [[]])
+            return json.dumps([[{"id": 123, "tag_name": current_tag, "draft": not public}]] if exists else [[]])
         if args[:2] == ("release", "create"):
             exists = True
+            public = False
+            current_tag = args[2]
+        if args[:2] == ("release", "edit"):
+            if "--draft" in args:
+                public = False
+            if "--tag" in args:
+                current_tag = args[args.index("--tag") + 1]
+        if args[:2] == ("release", "delete-asset"):
+            remote_assets[:] = [asset for asset in remote_assets if asset["name"] != args[3]]
         if args[:2] == ("release", "upload"):
             if fail_upload:
                 raise subprocess.CalledProcessError(1, ["gh", *args])
             path = Path(args[3])
+            remote_assets[:] = [asset for asset in remote_assets if asset["name"] != path.name]
             remote_assets.append({"name": path.name, "size": path.stat().st_size,
                                   "digest": remote_digest or "sha256:" + client_release.digest(path)})
         return ""
@@ -165,13 +176,38 @@ def test_wrong_github_account_cannot_mutate_a_release(tmp_path, monkeypatch):
     assert not any(call[0] == "release" for call in calls)
 
 
-@pytest.mark.parametrize("problem", ["public", "wrong_tag"])
-def test_published_release_or_conflicting_tag_cannot_be_replaced(tmp_path, monkeypatch, problem):
+def test_conflicting_tag_cannot_be_replaced(tmp_path, monkeypatch):
     bundle, _ = upload_fixture(tmp_path)
-    calls = mock_github(monkeypatch, **{problem: True})
+    calls = mock_github(monkeypatch, wrong_tag=True)
     with pytest.raises(ValueError):
         build_release.upload(bundle, publish=True)
     assert not any(call[0] == "release" for call in calls)
+
+
+def test_rolling_release_reuses_entry_and_removes_old_build_after_verification(tmp_path, monkeypatch):
+    bundle, _ = upload_fixture(tmp_path)
+    old_tag = "client-" + "b" * 40
+    calls = mock_github(monkeypatch, public=True, old_tag=old_tag,
+                        stored_assets=[{"name": "old-game.tar.gz", "size": 42}])
+    build_release.upload(bundle)
+    edit = next(call for call in calls if call[:2] == ("release", "edit"))
+    assert edit[2] == old_tag and "--draft" in edit
+    assert edit[edit.index("--tag") + 1] == f"client-{SHA}"
+    assert not any(call[:2] == ("release", "create") for call in calls)
+    uploaded = next(index for index, call in enumerate(calls) if call[:2] == ("release", "upload"))
+    removed = next(index for index, call in enumerate(calls) if call[:2] == ("release", "delete-asset"))
+    assert removed > uploaded
+    assert calls[removed - 1][:3] == ("api", "--paginate", "--slurp")
+    assert not any("--draft=false" in call for call in calls)
+
+
+def test_failed_replacement_preserves_old_downloads(tmp_path, monkeypatch):
+    bundle, _ = upload_fixture(tmp_path)
+    calls = mock_github(monkeypatch, public=True, fail_upload=True,
+                        stored_assets=[{"name": "old-game.tar.gz", "size": 42}])
+    with pytest.raises(subprocess.CalledProcessError):
+        build_release.upload(bundle)
+    assert not any(call[:2] == ("release", "delete-asset") for call in calls)
 
 
 @pytest.mark.parametrize("publish,exists", [(False, False), (False, True), (True, False), (True, True)])

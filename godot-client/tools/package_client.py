@@ -110,6 +110,7 @@ of the repository: https://jrsoftware.org/isdl.php
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime
 import hashlib
 import json
@@ -2567,6 +2568,23 @@ def make_zip(stage: Path) -> Path:
 
 
 def make_installer(stage: Path, iscc: Path, version: str, launch_args: list[str], logs: Path) -> Path:
+    # Inno Setup 6 cannot read every long asset path through a release's full
+    # commit-qualified directory. A short junction retains the original files.
+    DIST.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="inno-", dir=DIST) as temporary:
+        source = Path(temporary) / "src"
+        quote = lambda value: "'" + str(value).replace("'", "''") + "'"
+        command = f"New-Item -ItemType Junction -Path {quote(source)} -Target {quote(stage.resolve())} -ErrorAction Stop | Out-Null"
+        encoded = base64.b64encode(command.encode("utf-16le")).decode("ascii")
+        subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded], check=True,
+                       stdout=subprocess.DEVNULL)
+        try:
+            return _compile_installer(stage, source, iscc, version, launch_args, logs)
+        finally:
+            source.rmdir()  # Remove only the junction, never the staged files.
+
+
+def _compile_installer(stage: Path, source: Path, iscc: Path, version: str, launch_args: list[str], logs: Path) -> Path:
     size = sum(p.stat().st_size for p in stage.rglob("*") if p.is_file())
     parameters = " ".join(launch_args).replace('"', '""')
     spanning = size > 1_800_000_000
@@ -2589,7 +2607,7 @@ SolidCompression=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={{app}}\\app\\RabbitLands.exe
-SetupIconFile={stage}\\app\\assets\\branding\\rabbitlands-icon.ico
+SetupIconFile={source}\\app\\assets\\branding\\rabbitlands-icon.ico
 {"DiskSpanning=yes" + chr(10) + "DiskSliceSize=1073741824" if spanning else ""}
 
 [Tasks]
@@ -2602,7 +2620,7 @@ Type: filesandordirs; Name: "{{app}}\\app"
 Type: filesandordirs; Name: "{{app}}\\eloria-assets"
 
 [Files]
-Source: "{stage}\\*"; DestDir: "{{app}}"; Excludes: "{MARKER}"; Flags: recursesubdirs ignoreversion
+Source: "{source}\\*"; DestDir: "{{app}}"; Excludes: "{MARKER}"; Flags: recursesubdirs ignoreversion
 
 [Icons]
 Name: "{{group}}\\RabbitLands"; Filename: "{{app}}\\{launch_binary}"; Parameters: "{launch_parameters}"; WorkingDir: "{{app}}\\app"
