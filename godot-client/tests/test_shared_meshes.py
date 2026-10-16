@@ -22,6 +22,7 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 CLIENT = Path(__file__).resolve().parents[1]
 REPO = CLIENT.parent
@@ -145,6 +146,21 @@ class SharedMeshApplyTest(unittest.TestCase):
         self.assertEqual(sorted(stamp), sorted(after), "no file appears or disappears on a second run")
         for path, data in stamp.items():
             self.assertEqual(data, after[path], f"{path.name} changed on a second run")
+
+    def test_a_reader_sees_the_shared_package_as_it_was(self):
+        """inline_prototypes, as glb_reader.load runs it: the mesh back on each
+        placement and the pool reference gone, so a tool that writes the
+        document out again does not make the client draw the prop twice."""
+        self.run_tool("--apply", "--sets", "continent-v2")
+        path = self.root / "continent-v2" / "north" / "client" / "world.glb"
+        SM._prototype.cache_clear()
+        self.addCleanup(SM._prototype.cache_clear)
+        with mock.patch.object(SM, "POOL", self.root / "_shared" / "meshes"):
+            document, binary = SM.inline_prototypes(path, *SM.read_glb(path))
+        original, original_binary = self.before["north"]
+        self.assertEqual(document["nodes"], original["nodes"])
+        self.assertEqual(SM.mesh_identity(document, binary, 0, path, {})[0],
+                         SM.mesh_identity(original, original_binary, 0, Path("x.glb"), {})[0])
 
 
 if __name__ == "__main__":

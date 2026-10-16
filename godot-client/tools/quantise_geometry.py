@@ -246,7 +246,7 @@ def main() -> int:
         if target.read_bytes() != result["path"].read_bytes() and repo_path(result["path"]) not in manifest:
             raise SystemExit(f"archive copy of {repo_path(result['path'])} does not match the file being replaced")
     for result in results:
-        result["path"].write_bytes(result["data"])
+        SM.write_package_glb(result["path"], result["data"])
         entry = manifest.setdefault(repo_path(result["path"]),
                                     {"sha256": result["old_sha"], "bytes": result["old_bytes"]})
         entry.update({"newSha256": sha256(result["data"]), "newBytes": len(result["data"])})
