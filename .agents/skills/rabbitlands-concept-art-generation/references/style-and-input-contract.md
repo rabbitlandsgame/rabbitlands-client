@@ -27,7 +27,7 @@ This is a direction, not permission to copy a reference asset. Preserve the requ
 
 ## Construction rules by body plan
 
-- **Humanoid:** use a strict-front neutral A-pose for modular/reference-pack work; hands visible and separated from hips, legs separated, face forward, palms consistently oriented, and hair, capes, and garments clear of important joints.
+- **Humanoid:** use a strict-front neutral A-pose for modular/reference-pack work; hands visible and separated from hips, legs separated, face forward, palms consistently oriented, and hair, capes, and garments clear of important joints. For a full-body T-pose body intended for Meshy rigging, use a square canvas and state the arm span to height ratio (about 1.05 : 1): portrait 2:3 canvases gave a span of about 0.83 of the height, and stretching the arms afterwards inflated them.
 - **Quadruped:** standing neutral; all four feet visible or clearly inferable; legs do not overlap; tail attachment and underside are readable.
 - **Flyer:** wings relaxed enough to fit the image but separated from the torso; shoulder roots, membrane/feather span, legs, and tail remain visible.
 - **Serpent or aquatic:** straight or gently curved neutral body; clear head-to-tail centerline; fins and tentacles separated; never invent legs.

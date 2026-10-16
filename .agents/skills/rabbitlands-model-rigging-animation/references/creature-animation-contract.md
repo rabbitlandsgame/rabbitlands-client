@@ -27,6 +27,8 @@ The seven clips are Eloria's base compatibility contract. Do not import another 
 - `Sword_Attack` must use the creature's anatomy; do not add a sword.
 - Death ends in a stable pose suitable for a held final frame.
 - Faces, hands, horns, hair, feathers, cloth, wing panels, and detached rigid pieces remain attached to the correct control throughout every clip.
+- Runtime facing is declared per model as `import.forwardAxisCorrectionDegreesY` in `godot-client/data/actors/models.json`; rig families are authored facing different ways, so never copy a neighbour's value. Measure it with `godot-client/tools/creature_facing.py`, which `godot-client/tests/test_native_glb_assets.py` (`test_every_rig_declares_the_correction_its_facing_needs`) holds every rig to, and confirm with a side render.
+- Many creature GLBs are exported normalised to a 1.7 m height. `import.scale` in `models.json` is the client's normalisation of the model; a `scale:` line in the server's creatures profile is the gameplay size on top of it. The server's creature footprint is measured from the model at that combined size by its footprint tool, never hand-edited.
 
 ## Gameplay readability and polish
 

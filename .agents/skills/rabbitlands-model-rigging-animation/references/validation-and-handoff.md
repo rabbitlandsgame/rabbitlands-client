@@ -31,6 +31,14 @@ Use tolerances appropriate to asset scale and record them in the report. A pass/
 
 For Blender-authored deliveries, also verify ordinary playback after selecting different Actions: action range, scene range, preview range, NLA state, FPS, and action slot are distinct. A dedicated review scene does not replace this test.
 
+Blender traps found while generating creature clips (the fixes are in `.local/asset-authoring/workspace/lowpoly_rigged/tools/`):
+
+- Create, bake and export one generated action per Blender session when using slotted actions. Two created in one session made the glTF exporter silently drop one (`rig_motion.py`).
+- The glTF importer leaves pose bones at the last imported clip's first frame. Reset every pose bone's `matrix_basis` before measuring the rest.
+- Moving rest edit-bones does not move a bind-pose mesh. To change the rest shape, run `pose.visual_transform_apply`, apply the Armature modifier on each mesh, run `pose.armature_apply` and re-add the modifier (`level_feet_rest.py`), then measure the mesh, not the bones.
+- An IK constraint on a foot with a position-only target leaves the foot free to twist. End the chain at the shin and lock the foot's world orientation (`gait_ik.py`, `COPY_ROTATION`). Blender IK keeps the previous frame's fold, so solve each baked frame from rest.
+- A generator that rotates a limb about a world axis must derive the sign and pivot from the rig's rest geometry instead of assuming them (`action_gen.py`).
+
 ## Packaging gate
 
 Deliver only when the manifest binds evidence to exact file hashes. Include:

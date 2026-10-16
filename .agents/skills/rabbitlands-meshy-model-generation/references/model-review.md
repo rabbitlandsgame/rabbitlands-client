@@ -21,6 +21,7 @@ Rotate around the entire model and compare to the source image:
 - exact limb, head, wing, horn, fin, and tentacle counts are preserved;
 - back, underside, and occluded areas are resolved conservatively;
 - surfaces are closed where expected, with no holes, inverted regions, internal duplicates, or floating fragments;
+- no hidden inner wall: some deliveries model clothing, or the whole body, as a solid shell whose inside wall sits a few millimetres under the visible surface. On every new character body, run an outside-in visibility pass and remove the wall before rigging (`eloria-assets/tools/drop_inner_shell.py` applies that pass's mask);
 - thin surfaces have usable thickness and do not collapse;
 - shoulders, hips, knees, elbows, jaws, wing roots, and tail roots have deformation clearance;
 - mouth interiors, eyelids, fingers, feathers, cloth, and layered pieces are not fused in ways that block required motion;

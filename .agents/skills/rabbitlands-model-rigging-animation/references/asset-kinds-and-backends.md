@@ -6,6 +6,10 @@
 - Equipment compatibility depends on the skeleton contract; a plausible humanoid rig is not sufficient.
 - Use the shared animation library and rest-pose-aware retargeting where possible.
 - Validate equipment rebinding and socket behavior by bone name.
+- Player bodies play only the shared library named by `animationLibrary` in `godot-client/data/actors/models.json` (`Universal_Animation_Library.glb`); clips baked into a race GLB are not played. `godot-client/src/actors/native_animation_importer.gd` copies library keys onto the body by bone name without bind compensation, so a body's bind pose must equal the library's `Rest_Pose` clip. The library's node defaults are a posed state, not a rest.
+- glTF carries no loop flag. A clip loops only when the action map's `loopingClips` (`godot-client/data/animations/luminous.json`) lists it; keep death, pain and transitions one-shot. `godot-client/tests/test_protocol.gd` and `godot-client/tests/test_animation_looping.gd` pin both directions.
+- Locomotion playback speed is the actor's travel speed divided by the action's `strideMetresPerSecond`, clamped to 0.35-3.5 (`ReplicatedActor3D._playback_speed_for`). Re-measure the stride when a travel clip changes.
+- Verify any rig-level rest scale in the engine, not with an offline probe. In a client measurement a joint rest scale did not reach the skinned body, because the import rebuilds binds from the scaled rest, while `BoneAttachment3D` children inherited it.
 
 ## Creature
 
@@ -32,6 +36,8 @@
 - action lists, animation library, bone map, FPS, profile output, batch patterns, reports, dry-run, and overwrite controls.
 
 Use `--anim library` for production retargeting when a compatible library and map exist. Use procedural animation as an explicit blockout or when a project generator defines the intended creature motion. Use `--dry-run` before batches and preserve reports.
+
+The local batch creature pipeline is `.local/asset-authoring/workspace/lowpoly_rigged/`: `run_pipeline.py` builds from a manifest such as `models.meshy.json` (per-model repair options), acceptance is recorded in `models/<slug>/review.json`, and the donor-free `auto_animate.py` is described in `REPORT-auto-animate.md`. It runs under `eloria-tools/.venv`, which was not migrated; recreate that environment before running it.
 
 ## Rig review
 
