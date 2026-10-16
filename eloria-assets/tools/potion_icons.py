@@ -294,8 +294,11 @@ SHELF_BEFORE_CROPS = 48
 #: The first id and icon after the crops. The crop roster grew on 2026-10-14
 #: (Grapes, Cabbage and Rosemary at icons 596-598, Grapes and Cabbage at items
 #: 1892-1893, after Large Hide and the spell tomes took 1862-1891), and no
-#: bottle had been appended here yet, so this moved with it.
-AFTER_CROPS_ITEM_ID = 1894
+#: bottle had been appended here yet, so this moved with it. It moved once
+#: more on 2026-10-16, still before any bottle: the server gave item 1894 to
+#: the Watch Arming Sword. main() now refuses to write a potion whose item id
+#: or icon an item outside this tool's fence already holds.
+AFTER_CROPS_ITEM_ID = 1895
 AFTER_CROPS_IMAGE_ID = 599
 
 for index, potion in enumerate(SHELF):
@@ -495,6 +498,44 @@ def item_block(potion: Potion) -> str:
     return "\n".join(lines)
 
 
+def _outside_fence(catalogue: str) -> str:
+    """The catalogue without the rows this tool owns."""
+    if OPEN_ITEMS not in catalogue:
+        return catalogue
+    head, _, rest = catalogue.partition(OPEN_ITEMS)
+    return head + rest.partition(CLOSE_ITEMS)[2]
+
+
+def _values(catalogue: str, key: str) -> set[int]:
+    """Every whole-number `key:` value (item_id, image_id) in the catalogue."""
+    values = set()
+    for line in catalogue.splitlines():
+        field, _, value = line.partition(":")
+        if field.strip() == key and value.strip().isdigit():
+            values.add(int(value))
+    return values
+
+
+def id_collisions(potions: list[Potion], catalogue: str) -> list[str]:
+    """The potions whose item id or icon another item already holds.
+
+    The shelf's ids are frozen by roster order, so the server can hand out an
+    id in a range no bottle has used yet; writing over it would give two items
+    one id. This reads the catalogue at write time instead of trusting the
+    boundaries above."""
+    others = _outside_fence(catalogue)
+    items, images = _values(others, "item_id"), _values(others, "image_id")
+    clashes = ["%s: item %d" % (p.name, p.item_id) for p in potions
+               if p.item_id in items]
+    clashes += ["%s: icon %d" % (p.name, p.image_id) for p in potions
+                if p.image_id in images]
+    if clashes:
+        clashes.append("next free outside the fence: item %d, icon %d; freeze "
+                       "a new shelf boundary there (see SHELF_BEFORE_CROPS)"
+                       % (max(items) + 1, max(images) + 1))
+    return clashes
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="define the potion shelf and paint its icons")
@@ -526,9 +567,12 @@ def main() -> int:
 
     items_path = args.server / "config/eloria/items.txt"
     catalogue = items_path.read_text(encoding="utf-8")
-    if OPEN_ITEMS in catalogue:
-        head, _, rest = catalogue.partition(OPEN_ITEMS)
-        catalogue = head + rest.partition(CLOSE_ITEMS)[2]
+    collisions = id_collisions(potions, catalogue)
+    if collisions:
+        print("these ids are already taken by other items:\n  %s"
+              % "\n  ".join(collisions), file=sys.stderr)
+        return 2
+    catalogue = _outside_fence(catalogue)
     taken = {line.partition(":")[2].strip().casefold()
              for line in catalogue.splitlines() if line.startswith("name:")}
     clash = sorted(p.name for p in potions if p.name.casefold() in taken)

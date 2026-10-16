@@ -153,13 +153,14 @@ class ItemIconAtlasTest(unittest.TestCase):
         # distillate appended after Magic Distillate would have been handed
         # 1860 and icon 594, the crops' own. It continues after them now,
         # and after Grapes and Cabbage's items (1892-1893), which follow the
-        # spell tomes.
+        # spell tomes, and after the Watch Arming Sword the server gave 1894.
         potions = potion_icons.roster()
         self.assertEqual(sum(p.image_id < min(crops.values()) for p in potions),
                          potion_icons.SHELF_BEFORE_CROPS)
         self.assertEqual(potion_icons.AFTER_CROPS_IMAGE_ID, max(crops.values()) + 1)
-        self.assertEqual(potion_icons.AFTER_CROPS_ITEM_ID,
-                         max(crop_icons.SERVER_ITEM_IDS.values()) + 1)
+        self.assertEqual(potion_icons.AFTER_CROPS_ITEM_ID, 1895)
+        self.assertGreater(potion_icons.AFTER_CROPS_ITEM_ID,
+                           max(crop_icons.SERVER_ITEM_IDS.values()))
         self.assertEqual(set(crop_icons.SERVER_ITEM_IDS), set(crops))
         self.assertFalse({p.item_id for p in potions} & set(crop_icons.SERVER_ITEM_IDS.values()))
         plate = read_png(potion_icons.TEMPLATE) if potion_icons.TEMPLATE.is_file() else None
@@ -172,6 +173,25 @@ class ItemIconAtlasTest(unittest.TestCase):
                 # phials beside them change about a tenth of the cell.
                 changed = (np.abs(self.cell_for(image_id) - plate).max(axis=2) > 24).mean()
                 self.assertGreater(changed, .12)
+
+    def test_the_potion_shelf_refuses_ids_another_item_holds(self) -> None:
+        """The shelf's ids are frozen by roster order, so the server can take
+        one first (the Watch Arming Sword took 1894 before any bottle did).
+        Rows inside the tool's own fence are its own and never collide."""
+        import potion_icons
+        potions = potion_icons.roster()
+        first = potions[0]
+        fenced = "\n".join([potion_icons.OPEN_ITEMS,
+                            "item_id: %d" % first.item_id,
+                            "image_id: %d" % first.image_id,
+                            potion_icons.CLOSE_ITEMS])
+        self.assertEqual(potion_icons.id_collisions(potions, fenced), [])
+        foreign = "[item]\nname: Intruder\nitem_id: %d\nimage_id: %d\n[/item]\n" % (
+            first.item_id, first.image_id)
+        clashes = potion_icons.id_collisions(potions, foreign + fenced)
+        self.assertIn("%s: item %d" % (first.name, first.item_id), clashes)
+        self.assertIn("%s: icon %d" % (first.name, first.image_id), clashes)
+        self.assertIn("next free outside the fence", clashes[-1])
 
 
 if __name__ == "__main__":
