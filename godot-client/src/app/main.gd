@@ -2199,7 +2199,7 @@ func _on_chat_configuration_changed(key: String, _value: Variant) -> void:
 	if key == "combined":
 		_chat_tab = "all"
 		chat_hud.select_tab("all")
-	system_chat_hud.visible = not combined and not system_chat_hud.user_closed
+	system_chat_hud.set_feed_suppressed(combined)
 	_sync_chat()
 	_refresh_unified_settings()
 
@@ -3431,6 +3431,8 @@ func _clear_world_presentation() -> void:
 	minimap_frame.hide()
 	chat_output.clear()
 	system_chat_hud.output.clear()
+	chat_hud.preview_feed.clear_messages()
+	system_chat_hud.preview_feed.clear_messages()
 	console_output.clear()
 	chat_hud.reset_destinations()
 	chat_log_tabs.sync([], [])
@@ -4002,9 +4004,9 @@ func _reveal_chat_messages() -> void:
 	if line.is_empty() or not _chat_line_allowed(line):
 		return
 	if _chat_line_shown(line):
-		chat_hud.reveal_message()
+		chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line))
 	if ChatMessages.kind(line) == "system" and not bool(chat_hud.options.get("combined", false)):
-		system_chat_hud.reveal_message()
+		system_chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line))
 
 func _on_minimap_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -7767,14 +7769,17 @@ func _formatted_chat_line(line: Dictionary) -> String:
 			prefix = "[%s] %s" % [stamp, prefix]
 	return prefix + text
 
-func _append_chat_text(target: RichTextLabel, line: Dictionary) -> void:
-	# Literal text prevents player-supplied BBCode from becoming UI markup.
+func _chat_line_colour(line: Dictionary) -> Color:
 	var palette := {"local": Color("eee3c8"), "party": Color("9bdff1"),
 		"private": Color("d2b4f4"), "guild": Color("e1cf92"), "channel": Color("b3dfad")}
 	var colour := int(line.get("colour", 0))
 	var category := ChatMessages.kind(line)
-	target.push_color(palette.get(category,
-		EloriaProtocol.el_text_colour(colour) if colour > 0 else Color("d6cbaa")))
+	return palette.get(category,
+		EloriaProtocol.el_text_colour(colour) if colour > 0 else Color("d6cbaa"))
+
+func _append_chat_text(target: RichTextLabel, line: Dictionary) -> void:
+	# Literal text prevents player-supplied BBCode from becoming UI markup.
+	target.push_color(_chat_line_colour(line))
 	target.add_text(_formatted_chat_line(line) + "\n")
 	target.pop()
 

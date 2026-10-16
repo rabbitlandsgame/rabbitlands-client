@@ -1,6 +1,7 @@
 extends PanelContainer
 ## Independently movable conversation/system surfaces with a feathered backdrop.
 const FADE_SHADER := preload("res://src/ui/chat_soft_fade.gdshader")
+const PreviewScript := preload("res://src/ui/chat_preview.gd")
 const MINIMUM := Vector2(320, 165)
 const DEFAULT_SIZE := Vector2(490, 240)
 const DEFAULT_OPTIONS := {"font_size": 16, "background_opacity": 0.30,
@@ -37,6 +38,8 @@ var composer: HBoxContainer
 var _fade: ColorRect
 var _header: HBoxContainer
 var _frame: Control
+var preview_feed: Control
+var _feed_suppressed := false
 
 func _ready() -> void:
 	if not has_node("Frame"):
@@ -62,6 +65,16 @@ func _ready() -> void:
 	_fade.material = material
 	_frame.add_child(_fade)
 	_frame.move_child(_fade, 0)
+	# Include the outer padding so the header, tabs and composer share a backdrop.
+	_fade.offset_left = -6
+	_fade.offset_top = -6
+	_fade.offset_right = 6
+	_fade.offset_bottom = 6
+	preview_feed = PreviewScript.new()
+	preview_feed.name = name + "Preview"
+	preview_feed.source = self
+	# A sibling remains drawable while this window and its controls are hidden.
+	get_parent().add_child.call_deferred(preview_feed)
 	($Frame/Layout/Header/Title as Label).text = "System" if feed_role == "system" else "Chat"
 	($Frame/Layout/Header/Title as Label).add_theme_font_size_override("font_size", 13)
 	_header.tooltip_text = "Drag to move. Configure or lock this window in Chat settings."
@@ -323,7 +336,16 @@ func apply_options() -> void:
 	grip.visible = dragger.enabled
 	custom_minimum_size = Vector2(280, 95) if feed_role == "system" else MINIMUM
 	user_closed = not bool(options.get("visible", true))
-	visible = not user_closed
+	visible = not user_closed and not _feed_suppressed
+	if not user_closed:
+		preview_feed.clear_messages()
+	preview_feed.refresh_style()
+
+func set_feed_suppressed(suppressed: bool) -> void:
+	_feed_suppressed = suppressed
+	visible = not user_closed and not suppressed
+	if suppressed:
+		preview_feed.clear_messages()
 
 func set_option(key: String, value: Variant) -> void:
 	if not options.has(key):
@@ -340,15 +362,20 @@ func reset_layout() -> void:
 	resize_window(fallback.size)
 	save_layout()
 
-func reveal_message() -> void:
+func reveal_message(text: String = "", colour: Color = Color("eee3c8")) -> void:
 	_last_message_msec = Time.get_ticks_msec()
-	if not user_closed and bool(options.get("visible", true)):
+	if _feed_suppressed:
+		return
+	if user_closed:
+		preview_feed.add_message(text, colour)
+	elif bool(options.get("visible", true)):
 		show()
 
 func open_chat() -> void:
 	user_closed = false
 	options.visible = true
-	show()
+	preview_feed.clear_messages()
+	visible = not _feed_suppressed
 	output.modulate.a = 1.0
 	_last_message_msec = Time.get_ticks_msec()
 	dragger.clamp_into_view()
@@ -406,3 +433,7 @@ func _on_resize_input(event: InputEvent) -> void:
 
 func save_layout() -> void:
 	WindowPreferences.store_layout(_layout_key(), Rect2(position, size), false, preferences_path, options)
+
+func _exit_tree() -> void:
+	if is_instance_valid(preview_feed):
+		preview_feed.queue_free()

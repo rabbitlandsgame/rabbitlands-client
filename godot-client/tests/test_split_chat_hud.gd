@@ -23,6 +23,9 @@ func _run() -> void:
 	_expect(chat.get_theme_stylebox("panel") is StyleBoxEmpty
 		and system.get_theme_stylebox("panel") is StyleBoxEmpty, "both surfaces have no solid frame")
 	_expect(chat.get_node("Frame/SoftFade").material is ShaderMaterial, "the backdrop is a feathered shader")
+	for surface: PanelContainer in [chat, system]:
+		_expect(surface.get_node("Frame/SoftFade").get_global_rect().is_equal_approx(surface.get_global_rect()),
+			"the backdrop covers the full window including its padding")
 	chat.set_option("idle_fade", 1)
 	chat.set("_last_message_msec", Time.get_ticks_msec() - 5000)
 	chat.call("_process", 0.2)
@@ -122,8 +125,11 @@ func _run() -> void:
 	chat.dismiss()
 	_chat(0, "Tavi: chat while closed")
 	_expect(not chat.visible, "messages respect a dismissed conversation window")
+	await _check_closed_previews(chat, system)
 	main.call("_show_chat_input")
 	_expect(chat.visible and chat.input.has_focus(), "T reopens and focuses conversations")
+	_expect(not chat.preview_feed.visible and chat.preview_feed.get_child_count() == 0,
+		"reopening conversations clears the transient feed")
 	main.call("_hide_chat_input")
 	chat.options_button.pressed.emit()
 	_expect(main.settings_window.tabs.get_current_tab_control().name == "Chat", "the window shortcut opens its dedicated Chat settings")
@@ -156,6 +162,87 @@ func _run() -> void:
 	await process_frame
 	print("split chat HUD tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
+
+func _check_closed_previews(chat: PanelContainer, system: PanelContainer) -> void:
+	system.dismiss()
+	chat.preview_feed.clear_messages()
+	system.preview_feed.clear_messages()
+	_chat(0, "Tavi: [b]Meet at the bridge.[/b]")
+	_chat(3, "Your lantern is ready.")
+	var preview: Control = chat.preview_feed
+	var notices: Control = system.preview_feed
+	preview.set_process(false)
+	notices.set_process(false)
+	_expect(not chat.visible and not system.visible and preview.visible and notices.visible,
+		"both dismissed windows show only their transient message feeds")
+	_expect(preview.get_child_count() == 1 and notices.get_child_count() == 1,
+		"conversation and system previews route each message once")
+	var first := preview.get_child(0) as Label
+	var notice := notices.get_child(0) as Label
+	_expect(first.text.contains("[Local] Tavi: [b]Meet at the bridge.[/b]")
+		and notice.text.contains("[System] Your lantern is ready."),
+		"previews keep category labels and display player markup literally")
+	_expect(first.get_theme_font_size("font_size") == 19 and notice.get_theme_font_size("font_size") == 13,
+		"previews use each feed's independent font size")
+	_expect(preview.mouse_filter == Control.MOUSE_FILTER_IGNORE and first.mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and preview.clip_contents, "previews pass clicks through and stay inside the saved window area")
+	var start_y := first.position.y
+	preview.call("_process", 2.0)
+	_expect(first.position.y < start_y and is_equal_approx(first.modulate.a, 1.0),
+		"a closed-feed message rises while remaining readable")
+	var raised_y := first.position.y
+	_chat(0, "Tavi: Another message arrives.")
+	preview.set_process(false)
+	preview.call("_process", 0.2)
+	var newest := preview.get_child(1) as Label
+	_expect(first.position.y < raised_y and first.position.y + first.size.y <= newest.position.y,
+		"new arrivals push older messages upward without overlapping (old %.2f + %.2f, new %.2f, before %.2f)"
+		% [first.position.y, first.size.y, newest.position.y, raised_y])
+	preview.call("_process", 3.0)
+	_expect(first.modulate.a > 0 and first.modulate.a < 1 and is_equal_approx(newest.modulate.a, 1.0),
+		"each message fades on its own clock without a new arrival reviving old text")
+	notices.call("_process", 5.0)
+	_expect(is_equal_approx(notice.modulate.a, 0.5), "system previews use the same timed fade")
+	await _capture("06-closed-previews.png")
+	preview.call("_process", 3.0)
+	notices.call("_process", 2.0)
+	_expect(not preview.visible and not notices.visible and preview.get_child_count() == 0
+		and notices.get_child_count() == 0, "expired previews disappear and release their labels")
+	_expect(chat.output.get_parsed_text().contains("Meet at the bridge")
+		and system.output.get_parsed_text().contains("Your lantern is ready"),
+		"fading previews preserve both full histories")
+	main.console_commands.ignored.append("previewignored")
+	main.console_commands.filters.append("previewblockedword")
+	_chat(0, "PreviewIgnored: hidden local")
+	_chat(1, "[PM from PreviewIgnored: hidden private]")
+	_chat(0, "Tavi: previewblockedword")
+	_expect(preview.get_child_count() == 0, "ignored players and filtered words never appear in previews")
+	main.console_commands.ignored.erase("previewignored")
+	main.console_commands.filters.erase("previewblockedword")
+	for index in range(10):
+		_chat(0, "Tavi: busy feed %d" % index)
+	_expect(preview.get_child_count() == 6, "busy traffic keeps a bounded preview stack")
+	main.call("_on_client_setting_changed", "Chat", "chat_combined", true)
+	_chat(3, "Combined notice while closed.")
+	_expect(not system.visible and not notices.visible
+		and (preview.get_child(preview.get_child_count() - 1) as Label).text.contains("Combined notice"),
+		"combined mode routes closed system notices only to the conversation preview")
+	main.call("_on_client_setting_changed", "Chat", "system_chat_font_size", 13)
+	_expect(not system.visible, "editing suppressed system settings does not reopen the merged-away feed")
+	main.call("_on_client_setting_changed", "Chat", "chat_combined", false)
+	_expect(not system.visible, "separating feeds preserves a dismissed system window")
+	main.call("_on_client_setting_changed", "Chat", "system_chat_visible", true)
+	_chat(3, "An open system message.")
+	_expect(not notices.visible, "open windows do not duplicate messages into the preview feed")
+	main.call("_on_chat_tab_pressed", "party")
+	chat.dismiss()
+	_chat(0, "Tavi: local outside the selected tab")
+	_expect(preview.get_child_count() == 0, "closed previews respect the selected chat tab")
+	_chat(0, "[Party] Rowan: preview in the selected tab")
+	_expect(preview.get_child_count() == 1, "selected-tab messages still receive closed previews")
+	main.call("_on_chat_tab_pressed", "all")
+	chat.dismiss()
+	_chat(0, "Tavi: ready to reopen")
 
 func _mount() -> void:
 	main = (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
