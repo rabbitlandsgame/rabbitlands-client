@@ -1832,11 +1832,14 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
 
-## A movement command that moves the actor nowhere is the server restating the
-## last one, not a step. Taken at face value it restarted the walk clip on every
-## such packet, so an actor that had stopped kept walking on the spot forever.
+## Resting commands can arrive before the body finishes its buffered step,
+## including combat ending on the way to a dropped bag. Keep the step's gait
+## until arrival, even when the last command in a reduced burst names idle.
+## Conversely, a restated movement command must not restart a finished step.
 func _movement_aware_action(action: StringName,
 		target_changed: bool) -> StringName:
+	if _segment_duration > 0.0 and action in [&"idle", &"combat_idle", &"turn"]:
+		return _paced_travel_action(&"run" if _previous_step_gait & 1 else &"walk")
 	if action not in [&"walk", &"run"]:
 		return action
 	if target_changed or _segment_duration > 0.0 or _movement_coast_remaining > 0.0:
@@ -3043,7 +3046,7 @@ func _on_animation_finished(_animation_name: StringName) -> void:
 		play_action(&"cast_channel")
 	elif current_action in [&"cast", &"cast_aggressive", &"cast_defensive", &"heal",
 		&"cast_exit", &"attack_primary", &"attack_secondary", &"defend", &"ranged_attack", &"pain"]:
-		play_action(&"combat_idle" if _in_combat else &"idle")
+		play_action(_movement_aware_action(&"combat_idle" if _in_combat else &"idle", false))
 
 func set_hand_props_visible(enabled: bool) -> void:
 	for part: int in [0, 1]:

@@ -35,7 +35,72 @@ func advance(actor: TimedActor, seconds: float) -> void:
 	actor.clock_msec += roundi(seconds * 1000.0)
 	actor._physics_process(seconds)
 
+func add_animation_fixture(actor: TimedActor) -> void:
+	actor.resolver = AnimationResolver.new(JSON.parse_string(
+		FileAccess.get_file_as_string("res://data/animations/luminous.json")))
+	var player := AnimationPlayer.new()
+	actor.add_child(player)
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	var library := AnimationLibrary.new()
+	for clip: String in actor.resolver.required_clips():
+		var animation := Animation.new()
+		animation.length = 0.1
+		if actor.resolver.looping_clips.has(clip):
+			animation.loop_mode = Animation.LOOP_LINEAR
+		library.add_animation(clip, animation)
+	player.add_animation_library("", library)
+	actor.animation_player = player
+	player.animation_finished.connect(actor._on_animation_finished)
+
+func check_post_combat_movement() -> void:
+	for command: int in [22, 32]:
+		var action: StringName = &"run" if command == 32 else &"walk"
+		# Commands from one socket read are reduced before the actor is drawn.
+		# A combat-end command behind the step must not hide its locomotion.
+		var actor := spawn_actor()
+		add_animation_fixture(actor)
+		var dto := state(0, 0, 46, false)
+		dto["in_combat"] = true
+		dto = ActorReducer.apply_command(dto, command)
+		dto = ActorReducer.apply_command(dto, 19)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == action,
+			"coalesced combat end keeps the %s to the bag" % action)
+		var before := actor.global_position
+		advance(actor, actor._segment_duration * 0.5)
+		expect(actor.global_position.distance_to(before) > 0.1 and actor.current_action == action,
+			"the body moves with the %s animation during bag approach" % action)
+		actor.free()
+
+		# The same transition can arrive after the first movement frame, or
+		# be restated by a later health/equipment update during interpolation.
+		actor = spawn_actor()
+		add_animation_fixture(actor)
+		dto = ActorReducer.apply_command(state(0, 0, 19, false), command)
+		actor.apply_server_state(dto, adapter)
+		advance(actor, actor._segment_duration * 0.25)
+		dto = ActorReducer.apply_command(dto, 19)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == action,
+			"a later combat-end packet keeps the active %s" % action)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == action,
+			"a repeated combat-end state keeps the active %s" % action)
+		actor.play_action(&"pain", true)
+		actor.animation_player.advance(0.11)
+		expect(actor.current_action == action,
+			"a finished hit reaction resumes the %s while approaching the bag" % action)
+		advance(actor, 2.0)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == &"idle" and actor.global_position.is_equal_approx(actor.server_target),
+			"arrival at the bag idles without restarting the %s" % action)
+		actor.play_action(&"pain", true)
+		actor.animation_player.advance(0.11)
+		expect(actor.current_action == &"idle", "a stationary hit reaction still returns to idle")
+		actor.free()
+
 func run() -> void:
+	check_post_combat_movement()
 	for running: bool in [false, true]:
 		var ordinary := spawn_actor()
 		var pace := 0.2 if running else 0.6
