@@ -105,9 +105,19 @@ def _select_roots(asset_id: str, document: dict, names: list[str]) -> list[int]:
     occurrences: dict[str, list[int]] = {}
     for index, node in enumerate(document["nodes"]):
         occurrences.setdefault(str(node.get("name", "")), []).append(index)
+    parents = _parents(document)
+    scene_roots = set(document['scenes'][document.get('scene', 0)].get('nodes', []))
+    def complete_placement(index):
+        parent = parents.get(index)
+        return index in scene_roots or (parent is not None and
+            str(document['nodes'][parent].get('name', '')).endswith('_WorldPlacement'))
     indices = []
     for name in names:
         matches = occurrences.get(name, [])
+        # Generated transform wrappers may share their object's name. Only
+        # the complete placement is an extraction root; inner wrappers are fragments.
+        if len(matches) > 1:
+            matches = [index for index in matches if complete_placement(index)]
         if len(matches) != 1:
             raise ValueError(f"{asset_id} root {name!r} has {len(matches)} matches")
         if name.startswith(FORBIDDEN_ROOT_PREFIXES):
@@ -190,10 +200,145 @@ def _embed_external_images(document: dict, body: bytes, source_dir: Path,
     return document, bytes(packed)
 
 
+def _repair_recipe(recipe):
+    if recipe == 'mirrorhold-rowing-boat-v1':
+        from amberwood import props
+        meshes = {'Mirrorhold_Boat': props.rowing_boat(4.6, 1.5)}
+    elif recipe == 'mirrorhold-drain-grate-v1':
+        import secretrooms
+        group = secretrooms.entrance_prop('drain_grate',
+            {'rock': 'cliff_rock', 'bark': 'bark_dark', 'stone': 'pale_ashlar', 'timber': 'timber_dark'},
+            seed=20260829)
+        meshes = {'Secret_mirror_lens_garden__' + name: mesh
+                  for name, mesh in group.by_material(False).items()}
+    else:
+        raise ValueError('Unsupported map geometry repair recipe')
+    result = {}
+    for name, mesh in sorted(meshes.items()):
+        mesh.sanitise_normals()
+        mesh.drop_degenerate()
+        mesh.weld(1e-4)
+        result[name] = [mesh.positions.astype('<f4'), mesh.normals.astype('<f4'),
+                        mesh.uvs.astype('<f4'), mesh.indices.astype('<u4').ravel()]
+    return result
+
+
+def _geometry_digest(values):
+    return hashlib.sha256(b''.join(array.tobytes() for arrays in values for array in arrays)).hexdigest()
+
+
+def _repair_geometry(spec, document, body, source):
+    """Apply only explicit, hash-pinned procedural reconstruction recipes."""
+    repair = spec.get('geometryRepair')
+    if repair is None:
+        return document, body, None
+    recipe = _repair_recipe(repair['recipe'])
+    if _geometry_digest(recipe.values()) != repair['geometrySha256']:
+        raise ValueError('Procedural repair recipe changed; review its pinned geometry')
+    selected = _select_roots(str(spec['id']), document, list(spec['roots']))
+    meshes = {document['nodes'][i]['mesh'] for i in S.descendants(document, selected)
+              if 'mesh' in document['nodes'][i]}
+    names = {document['meshes'][index].get('name'): index for index in meshes}
+    if set(names) != set(recipe) or len(names) != len(meshes):
+        raise ValueError('Selected reconstruction mesh layout changed')
+    semantics = ('POSITION', 'NORMAL', 'TEXCOORD_0')
+    original = []
+    for name in recipe:
+        primitives = document['meshes'][names[name]]['primitives']
+        if len(primitives) != 1 or set(primitives[0]['attributes']) != set(semantics) or primitives[0].get('targets'):
+            raise ValueError('Reconstruction primitive layout changed')
+        primitive = primitives[0]
+        arrays = [S.GR.accessor(document, body, primitive['attributes'][k]).astype('<f4') for k in semantics]
+        arrays.append(S.GR.accessor(document, body, primitive['indices']).astype('<u4').ravel())
+        original.append(arrays)
+    report = dict(repair, applied=False)
+    if _geometry_digest(original) == repair['geometrySha256']:
+        return document, body, report
+    if hashlib.sha256(source.read_bytes()).hexdigest() != repair['sourceSha256']:
+        raise ValueError('Damaged source differs from the pinned repair input')
+    document = copy.deepcopy(document)
+    packed = bytearray(body)
+    for name, arrays in recipe.items():
+        primitive = document['meshes'][names[name]]['primitives'][0]
+        for semantic, array in zip((*semantics, 'indices'), arrays, strict=True):
+            packed.extend(b'\0' * ((-len(packed)) % 4))
+            view = len(document['bufferViews'])
+            document['bufferViews'].append({'buffer': 0, 'byteOffset': len(packed),
+                'byteLength': array.nbytes, 'target': 34963 if semantic == 'indices' else 34962})
+            packed.extend(array.tobytes())
+            accessor = {'bufferView': view, 'componentType': 5125 if semantic == 'indices' else 5126,
+                        'count': len(array), 'type': 'SCALAR' if array.ndim == 1 else 'VEC' + str(array.shape[1]),
+                        'min': np.atleast_1d(array.min(axis=0)).astype(float).tolist(),
+                        'max': np.atleast_1d(array.max(axis=0)).astype(float).tolist()}
+            index = len(document['accessors'])
+            document['accessors'].append(accessor)
+            if semantic == 'indices':
+                primitive['indices'] = index
+            else:
+                primitive['attributes'][semantic] = index
+    document['buffers'] = [{'byteLength': len(packed)}]
+    report['applied'] = True
+    return document, bytes(packed), report
+
+
+def _materialize_selected(document, body, roots, source):
+    """Expand hash-verified shared props for standalone library exports."""
+    matrices, _ = S.GR.hierarchy(document)
+    private, body = _embed_external_images(
+        document, body, source.parent, _reachable_images(document, roots))
+    for root in roots:
+        OE.set_matrix(private['nodes'][root], matrices[root])
+    merged = S.Exporter(source.with_name('in-memory-extraction.glb'))
+    chosen = merged.add(private, body, roots)
+    prototypes = {}
+    manifest = None
+    for node in list(merged.doc['nodes']):
+        extras = node.get('extras', {}).get('eloria', {})
+        key = extras.get('prototype')
+        if key is None:
+            continue
+        if not re.fullmatch(r'[0-9a-f]{64}', key):
+            raise ValueError('Invalid shared map prototype key')
+        path = (MAPS / '_shared/meshes' / (key + '.glb')).resolve()
+        if manifest is None:
+            manifest = _read_json(source.with_suffix('.json')).get('externalMeshes', {})
+        expected = next((sha for uri, sha in manifest.items()
+                         if (source.parent / uri).resolve() == path), None)
+        if expected is None or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            raise ValueError('Missing or changed shared map prototype: ' + key)
+        if key not in prototypes:
+            proto, data = S.GR.load(path)
+            proto_roots = proto['scenes'][proto.get('scene', 0)]['nodes']
+            proto, data = _embed_external_images(
+                proto, data, path.parent, _reachable_images(proto, proto_roots))
+            prototypes[key] = (proto, data, proto_roots)
+        proto, data, proto_roots = prototypes[key]
+        wrappers = merged.add(proto, data, proto_roots)
+        node.setdefault('children', []).extend(wrappers)
+        for wrapper in wrappers:
+            merged.doc['scenes'][0]['nodes'].remove(wrapper)
+        extras.pop('prototype')
+    return merged.doc, bytes(merged.body), chosen
+
+
 def _extract_one(spec: dict, source: Path, slug: str, output: Path, shared_images: Path) -> dict:
     document, body = S.GR.load(source)
+    document, body, repair = _repair_geometry(spec, document, body, source)
     roots = _select_roots(str(spec["id"]), document, [str(name) for name in spec["roots"]])
+    document, body, roots = _materialize_selected(document, body, roots, source)
     matrices, _ = S.GR.hierarchy(document)
+    for node_index in S.descendants(document, roots):
+        node = document['nodes'][node_index]
+        if 'mesh' not in node:
+            continue
+        for primitive in document['meshes'][node['mesh']]['primitives']:
+            vertices = S.GR.accessor(document, body, primitive['attributes']['POSITION'])
+            if not np.isfinite(vertices).all():
+                raise ValueError(str(spec['id']) + ' contains nonfinite geometry')
+            if 'indices' in primitive:
+                indices = S.GR.accessor(document, body, primitive['indices'])
+                if indices.size and int(indices.max()) >= len(vertices):
+                    raise ValueError(str(spec['id']) + ' contains out-of-range triangle indices')
     low, high = OE.subtree_bounds_all(S, document, body, roots)
     size = high - low
     if not np.isfinite(low).all() or not np.isfinite(high).all() or np.any(size <= 0.001):
@@ -218,6 +363,8 @@ def _extract_one(spec: dict, source: Path, slug: str, output: Path, shared_image
         "roots": list(spec["roots"]),
     }
     summary = exporter.write()
+    if repair is not None:
+        summary["geometryRepair"] = repair
     summary.update({
         "id": spec["id"],
         "output": _report_path(target),
