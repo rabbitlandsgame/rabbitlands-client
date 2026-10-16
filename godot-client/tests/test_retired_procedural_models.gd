@@ -91,6 +91,25 @@ func _run() -> void:
 			check(retained != null, "retired scenery placement retains map identity")
 			check(not retained is MeshInstance3D, "package does not draw retired scenery")
 	loader.free()
+	# Landfall's textured arrival inlay was explicitly restored after retirement.
+	# Exercise its actual chunk: the nearby retired paving must stay suppressed.
+	var plaza := WorldLoader.new()
+	plaza.detached_build = true
+	plaza.detached_cache_enabled = false
+	root.add_child(plaza)
+	plaza.load_world("res://../eloria-assets/maps/continent-v2/landfall/client/chunks/08_11/world.json")
+	check(plaza.world_root != null, "Landfall plaza chunk loads")
+	if plaza.world_root != null:
+		var rosette := plaza.world_root.find_child("Walk_landfall_plaza_rosette", true, false) as MeshInstance3D
+		check(rosette != null and rosette.mesh != null, "arrival star mosaic renders")
+		if rosette != null and rosette.mesh != null:
+			var material := rosette.mesh.surface_get_material(0) as StandardMaterial3D
+			check(material != null and material.albedo_texture != null, "arrival mosaic retains original texture")
+			if material != null and material.albedo_texture != null:
+				check(material.albedo_texture.get_size() == Vector2(1024, 1024), "arrival mosaic retains full 1024-pixel resolution")
+		var paving := plaza.world_root.find_child("*garden_paving*", true, false)
+		check(paving != null and not paving is MeshInstance3D, "retired plaza paving stays suppressed")
+	plaza.free()
 	var pool := preload("res://src/world/external_mesh_pool.gd")
 	for identity: String in retired_index.get("retiredMapPrototypes", []):
 		check(pool.acquire(identity, "unused") == null, "pooled retired model refused")
@@ -99,7 +118,8 @@ func _run() -> void:
 		"retired_runtime_paths_checked": checked,
 		"baked_copy_checked": inline_checked,
 		"real_map_loader_checked": true,
-		"scope": "Current scene cache, actor configuration, equipment lifecycle and service model path; no archived visuals or generated body fallback. Updated Moss Bear actor still configures."}
+		"restored_landfall_inlay_checked": true,
+		"scope": "Retired visuals remain suppressed; the restored Landfall star mosaic keeps its 1024-pixel texture. Updated Moss Bear actor still configures."}
 	var output := "user://procedural-retirement.json"
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--report="): output = argument.trim_prefix("--report=")

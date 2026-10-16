@@ -20,6 +20,14 @@ The public summary and per-model hashes are in `docs/qa/procedural-model-archive
 The archive is recoverable source material, outside the game's model folders and
 outside packaging. It is not an active asset-development destination.
 
+The Landfall arrival plaza's star mosaic is a user-requested restoration on
+2026-10-16. Its original `kit-sw-plaza-rosette.glb` and 1024-pixel mosaic texture
+remain active as a ground inlay. The saved Landfall scene binds the preserved
+model again, and the runtime retirement index permits its mesh in chunk
+`08_11` while continuing to suppress the retired garden paving beside it.
+The original retirement receipts remain historical records; the rosette
+generator remains disabled.
+
 Procedural actor and equipment definitions are removed, including 158 actor
 model entries, 163 actor-type mappings, four equipment visuals and 710 obsolete
 authoring-catalog records. Historical identifiers remain reserved in the

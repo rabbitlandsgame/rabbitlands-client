@@ -1,0 +1,259 @@
+{
+  "date": "2026-10-16",
+  "scope": "Read-only audit of ground textures and decorative inlays affected by procedural model retirement; no runtime asset changes.",
+  "result": {
+    "additional_ground_finish_models_removed": 9,
+    "affected_named_paths": 9,
+    "missing_referenced_map_images": 0,
+    "other_standalone_mosaic_or_inlay_losses_identified": 0
+  },
+  "coverage": {
+    "retired_models": 1036,
+    "retirement_map_entries": 218,
+    "blocked_map_meshes": 1225,
+    "blocked_shared_prototypes": 73,
+    "registry_entries": 130,
+    "reachable_manifests": 1387,
+    "reachable_glbs": 6243,
+    "unique_external_images": 3282,
+    "ground_or_inlay_material_bindings": 4534
+  },
+  "texture_verification": {
+    "all_referenced_external_images_present": true,
+    "retired_images_referenced_by_current_maps": 0,
+    "paving_albedo_and_normal_match_original_hashes": true
+  },
+  "additional_ground_finish_losses": [
+    {
+      "asset": "kit-sw-garden-paving-5-10",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-north-lane"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/07_09/world.glb",
+          "mesh": 9,
+          "name": "kit-sw-garden-paving-5-10",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-5-11",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-link-gate",
+        "gt-main-street"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/07_10/world.glb",
+          "mesh": 9,
+          "name": "kit-sw-garden-paving-5-11",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-6-10",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-north-lane"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/08_09/world.glb",
+          "mesh": 12,
+          "name": "kit-sw-garden-paving-6-10",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-6-12",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-south-lane"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/08_11/world.glb",
+          "mesh": 10,
+          "name": "kit-sw-garden-paving-6-12",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-7-10",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-east-walk",
+        "gt-ne-walk",
+        "gt-north-lane",
+        "gt-north-link"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/09_09/world.glb",
+          "mesh": 6,
+          "name": "kit-sw-garden-paving-7-10",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-7-11",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-east-walk",
+        "gt-south-lane",
+        "gt-south-link"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/09_10/world.glb",
+          "mesh": 6,
+          "name": "kit-sw-garden-paving-7-11",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-7-12",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-south-lane",
+        "gt-south-link"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/09_11/world.glb",
+          "mesh": 7,
+          "name": "kit-sw-garden-paving-7-12",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-8-10",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-east-walk",
+        "gt-se-walk"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/10_09/world.glb",
+          "mesh": 5,
+          "name": "kit-sw-garden-paving-8-10",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-8-11",
+      "source_hash_verified": true,
+      "source_model_missing": true,
+      "saved_scenes": [
+        "godot-client/world_authoring/regions/landfall/landfall.tscn"
+      ],
+      "paths_covered": [
+        "gt-east-walk",
+        "gt-se-walk",
+        "gt-south-lane"
+      ],
+      "runtime_copies": [
+        {
+          "glb": "eloria-assets/maps/continent-v2/landfall/client/chunks/10_10/world.glb",
+          "mesh": 4,
+          "name": "kit-sw-garden-paving-8-11",
+          "material": "garden-paving-limestone",
+          "suppressed": true
+        }
+      ]
+    }
+  ],
+  "affected_paths": [
+    "gt-east-walk",
+    "gt-link-gate",
+    "gt-main-street",
+    "gt-ne-walk",
+    "gt-north-lane",
+    "gt-north-link",
+    "gt-se-walk",
+    "gt-south-lane",
+    "gt-south-link"
+  ],
+  "reason_to_preserve": "These are terrain-conforming limestone path overlays, authored to correct the garden town road finish. They are ground surfaces, like the restored plaza mosaic, rather than standalone scenery objects.",
+  "source_records": [
+    "eloria-assets/maps/continent-v2/sw_isle/source/garden-paving-record.json",
+    "eloria-assets/maps/continent-v2/sw_isle/source/garden_paving.py"
+  ],
+  "runtime_verification": {
+    "all_nine_chunks_loaded": true,
+    "all_nine_paving_meshes_suppressed": true,
+    "map_cache_disabled": true
+  },
+  "remaining_structural_walk_surfaces": {
+    "families": [
+      "Manymouth Delta retired house floors",
+      "Manymouth Delta retired arch-stair platform",
+      "Sunmane Steppe retired bridge deck",
+      "Whitehorn Range retired ice-cave floor"
+    ],
+    "classification": "Surfaces belonging to retired complete structures; not standalone ground finishes or decorative inlays."
+  },
+  "retained_examples": [
+    "Landfall plaza star mosaic",
+    "Crownwater mosaic floors",
+    "Amethyst vault floors",
+    "Sunmane cave floors"
+  ],
+  "notes": [
+    "The original retirement receipts remain unchanged.",
+    "Fifteen territory manifests load streamed chunks and intentionally have no single world.glb; their chunks were scanned.",
+    "This audit identifies nine additional paving pieces for restoration; it does not restore them."
+  ]
+}

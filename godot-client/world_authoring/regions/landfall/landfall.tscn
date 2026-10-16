@@ -316,6 +316,7 @@
 
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-landing-beacon.glb" id="s0_148_r2idi"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-plaza-rosette.glb" id="plaza_rosette"]
 
 
 
@@ -38471,7 +38472,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -152, 121.4942, 34)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Plaza Rosette" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Plaza Rosette" instance=ExtResource("plaza_rosette")]
 metadata/map_asset_id = "sw_isle:kit-sw-plaza-rosette"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-plaza-rosette.glb"
 
