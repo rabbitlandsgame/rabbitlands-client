@@ -316,5 +316,6 @@ def build(server):
 
 
 if __name__=='__main__':
+    raise RuntimeError('build_underground.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
     ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--server',type=Path,required=True)
     build(ap.parse_args().server.resolve())

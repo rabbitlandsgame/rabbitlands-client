@@ -1,5 +1,12 @@
 # Local asset-authoring workspace
 
+Procedural model outputs across all types were archived and removed from game
+use on 2026-10-16. See [the retirement record](procedural-model-archive.md) before
+running older builders or selecting animation targets. Their original sources
+are recoverable in the ignored archive; current imported-model processing tools
+and approved models remain active. Historical receipts below describe completed
+verification and do not reactivate retired generators.
+
 The complete concept-art, Meshy model-generation, rigging/animation and video-motion-fitting skills live under `.agents/skills/rabbitlands-*`. Their references and UI metadata are included. The existing video-generation and creature-integration skills remain available.
 
 Original high-resolution models, full-resolution textures, concept inputs, animation libraries, generated source stages and processing scripts are consolidated under:

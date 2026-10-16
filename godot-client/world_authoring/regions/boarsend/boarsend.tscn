@@ -269,7 +269,6 @@
 
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="u_asset"]
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/gameplay_marker.gd" id="u_marker"]
-[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/underground-assets/barrow-mouth.glb" id="u_mouth"]
 
 [ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-sweet-chestnut-summer-1.glb" id="lv_sweet_chestnut_summer_1"]
 
@@ -24085,7 +24084,7 @@ metadata = {"undergroundSection": "boarsend_barrow"}
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 143.5, 144.35, -60.5)
 
-[node name="Mouth" parent="AuthoredAssets/boarsend_barrow-entrance" instance=ExtResource("u_mouth")]
+[node name="Mouth" parent="AuthoredAssets/boarsend_barrow-entrance" type="Node3D"]
 
 [node name="lv_boarsend_Sweet Chestnut Summer 1 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")

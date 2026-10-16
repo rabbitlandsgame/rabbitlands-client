@@ -35,6 +35,7 @@ extends RefCounted
 ## Actors are left as they were: their load time is why this cache exists.
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
+const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
 
 static var _scenes: Dictionary = {}
@@ -66,6 +67,8 @@ static func install_prepared(scenes: Dictionary) -> void:
 
 ## Returns a fresh instance of `path`, or null when the file cannot be imported.
 static func instantiate(path: String) -> Node3D:
+	if ArchivedModelPolicy.is_retired_path(path):
+		return null
 	path = _canonical_path(path)
 	if path.is_empty() or _failed.has(path):
 		return null
@@ -91,6 +94,8 @@ static func _canonical_path(path: String) -> String:
 	return ProjectSettings.globalize_path(path) if path.begins_with("res://") else path
 
 static func _build(path: String) -> PackedScene:
+	if ArchivedModelPolicy.is_retired_path(path):
+		return null
 	var imported := _imported_actor_scene(path)
 	if imported != null:
 		return imported

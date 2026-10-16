@@ -63,7 +63,8 @@ extends RefCounted
 ## directions. Every other package builds exactly as before and keeps its
 ## entry. (Live continent chunks are detached builds, which read the cache but
 ## never write it, so this reaches whole-map loads today.)
-const CACHE_FORMAT_VERSION := 7
+## 8 - archived procedural model copies are omitted before scene batching.
+const CACHE_FORMAT_VERSION := 8
 
 ## Wrapped into the digest so the hash of a package cannot be confused with the
 ## hash of anything else, and so the digest itself can be revised without

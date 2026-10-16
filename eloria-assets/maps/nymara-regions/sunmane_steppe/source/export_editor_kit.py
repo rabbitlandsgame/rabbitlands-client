@@ -223,6 +223,7 @@ def build(stem: str) -> bytes:
 
 
 def main() -> int:
+    raise RuntimeError('export_editor_kit.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true", help="verify, do not write")
     args = parser.parse_args()

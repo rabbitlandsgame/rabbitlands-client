@@ -131,7 +131,6 @@
 
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="u_asset"]
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/gameplay_marker.gd" id="u_marker"]
-[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/underground-assets/mine-mouth.glb" id="u_mouth"]
 
 [ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-scots-pine-tree-1.glb" id="lv_scots_pine_tree_1"]
 
@@ -8305,7 +8304,7 @@ metadata = {"undergroundSection": "pinebrow_workings"}
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128.5, 155.95, -96.5)
 
-[node name="Mouth" parent="AuthoredAssets/pinebrow_workings-entrance" instance=ExtResource("u_mouth")]
+[node name="Mouth" parent="AuthoredAssets/pinebrow_workings-entrance" type="Node3D"]
 
 [node name="lv_pinebrow_Scots Pine Tree 1 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")

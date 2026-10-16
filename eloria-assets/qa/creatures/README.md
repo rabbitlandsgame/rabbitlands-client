@@ -1,5 +1,10 @@
 # Creature production QA
 
+> Historical procedural-model QA. These model builders and outputs are retired
+> and archived as of 2026-10-16. Do not use the reproduction commands below for
+> current development. See `docs/procedural-model-archive.md` and the current
+> `eloria-assets/source/model-development-roster.json` instead.
+
 The thirty-two native Nymara creatures were rebuilt from the concept art to
 production anatomy. The previous pass assembled every creature from three
 stacked ellipsoids and four straight cylinders on a shared twenty-one bone

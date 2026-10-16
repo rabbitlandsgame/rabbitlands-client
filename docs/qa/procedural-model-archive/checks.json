@@ -1,0 +1,161 @@
+{
+  "date": "2026-10-16",
+  "status": "Focused retirement checks pass; unrelated pre-existing validation limits recorded below",
+  "client_regression_tests": {
+    "passed": 3
+  },
+  "server_content_checks": {
+    "passed": 5,
+    "scope": "removed definitions and acquisition references; served World content setup without collision preprocessing; retained model count; remaining livestock definitions/spawns"
+  },
+  "runtime": {
+    "baked_copy_checked": true,
+    "failures": [],
+    "passed": true,
+    "real_map_loader_checked": true,
+    "retired_runtime_paths_checked": 993,
+    "scope": "Current scene cache, actor configuration, equipment lifecycle and service model path; no archived visuals or generated body fallback. Updated Moss Bear actor still configures."
+  },
+  "moss_bear": {
+    "approved_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+    "all_seven_clips_pass": true,
+    "report": {
+      "candidate_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+      "clips": [
+        {
+          "attack_switch_error": 0.0,
+          "clip": "Idle_A",
+          "duration_seconds": 3.20000004768372,
+          "finite": true,
+          "idle_restore_error": 0.0,
+          "independent_glb_world_max_error": 2.06267915636715e-06,
+          "native_import_max_error": 1.32386253426375e-06,
+          "terminal_hold_error": 0.0
+        },
+        {
+          "attack_switch_error": 0.0,
+          "clip": "Fighting_Idle",
+          "duration_seconds": 2.71666669845581,
+          "finite": true,
+          "idle_restore_error": 0.0,
+          "independent_glb_world_max_error": 1.78448177101664e-06,
+          "native_import_max_error": 1.5915668427624e-06,
+          "terminal_hold_error": 0.0
+        },
+        {
+          "attack_switch_error": 0.0,
+          "clip": "Hit_Chest",
+          "duration_seconds": 1.04999995231628,
+          "finite": true,
+          "idle_restore_error": 0.0,
+          "independent_glb_world_max_error": 1.78448177101664e-06,
+          "native_import_max_error": 1.5679534044466e-06,
+          "terminal_hold_error": 0.0
+        },
+        {
+          "attack_switch_error": 0.0,
+          "clip": "Death_A",
+          "duration_seconds": 3.75,
+          "finite": true,
+          "idle_restore_error": 0.0,
+          "independent_glb_world_max_error": 6.83445418481199e-07,
+          "native_import_max_error": 3.38489314799517e-07,
+          "terminal_hold_error": 3.38489314799517e-07
+        },
+        {
+          "attack_switch_error": 0.0,
+          "clip": "Sword_Attack",
+          "duration_seconds": 3.5,
+          "finite": true,
+          "idle_restore_error": 0.0,
+          "independent_glb_world_max_error": 6.55516197101136e-07,
+          "native_import_max_error": 3.8426509263445e-07,
+          "terminal_hold_error": 2.52881079632061e-07
+        },
+        {
+          "attack_switch_error": 0.0,
+          "clip": "Walk",
+          "duration_seconds": 1.07500004768372,
+          "finite": true,
+          "idle_restore_error": 0.0,
+          "independent_glb_world_max_error": 6.35602202314622e-06,
+          "native_import_max_error": 4.5491270839193e-07,
+          "terminal_hold_error": 0.0
+        },
+        {
+          "attack_switch_error": 0.0,
+          "clip": "Jog",
+          "duration_seconds": 0.720000028610229,
+          "finite": true,
+          "idle_restore_error": 0.0,
+          "independent_glb_world_max_error": 6.53490084423503e-06,
+          "native_import_max_error": 5.23877019986685e-07,
+          "terminal_hold_error": 0.0
+        }
+      ],
+      "engine": {
+        "build": "official",
+        "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+        "hex": 263938,
+        "major": 4,
+        "minor": 7,
+        "patch": 2,
+        "status": "stable",
+        "string": "4.7.2-stable (official)",
+        "timestamp": 0
+      },
+      "failures": [],
+      "passed": true,
+      "preservation_note": "All seven slots pass independent GLB world-pose witnesses. Exact inherited Walk/Jog and three old idle/hit clip payloads are checked separately in promotion.json.",
+      "scope": "Current runtime asset and dedicated map; imported scene cache and native library, all seven clips. Focused component integration, not a full client/server session.",
+      "skin_influences": [
+        4
+      ]
+    }
+  },
+  "preserved_models": {
+    "protected_models_checked": 8181,
+    "external_dependencies_checked": 31411,
+    "shared_sidecars_restored_for_updated_models": [],
+    "missing_dependencies": []
+  },
+  "archive": {
+    "model_count": 1036,
+    "removed_files": 11660,
+    "verified_file_entries": 11944,
+    "shared_texture_dependencies_added": 151,
+    "manifest_sha256": "821f6f7712cf69225a8d0dfe1ef09458a297fb480f37cb353402634b4c76d85e",
+    "generator_entrypoints_disabled": 12,
+    "scripts_parsed": 15,
+    "edited_scene_reference_checks": 7,
+    "missing_dependencies": [],
+    "definition_backup_files": 16
+  },
+  "scene_policy": {
+    "hash_bound_runtime_map_files": 218,
+    "retired_pooled_prototypes": 73
+  },
+  "validation_limits": [
+    {
+      "stage": "before_retirement",
+      "expansion_spawns_outside_published_exterior_isles": [
+        [
+          "skeleton",
+          "landfall_insides"
+        ]
+      ],
+      "full_drop_regeneration_already_stale": true
+    },
+    {
+      "stage": "after_retirement",
+      "expansion_spawns_outside_published_exterior_isles": [
+        [
+          "skeleton",
+          "landfall_insides"
+        ]
+      ],
+      "full_drop_regeneration_already_stale": true
+    }
+  ],
+  "publication": "Validated locally before the user-requested develop integration. No deployment, release, paid generation or player database changes."
+}

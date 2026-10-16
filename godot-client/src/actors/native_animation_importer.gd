@@ -4,6 +4,7 @@ extends RefCounted
 
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
+const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 ## Retargets a native glTF animation library onto an actor's skeleton.
 ##
 ## The shared universal library ships 162 clips built from roughly 226 000
@@ -41,6 +42,9 @@ static func import_library(owner: Node, source_path: String,
 		looping_clips: PackedStringArray = PackedStringArray()) -> Dictionary:
 	var result := {"player": null, "clips": PackedStringArray(),
 		"errors": PackedStringArray()}
+	if ArchivedModelPolicy.is_retired_path(source_path):
+		result["retired"] = true
+		return result
 	if target_skeleton == null:
 		result.errors.append("animation retarget skeleton missing")
 		return result
@@ -97,6 +101,8 @@ static func clear() -> void:
 ## library names one today; the packaging tests check every animationLibrary
 ## in models.json.
 static func prewarm(source_path: String) -> void:
+	if ArchivedModelPolicy.is_retired_path(source_path):
+		return
 	if source_path.is_empty() or _sources.has(source_path) or _prewarming.has(source_path):
 		return
 	var thread := Thread.new()

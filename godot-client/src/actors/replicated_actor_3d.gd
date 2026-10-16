@@ -7,6 +7,7 @@ const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd"
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
+const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
 
 @export var walk_presentation_speed := 6.0
 @export var run_presentation_speed := 9.0
@@ -493,6 +494,11 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 	_equipment_config = preload(
 		"res://src/actors/equipment_registry_snapshot_cache.gd").acquire(equipment_config)
 	_invalidate_hand_prop_ranged_cache()
+	if ARCHIVED_MODEL_POLICY.is_retired_actor_type(int(dto.get("actor_type", -1))) or bool(model_config.get("retired", false)):
+		# Keep identity, picking, nameplate and protocol state without drawing
+		# either the archived model or a replacement placeholder body.
+		set_meta("retired_model", true)
+		return []
 	var source_path := _external_path(str(model_config.get("scene", "")))
 	var errors := _load_native_scene(source_path)
 	if not errors.is_empty():
@@ -2011,6 +2017,15 @@ func _create_equipment_part(part: int, visual_id: int, allow_fallback: bool) -> 
 	if visual_id == 0 and bool(part_config.get("bareWhenEmpty", false)):
 		return
 	var model_config: Dictionary = _equipment_model_config(part, visual_id)
+	if ARCHIVED_MODEL_POLICY.is_retired_equipment(part, visual_id) or bool(model_config.get("retired", false)):
+		# Reserve the visual ID and lifecycle slot without a generated fallback.
+		var marker := Node3D.new()
+		marker.name = "RetiredEquipment_%d_%d" % [part, visual_id]
+		marker.set_meta("native_equipment", true)
+		marker.set_meta("retired_equipment", true)
+		_native_skeleton.add_child(marker)
+		_equipment_nodes[part] = [marker]
+		return
 	if part == 0:
 		_hand_prop_weapon_has_ranged_animation = model_config.has(
 			"rangedAnimationScene")

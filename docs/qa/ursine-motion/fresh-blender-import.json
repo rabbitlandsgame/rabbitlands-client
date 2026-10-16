@@ -1,0 +1,134 @@
+[
+  {
+    "label": "original",
+    "sha256": "8cb83ba3464c3bb957f5ec496a7ded79b5e9cf218ea4e70812c4a1fde3290ce1",
+    "blender": "5.2.1 LTS",
+    "clips": {
+      "Idle_A": {
+        "finite": true,
+        "range": [
+          0.0,
+          76.80000305175781
+        ],
+        "independent_joint_position_error": null
+      },
+      "Fighting_Idle": {
+        "finite": true,
+        "range": [
+          0.0,
+          65.19999694824219
+        ],
+        "independent_joint_position_error": null
+      },
+      "Hit_Chest": {
+        "finite": true,
+        "range": [
+          0.0,
+          25.19999885559082
+        ],
+        "independent_joint_position_error": null
+      },
+      "Walk": {
+        "finite": true,
+        "range": [
+          0.0,
+          25.80000114440918
+        ],
+        "independent_joint_position_error": null
+      },
+      "Jog": {
+        "finite": true,
+        "range": [
+          0.0,
+          17.280000686645508
+        ],
+        "independent_joint_position_error": null
+      },
+      "Sword_Attack": {
+        "finite": true,
+        "range": [
+          0.0,
+          26.400001525878906
+        ],
+        "independent_joint_position_error": null
+      },
+      "Death_A": {
+        "finite": true,
+        "range": [
+          0.0,
+          60.0
+        ],
+        "independent_joint_position_error": null
+      }
+    },
+    "fps": 24,
+    "camera_policy": "Fixed identical before/after cameras and ortho scale 4.35, focus (0,0,0.95)",
+    "timing_policy": "Original clips play once at original speed, then hold their endpoint through the full reference window. Revised clips retain reference timing."
+  },
+  {
+    "label": "revised",
+    "sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+    "blender": "5.2.1 LTS",
+    "clips": {
+      "Idle_A": {
+        "finite": true,
+        "range": [
+          0.0,
+          76.80000305175781
+        ],
+        "independent_joint_position_error": 4.1442643627931375e-06
+      },
+      "Fighting_Idle": {
+        "finite": true,
+        "range": [
+          0.0,
+          65.19999694824219
+        ],
+        "independent_joint_position_error": 3.7088836126741853e-06
+      },
+      "Hit_Chest": {
+        "finite": true,
+        "range": [
+          0.0,
+          25.19999885559082
+        ],
+        "independent_joint_position_error": 3.9087977952156905e-06
+      },
+      "Walk": {
+        "finite": true,
+        "range": [
+          0.0,
+          25.80000114440918
+        ],
+        "independent_joint_position_error": 1.0878470526609618e-06
+      },
+      "Jog": {
+        "finite": true,
+        "range": [
+          0.0,
+          17.280000686645508
+        ],
+        "independent_joint_position_error": 4.981891956412632e-06
+      },
+      "Sword_Attack": {
+        "finite": true,
+        "range": [
+          0.0,
+          84.0
+        ],
+        "independent_joint_position_error": 1.0433101957918467e-06
+      },
+      "Death_A": {
+        "finite": true,
+        "range": [
+          0.0,
+          90.0
+        ],
+        "independent_joint_position_error": 2.6599802532278893e-06
+      }
+    },
+    "fps": 24,
+    "camera_policy": "Fixed identical before/after cameras and ortho scale 4.35, focus (0,0,0.95)",
+    "timing_policy": "Original clips play once at original speed, then hold their endpoint through the full reference window. Revised clips retain reference timing."
+  }
+]

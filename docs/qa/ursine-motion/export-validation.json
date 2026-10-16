@@ -1,0 +1,315 @@
+{
+  "installed_runtime_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+  "preservation_contract": "Exact reviewed file. Walk/Jog evidence applies by exact accepted payload and binary-prefix equality; action evidence binds to the installed file directly.",
+  "gait_validation": {
+    "source_sha256": "5f5837fc557421c0ed6b11bc9fda400c190d40b122290da53baa1b76fb5ca8a8",
+    "candidate_sha256": "8cb83ba3464c3bb957f5ec496a7ded79b5e9cf218ea4e70812c4a1fde3290ce1",
+    "passed": true,
+    "failures": [],
+    "static_document_equality": {
+      "nodes": true,
+      "meshes": true,
+      "skins": true,
+      "materials": true,
+      "textures": true,
+      "images": true,
+      "samplers": true,
+      "scenes": true,
+      "scene": true
+    },
+    "source_binary_prefix_exact": true,
+    "unrelated_animations_exact": {
+      "Death_A": true,
+      "Fighting_Idle": true,
+      "Hit_Chest": true,
+      "Idle_A": true,
+      "Sword_Attack": true
+    },
+    "skin_weight_sum_max_error": 9.313225746154785e-08,
+    "clips": {
+      "Jog": {
+        "duration_seconds": 0.7200000286102295,
+        "key_count": 554,
+        "evaluated_poses": 1383,
+        "evaluation": "all exported keys, all half-keys, and an independent 384 Hz grid",
+        "minimum_full_mesh_floor_native": 0.0016753943954416464,
+        "maximum_physical_segment_error_native": 1.9363182215334507e-05,
+        "loop_world_matrix_max_error": 8.881784197001252e-16,
+        "quaternion_norm_error": 4.0860343997195514e-08,
+        "minimum_quaternion_adjacent_dot": 0.9999377879971304,
+        "minimum_supported_paws": 2,
+        "root_translation_span_native": [
+          0.04088688176125288,
+          0.03778654336929321,
+          0.0018104910850524902
+        ],
+        "legs": {
+          "fore_left": {
+            "stance_floor_min_native": 0.001679609964655651,
+            "stance_floor_max_native": 0.00200708237253064,
+            "stance_slide_rms_native_per_second": 0.00031636126691216894,
+            "slide_fraction_of_forward_speed": 0.00018873209294645966,
+            "maximum_paw_lift_native": 0.1265353859879801,
+            "forward_excursion_native": 0.737345836865201,
+            "hinge_internal_angle_degrees": [
+              87.64360471335984,
+              164.6804581577145
+            ],
+            "touchdown_seconds": 0.1440000057220459,
+            "touchdown_frame_24fps": 3.456000137329102,
+            "lift_off_seconds": 0.561600022315979
+          },
+          "fore_right": {
+            "stance_floor_min_native": 0.0016753943954416464,
+            "stance_floor_max_native": 0.0019961549284912145,
+            "stance_slide_rms_native_per_second": 0.0004428757307952658,
+            "slide_fraction_of_forward_speed": 0.00026420700740014715,
+            "maximum_paw_lift_native": 0.12653354977297154,
+            "forward_excursion_native": 0.7373209679374855,
+            "hinge_internal_angle_degrees": [
+              87.70779487352087,
+              164.68538541928865
+            ],
+            "touchdown_seconds": 0.5040000200271606,
+            "touchdown_frame_24fps": 12.096000480651854,
+            "lift_off_seconds": 0.2016000080108641
+          },
+          "hind_left": {
+            "stance_floor_min_native": 0.0019202156429518925,
+            "stance_floor_max_native": 0.0021106683100269577,
+            "stance_slide_rms_native_per_second": 0.00021007752121477913,
+            "slide_fraction_of_forward_speed": 0.00012532624694184538,
+            "maximum_paw_lift_native": 0.126902274195185,
+            "forward_excursion_native": 0.7373257765239586,
+            "hinge_internal_angle_degrees": [
+              71.91958303601353,
+              147.78291761944502
+            ],
+            "touchdown_seconds": 0.0,
+            "touchdown_frame_24fps": 0.0,
+            "lift_off_seconds": 0.4176000165939331
+          },
+          "hind_right": {
+            "stance_floor_min_native": 0.001937161613463708,
+            "stance_floor_max_native": 0.0020044106290587104,
+            "stance_slide_rms_native_per_second": 0.0002708918191077983,
+            "slide_fraction_of_forward_speed": 0.00016160631951345225,
+            "maximum_paw_lift_native": 0.12663037652112222,
+            "forward_excursion_native": 0.737339067024337,
+            "hinge_internal_angle_degrees": [
+              72.25300712827769,
+              150.02134091716877
+            ],
+            "touchdown_seconds": 0.36000001430511475,
+            "touchdown_frame_24fps": 8.640000343322754,
+            "lift_off_seconds": 0.05760000228881841
+          }
+        },
+        "speed_native_per_second": 1.6762452107279693,
+        "speed_after_current_import_scale": 1.7748486590038313
+      },
+      "Walk": {
+        "duration_seconds": 1.0750000476837158,
+        "key_count": 827,
+        "evaluated_poses": 2065,
+        "evaluation": "all exported keys, all half-keys, and an independent 384 Hz grid",
+        "minimum_full_mesh_floor_native": 0.0017756356322084625,
+        "maximum_physical_segment_error_native": 1.5122440008522031e-05,
+        "loop_world_matrix_max_error": 3.3306690738754696e-16,
+        "quaternion_norm_error": 4.1538287254283546e-08,
+        "minimum_quaternion_adjacent_dot": 0.9999424604797476,
+        "minimum_supported_paws": 2,
+        "root_translation_span_native": [
+          0.02867008512839675,
+          0.02081751823425293,
+          0.0011646747589111328
+        ],
+        "legs": {
+          "fore_left": {
+            "stance_floor_min_native": 0.0017756356322084625,
+            "stance_floor_max_native": 0.0020051141077039696,
+            "stance_slide_rms_native_per_second": 0.00017696791270309294,
+            "slide_fraction_of_forward_speed": 0.00023520645440751374,
+            "maximum_paw_lift_native": 0.0866317459226705,
+            "forward_excursion_native": 0.5643360242241573,
+            "hinge_internal_angle_degrees": [
+              101.56596044402032,
+              157.60560715299312
+            ],
+            "touchdown_seconds": 0.21500000953674317,
+            "touchdown_frame_24fps": 5.160000228881836,
+            "lift_off_seconds": 0.9460000419616701
+          },
+          "fore_right": {
+            "stance_floor_min_native": 0.001776951054474177,
+            "stance_floor_max_native": 0.0019984933393832447,
+            "stance_slide_rms_native_per_second": 0.00016473877545058872,
+            "slide_fraction_of_forward_speed": 0.0002189528185382238,
+            "maximum_paw_lift_native": 0.08662885396022456,
+            "forward_excursion_native": 0.564335917795058,
+            "hinge_internal_angle_degrees": [
+              101.6124974315609,
+              157.6202104396655
+            ],
+            "touchdown_seconds": 0.752500033378601,
+            "touchdown_frame_24fps": 18.060000801086424,
+            "lift_off_seconds": 0.4085000181198119
+          },
+          "hind_left": {
+            "stance_floor_min_native": 0.0019441680771481518,
+            "stance_floor_max_native": 0.002068174936610846,
+            "stance_slide_rms_native_per_second": 9.304672302188106e-05,
+            "slide_fraction_of_forward_speed": 0.00012366755917459678,
+            "maximum_paw_lift_native": 0.08696965882053737,
+            "forward_excursion_native": 0.5643343176672032,
+            "hinge_internal_angle_degrees": [
+              85.4691991834283,
+              134.66030047671853
+            ],
+            "touchdown_seconds": 0.0,
+            "touchdown_frame_24fps": 0.0,
+            "lift_off_seconds": 0.7310000324249268
+          },
+          "hind_right": {
+            "stance_floor_min_native": 0.0019545306891490953,
+            "stance_floor_max_native": 0.0020008617768339215,
+            "stance_slide_rms_native_per_second": 8.643774321067665e-05,
+            "slide_fraction_of_forward_speed": 0.00011488362379953114,
+            "maximum_paw_lift_native": 0.08684269583088847,
+            "forward_excursion_native": 0.564333989075636,
+            "hinge_internal_angle_degrees": [
+              86.11205013250283,
+              136.38952779253256
+            ],
+            "touchdown_seconds": 0.5375000238418579,
+            "touchdown_frame_24fps": 12.90000057220459,
+            "lift_off_seconds": 0.193500008583069
+          }
+        },
+        "speed_native_per_second": 0.7523939474742563,
+        "speed_after_current_import_scale": 0.7966527690404819
+      }
+    },
+    "scope": "Local animation candidate; exact video tracking and full game validation are not claimed.",
+    "rig_policy": "Existing nonserial native controller parents remain intact. Animated local offsets reconstruct fixed-length physical chains."
+  },
+  "action_validation": {
+    "candidate_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+    "source_sha256": "8cb83ba3464c3bb957f5ec496a7ded79b5e9cf218ea4e70812c4a1fde3290ce1",
+    "static_document_exact": true,
+    "source_binary_prefix_exact": true,
+    "preserved_clips": {
+      "Walk": true,
+      "Jog": true,
+      "Idle_A": true,
+      "Fighting_Idle": true,
+      "Hit_Chest": true
+    },
+    "clips": {
+      "Sword_Attack": {
+        "duration_seconds": 3.5,
+        "keys": 681,
+        "evaluated_keys_half_keys_and_384hz": 2260,
+        "full_mesh_minimum_height": 0.002704819850679146,
+        "worst_floor_time": 0.6770833333333333,
+        "max_physical_segment_error": 6.967623350850882e-05,
+        "hold_world_max_error": 0.0,
+        "muzzle_end_height": 0.6438767740476028,
+        "hip_end_height": 0.8072793697403509,
+        "chest_end_height": 0.5348392119795344,
+        "legs": {
+          "fore_left": {
+            "stance_slide_rms": 0.0005191792843599652,
+            "stance_min_height": 0.0027157861770426063,
+            "stance_max_height": 0.002868256030470087,
+            "maximum_paw_height": 0.9408077330675028,
+            "end_paw_height": 0.0028673779985321185
+          },
+          "fore_right": {
+            "stance_slide_rms": 0.001302244716063758,
+            "stance_min_height": 0.002704819850679146,
+            "stance_max_height": 0.002891269865861213,
+            "maximum_paw_height": 0.002891269865861213,
+            "end_paw_height": 0.00286694817701685
+          },
+          "hind_left": {
+            "stance_slide_rms": 0.00010014200934706413,
+            "stance_min_height": 0.0030292769783116856,
+            "stance_max_height": 0.003063901901738537,
+            "maximum_paw_height": 0.003063901901738537,
+            "end_paw_height": 0.0030344336247577434
+          },
+          "hind_right": {
+            "stance_slide_rms": 0.00019287719782714184,
+            "stance_min_height": 0.002885133646851571,
+            "stance_max_height": 0.0029896370966478393,
+            "maximum_paw_height": 0.0029896370966478393,
+            "end_paw_height": 0.0029879340615380687
+          }
+        },
+        "quaternion_norm_max_error": 4.488780291911354e-08,
+        "minimum_adjacent_quaternion_dot": 0.9994250892047125,
+        "maximum_joint_speed_native_per_second": 5.492004396431838,
+        "maximum_head_pivot_speed_native_per_second": 1.1227161383814626,
+        "maximum_adjacent_world_rotation_degrees": 3.818134431636405
+      },
+      "Death_A": {
+        "duration_seconds": 3.75,
+        "keys": 731,
+        "evaluated_keys_half_keys_and_384hz": 2425,
+        "full_mesh_minimum_height": 0.002616477446419319,
+        "worst_floor_time": 0.8541666865348816,
+        "max_physical_segment_error": 2.5251696925021605e-05,
+        "hold_world_max_error": 0.0,
+        "muzzle_end_height": 0.011999898810422408,
+        "hip_end_height": 0.011579158551146393,
+        "chest_end_height": 0.003000172111311888,
+        "legs": {
+          "fore_left": {
+            "stance_slide_rms": 0.001822420963168605,
+            "stance_min_height": 0.002616477446419319,
+            "stance_max_height": 0.0028612020283271004,
+            "maximum_paw_height": 0.2747559293311324,
+            "end_paw_height": 0.18174965183686437
+          },
+          "fore_right": {
+            "stance_slide_rms": 0.0017667393350147905,
+            "stance_min_height": 0.0026193611499436904,
+            "stance_max_height": 0.0028629871294312526,
+            "maximum_paw_height": 0.2533432642106267,
+            "end_paw_height": 0.13823750003429902
+          },
+          "hind_left": {
+            "stance_slide_rms": 0.0004997411063594486,
+            "stance_min_height": 0.0028977006953618597,
+            "stance_max_height": 0.0030343529321829894,
+            "maximum_paw_height": 0.10272448793701429,
+            "end_paw_height": 0.0031533603241866697
+          },
+          "hind_right": {
+            "stance_slide_rms": 0.0010432266320098296,
+            "stance_min_height": 0.0029637888026588944,
+            "stance_max_height": 0.0030055348784200093,
+            "maximum_paw_height": 0.4837993611338838,
+            "end_paw_height": 0.22168928636308438
+          }
+        },
+        "quaternion_norm_max_error": 4.291718880278239e-08,
+        "minimum_adjacent_quaternion_dot": 0.999254356263853,
+        "maximum_joint_speed_native_per_second": 4.57923517632267,
+        "maximum_head_pivot_speed_native_per_second": 2.5611942621297623,
+        "maximum_adjacent_world_rotation_degrees": 4.537886572748591
+      }
+    },
+    "passed": true,
+    "failures": [],
+    "tolerances": {
+      "minimum_full_skin_floor_native": -0.0005,
+      "physical_segment_interpolation_native": 0.0001,
+      "stance_slide_rms_native_per_second": 0.005,
+      "settled_head_chest_hip_floor_native": 0.015,
+      "terminal_world_matrix_drift": 1e-06
+    },
+    "method": "Exported keys and half-keys plus independent 384 Hz samples; static binary preservation; native physical chains, full skin and actual soles."
+  }
+}

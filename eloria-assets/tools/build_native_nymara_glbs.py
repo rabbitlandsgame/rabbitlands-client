@@ -643,6 +643,8 @@ class GLB:
         return index
 
     def write(self, path: Path) -> None:
+        from retired_model_generation import require_supported_generator
+        require_supported_generator(self.doc["asset"].get("generator", ""))
         self.doc["buffers"][0]["byteLength"] = len(self.binary)
         encoded = json.dumps(self.doc, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         encoded += b" " * (align4(len(encoded)) - len(encoded))
@@ -3642,6 +3644,7 @@ def catalogue_path(path: Path, repo_root: Path) -> str:
 
 
 def main() -> None:
+    raise RuntimeError('build_native_nymara_glbs.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
     parser=argparse.ArgumentParser(description=__doc__)
     assets_root=Path(__file__).resolve().parents[1]
     repo_root=assets_root.parent

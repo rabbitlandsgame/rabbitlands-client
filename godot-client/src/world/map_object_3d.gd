@@ -445,6 +445,9 @@ func _add_storage_visual(height: float) -> void:
 func _add_model(entry: Dictionary) -> float:
 	if entry.is_empty():
 		return 0.0
+	if bool(entry.get("retired", false)):
+		model_id = str(entry.get("id", ""))
+		return float(entry.get("height", 0.0))
 	var model: Node3D = GlbSceneCache.instantiate(
 		_external_path(str(entry.get("scene", ""))))
 	if model == null:

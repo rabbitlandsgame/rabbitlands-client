@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw
 from video_motion.asset import Asset, digest
+from retired_model_generation import require_animation_source
 from video_motion.rig import Rig, auto_profile
 from video_motion.video import extract, choose_cycle, optical_observations, contour_paw_observations
 from video_motion.solve import fit, periodic_motion, motion_package, transfer, validate_export, dense_bake
@@ -25,6 +26,7 @@ def save(path, record):
 
 def make_rig(args):
     asset = Asset(args.model)
+    require_animation_source(asset)
     return Rig(asset, load(args.profile) if args.profile else auto_profile(asset))
 
 

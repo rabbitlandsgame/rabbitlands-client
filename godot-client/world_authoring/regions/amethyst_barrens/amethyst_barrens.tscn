@@ -31,8 +31,6 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-basalt-columns-2.glb" id="158_5eejp"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-crystal-rock-arch-1.glb" id="159_35jx1"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-split-geode-2.glb" id="160_blg8n"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-prospector-workbench.glb" id="161_o17kx"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-survey-signpost.glb" id="162_bc260"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-surveyor-tripod-1.glb" id="163_vx3x6"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-crystal-sluice-1.glb" id="164_robk2"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-supply-crate-1.glb" id="165_cj4q5"]
@@ -41,9 +39,7 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-mine-rail-straight-1.glb" id="168_j71e7"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-mine-rail-straight-2.glb" id="169_8yusn"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-ore-cart-1.glb" id="170_agbu3"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-glow-brazier.glb" id="171_2klej"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-lantern-post-1.glb" id="172_kxfnl"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-1.glb" id="173_tmffk"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-prospector-lean-to-1.glb" id="174_8vwx3"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-tool-rack-1.glb" id="175_bturs"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-crystal-growth-5.glb" id="176_pr7jh"]
@@ -51,14 +47,12 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-vein-scree-3.glb" id="178_ktuna"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-ashen-brush-3.glb" id="179_fexl4"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-vein-scree-2.glb" id="180_vyiey"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb" id="181_fvrki"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-vein-scree-1.glb" id="182_04omw"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-ashen-brush-2.glb" id="183_6e8bv"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-lichen-stone-mat-1.glb" id="184_oje8i"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-vein-scree-4.glb" id="185_mvgr0"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-lichen-stone-mat-2.glb" id="186_cqjqg"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-ashen-brush-1.glb" id="187_4vdac"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb" id="188_05dxw"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-dead-thorn-2.glb" id="189_dewfv"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-lichen-stone-mat-3.glb" id="190_utx11"]
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="asset"]
@@ -6662,7 +6656,7 @@ scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/k
 collision_role = "solid"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Prospector Workbench" unique_id=1293125884 instance=ExtResource("161_o17kx")]
+[node name="Content" parent="AuthoredAssets/Prospector Workbench" unique_id=1293125884 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-prospector-workbench"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-prospector-workbench.glb"
 
@@ -6676,7 +6670,7 @@ scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/k
 collision_role = "solid"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Survey Signpost" unique_id=1312495523 instance=ExtResource("162_bc260")]
+[node name="Content" parent="AuthoredAssets/Survey Signpost" unique_id=1312495523 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-survey-signpost"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-survey-signpost.glb"
 
@@ -6799,7 +6793,7 @@ scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/k
 collision_role = "solid"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Glow Brazier" unique_id=882443473 instance=ExtResource("171_2klej")]
+[node name="Content" parent="AuthoredAssets/Glow Brazier" unique_id=882443473 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-glow-brazier"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-glow-brazier.glb"
 
@@ -6840,7 +6834,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-1"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-1.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 1" unique_id=979297354 instance=ExtResource("173_tmffk")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 1" unique_id=979297354 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-1.glb"
 
@@ -6977,7 +6971,7 @@ scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/k
 collision_role = "solid"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Glow Brazier2" unique_id=1591965300 instance=ExtResource("171_2klej")]
+[node name="Content" parent="AuthoredAssets/Glow Brazier2" unique_id=1591965300 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-glow-brazier"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-glow-brazier.glb"
 
@@ -7018,7 +7012,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-1"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-1.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 2" unique_id=1112863655 instance=ExtResource("173_tmffk")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 2" unique_id=1112863655 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-1.glb"
 
@@ -7944,7 +7938,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 0" unique_id=774048506 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 0" unique_id=774048506 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -7957,7 +7951,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 3" unique_id=174736262 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 3" unique_id=174736262 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -7970,7 +7964,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 4" unique_id=1399132425 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 4" unique_id=1399132425 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -7983,7 +7977,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 5" unique_id=1432199082 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 5" unique_id=1432199082 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -7996,7 +7990,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 6" unique_id=884282157 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 6" unique_id=884282157 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8009,7 +8003,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 7" unique_id=433682940 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 7" unique_id=433682940 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8022,7 +8016,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 8" unique_id=856670025 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 8" unique_id=856670025 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8035,7 +8029,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 9" unique_id=1910382902 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 9" unique_id=1910382902 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8581,7 +8575,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 10" unique_id=2008939124 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 10" unique_id=2008939124 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8594,7 +8588,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 11" unique_id=352310995 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 11" unique_id=352310995 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8607,7 +8601,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 12" unique_id=1887115220 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 12" unique_id=1887115220 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8620,7 +8614,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 13" unique_id=1166420218 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 13" unique_id=1166420218 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8633,7 +8627,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 14" unique_id=760206104 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 14" unique_id=760206104 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8646,7 +8640,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 15" unique_id=1862301850 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 15" unique_id=1862301850 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8659,7 +8653,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 16" unique_id=1983606451 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 16" unique_id=1983606451 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8672,7 +8666,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 17" unique_id=2124468228 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 17" unique_id=2124468228 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8685,7 +8679,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 18" unique_id=383388806 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 18" unique_id=383388806 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8698,7 +8692,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-0"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 19" unique_id=1034041976 instance=ExtResource("181_fvrki")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 19" unique_id=1034041976 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-0"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-0.glb"
 
@@ -8919,7 +8913,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-2"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 20" unique_id=797393166 instance=ExtResource("188_05dxw")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 20" unique_id=797393166 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 
@@ -8932,7 +8926,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-2"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 21" unique_id=573695258 instance=ExtResource("188_05dxw")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 21" unique_id=573695258 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 
@@ -8945,7 +8939,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-2"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 22" unique_id=1603075516 instance=ExtResource("188_05dxw")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 22" unique_id=1603075516 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 
@@ -9361,7 +9355,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-2"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 23" unique_id=176262235 instance=ExtResource("188_05dxw")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 23" unique_id=176262235 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 
@@ -9374,7 +9368,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-2"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 24" unique_id=686956969 instance=ExtResource("188_05dxw")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 24" unique_id=686956969 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 
@@ -9387,7 +9381,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-2"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 25" unique_id=1341451894 instance=ExtResource("188_05dxw")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 25" unique_id=1341451894 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 
@@ -9400,7 +9394,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-2"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 26" unique_id=163200506 instance=ExtResource("188_05dxw")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 26" unique_id=163200506 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 
@@ -9413,7 +9407,7 @@ catalog_asset_id = "amethyst:kit-rubble-scree-2"
 scene_path = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 metadata/map_authoring_asset_wrapper = true
 
-[node name="Content" parent="AuthoredAssets/Rubble Scree 27" unique_id=1595391389 instance=ExtResource("188_05dxw")]
+[node name="Content" parent="AuthoredAssets/Rubble Scree 27" unique_id=1595391389 type="Node3D"]
 metadata/map_asset_id = "amethyst:kit-rubble-scree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/amethyst_barrens/assets/prototypes/kit-rubble-scree-2.glb"
 
