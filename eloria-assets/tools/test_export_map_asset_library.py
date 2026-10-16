@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import copy
 from unittest.mock import patch
 import json
 import sys
@@ -34,12 +33,12 @@ class PlacementRootSelectionTest(unittest.TestCase):
 
 
 class SharedPrototypeExportTest(unittest.TestCase):
-    def test_verified_prototype_expands_with_instance_transform_once(self):
+    def test_verified_prototype_reads_back_once_with_instance_transform(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             key = 'c' * 64
-            prototype = root / '_shared/meshes' / (key + '.glb')
-            prototype.parent.mkdir(parents=True)
+            pool = root / '_shared/meshes'
+            prototype = pool / (key + '.glb')
             positions = np.array([[0, 0, 0], [2, 0, 0], [0, 2, 1]], dtype='<f4')
             doc = {'asset': {'version': '2.0'}, 'scene': 0, 'scenes': [{'nodes': [0]}],
                 'nodes': [{'mesh': 0}], 'meshes': [{'primitives': [{'attributes': {'POSITION': 0}}]}],
@@ -47,38 +46,54 @@ class SharedPrototypeExportTest(unittest.TestCase):
                 'bufferViews': [{'buffer': 0, 'byteOffset': 0, 'byteLength': positions.nbytes}],
                 'buffers': [{'byteLength': positions.nbytes}]}
             E.S.dump_glb(prototype, doc, positions.tobytes())
-            manifest = root / 'world.json'
-            manifest.write_text(json.dumps({'externalMeshes': {'_shared/meshes/' + prototype.name: hashlib.sha256(prototype.read_bytes()).hexdigest()}}), encoding='utf-8')
-            source = {'asset': {'version': '2.0'}, 'scenes': [{'nodes': [0]}],
-                'nodes': [{'name': 'Prop', 'translation': [5, 3, 2], 'extras': {'eloria': {'prototype': key}}}]}
-            with patch.object(E, 'MAPS', root):
-                document, body, roots = E._materialize_selected(source, b'', [0], root / 'world.glb')
+            source = root / 'region/world.glb'
+            E.S.dump_glb(source, {'asset': {'version': '2.0'}, 'scenes': [{'nodes': [0]}],
+                'nodes': [{'name': 'Prop', 'translation': [5, 3, 2], 'extras': {'eloria': {'prototype': key}}}]}, b'')
+            manifest = source.with_suffix('.json')
+            certified = {'externalMeshes': {'../_shared/meshes/' + prototype.name: hashlib.sha256(prototype.read_bytes()).hexdigest()}}
+            manifest.write_text(json.dumps(certified), encoding='utf-8')
+            with patch.object(E.SM, 'POOL', pool):
+                self.assertEqual(E._verify_shared_props('continent:prop', source, ['Prop']), [key])
+                document, body = E.S.GR.load(source)
+                roots = E._select_roots('continent:prop', document, ['Prop'])
                 low, high = E.OE.subtree_bounds_all(E.S, document, body, roots)
                 np.testing.assert_allclose(low, [5, 3, 2])
                 np.testing.assert_allclose(high, [7, 5, 3])
-                self.assertNotIn('prototype', document['nodes'][0]['extras']['eloria'])
+                self.assertEqual(len(document['meshes']), 1)
+                self.assertNotIn('children', document['nodes'][0])
+                self.assertNotIn('extras', document['nodes'][0])
+                manifest.write_text(json.dumps({'externalMeshes': {}}), encoding='utf-8')
+                with self.assertRaises(ValueError):
+                    E._verify_shared_props('continent:prop', source, ['Prop'])
+                manifest.write_text(json.dumps(certified), encoding='utf-8')
                 prototype.write_bytes(prototype.read_bytes() + b'changed')
                 with self.assertRaises(ValueError):
-                    E._materialize_selected(source, b'', [0], root / 'world.glb')
+                    E._verify_shared_props('continent:prop', source, ['Prop'])
 
-    def test_skiff_reconstruction_is_pinned_and_preserves_other_boats(self):
-        spec = next(row for row in json.loads(E.DEFAULT_MANIFEST.read_text(encoding='utf-8'))['assets'] if row['id'] == 'continent:pier-skiff')
-        source = E.MAPS / spec['source']
-        doc, body = E.S.GR.load(source)
-        original = copy.deepcopy(doc)
-        repaired, binary, report = E._repair_geometry(spec, doc, body, source)
-        self.assertTrue(report['applied'])
-        self.assertEqual(doc, original)
-        changed = [i for i in range(len(doc['meshes'])) if repaired['meshes'][i] != doc['meshes'][i]]
-        self.assertEqual(len(changed), 1)
-        primitive = repaired['meshes'][changed[0]]['primitives'][0]
-        positions = E.S.GR.accessor(repaired, binary, primitive['attributes']['POSITION'])
-        np.testing.assert_allclose(positions.min(0), [-2.3, 0, -.75], atol=1e-6)
-        np.testing.assert_allclose(positions.max(0), [2.3, .605, .75], atol=1e-6)
-        bad = copy.deepcopy(spec)
-        bad['geometryRepair']['sourceSha256'] = '0' * 64
-        with self.assertRaises(ValueError):
-            E._repair_geometry(bad, doc, body, source)
+    def test_mirrorhold_skiff_and_drain_grate_read_as_their_native_shapes(self):
+        # These two needed a procedural rebuild while the part-split master was
+        # misread (positions off their accessor bounds, NaNs, indices past the
+        # vertex count). The repaired master must keep them whole on its own.
+        expected = {'continent:pier-skiff': ([-2.3, 0, -.75], [2.3, .605, .75]),
+                    'continent:drain-grate': ([-.8, 0, -.8], [.8, .205, .8])}
+        rows = json.loads(E.DEFAULT_MANIFEST.read_text(encoding='utf-8'))['assets']
+        for spec in (row for row in rows if row['id'] in expected):
+            doc, body = E.S.GR.load(E.MAPS / spec['source'])
+            corners = []
+            for index in E.S.descendants(doc, E._select_roots(spec['id'], doc, spec['roots'])):
+                if 'mesh' not in doc['nodes'][index]:
+                    continue
+                for primitive in doc['meshes'][doc['nodes'][index]['mesh']]['primitives']:
+                    accessor = doc['accessors'][primitive['attributes']['POSITION']]
+                    positions = E.S.GR.accessor(doc, body, primitive['attributes']['POSITION'])
+                    indices = E.S.GR.accessor(doc, body, primitive['indices'])
+                    self.assertTrue(np.isfinite(positions).all(), spec['id'])
+                    self.assertLess(int(indices.max()), len(positions), spec['id'])
+                    np.testing.assert_array_equal(positions.min(0), np.float32(accessor['min']), spec['id'])
+                    np.testing.assert_array_equal(positions.max(0), np.float32(accessor['max']), spec['id'])
+                    corners += [positions.min(0), positions.max(0)]
+            np.testing.assert_allclose(np.min(corners, 0), expected[spec['id']][0], atol=1e-6, err_msg=spec['id'])
+            np.testing.assert_allclose(np.max(corners, 0), expected[spec['id']][1], atol=1e-6, err_msg=spec['id'])
 
 
 class MapAssetLibraryExportTest(unittest.TestCase):
