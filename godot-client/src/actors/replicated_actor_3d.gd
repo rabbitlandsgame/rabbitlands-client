@@ -1659,10 +1659,22 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 	var previous_target: Vector3 = server_target
 	server_target = next_target
 	var actor_command: int = int(dto.get("command", -1))
+	var combat_changed: bool = bool(dto.get("in_combat", _in_combat)) != _in_combat
 	_in_combat = bool(dto.get("in_combat", _in_combat))
 	var command_sequence := int(dto.get("command_sequence", -1))
 	var fresh_command := command_sequence != _last_command_sequence
 	_last_command_sequence = command_sequence
+	# Combat interrupts the movement stream. Its duration is not a step
+	# interval, and the network buffer from the approach must not slow the
+	# short move onto the bag. Keep learned gaits and any step still rendering;
+	# only the next step's timing starts afresh. Explicit transition commands
+	# also cover entering and leaving combat within one reduced update.
+	if combat_changed or (fresh_command and actor_command in [18, 19]):
+		_last_movement_update_msec = -1
+		_unconfirmed_paces.clear()
+		_unconfirmed_gait = -1
+		_jitter_allowance = 0.0
+		_schedule_due = -1.0
 	# Which command the facing comes from, and which it does not. Everything
 	# arriving in one socket read is reduced to a single state and rendered
 	# once, so the last command of a frame is rarely the one that named a

@@ -99,8 +99,66 @@ func check_post_combat_movement() -> void:
 		expect(actor.current_action == &"idle", "a stationary hit reaction still returns to idle")
 		actor.free()
 
+func check_post_combat_pace() -> void:
+	for command: int in [22, 32]:
+		var pace := 0.2 if command == 32 else 0.6
+		var action := "running" if command == 32 else "walking"
+		var actor := spawn_actor()
+		# A brief fight after the first approach step must not become the
+		# first cadence sample: there is no established history to outvote it.
+		actor.apply_server_state(state(1, 0, command, false), adapter)
+		advance(actor, pace)
+		var dto := ActorReducer.apply_command(state(1, 0, command, false), 18)
+		actor.apply_server_state(dto, adapter)
+		advance(actor, 0.2)
+		dto = ActorReducer.apply_command(dto, 19)
+		dto = ActorReducer.apply_command(dto, command)
+		actor.apply_server_state(dto, adapter)
+		expect(is_equal_approx(actor._smoothed_server_interval, pace),
+			"a short fight does not teach a slower %s pace (%.3f s/tile)" % [action, actor._smoothed_server_interval])
+		expect(actor._segment_duration <= pace * actor.arrival_margin + 0.005,
+			"the first %s step onto the bag keeps its normal duration (%.3f s)" % [action, actor._segment_duration])
+		actor.free()
+
+		# A late packet earns a buffer during travel. A completed fight must
+		# not spend that old buffer slowing the single step onto the bag.
+		actor = spawn_actor()
+		for tile: int in range(1, 13):
+			actor.apply_server_state(state(tile, 0, command, false), adapter)
+			advance(actor, pace)
+		advance(actor, 0.18 if command == 32 else 0.3)
+		actor.apply_server_state(state(13, 0, command, false), adapter)
+		expect(actor._jitter_allowance > 0.1, "late packets still buffer an active %s route" % action)
+		dto = ActorReducer.apply_command(state(13, 0, command, false), 18)
+		actor.apply_server_state(dto, adapter)
+		advance(actor, 3.0)
+		dto = ActorReducer.apply_command(dto, 19)
+		dto = ActorReducer.apply_command(dto, command)
+		actor.apply_server_state(dto, adapter)
+		expect(actor._segment_duration <= pace * actor.arrival_margin + 0.005,
+			"pre-fight network buffering does not slow the %s onto the bag (%.3f s)" % [action, actor._segment_duration])
+		actor.free()
+
+	# Even when the transition is folded into a step and the intermediate
+	# combat flag is never drawn, retain the learned pace and haste.
+	var actor := spawn_actor()
+	actor._pace_histories[3] = PackedFloat32Array([0.105, 0.105, 0.105])
+	actor.apply_server_state(state(1, 0, 32, true), adapter)
+	advance(actor, 0.5)
+	actor._jitter_allowance = 0.2
+	var dto := ActorReducer.apply_command(state(1, 0, 32, true), 18)
+	dto = ActorReducer.apply_command(dto, 32)
+	dto = ActorReducer.apply_command(dto, 19)
+	actor.apply_server_state(dto, adapter)
+	expect(is_equal_approx(actor._smoothed_server_interval, 0.105),
+		"coalesced combat transitions preserve the learned hasted pace")
+	expect(actor._segment_duration <= 0.105 * actor.arrival_margin + 0.005,
+		"a coalesced combat end clears the old buffer for a hasted bag step")
+	actor.free()
+
 func run() -> void:
 	check_post_combat_movement()
+	check_post_combat_pace()
 	for running: bool in [false, true]:
 		var ordinary := spawn_actor()
 		var pace := 0.2 if running else 0.6
