@@ -125,7 +125,8 @@ def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_t
     calls, remote_assets = [], []
     current_tag = old_tag or f"client-{SHA}"
     if stored_assets:
-        remote_assets.extend(stored_assets)
+        remote_assets.extend({"id": index + 1, "state": "uploaded", **asset}
+                             for index, asset in enumerate(stored_assets))
 
     def gh(*args):
         nonlocal exists, public, current_tag
@@ -139,6 +140,10 @@ def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_t
         if args[0] == "api" and "matching-refs" in args[1]:
             return json.dumps([{"ref": f"refs/tags/client-{SHA}",
                                 "object": {"type": "commit", "sha": "b" * 40 if wrong_tag else SHA}}])
+        if args[:3] == ("api", "--method", "DELETE"):
+            asset_id = int(args[3].rsplit("/", 1)[1])
+            remote_assets[:] = [asset for asset in remote_assets if asset["id"] != asset_id]
+            return ""
         if args[:3] == ("api", "--paginate", "--slurp"):
             if "/assets?" in args[3]:
                 # Use two pages to cover the asset-list pagination.
@@ -160,7 +165,7 @@ def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_t
                 raise subprocess.CalledProcessError(1, ["gh", *args])
             path = Path(args[3])
             remote_assets[:] = [asset for asset in remote_assets if asset["name"] != path.name]
-            remote_assets.append({"name": path.name, "size": path.stat().st_size,
+            remote_assets.append({"id": 999, "state": "uploaded", "name": path.name, "size": path.stat().st_size,
                                   "digest": remote_digest or "sha256:" + client_release.digest(path)})
         return ""
 
@@ -195,7 +200,7 @@ def test_rolling_release_reuses_entry_and_removes_old_build_after_verification(t
     assert edit[edit.index("--tag") + 1] == f"client-{SHA}"
     assert not any(call[:2] == ("release", "create") for call in calls)
     uploaded = next(index for index, call in enumerate(calls) if call[:2] == ("release", "upload"))
-    removed = next(index for index, call in enumerate(calls) if call[:2] == ("release", "delete-asset"))
+    removed = next(index for index, call in enumerate(calls) if call[:3] == ("api", "--method", "DELETE"))
     assert removed > uploaded
     assert calls[removed - 1][:3] == ("api", "--paginate", "--slurp")
     assert not any("--draft=false" in call for call in calls)
@@ -207,7 +212,7 @@ def test_failed_replacement_preserves_old_downloads(tmp_path, monkeypatch):
                         stored_assets=[{"name": "old-game.tar.gz", "size": 42}])
     with pytest.raises(subprocess.CalledProcessError):
         build_release.upload(bundle)
-    assert not any(call[:2] == ("release", "delete-asset") for call in calls)
+    assert not any(call[:3] == ("api", "--method", "DELETE") for call in calls)
 
 
 @pytest.mark.parametrize("publish,exists", [(False, False), (False, True), (True, False), (True, True)])
@@ -236,6 +241,18 @@ def test_resume_reuses_only_identical_remote_assets(tmp_path, monkeypatch):
     build_release.upload(bundle, publish=True)
     assert not any(call[:2] == ("release", "upload") for call in calls)
     assert any("--draft=false" in call for call in calls)
+
+
+def test_resume_replaces_interrupted_upload_reservation_by_id(tmp_path, monkeypatch):
+    bundle, asset = upload_fixture(tmp_path)
+    stored = [{"id": 42, "name": asset.name, "state": "starter", "size": asset.stat().st_size,
+               "digest": None}]
+    calls = mock_github(monkeypatch, stored_assets=stored)
+    build_release.upload(bundle)
+    deletion = ("api", "--method", "DELETE", f"repos/{build_release.REPOSITORY}/releases/assets/42")
+    assert deletion in calls
+    assert calls.index(deletion) < next(index for index, call in enumerate(calls)
+                                         if call[:2] == ("release", "upload"))
 
 
 @pytest.mark.parametrize("problem", ["fail_upload", "remote_digest"])

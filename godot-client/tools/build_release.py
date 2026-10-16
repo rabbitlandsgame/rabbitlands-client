@@ -295,8 +295,13 @@ def upload(bundle: Path, publish: bool = False) -> None:
     # GitHub's recorded digest proves that an existing upload is identical.
     for path, row in zip(paths, data["assets"]):
         old = previous.get(path.name, {})
-        if old.get("size") == row["size"] and old.get("digest") == "sha256:" + row["sha256"]:
+        if (old.get("state") == "uploaded" and old.get("size") == row["size"]
+                and old.get("digest") == "sha256:" + row["sha256"]):
             continue
+        if old:
+            # Interrupted transfers can reserve a name in the "starter" state.
+            # gh's name lookup omits these, so remove the reservation by ID.
+            gh("api", "--method", "DELETE", f"repos/{REPOSITORY}/releases/assets/{old['id']}")
         gh("release", "upload", tag, str(path), "--repo", REPOSITORY, "--clobber")
     uploaded = github_assets(existing["id"])
     expected = {path.name: path.stat().st_size for path in paths}
@@ -304,11 +309,13 @@ def upload(bundle: Path, publish: bool = False) -> None:
     if any(remote_sizes.get(name) != size for name, size in expected.items()):
         raise ValueError("Remote assets do not match the bundle; the release remains a draft.")
     digests = {Path(row["path"]).name: "sha256:" + row["sha256"] for row in data["assets"]}
-    if any(asset["name"] in digests and asset.get("digest") and asset["digest"] != digests[asset["name"]] for asset in uploaded):
+    if any(asset["name"] in digests and (asset.get("state") != "uploaded"
+            or asset.get("digest") != digests[asset["name"]]) for asset in uploaded):
         raise ValueError("A remote download checksum differs; the release remains a draft.")
     # Prune only after every replacement download is uploaded and verified.
-    for name in remote_sizes.keys() - expected.keys():
-        gh("release", "delete-asset", tag, name, "--repo", REPOSITORY, "--yes")
+    for asset in uploaded:
+        if asset["name"] not in expected:
+            gh("api", "--method", "DELETE", f"repos/{REPOSITORY}/releases/assets/{asset['id']}")
     if {asset["name"]: asset["size"] for asset in github_assets(existing["id"])} != expected:
         raise ValueError("Old release assets could not be removed; the release remains a draft.")
     for other in client_releases:
