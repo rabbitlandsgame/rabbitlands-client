@@ -85,12 +85,15 @@ client revision before building. Both targets use the same resolved full hash.
 
 The output is `../dist/releases/client-<full-client-commit>/`:
 
-- **Windows:** a per-user `*-setup.exe` installer and, for larger games,
-  accompanying `*-setup-*.bin` files with 1 GiB slices. Shortcuts start the
-  restart updater. Download all installer files into one folder before setup.
+- **Windows:** one small per-user `*-setup.exe`. It embeds the launch and setup
+  helpers, then downloads the matching signed game payload during installation.
+  Download progress and SHA-256 checks use Inno Setup 6; the helper also verifies
+  the RSA signature, complete archive and extracted files before installing.
+  Setup can repair the same build. Players need an internet connection, and
+  do not manually download the update parts. Shortcuts start the restart updater.
 - **Linux:** a `.tar.gz` containing the native executable, updater and launch
-  scripts with executable permissions. An archive at or above GitHub's 2 GiB
-  limit is split into `.tar.gz.001`, `.002`, etc., each at most 1 GiB. The
+  scripts with executable permissions. An archive larger than 256 MiB is
+  split into `.tar.gz.001`, `.002`, etc., each at most 256 MiB. The
   generated release notes give the exact reassembly/extraction command.
 - Both signed update manifests and their bounded `.update.zip.###` downloads.
 - `SHA256SUMS` and `RELEASE-NOTES.md` for players, `release.json` listing exactly
@@ -99,6 +102,13 @@ The output is `../dist/releases/client-<full-client-commit>/`:
 Only the listed player downloads, signed manifests, update parts and checksums
 are uploaded. Build folders, logs, signing keys and server policy stay local.
 The initial Windows ZIP is omitted because the installer handles large games.
+The source archive alone lacks imported Godot resources and generated texture
+caches; online setup downloads the prepared runtime files from the same release.
+Its commit-pinned downloads require a published release. Draft installers can be
+reviewed and tested locally; public downloads begin after publication. Get a new
+setup executable when the current compiled release is replaced.
+An offline Windows installer is still available with `package_client.py --installer`
+without `--online-installer`; keep all of its companion `.bin` files together.
 Every upload asset is checked against GitHub's limit and hashed. If a build
 fails, fix the cause and use a fresh `--out` directory; existing release output
 is never silently overwritten. The packager's shared import/texture cache is
@@ -135,9 +145,11 @@ are present:
 python godot-client/tools/build_release.py upload --bundle $RabbitLandsRelease --publish
 ```
 
-An interrupted draft can use the same command again. Downloads already recorded
+Transient upload connection failures are retried up to five times per file;
+failed upload reservations are cleared before retrying. An interrupted draft can
+use the same command again. Downloads already recorded
 by GitHub with the expected size and SHA-256 are reused. The script checks the
-remote asset list, sizes and available checksums before publication; failures
+remote asset list, upload states, sizes and SHA-256 checksums before publication; failures
 leave the draft unpublished. `--publish` marks the completed release as latest.
 Players can find it on the [client Releases page](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
 No GitHub Actions workflow is required.
@@ -160,7 +172,7 @@ server being deployed.
 1. Reuse the current client release entry as a draft, targeting the packaged
    client commit with that build's tag. Create an entry if none exists yet.
 2. Upload the signed platform manifest and every `.update.zip.###` part listed
-   in the instructions. These parts are each at most 1 GiB, below GitHub's
+   in the instructions. These parts are each at most 256 MiB, below GitHub's
    release asset limit. The regular standalone ZIP/tarball is an initial
    install artifact; if it reaches 2 GiB, use `build_release.py` to prepare the
    Windows installer slices and split Linux download described above.

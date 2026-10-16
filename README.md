@@ -58,6 +58,8 @@ see [building and publishing client updates](docs/client-updates.md).
 Maintainers can use `godot-client/tools/build_release.py` to build both Windows
 and Linux downloads and replace the current GitHub release, starting as a draft.
 Only the latest compiled build is retained on GitHub.
+The Windows download is a small setup executable that downloads and verifies
+the game files during installation. Linux uses the supplied portable archive.
 
 For the integrated **Last Lantern** opening adventure, run
 [`prototypes/last-lantern/play.cmd`](prototypes/last-lantern/play.cmd). It starts

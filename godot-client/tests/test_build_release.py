@@ -61,6 +61,7 @@ def test_build_freezes_one_commit_and_collects_only_supported_downloads(tmp_path
     assert len(commands) == 2
     assert all(command[command.index("--ref") + 1] == SHA for command in commands)
     assert "--installer" in commands[0] and "--no-zip" in commands[0]
+    assert "--online-installer" in commands[0]
     assert "--installer" not in commands[1] and "--no-zip" not in commands[1]
     assert all("--no-smoke" not in command and "--no-client-updates" not in command for command in commands)
     paths = [Path(row["path"]) for row in data["assets"]]
@@ -73,7 +74,7 @@ def test_build_freezes_one_commit_and_collects_only_supported_downloads(tmp_path
     assert policy["required_commit"] == SHA
 
 
-def test_large_linux_archive_parts_reassemble_at_the_github_boundary(tmp_path, monkeypatch):
+def test_linux_archive_parts_reassemble_at_the_configured_part_boundary(tmp_path, monkeypatch):
     monkeypatch.setattr(build_release, "ASSET_LIMIT", 32)
     monkeypatch.setattr(build_release, "PART_BYTES", 13)
     archive = tmp_path / "RabbitLands-Linux-test.tar.gz"
@@ -87,6 +88,9 @@ def test_large_linux_archive_parts_reassemble_at_the_github_boundary(tmp_path, m
     notes = build_release.release_notes(SHA, stages, parts)
     assert "cat RabbitLands-Linux-test.tar.gz." in notes
     archive.write_bytes(contents[:31])
+    smaller_parts = build_release.initial_linux_assets(archive)
+    assert b"".join(path.read_bytes() for path in smaller_parts) == contents[:31]
+    archive.write_bytes(contents[:13])
     assert build_release.initial_linux_assets(archive) == [archive]
 
 
@@ -111,6 +115,26 @@ def test_changed_update_part_cannot_enter_release(tmp_path):
         build_release.platform_assets(tmp_path, SHA, "linux")
 
 
+def test_online_installer_uses_signed_downloads_and_excludes_old_offline_slices(tmp_path):
+    stage = fake_package(tmp_path, "windows")
+    manifest = tmp_path / f"{stage.name}-windows.json"
+    payload = json.loads(base64.b64decode(json.loads(manifest.read_text())["payload"]))
+    receipt = {"schema": 1, "mode": "online", "commit": SHA, "manifest": manifest.name,
+               "parts": [{"name": part["url"].rsplit("/", 1)[1], "size": part["size"], "sha256": part["sha256"]}
+                         for part in payload["parts"]]}
+    path = tmp_path / f"{stage.name}-setup-downloads.json"
+    path.write_text(json.dumps(receipt))
+    assets, _, _ = build_release.platform_assets(tmp_path, SHA, "windows")
+    assert any(asset.name.endswith("-setup.exe") for asset in assets)
+    assert not any(asset.suffix == ".bin" for asset in assets)
+    notes = build_release.release_notes(SHA, {"windows": stage, "linux": tmp_path / "Linux"}, [])
+    assert "downloads and verifies" in notes and "setup-*.bin" not in notes
+    receipt["parts"][0]["sha256"] = "0" * 64
+    path.write_text(json.dumps(receipt))
+    with pytest.raises(ValueError, match="do not match"):
+        build_release.platform_assets(tmp_path, SHA, "windows")
+
+
 def upload_fixture(tmp_path):
     asset = tmp_path / "download.exe"
     asset.write_bytes(b"download")
@@ -121,7 +145,7 @@ def upload_fixture(tmp_path):
     return bundle, asset
 
 
-def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_tag=False, fail_upload=False, remote_digest=None, exists=True, stored_assets=None, old_tag=None):
+def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_tag=False, fail_upload=False, remote_digest=None, exists=True, stored_assets=None, old_tag=None, transient_upload=False):
     calls, remote_assets = [], []
     current_tag = old_tag or f"client-{SHA}"
     if stored_assets:
@@ -129,7 +153,7 @@ def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_t
                              for index, asset in enumerate(stored_assets))
 
     def gh(*args):
-        nonlocal exists, public, current_tag
+        nonlocal exists, public, current_tag, transient_upload
         calls.append(args)
         if args[:2] == ("api", "user"):
             return account
@@ -164,6 +188,11 @@ def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_t
             if fail_upload:
                 raise subprocess.CalledProcessError(1, ["gh", *args])
             path = Path(args[3])
+            if transient_upload:
+                transient_upload = False
+                remote_assets.append({"id": 88, "name": path.name, "size": path.stat().st_size,
+                                      "state": "starter", "digest": None})
+                raise ValueError("remote error: tls: bad record MAC")
             remote_assets[:] = [asset for asset in remote_assets if asset["name"] != path.name]
             remote_assets.append({"id": 999, "state": "uploaded", "name": path.name, "size": path.stat().st_size,
                                   "digest": remote_digest or "sha256:" + client_release.digest(path)})
@@ -253,6 +282,16 @@ def test_resume_replaces_interrupted_upload_reservation_by_id(tmp_path, monkeypa
     assert deletion in calls
     assert calls.index(deletion) < next(index for index, call in enumerate(calls)
                                          if call[:2] == ("release", "upload"))
+
+
+def test_transient_upload_failure_retries_and_clears_its_reservation(tmp_path, monkeypatch):
+    bundle, _ = upload_fixture(tmp_path)
+    calls = mock_github(monkeypatch, transient_upload=True)
+    monkeypatch.setattr(build_release.time, "sleep", lambda delay: None)
+    build_release.upload(bundle, publish=True)
+    assert len([call for call in calls if call[:2] == ("release", "upload")]) == 2
+    assert ("api", "--method", "DELETE", f"repos/{build_release.REPOSITORY}/releases/assets/88") in calls
+    assert any("--draft=false" in call for call in calls)
 
 
 @pytest.mark.parametrize("problem", ["fail_upload", "remote_digest"])

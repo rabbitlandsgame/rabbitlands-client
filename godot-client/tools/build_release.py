@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 
 import client_release
 import package_client
@@ -23,7 +24,7 @@ import package_client
 REPOSITORY = "rabbitlandsgame/rabbitlands-client"
 ACCOUNT = "rabbitlandsgame"
 ASSET_LIMIT = 2 * 1024**3  # GitHub requires each asset to be strictly smaller.
-PART_BYTES = 1024**3
+PART_BYTES = client_release.PART_BYTES
 REPO = package_client.REPO
 
 
@@ -75,7 +76,7 @@ def preflight(options) -> tuple[str, Path, Path]:
 
 
 def initial_linux_assets(archive: Path) -> list[Path]:
-    if archive.stat().st_size < ASSET_LIMIT:
+    if archive.stat().st_size <= PART_BYTES:
         return [archive]
     # Keep the full local archive, but upload only its bounded parts.
     parts = client_release.split_payload(archive, "", part_bytes=PART_BYTES)
@@ -115,7 +116,16 @@ def platform_assets(folder: Path, sha: str, platform: str) -> tuple[list[Path], 
         setup = folder / f"{stage.name}-setup.exe"
         if not setup.is_file():
             raise ValueError("The Windows installer was not built.")
-        assets.extend([setup, *sorted(folder.glob(f"{stage.name}-setup-*.bin"))])
+        receipt = folder / f"{stage.name}-setup-downloads.json"
+        if receipt.is_file():
+            expected = {"schema": 1, "mode": "online", "commit": sha, "manifest": manifest.name,
+                        "parts": [{"name": part["url"].rsplit("/", 1)[1], "size": part["size"], "sha256": part["sha256"]}
+                                  for part in payload["parts"]]}
+            if json.loads(receipt.read_text(encoding="utf-8")) != expected:
+                raise ValueError("The online installer downloads do not match the signed release.")
+            assets.append(setup)
+        else:
+            assets.extend([setup, *sorted(folder.glob(f"{stage.name}-setup-*.bin"))])
     else:
         assets.extend(initial_linux_assets(folder / f"{stage.name}.tar.gz"))
     return assets, policy, stage
@@ -145,6 +155,16 @@ def release_notes(sha: str, stages: dict[str, Path], linux_assets: list[Path]) -
     linux_download = f"every `{linux}.tar.gz.###` part" if split else f"`{linux}.tar.gz`"
     extract = (f"cat {linux}.tar.gz.[0-9][0-9][0-9]* | tar -xz -C ~/Games"
                if split else f"tar -xzf {linux}.tar.gz -C ~/Games")
+    online = (stages["windows"].parent / f"{windows}-setup-downloads.json").is_file()
+    windows_install = (
+        f"Download `{windows}-setup.exe` and run it. An internet connection is required: "
+        "setup downloads and verifies the matching game files automatically. "
+        "Use the Rabbit Lands Start menu shortcut after installation. "
+        "Installation is per user and needs no administrator rights."
+        if online else
+        f"Download `{windows}-setup.exe` and every accompanying `{windows}-setup-*.bin` "
+        "file into the same folder. Run the setup executable, then use the Rabbit Lands "
+        "Start menu shortcut. Installation is per user and needs no administrator rights.")
     return f"""# Rabbit Lands desktop downloads
 
 Client commit: `{sha}`. Use the server settings announced for your testing round.
@@ -152,9 +172,7 @@ Only the current compiled client build is kept in GitHub Releases.
 
 ## Windows x86_64
 
-Download `{windows}-setup.exe` and every accompanying `{windows}-setup-*.bin`
-file into the same folder. Run the setup executable, then use the Rabbit Lands
-Start menu shortcut. Installation is per user and needs no administrator rights.
+{windows_install}
 
 ## Linux x86_64
 
@@ -195,7 +213,7 @@ def build(options) -> Path:
         if options.server:
             command.extend(["--server", options.server])
         if platform == "windows":
-            command.extend(["--installer", "--iscc", str(iscc), "--no-zip"])
+            command.extend(["--installer", "--online-installer", "--iscc", str(iscc), "--no-zip"])
         run(command)
     return assemble(root, sha)
 
@@ -241,6 +259,36 @@ def github_assets(release_id: int) -> list[dict]:
     pages = json.loads(gh("api", "--paginate", "--slurp",
                           f"repos/{REPOSITORY}/releases/{release_id}/assets?per_page=100"))
     return [asset for page in pages for asset in page]
+
+
+def asset_matches(asset: dict, row: dict) -> bool:
+    return (asset.get("state") == "uploaded" and asset.get("size") == row["size"]
+            and asset.get("digest") == "sha256:" + row["sha256"])
+
+
+def upload_asset(tag: str, release_id: int, path: Path, row: dict, old: dict) -> None:
+    for attempt in range(5):
+        if asset_matches(old, row):
+            return
+        if old:
+            # Interrupted transfers reserve names that gh's lookup omits.
+            gh("api", "--method", "DELETE", f"repos/{REPOSITORY}/releases/assets/{old['id']}")
+        print(f"Uploading {path.name} ({row['size']} bytes)", flush=True)
+        try:
+            gh("release", "upload", tag, str(path), "--repo", REPOSITORY, "--clobber")
+            return
+        except ValueError as error:
+            network_errors = ("bad record mac", "connection", "eof", "timeout", "timed out",
+                              "stream error", "http 502", "http 503", "http 504")
+            if not any(message in str(error).lower() for message in network_errors):
+                raise
+            old = next((asset for asset in github_assets(release_id) if asset["name"] == path.name), {})
+            if asset_matches(old, row):
+                return  # GitHub stored it even though the response was lost.
+            if attempt == 4:
+                raise
+            print(f"Connection interrupted; retrying {path.name} ({attempt + 2}/5).", flush=True)
+            time.sleep(min(2**attempt, 8))
 
 
 def upload(bundle: Path, publish: bool = False) -> None:
@@ -294,15 +342,7 @@ def upload(bundle: Path, publish: bool = False) -> None:
     # Small calls avoid the Windows command-line length limit. Resume only when
     # GitHub's recorded digest proves that an existing upload is identical.
     for path, row in zip(paths, data["assets"]):
-        old = previous.get(path.name, {})
-        if (old.get("state") == "uploaded" and old.get("size") == row["size"]
-                and old.get("digest") == "sha256:" + row["sha256"]):
-            continue
-        if old:
-            # Interrupted transfers can reserve a name in the "starter" state.
-            # gh's name lookup omits these, so remove the reservation by ID.
-            gh("api", "--method", "DELETE", f"repos/{REPOSITORY}/releases/assets/{old['id']}")
-        gh("release", "upload", tag, str(path), "--repo", REPOSITORY, "--clobber")
+        upload_asset(tag, existing["id"], path, row, previous.get(path.name, {}))
     uploaded = github_assets(existing["id"])
     expected = {path.name: path.stat().st_size for path in paths}
     remote_sizes = {asset["name"]: asset["size"] for asset in uploaded}

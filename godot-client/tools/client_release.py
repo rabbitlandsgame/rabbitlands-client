@@ -14,7 +14,7 @@ import zipfile
 from pathlib import Path
 
 CHUNK_BYTES = 8 * 1024 * 1024
-PART_BYTES = 1024 * 1024 * 1024
+PART_BYTES = 256 * 1024 * 1024
 MAX_ANCESTORS = 100000
 
 
@@ -163,3 +163,39 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
         encoding="utf-8")
     archive.unlink()  # Players download the pieces; the unsplit archive is redundant.
     return assets + [policy, instructions]
+
+
+def export_installer_helper(stage: Path, godot: Path, tools_source: Path,
+                            preset_text: str, run_godot, logs: Path) -> Path:
+    """Build the small setup helper; the selected game's bytes stay untouched."""
+    project = logs / "installer-project"
+    scripts = project / "src/updates"
+    scripts.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(tools_source / "src/updates/release.gd", scripts / "release.gd")
+    shutil.copyfile(tools_source / "tools/install_client_payload.gd", project / "install.gd")
+    data = project / "data"
+    data.mkdir(exist_ok=True)
+    shutil.copyfile(stage / "app/client-release.json", data / "client_release.json")
+    shutil.copyfile(stage.parent / f"{stage.name}-windows.json", data / "install_manifest.json")
+    branding = project / "assets/branding"
+    branding.mkdir(parents=True, exist_ok=True)
+    for name in ("rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
+        shutil.copyfile(stage / "app/assets/branding" / name, branding / name)
+    (project / "project.godot").write_text(
+        'config_version=5\n[application]\nconfig/name="Rabbit Lands Setup"\n'
+        'config/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\n'
+        'run/main_scene="res://main.tscn"\n[rendering]\nrenderer/rendering_method="gl_compatibility"\n', encoding="utf-8")
+    (project / "main.tscn").write_text(
+        '[gd_scene load_steps=2 format=3]\n[ext_resource type="Script" path="res://install.gd" id="1"]\n'
+        '[node name="Installer" type="Node"]\nscript=ExtResource("1")\n', encoding="utf-8")
+    preset_text = preset_text.replace('binary_format/embed_pck=false', 'binary_format/embed_pck=true')
+    (project / "export_presets.cfg").write_text(preset_text, encoding="utf-8")
+    run_godot(godot, ["--headless", "--path", str(project), "--import"], logs / "installer-import.log", timeout=120)
+    helper_hash = hashlib.sha256((project / "install.gd").read_bytes()
+        + (scripts / "release.gd").read_bytes() + (data / "install_manifest.json").read_bytes()).hexdigest()[:12]
+    binary = logs / f"RabbitLands-install-{helper_hash}.exe"
+    run_godot(godot, ["--headless", "--path", str(project), "--export-release", "Windows Desktop", str(binary)],
+              logs / "installer-export.log", timeout=120)
+    if not binary.is_file():
+        raise ValueError("The online installer helper export is incomplete.")
+    return binary
