@@ -45,7 +45,7 @@ key placeholder and using the verified server endpoint for the deployment:
 
 ```powershell
 python godot-client/tools/package_client.py --ref HEAD `
-  --server "game.rabbitlandsgame.com:2000" `
+  --server "game.rabbitlandsgame.com:2001" `
   --update-signing-key "C:\path\to\private\signing-private.pem"
 ```
 
