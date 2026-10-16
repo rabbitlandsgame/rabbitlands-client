@@ -3644,7 +3644,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	for slot: int in range(8):
 		# Compare modifiers too, including when the spell shortcut was rebound.
 		if event.is_action_pressed("quick_item_%d" % (slot + 1), false, true):
-			_use_inventory_slot(slot)
+			# Text controls can leave Ctrl+number unhandled; typing must not use an item.
+			if not _text_entry_active():
+				_use_inventory_slot(slot)
 			get_viewport().set_input_as_handled()
 			return
 	# toggle_map, toggle_minimap and toggle_console are deliberately absent:
@@ -10343,6 +10345,7 @@ func _sync_equipment_slots() -> void:
 func _sync_quick_slots() -> void:
 	for slot: int in range(quick_slot_buttons.size()):
 		var quick_button: Button = quick_slot_buttons[slot]
+		var shortcut: String = settings_window.call("binding_text", "quick_item_%d" % (slot + 1))
 		var quick_item_value: Variant = AppState.inventory.get(slot)
 		if quick_item_value is Dictionary:
 			var quick_item: Dictionary = quick_item_value as Dictionary
@@ -10355,6 +10358,7 @@ func _sync_quick_slots() -> void:
 			var quick_tooltip: String = (_inventory_tooltip(quick_item, slot)
 				+ "\nQuick slot: %d  Quantity: %d" % [slot + 1,
 					int(quick_item.get("quantity", 0))])
+			quick_tooltip += "\nShortcut: " + shortcut
 			if cooldown_seconds > 0:
 				quick_tooltip += "\nCooldown: %d seconds" % cooldown_seconds
 			elif not usable:
@@ -10365,7 +10369,8 @@ func _sync_quick_slots() -> void:
 			quick_button.icon = null
 			quick_button.text = ""
 			quick_button.disabled = true
-			quick_button.tooltip_text = "Empty item quick slot\nScroll this column for more item shortcuts."
+			quick_button.tooltip_text = ("Empty item quick slot\nShortcut: " + shortcut
+				+ "\nScroll this column for more item shortcuts.")
 	if selected_inventory_slot >= 0:
 		var selected_value: Variant = AppState.inventory.get(selected_inventory_slot)
 		if selected_value is Dictionary:
@@ -10778,6 +10783,7 @@ func _on_client_setting_changed(section: String, key: String,
 
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()
+	_sync_quick_slots()
 	# The help page is generated from the bindings, so it follows a rebind.
 	reference_window.call("_refresh_help")
 

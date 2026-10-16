@@ -83,6 +83,10 @@ Storage opens in the compact classic layout. Right-click its title to choose
 remembered. The inventory's blue quantity shortcuts also control storage
 withdrawals and deposits. Double-click a stored item to withdraw it.
 
+Use the first eight backpack slots from the item quick bar with **1–8** or
+**Ctrl+1–8**. Hover a slot to see its active shortcuts, quantity and cooldown.
+Rebind item shortcuts in **Settings → Controls**.
+
 **Item Lists** opens named favorite sets. Create a list, add selected items with
 **+**, and edit each item's quantity. Clicking a list name swaps the favorite
 grid immediately. **Get list** tops up matching backpack quantities from the

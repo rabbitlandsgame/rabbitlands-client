@@ -204,7 +204,15 @@ func restore_bindings(stored: Dictionary) -> int:
 		if event == null:
 			continue
 		InputMap.action_erase_events(name)
-		InputMap.action_add_event(name, event)
+		# Settings store the first shortcut. Restore every shipped shortcut
+		# when that value is the default, so saving cannot discard its aliases.
+		var defaults: Dictionary = ProjectSettings.get_setting("input/" + name, {})
+		var default_events: Array = defaults.get("events", [])
+		if not default_events.is_empty() and str(stored[action]) == _describe(default_events[0]):
+			for default_event: InputEvent in default_events:
+				InputMap.action_add_event(name, default_event)
+		else:
+			InputMap.action_add_event(name, event)
 		restored += 1
 	_refresh_bindings()
 	return restored
@@ -240,13 +248,19 @@ func _parse(described: String) -> InputEventKey:
 				event.physical_keycode = OS.find_keycode_from_string(part)
 	return event if event.physical_keycode != 0 else null
 
+func binding_text(action: String) -> String:
+	var descriptions: Array[String] = []
+	if InputMap.has_action(action):
+		for event: InputEvent in InputMap.action_get_events(action):
+			var described := _describe(event)
+			if not described.is_empty():
+				descriptions.append(described)
+	return " / ".join(descriptions) if not descriptions.is_empty() else tr("ELORIA_SETTINGS_UNBOUND")
+
 func _refresh_bindings() -> void:
 	for action: Variant in binding_rows:
 		var button: Button = binding_rows[action] as Button
-		var events: Array[InputEvent] = (InputMap.action_get_events(str(action))
-			if InputMap.has_action(str(action)) else [])
-		button.text = (_describe(events[0]) if not events.is_empty()
-			else tr("ELORIA_SETTINGS_UNBOUND"))
+		button.text = binding_text(str(action))
 
 func _build() -> void:
 	panel = PanelContainer.new()
