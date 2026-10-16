@@ -82,6 +82,8 @@ CHUNK_LATTICE = -1023.0
 CHUNK_ORIGIN = [CHUNK_LATTICE, CHUNK_LATTICE]
 CELL = 2.0
 DEFAULT_CHECKOUT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(DEFAULT_CHECKOUT / "eloria-assets" / "tools"))
+import publish_finish as PF  # noqa: E402
 TOOL = "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py"
 # Flat kit inlays and kit decks published as walk surfaces (see the module notes): their mesh nodes become
 # Walk_<region>_<suffix>. The pier trestles' and causeway arches' decks are kit solids, which carry no client
@@ -956,6 +958,16 @@ def main():
         trim_extensions(master)
         master.write()
         timings["master_s"] = round(time.time() - t, 1)
+    # Published as baked, every cell carries its own copy of each repeated kit
+    # prop and its normals at 32 bits. The space passes settle that, and the
+    # figures the manifests record about their own GLBs with it - so they run
+    # before the record below measures what shipped. GEOMETRY_RESIDENT_FACTOR
+    # goes with them: on a territory's first publish there is no
+    # publication.json yet to read it from.
+    t = time.time()
+    PF.finish([out], factor=GEOMETRY_RESIDENT_FACTOR)
+    timings["space_passes_s"] = round(time.time() - t, 1)
+    manifest = json.loads((out / "world.json").read_text(encoding="utf-8"))
     glbs = sorted((out / "chunks").glob("*/world.glb"))
     sizes = [p.stat().st_size for p in glbs]
     record = {"region": REGION, "tool": TOOL,
