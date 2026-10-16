@@ -40,6 +40,7 @@ var _header: HBoxContainer
 var _frame: Control
 var preview_feed: Control
 var _feed_suppressed := false
+var _temporarily_open := false
 
 func _ready() -> void:
 	if not has_node("Frame"):
@@ -342,7 +343,7 @@ func apply_options() -> void:
 	_header.mouse_default_cursor_shape = Control.CURSOR_ARROW if not dragger.enabled else Control.CURSOR_MOVE
 	grip.visible = dragger.enabled
 	custom_minimum_size = Vector2(280, 95) if feed_role == "system" else MINIMUM
-	user_closed = not bool(options.get("visible", true))
+	user_closed = not bool(options.get("visible", true)) and not _temporarily_open
 	visible = not user_closed and not _feed_suppressed
 	if not user_closed:
 		preview_feed.clear_messages()
@@ -357,6 +358,8 @@ func set_feed_suppressed(suppressed: bool) -> void:
 func set_option(key: String, value: Variant) -> void:
 	if not options.has(key):
 		return
+	if key == "visible":
+		_temporarily_open = false
 	options[key] = value
 	apply_options()
 	resize_window(size)
@@ -378,15 +381,24 @@ func reveal_message(text: String = "", colour: Color = Color("eee3c8")) -> void:
 	elif bool(options.get("visible", true)):
 		show()
 
-func open_chat() -> void:
+func open_chat(temporary := false) -> void:
+	if temporary and user_closed:
+		_temporarily_open = true
 	user_closed = false
-	options.visible = true
+	# Resuming a draft or changing tabs must retain the hidden preference.
+	if not _temporarily_open:
+		options.visible = true
 	preview_feed.clear_messages()
 	visible = not _feed_suppressed
 	output.modulate.a = 1.0
 	_last_message_msec = Time.get_ticks_msec()
 	dragger.clamp_into_view()
 	save_layout()
+
+func finish_typing() -> void:
+	if _temporarily_open and not input.has_focus() and input.text.is_empty():
+		_temporarily_open = false
+		apply_options()
 
 func dismiss() -> void:
 	set_option("visible", false)

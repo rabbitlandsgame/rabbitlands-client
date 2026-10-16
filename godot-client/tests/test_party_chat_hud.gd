@@ -79,7 +79,8 @@ func _run() -> void:
 	main.call("_show_chat_input")
 	_expect(chat.visible and chat.input.has_focus(), "T reopens and focuses the same chat window")
 	main.call("_hide_chat_input")
-	_expect(chat.input.visible and not chat.input.has_focus(), "leaving input focus keeps the chat footer available")
+	_expect(not chat.visible and not chat.input.has_focus(), "leaving empty input restores the dismissed chat window")
+	chat.open_chat()
 	chat.position = Vector2(180, 220)
 	chat.resize_window(Vector2(520, 310))
 	chat.save_layout()
@@ -237,6 +238,18 @@ func _check_sending() -> void:
 			main.call("_on_chat_tab_pressed", str(spec[0]))
 			main.call("_on_chat_submitted", str(spec[1]))
 			_expect(await _received(receiver) == EloriaProtocol.chat(str(spec[2])), "tab sends the expected protocol frame: " + str(spec[0]))
+		main.chat_hud.set_destination("local")
+		main.chat_hud.dismiss()
+		main.call("_show_chat_input")
+		main.chat_input.text = "resumed hidden draft"
+		main.call("_hide_chat_input")
+		main.call("_show_chat_input")
+		main.chat_input.text_submitted.emit(main.chat_input.text)
+		_expect(await _received(receiver) == EloriaProtocol.chat("resumed hidden draft"),
+			"a resumed draft reaches the local test connection")
+		_expect(not main.chat_hud.visible and not main.chat_input.has_focus() and main.chat_input.text.is_empty(),
+			"sending a resumed draft restores the previously hidden window")
+		main.chat_hud.open_chat()
 		receiver.disconnect_from_host()
 	peer.disconnect_from_host()
 	listener.stop()

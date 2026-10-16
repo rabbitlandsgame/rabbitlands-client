@@ -106,10 +106,10 @@ func _run() -> void:
 	var old_size := system.size
 	await _drag(system.grip, Vector2(55, -15))
 	_expect(system.size.is_equal_approx(old_size + Vector2(55, -15)), "the system window also resizes through its real grip")
-	(main.settings_window.find_child("chat_font_size", true, false) as SpinBox).value = 19
-	(main.settings_window.find_child("system_chat_font_size", true, false) as SpinBox).value = 13
-	(main.settings_window.find_child("system_chat_background_opacity", true, false) as SpinBox).value = 0.45
-	(main.settings_window.find_child("chat_line_spacing", true, false) as SpinBox).value = 4
+	(main.settings_window.panel.find_child("chat_font_size", true, false) as SpinBox).value = 19
+	(main.settings_window.panel.find_child("system_chat_font_size", true, false) as SpinBox).value = 13
+	(main.settings_window.panel.find_child("system_chat_background_opacity", true, false) as SpinBox).value = 0.45
+	(main.settings_window.panel.find_child("chat_line_spacing", true, false) as SpinBox).value = 4
 	main.call("_on_client_setting_changed", "Chat", "chat_locked", true)
 	_expect(chat.output.get_theme_font_size("normal_font_size") == 19
 		and system.output.get_theme_font_size("normal_font_size") == 13, "text sizes are independent")
@@ -132,6 +132,7 @@ func _run() -> void:
 	_expect(not chat.preview_feed.visible and chat.preview_feed.get_child_count() == 0,
 		"reopening conversations clears the transient feed")
 	main.call("_hide_chat_input")
+	_check_typing_visibility(chat, system)
 	chat.options_button.pressed.emit()
 	_expect(main.settings_window.tabs.get_current_tab_control().name == "Chat", "the window shortcut opens its dedicated Chat settings")
 	await _capture("04-chat-settings.png")
@@ -163,6 +164,61 @@ func _run() -> void:
 	await process_frame
 	print("split chat HUD tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
+
+func _check_typing_visibility(chat: PanelContainer, system: PanelContainer) -> void:
+	var system_visible := system.visible
+	chat.input.clear()
+	chat.dismiss()
+	_key(KEY_T)
+	_expect(chat.visible and chat.input.has_focus(), "T temporarily reveals hidden chat for typing")
+	_key(KEY_ESCAPE)
+	_expect(not chat.visible and not chat.input.has_focus(), "Escape with no draft restores hidden chat")
+	_key(KEY_T)
+	chat.input.text = "unfinished from hidden chat"
+	_key(KEY_ESCAPE)
+	_expect(chat.visible and not chat.input.has_focus() and chat.input.text == "unfinished from hidden chat",
+		"leaving typing keeps a draft visible in temporarily revealed chat")
+	_key(KEY_T)
+	main.call("_on_chat_tab_pressed", "local")
+	chat.set_option("line_spacing", chat.options.line_spacing)
+	_expect(chat.visible and chat.input.has_focus() and chat.input.text == "unfinished from hidden chat",
+		"resuming, selecting a destination and applying appearance settings preserve a temporary draft")
+	var stored := WindowPreferences.stored_options("chat_soft", {}, settings_path)
+	_expect(not bool(stored.get("visible", true)), "temporary typing preserves the saved hidden preference")
+	_key(KEY_ESCAPE)
+	_key(KEY_ESCAPE)
+	_expect(not chat.visible and chat.input.text.is_empty() and system.visible == system_visible,
+		"clearing the draft restores hidden chat without changing the system window")
+	_key(KEY_T)
+	chat.input.text = "deleted while typing"
+	chat.input.clear()
+	_key(KEY_ESCAPE)
+	_expect(not chat.visible, "deleting the draft before Escape also restores hidden chat")
+	_key(KEY_T)
+	chat.set_destination("private")
+	chat.input.text = "private draft without a recipient"
+	_key(KEY_ENTER)
+	_expect(chat.visible and chat.input.has_focus() and chat.input.text == "private draft without a recipient",
+		"a refused send keeps the temporary window and its draft available")
+	_key(KEY_ESCAPE)
+	_key(KEY_ESCAPE)
+	chat.set_destination("local")
+	chat.set_option("visible", true)
+	_key(KEY_T)
+	_key(KEY_ESCAPE)
+	_expect(chat.visible, "chat that was already visible stays visible after typing")
+	chat.dismiss()
+	_key(KEY_T)
+	chat.set_option("visible", true)
+	_key(KEY_ESCAPE)
+	_expect(chat.visible, "explicitly showing a temporary chat window keeps it visible")
+
+func _key(code: Key) -> void:
+	var event := InputEventKey.new()
+	event.physical_keycode = code
+	event.keycode = code
+	event.pressed = true
+	root.push_input(event, true)
 
 func _check_closed_previews(chat: PanelContainer, system: PanelContainer) -> void:
 	system.dismiss()

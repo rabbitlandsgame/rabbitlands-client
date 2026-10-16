@@ -2245,13 +2245,14 @@ func _on_invasion_assistant_command_requested(command: String) -> void:
 			"Invasion assistant request failed: %s" % error_string(error))
 
 func _show_chat_input() -> void:
-	chat_hud.open_chat()
+	chat_hud.open_chat(true)
 	chat_input.show()
 	chat_input.grab_focus()
 	_sync_hud_button_states(true)
 
 func _hide_chat_input() -> void:
 	chat_input.release_focus()
+	chat_hud.finish_typing()
 	_sync_hud_button_states(true)
 
 ## Reacts to a map panel opening or closing. _update_map_viewports() owns the
@@ -3581,6 +3582,12 @@ func _handle_bound_action(event: InputEvent) -> bool:
 		return true
 	if not game_view.visible:
 		return false
+	# After leaving typing, a separate Escape discards the draft before
+	# the same press can close another window.
+	if event.is_action_pressed("cancel") and not chat_input.text.is_empty():
+		chat_input.clear()
+		_hide_chat_input()
+		return true
 	if event.is_action_pressed("toggle_inventory"):
 		_on_inventory_button_pressed()
 		return true

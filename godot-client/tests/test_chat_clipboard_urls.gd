@@ -135,6 +135,37 @@ func _run() -> void:
 	main.chat_input.grab_focus()
 	_expect(main.chat_input.selecting_enabled and main.chat_input.shortcut_keys_enabled
 		and main.chat_input.context_menu_enabled, "chat input retains native selection, copy and paste")
+	main.chat_input.text = "unfinished message"
+	main.inventory_panel.show()
+	main.chat_input.grab_focus()
+	_key(KEY_ESCAPE)
+	_expect(not main.chat_input.has_focus() and main.chat_input.text == "unfinished message"
+		and main.inventory_panel.visible, "first Escape leaves typing and preserves the draft")
+	_key(KEY_ESCAPE, false, true)
+	_expect(main.chat_input.text == "unfinished message", "holding Escape does not discard the draft")
+	_key(KEY_T)
+	_expect(main.chat_input.has_focus() and main.chat_input.text == "unfinished message",
+		"T resumes the unfinished draft")
+	_key(KEY_ESCAPE)
+	_key(KEY_ESCAPE)
+	_expect(main.chat_input.text.is_empty() and not main.chat_input.has_focus()
+		and main.chat_hud.visible and main.system_chat_hud.visible and main.inventory_panel.visible,
+		"second Escape clears the draft without hiding chat or closing another window")
+	_key(KEY_ESCAPE)
+	_expect(not main.inventory_panel.visible, "Escape with no draft retains normal window closing")
+	var other_input := LineEdit.new()
+	main.game_view.add_child(other_input)
+	other_input.text = "another field"
+	other_input.grab_focus()
+	main.chat_input.text = "unfocused draft"
+	_key(KEY_ESCAPE)
+	_expect(main.chat_input.text == "unfocused draft" and other_input.text == "another field",
+		"Escape in another text field leaves both drafts alone")
+	other_input.release_focus()
+	_key(KEY_ESCAPE)
+	_expect(main.chat_input.text.is_empty(), "Escape clears a draft after focus leaves chat by another route")
+	other_input.queue_free()
+	main.chat_input.grab_focus()
 	if DisplayServer.get_name() != "headless":
 		var previous := DisplayServer.clipboard_get()
 		DisplayServer.clipboard_set("pasted reply with a URL https://rabbitlandsgame.com")
