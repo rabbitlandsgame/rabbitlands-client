@@ -245,6 +245,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"borrowed_sky_v1",
 	"spell_ring_v1",
 	"followup_tutorials_v1",
+	"field_dispatch_v1",
 	"signed_ashore_v1",
 	"actor16_v1",
 	"adjacent_actors_v1",
@@ -3091,7 +3092,7 @@ static func decode_lantern(payload: PackedByteArray, logical_coordinates := fals
 		return {"type":"invalid", "error":"lantern_version"}
 	if value.has("ring_training") and not value.ring_training is bool:
 		return {"type":"invalid", "error":"ring_training"}
-	if value.has("tutorial") and value.tutorial not in ["second_bell", "borrowed_sky", "followup", "signed_ashore", "watchpost"]:
+	if value.has("tutorial") and value.tutorial not in ["second_bell", "borrowed_sky", "followup", "signed_ashore", "watchpost", "field_dispatch"]:
 		return {"type":"invalid", "error":"tutorial_kind"}
 	# Signed Ashore, the landing isle's chapter: its four countersigns
 	# (grove/temple/gate/light) stand in for the Lantern's flags below. The

@@ -76,17 +76,23 @@ func _refresh() -> void:
 	card.visible = visible
 	if not visible: return
 	var road := str(state.get("tutorial", "")) == "followup"
+	var field := str(state.get("tutorial", "")) == "field_dispatch"
 	var sky := str(state.get("tutorial", "")) == "borrowed_sky"
 	var second_bell := str(state.get("tutorial", "")) == "second_bell"
 	# Signed Ashore is guided by Nash, so the card offers "Ask Nash";
 	# it runs on the live isle rather than a practice copy, so leaving is a skip.
 	var signed_ashore := str(state.get("tutorial", "")) == "signed_ashore"
 	var watchpost := str(state.get("tutorial", "")) == "watchpost"
-	help.visible = second_bell or sky or road or signed_ashore or watchpost
+	help.visible = second_bell or sky or road or signed_ashore or watchpost or field
 	help.text = "Quest help" if watchpost else "Ask " + str(state.get("guide", "Guide")) if road else "Ask Sera" if sky else "Ask Nash"
 	skip.text = "Leave tutorial…" if second_bell or sky or road else "Skip tutorial…"
+	if field:
+		help.text = "Quest help"
+		skip.text = "Hide guide"
 	chapter.text = ("HELP FOR THE WATCHPOST" if watchpost else str(state.get("adventure", "PRACTICE")).to_upper() if road else "THE BORROWED SKY" if sky else "THE SECOND BELL" if second_bell else str(state.get("chapter", "SIGNED ASHORE")) if signed_ashore else "THE LAST LANTERN") + "  ·  %d / %d" % [int(state.get("stage", 1)), int(state.get("total", 28))]
 	heading.text = str(state.get("title", ""))
+	if field:
+		chapter.text = "MAIN WORLD DISPATCH  ·  %d / %d" % [int(state.get("stage",1)),int(state.get("total",1))]
 	instruction.text = str(state.get("hint", ""))
 	if road:
 		instruction.text += "\nSeparate practice character · checkpoint saved"
@@ -97,7 +103,7 @@ func _refresh() -> void:
 	var needed := int(state.get("required", 1))
 	# Signed Ashore counts every fact that needs more than one (5 Olives,
 	# 3 Lemons sold, 2 points spent); the Lantern keeps its four counted steps.
-	if needed > 1 and (road or watchpost or signed_ashore or str(state.get("key", "")) in ["reed", "quartz", "take_reed", "attribute", "sage"]):
+	if needed > 1 and (road or field or watchpost or signed_ashore or str(state.get("key", "")) in ["reed", "quartz", "take_reed", "attribute", "sage"]):
 		instruction.text += "\nProgress: %d / %d" % [int(state.get("count", 0)), needed]
 	instruction.visible = not compact
 	collapse.text = "Instructions" if compact else "Less"
@@ -176,7 +182,7 @@ func control_for_step() -> Control:
 			var list := _node("ManufacturingList") as ItemList
 			# The Lantern only ever makes a Torch; the others name the recipe
 			# (Signed Ashore mixes a Wood Plank before its Torch).
-			var wanted := str(state.get("item", "Torch")) if str(state.get("tutorial", "")) in ["followup", "signed_ashore", "watchpost"] else "Torch"
+			var wanted := str(state.get("item", "Torch")) if str(state.get("tutorial", "")) in ["followup", "signed_ashore", "watchpost", "field_dispatch"] else "Torch"
 			return _node("ManufacturingMixOne") if not wanted.is_empty() and _selected_item(list).contains(wanted) else list
 		"deposit", "withdraw":
 			if not _visible(_node("StoragePanel")): return null

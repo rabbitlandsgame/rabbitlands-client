@@ -32,6 +32,7 @@ func _init() -> void:
 		"second_bell_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"borrowed_sky_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"followup_tutorials_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
+		"field_dispatch_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"signed_ashore_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"landfall_underground_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
 		"tutorial_rewards_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,

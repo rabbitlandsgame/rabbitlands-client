@@ -41,6 +41,10 @@ func _init() -> void:
 	expect(decode(broken).get("type")=="invalid","flags are booleans")
 	expect(EloriaProtocol.decode_lantern("{".to_utf8_buffer()).type=="invalid","invalid JSON")
 	expect(EloriaProtocol.CLIENT_CAPABILITIES.has("lantern_tutorial_v1"),"capability declared")
+	var dispatch: Dictionary=valid.duplicate(true)
+	dispatch.tutorial="field_dispatch"
+	expect(decode(dispatch).get("type")=="lantern_tutorial","main-world dispatch guide decodes")
+	expect(EloriaProtocol.CLIENT_CAPABILITIES.has("field_dispatch_v1"),"public guide has a separate capability")
 	var bell: Dictionary=valid.duplicate(true)
 	bell.tutorial="second_bell";bell.chapter="THE SECOND BELL";bell.map="bellwatch"
 	bell.remaining=3;bell.pending=true;bell.assisted=false
