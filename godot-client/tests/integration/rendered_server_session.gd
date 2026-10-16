@@ -439,6 +439,11 @@ func _run() -> void:
 	var cycle_down: InputEventMouseButton = InputEventMouseButton.new()
 	cycle_down.button_index = MOUSE_BUTTON_RIGHT
 	cycle_down.pressed = true
+	var cycle_container: Control = main.get("viewport_container") as Control
+	var cycle_viewport: SubViewport = main.get("main_viewport") as SubViewport
+	cycle_down.position = camera.unproject_position(actor.global_position + Vector3.UP) \
+		* cycle_container.size / Vector2(cycle_viewport.size)
+	var action_over_self: String = "pick" if int(main.call("_ground_bag_below_player")) >= 0 else "look"
 	main.set("_interaction_mode", "walk")
 	main.call("_on_world_gui_input", cycle_down)
 	var cursor_motion: InputEventMouseMotion = InputEventMouseMotion.new()
@@ -449,8 +454,8 @@ func _run() -> void:
 	main.call("_on_world_gui_input", cycle_up)
 	_expect(is_equal_approx(camera_rig.yaw_degrees, yaw_before_cycle)
 		and camera_rig.global_position.is_equal_approx(actor.global_position)
-		and str(main.get("_interaction_mode")) == "trade",
-		"right click cycles the action while the camera stays focused on the player")
+		and str(main.get("_interaction_mode")) == action_over_self,
+		"right click selects an available action over the player while the camera stays focused")
 	_expect(_actor_is_in_frame(camera, actor.global_position),
 		"action cycling keeps the local actor in frame")
 	var action_camera: Dictionary = _json_safe(camera_rig.camera_diagnostics()) as Dictionary

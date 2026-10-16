@@ -1638,8 +1638,8 @@ func _run() -> void:
 	right_down.pressed = true
 	main.set("_interaction_mode", "walk")
 	main.call("_on_world_gui_input", right_down)
-	_expect(str(main.get("_interaction_mode")) == "trade",
-		"right click cycles the selected world action")
+	_expect(str(main.get("_interaction_mode")) == "walk",
+		"right click over empty ground keeps the Move action")
 	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
 	motion.relative = Vector2(40.0, 12.0)
 	var initial_yaw: float = camera_rig.yaw_degrees
@@ -1650,7 +1650,7 @@ func _run() -> void:
 	right_up.button_index = MOUSE_BUTTON_RIGHT
 	right_up.pressed = false
 	main.call("_on_world_gui_input", right_up)
-	_expect(str(main.get("_interaction_mode")) == "trade",
+	_expect(str(main.get("_interaction_mode")) == "walk",
 		"right release does not cycle a second time")
 	main.set("_interaction_mode", "walk")
 
@@ -3386,17 +3386,13 @@ func _check_trade_mode(main: Control) -> void:
 	_expect(str(main.get("_interaction_mode")) == "attack" and _take(receiver).is_empty(),
 		"a right click cycles trade to attack without issuing a command")
 	main.set("_interaction_mode", "walk")
-	for index: int in MouseCursors.WORLD_ACTIONS.size():
-		var wanted: String = MouseCursors.WORLD_ACTIONS[
-			(index + 1) % MouseCursors.WORLD_ACTIONS.size()]
+	var player_actions: Array[String] = ["trade", "attack", "look", "walk"]
+	for wanted: String in player_actions:
 		_click(at, true, false, MOUSE_BUTTON_RIGHT)
 		_click(at, false, false, MOUSE_BUTTON_RIGHT)
 		_expect(str(main.get("_interaction_mode")) == wanted and _take(receiver).is_empty(),
 			"right-click selects %s without activating the selected player" % wanted)
-		if wanted == "use":
-			_expect(str(main.get("_inventory_tool")) == "use",
-				"the world use mode also arms the inventory use-item tool")
-		elif wanted == "look":
+		if wanted == "look":
 			_expect(str(main.get("_inventory_tool")) == "inspect",
 				"the look mode also arms the inventory inspect tool")
 	_expect(str(main.get("_inventory_tool")) == "grab",

@@ -32,7 +32,8 @@ const GRAB := 13
 
 const CURSOR_COUNT := 14
 
-## Right-click selects an action; selection itself never sends a command.
+## Right-click follows this order, skipping actions unavailable under the
+## pointer; selection itself never sends a command.
 const WORLD_ACTIONS: Array[String] = [
 	"walk", "trade", "attack", "use", "pick", "harvest", "talk", "look"]
 const ACTION_CURSORS := {

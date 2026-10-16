@@ -24,6 +24,7 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 	_check_pointer(main)
+	_check_cycle(main)
 	_check_wear_destination(main)
 	_check_double_click(main)
 	main.queue_free()
@@ -40,6 +41,7 @@ func _inventory() -> Dictionary:
 
 func _fixture(main: Node) -> void:
 	_inventory().clear()
+	(app_state.get("inventory_cooldowns") as Dictionary).clear()
 	_inventory()[0] = {"image_id": 1, "quantity": 3,
 		"inventory_usable": true}
 	_inventory()[1] = {"image_id": 2, "quantity": 1,
@@ -102,6 +104,48 @@ func _check_pointer(main: Node) -> void:
 		"the right-button cycle visits the hand, the eye and the finger"
 			+ " (saw %s)" % str(seen))
 	main.set("_inventory_tool", "grab")
+
+func _check_cycle(main: Node) -> void:
+	_fixture(main)
+	_check_cycle_case(main, 0, ["use", "inspect", "grab"], "usable backpack item")
+	_check_cycle_case(main, 1, ["inspect", "grab"], "unusable backpack item")
+	# Worn items cannot be used even if they carry the usable flag.
+	_inventory()[36]["inventory_usable"] = true
+	_check_cycle_case(main, 36, ["inspect", "grab"], "worn item")
+	_check_cycle_case(main, 2, ["inspect", "grab"], "empty slot")
+	_inventory()[3] = {"image_id": 4, "quantity": 1}
+	_check_cycle_case(main, 3, ["inspect", "grab"], "item without a usable flag")
+	var cooldowns: Dictionary = app_state.get("inventory_cooldowns") as Dictionary
+	cooldowns[0] = {"end_msec": Time.get_ticks_msec() + 60000}
+	_check_cycle_case(main, 0, ["inspect", "grab"], "item on cooldown")
+	cooldowns[0] = {"end_msec": Time.get_ticks_msec() - 1}
+	_check_cycle_case(main, 0, ["use", "inspect", "grab"], "expired cooldown")
+	main.set("_inventory_tool", "use")
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_RIGHT
+	event.pressed = true
+	main.call("_on_inventory_slot_gui_input", event, 1)
+	_expect(str(main.get("_inventory_tool")) == "inspect",
+		"moving from a usable item to an unusable one keeps the cycle valid")
+	main.call("_begin_carry", 0)
+	main.call("_on_inventory_slot_gui_input", event, 1)
+	_expect(int(main.get("_carried_slot")) == -1
+		and str(main.get("_inventory_tool")) == "inspect",
+		"right click returns a carried item before cycling")
+	_fixture(main)
+	main.set("_inventory_tool", "grab")
+
+func _check_cycle_case(main: Node, slot: int, tools: Array[String], label: String) -> void:
+	main.set("_inventory_tool", "grab")
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_RIGHT
+	for index: int in tools.size() * 2:
+		event.pressed = true
+		main.call("_on_inventory_slot_gui_input", event, slot)
+		event.pressed = false
+		main.call("_on_inventory_slot_gui_input", event, slot)
+		_expect(str(main.get("_inventory_tool")) == tools[index % tools.size()],
+			"%s cycles to %s once per click" % [label, tools[index % tools.size()]])
 
 func _check_wear_destination(main: Node) -> void:
 	_fixture(main)

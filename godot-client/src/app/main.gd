@@ -2138,10 +2138,38 @@ func _reset_world_action() -> void:
 	_cursor_refresh_msec = 0
 	_sync_hud_button_states(true)
 
-func _cycle_world_action() -> void:
+## Use the click handler's target priority and capabilities so cycling cannot
+## arm a tool that does nothing at this position. Move always remains a way
+## back to the normal contextual pointer.
+func _available_world_actions_at(viewport_position: Vector2) -> Array[String]:
+	var actions: Array[String] = ["walk"]
+	var actor_id: int = _pick_actor(viewport_position)
+	if actor_id >= 0:
+		if actor_id == AppState.local_actor_id and _ground_bag_below_player() >= 0:
+			actions.append("pick")
+		var dto: Dictionary = AppState.actors.get(actor_id, {})
+		for action: String in MouseCursors.WORLD_ACTIONS:
+			if action != "walk" and _actor_click_action(actor_id, dto, false, action) == action:
+				actions.append(action)
+		return actions
+	if _pick_ground_bag(viewport_position) >= 0:
+		actions.append("pick")
+		return actions
+	var map_object: MapObject3D = _pick_map_object(viewport_position)
+	if map_object != null:
+		actions.append("harvest" if map_object.is_harvestable() else "use")
+		actions.append("look")
+	return actions
+
+func _cycle_world_action(viewport_position: Vector2) -> void:
+	var actions: Array[String] = _available_world_actions_at(viewport_position)
 	var index: int = MouseCursors.WORLD_ACTIONS.find(_interaction_mode)
-	_interaction_mode = MouseCursors.WORLD_ACTIONS[
-		(index + 1) % MouseCursors.WORLD_ACTIONS.size()]
+	for step: int in range(1, MouseCursors.WORLD_ACTIONS.size() + 1):
+		var action: String = MouseCursors.WORLD_ACTIONS[
+			(index + step) % MouseCursors.WORLD_ACTIONS.size()]
+		if action in actions:
+			_interaction_mode = action
+			break
 	match _interaction_mode:
 		"use":
 			_set_inventory_tool("use")
@@ -3748,7 +3776,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 				elif _has_carry():
 					_cancel_carry()
 				else:
-					_cycle_world_action()
+					_cycle_world_action(_local_viewport_position(mouse_button.position))
 			viewport_container.accept_event()
 			return
 		if camera_rig.handle_mouse_button(mouse_button):
@@ -11609,10 +11637,13 @@ func _describe_slot(slot: int, with_window: bool) -> void:
 
 ## Right-clicking an item takes the next tool and describes what is under the
 ## cursor without opening anything, so the player can see what the new tool
-## would act on before using it.
+## would act on before using it. Skip Use unless this slot can use its item now.
 func _cycle_inventory_tool(slot: int) -> void:
 	var index: int = INVENTORY_TOOLS.find(_inventory_tool)
-	_set_inventory_tool(INVENTORY_TOOLS[(index + 1) % INVENTORY_TOOLS.size()])
+	var next_tool: String = INVENTORY_TOOLS[(index + 1) % INVENTORY_TOOLS.size()]
+	if next_tool == "use" and not _slot_click_uses_item(slot):
+		next_tool = "inspect"
+	_set_inventory_tool(next_tool)
 	if AppState.inventory.has(slot):
 		selected_inventory_slot = slot
 		_describe_slot(slot, false)
@@ -12287,21 +12318,23 @@ func _sync_selection() -> void:
 ## pointer offers them a look until attack mode or Alt says otherwise, and a
 ## stray click in a crowd must not open a fight with one.
 func _actor_click_action(actor_id: int, dto: Dictionary,
-		alt_pressed: bool) -> String:
+		alt_pressed: bool, mode := "") -> String:
+	if mode.is_empty():
+		mode = _interaction_mode
 	if dto.is_empty():
 		return "none"
 	# A spell waiting for an actor claims whoever is under the pointer, you
 	# included; every other action here is about somebody else.
 	if AppState.pending_spell_target == "actor":
 		return "spell"
-	if _interaction_mode == "look" and int(dto.get("kind", 0)) in [1, 4] \
+	if mode == "look" and int(dto.get("kind", 0)) in [1, 4] \
 			and not alt_pressed:
 		return "look"
 	if actor_id == AppState.local_actor_id:
 		return "none"
 	if alt_pressed and _is_attackable_actor(actor_id, dto):
 		return "attack"
-	match _interaction_mode:
+	match mode:
 		"attack":
 			return "attack" if _is_attackable_actor(actor_id, dto) else "none"
 		"trade":

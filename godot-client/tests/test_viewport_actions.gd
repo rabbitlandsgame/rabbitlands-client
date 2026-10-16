@@ -35,7 +35,11 @@ func _run() -> void:
 		1: {"actor_id": 1, "kind": 1, "alive": true},
 		2: {"actor_id": 2, "kind": 1, "alive": true},
 		3: {"actor_id": 3, "kind": 2, "alive": true},
-		4: {"actor_id": 4, "kind": 3, "alive": true}})
+		4: {"actor_id": 4, "kind": 3, "alive": true},
+		5: {"actor_id": 5, "kind": 5, "name_colour": 4, "alive": true},
+		6: {"actor_id": 6, "kind": 1, "alive": false},
+		7: {"actor_id": 7, "kind": 3, "alive": false},
+		8: {"actor_id": 8, "kind": 0, "alive": true}})
 	main.set("picked_actor", 2)
 	_check_cycle()
 	_check_actions()
@@ -45,23 +49,99 @@ func _run() -> void:
 	print("viewport actions tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
 
-func _mouse(button: MouseButton, pressed := true) -> InputEventMouseButton:
+func _mouse(button: MouseButton, pressed := true,
+		position := Vector2(640, 360)) -> InputEventMouseButton:
 	var event := InputEventMouseButton.new()
 	event.button_index = button
 	event.pressed = pressed
-	event.position = Vector2(640, 360)
+	event.position = position
 	main.call("_on_world_gui_input", event)
 	return event
 
 func _check_cycle() -> void:
+	# Selection elsewhere must not determine what is available under the mouse.
+	state.set("selected_actor_id", 3)
+	_check_cycle_case("player", ["walk", "trade", "attack", "look"])
+	main.set("picked_actor", 3)
+	_check_cycle_case("NPC", ["walk", "talk"])
+	main.set("picked_actor", 4)
+	_check_cycle_case("creature", ["walk", "attack"])
+	main.set("picked_actor", 5)
+	_check_cycle_case("summon", ["walk", "attack", "talk"])
+	main.set("picked_actor", 6)
+	_check_cycle_case("dead player", ["walk", "look"])
+	main.set("picked_actor", 7)
+	_check_cycle_case("dead creature", ["walk"])
+	main.set("picked_actor", 8)
+	_check_cycle_case("unknown actor", ["walk"])
+	main.set("picked_actor", 1)
+	_check_cycle_case("self", ["walk", "look"])
+	state.set("ground_bags", {9: {"x": 10, "y": 20}})
+	(state.get("actors") as Dictionary)[1].merge({"x": 10, "y": 20})
+	_check_cycle_case("bag at own feet", ["walk", "pick", "look"])
+	state.set("ground_bags", {})
+	main.set("picked_actor", 2)
+	state.set("lantern_tutorial", {
+		"active": true, "tutorial": "borrowed_sky", "talk_actor_ids": [2]})
+	_check_cycle_case("tutorial companion", ["walk", "talk", "look"])
+	state.set("lantern_tutorial", {})
+	main.set("picked_actor", -1)
+	_check_cycle_case("ground", ["walk"])
+	main.set("picked_bag", 9)
+	_check_cycle_case("ground bag", ["walk", "pick"])
+	var object := MapObject3D.new()
+	object.object_id = 17
+	object.kind = EloriaProtocol.MAP_OBJECT_HARVEST
+	main.set("picked_object", object)
+	_check_cycle_case("bag in front of resource", ["walk", "pick"])
+	main.set("picked_bag", -1)
+	_check_cycle_case("resource", ["walk", "harvest", "look"])
+	object.kind = EloriaProtocol.MAP_OBJECT_INTERACTIVE
+	_check_cycle_case("interactive object", ["walk", "use", "look"])
+	object.kind = EloriaProtocol.MAP_OBJECT_EXIT
+	_check_cycle_case("exit", ["walk", "use", "look"])
+	main.set("picked_actor", 3)
+	_check_cycle_case("NPC in front of object", ["walk", "talk"])
+	main.set("picked_object", null)
+	object.free()
+	# A change of hovered target also skips tools from the old target's cycle.
+	main.set("_interaction_mode", "trade")
+	_mouse(MOUSE_BUTTON_RIGHT)
+	_expect(str(main.get("_interaction_mode")) == "talk",
+		"moving from a player to an NPC skips unavailable tools")
+	main.set("picked_actor", -1)
+	_mouse(MOUSE_BUTTON_RIGHT)
+	_expect(str(main.get("_interaction_mode")) == "walk",
+		"moving onto ground returns to Move")
+	# Input is local to the viewport control and must be scaled before picking.
+	var viewport: SubViewport = main.get("main_viewport") as SubViewport
+	var original_size: Vector2i = viewport.size
+	viewport.size = Vector2i(640, 360)
+	var position := Vector2(173, 91)
+	var viewport_position: Vector2 = main.call("_local_viewport_position", position)
+	main.set("actors_by_position", {viewport_position: 3})
+	_mouse(MOUSE_BUTTON_RIGHT, true, position)
+	_expect(str(main.get("_interaction_mode")) == "talk", "cycle picks at the click position")
+	viewport.size = original_size
+	main.set("actors_by_position", {})
+	main.set("picked_actor", 2)
+	_expect((network.get("frames") as Array).is_empty(), "context changes never send a command")
+	main.set("_interaction_mode", "harvest")
+	var escape := InputEventAction.new()
+	escape.action = "cancel"
+	escape.pressed = true
+	main.call("_unhandled_input", escape)
+	_expect(str(main.get("_interaction_mode")) == "walk", "Escape returns to Move")
+	_expect(str(main.get("_inventory_tool")) == "grab", "Escape also puts the inventory tool down")
+
+func _check_cycle_case(label: String, actions: Array[String]) -> void:
 	main.set("_interaction_mode", "walk")
-	for index: int in MouseCursors.WORLD_ACTIONS.size():
-		var wanted: String = MouseCursors.WORLD_ACTIONS[
-			(index + 1) % MouseCursors.WORLD_ACTIONS.size()]
+	for index: int in actions.size() * 2:
+		var wanted: String = actions[(index + 1) % actions.size()]
 		_mouse(MOUSE_BUTTON_RIGHT)
 		_mouse(MOUSE_BUTTON_RIGHT, false)
 		_expect(str(main.get("_interaction_mode")) == wanted,
-			"right click selects %s once per click" % wanted)
+			"%s: right click selects %s once per click" % [label, wanted])
 		_expect((network.get("frames") as Array).is_empty(),
 			"cycling %s does not activate the actor" % wanted)
 		_expect(MouseCursors.choose({"over_world": true, "mode": wanted})
@@ -70,13 +150,6 @@ func _check_cycle() -> void:
 			_expect(str(main.get("_inventory_tool")) == "use", "Use arms item use")
 		elif wanted == "look":
 			_expect(str(main.get("_inventory_tool")) == "inspect", "Look arms item inspection")
-	main.set("_interaction_mode", "harvest")
-	var escape := InputEventAction.new()
-	escape.action = "cancel"
-	escape.pressed = true
-	main.call("_unhandled_input", escape)
-	_expect(str(main.get("_interaction_mode")) == "walk", "Escape returns to Move")
-	_expect(str(main.get("_inventory_tool")) == "grab", "Escape also puts the inventory tool down")
 
 func _check_actions() -> void:
 	main.set("_interaction_mode", "trade")
@@ -86,6 +159,10 @@ func _check_actions() -> void:
 	_mouse(MOUSE_BUTTON_LEFT)
 	_expect_frame(EloriaProtocol.attack_actor(2), "Fight attacks the clicked player")
 	_mouse(MOUSE_BUTTON_RIGHT)
+	_mouse(MOUSE_BUTTON_LEFT)
+	_expect_frame(EloriaProtocol.look_at_player(2), "Look inspects the clicked player")
+	main.set("_interaction_mode", "use")
+	main.call("_set_inventory_tool", "use")
 	_mouse(MOUSE_BUTTON_LEFT)
 	_expect((network.get("frames") as Array).is_empty(), "Use cannot attack a player")
 	state.set("inventory", {0: {"image_id": 1, "quantity": 3, "inventory_usable": true}})
@@ -102,6 +179,7 @@ func _check_actions() -> void:
 	_expect_frame(EloriaProtocol.use_map_object(17), "Use activates a world object")
 	main.set("picked_object", null)
 	main.set("picked_bag", 9)
+	main.set("_interaction_mode", "walk")
 	_mouse(MOUSE_BUTTON_RIGHT)
 	_mouse(MOUSE_BUTTON_LEFT)
 	_expect_frame(EloriaProtocol.inspect_bag(9), "Pick up opens the clicked ground bag")
@@ -109,15 +187,18 @@ func _check_actions() -> void:
 	main.set("picked_bag", -1)
 	main.set("picked_object", object)
 	object.kind = EloriaProtocol.MAP_OBJECT_HARVEST
+	main.set("_interaction_mode", "walk")
 	_mouse(MOUSE_BUTTON_RIGHT)
 	_mouse(MOUSE_BUTTON_LEFT)
 	_expect_frame(EloriaProtocol.harvest(17), "Harvest gathers the clicked resource")
 	main.set("picked_object", null)
 	main.set("picked_actor", 3)
+	main.set("_interaction_mode", "walk")
 	_mouse(MOUSE_BUTTON_RIGHT)
 	_mouse(MOUSE_BUTTON_LEFT)
 	_expect_frame(EloriaProtocol.touch_actor(3), "Talk greets the clicked NPC")
 	main.set("picked_actor", 2)
+	main.set("_interaction_mode", "attack")
 	_mouse(MOUSE_BUTTON_RIGHT)
 	_mouse(MOUSE_BUTTON_LEFT)
 	_expect_frame(EloriaProtocol.look_at_player(2), "Look inspects the clicked player")

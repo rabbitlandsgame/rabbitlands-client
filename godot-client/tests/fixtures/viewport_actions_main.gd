@@ -3,9 +3,10 @@ extends "res://src/app/main.gd"
 var picked_actor := -1
 var picked_bag := -1
 var picked_object: MapObject3D
+var actors_by_position: Dictionary = {}
 
-func _pick_actor(_position: Vector2) -> int:
-	return picked_actor
+func _pick_actor(position: Vector2) -> int:
+	return int(actors_by_position.get(position, -1)) if not actors_by_position.is_empty() else picked_actor
 
 func _pick_ground_bag(_position: Vector2) -> int:
 	return picked_bag
