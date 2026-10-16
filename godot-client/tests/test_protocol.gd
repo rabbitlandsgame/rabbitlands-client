@@ -1394,14 +1394,13 @@ func _init() -> void:
 			# catalog_sources to its tables, and tests/test_catalog_sources.py
 			# holds this catalog's sources to that manifest whenever a server
 			# checkout is found.
-			# 545: the forty-two hand-authored recipes, which stay first in
-			# the file and so stay first here, the 499 the crafting ladder
-			# generates below them, and four recipes appended after it so no
-			# index moves (the watchpost's Bandage, Landfall's Feasting from
-			# Grapes and Cabbage and Gloam Wax from Rosemary, and Bread from
-			# Wheat and Salt).
+			# 539: the forty-two hand-authored recipes, the 493 remaining
+			# crafting ladder recipes after procedural equipment retirement,
+			# and four appended alternatives: the watchpost's Bandage, Landfall's
+			# Feasting from Grapes and Cabbage, Gloam Wax from Rosemary, and
+			# Bread from Wheat and Salt.
 			_expect(str(sources.get("profile", "")) == "eloria"
-				and manufacturing_recipes.size() == 545
+				and manufacturing_recipes.size() == 539
 				and str((manufacturing_recipes[0] as Dictionary).get("output", "")) == "Torch",
 				"manufacturing catalog matches the served profile's own recipes")
 			# Both catalogs come out of one generator run, so an index into the
