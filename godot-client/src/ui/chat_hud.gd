@@ -4,6 +4,7 @@ const FADE_SHADER := preload("res://src/ui/chat_soft_fade.gdshader")
 const PreviewScript := preload("res://src/ui/chat_preview.gd")
 const MINIMUM := Vector2(320, 165)
 const DEFAULT_SIZE := Vector2(490, 240)
+const BACKDROP_RIGHT_FADE := 160.0
 const DEFAULT_OPTIONS := {"font_size": 16, "background_opacity": 0.30,
 	"line_spacing": 2, "idle_fade": 0, "locked": false, "visible": true, "combined": false}
 signal tab_selected(key: String)
@@ -65,11 +66,13 @@ func _ready() -> void:
 	_fade.material = material
 	_frame.add_child(_fade)
 	_frame.move_child(_fade, 0)
-	# Include the outer padding so the header, tabs and composer share a backdrop.
+	# Keep the full window backed; feather only after the controls end.
 	_fade.offset_left = -6
 	_fade.offset_top = -6
 	_fade.offset_right = 6
 	_fade.offset_bottom = 6
+	item_rect_changed.connect(_sync_backdrop)
+	_sync_backdrop()
 	preview_feed = PreviewScript.new()
 	preview_feed.name = name + "Preview"
 	preview_feed.source = self
@@ -316,6 +319,17 @@ func select_tab(key: String) -> void:
 func _layout_key() -> String:
 	return "system_chat_soft" if feed_role == "system" else "chat_soft"
 
+func _sync_backdrop() -> void:
+	# The decorative tail must not shade the fixed resource rail.
+	var available := maxf(0.0, get_viewport_rect().size.x
+		- WindowDrag.RESERVED_RIGHT_RAIL - get_global_rect().end.x)
+	var extension := minf(BACKDROP_RIGHT_FADE, available)
+	_fade.offset_right = 6 + extension
+	var material := _fade.material as ShaderMaterial
+	material.set_shader_parameter("panel_width", size.x)
+	material.set_shader_parameter("backdrop_width", size.x + extension)
+	material.set_shader_parameter("right_fade_width", BACKDROP_RIGHT_FADE)
+
 func _default_rect() -> Rect2:
 	var requested := Vector2(440, 160) if feed_role == "system" else DEFAULT_SIZE
 	var where := Vector2(18, maxf(12, _bottom_limit() - requested.y - 12)) if feed_role == "system" else Vector2(18, 48)
@@ -414,6 +428,7 @@ func _queue_layout_clamp() -> void:
 
 func _clamp_layout() -> void:
 	resize_window(size)
+	_sync_backdrop()
 
 func _on_resize_input(event: InputEvent) -> void:
 	if bool(options.get("locked", false)):

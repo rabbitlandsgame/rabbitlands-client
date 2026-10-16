@@ -24,8 +24,10 @@ func _run() -> void:
 		and system.get_theme_stylebox("panel") is StyleBoxEmpty, "both surfaces have no solid frame")
 	_expect(chat.get_node("Frame/SoftFade").material is ShaderMaterial, "the backdrop is a feathered shader")
 	for surface: PanelContainer in [chat, system]:
-		_expect(surface.get_node("Frame/SoftFade").get_global_rect().is_equal_approx(surface.get_global_rect()),
-			"the backdrop covers the full window including its padding")
+		var backdrop: Rect2 = surface.get_node("Frame/SoftFade").get_global_rect()
+		var window := surface.get_global_rect()
+		_expect(backdrop.position.is_equal_approx(window.position) and is_equal_approx(backdrop.size.y, window.size.y)
+			and backdrop.end.x > window.end.x, "the backdrop extends beyond the full window before fading")
 	chat.set_option("idle_fade", 1)
 	chat.set("_last_message_msec", Time.get_ticks_msec() - 5000)
 	chat.call("_process", 0.2)
