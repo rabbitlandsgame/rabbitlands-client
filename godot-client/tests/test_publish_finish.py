@@ -217,6 +217,53 @@ class PublishFinishTest(unittest.TestCase):
         self.assertEqual(SM.manifest_indent(
             (package / "chunks" / "01_00" / "world.json").read_text(encoding="utf-8")), 2)
 
+    def test_pooling_a_new_prop_keeps_the_references_already_named(self):
+        """A file that already places pooled props and gains a new repeated one
+        must still name every prototype it places: a reference the manifest
+        drops draws nothing in the client, and the packager does not ship it."""
+        package = self.package("town")
+        self.finish(package)
+        first = {path.stem for path in self.pool()}
+        for cell in ("00_00", "01_00"):
+            glb = package / "chunks" / cell / "world.glb"
+            glb.write_bytes(SM.write_glb(*with_prop(*SM.read_glb(glb), seed=31.0)))
+        self.finish(package)
+        self.assertEqual(len(self.pool()), 2, "the new prop is pooled too")
+        for cell in ("00_00", "01_00"):
+            chunk = package / "chunks" / cell
+            document, _ = SM.read_glb(chunk / "world.glb")
+            placed = {node["extras"][SM.EXTRAS_KEY][SM.PROTOTYPE_FIELD] for node in document["nodes"]}
+            self.assertTrue(first < placed, "the old placements still name the first prototype")
+            manifest = json.loads((chunk / "world.json").read_text(encoding="utf-8"))
+            named = {Path(uri).stem for uri in manifest[SM.MANIFEST_KEY]}
+            self.assertEqual(named, placed, f"{cell}: the manifest names exactly what the file places")
+
+
+def with_prop(document: dict, binary: bytes, seed: float) -> tuple[dict, bytes]:
+    """`document` with prop(seed) added as one more placed mesh."""
+    extra, extra_binary = prop(seed)
+    document = json.loads(json.dumps(document))
+    packed = bytearray(binary)
+    packed.extend(b"\0" * ((-len(packed)) % 4))
+    base = len(packed)
+    packed.extend(extra_binary)
+    views = len(document.setdefault("bufferViews", []))
+    for view in extra["bufferViews"]:
+        document["bufferViews"].append(dict(view, byteOffset=base + view["byteOffset"]))
+    accessors = len(document.setdefault("accessors", []))
+    for accessor in extra["accessors"]:
+        document["accessors"].append(dict(accessor, bufferView=views + accessor["bufferView"]))
+    materials = len(document.setdefault("materials", []))
+    document["materials"] += extra["materials"]
+    primitive = extra["meshes"][0]["primitives"][0]
+    document.setdefault("meshes", []).append({"name": "rock", "primitives": [{
+        "attributes": {key: accessors + value for key, value in primitive["attributes"].items()},
+        "indices": accessors + primitive["indices"], "material": materials + primitive["material"]}]})
+    document["nodes"].append({"name": "Rock", "mesh": len(document["meshes"]) - 1})
+    document["scenes"][0]["nodes"].append(len(document["nodes"]) - 1)
+    document["buffers"] = [{"byteLength": len(packed)}]
+    return document, bytes(packed)
+
 
 class PartFileReaderTest(unittest.TestCase):
     """A GLB whose binary continues in a sibling part file."""

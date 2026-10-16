@@ -769,14 +769,22 @@ def apply_to_file(glb: Path, shared: dict, index: dict, dry_run: bool) -> dict:
     if not dry_run:
         write_package_glb(glb, data)
 
-    uris = {}
-    for identity in sorted(set(moving.values())):
-        uri = os.path.relpath(POOL / f"{identity}.glb", glb.parent).replace("\\", "/")
-        uris[uri] = index[identity]["sha256"]
+    # Every prototype the file places, not only the ones moved now: a file
+    # shared before that gains another repeated prop keeps its old placements,
+    # and a reference the manifest stops naming draws nothing in the client and
+    # is not shipped by the packager.
+    placed = {(node.get("extras", {}).get(EXTRAS_KEY) or {}).get(PROTOTYPE_FIELD)
+              for node in document.get("nodes", [])} - {None}
     manifest_path = manifest_for(glb)
     if manifest_path and not dry_run:
         text = manifest_path.read_bytes().decode("utf-8")
         manifest = json.loads(text)
+        named = manifest.get(MANIFEST_KEY) if isinstance(manifest.get(MANIFEST_KEY), dict) else {}
+        uris = {}
+        for identity in sorted(placed):
+            uri = os.path.relpath(POOL / f"{identity}.glb", glb.parent).replace("\\", "/")
+            uris[uri] = index[identity]["sha256"] if identity in index else named.get(uri) \
+                or sha256((POOL / f"{identity}.glb").read_bytes())
         manifest[MANIFEST_KEY] = uris
         write_manifest(manifest_path, manifest, text)
     return {"moved": len(moving), "placements": placements, "written": written,
