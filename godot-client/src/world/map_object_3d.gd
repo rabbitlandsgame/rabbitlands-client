@@ -1,5 +1,7 @@
 class_name MapObject3D
 extends StaticBody3D
+const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
+const STORAGE_GLOW_SHADER := preload("res://src/world/storage_glow.gdshader")
 ## A clickable world object: a harvest node or an interactive.
 ##
 ## The world package renders the surrounding scenery as ordinary map geometry,
@@ -48,6 +50,8 @@ const EXIT_COLOUR := Color("ff4747")
 const PORTAL_GLYPH := "P"
 const EXIT_GLYPH := "X"
 const STORAGE_COLOUR := Color("d6bb7a")
+const STORAGE_WORLD_RANGE := 90.0
+const GAMEPLAY_LAYER := 2
 ## The waygate texts the continent tool writes name where the gate leads in
 ## these words; the label beside the P on the full map is that name.
 const PORTAL_DESTINATION_PHRASE := "Beyond it lies "
@@ -68,6 +72,8 @@ var departure_available := false
 ## re-draped after a map's walk surface arrives is shaped by the ground it
 ## stands on rather than by whatever it was draped over before.
 var _ring_flat: Mesh = null
+var _storage_glow: MeshInstance3D
+var _storage_glow_flat: Mesh
 ## True when the registry hands this object's art to the map package rather
 ## than standing a model on it; see `interactives.mapAuthored`.
 var _map_authored: bool = false
@@ -243,6 +249,9 @@ func map_glyph() -> String:
 func set_surface_height(height: float) -> void:
 	global_position.y = height + 0.05
 	_drape_ring()
+	if is_instance_valid(_storage_glow):
+		var draped := GroundDrape.drape(_storage_glow, _storage_glow_flat)
+		_storage_glow.mesh = _storage_glow_flat if draped == null else draped
 
 ## Marks the node the player is currently harvesting. The ring is hidden while
 ## an object is merely standing there, so this is the only thing that draws it
@@ -395,6 +404,42 @@ func _build_visual(catalog: Dictionary) -> void:
 	_add_pick_shape(height)
 	if not authored.is_empty() and $PickShape.shape is CylinderShape3D:
 		($PickShape.shape as CylinderShape3D).radius = float(authored.get("radius", .9))
+	if is_storage():
+		_add_storage_visual(height)
+
+## Keep the service readable above the lid, with a soft animated ground halo.
+## Layer 2 belongs to the gameplay camera; the maps keep their storage dot.
+func _add_storage_visual(height: float) -> void:
+	var title := Label3D.new()
+	title.name = "StorageLabel"
+	title.text = "Storage"
+	title.position.y = maxf(height, 0.75) + 0.85
+	title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	title.fixed_size = true
+	WORLD_LABEL_STYLE.apply(title, 16, 0.0012953, 5)
+	title.modulate = STORAGE_COLOUR.lightened(0.3)
+	title.no_depth_test = true
+	title.layers = GAMEPLAY_LAYER
+	title.visibility_range_end = STORAGE_WORLD_RANGE
+	add_child(title)
+
+	var material := ShaderMaterial.new()
+	material.shader = STORAGE_GLOW_SHADER
+	material.set_shader_parameter("glow_colour", STORAGE_COLOUR)
+	material.set_shader_parameter("phase", float(posmod(object_id, 17)) * 0.37)
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(2.8, 2.8)
+	plane.subdivide_width = 12
+	plane.subdivide_depth = 12
+	_storage_glow_flat = plane
+	_storage_glow = MeshInstance3D.new()
+	_storage_glow.name = "StorageGlow"
+	_storage_glow.mesh = _storage_glow_flat
+	_storage_glow.material_override = material
+	_storage_glow.layers = GAMEPLAY_LAYER
+	_storage_glow.visibility_range_end = STORAGE_WORLD_RANGE
+	_storage_glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_storage_glow)
 
 ## Returns the height of the model that was placed, or 0.0 for none.
 func _add_model(entry: Dictionary) -> float:
