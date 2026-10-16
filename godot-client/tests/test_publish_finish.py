@@ -13,7 +13,9 @@ trust it:
   * the figures a manifest records about its own GLB follow the file.
     audit_continent.py and _continent_v2/tests/test_publish_client_geometry.py
     read them back and compare, so a pass that shrinks a GLB and leaves them
-    alone publishes a package that fails its own contracts.
+    alone publishes a package that fails its own contracts. That includes the
+    props it moved out: a streamed cell states the prototypes its chunk draws,
+    which the client's chunk budget counts once while any resident cell does.
   * running it again changes nothing, so a publisher may call it unconditionally.
 
 A region master past 90 MiB continues in sibling part files, which are ordinary
@@ -160,19 +162,81 @@ class PublishFinishTest(unittest.TestCase):
         for name, factor, expected in (("town", None, 5.0), ("sw_isle", 1.0, 1.0)):
             package = self.package(name, factor=factor)
             self.finish(package)
+            index = json.loads((self.root / "_shared" / "meshes" / "index.json").read_text(encoding="utf-8"))
             manifest = json.loads((package / "world.json").read_text(encoding="utf-8"))
             for cell in manifest["streamingChunks"]["chunks"]:
                 chunk = package / Path(cell["manifest"]).parent
                 size = (chunk / "world.glb").stat().st_size
                 self.assertEqual(cell["glbBytes"], size, f"{name}: the figure is the shipped GLB's")
                 self.assertEqual(cell["geometryResidentBytes"], math.ceil(expected * size), name)
+                child = json.loads((chunk / "world.json").read_text(encoding="utf-8"))
+                drawn = {Path(uri).stem for uri in child[SM.MANIFEST_KEY]}
+                self.assertEqual(len(drawn), 1, name)
+                self.assertEqual(cell["sharedMeshResidentBytes"],
+                                 {key: math.ceil(expected * index["prototypes"][key]["bytes"]) for key in drawn},
+                                 f"{name}: the prop it moved out, at the cell's own factor")
+                self.assertEqual(list(cell).index("sharedMeshResidentBytes"),
+                                 list(cell).index("sharedResourceResidentBytes") + 1,
+                                 "written beside the image figures, not wherever")
                 self.assertEqual(cell["estimatedResidentBytes"],
                                  cell["geometryResidentBytes"]
-                                 + sum(cell["sharedResourceResidentBytes"].values()), name)
-                child = json.loads((chunk / "world.json").read_text(encoding="utf-8"))
+                                 + sum(cell["sharedResourceResidentBytes"].values())
+                                 + sum(cell["sharedMeshResidentBytes"].values()), name)
                 self.assertEqual(child["performance"]["glbBytes"], size, name)
                 self.assertEqual(child["performance"]["meshes"], 0, "the meshes moved to the pool")
                 self.assertEqual(child["performance"]["nodes"], 2, name)
+
+    def test_a_cell_counts_the_prototypes_its_chunk_draws(self):
+        """What the client's budget counts for a pooled prop: one entry per
+        prototype a chunk names, sized from the pool's index, and nothing for a
+        chunk that draws none. A prototype placed twice is still one mesh."""
+        package = self.package("town", cells=3)
+        lonely = package / "chunks" / "02_00" / "world.glb"
+        lonely.write_bytes(SM.write_glb(*prop(17.0)))
+        self.finish(package)
+        index = json.loads((self.root / "_shared" / "meshes" / "index.json").read_text(encoding="utf-8"))
+        (identity, entry), = index["prototypes"].items()
+        cells = {cell["id"]: cell for cell in json.loads(
+            (package / "world.json").read_text(encoding="utf-8"))["streamingChunks"]["chunks"]}
+        for shared in ("00_00", "01_00"):
+            self.assertEqual(cells[shared]["sharedMeshResidentBytes"], {identity: 5 * entry["bytes"]},
+                             "both placements draw the one prototype, counted once")
+        self.assertNotIn("sharedMeshResidentBytes", cells["02_00"], "its prop stayed embedded")
+        self.assertEqual(cells["02_00"]["estimatedResidentBytes"],
+                         cells["02_00"]["geometryResidentBytes"] + 100)
+
+    def test_the_index_figure_wins_and_the_file_stands_in(self):
+        """The pool's index is what the packager checks a prototype against; a
+        prototype it does not list yet is sized from its file."""
+        import publish_finish as PF
+        pool = self.root / "_shared" / "meshes"
+        pool.mkdir(parents=True)
+        (pool / ("a" * 64 + ".glb")).write_bytes(b"x" * 300)
+        (pool / ("b" * 64 + ".glb")).write_bytes(b"x" * 700)
+        (pool / "index.json").write_text(json.dumps({"prototypes": {"a" * 64: {"bytes": 1000}}}),
+                                         encoding="utf-8")
+        chunk = self.root / "maps" / "chunks" / "00_00"
+        chunk.mkdir(parents=True)
+        child = {SM.MANIFEST_KEY: {os.path.relpath(pool / f"{key * 64}.glb", chunk).replace("\\", "/"): "0"
+                                   for key in "abc"}}
+        self.assertEqual(PF.prototype_figures(child, chunk / "world.json", 1.0, {}),
+                         {"a" * 64: 1000, "b" * 64: 700},
+                         "the index's bytes, else the file's; a missing file draws nothing and costs nothing")
+        self.assertEqual(PF.prototype_figures(child, chunk / "world.json", 5.0, {}),
+                         {"a" * 64: 5000, "b" * 64: 3500})
+
+    def test_a_publication_record_keeps_the_manifest_estimate(self):
+        package = self.package("sw_isle", factor=1.0)
+        (package / "publication.json").write_text(json.dumps(
+            {"geometryResidentFactor": 1.0, "estimatedResidentMiB": {"00_00": 0.0, "01_00": 0.0}},
+            indent=1) + "\n", encoding="utf-8")
+        self.finish(package)
+        record = json.loads((package / "publication.json").read_text(encoding="utf-8"))
+        manifest = json.loads((package / "world.json").read_text(encoding="utf-8"))
+        self.assertEqual(record["estimatedResidentMiB"],
+                         {cell["id"]: round(cell["estimatedResidentBytes"] / 1048576, 1)
+                          for cell in manifest["streamingChunks"]["chunks"]})
+        self.assertEqual(SM.manifest_indent((package / "publication.json").read_text(encoding="utf-8")), 1)
 
     def test_the_figures_a_publisher_declares_win(self):
         import publish_finish as PF

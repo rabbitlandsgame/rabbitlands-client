@@ -13,10 +13,16 @@ budget is still 256 MiB. The package case checks every committed isle package: i
 (publication.json geometryResidentFactor) and every cell carries it, so a stale or mis-merged republish that writes
 5 x again fails (a package published before the call fails until the territory is republished).
 
+Both kinds of cell also state the pooled prototypes their chunk draws (sharedMeshResidentBytes, written by
+publish_finish.py's restamp at the cell's own factor): a prop the space passes moved into maps/_shared/meshes left the
+chunk's GLB but is still drawn while the cell is resident, and the stream counts each prototype once. Its estimate
+sums geometry, images and prototypes.
+
     python -m pytest eloria-assets/maps/continent-v2/_continent_v2/tests/test_publish_client_geometry.py -q
 """
 from __future__ import annotations
 
+import functools
 import inspect
 import json
 import math
@@ -50,12 +56,38 @@ def test_the_publisher_writes_that_figure_into_every_cell():
     assert '"geometryResidentBytes": geometry' in source
     assert '"estimatedResidentBytes": geometry + sum(stats["sharedResourceResidentBytes"].values())' in source
     assert 'record["geometryResidentFactor"] = GEOMETRY_RESIDENT_FACTOR' in source
+    # The prototype figures come from the space passes, at the v2 factor, before the record reads the manifest.
+    assert source.index("PF.finish([out], factor=GEOMETRY_RESIDENT_FACTOR)") < source.index(
+        'manifest = json.loads((out / "world.json").read_text(encoding="utf-8"))')
     assert '["glbBytes"] * 5' not in source
 
 
 def test_the_legacy_exporter_keeps_five_times():
     text = (MAPS / "nymara-regions" / "_continent" / "build_continent.py").read_text(encoding="utf-8")
     assert "geometry_bytes=chunk_stats['glbBytes']*5" in text
+
+
+@functools.cache
+def pool_index(directory):
+    return json.loads((directory / "index.json").read_text(encoding="utf-8"))["prototypes"]
+
+
+def drawn_prototypes(child_path, child, factor):
+    """What a chunk's pooled prototypes cost at `factor`, from the pool index (which must match the file)."""
+    figures = {}
+    for uri in child.get("externalMeshes") or {}:
+        target = (child_path.parent / uri).resolve()
+        index = pool_index(target.parent)
+        assert index[target.stem]["bytes"] == target.stat().st_size, (uri, "the pool index is behind its file")
+        figures[target.stem] = math.ceil(factor * index[target.stem]["bytes"])
+    return figures
+
+
+def check_estimate(cell, child_path, child, factor):
+    prototypes = drawn_prototypes(child_path, child, factor)
+    assert cell.get("sharedMeshResidentBytes", {}) == prototypes, (cell["id"], "the prototypes it draws")
+    assert cell["estimatedResidentBytes"] == cell["geometryResidentBytes"] + sum(
+        cell["sharedResourceResidentBytes"].values()) + sum(prototypes.values()), cell["id"]
 
 
 def legacy_manifests():
@@ -85,8 +117,7 @@ def test_legacy_figures_keep_five_times_their_glb(manifest_path):
         glb = child_path.parent / child["asset"]["glb"]
         assert cell["glbBytes"] == glb.stat().st_size, (cell["id"], "the figure is the shipped GLB's")
         assert cell["geometryResidentBytes"] == LEGACY_FACTOR * cell["glbBytes"], cell["id"]
-        assert cell["estimatedResidentBytes"] == cell["geometryResidentBytes"] + sum(
-            cell["sharedResourceResidentBytes"].values()), cell["id"]
+        check_estimate(cell, child_path, child, LEGACY_FACTOR)
 
 
 def packages():
@@ -102,8 +133,10 @@ def test_a_package_published_with_the_factor_carries_it(package):
     assert record["geometryResidentFactor"] == PC.GEOMETRY_RESIDENT_FACTOR
     manifest = json.loads((package / "world.json").read_text(encoding="utf-8"))
     for cell in manifest["streamingChunks"]["chunks"]:
-        glb = package / Path(cell["manifest"]).parent / "world.glb"
+        child_path = package / cell["manifest"]
+        glb = child_path.parent / "world.glb"
         assert cell["glbBytes"] == glb.stat().st_size, cell["id"]
         assert cell["geometryResidentBytes"] == math.ceil(PC.GEOMETRY_RESIDENT_FACTOR * cell["glbBytes"]), cell["id"]
-        assert cell["estimatedResidentBytes"] == cell["geometryResidentBytes"] + sum(
-            cell["sharedResourceResidentBytes"].values()), cell["id"]
+        check_estimate(cell, child_path, json.loads(child_path.read_text(encoding="utf-8")),
+                       PC.GEOMETRY_RESIDENT_FACTOR)
+        assert record["estimatedResidentMiB"][cell["id"]] == round(cell["estimatedResidentBytes"] / 1048576, 1)

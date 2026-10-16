@@ -960,10 +960,11 @@ def main():
         timings["master_s"] = round(time.time() - t, 1)
     # Published as baked, every cell carries its own copy of each repeated kit
     # prop and its normals at 32 bits. The space passes settle that, and the
-    # figures the manifests record about their own GLBs with it - so they run
-    # before the record below measures what shipped. GEOMETRY_RESIDENT_FACTOR
+    # figures the manifests record about their own GLBs with it, including the
+    # pooled prototypes each cell now draws (sharedMeshResidentBytes) - so they
+    # run before the record below measures what shipped. GEOMETRY_RESIDENT_FACTOR
     # goes with them: on a territory's first publish there is no
-    # publication.json yet to read it from.
+    # publication.json yet to read it from, and the prototypes count at it too.
     t = time.time()
     PF.finish([out], factor=GEOMETRY_RESIDENT_FACTOR)
     timings["space_passes_s"] = round(time.time() - t, 1)

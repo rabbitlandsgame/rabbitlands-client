@@ -123,10 +123,13 @@ func _validate_chunks() -> void:
 		for field: String in ["estimatedResidentBytes", "geometryResidentBytes"]:
 			if value.has(field) and (not (value[field] is int or value[field] is float) or not is_finite(float(value[field])) or float(value[field]) < 1):
 				errors.append("streaming chunk memory estimate must be positive: " + identity)
-		var shared: Variant = value.get("sharedResourceResidentBytes", {})
-		if not shared is Dictionary:
-			errors.append("streaming chunk shared resources must be an object: " + identity)
-		else:
+		# Shared images by content hash; pooled prototypes by identity (the
+		# prototype file's stem, which is also a SHA256).
+		for field: String in ["sharedResourceResidentBytes", "sharedMeshResidentBytes"]:
+			var shared: Variant = value.get(field, {})
+			if not shared is Dictionary:
+				errors.append("streaming chunk shared resources must be an object: " + identity)
+				continue
 			for hash: Variant in shared:
 				var bytes: Variant = shared[hash]
 				if not hash is String or str(hash).length() != 64 or not str(hash).is_valid_hex_number(false):

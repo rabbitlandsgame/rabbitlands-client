@@ -28,6 +28,7 @@ gameplay metadata and full `world.glb` review export. It adds:
         "estimatedResidentBytes": 4194304,
         "geometryResidentBytes": 617280,
         "sharedResourceResidentBytes": {"<SHA256>": 1398102},
+        "sharedMeshResidentBytes": {"<prototype SHA256>": 472200},
         "packageDigest": "<64 lowercase SHA256 characters>"
       }
     ]
@@ -115,6 +116,22 @@ to count until their last resource is released. Accounting is per territory;
 the GPU pool also shares textures between adjacent territories, so their combined
 estimate remains conservative.
 
+Pooled props count the same way. The space passes move a prop repeated across
+files into `maps/_shared/meshes` and leave the chunk a placement naming it
+(`externalMeshes`); `ExternalMeshPool` draws one mesh for every resident user.
+The prop has left the chunk's `glbBytes` but not the GPU, so
+`publish_finish.py`'s restamp states each cell's prototypes in
+`sharedMeshResidentBytes`: the prototype's identity (its file stem) to the
+pool index's `bytes` times the cell's own geometry factor (5 for the legacy
+exporters, 1.0 for continent-v2). Selection counts each identity once across
+the prospective resident set, and the walk that marks `blocking` floors it at
+5 x like the cell's geometry. `estimatedResidentBytes` includes them. Before
+this, a Nymara cell restated after pooling counted almost nothing for its
+props: on the shipped sidecar figures Amberwood admitted 15.8 cells per focus
+on average while the prototypes they drew, 189 MiB, went uncounted; counted,
+it admits 6.4 (its admission before the restamp was 5.8). Prototype images
+are already among the cell's `sharedResourceResidentBytes`.
+
 Chunk retirement frees a bounded number of nodes per frame. Territory retirement
 pauses new work and waits by polling any existing worker before releasing its
 descendants. Continuous territory adoption transfers the same root and cell
@@ -193,6 +210,12 @@ selected child GLBs are imported. It also covers actual arrival priming,
 asynchronous replacement, node release, byte/count limits, external integrity,
 actual shared image identity, neighbor picking, continuous adoption and later
 preview collision ownership.
+
+`tests/test_continent_chunk_shared_meshes.gd` covers the prototype figures:
+once per identity across selection, residency and retirement, the 5 x blocking
+floor for a continent-v2 cell, and the manifest check. `test_publish_finish.py`
+and `_continent_v2/tests/test_publish_client_geometry.py` check the restamp and
+every committed territory's cells against the pool index.
 
 `tests/test_chunk_ambient_population.gd` uses actual translated physics terrain,
 a saved model scene, cold cells, preview collision and bounded retirement to

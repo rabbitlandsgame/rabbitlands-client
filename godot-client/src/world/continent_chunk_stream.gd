@@ -30,6 +30,16 @@ const PUBLISHED_SHARED_KEY := "publishedSharedResourceResidentBytes"
 ## worker instead of lengthening the arrival. Every legacy cell already
 ## publishes exactly this figure, so its walk is unchanged.
 const BLOCKING_GEOMETRY_PER_GLB_BYTE := 5
+## A cell's pooled prototypes (publish_finish.py restamp): prototype identity ->
+## resident bytes, at the same factor as the cell's own geometry. A pooled prop
+## left the chunk's GLB but is drawn from ExternalMeshPool while the cell is
+## resident, so it is counted once while any resident cell names it, as a
+## shared image is. Since the space passes most of a cell's geometry is here:
+## Four Gates 02_07's GLB went from 1,295,400 to 18,336 bytes.
+const SHARED_MESHES_KEY := "sharedMeshResidentBytes"
+## Prototype identities and image hashes are both SHA256, so a walk's shared
+## figures keep prototypes under this prefix.
+const SHARED_MESH_PREFIX := "mesh:"
 
 signal cell_ready(identity: String, imported: Node3D)
 signal cell_retiring(identity: String, imported: Node3D)
@@ -213,13 +223,21 @@ static func bounds_distance(position: Vector3, bounds: Dictionary) -> float:
 ## what this client really holds (the default), or PUBLISHED_SHARED_KEY.
 static func incremental_cost(entry: Dictionary, shared: Dictionary,
 		key := "sharedResourceResidentBytes") -> int:
-	# Decoded textures are pooled by content hash. Count each hash once across
-	# the prospective resident set, while keeping legacy all-in estimates valid.
+	# Decoded textures and pooled prototypes are shared by identity. Count each
+	# once across the prospective resident set, while keeping legacy all-in
+	# estimates (which already include a cell's prototypes) valid.
 	if not entry.has("geometryResidentBytes"):
 		return int(entry.estimatedResidentBytes)
 	var geometry := int(entry.geometryResidentBytes)
+	# The blocking walk counts geometry at no less than 5 x its GLB bytes. A
+	# cell's prototypes are stated at the factor of its own geometry, so they
+	# take the same floor: x5 for a continent-v2 cell, x1 for a legacy one.
+	var prototype_scale := 1.0
 	if key == PUBLISHED_SHARED_KEY and entry.has("glbBytes"):
-		geometry = maxi(geometry, BLOCKING_GEOMETRY_PER_GLB_BYTE * int(entry.glbBytes))
+		var floor_bytes := BLOCKING_GEOMETRY_PER_GLB_BYTE * int(entry.glbBytes)
+		if floor_bytes > geometry:
+			prototype_scale = float(floor_bytes) / maxi(1, geometry)
+			geometry = floor_bytes
 	var cost := maxi(1, geometry)
 	var images: Dictionary = entry.get(key, entry.get("sharedResourceResidentBytes", {}))
 	for identity: String in images:
@@ -227,6 +245,14 @@ static func incremental_cost(entry: Dictionary, shared: Dictionary,
 		var previous := int(shared.get(identity, 0))
 		cost += maxi(0, bytes - previous)
 		shared[identity] = maxi(previous, bytes)
+	var prototypes: Variant = entry.get(SHARED_MESHES_KEY)
+	if prototypes is Dictionary:
+		for identity: String in prototypes:
+			var bytes := maxi(0, ceili(float(prototypes[identity]) * prototype_scale))
+			var slot := SHARED_MESH_PREFIX + identity
+			var previous := int(shared.get(slot, 0))
+			cost += maxi(0, bytes - previous)
+			shared[slot] = maxi(previous, bytes)
 	return cost
 
 func selection(position: Vector3, retain := false) -> Array[Dictionary]:

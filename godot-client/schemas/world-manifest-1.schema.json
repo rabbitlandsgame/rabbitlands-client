@@ -69,6 +69,7 @@
               "estimatedResidentBytes": {"type": "integer", "minimum": 1},
               "geometryResidentBytes": {"type": "integer", "minimum": 1},
               "sharedResourceResidentBytes": {"type": "object", "propertyNames": {"pattern": "^[0-9a-f]{64}$"}, "additionalProperties": {"type": "integer", "minimum": 0}},
+              "sharedMeshResidentBytes": {"type": "object", "propertyNames": {"pattern": "^[0-9a-f]{64}$"}, "additionalProperties": {"type": "integer", "minimum": 0}},
               "packageDigest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
               "bounds": {
                 "type": "object", "required": ["min", "max"],

@@ -36,6 +36,13 @@ The last step is bookkeeping: the figures a manifest records about its own GLB.
 both checked against the file on disk (audit_continent.py, and
 _continent_v2/tests/test_publish_client_geometry.py), and a pass that shrinks a
 GLB without restating them leaves the package failing its own contracts.
+
+A pooled prop leaves its chunk's GLB, but not the GPU: the client draws it from
+the pool while that chunk is resident. So a parent also states, per streamed
+cell, the prototypes its chunk draws (`sharedMeshResidentBytes`, prototype ->
+resident bytes, at the same factor as the cell's own geometry), and the stream
+counts each one once while any resident cell names it, as it already does for
+the shared images (godot-client/src/world/continent_chunk_stream.gd).
 """
 from __future__ import annotations
 
@@ -214,14 +221,74 @@ def _own_figures(manifest: dict, path: Path) -> bool:
     return changed
 
 
+SHARED_MESHES_KEY = "sharedMeshResidentBytes"
+
+
+def _pool_index(directory: Path, indexes: dict) -> dict:
+    """The index.json beside a pool's prototypes, read once per directory."""
+    key = str(directory)
+    if key not in indexes:
+        try:
+            indexes[key] = json.loads((directory / "index.json").read_text(encoding="utf-8")).get("prototypes", {})
+        except (OSError, ValueError, AttributeError):
+            indexes[key] = {}
+    return indexes[key]
+
+
+def prototype_figures(child: dict, child_path: Path, resident: float, indexes: dict) -> dict:
+    """What the prototypes a chunk draws cost resident: identity -> bytes.
+
+    The identity is the prototype file's stem, the key the client's
+    ExternalMeshPool shares a mesh by, so the stream can count it once across
+    every resident cell. Its size is the one the pool's index records (kept in
+    step with the file by shared_meshes.reconcile, which finish() runs first),
+    or the file's own where the index lacks it, at the cell's resident factor.
+    A reference to no file draws nothing in the client and costs nothing.
+    """
+    figures = {}
+    named = child.get(SM.MANIFEST_KEY)
+    for uri in named if isinstance(named, dict) else {}:
+        target = (child_path.parent / uri).resolve()
+        identity = target.stem
+        size = _pool_index(target.parent, indexes).get(identity, {}).get("bytes")
+        if not isinstance(size, int):
+            if not target.is_file():
+                continue
+            size = target.stat().st_size
+        figures[identity] = max(figures.get(identity, 0), max(1, math.ceil(resident * size)))
+    return dict(sorted(figures.items()))
+
+
+def _set_prototypes(cell: dict, figures: dict) -> bool:
+    """Write a cell's prototype figures beside its image figures. True if changed."""
+    if not figures:
+        return cell.pop(SHARED_MESHES_KEY, None) is not None
+    if cell.get(SHARED_MESHES_KEY) == figures:
+        return False
+    if SHARED_MESHES_KEY not in cell and "sharedResourceResidentBytes" in cell:
+        items = list(cell.items())
+        cell.clear()
+        for key, value in items:
+            cell[key] = value
+            if key == "sharedResourceResidentBytes":
+                cell[SHARED_MESHES_KEY] = figures
+    else:
+        cell[SHARED_MESHES_KEY] = figures
+    return True
+
+
 def restamp(manifests, dry_run: bool = False, factor: float | None = None) -> list[str]:
     """Put every recorded GLB figure back in step with the file on disk.
 
     A manifest states its own GLB's size, and a parent states each streamed
     chunk's - with the resident-byte estimate the client admits chunks by. Both
     are read back and checked, so a pass that shrinks a GLB owes them an update.
+    The pass that shrinks it most moves props into the pool, so a cell also
+    states what its pooled prototypes cost (`sharedMeshResidentBytes`), and its
+    standalone estimate counts them: geometry + images + prototypes.
     """
     updated: list[str] = []
+    indexes: dict = {}
     for raw in manifests:
         path = Path(raw)
         loaded = _load(path)
@@ -242,9 +309,11 @@ def restamp(manifests, dry_run: bool = False, factor: float | None = None) -> li
                 continue
             size = glb.stat().st_size
             geometry = math.ceil(resident * size)
+            prototypes = prototype_figures(child[0], child_path, resident, indexes)
+            changed = _set_prototypes(cell, prototypes) or changed
             shared = (cell.get("sharedResourceResidentBytes") or {}).values()
             for key, value in (("glbBytes", size), ("geometryResidentBytes", geometry),
-                               ("estimatedResidentBytes", geometry + sum(shared))):
+                               ("estimatedResidentBytes", geometry + sum(shared) + sum(prototypes.values()))):
                 if key in cell and cell[key] != value:
                     cell[key] = value
                     changed = True
@@ -256,7 +325,29 @@ def restamp(manifests, dry_run: bool = False, factor: float | None = None) -> li
             updated.append(SM.repo_relative(path))
             if not dry_run:
                 SM.write_manifest(path, manifest, text)
+        if cells and _restate_publication(path.parent / "publication.json", cells, dry_run):
+            updated.append(SM.repo_relative(path.parent / "publication.json"))
     return updated
+
+
+def _restate_publication(record_path: Path, cells: list, dry_run: bool) -> bool:
+    """The per-cell estimate a continent-v2 publication record copies from its
+    manifest (publish_client.py `estimatedResidentMiB`). True if changed."""
+    loaded = _load(record_path) if record_path.is_file() else None
+    recorded = loaded[0].get("estimatedResidentMiB") if loaded else None
+    if not isinstance(recorded, dict):
+        return False
+    changed = False
+    for cell in cells:
+        identity = cell.get("id")
+        if identity in recorded and "estimatedResidentBytes" in cell:
+            value = round(cell["estimatedResidentBytes"] / 1048576, 1)
+            if recorded[identity] != value:
+                recorded[identity] = value
+                changed = True
+    if changed and not dry_run:
+        SM.write_manifest(record_path, loaded[0], loaded[1])
+    return changed
 
 
 def package_manifests(files: list[Path]) -> list[Path]:
