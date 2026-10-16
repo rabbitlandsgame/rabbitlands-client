@@ -26,8 +26,7 @@ func _run() -> void:
 	for surface: PanelContainer in [chat, system]:
 		var backdrop: Rect2 = surface.get_node("Frame/SoftFade").get_global_rect()
 		var window := surface.get_global_rect()
-		_expect(backdrop.position.is_equal_approx(window.position) and is_equal_approx(backdrop.size.y, window.size.y)
-			and backdrop.end.x > window.end.x, "the backdrop extends beyond the full window before fading")
+		_expect(backdrop.is_equal_approx(window), "the backdrop stays inside the window's resize bounds")
 	chat.set_option("idle_fade", 1)
 	chat.set("_last_message_msec", Time.get_ticks_msec() - 5000)
 	chat.call("_process", 0.2)
