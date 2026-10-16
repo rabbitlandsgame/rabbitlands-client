@@ -29,7 +29,7 @@ def build(key, adventure):
         t('rival','Practice prism',(106,60),(100,60),kind='npc'),
         t('enemy','Road opponent',(101,65),(96,65),kind='npc'),
         t('ore','Iron Ore',(50,98),(50,96),7310,'harvestable'),
-        t('coal','Deep Coal',(70,98),(70,96),7311,'harvestable'),
+        t('coal','Coal',(70,98),(70,96),7311,'harvestable'),
         t('fork','East fork gate',(84,60),(81,60),7320,'gate'),
         t('fork_west','West fork gate',(36,60),(39,60),7321,'gate'),
         t('cache_reward','Individual reward cache',(60,19),(60,22),7322,'cache'),
@@ -100,7 +100,7 @@ def build(key, adventure):
     manifest=json.loads((CLIENT/'eloria-assets/maps/stillglass/world.json').read_text())
     manifest['asset'].update(id=mid,name=adventure['name'])
     manifest['landmarks']=[dict(id=t['id'],name=t['label'],position=[t['tile'][0],.4,-t['tile'][1]]) for t in targets]
-    manifest['interactives']=[dict(id=t['id'],kind=t['kind'],objectId=t['objectId'],position=[t['tile'][0],.4,-t['tile'][1]],serverTile=t['tile'],approachTile=t['approach'],resource='Iron Ore' if t['id']=='ore' else 'Deep Coal' if t['id']=='coal' else '') for t in targets if t['objectId']]
+    manifest['interactives']=[dict(id=t['id'],kind=t['kind'],objectId=t['objectId'],position=[t['tile'][0],.4,-t['tile'][1]],serverTile=t['tile'],approachTile=t['approach'],resource='Iron Ore' if t['id']=='ore' else 'Coal' if t['id']=='coal' else '') for t in targets if t['objectId']]
     (out/'world.json').write_text(json.dumps(manifest,indent=2)+'\n')
     assert len({t['objectId'] for t in targets if t['objectId']})==len([t for t in targets if t['objectId']])
     for target in targets:assert grid[target['approach'][1]*SIZE+target['approach'][0]]
