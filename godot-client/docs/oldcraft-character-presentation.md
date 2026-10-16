@@ -15,24 +15,27 @@ Eloria's canonical player rig remains the source of truth:
 - Keep gameplay displacement code-owned. Animation root motion remains off.
 - Body, skinned hair, and modular garments must bind to the same canonical
   skeleton. Rigid equipment remains on named sockets.
-- Do not author scale tracks into shared animation clips. The presentation
-  layer uses persistent bone pose scales for chest, limbs, head, hands, and
-  feet; scale animation would fight that layer every frame.
-- Retain culture-specific silhouettes. Heavy cultures receive more trunk and
-  extremity mass, while tall or spectral cultures keep their long-limbed read.
-- Require an explicit player-culture profile before applying pose scales.
-  Creatures and other NPC rigs remain untouched even when they reuse names
-  such as `Head`, `hand_l`, or `thigh_l`.
+- Do not author scale tracks into shared animation clips. Proportion belongs
+  in the body meshes; a scale track would override it every frame.
+- Retain culture-specific silhouettes in the body meshes themselves. Heavy
+  cultures carry more trunk and extremity mass, while tall or spectral
+  cultures keep their long-limbed read.
 - Continue using equipment fit variants where a silhouette cannot be reached
   by a uniform fit. Covered body zones should remain hidden to avoid clipping
   and unnecessary overdraw.
 
-`OldcraftActorStyle` applies this contract once after the native skeleton is
-loaded. It never changes the rest rig or inverse binds, so rebound equipment
-inherits the same silhouette. Its material pass retains authored texture,
+`OldcraftActorStyle` no longer touches the skeleton. The persistent bone pose
+scales it used to apply to the chest, limbs, head, hands, and feet were
+removed on 2026-10-05: they compounded down each chain, so a hand ended up
+about 1.6 times its authored girth, and they fought the fitted equipment.
+Bodies now render at their authored proportions. The class applies only the
+material finish to each actor's native model: it retains authored texture,
 tint, transparency, emission, metal masks, and normal textures while
 softening plastic-looking highlights with a roughness floor, restrained
-dielectric specular, and a bounded normal-map strength.
+dielectric specular, and a bounded normal-map strength. Materials whose names
+begin with `Race feature glass` keep their authored gloss.
+`tests/test_oldcraft_actor_style.gd` checks that no skeleton styling remains
+and that glass keeps its gloss.
 
 ## Source-model intake contract
 

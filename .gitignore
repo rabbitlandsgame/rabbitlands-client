@@ -24,9 +24,9 @@ xcuserdata/
 godot-client/Godot_v*.exe
 godot-client/Godot_v*
 
-# Godot editor artefacts. The godot-client project is imported by CI
-# ("godot --headless --path godot-client --editor --quit"), which regenerates
-# all of these, so none of them belong in the tree.
+# Godot editor artefacts. A headless import of the godot-client project
+# ("godot --headless --path godot-client --import") regenerates all of these
+# in a fresh checkout, so none of them belong in the tree.
 godot-client/.godot/
 *.import
 # Biome masks encode four independent numeric weights, including alpha.
@@ -39,7 +39,7 @@ godot-client/**/*.glb.report.json
 # Textures extracted by Godot from the self-contained Meshy storage GLB.
 godot-client/assets/world/interactives/storage_[0-9].jpg
 
-# Rendered test evidence. CI uploads it as a build artifact.
+# Rendered test evidence written by local test runs.
 godot-client/test-artifacts/
 
 # Validator reports written beside the map packages they describe.

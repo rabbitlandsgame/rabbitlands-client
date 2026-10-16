@@ -48,7 +48,8 @@ seats generated models in the territory palette's kit
 (`godot-client/world_authoring/regions/crownwater/assets/prototypes/kit-*.glb`). Each model is taken
 from the first folder that has it.
 
-- The Crownwater set, from `work-output/crownwater-2026-09-28/asset-prompts.md`: a gondola, a
+- The Crownwater set, from
+  `.local/asset-authoring/workspace/work-output/crownwater-2026-09-28/asset-prompts.md`: a gondola, a
   ceremonial barge, a flower barge, lamp buoys and divers' floats; bricole posts, a gondola post, a
   water stair and a sea wall; a teal-domed gazebo, a crown fountain, balustrades, citrus planters,
   obelisk lamps and a pergola; oyster baskets, a pearl-sorting table, a net-mending frame, market

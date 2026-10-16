@@ -19,7 +19,7 @@ python source/verify_landscape.py --server <server-checkout> --report <audit.jso
 
 The first command exports main and reduced GLBs, a 792 × 792 half-metre EWCG grid, minimap, manifests and validators. It refines collision from actual rendered triangles, opens exposed walk surfaces, stamps solid towers, then guards the actual actor-centre samples before verification. The second performs the server fold and real `World.find_path` in memory, without writing server state. Source uses fixed seed `20260829` and the shared toolkit. `source/migrate_compact_server.py` records the one-time coordinate migration; the integration owner runs it before publishing updated services and portals.
 
-Current machine measurements are in `performance.json` and `verification-report.json`. Gameplay-camera before/after views, route audits and annotated review are in `work-output/coastal-rollout/westhaven` at the workspace root. Final live path verification is recorded by the coastal integration run. Older comparison and validation documents describe the previous 576m package and are historical evidence.
+Current machine measurements are in `performance.json` and `verification-report.json`. Gameplay-camera before/after views, route audits and annotated review are in `.local/asset-authoring/workspace/work-output/coastal-rollout/westhaven`, in the local authoring archive (see `docs/asset-authoring.md`). Final live path verification is recorded by the coastal integration run. Older comparison and validation documents describe the previous 576m package and are historical evidence.
 
 ## Editor kit
 
@@ -28,7 +28,8 @@ seats generated models in the territory palette's kit
 (`godot-client/world_authoring/regions/westhaven/assets/prototypes/kit-*.glb`). Each model is taken
 from the first folder that has it.
 
-- The Westhaven set, from `work-output/westhaven-2026-09-28/asset-prompts.md`: terracotta townhouses, a
+- The Westhaven set, from
+  `.local/asset-authoring/workspace/work-output/westhaven-2026-09-28/asset-prompts.md`: terracotta townhouses, a
   harbour row, a merchant house and a fisher's hut; a harbour crane, cargo, rope, lobster pots, fish
   crates, an anchor, a mooring buoy and quay steps; fishing boats, a skiff, a sloop and a caravel;
   olives, stone pines, cypresses, lemon trees and bougainvillea; beach rocks, net frames, vineyards, a

@@ -69,8 +69,9 @@ the strict contracts passed with 0 failures, the audit passed and verified the
 publication, and the live fixture audit proved all 10,163 lanes offline by the server's
 own walking rules with 0 errors; the continent, crossing-related server and client
 tests passed. The live suites on a real server and client were not run for this
-publication, at the owner's request. Known limitations are listed in
-`STATUS-2026-09-13-takeover.md`: roads are not yet walkable (the walkable-roads round);
+publication, at the maintainers' request. Known limitations were listed in
+`STATUS-2026-09-13-takeover.md`, a historical status note kept outside the repository:
+roads are not yet walkable (the walkable-roads round);
 the reach links leave wall steps over the 4 m smoothing limit where the Moors pass
 switchback's legs are stacked on the Whitehorn face; the Grey Moors undercut mouth is
 served at the foot of its slope; and the Four Gates north and south gates still have no
@@ -88,7 +89,8 @@ headless suite passed 19 checks with 0 failures; and the border-crossing and ext
 continuation headless suites passed. The world-input suite still has two unrelated failures
 for imported material texture filtering and mip chains. No live suite, full server suite or
 build chain was run, and this follow-up changed no geometry, publication or server data.
-Evidence is retained in `../../../../../after/roadless-fixtures-tests-20260919-190518.log`,
+Its evidence is historical and was kept outside the repository, in the original authoring
+workspace: `../../../../../after/roadless-fixtures-tests-20260919-190518.log`,
 `../../../../../after/roadless-prepare-20260919-191643.log`,
 `../../../../../after/headless-roadless-map-clicks-agent-20260919-r2.log`, and
 `../../../../../after/roadless-fixture-validation-20260919.json`.
@@ -99,7 +101,8 @@ rows differ, including Whitehorn-Mirrorhold at 48/47. Its `both` count checks on
 floor bytes at two segment-midpoint samples, while `crossed` checks exact served portal-tile
 membership; it does not apply actual step-height, collar, reachability, landing or lane-
 pruning rules. This is recorded as an unresolved diagnostic discrepancy, not evidence that
-each unmatched sample is a legal missing lane. See
+each unmatched sample is a legal missing lane. See the historical evidence kept outside
+the repository, in the original authoring workspace:
 `../../../../../STATUS-2026-09-19-roadless-fixtures.md`
 and `../../../../../after/roadless-border-audit-20260919-191929.log`.
 

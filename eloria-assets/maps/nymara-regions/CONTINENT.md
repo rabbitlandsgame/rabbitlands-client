@@ -256,7 +256,7 @@ Both read the package with `_toolkit/glb_reader.py` and are idempotent, and
 `godot-client/tests/test_walk_surfaces.py` holds every region to the first.
 
 
-## Grey Moors circulation pass â€” September 2026
+## Grey Moors circulation pass - September 2026
 
 The stable east-waygate id still links to Crownwater, but its visible ferry
 now lands at the actual south-west cove. The earlier eastern marker stood
@@ -269,7 +269,7 @@ stone crown stands on the mound, reached by a side ascent; its entrance
 faces the ceremonial approach. Twelve surveyed wet crossings supply the
 corrected authored collision fold, including the cove jetty.
 
-## Amethyst Barrens circulation pass â€” September 2026
+## Amethyst Barrens circulation pass - September 2026
 
 The four continent links keep their stable ids and destinations. The Mirrorhold
 trigger stands beside its watchtower instead of inside it. The Crownwater
@@ -282,7 +282,7 @@ the observatory stair reaches an open podium and a framed Resonant Vault door.
 The basin river is incised downstream before the roads are graded, and its
 western tributary now meets the main course. No graph edge is added or removed.
 
-## Ssarathi Ruins circulation pass â€” September 2026
+## Ssarathi Ruins circulation pass - September 2026
 
 The four continent links retain their ids and destinations. The Crownwater boat
 uses the western southern jetty at world (8, 99), with its cargo station on the
@@ -363,15 +363,19 @@ See sunmane_steppe/layout-review.md for evidence and remaining visual limits.
 
 ## The continent map
 
-The map window's continent is not a painting. `continent-layout.json` says
-where each exterior region sits on one canvas, in metres, and
-`eloria-assets/tools/build_continent_map.py` lays every region's own
-`minimap.webp` there to scale - the same top-down picture the Tab map draws
-live of the map the player stands on - into `continent-map.webp` beside this
-file, and writes the client's `godot-client/data/maps/cartography.json`. Each
-region on the continent is a click target that opens the region's own tab
-map, cropped to what the live Tab map frames (`mapBounds`, then
-`playableBounds`, then the server's addressable rectangle), so a preview
-shows what a player sees on arrival. Re-run the tool after a region redraws
-its minimap or moves on the layout; `godot-client/tests/test_cartography.py`
-fails while the checked-in picture or cartography is stale.
+The map window's continent is not a painting.
+`eloria-assets/tools/build_continent_map.py` draws it from the regions' actual
+geometry under shared north-up lighting into `continent-map.webp` beside this
+file, and writes the client's `godot-client/data/maps/cartography.json`.
+Positions come from `continent-geography.json`: each region sits at its
+translation, and the polygon it owns is its click target.
+`continent-layout.json` supplies the atlas scale, canvas and sea colour, and
+its `geometryAtlas` names the single master render the picture is taken from
+(`_continent/cartography/continent-atlas.png`, made by
+`_continent/atlas_export.py`). Each region's click opens its own tab map, the
+`minimap.webp` the live Tab map draws, cropped to what that map frames
+(`mapBounds`, then `playableBounds`, then the server's addressable rectangle,
+then the mesh bounds), so a preview shows what a player sees on arrival.
+Re-run the tool after a region's geometry, minimap or geography changes;
+`godot-client/tests/test_cartography.py` fails while the checked-in picture or
+cartography is stale.

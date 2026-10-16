@@ -93,7 +93,8 @@ migration is revision guarded; repeat builds do not compress content twice.
 `source/prepare_meshy_kit.py --input <mirrorhold models> <verdant models>` seats the
 generated models in the territory palette's kit
 (`godot-client/world_authoring/regions/mirrorhold/assets/prototypes/kit-*.glb`):
-the Mirrorhold set from `work-output/mirrorhold-2026-09-27/asset-prompts.md`
+the Mirrorhold set from
+`.local/asset-authoring/workspace/work-output/mirrorhold-2026-09-27/asset-prompts.md`
 (alpine firs and pines, juniper, flower cushions and tussocks, snow-capped
 boulders and scree, sun mirrors, lens stands, telescopes, a mirror obelisk,
 lens-grinder bench, lens crates and sign, sundial, planters, benches, potted

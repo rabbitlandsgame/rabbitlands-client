@@ -93,7 +93,8 @@ seats generated models in the territory palette's kit
 (`godot-client/world_authoring/regions/manymouth_delta/assets/prototypes/kit-*.glb`). Each model is
 taken from the first folder that has it.
 
-- The Manymouth set, from `work-output/manymouth-delta-2026-09-28/asset-prompts.md`: stilt houses, a
+- The Manymouth set, from
+  `.local/asset-authoring/workspace/work-output/manymouth-delta-2026-09-28/asset-prompts.md`: stilt houses, a
   net shed, a spirit shrine, a stone lantern and a bamboo gate; sampans, a market boat, a reed raft and
   floating lanterns; a banyan, a fan palm, bamboo, a flame tree, water lilies and papyrus; rice
   paddies, sheaves, a rice store and a fish weir; water jars, a hearth, a hammock, a fish line,

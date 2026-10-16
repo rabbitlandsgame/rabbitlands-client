@@ -480,12 +480,12 @@ The **Review notes** dock keeps comments pinned to spots in the open territory. 
 
 ## Concept master
 
-**Map tools > Show the concept master on the terrain** lays the coordinate-locked concept art over the territory as a design reference. The art comes from `work-output/continent-region-masters`, which replaces the older regional concepts as the visual boundary authority.
+**Map tools > Show the concept master on the terrain** lays the coordinate-locked concept art over the territory as a design reference. The art comes from the `continent-region-masters` package (see **Settings** below for where it lives), which replaces the older regional concepts as the visual boundary authority.
 
 - **Placement.** Each region's `contract.json` places its master. `cropRectWorld` gives continent X and Z at exactly 1 m a pixel, north (−Z) at the top, with 96 m of context around the ownership. The territory frame subtracts the scene's continent translation.
 - **Boundaries.** White is the current (develop) ownership and magenta the proposed one from the contract.
 - **Minimap.** The same picture is a minimap mode, alone or beside the live render.
-- **Settings.** The package is found above the project automatically; **Editor Settings > Map Authoring > Concept > Masters Folder** points elsewhere, and **Opacity** sets the overlay's strength.
+- **Settings.** Automatic discovery looks for `work-output/continent-region-masters` in the project folder and the folders above it. In this repository's layout the package lives under the git-ignored `.local/asset-authoring/workspace/work-output/continent-region-masters` (the local authoring archive, see [`docs/asset-authoring.md`](../../docs/asset-authoring.md)), which that search does not reach, so set **Editor Settings > Map Authoring > Concept > Masters Folder** to that folder. **Opacity** sets the overlay's strength.
 
 It is concept art, not a heightmap, and not an ownership change. Nothing edits the scene or the package, and the overlay is never saved.
 
@@ -565,8 +565,8 @@ The focused editor test builds a disposable 41×41 region fixture under `res://t
 - top-down framing and ownership clipping;
 - that no helper node (ghost, grid, preview lights, walker, copy ghost, focus helper) is ever saved, and that group tags are.
 
-```powershell
-& 'C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64_console.exe' --editor --headless --path . --script res://tests/test_map_authoring_usability_editor.gd
+```sh
+godot --editor --headless --path godot-client --script res://tests/test_map_authoring_usability_editor.gd
 ```
 
 The test waits for the editor to finish its first scan before opening the fixture, and restores every Editor Settings value it changes.
@@ -575,8 +575,8 @@ The test waits for the editor to finish its first scan before opening the fixtur
 
 `tests/test_map_authoring_served_grid.gd` (headless, no editor) checks the served-grid reader and the walker on it against eloria-server's fixtures, whose byte copies are in `tests/fixtures/`: the golden `served_grid_golden.escg.gz`, its description `served_grid_golden.json`, and the two odd-sized files the description lists (5 × 7, row deltas that wrap, filter 1 gzipped and filter 0 raw). The SHA-256 of the golden file and of its description are literals in this test and in the server's `tests/test_served_grid_format.py`, so a fixture or its answers changed on one side alone fail that side; `.gitattributes` keeps their bytes exact. A fixture rebuild on the server means copying every fixture file here and updating both literals. It checks the header, the decoded codes and sample tiles; the reach from four seeds through the walker's flood and reach tint; the server's route through the fixture's corridor; codes 64, 128, 4,096 and 32,704 walking through every walk path; the 1.0 m climb (20 codes legal, 21 not) and the corner rule; the inlined flood against the plain step rule; every header and payload refusal, bytes after the gzip stream and dimensions that overflow; a tampered file; a package's `servedGrid` block (hash, unit, climb, datum, a missing file or binary, an uppercase hash) and its frame against the scene's; `load_grid`'s order through a manifest path (served, refused, missing, version 1); the live estimate's half-up quantisation; and the decode time of a 2046 × 2046 grid. Set `ELORIA_SERVED_GRID_FLOOD_TIMING=1` to time the walker's flood over that grid as well.
 
-```powershell
-& 'C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64_console.exe' --headless --path . --script res://tests/test_map_authoring_served_grid.gd
+```sh
+godot --headless --path godot-client --script res://tests/test_map_authoring_served_grid.gd
 ```
 
 `tests/test_terrain_sculpt_editor.gd` now uses an isolated catalog, manifest and authoring spec under `test-artifacts/terrain-sculpt/`, checks that the edited scene is exactly its fixture before any input or save, and stops without saving otherwise.

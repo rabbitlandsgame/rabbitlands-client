@@ -87,7 +87,8 @@ the generated models in the territory palette's kit
 (`godot-client/world_authoring/regions/whitehorn_range/assets/prototypes/kit-*.glb`). Each model is
 taken from the first folder that has it.
 
-- The Whitehorn set, from `work-output/whitehorn-range-2026-09-28/asset-prompts.md`: granite spires,
+- The Whitehorn set, from
+  `.local/asset-authoring/workspace/work-output/whitehorn-range-2026-09-28/asset-prompts.md`: granite spires,
   crags, a knife ridge, boulders, a rockfall and an icicle arch; frozen waterfalls, ice shards, a
   glacier block, frozen ponds and icicle fringes; snow-laden firs, a wind-bent pine, a frosted larch
   and juniper; expedition tents, firewood shelters, sledges, ski racks, gear baskets, trail lanterns
