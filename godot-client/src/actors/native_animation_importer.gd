@@ -3,6 +3,7 @@ class_name NativeAnimationImporter
 extends RefCounted
 
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
 ## Retargets a native glTF animation library onto an actor's skeleton.
 ##
 ## The shared universal library ships 162 clips built from roughly 226 000
@@ -134,7 +135,7 @@ static func _parse_library(path: String) -> Node:
 	var state := GLTFState.new()
 	if document.append_from_file(path, state) != OK:
 		return null
-	return document.generate_scene(state)
+	return document.generate_scene(state, GltfAnimationFidelity.bake_fps(state))
 
 static func _skeleton_signature(skeleton: Skeleton3D) -> String:
 	var names := PackedStringArray()

@@ -1,0 +1,1076 @@
+{
+  "checks": [
+    {
+      "actor": "briarhide_wolf",
+      "model_sha256": "48cdf0f2bdc9275fc86bae2f280745991f1cefc5d735f899fc599c1430dd62cc",
+      "limbs": {
+        "fore_left": {
+          "before_rms_degrees": 25.147990993511126,
+          "after_rms_degrees": 14.384807434988383,
+          "bite_before_degrees": [
+            18.086077296652675,
+            9.180797784813333,
+            11.881237701224878
+          ],
+          "bite_after_degrees": [
+            10.447628745787227,
+            4.283632735519783,
+            6.788824855269394
+          ]
+        },
+        "fore_right": {
+          "before_rms_degrees": 22.481215175639385,
+          "after_rms_degrees": 10.797774666072792,
+          "bite_before_degrees": [
+            5.172512428376731,
+            5.92669347687978,
+            6.360731442646433
+          ],
+          "bite_after_degrees": [
+            12.29767280103135,
+            8.15534725213741,
+            7.082265973354287
+          ]
+        },
+        "hind_left": {
+          "before_rms_degrees": 30.100036668306082,
+          "after_rms_degrees": 7.83242201496295,
+          "bite_before_degrees": [
+            50.334006388064054,
+            72.29485591031015,
+            71.80207233556874
+          ],
+          "bite_after_degrees": [
+            5.991104173521143,
+            7.511867720056428,
+            9.127024369555604
+          ]
+        },
+        "hind_right": {
+          "before_rms_degrees": 35.584040020301636,
+          "after_rms_degrees": 7.736851515373921,
+          "bite_before_degrees": [
+            44.865562875024196,
+            66.63155377103956,
+            79.20432722915024
+          ],
+          "bite_after_degrees": [
+            3.8556344005456515,
+            11.066500219891036,
+            6.108941676577315
+          ]
+        }
+      },
+      "torso": {
+        "hips": {
+          "old_bite_height_fraction": 0.33295955400775057,
+          "new_bite_height_fraction": 0.5853289682862072,
+          "source_native_target_bite_height_fraction": 0.6272313598006278,
+          "old_trajectory_rms_height_fraction": 0.05825863654182689,
+          "new_trajectory_rms_height_fraction": 0.01675303897917334
+        },
+        "chest": {
+          "old_bite_height_fraction": 0.3166493990076581,
+          "new_bite_height_fraction": 0.5327312625948032,
+          "source_native_target_bite_height_fraction": 0.5152894138999775,
+          "old_trajectory_rms_height_fraction": 0.05256906312124374,
+          "new_trajectory_rms_height_fraction": 0.015299199546915412
+        }
+      },
+      "muzzle": {
+        "bite_upper_muzzle_pitch_degrees": -18.186120153150387,
+        "bite_forward_gain_native": 0.010381295867348816,
+        "bite_forward_aim": true,
+        "native_jaw_policy": {
+          "arc": true,
+          "role": "Chin"
+        }
+      },
+      "minimum_hinge_branch_margin_degrees": 29.610027803868423,
+      "native_hinge_margins": {
+        "fore_left_elbow": 29.610027803868423,
+        "fore_right_elbow": 33.16019808313119,
+        "hind_left_knee": 40.334486067934435,
+        "hind_left_hock": 59.925540167771345,
+        "hind_right_knee": 36.44519681941955,
+        "hind_right_hock": 59.354100944836716
+      },
+      "endpoint_surface_difference_native": 8.881784197001252e-16,
+      "recovered_hold_drift_native": 8.881784197001252e-16,
+      "protected_jaw_tail_and_lateral_control_difference": 0.0,
+      "maximum_native_bound_violation": 0.0,
+      "continuity": {
+        "24": {
+          "model_sha256": "48cdf0f2bdc9275fc86bae2f280745991f1cefc5d735f899fc599c1430dd62cc",
+          "clip": "Sword_Attack",
+          "sampling_fps": 24,
+          "maximum_surface_speed_heights_per_second": 3.7640124824816916,
+          "maximum_surface_acceleration_heights_per_second2": 49.00590863172557,
+          "surface_acceleration_p99": 29.170961203837937,
+          "surface_jerk_rms_heights_per_second3": 190.60761353162613,
+          "maximum_acceleration_time_seconds": 3.5416666666666665,
+          "maximum_acceleration_vertex_id": 3009,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "48": {
+          "model_sha256": "48cdf0f2bdc9275fc86bae2f280745991f1cefc5d735f899fc599c1430dd62cc",
+          "clip": "Sword_Attack",
+          "sampling_fps": 48,
+          "maximum_surface_speed_heights_per_second": 3.840062952692205,
+          "maximum_surface_acceleration_heights_per_second2": 77.9654364806607,
+          "surface_acceleration_p99": 34.04224324523397,
+          "surface_jerk_rms_heights_per_second3": 295.0898189340529,
+          "maximum_acceleration_time_seconds": 3.520833333333333,
+          "maximum_acceleration_vertex_id": 3009,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "96": {
+          "model_sha256": "48cdf0f2bdc9275fc86bae2f280745991f1cefc5d735f899fc599c1430dd62cc",
+          "clip": "Sword_Attack",
+          "sampling_fps": 96,
+          "maximum_surface_speed_heights_per_second": 3.8496174870555135,
+          "maximum_surface_acceleration_heights_per_second2": 82.30395098543566,
+          "surface_acceleration_p99": 36.939477730319915,
+          "surface_jerk_rms_heights_per_second3": 403.90057381923816,
+          "maximum_acceleration_time_seconds": 3.520833333333333,
+          "maximum_acceleration_vertex_id": 3009,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        }
+      },
+      "previous_96fps": {
+        "model_sha256": "12bf58975c1286af951100d9337e1273e0b1bf53e32044e28bed3a77f97a92f4",
+        "clip": "Sword_Attack",
+        "sampling_fps": 96,
+        "maximum_surface_speed_heights_per_second": 4.528781161442703,
+        "maximum_surface_acceleration_heights_per_second2": 185.3769197372506,
+        "surface_acceleration_p99": 51.359578529259366,
+        "surface_jerk_rms_heights_per_second3": 811.016997178656,
+        "maximum_acceleration_time_seconds": 3.083333333333333,
+        "maximum_acceleration_vertex_id": 2457,
+        "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+      },
+      "passed": true
+    },
+    {
+      "actor": "thornhide_wolf",
+      "model_sha256": "b2eb0833525286521042283d5f2e333e0fd493d4e141ccefde56fc00f1015d83",
+      "limbs": {
+        "fore_left": {
+          "before_rms_degrees": 33.54149549093861,
+          "after_rms_degrees": 27.102370691545367,
+          "bite_before_degrees": [
+            12.804973327661036,
+            17.451717321694705,
+            75.27653412857342
+          ],
+          "bite_after_degrees": [
+            10.621864013799703,
+            8.641028069153336,
+            16.311901542865712
+          ]
+        },
+        "fore_right": {
+          "before_rms_degrees": 27.415607197083865,
+          "after_rms_degrees": 15.975572983206213,
+          "bite_before_degrees": [
+            14.02587352489226,
+            6.148284840645069,
+            70.13098484219715
+          ],
+          "bite_after_degrees": [
+            17.83237021668542,
+            9.941653859588232,
+            16.054440115373467
+          ]
+        },
+        "hind_left": {
+          "before_rms_degrees": 39.182543473446735,
+          "after_rms_degrees": 22.11930146849311,
+          "bite_before_degrees": [
+            65.6105396693619,
+            39.392595606124345,
+            35.1675178146746
+          ],
+          "bite_after_degrees": [
+            11.619607812480776,
+            7.5839873479516955,
+            15.8935352224512
+          ]
+        },
+        "hind_right": {
+          "before_rms_degrees": 34.196551427626126,
+          "after_rms_degrees": 18.0224287880686,
+          "bite_before_degrees": [
+            70.80848605761504,
+            44.706126029914664,
+            12.066617734904314
+          ],
+          "bite_after_degrees": [
+            9.512996621026621,
+            11.487496937127137,
+            6.105248107267151
+          ]
+        }
+      },
+      "torso": {
+        "hips": {
+          "old_bite_height_fraction": 0.5030848189462194,
+          "new_bite_height_fraction": 0.5648352026615062,
+          "source_native_target_bite_height_fraction": 0.6133440060160932,
+          "old_trajectory_rms_height_fraction": 0.0341225385671466,
+          "new_trajectory_rms_height_fraction": 0.056791201348464944
+        },
+        "chest": {
+          "old_bite_height_fraction": 0.4628218353153623,
+          "new_bite_height_fraction": 0.49361761090866707,
+          "source_native_target_bite_height_fraction": 0.47477864978670725,
+          "old_trajectory_rms_height_fraction": 0.04513946088181513,
+          "new_trajectory_rms_height_fraction": 0.02932662994335749
+        }
+      },
+      "muzzle": {
+        "bite_upper_muzzle_pitch_degrees": -10.92319352545797,
+        "bite_forward_gain_native": -0.027244203487096552,
+        "bite_forward_aim": true,
+        "native_jaw_policy": {
+          "arc": true,
+          "role": "Chin"
+        }
+      },
+      "minimum_hinge_branch_margin_degrees": 28.694500707800504,
+      "native_hinge_margins": {
+        "fore_left_elbow": 28.694500707800504,
+        "fore_right_elbow": 32.363333398235966,
+        "hind_left_knee": 38.34745663710979,
+        "hind_left_hock": 46.284564540499225,
+        "hind_right_knee": 35.129216419368674,
+        "hind_right_hock": 68.11633267536607
+      },
+      "endpoint_surface_difference_native": 1.1102230246251565e-15,
+      "recovered_hold_drift_native": 4.440892098500626e-16,
+      "protected_jaw_tail_and_lateral_control_difference": 0.0,
+      "maximum_native_bound_violation": 0.0,
+      "continuity": {
+        "24": {
+          "model_sha256": "b2eb0833525286521042283d5f2e333e0fd493d4e141ccefde56fc00f1015d83",
+          "clip": "Sword_Attack",
+          "sampling_fps": 24,
+          "maximum_surface_speed_heights_per_second": 2.354626847361452,
+          "maximum_surface_acceleration_heights_per_second2": 40.27884338623511,
+          "surface_acceleration_p99": 21.507297108016406,
+          "surface_jerk_rms_heights_per_second3": 120.90121296290776,
+          "maximum_acceleration_time_seconds": 3.1666666666666665,
+          "maximum_acceleration_vertex_id": 3210,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "48": {
+          "model_sha256": "b2eb0833525286521042283d5f2e333e0fd493d4e141ccefde56fc00f1015d83",
+          "clip": "Sword_Attack",
+          "sampling_fps": 48,
+          "maximum_surface_speed_heights_per_second": 2.6188771770218597,
+          "maximum_surface_acceleration_heights_per_second2": 55.11550668719528,
+          "surface_acceleration_p99": 25.156307845130335,
+          "surface_jerk_rms_heights_per_second3": 197.38959650976778,
+          "maximum_acceleration_time_seconds": 3.1041666666666665,
+          "maximum_acceleration_vertex_id": 3062,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "96": {
+          "model_sha256": "b2eb0833525286521042283d5f2e333e0fd493d4e141ccefde56fc00f1015d83",
+          "clip": "Sword_Attack",
+          "sampling_fps": 96,
+          "maximum_surface_speed_heights_per_second": 2.6646161232353593,
+          "maximum_surface_acceleration_heights_per_second2": 68.187120673814,
+          "surface_acceleration_p99": 27.30975767623133,
+          "surface_jerk_rms_heights_per_second3": 306.0971398907515,
+          "maximum_acceleration_time_seconds": 3.09375,
+          "maximum_acceleration_vertex_id": 3062,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        }
+      },
+      "previous_96fps": {
+        "model_sha256": "b6301cdc750e6e19fbd08134f9fe8b992f20e7218c7f8fbe5783faa59c1ce6e1",
+        "clip": "Sword_Attack",
+        "sampling_fps": 96,
+        "maximum_surface_speed_heights_per_second": 3.6959009664963274,
+        "maximum_surface_acceleration_heights_per_second2": 330.783214408488,
+        "surface_acceleration_p99": 38.59216752516393,
+        "surface_jerk_rms_heights_per_second3": 1698.1018828192305,
+        "maximum_acceleration_time_seconds": 3.9166666666666665,
+        "maximum_acceleration_vertex_id": 2669,
+        "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+      },
+      "passed": true
+    },
+    {
+      "actor": "thornbark_wolf",
+      "model_sha256": "2a74e3056e249b9c49558e73b6e5cffd0bb3f12fb108c46c899a076c174064fb",
+      "limbs": {
+        "fore_left": {
+          "before_rms_degrees": 33.21537965326884,
+          "after_rms_degrees": 23.05467113402954,
+          "bite_before_degrees": [
+            21.705423719530426,
+            5.012678787374388,
+            94.60264160530907
+          ],
+          "bite_after_degrees": [
+            11.788533816253953,
+            7.039762919581849,
+            31.87391152788913
+          ]
+        },
+        "fore_right": {
+          "before_rms_degrees": 32.414509243493974,
+          "after_rms_degrees": 23.52902193797594,
+          "bite_before_degrees": [
+            39.014867677319515,
+            35.50541676457632,
+            96.88693966177864
+          ],
+          "bite_after_degrees": [
+            17.40272001967482,
+            7.991641149712637,
+            22.92577766885419
+          ]
+        },
+        "hind_left": {
+          "before_rms_degrees": 17.78054951588306,
+          "after_rms_degrees": 11.522821036380451,
+          "bite_before_degrees": [
+            2.287811848110316,
+            36.44909826125055,
+            52.712486498196895
+          ],
+          "bite_after_degrees": [
+            3.6571532446369175,
+            7.270174657242948,
+            17.898210946648184
+          ]
+        },
+        "hind_right": {
+          "before_rms_degrees": 20.457358798608954,
+          "after_rms_degrees": 8.503179530158773,
+          "bite_before_degrees": [
+            8.459140882073708,
+            41.49206373423415,
+            51.188324789794265
+          ],
+          "bite_after_degrees": [
+            7.810131531793241,
+            10.611707065820896,
+            9.443716059970688
+          ]
+        }
+      },
+      "torso": {
+        "hips": {
+          "old_bite_height_fraction": 0.4518333804516987,
+          "new_bite_height_fraction": 0.5834218651450999,
+          "source_native_target_bite_height_fraction": 0.6416092818566911,
+          "old_trajectory_rms_height_fraction": 0.03043854592779062,
+          "new_trajectory_rms_height_fraction": 0.013274082168262641
+        },
+        "chest": {
+          "old_bite_height_fraction": 0.46639987879956246,
+          "new_bite_height_fraction": 0.5701016593832648,
+          "source_native_target_bite_height_fraction": 0.5575879594212368,
+          "old_trajectory_rms_height_fraction": 0.03008663322166624,
+          "new_trajectory_rms_height_fraction": 0.014585106077099385
+        }
+      },
+      "muzzle": {
+        "bite_upper_muzzle_pitch_degrees": 13.658157289979435,
+        "bite_forward_gain_native": -0.02354620275815056,
+        "bite_forward_aim": true,
+        "native_jaw_policy": {
+          "arc": false,
+          "role": "Transfer_Lower_Jaw"
+        }
+      },
+      "minimum_hinge_branch_margin_degrees": 22.978731770616726,
+      "native_hinge_margins": {
+        "fore_left_elbow": 22.978731770616726,
+        "fore_right_elbow": 28.924473925238438,
+        "hind_left_knee": 38.70613985165706,
+        "hind_left_hock": 59.555423338237716,
+        "hind_right_knee": 39.266730910849304,
+        "hind_right_hock": 55.33976881118312
+      },
+      "endpoint_surface_difference_native": 1.1102230246251565e-15,
+      "recovered_hold_drift_native": 8.881784197001252e-16,
+      "protected_jaw_tail_and_lateral_control_difference": 0.0,
+      "maximum_native_bound_violation": 0.0,
+      "continuity": {
+        "24": {
+          "model_sha256": "2a74e3056e249b9c49558e73b6e5cffd0bb3f12fb108c46c899a076c174064fb",
+          "clip": "Sword_Attack",
+          "sampling_fps": 24,
+          "maximum_surface_speed_heights_per_second": 2.468229345796497,
+          "maximum_surface_acceleration_heights_per_second2": 36.65271908722178,
+          "surface_acceleration_p99": 20.44928965355373,
+          "surface_jerk_rms_heights_per_second3": 123.03623790753122,
+          "maximum_acceleration_time_seconds": 3.1666666666666665,
+          "maximum_acceleration_vertex_id": 2495,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "48": {
+          "model_sha256": "2a74e3056e249b9c49558e73b6e5cffd0bb3f12fb108c46c899a076c174064fb",
+          "clip": "Sword_Attack",
+          "sampling_fps": 48,
+          "maximum_surface_speed_heights_per_second": 2.4906655911755777,
+          "maximum_surface_acceleration_heights_per_second2": 41.922978307810126,
+          "surface_acceleration_p99": 25.83739624840664,
+          "surface_jerk_rms_heights_per_second3": 187.87324068836395,
+          "maximum_acceleration_time_seconds": 3.1041666666666665,
+          "maximum_acceleration_vertex_id": 3166,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "96": {
+          "model_sha256": "2a74e3056e249b9c49558e73b6e5cffd0bb3f12fb108c46c899a076c174064fb",
+          "clip": "Sword_Attack",
+          "sampling_fps": 96,
+          "maximum_surface_speed_heights_per_second": 2.505807978832235,
+          "maximum_surface_acceleration_heights_per_second2": 53.310819248249494,
+          "surface_acceleration_p99": 28.395989465587203,
+          "surface_jerk_rms_heights_per_second3": 273.4574439601593,
+          "maximum_acceleration_time_seconds": 3.09375,
+          "maximum_acceleration_vertex_id": 3166,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        }
+      },
+      "previous_96fps": {
+        "model_sha256": "859f9436e6e3edb2940206b679c19dc576c55ed72173602d4b2b520c8ff4771a",
+        "clip": "Sword_Attack",
+        "sampling_fps": 96,
+        "maximum_surface_speed_heights_per_second": 3.0213278982349503,
+        "maximum_surface_acceleration_heights_per_second2": 83.5705914516081,
+        "surface_acceleration_p99": 22.432890789227923,
+        "surface_jerk_rms_heights_per_second3": 330.5865061001563,
+        "maximum_acceleration_time_seconds": 3.09375,
+        "maximum_acceleration_vertex_id": 2638,
+        "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+      },
+      "passed": true
+    },
+    {
+      "actor": "crystal_dire_wolf",
+      "model_sha256": "e7fa9c56845b80bdef2a4a1f089c66a1c2defec45c2041ec42e1f5d22f937a2d",
+      "limbs": {
+        "fore_left": {
+          "before_rms_degrees": 32.71455485932288,
+          "after_rms_degrees": 27.356200110777152,
+          "bite_before_degrees": [
+            11.442011783835596,
+            10.459832608072231,
+            48.096457670005556
+          ],
+          "bite_after_degrees": [
+            11.20145570428698,
+            6.336515776614173,
+            45.07978946149525
+          ]
+        },
+        "fore_right": {
+          "before_rms_degrees": 34.433455498672046,
+          "after_rms_degrees": 26.458504159476927,
+          "bite_before_degrees": [
+            18.726554530766894,
+            18.285727733060213,
+            58.966910918274024
+          ],
+          "bite_after_degrees": [
+            13.049696468511856,
+            10.604141638440806,
+            45.31253219118196
+          ]
+        },
+        "hind_left": {
+          "before_rms_degrees": 36.81542546294374,
+          "after_rms_degrees": 25.392425117715632,
+          "bite_before_degrees": [
+            58.85868921410533,
+            14.341323469805863,
+            40.05967450977856
+          ],
+          "bite_after_degrees": [
+            9.92337243172549,
+            7.685769726199129,
+            40.32424851968009
+          ]
+        },
+        "hind_right": {
+          "before_rms_degrees": 41.40256713092802,
+          "after_rms_degrees": 29.06880360107043,
+          "bite_before_degrees": [
+            62.14730545153654,
+            31.050418041253767,
+            49.8394605763197
+          ],
+          "bite_after_degrees": [
+            7.442687285714147,
+            9.676315943306811,
+            48.26852034749954
+          ]
+        }
+      },
+      "torso": {
+        "hips": {
+          "old_bite_height_fraction": 0.6214324905021964,
+          "new_bite_height_fraction": 0.5505967621597522,
+          "source_native_target_bite_height_fraction": 0.5911668160427166,
+          "old_trajectory_rms_height_fraction": 0.037171268577909,
+          "new_trajectory_rms_height_fraction": 0.018531448994246216
+        },
+        "chest": {
+          "old_bite_height_fraction": 0.5131157225398026,
+          "new_bite_height_fraction": 0.5354275753492296,
+          "source_native_target_bite_height_fraction": 0.49569592500901005,
+          "old_trajectory_rms_height_fraction": 0.03025573834503203,
+          "new_trajectory_rms_height_fraction": 0.028757392441761963
+        }
+      },
+      "muzzle": {
+        "bite_upper_muzzle_pitch_degrees": -12.267510393823372,
+        "bite_forward_gain_native": -0.0008840523607511752,
+        "bite_forward_aim": true,
+        "native_jaw_policy": {
+          "arc": false,
+          "role": "Transfer_Lower_Jaw"
+        }
+      },
+      "minimum_hinge_branch_margin_degrees": 29.970656159221786,
+      "native_hinge_margins": {
+        "fore_left_elbow": 29.970656159221786,
+        "fore_right_elbow": 33.36059102017215,
+        "hind_left_knee": 40.07272682035597,
+        "hind_left_hock": 45.30566542078889,
+        "hind_right_knee": 41.971753753867034,
+        "hind_right_hock": 52.15344634512627
+      },
+      "endpoint_surface_difference_native": 1.1102230246251565e-15,
+      "recovered_hold_drift_native": 6.661338147750939e-16,
+      "protected_jaw_tail_and_lateral_control_difference": 0.0,
+      "maximum_native_bound_violation": 0.0,
+      "continuity": {
+        "24": {
+          "model_sha256": "e7fa9c56845b80bdef2a4a1f089c66a1c2defec45c2041ec42e1f5d22f937a2d",
+          "clip": "Sword_Attack",
+          "sampling_fps": 24,
+          "maximum_surface_speed_heights_per_second": 2.9526004960441146,
+          "maximum_surface_acceleration_heights_per_second2": 34.77241668159883,
+          "surface_acceleration_p99": 18.883266838166126,
+          "surface_jerk_rms_heights_per_second3": 112.95635205652773,
+          "maximum_acceleration_time_seconds": 3.125,
+          "maximum_acceleration_vertex_id": 686,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "48": {
+          "model_sha256": "e7fa9c56845b80bdef2a4a1f089c66a1c2defec45c2041ec42e1f5d22f937a2d",
+          "clip": "Sword_Attack",
+          "sampling_fps": 48,
+          "maximum_surface_speed_heights_per_second": 3.0161658519547534,
+          "maximum_surface_acceleration_heights_per_second2": 40.229303531445034,
+          "surface_acceleration_p99": 22.872733141513905,
+          "surface_jerk_rms_heights_per_second3": 177.7037803523624,
+          "maximum_acceleration_time_seconds": 3.1041666666666665,
+          "maximum_acceleration_vertex_id": 686,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "96": {
+          "model_sha256": "e7fa9c56845b80bdef2a4a1f089c66a1c2defec45c2041ec42e1f5d22f937a2d",
+          "clip": "Sword_Attack",
+          "sampling_fps": 96,
+          "maximum_surface_speed_heights_per_second": 3.0172849701795066,
+          "maximum_surface_acceleration_heights_per_second2": 57.19914250194817,
+          "surface_acceleration_p99": 25.05513922559866,
+          "surface_jerk_rms_heights_per_second3": 344.4724083104007,
+          "maximum_acceleration_time_seconds": 3.9166666666666665,
+          "maximum_acceleration_vertex_id": 8,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        }
+      },
+      "previous_96fps": {
+        "model_sha256": "1ee1b9e159332d6f805f627b853f039893ce780b975287fb71575a63dd74063d",
+        "clip": "Sword_Attack",
+        "sampling_fps": 96,
+        "maximum_surface_speed_heights_per_second": 3.8094765523657115,
+        "maximum_surface_acceleration_heights_per_second2": 83.35019541802521,
+        "surface_acceleration_p99": 23.664236670531093,
+        "surface_jerk_rms_heights_per_second3": 358.18239428208005,
+        "maximum_acceleration_time_seconds": 3.5,
+        "maximum_acceleration_vertex_id": 2034,
+        "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+      },
+      "passed": true
+    },
+    {
+      "actor": "moss_armored_hound",
+      "model_sha256": "b8cc2d4757b70b438d76e581df51ff168f82c3155599fc5bf4bc4c8778dde917",
+      "limbs": {
+        "fore_left": {
+          "before_rms_degrees": 18.373120655278864,
+          "after_rms_degrees": 9.634857285399072,
+          "bite_before_degrees": [
+            6.79461330882182,
+            4.283704526931944,
+            17.666751444167893
+          ],
+          "bite_after_degrees": [
+            10.734938155942796,
+            3.544587753213848,
+            7.012508490091181
+          ]
+        },
+        "fore_right": {
+          "before_rms_degrees": 22.532924977721077,
+          "after_rms_degrees": 8.633041126622864,
+          "bite_before_degrees": [
+            3.8367862582574235,
+            6.102581593728425,
+            30.630118949936325
+          ],
+          "bite_after_degrees": [
+            12.84416367415617,
+            8.584838275870364,
+            5.880456998654095
+          ]
+        },
+        "hind_left": {
+          "before_rms_degrees": 39.534643862392734,
+          "after_rms_degrees": 24.282218174101732,
+          "bite_before_degrees": [
+            72.6102622957716,
+            41.690894338658985,
+            34.19808646766655
+          ],
+          "bite_after_degrees": [
+            25.280526995381692,
+            9.411741027170228,
+            15.756316099884028
+          ]
+        },
+        "hind_right": {
+          "before_rms_degrees": 37.09834880803641,
+          "after_rms_degrees": 18.73936149168736,
+          "bite_before_degrees": [
+            74.37275655795702,
+            50.67304021802343,
+            29.82946600364292
+          ],
+          "bite_after_degrees": [
+            22.898169109239756,
+            12.909702979757625,
+            6.640453415181913
+          ]
+        }
+      },
+      "torso": {
+        "hips": {
+          "old_bite_height_fraction": 0.6856412698772926,
+          "new_bite_height_fraction": 0.6033812123265591,
+          "source_native_target_bite_height_fraction": 0.6388790771050915,
+          "old_trajectory_rms_height_fraction": 0.041414084782649296,
+          "new_trajectory_rms_height_fraction": 0.0297755644613556
+        },
+        "chest": {
+          "old_bite_height_fraction": 0.5359082734797957,
+          "new_bite_height_fraction": 0.489602852712365,
+          "source_native_target_bite_height_fraction": 0.4749016792140959,
+          "old_trajectory_rms_height_fraction": 0.03340292584478338,
+          "new_trajectory_rms_height_fraction": 0.03636493420084728
+        }
+      },
+      "muzzle": {
+        "bite_upper_muzzle_pitch_degrees": -12.071797560643411,
+        "bite_forward_gain_native": 0.0005532817725437678,
+        "bite_forward_aim": true,
+        "native_jaw_policy": {
+          "arc": false,
+          "role": "Transfer_Lower_Jaw"
+        }
+      },
+      "minimum_hinge_branch_margin_degrees": 29.572486421023076,
+      "native_hinge_margins": {
+        "fore_left_elbow": 29.572486421023076,
+        "fore_right_elbow": 33.06435445890072,
+        "hind_left_knee": 42.68965469711314,
+        "hind_left_hock": 53.95009426019451,
+        "hind_right_knee": 37.52979793962028,
+        "hind_right_hock": 39.58139072457429
+      },
+      "endpoint_surface_difference_native": 8.881784197001252e-16,
+      "recovered_hold_drift_native": 8.881784197001252e-16,
+      "protected_jaw_tail_and_lateral_control_difference": 0.0,
+      "maximum_native_bound_violation": 0.0,
+      "continuity": {
+        "24": {
+          "model_sha256": "b8cc2d4757b70b438d76e581df51ff168f82c3155599fc5bf4bc4c8778dde917",
+          "clip": "Sword_Attack",
+          "sampling_fps": 24,
+          "maximum_surface_speed_heights_per_second": 3.6475340671115917,
+          "maximum_surface_acceleration_heights_per_second2": 44.917849603858414,
+          "surface_acceleration_p99": 21.630556772461414,
+          "surface_jerk_rms_heights_per_second3": 117.12421494270531,
+          "maximum_acceleration_time_seconds": 3.125,
+          "maximum_acceleration_vertex_id": 3701,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "48": {
+          "model_sha256": "b8cc2d4757b70b438d76e581df51ff168f82c3155599fc5bf4bc4c8778dde917",
+          "clip": "Sword_Attack",
+          "sampling_fps": 48,
+          "maximum_surface_speed_heights_per_second": 3.660003960192469,
+          "maximum_surface_acceleration_heights_per_second2": 48.300379807161974,
+          "surface_acceleration_p99": 25.33296982851683,
+          "surface_jerk_rms_heights_per_second3": 177.94063036874903,
+          "maximum_acceleration_time_seconds": 3.125,
+          "maximum_acceleration_vertex_id": 3701,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "96": {
+          "model_sha256": "b8cc2d4757b70b438d76e581df51ff168f82c3155599fc5bf4bc4c8778dde917",
+          "clip": "Sword_Attack",
+          "sampling_fps": 96,
+          "maximum_surface_speed_heights_per_second": 3.6975103511866325,
+          "maximum_surface_acceleration_heights_per_second2": 66.85361392417836,
+          "surface_acceleration_p99": 26.672777603642785,
+          "surface_jerk_rms_heights_per_second3": 341.63156490061186,
+          "maximum_acceleration_time_seconds": 3.9166666666666665,
+          "maximum_acceleration_vertex_id": 226,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        }
+      },
+      "previous_96fps": {
+        "model_sha256": "dbe25a71097a905c68d3a54074d99d89215e3414fcf6556836e7b510b3f43daa",
+        "clip": "Sword_Attack",
+        "sampling_fps": 96,
+        "maximum_surface_speed_heights_per_second": 2.617475572200239,
+        "maximum_surface_acceleration_heights_per_second2": 52.7973031188336,
+        "surface_acceleration_p99": 20.48483765235401,
+        "surface_jerk_rms_heights_per_second3": 354.7434055284696,
+        "maximum_acceleration_time_seconds": 3.09375,
+        "maximum_acceleration_vertex_id": 3701,
+        "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+      },
+      "passed": true
+    },
+    {
+      "actor": "mossbound_hound",
+      "model_sha256": "e31e552dac8c8f4c05ff9e075ccfdc22323644fa8da4bd9c1fc2b34acc7bc1d9",
+      "limbs": {
+        "fore_left": {
+          "before_rms_degrees": 25.898533657462362,
+          "after_rms_degrees": 13.802068828753017,
+          "bite_before_degrees": [
+            20.363480603318273,
+            5.777148177786594,
+            27.731075720623814
+          ],
+          "bite_after_degrees": [
+            12.661099350848149,
+            5.210406724940861,
+            9.38536262982684
+          ]
+        },
+        "fore_right": {
+          "before_rms_degrees": 27.503350951831443,
+          "after_rms_degrees": 14.255934978142154,
+          "bite_before_degrees": [
+            34.37792574032716,
+            6.108599091755201,
+            8.093961968615641
+          ],
+          "bite_after_degrees": [
+            12.690224128530907,
+            7.979011764783488,
+            12.190299369936268
+          ]
+        },
+        "hind_left": {
+          "before_rms_degrees": 26.872035491527935,
+          "after_rms_degrees": 10.154900593169419,
+          "bite_before_degrees": [
+            20.904209752955534,
+            19.070094543995687,
+            19.915504122122066
+          ],
+          "bite_after_degrees": [
+            5.49359695090666,
+            8.215936714322542,
+            9.441768482348454
+          ]
+        },
+        "hind_right": {
+          "before_rms_degrees": 19.912088490598574,
+          "after_rms_degrees": 8.956950321533403,
+          "bite_before_degrees": [
+            10.36764026616463,
+            24.283423049546712,
+            15.404880931183575
+          ],
+          "bite_after_degrees": [
+            7.004199783878112,
+            8.947715650374288,
+            5.667507448419388
+          ]
+        }
+      },
+      "torso": {
+        "hips": {
+          "old_bite_height_fraction": 0.540498614906569,
+          "new_bite_height_fraction": 0.5012292448060688,
+          "source_native_target_bite_height_fraction": 0.5459377240369481,
+          "old_trajectory_rms_height_fraction": 0.0384180241235312,
+          "new_trajectory_rms_height_fraction": 0.030313445847791817
+        },
+        "chest": {
+          "old_bite_height_fraction": 0.5176010320634559,
+          "new_bite_height_fraction": 0.48365169064657315,
+          "source_native_target_bite_height_fraction": 0.46660211782974903,
+          "old_trajectory_rms_height_fraction": 0.040770900031628775,
+          "new_trajectory_rms_height_fraction": 0.015422386990590202
+        }
+      },
+      "muzzle": {
+        "bite_upper_muzzle_pitch_degrees": -12.572472740515991,
+        "bite_forward_gain_native": -0.0029849060951414597,
+        "bite_forward_aim": true,
+        "native_jaw_policy": {
+          "arc": false,
+          "role": "Transfer_Lower_Jaw"
+        }
+      },
+      "minimum_hinge_branch_margin_degrees": 24.731482285614117,
+      "native_hinge_margins": {
+        "fore_left_elbow": 24.731482285614117,
+        "fore_right_elbow": 29.953679362293197,
+        "hind_left_knee": 38.53258405939159,
+        "hind_left_hock": 58.80987854830024,
+        "hind_right_knee": 36.13409804237727,
+        "hind_right_hock": 61.13006070054814
+      },
+      "endpoint_surface_difference_native": 4.579669976578771e-16,
+      "recovered_hold_drift_native": 6.661338147750939e-16,
+      "protected_jaw_tail_and_lateral_control_difference": 0.0,
+      "maximum_native_bound_violation": 0.0,
+      "continuity": {
+        "24": {
+          "model_sha256": "e31e552dac8c8f4c05ff9e075ccfdc22323644fa8da4bd9c1fc2b34acc7bc1d9",
+          "clip": "Sword_Attack",
+          "sampling_fps": 24,
+          "maximum_surface_speed_heights_per_second": 3.0371476406346605,
+          "maximum_surface_acceleration_heights_per_second2": 47.11848245052879,
+          "surface_acceleration_p99": 29.740872808486255,
+          "surface_jerk_rms_heights_per_second3": 188.84947079283975,
+          "maximum_acceleration_time_seconds": 3.083333333333333,
+          "maximum_acceleration_vertex_id": 3105,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "48": {
+          "model_sha256": "e31e552dac8c8f4c05ff9e075ccfdc22323644fa8da4bd9c1fc2b34acc7bc1d9",
+          "clip": "Sword_Attack",
+          "sampling_fps": 48,
+          "maximum_surface_speed_heights_per_second": 3.4435407149607737,
+          "maximum_surface_acceleration_heights_per_second2": 86.1406945286488,
+          "surface_acceleration_p99": 36.668607327801055,
+          "surface_jerk_rms_heights_per_second3": 375.3506245561651,
+          "maximum_acceleration_time_seconds": 3.083333333333333,
+          "maximum_acceleration_vertex_id": 498,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "96": {
+          "model_sha256": "e31e552dac8c8f4c05ff9e075ccfdc22323644fa8da4bd9c1fc2b34acc7bc1d9",
+          "clip": "Sword_Attack",
+          "sampling_fps": 96,
+          "maximum_surface_speed_heights_per_second": 3.57368640590721,
+          "maximum_surface_acceleration_heights_per_second2": 122.67029983107135,
+          "surface_acceleration_p99": 41.353308320882725,
+          "surface_jerk_rms_heights_per_second3": 720.508391861688,
+          "maximum_acceleration_time_seconds": 3.09375,
+          "maximum_acceleration_vertex_id": 498,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        }
+      },
+      "previous_96fps": {
+        "model_sha256": "46bbabcdf0065bdb4bfb2e8d54ab05ddb64e06bc9d86aa658eeb7ed57fa6beeb",
+        "clip": "Sword_Attack",
+        "sampling_fps": 96,
+        "maximum_surface_speed_heights_per_second": 2.7879665217755543,
+        "maximum_surface_acceleration_heights_per_second2": 263.0506299111059,
+        "surface_acceleration_p99": 29.145284112371165,
+        "surface_jerk_rms_heights_per_second3": 1399.1216092877603,
+        "maximum_acceleration_time_seconds": 3.9166666666666665,
+        "maximum_acceleration_vertex_id": 740,
+        "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+      },
+      "passed": true
+    },
+    {
+      "actor": "red_fox",
+      "model_sha256": "a4be25828c05bfc40b64f2a1416d4d01a4861e1ed4bab93f92c9cf2b5012de50",
+      "limbs": {
+        "fore_left": {
+          "before_rms_degrees": 18.495190610457342,
+          "after_rms_degrees": 14.576208051979506,
+          "bite_before_degrees": [
+            8.689961484945542,
+            6.905202892822971,
+            15.349872774945796
+          ],
+          "bite_after_degrees": [
+            10.604199511441252,
+            4.201991389593391,
+            11.007807491594136
+          ]
+        },
+        "fore_right": {
+          "before_rms_degrees": 23.13598132450448,
+          "after_rms_degrees": 16.825226720351047,
+          "bite_before_degrees": [
+            32.37237381215743,
+            6.407654817800146,
+            18.729669812624188
+          ],
+          "bite_after_degrees": [
+            12.36151837756493,
+            8.270069347311933,
+            12.955790235211087
+          ]
+        },
+        "hind_left": {
+          "before_rms_degrees": 18.635654270567812,
+          "after_rms_degrees": 9.673882341170346,
+          "bite_before_degrees": [
+            34.01670171885484,
+            6.063303094634835,
+            8.161245188801278
+          ],
+          "bite_after_degrees": [
+            4.111938289999599,
+            9.023054615372184,
+            10.449949286445287
+          ]
+        },
+        "hind_right": {
+          "before_rms_degrees": 20.182063044388492,
+          "after_rms_degrees": 6.744267575702483,
+          "bite_before_degrees": [
+            24.679048233708123,
+            11.408923247732586,
+            11.406907749123937
+          ],
+          "bite_after_degrees": [
+            5.078215022121812,
+            8.045465563574073,
+            5.288583882151803
+          ]
+        }
+      },
+      "torso": {
+        "hips": {
+          "old_bite_height_fraction": 0.5462837872983974,
+          "new_bite_height_fraction": 0.5071203525219398,
+          "source_native_target_bite_height_fraction": 0.5575098704157304,
+          "old_trajectory_rms_height_fraction": 0.041206650188041205,
+          "new_trajectory_rms_height_fraction": 0.02397995700212633
+        },
+        "chest": {
+          "old_bite_height_fraction": 0.5012337674861059,
+          "new_bite_height_fraction": 0.4679607754528564,
+          "source_native_target_bite_height_fraction": 0.46677870109807984,
+          "old_trajectory_rms_height_fraction": 0.04239880078931095,
+          "new_trajectory_rms_height_fraction": 0.036442420981511306
+        }
+      },
+      "muzzle": {
+        "bite_upper_muzzle_pitch_degrees": -21.97734451147329,
+        "bite_forward_gain_native": 0.0018735874502044947,
+        "bite_forward_aim": true,
+        "native_jaw_policy": {
+          "arc": false,
+          "role": "Transfer_Lower_Jaw"
+        }
+      },
+      "minimum_hinge_branch_margin_degrees": 30.326557433598285,
+      "native_hinge_margins": {
+        "fore_left_elbow": 30.326557433598285,
+        "fore_right_elbow": 34.180686790205336,
+        "hind_left_knee": 40.324098533591716,
+        "hind_left_hock": 44.161424542745486,
+        "hind_right_knee": 40.109825387295814,
+        "hind_right_hock": 60.915022824702866
+      },
+      "endpoint_surface_difference_native": 8.881784197001252e-16,
+      "recovered_hold_drift_native": 8.881784197001252e-16,
+      "protected_jaw_tail_and_lateral_control_difference": 0.0,
+      "maximum_native_bound_violation": 0.0,
+      "continuity": {
+        "24": {
+          "model_sha256": "a4be25828c05bfc40b64f2a1416d4d01a4861e1ed4bab93f92c9cf2b5012de50",
+          "clip": "Sword_Attack",
+          "sampling_fps": 24,
+          "maximum_surface_speed_heights_per_second": 2.63098635814554,
+          "maximum_surface_acceleration_heights_per_second2": 33.8262915002837,
+          "surface_acceleration_p99": 19.799865784497946,
+          "surface_jerk_rms_heights_per_second3": 105.33417951683806,
+          "maximum_acceleration_time_seconds": 3.125,
+          "maximum_acceleration_vertex_id": 2588,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "48": {
+          "model_sha256": "a4be25828c05bfc40b64f2a1416d4d01a4861e1ed4bab93f92c9cf2b5012de50",
+          "clip": "Sword_Attack",
+          "sampling_fps": 48,
+          "maximum_surface_speed_heights_per_second": 2.6529303256140415,
+          "maximum_surface_acceleration_heights_per_second2": 37.8311511934024,
+          "surface_acceleration_p99": 21.121638532108935,
+          "surface_jerk_rms_heights_per_second3": 144.666577749804,
+          "maximum_acceleration_time_seconds": 3.1041666666666665,
+          "maximum_acceleration_vertex_id": 535,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        },
+        "96": {
+          "model_sha256": "a4be25828c05bfc40b64f2a1416d4d01a4861e1ed4bab93f92c9cf2b5012de50",
+          "clip": "Sword_Attack",
+          "sampling_fps": 96,
+          "maximum_surface_speed_heights_per_second": 2.667857803373608,
+          "maximum_surface_acceleration_heights_per_second2": 39.61735807695153,
+          "surface_acceleration_p99": 22.154577788089348,
+          "surface_jerk_rms_heights_per_second3": 167.6343269042969,
+          "maximum_acceleration_time_seconds": 3.114583333333333,
+          "maximum_acceleration_vertex_id": 535,
+          "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+        }
+      },
+      "previous_96fps": {
+        "model_sha256": "fcb7810cd3b9390820b7e319c1a373fbaad304745e3a48876499e56e828dea6f",
+        "clip": "Sword_Attack",
+        "sampling_fps": 96,
+        "maximum_surface_speed_heights_per_second": 2.1876159110059996,
+        "maximum_surface_acceleration_heights_per_second2": 53.18613321777128,
+        "surface_acceleration_p99": 18.128035826186665,
+        "surface_jerk_rms_heights_per_second3": 195.3419804671694,
+        "maximum_acceleration_time_seconds": 3.09375,
+        "maximum_acceleration_vertex_id": 4,
+        "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+      },
+      "passed": true
+    }
+  ],
+  "complete": true,
+  "passed": true,
+  "raw_source_96fps": {
+    "model_sha256": "718642ed90b3b86e6c05f7090843a4002e80ff93e66d541e57799cb000aa2721",
+    "clip": "Sword_Attack",
+    "sampling_fps": 96,
+    "maximum_surface_speed_heights_per_second": 9.357528658814276,
+    "maximum_surface_acceleration_heights_per_second2": 542.2667533664785,
+    "surface_acceleration_p99": 138.40596554029204,
+    "surface_jerk_rms_heights_per_second3": 3181.4820608576388,
+    "maximum_acceleration_time_seconds": 3.1666666666666665,
+    "maximum_acceleration_vertex_id": 0,
+    "policy": "Compare the same physical vertices and original timestamps. These diagnostics do not replace normal-speed visual review or contact validation."
+  },
+  "policy": "Source pose/trajectory evidence is authored 3D, not measured hidden video. Direction and dynamic diagnostics accompany multi-angle textured review; visual acceptance stays separate."
+}

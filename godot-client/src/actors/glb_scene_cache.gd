@@ -34,6 +34,7 @@ extends RefCounted
 ## get the same chains and the same anisotropic filter as the map around them.
 ## Actors are left as they were: their load time is why this cache exists.
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
 
 static var _scenes: Dictionary = {}
@@ -119,7 +120,7 @@ static func _build_raw(path: String) -> PackedScene:
 	var world_asset := is_world_asset(path)
 	if world_asset:
 		build_texture_mipmaps(state)
-	var generated: Node = document.generate_scene(state)
+	var generated: Node = document.generate_scene(state, GltfAnimationFidelity.bake_fps(state))
 	if generated == null:
 		return null
 	if generated is not Node3D:

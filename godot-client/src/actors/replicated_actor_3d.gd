@@ -3033,7 +3033,7 @@ func play_action(action: StringName, restart := false) -> void:
 ## `Run_Female` covers 2.666 against a running 5.0 m/s (1.88x). Only Speed Hax
 ## on top of a run - 10 m/s - asks for more than the ceiling.
 func _playback_speed_for(action: StringName) -> float:
-	var stride: float = resolver.stride_speed_for_action(action)
+	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale)
 	if stride <= 0.0:
 		return resolver.playback_speed_for_action(action)
 	return clampf(_travel_speed() / stride, 0.35, 3.5)

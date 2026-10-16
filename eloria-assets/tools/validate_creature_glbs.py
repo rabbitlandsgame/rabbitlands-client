@@ -25,10 +25,16 @@ TYPE_WIDTHS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 
 ANIMATION_SAMPLES = 12
 GROUND_PENETRATION = .05      # metres a posed mesh may dip below y = 0
-MAX_INFLUENCES = 4
+MAX_INFLUENCES = 8
 MAX_ROOT_DRIFT = .02          # metres of horizontal travel in an in-place clip
 MAX_BOUND = 12.0              # metres; anything larger is a scale accident
 GROUND_TOLERANCE = .06
+
+
+def horizontal_root_excursion(values):
+    """A root may have a fixed local offset beneath its repaired body pivot."""
+    travel = np.asarray(values)[:, [0, 2]]
+    return float(np.abs(travel - travel[0]).max())
 
 
 def read_glb(path: Path):
@@ -70,6 +76,24 @@ def _quat_matrix(q):
         [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
         [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
         [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+
+
+def skin_attributes(document, binary, attributes):
+    """Read every influence set, including normalized integer weight accessors."""
+    sets = sorted(int(k.split('_')[1]) for k in attributes if k.startswith('JOINTS_'))
+    weight_sets = sorted(int(k.split('_')[1]) for k in attributes if k.startswith('WEIGHTS_'))
+    if not sets or sets != list(range(len(sets))) or sets != weight_sets:
+        raise ValueError('skin influence sets must be paired and consecutive from zero')
+    joints, weights = [], []
+    for index in sets:
+        joints.append(accessor(document, binary, attributes[f'JOINTS_{index}']).astype(int))
+        spec = document['accessors'][attributes[f'WEIGHTS_{index}']]
+        values = accessor(document, binary, attributes[f'WEIGHTS_{index}']).astype(float)
+        if spec.get('normalized') and spec['componentType'] != 5126:
+            dtype = np.dtype(COMPONENT_DTYPES[spec['componentType']])
+            values /= np.iinfo(dtype).max
+        weights.append(values)
+    return np.concatenate(joints, axis=1), np.concatenate(weights, axis=1)
 
 
 def _local_matrix(node, override):
@@ -168,8 +192,7 @@ def posed_bounds(document, binary, animation, final_only: bool = False):
                 if "JOINTS_0" not in attributes:
                     continue
                 positions = accessor(document, binary, attributes["POSITION"]).astype(float)
-                joint_ids = accessor(document, binary, attributes["JOINTS_0"]).astype(int)
-                weights = accessor(document, binary, attributes["WEIGHTS_0"]).astype(float)
+                joint_ids, weights = skin_attributes(document, binary, attributes)
                 homogeneous = np.concatenate([positions, np.ones((len(positions), 1))], 1)
                 skinned = np.zeros_like(positions)
                 for slot in range(joint_ids.shape[1]):
@@ -298,8 +321,14 @@ def check(document, binary, path: Path, required_clips, attachment_bones,
                 if "JOINTS_0" not in attributes or "WEIGHTS_0" not in attributes:
                     problems.append("skinned asset has a primitive without skin attributes")
                     continue
-                joints = accessor(document, binary, attributes["JOINTS_0"])
-                weights = accessor(document, binary, attributes["WEIGHTS_0"]).astype(float)
+                try:
+                    joints, weights = skin_attributes(document, binary, attributes)
+                except ValueError as exc:
+                    problems.append(str(exc))
+                    continue
+                if not np.isfinite(weights).all() or (weights < 0).any():
+                    problems.append("non-finite or negative skin weights")
+                    continue
                 sums = weights.sum(axis=1)
                 if (sums < .999).any() or (sums > 1.001).any():
                     problems.append(f"weights not normalised (min {sums.min():.3f}, "
@@ -366,9 +395,10 @@ def check(document, binary, path: Path, required_clips, attachment_bones,
             if float(times.min()) < -1e-4:
                 problems.append(f"clip '{name}' has negative key times")
             duration = max(duration, float(times.max()))
-            if target["path"] == "translation" and names[node] == "root":
-                travel = values[:, [0, 2]]
-                drift = float(np.abs(travel).max())
+            # A one-shot's bodily fold/lunge is not accumulated locomotion.
+            if (target["path"] == "translation" and names[node] == "root"
+                    and name in {"Walk", "Jog", "Run", "Fly", "Swim"}):
+                drift = horizontal_root_excursion(values)
                 if drift > MAX_ROOT_DRIFT:
                     problems.append(f"clip '{name}' drifts the root {drift:.3f}m "
                                     "horizontally (locomotion must be in place)")
@@ -401,6 +431,7 @@ def main() -> int:
     parser.add_argument("--models", type=Path, required=True)
     parser.add_argument("--animations", type=Path, required=True)
     parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--only", nargs="+", help="Validate selected creature model IDs")
     args = parser.parse_args()
 
     catalog = json.loads(args.catalog.read_text())
@@ -409,7 +440,13 @@ def main() -> int:
     required_clips = sorted(set(animation_map.get("actions", {}).values()))
 
     creature_models = {key: value for key, value in models.get("models", {}).items()
-                       if str(value.get("animationMap", "")).endswith("creature.json")}
+                       if str(value.get("animationMap", "")).endswith("creature.json")
+                       or "/animations/canine/" in str(value.get("animationMap", ""))}
+    if args.only:
+        unknown = set(args.only) - creature_models.keys()
+        if unknown:
+            parser.error(f"Unknown creature model IDs: {sorted(unknown)}")
+        creature_models = {key: value for key, value in creature_models.items() if key in args.only}
     attachment_bones = sorted({bone for value in creature_models.values()
                                for bone in value.get("attachments", {}).values()})
 
@@ -438,6 +475,10 @@ def main() -> int:
         if library and library != scene:
             print(f"WARN {model_id}: animationLibrary differs from scene ({library})")
         try:
+            model_map = config.get("animationMap", "")
+            if model_map.startswith("res://"):
+                map_path = args.root / model_map.replace("res://", "godot-client/")
+                required_clips = sorted(set(json.loads(map_path.read_text(encoding="utf-8")).get("actions", {}).values()))
             document, binary = read_glb(path)
             problems, tris = check(document, binary, path, required_clips,
                                    attachment_bones, bool(entries[model_id].get("hovers")))

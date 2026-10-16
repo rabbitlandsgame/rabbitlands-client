@@ -8,6 +8,9 @@ var playback_speeds: Dictionary
 ## speed 1.0, measured from its planted foot. The clips animate in place, so
 ## this is what tells an actor how fast to run one for its own travel speed.
 var stride_speeds: Dictionary
+## Opt in when stride measurements include import scale but must also follow
+## the runtime's small-creature enlargement and server species/invasion scale.
+var stride_scales_with_actor := false
 ## The clips that are cycles - travel, idles, dances - rather than one-shot
 ## transitions. glTF has no way to say a clip loops, so a runtime import
 ## leaves every clip one-shot; this list is where looping is stated. A walk
@@ -34,6 +37,7 @@ func _init(config: Dictionary) -> void:
 	command_to_action = config.get("serverCommands", {}).duplicate(true)
 	playback_speeds = config.get("playbackSpeeds", {}).duplicate(true)
 	stride_speeds = config.get("strideMetresPerSecond", {}).duplicate(true)
+	stride_scales_with_actor = bool(config.get("strideScalesWithActor", false))
 	looping_clips = PackedStringArray(config.get("loopingClips", []))
 	facing_offsets = config.get("facingOffsets", {}).duplicate(true)
 	fallback_action = StringName(config.get("fallbackAction", "idle"))
@@ -60,8 +64,9 @@ func playback_speed_for_action(action: StringName) -> float:
 
 ## Zero for actions that are not travel, which is the caller's signal to use
 ## the fixed playback speed instead.
-func stride_speed_for_action(action: StringName) -> float:
-	return maxf(0.0, float(stride_speeds.get(String(action), 0.0)))
+func stride_speed_for_action(action: StringName, actor_scale := 1.0) -> float:
+	var stride := maxf(0.0, float(stride_speeds.get(String(action), 0.0)))
+	return stride * maxf(actor_scale, 0.01) if stride_scales_with_actor else stride
 
 func is_at_ease(action: StringName) -> bool:
 	return at_ease_actions.has(String(action))
