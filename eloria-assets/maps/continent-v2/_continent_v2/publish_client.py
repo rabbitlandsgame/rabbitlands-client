@@ -207,10 +207,11 @@ def territory_resources(out, names):
 
 
 # What a v2 cell's geometry counts against the stream budget (geometryResidentBytes), as a multiple of its GLB's
-# bytes. build_continent.py counts 5 x for the twelve territories and keeps doing so. The village-mem captures
-# measured the mesh memory a v2 cell really holds at 0.45-0.48 x its GLB, so 5 x (about ten times the truth) let 4-6
-# cells stay resident and left 46 framed holes in the wide and zoomed-out views. Owner call 2026-10-03: 1.0 x for
-# continent-v2 only (trials: 17 holes, 16-22 cells resident, 6-9 s to settle). tests/test_publish_client_geometry.py.
+# bytes. The village-mem captures measured the mesh memory a v2 cell really holds at 0.45-0.48 x its GLB, so 5 x
+# (about ten times the truth) let 4-6 cells stay resident and left 46 framed holes in the wide and zoomed-out views.
+# Owner call 2026-10-03: 1.0 x for continent-v2 (trials: 17 holes, 16-22 cells resident, 6-9 s to settle). The twelve
+# legacy territories followed on 2026-10-16 (publish_finish.py LEGACY_RESIDENT_FACTOR, measured the same way).
+# tests/test_publish_client_geometry.py.
 GEOMETRY_RESIDENT_FACTOR = 1.0
 
 

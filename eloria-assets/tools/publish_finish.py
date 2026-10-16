@@ -66,9 +66,14 @@ import shared_meshes as SM  # noqa: E402
 
 MAPS = SM.MAPS
 POOL = SM.POOL
-# What a streamed chunk is assumed to cost resident, where the package does not
-# say: the figure the nymara and Four Gates publishers have always written.
-LEGACY_RESIDENT_FACTOR = 5.0
+# What a byte of streamed chunk GLB is assumed to cost resident, where the
+# package does not say: the nymara and Four Gates publishers write no
+# publication record. They wrote 5 until 2026-10-16, when the village-mem
+# method measured all twelve territories: a cell's pooled prototypes hold
+# 0.91 x their GLB (none above 1.0) and its own meshes 0.31 x, so 5 counted
+# props at about 5.5 x the truth and kept about 6 of the 16 cells in reach
+# resident. Owner call 2026-10-16: 1.0, as continent-v2.
+LEGACY_RESIDENT_FACTOR = 1.0
 
 
 # --- the files a publisher wrote ---------------------------------------------

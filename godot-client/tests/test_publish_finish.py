@@ -159,7 +159,8 @@ class PublishFinishTest(unittest.TestCase):
         self.assertEqual(len(document["meshes"]), 1)
 
     def test_recorded_figures_follow_the_files(self):
-        for name, factor, expected in (("town", None, 5.0), ("sw_isle", 1.0, 1.0)):
+        import publish_finish as PF
+        for name, factor, expected in (("town", None, PF.LEGACY_RESIDENT_FACTOR), ("declared", 2.5, 2.5)):
             package = self.package(name, factor=factor)
             self.finish(package)
             index = json.loads((self.root / "_shared" / "meshes" / "index.json").read_text(encoding="utf-8"))
@@ -190,7 +191,7 @@ class PublishFinishTest(unittest.TestCase):
         """What the client's budget counts for a pooled prop: one entry per
         prototype a chunk names, sized from the pool's index, and nothing for a
         chunk that draws none. A prototype placed twice is still one mesh."""
-        package = self.package("town", cells=3)
+        package = self.package("town", cells=3, factor=5.0)
         lonely = package / "chunks" / "02_00" / "world.glb"
         lonely.write_bytes(SM.write_glb(*prop(17.0)))
         self.finish(package)
@@ -240,9 +241,10 @@ class PublishFinishTest(unittest.TestCase):
 
     def test_the_figures_a_publisher_declares_win(self):
         import publish_finish as PF
-        self.assertEqual(PF.resident_factor(self.root, 1.0), 1.0,
+        self.assertEqual(PF.resident_factor(self.root, 2.5), 2.5,
                          "a publisher that has not written publication.json yet says so itself")
         self.assertEqual(PF.resident_factor(self.root), PF.LEGACY_RESIDENT_FACTOR)
+        self.assertEqual(PF.LEGACY_RESIDENT_FACTOR, 1.0, "owner call 2026-10-16: legacy maps count 1 x their GLB")
 
     def test_normals_are_quantised_and_the_geometry_is_kept(self):
         package = self.package("town")

@@ -1,17 +1,19 @@
-"""_continent_v2/publish_client.py: a v2 cell counts its geometry at 1.0 x its GLB; every legacy map keeps 5 x.
+"""Every streamed cell counts its geometry at 1.0 x its GLB: continent-v2's publish_client.py and the legacy maps alike.
 
 ContinentChunkStream (godot-client/src/world/continent_chunk_stream.gd) adds a cell's geometryResidentBytes to the
-images it brings when it decides what stays resident under maximumResidentBytes. The twelve territories' exporter
-(nymara-regions/_continent/build_continent.py) and Four Gates publish 5 x the chunk GLB's bytes there; the v2
-publisher did the same until the owner call of 2026-10-03, which set 1.0 x for continent-v2 only (a v2 cell's mesh
-memory measured 0.45-0.48 x its GLB). The client is not changed: the figure travels in the v2 manifests alone.
+images it brings when it decides what stays resident under maximumResidentBytes. The v2 publisher wrote 5 x the chunk
+GLB's bytes there until the owner call of 2026-10-03 set 1.0 x for continent-v2 (a v2 cell's mesh memory measured
+0.45-0.48 x its GLB). The twelve legacy territories' exporter (nymara-regions/_continent/build_continent.py, Four
+Gates included) kept 5 x until the owner call of 2026-10-16 set 1.0 x for them too (publish_finish.py
+LEGACY_RESIDENT_FACTOR; their pooled prototypes measured 0.91 x their GLB, none above 1.0, their own meshes 0.31 x).
+The client is not changed: the figure travels in the manifests alone.
 
 The synthetic cases need only the publisher module. The legacy cases read every streamed territory manifest outside
-continent-v2 in this checkout, the figures the client budgets with: each cell's geometry is still 5 x the bytes of
-the GLB it names (and those are the shipped file's bytes), its estimate still sums geometry and images, and the
-budget is still 256 MiB. The package case checks every committed isle package: it records the factor
-(publication.json geometryResidentFactor) and every cell carries it, so a stale or mis-merged republish that writes
-5 x again fails (a package published before the call fails until the territory is republished).
+continent-v2 in this checkout, the figures the client budgets with: each cell's geometry is 1 x the bytes of the GLB
+it names (and those are the shipped file's bytes), and the budget is still 256 MiB. The package case checks every
+committed isle package: it records the factor (publication.json geometryResidentFactor) and every cell carries it, so
+a stale or mis-merged republish that writes 5 x again fails (a package published before the call fails until the
+territory is republished).
 
 Both kinds of cell also state the pooled prototypes their chunk draws (sharedMeshResidentBytes, written by
 publish_finish.py's restamp at the cell's own factor): a prop the space passes moved into maps/_shared/meshes left the
@@ -40,7 +42,7 @@ import publish_client as PC  # noqa: E402
 
 REGIONS = tuple(entry["id"] for entry in json.loads(
     (CHECKOUT / "godot-client/world_authoring/continent-v2/territories.json").read_text(encoding="utf-8"))["entries"])
-LEGACY_FACTOR = 5
+LEGACY_FACTOR = 1.0
 
 
 def test_a_v2_cell_counts_its_glb_once():
@@ -62,9 +64,11 @@ def test_the_publisher_writes_that_figure_into_every_cell():
     assert '["glbBytes"] * 5' not in source
 
 
-def test_the_legacy_exporter_keeps_five_times():
+def test_the_legacy_exporters_count_their_glb_once():
+    assert PC.PF.LEGACY_RESIDENT_FACTOR == LEGACY_FACTOR, "owner call 2026-10-16: the legacy maps count 1.0 x too"
     text = (MAPS / "nymara-regions" / "_continent" / "build_continent.py").read_text(encoding="utf-8")
-    assert "geometry_bytes=chunk_stats['glbBytes']*5" in text
+    assert "geometry_bytes=max(1,math.ceil(PF.LEGACY_RESIDENT_FACTOR*chunk_stats['glbBytes']))" in text
+    assert "chunk_stats['glbBytes']*5" not in text
 
 
 @functools.cache
@@ -106,7 +110,7 @@ def legacy_manifests():
 
 
 @pytest.mark.parametrize("manifest_path", legacy_manifests())
-def test_legacy_figures_keep_five_times_their_glb(manifest_path):
+def test_legacy_figures_count_their_glb_once(manifest_path):
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     stream = manifest["streamingChunks"]
     assert stream["maximumResidentBytes"] == PC.SHIPPING_BUDGET
@@ -116,7 +120,7 @@ def test_legacy_figures_keep_five_times_their_glb(manifest_path):
         child = json.loads(child_path.read_text(encoding="utf-8"))
         glb = child_path.parent / child["asset"]["glb"]
         assert cell["glbBytes"] == glb.stat().st_size, (cell["id"], "the figure is the shipped GLB's")
-        assert cell["geometryResidentBytes"] == LEGACY_FACTOR * cell["glbBytes"], cell["id"]
+        assert cell["geometryResidentBytes"] == max(1, math.ceil(LEGACY_FACTOR * cell["glbBytes"])), cell["id"]
         check_estimate(cell, child_path, child, LEGACY_FACTOR)
 
 

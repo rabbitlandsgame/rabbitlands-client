@@ -122,15 +122,22 @@ files into `maps/_shared/meshes` and leave the chunk a placement naming it
 The prop has left the chunk's `glbBytes` but not the GPU, so
 `publish_finish.py`'s restamp states each cell's prototypes in
 `sharedMeshResidentBytes`: the prototype's identity (its file stem) to the
-pool index's `bytes` times the cell's own geometry factor (5 for the legacy
-exporters, 1.0 for continent-v2). Selection counts each identity once across
-the prospective resident set, and the walk that marks `blocking` floors it at
-5 x like the cell's geometry. `estimatedResidentBytes` includes them. Before
-this, a Nymara cell restated after pooling counted almost nothing for its
-props: on the shipped sidecar figures Amberwood admitted 15.8 cells per focus
-on average while the prototypes they drew, 189 MiB, went uncounted; counted,
-it admits 6.4 (its admission before the restamp was 5.8). Prototype images
-are already among the cell's `sharedResourceResidentBytes`.
+pool index's `bytes` times the cell's own geometry factor. Selection counts
+each identity once across the prospective resident set, and the walk that
+marks `blocking` floors it at 5 x like the cell's geometry.
+`estimatedResidentBytes` includes them. Prototype images are already among
+the cell's `sharedResourceResidentBytes`.
+
+Every exporter publishes geometry at 1.0 x its GLB bytes: continent-v2 since
+2026-10-03, and the twelve legacy territories (`publish_finish.py`
+`LEGACY_RESIDENT_FACTOR`) since 2026-10-16. The legacy ones wrote 5 x before.
+Measured with the village-mem method (`mesh_get_surface` bytes; a windowed
+`RENDER_BUFFER_MEM_USED` delta agreed within 2%), a legacy cell's pooled
+prototypes hold 0.83-0.96 x their GLB and none more than 1.0 x, and its own
+meshes 0.17-0.47 x. At 5 x Amberwood and Four Gates kept 6.4 and 6.9 cells
+per focus resident of about 16 in reach; at 1 x they keep 15.8 and 14.8,
+whose real cost stays under the 256 MiB budget (Four Gates peaks at 248 MiB).
+The blocking set is the same at either factor.
 
 Chunk retirement frees a bounded number of nodes per frame. Territory retirement
 pauses new work and waits by polling any existing worker before releasing its
@@ -213,7 +220,7 @@ preview collision ownership.
 
 `tests/test_continent_chunk_shared_meshes.gd` covers the prototype figures:
 once per identity across selection, residency and retirement, the 5 x blocking
-floor for a continent-v2 cell, and the manifest check. `test_publish_finish.py`
+floor for a cell published at 1 x, and the manifest check. `test_publish_finish.py`
 and `_continent_v2/tests/test_publish_client_geometry.py` check the restamp and
 every committed territory's cells against the pool index.
 

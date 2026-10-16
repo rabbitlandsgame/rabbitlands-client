@@ -22,13 +22,13 @@ const FRAMED_RADIUS := 64.0
 const VramTextures := preload("res://src/world/vram_textures.gd")
 ## Where configure() keeps a chunk's shared image figures as published.
 const PUBLISHED_SHARED_KEY := "publishedSharedResourceResidentBytes"
-## The geometry figure develop's exporters publish per GLB byte
-## (build_continent.py: 5 x glbBytes). The walk that marks `blocking` (what
-## prime() imports synchronously) never counts less than that: a publisher
-## that counts geometry nearer the GPU's real figure (continent-v2: 1 x
-## glbBytes) admits more cells to residency, but those stream in on the
-## worker instead of lengthening the arrival. Every legacy cell already
-## publishes exactly this figure, so its walk is unchanged.
+## The geometry figure the exporters published per GLB byte before it was
+## measured (build_continent.py: 5 x glbBytes until 2026-10-16). The walk that
+## marks `blocking` (what prime() imports synchronously) never counts less
+## than that: a publisher that counts geometry nearer the GPU's real figure
+## (1 x glbBytes: continent-v2 since 2026-10-03, the legacy territories since
+## 2026-10-16) admits more cells to residency, but those stream in on the
+## worker instead of lengthening the arrival.
 const BLOCKING_GEOMETRY_PER_GLB_BYTE := 5
 ## A cell's pooled prototypes (publish_finish.py restamp): prototype identity ->
 ## resident bytes, at the same factor as the cell's own geometry. A pooled prop
@@ -239,7 +239,7 @@ static func incremental_cost(entry: Dictionary, shared: Dictionary,
 	var geometry := int(entry.geometryResidentBytes)
 	# The blocking walk counts geometry at no less than 5 x its GLB bytes. A
 	# cell's prototypes are stated at the factor of its own geometry, so they
-	# take the same floor: x5 for a continent-v2 cell, x1 for a legacy one.
+	# take the same floor: x5 for a cell published at 1 x, x1 for one at 5 x.
 	var prototype_scale := 1.0
 	if key == PUBLISHED_SHARED_KEY and entry.has("glbBytes"):
 		var floor_bytes := BLOCKING_GEOMETRY_PER_GLB_BYTE * int(entry.glbBytes)

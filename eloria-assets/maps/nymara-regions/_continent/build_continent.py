@@ -1193,9 +1193,10 @@ def export_geometry(world,content,output):
             # existing published chunks without this key still use it.
             c['objectMaterialOverrides']={'schema':'eloria-object-material-overrides-v1','entries':[]}
             json_write(chunk_root/'world.json',c)
-            # Conservative geometry + BVH + texture allowance. Runtime has an
-            # independent shared-texture pool; this deliberately overestimates.
-            geometry_bytes=chunk_stats['glbBytes']*5
+            # Geometry at the legacy resident factor (publish_finish.py, 1 x its
+            # GLB since the 2026-10-16 measurement; 5 x before). The space passes
+            # restate it, with the prototypes each cell draws, after the bake.
+            geometry_bytes=max(1,math.ceil(PF.LEGACY_RESIDENT_FACTOR*chunk_stats['glbBytes']))
             shared_bytes=chunk_stats['sharedResourceResidentBytes']
             estimated=geometry_bytes+sum(shared_bytes.values())
             manifest['streamingChunks']['chunks'].append({'id':name,'manifest':f'chunks/{name}/world.json','bounds':bounds,
