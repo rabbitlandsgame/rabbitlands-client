@@ -18,7 +18,7 @@ Original high-resolution models, full-resolution textures, concept inputs, anima
 
 This entire directory is ignored by Git. It contains local authoring data, not assets to package with the game. No credentials, old Git metadata or migration identity records belong here. Packaged game releases, engine caches and rebuildable map caches are outside the transfer scope. Original files remain intact at their source.
 
-The transfer verified348,626 files (239,423,641,584 bytes) and updated literal paths in1,233 copied scripts with exact original backups. All four complete skills include their18 supporting references and original UI metadata. `docs/qa/asset-authoring/transfer-summary.json` records the public summary; full per-file inventories remain local. The tracked ignore rule and repository-local exclusion protect the archive across branch changes.
+The transfer verified 348,626 files (239,423,641,584 bytes) and updated literal paths in 1,233 copied scripts with exact original backups. All four complete skills include their 18 supporting references and original UI metadata. `docs/qa/asset-authoring/transfer-summary.json` records the public summary; full per-file inventories remain local. The tracked ignore rule and repository-local exclusion protect the archive across branch changes.
 
 The archive retains original folder names such as `generate_models`, `eloria-tools` and `eloria-client` so related inputs still line up. These are local authoring snapshots; current development and publication target the Rabbit Lands repositories. The historical client source snapshot is not a Git checkout. Tools that replay historical Git commits still require the separately retained original checkout; this migration does not manufacture the old history.
 
