@@ -425,7 +425,13 @@ chunk stream's 256 MiB budget, so the stream refused most of its neighbours.
   images its territory manifest names (wherever they live), then counts each
   shared image at its sidecar's GPU bytes when it will be uploaded from one, the
   published RGBA8 figure otherwise (`VramTextures.resident_bytes`), and logs
-  `vram_textures budget <territory>: N of M images at sidecar size`. No map is
+  `vram_textures budget <territory>: N of M images at sidecar size`. "Will be
+  uploaded" is judged by the index of the image's own directory, the one its
+  load uses: another index read in the session can list a sidecar for a sha
+  this one excludes (continent-v2 encodes images the Nymara index excludes for
+  `no_material_role`), and pricing by it under-counted every Nymara territory
+  visited after Landfall. An image its territory names no directory for keeps
+  the published figure. No map is
   republished. An index entry missing a field, or claiming fewer GPU bytes than
   its format's top level holds, is not used; a sidecar refused at load sends
   its image back to the published figure for the rest of the session (the

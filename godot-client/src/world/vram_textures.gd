@@ -124,8 +124,11 @@ static var _formats := -1
 static var _formats_override := -1
 ## Normalised source directory -> {status, entries, sha256, entries_by_sha}.
 static var _indexes: Dictionary = {}
-## Source sha -> its index entry, across every index read (the chunk budget
-## knows a sha, not a directory). Content addressing makes the sha enough.
+## Source sha -> its index entry, across every index read: the first one read
+## that lists it (`lookup`). It is not what a load of the image uploads: two
+## indexes can disagree about one sha (one excludes it, another lists a
+## sidecar), and a load takes the sidecar only from the index of the image's
+## own directory (`sidecar_entry`), so the chunk budget prices by directory too.
 static var _by_sha: Dictionary = {}
 ## Sidecar shas already warned about, so a broken file says so once.
 static var _warned: Dictionary = {}
@@ -510,6 +513,25 @@ static func image_directories(manifest_data: Dictionary, glb_directory: String) 
 	sorted.sort()
 	return sorted
 
+## Source sha -> the directories (normalised, sorted) a manifest's
+## `externalResources` load it from, for `resident_bytes`. A territory manifest
+## lists every image its chunks name, so its stream can price each one by the
+## index the load will really use.
+static func image_directories_by_sha(manifest_data: Dictionary, glb_directory: String) -> Dictionary:
+	var by_sha: Dictionary = {}
+	var resources: Variant = manifest_data.get("externalResources", {})
+	if resources is Dictionary:
+		for uri: Variant in resources:
+			var sha := str((resources as Dictionary)[uri])
+			if not by_sha.has(sha):
+				by_sha[sha] = {}
+			by_sha[sha][_normalise(glb_directory.path_join(str(uri)).get_base_dir())] = true
+	for sha: String in by_sha:
+		var sorted := PackedStringArray((by_sha[sha] as Dictionary).keys())
+		sorted.sort()
+		by_sha[sha] = sorted
+	return by_sha
+
 ## Reads the index of every directory a manifest's images live in, for the
 ## chunk budget: a territory manifest lists all its chunks' images, so its
 ## stream can correct every cell's figures before the first chunk import
@@ -543,18 +565,28 @@ static func lookup(sha: String) -> Dictionary:
 ## BC1). Per sha, not a factor, because only the client knows which of those
 ## applies to each image; and here rather than in the publisher, so no map is
 ## republished and an older client or a fallback machine never under-counts.
-## Only indexes already read count (the stream reads its territory's with
-## `read_indexes_for` first); an unknown sha keeps the published figure.
-static func resident_bytes(sha: String, published: int) -> int:
-	if mode() == Mode.OFF:
-		return published
-	var entry := lookup(sha)
-	if entry.is_empty() or not (usable_formats() & int(FORMAT_BITS[entry.format])):
+##
+## `source_directories` are the directories the image is loaded from
+## (`image_directories_by_sha`). Each answers as a load from it would
+## (`sidecar_entry`, reading its index if no one has yet): another index that
+## lists a sidecar for the same sha does not count, because the load never
+## uses it. An image that some directory decodes, or that no directory is
+## named for, keeps the published figure.
+static func resident_bytes(sha: String, published: int, source_directories: PackedStringArray) -> int:
+	if mode() == Mode.OFF or source_directories.is_empty():
 		return published
 	_mutex.lock()
 	var decoded := _decoded_instead.has(sha)
 	_mutex.unlock()
-	return published if decoded else int(entry.gpuBytes)
+	if decoded:
+		return published
+	var bytes := 0
+	for directory: String in source_directories:
+		var entry := sidecar_entry(sha, directory)
+		if entry.is_empty():
+			return published
+		bytes = maxi(bytes, int(entry.gpuBytes))
+	return bytes
 
 ## Records that an indexed image was decoded after all (see _decoded_instead),
 ## so the chunk budget counts it at the published figure from now on.

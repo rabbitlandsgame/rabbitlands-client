@@ -71,6 +71,9 @@ var _physics_enabled := true
 var _preview_enabled := false
 ## VramTextures.budget_generation() when the entries were last corrected.
 var _corrected_generation := -1
+## Image sha -> the directories this territory loads it from
+## (VramTextures.image_directories_by_sha), which price it.
+var _image_directories: Dictionary = {}
 ## Import workers whose owner left the tree or re-primed before they finished.
 ## A worker may be waiting on rendering-server commands that only the main
 ## thread services, so joining it synchronously deadlocks the client; the
@@ -157,8 +160,12 @@ func configure(source: WorldManifest, cache_enabled: bool) -> void:
 	maximum_resident_bytes = maxi(1, int(config.get("maximumResidentBytes", DEFAULT_RESIDENT_BYTES)))
 	# The sidecar indexes of every image this territory names, read before any
 	# figure is corrected: the budget must not depend on a chunk import having
-	# read them first, nor on where the shared images live.
+	# read them first, nor on where the shared images live. Each image is
+	# priced by its own directory's index, the one its load uses, never by an
+	# index another territory read (continent-v2 lists sidecars for images the
+	# Nymara index excludes, and a Nymara chunk decodes those).
 	var indexes := VramTextures.read_indexes_for(source.data, source.glb_path().get_base_dir())
+	_image_directories = VramTextures.image_directories_by_sha(source.data, source.glb_path().get_base_dir())
 	for value: Dictionary in config.chunks:
 		var entry := value.duplicate(true)
 		entry.path = source.source_path.get_base_dir().path_join(str(entry.manifest))
@@ -196,7 +203,8 @@ func _correct_entries() -> Vector2i:
 		if not published is Dictionary or not shared is Dictionary:
 			continue
 		for identity: String in published:
-			var bytes := VramTextures.resident_bytes(identity, int(published[identity]))
+			var bytes := VramTextures.resident_bytes(identity, int(published[identity]),
+				_image_directories.get(identity, PackedStringArray()))
 			shared[identity] = bytes
 			counted[identity] = true
 			if bytes != int(published[identity]):
