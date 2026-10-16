@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Join the continent graph to the packages and write the server's portal table.
 
-    python eloria-assets/tools/continent_portals.py --server ../dev-server \
+    python eloria-assets/tools/continent_portals.py --server ../rabbitlands-server \
         --maps <dir generate_nymara_maps.py wrote to> [--apply]
 
 `maps/nymara-regions/region-connections.json` says which region touches which

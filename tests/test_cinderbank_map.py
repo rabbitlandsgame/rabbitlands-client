@@ -7,6 +7,9 @@ import struct
 import unittest
 
 CLIENT=Path(__file__).resolve().parents[1]
+# The server checkout beside this one; eloria-server and dev-server are its
+# names from before the move to Rabbit Lands.
+SERVERS=('rabbitlands-server','eloria-server','dev-server')
 PACKAGE=CLIENT/'eloria-assets/maps/cinderbank'
 
 
@@ -38,8 +41,8 @@ class CinderbankMapTests(unittest.TestCase):
             x0,y0,x1,y1=prop['bounds']
             for y in range(y0,y1+1):
                 for x in range(x0,x1+1):self.assertEqual(grid[y*size+x],0,prop['id'])
-        server=CLIENT.parent/'dev-server'
-        if server.exists():
+        server=next((CLIENT.parent/name for name in SERVERS if (CLIENT.parent/name).exists()),None)
+        if server:
             self.assertEqual(json.loads((server/'config/eloria/cinderbank.json').read_text(encoding='utf-8')),self.layout)
             packed=gzip.decompress((server/'tools/collision/cinderbank.escg.gz').read_bytes())
             self.assertEqual(packed,struct.pack('<4sHHI',b'ESCG',1,200,size)+bytes(grid))
