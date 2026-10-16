@@ -24,9 +24,13 @@ The Landfall arrival plaza's star mosaic is a user-requested restoration on
 2026-10-16. Its original `kit-sw-plaza-rosette.glb` and 1024-pixel mosaic texture
 remain active as a ground inlay. The saved Landfall scene binds the preserved
 model again, and the runtime retirement index permits its mesh in chunk
-`08_11` while continuing to suppress the retired garden paving beside it.
-The original retirement receipts remain historical records; the rosette
-generator remains disabled.
+`08_11`. The nine original `kit-sw-garden-paving-*` limestone path overlays
+were subsequently restored at the user's request. Their original model and
+texture hashes, saved placements and terrain-conforming geometry are preserved;
+their scene instances, authoring catalogue entries and runtime meshes are active
+again. See `docs/qa/procedural-model-archive/ground-inlay-restoration.json` for
+verification. The original retirement and audit receipts remain historical
+records; the rosette and paving generators remain disabled.
 
 Procedural actor and equipment definitions are removed, including 158 actor
 model entries, 163 actor-type mappings, four equipment visuals and 710 obsolete

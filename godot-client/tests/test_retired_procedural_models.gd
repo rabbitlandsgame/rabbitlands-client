@@ -11,6 +11,48 @@ func check(ok: bool, message: String) -> void:
 		failures.append(message)
 		push_error(message)
 
+func _check_restored_paving() -> Array[Dictionary]:
+	# The audit pins the exact nine published chunks affected by the cleanup.
+	var audit: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+		"res://../docs/qa/procedural-model-archive/ground-inlay-audit.json"))
+	var record: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+		"res://../eloria-assets/maps/continent-v2/sw_isle/source/garden-paving-record.json"))
+	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+		"res://world_authoring/continent-v2/shared-kit-catalog.json"))
+	var results: Array[Dictionary] = []
+	for piece: Dictionary in audit.additional_ground_finish_losses:
+		var stem := str(piece.asset)
+		var source := "res://world_authoring/regions/sw_isle/assets/prototypes/" + stem + ".glb"
+		var expected := str(record.outputs["prototypes/" + stem + ".glb"])
+		check(FileAccess.get_sha256(source) == expected, stem + " original source bytes restored")
+		check(catalog.models.has(source), stem + " available in authoring catalogue")
+		var copy: Dictionary = piece.runtime_copies[0]
+		var loader := WorldLoader.new()
+		loader.detached_build = true
+		loader.detached_cache_enabled = false
+		root.add_child(loader)
+		loader.load_world("res://../" + str(copy.glb).get_basename() + ".json")
+		check(loader.world_root != null, stem + " published chunk loads")
+		var texture_size := Vector2.ZERO
+		var rendered := false
+		if loader.world_root != null:
+			var name := "Walk_landfall_" + stem.trim_prefix("kit-sw-").replace("-", "_")
+			var paving := loader.world_root.find_child(name, true, false) as MeshInstance3D
+			rendered = paving != null and paving.mesh != null
+			check(rendered, stem + " restored walk surface renders")
+			if rendered:
+				var material := paving.mesh.surface_get_material(0) as StandardMaterial3D
+				check(material != null and material.albedo_texture != null, stem + " limestone texture retained")
+				if material != null and material.albedo_texture != null:
+					texture_size = material.albedo_texture.get_size()
+					check(texture_size == Vector2(768, 768), stem + " original texture resolution retained")
+		results.append({"asset": stem, "rendered": rendered,
+			"source_sha256": FileAccess.get_sha256(source),
+			"texture_pixels": [int(texture_size.x), int(texture_size.y)]})
+		loader.free()
+	check(results.size() == 9, "all nine garden paving pieces checked")
+	return results
+
 func _run() -> void:
 	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
@@ -92,7 +134,7 @@ func _run() -> void:
 			check(not retained is MeshInstance3D, "package does not draw retired scenery")
 	loader.free()
 	# Landfall's textured arrival inlay was explicitly restored after retirement.
-	# Exercise its actual chunk: the nearby retired paving must stay suppressed.
+	# Exercise its actual chunk alongside the restored garden paving.
 	var plaza := WorldLoader.new()
 	plaza.detached_build = true
 	plaza.detached_cache_enabled = false
@@ -107,9 +149,10 @@ func _run() -> void:
 			check(material != null and material.albedo_texture != null, "arrival mosaic retains original texture")
 			if material != null and material.albedo_texture != null:
 				check(material.albedo_texture.get_size() == Vector2(1024, 1024), "arrival mosaic retains full 1024-pixel resolution")
-		var paving := plaza.world_root.find_child("*garden_paving*", true, false)
-		check(paving != null and not paving is MeshInstance3D, "retired plaza paving stays suppressed")
+		var paving := plaza.world_root.find_child("Walk_landfall_garden_paving_6_12", true, false) as MeshInstance3D
+		check(paving != null and paving.mesh != null, "restored plaza paving renders beside the mosaic")
 	plaza.free()
+	var restored_paving := _check_restored_paving()
 	var pool := preload("res://src/world/external_mesh_pool.gd")
 	for identity: String in retired_index.get("retiredMapPrototypes", []):
 		check(pool.acquire(identity, "unused") == null, "pooled retired model refused")
@@ -119,7 +162,8 @@ func _run() -> void:
 		"baked_copy_checked": inline_checked,
 		"real_map_loader_checked": true,
 		"restored_landfall_inlay_checked": true,
-		"scope": "Retired visuals remain suppressed; the restored Landfall star mosaic keeps its 1024-pixel texture. Updated Moss Bear actor still configures."}
+		"restored_landfall_paving": restored_paving,
+		"scope": "Retired visuals remain suppressed; Landfall's star mosaic and nine limestone paving overlays retain their original textures. Updated Moss Bear actor still configures."}
 	var output := "user://procedural-retirement.json"
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--report="): output = argument.trim_prefix("--report=")

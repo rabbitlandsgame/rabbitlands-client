@@ -317,6 +317,15 @@
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-landing-beacon.glb" id="s0_148_r2idi"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-plaza-rosette.glb" id="plaza_rosette"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-5-10.glb" id="garden_paving_5_10"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-5-11.glb" id="garden_paving_5_11"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-6-10.glb" id="garden_paving_6_10"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-6-12.glb" id="garden_paving_6_12"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-10.glb" id="garden_paving_7_10"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-11.glb" id="garden_paving_7_11"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-12.glb" id="garden_paving_7_12"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-8-10.glb" id="garden_paving_8_10"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-8-11.glb" id="garden_paving_8_11"]
 
 
 
@@ -38279,7 +38288,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -204, 121.5642, -102)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 5 10" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 5 10" instance=ExtResource("garden_paving_5_10")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-5-10"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-5-10.glb"
 
@@ -38298,7 +38307,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -204, 121.5542, -6)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 5 11" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 5 11" instance=ExtResource("garden_paving_5_11")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-5-11"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-5-11.glb"
 
@@ -38317,7 +38326,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -108, 121.5642, -102)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 6 10" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 6 10" instance=ExtResource("garden_paving_6_10")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-6-10"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-6-10.glb"
 
@@ -38336,7 +38345,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -108, 121.5792, 90)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 6 12" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 6 12" instance=ExtResource("garden_paving_6_12")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-6-12"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-6-12.glb"
 
@@ -38355,7 +38364,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 121.5642, -102)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 7 10" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 7 10" instance=ExtResource("garden_paving_7_10")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-7-10"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-10.glb"
 
@@ -38374,7 +38383,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 121.5842, -6)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 7 11" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 7 11" instance=ExtResource("garden_paving_7_11")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-7-11"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-11.glb"
 
@@ -38393,7 +38402,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 121.5792, 90)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 7 12" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 7 12" instance=ExtResource("garden_paving_7_12")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-7-12"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-7-12.glb"
 
@@ -38412,7 +38421,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84, 121.5442, -102)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 8 10" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 8 10" instance=ExtResource("garden_paving_8_10")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-8-10"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-8-10.glb"
 
@@ -38431,7 +38440,7 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84, 121.5742, -6)
 
-[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 8 11" type="Node3D"]
+[node name="Content" parent="AuthoredAssets/s0_Sw Garden Paving 8 11" instance=ExtResource("garden_paving_8_11")]
 metadata/map_asset_id = "sw_isle:kit-sw-garden-paving-8-11"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-garden-paving-8-11.glb"
 
