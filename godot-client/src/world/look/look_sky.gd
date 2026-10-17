@@ -218,6 +218,8 @@ static func _set_constants(material: ShaderMaterial) -> void:
 ## the same in both under it), so the sky keeps it.
 static func _haze(environment: Environment, lighting: WorldManifest, haze: Color) -> void:
 	var declared_density := 0.0
+	# How much of a fog bank the weather lays over it (WeatherSky), 0..1.
+	var weather_fog := 0.0
 	var environment_block: Variant = lighting.data.get("environment")
 	if environment_block is Dictionary:
 		var fog: Variant = (environment_block as Dictionary).get("fog")
@@ -225,12 +227,15 @@ static func _haze(environment: Environment, lighting: WorldManifest, haze: Color
 			var density: Variant = (fog as Dictionary).get("density")
 			if density is float or density is int:
 				declared_density = float(density)
+			weather_fog = clampf(float((fog as Dictionary).get("weather", 0.0)), 0.0, 1.0)
 	environment.fog_enabled = true
 	environment.fog_mode = Environment.FOG_MODE_DEPTH
-	environment.fog_depth_begin = LookProfile.HAZE_BEGIN
-	environment.fog_depth_end = LookProfile.HAZE_END
-	environment.fog_depth_curve = LookProfile.HAZE_CURVE
-	environment.fog_density = LookProfile.haze_density(declared_density)
+	environment.fog_depth_begin = lerpf(LookProfile.HAZE_BEGIN, LookProfile.WEATHER_HAZE_BEGIN,
+		weather_fog)
+	environment.fog_depth_end = lerpf(LookProfile.HAZE_END, LookProfile.WEATHER_HAZE_END,
+		weather_fog)
+	environment.fog_depth_curve = lerpf(LookProfile.HAZE_CURVE, 1.0, weather_fog)
+	environment.fog_density = lerpf(LookProfile.haze_density(declared_density), 1.0, weather_fog)
 	environment.fog_light_color = haze
 	environment.fog_light_energy = 1.0
 	environment.fog_aerial_perspective = 0.0

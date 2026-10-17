@@ -224,6 +224,24 @@ func _run() -> void:
 	_expect(float(fogged.fog.density) > float(dry_env.fog.density) * 6.0
 		and float(fogged.sun.energy) > float(dry_env.sun.energy) * 0.7,
 		"a fog bank closes the view without putting the sun out")
+	var grey: Dictionary = WeatherSky.weathered_look(lit, {"clouds": 0.92}).data.environment
+	_expect(float(grey.sun.shadowOpacity)
+			< WorldEnvironmentBinder.sun_shadow_opacity(dry_env.sun) * 0.4,
+		"an overcast sky softens the shadows: flat light, not a grey noon")
+	_expect(is_equal_approx(float(fogged.fog.weather), 0.85),
+		"the weather's fog travels with the haze for the look pass")
+	var haze_test := Environment.new()
+	LookSky._haze(haze_test, WeatherSky.weathered_look(lit, {"fog": 0.85}), Color.GRAY)
+	var clear_haze := Environment.new()
+	LookSky._haze(clear_haze, lit, Color.GRAY)
+	_expect(haze_test.fog_depth_begin < 20.0 and haze_test.fog_depth_end < 200.0
+		and haze_test.fog_density > clear_haze.fog_density
+		and is_equal_approx(clear_haze.fog_depth_begin, LookProfile.HAZE_BEGIN),
+		"a fog bank closes the painted haze in; a clear day keeps it far off")
+	var dusty: Dictionary = WeatherSky.weathered_look(lit, {"fall": 4, "precipitation": 0.8,
+		"fog": 0.7}).data.environment
+	var dust := DayNightBinder._colour(dusty.fog.color, Color.BLACK)
+	_expect(dust.r > dust.b, "a sandstorm's haze is sand-coloured")
 	var dark: Dictionary = WeatherSky.weathered_look(lit, {"darkness": 0.6}).data.environment
 	_expect(float(dark.sun.energy) < float(dry_env.sun.energy) * 0.5
 		and float(dark.ambient.energy) < float(dry_env.ambient.energy),

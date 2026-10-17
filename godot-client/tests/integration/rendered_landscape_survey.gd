@@ -169,10 +169,27 @@ func _run() -> void:
 		var actors := {1: {"actor_id": 1, "x": tile.x, "y": tile.y,
 			"rotation": 0, "actor_type": 0, "kind": 1, "name": "Traveller",
 			"health": 100, "max_health": 100, "alive": true, "appearance": {}}}
+		# `crowd`: that many more humanoids two tiles apart round the player,
+		# for timing a view under load (crowd_benchmarks.gd's bare humanoid).
+		var crowd := int(spec.get("crowd", 0))
+		var columns := maxi(1, int(ceil(sqrt(float(crowd)))))
+		for index: int in crowd:
+			var id := 20000 + index
+			actors[id] = {"actor_id": id,
+				"x": tile.x + (index % columns - columns / 2) * 2,
+				"y": tile.y + (index / columns - columns / 2) * 2,
+				"rotation": (index * 977) % 65536, "actor_type": 1, "kind": 1,
+				"name": "Crowd", "health": 80, "max_health": 100, "alive": true,
+				"appearance": {}}
 		state.set("local_actor_id", 1)
 		state.set("actors", actors)
 		state.call("mark_all_actors_changed")
 		main.call("_sync_world")
+		var spawn_deadline := Time.get_ticks_msec() + 180000
+		while (main.get("actor_nodes") as Dictionary).size() < crowd + 1 \
+				and Time.get_ticks_msec() < spawn_deadline:
+			main.call("_sync_world", state.call("take_changed_actors"))
+			await process_frame
 		var rig: Node3D = main.get("camera_rig")
 		rig.set("yaw_degrees", float(spec.get("yaw", 0)))
 		# The spec may ask for a lower view (a wall or a horn above a site); the rig accepts -80..-15.
@@ -189,11 +206,11 @@ func _run() -> void:
 		# `sky` ([kind, precipitation, clouds, fog, darkness, wind, lightning],
 		# 0-100, with `sky_name`) is a weather_state_v1 frame instead: the sky
 		# a scheduler state draws, already there.
-		var sky: Array = spec.get("sky", [])
-		if sky.size() == 7:
+		var sky_look: Array = spec.get("sky", [])
+		if sky_look.size() == 7:
 			var frame := PackedByteArray([1])
 			for _look: int in 2:
-				for value: Variant in sky:
+				for value: Variant in sky_look:
 					frame.append(int(value))
 			frame.append_array(PackedByteArray([0, 0]))
 			var label := str(spec.get("sky_name", "")).to_ascii_buffer()

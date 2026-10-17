@@ -345,8 +345,10 @@ func _build_fall(fall_kind: String) -> GPUParticles3D:
 			# Slow and drifting: a flake takes seconds to cross the box.
 			node.lifetime = 7.0 if fall_kind == "snow" else 9.0
 			node.preprocess = node.lifetime
+			# Sized for the game camera, forty metres off: a real flake would
+			# be a pixel.
 			node.draw_pass_1 = _flake_mesh(Color(0.96, 0.97, 1.0, 0.9) if fall_kind == "snow"
-				else Color(0.36, 0.34, 0.33, 0.85), 0.11 if fall_kind == "snow" else 0.08)
+				else Color(0.30, 0.28, 0.27, 0.9), 0.3 if fall_kind == "snow" else 0.22)
 			process.spread = 28.0
 			process.initial_velocity_min = 1.2 if fall_kind == "snow" else 0.7
 			process.initial_velocity_max = 2.2 if fall_kind == "snow" else 1.3
@@ -357,7 +359,7 @@ func _build_fall(fall_kind: String) -> GPUParticles3D:
 			# Driven sideways, low and fast.
 			node.lifetime = 1.6
 			node.position.y = 2.0
-			node.draw_pass_1 = _flake_mesh(Color(0.86, 0.72, 0.50, 0.55), 0.09)
+			node.draw_pass_1 = _flake_mesh(Color(0.86, 0.72, 0.50, 0.5), 0.35)
 			process.emission_box_extents = Vector3(RAIN_BOX.x, 3.0, RAIN_BOX.z)
 			process.direction = Vector3(1.0, -0.08, 0.35)
 			process.spread = 12.0

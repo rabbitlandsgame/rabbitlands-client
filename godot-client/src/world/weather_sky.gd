@@ -39,8 +39,14 @@ const AMBIENT_LEFT_DARK := 0.7
 const FOG_THICKER := 9.0
 ## The sun's colour under full cloud: the warmth goes first.
 const SUN_GREY := 0.6
+## What full cloud leaves of the sun's shadows.
+const SHADOW_LEFT := 0.25
 ## What full cloud or rain leaves of the colour's saturation.
 const SATURATION_LEFT := 0.72
+
+## The haze's colour when what falls is sand or ash, at full precipitation.
+const SAND_HAZE := Color(0.78, 0.64, 0.44)
+const ASH_HAZE := Color(0.34, 0.32, 0.31)
 
 ## The manifest under a single wetness (0 dry to 1 a full storm): the look of
 ## a storm scaled by it. Kept for callers that have only that number.
@@ -67,8 +73,18 @@ static func weathered_look(lighting: WorldManifest, look: Dictionary) -> WorldMa
 	var copy := WorldManifest.new()
 	copy.source_path = lighting.source_path
 	copy.data = lighting.data.duplicate()
-	copy.data["environment"] = weather_environment(declared as Dictionary,
-		cover, fog, darkness, falling)
+	var environment := weather_environment(declared as Dictionary, cover, fog, darkness, falling)
+	var haze: Variant = environment.get("fog")
+	if haze is Dictionary:
+		# The look pass closes its depth haze in by this (LookSky._haze).
+		(haze as Dictionary)["weather"] = fog
+		var fall := int(look.get("fall", 0))
+		if fall in [3, 4] and falling > 0.0:
+			var tint: Color = SAND_HAZE if fall == 4 else ASH_HAZE
+			var colour := DayNightBinder._colour((haze as Dictionary).get("color"), tint)
+			var dusted := colour.lerp(tint, falling * 0.8)
+			(haze as Dictionary)["color"] = [dusted.r, dusted.g, dusted.b]
+	copy.data["environment"] = environment
 	return copy
 
 ## The environment block under the weather, as a new dictionary: `cover`
@@ -90,6 +106,10 @@ static func weather_environment(declared: Dictionary, cover: float, fog := 0.0,
 	var sun: Variant = result.get("sun")
 	if sun is Dictionary:
 		var block: Dictionary = sun as Dictionary
+		# Cloud softens the shadows before it dims the sun: an overcast day is
+		# flat light, and full-strength shadows under a grey sky read as noon.
+		block["shadowOpacity"] = WorldEnvironmentBinder.sun_shadow_opacity(block) \
+			* lerpf(1.0, SHADOW_LEFT, cover)
 		block["energy"] = float(block.get("energy", 1.0)) * lerpf(1.0, SUN_LEFT_DARK, darkness)
 	var ambient: Variant = result.get("ambient")
 	if ambient is Dictionary:
