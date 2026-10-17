@@ -1871,9 +1871,10 @@ theme_override_constants/separation = 10
 [node name="SoundEnabled" type="CheckButton" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341516]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "Play Rabbit Lands' sounds for what the server reports"
+tooltip_text = "Enable music, world sounds, and HUD sounds"
 button_pressed = true
-text = "Sound"
+text = "Master audio"
+custom_minimum_size = Vector2(200, 0)
 
 [node name="SoundVolume" type="HSlider" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341517]
 unique_name_in_owner = true
@@ -1883,13 +1884,13 @@ size_flags_horizontal = 3
 min_value = 0.0
 max_value = 1.0
 step = 0.05
-value = 0.7
+value = 0.6
 
 [node name="SoundVolumeValue" type="Label" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341518]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(52, 0)
 layout_mode = 2
-text = "70%"
+text = "60%"
 horizontal_alignment = 2
 
 [node name="ShowThroughObstacles" type="CheckButton" parent="GameView/SettingsControls/Content" unique_id=1502773650]

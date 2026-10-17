@@ -15,6 +15,7 @@ extends RefCounted
 ##
 ## Maps that declare nothing get nothing, which is every package but one.
 
+const AudioMix := preload("res://src/audio/audio_mix.gd")
 const AUDIO_DIRECTORY := "res://assets/audio/"
 const DEFAULT_GAIN := 0.5
 const DEFAULT_RADIUS := 60.0
@@ -23,6 +24,7 @@ static func apply(manifest: WorldManifest, parent: Node3D,
 		world_scene: Node3D, catalog: PackedStringArray) -> int:
 	if manifest == null or parent == null:
 		return 0
+	AudioMix.ensure_buses()
 	var environment: Variant = manifest.data.get("environment", {})
 	if environment is not Dictionary:
 		return 0
@@ -58,6 +60,7 @@ static func _add_flat(parent: Node3D, entry: Dictionary, stream: AudioStream,
 	var player := AudioStreamPlayer.new()
 	player.name = str(entry.get("id", "Ambience"))
 	player.stream = _looping(stream)
+	player.bus = AudioMix.CATEGORIES.ambience.bus
 	player.volume_db = volume_db
 	player.autoplay = true
 	parent.add_child(player)
@@ -71,6 +74,7 @@ static func _add_positional(parent: Node3D, world_scene: Node3D,
 		var player := AudioStreamPlayer3D.new()
 		player.name = "%s_%d" % [str(entry.get("id", "Ambience")), bound]
 		player.stream = _looping(stream)
+		player.bus = AudioMix.CATEGORIES.ambience.bus
 		player.volume_db = volume_db
 		player.max_distance = float(entry.get("radius", DEFAULT_RADIUS))
 		player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE

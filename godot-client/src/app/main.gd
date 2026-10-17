@@ -69,6 +69,7 @@ const ContinentMapScript := preload("res://src/ui/continent_map.gd")
 const MinimapMarkerOverlayScript := preload("res://src/ui/minimap_marker_overlay.gd")
 const PlayerInfoPanelScript := preload("res://src/ui/player_info_panel.gd")
 const AudioDirectorScript := preload("res://src/audio/audio_director.gd")
+const AudioMix := preload("res://src/audio/audio_mix.gd")
 const FootstepSurface := preload("res://src/audio/footstep_surface.gd")
 const SpellsWindowScript := preload("res://src/ui/spells_window.gd")
 const SummoningWindowScript := preload("res://src/ui/summoning_window.gd")
@@ -2451,6 +2452,10 @@ func _configure_unified_settings() -> void:
 			row.reparent(page, false)
 			if row_name == "UiScaleRow":
 				page.move_child(row, 0)
+	settings_window.add_audio_controls()
+	for category: String in audio_director.category_volumes:
+		settings_window.restore_value("audio_" + category,
+			audio_director.category_volumes[category])
 	# The banner controls themselves retain their names and persisted keys.
 	var actor_hud_menu := get_node("%BannerControls") as Control
 	(actor_hud_menu.get_node("Options") as Control).reparent(
@@ -2564,6 +2569,9 @@ func _refresh_unified_settings() -> void:
 	sound_enabled.set_pressed_no_signal(audio_director.enabled)
 	sound_volume.set_value_no_signal(audio_director.volume_linear)
 	sound_volume_value.text = "%d%%" % roundi(audio_director.volume_linear * 100.0)
+	for category: String in audio_director.category_volumes:
+		settings_window.restore_value("audio_" + category,
+			audio_director.category_volumes[category])
 	minimap_size.set_value_no_signal(_minimap_scale)
 	minimap_size_value.text = "%d%%" % roundi(_minimap_scale * 100.0)
 	ui_scale_slider.set_value_no_signal(_ui_scale)
@@ -7228,7 +7236,10 @@ func _load_hud_settings() -> void:
 			console_commands.aliases = (stored_aliases as Dictionary).duplicate()
 		audio_director.enabled = bool(config.get_value("audio", "enabled", true))
 		audio_director.volume_linear = clampf(float(config.get_value(
-			"audio", "volume", 0.7)), 0.0, 1.0)
+			"audio", "volume", AudioMix.MASTER_DEFAULT)), 0.0, 1.0)
+		for category: String in AudioMix.CATEGORIES:
+			audio_director.set_category_volume(category, float(config.get_value(
+				"audio", category + "_volume", AudioMix.CATEGORIES[category].volume)))
 		for banner_key: String in BANNER_OPTION_NODES:
 			var box: CheckBox = _banner_option_boxes[banner_key] as CheckBox
 			box.set_pressed_no_signal(bool(config.get_value(
@@ -7241,6 +7252,9 @@ func _load_hud_settings() -> void:
 	sound_volume.set_value_no_signal(float(audio_director.volume_linear))
 	sound_volume_value.text = "%d%%" % roundi(
 		float(audio_director.volume_linear) * 100.0)
+	for category: String in audio_director.category_volumes:
+		settings_window.restore_value("audio_" + category,
+			audio_director.category_volumes[category])
 	minimap_size.set_value_no_signal(_minimap_scale)
 	ui_scale_slider.set_value_no_signal(_ui_scale)
 	show_through_obstacles.set_pressed_no_signal(_show_through_obstacles)
@@ -7347,6 +7361,9 @@ func _save_hud_settings() -> void:
 	config.set_value("console", "aliases", console_commands.aliases)
 	config.set_value("audio", "enabled", bool(audio_director.enabled))
 	config.set_value("audio", "volume", float(audio_director.volume_linear))
+	for category: String in audio_director.category_volumes:
+		config.set_value("audio", category + "_volume",
+			float(audio_director.category_volumes[category]))
 	config.set_value("hud", "minimap_scale", _minimap_scale)
 	config.set_value("hud", "ui_scale", _ui_scale)
 	config.set_value("hud", "show_through_obstacles", _show_through_obstacles)
@@ -11006,6 +11023,10 @@ func _set_name_distance(value: Variant) -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if section == "Audio" and key.begins_with("audio_"):
+		audio_director.set_category_volume(key.trim_prefix("audio_"), float(value))
+		_save_hud_settings()
+		return
 	if section == "Chat":
 		var surface: PanelContainer = system_chat_hud if key.begins_with("system_chat_") else chat_hud
 		var option := key.trim_prefix("system_chat_") if key.begins_with("system_chat_") else key.trim_prefix("chat_")

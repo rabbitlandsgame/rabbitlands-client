@@ -6,6 +6,8 @@ extends SceneTree
 ## loop, a gain and where it belongs; the client plays exactly that and invents
 ## no placement of its own.
 
+const AudioMix := preload("res://src/audio/audio_mix.gd")
+
 var failures := 0
 
 func _init() -> void:
@@ -44,6 +46,8 @@ func _run() -> void:
 		"city-ambience") as AudioStreamPlayer
 	_expect(flat != null and flat.stream != null and flat.autoplay,
 		"an entry with no node prefix is played flat")
+	_expect(flat != null and flat.bus == AudioMix.CATEGORIES.ambience.bus,
+		"flat ambience uses the player's ambience volume")
 	_expect(flat != null
 		and is_equal_approx(db_to_linear(flat.volume_db), 0.5),
 		"the gain the package asked for is the gain used")
@@ -52,6 +56,9 @@ func _run() -> void:
 	_expect(positional != null
 		and is_equal_approx(positional.max_distance, 120.0),
 		"a positional entry carries the declared radius")
+	_expect(positional != null and positional.bus == AudioMix.CATEGORIES.ambience.bus
+		and AudioServer.get_bus_send(AudioServer.get_bus_index(positional.bus)) == AudioMix.MASTER_BUS,
+		"positional ambience follows both ambience and master volume")
 	_expect(positional != null
 		and positional.global_position.is_equal_approx(Vector3(0.0, 0.0, -30.0)),
 		"it sits on the node the package named, not at a guess")

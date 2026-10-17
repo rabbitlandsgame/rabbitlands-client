@@ -13,6 +13,7 @@ extends Control
 ## The script declares no `class_name`: a global class is parsed before the
 ## autoload singletons are registered, and this reads `AppState` directly.
 
+const AudioMix := preload("res://src/audio/audio_mix.gd")
 const PANEL_SIZE := Vector2(960.0, 520.0)
 ## Nothing may cover the fixed resource rail down the right-hand edge.
 const RESERVED_RIGHT_RAIL := 96.0
@@ -696,6 +697,40 @@ func add_choice(section: String, key: String, label: String,
 		setting_changed.emit(section, key, option.get_item_metadata(index)))
 	row.add_child(option)
 
+func add_audio_controls() -> void:
+	var page := page_body("Audio")
+	for category: String in AudioMix.CATEGORIES:
+		var info: Dictionary = AudioMix.CATEGORIES[category]
+		var key := "audio_" + category
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		page.add_child(row)
+		var caption := Label.new()
+		caption.text = str(info.label)
+		caption.custom_minimum_size.x = 200.0
+		row.add_child(caption)
+		var slider := HSlider.new()
+		slider.name = key
+		slider.max_value = 1.0
+		slider.step = 0.01
+		slider.value = float(info.volume)
+		slider.custom_minimum_size.x = 200.0
+		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		slider.tooltip_text = "Adjust %s independently. 0%% mutes this category." % str(info.label).to_lower()
+		row.add_child(slider)
+		var reading := Label.new()
+		reading.name = key + "_value"
+		reading.custom_minimum_size.x = 52.0
+		reading.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		reading.text = "%d%%" % roundi(slider.value * 100.0)
+		row.add_child(reading)
+		slider.value_changed.connect(func(value: float) -> void:
+			reading.text = "%d%%" % roundi(value * 100.0)
+			setting_changed.emit("Audio", key, value))
+	# Credits stay at the end, below the controls they describe.
+	page.move_child(page.get_node("AudioCreditsButton"), page.get_child_count() - 1)
+
 ## Refreshing controls never saves or emits a change. This also covers values
 ## changed by a HUD shortcut while the settings window was closed.
 func restore_value(key: String, value: Variant) -> void:
@@ -712,7 +747,7 @@ func restore_value(key: String, value: Variant) -> void:
 		(control as Range).set_value_no_signal(float(value))
 		var reading := panel.find_child(key + "_value", true, false) as Label
 		if reading != null:
-			reading.text = "%.3f" % float(value)
+			reading.text = "%d%%" % roundi(float(value) * 100.0) if key.begins_with("audio_") else "%.3f" % float(value)
 
 func _add_button(page: VBoxContainer, key: String, label: String) -> void:
 	var button := Button.new()
