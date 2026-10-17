@@ -113,6 +113,9 @@ const BATCH_META := &"static_batch"
 
 enum Kind { NONE = -1, TERRAIN = 0, BIOME = 1, PATCH = 2, DECK = 3 }
 
+## Class textures as built by `class_texture`, by name.
+static var _class_mutex := Mutex.new()
+static var _class_textures: Dictionary = {}
 static var _biome_mutex := Mutex.new()
 static var _biome_tried := false
 static var _biome_shader: Shader
@@ -535,11 +538,29 @@ static func painted_for(source: Material, kind: Kind, mesh: Mesh, surface: int,
 	var meadow := kind == Kind.PATCH and is_meadow(standard)
 	var kept := kind == Kind.PATCH and not meadow and is_kept_patch(standard, region)
 	var rock := kind == Kind.PATCH and not meadow and not kept and is_rock(standard)
+	var paved := kind == Kind.PATCH and is_paving(standard) and not kept
 	var rim := LookProfile.DECK_RIM
+	var rim_lobe := LookProfile.DECK_RIM_LOBE
 	if kind == Kind.PATCH:
-		rim = LookProfile.PAVING_RIM if is_paving(standard) and not kept \
+		rim = LookProfile.PAVING_RIM if paved \
 			else LookProfile.MEADOW_RIM if meadow else LookProfile.PATCH_RIM
+		rim_lobe = LookProfile.PAVING_RIM_LOBE if paved \
+			else LookProfile.MEADOW_RIM_LOBE if meadow else LookProfile.PATCH_RIM_LOBE
 	painted.set_shader_parameter(&"look_rim", rim)
+	painted.set_shader_parameter(&"look_rim_lobe",
+		Vector2(rim_lobe.x, LookProfile.RIM_LOBE_METRES))
+	painted.set_shader_parameter(&"look_rim_grain", rim_lobe.y)
+	# A region's class texture for this surface (`ground.class_textures`).
+	var slot := class_slot(standard, kind, meadow, kept or rock)
+	var chosen: Variant = LookProfile.region_value(region, "ground", "class_textures", {})
+	if not slot.is_empty() and chosen is Dictionary and (chosen as Dictionary).has(slot):
+		var texture_name := str((chosen as Dictionary)[slot])
+		var detail := class_texture(texture_name)
+		if detail != null:
+			painted.set_shader_parameter(&"look_class_texture", detail)
+			painted.set_shader_parameter(&"look_class_metres",
+				float((LookProfile.CLASS_TEXTURES[texture_name] as Dictionary)["metres"]))
+			painted.set_shader_parameter(&"look_class_hue", LookProfile.CLASS_TEXTURE_HUE)
 	var opacity := 1.0
 	if meadow:
 		opacity = LookProfile.MEADOW_OPACITY
@@ -549,8 +570,7 @@ static func painted_for(source: Material, kind: Kind, mesh: Mesh, surface: int,
 	# `ground.paving_tint` names a region's own (sw_isle's limestone courts read
 	# near-white, L0.72 s0.20, at the shared one).
 	var surface_tint: Color = LookProfile.region_value(region, "ground", "paving_tint",
-		LookProfile.PAVING_SURFACE_TINT) \
-		if kind == Kind.PATCH and is_paving(standard) and not kept else Color.WHITE
+		LookProfile.PAVING_SURFACE_TINT) if paved else Color.WHITE
 	painted.set_shader_parameter(&"look_surface_tint",
 		Vector3(surface_tint.r, surface_tint.g, surface_tint.b))
 	painted.set_shader_parameter(&"look_rim_noise_metres", LookProfile.RIM_NOISE_METRES)
@@ -631,6 +651,55 @@ static func painted_for(source: Material, kind: Kind, mesh: Mesh, surface: int,
 static func deck_path_of(region: String) -> float:
 	return clampf(float(LookProfile.region_value(region, "ground", "deck_path", 1.0)),
 		0.0, 1.0)
+
+## The class texture slot a painted surface fills (LookProfile.CLASS_TEXTURE_SLOTS),
+## or "" for none: a worn walk deck, pale paving, a sand glaze or a green
+## meadow. A kept patch (a mosaic, a signature surface) and bare rock keep
+## their own texture.
+static func class_slot(material: BaseMaterial3D, kind: Kind, meadow: bool, kept: bool) -> String:
+	if kind == Kind.DECK:
+		return "deck"
+	if kind != Kind.PATCH or kept:
+		return ""
+	if meadow:
+		return "meadow"
+	if is_paving(material):
+		return "paving"
+	if sand_tint(material.albedo_color) and not is_cobble(material):
+		return "sand"
+	return ""
+
+## The class texture `texture_name` names (LookProfile.CLASS_TEXTURES), with
+## mipmaps: .import files are not versioned, so a fresh checkout imports the
+## PNG without them and a ground texture without mipmaps shimmers. Built once
+## and shared. Loader workers call this too, so nothing is built under the
+## lock: two that race keep the first texture published.
+static func class_texture(texture_name: String) -> Texture2D:
+	_class_mutex.lock()
+	var known: Variant = _class_textures.get(texture_name)
+	_class_mutex.unlock()
+	if known is Texture2D:
+		return known
+	var entry: Variant = LookProfile.CLASS_TEXTURES.get(texture_name)
+	if entry is not Dictionary:
+		return null
+	var source := load(str((entry as Dictionary)["path"])) as Texture2D
+	if source == null:
+		push_warning("look_ground: class texture %s did not load" % texture_name)
+		return null
+	var built: Texture2D = source
+	var image := source.get_image()
+	if image != null and not image.has_mipmaps() \
+			and (not image.is_compressed() or image.decompress() == OK):
+		image.generate_mipmaps()
+		built = ImageTexture.create_from_image(image)
+	_class_mutex.lock()
+	if _class_textures.get(texture_name) is Texture2D:
+		built = _class_textures[texture_name]
+	else:
+		_class_textures[texture_name] = built
+	_class_mutex.unlock()
+	return built
 
 ## The colour (display sRGB) a region's walk decks carry in their vertex
 ## colour where they are road (`ground.deck_road_colour`), or null.

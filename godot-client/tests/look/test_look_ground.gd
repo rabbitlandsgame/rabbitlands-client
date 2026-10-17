@@ -152,6 +152,18 @@ func _run() -> void:
 		and is_equal_approx(float(patch_paint.get_shader_parameter(&"look_opacity")),
 			LookProfile.PATCH_OPACITY),
 		"a patch has no edging band, keeps its footprint and is a glaze")
+	# The cut wanders in broad lobes and follows the texture's grain, so a
+	# rectangle's side does not read as a ruled line.
+	_expect(deck_paint.get_shader_parameter(&"look_rim_lobe")
+			== Vector2(LookProfile.DECK_RIM_LOBE.x, LookProfile.RIM_LOBE_METRES)
+		and is_equal_approx(float(deck_paint.get_shader_parameter(&"look_rim_grain")),
+			LookProfile.DECK_RIM_LOBE.y)
+		and patch_paint.get_shader_parameter(&"look_rim_lobe")
+			== Vector2(LookProfile.PATCH_RIM_LOBE.x, LookProfile.RIM_LOBE_METRES),
+		"decks and patches take their class's edge lobes and grain")
+	# An unset shader parameter reads back as null; the shader's default is 0.
+	_expect(deck_paint.get_shader_parameter(&"look_class_metres") == null,
+		"a region that names no class textures keeps its own")
 
 	# A continent chunk is painted with its own region's trims, and the roads
 	# of a root with pale paving learn where it lies.
@@ -185,6 +197,31 @@ func _run() -> void:
 		and int((chunk_soil.get_surface_override_material(0) as ShaderMaterial)
 			.get_shader_parameter(&"look_paving_count")) == 1,
 		"its road and its soil learn the paving's bounds")
+	# A region that names class textures lays them over its roads and paving
+	# (Greenlight's file names all four), with mipmaps, and keeps a kept patch's.
+	var isle := Node3D.new()
+	root.add_child(isle)
+	var isle_deck := _mesh(isle, "Walk_greenlight_road_greenlight_9_9",
+		deck_material.duplicate() as StandardMaterial3D)
+	var isle_paving := _mesh(isle, "AuthoredGround_greenlight_quay_greenlight_9_9",
+		paving_material.duplicate() as StandardMaterial3D)
+	var greenlight := WorldManifest.new()
+	greenlight.data = {"asset": {"id": "greenlight__chunk_9_9"},
+		"continentGeography": {"geometryMode": "continent-chunks-v1"}}
+	LookGround.paint_loaded(isle, greenlight)
+	var isle_deck_paint := isle_deck.get_surface_override_material(0) as ShaderMaterial
+	var isle_paving_paint := isle_paving.get_surface_override_material(0) as ShaderMaterial
+	var earth := isle_deck_paint.get_shader_parameter(&"look_class_texture") as Texture2D
+	_expect(earth != null and earth.get_image().has_mipmaps()
+		and float(isle_deck_paint.get_shader_parameter(&"look_class_metres"))
+			== float(LookProfile.CLASS_TEXTURES["packed_earth"]["metres"])
+		and isle_paving_paint.get_shader_parameter(&"look_class_texture")
+			== LookGround.class_texture("flagstone"),
+		"Greenlight's roads take packed earth and its paving flagstone, mipmapped")
+	_expect(LookGround.class_texture("packed_earth") == earth,
+		"each class texture is built once")
+	isle.queue_free()
+
 	# The trims are the region files' (src/world/look/regions/<id>.json).
 	var trims := LookProfile.region_section("amberwood", "ground")
 	_expect(trims.has("path_luma") and trims.path_tint is Color,

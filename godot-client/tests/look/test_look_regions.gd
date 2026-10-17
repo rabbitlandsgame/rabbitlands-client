@@ -98,7 +98,8 @@ func _run() -> void:
 	# ([0.0, 0.0] != [0, 0]); the typed data must not care which one a value was.
 	var parsed: Dictionary = JSON.parse_string(JSON.stringify({"id": "test_schema",
 		"grass": {"root": [0, 1, 0], "tip": "#ffcc00", "value": 2},
-		"ground": {"path_luma_compat": 0.3, "path_luma": 0.2, "path_tint": [1, 0.5, 0.25]},
+		"ground": {"path_luma_compat": 0.3, "path_luma": 0.2, "path_tint": [1, 0.5, 0.25],
+			"class_textures": {"deck": "packed_earth", "sand": "beach_sand"}},
 		"foliage": {"crown_materials": ["foliage_green", "foliage_amber"],
 			"shrub_words": ["tussock"]}}))
 	var problems := LookProfile.define_region("test_schema", parsed)
@@ -110,6 +111,12 @@ func _run() -> void:
 			== (0.2 if forward else 0.3)
 		and LookProfile.ground_value("test_schema", "path_tint", Color.BLACK) == Color(1, 0.5, 0.25),
 		"`_compat` wins only in the compatibility renderer")
+	_expect(LookProfile.ground_value("test_schema", "class_textures", {})
+			== {"deck": "packed_earth", "sand": "beach_sand"},
+		"class textures are a table of slots to texture names")
+	for name: String in LookProfile.CLASS_TEXTURES:
+		_expect(ResourceLoader.exists(str(LookProfile.CLASS_TEXTURES[name]["path"])),
+			"class texture %s is in the project" % name)
 	var crowns := LookProfile.foliage_words("test_schema", "crown_materials")
 	_expect(crowns.has("foliage_green") and crowns.count("foliage_amber") == 1
 		and crowns.size() == LookProfile.CROWN_MATERIALS.size() + 1
@@ -132,6 +139,13 @@ func _run() -> void:
 			"path_tint": [1, 2]},
 		"grass": {"layers_forward": {"moss": 1.0}, "layers": {"moss": "lots"}},
 		"foliage": {"tree_words": "oak"}})
+	var bad_textures := LookProfile.define_region("test_bad_textures", {"id": "test_bad_textures",
+		"ground": {"class_textures": {"deck": "marble"}}})
+	_expect(bad_textures.size() == 1 and bad_textures[0].contains("ground.class_textures"),
+		"an unknown class texture is refused (%s)" % "; ".join(bad_textures))
+	var bad_slot := LookProfile.define_region("test_bad_slot", {"id": "test_bad_slot",
+		"ground": {"class_textures": {"roof": "flagstone"}}})
+	_expect(bad_slot.size() == 1, "and so is an unknown slot")
 	for needle: String in ["someone_else", "unknown section \"weather\"",
 			"unknown key \"ground.verge_value\"", "ground.path_luma", "ground.path_tint",
 			"grass.layers_forward", "grass.layers\" is not", "foliage.tree_words"]:
