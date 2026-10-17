@@ -263,6 +263,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"merchant_window_v1",
 	"merchant_weights_v1",
 	"merchant_descriptions_v1",
+	"merchant_lots_v1",
 	"navigation_hud_v1",
 	"map_marker_actor_v1",
 	"party_window_v1",
@@ -1958,6 +1959,18 @@ static func decode_merchant(payload: PackedByteArray) -> Dictionary:
 				return {"type": "invalid", "error": "merchant_description"}
 			entry["description"] = str(description.value)
 			offset = int(description.offset)
+	# Exact sale bundles allow prices such as two flowers for one gold.
+	if offset < payload.size():
+		if offset + 2 > payload.size() or u16(payload, offset) != items.size():
+			return {"type": "invalid", "error": "merchant_lots_count"}
+		offset += 2
+		if offset + items.size() * 2 != payload.size():
+			return {"type": "invalid", "error": "merchant_lots_length"}
+		for entry: Dictionary in items:
+			entry["sell_quantity"] = u16(payload, offset)
+			if int(entry.sell_quantity) < 1:
+				return {"type": "invalid", "error": "merchant_lot_zero"}
+			offset += 2
 	if offset != payload.size():
 		return {"type": "invalid", "error": "merchant_trailing"}
 	return {"type": "merchant", "actor_id": actor_id, "npc_name": str(name_field.value),

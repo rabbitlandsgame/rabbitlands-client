@@ -726,7 +726,8 @@ func _sync_merchant() -> void:
 	merchant_buy_list.clear()
 	merchant_sell_list.clear()
 	for entry: Dictionary in AppState.merchant.get("items", []) as Array:
-		_add_merchant_row(merchant_buy_list, entry, false)
+		if int(entry.get("buy_price", 0)) > 0:
+			_add_merchant_row(merchant_buy_list, entry, false)
 		if int(entry.get("owned", 0)) > 0 and int(entry.get("sell_price", 0)) > 0:
 			_add_merchant_row(merchant_sell_list, entry, true)
 	merchant_empty_pack.visible = merchant_sell_list.item_count == 0
@@ -750,17 +751,23 @@ func _sync_merchant() -> void:
 
 func _add_merchant_row(list: ItemList, entry: Dictionary, selling: bool) -> void:
 	var name := str(entry.get("name", ""))
-	var price := int(entry.get("sell_price" if selling else "buy_price", 0))
-	var label := "%s  ×%d     ·     %d gc each" % [name, int(entry.get("owned", 0)), price] if selling else "%s     ·     %d gc each" % [name, price]
+	var price := _merchant_price_label(entry, selling)
+	var label := "%s  ×%d     ·     %s" % [name, int(entry.get("owned", 0)), price] if selling else "%s     ·     %s" % [name, price]
 	var row := list.item_count
 	list.add_item(label, _named_icon(int(entry.get("image_id", 0)), name))
 	list.set_item_metadata(row, int(entry.get("index", row)))
-	list.set_item_tooltip(row, "%s\n%s: %d gc each\nIn your pack: %d" % [name, "Sell price" if selling else "Buy price", price, int(entry.get("owned", 0))])
+	list.set_item_tooltip(row, "%s\n%s: %s\nIn your pack: %d" % [name, "Sell price" if selling else "Buy price", price, int(entry.get("owned", 0))])
+
+func _merchant_price_label(entry: Dictionary, selling: bool) -> String:
+	var price := int(entry.get("sell_price" if selling else "buy_price", 0))
+	var lot := maxi(1, int(entry.get("sell_quantity", 1))) if selling else 1
+	return "%d gc each" % price if lot == 1 else "%s gc each (%d for %d gc)" % [str(float(price) / lot), lot, price]
 
 func _on_merchant_selected(_index: int, mode: String) -> void:
 	merchant_quantity.text = "1"
 	_merchant_mode = mode
 	merchant_list = merchant_buy_list if mode == "buy" else merchant_sell_list
+	merchant_quantity.text = str(maxi(1, int(_merchant_entry().get("sell_quantity", 1)))) if mode == "sell" else "1"
 	(merchant_sell_list if mode == "buy" else merchant_buy_list).deselect_all()
 	merchant_list.ensure_current_is_visible()
 	_sync_merchant_summary()
@@ -772,6 +779,7 @@ func _on_merchant_mode(mode: String) -> void:
 	(merchant_sell_list if mode == "buy" else merchant_buy_list).deselect_all()
 	if merchant_list.get_selected_items().is_empty() and merchant_list.item_count > 0:
 		merchant_list.select(0)
+	merchant_quantity.text = str(maxi(1, int(_merchant_entry().get("sell_quantity", 1)))) if mode == "sell" else "1"
 	merchant_list.ensure_current_is_visible()
 	_sync_merchant_summary()
 
@@ -789,7 +797,9 @@ func _merchant_maximum(entry: Dictionary) -> int:
 	if entry.is_empty():
 		return 0
 	if _merchant_mode == "sell":
-		return mini(1000000, int(entry.get("owned", 0)))
+		var lot := maxi(1, int(entry.get("sell_quantity", 1)))
+		var owned := mini(1000000, int(entry.get("owned", 0)))
+		return owned - owned % lot
 	var price := int(entry.get("buy_price", 0))
 	var maximum := mini(1000000, int(AppState.merchant.get("gold", 0)) / price) if price > 0 else 1000000
 	var weight := int(entry.get("emu", 0))
@@ -799,7 +809,8 @@ func _merchant_maximum(entry: Dictionary) -> int:
 	return maximum
 
 func _merchant_change_quantity(delta: int) -> void:
-	merchant_quantity.text = str(clampi(int(merchant_quantity.text) + delta, 1, 1000000))
+	var lot := maxi(1, int(_merchant_entry().get("sell_quantity", 1))) if _merchant_mode == "sell" else 1
+	merchant_quantity.text = str(clampi(int(merchant_quantity.text) + delta * lot, lot, 1000000))
 	_sync_merchant_summary()
 
 func _merchant_set_maximum() -> void:
@@ -820,7 +831,7 @@ func _sync_merchant_summary(_text: String = "") -> void:
 		return
 	var buying := _merchant_mode == "buy"
 	var price := int(entry.get("buy_price" if buying else "sell_price", 0))
-	merchant_selection.text = "%s\n%s · %d gc each" % ["BUYING" if buying else "SELLING", str(entry.get("name", "")), price]
+	merchant_selection.text = "%s\n%s · %s" % ["BUYING" if buying else "SELLING", str(entry.get("name", "")), _merchant_price_label(entry, not buying)]
 	merchant_selected_icon.texture = _named_icon(int(entry.get("image_id", 0)), str(entry.get("name", "")))
 	var description := str(entry.get("description", "")).strip_edges()
 	merchant_description.text = description if not description.is_empty() else "No description available."
@@ -830,14 +841,21 @@ func _sync_merchant_summary(_text: String = "") -> void:
 		merchant_totals.text = "Enter a whole quantity\nbetween 1 and 1,000,000."
 		return
 	var quantity := int(quantity_text)
+	var lot := 1 if buying else maxi(1, int(entry.get("sell_quantity", 1)))
+	if quantity % lot != 0:
+		merchant_totals.text = "Sell in multiples of %d.\n%d items = %d gc." % [lot, lot, price]
+		return
 	var maximum := _merchant_maximum(entry)
 	merchant_trade.text = "%s %d" % ["Buy" if buying else "Sell", quantity]
+	if not buying and maximum == 0 and lot > 1:
+		merchant_totals.text = "Need %d items to sell\nfor %d gc." % [lot, price]
+		return
 	if quantity > maximum:
 		merchant_totals.text = "Maximum available: %d\n%s" % [maximum,
 			"Not enough gold or free carry space." if buying else "You do not own that many."]
 		merchant_trade.tooltip_text = merchant_totals.text
 		return
-	var total := quantity * price
+	var total := quantity / lot * price
 	var gold_after := int(AppState.merchant.get("gold", 0)) + (-total if buying else total)
 	merchant_totals.text = "%s: %d gc\nGold after: %d gc" % ["Cost" if buying else "Receive", total, gold_after]
 	if entry.has("emu"):

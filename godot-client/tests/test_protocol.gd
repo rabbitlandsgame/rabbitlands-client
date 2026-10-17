@@ -54,6 +54,7 @@ func _init() -> void:
 		"merchant_window_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"merchant_weights_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"merchant_descriptions_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
+		"merchant_lots_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"navigation_hud_v1": EloriaProtocol.ServerMessage.ELORIA_NAVIGATION_STATE,
 		"map_marker_actor_v1": EloriaProtocol.ServerMessage.SEND_MAP_MARKER,
 		"achievements_window_v1":
