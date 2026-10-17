@@ -7,12 +7,14 @@ import json
 import tempfile
 import unittest
 import wave
+import sys
 from pathlib import Path
 import numpy as np
 
 CLIENT = Path(__file__).resolve().parents[1]
 AUDIO = CLIENT / "assets/audio"
 SOURCE = CLIENT.parent / "eloria-assets/source/audio"
+sys.path.insert(0, str(CLIENT / 'tools'))
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -29,7 +31,8 @@ class NativeSoundTests(unittest.TestCase):
         required.update(f"footstep_{s}_{i}" for s in ("dirt", "grass", "stone", "wood", "sand", "snow") for i in range(1, 4))
         self.assertEqual({s["name"] for s in self.catalog["sounds"]}, required)
         self.assertEqual(len(self.catalog["sounds"]), len(required))
-        self.assertEqual({s["name"] for s in self.catalog["music"]}, {"settlement", "wilds", "depths"})
+        self.assertEqual(len(self.catalog["music"]), 39)
+        self.assertTrue({"settlement", "wilds", "depths"} <= {s["name"] for s in self.catalog["music"]})
         files = {s["file"] for s in self.catalog["sounds"] + self.catalog["music"]}
         self.assertEqual(files, {p.name for p in AUDIO.iterdir() if p.suffix in {".wav", ".ogg"}})
 
@@ -49,9 +52,19 @@ class NativeSoundTests(unittest.TestCase):
                 self.assertEqual(record["source"], entry["source"])
                 self.assertTrue(record["changes"])
                 source = self.provenance["sources"][record["source"]]
-                self.assertIn(source["license"], {"CC0-1.0", "CC-BY-3.0"})
+                self.assertIn(source["license"], {"CC0-1.0", "CC-BY-3.0", "CC-BY-4.0"})
                 self.assertTrue(source["download_url"].startswith("https://"))
                 self.assertEqual(len(source["download_sha256"]), 64)
+
+    def test_music_program_has_playable_choices_and_uses_every_new_selection(self):
+        programs = json.loads((AUDIO / 'music-program.json').read_text(encoding='utf-8'))['programs']
+        known = {m['name'] for m in self.catalog['music']}
+        used = {name for pool in programs.values() for name in pool['tracks']}
+        self.assertTrue(used <= known)
+        self.assertTrue({m['name'] for m in self.catalog['music'] if m.get('review_id')} <= used)
+        for pool in programs.values():
+            self.assertTrue(pool['tracks'])
+        self.assertTrue(programs['aftermath']['once'])
 
     def test_wavs_are_playable_audible_and_do_not_clip(self):
         for sound in self.catalog["sounds"]:
@@ -87,7 +100,9 @@ class NativeSoundTests(unittest.TestCase):
             for key in ("creator", "title", "url", "license_url"):
                 self.assertIn(source[key], credits)
             license_text = (AUDIO / "licenses" / (source["license"] + ".txt")).read_text(encoding="utf-8")
-            self.assertIn("Creative Commons Legal Code", license_text)
+            expected = ("Creative Commons Attribution 4.0 International Public License"
+                        if source["license"] == "CC-BY-4.0" else "Creative Commons Legal Code")
+            self.assertIn(expected, license_text)
         waterfall = next(a for a in self.provenance["assets"] if a["name"] == "waterfall")
         self.assertEqual(self.provenance["sources"][waterfall["source"]]["license"], "CC-BY-3.0")
         self.assertIn(waterfall["changes"], credits)

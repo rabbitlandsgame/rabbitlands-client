@@ -699,6 +699,16 @@ func add_choice(section: String, key: String, label: String,
 
 func add_audio_controls() -> void:
 	var page := page_body("Audio")
+	var now_playing := Label.new()
+	now_playing.name = "NowPlaying"
+	now_playing.text = "Music: —"
+	now_playing.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(now_playing)
+	var director := get_tree().root.find_child("AudioDirector", true, false)
+	if director != null:
+		director.music_changed.connect(func(title: String, creator: String) -> void:
+			now_playing.text = "Music: —" if title.is_empty() else "Playing: " + title
+			now_playing.tooltip_text = creator)
 	for category: String in AudioMix.CATEGORIES:
 		var info: Dictionary = AudioMix.CATEGORIES[category]
 		var key := "audio_" + category
