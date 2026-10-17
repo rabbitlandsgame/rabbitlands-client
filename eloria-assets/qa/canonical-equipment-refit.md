@@ -364,8 +364,8 @@ worst frame of Bow_Pull_Back (`stretch_check.py`):
 | --- | ---: | ---: | ---: | ---: |
 | Studded Jack | 4.48% | 0.94% | 4.73% | 0.81% |
 | Scout Vest | 4.99% | 0.35% | 4.96% | 0.21% |
-| Acolyte Tunic | 2.47% | 0.71% | 2.47% | 0.95% |
-| Furtrim Coat | 2.35% | 0.77% | 2.32% | 0.60% |
+| Acolyte Tunic | 2.47% | 0.71% | 2.47% | 1.11% |
+| Furtrim Coat | 2.35% | 0.64% | 2.32% | 0.64% |
 | Phoenix Cuirass | 0.59% | 1.15% | 0.88% | 1.40% |
 
 The Phoenix figure rises by six triangles of its 1,357, at the shoulder. In
@@ -406,6 +406,30 @@ taken above the quarter of the grid closest to the skin. That is 36 mm for the
 Phoenix Cuirass and 0.5–15 mm for the coats. Measured this way, without the
 standoff, the cap had drawn the cuirass in by 2 cm all over and its chest read
 flatter. The bust now comes forward 12–23 mm and the waist goes in up to 2 cm.
+
+**Collars not reaching the back of the neck (after the headwear notes).** The
+owner pointed out that part of the gap between hood and collar (notes 9–11)
+was the torso: the collar did not come far enough back. A trunk bone's
+clearance clears the spine and clavicle skin, not the neck's. So in idle the
+back of every kit collar lay inside the nape: from 1.46 m on the Studded Jack
+(5 cm deep by 1.56 m) and from 1.48–1.54 m on the others. From the side, the
+nape showed where the collar should wrap it.
+
+The torso specs now carry a `collar` entry, on both bodies. It casts rays
+out of the posed neck_01 → Head axis, every 1 cm from 1.40 to 1.64 m and
+every 10° around. Where the outermost trunk art is closer than the skin plus
+15 mm, it moves the art at that height and bearing out along the ray. The move
+is smoothed round the neck, measured and applied twice, and faded in over the
+first 4 cm. Only art within 4 cm of the neck skin moves, so the shoulders and
+an open collar's front keep their shape. The largest moves are at the back:
+up to 7–8 cm on the Scout Vest and the Studded Jack, 11 cm on the female
+Furtrim Coat, 4–6 cm on the Acolyte Tunic and 2 cm on the Phoenix Cuirass. In
+idle, every collar's back now clears the nape up to 1.60 m: at least flush,
+and 5–15 mm off it in all but two 1 cm cells per torso (8 mm clearance had
+left the skin grazing through at the back centre). The collars wrap the nape
+and meet the hoods' back edge. The collar art carries `neck_01` weight there,
+so it follows the head. The tearing figures above are for the collared
+torsos. Evidence: [collars](design-fit/review-fixes-collar.jpg).
 
 **Arcanist tails folding at the knee (note 5).** The Acolyte Legguards' two
 back tails, and three trim strips, took thigh weights above the knee and calf

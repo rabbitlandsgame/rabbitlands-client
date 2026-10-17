@@ -41,7 +41,8 @@ limb_head_remap seats them (seat_soles).  ``tuck_into`` layers one piece
 inside another of the same set, such as trouser legs inside the boots (tuck).
 Later the same day, after the owner's review: ``conform`` lets a coat front
 follow the chest it covers on the bodies it names (conform), and ``drape``
-hangs tails from the belt instead of binding them to the leg behind (drape).
+hangs tails from the belt instead of binding them to the leg behind (drape);
+``collar`` brings a collar's back out of the neck it was fitted into (collar).
 
 The output per source is ``<source>.npz``: rest positions in glTF axes,
 four joint names and weights per vertex, and a keep mask for triangles
@@ -422,6 +423,81 @@ def conform(body, posed, tris, w, ps):
                  "in_mm": round(1000 * float(-move.min()), 1)}
 
 
+def collar(body, posed, tris, w, ps):
+    """Bring a collar's back out of the neck it was fitted into.
+
+    Added 2026-10-17 (owner review: the hoods could not reach the collars
+    partly because the collars did not come far enough back).  A trunk
+    bone's clearance clears the spine and clavicle skin, not the neck's, so a
+    collar drawn round a slimmer neck stays where the design put it: in idle
+    the back of every kit collar dropped inside the nape, from 1.46 m on the
+    Studded Jack (5 cm deep by 1.56 m) and from 1.48-1.54 m on the others,
+    and from the side the nape showed where the collar should wrap it.
+    ``collar`` casts rays out of the posed neck_01 -> Head axis on a grid of
+    heights (``from``-``to``, 1 cm) and bearings (10 degrees) and, where the
+    outermost trunk art lies closer than the skin plus ``clear``, moves the
+    art at that height and bearing out along the ray by the difference (at
+    most ``max``), smoothed and faded in over the first 4 cm.  Every layer on
+    the ray moves together, and nothing moves where the art already clears
+    the neck, so the front of an open collar keeps its shape; only art within
+    4 cm of the neck skin moves fully (fading out by 6 cm), so the smoothing
+    round the ring never carries a shoulder plate with it.  Returns the shell
+    and a report.
+    """
+    c = ps["collar"]
+    z0, z1 = float(c.get("from", 1.40)), float(c.get("to", 1.64))
+    clear, cap = float(c.get("clear", .008)), float(c.get("max", .07))
+    limb = np.array([bool(b.get("limb")) for b in ps["bones"]])
+    trunk = w[:, ~limb].sum(1) if (~limb).any() else np.ones(len(posed))
+    faces = tris[np.all(trunk[tris] > .5, axis=1)]
+    n0, n1 = np.array(body.joint("neck_01")), np.array(body.joint("Head"))
+    axis = (n1 - n0) / np.linalg.norm(n1 - n0)
+    centre = lambda z: n0 + (z - n0[2]) / axis[2] * axis
+    zs = np.arange(z0, z1 + 1e-9, .01); bearings = np.radians(np.arange(0, 360, 10))
+    kz = np.exp(-.5 * (np.arange(-3, 4) * .01 / .015) ** 2)
+    ka = np.exp(-.5 * (np.arange(-3, 4) * 10. / 15.) ** 2)
+    def blur(a):  # round the neck (wrapping) and up it
+        a = np.apply_along_axis(lambda r: np.convolve(np.r_[r[-3:], r, r[:3]], ka, "valid"), 1, a)
+        return np.apply_along_axis(lambda r: np.convolve(r, kz, "same"), 0, a)
+    sm = lambda x, e0, e1: (lambda t: t * t * (3 - 2 * t))(np.clip((x - e0) / (e1 - e0), 0., 1.))
+    out, total, cells = posed.copy(), np.zeros(len(posed)), 0
+    # The smoothing undershoots a cell's own need at the collar's top edge, so
+    # measure and push twice.
+    for _ in range(int(c.get("passes", 2))):
+        art = BVHTree.FromPolygons([Vector(p) for p in out], faces.tolist())
+        D = np.zeros((len(zs), len(bearings))); M = np.zeros_like(D); S = np.full_like(D, np.inf)
+        for i, z in enumerate(zs):
+            o = Vector(centre(z))
+            for j, a in enumerate(bearings):
+                d = Vector((np.sin(a), -np.cos(a), 0.))  # bearing 0 is the front (-Y)
+                skin = body.bvh.ray_cast(o, d, .3)
+                outer, start = None, o
+                for _ in range(12):
+                    h = art.ray_cast(start, d, .3)
+                    if h[0] is None or (h[0] - o).length > .3:
+                        break
+                    outer = (h[0] - o).length; start = h[0] + d * 1e-4
+                if skin[0] is not None:
+                    S[i, j] = skin[3]
+                    if outer is not None:
+                        D[i, j] = np.clip(skin[3] + clear - outer, 0., cap); M[i, j] = 1.
+        cells = max(cells, int((D > 0).sum()))
+        # smoothed over the cells whose ray met the art, never below a cell's own need
+        norm = np.maximum(blur(M), 1e-6)
+        Ds = blur(M * np.maximum(blur(D * M) / norm, D)) / norm
+        rel = out - np.array([centre(z) for z in out[:, 2]])
+        bearing = np.degrees(np.arctan2(rel[:, 0], -rel[:, 1])) % 360
+        ii = np.clip(np.round((out[:, 2] - z0) / .01).astype(int), 0, len(zs) - 1)
+        jj = np.round(bearing / 10).astype(int) % len(bearings)
+        inside = (out[:, 2] >= z0) & (out[:, 2] <= z1 + .01)
+        ring = 1 - sm(np.linalg.norm(rel[:, :2], axis=1) - S[ii, jj], .04, .06)
+        move = np.where(inside, Ds[ii, jj], 0.) * sm(out[:, 2], z0, z0 + .04) * trunk * ring
+        flat = rel * np.array([1., 1., 0.])
+        flat /= np.maximum(np.linalg.norm(flat, axis=1, keepdims=True), 1e-6)
+        out = out + flat * move[:, None]; total += move
+    return out, {"cells": cells, "max_mm": round(1000 * float(total.max()), 1)}
+
+
 def welded_graph(P, tris):
     """Coincident vertices as one node: (vertex -> node, node count, unique node edges)."""
     keys = np.round(P / 1e-5).astype(np.int64)
@@ -637,6 +713,8 @@ def main():
         posed, w, dom, report = fit_piece(body, P, tris, ps)
         if "conform" in ps and args.body.stem in ps["conform"].get("bodies", []):
             posed, report["conform"] = conform(body, posed, tris, w, ps)
+        if "collar" in ps:
+            posed, report["collar"] = collar(body, posed, tris, w, ps)
         edges = np.array([e.vertices[:] for e in me.edges])
         solved[piece] = {"src": src_path, "P": P, "tris": tris, "edges": edges, "posed": posed, "dom": dom,
                          "w": w, "report": report}
