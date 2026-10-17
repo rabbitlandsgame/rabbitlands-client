@@ -109,7 +109,8 @@ func run() -> void:
 	var art_size: Vector2 = slot.size - slot_style.get_minimum_size()
 	check(art_size.x >= 26 and art_size.y >= 26 and slot.get_theme_constant("icon_max_width") >= 26, "each docked spell has a larger readable square of artwork")
 	check(slot_style.get_content_margin(SIDE_TOP) >= maxf(target.get_rect().end.y, power.get_rect().end.y), "the target and power badges sit above the spell artwork: %s, %s" % [slot_style.get_content_margin(SIDE_TOP), maxf(target.get_rect().end.y, power.get_rect().end.y)])
-	check(slot.tooltip_text.contains("Target: Mira") and slot.tooltip_text.contains("Power 10"), "the tooltip expands the current recipient and power")
+	check(slot.tooltip_text.contains("Target: click the recipient") and not slot.tooltip_text.contains("Mira")
+		and slot.tooltip_text.contains("Power 10"), "the tooltip says a target is clicked, never pre-chosen, and gives the power")
 	check(slot.modulate.a == 1 and target.modulate.a == 1, "unavailable spells do not fade their corner badges")
 	# Exercise the same clear action as the context menu, including its refresh.
 	main.spell_loadout.path = "user://spell-bar-clear-regression.cfg"

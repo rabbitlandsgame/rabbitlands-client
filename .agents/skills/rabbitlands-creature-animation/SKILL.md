@@ -20,3 +20,5 @@ Public changes belong only in the current Rabbit Lands repositories. Keep privat
 For the authored Rabbit/Jackalope pilot, use [rabbit-family motion](../rabbitlands-video-motion-fitting/references/leporid-transfer.md); its morph-aware native adapter and explicit skin preparations are separate from the canine replay package.
 
 For authored cat-family pilots and native anatomical side/hinge fitting, read [native feline motion](references/native-feline-motion.md). The seven cats are user accepted; their installed behavior and public checks are documented in `docs/felid-motion.md`. Consult the current selection and publication receipts before continuing.
+
+For grounded boar/tapir pilots, head/tusk strikes and collapse-frame singularities, read [native boar and tapir motion](references/native-boar-tapir-motion.md). The five reviewed sets and portable checks are documented in `docs/boar-motion.md`. Native anatomy, wrapper behavior and visual acceptance remain actor-specific.

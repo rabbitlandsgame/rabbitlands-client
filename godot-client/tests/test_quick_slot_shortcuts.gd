@@ -66,8 +66,8 @@ func run() -> void:
 	for panel: String in BLOCKING_PANELS:
 		reset_windows()
 		if panel == "full_map":
-			root.push_input(key(KEY_TAB), true)
-			root.push_input(key(KEY_TAB, false, false), true)
+			root.push_input(key(KEY_M), true)
+			root.push_input(key(KEY_M, false, false), true)
 		else:
 			(main.get(panel) as Control).show()
 		root.gui_release_focus()

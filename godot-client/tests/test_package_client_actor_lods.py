@@ -583,6 +583,27 @@ def test_pck_directory_is_read_from_a_godot_47_pack(tmp_path):
         "assets/actors/native/face_masks/hero.png.import", "project.binary"}
 
 
+def test_universal_mac_pack_checks_require_the_exported_desktop_variants(tmp_path, monkeypatch):
+    build, app = tmp_path / "build", tmp_path / "app"
+    _track(monkeypatch, _write_tree(build))
+    _import_mask(build)
+    _import_cloth_texture(build)
+    sidecar = build / "godot-client/assets/actors/native/equipment/textures/cloth.jpg.import"
+    text = sidecar.read_text()
+    desktop = ".godot/imported/cloth.jpg-test.s3tc.ctex"
+    mobile = ".godot/imported/cloth.jpg-test.etc2.ctex"
+    text = text.replace('"res://' + desktop + '"', '"res://' + desktop + '", "res://' + mobile + '"')
+    sidecar.write_text(text)
+    _write_pck(app / "RabbitLands.pck", GOOD_PCK)
+    package.stage_loose_client_files(build, app)
+    package.check_actor_pack(build, app, "macos")
+    with pytest.raises(package.PackageError, match="imported product"):
+        package.check_actor_pack(build, app)
+    _write_pck(app / "RabbitLands.pck", [path for path in GOOD_PCK if path != desktop])
+    with pytest.raises(package.PackageError, match="imported product"):
+        package.check_actor_pack(build, app, "macos")
+
+
 GOOD_PCK = ["assets/actors/native/face_masks/hero.png.import",
             ".godot/imported/hero.png-test.ctex",
             "assets/actors/native/face_masks/manifest.json",

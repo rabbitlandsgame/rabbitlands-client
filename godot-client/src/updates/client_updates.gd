@@ -33,6 +33,7 @@ func _ready() -> void:
 	_status.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_status.position = Vector2(-500, 14)
 	_status.size = Vector2(480, 56)
+	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_status.add_theme_color_override("font_color", Color("ffd58c"))

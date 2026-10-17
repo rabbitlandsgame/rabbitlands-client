@@ -6,6 +6,7 @@ signal open_wheel
 signal layout_changed
 signal settings_requested
 const SpellButton := preload("res://src/ui/prepared_spell_button.gd")
+const TechniqueIcons := preload("res://src/ui/technique_icons.gd")
 const SCOPE_BADGES := {"self": "Self", "target": "Target", "allies": "Allies", "burst": "Burst", "location": "Ground", "inventory": "Item", "destination": "Recall"}
 const CORNER_BADGES := {"self": "S", "target": "T", "allies": "A", "burst": "B", "location": "G", "inventory": "I", "destination": "R"}
 const SLOT_SIZE := 44.0
@@ -116,6 +117,7 @@ func _ready() -> void:
 		button.add_theme_stylebox_override("pressed", _style(Color(0.35, 0.27, 0.13), 2))
 		button.pressed.connect(func(): cast_slot.emit(index))
 		button.spell_dropped.connect(func(id: int, power: int): loadout.assign_slot(index, id, power))
+		button.technique_dropped.connect(func(key: String): loadout.assign_technique(index, key))
 		button.gui_input.connect(_slot_input.bind(index))
 		cell.add_child(button)
 		for corner in ["Target", "Power"]:
@@ -168,6 +170,8 @@ func _ready() -> void:
 	add_child(menu)
 	loadout.changed.connect(refresh)
 	AppState.magic_state_received.connect(func(_data: Dictionary): refresh())
+	AppState.state_changed.connect(func(path: StringName):
+		if path == &"techniques": refresh())
 	refresh()
 	set_expanded(start_expanded)
 	_layout()
@@ -200,10 +204,11 @@ func _build_settings() -> void:
 	body.add_child(heading)
 	mode_picker = OptionButton.new()
 	mode_picker.name = "CastingMode"
-	mode_picker.add_item("Prepared · selected target")
-	mode_picker.add_item("Aimed · click target")
-	mode_picker.add_item("Ring · Left Shift")
-	mode_picker.item_selected.connect(func(index: int): loadout.set_mode(["prepared", "aimed", "wheel"][index]))
+	# Target spells always wait for a click on the recipient, so there is
+	# no separate "aimed" mode any more: a saved "aimed" reads as Quick bar.
+	mode_picker.add_item("Quick bar and book · click each target")
+	mode_picker.add_item("Ring · hold Left Shift")
+	mode_picker.item_selected.connect(func(index: int): loadout.set_mode(["prepared", "wheel"][index]))
 	body.add_child(mode_picker)
 	slot_count_picker = OptionButton.new()
 	slot_count_picker.name = "QuickSlotCount"
@@ -451,15 +456,20 @@ func _finish_drag() -> void:
 
 func refresh() -> void:
 	if mode_picker == null: return
-	mode_picker.select(["prepared", "aimed", "wheel"].find(loadout.mode))
+	mode_picker.select(["prepared", "wheel"].find(loadout.mode))
 	wheel_button.visible = loadout.mode == "wheel" and not (docked and _has_hud_dock())
 	ring_size_picker.visible = loadout.mode == "wheel"
 	ring_size_picker.select(ring_size_picker.get_item_index(loadout.ring_size))
 	ring_size_picker.text = "Ring size %d%%" % loadout.ring_size
 	_selected_actor = AppState.selected_actor_id
+	_technique_cooling = false
 	for index in range(buttons.size()):
 		var slot: Dictionary = loadout.slots[index]
 		var button = buttons[index]
+		button.technique = str(slot.get("technique", ""))
+		if not button.technique.is_empty():
+			_refresh_technique_slot(index, button)
+			continue
 		button.spell_id = int(slot.id)
 		button.power = int(slot.power)
 		var definition: Dictionary = loadout.catalog.spell(int(slot.id))
@@ -481,8 +491,7 @@ func refresh() -> void:
 		button.get_node("Shortcut").text = key_label.text
 		var target_label := str(SCOPE_BADGES.get(scope, ""))
 		if scope == "target":
-			var actor: Dictionary = AppState.actors.get(AppState.selected_actor_id, {})
-			target_label += ": " + str(actor.get("name", "select a recipient"))
+			target_label += ": click the recipient"
 		button.tooltip_text = "%s · %s · Power %d\n%s\nUses the last cast target type and power for this family.\nRight click to edit; drag a spell here." % [definition.get("name", "Empty slot"), target_label, int(slot.power), shortcut]
 		if effective_power != int(slot.power): button.tooltip_text += "\nSaved P%d; currently limited to P%d." % [int(slot.power), effective_power]
 		var reasons: Array[String] = []
@@ -491,6 +500,51 @@ func refresh() -> void:
 		# Dim only the button's art. Its child badges must remain legible.
 		button.self_modulate.a = 1.0 if reasons.is_empty() else 0.55
 		if not reasons.is_empty(): button.tooltip_text += "\n" + reasons[0]
+
+## Whether any technique slot is counting down, so `_process` keeps redrawing.
+var _technique_cooling := false
+var _next_cooldown_refresh := 0
+
+## A technique in a quick slot: its painted icon, its action-point cost in the
+## top-right badge where a spell shows power, and its cooldown in seconds in
+## the top-left badge where a spell shows its target type. The art dims while
+## it cannot be used, as a spell's does.
+func _refresh_technique_slot(index: int, button) -> void:
+	var key: String = button.technique
+	var row: Dictionary = {}
+	for raw: Variant in AppState.techniques.get("techniques", []):
+		if raw is Dictionary and str(raw.get("key", "")) == key:
+			row = raw
+			break
+	button.spell_id = -1
+	button.icon = TechniqueIcons.icon_for(key)
+	button.text = "" if button.icon != null else str(row.get("name", key)).left(4)
+	var elapsed := float(Time.get_ticks_msec() - int(AppState.techniques.get("received_msec", 0))) / 1000.0
+	var waiting := maxf(0.0, float(row.get("ready_in", 0.0)) - elapsed)
+	var cost := int(row.get("ap", 0))
+	var target_badge: Label = button.get_node("Target")
+	var power_badge: Label = button.get_node("Power")
+	target_badge.text = str(ceili(waiting)) if waiting > 0.05 else ""
+	target_badge.visible = waiting > 0.05
+	power_badge.text = str(cost) if cost > 0 else ""
+	power_badge.visible = cost > 0
+	_technique_cooling = _technique_cooling or waiting > 0.05
+	var keys: Array[InputEvent] = InputMap.action_get_events("quick_spell_%d" % (index + 1))
+	var shortcut := keys[0].as_text() if not keys.is_empty() else "Unbound"
+	var key_label: Label = button.get_parent().get_node("Key")
+	key_label.text = str(index + 1) if index < 9 else ["0", "-", "="][index - 9]
+	key_label.tooltip_text = shortcut
+	button.get_node("Shortcut").text = key_label.text
+	var blocker := str(row.get("blocker", ""))
+	var reason := ("Unknown on this server." if row.is_empty()
+		else "Read the %s to learn it." % str(row.get("manual", "manual")) if not bool(row.get("known", false))
+		else blocker if not blocker.is_empty()
+		else "Ready in %ds." % ceili(waiting) if waiting > 0.05 else "")
+	button.tooltip_text = "%s · technique%s\n%s\n%s\nRight click to clear; drag a spell or technique here." % [
+		str(row.get("name", key)), (" · %d AP" % cost) if cost > 0 else "", str(row.get("description", "")), shortcut]
+	if not reason.is_empty():
+		button.tooltip_text += "\n" + reason
+	button.self_modulate.a = 1.0 if reason.is_empty() else 0.55
 
 func _slot_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -501,4 +555,7 @@ func _slot_input(event: InputEvent, index: int) -> void:
 
 func _process(_delta: float) -> void:
 	if AppState.selected_actor_id != _selected_actor: refresh()
+	elif _technique_cooling and Time.get_ticks_msec() >= _next_cooldown_refresh:
+		_next_cooldown_refresh = Time.get_ticks_msec() + 250
+		refresh()
 	_layout()

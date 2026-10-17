@@ -403,6 +403,10 @@ func look_at_map_object(object_id: int) -> Error:
 func attack_actor(actor_id: int) -> Error:
 	return send_frame(EloriaProtocol.attack_actor(actor_id))
 
+## A technique names at most an actor, never a tile, so it is sent unframed.
+func technique_request(data: Dictionary) -> Error:
+	return send_frame(EloriaProtocol.technique_request(data))
+
 func trade_with(actor_id: int) -> Error:
 	return send_frame(EloriaProtocol.trade_with(actor_id))
 

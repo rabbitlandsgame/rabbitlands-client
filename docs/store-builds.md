@@ -96,7 +96,7 @@ IDs or stored Steam credentials in this repository.
 
    `APP_ID`/depot placeholders must be replaced with assigned numeric IDs. The
    command rejects GitHub builds, mixed commits, duplicate IDs, update helpers,
-   signing material and a cache/script directory inside shipped game content.
+   private signing material and a cache/script directory inside shipped content.
    It creates `app-build.vdf`, per-depot VDFs and
    `steamworks-launch-settings.json`. It performs no upload.
 4. Enter the generated launch settings under Steamworks **Installation > General
@@ -139,17 +139,20 @@ integration. API features can be added separately after rights/plugin review.
 
 The macOS runner uses pinned Godot 4.7.2 and its official universal template,
 both S3TC/BPTC and ETC2/ASTC imports, and the existing Rabbit Lands `.icns` icon.
-It exports a normal bundle, places the loose game files in
-`Contents/Resources/game/{app,eloria-assets}`, and compiles a small universal native
-entry point. That entry point sets the required working directory and execs the
-Godot helper before any game script reads an asset. Asset placement uses renames.
-The final PCK sits once beside the helper in `Contents/Helpers`; no
-`--main-pack`/`--path` override is passed to an official release template.
-Both the helper and completed bundle are launched headless. This does not prove
+It exports a normal bundle, placing the PCK and loose app files in
+`Contents/Resources` and map assets in `Contents/eloria-assets`. Godot 4.7 sets its
+working directory to Resources before scripts run, preserving the existing
+`assets/...` and `../eloria-assets` paths. It uses Godot's original universal
+executable as the entry point. Asset placement uses renames, with one final PCK
+and no `--main-pack`/`--path` overrides.
+The completed signed bundle is launched headless, its code signature is checked
+again after startup, and the archive is restored and tested after the original
+stage is released. Both Intel/Apple Silicon slices are verified. This does not prove
 GPU rendering, playability, or Intel/Apple Silicon hardware compatibility.
 
 Mac builds currently omit the BC-only map sidecars; source-image fallback is
-retained. Imported PCK textures include both architecture families. Measure real
+retained. Godot requires both import families for universal validation; its 4.7.2
+universal Mac exporter selects desktop S3TC/BPTC products for the PCK. Measure real
 GPU texture support, loading time and RAM before declaring minimum specs.
 The test bundle is ad-hoc signed after all contents are finalized. It is **not a
 public release installer**. Do not advertise macOS support based on this export.
@@ -185,6 +188,12 @@ To finish:
    RabbitLands-macOS.zip` on the Mac. Test a freshly downloaded/quarantined copy
    before publishing. Updates replace the whole signed app; the GitHub updater
    must not modify bundle contents. A signed DMG can be added later.
+
+   GitHub Releases [limits each asset to under 2 GiB](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
+   The measured Mac test archive exceeds that limit. A public GitHub Mac download
+   will need multipart delivery and a Mac download helper after Apple signing is
+   configured; do not upload an oversized ZIP. The current 256 MiB Actions parts
+   are the developer handoff format, not a published Mac installer.
 
 Sources: [Godot macOS export](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_macos.html),
 [Apple notarization](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution),

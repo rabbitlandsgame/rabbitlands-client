@@ -1483,6 +1483,87 @@
      ],
      "density": 0.0016
     }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.76,
+      0.7
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.96,
+      0.76,
+      0.76
+     ]
+    },
+    "fog": {
+     "color": [
+      0.84,
+      0.76,
+      0.78
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.62,
+      0.48
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.92,
+      0.6,
+      0.58
+     ]
+    },
+    "fog": {
+     "color": [
+      0.78,
+      0.62,
+      0.64
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.15,
+      0.14,
+      0.3
+     ],
+     "horizon": [
+      0.31,
+      0.28,
+      0.44
+     ]
+    },
+    "fog": {
+     "color": [
+      0.3,
+      0.27,
+      0.4
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.6,
+      0.57,
+      0.74
+     ]
+    },
+    "moon": {
+     "color": [
+      0.6,
+      0.58,
+      0.88
+     ]
+    }
    }
   },
   "water": {
@@ -1498,6 +1579,16 @@
    ],
    "causticsEnabled": true,
    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.5
+   },
+   "gulls": {
+    "enabled": true,
+    "density": 0.3
+   }
   }
  },
  "lighting": {
