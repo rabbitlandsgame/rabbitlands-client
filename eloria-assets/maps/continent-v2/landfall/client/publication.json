@@ -2,23 +2,23 @@
  "region": "landfall",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "d8b9fe986f23da49231981f6c31b9a415fc28ca3e9115f95f6e7d4235c85dfc4",
-  "sceneSha256": "91e3c0f1d7894ebc95580990826f66b7e79699463f76f555dbece294336c8b97",
+  "sha256": "628dc275f2d80f621cef9853899a94e782d8e98b7738387bcf77332824dbf19b",
+  "sceneSha256": "58ebadee9305fc2e60ec47d83d0c6e5541db058a1e896ea6888d7fb0bd80b095",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/landfall/landfall.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "fc027b96d02412d1d4e9eadd09c3e56383976ad3002187216463b0d1dfe73c8c",
+  "sidecarSha256": "bab12d72454f3a8b565ac8bcf4a2cf8863f77b93665194e6cc515b357178b2ae",
   "collisionSha256": "f08c65115b8b898f2f611529f3c4b9c28482fefe446728043d734687866d546d",
   "servedGridSha256": "d8c7fe12734903713363603416c312c3b4e2a4a4d025a191dff6324b1587edb5",
   "walkableCells": 726111,
   "openTiles": 176094,
-  "sourceSnapshotSha256": "d8b9fe986f23da49231981f6c31b9a415fc28ca3e9115f95f6e7d4235c85dfc4"
+  "sourceSnapshotSha256": "628dc275f2d80f621cef9853899a94e782d8e98b7738387bcf77332824dbf19b"
  },
  "chunks": 32,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 1,
  "chunkGlbBytes": {
-  "total": 40561724,
+  "total": 40568152,
   "max": 3584504,
   "over100MiB": []
  },
@@ -35,7 +35,7 @@
   "08_12": 121.8,
   "08_13": 37.6,
   "09_08": 199.7,
-  "09_09": 359.9,
+  "09_09": 359.8,
   "09_10": 283.1,
   "09_11": 388.9,
   "09_12": 212.4,
@@ -57,19 +57,19 @@
   "12_10": 43.1
  },
  "timings": {
-  "snapshot_s": 1.1,
+  "snapshot_s": 1.0,
   "terrain_s": 0.0,
   "water_s": 0.0,
-  "overlays_s": 0.8,
+  "overlays_s": 0.7,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 151152136,
+  "surface_glb_bytes": 151159308,
   "walk_kit_nodes": 11,
-  "library_s": 0.4,
+  "library_s": 0.5,
   "harvest_nodes": 80,
-  "chunks_s": 3.3,
-  "space_passes_s": 3.7
+  "chunks_s": 2.1,
+  "space_passes_s": 3.6
  },
- "seconds": 21.3,
+ "seconds": 20.0,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 7,

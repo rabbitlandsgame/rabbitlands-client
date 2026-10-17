@@ -2,24 +2,24 @@
  "region": "greenlight",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "d826cf403b04aff2aa9e4b4873bf0586ccab2197046efa681c42bf7d76ece29e",
-  "sceneSha256": "5329a67ab75f8dac6559b2633186aeab45fdd13014259412bc5728ea5dedcbbe",
+  "sha256": "cd09cdca934a47583ae50b2ce092f23b97b14a16c2c110e0a56bdff9bc1ec81a",
+  "sceneSha256": "316c46d98aeb718173e367743f1f89f327c8ddea40fc840407afaf82fa268686",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/greenlight/greenlight.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "882572efee14b0ed4de1f27622532e116f9b2656c2df73d0f8fd09cbc67e38a6",
+  "sidecarSha256": "5ab95ad8dcfb4eaa1c7824ff87a7c3e69f892a2e6c2a67fce450fd47ab3f09bc",
   "collisionSha256": "ac88bf91ba342162ef201e2583b7715473e063377d56fc731e4d2bd1d9fa3da8",
   "servedGridSha256": "ee0041e9c2e463b5a5f1aa7faebdb60b2aa8175f36c00cf362f8b70606e06dae",
   "walkableCells": 238214,
   "openTiles": 57507,
-  "sourceSnapshotSha256": "d826cf403b04aff2aa9e4b4873bf0586ccab2197046efa681c42bf7d76ece29e"
+  "sourceSnapshotSha256": "cd09cdca934a47583ae50b2ce092f23b97b14a16c2c110e0a56bdff9bc1ec81a"
  },
  "chunks": 72,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 50948508,
-  "max": 3557004,
+  "total": 50947120,
+  "max": 3520284,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -71,16 +71,16 @@
   "11_09": 11.4,
   "11_10": 11.4,
   "11_11": 123.1,
-  "11_12": 126.2,
-  "11_13": 116.5,
-  "11_14": 19.3,
+  "11_12": 126.3,
+  "11_13": 116.6,
+  "11_14": 11.2,
   "12_08": 11.1,
   "12_09": 11.4,
   "12_10": 11.4,
   "12_11": 111.5,
-  "12_12": 72.0,
-  "12_13": 134.5,
-  "12_14": 147.5,
+  "12_12": 64.0,
+  "12_13": 134.3,
+  "12_14": 147.6,
   "13_08": 11.1,
   "13_09": 11.4,
   "13_10": 11.4,
@@ -97,19 +97,19 @@
   "14_14": 11.0
  },
  "timings": {
-  "snapshot_s": 0.8,
+  "snapshot_s": 0.7,
   "terrain_s": 0.1,
   "water_s": 0.0,
-  "overlays_s": 0.7,
+  "overlays_s": 0.6,
   "bridges_s": 0.1,
-  "surface_glb_bytes": 123594004,
+  "surface_glb_bytes": 123592668,
   "walk_kit_nodes": 93,
-  "library_s": 0.3,
+  "library_s": 0.2,
   "harvest_nodes": 37,
-  "chunks_s": 1.9,
-  "space_passes_s": 4.0
+  "chunks_s": 1.7,
+  "space_passes_s": 3.3
  },
- "seconds": 15.0,
+ "seconds": 13.2,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 0,
@@ -136,7 +136,7 @@
    -968
   ],
   "maximumPlacements": 112,
-  "maximumTriangles": 168443,
+  "maximumTriangles": 168083,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
