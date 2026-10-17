@@ -110,11 +110,12 @@ func _run() -> void:
 	var complete: Array = StatusIcons.TEXTURES.keys()
 	dto["status_effects"] = complete
 	fox.apply_server_state(dto, adapter, true)
-	_expect(icons.get_child_count() == 19 and fox.status_effect_count() == 19, "all negative and positive icons exist")
-	var wrapped: Rect2 = main_script.overhead_block_rect(Vector2(400, 300), "Red Fox", "", 19)
+	_expect(icons.get_child_count() == complete.size() and fox.status_effect_count() == complete.size(),
+		"all negative and positive icons exist")
+	var wrapped: Rect2 = main_script.overhead_block_rect(Vector2(400, 300), "Red Fox", "", complete.size())
 	_expect(wrapped.size.x == afflicted.size.x and wrapped.size.y > afflicted.size.y,
 		"large status lists grow upwards with a bounded width")
-	_expect((icons.get_child(18).mesh as QuadMesh).center_offset.y
+	_expect((icons.get_child(complete.size() - 1).mesh as QuadMesh).center_offset.y
 		> (icons.get_child(0).mesh as QuadMesh).center_offset.y, "additional rows sit above the first")
 	fox.set_status_effects(["poison", "shield", "regeneration", "haste"])
 
@@ -145,7 +146,8 @@ func _run() -> void:
 	fox.position.x = -3.0
 	player.position.x = 3.0
 	var legend := Label.new()
-	legend.text = "ACTOR STATUS EFFECTS\nFox: mixed effects    Goblin: all 13 positive effects    Player: mixed effects"
+	legend.text = "ACTOR STATUS EFFECTS\nFox: mixed effects    Goblin: all %d positive effects    Player: mixed effects" % (
+		complete.size() - StatusIcons.NEGATIVE.size())
 	legend.position = Vector2(40, 40)
 	legend.add_theme_font_size_override("font_size", 18)
 	root.add_child(legend)
@@ -174,7 +176,7 @@ func _test_own_player(state: Node, effects: Array) -> void:
 	state.get("actors")[99] = {"actor_id": 99, "kind": 1, "health": 20, "status_effects": effects}
 	main.call("_sync_local_status_icons")
 	var grid := main.get("local_status_grid") as GridContainer
-	_expect(grid != null and grid.get_child_count() == 19 and grid.columns == 6,
+	_expect(grid != null and grid.get_child_count() == effects.size() and grid.columns == 6,
 		"own overhead HUD shows all statuses and wraps them")
 	_expect(grid.get_parent().get_child(0) == grid, "own icons appear above the name and resources")
 	state.get("actors")[99].health = 0

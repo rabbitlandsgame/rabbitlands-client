@@ -38,6 +38,8 @@ func _init() -> void:
 		"tutorial_rewards_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"spell_ring_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"magic_book_v2": EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE,
+		"techniques_v1": EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE,
+		"magic_autocast_v1": EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE,
 		"actor16_v1": EloriaProtocol.ServerMessage.ADD_NEW_ACTOR_EXTENDED,
 		"actor_wardrobe_v1": EloriaProtocol.ServerMessage.ADD_NEW_ENHANCED_ACTOR,
 		"almanac_v1": EloriaProtocol.ServerMessage.ELORIA_ALMANAC_STATE,
@@ -183,6 +185,8 @@ func _init() -> void:
 	# chapter's shape. Signed Ashore's is its first card, live, carrying the
 	# four countersigns in place of the Lantern's flags.
 	var capability_specific_probes: Dictionary = {
+		"magic_autocast_v1": '{"kind":"autocast","enabled":true,"active":false,"spell_id":-1,"target_id":-1}'.to_utf8_buffer().hex_encode(),
+		"techniques_v1": '{"kind":"techniques","action_points":12,"max_action_points":200,"queued":"","stance":"","round":2.0,"techniques":[]}'.to_utf8_buffer().hex_encode(),
 		"spell_impacts_v1": '{"kind":"spell_impact","effect":83,"actor_id":1,"target_id":2,"power":1,"release_delay":0.45,"flight_duration":0.3}'.to_utf8_buffer().hex_encode(),
 		"market_window_v3": str((JSON.parse_string(FileAccess.get_file_as_string(
 			"res://tests/fixtures/marketplace_v3.json")) as Dictionary).browse),
@@ -1358,20 +1362,21 @@ func _init() -> void:
 			knowledge_entry_count = knowledge_entries.size()
 			# The catalog is compiled from the profile the server actually
 			# runs, not from the unmodified Eternal Lands data the fork was
-			# built on. That profile has forty-five books - the starting
+			# built on. That profile has sixty-six books - the starting
 			# reader, the fifteen the crafting ladder gates its tier-3 and
-			# better recipes behind, and the twenty-nine spell tomes; the
-			# legacy one has 385, and shipping those listed knowledge the
-			# server has never heard of.
+			# better recipes behind, the twenty-nine spell tomes and the
+			# twenty-one technique manuals; the legacy one has 385, and
+			# shipping those listed knowledge the server has never heard of.
 			var knowledge_source: Dictionary = (knowledge_catalog_value
 				as Dictionary).get("source", {}) as Dictionary
 			_expect(str(knowledge_source.get("profile", "")) == "eloria",
 				"knowledge catalog names the profile it was compiled from: "
 					+ str(knowledge_source.get("profile", "")))
-			_expect(knowledge_entries.size() == 45
+			_expect(knowledge_entries.size() == 66
 				and str(knowledge_entries[0]) == "Beginnings"
 				and knowledge_entries.has("Iron Working")
-				and knowledge_entries.has("Tome of Magic Bolt"),
+				and knowledge_entries.has("Tome of Magic Bolt")
+				and str(knowledge_entries[65]) == "Manual of Mark Target",
 				"knowledge catalog matches the served profile's own books: %s"
 					% str(knowledge_entries))
 	var manufacturing_catalog_file: FileAccess = FileAccess.open(
