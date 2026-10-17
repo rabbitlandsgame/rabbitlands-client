@@ -92,6 +92,7 @@ Open and run these scenes in Godot 4.7.2:
 
 - `src/dev/model_validation.tscn`: switches luminous male/female, retargets the native 162-clip animation GLB, cycles mapped clips, and rotates lighting.
 - `src/dev/world_validation.tscn`: loads Four Gates through the production `WorldLoader`, including manifest validation and declared collision.
+- `src/dev/trailer_camera/trailer_camera.tscn`: flies a camera along a keyframed shot file over a served map, for trailer world shots rendered with Movie Maker. Its [README](src/dev/trailer_camera/README.md) also covers the live client's capture-only HUD toggle (`-- --trailer-capture`, F9).
 
 A PASS label is evidence of source/runtime loading only. Record screenshots and review skeletons, materials, attachments, navigation, and coordinate placement before changing traceability to VERIFIED.
 

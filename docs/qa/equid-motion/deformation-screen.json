@@ -1,0 +1,123 @@
+{
+  "scope": "Same exported pose on original and repaired skin. This diagnostic does not certify artistic approval. Triangle edges shorter than 1% of native rest height excluded from stretch ratios; coincident rest seams checked separately.",
+  "actors": {
+    "moor_pony": {
+      "sha256": "50589ff68ad7c9586e49681dcf8c5012d19fe32f9aecdd0340d75e13e8e8421f",
+      "coincident_seam_pairs": 1695,
+      "clips": {
+        "Walk": {
+          "prior_prepared_skin": {
+            "maximum_stretch": 6.730547288277789,
+            "p99_stretch": 1.4214084854691333,
+            "worst_edge_and_time": [
+              6.730547288277789,
+              [
+                2124,
+                2125
+              ],
+              0.8120000034570694
+            ],
+            "max_coincident_seam_gap": 0
+          },
+          "repaired_skin": {
+            "maximum_stretch": 1.9408922077083839,
+            "p99_stretch": 1.1637055534116387,
+            "worst_edge_and_time": [
+              1.9408922077083839,
+              [
+                2233,
+                3014
+              ],
+              0.43400000184774395
+            ],
+            "max_coincident_seam_gap": 0
+          }
+        },
+        "Jog": {
+          "prior_prepared_skin": {
+            "maximum_stretch": 9.274042867640157,
+            "p99_stretch": 1.581049428067528,
+            "worst_edge_and_time": [
+              9.274042867640157,
+              [
+                2124,
+                2125
+              ],
+              0.33000001311302185
+            ],
+            "max_coincident_seam_gap": 0
+          },
+          "repaired_skin": {
+            "maximum_stretch": 2.228886904620341,
+            "p99_stretch": 1.2159069664575624,
+            "worst_edge_and_time": [
+              2.228886904620341,
+              [
+                2233,
+                3014
+              ],
+              0.02475000098347664
+            ],
+            "max_coincident_seam_gap": 0
+          }
+        },
+        "Sword_Attack": {
+          "prior_prepared_skin": {
+            "maximum_stretch": 6.976303078954512,
+            "p99_stretch": 1.3137824831146308,
+            "worst_edge_and_time": [
+              6.976303078954512,
+              [
+                2454,
+                2455
+              ],
+              0.4800000071525574
+            ],
+            "max_coincident_seam_gap": 0
+          },
+          "repaired_skin": {
+            "maximum_stretch": 1.759364443123977,
+            "p99_stretch": 1.115389820727227,
+            "worst_edge_and_time": [
+              1.759364443123977,
+              [
+                281,
+                282
+              ],
+              0.5600000083446502
+            ],
+            "max_coincident_seam_gap": 0
+          }
+        },
+        "Death_A": {
+          "prior_prepared_skin": {
+            "maximum_stretch": 11.935191217144583,
+            "p99_stretch": 2.0658095155408613,
+            "worst_edge_and_time": [
+              11.935191217144583,
+              [
+                2454,
+                2455
+              ],
+              1.7549999356269836
+            ],
+            "max_coincident_seam_gap": 0
+          },
+          "repaired_skin": {
+            "maximum_stretch": 1.721683826809207,
+            "p99_stretch": 1.329832157900551,
+            "worst_edge_and_time": [
+              1.721683826809207,
+              [
+                240,
+                242
+              ],
+              1.0724999606609344
+            ],
+            "max_coincident_seam_gap": 0
+          }
+        }
+      }
+    }
+  }
+}
