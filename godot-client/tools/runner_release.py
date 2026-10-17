@@ -22,11 +22,16 @@ from release_storage import DiskBudget
 
 def authorize() -> None:
     # An installation token has no human /user identity. Accept it only in
-    # this repository's own Actions context, with repository write access.
+    # this repository's own Actions context. GET /repos does not expose the
+    # human user's .permissions.push field for this token. The workflow grants
+    # contents: write; GitHub enforces it on each draft/upload API operation.
     if os.environ.get("GITHUB_ACTIONS") == "true":
         if os.environ.get("GITHUB_REPOSITORY") != release.REPOSITORY:
             raise ValueError("This runner is not executing in the Rabbit Lands client repository.")
-    elif release.gh("api", "user", "--jq", ".login") != release.ACCOUNT:
+        if release.gh("api", f"repos/{release.REPOSITORY}", "--jq", ".full_name") != release.REPOSITORY:
+            raise ValueError("The workflow token cannot access the Rabbit Lands client repository.")
+        return
+    if release.gh("api", "user", "--jq", ".login") != release.ACCOUNT:
         raise ValueError("Use the Rabbit Lands account to stage release downloads.")
     if release.gh("api", f"repos/{release.REPOSITORY}", "--jq", ".permissions.push") != "true":
         raise ValueError("The workflow token needs contents: write on the client repository.")
