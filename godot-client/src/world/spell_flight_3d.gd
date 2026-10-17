@@ -1,7 +1,7 @@
 extends Node3D
 ## A bounded, analytic trail: identical at any frame rate and no full-length beam.
 ## UV falloff supplies soft edges in Compatibility, without requiring bloom.
-const ENERGY_SHADER = preload("res://src/world/spell_energy.gdshader")
+const SPELL_MATERIALS = preload("res://src/world/spell_visual_material.gd")
 const SEGMENTS := 28
 const AFTERGLOW := 0.24
 var duration := 0.4
@@ -22,7 +22,6 @@ var _mesh_node: MeshInstance3D
 var _ribbon_material: ShaderMaterial
 var _glow_material: ShaderMaterial
 var _native_geometry: RefCounted
-static var _power_materials: Dictionary = {}
 static var _native_build_attempts := 0
 static var _native_build_successes := 0
 static var _native_build_fallbacks := 0
@@ -64,25 +63,14 @@ static func native_presentation_stats() -> Dictionary:
 	}
 
 func _set_power_materials(power: int) -> void:
-	if not _power_materials.has(power):
-		_ribbon_material = ShaderMaterial.new()
-		_ribbon_material.shader = ENERGY_SHADER
-		_glow_material = ShaderMaterial.new()
-		_glow_material.shader = ENERGY_SHADER
-		_glow_material.set_shader_parameter("radial", true)
-		# Vertex colors are packed into bytes. Brightness belongs in the shader
-		# so high powers don't clip orange/green/violet into the same yellow.
-		for material: ShaderMaterial in [_ribbon_material, _glow_material]:
-			material.set_shader_parameter("intensity", SpellPresentation.power_intensity(power))
-		_power_materials[power] = [_ribbon_material, _glow_material]
-	_ribbon_material = _power_materials[power][0]
-	_glow_material = _power_materials[power][1]
+	_ribbon_material = SPELL_MATERIALS.energy(tint, power, false)
+	_glow_material = SPELL_MATERIALS.energy(tint, power, true)
 
 func configure(id: int, color: Color, from: Vector3, to: Vector3, power := 1) -> void:
 	effect_id = id
 	power_level = clampi(power, 1, 10)
-	_set_power_materials(power_level)
 	tint = color
+	_set_power_materials(power_level)
 	set_endpoints(from, to)
 	duration = clampf(_path_distance / 13.0, 0.22, 0.62)
 

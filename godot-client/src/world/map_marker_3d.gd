@@ -1,6 +1,7 @@
 class_name MapMarker3D
 extends Node3D
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
+const SPELL_MATERIALS = preload("res://src/world/spell_visual_material.gd")
 ## A navigation marker on the map and in the gameplay viewport. The world
 ## effect is a green ground glow, rising sparks and a floating label; the
 ## full map keeps its larger gold pin. Personal annotations use the same
@@ -12,6 +13,7 @@ const MAP_MARKER_LAYER := 4
 const MARKER_COLOUR := Color(0.98, 0.78, 0.22)
 const GAMEPLAY_LAYER := 2
 const WORLD_COLOUR := Color(0.4, 1.0, 0.08)
+const RING_COLOUR := Color("169b45")
 const WORLD_RANGE := 90.0
 const REDRAPE_METRES := 0.15
 
@@ -79,7 +81,7 @@ func _build_world_visual() -> void:
 	var glow_material := StandardMaterial3D.new()
 	glow_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	glow_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	glow_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	glow_material.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
 	glow_material.vertex_color_use_as_albedo = true
 	glow_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	_flat_glow = _glow_mesh()
@@ -93,13 +95,23 @@ func _build_world_visual() -> void:
 	add_child(_ground_glow)
 
 	var spark_material := StandardMaterial3D.new()
+	spark_material.albedo_texture = SPELL_MATERIALS.particle_texture(Color("17a649"))
+	spark_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 	spark_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	spark_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	spark_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	spark_material.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
 	spark_material.vertex_color_use_as_albedo = true
 	spark_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	var halo := spark_material.duplicate() as StandardMaterial3D
+	halo.albedo_texture = _spark_texture()
+	halo.albedo_color = Color(0.40, 1.0, 0.46, 0.35)
+	halo.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	halo.render_priority = 1
+	spark_material.next_pass = halo
 	var spark_mesh := QuadMesh.new()
-	spark_mesh.size = Vector2(0.15, 0.15)
+	# A slightly elongated glow reads as rising magic rather than square confetti.
+	# Its transparent skirt needs a larger quad to retain a visible centre.
+	spark_mesh.size = Vector2(0.32, 0.40)
 	spark_mesh.material = spark_material
 	var particles := ParticleProcessMaterial.new()
 	particles.direction = Vector3.UP
@@ -109,6 +121,8 @@ func _build_world_visual() -> void:
 	particles.initial_velocity_max = 1.4
 	particles.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	particles.emission_sphere_radius = 0.35
+	particles.scale_min = 0.65
+	particles.scale_max = 1.2
 	var gradient := Gradient.new()
 	var colours := PackedColorArray()
 	var offsets := PackedFloat32Array()
@@ -117,7 +131,7 @@ func _build_world_visual() -> void:
 	for sample: int in range(65):
 		var age: float = float(sample) / 64.0
 		var alpha: float = smoothstep(0.0, 0.16, age) * (1.0 - smoothstep(0.35, 1.0, age))
-		colours.append(Color(WORLD_COLOUR, alpha))
+		colours.append(Color(1.0, 1.0, 1.0, alpha))
 		offsets.append(age)
 	gradient.colors = colours
 	gradient.offsets = offsets
@@ -156,6 +170,11 @@ func _build_world_visual() -> void:
 	_world_label.visibility_range_end = WORLD_RANGE
 	add_child(_world_label)
 
+## Match the soft radial falloff of spell_energy.gdshader. Share the texture
+## across markers; billboarding and the lifetime ramp still run on the GPU.
+static func _spark_texture() -> GradientTexture2D:
+	return SPELL_MATERIALS.glow_texture()
+
 ## A soft ring, with transparent edges. The ground draper lifts each vertex
 ## onto slopes once the map's navigation surface is ready.
 static func _glow_mesh() -> ArrayMesh:
@@ -170,7 +189,7 @@ static func _glow_mesh() -> ArrayMesh:
 				var angle: float = TAU * float(segment + corner.x) / 32.0
 				var radius: float = radii[band + corner.y]
 				vertices.append(Vector3(cos(angle) * radius, 0.0, sin(angle) * radius))
-				colours.append(Color(WORLD_COLOUR, alpha[band + corner.y]))
+				colours.append(Color(RING_COLOUR, alpha[band + corner.y]))
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices

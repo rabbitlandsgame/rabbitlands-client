@@ -21,11 +21,12 @@ const RING_INNER_RADIUS := 0.22
 const COLUMN_HEIGHT := 1.5
 const COLUMN_CENTRE := 0.85
 const FLARE_SIZE := 0.34
-## Pale gold through amber: a sparkle, not a spell palette.
-const WARM := Color(1.0, 0.86, 0.42)
-const PALE := Color(1.0, 0.97, 0.78)
+## The approved copper edge and warm gold core stay visible on pale ground.
+const COPPER := Color("69400c")
+const GOLD := Color("ffe7a0")
 
 static var _flare_texture: ImageTexture
+static var _copper_texture: ImageTexture
 
 var _target: WeakRef
 var _particles: GPUParticles3D
@@ -118,22 +119,31 @@ func _add_particles() -> void:
 	fade_texture.gradient = fade
 	process.color_ramp = fade_texture
 
-	# Each flare picks its own warmth somewhere between gold and near-white.
-	var hues := Gradient.new()
-	hues.set_color(0, WARM)
-	hues.set_color(1, PALE)
-	var hues_texture := GradientTexture1D.new()
-	hues_texture.gradient = hues
-	process.color_initial_ramp = hues_texture
+	# The texture owns the copper/gold palette. Retain the initial-ramp path
+	# with a neutral color so the seeded particle motion matches the review.
+	var initial := Gradient.new()
+	initial.set_color(0, Color.WHITE)
+	initial.set_color(1, Color.WHITE)
+	var initial_texture := GradientTexture1D.new()
+	initial_texture.gradient = initial
+	process.color_initial_ramp = initial_texture
 
 	var flare := StandardMaterial3D.new()
-	flare.albedo_texture = _flare()
+	flare.albedo_texture = _copper_flare()
 	flare.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	flare.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	flare.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	flare.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
 	flare.vertex_color_use_as_albedo = true
 	# Particle billboarding, so the flare's own spin is kept.
 	flare.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	# The colored body supplies contrast on snow; the original soft star adds
+	# a restrained gold glow. Both passes share the particle's fade and spin.
+	var glow := flare.duplicate() as StandardMaterial3D
+	glow.albedo_texture = _flare()
+	glow.albedo_color = Color(1.0, 0.82, 0.32, 0.32)
+	glow.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	glow.render_priority = 1
+	flare.next_pass = glow
 	var quad := QuadMesh.new()
 	quad.size = Vector2(FLARE_SIZE, FLARE_SIZE)
 	quad.material = flare
@@ -153,6 +163,22 @@ func _add_particles() -> void:
 	_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_particles)
 	_particles.emitting = true
+
+## Review option B: preserve the four-point silhouette with a copper edge.
+## Cache the texture so restarting a harvest never rebuilds it.
+static func _copper_flare() -> ImageTexture:
+	if _copper_texture != null:
+		return _copper_texture
+	var image := _flare().get_image()
+	for y: int in range(image.get_height()):
+		for x: int in range(image.get_width()):
+			var mask := image.get_pixel(x, y).a
+			var tint := COPPER.lerp(GOLD, smoothstep(0.08, 0.85, mask))
+			tint.a = pow(mask, 0.65) * 0.94
+			image.set_pixel(x, y, tint)
+	image.generate_mipmaps()
+	_copper_texture = ImageTexture.create_from_image(image)
+	return _copper_texture
 
 ## A soft four-pointed star: a round glow crossed by two thin rays, generated
 ## rather than imported. A bare quad reads as a hard square, and a round dot
