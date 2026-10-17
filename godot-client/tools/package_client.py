@@ -1411,7 +1411,17 @@ def pck_paths(pck: Path) -> set[str]:
     return paths
 
 
-def check_actor_pack(build_dir: Path, app_dir: Path) -> None:
+def exported_import_products(sidecar: Path, platform: str = "") -> list[str]:
+    products = _import_products(sidecar)
+    if platform == "macos":
+        # Godot 4.7.2 declares s3tc/bptc for universal Mac presets. Both
+        # texture families must be imported for export validation, but the
+        # universal PCK intentionally omits the mobile variants.
+        products = [path for path in products if not path.endswith((".etc2.ctex", ".astc.ctex"))]
+    return products
+
+
+def check_actor_pack(build_dir: Path, app_dir: Path, platform: str = "") -> None:
     """Each actor file is in exactly one place - the PCK or app/assets - or, if dropped, in none.
 
     The PCK must hold every PCK-only actor resource (as its .import remap and
@@ -1432,7 +1442,7 @@ def check_actor_pack(build_dir: Path, app_dir: Path) -> None:
             problems.append(f"{local}: not in the PCK")
         elif entry.endswith(".import"):
             sidecar = project / entry
-            products = _import_products(sidecar) if sidecar.is_file() else []
+            products = exported_import_products(sidecar, platform) if sidecar.is_file() else []
             if not products or any(p not in paths for p in products):
                 problems.append(f"{local}: its imported product is not in the PCK")
         if (app_dir / local).exists():
@@ -1456,7 +1466,7 @@ def check_actor_pack(build_dir: Path, app_dir: Path) -> None:
         f"{len(shipping['dropped'])} dropped")
 
 
-def check_scene_texture_pack(build_dir: Path, app_dir: Path) -> None:
+def check_scene_texture_pack(build_dir: Path, app_dir: Path, platform: str = "") -> None:
     """Every scene texture is in the PCK as its .import remap and the VRAM product it names."""
     paths = pck_paths(app_dir / "RabbitLands.pck")
     project = build_dir / "godot-client"
@@ -1464,7 +1474,7 @@ def check_scene_texture_pack(build_dir: Path, app_dir: Path) -> None:
     problems: list[str] = []
     for relative in sorted(textures):
         local = PurePosixPath(relative).relative_to("godot-client").as_posix()
-        products = _import_products(project / (local + ".import"))
+        products = exported_import_products(project / (local + ".import"), platform)
         if local + ".import" not in paths:
             problems.append(f"{local}: not in the PCK")
         elif not products or any(p not in paths for p in products):
@@ -2947,8 +2957,12 @@ def _main(argv=None, storage=None) -> int:
         stage_loose_client_files(build_dir, app_dir)
         (app_dir / "client-release.json").write_text(json.dumps(metadata), encoding="utf-8")
         stage_audio_credits(app_dir, stage)
-        check_actor_pack(build_dir, app_dir)
-        check_scene_texture_pack(build_dir, app_dir)
+        if options.platform == "macos":
+            check_actor_pack(build_dir, app_dir, "macos")
+            check_scene_texture_pack(build_dir, app_dir, "macos")
+        else:
+            check_actor_pack(build_dir, app_dir)
+            check_scene_texture_pack(build_dir, app_dir)
         check_editor_sources_unpacked(app_dir)
         if storage:
             storage.check("export and staging validated")

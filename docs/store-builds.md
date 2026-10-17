@@ -149,7 +149,8 @@ Both the helper and completed bundle are launched headless. This does not prove
 GPU rendering, playability, or Intel/Apple Silicon hardware compatibility.
 
 Mac builds currently omit the BC-only map sidecars; source-image fallback is
-retained. Imported PCK textures include both architecture families. Measure real
+retained. Godot requires both import families for universal validation; its 4.7.2
+universal Mac exporter selects desktop S3TC/BPTC products for the PCK. Measure real
 GPU texture support, loading time and RAM before declaring minimum specs.
 The test bundle is ad-hoc signed after all contents are finalized. It is **not a
 public release installer**. Do not advertise macOS support based on this export.
