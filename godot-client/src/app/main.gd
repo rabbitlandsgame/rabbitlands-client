@@ -360,6 +360,12 @@ var reference_window: Control
 var _shadows_enabled := true
 var _effects_enabled := true
 var _nameplates_enabled := true
+## Trailer capture (`_configure_trailer_capture`): off unless the client was
+## launched with TRAILER_CAPTURE_ARGUMENT. 0 draws the HUD, 1 the world alone,
+## 2 the world without nameplates. Never saved.
+var _trailer_capture_enabled := false
+var _trailer_capture_level := 0
+var _trailer_capture_layer: CanvasLayer
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
 var _fps_limit := 0
 var _player_notes := ""
@@ -1005,6 +1011,10 @@ const MAP_PICTURE_SINK_METRES := 0.05
 ## The slider's range lives with the slider, in settings_window.gd.
 const NAME_DISTANCE_DEFAULT_METRES := SettingsWindowScript.NAME_DISTANCE_DEFAULT
 const NAME_FADE_METRES := 5.0
+## The launch argument (after `--`) that arms trailer capture, and the fixed,
+## unbindable key that cycles it (`_configure_trailer_capture`).
+const TRAILER_CAPTURE_ARGUMENT := "--trailer-capture"
+const TRAILER_CAPTURE_KEY := KEY_F9
 ## How many actors `_sync_world` builds in one pass. A spawn is a couple of
 ## milliseconds of model, skin and equipment work, so a pack of twenty
 ## arriving together was one long frame; the rest follow on the next frames.
@@ -1295,6 +1305,7 @@ func _ready() -> void:
 	_load_hud_settings()
 	# Explicit launch options select a server without changing saved settings.
 	_apply_connection_launch_options(OS.get_cmdline_user_args())
+	_configure_trailer_capture(OS.get_cmdline_user_args())
 	_configure_inventory_menus()
 	_configure_minimap_menu()
 	_build_inventory_slots()
@@ -3532,6 +3543,12 @@ func _clear_world_presentation() -> void:
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	if _trailer_capture_enabled and event is InputEventKey and (event as InputEventKey).pressed \
+			and not (event as InputEventKey).echo \
+			and (event as InputEventKey).physical_keycode == TRAILER_CAPTURE_KEY:
+		_cycle_trailer_capture()
+		get_viewport().set_input_as_handled()
+		return
 	# A drag can end over a window that consumes the release before gui_input.
 	if event is InputEventMouseButton and not event.pressed \
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
@@ -3998,7 +4015,7 @@ func _banner_row(row_name: String) -> HBoxContainer:
 func _nameplate_visible_for(actor_id: int) -> bool:
 	if actor_id == AppState.local_actor_id:
 		return false
-	if not _nameplates_enabled:
+	if not _nameplates_enabled or _trailer_capture_level >= 2:
 		return false
 	if _banner_option("instance_mode"):
 		return false
@@ -10857,6 +10874,47 @@ func _sync_spell_power_controls() -> void:
 	spell_power_value.text = "P%d" % requested_spell_power
 	spell_power_down.disabled = requested_spell_power <= 1
 	spell_power_up.disabled = requested_spell_power >= ceiling
+
+## Trailer capture, for filming and never a player setting: launched with
+## `-- --trailer-capture`, TRAILER_CAPTURE_KEY cycles the HUD, a clean feed of
+## the world alone, and the clean feed without nameplates (see
+## src/dev/trailer_camera/README.md). The clean feed draws the world
+## viewport's own texture over everything, so a window, popup or chat line
+## that opens underneath during a take never reaches the recording; the HUD
+## still takes input beneath it. Without the argument the key does nothing.
+func _configure_trailer_capture(arguments: PackedStringArray) -> void:
+	_trailer_capture_enabled = arguments.has(TRAILER_CAPTURE_ARGUMENT)
+	if not _trailer_capture_enabled or _trailer_capture_layer != null:
+		return
+	_trailer_capture_layer = CanvasLayer.new()
+	_trailer_capture_layer.name = "TrailerCaptureFeed"
+	_trailer_capture_layer.layer = 128
+	_trailer_capture_layer.visible = false
+	var feed := TextureRect.new()
+	feed.name = "WorldFeed"
+	feed.texture = main_viewport.get_texture()
+	feed.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	feed.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	feed.stretch_mode = TextureRect.STRETCH_SCALE
+	feed.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_trailer_capture_layer.add_child(feed)
+	add_child(_trailer_capture_layer)
+	game_view.visibility_changed.connect(_sync_trailer_capture)
+	print("trailer_capture enabled: %s cycles HUD, clean feed, clean feed without nameplates" % [
+		OS.get_keycode_string(TRAILER_CAPTURE_KEY)])
+
+func _cycle_trailer_capture() -> void:
+	_trailer_capture_level = (_trailer_capture_level + 1) % 3
+	_sync_trailer_capture()
+	# Nameplates follow level 2 through _nameplate_visible_for.
+	_apply_banner_options()
+	print("trailer_capture level=", _trailer_capture_level)
+
+## The clean feed only ever covers the game view: at the login screen, or
+## after a disconnect, there is no world to film.
+func _sync_trailer_capture() -> void:
+	if _trailer_capture_layer != null:
+		_trailer_capture_layer.visible = _trailer_capture_level > 0 and game_view.visible
 
 ## Saves what is on screen. The legacy client bound this to a dedicated key
 ## and so does this one; the file goes to the user directory, because a client
