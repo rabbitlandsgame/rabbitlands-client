@@ -290,6 +290,39 @@ once more after the cuff cut, again replacing the eight they superseded.
 There is still no automatic landmark finder, so each spec's skeleton is read
 off renders. Race headwear is untouched.
 
+### Reviewing fits in the client
+
+`godot-client/review-equipment.bat` opens an interactive turntable on the
+real client actor (`tools/equipment_review/`). It is configured the way
+`tests/canonical_equipment_preview.gd` configures it.
+
+- **Drop-downs:** race (all eight), sex, armour set and animation. The sets
+  are the four class starter kits from `CreationArchetypes`, plus those in
+  `tools/equipment_review/review_sets.json`. The chosen clip loops at the
+  game's playback speed.
+- **Toggles:** headwear, weapons and cape, and hair.
+- **Camera:** mouse orbit, pan and zoom, keyboard turning, and preset views
+  on 1–5. Space pauses, `,` and `.` step a frame, and `[` and `]` change the
+  speed.
+- **Notes:** F2 or C saves a screenshot without the panels and asks for a
+  note.
+- **Reload:** F5 reloads from disk after an edit.
+
+A piece whose GLB is newer than Godot's import is built straight from the
+file, so the viewer never shows a stale import.
+
+Notes go to `<checkout>/.local/asset-authoring/working/equipment-review/<session>/`.
+Each session folder holds:
+
+- `notes.jsonl`: one line per note, with the race, sex, set, each piece's key
+  and resolved scene, the clip and its time, the camera, and the commit;
+- `notes.md`, the same notes in readable form;
+- `shot_NNN.png`, the screenshots;
+- `session.json`.
+
+`--race`, `--sex`, `--set`, `--clip` and `--review-dir` preselect the view
+and the notes folder.
+
 ## Two body shapes, preserved race identity
 
 There are **two body equipment fits**, with 200 torso/leg/boot designs each,
