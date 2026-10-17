@@ -2,24 +2,24 @@
  "region": "boarsend",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "3230efb28bc8e790e5a8c86507f419492261d51bb6612e854979e4187be25c7c",
-  "sceneSha256": "6b861530d1773f0cf080d7d1e72a3cdbab82f142251ccccc7a10e1d0ac7a66f7",
+  "sha256": "faf1dda4c478848b1ad246a68e7509885b466f57c75d4375066b65b0d2b01db6",
+  "sceneSha256": "44152042a03d1785c374548942a66c4ea775a1b3180f4a263fbff14acbda7af0",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/boarsend/boarsend.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "2026ac07e91fb25b234964395c04ff6fbffdcf48cac7053b3806bea2cedda363",
-  "collisionSha256": "a519e17d4b1dca231d8b317760a9916481017a0ad340999781046708456a3937",
-  "servedGridSha256": "db4a09befa44b9bd31780e989d53b3234c283b617ca632fb2849a4c65f334bb6",
-  "walkableCells": 713593,
-  "openTiles": 173927,
-  "sourceSnapshotSha256": "3230efb28bc8e790e5a8c86507f419492261d51bb6612e854979e4187be25c7c"
+  "sidecarSha256": "d90915e7392bae63142903d02ef171c85589f6656a77ad24f3d163dc09334a1f",
+  "collisionSha256": "127267ca26a1b6a4bf00c7fc4e70f5c7ea997d575429b38b777f4a377bb271e0",
+  "servedGridSha256": "578f2a9c9493b45d33bd14ca6a0412f4a4a4572739151b155c8678ee8d41518e",
+  "walkableCells": 713675,
+  "openTiles": 173948,
+  "sourceSnapshotSha256": "faf1dda4c478848b1ad246a68e7509885b466f57c75d4375066b65b0d2b01db6"
  },
  "chunks": 106,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 59111756,
-  "max": 2524044,
+  "total": 62696428,
+  "max": 2784408,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -64,50 +64,50 @@
   "08_13": 112.9,
   "08_14": 11.0,
   "09_05": 129.0,
-  "09_06": 125.6,
+  "09_06": 125.4,
   "09_07": 36.2,
-  "09_08": 149.1,
+  "09_08": 149.2,
   "09_09": 91.9,
   "09_10": 43.6,
   "09_11": 11.4,
-  "09_12": 137.3,
-  "09_13": 161.5,
+  "09_12": 137.6,
+  "09_13": 161.9,
   "09_14": 11.0,
   "10_05": 27.0,
-  "10_06": 89.0,
-  "10_07": 118.2,
-  "10_08": 151.0,
-  "10_09": 105.1,
-  "10_10": 178.9,
+  "10_06": 84.4,
+  "10_07": 118.3,
+  "10_08": 151.2,
+  "10_09": 105.4,
+  "10_10": 179.1,
   "10_11": 141.2,
-  "10_12": 60.1,
+  "10_12": 68.8,
   "10_13": 152.7,
   "10_14": 11.0,
   "11_06": 90.4,
   "11_07": 159.8,
   "11_08": 147.8,
-  "11_09": 156.7,
-  "11_10": 127.8,
-  "11_11": 91.6,
-  "11_12": 197.7,
+  "11_09": 147.7,
+  "11_10": 127.9,
+  "11_11": 92.2,
+  "11_12": 198.1,
   "11_13": 108.1,
   "11_14": 11.0,
   "12_06": 75.6,
   "12_07": 128.5,
   "12_08": 147.3,
   "12_09": 107.6,
-  "12_10": 115.8,
-  "12_11": 125.2,
-  "12_12": 64.8,
+  "12_10": 115.9,
+  "12_11": 125.8,
+  "12_12": 65.0,
   "12_13": 11.4,
   "12_14": 11.0,
   "13_06": 74.2,
   "13_07": 88.0,
   "13_08": 88.1,
-  "13_09": 96.7,
-  "13_10": 180.2,
-  "13_11": 181.5,
-  "13_12": 88.0,
+  "13_09": 96.8,
+  "13_10": 180.4,
+  "13_11": 181.6,
+  "13_12": 96.9,
   "13_13": 11.4,
   "13_14": 11.0,
   "14_06": 102.4,
@@ -131,21 +131,22 @@
   "16_10": 10.9
  },
  "timings": {
-  "snapshot_s": 36.1,
+  "snapshot_s": 1.7,
   "terrain_s": 0.2,
   "water_s": 0.0,
-  "overlays_s": 1.3,
+  "overlays_s": 1.2,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 173812968,
+  "surface_glb_bytes": 389346584,
   "walk_kit_nodes": 0,
-  "library_s": 0.7,
+  "library_s": 0.6,
   "harvest_nodes": 48,
-  "chunks_s": 6.5
+  "chunks_s": 3.8,
+  "space_passes_s": 5.7
  },
- "seconds": 96.8,
+ "seconds": 27.3,
  "imagePolicy": {
   "surface": {
-   "imagesResampled": 17,
+   "imagesResampled": 64,
    "resampledImages": [
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
@@ -155,6 +156,53 @@
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
     "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
     "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
     "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
@@ -189,132 +237,6 @@
   "cellMetres": 96
  },
  "certifiedTextureAliases": [
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/06098eff09b16e138091cf72ea2a967f1500fcb8ed235ffc594e667293aaf1b8.jpg",
-   "sha256": "06098eff09b16e138091cf72ea2a967f1500fcb8ed235ffc594e667293aaf1b8",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb",
-   "sourceModelSha256": "4bd35e6f009ec51aed620daa43ffba481948c5e383654850d1f2c5250456db08"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/19ea9f43d54a4e15753a7247cf0116c7b4ff31db23e7365f153660f3913749d2.jpg",
-   "sha256": "19ea9f43d54a4e15753a7247cf0116c7b4ff31db23e7365f153660f3913749d2",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb",
-   "sourceModelSha256": "550843a9bde13abd99becec670625679b0d40219e873bc597b34376c887827d5"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/267338583e78467d3a4ba5b98adec6d0931ff1f4e5838d7201b357b5f0ebb031.jpg",
-   "sha256": "267338583e78467d3a4ba5b98adec6d0931ff1f4e5838d7201b357b5f0ebb031",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-sweet-chestnut-summer-1.glb",
-   "sourceModelSha256": "caae11f941dc40aee66e324cedc135eddc49da0be062448a4f76450b0881e706"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/3c89c34c40856bcf89c082aa3ec4753af92044e6a7cba329889524ec29a31387.jpg",
-   "sha256": "3c89c34c40856bcf89c082aa3ec4753af92044e6a7cba329889524ec29a31387",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb",
-   "sourceModelSha256": "4bd35e6f009ec51aed620daa43ffba481948c5e383654850d1f2c5250456db08"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/48ab14d6fae0b71e0b8897d32d2821eb510919bd0225a34e02777b819fab06f1.jpg",
-   "sha256": "48ab14d6fae0b71e0b8897d32d2821eb510919bd0225a34e02777b819fab06f1",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb",
-   "sourceModelSha256": "e0f9d6721b08a387a6f43bc3febfa9bb6e782da411b5f1d2e1ecab984cf16989"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/55ce4a2dbcd1536d26e0994d0964a8aa25b5abd0e4be9f3b44b4403d08ab39bb.jpg",
-   "sha256": "55ce4a2dbcd1536d26e0994d0964a8aa25b5abd0e4be9f3b44b4403d08ab39bb",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-summer-oak-tree-2.glb",
-   "sourceModelSha256": "a5ba871768d4cba5d0d1f94fbdfcd5f711605f0a15ef872b4dce8e34f3f6dba5"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/695c4ea791eeb4305df304425d66cb5a77edbd87062f19ea68f78ec652cbb9d8.jpg",
-   "sha256": "695c4ea791eeb4305df304425d66cb5a77edbd87062f19ea68f78ec652cbb9d8",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-summer-oak-tree-2.glb",
-   "sourceModelSha256": "a5ba871768d4cba5d0d1f94fbdfcd5f711605f0a15ef872b4dce8e34f3f6dba5"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/78d24dd9ce94bac0225f50d879e3cd4021b8cc1e039d66a6f429c13bb97283d5.jpg",
-   "sha256": "78d24dd9ce94bac0225f50d879e3cd4021b8cc1e039d66a6f429c13bb97283d5",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb",
-   "sourceModelSha256": "4bd35e6f009ec51aed620daa43ffba481948c5e383654850d1f2c5250456db08"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/7944c3205d83f66649cfef8f9887785df17e59a481c00b82d0980783f7284a57.jpg",
-   "sha256": "7944c3205d83f66649cfef8f9887785df17e59a481c00b82d0980783f7284a57",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb",
-   "sourceModelSha256": "550843a9bde13abd99becec670625679b0d40219e873bc597b34376c887827d5"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/7d536075548ceaa0109542c0d3f0a4d1a6a113e8398600705c26c61faf6d3934.jpg",
-   "sha256": "7d536075548ceaa0109542c0d3f0a4d1a6a113e8398600705c26c61faf6d3934",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb",
-   "sourceModelSha256": "7011920b26167774560126bc62d95d4c3521cacd4a8ce1144b1d0c140f16d893"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/80ba9efadeb8e930e800063f92f3abc91fd1a4ea3ae19f5fd9dc0e89bb152d5f.jpg",
-   "sha256": "80ba9efadeb8e930e800063f92f3abc91fd1a4ea3ae19f5fd9dc0e89bb152d5f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb",
-   "sourceModelSha256": "7011920b26167774560126bc62d95d4c3521cacd4a8ce1144b1d0c140f16d893"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/8d9ea24ccf79658002c30020c3a05a4a64a2068fe1ecb0de8e7a090e46c3a827.jpg",
-   "sha256": "8d9ea24ccf79658002c30020c3a05a4a64a2068fe1ecb0de8e7a090e46c3a827",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-summer-oak-tree-1.glb",
-   "sourceModelSha256": "d130dfba4eca395ed3ee4fda786bc1b7c9895e6a8bb4fc38035a9ee3cb5db0d0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/a3278ea75dd7cc0e852e8d7822fe2bb288a2e8315aa2cad3ebe00df99c75cc60.jpg",
-   "sha256": "a3278ea75dd7cc0e852e8d7822fe2bb288a2e8315aa2cad3ebe00df99c75cc60",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb",
-   "sourceModelSha256": "7011920b26167774560126bc62d95d4c3521cacd4a8ce1144b1d0c140f16d893"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/a71af8edb1ef79298c46155f0817903985c80142b1acf951172fab826252b4cc.jpg",
-   "sha256": "a71af8edb1ef79298c46155f0817903985c80142b1acf951172fab826252b4cc",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-sweet-chestnut-summer-1.glb",
-   "sourceModelSha256": "caae11f941dc40aee66e324cedc135eddc49da0be062448a4f76450b0881e706"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/aa0f739c554fbe2fb20e9dd9f4dbd6b2220bf7592573c83b95d321c62f304896.jpg",
-   "sha256": "aa0f739c554fbe2fb20e9dd9f4dbd6b2220bf7592573c83b95d321c62f304896",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb",
-   "sourceModelSha256": "e0f9d6721b08a387a6f43bc3febfa9bb6e782da411b5f1d2e1ecab984cf16989"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/b3ec48f96d3a377d6f8cb3a210d245aa3e731ad56618fe9b3a80a735661b88fc.jpg",
-   "sha256": "b3ec48f96d3a377d6f8cb3a210d245aa3e731ad56618fe9b3a80a735661b88fc",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-sweet-chestnut-summer-1.glb",
-   "sourceModelSha256": "caae11f941dc40aee66e324cedc135eddc49da0be062448a4f76450b0881e706"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/b5f7ca1f7a45b2a2a3e787c7b289102aba4f4753c31e8c8e170672b98b21b3d0.jpg",
-   "sha256": "b5f7ca1f7a45b2a2a3e787c7b289102aba4f4753c31e8c8e170672b98b21b3d0",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-summer-oak-tree-1.glb",
-   "sourceModelSha256": "d130dfba4eca395ed3ee4fda786bc1b7c9895e6a8bb4fc38035a9ee3cb5db0d0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/cbf355ebcd143f751e4d3315034ef15f4467d1bbbf64030efc6114da8c5992d2.jpg",
-   "sha256": "cbf355ebcd143f751e4d3315034ef15f4467d1bbbf64030efc6114da8c5992d2",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb",
-   "sourceModelSha256": "e0f9d6721b08a387a6f43bc3febfa9bb6e782da411b5f1d2e1ecab984cf16989"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/d5e922f5a5d88b40db797cc2c886ded94d4b8708e27d1aa58b3b0e64b85ea9df.jpg",
-   "sha256": "d5e922f5a5d88b40db797cc2c886ded94d4b8708e27d1aa58b3b0e64b85ea9df",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb",
-   "sourceModelSha256": "550843a9bde13abd99becec670625679b0d40219e873bc597b34376c887827d5"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/d64f6b793456b837a1e754a6ba951381a58f5f4ded2e520af1c8c081a440450b.jpg",
-   "sha256": "d64f6b793456b837a1e754a6ba951381a58f5f4ded2e520af1c8c081a440450b",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-summer-oak-tree-1.glb",
-   "sourceModelSha256": "d130dfba4eca395ed3ee4fda786bc1b7c9895e6a8bb4fc38035a9ee3cb5db0d0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/e062e932e5a21ac75bebfc7b6a46a7bf682aa8a7cda9597f503f47dd40e4be50.jpg",
-   "sha256": "e062e932e5a21ac75bebfc7b6a46a7bf682aa8a7cda9597f503f47dd40e4be50",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-summer-oak-tree-2.glb",
-   "sourceModelSha256": "a5ba871768d4cba5d0d1f94fbdfcd5f711605f0a15ef872b4dce8e34f3f6dba5"
-  },
   {
    "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac.jpg",
    "sha256": "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac",

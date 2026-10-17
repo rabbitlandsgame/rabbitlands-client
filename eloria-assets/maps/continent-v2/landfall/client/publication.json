@@ -2,24 +2,24 @@
  "region": "landfall",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "533b49fbb688a637be9f1015c121d4d910e15e9cc73a307540459b258c23d4b2",
-  "sceneSha256": "17a4812718255d72796fe7576ca5dc78bfbc26ed98dc7198dcbd49d03a0dc624",
+  "sha256": "d8b9fe986f23da49231981f6c31b9a415fc28ca3e9115f95f6e7d4235c85dfc4",
+  "sceneSha256": "91e3c0f1d7894ebc95580990826f66b7e79699463f76f555dbece294336c8b97",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/landfall/landfall.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "21234b9a90f1d0a19e418d2dc352af8e4df93a5941fa05f29fe29540d2fff320",
-  "collisionSha256": "cd8e9f779e65fa1fdeafb5b817101d7df1f8330b07ba726f5c591fb349cbbb91",
-  "servedGridSha256": "3fa61cd46ce7cb955a53d7a5fa594f6ddce4d744a1b0492645896cc2fc4b1c5c",
-  "walkableCells": 725866,
-  "openTiles": 176021,
-  "sourceSnapshotSha256": "533b49fbb688a637be9f1015c121d4d910e15e9cc73a307540459b258c23d4b2"
+  "sidecarSha256": "fc027b96d02412d1d4e9eadd09c3e56383976ad3002187216463b0d1dfe73c8c",
+  "collisionSha256": "f08c65115b8b898f2f611529f3c4b9c28482fefe446728043d734687866d546d",
+  "servedGridSha256": "d8c7fe12734903713363603416c312c3b4e2a4a4d025a191dff6324b1587edb5",
+  "walkableCells": 726111,
+  "openTiles": 176094,
+  "sourceSnapshotSha256": "d8b9fe986f23da49231981f6c31b9a415fc28ca3e9115f95f6e7d4235c85dfc4"
  },
  "chunks": 32,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 1,
  "chunkGlbBytes": {
-  "total": 40310808,
-  "max": 3508948,
+  "total": 40561724,
+  "max": 3584504,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -29,24 +29,24 @@
   "07_11": 136.2,
   "07_12": 63.4,
   "08_08": 75.6,
-  "08_09": 289.3,
+  "08_09": 289.4,
   "08_10": 333.7,
   "08_11": 334.0,
   "08_12": 121.8,
   "08_13": 37.6,
   "09_08": 199.7,
-  "09_09": 359.8,
+  "09_09": 359.9,
   "09_10": 283.1,
-  "09_11": 389.0,
+  "09_11": 388.9,
   "09_12": 212.4,
   "09_13": 63.4,
   "10_08": 105.8,
   "10_09": 356.2,
   "10_10": 267.9,
   "10_11": 380.4,
-  "10_12": 156.3,
+  "10_12": 147.4,
   "10_13": 123.8,
-  "11_08": 153.7,
+  "11_08": 153.6,
   "11_09": 271.5,
   "11_10": 346.6,
   "11_11": 179.6,
@@ -57,18 +57,19 @@
   "12_10": 43.1
  },
  "timings": {
-  "snapshot_s": 23.9,
-  "terrain_s": 0.1,
+  "snapshot_s": 1.1,
+  "terrain_s": 0.0,
   "water_s": 0.0,
-  "overlays_s": 1.0,
+  "overlays_s": 0.8,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 141625704,
+  "surface_glb_bytes": 151152136,
   "walk_kit_nodes": 11,
-  "library_s": 0.6,
+  "library_s": 0.4,
   "harvest_nodes": 80,
-  "chunks_s": 3.9
+  "chunks_s": 3.3,
+  "space_passes_s": 3.7
  },
- "seconds": 62.3,
+ "seconds": 21.3,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 7,
@@ -99,155 +100,9 @@
    -1022
   ],
   "maximumPlacements": 201,
-  "maximumTriangles": 391729,
+  "maximumTriangles": 391716,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "certifiedTextureAliases": [
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e.jpg",
-   "sha256": "5ff5587aad7e75854997ab4e4515a05cdfafab4d962ad9a7207c8cb0a95db29e",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-apple-tree-1.glb",
-   "sourceModelSha256": "d957b15f5b2e03767fb78986982fe24fe64ede78f1bdb04301b5a6f08b50d32e"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/60f656355d95d82471bc2e6d969cdd31a951b16b3f6231165123c1baa8f3f7b4.jpg",
-   "sha256": "60f656355d95d82471bc2e6d969cdd31a951b16b3f6231165123c1baa8f3f7b4",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-2.glb",
-   "sourceModelSha256": "6221fda4a6dd58f27f6ffeb97e430a6736811ac86ede3716840bb66545de88af"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/7ebd0b5e25ead169407e27e52c4f4a6b161aa12be67f8e3277fb6c626916d571.jpg",
-   "sha256": "7ebd0b5e25ead169407e27e52c4f4a6b161aa12be67f8e3277fb6c626916d571",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-wheelbarrow-1.glb",
-   "sourceModelSha256": "63625052269d15b7ac12ab84c339f767061dc9fcfc71f3ff31dc86f19564f3fc"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/8028151c09afa979d1c8e90630d993d761a2b721147cc9d6e46fa811b8064f4d.jpg",
-   "sha256": "8028151c09afa979d1c8e90630d993d761a2b721147cc9d6e46fa811b8064f4d",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-wheelbarrow-1.glb",
-   "sourceModelSha256": "63625052269d15b7ac12ab84c339f767061dc9fcfc71f3ff31dc86f19564f3fc"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg",
-   "sha256": "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb",
-   "sourceModelSha256": "b7246d0403500e6e991a512444b5bb4c4d66764012f25585c6697b56998f8f71"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg",
-   "sha256": "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb",
-   "sourceModelSha256": "b7246d0403500e6e991a512444b5bb4c4d66764012f25585c6697b56998f8f71"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346.jpg",
-   "sha256": "93772afc0935e2f29c2bdbd215194e4fb6e49a59d21cc98b201ddf5c43206346",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-apple-tree-1.glb",
-   "sourceModelSha256": "d957b15f5b2e03767fb78986982fe24fe64ede78f1bdb04301b5a6f08b50d32e"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/9838228a628ca9b47afe3f913b064404da517778b9e93b38077652ee7fe8704c.jpg",
-   "sha256": "9838228a628ca9b47afe3f913b064404da517778b9e93b38077652ee7fe8704c",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-hay-stack-1.glb",
-   "sourceModelSha256": "c90cb070a6d2ea25da539baff4ee1ad5205fd22419e7f8a3cfdafdedb2244295"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/bac5e9f11382e86b67c382664979ee024110d05031c0564736973fab867b854f.jpg",
-   "sha256": "bac5e9f11382e86b67c382664979ee024110d05031c0564736973fab867b854f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-hay-stack-1.glb",
-   "sourceModelSha256": "c90cb070a6d2ea25da539baff4ee1ad5205fd22419e7f8a3cfdafdedb2244295"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/ca725e9be5c8e940f5be6d212920c1bcb2408be9954e112a667062b3704e67af.jpg",
-   "sha256": "ca725e9be5c8e940f5be6d212920c1bcb2408be9954e112a667062b3704e67af",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-2.glb",
-   "sourceModelSha256": "6221fda4a6dd58f27f6ffeb97e430a6736811ac86ede3716840bb66545de88af"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/cd2a8334650dbac4db07bed7230ed11fc366a19d963d5a27815193c8a6d8b785.jpg",
-   "sha256": "cd2a8334650dbac4db07bed7230ed11fc366a19d963d5a27815193c8a6d8b785",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-wheelbarrow-1.glb",
-   "sourceModelSha256": "63625052269d15b7ac12ab84c339f767061dc9fcfc71f3ff31dc86f19564f3fc"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/d3d24d9ba4a801491a69b9a9cc814ea89234cfffc869b82acf7dd8abd92ff5f6.jpg",
-   "sha256": "d3d24d9ba4a801491a69b9a9cc814ea89234cfffc869b82acf7dd8abd92ff5f6",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-hay-stack-1.glb",
-   "sourceModelSha256": "c90cb070a6d2ea25da539baff4ee1ad5205fd22419e7f8a3cfdafdedb2244295"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a.jpg",
-   "sha256": "d6015571411ae42074bfb738eb9946b90b7a1834e624ad91407508b899f2563a",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-apple-tree-1.glb",
-   "sourceModelSha256": "d957b15f5b2e03767fb78986982fe24fe64ede78f1bdb04301b5a6f08b50d32e"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/efdc6c7fa066f05a627dbbb60d874ea830267c4fc640b807350567a9c8707ddf.jpg",
-   "sha256": "efdc6c7fa066f05a627dbbb60d874ea830267c4fc640b807350567a9c8707ddf",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-woodcutter-block-1.glb",
-   "sourceModelSha256": "582bb787519342be72e0fb4e4b56d4ff86a01d0c3f4784370ba82ab9739fe3eb"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f2f6dc0d9e4684dce667426f1fc0be3224fc4675a6d6c0c019ab003a52639557.jpg",
-   "sha256": "f2f6dc0d9e4684dce667426f1fc0be3224fc4675a6d6c0c019ab003a52639557",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-woodcutter-block-1.glb",
-   "sourceModelSha256": "582bb787519342be72e0fb4e4b56d4ff86a01d0c3f4784370ba82ab9739fe3eb"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f61385b6cc5180d44743118595014206f7e954261701da3af3a23835318668c4.jpg",
-   "sha256": "f61385b6cc5180d44743118595014206f7e954261701da3af3a23835318668c4",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-2.glb",
-   "sourceModelSha256": "6221fda4a6dd58f27f6ffeb97e430a6736811ac86ede3716840bb66545de88af"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f88e7bea599726af80c247e79da260703df40c64552fe4f1f31e0dc41c996c98.jpg",
-   "sha256": "f88e7bea599726af80c247e79da260703df40c64552fe4f1f31e0dc41c996c98",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-woodcutter-block-1.glb",
-   "sourceModelSha256": "582bb787519342be72e0fb4e4b56d4ff86a01d0c3f4784370ba82ab9739fe3eb"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg",
-   "sha256": "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb",
-   "sourceModelSha256": "b7246d0403500e6e991a512444b5bb4c4d66764012f25585c6697b56998f8f71"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/amberwood/assets/textures/0654f88d04399ef6ad7e604cc1e61d07ebe4ce6dcbe1cf0c229783fc91751faf.jpg",
-   "sha256": "0654f88d04399ef6ad7e604cc1e61d07ebe4ce6dcbe1cf0c229783fc91751faf",
-   "sourceModel": "godot-client/world_authoring/regions/amberwood/assets/prototypes/kit-sawhorse-1.glb",
-   "sourceModelSha256": "d3248bd5d5538d5c15dc4362d0bbf8079ab15d1dbaded35b1a5c9c03e8e848d4"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/amberwood/assets/textures/423dbbf97e77b6c85f938de20badd0267e79dff3ef9f5d7bb17fa589b02f0826.jpg",
-   "sha256": "423dbbf97e77b6c85f938de20badd0267e79dff3ef9f5d7bb17fa589b02f0826",
-   "sourceModel": "godot-client/world_authoring/regions/amberwood/assets/prototypes/kit-sawhorse-1.glb",
-   "sourceModelSha256": "d3248bd5d5538d5c15dc4362d0bbf8079ab15d1dbaded35b1a5c9c03e8e848d4"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/amberwood/assets/textures/f6f4048bc970360833817c0c9e76281e908073886cb5e49307966cd5fdd515f6.jpg",
-   "sha256": "f6f4048bc970360833817c0c9e76281e908073886cb5e49307966cd5fdd515f6",
-   "sourceModel": "godot-client/world_authoring/regions/amberwood/assets/prototypes/kit-sawhorse-1.glb",
-   "sourceModelSha256": "d3248bd5d5538d5c15dc4362d0bbf8079ab15d1dbaded35b1a5c9c03e8e848d4"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/grey_moors/assets/textures/0e8fd2153ae43978122c31f958190bd7dba9c7e265ffd50792c4970b62eb1aed.jpg",
-   "sha256": "0e8fd2153ae43978122c31f958190bd7dba9c7e265ffd50792c4970b62eb1aed",
-   "sourceModel": "godot-client/world_authoring/regions/grey_moors/assets/prototypes/kit-firewood-shelter-1.glb",
-   "sourceModelSha256": "16e70de6ae8796a26ca0b5a11cc4d4e420c99c2702c79e95fd599216808dac60"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/grey_moors/assets/textures/8fd018e4548fa98e0c1b247229e26a441fd349a1882faec093d1c6f6c7f91ffa.jpg",
-   "sha256": "8fd018e4548fa98e0c1b247229e26a441fd349a1882faec093d1c6f6c7f91ffa",
-   "sourceModel": "godot-client/world_authoring/regions/grey_moors/assets/prototypes/kit-firewood-shelter-1.glb",
-   "sourceModelSha256": "16e70de6ae8796a26ca0b5a11cc4d4e420c99c2702c79e95fd599216808dac60"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/grey_moors/assets/textures/a9ac143b463312857a7fd13fbcbec801cebf7983d36cb688ad40cee67d663f33.jpg",
-   "sha256": "a9ac143b463312857a7fd13fbcbec801cebf7983d36cb688ad40cee67d663f33",
-   "sourceModel": "godot-client/world_authoring/regions/grey_moors/assets/prototypes/kit-firewood-shelter-1.glb",
-   "sourceModelSha256": "16e70de6ae8796a26ca0b5a11cc4d4e420c99c2702c79e95fd599216808dac60"
-  }
- ]
+ }
 }
