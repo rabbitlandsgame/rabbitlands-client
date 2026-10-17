@@ -18,7 +18,7 @@ trailer, film the live client with the capture HUD toggle below.
 | `trailer_camera.tscn`, `trailer_camera.gd` | the scene: load, hold chunks, bind light, fly, write |
 | `trailer_shot.gd` | the shot format and path maths (tested by `tests/test_trailer_shot.gd`) |
 | `render_shot.py` | renders a shot through Movie Maker at 2560x1440 |
-| `shots/*.json` | sample shots: `landfall_north_gate`, `crownwater_causeways` |
+| `shots/*.json` | sample shots: `landfall_north_gate`, `greenlight_causeway` |
 
 ## Running a shot
 
@@ -71,16 +71,12 @@ wanted size for the render and deletes it afterwards. It refuses to run if an
 hand, the same command without that override gives a 1280x720 movie whatever
 `--resolution` says.
 
-Measured on the RTX 5080 laptop at 2560x1440: the 6 s Landfall shot rendered as
-MJPEG AVI in 33 s (422 frames, 125 MB); the 8 s Crownwater shot as a PNG sequence
-took 11 minutes (542 frames, 1.8 GB), because PNG encoding is the bottleneck. Use
-AVI for review and PNG for masters. Both are 60 fps with exact frame times:
-under `--fixed-fps` the shot clock is frame / fps, not wall time.
-
-On the shared laptop, wrap any render in `gpu_lock.sh` (one GPU job at a time).
-The lock waits up to five minutes for 5 GB of free RAM first, so give the
-command a long timeout; killing the wrapper while it waits leaves the lock
-behind until it goes stale after 15 minutes.
+Measured on a laptop RTX 5080 at 2560x1440: as MJPEG AVI the 6 s Landfall shot
+recorded in 33 s (422 frames, 125 MB) and the 8 s Greenlight shot in 49 s (542
+frames); an 8 s shot as a PNG sequence took 11 minutes (542 frames, 1.8 GB),
+because PNG encoding is the bottleneck. Use AVI for review and PNG for masters.
+Both are 60 fps with exact frame times: under `--fixed-fps` the shot clock is
+frame / fps, not wall time. A render keeps the GPU busy; run one at a time.
 
 ## Streaming
 
@@ -100,8 +96,8 @@ on a very fast move its far edge can still be growing.
 
 A chunk is resident only if it lies within `streamRadius` horizontally of the
 path. For a high flyover that sees the whole region, raise `streamRadius` past
-the region's size. Landfall (26 of its 32 chunks) loaded in 5-8 s and Crownwater
-(all 40) in 7-12 s, at an estimated 884 and 535 MiB under the
+the region's size. Landfall (26 of its 32 chunks) loaded in 5-8 s and Greenlight
+(58 of 72) in 5-7 s, at an estimated 884 and 610 MiB under the
 `residentBudgetMiB` default of 6144. The log line `trailer chunks ...` reports
 both figures, and the script warns when the budget leaves chunks out.
 `neighbours` loads the adjoining regions as the game shows them across a border.
@@ -151,8 +147,8 @@ the same way. `"interpolation": "linear"` draws straight segments instead.
 
 | Field | Default | Meaning |
 | --- | --- | --- |
-| `map` | required | a registry id (`landfall`, `crownwater`) or a `world.json` path |
-| `gameMinute` | the map's own light | the server clock, 0-359: 0 midnight, ~75 dawn, 180 noon, ~285 dusk |
+| `map` | required | a registry id (`landfall`, `greenlight`) or a `world.json` path |
+| `gameMinute` | the map's own light | the server clock, 0-359: 0 midnight, ~48 sunrise, 180 noon, ~312 sunset; the sun casts shadows from ~75 to ~285 |
 | `environmentVariant` | none | a manifest variant merged over its environment, such as `golden-hour` |
 | `sunBearing` | the map's | the compass bearing the sun stands at |
 | `fog` | `true` | `false` turns the map's fog off |
@@ -166,6 +162,9 @@ the same way. `"interpolation": "linear"` draws straight segments instead.
 | `ambientLife`, `lightMarkers` | `true` | the map's ambient animals and lamp lights |
 | `preroll` | 1.0 | seconds held on the first key before the clock starts |
 | `resolution` | none | warns when the window differs |
+
+The camera draws no weather: rain and storms are configured only for mainland
+maps, so the scene does not add any.
 
 ## Capture HUD toggle in the live client
 
