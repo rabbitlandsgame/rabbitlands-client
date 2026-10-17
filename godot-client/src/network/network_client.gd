@@ -122,6 +122,7 @@ func _send_release_identity() -> void:
 		var end := mini(offset + 512, history.size())
 		var body := {"schema": 1, "commit": identity.get("commit", ""),
 			"platform": identity.get("platform", "source"),
+			"distribution": ClientRelease.update_owner(identity),
 			"ancestors": history.slice(offset, end), "offset": offset,
 			"complete": end == history.size()}
 		if send_frame(EloriaProtocol.encode(205, JSON.stringify(body).to_utf8_buffer())) != OK:
@@ -401,6 +402,10 @@ func look_at_map_object(object_id: int) -> Error:
 
 func attack_actor(actor_id: int) -> Error:
 	return send_frame(EloriaProtocol.attack_actor(actor_id))
+
+## A technique names at most an actor, never a tile, so it is sent unframed.
+func technique_request(data: Dictionary) -> Error:
+	return send_frame(EloriaProtocol.technique_request(data))
 
 func trade_with(actor_id: int) -> Error:
 	return send_frame(EloriaProtocol.trade_with(actor_id))

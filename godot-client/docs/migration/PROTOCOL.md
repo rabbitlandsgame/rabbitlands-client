@@ -227,6 +227,28 @@ deposit or a failed mix does not count. The client presents the totals and
 derives its "this session" column as a difference against the totals as they
 stood when the session started; it increments nothing.
 
+Combat techniques (the server's `eloria/techniques.py`) use one new number in
+each direction's spirit but only one on the wire. The client asks with
+`ELORIA_TECHNIQUE_REQUEST(220)`, client to server, a UTF-8 JSON body
+`{"op": "use", "key": <technique>, "target_id": <actor id, optional>}` or
+`{"op": "state"}`. It names at most an actor, never a tile, so it is sent
+unframed even when coordinates are selected. The answer rides the existing
+JSON channel `ELORIA_MAGIC_STATE(212)` as kind `"techniques"`, sent only to a
+client that declares `techniques_v1`: the real action-point pool (the legacy
+stats slots 113/114 carry pick points on this server), what is readied and
+held, and one row per technique with its cost, cooldown, `ready_in` seconds,
+whether it is known, and the server's refusal text. The client draws the rows
+and never decides a technique is usable. Stun, root, sunder, mark, challenge,
+brace, riposte, war_cry and intercept arrive as ordinary actor status names.
+
+Repeat casting rides the same JSON pair. The client switches it with
+`magic_request {"op": "autocast", "enabled": bool}` and is told the switch and
+whether a spell is repeating as `ELORIA_MAGIC_STATE` kind `"autocast"`
+(`enabled`, `active`, `spell_id`, `target_id`), only when it declares
+`magic_autocast_v1`. Escape sends the ordinary `{"op": "cancel"}`, which stops
+a repeat. Target spells are always aimed by a click: no client path sends a
+cast at the selected actor without one.
+
 ## Capability handshake
 
 On login the client sends `#clientcaps a,b,c` as an ordinary `RAW_TEXT(0)`
@@ -558,7 +580,9 @@ tiles rather than actors, because the actor packets already say who moved and
 the part a client cannot work out is where the ends were - by the time it hears
 about an arrival, the departure has already gone.
 
-`MAP_SET_OBJECTS(220)` and `MAP_STATE_OBJECTS(221)` stay unallocated. They are
+`MAP_SET_OBJECTS(220)` and `MAP_STATE_OBJECTS(221)` stay unallocated as
+server-to-client commands (220 client-to-server is the technique request
+above; the directions are separate spaces). They are
 superseded rather than missing: `ELORIA_MAP_OBJECTS(236)` already states every
 clickable object on a map with its kind and its name, which is strictly more
 than the legacy pair carried. Mines - `REMOVE_MINE(80)`, `GET_NEW_MINE(81)`,

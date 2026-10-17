@@ -97,10 +97,9 @@ func begin(spell_id: int, power: int, selected_target_id := -1) -> void:
 	elif scope in ["target", "burst", "location"]:
 		Network.begin_magic_selection(pending, scope)
 		AppState.pending_spell_target = "actor" if scope == "target" else "location"
-		if scope == "target" and target_mode == "prepared" and selected_target_id >= 0 \
-				and target_validator.is_valid() and bool(target_validator.call(spell_id, selected_target_id)):
-			confirm_actor(selected_target_id)
-			return
+		# Every target cast is aimed by the player's own click: a selected or
+		# faced creature is never picked for them (`selected_target_id` is
+		# kept for callers, not used).
 		status_changed.emit("Select %s for %s. Escape cancels." % [
 			"an actor" if scope == "target" else "a location", spell.name])
 		AppState.actor_animation_requested.emit({"actor_id": AppState.local_actor_id,

@@ -31,6 +31,8 @@ const NAME_DISTANCE_DEFAULT := 30.0
 const MapCache := preload("res://src/world/map_scene_cache.gd")
 ## The look pass's switch and quality names; preloaded for the same reason.
 const LookProfileScript := preload("res://src/world/look/look_profile.gd")
+## keys.ini, Eternal Lands-style: the file every key binding is kept in.
+const KeyBindings := preload("res://src/ui/key_bindings.gd")
 
 ## The actions a player may rebind, grouped the way they are used. Actions the
 ## client does not own - text editing inside a LineEdit, for instance - are not
@@ -42,8 +44,9 @@ const BINDABLE := {
 		"toggle_console", "toggle_encyclopedia", "chat_focus",
 		"toggle_spells", "toggle_summoning", "toggle_manufacture",
 		"toggle_emotes", "toggle_quest_journal", "toggle_buddy", "toggle_stats",
-		"toggle_ranging", "toggle_help", "toggle_notepad", "toggle_options",
+		"toggle_ranging", "toggle_techniques", "toggle_help", "toggle_notepad", "toggle_options",
 		"toggle_mail", "toggle_party", "toggle_guild", "toggle_achievements"],
+	"Rings": ["spell_ring", "technique_ring"],
 	"Actions": ["attack_selected", "combat_target", "summon_behavior",
 		"toggle_sit", "toggle_show_through_obstacles", "screenshot", "cancel",
 		"connect", "disconnect", "open_last_url"],
@@ -146,11 +149,72 @@ func apply_capture(event: InputEvent) -> bool:
 	binding.shift_pressed = key.shift_pressed
 	binding.ctrl_pressed = key.ctrl_pressed
 	binding.alt_pressed = key.alt_pressed
+	# A modifier pressed on its own is the key itself (a ring is held), not
+	# a modifier of nothing: keep which side it was and drop its own flag.
+	match key.physical_keycode:
+		KEY_SHIFT:
+			binding.shift_pressed = false
+			binding.location = key.location
+		KEY_CTRL:
+			binding.ctrl_pressed = false
+			binding.location = key.location
+		KEY_ALT:
+			binding.alt_pressed = false
+			binding.location = key.location
 	InputMap.action_erase_events(action)
 	InputMap.action_add_event(action, binding)
 	_refresh_bindings()
+	save_keys_file()
+	var others := actions_using(binding, action)
+	if not others.is_empty():
+		capture_label.text = "%s is also bound to %s. Change one of them if they clash." % [
+			KeyBindings.describe(binding), ", ".join(others)]
+		capture_label.show()
 	binding_changed.emit(action)
 	return true
+
+## Every action the Controls page offers, in its order.
+func bindable_actions() -> Array:
+	var actions: Array = []
+	for group: Variant in BINDABLE:
+		actions.append_array(BINDABLE[group])
+	return actions
+
+## Other offered actions already bound to this exact key.
+func actions_using(binding: InputEventKey, except: String) -> Array[String]:
+	var wanted := KeyBindings.describe(binding)
+	var found: Array[String] = []
+	for action: Variant in bindable_actions():
+		if str(action) == except or not InputMap.has_action(str(action)):
+			continue
+		for event: InputEvent in InputMap.action_get_events(str(action)):
+			if KeyBindings.describe(event) == wanted:
+				found.append(str(action).replace("_", " "))
+				break
+	return found
+
+## Writes keys.ini from the current input map.
+func save_keys_file() -> Error:
+	return KeyBindings.save(bindable_actions())
+
+## At start-up: keys.ini wins when it exists; otherwise the bindings already
+## applied (the defaults, or an older settings file's) are written to it, so
+## the file always exists after the first run.
+func load_keys_file() -> int:
+	var applied := KeyBindings.load_file(bindable_actions())
+	if applied == 0 and not FileAccess.file_exists(KeyBindings.PATH):
+		save_keys_file()
+	_refresh_bindings()
+	return applied
+
+## The Reset button: every key back to its shipped default.
+func reset_keys() -> void:
+	KeyBindings.reset_to_defaults(bindable_actions())
+	save_keys_file()
+	_refresh_bindings()
+	capture_label.text = "Every key is back to its default."
+	capture_label.show()
+	binding_changed.emit("")
 
 ## Every rebound action, as text this client can store and read back. An
 ## action whose binding cannot be written as text is left out rather than
@@ -584,9 +648,29 @@ func _build_gameplay() -> void:
 	_add_button(page, "target_mode_strong", tr("ELORIA_SETTINGS_TARGET_STRONG"))
 	_add_button(page, "target_mode_weak", tr("ELORIA_SETTINGS_TARGET_WEAK"))
 	_add_button(page, "autogather", tr("ELORIA_SETTINGS_AUTOGATHER"))
+	# Kept by the server per character; the box shows what it last said.
+	_add_toggle(page, "magic_autocast", tr("ELORIA_SETTINGS_AUTOCAST"), false)
+	var autocast_hint := Label.new()
+	autocast_hint.text = tr("ELORIA_SETTINGS_AUTOCAST_HINT")
+	autocast_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(autocast_hint)
 
 func _build_controls() -> void:
 	var list := _new_page("Controls", tr("ELORIA_SETTINGS_CONTROLS"))
+	var top := HBoxContainer.new()
+	top.name = "KeysFileRow"
+	list.add_child(top)
+	var where := Label.new()
+	where.name = "KeysFile"
+	where.text = tr("ELORIA_SETTINGS_KEYS_FILE")
+	where.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	where.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(where)
+	var reset := Button.new()
+	reset.name = "ResetKeys"
+	reset.text = tr("ELORIA_SETTINGS_RESET_KEYS")
+	reset.pressed.connect(reset_keys)
+	top.add_child(reset)
 	for group: Variant in BINDABLE:
 		var heading := Label.new()
 		heading.text = str(group)

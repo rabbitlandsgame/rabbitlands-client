@@ -121,6 +121,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import macos_package
 import tarfile
 import tempfile
 import time
@@ -397,7 +398,11 @@ EDITOR_SOURCE_PROVENANCE = re.compile(r"(^|/)authoring/continent-authoring\.json
 PLATFORMS = {
     "windows": {"preset": "Windows Desktop", "binary": "RabbitLands.exe", "folder": "RabbitLands-Windows"},
     "linux": {"preset": "Linux", "binary": "RabbitLands.x86_64", "folder": "RabbitLands-Linux"},
+    "macos": {"preset": "macOS", "binary": "RabbitLands", "folder": "RabbitLands-macOS"},
 }
+# Kept separate so Windows/Linux export presets and their installer helpers
+# retain their existing behavior.
+EXPORT_PRESETS += macos_package.EXPORT_PRESET
 WSL_DISTRO = "Ubuntu-24.04"
 
 
@@ -1315,6 +1320,9 @@ def check_scene_texture_imports(project: Path) -> None:
 
 
 def export_project(godot: Path, project: Path, app_dir: Path, logs: Path, platform: dict) -> None:
+    if platform.get("preset") == "macOS":
+        macos_package.export(godot, project, app_dir, logs, run_godot)
+        return
     log(f"exporting ({platform['preset']})")
     app_dir.mkdir(parents=True, exist_ok=True)
     text = run_godot(godot, ["--headless", "--path", str(project), "--export-release",
@@ -1403,7 +1411,17 @@ def pck_paths(pck: Path) -> set[str]:
     return paths
 
 
-def check_actor_pack(build_dir: Path, app_dir: Path) -> None:
+def exported_import_products(sidecar: Path, platform: str = "") -> list[str]:
+    products = _import_products(sidecar)
+    if platform == "macos":
+        # Godot 4.7.2 declares s3tc/bptc for universal Mac presets. Both
+        # texture families must be imported for export validation, but the
+        # universal PCK intentionally omits the mobile variants.
+        products = [path for path in products if not path.endswith((".etc2.ctex", ".astc.ctex"))]
+    return products
+
+
+def check_actor_pack(build_dir: Path, app_dir: Path, platform: str = "") -> None:
     """Each actor file is in exactly one place - the PCK or app/assets - or, if dropped, in none.
 
     The PCK must hold every PCK-only actor resource (as its .import remap and
@@ -1424,7 +1442,7 @@ def check_actor_pack(build_dir: Path, app_dir: Path) -> None:
             problems.append(f"{local}: not in the PCK")
         elif entry.endswith(".import"):
             sidecar = project / entry
-            products = _import_products(sidecar) if sidecar.is_file() else []
+            products = exported_import_products(sidecar, platform) if sidecar.is_file() else []
             if not products or any(p not in paths for p in products):
                 problems.append(f"{local}: its imported product is not in the PCK")
         if (app_dir / local).exists():
@@ -1448,7 +1466,7 @@ def check_actor_pack(build_dir: Path, app_dir: Path) -> None:
         f"{len(shipping['dropped'])} dropped")
 
 
-def check_scene_texture_pack(build_dir: Path, app_dir: Path) -> None:
+def check_scene_texture_pack(build_dir: Path, app_dir: Path, platform: str = "") -> None:
     """Every scene texture is in the PCK as its .import remap and the VRAM product it names."""
     paths = pck_paths(app_dir / "RabbitLands.pck")
     project = build_dir / "godot-client"
@@ -1456,7 +1474,7 @@ def check_scene_texture_pack(build_dir: Path, app_dir: Path) -> None:
     problems: list[str] = []
     for relative in sorted(textures):
         local = PurePosixPath(relative).relative_to("godot-client").as_posix()
-        products = _import_products(project / (local + ".import"))
+        products = exported_import_products(project / (local + ".import"), platform)
         if local + ".import" not in paths:
             problems.append(f"{local}: not in the PCK")
         elif not products or any(p not in paths for p in products):
@@ -2298,6 +2316,8 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
 
 def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = False,
             pool_test: str | None = None) -> str | None:
+    if platform.get("preset") == "macOS":
+        return macos_package.smoke(app_dir, logs, run_godot, SMOKE_FAILURES)
     self_test = "ELORIA_VRAM_SELF_TEST=1 " if vram_textures else ""
     pool_dir = f"res://../{pool_test}" if vram_textures and pool_test else ""
     if pool_dir:
@@ -2839,7 +2859,9 @@ def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
 def _main(argv=None, storage=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--platform", choices=sorted(PLATFORMS), default="windows",
-                        help="windows: folder + zip; linux: folder + tar.gz (default windows)")
+                        help="windows: folder + zip; linux: folder + tar.gz; macos: native app bundle")
+    parser.add_argument("--distribution", choices=("github", "steam", "standalone"), default="github",
+                        help="update owner: GitHub updater (default), Steam, or manual bundle replacement")
     parser.add_argument("--ref", default="origin/develop", help="commit to package (default origin/develop)")
     parser.add_argument("--no-fetch", action="store_true", help="do not fetch origin first")
     parser.add_argument("--godot", help="Godot console exe (default: the one in the client checkout)")
@@ -2867,12 +2889,23 @@ def _main(argv=None, storage=None) -> int:
     started = time.time()
     platform = PLATFORMS[options.platform]
     try:
+        updating = options.distribution == "github" and not options.no_client_updates
+        if options.platform == "macos":
+            if sys.platform != "darwin":
+                raise PackageError("Build macOS on a Mac or the macOS Actions runner; native bundle validation is required.")
+            if options.distribution == "github":
+                raise PackageError("macOS currently uses --distribution steam or standalone (manual bundle replacement).")
+            # Existing BC-only map sidecars are not portable across all Apple
+            # GPUs. Universal exports include both desktop and mobile imports.
+            options.no_vram_textures = True
+        if options.distribution != "github" and (options.installer or options.online_installer):
+            raise PackageError("Steam/standalone builds contain the full game; GitHub installers are a separate build.")
         if options.installer and options.platform != "windows":
             raise PackageError("--installer builds a Windows installer only")
         if options.online_installer and (not options.installer or options.no_client_updates):
             raise PackageError("--online-installer requires --installer and signed client updates")
         godot = find_godot(options.godot)
-        if not options.no_client_updates and (not options.update_signing_key.is_file() or not options.update_public_key.is_file()):
+        if updating and (not options.update_signing_key.is_file() or not options.update_public_key.is_file()):
             raise PackageError("automatic updates need an RSA signing key pair; see docs/client-updates.md, or use --no-client-updates")
         iscc = find_iscc(options.iscc) if options.installer else None
         if options.installer and iscc is None:
@@ -2884,7 +2917,8 @@ def _main(argv=None, storage=None) -> int:
         sha = git("rev-parse", "--verify", options.ref + "^{commit}").strip()
         stamp = datetime.date.today().strftime("%Y%m%d")
         version = f"{stamp}-{sha[:9]}"
-        stage = options.out.resolve() / f"{platform['folder']}-{version}"
+        suffix = "" if options.distribution == "github" else "-" + options.distribution
+        stage = options.out.resolve() / f"{platform['folder']}-{version}{suffix}"
         log(f"packaging {options.ref} = {sha[:9]} into {stage}")
         if stage.exists():
             if not options.force:
@@ -2899,10 +2933,15 @@ def _main(argv=None, storage=None) -> int:
 
         build_dir = options.build_dir.resolve()
         project = prepare_build_tree(build_dir, sha)
+        if options.distribution != "github" and "const DISTRIBUTION_SCHEMA := 1" not in (project / "src/updates/release.gd").read_text(encoding="utf-8"):
+            raise PackageError("The selected commit predates store-managed updates; select a commit containing the distribution support.")
+        if options.platform == "macos":
+            macos_package.prepare_import(project)
         if storage:
             storage.check("source ready", 1024**3)  # Allow imports/export scratch before starting Godot.
         metadata = client_release.identity(REPO, sha, options.platform,
-                    None if options.no_client_updates else options.update_public_key, options.github_repository)
+                    None if options.no_client_updates and options.distribution == "github" else options.update_public_key,
+                    options.github_repository, options.distribution)
         (project / "data/client_release.json").write_text(json.dumps(metadata), encoding="utf-8")
         previews = drop_preview_maps(build_dir)
         served = read_served_v2_packages(build_dir)
@@ -2918,8 +2957,12 @@ def _main(argv=None, storage=None) -> int:
         stage_loose_client_files(build_dir, app_dir)
         (app_dir / "client-release.json").write_text(json.dumps(metadata), encoding="utf-8")
         stage_audio_credits(app_dir, stage)
-        check_actor_pack(build_dir, app_dir)
-        check_scene_texture_pack(build_dir, app_dir)
+        if options.platform == "macos":
+            check_actor_pack(build_dir, app_dir, "macos")
+            check_scene_texture_pack(build_dir, app_dir, "macos")
+        else:
+            check_actor_pack(build_dir, app_dir)
+            check_scene_texture_pack(build_dir, app_dir)
         check_editor_sources_unpacked(app_dir)
         if storage:
             storage.check("export and staging validated")
@@ -2939,21 +2982,40 @@ def _main(argv=None, storage=None) -> int:
         check_registry(build_dir, stage)
         check_glb_textures(app_dir)
         check_shared_meshes(build_dir, stage)
-        if not options.no_client_updates:
+        if updating:
             client_release.export_launcher(stage, metadata, godot, project, EXPORT_PRESETS,
                                            platform["preset"], run_godot, logs)
-        launch_args = write_launchers(stage, options.server, build_dir, version, platform)
-        if not options.no_smoke:
+        launch_args = ([] if options.platform == "macos" else
+                       write_launchers(stage, options.server, build_dir, version, platform))
+        if options.distribution == "steam" and options.platform != "macos":
+            (stage / "README.txt").write_text(
+                "Rabbit Lands - Steam build\n"
+                "Start and update the game through your Steam Library.\n"
+                "To repair an installation, use Steam's Verify integrity of game files.\n"
+                "Keep app/ and eloria-assets/ together. Player settings remain in user storage.\n",
+                encoding="utf-8")
+        if options.platform == "linux" and os.name != "nt":
+            for script in stage.glob("RabbitLands*.sh"):
+                script.chmod(0o755)
+        if not options.no_smoke and options.platform != "macos":
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
                          pool_test=pooled_sidecar_directory(stage))
 
         outputs = [stage]
-        if not options.no_client_updates:
+        if options.platform == "macos":
+            macos_package.finish(stage, project, metadata)
+            if not options.no_smoke:
+                macos_package.smoke_binary(macos_package.bundle(stage) / "Contents/MacOS/RabbitLands",
+                    stage, logs / "smoke-bundle.log", run_godot, SMOKE_FAILURES)
+                subprocess.run(["codesign", "--verify", "--deep", "--strict", str(macos_package.bundle(stage))], check=True)
+        if updating:
             outputs.extend(client_release.publish_artifacts(stage, metadata, options.update_signing_key,
                                                             godot, project, run_godot, logs,
                 **({"accept_part": storage.accept_part, "budget": storage.budget} if storage else {})))
         if not options.no_zip:
-            if storage:
+            if options.platform == "macos":
+                outputs.append(macos_package.archive(stage))
+            elif storage:
                 if options.platform != "linux":
                     raise PackageError("Runner Windows builds use the online installer, without an additional ZIP.")
                 base = f"https://github.com/{metadata['repository']}/releases/download/client-{sha}"

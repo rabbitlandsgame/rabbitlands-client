@@ -51,7 +51,11 @@ enum ClientMessage {
 	# Eternal Lands spoke for everything below 200, so what this client asks
 	# for that Eternal Lands never had is numbered from there up.
 	ELORIA_MIX_REQUEST = 200, ELORIA_TOOL_REQUEST = 201, ELORIA_TUTORIAL_UI = 203,
-	ELORIA_MAP_COMMAND = 204, ELORIA_CLIENT_RELEASE = 205
+	ELORIA_MAP_COMMAND = 204, ELORIA_CLIENT_RELEASE = 205,
+	# Use a combat technique: {"op": "use", "key", "target_id"}. Carries only
+	# an actor id, so it is never coordinate-framed. The state comes back on
+	# ELORIA_MAGIC_STATE as kind "techniques".
+	ELORIA_TECHNIQUE_REQUEST = 220
 }
 
 enum ServerMessage {
@@ -300,12 +304,24 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# to a client that claims this, and moves a client that does not off it.
 	"continent_v2_maps_v1",
 	"landfall_underground_v1",
+	# The Techniques window and the real action-point pool, sent as
+	# ELORIA_MAGIC_STATE kind "techniques".
+	"techniques_v1",
+	# Repeat casting: whether it is on and running, ELORIA_MAGIC_STATE kind
+	# "autocast"; switched with magic_request {"op": "autocast"}.
+	"magic_autocast_v1",
 ]
 
 ## `#clientcaps` is an ordinary chat command; the server parses it out of
 ## RAW_TEXT and stores the set on the session.
 static func client_capabilities() -> PackedByteArray:
 	return chat("#clientcaps " + ",".join(PackedStringArray(CLIENT_CAPABILITIES)))
+
+## Ask the server to use a combat technique. The server checks everything -
+## manual, level, gear, cooldown, action points - and answers in chat and with
+## a fresh technique state.
+static func technique_request(data: Dictionary) -> PackedByteArray:
+	return encode(ClientMessage.ELORIA_TECHNIQUE_REQUEST, JSON.stringify(data).to_utf8_buffer())
 
 ## Ask the server to play an emote. The name rather than a legacy numeric id:
 ## this server has no such id namespace, and mirroring one here would be a

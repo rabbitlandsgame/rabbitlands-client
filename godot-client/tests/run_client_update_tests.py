@@ -50,6 +50,7 @@ def main() -> None:
             raise RuntimeError(result.stderr or f"{script} exited {result.returncode}")
 
     run("tests/test_client_updates.gd", root / "install-fixture")
+    run("tests/test_store_updates.gd", root / "store-install-fixture")
     private, public, certificate = (root / name for name in ("private.pem", "public.pem", "localhost.crt"))
     # An output folder can be reused without overwriting its test key.
     if not private.exists():
@@ -84,7 +85,9 @@ def main() -> None:
     server.socket = context.wrap_socket(server.socket, server_side=True)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    url = f"https://localhost:{server.server_port}"
+    # The fixture listens on IPv4. Avoid Windows localhost resolving to ::1
+    # while retaining explicit certificate hostname verification in the test.
+    url = f"https://127.0.0.1:{server.server_port}"
     release = {"schema": 1, "commit": "b" * 40, "platform": "windows",
                "size": archive.stat().st_size, "unpacked_size": unpacked,
                "sha256": client_release.digest(archive),

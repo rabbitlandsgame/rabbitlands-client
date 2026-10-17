@@ -103,6 +103,17 @@ var chat_lines: Array[Dictionary] = []
 var active_channels: Array[int] = [0, 0, 0]
 var active_channel_index := 0
 var selected_actor_id := -1
+## The server's technique state (ELORIA_MAGIC_STATE kind "techniques"): the
+## rows, the real action points, what is readied and held. Empty until a
+## techniques_v1 server says otherwise. `received_msec` dates the cooldowns.
+var techniques: Dictionary = {}
+## Repeat casting as the server states it (kind "autocast"): `enabled` is the
+## player's switch, `active` whether a spell is repeating now and which.
+var autocast: Dictionary = {}
+## Debuffs shown under a creature's name. Keep in step with
+## status_effect_icons.gd NEGATIVE (that script preloads art; this one must not).
+const NEGATIVE_STATUSES := ["poison", "cripple", "expose_heat", "expose_cold",
+	"expose_magic", "expose_radiation", "stun", "root", "sunder", "mark", "challenge"]
 var npc_dialogue: Dictionary = {"open": false, "name": "", "text": "",
 	"options": [], "quest": false, "quest_id": 0}
 var trade: Dictionary = {"open": false, "partner": "", "storage_available": false,
@@ -419,6 +430,8 @@ func _on_connection_state_changed(value: String) -> void:
 		adjacent_maps.clear()
 		lantern_tutorial.clear()
 		selected_actor_id = -1
+		techniques.clear()
+		autocast.clear()
 		npc_dialogue = {"open": false, "name": "", "text": "", "options": [],
 			"quest": false, "quest_id": 0}
 		trade = _empty_trade_state()
@@ -1315,12 +1328,19 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"special_events")
 		"magic_state":
 			var magic: Dictionary = event.data
-			if magic.get("kind") in ["creature_status", "actor_status"]:
+			if magic.get("kind") == "techniques":
+				techniques = magic.duplicate(true)
+				techniques["received_msec"] = Time.get_ticks_msec()
+				state_changed.emit(&"techniques")
+			elif magic.get("kind") == "autocast":
+				autocast = magic.duplicate(true)
+				state_changed.emit(&"autocast")
+			elif magic.get("kind") in ["creature_status", "actor_status"]:
 				var status_actor_id := int(magic.get("actor_id", -1))
 				if actors.has(status_actor_id) and magic.get("effects") is Array:
 					var status_actor: Dictionary = actors[status_actor_id]
 					status_actor["negative_statuses"] = (magic.effects as Array).filter(
-						func(effect: Variant) -> bool: return effect in ["poison", "cripple", "expose_heat", "expose_cold", "expose_magic", "expose_radiation"])
+						func(effect: Variant) -> bool: return effect in NEGATIVE_STATUSES)
 					status_actor["status_effects"] = (magic.effects as Array).duplicate()
 					mark_actor_changed(status_actor_id)
 					state_changed.emit(&"actors")

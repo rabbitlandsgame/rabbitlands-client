@@ -1,0 +1,28 @@
+name: Retire previous published client
+on:
+  release:
+    types: [published]
+permissions:
+  contents: write
+concurrency:
+  group: rabbitlands-desktop-release
+  cancel-in-progress: false
+jobs:
+  cleanup:
+    if: github.repository == 'rabbitlandsgame/rabbitlands-client' && startsWith(github.event.release.tag_name, 'client-')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: master
+          fetch-depth: 1
+          sparse-checkout: godot-client/tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Verify the public replacement before retiring older downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: python godot-client/tools/prune_published_release.py --tag "$RELEASE_TAG"

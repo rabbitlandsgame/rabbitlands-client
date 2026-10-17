@@ -84,6 +84,7 @@ const LoginBackdropScript := preload("res://src/ui/login_backdrop.gd")
 const ReferenceWindowScript := preload("res://src/ui/reference_window.gd")
 const ActiveBuffBarScript := preload("res://src/ui/active_buff_bar.gd")
 const StatusEffectIcons := preload("res://src/ui/status_effect_icons.gd")
+const KeyBindings := preload("res://src/ui/key_bindings.gd")
 const VramTextures := preload("res://src/world/vram_textures.gd")
 var interior_cutaway: RefCounted = InteriorCutawayScript.new()
 ## On a secrets map, only the secret the player stands in is drawn; the rest
@@ -368,6 +369,10 @@ var spells_window: Control
 var summoning_window: Control
 var emotes_window: Control
 var ranging_window: Control
+## The Techniques tab inside the Spells & Techniques window. The Tab-held
+## technique ring and the quick spell slots aim through it.
+var techniques_panel: VBoxContainer
+var technique_ring: Control
 var guild_window: Control
 var settings_window: Control
 var reference_window: Control
@@ -1117,6 +1122,10 @@ func _ready() -> void:
 	spells_window = SpellsWindowScript.new()
 	game_view.add_child(spells_window)
 	spells_window.reserve_bottom_hud($GameView/Quickbar)
+	techniques_panel = spells_window.get("techniques_panel") as VBoxContainer
+	techniques_panel.call("configure", Network.technique_request,
+		_technique_creature_target, _technique_player_target)
+	techniques_panel.connect("place_on_bar", _place_technique_on_bar)
 	# Configured further down, once the spell catalog has read its data file:
 	# the window builds its group rows from the catalog it is handed.
 	summoning_window = SummoningWindowScript.new()
@@ -1216,6 +1225,14 @@ func _ready() -> void:
 		_stop_keyboard_movement()
 		_magic_ring_ui(20))
 	casting_bar.open_wheel.connect(spell_wheel.open_wheel)
+	# Hold Tab (technique_ring) for the technique ring; it aims through the
+	# Techniques tab exactly as the tab and the quick slots do.
+	technique_ring = preload("res://src/ui/technique_ring.gd").new()
+	technique_ring.set("techniques", techniques_panel)
+	technique_ring.set("anchor_provider", _spell_wheel_anchor)
+	technique_ring.set("can_open", _can_open_technique_ring)
+	technique_ring.z_index = 250
+	game_view.add_child(technique_ring)
 	spell_loadout.changed.connect(func():
 		magic_selection.target_mode = spell_loadout.targeting_mode()
 		spell_wheel.preferences = spell_loadout.ring_preferences
@@ -1608,7 +1625,8 @@ func _text_entry_active() -> bool:
 	return focus is LineEdit or focus is TextEdit
 
 func _update_keyboard_movement() -> void:
-	if (spell_wheel != null and spell_wheel.visible) or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
+	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
+			or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
 			or storage_panel.visible or full_map.visible \
 			or console_panel.visible or settings_panel.visible or item_lists_panel.visible \
 			or Input.is_key_pressed(KEY_ALT) or Input.is_key_pressed(KEY_CTRL):
@@ -3574,6 +3592,12 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed \
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
 		camera_rig.handle_mouse_button(event as InputEventMouseButton)
+	if technique_ring != null:
+		if technique_ring.call("handle_event", event):
+			_stop_keyboard_movement()
+			get_viewport().set_input_as_handled()
+			return
+		if technique_ring.visible: return
 	if spell_wheel != null:
 		if spell_wheel.handle_event(event):
 			_set_attack_modifier(false)
@@ -3588,7 +3612,15 @@ func _input(event: InputEvent) -> void:
 	if _handle_bound_action(event):
 		get_viewport().set_input_as_handled()
 
+## Each ring may open (and stay open) only while the other is shut; the rest
+## of the rules are the same for both (`_ring_allowed`).
+func _can_open_technique_ring() -> bool:
+	return _ring_allowed() and not (spell_wheel != null and spell_wheel.visible)
+
 func _can_open_spell_wheel() -> bool:
+	return _ring_allowed() and not (technique_ring != null and technique_ring.visible)
+
+func _ring_allowed() -> bool:
 	return game_view.visible and not _text_entry_active() \
 		and not popup_panel.visible and not purchase_confirm.visible \
 		and not dialogue_panel.visible and not trade_panel.visible \
@@ -3686,7 +3718,9 @@ func _handle_bound_action(event: InputEvent) -> bool:
 	if event.is_action_pressed("toggle_inventory"):
 		_on_inventory_button_pressed()
 		return true
-	if event.is_action_pressed("toggle_map"):
+	# Exact match: the map is a bare M, and Alt+M (minimap) and Ctrl+M
+	# (manufacture) must not open it as well.
+	if event.is_action_pressed("toggle_map", false, true):
 		_toggle_full_map()
 		return true
 	if event.is_action_pressed("toggle_minimap"):
@@ -3774,6 +3808,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		["toggle_buddy", _on_buddy_button_pressed],
 		["toggle_stats", _on_stats_button_pressed],
 		["toggle_ranging", _on_ranging_button_pressed],
+		["toggle_techniques", _on_techniques_button_pressed],
 		["toggle_help", _on_help_button_pressed],
 		["toggle_notepad", _on_info_button_pressed],
 		["toggle_options", _on_options_pressed],
@@ -3806,6 +3841,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if popup_panel.visible:
 			# The popup is modal: it takes the cancel before anything under it.
 			_on_popup_dismiss_pressed()
+		elif bool(AppState.autocast.get("active", false)):
+			# Escape stops repeat casting before it closes anything else.
+			Network.magic_request({"op": "cancel"})
 		elif extension_windows != null and extension_windows.close_top():
 			pass
 		elif player_info_panel != null and player_info_panel.is_open():
@@ -3818,6 +3856,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			emotes_window.call("close")
 		elif ranging_window != null and bool(ranging_window.call("is_open")):
 			ranging_window.call("close")
+		elif techniques_panel != null and str(techniques_panel.get("pending_key")) != "":
+			techniques_panel.call("cancel_pending")
 		elif guild_window != null and bool(guild_window.call("is_open")):
 			guild_window.call("close")
 		elif settings_window != null and settings_window.is_open():
@@ -4642,6 +4682,11 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 		return
 	var picked_actor_id: int = _pick_actor(viewport_position)
 	if picked_actor_id >= 0:
+		# A technique armed from the Techniques window takes the creature
+		# clicked next, the way a pending spell takes its target.
+		if techniques_panel != null and bool(techniques_panel.call("fire_at", picked_actor_id)):
+			AppState.select_actor(picked_actor_id)
+			return
 		# A bag at your own feet outranks your own body: you are not a click
 		# target for yourself, so the click opens the sack you are standing
 		# over. A pending actor spell still wins - clicking yourself casts
@@ -4827,8 +4872,10 @@ func _on_state_changed(path: StringName) -> void:
 			_update_legacy_clock_and_compass()
 			_apply_day_night()
 			_sync_diagnostics()
-		&"attributes":
+		&"attributes", &"techniques":
 			_sync_stats()
+		&"autocast":
+			_sync_autocast()
 		&"perks", &"perk_catalog":
 			_sync_stats()
 			_sync_perk_catalog()
@@ -7282,8 +7329,10 @@ func _load_hud_settings() -> void:
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
+		# keys.ini holds the bindings now. The settings file's old copy is read
+		# only when there is no keys.ini yet, to carry a player's keys over.
 		var stored_bindings: Variant = config.get_value("controls", "bindings", {})
-		if stored_bindings is Dictionary:
+		if stored_bindings is Dictionary and not FileAccess.file_exists(KeyBindings.PATH):
 			settings_window.call("restore_bindings", stored_bindings)
 		var stored_marks: Variant = config.get_value("console", "marks", [])
 		if stored_marks is Array:
@@ -7336,6 +7385,7 @@ func _load_hud_settings() -> void:
 	_apply_inventory_scale(_inventory_scale)
 	_apply_ground_bag_scale(_ground_bag_scale)
 	_apply_banner_options()
+	settings_window.call("load_keys_file")
 	_refresh_unified_settings()
 
 func _on_ui_scale_changed(value: float) -> void:
@@ -7419,8 +7469,6 @@ func _save_hud_settings() -> void:
 	config.set_value("hud", "spell_quickbar", casting_bar.hud_layout())
 	config.set_value("camera", "rotation_sensitivity",
 		float(camera_rig.rotation_sensitivity))
-	config.set_value("controls", "bindings",
-		settings_window.call("stored_bindings"))
 	config.set_value("console", "marks", console_commands.marks)
 	config.set_value("console", "ignored", console_commands.ignored)
 	config.set_value("console", "filters", console_commands.filters)
@@ -8072,8 +8120,8 @@ func _configure_window_stack() -> void:
 			item_lists_panel, console_panel, reading_panel, chat_hud, system_chat_hud]:
 		window_stack.register(panel)
 	for controller: Control in [spells_window, summoning_window, emotes_window,
-			ranging_window, guild_window, settings_window, reference_window,
-			player_info_panel]:
+			ranging_window, guild_window, settings_window,
+			reference_window, player_info_panel]:
 		window_stack.register(controller.get("panel"))
 	for panel: Control in extension_windows._cascade():
 		window_stack.register(panel)
@@ -8270,8 +8318,9 @@ func _sync_stats() -> void:
 	var carried: int = int(stats.get("carried", 0))
 	var capacity: int = maxi(0, int(stats.get("capacity", 0)))
 	var free_space: int = clampi(capacity - carried, 0, capacity)
-	var action: int = int(stats.get("action_points", 0))
-	var max_action: int = maxi(1, int(stats.get("max_action_points", 1)))
+	var action_pool := _action_pool(stats)
+	var action: int = action_pool.x
+	var max_action: int = action_pool.y
 	_set_meter(health_bar, health_text, health, max_health, "Health")
 	_set_meter(mana_bar, mana_text, ether, max_ether, "Ethereality")
 	_set_meter(action_bar, action_text, action, max_action, "Action")
@@ -8428,8 +8477,9 @@ func _sync_statistics_document(stats: Dictionary) -> void:
 	var max_health: int = maxi(1, int(stats.get("max_health", 1)))
 	var ether: int = int(stats.get("ether", 0))
 	var max_ether: int = maxi(1, int(stats.get("max_ether", 1)))
-	var action: int = int(stats.get("action_points", 0))
-	var max_action: int = maxi(1, int(stats.get("max_action_points", 1)))
+	var action_pool := _action_pool(stats)
+	var action: int = action_pool.x
+	var max_action: int = action_pool.y
 	for pool: Array in [["Material", health, max_health],
 			["Ethereal", ether, max_ether], ["Action", action, max_action]]:
 		stats_pools.add_child(_stats_pool(str(pool[0]), int(pool[1]),
@@ -10372,7 +10422,8 @@ func _sync_hud_button_states(force := false) -> void:
 		# an open window says so with the lit frame its pressed style carries.
 		var atlas: Texture2D = (_hud_inactive_atlas if button.disabled
 			else _hud_active_atlas)
-		if atlas != null:
+		# A button the atlas has no art for yet (Techniques) keeps its label.
+		if atlas != null and _hud_icon_regions.has(button):
 			button.icon = _atlas_region(atlas, _icon_region_for(button, sitting))
 	_apply_attack_preview(attack_preview)
 
@@ -11270,14 +11321,19 @@ func _on_client_setting_changed(section: String, key: String,
 			Network.send_chat("#targetmode weak")
 		"autogather":
 			Network.send_chat("#autogather")
+		"magic_autocast":
+			Network.magic_request({"op": "autocast", "enabled": bool(value)})
 	# Commands on Gameplay belong to the server; its local preferences still
 	# save immediately.
-	if key not in ["target_mode_strong", "target_mode_weak", "autogather"]:
+	if key not in ["target_mode_strong", "target_mode_weak", "autogather", "magic_autocast"]:
 		_save_hud_settings()
 
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()
 	_sync_quick_slots()
+	# Quick spell badges and the Techniques hint name the keys they use.
+	casting_bar.refresh()
+	techniques_panel.call("sync")
 	# The help page is generated from the bindings, so it follows a rebind.
 	reference_window.call("_refresh_help")
 
@@ -11357,6 +11413,52 @@ func _on_emotes_button_pressed() -> void:
 func _on_quest_button_pressed() -> void:
 	extension_windows.call("toggle_quest_journal")
 	_sync_hud_button_states(true)
+
+## Ctrl+X: the Spells & Techniques window, opened on Techniques.
+func _on_techniques_button_pressed() -> void:
+	spells_window.call("toggle_techniques")
+	audio_director.play("ui_click" if spells_window.is_open() else "ui_close")
+	_sync_hud_button_states(true)
+
+## The Techniques tab's "+": the first empty quick spell slot takes it.
+func _place_technique_on_bar(key: String) -> void:
+	var index: int = int(spell_loadout.call("first_empty_slot"))
+	if index < 0:
+		AppState.append_local_message("Every quick spell slot is in use. Drag the technique onto the one to replace.")
+		return
+	spell_loadout.call("assign_technique", index, key)
+	AppState.append_local_message("%s is on quick spell slot %d." % [
+		str(techniques_panel.get("rows").get(key, {}).get("name", key)), index + 1])
+
+## A creature a technique may be aimed at: something this player could attack
+## that is not another player.
+func _technique_creature_target(actor_id: int) -> bool:
+	var actor: Dictionary = AppState.actors.get(actor_id, {})
+	return int(actor.get("kind", 0)) not in [1, 4] and _is_attackable_actor(actor_id, actor)
+
+## Another player, for Intercept; the server checks they are in the party.
+func _technique_player_target(actor_id: int) -> bool:
+	var actor: Dictionary = AppState.actors.get(actor_id, {})
+	return actor_id != AppState.local_actor_id and int(actor.get("kind", 0)) in [1, 4]
+
+## The action points a meter shows. The legacy stats slots 113/114 carry pick
+## points on this server, so a techniques_v1 server's real pool wins.
+func _action_pool(stats: Dictionary) -> Vector2i:
+	if AppState.techniques.has("action_points"):
+		return Vector2i(int(AppState.techniques.get("action_points", 0)),
+			maxi(1, int(AppState.techniques.get("max_action_points", 1))))
+	return Vector2i(int(stats.get("action_points", 0)),
+		maxi(1, int(stats.get("max_action_points", 1))))
+
+## Repeat casting: the Gameplay box follows the server, and while a spell is
+## repeating the spell status line says so and how to stop it.
+func _sync_autocast() -> void:
+	settings_window.call("restore_toggle", "magic_autocast", bool(AppState.autocast.get("enabled", false)))
+	if bool(AppState.autocast.get("active", false)):
+		var spell: Dictionary = spell_catalog.spell(int(AppState.autocast.get("spell_id", -1))) if spell_catalog != null else {}
+		spell_status.text = "Repeating %s every round · click elsewhere or press Esc to stop" % str(spell.get("name", "a spell"))
+	elif spell_status.text.begins_with("Repeating "):
+		spell_status.text = ""
 
 func _on_ranging_button_pressed() -> void:
 	ranging_window.toggle()
@@ -11489,6 +11591,10 @@ func _spell_result_text(result: Dictionary) -> String:
 func _cast_spell_slot(slot: int) -> void:
 	if slot < 0 or slot >= spell_loadout.slots.size(): return
 	var entry: Dictionary = spell_loadout.slots[slot]
+	if not str(entry.get("technique", "")).is_empty():
+		# A technique on the quick bar is aimed like one from the ring or tab.
+		techniques_panel.call("use", str(entry.technique))
+		return
 	if int(entry.id) < 0:
 		spells_window.edit_prepared_slot(slot)
 		return

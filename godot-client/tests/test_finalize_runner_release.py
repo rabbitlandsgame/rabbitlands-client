@@ -79,6 +79,14 @@ def test_bad_cloud_digest_preserves_previous_files_and_tag(tmp_path, monkeypatch
     assert not any(call[:2] == ("release", "edit") or call[:3] == ("api", "--method", "DELETE") for call in calls)
 
 
+def test_finalizing_a_draft_keeps_the_working_published_release(tmp_path, monkeypatch):
+    receipts, assets, calls = fixture(tmp_path, monkeypatch)
+    old = {"id": 99, "tag_name": "client-" + "f" * 40, "draft": False}
+    monkeypatch.setattr(release, "github_releases", lambda: [old])
+    runner.finalize(receipts, tmp_path / "final")
+    assert not any(call[:2] == ("release", "delete") for call in calls)
+
+
 def test_different_platform_commits_cannot_be_finalized(tmp_path, monkeypatch):
     receipts, assets, calls = fixture(tmp_path, monkeypatch)
     data = json.loads(receipts[1].read_text())

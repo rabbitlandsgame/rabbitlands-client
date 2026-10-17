@@ -1,0 +1,93 @@
+name: Build Steam depots and macOS tests
+run-name: Store builds from ${{ github.ref_name }} (${{ github.sha }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Native platform to build
+        type: choice
+        options: [all, windows, linux, macos]
+        default: all
+      distribution:
+        description: Update owner (standalone is macOS only)
+        type: choice
+        options: [steam, standalone]
+        default: steam
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rabbitlands-store-build-${{ github.ref }}-${{ inputs.platform }}-${{ inputs.distribution }}
+  cancel-in-progress: false
+
+env:
+  PYTHONUTF8: '1'
+  PIP_NO_CACHE_DIR: '1'
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+
+jobs:
+  build:
+    name: ${{ matrix.platform }} / ${{ inputs.distribution }}
+    if: github.repository == 'rabbitlandsgame/rabbitlands-client'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            runner: windows-2025
+          - platform: linux
+            runner: ubuntu-24.04
+          - platform: macos
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: (inputs.platform == 'all' || inputs.platform == matrix.platform) && (inputs.distribution == 'steam' || matrix.platform == 'macos')
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout: godot-client/tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: (inputs.platform == 'all' || inputs.platform == matrix.platform) && (inputs.distribution == 'steam' || matrix.platform == 'macos')
+        with:
+          python-version: '3.13'
+      - name: Install Python build dependencies
+        if: (inputs.platform == 'all' || inputs.platform == matrix.platform) && (inputs.distribution == 'steam' || matrix.platform == 'macos')
+        run: python -m pip install --requirement godot-client/tools/runner-requirements.txt
+      - name: Install native Linux libraries
+        if: matrix.platform == 'linux' && inputs.distribution == 'steam' && (inputs.platform == 'all' || inputs.platform == 'linux')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1
+      - name: Build complete store content with bounded disk use
+        if: (inputs.platform == 'all' || inputs.platform == matrix.platform) && (inputs.distribution == 'steam' || matrix.platform == 'macos')
+        shell: bash
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          DISTRIBUTION: ${{ inputs.distribution }}
+        run: |
+          python godot-client/tools/store_build.py build --platform "$PLATFORM" --distribution "$DISTRIBUTION" --ref "$GITHUB_SHA" --out "$RUNNER_TEMP/store-build"
+      - name: Retain verified depot archive parts
+        if: (inputs.platform == 'all' || inputs.platform == matrix.platform) && (inputs.distribution == 'steam' || matrix.platform == 'macos')
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: depot-${{ inputs.distribution }}-${{ matrix.platform }}-${{ github.sha }}
+          path: ${{ runner.temp }}/store-build/artifact/*
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 7
+      - name: Retain disk and startup diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: store-diagnostics-${{ matrix.platform }}
+          path: |
+            ${{ runner.temp }}/store-build/disk-usage.json
+            ${{ runner.temp }}/store-build/downloads/.build/logs/*/*.log
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
