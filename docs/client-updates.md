@@ -116,6 +116,10 @@ reused across builds.
 
 ## Upload a complete desktop release
 
+For bounded-storage hosted builds, see [runner builds](runner-builds.md). That
+path builds one platform per job, streams verified parts into an existing draft,
+and finalizes small receipts without copying full builds between jobs.
+
 First push the selected client commit through the repository's configured SSH
 identity. Uploads require GitHub CLI authenticated as **rabbitlandsgame** with
 write access. SSH authentication and CLI authentication are separate; the

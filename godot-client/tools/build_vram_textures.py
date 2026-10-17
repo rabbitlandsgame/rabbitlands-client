@@ -612,8 +612,45 @@ def cache_key(sha: str, recipe: str, version: str) -> str:
     return f"{sha}.{recipe}.r{RECIPE_VERSION}.{re.sub(r'[^A-Za-z0-9.]+', '_', version)}"
 
 
+def texture_batches(items: list[dict], limit: int = 128 * 1024**2):
+    """Bound the raw DDS files retained before each quality-check pass."""
+    from PIL import Image
+    batch, size = [], 0
+    for item in items:
+        with Image.open(item["src"]) as image:
+            width, height = image.size
+        # Upper bound for BC7/BC5: 16 bytes per 4x4 block, all mip levels,
+        # plus the largest DDS header. BC1 uses fewer bytes.
+        needed = 148
+        while True:
+            needed += max(1, (width + 3) // 4) * max(1, (height + 3) // 4) * 16
+            if width == height == 1:
+                break
+            width, height = max(1, width // 2), max(1, height // 2)
+        if needed > limit:
+            raise BuildError(f"Texture exceeds the runner's DDS scratch budget: {item['src']}")
+        item["_dds_bytes"] = needed
+        if batch and (size + needed > limit or len(batch) >= 64):
+            yield batch
+            batch, size = [], 0
+        batch.append(item)
+        size += needed
+    if batch:
+        yield batch
+
+
+def check_cache_budget(cache: Path, limit: int | None, additional: int = 0):
+    if limit is not None:
+        used = sum(path.stat().st_size for path in cache.rglob("*") if path.is_file())
+        if used + additional > limit:
+            raise BuildError("Graphics cache and quality scratch would exceed the runner disk budget.")
+
+
 def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Path, procs: int,
-          prune: bool = True, floors: dict | None = None, skip: list[str] | None = None) -> dict:
+          prune: bool = True, floors: dict | None = None, skip: list[str] | None = None,
+          link_output: bool = False, cache_budget_bytes: int | None = None) -> dict:
+    if link_output and (out_root is None or out_root.resolve() == cache.resolve()):
+        raise BuildError("--link-output requires a separate disposable output directory.")
     floors = dict(FLOORS, **(floors or {}))
     started = time.time()
     ensure_ignored(cache)
@@ -647,10 +684,27 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
         # Only a cutout's alpha is gated, at the thresholds its materials use.
         return [float(c) for c in item.get("cutoffs") or [0.5]] if item["recipe"] == "base_alpha" else []
 
-    def ensure(items: list[dict]) -> None:
+    def ensure(items: list[dict], _bounded=False) -> None:
         """Encodes and measures every item whose cache entry is missing, and
         measures again (from the cached sidecar) every entry whose numbers an
         older measure() or other alpha cutoffs produced."""
+        if link_output and not _bounded:
+            # Keep every copy/cutoff of a shared encode in the same batch,
+            # preserving the original quality proof while releasing DDS files
+            # between batches instead of retaining the entire map set.
+            grouped = {}
+            for item in items:
+                key = (item["sha"], item["recipe"])
+                group = grouped.setdefault(key, {"src": str(item["path"]), "items": []})
+                group["items"].append(item)
+            for batch in texture_batches(list(grouped.values())):
+                # Reserve both a worst-case compressed sidecar and its raw DDS
+                # until quality measurement removes the latter.
+                check_cache_budget(cache, cache_budget_bytes,
+                                   2 * sum(group["_dds_bytes"] for group in batch) + 4 * 1024**2)
+                ensure([item for group in batch for item in group["items"]], _bounded=True)
+                check_cache_budget(cache, cache_budget_bytes)
+            return
         jobs, remeasure = [], []
         # Two directories' copies of one image share one encode (the cache key
         # is the source sha and the recipe): it is queued once and measured at
@@ -772,7 +826,11 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
                 psnr_keys.add(item["key"])
                 base_psnr.append(meta["quality"]["psnr"])
             name = f"{sha}.{item['recipe']}.evt"
-            shutil.copyfile(cache / f"{item['key']}.evt", target / name)
+            if link_output:
+                (target / name).unlink(missing_ok=True)
+                os.link(cache / f"{item['key']}.evt", target / name)
+            else:
+                shutil.copyfile(cache / f"{item['key']}.evt", target / name)
             index["images"][sha] = {"file": name, "recipe": item["recipe"], "format": meta["format"],
                                     "width": meta["width"], "height": meta["height"],
                                     "mipmaps": meta["mipmaps"], "gpuBytes": meta["gpuBytes"],
@@ -835,6 +893,8 @@ def main() -> int:
     parser.add_argument("--godot", help="Godot 4.7.2 editor binary (default: ELORIA_GODOT, the checkout's, PATH)")
     parser.add_argument("--procs", type=int, default=max(1, min(8, (os.cpu_count() or 2) // 2)))
     parser.add_argument("--no-prune", action="store_true", help="keep cache entries this run did not use")
+    parser.add_argument("--link-output", action="store_true", help="hard-link sidecars into a disposable runner stage")
+    parser.add_argument("--cache-budget-bytes", type=int, help="runner allowance for cached encodes and quality scratch")
     parser.add_argument("--floors", help="JSON object overriding quality floors (tests)")
     parser.add_argument("--skip-dir", action="append", default=[],
                         help="image directory (relative to a --maps root) to leave un-encoded; repeatable. "
@@ -846,7 +906,7 @@ def main() -> int:
                         options.out_root.resolve() if options.out_root else None,
                         options.cache.resolve(), find_godot(options.godot), options.procs,
                         prune=not options.no_prune, floors=json.loads(options.floors) if options.floors else None,
-                        skip=options.skip_dir)
+                        skip=options.skip_dir, link_output=options.link_output, cache_budget_bytes=options.cache_budget_bytes)
     except BuildError as error:
         log(f"FAILED: {error}")
         return 1
