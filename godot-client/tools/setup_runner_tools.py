@@ -57,7 +57,8 @@ def extract_member(archive: Path, member: str, target: Path) -> None:
 
 
 def install(platform: str, root: Path, *, installers=True) -> dict:
-    if platform not in {"windows", "linux", "macos"} or ((platform == "windows") != (os.name == "nt")) or ((platform == "macos") != (sys.platform == "darwin")):
+    native = {"win32": "windows", "darwin": "macos"}.get(sys.platform, "linux")
+    if platform not in {"windows", "linux", "macos"} or platform != native:
         raise ValueError("Run each hosted platform build on its native operating system.")
     root.mkdir(parents=True, exist_ok=False)
     godot_name = {"windows": "Godot_v4.7.2-stable_win64.exe",
@@ -66,9 +67,18 @@ def install(platform: str, root: Path, *, installers=True) -> dict:
     editor_zip = root / "editor.zip"
     download(DOWNLOADS[platform], editor_zip)
     if platform == "macos":
-        # Godot's self-contained editor executable works headless without its
-        # icon/Info.plist. Keep only that executable, as on Linux/Windows.
-        extract_member(editor_zip, "Godot.app/Contents/MacOS/Godot", godot)
+        # Keep the signed bundle intact. Moving its main executable out of the
+        # app can invalidate its Info.plist/code-signature relationship and
+        # macOS kills it before Godot starts, even for a headless import.
+        with zipfile.ZipFile(editor_zip) as archive:
+            for entry in archive.infolist():
+                path = Path(entry.filename)
+                if path.is_absolute() or ".." in path.parts or not entry.filename.startswith(("Godot.app/", "__MACOSX/")):
+                    raise ValueError("Unexpected path in the pinned Godot macOS archive.")
+        subprocess.run(["ditto", "-x", "-k", str(editor_zip), str(root)], check=True)
+        godot = root / "Godot.app/Contents/MacOS/Godot"
+        if not godot.is_file():
+            raise ValueError("The macOS tool bundle is missing its main executable.")
     else:
         extract_member(editor_zip, godot_name, godot)
     editor_zip.unlink()
