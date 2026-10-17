@@ -1,5 +1,10 @@
 # Automatic client updates
 
+This page covers the GitHub Windows/Linux distribution. [Steam and macOS builds](store-builds.md)
+use an explicit distribution owner: Steam replaces its own game files, and
+standalone macOS updates replace the complete signed app. Those builds retain
+commit compatibility checks but never download or apply GitHub update payloads.
+
 The game server names the **client Git commit packaged for that server**. This
 is independent of the server repository's own commit. Client builds contain
 their full commit ID and complete ancestor list, generated from Git at package
@@ -130,12 +135,13 @@ $RabbitLandsRelease = "C:\rabbitlands\dist\releases\client-<full-client-commit>\
 python godot-client/tools/build_release.py upload --bundle $RabbitLandsRelease
 ```
 
-This creates or reuses the **one current client release entry**, using
-`RELEASE-NOTES.md` as its description. Replacing a published build first returns
-that entry to **draft**, updates its tag to `client-<full-client-commit>`, then
-uploads the replacement files. After the replacement downloads pass verification,
-the previous compiled files are removed. Older generated client-release entries,
-if any, are also removed. GitHub keeps only the current compiled build.
+This creates or reuses the **current client draft**, using `RELEASE-NOTES.md` as
+its description. The working published release stays available while its
+replacement is prepared and reviewed. Older files in the draft are removed only
+after all replacement files pass verification. After the replacement is published,
+the **Retire previous published client** workflow verifies its checksum inventory
+and retires older published compiled releases. A published release and replacement
+draft can coexist temporarily; compiled version history is not retained afterwards.
 
 The commit-specific tag keeps signed update URLs tied to the actual build. The
 script verifies that commit exists in the public client repository and refuses

@@ -61,6 +61,10 @@ Only the latest compiled build is retained on GitHub.
 The Windows download is a small setup executable that downloads and verifies
 the game files during installation. Linux uses the supplied portable archive.
 
+Maintainers can also prepare complete [Steam depots and macOS test bundles](docs/store-builds.md).
+Steam manages updates for its builds; the GitHub installers keep their existing
+signed update path. The same guide tracks the remaining Steam Deck and Android work.
+
 For the integrated **Last Lantern** opening adventure, run
 [`prototypes/last-lantern/play.cmd`](prototypes/last-lantern/play.cmd). It starts
 the real client and a loopback dev-server with a separate local character database.

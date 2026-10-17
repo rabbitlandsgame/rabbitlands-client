@@ -221,7 +221,7 @@ def test_conflicting_tag_cannot_be_replaced(tmp_path, monkeypatch):
 def test_rolling_release_reuses_entry_and_removes_old_build_after_verification(tmp_path, monkeypatch):
     bundle, _ = upload_fixture(tmp_path)
     old_tag = "client-" + "b" * 40
-    calls = mock_github(monkeypatch, public=True, old_tag=old_tag,
+    calls = mock_github(monkeypatch, public=False, old_tag=old_tag,
                         stored_assets=[{"name": "old-game.tar.gz", "size": 42}])
     build_release.upload(bundle)
     edit = next(call for call in calls if call[:2] == ("release", "edit"))
@@ -237,11 +237,31 @@ def test_rolling_release_reuses_entry_and_removes_old_build_after_verification(t
 
 def test_failed_replacement_preserves_old_downloads(tmp_path, monkeypatch):
     bundle, _ = upload_fixture(tmp_path)
-    calls = mock_github(monkeypatch, public=True, fail_upload=True,
+    calls = mock_github(monkeypatch, public=False, fail_upload=True,
                         stored_assets=[{"name": "old-game.tar.gz", "size": 42}])
     with pytest.raises(subprocess.CalledProcessError):
         build_release.upload(bundle)
     assert not any(call[:3] == ("api", "--method", "DELETE") for call in calls)
+
+
+def test_a_published_commit_cannot_be_redrafted(tmp_path, monkeypatch):
+    bundle, _ = upload_fixture(tmp_path)
+    calls = mock_github(monkeypatch, public=True)
+    with pytest.raises(ValueError, match="already published"):
+        build_release.upload(bundle)
+    assert not any(call[0] == "release" for call in calls)
+
+
+def test_preparing_a_new_draft_keeps_the_old_published_release(tmp_path, monkeypatch):
+    bundle, _ = upload_fixture(tmp_path)
+    calls = mock_github(monkeypatch)
+    old = {"id": 120, "tag_name": "client-" + "b" * 40, "draft": False}
+    draft = {"id": 123, "tag_name": "client-" + SHA, "draft": True}
+    monkeypatch.setattr(build_release, "github_releases", lambda: [old])
+    monkeypatch.setattr(build_release, "github_release", lambda tag: draft)
+    build_release.upload(bundle)
+    assert any(call[:2] == ("release", "create") for call in calls)
+    assert not any(call[:2] == ("release", "delete") or (call[:2] == ("release", "edit") and call[2] == old["tag_name"]) for call in calls)
 
 
 @pytest.mark.parametrize("publish,exists", [(False, False), (False, True), (True, False), (True, True)])

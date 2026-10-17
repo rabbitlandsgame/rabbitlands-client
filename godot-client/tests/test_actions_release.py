@@ -49,6 +49,42 @@ def test_no_client_draft_creates_one_and_preserves_published_release(tmp_path, m
     assert len(calls) == 1 and calls[0][:2] == ("release", "create") and "--draft" in calls[0]
 
 
+def test_new_draft_visibility_is_retried_without_duplicate_creation(tmp_path, monkeypatch):
+    context(tmp_path, monkeypatch)
+    monkeypatch.setattr(actions.release, "github_releases", lambda: [])
+    created, waits = [], []
+    monkeypatch.setattr(actions.release, "gh", lambda *args: created.append(args))
+    sequence = iter([None, None, {"id": 789, "draft": True, "author": {"login": "github-actions[bot]"}}])
+    monkeypatch.setattr(actions.release, "github_release", lambda tag: next(sequence))
+    monkeypatch.setattr(actions.time, "sleep", waits.append)
+    assert actions.prepare() == (SHA, 789)
+    assert len(created) == 1 and waits == [1, 2]
+
+
+def test_mac_toolchain_retains_signed_bundle_and_portable_templates(tmp_path, monkeypatch):
+    monkeypatch.setattr(tools.sys, "platform", "darwin")
+    def download(spec, target):
+        with zipfile.ZipFile(target, "w") as archive:
+            if spec == tools.DOWNLOADS["macos"]:
+                archive.writestr("Godot.app/Contents/MacOS/Godot", b"signed-editor")
+                archive.writestr("Godot.app/Contents/Info.plist", b"signed-plist")
+            else:
+                archive.writestr("templates/macos.zip", b"universal-template")
+    def run(command, **kwargs):
+        assert command[:3] == ["ditto", "-x", "-k"]
+        with zipfile.ZipFile(command[3]) as archive:
+            archive.extractall(command[4])
+    monkeypatch.setattr(tools, "download", download)
+    monkeypatch.setattr(tools.subprocess, "run", run)
+    root = tmp_path / "tools"
+    config = tools.install("macos", root, installers=False)
+    assert config["godot"] == root / "Godot.app/Contents/MacOS/Godot"
+    assert (root / "Godot.app/Contents/Info.plist").read_bytes() == b"signed-plist"
+    assert (root / "_sc_").is_file()
+    assert (root / "editor_data/export_templates/4.7.2.stable/macos.zip").read_bytes() == b"universal-template"
+    assert not (root / "editor.zip").exists()
+
+
 @pytest.mark.parametrize("condition", ["unrelated-owner", "ambiguous-drafts"])
 def test_draft_selection_does_not_mutate_an_unexpected_destination(tmp_path, monkeypatch, condition):
     context(tmp_path, monkeypatch)

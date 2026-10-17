@@ -1,11 +1,11 @@
 ---
 name: rabbitlands-creature-animation
-description: Fit, audit, transfer and integrate reference motion on Rabbit Lands creature rigs. Use for canine walk, lunge/bite or death revisions, anatomical remapping, paw contact, skin/tail repair and runtime animation promotion.
+description: Author, fit, audit, transfer and integrate creature motion on Rabbit Lands creature rigs. Use for native creature-family walk/run, attack or death animation, anatomical remapping, paw contact, skin/tail repair and runtime animation promotion.
 ---
 
 # Rabbit Lands creature animation
 
-Read `docs/creature-video-motion.md` and `eloria-assets/source/animations/canine/manifest.json` before selecting a continuation. Seven reviewed canine profiles, prepared inputs and native curves are packaged there. Their replay command is offline; it does not infer anatomy for a new actor. Use `eloria-assets/tools/video_motion` for native fitting, surface/contact evaluation, temporal regularization and physical chain diagnostics.
+For a canine continuation, read `docs/creature-video-motion.md` and `eloria-assets/source/animations/canine/manifest.json` before selecting a fit. Seven reviewed canine profiles, prepared inputs and native curves are packaged there. Their replay command is offline; it does not infer anatomy for a new actor. Use `eloria-assets/tools/video_motion` for native fitting, surface/contact evaluation, temporal regularization and physical chain diagnostics.
 
 Read [the motion audit](references/motion-audit.md) for the lessons behind the selected fits. Keep source evidence, fitting assumptions, skin repairs, numerical qualification and visual acceptance distinct. A generated video is a reference, not a skeleton export. A paid provider job or non-public upload needs its own scoped user authorization; do not generate another video to recover local work.
 
@@ -18,3 +18,7 @@ Persist import fidelity settings and measured walk speed at the actual model sca
 Public changes belong only in the current Rabbit Lands repositories. Keep private authoring paths, provider receipts, credentials and migration records outside Git. Follow root repository instructions for branch policy and repository-scoped identity. Update the manifest and evidence whenever a dependency or selected output changes.
 
 For the authored Rabbit/Jackalope pilot, use [rabbit-family motion](../rabbitlands-video-motion-fitting/references/leporid-transfer.md); its morph-aware native adapter and explicit skin preparations are separate from the canine replay package.
+
+For authored cat-family pilots and native anatomical side/hinge fitting, read [native feline motion](references/native-feline-motion.md). The seven cats are user accepted; their installed behavior and public checks are documented in `docs/felid-motion.md`. Consult the current selection and publication receipts before continuing.
+
+For grounded boar/tapir pilots, head/tusk strikes and collapse-frame singularities, read [native boar and tapir motion](references/native-boar-tapir-motion.md). The five reviewed sets and portable checks are documented in `docs/boar-motion.md`. Native anatomy, wrapper behavior and visual acceptance remain actor-specific.

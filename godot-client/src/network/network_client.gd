@@ -122,6 +122,7 @@ func _send_release_identity() -> void:
 		var end := mini(offset + 512, history.size())
 		var body := {"schema": 1, "commit": identity.get("commit", ""),
 			"platform": identity.get("platform", "source"),
+			"distribution": ClientRelease.update_owner(identity),
 			"ancestors": history.slice(offset, end), "offset": offset,
 			"complete": end == history.size()}
 		if send_frame(EloriaProtocol.encode(205, JSON.stringify(body).to_utf8_buffer())) != OK:
