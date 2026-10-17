@@ -153,7 +153,7 @@ def test_macos_finish_moves_assets_without_extra_copy_and_seals_bundle(tmp_path,
     assert (app / "Contents/MacOS/RabbitLands").read_bytes() == b"universal-game-binary"
     assert not (root / "app").exists()
     assert commands[-1] == ["seal", app]
-    assert commands[0][:4] == ["lipo", "-verify_arch", "x86_64", "arm64"]
+    assert commands[0][0] == "lipo" and commands[0][2:] == ["-verify_arch", "x86_64", "arm64"]
 
 
 def test_mac_cross_export_fails_instead_of_claiming_a_native_test(tmp_path, monkeypatch):

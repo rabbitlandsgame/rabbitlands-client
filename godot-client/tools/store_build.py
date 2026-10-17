@@ -66,6 +66,8 @@ def build(options):
     version = subprocess.check_output([str(config["godot"]), "--headless", "--version"], text=True).strip()
     if not version.startswith("4.7.2.stable"):
         raise ValueError("Store builds require the pinned Godot 4.7.2-stable toolchain.")
+    if options.platform == "macos":
+        subprocess.run(["lipo", str(config["godot"]), "-verify_arch", "x86_64", "arm64"], check=True)
     public = root / "update_public.pem"
     public.write_text(package.git("show", f"{sha}:godot-client/data/update_public.pem"), encoding="ascii")
     source = root / "source"

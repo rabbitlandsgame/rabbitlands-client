@@ -189,6 +189,12 @@ To finish:
    before publishing. Updates replace the whole signed app; the GitHub updater
    must not modify bundle contents. A signed DMG can be added later.
 
+   GitHub Releases [limits each asset to under 2 GiB](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
+   The measured Mac test archive exceeds that limit. A public GitHub Mac download
+   will need multipart delivery and a Mac download helper after Apple signing is
+   configured; do not upload an oversized ZIP. The current 256 MiB Actions parts
+   are the developer handoff format, not a published Mac installer.
+
 Sources: [Godot macOS export](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_macos.html),
 [Apple notarization](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution),
 [Valve macOS distribution requirements](https://partner.steamgames.com/doc/store/application/platforms).

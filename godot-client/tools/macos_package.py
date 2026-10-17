@@ -145,7 +145,7 @@ def finish(stage, project, metadata):
     info["CFBundleVersion"] = str(len(metadata.get("ancestors", [])) or 1)
     info_path.write_bytes(plistlib.dumps(info))
     binary.chmod(0o755)
-    subprocess.run(["lipo", "-verify_arch", "x86_64", "arm64", str(binary)], check=True)
+    subprocess.run(["lipo", str(binary), "-verify_arch", "x86_64", "arm64"], check=True)
     (game / "BUILD.json").write_text(json.dumps({"commit": metadata["commit"],
         "distribution": metadata["distribution"], "signing": "ad-hoc-test-only"}, indent=2) + "\n")
     sign(target)
