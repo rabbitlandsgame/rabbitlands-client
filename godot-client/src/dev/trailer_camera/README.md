@@ -163,8 +163,15 @@ the same way. `"interpolation": "linear"` draws straight segments instead.
 | `preroll` | 1.0 | seconds held on the first key before the clock starts |
 | `resolution` | none | warns when the window differs |
 
-The camera draws no weather: rain and storms are configured only for mainland
-maps, so the scene does not add any.
+The camera draws no weather and no night lamps: every shot is clear sky at the
+shot's hour. In the live client, each isle has its own scheduled sky (Ravenhead
+is wet about 45% of the time, Landfall rarely), and lanterns light at dusk.
+- To film a particular sky live, a moderator can hold it with
+  `#weather set <state> [0-100] [force]` and release it with `#weather auto`.
+  `#weather list` shows the states.
+- Offline weather would come from `Weather3D.set_state(current, target, seconds)`,
+  as the integration survey harness drives it through its `sky` field. It is not
+  wired into this scene.
 
 ## Capture HUD toggle in the live client
 
