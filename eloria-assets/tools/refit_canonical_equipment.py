@@ -83,7 +83,8 @@ def retained_reference_rig(race, directory, body_hash):
 def tool_hashes():
     names = ['conform_equipment.py','equipment_authoring.py','torso_remap.py',
              'limb_head_remap.py','equipment_seams.py','equipment_seam_texture.py',
-             'equipment_skinning.py','headwear_envelope.py','refit_canonical_equipment.py']
+             'equipment_skinning.py','headwear_envelope.py','refit_canonical_equipment.py',
+             'design_fit.py']
     return {n:digest(Path(__file__).with_name(n)) for n in names}
 
 
@@ -117,6 +118,10 @@ def build_one(piece, race, tag, body_hash, code_hashes, resume, head_reference=N
     if not source.exists():raise ValueError(f'Original source missing: {source}')
     before = digest(source)
     expected = {'source_sha256':before,'body_sha256':body_hash,'tool_sha256':code_hashes}
+    import design_fit
+    design = design_fit.path_for(source, rig)
+    if design.exists():
+        expected['design_fit_sha256'] = digest(design)
     reference = Path(head_reference)/f'{race}.glb' if piece.part == 3 and head_reference else None
     if reference:
         expected['head_reference_sha256'] = digest(reference)
