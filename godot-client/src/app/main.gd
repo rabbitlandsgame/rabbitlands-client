@@ -83,6 +83,7 @@ const ChatLogTabsScript := preload("res://src/ui/chat_log_tabs.gd")
 const LoginBackdropScript := preload("res://src/ui/login_backdrop.gd")
 const ReferenceWindowScript := preload("res://src/ui/reference_window.gd")
 const ActiveBuffBarScript := preload("res://src/ui/active_buff_bar.gd")
+const StatusEffectIcons := preload("res://src/ui/status_effect_icons.gd")
 const VramTextures := preload("res://src/world/vram_textures.gd")
 var interior_cutaway: RefCounted = InteriorCutawayScript.new()
 ## On a secrets map, only the secret the player stands in is drawn; the rest
@@ -379,6 +380,8 @@ var spell_wheel: Control
 var _magic_area_preview: MeshInstance3D
 var player_info_panel: Control
 var active_buff_bar: Control
+var local_status_grid: GridContainer
+var _local_status_effects: Array[String] = []
 ## Server map objects whose tile has no navigation surface beneath it on the
 ## rendered map. Misplaced content rather than a client fault, but silent
 ## unless somebody counts it.
@@ -6595,7 +6598,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		candidates.append({"actor": actor, "id": int(raw_id), "priority": priority,
 			"distance": actor.global_position.distance_squared_to(camera_rig.focus),
 			"rect": overhead_block_rect(screen, str(dto.get("name", "")),
-				actor.occupation(), actor.negative_status_count())})
+				actor.occupation(), actor.status_effect_count())})
 	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if a.priority != b.priority: return a.priority < b.priority
 		if a.distance != b.distance: return a.distance < b.distance
@@ -6633,10 +6636,9 @@ static func overhead_block_rect(screen: Vector2, actor_name: String,
 		height += ReplicatedActor3D.OCCUPATION_DROP
 	var top := 12.0
 	if negative_status_count > 0:
-		width = maxf(width, negative_status_count * (ReplicatedActor3D.NEGATIVE_STATUS_SIZE
-			+ ReplicatedActor3D.NEGATIVE_STATUS_GAP) - ReplicatedActor3D.NEGATIVE_STATUS_GAP + 8.0)
+		width = maxf(width, StatusEffectIcons.width(negative_status_count) + 8.0)
 		var rise: float = ReplicatedActor3D.NEGATIVE_STATUS_RISE
-		top = rise + ReplicatedActor3D.NEGATIVE_STATUS_SIZE * 0.5 + 2.0
+		top = rise + ReplicatedActor3D.NEGATIVE_STATUS_SIZE * 0.5 + 2.0 + StatusEffectIcons.extra_height(negative_status_count)
 		height += top - 12.0
 	return Rect2(screen - Vector2(width * 0.5, top), Vector2(width, height))
 
@@ -9798,6 +9800,7 @@ func _update_legacy_clock_and_compass() -> void:
 	compass_needle.rotation = deg_to_rad(-camera_rig.yaw_degrees)
 
 func _update_actor_resource_overlay() -> void:
+	_sync_local_status_icons()
 	if not _banner_has_content():
 		if actor_resource_overlay.visible:
 			actor_resource_overlay.hide()
@@ -9838,7 +9841,42 @@ func _above_head(actor_node: Node3D) -> Vector3:
 		if actor_node.has_method("head_height") else 2.8 - BANNER_HEAD_CLEARANCE)
 	return actor_node.global_position + Vector3(0.0, head + BANNER_HEAD_CLEARANCE, 0.0)
 
+func _sync_local_status_icons() -> void:
+	var dto: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	var next: Array[String] = StatusEffectIcons.known(dto.get("status_effects", dto.get("negative_statuses", [])))
+	if not _nameplates_enabled or int(dto.get("health", 0)) <= 0:
+		next.clear()
+	if next == _local_status_effects:
+		return
+	_local_status_effects = next
+	if not is_instance_valid(local_status_grid):
+		local_status_grid = GridContainer.new()
+		local_status_grid.name = "LocalStatusIcons"
+		local_status_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		local_status_grid.add_theme_constant_override("h_separation", int(StatusEffectIcons.GAP))
+		local_status_grid.add_theme_constant_override("v_separation", int(StatusEffectIcons.GAP))
+		var rows := actor_resource_overlay.get_node("Rows")
+		rows.add_child(local_status_grid)
+		rows.move_child(local_status_grid, 0)
+	for child: Node in local_status_grid.get_children():
+		local_status_grid.remove_child(child)
+		child.queue_free()
+	local_status_grid.columns = maxi(1, mini(StatusEffectIcons.COLUMNS, next.size()))
+	local_status_grid.visible = not next.is_empty()
+	for effect: String in next:
+		var icon := TextureRect.new()
+		icon.name = effect
+		icon.custom_minimum_size = Vector2.ONE * StatusEffectIcons.SIZE
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.texture = StatusEffectIcons.TEXTURES[effect]
+		icon.tooltip_text = effect.replace("expose_", "Weakness: ").replace("_", " ").capitalize()
+		icon.mouse_filter = Control.MOUSE_FILTER_PASS
+		local_status_grid.add_child(icon)
+
 func _banner_has_content() -> bool:
+	if not _local_status_effects.is_empty():
+		return true
 	if _banner_option("show_names"):
 		return true
 	for row_spec: Array in BANNER_ROWS:

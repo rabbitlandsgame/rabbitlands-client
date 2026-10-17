@@ -2,6 +2,7 @@ extends SceneTree
 ## Packet-to-actor coverage plus an optional rendered preview with real models.
 
 var failures := 0
+const StatusIcons := preload("res://src/ui/status_effect_icons.gd")
 
 func _init() -> void:
 	call_deferred("_run")
@@ -15,6 +16,10 @@ func _run() -> void:
 	_packet(state, 9, ["poison", "cripple", "expose_cold"])
 	_expect(state.get("actors")[9].negative_statuses == ["poison", "cripple", "expose_cold"],
 		"authoritative snapshot is kept on the creature")
+	state.call("_on_packet", 212, JSON.stringify({"kind": "actor_status", "actor_id": 9,
+		"effects": ["poison", "shield", "regeneration"]}).to_utf8_buffer())
+	_expect(state.get("actors")[9].status_effects == ["poison", "shield", "regeneration"]
+		and state.get("actors")[9].negative_statuses == ["poison"], "both polarities are replicated")
 	_packet(state, 404, ["poison"])
 	_expect(not state.get("actors").has(404), "status cannot resurrect a removed actor")
 	_packet(state, 9, [])
@@ -57,7 +62,7 @@ func _run() -> void:
 	fox.set_health_visible(true)
 	var all_effects := ["poison", "cripple", "expose_heat", "expose_cold", "expose_magic", "expose_radiation"]
 	fox.set_negative_statuses(all_effects + ["poison", "accuracy", "unknown"])
-	var icons := fox.get_node("NegativeStatusIcons") as Node3D
+	var icons := fox.get_node("StatusIcons") as Node3D
 	_expect(icons.get_child_count() == 6, "six distinct negative effects; duplicates and benefits excluded")
 	_expect(icons.position.y == fox.get_node("Nameplate").position.y, "row follows model's head anchor")
 	for index: int in range(6):
@@ -102,6 +107,16 @@ func _run() -> void:
 	var afflicted: Rect2 = main_script.overhead_block_rect(Vector2(400, 300), "Red Fox", "", 6)
 	_expect(afflicted.position.y < plain.position.y and afflicted.size.x >= 6 * 20 + 5 * 3,
 		"crowding reserves the icon row's height and width")
+	var complete: Array = StatusIcons.TEXTURES.keys()
+	dto["status_effects"] = complete
+	fox.apply_server_state(dto, adapter, true)
+	_expect(icons.get_child_count() == 19 and fox.status_effect_count() == 19, "all negative and positive icons exist")
+	var wrapped: Rect2 = main_script.overhead_block_rect(Vector2(400, 300), "Red Fox", "", 19)
+	_expect(wrapped.size.x == afflicted.size.x and wrapped.size.y > afflicted.size.y,
+		"large status lists grow upwards with a bounded width")
+	_expect((icons.get_child(18).mesh as QuadMesh).center_offset.y
+		> (icons.get_child(0).mesh as QuadMesh).center_offset.y, "additional rows sit above the first")
+	fox.set_status_effects(["poison", "shield", "regeneration", "haste"])
 
 	var goblin := ReplicatedActor3D.new()
 	stage.add_child(goblin)
@@ -112,27 +127,66 @@ func _run() -> void:
 	_expect(goblin.configure(goblin_dto, adapter, config, animations).is_empty(), "imported goblin loads")
 	goblin.set_physics_process(false)
 	goblin.set_health_visible(true)
-	goblin.set_negative_statuses(["poison", "cripple"])
-	fox.position.x = -1.8
-	goblin.position.x = 1.8
+	goblin.set_status_effects(complete.filter(func(effect: String) -> bool: return effect not in StatusIcons.NEGATIVE))
+	var player := ReplicatedActor3D.new()
+	stage.add_child(player)
+	config = registry.models.luminous_male
+	animations = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
+	var player_dto := dto.duplicate()
+	player_dto.name = "Player"
+	player_dto.kind = 1
+	_expect(player.configure(player_dto, adapter, config, animations).is_empty(), "player model loads")
+	player.set_physics_process(false)
+	player.set_health_visible(true)
+	player_dto["status_effects"] = ["cripple", "expose_heat", "magic_protection", "haste", "accuracy", "true_sight"]
+	player.apply_server_state(player_dto, adapter, true)
+	_expect(player.get_node("StatusIcons").get_child_count() == 6, "players show both positive and negative effects")
+	_expect(bool(player.get("_hastened")), "replicated haste also changes movement presentation")
+	fox.position.x = -3.0
+	player.position.x = 3.0
 	var legend := Label.new()
-	legend.text = "NEGATIVE STATUS EFFECTS\nPoison   Cripple   Heat weakness   Cold weakness   Magic weakness   Radiation weakness"
+	legend.text = "ACTOR STATUS EFFECTS\nFox: mixed effects    Goblin: all 13 positive effects    Player: mixed effects"
 	legend.position = Vector2(40, 40)
 	legend.add_theme_font_size_override("font_size", 18)
 	root.add_child(legend)
+	await _test_own_player(state, complete)
 	for frame: int in range(8):
 		await process_frame
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
-		var artifacts := ProjectSettings.globalize_path("res://test-artifacts/creature-status")
+		var artifacts := ProjectSettings.globalize_path("res://test-artifacts/actor-status")
 		DirAccess.make_dir_recursive_absolute(artifacts)
 		_expect(root.get_texture().get_image().save_png(artifacts.path_join("preview.png")) == OK,
 			"rendered preview saved")
 	stage.queue_free()
 	legend.queue_free()
 	await process_frame
-	print("creature status icons: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
+	print("actor status icons: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
+
+func _test_own_player(state: Node, effects: Array) -> void:
+	state.get("actors").clear()
+	var main := (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
+	root.add_child(main)
+	main.hide()
+	await process_frame
+	state.set("local_actor_id", 99)
+	state.get("actors")[99] = {"actor_id": 99, "kind": 1, "health": 20, "status_effects": effects}
+	main.call("_sync_local_status_icons")
+	var grid := main.get("local_status_grid") as GridContainer
+	_expect(grid != null and grid.get_child_count() == 19 and grid.columns == 6,
+		"own overhead HUD shows all statuses and wraps them")
+	_expect(grid.get_parent().get_child(0) == grid, "own icons appear above the name and resources")
+	state.get("actors")[99].health = 0
+	main.call("_sync_local_status_icons")
+	_expect(not grid.visible, "own statuses disappear on death")
+	state.get("actors")[99].health = 20
+	main.set("_nameplates_enabled", false)
+	main.call("_sync_local_status_icons")
+	_expect(not grid.visible, "own statuses respect the display setting")
+	state.get("actors").clear()
+	main.queue_free()
+	await process_frame
 
 func _packet(state: Node, actor_id: int, effects: Variant) -> void:
 	state.call("_on_packet", 212, JSON.stringify({"kind": "creature_status", "actor_id": actor_id,
