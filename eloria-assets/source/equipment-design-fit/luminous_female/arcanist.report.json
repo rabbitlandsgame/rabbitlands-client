@@ -1,11 +1,11 @@
 {
- "format": 1,
+ "format": 2,
  "spec": "arcanist.json",
- "spec_sha256": "6c1d1f2b8e64250a497f42178be36c1991f6a721132ec511d62ac64d512b5068",
+ "spec_sha256": "9b3a33a5648815f302838206a86ff13eabee95fada584202b61c92f4cf2dbd44",
  "body": "luminous_female.glb",
  "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
  "pose": "Idle_Subtle",
- "tool_sha256": "be2702e946860c1d0a9bfb33d73a89f519c9aef9ec79dae7d237d9599366d24e",
+ "tool_sha256": "40a0d22ba79322e7016fadeb5b1b4d3dae311fc0d0ebb23b1584d2c015798c11",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
@@ -74,10 +74,16 @@
       -5.4
      ],
      "girth": 1.0
+    },
+    "conform": {
+     "cells": 932,
+     "standoff_mm": 0.5,
+     "out_mm": 23.2,
+     "in_mm": 20.0
     }
    },
    "out": "Eloria_Arcane_Armor_Design_Sheet__r02_c03.glb.npz",
-   "sha256": "9601aa0cf342deaee1367a3b0b29be556060f6cd085dde58e283f52df36d4a88"
+   "sha256": "9ad829e2fb1e60b7f5e132f4d1520e05d8a67fee717fb4ea916fc124548b45ae"
   },
   "legs": {
    "source": "Eight_arcane_leg_armor_designs__r02_c03.glb",
@@ -135,10 +141,16 @@
       0.4
      ],
      "girth": 1.068
-    }
+    },
+    "drape_vertices": [
+     {
+      "+": 67,
+      "-": 71
+     }
+    ]
    },
    "out": "Eight_arcane_leg_armor_designs__r02_c03.glb.npz",
-   "sha256": "ec87889ea823de7dc5324fbef4e575e2830dc9f91b3d9487d8ba96d67cf7ff92"
+   "sha256": "482d048e8bb356e4acd51ce1d53503d1103f1fd3a4d1df54a1018adbaa8071cc"
   },
   "boots": {
    "source": "Arcane_Fantasy_Boots_Concept_Sheet__r02_c03.glb",
@@ -193,7 +205,7 @@
     }
    },
    "out": "Arcane_Fantasy_Boots_Concept_Sheet__r02_c03.glb.npz",
-   "sha256": "f69c22fa81feedc589d68682fd8c42072df6f4c4da77d3af7666cade4b6a9504"
+   "sha256": "398f8e226abab2a1f9c6073ff776705dc3dab5df034aa218731202e8fbb34f15"
   }
  }
 }

@@ -266,8 +266,8 @@ and both came from choosing whole triangles by their centre.
   centre. The hidden skin therefore left a row of holes past the lining's
   end, and the dark sleeve interior showed through them.
 
-  The edge is now `wrist_cover`: the nearest centre of any triangle that
-  crosses the plane (0.733 m male, 0.725 m female). No hidden triangle reaches
+  The edge is now `wrist_cover`: half a millimetre short of the nearest centre
+  of any triangle that crosses the plane (0.732 m male, 0.724 m female). No hidden triangle reaches
   past the lining any more. Over its last stretch the lining stays at least
   3 mm outside the skin it keeps. There it also takes that skin's own
   lowerarm/hand weights (`lining_weights`); otherwise the wrist skin swings
@@ -322,6 +322,139 @@ Each session folder holds:
 
 `--race`, `--sex`, `--set`, `--clip` and `--review-dir` preselect the view
 and the notes folder.
+
+The viewer also reshoots a review without anyone at the keyboard:
+
+- `--replay <notes.jsonl> [--notes 7,13] [--out <dir>]` restores each note's
+  race, sex, set, toggles, clip time and camera, saves `replay_NNN.png` and
+  quits. Any file of note-shaped lines works, so a list of chosen views can be
+  shot the same way.
+- `--equipment <equipment.json>` reads a copy that points at candidate GLBs,
+  so a fix is seen on the noted view before it is installed.
+- `--headwear yes|no` overrides the notes' headwear toggle.
+- `--debug-tint yes` draws generated backings magenta and body surfaces cyan.
+  It tells a hole from a dark lining, or from the skin behind it.
+
+The actor's nameplate, health bar and their backing are hidden: the empty
+backing used to float above the head as a dark box.
+
+### Owner review fixes (2026-10-17)
+
+The owner reviewed all five sets in the viewer and left 17 notes (review
+commit `724ee07e`). Ten are fixed here. The seven headwear notes (4, 6, 9–12
+and 17) are left for their own pass; see **Not yet done** below.
+
+**Sleeves tearing in the bow pull (notes 1, 2, 15 and 16).** The design fit
+weighted every vertex from the posed body surface nearest it in idle. There
+the arms hang against the coat, so a sleeve's inner wall took chest weights
+and its hem stayed behind as the arm rose. `design_fit.bind_sleeves` now binds
+every vertex the fit gave to an arm with torso_remap's own arm field. The
+upper arm hands over to the forearm from 43% to 59% of the way to the wrist.
+The trunk keeps the fit's weights. The weights are smoothed with the
+sleeve/coat bridges opened, except across the shoulder yoke, and the rest pose
+is solved again from the idle shell. The client therefore still shows the
+fitted shell exactly in idle. The npz is now `FORMAT` 2, adding each vertex's
+arm share and the idle skinning matrices. A loose tie on the Scout Vest
+(`loose_ties`, 10 triangles) is dropped, as torso_remap drops it.
+
+Share of art triangles stretched past 1.8× their idle edge length, at the
+worst frame of Bow_Pull_Back (`stretch_check.py`):
+
+| Torso | Male before | Male after | Female before | Female after |
+| --- | ---: | ---: | ---: | ---: |
+| Studded Jack | 4.48% | 0.94% | 4.73% | 0.81% |
+| Scout Vest | 4.99% | 0.35% | 4.96% | 0.21% |
+| Acolyte Tunic | 2.47% | 0.71% | 2.47% | 0.95% |
+| Furtrim Coat | 2.35% | 0.77% | 2.32% | 0.60% |
+| Phoenix Cuirass | 0.59% | 1.15% | 0.88% | 1.40% |
+
+The Phoenix figure rises by six triangles of its 1,357, at the shoulder. In
+the engine its torn, hanging sleeve (notes 15 and 16) is gone. A pauldron's
+edge now lifts with the arm and shows the dark lining under it.
+
+**Holes at the throat (notes 7, 13 and 14).** Under a torso, `TorsoBodyCover`
+keeps only those neck faces whose three corners carry more than half
+Head/neck_01 weight. On the Human body that ring starts at 1.467 m (male)
+and 1.456 m (female) at the front. The lining's neckline is cut at 1.40 m, and
+the throat faces between carry no neck weight at all. Under an open collar
+the throat was therefore neither skin nor lining: a hole into the coat
+(notes 13 and 14), and a dark well seen from above (note 7). Lowering the
+weight threshold, as race bridges do, would not reach them.
+
+torso_remap now writes the lining's neckline height, `LINING_NECKLINE`, as
+bodyCover's fourth value. With it, `TorsoBodyCover.keeps_open_throat` keeps
+the skin in front of the neck axis, within 13 cm of the midline, from 1 cm
+below that neckline as torso_remap cuts it. Pieces without the value are cut
+as before; today only the five refitted torsos carry it.
+
+Inside the Furtrim Coat, a 28-vertex loose fragment ran 9 cm deep into the
+neck and showed as the black band of note 14. `buried_fragments` drops small
+components centred in that open throat that lie more than 3 cm inside the
+skin; on these torsos only that fragment qualifies. Trim that merely dips
+into the skin elsewhere stays.
+
+**Flat female chest (note 8).** One girth and shift per trunk bone keeps a coat
+drawn for a flat chest flat. On the female body the Studded Jack's front sat
+on the bust apex, with the skin up to 1.6 cm through it, and stood 3–4 cm off
+the upper chest and the waist. The torso specs now carry a `conform` entry,
+applied on `luminous_female` only. On a 1 cm grid in front of the chest it
+moves the trunk art front to back, so that its outermost layer sits 1.2–1.6 cm
+off the skin. It moves out by at most 3 cm and in by at most 2 cm, smoothed;
+every layer at a point moves together, and the sleeves and the back do not
+move. A plate that stands well off the body keeps that standoff: the target is
+taken above the quarter of the grid closest to the skin. That is 36 mm for the
+Phoenix Cuirass and 0.5–15 mm for the coats. Measured this way, without the
+standoff, the cap had drawn the cuirass in by 2 cm all over and its chest read
+flatter. The bust now comes forward 12–23 mm and the waist goes in up to 2 cm.
+
+**Arcanist tails folding at the knee (note 5).** The Acolyte Legguards' two
+back tails, and three trim strips, took thigh weights above the knee and calf
+weights below it, so they creased at the knee in every stride. The legs
+spec's `drape` entry hangs them from the pelvis instead. Each tail follows its
+thigh up to 80% by 60% of its drop, with 15% calf at the hem, so it swings as
+one panel.
+
+Evidence:
+[tearing](design-fit/review-fixes-tearing.jpg),
+[throat](design-fit/review-fixes-throat.jpg),
+[female chest](design-fit/review-fixes-chest.jpg),
+[Arcanist tails](design-fit/review-fixes-tails.jpg). Each image shows the
+installed fit beside the fix, on the noted view, reshot with `--replay`.
+
+`wrist_cover` now sits half a millimetre short of that triangle's centre. On
+the centre itself, the triangle sat on the cover's strict edge: the Human body
+kept it and a race body, whose rest skeleton differs by micrometres, cut it.
+`torso_body_cover.gd` caught this as one face in 2,027 on six male races,
+after the cuff fix.
+
+All 30 design-fit pieces were refitted. Only the five torsos and the Acolyte
+Legguards changed; the other legs and boots are unchanged to the micron and
+reinstalled byte for byte. The ten new fitted-cloth textures replace ten that
+no GLB references any more; the six older orphans stay.
+
+Tests:
+
+- The equipment, remapper and held-prop suites fail on the same 9 IDs as
+  clean develop at `224bb9b9`.
+- `torso_body_cover.gd` passes: 16 races, cover and equip/unequip.
+- `creation_class_equipment_fit.gd` passes: 54,666 checks on 16 rigs.
+- The torso LOD, imported-actor LOD and registry snapshot tests pass.
+- `armour_body_cover.gd` reports 60 failures, all "restores sculpted hair
+  visibility". In each, the scalp stays visible under the Amberwood 04 helm
+  (3:120) in its own set, on ten rigs. No piece or code path changed here
+  touches it.
+
+**Not yet done.**
+
+- **Headwear (notes 4, 6, 9–12 and 17).** The Vanguard and Phoenix helms
+  read large, the Acolyte Hood cuts into the chin, and the three hoods end
+  above the torso collar. Headwear is sized by `limb_head_remap.head_frame`
+  and carried to the races by `refit_race_headwear.py`. It is socketed
+  rigidly to the Head bone, so a cowl lengthened over the collar would cut
+  through it whenever the head turns, unless the cowl follows the neck.
+- **Other torsos.** The open throat and the female conform reach only the
+  five refitted torsos. Every other torso keeps the throat cover until it is
+  refitted, and keeps its flat front until it has a set spec.
 
 ## Two body shapes, preserved race identity
 

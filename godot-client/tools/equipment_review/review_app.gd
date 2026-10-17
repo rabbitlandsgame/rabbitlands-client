@@ -88,7 +88,7 @@ func _ready() -> void:
 	get_viewport().msaa_3d = Viewport.MSAA_4X
 	_models = _read_json("res://data/actors/models.json").get("models", {}) as Dictionary
 	_animation_map = _read_json("res://data/animations/luminous.json")
-	_equipment = _read_json("res://data/actors/equipment.json")
+	_equipment = _read_json(str(options.get("equipment", "res://data/actors/equipment.json")))
 	_build_sets()
 	_race = str(options.get("race", _race))
 	_sex = str(options.get("sex", _sex))
@@ -104,6 +104,8 @@ func _ready() -> void:
 	_rebuild_actor()
 	if options.get("selftest", "no") == "yes":
 		_selftest.call_deferred()
+	elif options.has("replay"):
+		_replay.call_deferred()
 
 
 # ---------------------------------------------------------------- data
@@ -174,6 +176,9 @@ func _build_stage() -> void:
 	add_child(floor_mesh)
 	_cam = Camera3D.new()
 	_cam.fov = 35.0
+	# The actor's nameplate, health bar and their backing are gameplay overlays,
+	# not equipment: their empty backing floated over the head as a dark box.
+	_cam.cull_mask &= ~ReplicatedActor3D.GAMEPLAY_ONLY_VISUAL_LAYER
 	add_child(_cam)
 	_cam.current = true
 	_update_camera()
@@ -237,6 +242,32 @@ func _apply_equipment() -> void:
 	var visuals := _current_visuals()
 	_prefer_files_on_disk(visuals)
 	actor.apply_equipment_visuals(visuals)
+	if options.get("debug-tint", "no") == "yes":
+		_debug_tint()
+
+
+## --debug-tint yes: generated backings magenta, body and wardrobe surfaces cyan,
+## so a hole can be told from a lining or the skin behind it.
+func _debug_tint() -> void:
+	var tints := {"backing": Color(1.0, 0.0, 1.0), "body": Color(0.0, 0.9, 0.9)}
+	for node: Node in actor.find_children("*", "MeshInstance3D", true, false):
+		var mesh_node := node as MeshInstance3D
+		var lower := mesh_node.name.to_lower()
+		var kind := ("backing" if lower.contains("backing") else
+			"body" if lower in ["body", "char1", "mesh_node"] or lower.begins_with("wardrobe_") else "")
+		if options.get("debug-meshes", "no") == "yes":
+			var first := mesh_node.get_active_material(0) if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 0 else null
+			print("MESH ", actor.get_path_to(mesh_node), " visible=", mesh_node.is_visible_in_tree(),
+				" surfaces=", mesh_node.mesh.get_surface_count() if mesh_node.mesh != null else 0,
+				" material=", first.resource_name if first != null else "-",
+				" transparency=", (first as BaseMaterial3D).transparency if first is BaseMaterial3D else -1,
+				" tint=", kind)
+		if kind.is_empty():
+			continue
+		var material := StandardMaterial3D.new()
+		material.albedo_color = tints[kind]
+		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		mesh_node.material_override = material
 
 
 ## Where a GLB changed after Godot imported it, the imported scene is stale:
@@ -284,7 +315,7 @@ func _reload_from_disk() -> void:
 	GlbSceneCache.clear()
 	NativeAnimationImporter.clear()
 	_raw_loaded.clear()
-	_equipment = _read_json("res://data/actors/equipment.json")
+	_equipment = _read_json(str(options.get("equipment", "res://data/actors/equipment.json")))
 	_models = _read_json("res://data/actors/models.json").get("models", {}) as Dictionary
 	_build_sets()
 	await _rebuild_actor()
@@ -782,4 +813,48 @@ func _selftest() -> void:
 	_save_note()
 	print("SELFTEST_OK ", _review_dir)
 	await get_tree().create_timer(0.3).timeout
+	get_tree().quit()
+
+
+## --replay <notes.jsonl> [--notes 7,13] [--out <dir>]: restore each note's view
+## (race, sex, set, toggles, clip time, camera), save replay_NNN.png without the
+## panels, and quit. Shows what a fix did to the view a note was written on.
+func _replay() -> void:
+	var path := str(options["replay"])
+	var wanted := str(options.get("notes", "")).split(",", false)
+	var out := str(options.get("out", path.get_base_dir().path_join("replay")))
+	DirAccess.make_dir_recursive_absolute(out)
+	_ui.visible = false
+	for line: String in FileAccess.get_file_as_string(path).split("\n", false):
+		var note: Dictionary = JSON.parse_string(line) as Dictionary
+		if not wanted.is_empty() and not wanted.has(str(int(note["n"]))):
+			continue
+		_race = str(note["race"])
+		_sex = str(note["sex"])
+		for i in range(_sets.size()):
+			if _sets[i]["name"] == note["set"]:
+				_set_index = i
+		_show_head = (bool(note.get("headwear", true)) if not options.has("headwear")
+			else options["headwear"] == "yes")
+		_show_extras = bool(note.get("weapons_and_cape", false))
+		_show_hair = bool(note.get("hair", true))
+		_speed = float(note.get("speed", 1.0))
+		_clip = str(note["clip"])
+		_paused = true
+		await _rebuild_actor()
+		var camera: Dictionary = note["camera"] as Dictionary
+		_yaw = deg_to_rad(float(camera["yaw_degrees"]))
+		_pitch = deg_to_rad(float(camera["pitch_degrees"]))
+		_distance = float(camera["distance"])
+		var target: Array = camera["target"] as Array
+		_target = Vector3(float(target[0]), float(target[1]), float(target[2]))
+		_update_camera()
+		if actor != null and actor.animation_player != null and actor.animation_player.has_animation(_clip):
+			actor.animation_player.seek(float(note["clip_time"]), true)
+		for _frame in range(3):
+			await RenderingServer.frame_post_draw
+		var shot := out.path_join("replay_%03d.png" % int(note["n"]))
+		get_viewport().get_texture().get_image().save_png(shot)
+		print("REPLAY ", int(note["n"]), " -> ", shot)
+	print("REPLAY_OK ", out)
 	get_tree().quit()

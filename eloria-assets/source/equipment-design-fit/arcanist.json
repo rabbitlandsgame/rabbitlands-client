@@ -212,7 +212,21 @@
      ]
     }
    ],
-   "split_limbs": true
+   "split_limbs": true,
+   "conform": {
+    "bodies": [
+     "luminous_female"
+    ],
+    "region": [
+     0.17,
+     1.08,
+     1.42
+    ],
+    "clear": 0.012,
+    "max_gap": 0.016,
+    "max_in": 0.02,
+    "max_out": 0.03
+   }
   },
   "legs": {
    "source": "Eight_arcane_leg_armor_designs__r02_c03.glb",
@@ -414,6 +428,35 @@
       "calf_r",
       "foot_r"
      ]
+    }
+   ],
+   "drape": [
+    {
+     "box": [
+      [
+       -0.3,
+       0.02,
+       -0.4
+      ],
+      [
+       0.3,
+       0.3,
+       0.45
+      ]
+     ],
+     "hang": "pelvis",
+     "sides": {
+      "+": [
+       "thigh_l",
+       "calf_l"
+      ],
+      "-": [
+       "thigh_r",
+       "calf_r"
+      ]
+     },
+     "follow": 0.8,
+     "calf": 0.15
     }
    ]
   },

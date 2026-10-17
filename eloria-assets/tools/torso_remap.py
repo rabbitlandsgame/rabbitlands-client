@@ -48,6 +48,11 @@ SLEEVE_PROFILE_SCALE = np.array([
 SHOULDER_CAP_INSET = 0.012
 SLEEVE_PROFILE_LOCK_T = 0.62
 SLEEVE_BACKING_CLEARANCE = 0.006
+#: Centre height (fit units) of the lining's open neckline. Since 2026-10-17
+#: it is also bodyCover's fourth value: the runtime (TorsoBodyCover's open
+#: throat) keeps the throat skin above it, which it otherwise hid up to the
+#: neck's own ring, leaving a hole under every open collar.
+LINING_NECKLINE = 1.40
 # Profiles used by the installed class silhouettes before the final shoulder
 # review.  They are retained as data so tests can prove every new curve is
 # byte-stable from the lock knot through the cuff.
@@ -852,6 +857,66 @@ def seat_arm_backing_inside_visible(
     }
 
 
+def loose_ties(points, triangles, labels, source, source_height):
+    """Triangles of tiny isolated ties hanging far below the measured cuff.
+
+    After the arm scale is corrected they become long floating spikes, or float
+    beside the hand. Only those narrow, disconnected fragments are marked;
+    ordinary trim and hem tabs stay intact.
+    """
+    drop = np.zeros(len(triangles), dtype=bool)
+    for label in np.unique(labels):
+        own = labels == label
+        block = np.unique(np.round(points[own], 5), axis=0)
+        if len(block) > 8 or np.ptp(block[:, 0]) > .025 * source_height:
+            continue
+        side = 'l' if block[:, 0].mean() > 0 else 'r'
+        if (abs(block[:, 0].mean()) > .23 * source_height
+                and block[:, 1].min() < source[side][1][1] - .12 * source_height
+                and block[:, 1].max() < source[side][1][1]):
+            drop |= own[triangles].any(axis=1)
+    return drop
+
+
+def buried_fragments(points, triangles, labels, rig, depth=.03, largest=64):
+    """Triangles of small loose fragments the fit carries through the throat.
+
+    Added 2026-10-17.  Some sources carry small loose pieces, a strap end or an
+    inner fold, that a set fit lands inside the body: the Warden coat's
+    28-vertex throat fragment ran 9 cm deep into the neck.  The cover hid the
+    skin around it until the throat stayed visible under open collars
+    (TorsoBodyCover's open throat, LINING_NECKLINE); then it cut across the
+    neck as a black band.  A component of at most ``largest`` welded vertices
+    centred in that open throat (in front of the neck axis, within 13 cm of the
+    midline, from 2 cm below the neckline to 1.52 m) with a vertex there more
+    than ``depth`` inside the skin, along the ray from the neck axis, is dropped.
+    Trim elsewhere that merely dips into the skin (studs, buckles, fur tufts
+    over the shoulders) stays: the cover still hides the skin there.
+    """
+    s = rig.fit_scale
+    skin = rig.positions[rig.faces]
+    drop = np.zeros(len(triangles), dtype=bool)
+    axis_z = lambda y: (-.051 + (y / s - 1.452) / (1.568 - 1.452) * .062) * s
+    throat = lambda p: ((LINING_NECKLINE - .02) * s < p[1] < 1.52 * s and abs(p[0]) < .13 * s
+                        and p[2] >= axis_z(p[1]))
+    for label in np.unique(labels):
+        own = np.flatnonzero(labels == label)
+        if len(np.unique(np.round(points[own], 5), axis=0)) > largest or not throat(points[own].mean(0)):
+            continue
+        for v in own:
+            p = points[v]
+            if not throat(p):
+                continue
+            origin = np.array([0., p[1], axis_z(p[1])])
+            ray = p - origin
+            radius = float(np.linalg.norm(ray))
+            hit = io.cast(origin, ray / radius, skin)[0] if radius > 1e-6 else np.inf
+            if radius < 1e-6 or (np.isfinite(hit) and radius < hit - depth * s):
+                drop |= np.isin(triangles, own).any(axis=1)
+                break
+    return drop
+
+
 def remap(points, triangles, rig, collar_lift=0., parts_out=None,
           arm_fit=None, split_sewn_surface=True):
     canon, edges, count = io._weld(points, triangles)
@@ -1036,19 +1101,7 @@ def remap(points, triangles, rig, collar_lift=0., parts_out=None,
     same_part = np.ptp(part[triangles], axis=1) == 0
     shoulder_seam = (points[triangles, 1].min(axis=1) > shoulder_y - .12 * source_height) & (edge_scale < 1.75)
     keep = same_part | shoulder_seam
-    # Tiny isolated ties extending far beyond the measured cuff become long
-    # floating spikes after the arm scale is corrected. Remove only those
-    # narrow, disconnected fragments; ordinary trim and hem tabs stay intact.
-    for label in np.unique(labels):
-        own = labels == label
-        block = np.unique(np.round(points[own], 5), axis=0)
-        if len(block) > 8 or np.ptp(block[:, 0]) > .025 * source_height:
-            continue
-        side = 'l' if block[:, 0].mean() > 0 else 'r'
-        if (abs(block[:, 0].mean()) > .23 * source_height
-                and block[:, 1].min() < source[side][1][1] - .12 * source_height
-                and block[:, 1].max() < source[side][1][1]):
-            keep &= ~own[triangles].any(axis=1)
+    keep &= ~loose_ties(points, triangles, labels, source, source_height)
     keep, cut_fragments = drop_cut_fragments(out, triangles, keep, labels, rig.fit_scale)
     import equipment_seams
     joints, weights = equipment_seams.smooth_skin(out, triangles[keep], joints, weights, len(rig.joint_names), strength=2.)
@@ -1321,7 +1374,7 @@ def clip_lining_neckline(points, faces, scale):
     """
     # Only the central throat is open. A horizontal ceiling across the arms
     # amputates the shoulder roof and leaves a hole behind raised sleeves.
-    height = (1.40 + 1.5 * np.maximum(0., np.abs(points[:, 0]) / scale - .08)) * scale
+    height = (LINING_NECKLINE + 1.5 * np.maximum(0., np.abs(points[:, 0]) / scale - .08)) * scale
     points, faces, _ = clip_open_sheet(points, faces, points[:, 1] - height)
     return points, faces
 
@@ -1367,9 +1420,12 @@ def wrist_cover(rig):
     lies inside the cover. A wrist triangle can reach past its centre by
     2.5 cm on the male body, so a cover edge on the lining's own plane hid skin
     beyond the lining and the cuff showed a fringe of holes at the hand. The
-    edge is therefore the nearest centre of any band triangle that crosses
-    the lining's plane. Skin between it and the plane stays, and
-    `lining` keeps it inside the sleeve lining.
+    edge is therefore just short of the nearest centre of any band triangle
+    that crosses the lining's plane. Skin between it and the plane stays, and
+    `lining` keeps it inside the sleeve lining. Half a millimetre short: on
+    the centre itself, that triangle sat on the cover's strict edge, kept on
+    the Human body and cut on a race body whose rest skeleton differs by a few
+    micrometres (torso_body_cover.gd's face-for-face match, 2026-10-17).
     """
     cut = lining_wrist(rig)
     faces = rig.faces
@@ -1377,7 +1433,7 @@ def wrist_cover(rig):
     centre = corner.mean(axis=1)
     band = (centre[:, 1] > .95 * rig.fit_scale) & (centre[:, 1] < 1.535 * rig.fit_scale)
     crossing = band & (np.abs(corner[:, :, 0]).max(axis=1) > cut) & (np.abs(centre[:, 0]) < cut)
-    return float(min(cut, np.abs(centre[crossing, 0]).min())) if crossing.any() else cut
+    return float(min(cut, np.abs(centre[crossing, 0]).min() - .0005 * rig.fit_scale)) if crossing.any() else cut
 
 
 def lining(rig, armour, triangles, binding_rig=None):
@@ -1601,13 +1657,23 @@ def build(source, out, rig, kind='cuirass', label='Remapped armour',
     body_file = io.RACES / f'{design_rig.source_slug}.glb'
     fit = design_fit.override(source, design_rig, body_file if body_file.exists() else None)
     if fit is not None:
-        # The set's design fit supplies the shell; backing and packing follow below.
-        points, joints, weights = fit['positions'], fit['joints'], fit['weights']
-        keep = design_fit.keep_triangles(fit, original_faces)
+        # The set's design fit supplies the shell; its sleeves are bound with
+        # the arm field (design_fit.bind_sleeves). Backing and packing follow below.
+        points, joints, weights, sewn = design_fit.bind_sleeves(fit, design_rig, original_faces)
+        fit = dict(fit, positions=points)
+        canon_raw, edges_raw, count_raw = io._weld(raw, original_faces)
+        labels = io._components(edges_raw, count_raw)[canon_raw]
+        ties = loose_ties(raw, original_faces, labels,
+                          source_skeleton(raw, original_faces), np.ptp(raw[:, 1]))
+        buried = buried_fragments(points, original_faces, labels, design_rig)
+        keep = design_fit.keep_triangles(fit, original_faces) & sewn & ~ties & ~buried
         report = {'designFit': {'file': fit['file'], 'sha256': fit['sha256']},
                   'openedSeamTriangles': int((~keep).sum()),
                   'passes': [{'name': 'design_fit', 'file': fit['file'],
-                              'openedTriangles': int((~keep).sum())}]}
+                              'openedTriangles': int((~keep).sum()),
+                              'sleeveBridgesOpened': int((~sewn).sum()),
+                              'looseTiesRemoved': int(ties.sum()),
+                              'buriedFragmentsRemoved': int(buried.sum())}]}
     else:
         points, joints, weights, keep, report = remap(
             raw, surface.indices.reshape(-1, 3), design_rig, lift,
@@ -1661,8 +1727,9 @@ def build(source, out, rig, kind='cuirass', label='Remapped armour',
         liner = glb.primitive(p, n, uv, idx, liner_mat, joints=j, weights=w, weight_floats=True)
     glb.mesh(label, [primitive], skin=0)
     glb.mesh('GeneratedArmorBacking', [liner], skin=0)
-    # The runtime hides the body up to wrist_cover, short of the lining's end.
-    cover = [.95, 1.535, wrist_cover(rig) / rig.fit_scale]
+    # The runtime hides the body up to wrist_cover, short of the lining's end,
+    # and keeps the throat skin above the lining's open neckline.
+    cover = [.95, 1.535, wrist_cover(rig) / rig.fit_scale, LINING_NECKLINE]
     glb.doc['meshes'][-1]['extras'] = {'bodyCover': cover}
     report['passes'].append({'name': 'fitted_backing', 'vertices': len(p),
                              'triangles': len(idx)//3, 'bodyCover': cover})

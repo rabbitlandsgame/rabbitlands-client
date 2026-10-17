@@ -39,6 +39,9 @@ its clearance clears (a boot shaft clears the default boot, not the trouser
 leg it hides).  ``ground`` seats separate boots' soles in the rest pose where
 limb_head_remap seats them (seat_soles).  ``tuck_into`` layers one piece
 inside another of the same set, such as trouser legs inside the boots (tuck).
+Later the same day, after the owner's review: ``conform`` lets a coat front
+follow the chest it covers on the bodies it names (conform), and ``drape``
+hangs tails from the belt instead of binding them to the leg behind (drape).
 
 The output per source is ``<source>.npz``: rest positions in glTF axes,
 four joint names and weights per vertex, and a keep mask for triangles
@@ -65,7 +68,10 @@ CLIENT = TOOLS.parent.parent
 LIBRARY = CLIENT / "godot-client/assets/actors/native/shared/Universal_Animation_Library.glb"
 POSEKIT = TOOLS / "shared_cape/posekit.py"
 SURFACES = ("body", "wardrobe_shirt", "wardrobe_pants", "wardrobe_boots")
-FORMAT = 1
+#: 2 (2026-10-17): adds arm_share and the idle skinning matrices (skin).
+FORMAT = 2
+#: Blender (x, y, z) -> glTF (x, z, -y), as a 4x4 change of basis.
+AXES = np.array([[1., 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0], [0, 0, 0, 1]])
 
 
 def args_after_dashes():
@@ -353,6 +359,69 @@ def fit_piece(body, P, tris, ps):
     return out, w, dom, report
 
 
+def conform(body, posed, tris, w, ps):
+    """Let a coat front follow the chest under it instead of hanging flat off it.
+
+    Added 2026-10-17 (owner review note 8: the female chest reads flat in every
+    fit).  The girth and shift of a trunk bone are one similarity, so a coat
+    drawn for a flat chest keeps its flat front: on the female body it clears
+    the bust apex by nothing (the skin crosses it there) and stands 3-4 cm
+    off the upper chest and the waist, and runs straight from the collar to the
+    belt.  ``conform`` (opt-in, and only on the bodies it names) measures,
+    on a 1 cm grid in front of the chest (``region``: x half-width, z from/to),
+    the outermost trunk art against the skin, and moves the art front to back
+    by the difference between that gap and the gap clamped to
+    [``clear``, ``max_gap``] -- out at the apex, in above and below it --
+    capped at ``max_out`` / ``max_in``, smoothed (``sigma``) and faded at the
+    region's edges.  A plate that stands well off the body keeps its standoff:
+    the clamp is taken above the quarter of the grid that is closest to the
+    skin (its 25th-percentile gap, less ``clear``), so the plate takes the
+    chest's shape instead of being drawn in by the cap all over.  Every layer
+    at a grid point moves by the same amount, so straps stay on the coat;
+    sleeves (the limb bones' share of ``w``) and the back do not move.
+    Returns the conformed shell and a report.
+    """
+    c = ps["conform"]
+    half, z0, z1 = (float(v) for v in c.get("region", (.17, 1.08, 1.44)))
+    clear, gmax = float(c.get("clear", .012)), float(c.get("max_gap", .022))
+    dmin, dmax = -float(c.get("max_in", .015)), float(c.get("max_out", .03))
+    limb = np.array([bool(b.get("limb")) for b in ps["bones"]])
+    trunk = w[:, ~limb].sum(1) if (~limb).any() else np.ones(len(posed))
+    faces = tris[np.all(trunk[tris] > .5, axis=1)]
+    art = BVHTree.FromPolygons([Vector(p) for p in posed], faces.tolist())
+    xs = np.arange(-half, half + 1e-9, .01); zs = np.arange(z0, z1 + 1e-9, .01)
+    G = np.zeros((len(zs), len(xs))); M = np.zeros_like(G)
+    for i, z in enumerate(zs):
+        for j, x in enumerate(xs):
+            o = Vector((x, -.5, z)); d = Vector((0, 1, 0))
+            ha, hs = art.ray_cast(o, d, 1.), body.bvh.ray_cast(o, d, 1.)
+            if ha[0] is None or hs[0] is None:
+                continue
+            gap = hs[3] - ha[3]  # art in front of the skin by this much
+            if gap < -.05 or gap > .12:
+                continue  # an opening or something that is not the coat front
+            G[i, j] = gap; M[i, j] = 1.
+    base = max(0., float(np.percentile(G[M > 0], 25)) - clear) if M.any() else 0.
+    D = np.where(M > 0, np.clip(np.clip(G - base, clear, gmax) + base - G, dmin, dmax), 0.)
+    # normalised gaussian smoothing over the valid cells
+    k = np.exp(-.5 * (np.arange(-6, 7) * .01 / float(c.get("sigma", .025))) ** 2)
+    blur = lambda a: np.apply_along_axis(lambda r: np.convolve(r, k, "same"), 0,
+                                         np.apply_along_axis(lambda r: np.convolve(r, k, "same"), 1, a))
+    Ds = blur(D * M) / np.maximum(blur(M), 1e-6)
+    sm = lambda x, e0, e1: (lambda t: t * t * (3 - 2 * t))(np.clip((x - e0) / (e1 - e0), 0., 1.))
+    out = posed.copy()
+    front = sm(.045 - posed[:, 1], .02, .06) * trunk  # body centre at y +.045 (glTF z -.045)
+    edge = (sm(-np.abs(posed[:, 0]), -half, -half + .04) * sm(posed[:, 2], z0, z0 + .05)
+            * (1 - sm(posed[:, 2], z1 - .05, z1)))
+    ii = np.clip(np.round((posed[:, 2] - z0) / .01).astype(int), 0, len(zs) - 1)
+    jj = np.clip(np.round((posed[:, 0] + half) / .01).astype(int), 0, len(xs) - 1)
+    move = Ds[ii, jj] * front * edge
+    out[:, 1] -= move  # forward is -Y
+    return out, {"cells": int(M.sum()), "standoff_mm": round(1000 * base, 1),
+                 "out_mm": round(1000 * float(move.max()), 1),
+                 "in_mm": round(1000 * float(-move.min()), 1)}
+
+
 def welded_graph(P, tris):
     """Coincident vertices as one node: (vertex -> node, node count, unique node edges)."""
     keys = np.round(P / 1e-5).astype(np.int64)
@@ -437,6 +506,65 @@ def seat_soles(body, P, rest, sink=0.004):
     return shifts
 
 
+def components(P, tris):
+    """Welded connected component of each vertex."""
+    canon, n, pairs = welded_graph(P, tris)
+    parent = np.arange(n)
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]; x = parent[x]
+        return x
+    for a, b in pairs:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+    return np.array([find(c) for c in range(n)])[canon]
+
+
+def drape(body, P, tris, top, tw, ps):
+    """Weight hanging panels as cloth from the belt, not as the leg behind them.
+
+    Bound from the nearest body surface, a tail hanging behind the legs takes
+    thigh weights above the knee and calf weights below it, so it creases at
+    the knee every stride as if sewn to the leg.  Each ``drape`` entry names a
+    design-space ``box``; every welded component inside it hangs from
+    ``hang`` (default pelvis) at the top and follows its side's thigh (the
+    ``sides`` entry for the component's x sign) up to ``follow`` of the way by
+    60% of the drop, with only ``calf`` of the calf at the hem, so it swings
+    with the stride in one gentle curve.  The drop runs over all of a side's
+    components together, so a trim strip at the hem weighs as the hem.
+    Positions are untouched; the rest pose is solved from these weights.
+    Returns the vertices draped per entry.
+    """
+    comp = components(P, tris)
+    smooth = lambda x, e0, e1: (lambda t: t * t * (3 - 2 * t))(np.clip((x - e0) / (e1 - e0), 0., 1.))
+    report = []
+    for d in ps["drape"]:
+        lo, hi = (np.array(v, float) for v in d["box"])
+        hang = body.index[d.get("hang", "pelvis")]
+        follow, calf = float(d.get("follow", .8)), float(d.get("calf", .15))
+        side = {"+": np.zeros(len(P), bool), "-": np.zeros(len(P), bool)}
+        for c in np.unique(comp):
+            own = comp == c
+            if np.all(P[own] >= lo) and np.all(P[own] <= hi):
+                side["+" if P[own, 0].mean() >= 0 else "-"] |= own
+        for sign, own in side.items():
+            if not own.any():
+                continue
+            thigh, shin = (body.index[b] for b in d["sides"][sign])
+            z = P[own, 2]
+            a = (z.max() - z) / max(float(np.ptp(z)), 1e-6)
+            ft, fc = follow * smooth(a, 0., .6), calf * smooth(a, .6, 1.)
+            rows = np.flatnonzero(own)
+            top[rows] = hang; tw[rows] = 0.
+            tw[rows, 0] = 1 - ft - fc
+            top[rows, 1], tw[rows, 1] = thigh, ft
+            top[rows, 2], tw[rows, 2] = shin, fc
+        report.append({s: int(o.sum()) for s, o in side.items()})
+    return report
+
+
 def skin_weights(body, P, edges, canon, dom, ps, neighbours=2, smooth=3, rigid=250):
     """Nearest posed body surface weights, scoped per design bone, smoothed, plates rigid."""
     W = np.zeros((len(P), len(body.bones)))
@@ -507,15 +635,19 @@ def main():
         P = np.array([(mesh_obj.matrix_world @ v.co)[:] for v in me.vertices])
         tris = np.array([t.vertices[:] for t in me.loop_triangles])
         posed, w, dom, report = fit_piece(body, P, tris, ps)
+        if "conform" in ps and args.body.stem in ps["conform"].get("bodies", []):
+            posed, report["conform"] = conform(body, posed, tris, w, ps)
         edges = np.array([e.vertices[:] for e in me.edges])
         solved[piece] = {"src": src_path, "P": P, "tris": tris, "edges": edges, "posed": posed, "dom": dom,
-                         "report": report}
+                         "w": w, "report": report}
 
     def finish(piece):
         ps, sv = spec["pieces"][piece], solved[piece]
         posed, report = sv["posed"], sv["report"]
         canon = np.unique(np.round(posed / 1e-5).astype(np.int64), axis=0, return_inverse=True)[1].ravel()
         top, tw, rigid = skin_weights(body, posed, sv["edges"], canon, sv["dom"], ps)
+        if ps.get("drape"):
+            report["drape_vertices"] = drape(body, sv["P"], sv["tris"], top, tw, ps)
         Mv = np.einsum("nk,nkij->nij", tw, body.skin[top])
         rest = np.einsum("nij,nj->ni", np.linalg.inv(Mv), np.c_[posed, np.ones(len(posed))])[:, :3]
         if ps.get("ground"):
@@ -545,11 +677,18 @@ def main():
         keep = stretch < float(ps.get("max_stretch", 2.5))
         # Blender Z-up -> glTF Y-up (the rig's axes)
         to_gltf = lambda a: np.c_[a[:, 0], a[:, 2], -a[:, 1]]
+        # Each vertex's share of each arm: torso_remap re-binds sleeves on it
+        # (design_fit.bind_sleeves), re-inverting the idle pose with `skin`.
+        names = [b["name"] for b in ps["bones"]]
+        arm_share = np.stack([sv["w"][:, [i for i, n in enumerate(names) if n.endswith("arm_" + side)]].sum(1)
+                              for side in ("l", "r")], 1)
         out = args.out / (ps["source"] + ".npz")
         np.savez_compressed(out, format=FORMAT, positions=to_gltf(rest).astype(np.float64),
                             posed=to_gltf(posed), joint_names=np.array(body.bones),
                             joints=sv["top"].astype(np.uint16), weights=sv["tw"].astype(np.float64),
-                            keep=keep, scale=float(ps["scale"]), source_sha256=digest(src_path),
+                            keep=keep, scale=float(ps["scale"]), arm_share=arm_share,
+                            skin=np.einsum("ij,bjk,kl->bil", AXES, body.skin, AXES.T),
+                            source_sha256=digest(src_path),
                             body_sha256=digest(args.body), spec_sha256=digest(args.spec))
         summary["pieces"][piece] = {"source": ps["source"], "vertices": len(P), "triangles": len(tris),
                                     "opened": int((~keep).sum()), "rigidPlates": sv["rigid"],

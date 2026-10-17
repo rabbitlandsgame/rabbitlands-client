@@ -1,83 +1,89 @@
 {
- "format": 1,
+ "format": 2,
  "spec": "ranger.json",
- "spec_sha256": "6b3af88006f7bf0d30a84e57890689203178abcfa659a7477e1eb9b28e34210e",
+ "spec_sha256": "237758e9d668a9f051b6e2d733130e291f602a8a1fb1699f72877909885f2265",
  "body": "luminous_female.glb",
  "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
  "pose": "Idle_Subtle",
- "tool_sha256": "be2702e946860c1d0a9bfb33d73a89f519c9aef9ec79dae7d237d9599366d24e",
+ "tool_sha256": "40a0d22ba79322e7016fadeb5b1b4d3dae311fc0d0ebb23b1584d2c015798c11",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
    "source": "Eight_leather_ranger_torso_designs__r01_c02.glb",
    "vertices": 1782,
    "triangles": 1498,
-   "opened": 107,
+   "opened": 16,
    "rigidPlates": 16,
    "bones": {
     "trunk_lower": {
      "k": 1.001,
-     "rays": 1511,
+     "rays": 1617,
      "shift_mm": [
-      2.8,
-      -15.5,
-      -2.6
+      4.5,
+      -15.0,
+      -2.4
      ],
      "girth": 1.096
     },
     "trunk_upper": {
      "k": 1.0,
-     "rays": 1142,
+     "rays": 1109,
      "shift_mm": [
-      1.5,
+      1.2,
       -48.2,
       5.4
      ],
-     "girth": 1.056
+     "girth": 1.061
     },
     "upperarm_l": {
      "k": 1.118,
-     "rays": 203,
+     "rays": 389,
      "shift_mm": [
-      2.5,
-      -5.5,
-      0.3
+      4.8,
+      -9.2,
+      0.7
      ],
      "girth": 1.0
     },
     "lowerarm_l": {
      "k": 1.065,
-     "rays": 389,
+     "rays": 419,
      "shift_mm": [
-      -7.8,
-      -5.1,
-      -0.0
+      -7.5,
+      -7.3,
+      0.8
      ],
-     "girth": 1.081
+     "girth": 1.083
     },
     "upperarm_r": {
      "k": 1.118,
-     "rays": 177,
+     "rays": 368,
      "shift_mm": [
-      -2.6,
-      6.0,
-      0.8
+      3.1,
+      -0.0,
+      -0.7
      ],
      "girth": 1.0
     },
     "lowerarm_r": {
      "k": 1.065,
-     "rays": 684,
+     "rays": 704,
      "shift_mm": [
-      9.8,
-      -2.6,
-      -1.4
+      10.0,
+      -4.0,
+      -1.0
      ],
-     "girth": 1.118
+     "girth": 1.103
+    },
+    "conform": {
+     "cells": 979,
+     "standoff_mm": 7.2,
+     "out_mm": 16.5,
+     "in_mm": 16.3
     }
    },
    "out": "Eight_leather_ranger_torso_designs__r01_c02.glb.npz",
-   "sha256": "48949f2f1f48b1323bf5b3d67bd10ff9d106da48fbe5739fe98e39013c93b328"
+   "sha256": "494eb74cfe31b10fbdbcd68a7ff92faed99eabb2213d3fd0f2b7c86f378598d6"
   },
   "legs": {
    "source": "Eight_rugged_ranger_legwear_designs__r01_c04.glb",
@@ -143,7 +149,7 @@
     }
    },
    "out": "Eight_rugged_ranger_legwear_designs__r01_c04.glb.npz",
-   "sha256": "da4e4777522a153e398d2fd0627c0026b284b51911e7b7e84181820742f7d7ef"
+   "sha256": "ac99e616004ed8630b4c564409f7eb674d4a97b21003671050fe2e4bec6532c8"
   },
   "boots": {
    "source": "Eight_frontier_boot_designs__r01_c03.glb",
@@ -198,7 +204,7 @@
     }
    },
    "out": "Eight_frontier_boot_designs__r01_c03.glb.npz",
-   "sha256": "8b322bd3beb7432ee9b1589b493047fdda6a5c2463ac3bc0d3a712e5ae5ec381"
+   "sha256": "05bf21097c4b9bc0bfe724a3c7fe651e6b44d3c1292bad229e95ce8933865b8f"
   }
  }
 }

@@ -31,7 +31,7 @@ func _check_minimal_extras_reader() -> void:
 	var torso := Extras.read(TORSO)
 	var backing := torso.get("GeneratedArmorBacking", {}) as Dictionary
 	var cover := backing.get("bodyCover", []) as Array
-	_expect(cover.size() == 3 and float(cover[0]) > 0.0,
+	_expect(cover.size() >= 3 and float(cover[0]) > 0.0,
 		"the JSON-only reader recovers fitted torso coverage")
 	var helm := Extras.read(HELM)
 	var covers_hair := false
@@ -143,7 +143,7 @@ func _check_external_fallback() -> void:
 	var has_cover := false
 	for piece_value: Variant in pieces:
 		var cover: Array = (piece_value as Dictionary).get("body_cover", []) as Array
-		has_cover = has_cover or cover.size() == 3
+		has_cover = has_cover or cover.size() >= 3
 	_expect(has_cover,
 		"external equipment metadata survives without a duplicate mesh import")
 	if scene != null:

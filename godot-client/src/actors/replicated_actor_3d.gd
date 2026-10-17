@@ -2285,6 +2285,7 @@ func _refresh_wardrobe_cover() -> void:
 			wardrobe_only = true
 			break
 	var cover_regions: Array = []
+	var open_throat := 0.0
 	var fitted_legs := false
 	var fitted_boots := false
 	var ranger_paired_lower := (
@@ -2298,6 +2299,8 @@ func _refresh_wardrobe_cover() -> void:
 				cover_regions.append(Vector3(TorsoBodyCover.LOW, TorsoBodyCover.HIGH, TorsoBodyCover.WRIST))
 			elif piece.has_meta("generated_body_cover"):
 				cover_regions.append(piece.get_meta("generated_body_cover"))
+				if piece.has_meta("generated_open_throat"):
+					open_throat = float(piece.get_meta("generated_open_throat"))
 				if part == 4:
 					fitted_legs = true
 				if part == 6:
@@ -2335,7 +2338,7 @@ func _refresh_wardrobe_cover() -> void:
 				not cover_regions.is_empty() or mask_to_wardrobe_neckline,
 				_native_skeleton.global_transform.affine_inverse() * mesh_node.global_transform,
 				rig_fit_scale(), cover_regions,
-				rig_name().begins_with("ssarathi_"), mask_to_wardrobe_neckline)
+				rig_name().begins_with("ssarathi_"), mask_to_wardrobe_neckline, open_throat)
 		if wardrobe_only and surface_name == "wardrobe_shirt" \
 				and _native_skeleton != null:
 			WARDROBE_SHIRT_FIT.apply(mesh_node, _native_skeleton)
@@ -2591,8 +2594,12 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		if part == BODY_PART and str(piece.get("name", "")) == TorsoBodyCover.BACKING_NAME:
 			clone.set_meta("replaces_torso_body", true)
 			var cover: Array = piece.get("body_cover", []) as Array
-			if cover.size() == 3:
+			if cover.size() == 3 or cover.size() == 4:
 				clone.set_meta("generated_body_cover", _vector3(cover, Vector3.ZERO))
+			# The lining's open neckline, where the throat skin stays
+			# (TorsoBodyCover.OPEN_THROAT_SLOPE).
+			if cover.size() == 4 and float(cover[3]) > 0.0:
+				clone.set_meta("generated_open_throat", float(cover[3]))
 		if (part == 4 and str(piece.get("name", "")) == "GeneratedLegBacking") or (part == 6 and str(piece.get("name", "")) == "GeneratedBootBacking"):
 			var cover: Array = piece.get("body_cover", []) as Array
 			if cover.size() == 3:

@@ -21,6 +21,7 @@ func expect(ok: bool, message: String) -> void:
 func verify_body(actor: ReplicatedActor3D, active: Dictionary, label: String) -> void:
 	var regions: Array = []
 	var backing_parts: Array = []
+	var open_throat := 0.0
 	for part: int in active:
 		for piece: Node in actor._equipment_nodes.get(part, []):
 			if piece.has_meta("replaces_torso_body") and not piece.has_meta("generated_body_cover"):
@@ -29,6 +30,8 @@ func verify_body(actor: ReplicatedActor3D, active: Dictionary, label: String) ->
 			if piece.has_meta("generated_body_cover"):
 				regions.append(piece.get_meta("generated_body_cover"))
 				backing_parts.append(part)
+			if piece.has_meta("generated_open_throat"):
+				open_throat = float(piece.get_meta("generated_open_throat"))
 	for part: int in [4, 5, 6]:
 		expect(backing_parts.has(part) == active.has(part), label + " backing metadata for slot " + str(part))
 	var visible_boot_backings := 0
@@ -98,7 +101,7 @@ func verify_body(actor: ReplicatedActor3D, active: Dictionary, label: String) ->
 				if active.has(5) and instance.name.to_lower() == "wardrobe_shirt":
 					covered = covered or (center.y > 1.40 and center.y < 1.65 and absf(center.x) < .20)
 				var disposition := protected_face_disposition(instance, before, indices, i,
-					transform, actor.rig_fit_scale(), collar_cover, bridge_surface, covered)
+					transform, actor.rig_fit_scale(), collar_cover, bridge_surface, covered, open_throat)
 				if disposition == FACE_RETAIN:
 					covered = false
 				elif disposition == FACE_REMOVE:
@@ -202,7 +205,7 @@ func run() -> void:
 
 func protected_face_disposition(instance: MeshInstance3D, arrays: Array,
 		ids: PackedInt32Array, start: int, transform: Transform3D, fit: float,
-		collar_cover: bool, bridge_surface: bool, covered: bool) -> int:
+		collar_cover: bool, bridge_surface: bool, covered: bool, open_throat: float = 0.0) -> int:
 	if instance.name.to_lower() not in ["body", "char1", "mesh_node"] or instance.skin == null:
 		return FACE_DEFAULT
 	var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
@@ -235,6 +238,13 @@ func protected_face_disposition(instance: MeshInstance3D, arrays: Array,
 	# except the bridge's throat: in front of the canonical neck_01
 	# (0, 1.452, -.051) -> Head (0, 1.568, .011) axis a quarter of that weight
 	# keeps a bridge face.
+	# A torso naming its lining's open neckline (bodyCover's fourth value)
+	# keeps the throat in front of that axis within 13 cm of the midline, from
+	# 1 cm below the neckline, which rises 1.5 per metre beyond 8 cm.
+	if (neck_envelope and open_throat > 0.0 and absf(center.x) < .13
+			and center.z >= lerpf(-.051, .011, (center.y - 1.452) / (1.568 - 1.452))
+			and center.y > open_throat + 1.5 * maxf(0.0, absf(center.x) - .08) - .01):
+		return FACE_RETAIN
 	if (neck_envelope and bridge_surface
 			and center.z >= lerpf(-.051, .011, (center.y - 1.452) / (1.568 - 1.452))):
 		return FACE_RETAIN if lowest_corner_weight > .25 else FACE_REMOVE

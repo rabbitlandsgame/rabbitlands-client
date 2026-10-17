@@ -50,6 +50,22 @@ const NECK_AXIS_TOP := Vector3(0., 1.568, .011)
 ## neck and head, so they stay put, open edges and all.
 const WARDROBE_BRIDGE_RIM_MAX_Y := 1.50
 const BRIDGE_MATERIAL := "Shared neck bridge"
+## A torso built since 2026-10-17 names, as its bodyCover's fourth value, the
+## centre height of its fitted lining's open neckline (torso_remap's
+## LINING_NECKLINE). Inside the collar the whole-face test hides the Human's
+## throat faces up to the neck's own ring, 1.467 m on the male body and 1.456 m
+## on the female, while the lining stops at that neckline: under an open
+## collar the throat was neither body nor lining but a hole into the coat
+## (owner review 2026-10-17, notes 13 and 14), and from above a dark well
+## (note 7). With the value set, skin in front of the neck axis that lies above
+## the lining's neckline stays. The neckline rises as torso_remap cuts it,
+## OPEN_THROAT_SLOPE per metre beyond OPEN_THROAT_FLAT_HALF_WIDTH, and the kept
+## skin starts OPEN_THROAT_OVERLAP below it, behind the lining's edge, so no
+## slit opens between them. Pieces without the value are cut as before.
+const OPEN_THROAT_SLOPE := 1.5
+const OPEN_THROAT_FLAT_HALF_WIDTH := .08
+const OPEN_THROAT_HALF_WIDTH := .13
+const OPEN_THROAT_OVERLAP := .01
 const RACE_HEAD_MATERIAL := "Race head"
 
 static var _cache: Dictionary = {}
@@ -73,7 +89,7 @@ static func covers(point: Vector3, regions: Array = [], preserve_tail: bool = fa
 static func apply(instance: MeshInstance3D, enabled: bool,
 		to_rig: Transform3D, fit: float, regions: Array = [],
 		preserve_tail: bool = false,
-		mask_to_wardrobe_neckline: bool = false) -> void:
+		mask_to_wardrobe_neckline: bool = false, open_throat: float = 0.0) -> void:
 	if not instance.has_meta("uncovered_body_mesh"):
 		if not enabled or instance.mesh == null:
 			return
@@ -101,17 +117,17 @@ static func apply(instance: MeshInstance3D, enabled: bool,
 				bone_name = skeleton.get_bone_name(bone_index)
 			if bone_name in [&"Head", &"neck_01"]:
 				protected_binds.append(bind)
-	var key := "%s|%s|%s|%s|%s|%s|%s" % [original.get_instance_id(), to_rig,
-		fit, regions, preserve_tail, protected_binds, mask_to_wardrobe_neckline]
+	var key := "%s|%s|%s|%s|%s|%s|%s|%s" % [original.get_instance_id(), to_rig,
+		fit, regions, preserve_tail, protected_binds, mask_to_wardrobe_neckline, open_throat]
 	if not _cache.has(key):
 		_cache[key] = cut(original, to_rig, fit, regions, preserve_tail,
-			protected_binds, mask_to_wardrobe_neckline)
+			protected_binds, mask_to_wardrobe_neckline, open_throat)
 	instance.mesh = _cache[key] as Mesh
 
 static func cut(original: Mesh, to_rig: Transform3D, fit: float,
 		regions: Array = [], preserve_tail: bool = false,
 		protected_binds: PackedInt32Array = PackedInt32Array(),
-		mask_to_wardrobe_neckline: bool = false) -> ArrayMesh:
+		mask_to_wardrobe_neckline: bool = false, open_throat: float = 0.0) -> ArrayMesh:
 	var result := ArrayMesh.new()
 	# Pants and boots also request body coverage, but must never activate the
 	# shaped collar mask.  Only a region that reaches the lower neck opts into
@@ -157,7 +173,7 @@ static func cut(original: Mesh, to_rig: Transform3D, fit: float,
 		entry["kept"] = _filtered_indices(entry["source"], entry["vertices"],
 			entry["bones"], entry["weights"], entry["stride"], to_rig, fit,
 			regions, preserve_tail, protected_binds, shaped_neck_active,
-			mask_to_wardrobe_neckline, entry["detached"], entry["bridge"])
+			mask_to_wardrobe_neckline, entry["detached"], entry["bridge"], open_throat)
 	if mask_to_wardrobe_neckline:
 		_inset_wardrobe_neckline_rim(passes, welded, to_rig, fit)
 	for surface: int in range(original.get_surface_count()):
@@ -171,7 +187,7 @@ static func cut(original: Mesh, to_rig: Transform3D, fit: float,
 				source_lods[distance] as PackedInt32Array, entry["vertices"],
 				entry["bones"], entry["weights"], entry["stride"], to_rig, fit,
 				regions, preserve_tail, protected_binds, shaped_neck_active,
-				mask_to_wardrobe_neckline, entry["detached"], entry["bridge"])
+				mask_to_wardrobe_neckline, entry["detached"], entry["bridge"], open_throat)
 		var blend_arrays: Array = original.surface_get_blend_shape_arrays(surface)
 		# Preserve surface numbering and its material overrides even when a
 		# whole wardrobe surface is covered. A zero-area triangle draws nothing.
@@ -199,7 +215,7 @@ static func _filtered_indices(source: PackedInt32Array,
 		protected_binds: PackedInt32Array, shaped_neck_active: bool,
 		mask_to_wardrobe_neckline: bool = false,
 		detached_neck_vertices: Dictionary = {},
-		bridge_surface: bool = false) -> PackedInt32Array:
+		bridge_surface: bool = false, open_throat: float = 0.0) -> PackedInt32Array:
 	var kept := PackedInt32Array()
 	for index: int in range(0, source.size(), 3):
 		if (mask_to_wardrobe_neckline
@@ -209,7 +225,7 @@ static func _filtered_indices(source: PackedInt32Array,
 			continue
 		if _keeps_face(source, index, vertices, bones, weights, stride, to_rig,
 				fit, regions, preserve_tail, protected_binds,
-				shaped_neck_active, mask_to_wardrobe_neckline, bridge_surface):
+				shaped_neck_active, mask_to_wardrobe_neckline, bridge_surface, open_throat):
 			kept.append_array(source.slice(index, index + 3))
 	return kept
 
@@ -218,7 +234,8 @@ static func _keeps_face(source: PackedInt32Array, index: int,
 		weights: PackedFloat32Array, stride: int, to_rig: Transform3D,
 		fit: float, regions: Array, preserve_tail: bool,
 		protected_binds: PackedInt32Array, shaped_neck_active: bool,
-		mask_to_wardrobe_neckline: bool, bridge_surface: bool = false) -> bool:
+		mask_to_wardrobe_neckline: bool, bridge_surface: bool = false,
+		open_throat: float = 0.0) -> bool:
 	var center := (vertices[source[index]] + vertices[source[index + 1]]
 		+ vertices[source[index + 2]]) / 3.0
 	var head_weight := 0.0
@@ -262,6 +279,8 @@ static func _keeps_face(source: PackedInt32Array, index: int,
 		and rest_center.y > NECK_ENVELOPE_MIN_Y
 		and absf(rest_center.x) < NECK_ENVELOPE_HALF_WIDTH)
 	var outer_head := head_weight > .5 and not neck_envelope
+	if neck_envelope and not mask_to_wardrobe_neckline and keeps_open_throat(rest_center, open_throat):
+		return true
 	# The bridge's throat inside an armour collar keeps its blended faces down to
 	# FRONT_BRIDGE_MIN_WEIGHT. The wardrobe-only neckline owns its own front dip.
 	if (neck_envelope and bridge_surface and not mask_to_wardrobe_neckline
@@ -274,6 +293,16 @@ static func _keeps_face(source: PackedInt32Array, index: int,
 	return ((all_corners_protected if neck_envelope else
 		(all_corners_protected if shaped_neck_active else outer_head)) or (not neck_envelope
 		and not covered))
+
+## True for rest-space skin the open throat keeps (see OPEN_THROAT_SLOPE):
+## in front of the neck axis, above the lining's neckline less the overlap.
+static func keeps_open_throat(rest_center: Vector3, open_throat: float) -> bool:
+	if open_throat <= 0.0 or absf(rest_center.x) >= OPEN_THROAT_HALF_WIDTH:
+		return false
+	var neckline := open_throat + OPEN_THROAT_SLOPE * maxf(
+		0.0, absf(rest_center.x) - OPEN_THROAT_FLAT_HALF_WIDTH)
+	return (rest_center.z >= _neck_axis_z(rest_center.y)
+		and rest_center.y > neckline - OPEN_THROAT_OVERLAP)
 
 ## Depth of the canonical neck_01 -> Head axis at a rest-space height.
 static func _neck_axis_z(y: float) -> float:

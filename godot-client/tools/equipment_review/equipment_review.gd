@@ -4,6 +4,8 @@ extends SceneTree
 ## Launched by review-equipment.bat:
 ##   Godot --path godot-client --script res://tools/equipment_review/equipment_review.gd -- [options]
 ## Options: --race luminous --sex male --set "<set name>" --clip Idle_Subtle --review-dir <dir>
+##   --equipment <equipment.json> (a copy pointing at candidate GLBs)
+##   --replay <notes.jsonl> [--notes 7,13] [--out <dir>] (re-shoot noted views, then quit)
 ## Everything else lives in review_app.gd.
 
 const ReviewApp := preload("res://tools/equipment_review/review_app.gd")
