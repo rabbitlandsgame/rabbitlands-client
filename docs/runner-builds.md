@@ -8,9 +8,56 @@ Serialize complete release workflows with one repository-wide concurrency group
 and `cancel-in-progress: false`; only the two platform jobs within a single
 release should stage into the draft concurrently.
 
-This prepares the build process for Actions. It does not install a workflow,
-change repository settings, provision a signing secret, publish a release, or
-deploy the server's client-update policy.
+The workflow is `.github/workflows/desktop-release.yml`, named **Build desktop
+release**. It builds both desktop platforms on GitHub's hosted runners, with
+Inno Setup 6 for Windows, and leaves the verified result as a draft. It does not
+publish the release or deploy the server's client-update policy.
+
+## Enable and run the workflow
+
+One-time maintainer setup:
+
+1. In the repository's [Actions secrets settings](https://github.com/rabbitlandsgame/rabbitlands-client/settings/secrets/actions),
+   create `CLIENT_UPDATE_SIGNING_KEY` containing the existing private RSA PEM key
+   that matches `godot-client/data/update_public.pem`. Do not generate a replacement
+   key or put the key in Git, a workflow file, an issue, or an artifact. This is
+   an explicit transfer of the private key to GitHub's encrypted Actions storage.
+2. Deliberately merge the release tooling and workflow into `master`. GitHub's
+   [manual trigger requires the workflow on the default branch](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
+   Check the complete `develop` promotion, including game changes, before merging.
+   The first merge itself starts a build.
+
+After activation:
+
+- **Automatic:** merging into `master` starts the workflow at that merge commit.
+  Direct pushes to `master` also start it. A push to `develop` does not.
+- **Manual:** open [Actions → Build desktop release](https://github.com/rabbitlandsgame/rabbitlands-client/actions/workflows/desktop-release.yml),
+  click **Run workflow**, choose **master** for the stable source or **develop**
+  for a test build, then click **Run workflow** again. Both platforms use that
+  run's exact commit, even if the branch advances during the build.
+- **Progress:** the run has a draft preparation job, separate Windows and Linux
+  jobs, and final verification. The summary links to the release downloads.
+- **Result:** review the current [draft release](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
+  Publication remains manual; the online installer's public download URLs require
+  publication before installation can be tested end to end.
+
+The workflow reuses the project's existing client draft or creates one when
+needed. Previously published downloads remain available while a new commit
+builds; finalization removes older compiled releases only after verifying both
+platforms. Rebuilding an already published commit requires first returning that
+release to draft, or selecting a newer source commit. Unrelated release entries
+are not selected for staging.
+
+Only one release workflow runs at a time. After failure, fix the cause and start
+a fresh manual run (or use GitHub's rerun controls). Previous downloads are not
+pruned by a failed platform build. Small receipts, disk reports and startup logs
+are retained as run artifacts for seven days; complete game folders are not.
+
+`setup_runner_tools.py` downloads Godot 4.7.2 and Inno Setup 6.7.3 from their
+official releases, checks pinned sizes and SHA-256 hashes, extracts only the
+job's release template, and removes downloaded archives before packaging.
+`runner-requirements.txt` pins the Python libraries tested with the tools.
+The existing local Inno Setup installation is unaffected.
 
 ## Disk budget
 
@@ -81,7 +128,7 @@ its ignored files and caches are included in the budget and may exceed it.
 
 Install Godot 4.7.2-stable and **only the release export template for the job's
 platform**. The Windows job also needs Inno Setup 6. Both jobs need Python with
-`numpy`, `Pillow` and `zstandard`, plus Git and GitHub CLI. Remove verified tool
+`numpy`, `Pillow`, `zstandard` and `cryptography`, plus Git and GitHub CLI. Remove verified tool
 download archives after extraction. Include every downloaded tool/template
 directory in `--tool-root`; the flag can be repeated. Keeping these downloads
 under one toolchain folder makes accounting straightforward.
@@ -99,8 +146,10 @@ staging destination.
 
 Signing still requires the existing private key matching
 `godot-client/data/update_public.pem`. Keep it outside both repositories and
-outside uploaded receipts/logs. Cloud provisioning of this key is a separate
-maintainer decision; these tools do not upload or configure secrets.
+outside uploaded receipts/logs. Hosted builds validate its public identity before
+downloading the toolchain, remove the secret from child-process environments,
+and delete their temporary key file on completion or failure. The build scripts
+do not upload or configure the Actions secret themselves.
 
 ## Build one platform
 

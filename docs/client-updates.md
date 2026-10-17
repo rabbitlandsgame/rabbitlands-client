@@ -156,7 +156,7 @@ by GitHub with the expected size and SHA-256 are reused. The script checks the
 remote asset list, upload states, sizes and SHA-256 checksums before publication; failures
 leave the draft unpublished. `--publish` marks the completed release as latest.
 Players can find it on the [client Releases page](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
-No GitHub Actions workflow is required.
+This local command remains available alongside the [hosted release workflow](runner-builds.md).
 
 After publishing, verify anonymous downloads and deploy the generated combined
 `client_updates.json` to the served server profile when ready to roll out the
@@ -258,5 +258,6 @@ For relevant download/retry changes, the optional local HTTPS harness is
 
 The runtime runner creates an isolated project, test keys, HTTPS server and
 certificate. Its fixtures never change an installed game or the production
-signing keys. No GitHub Actions workflows ship in this repository; these checks
-are manual and the full historical suites are not release gates.
+signing keys. These checks are manual, and the full historical suites are not
+release gates. The desktop release workflow runs the packaging checks for its
+selected source commit.

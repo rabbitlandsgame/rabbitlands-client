@@ -113,8 +113,11 @@ godot --headless --path godot-client --script res://tests/test_classic_storage.g
 ```
 
 `check_provenance.py` fails if an Eternal Lands map name or engine file format
-(`.elm`, `.e3d`, Cal3D, `.dds`, `.bmp`) appears anywhere in the tree. GitHub Actions and automatic merge checks are not configured. The retained
-tests are optional; run the focused checks relevant to a change.
+(`.elm`, `.e3d`, Cal3D, `.dds`, `.bmp`) appears anywhere in the tree. The retained
+tests are optional; run the focused checks relevant to a change. The
+[desktop release workflow](docs/runner-builds.md) builds signed Windows and
+Linux downloads after merges into `master` and supports manual runs. It does
+not impose the historical suites as merge checks.
 
 ## Maps
 
