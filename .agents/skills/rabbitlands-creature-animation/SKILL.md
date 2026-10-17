@@ -24,3 +24,5 @@ For authored cat-family pilots and native anatomical side/hinge fitting, read [n
 For grounded boar/tapir pilots, head/tusk strikes and collapse-frame singularities, read [native boar and tapir motion](references/native-boar-tapir-motion.md). The five reviewed sets and portable checks are documented in `docs/boar-motion.md`. Native anatomy, wrapper behavior and visual acceptance remain actor-specific.
 
 For rams, ibex, sheep, bison and yak, read [native hoofed motion](references/native-hoofed-motion.md). It covers anatomy-based forward frames, mirrored hoof lanes, native sole tilt, horn-supported collapse and actor-specific rig/coat repairs. The seven approved sets and portable checks are documented in `docs/caprine-motion.md`.
+
+For pony/horse rigs and tack, read [native equid motion](references/native-equid-motion.md). It covers whole-hoof ownership, saddle/bridle attachments, hanging-tail clearance, repaired-surface import witnesses and mount handoff. The approved Moor Pony behavior is documented in `docs/equid-motion.md`.
