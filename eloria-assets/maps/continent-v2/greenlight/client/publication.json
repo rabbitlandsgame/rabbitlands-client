@@ -2,23 +2,23 @@
  "region": "greenlight",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "cd09cdca934a47583ae50b2ce092f23b97b14a16c2c110e0a56bdff9bc1ec81a",
-  "sceneSha256": "316c46d98aeb718173e367743f1f89f327c8ddea40fc840407afaf82fa268686",
+  "sha256": "a5b47d24c15eeaaf2a9e4b2b8966499d9e2fccf2f4ffbe8c291b3cf8c23f0fd9",
+  "sceneSha256": "78c8728893fd4e717c3f7c37443d8e76905c5d656c98a082669efa182691402e",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/greenlight/greenlight.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "5ab95ad8dcfb4eaa1c7824ff87a7c3e69f892a2e6c2a67fce450fd47ab3f09bc",
+  "sidecarSha256": "0bc63b4bd895c17f6b8459c85f3ddf751e4ffcddad4aa62315144859c6e2f7aa",
   "collisionSha256": "ac88bf91ba342162ef201e2583b7715473e063377d56fc731e4d2bd1d9fa3da8",
   "servedGridSha256": "ee0041e9c2e463b5a5f1aa7faebdb60b2aa8175f36c00cf362f8b70606e06dae",
   "walkableCells": 238214,
   "openTiles": 57507,
-  "sourceSnapshotSha256": "cd09cdca934a47583ae50b2ce092f23b97b14a16c2c110e0a56bdff9bc1ec81a"
+  "sourceSnapshotSha256": "a5b47d24c15eeaaf2a9e4b2b8966499d9e2fccf2f4ffbe8c291b3cf8c23f0fd9"
  },
  "chunks": 72,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 50947120,
+  "total": 50994172,
   "max": 3520284,
   "over100MiB": []
  },
@@ -27,7 +27,7 @@
   "05_08": 41.0,
   "06_07": 43.2,
   "06_08": 197.0,
-  "06_09": 108.1,
+  "06_09": 108.2,
   "06_10": 11.2,
   "06_11": 11.1,
   "06_12": 11.1,
@@ -97,19 +97,19 @@
   "14_14": 11.0
  },
  "timings": {
-  "snapshot_s": 0.7,
+  "snapshot_s": 1.4,
   "terrain_s": 0.1,
   "water_s": 0.0,
   "overlays_s": 0.6,
   "bridges_s": 0.1,
-  "surface_glb_bytes": 123592668,
+  "surface_glb_bytes": 123667372,
   "walk_kit_nodes": 93,
   "library_s": 0.2,
   "harvest_nodes": 37,
   "chunks_s": 1.7,
-  "space_passes_s": 3.3
+  "space_passes_s": 3.6
  },
- "seconds": 13.2,
+ "seconds": 14.4,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 0,
@@ -140,25 +140,5 @@
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "certifiedTextureAliases": [
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/71d7dd0b736b117da5fac3e9f4ccb78a92fa225ec9f36e4b8cb16ff0f52fe119.jpg",
-   "sha256": "71d7dd0b736b117da5fac3e9f4ccb78a92fa225ec9f36e4b8cb16ff0f52fe119",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-driftwood-1.glb",
-   "sourceModelSha256": "33a187a9914e39ee3e96529326f8e3480fd2192a8f251ba9e158464d3bc7b61c"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/a1fee28b8bf81898429193eb466740fac8218ad7f9ebcef0d9f9d9f356c19135.jpg",
-   "sha256": "a1fee28b8bf81898429193eb466740fac8218ad7f9ebcef0d9f9d9f356c19135",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-driftwood-1.glb",
-   "sourceModelSha256": "33a187a9914e39ee3e96529326f8e3480fd2192a8f251ba9e158464d3bc7b61c"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/e756622340edb55cfaed2dcb9a246798ea95d930adad68b0958d3cdc81558ec1.jpg",
-   "sha256": "e756622340edb55cfaed2dcb9a246798ea95d930adad68b0958d3cdc81558ec1",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-driftwood-1.glb",
-   "sourceModelSha256": "33a187a9914e39ee3e96529326f8e3480fd2192a8f251ba9e158464d3bc7b61c"
-  }
- ]
+ }
 }

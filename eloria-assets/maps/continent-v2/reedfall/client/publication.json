@@ -2,49 +2,49 @@
  "region": "reedfall",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "af10a2ca6e7c73fc5a5168c0ce0c094d6d523209430a862febda9373fe8966c8",
-  "sceneSha256": "1f57451b44da7ce983cab08ad047f2bd1a825018a4efad92cac90ffdbee588a5",
+  "sha256": "87ada12425182383011848c88453f48714f4d09f31b1009a39f5141b0f717ccf",
+  "sceneSha256": "1321a67953914d7899e82b1f36e7293c13b962c5feb751d96b86205475d5763f",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/reedfall/reedfall.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "319ff27572d0ab1102d68da90b377152410aaf20f399acfec4f733b289be6bc4",
+  "sidecarSha256": "1314eaac7c8917640dcfb0fb0b5b651a66702f909e2ad979d19772fddbde889b",
   "collisionSha256": "84cd4372e6e4ce37c8195a3875c41824e158fe58b54f8c51e0e6cf48912b59b9",
   "servedGridSha256": "76507d6ce44bbeedc631268f8f08a372b0835af98a67bc7865a89a75fedb6661",
   "walkableCells": 477729,
   "openTiles": 117532,
-  "sourceSnapshotSha256": "af10a2ca6e7c73fc5a5168c0ce0c094d6d523209430a862febda9373fe8966c8"
+  "sourceSnapshotSha256": "87ada12425182383011848c88453f48714f4d09f31b1009a39f5141b0f717ccf"
  },
  "chunks": 38,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 27759656,
-  "max": 2536932,
+  "total": 28094904,
+  "max": 2539000,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
   "06_10": 25.6,
   "06_11": 43.5,
-  "06_12": 10.8,
+  "06_12": 21.5,
   "07_07": 22.9,
   "07_08": 18.9,
   "07_09": 71.9,
   "07_10": 70.6,
-  "07_11": 52.7,
-  "07_12": 55.3,
+  "07_11": 52.8,
+  "07_12": 66.0,
   "08_07": 100.2,
   "08_08": 169.7,
   "08_09": 27.5,
   "08_10": 88.0,
   "08_11": 35.8,
-  "08_12": 52.2,
+  "08_12": 60.3,
   "09_07": 69.6,
   "09_08": 187.2,
   "09_09": 70.1,
   "09_10": 117.4,
   "09_11": 93.4,
   "09_12": 24.1,
-  "10_07": 80.5,
+  "10_07": 80.6,
   "10_08": 221.1,
   "10_09": 168.6,
   "10_10": 75.9,
@@ -63,19 +63,19 @@
   "13_09": 10.8
  },
  "timings": {
-  "snapshot_s": 0.5,
+  "snapshot_s": 0.8,
   "terrain_s": 0.1,
   "water_s": 0.0,
   "overlays_s": 0.5,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 91067636,
+  "surface_glb_bytes": 91590244,
   "walk_kit_nodes": 8,
   "library_s": 0.2,
   "harvest_nodes": 57,
-  "chunks_s": 1.0,
-  "space_passes_s": 2.5
+  "chunks_s": 1.2,
+  "space_passes_s": 3.0
  },
- "seconds": 11.9,
+ "seconds": 14.0,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 7,
@@ -114,25 +114,5 @@
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "certifiedTextureAliases": [
-  {
-   "path": "godot-client/world_authoring/regions/manymouth_delta/assets/textures/d73e7f5403a7e01ebde6ee5a1d98f5a2ce2d5c307530504f556cddfd8a727c4c.jpg",
-   "sha256": "d73e7f5403a7e01ebde6ee5a1d98f5a2ce2d5c307530504f556cddfd8a727c4c",
-   "sourceModel": "godot-client/world_authoring/regions/manymouth_delta/assets/prototypes/kit-reed-raft-1.glb",
-   "sourceModelSha256": "f9d0026466d8d6953bc71de3d898aa4365ee04a7b0872e047ebf8ae64c525775"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/manymouth_delta/assets/textures/f3cfaee41daa0117762fb896c40dcc76237942ba9214be1d73176f8e6a17a894.jpg",
-   "sha256": "f3cfaee41daa0117762fb896c40dcc76237942ba9214be1d73176f8e6a17a894",
-   "sourceModel": "godot-client/world_authoring/regions/manymouth_delta/assets/prototypes/kit-reed-raft-1.glb",
-   "sourceModelSha256": "f9d0026466d8d6953bc71de3d898aa4365ee04a7b0872e047ebf8ae64c525775"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/manymouth_delta/assets/textures/fdb0dadb8acffab5ade5164c3bd9dff76ffdc36c6912b783a4118a1906a7ef47.jpg",
-   "sha256": "fdb0dadb8acffab5ade5164c3bd9dff76ffdc36c6912b783a4118a1906a7ef47",
-   "sourceModel": "godot-client/world_authoring/regions/manymouth_delta/assets/prototypes/kit-reed-raft-1.glb",
-   "sourceModelSha256": "f9d0026466d8d6953bc71de3d898aa4365ee04a7b0872e047ebf8ae64c525775"
-  }
- ]
+ }
 }

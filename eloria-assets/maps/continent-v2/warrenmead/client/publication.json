@@ -2,23 +2,23 @@
  "region": "warrenmead",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "cb1918ade2f6035743b9161c838eb6540a5dd0d9ebc1ba65676dff637b5eca78",
-  "sceneSha256": "1e2845860b785f146a04baa83493d3e2f458a7393cfc7ee67f442cd97869d10d",
+  "sha256": "f5af39fca39daabdeb52f894eeefde0ef825136047f8b00f727d9b429cbfb87e",
+  "sceneSha256": "5d1e25199411131bec2d8ca8fb8d20b3bf8946c689196ece4e02fa20fbbb4a6f",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/warrenmead/warrenmead.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "0b2c1203f1ad9e1a2434d0742c2a170385b3100137a24f02c113e2f3a1e45c8b",
+  "sidecarSha256": "8fed5d5e881cec21e24fca0496037929bc7550056c21a96e331a69fd681e34ce",
   "collisionSha256": "3647420da6243ec72f42669a52d066ab5ab10cd6933d6be659b598b7f498fdc8",
   "servedGridSha256": "a5caa315c36b5fa0223c8fd6112b8d775e4db2444a746336ccd031012af4cb04",
   "walkableCells": 481367,
   "openTiles": 118175,
-  "sourceSnapshotSha256": "cb1918ade2f6035743b9161c838eb6540a5dd0d9ebc1ba65676dff637b5eca78"
+  "sourceSnapshotSha256": "f5af39fca39daabdeb52f894eeefde0ef825136047f8b00f727d9b429cbfb87e"
  },
  "chunks": 50,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 28844596,
+  "total": 29014336,
   "max": 1422136,
   "over100MiB": []
  },
@@ -68,8 +68,8 @@
   "12_07": 18.8,
   "12_08": 10.8,
   "12_09": 10.9,
-  "12_10": 97.9,
-  "12_11": 75.4,
+  "12_10": 98.0,
+  "12_11": 75.5,
   "12_12": 54.6,
   "12_13": 58.8,
   "13_13": 37.8
@@ -78,16 +78,16 @@
   "snapshot_s": 0.9,
   "terrain_s": 0.1,
   "water_s": 0.0,
-  "overlays_s": 0.5,
+  "overlays_s": 0.6,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 168486888,
+  "surface_glb_bytes": 168756404,
   "walk_kit_nodes": 0,
-  "library_s": 0.3,
+  "library_s": 0.5,
   "harvest_nodes": 39,
-  "chunks_s": 1.6,
-  "space_passes_s": 2.9
+  "chunks_s": 1.8,
+  "space_passes_s": 3.2
  },
- "seconds": 11.3,
+ "seconds": 12.5,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 27,
@@ -142,137 +142,9 @@
    -954
   ],
   "maximumPlacements": 96,
-  "maximumTriangles": 156568,
+  "maximumTriangles": 156844,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "certifiedTextureAliases": [
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/102444b3267f4ff14ca08adf1ded3218be575d226566d3548c713c66900f708b.jpg",
-   "sha256": "102444b3267f4ff14ca08adf1ded3218be575d226566d3548c713c66900f708b",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-4.glb",
-   "sourceModelSha256": "5d053582930b42cb72947ebb5ddd93d7a64e947ead4139b5d4965ff73d07b492"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee.jpg",
-   "sha256": "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-3.glb",
-   "sourceModelSha256": "7c7b7324c2ef6aad0a7f689fd47637a6f0cf437e53c0b056682dd24a9ed1477f"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/2604f730bf5f84ce7ff3d9126fa771a048f60b99d2805ab4110e9c09b98b3833.jpg",
-   "sha256": "2604f730bf5f84ce7ff3d9126fa771a048f60b99d2805ab4110e9c09b98b3833",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-sea-stack-2.glb",
-   "sourceModelSha256": "f0185882c15c389bc7861ad9b9881c368774efec8c6e10dfb83c6f146b1d0ba0"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92.jpg",
-   "sha256": "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-3.glb",
-   "sourceModelSha256": "7c7b7324c2ef6aad0a7f689fd47637a6f0cf437e53c0b056682dd24a9ed1477f"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d.jpg",
-   "sha256": "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-3.glb",
-   "sourceModelSha256": "7c7b7324c2ef6aad0a7f689fd47637a6f0cf437e53c0b056682dd24a9ed1477f"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/37e0ca70e26c745f7ee2f99433403792b49196424886265ff2f2e0d20e8962ca.jpg",
-   "sha256": "37e0ca70e26c745f7ee2f99433403792b49196424886265ff2f2e0d20e8962ca",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-1.glb",
-   "sourceModelSha256": "7df0af6abd2452f8c384a25a925fd1cdd699271e9347703ef1527d379b7d8fe9"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/47a0643ce9ae9614da54b1140c1ac1c22b6f9bc8dd6c024d2fe403da30346d0f.jpg",
-   "sha256": "47a0643ce9ae9614da54b1140c1ac1c22b6f9bc8dd6c024d2fe403da30346d0f",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-1.glb",
-   "sourceModelSha256": "ab7ead4b1ffd24c05a9ab501188fce5ece6a87161261f0a22840a4731a55ac34"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/4bd6cd244d18ad3d993ad3135b684b14b5a01fe3ead55305623599bcfbf9fb76.jpg",
-   "sha256": "4bd6cd244d18ad3d993ad3135b684b14b5a01fe3ead55305623599bcfbf9fb76",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-1.glb",
-   "sourceModelSha256": "7df0af6abd2452f8c384a25a925fd1cdd699271e9347703ef1527d379b7d8fe9"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/50c4b27bc27f280522a9148d0ca60ca7d39667586894272f636ea2198d525648.jpg",
-   "sha256": "50c4b27bc27f280522a9148d0ca60ca7d39667586894272f636ea2198d525648",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-sea-stack-2.glb",
-   "sourceModelSha256": "f0185882c15c389bc7861ad9b9881c368774efec8c6e10dfb83c6f146b1d0ba0"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79.jpg",
-   "sha256": "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3.glb",
-   "sourceModelSha256": "26b9bfbcbafb36b05766ae178131e00f933b4c9eb69cc7511d861c58728b9f83"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/77343b686830d3ec20533900ab73422c9c3e502a443cd1d4bc880c2bab59b907.jpg",
-   "sha256": "77343b686830d3ec20533900ab73422c9c3e502a443cd1d4bc880c2bab59b907",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-sea-stack-2.glb",
-   "sourceModelSha256": "f0185882c15c389bc7861ad9b9881c368774efec8c6e10dfb83c6f146b1d0ba0"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/7a4c4a6f46ba3d09f07f5d4c88642599d2ef596b0ff6989fefaa07437d31a83d.jpg",
-   "sha256": "7a4c4a6f46ba3d09f07f5d4c88642599d2ef596b0ff6989fefaa07437d31a83d",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-1.glb",
-   "sourceModelSha256": "7df0af6abd2452f8c384a25a925fd1cdd699271e9347703ef1527d379b7d8fe9"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/84284bf13694a7c412a2c899f1d91481105bcc8494a83447c0fa61e1b3091387.jpg",
-   "sha256": "84284bf13694a7c412a2c899f1d91481105bcc8494a83447c0fa61e1b3091387",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-4.glb",
-   "sourceModelSha256": "5d053582930b42cb72947ebb5ddd93d7a64e947ead4139b5d4965ff73d07b492"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/854f20e314f3844adcd4044ed96c0fa158af6348c0dbd6d1131aa3abac118b84.jpg",
-   "sha256": "854f20e314f3844adcd4044ed96c0fa158af6348c0dbd6d1131aa3abac118b84",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-4.glb",
-   "sourceModelSha256": "5d053582930b42cb72947ebb5ddd93d7a64e947ead4139b5d4965ff73d07b492"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/8dc320422ff3b8d0cd07834513c149b0c98d4690c6c716163ca01a042f408182.jpg",
-   "sha256": "8dc320422ff3b8d0cd07834513c149b0c98d4690c6c716163ca01a042f408182",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-2.glb",
-   "sourceModelSha256": "b8c0f2ed2a03a67849d4bc11c9b6fecc848b333dc7d5ecd9cae7f714b0b1b098"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f.jpg",
-   "sha256": "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3.glb",
-   "sourceModelSha256": "26b9bfbcbafb36b05766ae178131e00f933b4c9eb69cc7511d861c58728b9f83"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/a12f3bdd2cc89c0da7e908fb9490c7afd1fee90d6aa2660305e67ccf1f7322f1.jpg",
-   "sha256": "a12f3bdd2cc89c0da7e908fb9490c7afd1fee90d6aa2660305e67ccf1f7322f1",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-1.glb",
-   "sourceModelSha256": "ab7ead4b1ffd24c05a9ab501188fce5ece6a87161261f0a22840a4731a55ac34"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832.jpg",
-   "sha256": "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3.glb",
-   "sourceModelSha256": "26b9bfbcbafb36b05766ae178131e00f933b4c9eb69cc7511d861c58728b9f83"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/aeb53d3b047e52e351e7bdde418f58ac054702720abcf73b8387188700f1da28.jpg",
-   "sha256": "aeb53d3b047e52e351e7bdde418f58ac054702720abcf73b8387188700f1da28",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-2.glb",
-   "sourceModelSha256": "b8c0f2ed2a03a67849d4bc11c9b6fecc848b333dc7d5ecd9cae7f714b0b1b098"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/c0e2086f4cda56fc52679e83a56211685fb8ee72753bb448fb2fee02a29a2292.jpg",
-   "sha256": "c0e2086f4cda56fc52679e83a56211685fb8ee72753bb448fb2fee02a29a2292",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-boulders-1.glb",
-   "sourceModelSha256": "ab7ead4b1ffd24c05a9ab501188fce5ece6a87161261f0a22840a4731a55ac34"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/e4586086a2fa390ea09e1b6983f1e7fea7780893fe6bfce5bafee807666c8c33.jpg",
-   "sha256": "e4586086a2fa390ea09e1b6983f1e7fea7780893fe6bfce5bafee807666c8c33",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-2.glb",
-   "sourceModelSha256": "b8c0f2ed2a03a67849d4bc11c9b6fecc848b333dc7d5ecd9cae7f714b0b1b098"
-  }
- ]
+ }
 }
