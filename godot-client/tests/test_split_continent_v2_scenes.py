@@ -51,10 +51,20 @@ def test_ground_mask_uses_exact_analytic_ellipse_and_inverse_transform():
     right=Region('right',[[5,-20],[20,-20],[20,20],[5,20]])
     result=list(S.ground_masks(source,'Ground/Regions/g',[left,right]))
     assert len(result)==2
+    # Read the clip ring back as Godot and the exporter do: Transform3D lists basis rows, so in x/z the node's
+    # X axis is (t0, t6) and its Z axis (t2, t8).
+    t=F.numbers(node.properties['transform'],'Transform3D')
+    axes=np.array([[t[0],t[2]],[t[6],t[8]]])
     for d,ring in result:
-        world=ring@matrix[np.ix_([0,2],[0,2])].T+matrix[[0,2],3]
+        world=ring@axes.T+t[[9,11]]
         assert Polygon(world).symmetric_difference(source.ownership.intersection(d.shape)).area<1e-9
     assert node.properties['size']=='Vector2(20, 10)' and len(result[0][1])==4
+
+def test_matrix_text_writes_the_basis_rows_godot_saves():
+    # A 90-degree yaw with scale (2, 1, 3): Godot 4.7.2 saves its X axis (0, 0, -2) as (t0, t3, t6).
+    matrix=np.eye(4);matrix[:3,0]=[0,0,-2];matrix[:3,2]=[3,0,0];matrix[:3,3]=[10,2,20]
+    assert S.matrix_text(matrix)=='Transform3D(0, 0, 3, 0, 1, 0, -2, 0, 0, 10, 2, 20)'
+    assert np.array_equal(T.transform(S.matrix_text(matrix)),matrix)
 
 def test_nonfinite_transform_fails_authority_assignment():
     node=T.Section('node',{'name':'x'},{'transform':'Transform3D(nan,0,0,0,1,0,0,0,1,0,0,0)'})
