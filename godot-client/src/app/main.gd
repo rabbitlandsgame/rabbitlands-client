@@ -11126,6 +11126,9 @@ func _on_client_setting_changed(section: String, key: String,
 			for actor_value: Variant in actor_nodes.values():
 				if is_instance_valid(actor_value):
 					(actor_value as ReplicatedActor3D).set_combat_effects_enabled(_effects_enabled)
+			for object_value: Variant in map_object_nodes.values():
+				if is_instance_valid(object_value):
+					(object_value as MapObject3D).set_particles_enabled(_effects_enabled)
 			_sync_harvest_sparkle()
 		"nameplates":
 			_nameplates_enabled = bool(value)
@@ -13048,6 +13051,7 @@ func _sync_map_objects() -> void:
 		var landscape_crossing: bool = bool(region_entry.get("landscapeTransitions", false)) and str(dto_value.get("label", "")) == "Portal"
 		map_object.configure(dto_value as Dictionary, adapter, catalog, landscape_crossing,
 			_object_presentation(object_id))
+		map_object.set_particles_enabled(_effects_enabled)
 		_fit_lantern_map_marker(map_object, "MapMarker")
 		world_root.add_child(map_object)
 		map_object_nodes[object_id] = map_object

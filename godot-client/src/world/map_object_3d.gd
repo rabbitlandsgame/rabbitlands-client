@@ -2,6 +2,7 @@ class_name MapObject3D
 extends StaticBody3D
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const STORAGE_GLOW_SHADER := preload("res://src/world/storage_glow.gdshader")
+const SPELL_MATERIALS := preload("res://src/world/spell_visual_material.gd")
 ## A clickable world object: a harvest node or an interactive.
 ##
 ## The world package renders the surrounding scenery as ordinary map geometry,
@@ -50,7 +51,10 @@ const EXIT_COLOUR := Color("ff4747")
 const PORTAL_GLYPH := "P"
 const EXIT_GLYPH := "X"
 const STORAGE_COLOUR := Color("d6bb7a")
-const STORAGE_WORLD_RANGE := 90.0
+## The camera can orbit 90 m from the player; nearby storage still draws there.
+const STORAGE_WORLD_RANGE := 120.0
+## Draw after transparent paving, whose distance sort changes as we approach.
+const STORAGE_EFFECT_PRIORITY := 2
 ## Decorative plaza paving sits above the navigation mesh (6.5 cm in Landfall).
 ## Leave room for it while preserving the halo's normal scene occlusion.
 const STORAGE_GLOW_CLEARANCE := 0.12
@@ -77,6 +81,7 @@ var departure_available := false
 var _ring_flat: Mesh = null
 var _storage_glow: MeshInstance3D
 var _storage_glow_flat: Mesh
+var _storage_sparks: GPUParticles3D
 ## True when the registry hands this object's art to the map package rather
 ## than standing a model on it; see `interactives.mapAuthored`.
 var _map_authored: bool = false
@@ -257,6 +262,11 @@ func set_surface_height(height: float) -> void:
 			STORAGE_GLOW_CLEARANCE)
 		_storage_glow.mesh = _storage_glow_flat if draped == null else draped
 
+func set_particles_enabled(enabled: bool) -> void:
+	if is_instance_valid(_storage_sparks):
+		_storage_sparks.visible = enabled
+		_storage_sparks.emitting = enabled
+
 ## Marks the node the player is currently harvesting. The ring is hidden while
 ## an object is merely standing there, so this is the only thing that draws it
 ## on an object whose model loaded.
@@ -429,6 +439,7 @@ func _add_storage_visual(height: float) -> void:
 
 	var material := ShaderMaterial.new()
 	material.shader = STORAGE_GLOW_SHADER
+	material.render_priority = STORAGE_EFFECT_PRIORITY
 	material.set_shader_parameter("glow_colour", STORAGE_COLOUR)
 	material.set_shader_parameter("phase", float(posmod(object_id, 17)) * 0.37)
 	var plane := PlaneMesh.new()
@@ -444,6 +455,55 @@ func _add_storage_visual(height: float) -> void:
 	_storage_glow.visibility_range_end = STORAGE_WORLD_RANGE
 	_storage_glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_storage_glow)
+	_add_storage_particles()
+
+## A continuous, low ring of gold motes; approaching never restarts the stream.
+func _add_storage_particles() -> void:
+	var material := SPELL_MATERIALS.particle(Color("ffc764"), 5)
+	material.render_priority = STORAGE_EFFECT_PRIORITY + 1
+	material.next_pass.render_priority = STORAGE_EFFECT_PRIORITY + 2
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.24, 0.28)
+	quad.material = material
+	var process := ParticleProcessMaterial.new()
+	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_RING
+	process.emission_ring_axis = Vector3.UP
+	process.emission_ring_radius = 1.12
+	process.emission_ring_inner_radius = 0.98
+	process.emission_ring_height = 0.08
+	process.direction = Vector3.UP
+	process.spread = 10.0
+	process.gravity = Vector3.ZERO
+	process.initial_velocity_min = 0.18
+	process.initial_velocity_max = 0.32
+	process.tangential_accel_min = 0.06
+	process.tangential_accel_max = 0.14
+	process.scale_min = 0.65
+	process.scale_max = 1.1
+	var fade := Gradient.new()
+	fade.colors = PackedColorArray([Color(1, 1, 1, 0), Color.WHITE,
+		Color(1, 1, 1, 0.7), Color(1, 1, 1, 0)])
+	fade.offsets = PackedFloat32Array([0.0, 0.15, 0.55, 1.0])
+	var ramp := GradientTexture1D.new()
+	ramp.gradient = fade
+	process.color_ramp = ramp
+	_storage_sparks = GPUParticles3D.new()
+	_storage_sparks.name = "StorageSparks"
+	_storage_sparks.amount = 24
+	_storage_sparks.lifetime = 2.2
+	_storage_sparks.preprocess = 2.2
+	_storage_sparks.randomness = 0.25
+	_storage_sparks.fixed_fps = 60
+	_storage_sparks.interpolate = true
+	_storage_sparks.local_coords = true
+	_storage_sparks.position.y = STORAGE_GLOW_CLEARANCE + 0.1
+	_storage_sparks.process_material = process
+	_storage_sparks.draw_pass_1 = quad
+	_storage_sparks.layers = GAMEPLAY_LAYER
+	_storage_sparks.visibility_range_end = STORAGE_WORLD_RANGE
+	_storage_sparks.visibility_aabb = AABB(Vector3(-1.7, -0.3, -1.7), Vector3(3.4, 1.8, 3.4))
+	_storage_sparks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_storage_sparks)
 
 ## Returns the height of the model that was placed, or 0.0 for none.
 func _add_model(entry: Dictionary) -> float:
