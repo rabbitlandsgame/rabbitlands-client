@@ -1,5 +1,8 @@
 # Desktop releases on runners with limited disk space
 
+For the separate Steam depot and macOS test workflow, see [store builds](store-builds.md).
+The GitHub installer workflow described here retains its current triggers and outputs.
+
 `godot-client/tools/runner_release.py` stages one platform in an existing draft
 release. Windows and Linux use **separate jobs**, pinned to the same full client
 commit. `finalize_runner_release.py` combines their small receipts after both

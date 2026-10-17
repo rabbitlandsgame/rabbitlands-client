@@ -149,7 +149,7 @@ def test_export_presets_never_filter_out_the_actor_tree():
         if line.startswith("exclude_filter=") and "assets/actors" in line
     ]
     assert not actor_exclusions
-    assert package.EXPORT_PRESETS.count('export_filter="all_resources"') == 2
+    assert package.EXPORT_PRESETS.count('export_filter="all_resources"') == len(package.PLATFORMS)
 
 
 def test_each_actor_file_ships_in_the_pck_loose_or_nowhere(tmp_path, monkeypatch):

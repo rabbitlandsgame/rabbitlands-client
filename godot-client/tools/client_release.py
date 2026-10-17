@@ -26,7 +26,9 @@ def digest(path: Path) -> str:
 
 
 def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
-             repository: str) -> dict:
+             repository: str, distribution: str = "github") -> dict:
+    if distribution not in {"github", "steam", "standalone"}:
+        raise ValueError("unsupported client distribution")
     if not re.fullmatch(r"[0-9a-f]{40}", sha):
         raise ValueError("client release requires a full Git commit")
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
@@ -41,7 +43,8 @@ def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
     if public_key and ("PRIVATE KEY" in pem or "PUBLIC KEY" not in pem):
         raise ValueError("update-public-key must contain a public RSA key only")
     return {"schema": 1, "commit": sha, "platform": platform,
-            "ancestors": ancestors, "public_key": pem, "repository": repository}
+            "ancestors": ancestors, "public_key": pem, "repository": repository,
+            "distribution": distribution}
 
 
 def build_payload(stage: Path, output: Path | BinaryIO) -> tuple[int, int]:
