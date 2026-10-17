@@ -36,6 +36,9 @@ var _player_marks: Array[Dictionary] = []
 ## (PackedVector3Array), `label` (Vector3, INF for none) and `current`.
 var _boundaries: Array[Dictionary] = []
 var _live_overlay: Control
+var _walk_target: Variant = null
+const WALK_TARGET_COLOUR := Color(1.0, 0.15, 0.12)
+const WALK_TARGET_RADIUS := 7.0
 const BOUNDARY_COLOUR := Color(1.0, 1.0, 1.0, 0.8)
 const BOUNDARY_LABEL_COLOUR := Color(1.0, 0.95, 0.8, 0.95)
 
@@ -81,6 +84,16 @@ func set_waypoints(waypoints: Array[Dictionary]) -> void:
 	_waypoints = waypoints
 	queue_redraw()
 
+func set_walk_target(position: Variant) -> void:
+	_walk_target = position
+	queue_redraw()
+
+func walk_target_point() -> Variant:
+	if not _walk_target is Vector3 or not is_instance_valid(_camera) \
+			or _camera.is_position_behind(_walk_target):
+		return null
+	return _texture_position(_camera.unproject_position(_walk_target))
+
 func waypoint_count() -> int:
 	return _waypoints.size()
 
@@ -108,13 +121,19 @@ func label_at(position: Vector2) -> String:
 func _draw() -> void:
 	if not is_instance_valid(_camera) or _adapter == null:
 		return
-	if _markers.is_empty() and _player_marks.is_empty() and _waypoints.is_empty() and _boundaries.is_empty():
+	if _markers.is_empty() and _player_marks.is_empty() and _waypoints.is_empty() and _boundaries.is_empty() and _walk_target == null:
 		return
 	var font: Font = get_theme_default_font()
 	_draw_boundaries(font)
 	_draw_waypoints(font)
 	_draw_set(_markers, MARKER_COLOUR)
 	_draw_set(_player_marks, PLAYER_MARK_COLOUR)
+	var target: Variant = walk_target_point()
+	if target is Vector2:
+		for diagonal: Vector2 in [Vector2(1, 1), Vector2(1, -1)]:
+			var arm := diagonal * WALK_TARGET_RADIUS
+			draw_line(target - arm, target + arm, Color(0.02, 0.02, 0.02, 0.95), 6.0, true)
+			draw_line(target - arm, target + arm, WALK_TARGET_COLOUR, 3.0, true)
 
 ## The P of a waygate and the X of a way off the map. Destination names stay
 ## available on hover. Drawn under the server's own markers, so a pin

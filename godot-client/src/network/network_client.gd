@@ -9,6 +9,7 @@ signal protocol_error(message: String)
 signal magic_selection_completed
 signal coordinate_intents_invalidated
 signal coordinate_route_cancelled
+signal movement_requested(tile: Vector2i)
 const CoordinateContext = preload("res://src/network/coordinate_context.gd")
 var coordinates = CoordinateContext.new()
 var magic_pending: Dictionary = {}
@@ -295,9 +296,11 @@ func login(username: String, password: String) -> Error:
 func move_to(tile: Vector2i, run := false) -> Error:
 	if not magic_pending.is_empty() and magic_scope in ["burst", "location"]:
 		return _finish_magic_selection({"x": tile.x, "y": tile.y})
-	if not coordinates.selected:
-		return send_frame(EloriaProtocol.move_to(tile.x, tile.y, run))
-	return _send_point(6 if run else 1, tile)
+	var error: Error = (send_frame(EloriaProtocol.move_to(tile.x, tile.y, run))
+		if not coordinates.selected else _send_point(6 if run else 1, tile))
+	if error == OK:
+		movement_requested.emit(tile)
+	return error
 
 func _send_point(command: int, tile: Vector2i) -> Error:
 	if not coordinates.ready():

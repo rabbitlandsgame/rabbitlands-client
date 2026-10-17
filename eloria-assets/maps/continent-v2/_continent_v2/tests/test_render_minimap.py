@@ -133,8 +133,36 @@ def compiler_available() -> bool:
         return False
 
 
+def test_pooled_only_chunks_and_retired_embedded_meshes(tmp_path, monkeypatch):
+    import render_region_cartography as rc
+    import glb_reader
+    pool = tmp_path / "prototypes"
+    monkeypatch.setattr(glb_reader.SM, "POOL", pool)
+    quad_glb(pool / "tree.glb", -2, -2, 2, 2, 8.0, (.2, .7, .2, 1.0))
+    placement = tmp_path / "placement.glb"
+    doc = {"asset": {"version": "2.0"}, "scene": 0, "scenes": [{"nodes": [0]}],
+           "nodes": [{"name": "tree", "translation": [20, 0, 30],
+                      "extras": {"eloria": {"prototype": "tree"}}}]}
+    placement.write_bytes(glb_reader.SM.write_glb(doc, b""))
+    piece = RM.read_chunk(rc, RM.Pool(rc), placement, {}, "fixture")
+    assert len(piece["parts"]) == 1
+    assert list(piece["low"]) == [18, 8, 28]
+    assert list(piece["high"]) == [22, 8, 32]
+    hidden = RM.read_chunk(rc, RM.Pool(rc), placement, {}, "fixture",
+                           {"retiredMapPrototypes": ["tree"]}, tmp_path)
+    assert hidden["parts"] == []
+    embedded = pool / "tree.glb"
+    policy = {"mapMeshCopies": {"prototypes/tree.glb": {"sha256": PC.sha(embedded), "meshes": [0]}}}
+    hidden = RM.read_chunk(rc, RM.Pool(rc), embedded, {}, "fixture", policy, tmp_path)
+    assert hidden["parts"] == []
+    policy["mapMeshCopies"]["prototypes/tree.glb"]["sha256"] = "0" * 64
+    with pytest.raises(RM.MinimapError, match="retired mesh index needs refresh"):
+        RM.read_chunk(rc, RM.Pool(rc), embedded, {}, "fixture", policy, tmp_path)
+
+
 @pytest.mark.skipif(not compiler_available(), reason="the atlas renderer needs a C compiler")
-def test_a_drawn_picture_holds_its_own_ground_and_the_neighbours_in_place(tmp_path):
+@pytest.mark.parametrize("ppm", [1, 4])
+def test_a_drawn_picture_holds_its_own_ground_and_the_neighbours_in_place(tmp_path, ppm, monkeypatch):
     root = fixture_checkout(tmp_path / "checkout")
     # the drawing tool reads the atlas renderer from this checkout, so link the real tools in
     tools = root / "eloria-assets" / "tools"
@@ -149,18 +177,44 @@ def test_a_drawn_picture_holds_its_own_ground_and_the_neighbours_in_place(tmp_pa
             else:
                 target.write_bytes((CHECKOUT / relative).read_bytes())
     assert tools.is_dir()
-    report = RM.render(root, "isle", tmp_path / "work", supersample=1, window=16, log=lambda *_: None)
-    assert report["imageSize"] == [40, 40] and report["windows"] == 9
+    # Real maps store trees as mesh-less shared placements. A render must
+    # expand those before traversing the scene.
+    import glb_reader
+    pool = root / "eloria-assets/maps/_shared/meshes"
+    monkeypatch.setattr(glb_reader.SM, "POOL", pool)
+    for identity, color in (("tree", (0.8, 0.1, 0.1, 1.0)), ("retired", (0.1, 0.1, 0.8, 1.0))):
+        quad_glb(pool / f"{identity}.glb", -2, -2, 2, 2, 8.0, color)
+    placement = root / "eloria-assets/maps/continent-v2/isle/client/chunks/00_00/world.glb"
+    doc, binary = glb_reader.load(placement, prototypes=False)
+    for identity, z in (("tree", 0), ("retired", 10)):
+        doc["scenes"][0]["nodes"].append(len(doc["nodes"]))
+        doc["nodes"].append({"name": identity, "translation": [-10, 0, z],
+                             "extras": {"eloria": {"prototype": identity}}})
+    placement.write_bytes(glb_reader.SM.write_glb(doc, binary))
+    policy = root / RM.RETIREMENT
+    policy.parent.mkdir(parents=True, exist_ok=True)
+    policy.write_text(json.dumps({"retiredMapPrototypes": ["retired"]}), encoding="utf-8")
+    report = RM.render(root, "isle", tmp_path / "work", supersample=1, window=16, log=lambda *_: None,
+                       pixels_per_metre=ppm)
+    assert report["imageSize"] == [40 * ppm, 40 * ppm] and report["windows"] == 9
+    assert report["worldMin"] == [-20.0, -20.0] and report["worldMax"] == [20.0, 20.0]
     assert set(report["neighbourChunksSha256"]) == {"holm"}
     from PIL import Image
     picture = Image.open(tmp_path / "work" / "isle" / PC.MINIMAP).convert("RGB")
     water = tuple(report["waterRGB"])
-    west, east_edge = picture.getpixel((5, 20)), picture.getpixel((35, 20))
-    middle = picture.getpixel((25, 20))   # isle x 5: neither isle's ground (x < 0) nor holm's (x >= 10)
+    west, east_edge = picture.getpixel((5 * ppm, 20 * ppm)), picture.getpixel((35 * ppm, 20 * ppm))
+    middle = picture.getpixel((25 * ppm, 20 * ppm))   # same world points at both densities
     def near(a, b):
         return all(abs(int(p) - int(q)) <= 24 for p, q in zip(a, b))
     assert west[1] > west[0] and not near(west, water)        # isle's green ground
     assert east_edge[0] > east_edge[1] and not near(east_edge, water)   # holm's red ground, moved 20 m east
     assert near(middle, water)
-    RM.apply(root, "isle", tmp_path / "work", report)
-    assert RM.check(root, ["isle"]) == []
+    tree = picture.getpixel((10 * ppm, 20 * ppm))
+    retired = picture.getpixel((10 * ppm, 30 * ppm))
+    assert tree[0] > tree[1]             # the shared tree is drawn above the ground
+    assert retired[1] > retired[2]      # retired scenery follows the runtime policy
+    assert report["chunkReaderVersion"] == RM.CHUNK_READER_VERSION
+    assert report["retirementSha256"] == PC.sha(policy)
+    if ppm == 1:
+        RM.apply(root, "isle", tmp_path / "work", report)
+        assert RM.check(root, ["isle"]) == []

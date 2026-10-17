@@ -186,15 +186,15 @@ func _run() -> void:
 			full_map_viewport.size) == null,
 			"full-map letterbox margins do not report false coordinates")
 	_expect(InputMap.has_action("toggle_map")
-		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarContent/ContinentButton") is TextureButton
-		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapLegend") is RichTextLabel
-		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapCoordinates") is Label,
+		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/ContinentButton") is TextureButton
+		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/MapLegend") is RichTextLabel
+		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarLayout/MapCoordinates") is Label,
 		"Tab map exposes continent navigation, a legend, and hover coordinates")
 	var map_motion: InputEventMouseMotion = InputEventMouseMotion.new()
 	map_motion.position = full_map_image.size * 0.5
 	main.call("_on_full_map_gui_input", map_motion)
 	_expect((main.get_node(
-		"GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapCoordinates") as Label).text.contains(","),
+		"GameView/FullMap/MapLayout/Sidebar/SidebarLayout/MapCoordinates") as Label).text.contains(","),
 		"map hover reports the same server tile used by click-to-walk")
 	main.call("_on_map_button_pressed")
 	var gameplay_camera: Camera3D = camera_rig.get_node("Camera") as Camera3D
@@ -2197,7 +2197,7 @@ func _run() -> void:
 			MapObject3D.INTERACTIVE_COLOUR),
 		"an interactive is orange on the map, as the legend says")
 	var map_legend: RichTextLabel = main.get_node(
-		"GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapLegend") as RichTextLabel
+		"GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/MapLegend") as RichTextLabel
 	_expect(map_legend != null and map_legend.text.contains("Harvest node")
 		and map_legend.text.contains("Interactive")
 		and map_legend.text.contains("Player / NPC")
@@ -2833,7 +2833,7 @@ func _run() -> void:
 	_expect(world_label != null and world_label.layers == MapMarker3D.GAMEPLAY_LAYER
 		and world_label.text == "Reed bank", "the marker also labels the gameplay view")
 	var marker_sidebar: RichTextLabel = main.get_node(
-		"GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapMarkerList") as RichTextLabel
+		"GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/MapMarkerList") as RichTextLabel
 	_expect(marker_sidebar.visible and marker_sidebar.text.contains("Reed bank")
 		and marker_sidebar.text.contains("780") and marker_sidebar.text.contains("481"),
 		"the map sidebar names the marker and its tile, which no pin drawn at"

@@ -121,6 +121,7 @@ var map_light_root: Node3D
 @onready var map_image: TextureRect = %MapImage
 @onready var map_title: Label = %MapTitle
 @onready var map_coordinates: Label = %MapCoordinates
+@onready var map_cursor_coordinates: Label = %MapCursorCoordinates
 @onready var continent_button: TextureButton = %ContinentButton
 @onready var current_map_button: Button = %CurrentMapButton
 @onready var region_preview: TextureRect = %RegionPreview
@@ -419,6 +420,10 @@ var _continent_textures: Dictionary = {}
 ## Overlay-local indices map to the combined cartography table's region indices.
 var _continent_region_indices: Array[int] = []
 var _tab_map_textures: Dictionary = {}
+## Keep detailed images for visible regions and the most recent preview.
+## The wider overview uses the small images warmed in _tab_map_textures.
+var _tab_map_detail_textures: Dictionary = {}
+var _map_detail_visible: Dictionary = {}
 ## Which region the big map is showing as a preview, or -1 for none, with
 ## that map's own adapter so the cursor can name the tile under it.
 var _preview_region_index := -1
@@ -513,12 +518,25 @@ var _current_map_display_name := "Unknown map"
 var _minimap_scale := 1.0
 var _minimap_orientation := MINIMAP_DEFAULT_ORIENTATION
 var _minimap_zoom := MINIMAP_ZOOM_DEFAULT
-## How far the Tab map is pulled back, and the framing it is pulled back from.
-## Only a map that frames its neighbours (a continent exterior) pulls back.
+## Tab map extent relative to its default framing. Below 1 it magnifies the
+## player's surroundings; above 1 a continent exterior shows its neighbours.
 var _full_map_region_id := ""
 var _full_map_zoom := 1.0
 var _full_map_base_size := 0.0
+var _full_map_base_position := Vector3.ZERO
 var _full_map_zoomable := false
+## A manual pan holds its world position until zooming or returning to the
+## current map restores player follow. Delay a click until release so a drag
+## never also sends a movement command.
+var _full_map_panned := false
+var _full_map_pan_position := Vector3.ZERO
+var _full_map_pan_press: InputEventMouseButton
+var _full_map_pan_origin := Vector3.ZERO
+var _full_map_pan_dragging := false
+var _full_map_cursor_inside := false
+var _full_map_cursor_position := Vector2.ZERO
+## The final map click, rather than an intermediate crossing in a route.
+var _map_walk_target: Dictionary = {}
 var _minimap_marker_scale := 1.0
 var _minimap_border := MINIMAP_DEFAULT_BORDER
 ## "square" or "round". A round minimap is the map masked to the circle its
@@ -928,14 +946,15 @@ const RESERVED_RIGHT_RAIL_MARGIN := 96.0
 const EL_GUI_COLOUR := Color(0.77, 0.57, 0.39)
 const EL_GUI_INVERT_COLOUR := Color(0.32, 0.23, 0.15)
 const EL_GUI_BRIGHT_COLOUR := Color(0.95, 0.76, 0.52)
+## How much of the continent the Tab map frames: 1 is the region and the
+## collar of its neighbours. The wheel can magnify up to 400% around the
+## player or pull back over the continent's pictures.
+const FULL_MAP_ZOOM_STEP := 1.25
+const FULL_MAP_ZOOM_MIN := 0.25
+const FULL_MAP_ZOOM_MAX := 6.0
+const FULL_MAP_PAN_THRESHOLD := 6.0
 ## How many metres of ground the minimap camera covers, and the bounds the
 ## scroll wheel moves it between.
-## How much of the continent the Tab map frames: 1 is the region and the
-## collar of its neighbours it has always framed, and the wheel pulls back
-## from there to the whole continent, whose pictures stand whether or not
-## their packages are loaded.
-const FULL_MAP_ZOOM_STEP := 1.25
-const FULL_MAP_ZOOM_MAX := 6.0
 const MINIMAP_ZOOM_DEFAULT := 180.0
 const MINIMAP_ZOOM_MIN := 60.0
 const MINIMAP_ZOOM_MAX := 480.0
@@ -1045,7 +1064,10 @@ func _ready() -> void:
 	world_root.add_child(exterior_stream)
 	exterior_stream.configure(map_registry)
 	exterior_stream.coordinate_context = Network.coordinates
-	Network.coordinate_route_cancelled.connect(func() -> void: exterior_stream.pending_walk.clear())
+	Network.coordinate_route_cancelled.connect(func() -> void:
+		exterior_stream.pending_walk.clear()
+		_clear_map_walk_target())
+	Network.movement_requested.connect(_on_movement_requested)
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_close_client)
 	world_object_models = _json("res://data/world/objects.json")
@@ -1116,6 +1138,13 @@ func _ready() -> void:
 	cartography_regions = (cartography.get("regions", []) as Array).duplicate()
 	_v2_cartography = _json("res://data/maps/cartography-continent-v2.json")
 	cartography_regions.append_array(_continent_v2_tab_maps(cartography))
+	var detail_maps: Dictionary = _json("res://data/maps/map-details.json").get("regions", {}) as Dictionary
+	for region: Dictionary in cartography_regions:
+		var detail: Dictionary = detail_maps.get(str(region.get("serverMap", "")), {}) as Dictionary
+		var tab_map: Dictionary = region.get("tabMap", {}) as Dictionary
+		if not detail.is_empty() and detail.get("worldMin") == tab_map.get("worldMin") \
+				and detail.get("worldMax") == tab_map.get("worldMax"):
+			tab_map["detail"] = detail
 	_region_polygons.clear()
 	equipment_config = preload(
 		"res://src/actors/equipment_registry_snapshot_cache.gd").prepare(
@@ -1216,6 +1245,7 @@ func _ready() -> void:
 	minimap_frame.gui_input.connect(_on_minimap_frame_gui_input)
 	map_image.gui_input.connect(_on_full_map_gui_input)
 	map_image.mouse_exited.connect(_on_full_map_mouse_exited)
+	map_image.visibility_changed.connect(_on_full_map_visibility_changed)
 	clock_face.gui_input.connect(_on_clock_gui_input)
 	compass_face.gui_input.connect(_on_compass_gui_input)
 	continent_button.pressed.connect(_on_continent_button_pressed)
@@ -1451,6 +1481,7 @@ func _process(delta: float) -> void:
 		_update_attached_map_markers()
 		_update_map_viewports()
 		_update_local_actor_follow()
+		_update_map_walk_target()
 		if AppState.actors.has(AppState.local_actor_id):
 			exterior_stream.update_position(camera_rig.focus)
 		# Look pass: a chunk or neighbour finished under the switch's old
@@ -1496,6 +1527,7 @@ func _update_map_viewports() -> void:
 	var now: int = Time.get_ticks_msec()
 	if minimap_frame.visible and now >= _minimap_refresh_msec:
 		_minimap_refresh_msec = now + MINIMAP_REFRESH_MSEC
+		_update_map_detail_levels()
 		map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		# The marks are drawn over that image and follow the same camera, so
 		# they are collected when it is redrawn and never while it is hidden.
@@ -1505,6 +1537,10 @@ func _update_map_viewports() -> void:
 		_apply_day_night()
 	if full_map.visible and map_image.visible and now >= _full_map_refresh_msec:
 		_full_map_refresh_msec = now + FULL_MAP_REFRESH_MSEC
+		_update_full_map_focus()
+		_update_map_detail_levels()
+		if _full_map_cursor_inside:
+			_update_full_map_cursor(_full_map_cursor_position)
 		full_map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		# Refresh projected markers alongside the terrain, including visibility
 		# changes when the player enters a different secret section.
@@ -3307,6 +3343,7 @@ func _exit_tree() -> void:
 	# and the cached tab-map textures are reported leaked at exit.
 	_remove_map_picture()
 	_tab_map_textures.clear()
+	_tab_map_detail_textures.clear()
 
 func _on_login_succeeded() -> void:
 	Diagnostics.record("login_succeeded", {"server_map": AppState.current_map})
@@ -3411,6 +3448,7 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	_clear_map_walk_target()
 	for raw_node: Variant in actor_nodes.values():
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
@@ -3542,6 +3580,7 @@ func _set_attack_modifier(held: bool) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT 			or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		_set_attack_modifier(false)
+		_cancel_full_map_drag()
 		if is_instance_valid(camera_rig):
 			camera_rig.cancel_rotation()
 
@@ -4091,14 +4130,23 @@ func _apply_minimap_zoom() -> void:
 ## The scroll wheel over the Tab map frames more or less of the continent
 ## around the region. Every region's picture stands whether or not it is
 ## loaded, so zooming out shows the neighbours, and a click out there walks
-## the legs to it the way a click just past the seam always has.
+## the legs to it the way a click just past the seam always has. Magnifying
+## past the default view centres on the player, including inside interiors.
 func _zoom_full_map(closer: bool) -> void:
-	if not _full_map_zoomable:
+	if _full_map_base_size <= 0.0:
 		return
+	_cancel_full_map_drag()
 	var previous: float = _full_map_zoom
 	var step: float = 1.0 / FULL_MAP_ZOOM_STEP if closer else FULL_MAP_ZOOM_STEP
-	_full_map_zoom = clampf(_full_map_zoom * step, 1.0, FULL_MAP_ZOOM_MAX)
-	if is_equal_approx(previous, _full_map_zoom):
+	_full_map_zoom = clampf(_full_map_zoom * step, FULL_MAP_ZOOM_MIN,
+		FULL_MAP_ZOOM_MAX if _full_map_zoomable else 1.0)
+	# Always stop at the default framing when crossing it from either limit.
+	if (previous < 1.0 and _full_map_zoom > 1.0) or (previous > 1.0 and _full_map_zoom < 1.0) \
+			or is_equal_approx(_full_map_zoom, 1.0):
+		_full_map_zoom = 1.0
+	var was_panned := _full_map_panned
+	_full_map_panned = false
+	if is_equal_approx(previous, _full_map_zoom) and not was_panned:
 		return
 	_apply_full_map_zoom()
 
@@ -4106,8 +4154,83 @@ func _apply_full_map_zoom() -> void:
 	if _full_map_base_size <= 0.0:
 		return
 	full_map_camera.size = _full_map_base_size * _full_map_zoom
+	_update_full_map_focus()
 	map_marker_overlay.configure(full_map_camera, adapter, full_map_viewport.size)
 	_request_map_redraw()
+
+func _update_full_map_focus() -> void:
+	if _full_map_base_size <= 0.0:
+		return
+	var focus := _full_map_base_position
+	if _full_map_zoom < 1.0:
+		if _full_map_panned:
+			focus.x = _full_map_pan_position.x
+			focus.z = _full_map_pan_position.z
+		else:
+			var actor_value: Variant = actor_nodes.get(AppState.local_actor_id)
+			if is_instance_valid(actor_value) and actor_value is Node3D:
+				var actor := actor_value as Node3D
+				focus.x = actor.global_position.x
+				focus.z = actor.global_position.z
+	full_map_camera.global_position = focus
+
+func _cancel_full_map_drag() -> void:
+	_full_map_pan_press = null
+	_full_map_pan_dragging = false
+
+func _handle_full_map_pan_input(event: InputEvent) -> bool:
+	if _full_map_zoom >= 1.0 or _full_map_base_size <= 0.0 or _map_input_blocked():
+		_cancel_full_map_drag()
+		return false
+	if event is InputEventMouseButton:
+		var mouse := event as InputEventMouseButton
+		if mouse.button_index != MOUSE_BUTTON_LEFT:
+			return false
+		var pixel: Variant = _texture_to_viewport_position(mouse.position, map_image, full_map_viewport.size)
+		if mouse.pressed:
+			if pixel is Vector2:
+				_full_map_pan_press = mouse.duplicate() as InputEventMouseButton
+				_full_map_pan_origin = full_map_camera.global_position
+				_full_map_pan_dragging = false
+		elif _full_map_pan_press != null:
+			_pan_full_map(mouse.position)
+			var click := _full_map_pan_press if not _full_map_pan_dragging else null
+			_cancel_full_map_drag()
+			if click != null and pixel is Vector2:
+				_handle_map_gui_input(click, map_image, full_map_viewport, full_map_camera, "full_map")
+		return true
+	if event is InputEventMouseMotion and _full_map_pan_press != null:
+		var motion := event as InputEventMouseMotion
+		if (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) == 0:
+			_cancel_full_map_drag()
+			return false
+		_pan_full_map(motion.position)
+		return true
+	return false
+
+## Translate the camera opposite the pointer so the grabbed ground follows
+## the hand. Use the displayed image size, including rectangular letterboxing,
+## and ray origins so the drag works at every zoom and window scale.
+func _pan_full_map(at: Vector2) -> void:
+	var drag := at - _full_map_pan_press.position
+	if not _full_map_pan_dragging and drag.length() < FULL_MAP_PAN_THRESHOLD:
+		return
+	var target := Vector2(full_map_viewport.size)
+	var displayed := map_image.size
+	if map_image.stretch_mode == TextureRect.STRETCH_KEEP_ASPECT_CENTERED:
+		displayed = target * minf(displayed.x / target.x, displayed.y / target.y)
+	if displayed.x <= 0.0 or displayed.y <= 0.0:
+		return
+	var pixels := drag * target / displayed
+	var world_delta := full_map_camera.project_ray_origin(pixels) - full_map_camera.project_ray_origin(Vector2.ZERO)
+	_full_map_pan_position = _full_map_pan_origin - world_delta
+	_full_map_panned = true
+	_full_map_pan_dragging = true
+	_update_full_map_focus()
+	map_marker_overlay.queue_redraw()
+	_request_map_redraw()
+	map_image.tooltip_text = ""
+	map_coordinates.text = "Coordinates: —"
 
 func _on_full_map_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -4115,27 +4238,52 @@ func _on_full_map_gui_input(event: InputEvent) -> void:
 		if wheel.pressed and (wheel.button_index == MOUSE_BUTTON_WHEEL_UP
 				or wheel.button_index == MOUSE_BUTTON_WHEEL_DOWN):
 			_zoom_full_map(wheel.button_index == MOUSE_BUTTON_WHEEL_UP)
+			_update_full_map_cursor(wheel.position)
 			map_image.accept_event()
 			return
+	if _handle_full_map_pan_input(event):
+		if event is InputEventMouseMotion or event is InputEventMouseButton:
+			_update_full_map_cursor(event.position)
+		map_image.accept_event()
+		return
 	if event is InputEventMouseMotion:
 		var mouse_motion: InputEventMouseMotion = event as InputEventMouseMotion
-		map_image.tooltip_text = map_marker_overlay.label_at(mouse_motion.position)
-		var viewport_position_value: Variant = _texture_to_viewport_position(
-			mouse_motion.position, map_image, full_map_viewport.size)
-		if not viewport_position_value is Vector2:
-			map_coordinates.text = "Coordinates: outside map image"
-			return
-		var viewport_position: Vector2 = viewport_position_value as Vector2
-		var target_value: Variant = _map_target_tile(full_map_camera, viewport_position)
-		if target_value is Vector2i:
-			var tile: Vector2i = target_value as Vector2i
-			map_coordinates.text = "Coordinates: %d, %d" % [tile.x, tile.y]
-		else:
-			map_coordinates.text = "Coordinates: outside walkable map"
+		_update_full_map_cursor(mouse_motion.position)
 		return
 	_handle_map_gui_input(event, map_image, full_map_viewport, full_map_camera, "full_map")
 
+func _update_full_map_cursor(at: Vector2) -> void:
+	_full_map_cursor_inside = true
+	_full_map_cursor_position = at
+	map_cursor_coordinates.hide()
+	map_image.tooltip_text = map_marker_overlay.label_at(at)
+	var pixel: Variant = _texture_to_viewport_position(at, map_image, full_map_viewport.size)
+	if not pixel is Vector2:
+		map_coordinates.text = "Coordinates: outside map image"
+		return
+	var tile: Variant = _map_target_tile(full_map_camera, pixel)
+	if tile is Vector2i:
+		map_coordinates.text = "Coordinates: %d, %d" % [tile.x, tile.y]
+		_show_map_cursor_coordinates(map_image, at, tile)
+	else:
+		map_coordinates.text = "Coordinates: outside walkable map"
+
+func _show_map_cursor_coordinates(control: Control, at: Vector2, tile: Vector2i) -> void:
+	map_cursor_coordinates.text = "X: %d, Y: %d" % [tile.x, tile.y]
+	map_cursor_coordinates.reset_size()
+	var margin := Vector2(4, 4)
+	var maximum := (control.size - map_cursor_coordinates.size - margin).max(margin)
+	map_cursor_coordinates.position = control.position + (at + Vector2(14, 18)).clamp(margin, maximum)
+	map_cursor_coordinates.show()
+
+func _on_full_map_visibility_changed() -> void:
+	_cancel_full_map_drag()
+	_full_map_cursor_inside = false
+	map_cursor_coordinates.hide()
+
 func _on_full_map_mouse_exited() -> void:
+	_full_map_cursor_inside = false
+	map_cursor_coordinates.hide()
 	map_image.tooltip_text = ""
 	if map_image.visible:
 		map_coordinates.text = "Coordinates: —"
@@ -4189,11 +4337,13 @@ func _local_actor_server_tile() -> Variant:
 		return null
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
+func _map_input_blocked() -> bool:
+	return (not game_view.visible or dialogue_panel.visible or trade_panel.visible
+		or storage_panel.visible or manufacturing_panel.visible)
+
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		map_render_viewport: SubViewport, camera: Camera3D, source: String) -> void:
-	if (not game_view.visible or dialogue_panel.visible or trade_panel.visible
-			or storage_panel.visible
-			or manufacturing_panel.visible):
+	if _map_input_blocked():
 		return
 	if not event is InputEventMouseButton:
 		return
@@ -4229,10 +4379,13 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		exterior_stream.pending_walk.clear()
 		_clear_keyboard_movement_tracking()
 		_clear_local_turn_prediction()
+		var selecting_spell := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
 		var move_error: Error = Network.move_to(target_value as Vector2i,
 			mouse_button.shift_pressed)
 		if move_error != OK:
 			push_warning("%s MOVE_TO failed: %s" % [source, error_string(move_error)])
+		elif not selecting_spell:
+			_set_map_walk_target(MapRegistry.normalize_server_map_id(AppState.current_map), target_value)
 	map_control.accept_event()
 
 func _map_target_tile(camera: Camera3D, viewport_position: Vector2) -> Variant:
@@ -4330,13 +4483,70 @@ func _map_click_beyond(camera: Camera3D, viewport_position: Vector2, run: bool, 
 	var leg: Vector3 = leg_value as Vector3
 	_clear_keyboard_movement_tracking()
 	_clear_local_turn_prediction()
+	var selecting_spell := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
 	var move_error: Error = Network.move_to(adapter.godot_to_server(leg), run)
 	if move_error != OK:
 		exterior_stream.pending_walk.clear()
 		push_warning("%s MOVE_TO failed: %s" % [source, error_string(move_error)])
 		return
+	if not selecting_spell:
+		_set_map_walk_target(str(beyond.map), beyond.tile)
 	print_debug("map_input source=", source, " walk to ", beyond.map, " tile=", beyond.tile, " via seam leg=", leg)
 	_show_walk_highlight(adapter.godot_to_server(point), point.y)
+
+func _set_map_walk_target(map_id: String, tile: Vector2i) -> void:
+	_map_walk_target = {"map": map_id, "tile": tile,
+		"last_actor_tile": Vector2i(-99999, -99999), "last_progress_msec": Time.get_ticks_msec()}
+	_update_map_walk_target()
+
+func _clear_map_walk_target() -> void:
+	_map_walk_target.clear()
+	if map_marker_overlay != null:
+		map_marker_overlay.set_walk_target(null)
+
+func _on_movement_requested(tile: Vector2i) -> void:
+	# A route issues new seam legs as maps change. Other movement replaces
+	# the map click, including keyboard movement and clicks in the world.
+	if not exterior_stream.pending_walk.is_empty() \
+			and exterior_stream.pending_walk.get("leg_tile") == tile:
+		return
+	_clear_map_walk_target()
+
+func _update_map_walk_target() -> void:
+	if _map_walk_target.is_empty():
+		return
+	var here := MapRegistry.normalize_server_map_id(AppState.current_map)
+	var target_map: String = _map_walk_target.map
+	var tile: Vector2i = _map_walk_target.tile
+	var routed: bool = not exterior_stream.pending_walk.is_empty() \
+		and str(exterior_stream.pending_walk.get("map", "")) == target_map \
+		and exterior_stream.pending_walk.get("tile") == tile
+	if here != target_map and not routed:
+		_clear_map_walk_target()
+		return
+	var target_adapter := adapter if here == target_map else CoordinateAdapter.new(exterior_stream.region_coordinates(target_map))
+	var point := target_adapter.tile_center(tile.x, tile.y)
+	if here != target_map:
+		var frame: Variant = exterior_stream.region_transform(target_map)
+		if not frame is Transform3D:
+			_clear_map_walk_target()
+			return
+		point = frame * point
+	var actor_value: Variant = actor_nodes.get(AppState.local_actor_id)
+	if is_instance_valid(actor_value) and actor_value is Node3D:
+		var position: Vector3 = (actor_value as Node3D).global_position
+		var actor_tile := adapter.godot_to_server(position)
+		if actor_tile != _map_walk_target.last_actor_tile:
+			_map_walk_target.last_actor_tile = actor_tile
+			_map_walk_target.last_progress_msec = Time.get_ticks_msec()
+		if here == target_map and Vector2(position.x, position.z).distance_to(Vector2(point.x, point.z)) < adapter.metres_per_tile * 0.25:
+			_clear_map_walk_target()
+			return
+	# A blocked or interrupted walk must not leave a permanent destination.
+	if Time.get_ticks_msec() - int(_map_walk_target.last_progress_msec) > 3000:
+		_clear_map_walk_target()
+		return
+	map_marker_overlay.set_walk_target(point)
 
 static func _control_to_viewport_position(local_position: Vector2,
 		control_size: Vector2, target_size: Vector2i) -> Vector2:
@@ -4360,6 +4570,7 @@ static func _texture_to_viewport_position(local_position: Vector2,
 	return _control_to_viewport_position(local_position, control_size, target_size)
 
 func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector2) -> void:
+	_clear_map_walk_target()
 	exterior_stream.pending_walk.clear()
 	if not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]:
 		var tile: Variant = _map_target_tile(gameplay_camera, viewport_position)
@@ -5383,6 +5594,8 @@ func _install_map_picture(manifest: WorldManifest) -> void:
 	if region_index >= 0 and not minimap.is_empty():
 		var region: Dictionary = cartography_regions[region_index] as Dictionary
 		texture = _tab_map_texture(region)
+		if texture != null:
+			texture = _tab_map_detail_texture(region)
 		tab_map = region.get("tabMap", {}) as Dictionary
 	var extent: Rect2 = MapPicture.extent(minimap, tab_map) if texture != null else Rect2()
 	if texture == null or extent.size.x <= 0.0 or extent.size.y <= 0.0:
@@ -5395,6 +5608,7 @@ func _install_map_picture(manifest: WorldManifest) -> void:
 	_install_neighbour_pictures()
 
 func _remove_map_picture() -> void:
+	_map_detail_visible.clear()
 	if is_instance_valid(_map_picture):
 		_map_picture.hide()
 		_map_picture.queue_free()
@@ -5462,6 +5676,7 @@ func _update_map_boundaries() -> void:
 ## first and stands in its own frame as before. Called after the current
 ## picture is laid and whenever the stream's resident table changes.
 func _install_neighbour_pictures() -> void:
+	var detail_plan_changed := false
 	if exterior_stream != null and not exterior_stream.residents_changed.is_connected(_install_neighbour_pictures):
 		exterior_stream.residents_changed.connect(_install_neighbour_pictures)
 	var residents: Dictionary = exterior_stream.residents if exterior_stream != null else {}
@@ -5480,12 +5695,16 @@ func _install_neighbour_pictures() -> void:
 			if is_instance_valid(stale):
 				(stale as Node).queue_free()
 			_neighbour_pictures.erase(stale_id)
+			detail_plan_changed = true
 	for map_id: String in wanted:
 		if _neighbour_pictures.has(map_id):
 			continue
 		var picture: Variant = _build_region_picture(map_id, residents.get(map_id, {}) as Dictionary)
 		if picture is MeshInstance3D:
 			_neighbour_pictures[map_id] = picture
+			detail_plan_changed = true
+	if detail_plan_changed:
+		_map_detail_visible.clear()
 
 ## One region's picture: its own minimap pixels, framed as the Tab map frames
 ## that region. A resident region is laid under its root at its manifest's
@@ -6421,6 +6640,7 @@ func _update_secret_sections(force: bool = false) -> void:
 	var previous_section: String = secret_sections.current_section()
 	secret_sections.call("update", local_actor_node.global_position, force)
 	if secret_sections.current_section() != previous_section:
+		_full_map_panned = false
 		_configure_full_map(world_loader.manifest)
 		_request_map_redraw()
 	# whoever and whatever stands in another secret stays unseen
@@ -6437,6 +6657,7 @@ func _configure_interior_cutaway(manifest: WorldManifest) -> void:
 
 
 func _configure_full_map(manifest: WorldManifest) -> void:
+	_cancel_full_map_drag()
 	var map_id := MapRegistry.normalize_server_map_id(AppState.current_map)
 	if map_id.is_empty():
 		map_id = manifest.asset_id()
@@ -6444,19 +6665,19 @@ func _configure_full_map(manifest: WorldManifest) -> void:
 	if changed_map:
 		_full_map_region_id = map_id
 		_full_map_zoom = 1.0
+		_full_map_panned = false
 	# A continent exterior shows a buffer of its neighbours around it.
 	var buffer: float = MapViewScript.NEIGHBOUR_BUFFER_METRES if manifest.data.has("continentGeography") else 0.0
 	MapViewScript.configure(full_map_camera, full_map_viewport,
 		MapViewScript.bounds_for(manifest, secret_sections.current_section()), buffer)
-	# A map that frames its neighbours can be pulled back over the continent;
-	# one that does not (an interior, a secret) keeps its own framing.
+	# Every map can magnify around the player. Only continent exteriors can
+	# pull back past their default framing to show neighbouring regions.
 	_full_map_base_size = full_map_camera.size
+	_full_map_base_position = full_map_camera.global_position
 	_full_map_zoomable = buffer > 0.0
 	if not _full_map_zoomable:
-		_full_map_zoom = 1.0
-	elif _full_map_zoom > 1.0:
-		full_map_camera.size = _full_map_base_size * _full_map_zoom
-	map_marker_overlay.configure(full_map_camera, adapter, full_map_viewport.size)
+		_full_map_zoom = minf(_full_map_zoom, 1.0)
+	_apply_full_map_zoom()
 	_update_map_boundaries()
 	if changed_map and _cartography_loaded:
 		_show_current_map_view()
@@ -6623,6 +6844,72 @@ func _tab_map_texture(region: Dictionary) -> Texture2D:
 	_tab_map_textures[key] = texture
 	return texture
 
+func _tab_map_detail_texture(region: Dictionary) -> Texture2D:
+	var detail: Dictionary = (region.get("tabMap", {}) as Dictionary).get("detail", {}) as Dictionary
+	if detail.is_empty():
+		return _tab_map_texture(region)
+	var key: String = str(region.get("serverMap", ""))
+	if _tab_map_detail_textures.has(key):
+		var cached: Texture2D = _tab_map_detail_textures[key]
+		_tab_map_detail_textures.erase(key)
+		_tab_map_detail_textures[key] = cached
+		return cached
+	var image := Image.new()
+	var error := image.load(ProjectSettings.globalize_path(str(detail.get("texture", ""))))
+	if error != OK or image.is_empty():
+		return _tab_map_texture(region)
+	image.generate_mipmaps()
+	var texture := ImageTexture.create_from_image(image)
+	while _tab_map_detail_textures.size() >= maxi(2, _map_detail_visible.size() + 1):
+		var evicted := false
+		for old_key: String in _tab_map_detail_textures.keys():
+			if old_key != MapRegistry.normalize_server_map_id(AppState.current_map) and not _map_detail_visible.has(old_key):
+				_tab_map_detail_textures.erase(old_key)
+				evicted = true
+				break
+		if not evicted:
+			break
+	_tab_map_detail_textures[key] = texture
+	return texture
+
+## Zooming or panning onto a neighbour should expose its detail too. Sample
+## the visible ground's owners, keeping a bounded set of up to five regions.
+func _update_map_detail_levels() -> void:
+	if _neighbour_pictures.is_empty():
+		return
+	var wanted := {MapRegistry.normalize_server_map_id(AppState.current_map): true}
+	var views: Array[Array] = []
+	if full_map.visible and map_image.visible and _full_map_zoom < 1.0:
+		views.append([full_map_camera, full_map_viewport.size])
+	if minimap_frame.visible:
+		views.append([map_camera, map_viewport.size])
+	for view: Array in views:
+		var camera: Camera3D = view[0]
+		for fraction: Vector2 in [Vector2(.5, .5), Vector2(.1, .1), Vector2(.9, .1),
+				Vector2(.1, .9), Vector2(.9, .9), Vector2(.5, .1), Vector2(.5, .9),
+				Vector2(.1, .5), Vector2(.9, .5)]:
+			var owner := _map_owning_point(camera.project_ray_origin(Vector2(view[1]) * fraction))
+			if not owner.is_empty() and wanted.size() < 5:
+				wanted[owner] = true
+	if wanted == _map_detail_visible:
+		return
+	_map_detail_visible = wanted
+	for map_id: String in _neighbour_pictures:
+		var picture := _neighbour_pictures[map_id] as MeshInstance3D
+		if not is_instance_valid(picture):
+			continue
+		var region_index := _region_index_for_map(map_id)
+		if region_index < 0:
+			continue
+		var region: Dictionary = cartography_regions[region_index]
+		var material := picture.mesh.surface_get_material(0) as StandardMaterial3D
+		material.albedo_texture = (_tab_map_detail_texture(region) if wanted.has(map_id)
+			else _tab_map_texture(region))
+	# Release detailed images when their regions leave both map views.
+	for key: String in _tab_map_detail_textures.keys():
+		if not wanted.has(key) and key != str((cartography_regions[_preview_region_index] as Dictionary).get("serverMap", "") if _preview_region_index >= 0 else ""):
+			_tab_map_detail_textures.erase(key)
+
 ## A region's name as the cartography writes it, for a line the player reads.
 func _region_name_for_map(server_map: String) -> String:
 	var region_index: int = _region_index_for_map(server_map)
@@ -6655,6 +6942,12 @@ func _on_continent_button_pressed() -> void:
 		_show_continent_view()
 
 func _show_current_map_view() -> void:
+	_full_map_cursor_inside = false
+	map_cursor_coordinates.hide()
+	_layout_full_map()
+	_cancel_full_map_drag()
+	_full_map_panned = false
+	_update_full_map_focus()
 	_ensure_cartography_textures()
 	continent_view.hide()
 	region_preview.hide()
@@ -6667,6 +6960,7 @@ func _show_current_map_view() -> void:
 	map_coordinates.text = "Coordinates: —"
 
 func _show_continent_view() -> void:
+	map_cursor_coordinates.hide()
 	_ensure_cartography_textures()
 	map_image.hide()
 	region_preview.hide()
@@ -6704,7 +6998,7 @@ func _preview_region(region_index: int) -> void:
 	if region_index == _region_index_for_map(AppState.current_map):
 		_show_current_map_view()
 		return
-	var texture: Texture2D = _tab_map_texture(region)
+	var texture: Texture2D = _tab_map_detail_texture(region)
 	if texture == null:
 		map_coordinates.text = "No map of %s has been drawn yet." % str(
 			region.get("name", "that region"))
@@ -6733,7 +7027,7 @@ func _preview_region(region_index: int) -> void:
 	map_coordinates.text = "Coordinates: —"
 
 ## The server tile under a point on the preview. The image is north-up at a
-## known metre a pixel and the map's own transform turns metres into tiles,
+## known world extent and the map's own transform turns metres into tiles,
 ## so the sidebar reads the same numbers it would over the live map.
 func _preview_tile_at(local_position: Vector2) -> Variant:
 	if _preview_region_index < 0 or _preview_region_index >= cartography_regions.size():
@@ -6761,10 +7055,12 @@ func _preview_tile_at(local_position: Vector2) -> Variant:
 func _on_region_preview_gui_input(event: InputEvent) -> void:
 	if not event is InputEventMouseMotion:
 		return
+	map_cursor_coordinates.hide()
 	var tile_value: Variant = _preview_tile_at((event as InputEventMouseMotion).position)
 	if tile_value is Vector2i:
 		var tile: Vector2i = tile_value as Vector2i
 		map_coordinates.text = "Coordinates: %d, %d" % [tile.x, tile.y]
+		_show_map_cursor_coordinates(region_preview, event.position, tile)
 		var service_label: String = _service_preview_overlay.label_at((event as InputEventMouseMotion).position)
 		if not service_label.is_empty():
 			map_coordinates.text += " — " + service_label
@@ -6778,6 +7074,7 @@ func _on_region_preview_gui_input(event: InputEvent) -> void:
 		map_coordinates.text = "Coordinates: outside map image"
 
 func _on_region_preview_mouse_exited() -> void:
+	map_cursor_coordinates.hide()
 	if region_preview.visible:
 		map_coordinates.text = "Coordinates: —"
 
@@ -9831,6 +10128,7 @@ func _floating_feedback_row(preferred_y: float, lowest_y: float) -> float:
 	return candidates[candidates.size() - 1]
 
 func _on_window_size_changed() -> void:
+	_layout_full_map()
 	# Match the render viewport to the actual drawable area so resizing changes
 	# camera aspect instead of stretching a fixed 16:9 render target. The
 	# container reports canvas units, which the content-scale system multiplies
@@ -9844,6 +10142,15 @@ func _on_window_size_changed() -> void:
 	if main_viewport.size != target_size:
 		main_viewport.size = target_size
 	OldcraftDialogueStyleScript.layout(self)
+
+func _layout_full_map() -> void:
+	var area := viewport_container.get_rect()
+	area.end = Vector2(minf(area.end.x, right_rail.position.x),
+		minf(area.end.y, (%Quickbar as Control).position.y))
+	full_map.offset_left = area.position.x - full_map.anchor_left * game_view.size.x
+	full_map.offset_top = area.position.y - full_map.anchor_top * game_view.size.y
+	full_map.offset_right = area.end.x - full_map.anchor_right * game_view.size.x
+	full_map.offset_bottom = area.end.y - full_map.anchor_bottom * game_view.size.y
 
 func _sync_hud_button_states(force := false) -> void:
 	if _hud_icon_regions.is_empty():
@@ -12663,6 +12970,7 @@ func _pick_map_object(viewport_position: Vector2) -> MapObject3D:
 ## a request: the server decides range, tools, level and whether anything
 ## happens at all.
 func _activate_map_object(map_object: MapObject3D, inspect: bool) -> void:
+	_clear_map_walk_target()
 	exterior_stream.pending_walk.clear()
 	if inspect:
 		var look_error: Error = Network.look_at_map_object(map_object.object_id)
@@ -13421,6 +13729,10 @@ func _apply_eloria_theme() -> void:
 	eloria_theme.set_color("font_color", "Label", Color(0.91, 0.86, 0.70))
 	eloria_theme.set_color("font_color", "Button", Color(0.93, 0.80, 0.58))
 	theme = eloria_theme
+	var map_style := panel.duplicate() as StyleBoxFlat
+	map_style.set_border_width_all(0)
+	map_style.set_content_margin_all(0.0)
+	full_map.add_theme_stylebox_override("panel", map_style)
 	# The chat frame owns its border; the message area needs no second box.
 	chat_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	chat_output.add_theme_constant_override("outline_size", 1)

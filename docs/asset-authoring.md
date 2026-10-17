@@ -1,5 +1,28 @@
 # Local asset-authoring workspace
 
+Regional map detail images are rendered from the current published chunk GLBs,
+including shared mesh placements, with `eloria-assets/tools/render_region_map_details.py`.
+The maintained chunk reader and native cartography rasterizer are reused; no map
+geometry or retired procedural model is regenerated. The four-pixels-per-metre
+`map-detail.webp` sidecars share the exact Tab-map extent. Their independent
+`godot-client/data/maps/map-details.json` index leaves the certified continent
+overview and its original renderer inputs unchanged. Run from the client root:
+
+```powershell
+python eloria-assets/tools/render_region_map_details.py --work .local/asset-authoring/working/map-detail-4ppm --apply
+python eloria-assets/tools/render_region_map_details.py --check
+```
+
+The render command resumes by skipping detail images whose frame, pixels and
+chunk inputs are current. `--region <id>` scopes a run. Intermediate reports and
+native libraries remain ignored; only the detail images, minimap detail metadata
+and generated index belong with the client. Re-run after publishing changed map
+chunks. The renderer expands shared scenery and applies the same retired-model
+index as the game; the reader version and policy hash invalidate old renders.
+Runtime loads detailed images with mipmaps for the active region, nearby regions
+visible while magnifying or panning, and the latest preview. At most five visible
+regions and one preview are retained; the wider overview uses smaller images.
+
 Procedural model outputs across all types were archived and removed from game
 use on 2026-10-16. See [the retirement record](procedural-model-archive.md) before
 running older builders or selecting animation targets. Their original sources
