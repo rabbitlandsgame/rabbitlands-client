@@ -1,0 +1,432 @@
+{
+ "set": "Phoenix (legendary 01)",
+ "note": "Design skeleton read off the raw Meshy meshes (Blender axes, source units: each piece normalised to 1 m tall, front -Y). The legs source keeps its sabatons, so one fit serves Phoenix Legguards and Phoenix Sabatons.",
+ "pieces": {
+  "torso": {
+   "source": "Eight_legendary_hero_armor_designs__r01_c01.glb",
+   "scale": 0.88,
+   "tau": 0.15,
+   "iters": 3,
+   "bones": [
+    {
+     "name": "trunk_lower",
+     "design": [
+      [
+       0,
+       0.03,
+       -0.278
+      ],
+      [
+       0,
+       0.03,
+       -0.0245
+      ]
+     ],
+     "body": [
+      "pelvis",
+      "spine_02"
+     ],
+     "radius": 0.2,
+     "offset": [
+      0,
+      -0.02,
+      0
+     ],
+     "covers": [
+      "pelvis",
+      "spine_01",
+      "spine_02"
+     ],
+     "zmin": 1.0,
+     "ray": 0.45,
+     "tmax": 0.03,
+     "weights_from": [
+      "pelvis",
+      "spine_01",
+      "spine_02",
+      "spine_03",
+      "thigh_l",
+      "thigh_r"
+     ],
+     "zmax": 1.18
+    },
+    {
+     "name": "trunk_upper",
+     "design": [
+      [
+       0,
+       0.03,
+       -0.0245
+      ],
+      [
+       0,
+       0.03,
+       0.33
+      ]
+     ],
+     "body": [
+      "spine_02",
+      "neck_01"
+     ],
+     "radius": 0.2,
+     "covers": [
+      "spine_02",
+      "spine_03",
+      "clavicle_l",
+      "clavicle_r"
+     ],
+     "ray": 0.45,
+     "tmax": 0.05,
+     "weights_from": [
+      "spine_02",
+      "spine_03",
+      "clavicle_l",
+      "clavicle_r",
+      "neck_01"
+     ],
+     "zmin": 1.15
+    },
+    {
+     "name": "upperarm_l",
+     "design": [
+      [
+       0.28,
+       0.02,
+       0.22
+      ],
+      [
+       0.355,
+       0.02,
+       -0.1
+      ]
+     ],
+     "body": [
+      "upperarm_l",
+      "lowerarm_l"
+     ],
+     "radius": 0.08,
+     "covers": [
+      "upperarm_l"
+     ],
+     "ray": 0.25,
+     "weights_from": [
+      "spine_03",
+      "clavicle_l",
+      "upperarm_l",
+      "lowerarm_l"
+     ]
+    },
+    {
+     "name": "lowerarm_l",
+     "design": [
+      [
+       0.355,
+       0.02,
+       -0.1
+      ],
+      [
+       0.4,
+       0.02,
+       -0.38
+      ]
+     ],
+     "body": [
+      "lowerarm_l",
+      "hand_l"
+     ],
+     "radius": 0.075,
+     "covers": [
+      "lowerarm_l"
+     ],
+     "ray": 0.25,
+     "weights_from": [
+      "upperarm_l",
+      "lowerarm_l",
+      "hand_l"
+     ]
+    },
+    {
+     "name": "upperarm_r",
+     "design": [
+      [
+       -0.28,
+       0.02,
+       0.22
+      ],
+      [
+       -0.355,
+       0.02,
+       -0.1
+      ]
+     ],
+     "body": [
+      "upperarm_r",
+      "lowerarm_r"
+     ],
+     "radius": 0.08,
+     "covers": [
+      "upperarm_r"
+     ],
+     "ray": 0.25,
+     "weights_from": [
+      "spine_03",
+      "clavicle_r",
+      "upperarm_r",
+      "lowerarm_r"
+     ]
+    },
+    {
+     "name": "lowerarm_r",
+     "design": [
+      [
+       -0.355,
+       0.02,
+       -0.1
+      ],
+      [
+       -0.4,
+       0.02,
+       -0.38
+      ]
+     ],
+     "body": [
+      "lowerarm_r",
+      "hand_r"
+     ],
+     "radius": 0.075,
+     "covers": [
+      "lowerarm_r"
+     ],
+     "ray": 0.25,
+     "weights_from": [
+      "upperarm_r",
+      "lowerarm_r",
+      "hand_r"
+     ]
+    }
+   ]
+  },
+  "legs": {
+   "source": "Eight_legendary_fantasy_leg_armor_designs__r01_c01.glb",
+   "scale": 1.07,
+   "tau": 0.15,
+   "iters": 3,
+   "bones": [
+    {
+     "name": "pelvis",
+     "design": [
+      [
+       0,
+       -0.02,
+       0.386
+      ],
+      [
+       0,
+       -0.02,
+       0.5
+      ]
+     ],
+     "body": [
+      "pelvis",
+      "spine_01"
+     ],
+     "radius": 0.2,
+     "covers": [
+      "pelvis"
+     ],
+     "ray": 0.4,
+     "weights_from": [
+      "pelvis",
+      "spine_01",
+      "thigh_l",
+      "thigh_r"
+     ]
+    },
+    {
+     "name": "thigh_l",
+     "design": [
+      [
+       0.11,
+       -0.02,
+       0.386
+      ],
+      [
+       0.155,
+       -0.03,
+       -0.02
+      ]
+     ],
+     "body": [
+      "thigh_l",
+      "calf_l"
+     ],
+     "radius": 0.11,
+     "covers": [
+      "thigh_l"
+     ],
+     "ray": 0.3,
+     "weights_from": [
+      "pelvis",
+      "thigh_l",
+      "calf_l"
+     ]
+    },
+    {
+     "name": "calf_l",
+     "design": [
+      [
+       0.155,
+       -0.03,
+       -0.02
+      ],
+      [
+       0.19,
+       -0.025,
+       -0.425
+      ]
+     ],
+     "body": [
+      "calf_l",
+      "foot_l"
+     ],
+     "radius": 0.085,
+     "covers": [
+      "calf_l"
+     ],
+     "ray": 0.3,
+     "weights_from": [
+      "thigh_l",
+      "calf_l",
+      "foot_l"
+     ]
+    },
+    {
+     "name": "foot_l",
+     "design": [
+      [
+       0.19,
+       -0.025,
+       -0.425
+      ],
+      [
+       0.2,
+       -0.11,
+       -0.486
+      ]
+     ],
+     "body": [
+      "foot_l",
+      "ball_l"
+     ],
+     "radius": 0.07,
+     "scale": 1.32,
+     "covers": [
+      "foot_l",
+      "ball_l"
+     ],
+     "ray": 0.3,
+     "interior_only": false,
+     "tmax": 0.025,
+     "gmax": 1.1,
+     "weights_from": [
+      "calf_l",
+      "foot_l",
+      "ball_l"
+     ]
+    },
+    {
+     "name": "thigh_r",
+     "design": [
+      [
+       -0.11,
+       -0.02,
+       0.386
+      ],
+      [
+       -0.155,
+       -0.03,
+       -0.02
+      ]
+     ],
+     "body": [
+      "thigh_r",
+      "calf_r"
+     ],
+     "radius": 0.11,
+     "covers": [
+      "thigh_r"
+     ],
+     "ray": 0.3,
+     "weights_from": [
+      "pelvis",
+      "thigh_r",
+      "calf_r"
+     ]
+    },
+    {
+     "name": "calf_r",
+     "design": [
+      [
+       -0.155,
+       -0.03,
+       -0.02
+      ],
+      [
+       -0.19,
+       -0.025,
+       -0.425
+      ]
+     ],
+     "body": [
+      "calf_r",
+      "foot_r"
+     ],
+     "radius": 0.085,
+     "covers": [
+      "calf_r"
+     ],
+     "ray": 0.3,
+     "weights_from": [
+      "thigh_r",
+      "calf_r",
+      "foot_r"
+     ]
+    },
+    {
+     "name": "foot_r",
+     "design": [
+      [
+       -0.19,
+       -0.025,
+       -0.425
+      ],
+      [
+       -0.2,
+       -0.11,
+       -0.486
+      ]
+     ],
+     "body": [
+      "foot_r",
+      "ball_r"
+     ],
+     "radius": 0.07,
+     "scale": 1.32,
+     "covers": [
+      "foot_r",
+      "ball_r"
+     ],
+     "ray": 0.3,
+     "interior_only": false,
+     "tmax": 0.025,
+     "gmax": 1.1,
+     "weights_from": [
+      "calf_r",
+      "foot_r",
+      "ball_r"
+     ]
+    }
+   ]
+  }
+ }
+}

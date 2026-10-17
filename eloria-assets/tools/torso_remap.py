@@ -1538,9 +1538,21 @@ def build(source, out, rig, kind='cuirass', label='Remapped armour',
     original_faces = surface.indices.reshape(-1, 3).copy()
     lift = COLLAR_LIFT.get(source.name.removesuffix('.orig'), 0.)
     arm_fit = ARM_FIT_OVERRIDES.get(source.name.removesuffix('.orig'))
-    points, joints, weights, keep, report = remap(
-        raw, surface.indices.reshape(-1, 3), design_rig, lift,
-        arm_fit=arm_fit, split_sewn_surface=(kind != 'shirt'))
+    import design_fit
+    body_file = io.RACES / f'{design_rig.source_slug}.glb'
+    fit = design_fit.override(source, design_rig, body_file if body_file.exists() else None)
+    if fit is not None:
+        # The set's design fit supplies the shell; backing and packing follow below.
+        points, joints, weights = fit['positions'], fit['joints'], fit['weights']
+        keep = design_fit.keep_triangles(fit, original_faces)
+        report = {'designFit': {'file': fit['file'], 'sha256': fit['sha256']},
+                  'openedSeamTriangles': int((~keep).sum()),
+                  'passes': [{'name': 'design_fit', 'file': fit['file'],
+                              'openedTriangles': int((~keep).sum())}]}
+    else:
+        points, joints, weights, keep, report = remap(
+            raw, surface.indices.reshape(-1, 3), design_rig, lift,
+            arm_fit=arm_fit, split_sewn_surface=(kind != 'shirt'))
     surface.indices = surface.indices.reshape(-1, 3)[keep].reshape(-1)
     surface.positions = points
     canon, _, _ = io._weld(points, surface.indices.reshape(-1, 3))
@@ -1582,7 +1594,8 @@ def build(source, out, rig, kind='cuirass', label='Remapped armour',
         'baseColorFactor': cloth_colour, 'metallicFactor': 0., 'roughnessFactor': 1.}})
     if texture is not None:
         import equipment_seam_texture
-        source_p = source_coordinates(p, j, w, raw, report, rig)
+        source_p = (design_fit.source_coordinates(p, fit, raw) if fit is not None
+                    else source_coordinates(p, j, w, raw, report, rig))
         liner = equipment_seam_texture.primitive(glb, p, idx.reshape(-1,3), n, j, w, source_p,
             raw, original_faces, surface.uvs, texture, label+' Fitted cloth')
     else:

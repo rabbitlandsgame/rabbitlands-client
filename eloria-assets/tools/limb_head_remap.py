@@ -150,19 +150,7 @@ def leg_frame(points, faces, rig, full_harness=False):
             want=np.interp(y,[low,source_crotch,high],[floor,target_crotch,waist])
             out[own,1]+=want-old
     if full_harness:
-        # Shared rest transforms do not make the two foot surfaces identical.
-        # Seat each sabaton on its weighted sole, keeping the shin split fixed.
-        # Short ornaments travel whole; both walls share the positive band map.
-        seam_y = .320 * rig.fit_scale
-        for side, sign in (("l", 1.), ("r", -1.)):
-            side_vertices = points[:, 0] * sign >= 0
-            have = float(out[side_vertices, 1].min())
-            want = ea.weighted_sole(rig, side) - .004 * rig.fit_scale
-            for label in np.unique(labels[side_vertices]):
-                own = (labels == label) & side_vertices
-                block = out[own, 1].copy()
-                y = np.full(len(block), block.mean()) if np.ptp(block) < .16 * rig.fit_scale else block
-                out[own, 1] += np.clip((seam_y-y) / max(seam_y-have, .01), 0., 1.) * (want-have)
+        seat_harness_soles(out, points, labels, rig)
     return out, {
         "name": "waist_crotch_and_shin_frames",
         "sourceCrotchY": source_crotch,
@@ -172,6 +160,27 @@ def leg_frame(points, faces, rig, full_harness=False):
         "hemY": float(floor),
         "shifts": shifts,
     }
+
+
+def seat_harness_soles(out, points, labels, rig):
+    """Seat each sabaton of a legs-with-boots harness on its weighted sole.
+
+    Shared rest transforms do not make the two foot surfaces identical, so
+    each side is lifted or lowered to 4 mm under its own weighted sole, the
+    shift fading out by the shin split. Short ornaments travel whole; both
+    walls share the positive band map. ``points`` (the source) picks the side.
+    """
+    seam_y = .320 * rig.fit_scale
+    for side, sign in (("l", 1.), ("r", -1.)):
+        side_vertices = points[:, 0] * sign >= 0
+        have = float(out[side_vertices, 1].min())
+        want = ea.weighted_sole(rig, side) - .004 * rig.fit_scale
+        for label in np.unique(labels[side_vertices]):
+            own = (labels == label) & side_vertices
+            block = out[own, 1].copy()
+            y = np.full(len(block), block.mean()) if np.ptp(block) < .16 * rig.fit_scale else block
+            out[own, 1] += np.clip((seam_y-y) / max(seam_y-have, .01), 0., 1.) * (want-have)
+    return out
 
 
 def boot_frame(points, faces, rig):
@@ -622,6 +631,10 @@ def build(source, out, rig, kind, label, span=None):
     is_head = kind in io.SOCKET_KIND
     region = "head" if is_head else ea.garment_region(kind)
     full = source.name.startswith("Eight_legendary_fantasy_leg_armor_designs__")
+    import design_fit
+    body_file = io.RACES / f"{rig.source_slug}.glb"
+    fit = None if is_head else design_fit.override(source, rig, body_file if body_file.exists() else None)
+    used = np.arange(len(p))
     if region == "boots" and not full:
         # Meshy sometimes joins the two shoes with triangles. Separate their
         # original owners before either heel/toe frame moves; a welded bridge
@@ -636,6 +649,15 @@ def build(source, out, rig, kind, label, span=None):
         p, report = leg_frame(p, f, rig, full)
     else:
         p, cuff, report = boot_frame(p, f, rig)
+    if fit is not None:
+        # The set's design fit supplies the shell. The frame above still
+        # measures the body's crotch and cuff, which the cut and backing use.
+        source_points = surface.positions[used]
+        p = fit['positions'][used].copy()
+        if full:
+            # The fit is solved in idle; its rest soles still go on the weighted soles.
+            seat_harness_soles(p, source_points, components(source_points, f), rig)
+        report['designFit'] = {'file': fit['file'], 'sha256': fit['sha256']}
     if full:
         clipped = clip(
             p,
@@ -653,7 +675,8 @@ def build(source, out, rig, kind, label, span=None):
         groin = report["crotchY"] - .025 * rig.fit_scale
         crossing = np.ptp(source_left[f].astype(int), axis=1) > 0
         f = f[~(crossing & (p[f, 1].min(axis=1) < groin))]
-    if not is_head:
+    if not is_head and fit is None:
+        # A design fit is already centred on the body surface, segment by segment.
         from equipment_joint_fit import align
         p, joint_fit = align(p, f, rig, region)
         report['jointFit'] = joint_fit

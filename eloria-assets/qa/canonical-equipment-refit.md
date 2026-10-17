@@ -44,6 +44,94 @@ This supersedes the earlier sixteen-body equipment delivery. The isolated
 worktree began at `68f4f6e20e7c11051aecbb580c03b47b89a25393`.
 Item definitions and gameplay stats are unchanged.
 
+## Set-level design fit (2026-10-16)
+
+`torso_remap` and `limb_head_remap` fit each piece on its own, so the pieces
+of one set are seated by different rules: a sleeve is scaled uniformly by the
+arm-length ratio (girth included) and trimmed by a fixed profile, pauldrons
+take the same scale, the trunk's depth is compressed to 0.8 of its width, and
+the body-contact cage flares a skirt outward to clear the thighs. Worn
+together, the Phoenix set read bulkier than its concept, with a bell-shaped
+skirt and wide thigh plates.
+
+A design fit instead fits a set the way it was drawn, on the body that wears
+it. First an iteration target was built in Blender: the raw Meshy pieces of
+the set assembled on the Human body in the game's idle pose
+([target](design-fit/phoenix-target.jpg)). `design_fit_blender.py` makes that
+assembly reproducible and turns it into the fitted shell:
+
+- Each vertex rides the design bone it belongs to. The design skeleton (trunk
+  lower/upper, upper arm, forearm, pelvis, thigh, calf, foot) is read off the
+  concept-pose mesh and recorded in a set spec,
+  `eloria-assets/source/equipment-design-fit/<set>.json`. Each design bone is
+  carried onto its body bone by a similarity. The bone direction is rotated
+  onto the body's, the cross-section is scaled by the piece's single girth
+  scale, and the bone is stretched only along its length.
+- Clearance is solved per bone with rays from the body bone's axis through the
+  skin it carries. A ridge-damped least-squares shift centres the shell. One
+  girth factor (capped at +12%) clears the skin by 12 mm on 85% of rays. A
+  shell lying more than 25 mm inside the skin is a designed opening and is
+  ignored, so openings never balloon a segment.
+- Skin weights come from the posed body surface nearest each vertex, scoped to
+  the bones each design bone may inherit from. They are smoothed over the
+  shell, and small welded plates are made rigid. The skirt's tassets may take
+  thigh weights, so they move with the legs instead of being flared clear of
+  them.
+- Rest positions invert linear-blend skinning at the idle pose. The client's
+  own skinning therefore returns the target exactly in idle (round trip
+  0.01 mm).
+
+The tool writes `<source>.npz` per body under
+`eloria-assets/source/equipment-design-fit/luminous_<sex>/`. When that file
+exists, `design_fit.override` hands the shell to `torso_remap.build` /
+`limb_head_remap.build` in place of their own retarget. Backings, inseams,
+the textured fitted cloth, the cuff cut, sole seating
+(`limb_head_remap.seat_harness_soles`), normals and packing all run as before.
+The file pins source and body hashes, and a stale one is refused. Fit records
+carry `design_fit_sha256`, and `tool_hashes` includes `design_fit.py`.
+
+```powershell
+blender -b --factory-startup --python eloria-assets/tools/design_fit_blender.py -- --spec eloria-assets/source/equipment-design-fit/phoenix.json --body <bodies>/luminous_male.glb --sources <generate_models/meshy-armor-individual-glb> --out eloria-assets/source/equipment-design-fit/luminous_male
+python eloria-assets/tools/refit_human_bodies.py --bodies <bodies> --generated <generate_models/meshy-armor-individual-glb> --out <scratch> --pieces legendary_hero_cuirass_01,legendary_leg_armor_01,legendary_sabatons_01 --tag <t>
+python eloria-assets/tools/install_human_equipment.py <scratch> --tag <t>
+python eloria-assets/tools/share_human_equipment_textures.py
+```
+
+The installer writes `equipment.json` and `native_asset_catalog.json` with
+CRLF line endings. This checkout is LF, so convert both back before
+committing.
+
+**Phoenix results.** The set covers Phoenix Cuirass, Phoenix Legguards and
+Phoenix Sabatons, on both bodies; the socketed Phoenix Helm is unchanged.
+Silhouette IoU against the target in idle (Blender, orthographic, backings
+hidden):
+
+| View | Old fit | Design fit |
+| --- | ---: | ---: |
+| Front | 0.903 | 0.981 |
+| Side | 0.810 | 0.985 |
+
+The leg pipeline still recomputes nearest-surface weights in the rest pose and
+cuts the cuff at 0.32 m, which accounts for the remainder.
+
+Evidence:
+
+- [Blender old/new/target](design-fit/phoenix-blender-old-new-target.jpg)
+- [in-engine before/after](design-fit/phoenix-engine-before-after.jpg) (real
+  `ReplicatedActor3D`, `canonical_equipment_preview.gd`)
+- [in-engine walk/run cycles](design-fit/phoenix-engine-walk-run.jpg)
+
+The equipment, remapper and held-prop suites show the same 9 failures as clean
+develop at `224bb9b9`; all of them predate this change and come from today's
+procedural retirement plus registry checks. `test_torso_body_cover_lods.gd`
+and `test_equipment_registry_snapshot_cache.gd` pass. The new
+`GeneratedArmorBacking` textures replace two orphaned ones. The packed GLBs
+grow 0.1–4%.
+
+**Not yet done.** Other sets keep their per-piece fits until they have a spec.
+Separate boots (sources without legs) need a calf/foot-only skeleton. Race
+headwear is untouched.
+
 ## Two body shapes, preserved race identity
 
 There are **two body equipment fits**, with 200 torso/leg/boot designs each,
