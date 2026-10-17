@@ -246,16 +246,45 @@ The engine check used the real actor, before and after, on both bodies: Idle_Sub
 - The coats keep their drawn shoulders and sleeves.
 - The cycles show no tearing at the armpits, knees or boot cuffs.
 
-Two things carry over from the sources and the old pipeline:
+One thing carries over from the source: a thin loose strap below the Scout
+Vest's hem now hangs at the right hip. The old fit threw it a metre to the
+side, out of frame.
 
-- A thin loose strap below the Scout Vest's hem now hangs at the right hip. The old fit threw it a metre to the side, out of frame.
-- The torso backing's wrist edge shows as a ragged fringe inside the wide Vanguard and Arcanist cuffs. It did so before as well.
+**Clean lining cuffs.** Inside wide cuffs, such as the Studded Jack's and the
+Acolyte Tunic's, the wrist used to show a ragged fringe. It had two causes,
+and both came from choosing whole triangles by their centre.
+
+- **The lining's spikes.** `torso_remap.lining` kept body and default-shirt
+  triangles whose centre fell short of the wrist plane. That left shirt-cuff
+  and wrist-skin spikes up to 2 cm past the plane. The lining is now cut
+  exactly on the plane (`clip_open_sheet`, the neckline clip generalised).
+  Each sleeve ends in one ring, at least 9 mm inside each kit's cuff (lining
+  0.743 m against art 0.752–0.788 m in the rest pose).
+- **Holes in the hand.** At runtime, `TorsoBodyCover` hides every body
+  triangle whose rest centre lies inside `bodyCover`. The wrist edge sat on
+  the lining's plane, but a male wrist triangle reaches up to 2.5 cm past its
+  centre. The hidden skin therefore left a row of holes past the lining's
+  end, and the dark sleeve interior showed through them.
+
+  The edge is now `wrist_cover`: the nearest centre of any triangle that
+  crosses the plane (0.733 m male, 0.725 m female). No hidden triangle reaches
+  past the lining any more. Over its last stretch the lining stays at least
+  3 mm outside the skin it keeps. There it also takes that skin's own
+  lowerarm/hand weights (`lining_weights`); otherwise the wrist skin swings
+  out through the ring as the hand bends in idle. The hand now comes out of a
+  clean ring.
+
+The four kit torsos were refitted with both fixes. Their art is byte-identical;
+only the lining and its `bodyCover` changed. Other torsos pick up the fixes
+when they are next refitted. Evidence:
+[lining cuffs before/after](design-fit/starter-kits-lining-cuffs.jpg).
 
 The equipment, remapper and held-prop suites fail on the same 9 test IDs as
 clean develop at `224bb9b9`. The Kneecops and Sidelace Breeches GLBs gain a
 `ReconstructedInseams` mesh, now that the fitted legs meet at the inseam. The
 packed GLBs change by −0.4% to +6.1%. The eight new fitted-cloth textures
-replace eight textures that no GLB references any more.
+replace eight textures that no GLB references any more. They were re-sampled
+once more after the cuff cut, again replacing the eight they superseded.
 
 **Not yet done.** Other sets keep their per-piece fits until they have a spec.
 There is still no automatic landmark finder, so each spec's skeleton is read

@@ -1322,9 +1322,19 @@ def clip_lining_neckline(points, faces, scale):
     # Only the central throat is open. A horizontal ceiling across the arms
     # amputates the shoulder roof and leaves a hole behind raised sleeves.
     height = (1.40 + 1.5 * np.maximum(0., np.abs(points[:, 0]) / scale - .08)) * scale
-    signed = points[:, 1] - height
+    points, faces, _ = clip_open_sheet(points, faces, points[:, 1] - height)
+    return points, faces
+
+
+def clip_open_sheet(points, faces, signed):
+    """Keep the part of a sheet where ``signed <= 0``, cut exactly on its edges.
+
+    Returns the kept points, their faces and, per kept point, the input point
+    it came from (for a new point on a cut edge, the edge's kept end).
+    """
     inside = signed <= 0.
     output = list(points)
+    origin = list(range(len(points)))
     cache, kept = {}, []
     def intersection(i, j):
         key = tuple(sorted((int(i), int(j))))
@@ -1332,6 +1342,7 @@ def clip_lining_neckline(points, faces, scale):
             t = signed[i] / (signed[i] - signed[j])
             cache[key] = len(output)
             output.append(points[i] * (1-t) + points[j] * t)
+            origin.append(int(i) if inside[i] else int(j))
         return cache[key]
     for face in faces:
         polygon = []
@@ -1339,22 +1350,49 @@ def clip_lining_neckline(points, faces, scale):
             if inside[i]: polygon.append(int(i))
             if inside[i] != inside[j]: polygon.append(intersection(i, j))
         kept.extend([[polygon[0], polygon[k], polygon[k+1]] for k in range(1, len(polygon)-1)])
-    kept = np.asarray(kept, dtype=np.int64)
+    kept = np.asarray(kept, dtype=np.int64).reshape(-1, 3)
     used, inverse = np.unique(kept, return_inverse=True)
-    return np.asarray(output)[used], inverse.reshape(-1, 3)
+    return np.asarray(output)[used], inverse.reshape(-1, 3), np.asarray(origin)[used]
+
+
+def lining_wrist(rig):
+    """Rest-pose |x| of the wrist plane each fitted sleeve lining ends on."""
+    return min(abs(rig.origin('hand_' + side)[0]) for side in ['l', 'r']) - .008 * rig.fit_scale
+
+
+def wrist_cover(rig):
+    """The bodyCover wrist edge that leaves no hole past the lining's end.
+
+    The runtime (TorsoBodyCover) hides each body triangle whose rest centre
+    lies inside the cover. A wrist triangle can reach past its centre by
+    2.5 cm on the male body, so a cover edge on the lining's own plane hid skin
+    beyond the lining and the cuff showed a fringe of holes at the hand. The
+    edge is therefore the nearest centre of any band triangle that crosses
+    the lining's plane. Skin between it and the plane stays, and
+    `lining` keeps it inside the sleeve lining.
+    """
+    cut = lining_wrist(rig)
+    faces = rig.faces
+    corner = rig.positions[faces]
+    centre = corner.mean(axis=1)
+    band = (centre[:, 1] > .95 * rig.fit_scale) & (centre[:, 1] < 1.535 * rig.fit_scale)
+    crossing = band & (np.abs(corner[:, :, 0]).max(axis=1) > cut) & (np.abs(centre[:, 0]) < cut)
+    return float(min(cut, np.abs(centre[crossing, 0]).min())) if crossing.any() else cut
 
 
 def lining(rig, armour, triangles, binding_rig=None):
     """A closed fitted backing with continuous anatomical sleeve weights."""
     points, faces = rig.positions, ea.garment_faces(rig, 'torso')
-    centre = points[faces].mean(axis=1)
+    skin_faces = points[faces]
+    centre = skin_faces.mean(axis=1)
     keep = (centre[:, 1] > .95 * rig.fit_scale) & (centre[:, 1] < 1.535 * rig.fit_scale)
-    wrist = min(abs(rig.origin('hand_' + side)[0]) for side in ['l', 'r']) - .008 * rig.fit_scale
-    keep &= np.abs(centre[:, 0]) < wrist
-    faces = faces[keep]
-    used, inverse = np.unique(faces, return_inverse=True)
-    points = points[used].copy()
-    faces = inverse.reshape(-1, 3)
+    cut, cover = lining_wrist(rig), wrist_cover(rig)
+    # End each sleeve on the wrist plane, cut exactly. Keeping whole
+    # triangles by centre left shirt-cuff and wrist-skin spikes up to 2 cm
+    # past the cut, which showed inside wide cuffs.
+    keep &= np.abs(points[faces, 0]).min(axis=1) < cut
+    points, faces, used = clip_open_sheet(points, faces[keep], np.abs(points[:, 0]) - cut)
+    points = points.copy()
     # Merge body UV seams before calculating the backing's outward normals.
     _, first, weld = np.unique(np.round(points, 6), axis=0, return_index=True, return_inverse=True)
     points = points[first]
@@ -1379,9 +1417,19 @@ def lining(rig, armour, triangles, binding_rig=None):
         want = np.interp(t, [0., .15, .5, 1.], [.055, .048, .040, .034]) * rig.fit_scale
         sleeve_faces = armour[triangles]
         sleeve_faces = sleeve_faces[(sleeve_faces[:, :, 0].mean(axis=1) * (1 if side == 'l' else -1)) > .18 * rig.fit_scale]
+        # Between the cover edge and the lining's end the body stays visible
+        # (see wrist_cover): the lining's last stretch holds that skin inside.
+        sign = 1 if side == 'l' else -1
+        wrist_skin = skin_faces[(skin_faces[:, :, 0].mean(axis=1) * sign > cover - .03 * rig.fit_scale)
+                                & (skin_faces[:, :, 0].mean(axis=1) * sign < cut + .03 * rig.fit_scale)]
+        near_hand = points[own, 0] * sign > cover - .015 * rig.fit_scale
         for row, (origin, ray, length) in enumerate(zip(centre_line, radial, radius)):
             if length < 1e-8:
                 continue
+            if near_hand[row] and len(wrist_skin):
+                skin, _ = io.cast(origin, ray / length, wrist_skin)
+                if np.isfinite(skin) and skin < .09 * rig.fit_scale:
+                    want[row] = max(want[row], skin + .003 * rig.fit_scale)
             hit, _ = io.cast(origin, ray / length, sleeve_faces)
             if np.isfinite(hit) and .012 * rig.fit_scale < hit < .16 * rig.fit_scale:
                 # Fill the shoulder seam just inside the artwork. Recessing this
@@ -1468,6 +1516,17 @@ def lining_weights(points, rig):
         share = arm * (points[:, 0] * sign > 0)
         dense[:, rig.joint_names.index('upperarm_' + side)] += share * (1 - lower)
         dense[:, rig.joint_names.index('lowerarm_' + side)] += share * lower
+        # Over its last stretch the lining holds wrist skin (see wrist_cover)
+        # that bends with the hand; it takes that skin's lowerarm/hand weights
+        # there, or the skin swings out through the ring in idle.
+        end = share * smoothstep(np.abs(points[:, 0]), wrist_cover(rig) - .02 * rig.fit_scale,
+                                 lining_wrist(rig))
+        near = np.flatnonzero(end > 0)
+        if len(near):
+            jj, ww = rig.weights_for(points[near], ['lowerarm_' + side, 'hand_' + side])
+            dense[near] *= (1 - end[near])[:, None]
+            for slot in range(jj.shape[1]):
+                dense[near, jj[:, slot]] += end[near] * ww[:, slot]
     j = np.argsort(-dense, axis=1)[:, :4]
     w = np.take_along_axis(dense, j, axis=1)
     w /= w.sum(axis=1, keepdims=True)
@@ -1602,7 +1661,8 @@ def build(source, out, rig, kind='cuirass', label='Remapped armour',
         liner = glb.primitive(p, n, uv, idx, liner_mat, joints=j, weights=w, weight_floats=True)
     glb.mesh(label, [primitive], skin=0)
     glb.mesh('GeneratedArmorBacking', [liner], skin=0)
-    cover = [.95, 1.535, min(abs(rig.origin('hand_' + side)[0]) for side in ['l', 'r']) / rig.fit_scale - .008]
+    # The runtime hides the body up to wrist_cover, short of the lining's end.
+    cover = [.95, 1.535, wrist_cover(rig) / rig.fit_scale]
     glb.doc['meshes'][-1]['extras'] = {'bodyCover': cover}
     report['passes'].append({'name': 'fitted_backing', 'vertices': len(p),
                              'triangles': len(idx)//3, 'bodyCover': cover})
