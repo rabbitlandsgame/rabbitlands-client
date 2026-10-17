@@ -39,7 +39,7 @@ func _run() -> void:
 	await process_frame
 	_expect(panel.visible, "the settings button opens it")
 	_expect((window.call("tab_titles") as Array)
-			== ["HUD", "Minimap", "Banners", "Graphics", "Camera", "Audio", "Inventory", "Spells", "Gameplay", "Controls"],
+			== ["HUD", "Chat", "Minimap", "Banners", "Graphics", "Camera", "Audio", "Inventory", "Spells", "Gameplay", "Controls"],
 		"it is tabbed: %s" % str(window.call("tab_titles")))
 	var rect: Rect2 = panel.get_global_rect()
 	_expect(rect.position.x >= 0.0 and rect.position.y >= 0.0
@@ -349,9 +349,12 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 		"timer_start_seconds", "minimap_visible", "minimap_orientation", "minimap_shape",
 		"minimap_border", "minimap_marker_scale", "minimap_zoom", "inventory_scale",
 		"ground_bag_scale", "storage_docked", "selected_quantity", "spell_bar_expanded",
-		"spell_bar_docked", "CastingMode", "QuickSlotCount", "RingSize", "secure", "start_backdrop",
+		"spell_bar_docked", "CastingMode", "QuickSlotCount", "RingSize", "start_backdrop",
 		"start_animated", "invasion_assistant_scale", "rotation_sensitivity",
-		"pan_sensitivity", "follow_player", "shadows", "particles", "nameplates"]
+		"shadows", "particles", "nameplates"]
+	_expect(window.find_child("pan_sensitivity", true, false) == null
+		and window.find_child("follow_player", true, false) == null,
+		"camera settings cannot detach the view from the player")
 	for key: String in (main.get("BANNER_OPTION_NODES") as Dictionary).values():
 		keys.append(key)
 	for type: StringName in main.get("MINIMAP_MARKER_TYPES"):
@@ -401,8 +404,8 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 	protect.button_pressed = true
 	var quantity := window.find_child("quantity_4", true, false) as SpinBox
 	quantity.value = 321
-	var secure := window.find_child("secure", true, false) as CheckBox
-	secure.button_pressed = true
+	_expect(window.find_child("secure", true, false) == null,
+		"settings cannot disable TLS")
 	await process_frame
 	var config := ConfigFile.new()
 	config.load(SETTINGS_PATH)
@@ -414,10 +417,10 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 		and config.get_value("inventory", "quantities")[4] == 321
 		and config.get_value("inventory", "bulk_exclusions")["drop"][2] == true
 		and config.get_value("connection", "secure") == true,
-		"timer, quantities, bulk protection and secure login save through their controls")
+		"timer, quantities and bulk protection save while TLS remains enabled")
 	main.call("_load_hud_settings")
 	_expect(timer.value == 123 and quantity.value == 321 and protect.button_pressed
-		and secure.button_pressed and orientation.get_item_metadata(orientation.selected) == "player_up",
+		and orientation.get_item_metadata(orientation.selected) == "player_up",
 		"reloading preferences restores every new control without changing its value")
 	main.call("_on_minimap_orientation_selected", 0)
 	_expect(orientation.get_item_metadata(orientation.selected) == "north_up",

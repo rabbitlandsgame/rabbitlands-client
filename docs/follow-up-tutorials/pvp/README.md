@@ -199,7 +199,9 @@ Target 5/6 finding the actual zone rule and demonstrating retreat/cancel, and 4/
 
 ## Source audit
 
-- [PK zones](../../../../dev-server/eloria/pk.py): provisional locations, caps and loss/multi-combat flags.
-- [World runtime](../../../../dev-server/eloria/world.py): player melee/ranged, flee, death ordering, summons and raid eligibility.
-- [Magic runtime](../../../../dev-server/eloria/magic_runtime.py), [territory raids](../../../../dev-server/eloria/territory_raids.py), [perks](../../../../dev-server/eloria/perks.py): hostile/support distinctions and advanced variants.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+- [PK zones](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/pk.py): provisional locations, caps and loss/multi-combat flags.
+- [World runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py): player melee/ranged, flee, death ordering, summons and raid eligibility.
+- [Magic runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/magic_runtime.py), [territory raids](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/territory_raids.py), [perks](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/perks.py): hostile/support distinctions and advanced variants.
 - [Native client](../../../godot-client/src/app/main.gd), [party UI](../../../godot-client/src/ui/extension_windows.gd): actual input and feedback; proposed zone summary is new work.

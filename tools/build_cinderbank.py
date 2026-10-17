@@ -393,7 +393,7 @@ def build(adventure,targets):
         sun=dict(color='#fff0d9',energy=.7,rotationDegrees=[-52,-32,0]),tonemap=dict(mode='filmic',exposure=.95))
     manifest['landmarks']=[dict(id=t['id'],name=t['label'],position=[t['tile'][0],.4,-t['tile'][1]]) for t in targets]
     manifest['interactives']=[dict(id=t['id'],kind=t['kind'],objectId=t['objectId'],position=[t['tile'][0],.4,-t['tile'][1]],
-        serverTile=t['tile'],approachTile=t['approach'],resource='Iron Ore' if t['id']=='ore' else 'Deep Coal' if t['id']=='coal' else '') for t in targets if t['objectId']]
+        serverTile=t['tile'],approachTile=t['approach'],resource='Iron Ore' if t['id']=='ore' else 'Coal' if t['id']=='coal' else '') for t in targets if t['objectId']]
     manifest['tutorial'].pop('art',None)
     (out/'world.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
     print('cinderbank:',sum(bool(v) for v in grid),'walkable tiles;',len(g.doc['nodes']),'batched meshes;',len(workshop.blockers),'prop footprints')

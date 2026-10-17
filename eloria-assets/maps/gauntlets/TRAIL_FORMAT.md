@@ -108,10 +108,12 @@ A `line` with step `"auto"` spaces its pieces by the kit's long side less `overl
 (1 m by default).
 
 The eight redrawn roads' sources are written by the design stage's
-`work-output/gauntlet-v2-design/regions/tools/author_routes.py` from the approved
-concept layouts: it places the mouths where nothing else is, the checkpoint fires
-after waves 2 and 4 and the side pocket, sizes the waves from each band's roster, and
-checks that no two pieces of the road come within 3 m unless they are joined.
+`author_routes.py`, kept with the local authoring sources under
+`.local/asset-authoring/workspace/work-output/gauntlet-v2-design/regions/tools/`
+(see `docs/asset-authoring.md`), from the approved concept layouts: it places
+the mouths where nothing else is, the checkpoint fires after waves 2 and 4 and
+the side pocket, sizes the waves from each band's roster, and checks that no two
+pieces of the road come within 3 m unless they are joined.
 
 ## The `gauntlet` block in `client/world.json`
 

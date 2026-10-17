@@ -167,6 +167,23 @@ def test_each_actor_file_ships_in_the_pck_loose_or_nowhere(tmp_path, monkeypatch
         "races", "shared", "creatures", "race_textures", "neck_textures")}
 
 
+def test_tracked_import_settings_do_not_require_loose_runtime_copies(tmp_path, monkeypatch):
+    build = tmp_path / "build"
+    app = tmp_path / "app"
+    sidecars = (CREATURE + ".import", CLOTH_TEXTURE + ".import", CREATURE + ".report.json")
+    _track(monkeypatch, _write_tree(build, extra=sidecars))
+    _import_mask(build)
+    _import_cloth_texture(build)
+    _write_pck(app / "RabbitLands.pck", GOOD_PCK)
+
+    package.stage_loose_client_files(build, app)
+    package.check_actor_pack(build, app)
+
+    assert (app / CREATURE.removeprefix("godot-client/")).is_file()
+    assert all(not (app / relative.removeprefix("godot-client/")).exists()
+               for relative in sidecars)
+
+
 def test_uri_textures_outside_the_imported_folders_stay_loose(tmp_path, monkeypatch):
     # The shared Superhero glTFs name their images by URI too; only the
     # equipment textures were the owner's call.
@@ -334,8 +351,8 @@ def test_a_kept_image_is_staged_loose_and_passes_the_pack_check(tmp_path, monkey
     _import_mask(build)
     _import_cloth_texture(build)
 
-    package.stage_loose_client_files(build, app)
     _write_pck(app / "RabbitLands.pck", GOOD_PCK)
+    package.stage_loose_client_files(build, app)
     package.check_actor_pack(build, app)
 
     assert (app / RACE_SOURCE.removeprefix("godot-client/")).is_file()
@@ -526,10 +543,12 @@ def test_only_loose_actor_files_are_staged_beside_the_executable(tmp_path, monke
     build = tmp_path / "build"
     app = tmp_path / "app"
     _track(monkeypatch, _write_tree(build))
+    _write_pck(app / "RabbitLands.pck", GOOD_PCK)
 
     package.stage_loose_client_files(build, app)
 
-    staged = sorted(p.relative_to(app).as_posix() for p in app.rglob("*") if p.is_file())
+    staged = sorted(p.relative_to(app).as_posix() for p in app.rglob("*")
+                    if p.is_file() and p.name != "RabbitLands.pck")
     assert staged == [
         "assets/actors/native/creatures/fox.glb",
         "assets/actors/native/equipment/cloth.glb",
@@ -544,6 +563,7 @@ def test_only_loose_actor_files_are_staged_beside_the_executable(tmp_path, monke
 
 def _write_pck(path: Path, names: list[str]) -> None:
     """A Godot 4.7 (format 4) PCK directory listing empty files with these names."""
+    path.parent.mkdir(parents=True, exist_ok=True)
     header = b"GDPC" + struct.pack("<4I", 4, 4, 7, 2) + struct.pack("<I", 2)
     reserved = b"\0" * 64
     directory_offset = len(header) + 8 + 8 + len(reserved)
@@ -590,8 +610,8 @@ def test_actor_pack_check_holds_each_file_to_one_place(tmp_path, monkeypatch,
     _track(monkeypatch, _write_tree(build))
     _import_mask(build)
     _import_cloth_texture(build)
-    package.stage_loose_client_files(build, app)
     _write_pck(app / "RabbitLands.pck", GOOD_PCK)
+    package.stage_loose_client_files(build, app)
     package.check_actor_pack(build, app)
 
     _write_pck(app / "RabbitLands.pck", names)

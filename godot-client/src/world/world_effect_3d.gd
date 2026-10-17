@@ -19,6 +19,7 @@ const LIFETIME_SECONDS := 1.1
 const RING_RADIUS := 0.72
 const PARTICLE_COUNT := 32
 const SpellFlight = preload("res://src/world/spell_flight_3d.gd")
+const SPELL_MATERIALS = preload("res://src/world/spell_visual_material.gd")
 
 ## The effect classes the server actually uses, by the palette they draw in.
 ## Everything else is neutral rather than guessed at.
@@ -49,7 +50,7 @@ var _material: StandardMaterial3D
 var _details := ImmediateMesh.new()
 var _native_details: ArrayMesh
 var _details_node: MeshInstance3D
-var _detail_material := CombatEffectMesh.material()
+var _detail_material: ShaderMaterial
 var _impact := Vector3.ZERO
 var _native_geometry: RefCounted
 static var _native_build_attempts := 0
@@ -93,18 +94,22 @@ static func native_presentation_stats() -> Dictionary:
 func configure(effect: int, origin: Vector3, target: Variant = null, power := 1) -> void:
 	effect_id = effect
 	power_level = clampi(power, 1, 10)
-	var brightness := SpellPresentation.power_intensity(power_level)
-	_detail_material.albedo_color = Color(1.0, 1.0, 1.0, brightness)
 	global_position = origin
 	_impact = Vector3.ZERO
 	if target is Vector3:
 		_impact = target as Vector3 - origin
 	var palette: Color = _palette()
+	_detail_material = SPELL_MATERIALS.geometry(palette, power_level)
 	_material = StandardMaterial3D.new()
-	_material.albedo_color = palette
+	_material.albedo_color = SPELL_MATERIALS.body_tint(palette)
 	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	_material.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
+	var ring_glow := _material.duplicate() as StandardMaterial3D
+	ring_glow.albedo_color = Color(palette, 0.40)
+	ring_glow.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	ring_glow.render_priority = 1
+	_material.next_pass = ring_glow
 	var ring_mesh := TorusMesh.new()
 	ring_mesh.inner_radius = (RING_RADIUS - 0.014) * SpellPresentation.power_radius(power_level)
 	ring_mesh.outer_radius = RING_RADIUS * SpellPresentation.power_radius(power_level)
@@ -196,7 +201,6 @@ func _start_impact() -> void:
 ## one rises, which is the one piece of meaning the server's own grouping
 ## supports; everything else drifts.
 func _add_burst(palette: Color) -> void:
-	var brightness := SpellPresentation.power_intensity(power_level)
 	var size := SpellPresentation.power_scale(power_level)
 	var process := ParticleProcessMaterial.new()
 	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
@@ -210,33 +214,13 @@ func _add_burst(palette: Color) -> void:
 	process.scale_max = 0.60 * size
 	process.color = Color.WHITE
 	var fade := Gradient.new()
-	fade.set_color(0, Color(palette.r, palette.g, palette.b, 1.0))
-	fade.set_color(1, Color(palette.r, palette.g, palette.b, 0.0))
+	fade.set_color(0, Color.WHITE)
+	fade.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
 	var ramp := GradientTexture1D.new()
 	ramp.gradient = fade
 	process.color_ramp = ramp
 
-	# A soft radial dot, generated rather than imported: a bare quad reads as a
-	# hard square at any camera distance.
-	var glow := Gradient.new()
-	glow.set_color(0, Color(1.0, 1.0, 1.0, 1.0))
-	glow.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
-	var dot_texture := GradientTexture2D.new()
-	dot_texture.gradient = glow
-	dot_texture.fill = GradientTexture2D.FILL_RADIAL
-	dot_texture.fill_from = Vector2(0.5, 0.5)
-	dot_texture.fill_to = Vector2(1.0, 0.5)
-	dot_texture.width = 32
-	dot_texture.height = 32
-
-	var dot := StandardMaterial3D.new()
-	dot.albedo_color = Color(1.0, 1.0, 1.0, brightness)
-	dot.albedo_texture = dot_texture
-	dot.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dot.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	dot.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	dot.vertex_color_use_as_albedo = true
-	dot.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	var dot := SPELL_MATERIALS.particle(palette, power_level)
 	var quad := QuadMesh.new()
 	quad.size = Vector2(0.20, 0.20)
 	quad.material = dot
@@ -295,6 +279,7 @@ func _process(delta: float) -> void:
 		_ring.scale = Vector3(scale_factor*footprint, 1.0, scale_factor*footprint)
 	if _material != null:
 		_material.albedo_color.a = (1.0 - progress) * 0.65 * SpellPresentation.power_intensity(power_level)
+		(_material.next_pass as StandardMaterial3D).albedo_color.a = _material.albedo_color.a * 0.40
 	_draw_details(progress)
 	if progress >= 1.0:
 		queue_free()

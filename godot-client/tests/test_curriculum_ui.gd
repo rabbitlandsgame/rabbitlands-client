@@ -31,6 +31,13 @@ func run() -> void:
 		"hint":"Gather the order.","control":"world","item":"Olive","required":5,"count":3})
 	check(guide.instruction.text.contains("3 / 5"), "all counted line objectives show progress")
 	check(guide.chapter.text.contains("THE WATCH MUST EAT"), "short quest title is visible")
+	guide.apply_state({"active":true,"tutorial":"field_dispatch","stage":2,"total":7,
+		"title":"The Watch Must Eat","hint":"Gather the order.","control":"world",
+		"item":"Olive","required":6,"count":4})
+	check(guide.chapter.text.contains("MAIN WORLD DISPATCH"), "public quests identify the main world")
+	check(guide.instruction.text.contains("4 / 6"), "public quest counters are visible")
+	check(not guide.instruction.text.contains("Separate practice"), "public quests show real-character instructions")
+	check(guide.skip.text == "Hide guide", "hiding the guide does not abandon a public quest")
 	var road := preload("res://src/world/road_scene.gd").new()
 	root.add_child(road)
 	var label := Label3D.new()

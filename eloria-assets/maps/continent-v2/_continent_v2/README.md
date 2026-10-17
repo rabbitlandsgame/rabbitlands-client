@@ -12,6 +12,16 @@ Do not re-run the original Meshy conditioning. Source kit libraries are shared b
 remain authored content. Original source scene/content/package directories retire after their saved content and
 publication move; the three catalog-declared kit folders remain shared libraries without active source editors.
 
+## Region borders
+
+Neighbouring maps change gradually, never at a line. The ground-colour grade over the frozen vertex colours ramps
+linearly across each border, `featherMetres` (130 m) on each side, about 260 m in all. The border it ramps across is
+warped by smooth noise (`borderWarpMetres` 60 m, `borderWarpScaleMetres` 80 m), so maps interfinger, and border zones
+lean toward a neutral meadow `ecotone` colour, so two strong palettes meet through grassland rather than a muddy mix.
+Each `godot-client/world_authoring/regions/<map>/colour-grade.json` records these values beside its graded copy
+`base-colors-graded.rgba8`; all fifteen maps use the same ones. Flora and ground-region bands that cross a border
+follow the same rule at roughly 150-250 m.
+
 ## Server publication
 
 After all active saved scenes are committed, bake every catalog map and publish its client package from that
@@ -63,6 +73,21 @@ map with unfloored blackspace between sections. The peaceful Lantern Mine
 supplies beginner Coal and Iron Ore; the deeper areas contain intermediate
 encounters and additional minerals. See `../landfall_insides/README.md` for
 locations, resources, encounter tiers, and the rebuild workflow.
+
+## Publication order
+
+New kit GLB or PNG files need `godot --headless --path godot-client --import` before the bake. A bake made without it
+was seen to pass, and `publish_client.py` then refused the package because an external image "is not hash-bound by the
+snapshot" (`_embed_external_images` in `eloria-assets/maps/nymara-regions/_continent/authoring.py`); delete those
+maps' bakes and bake again after the import. `publish_server.py` refuses a bake whose scene SHA-256 is not the
+checkout's scene file (`read_bake`), so bake from the committed scene.
+
+`publish_server.py --apply` writes `_continent_v2/publication.json` into the client checkout, and the server's sync
+records the client checkout's HEAD as `clientCommit` in the server's `tools/collision/manifest.json`. Apply, commit
+the record, then apply again so that provenance names the commit holding it; `--check` still passes when only that
+recorded commit differs, and notes it as `provenanceOnly`. After a merge, regenerate the generated outputs
+(crossings, publication records, each package's `world.json`, `collision.bin` and served grid) from the merged
+sources instead of hand-merging them.
 
 ## Harvest presentation
 

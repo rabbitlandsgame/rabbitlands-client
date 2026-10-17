@@ -5,7 +5,7 @@ Added 2026-10-13 for Eloria Client. Design: work-output/shared-prop-library-2026
 
     python eloria-assets/tools/shared_meshes.py --scan                 # what is duplicated
     python eloria-assets/tools/shared_meshes.py --apply --sets all     # externalise
-    python eloria-assets/tools/shared_meshes.py --verify               # every reference resolves
+    python eloria-assets/tools/shared_meshes.py --reconcile            # hashes back in step
 
 2,053 MB of the shipped map geometry is byte-identical to geometry in another
 map file: the same kit prop baked once per placement. Inside one file glTF
@@ -13,11 +13,15 @@ already shares a mesh across nodes (and the loader walks its collision shape
 once and batches its instances), so the waste is entirely between files, where
 glTF has no way to reference another file's mesh.
 
-This tool is a post-bake pass over finished packages, not a change to the three
-bake families (continent-v2's publish_client.py, the nymara region builders,
-build_four_gates.py). It reads a package's GLBs, moves every mesh that appears
-in two or more files into one content-addressed prototype file, and leaves the
-placement behind as a node with the same name and transform:
+This tool is a post-bake pass over finished packages: the bake families
+(continent-v2's publish_client.py, the nymara region builders,
+build_four_gates.py) are unchanged in how they bake, and call publish_finish.py
+afterwards to run this over what they wrote - which is the only thing that
+keeps a republished map from arriving with every prop copied again. Running
+this tool over the whole tree stays the way to catch what a scoped pass could
+not see. It reads a package's GLBs, moves every mesh that appears in two or
+more files into one content-addressed prototype file, and leaves the placement
+behind as a node with the same name and transform:
 
     maps/_shared/meshes/<sha256>.glb     one prototype: its mesh, materials, images
     maps/_shared/meshes/index.json       sha -> {bytes, primitives, files, materials}
@@ -38,10 +42,18 @@ one chunk and leaves the library (and every other package's digest) alone.
 
 Shared prototypes are immutable at runtime: the client's material passes must
 not write to a pooled mesh or its materials (see the design, Client).
+
+A placement without a mesh is also invisible to anything that walks
+`node["mesh"]`, which is most of the Python that reads a finished package - the
+continent audit's deck heights among them. `inline_prototypes` here is what the
+readers use to see a package whole; `glb_reader.load` calls it, so a tool built
+on the toolkit needs no change.
 """
 from __future__ import annotations
 
 import argparse
+import base64
+import functools
 import hashlib
 import json
 import os
@@ -63,6 +75,8 @@ SCHEMA = "eloria-shared-meshes-v1"
 # directory entry, the request and the manifest line.
 MIN_BYTES = 4096
 GLB_MAGIC = 0x46546C67
+# GitHub refuses a file over 100 MiB, as scene_io.PACKAGE_FILE_BYTES says.
+PACKAGE_FILE_BYTES = 100 * 2 ** 20
 
 SETS = {
     "continent-v2": MAPS / "continent-v2",
@@ -89,7 +103,59 @@ def read_glb(path: Path) -> tuple[dict, bytes]:
     if offset < len(data):
         length, _ = struct.unpack_from("<II", data, offset)
         binary = data[offset + 8:offset + 8 + length]
+    buffers = document.get("buffers", [])
+    if len(buffers) > 1 or any("uri" in buffer for buffer in buffers):
+        binary = _flatten_buffers(path, document, binary)
     return document, binary
+
+
+def _flatten_buffers(path: Path, document: dict, first: bytes) -> bytes:
+    """Fold a GLB's external buffers into one, and rebase its views onto it.
+
+    A region master past 90 MiB continues in sibling `.part<n>.<sha>.bin` files
+    (scene_io.dump_glb), which are standard glTF external buffers. Everything
+    downstream here reads a view's bytes as an offset into one binary, so a
+    view in part 1 would otherwise be read from part 0 at a part-local offset:
+    the wrong bytes, silently.
+    """
+    loaded = [first]
+    for buffer in document["buffers"][1:]:
+        uri = buffer.get("uri", "")
+        if uri.startswith("data:"):
+            loaded.append(base64.b64decode(uri.split(",", 1)[1]))
+            continue
+        if not uri:
+            raise ValueError(f"{path}: buffer {len(loaded)} has no uri and is not the GLB's own")
+        part = path.parent / uri
+        if not part.is_file():
+            raise ValueError(f"{path}: buffer file {uri} is missing")
+        loaded.append(part.read_bytes())
+    packed = bytearray()
+    for view in document["bufferViews"]:
+        start = view.get("byteOffset", 0)
+        data = loaded[view.get("buffer", 0)][start:start + view["byteLength"]]
+        packed.extend(b"\0" * ((-len(packed)) % 4))
+        view["buffer"] = 0
+        view["byteOffset"] = len(packed)
+        packed.extend(data)
+    document["buffers"] = [{"byteLength": len(packed)}]
+    return bytes(packed)
+
+
+def write_package_glb(path: Path, data: bytes) -> None:
+    """Write a package GLB, and drop the part files it no longer continues in.
+
+    The passes here always write a self-contained GLB, so a master that was
+    split leaves its parts behind as orphans - which the packager would ship
+    and `git` would keep. A file that cannot be made to fit without them is an
+    error rather than an unpushable commit.
+    """
+    if len(data) > PACKAGE_FILE_BYTES:
+        raise ValueError(f"{path}: {len(data)} bytes exceeds the {PACKAGE_FILE_BYTES}-byte file limit; "
+                         "it needs re-splitting through scene_io.dump_glb")
+    path.write_bytes(data)
+    for stale in path.parent.glob(f"{path.stem}.part*.bin"):
+        stale.unlink()
 
 
 def write_glb(document: dict, binary: bytes) -> bytes:
@@ -491,6 +557,151 @@ def _prune(document: dict, binary: bytes) -> tuple[dict, bytes]:
     return document, bytes(packed)
 
 
+@functools.lru_cache(maxsize=256)
+def _prototype(path: Path) -> tuple[dict, bytes]:
+    return read_glb(path)
+
+
+def inline_prototypes(path: Path, document: dict, binary: bytes) -> tuple[dict, bytes]:
+    """Put a shared package's pooled meshes back into the document that places them.
+
+    A placement that names a prototype carries no mesh of its own, so a reader
+    that walks `node["mesh"]` sees nothing where the package draws a tree: the
+    continent audit's deck heights, a package's vertex counts, a test's
+    triangles. This is the Python counterpart of the client's
+    WorldLoader._resolve_shared_meshes - the geometry comes back as a mesh on
+    the node that placed it, so a reader works whether the package shares its
+    props or not.
+
+    The pool is read, never written. A prototype's image URIs are rewritten
+    relative to the file being read, since they were written relative to the
+    pool.
+
+    The placement's pool reference goes once its mesh is back, as
+    apply_to_file's inverse: a node carrying both would be drawn twice by the
+    client if a tool wrote the document out again, and a reader that expands
+    references itself would add the prop a second time.
+    """
+    placements = [node for node in document.get("nodes", [])
+                  if PROTOTYPE_FIELD in (node.get("extras", {}).get(EXTRAS_KEY) or {})]
+    if not placements:
+        return document, binary
+    packed = bytearray(binary)
+    meshes: dict[str, int] = {}
+    for node in placements:
+        identity = node["extras"][EXTRAS_KEY][PROTOTYPE_FIELD]
+        if identity not in meshes:
+            source, body = _prototype((POOL / f"{identity}.glb").resolve())
+            meshes[identity] = _merge(path, document, packed, source, body)
+        node["mesh"] = meshes[identity]
+        extras = node["extras"]
+        extras[EXTRAS_KEY].pop(PROTOTYPE_FIELD)
+        if not extras[EXTRAS_KEY]:
+            extras.pop(EXTRAS_KEY)
+        if not extras:
+            node.pop("extras")
+    document["buffers"] = [{"byteLength": len(packed)}]
+    return document, bytes(packed)
+
+
+def _merge(path: Path, document: dict, packed: bytearray, source: dict, body: bytes) -> int:
+    """Copy one prototype's mesh and everything it references. Its mesh index."""
+    def add(key: str, value: dict) -> int:
+        document.setdefault(key, []).append(value)
+        return len(document[key]) - 1
+
+    def add_view(index: int) -> int:
+        data = view_bytes(source, body, index)
+        packed.extend(b"\0" * ((-len(packed)) % 4))
+        view = {k: v for k, v in source["bufferViews"][index].items() if k in ("byteStride", "target")}
+        view.update(buffer=0, byteOffset=len(packed), byteLength=len(data))
+        packed.extend(data)
+        return add("bufferViews", view)
+
+    def add_accessor(index: int) -> int:
+        accessor = dict(source["accessors"][index])
+        if "bufferView" in accessor:
+            accessor["bufferView"] = add_view(accessor["bufferView"])
+        return add("accessors", accessor)
+
+    images: dict[int, int] = {}
+    samplers: dict[int, int] = {}
+    textures: dict[int, int] = {}
+
+    def add_image(index: int) -> int:
+        if index not in images:
+            image = dict(source["images"][index])
+            if "bufferView" in image:
+                image["bufferView"] = add_view(image["bufferView"])
+            elif "uri" in image and not image["uri"].startswith("data:"):
+                target = (POOL / image["uri"]).resolve()
+                image["uri"] = os.path.relpath(target, path.parent).replace(os.sep, "/")
+            images[index] = add("images", image)
+        return images[index]
+
+    def add_texture(index: int) -> int:
+        if index not in textures:
+            texture = dict(source["textures"][index])
+            if "source" in texture:
+                texture["source"] = add_image(texture["source"])
+            if "sampler" in texture:
+                if texture["sampler"] not in samplers:
+                    samplers[texture["sampler"]] = add("samplers", dict(source["samplers"][texture["sampler"]]))
+                texture["sampler"] = samplers[texture["sampler"]]
+            textures[index] = add("textures", texture)
+        return textures[index]
+
+    def remap(node) -> None:
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if isinstance(value, dict) and key.endswith("Texture") and "index" in value:
+                    value["index"] = add_texture(value["index"])
+                else:
+                    remap(value)
+        elif isinstance(node, list):
+            for item in node:
+                remap(item)
+
+    mesh = json.loads(json.dumps(source["meshes"][0]))
+    for primitive in mesh["primitives"]:
+        primitive["attributes"] = {k: add_accessor(v) for k, v in sorted(primitive["attributes"].items())}
+        if "indices" in primitive:
+            primitive["indices"] = add_accessor(primitive["indices"])
+        if "material" in primitive:
+            material = json.loads(json.dumps(source["materials"][primitive["material"]]))
+            remap(material)
+            primitive["material"] = add("materials", material)
+        for target in primitive.get("targets", []):
+            for semantic in list(target):
+                target[semantic] = add_accessor(target[semantic])
+    for key in ("extensionsUsed", "extensionsRequired"):
+        if source.get(key):
+            document[key] = sorted(set(document.get(key, [])) | set(source[key]))
+    return add("meshes", mesh)
+
+
+def manifest_indent(text: str) -> int:
+    """The indentation the file already uses, so a rewrite is not a reformat.
+
+    The bake families disagree - the nymara publishers write two spaces and
+    continent-v2 one - and a pass that rewrote a manifest at its own preference
+    turned a two-line change into a whole-file diff.
+    """
+    for line in text.split("\n")[1:]:
+        body = line.lstrip(" ")
+        if body and not body.startswith("}"):
+            return len(line) - len(body)
+    return 2
+
+
+def write_manifest(path: Path, manifest: dict, text: str) -> None:
+    """Rewrite a manifest in the shape it was found in."""
+    rendered = json.dumps(manifest, indent=manifest_indent(text), ensure_ascii=False) + "\n"
+    if "\r\n" in text:
+        rendered = rendered.replace("\n", "\r\n")
+    path.write_bytes(rendered.encode("utf-8"))
+
+
 def _index_entry(prototype: dict, data: bytes) -> dict:
     """What the pool's index records about one prototype.
 
@@ -556,26 +767,32 @@ def apply_to_file(glb: Path, shared: dict, index: dict, dry_run: bool) -> dict:
     document, binary = _prune(document, binary)
     data = write_glb(document, binary)
     if not dry_run:
-        glb.write_bytes(data)
+        write_package_glb(glb, data)
 
-    uris = {}
-    for identity in sorted(set(moving.values())):
-        uri = os.path.relpath(POOL / f"{identity}.glb", glb.parent).replace("\\", "/")
-        uris[uri] = index[identity]["sha256"]
+    # Every prototype the file places, not only the ones moved now: a file
+    # shared before that gains another repeated prop keeps its old placements,
+    # and a reference the manifest stops naming draws nothing in the client and
+    # is not shipped by the packager.
+    placed = {(node.get("extras", {}).get(EXTRAS_KEY) or {}).get(PROTOTYPE_FIELD)
+              for node in document.get("nodes", [])} - {None}
     manifest_path = manifest_for(glb)
     if manifest_path and not dry_run:
         text = manifest_path.read_bytes().decode("utf-8")
         manifest = json.loads(text)
+        named = manifest.get(MANIFEST_KEY) if isinstance(manifest.get(MANIFEST_KEY), dict) else {}
+        uris = {}
+        for identity in sorted(placed):
+            uri = os.path.relpath(POOL / f"{identity}.glb", glb.parent).replace("\\", "/")
+            uris[uri] = index[identity]["sha256"] if identity in index else named.get(uri) \
+                or sha256((POOL / f"{identity}.glb").read_bytes())
         manifest[MANIFEST_KEY] = uris
-        rendered = json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
-        if "\r\n" in text:
-            rendered = rendered.replace("\n", "\r\n")
-        manifest_path.write_bytes(rendered.encode("utf-8"))
+        write_manifest(manifest_path, manifest, text)
     return {"moved": len(moving), "placements": placements, "written": written,
             "bytes": before - len(data), "manifest": bool(manifest_path)}
 
 
-def reconcile(dry_run: bool = False) -> list[str]:
+def reconcile(dry_run: bool = False, prototypes: set | None = None,
+              manifests: list | None = None) -> list[str]:
     """Refresh every manifest's externalMeshes sha from the pool files.
 
     A manifest records the prototype FILE's sha256, so anything that rewrites a
@@ -589,9 +806,12 @@ def reconcile(dry_run: bool = False) -> list[str]:
     # packager refuses a package where it disagrees with the file.
     if INDEX.is_file():
         index = json.loads(INDEX.read_text(encoding="utf-8"))
-        prototypes = index.get("prototypes", {})
+        pool = index.get("prototypes", {})
         changed = False
-        for identity, entry in prototypes.items():
+        # `prototypes` scopes this to the ones a publisher just wrote; without
+        # it every prototype in the pool is read back and checked.
+        for identity, entry in pool.items() if prototypes is None else (
+                (i, pool[i]) for i in sorted(prototypes) if i in pool):
             target = POOL / f"{identity}.glb"
             if not target.is_file():
                 continue
@@ -604,8 +824,9 @@ def reconcile(dry_run: bool = False) -> list[str]:
             INDEX.write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
         if changed:
             updated.append(repo_relative(INDEX))
-    for manifest_path in sorted(MAPS.rglob("*.json")):
-        if manifest_path.parent == POOL or "_shared" in manifest_path.parts:
+    candidates = sorted(MAPS.rglob("*.json")) if manifests is None else [Path(m) for m in manifests]
+    for manifest_path in candidates:
+        if manifest_path.parent == POOL or "_shared" in manifest_path.parts or not manifest_path.is_file():
             continue
         raw = manifest_path.read_bytes()
         if MANIFEST_KEY.encode() not in raw:
@@ -631,10 +852,7 @@ def reconcile(dry_run: bool = False) -> list[str]:
         updated.append(repo_relative(manifest_path))
         if dry_run:
             continue
-        rendered = json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
-        if "\r\n" in text:
-            rendered = rendered.replace("\n", "\r\n")
-        manifest_path.write_bytes(rendered.encode("utf-8"))
+        write_manifest(manifest_path, manifest, text)
     return updated
 
 

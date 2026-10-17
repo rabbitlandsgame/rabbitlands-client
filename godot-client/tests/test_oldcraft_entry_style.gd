@@ -70,11 +70,8 @@ func _run() -> void:
 		(login_button.get_theme_stylebox("disabled") as StyleBoxFlat).
 		corner_radius_top_left >= 8,
 		"primary action keeps an accessible hit area and rounded states")
-	var secure := main.get_node("%Secure") as CheckBox
-	var secure_normal := secure.get_theme_stylebox("normal") as StyleBoxFlat
-	_expect(secure_normal != null and secure_normal.bg_color.a <= 0.22 and
-		secure_normal.bg_color.r < 0.1 and secure.custom_minimum_size.y >= 36.0,
-		"TLS choice is a subtle translucent utility row")
+	_expect(main.get_node_or_null("LoginPanel/Content/Secure") == null,
+		"login uses TLS without a player-facing switch")
 	var new_character := main.get_node("%NewCharacter") as Button
 	_expect(new_character.custom_minimum_size.y >= 36.0 and
 		(new_character.get_theme_stylebox("disabled") as StyleBoxFlat).

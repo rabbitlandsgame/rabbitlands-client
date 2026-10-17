@@ -33,10 +33,10 @@ func _run() -> void:
 	var continent_image: TextureRect = main.get_node(
 		"GameView/FullMap/MapLayout/ContinentView/ContinentImage") as TextureRect
 	var continent_button: TextureButton = main.get_node(
-		"GameView/FullMap/MapLayout/Sidebar/SidebarContent/ContinentButton") as TextureButton
+		"GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/ContinentButton") as TextureButton
 	var map_title: Label = main.get_node("GameView/FullMap/MapLayout/MapTitle") as Label
 	var map_coordinates: Label = main.get_node(
-		"GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapCoordinates") as Label
+		"GameView/FullMap/MapLayout/Sidebar/SidebarLayout/MapCoordinates") as Label
 	var full_map_viewport: SubViewport = main.get_node("GameView/FullMapViewport") as SubViewport
 
 	# The cartography: every exterior region, each drawn from its own tab map.
@@ -199,7 +199,7 @@ func _run() -> void:
 	_expect(four_gates_texture != null and four_gates_texture.get_size() == four_gates_crop,
 		"Four Gates' preview frames its map bounds, " + str(four_gates_crop) + ", got "
 			+ str(four_gates_texture.get_size() if four_gates_texture != null else Vector2.ZERO))
-	_expect(main.call("_tab_map_texture", regions[four_gates_index]) == four_gates_texture,
+	_expect(main.call("_tab_map_detail_texture", regions[four_gates_index]) == four_gates_texture,
 		"a tab map is decoded once and kept")
 	_expect(map_title.text == "FOUR GATES", "the preview is titled with the map's name")
 
@@ -313,6 +313,10 @@ func _test_landfall_group(main: Control, app_state: Node) -> void:
 ## the tab map declares, or the whole picture where it declares none.
 func _tab_map_size(region: Dictionary) -> Vector2:
 	var tab_map: Dictionary = region.get("tabMap", {}) as Dictionary
+	var detail: Dictionary = tab_map.get("detail", {}) as Dictionary
+	if not detail.is_empty():
+		var image_size: Array = detail.imageSize
+		return Vector2(float(image_size[0]), float(image_size[1]))
 	var crop: Array = tab_map.get("region", []) as Array
 	if crop.size() == 4:
 		return Vector2(float(crop[2]), float(crop[3]))

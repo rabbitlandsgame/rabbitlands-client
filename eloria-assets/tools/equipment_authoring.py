@@ -3073,6 +3073,8 @@ class EquipmentGLB:
         return index
 
     def write(self, path: Path) -> None:
+        from retired_model_generation import require_supported_generator
+        require_supported_generator(self.doc["asset"].get("generator", ""))
         self.doc["buffers"][0]["byteLength"] = len(self.binary)
         encoded = json.dumps(self.doc, separators=(",", ":"), ensure_ascii=False).encode()
         encoded += b" " * (_align4(len(encoded)) - len(encoded))

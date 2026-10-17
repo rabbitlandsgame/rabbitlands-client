@@ -6,7 +6,6 @@ extends Node3D
 @export_range(3.0, 100.0) var distance := 26.0
 @export var zoom_step := 2.5
 @export var rotation_sensitivity := 0.25
-@export var pan_sensitivity := 0.012
 # The camera's near plane follows the zoom: a quarter of the orbit distance,
 # never wider than the 1 m the scene is authored for, never narrower than
 # 0.2 m. The width matters because the client renders through GL
@@ -30,9 +29,7 @@ const NEAR_PLANE_MIN := 0.2
 @onready var camera: Camera3D = %Camera
 
 var focus := Vector3.ZERO
-var pan_offset := Vector3.ZERO
 var _rotating := false
-var _panning := false
 
 func _ready() -> void:
 	_update_camera()
@@ -43,16 +40,12 @@ func set_focus(value: Vector3) -> void:
 
 func rebase_world(frame: Transform3D) -> void:
 	focus = frame * focus
-	pan_offset = frame.basis * pan_offset
 	yaw_degrees += rad_to_deg(frame.basis.get_euler().y)
 	_update_camera()
 
 func handle_mouse_button(event: InputEventMouseButton) -> bool:
-	if event.button_index == MOUSE_BUTTON_RIGHT:
-		_rotating = event.pressed
-		return true
 	if event.button_index == MOUSE_BUTTON_MIDDLE:
-		_panning = event.pressed
+		_rotating = event.pressed
 		return true
 	if event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_UP:
 		distance = clampf(distance - zoom_step, min_distance, max_distance)
@@ -70,16 +63,10 @@ func handle_mouse_motion(event: InputEventMouseMotion) -> bool:
 		pitch_degrees = clampf(pitch_degrees - event.relative.y * rotation_sensitivity, -80.0, -15.0)
 		_update_camera()
 		return true
-	if _panning:
-		var right := camera.global_basis.x
-		var forward := -camera.global_basis.z
-		right.y = 0.0
-		forward.y = 0.0
-		pan_offset += (-right.normalized() * event.relative.x
-			+ forward.normalized() * event.relative.y) * distance * pan_sensitivity
-		_update_camera()
-		return true
 	return false
+
+func cancel_rotation() -> void:
+	_rotating = false
 
 func screen_to_ground(screen_position: Vector2, ground_height: float) -> Variant:
 	var origin := camera.project_ray_origin(screen_position)
@@ -100,17 +87,12 @@ func ray_direction(screen_position: Vector2) -> Vector3:
 func camera_diagnostics() -> Dictionary:
 	return {
 		"focus": focus,
-		"pan_offset": pan_offset,
 		"rig_transform": global_transform,
 		"camera_transform": camera.global_transform if is_instance_valid(camera) else Transform3D.IDENTITY,
 		"yaw_degrees": yaw_degrees,
 		"pitch_degrees": pitch_degrees,
 		"distance": distance,
 	}
-
-func reset_pan() -> void:
-	pan_offset = Vector3.ZERO
-	_update_camera()
 
 func _update_camera() -> void:
 	if not is_instance_valid(camera):
@@ -121,7 +103,7 @@ func _update_camera() -> void:
 		sin(yaw) * cos(pitch),
 		-sin(pitch),
 		cos(yaw) * cos(pitch)) * distance
-	global_position = focus + pan_offset
+	global_position = focus
 	camera.position = offset
 	camera.near = clampf(distance * NEAR_PLANE_RATIO,
 		NEAR_PLANE_MIN, NEAR_PLANE_MAX)

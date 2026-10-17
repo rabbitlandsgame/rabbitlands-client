@@ -44,6 +44,8 @@ import publish_client as PC  # noqa: E402  (the package format: chunks_digest, t
 DEFAULT_CHECKOUT = PC.DEFAULT_CHECKOUT
 TOOL = "eloria-assets/maps/continent-v2/_continent_v2/render_minimap.py"
 REGISTRY = "godot-client/data/maps/registry.json"
+RETIREMENT = "godot-client/data/assets/retired_procedural_models.json"
+CHUNK_READER_VERSION = 2              # shared placements and the runtime retirement policy
 CATALOG = "godot-client/world_authoring/continent-v2/territories.json"
 WEBP_QUALITY = 92                       # the region minimaps' encoding (render_region_cartography.py)
 # One window covers every Landfall territory (the largest is 1,356 m): drawn in 256 m windows the pictures showed
@@ -123,13 +125,39 @@ class Pool:
         return np.ascontiguousarray(rgba, dtype=np.uint8)
 
 
-def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str) -> dict:
+def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None, checkout=None) -> dict:
     """One chunk's materials and its triangles in territory metres (scene_from_glb's rules: water ink on water
     materials, linear albedo, MASK for BLEND and soft ground, mirrored instances re-wound, invisible stream
     thresholds left out)."""
     import numpy as np
     R = rc.R
-    doc, binary = rc.read_glb(glb)
+    import glb_reader
+    doc, binary = glb_reader.load(glb, prototypes=False)
+    if retirement:
+        relative = glb.resolve().relative_to(Path(checkout).resolve()).as_posix()
+        entry = retirement.get("mapMeshCopies", {}).get(relative, {})
+        if entry and sha_bytes(glb.read_bytes()) != entry.get("sha256"):
+            raise MinimapError(f"{relative}: retired mesh index needs refresh")
+        retired_meshes = set(entry.get("meshes", []))
+        retired_prototypes = set(retirement.get("retiredMapPrototypes", []))
+        for node in doc.get("nodes", []):
+            if node.get("mesh") in retired_meshes:
+                node.pop("mesh")
+            extras = node.get("extras", {}).get("eloria", {})
+            if extras.get("prototype") in retired_prototypes:
+                extras.pop("prototype")
+                node.pop("mesh", None)
+    doc, binary = glb_reader.SM.inline_prototypes(glb, doc, binary)
+    resources = dict(resources)
+    # Restored pooled prototypes can name textures not present in the tiny
+    # placement document. Their content-addressed filenames pin their bytes.
+    for image in doc.get("images", []):
+        uri = image.get("uri")
+        if uri and uri not in resources:
+            identity = Path(uri).stem
+            if len(identity) != 64 or any(c not in "0123456789abcdef" for c in identity):
+                raise MinimapError(f"{glb}: undeclared pooled texture {uri}")
+            resources[uri] = identity
     materials, water = [], set()
     for i, material in enumerate(doc.get("materials", [])):
         name = material.get("name", str(i))
@@ -240,16 +268,20 @@ def sources(checkout: Path, region: str) -> list[dict]:
     frame = (here.get("continentGeography") or {}).get("frame")
     origin = [float(v) for v in here["continentGeography"]["translation"]]
     found = []
-    for entry in read_json(Path(checkout) / CATALOG)["entries"]:
-        row = rows.get(entry["id"]) or {}
+    for identity, row in rows.items():
+        if not row.get("continentGeography"):
+            continue
         if (row.get("continentGeography") or {}).get("frame") != frame or not row.get("manifest"):
             continue
-        package = package_of(checkout, entry["id"])
+        package = package_of(checkout, identity)
         if not (package / "world.json").is_file():
             continue
+        chunks = read_json(package / "world.json").get("streamingChunks", {}).get("chunks", [])
+        if not chunks:
+            continue
         translation = [float(v) for v in row["continentGeography"]["translation"]]
-        found.append({"region": entry["id"], "package": package,
-                      "chunks": read_json(package / "world.json")["streamingChunks"]["chunks"],
+        found.append({"region": identity, "package": package,
+                      "chunks": chunks,
                       "offset": (translation[0] - origin[0], translation[2] - origin[2])})
     found.sort(key=lambda source: source["region"] != region)
     if not found or found[0]["region"] != region:
@@ -258,7 +290,7 @@ def sources(checkout: Path, region: str) -> list[dict]:
 
 
 def render(checkout: Path, region: str, work: Path, supersample: int = 2, window: int = WINDOW_METRES,
-           log=print) -> dict:
+           log=print, *, pixels_per_metre: int = 1, world_frame=None) -> dict:
     """Draw the picture of one package into work/<region>/minimap.webp and return its report."""
     import numpy as np
     from PIL import Image
@@ -267,10 +299,20 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
         sys.path.insert(0, tools)
     import render_region_cartography as rc
     began = time.perf_counter()
+    policy_path = Path(checkout) / RETIREMENT
+    retirement = read_json(policy_path) if policy_path.is_file() else {}
+    retirement_sha = PC.sha(policy_path) if policy_path.is_file() else None
     drawn = sources(checkout, region)
     package = drawn[0]["package"]
     manifest = read_json(package / "world.json")
     low, high, size = frame_of(manifest)
+    if pixels_per_metre not in (1, 2, 4, 8):
+        raise MinimapError("pixels_per_metre must be 1, 2, 4 or 8")
+    if world_frame is not None:
+        low, high = world_frame
+        if any(v != int(v) for v in low + high):
+            raise MinimapError("detail frame must use whole metres")
+    size = [int((high[i] - low[i]) * pixels_per_metre) for i in range(2)]
     pool = Pool(rc)
     last_row, cache, used = {}, {}, set()
     picture = Image.new("RGB", tuple(size), tuple(rc.water_rgb()))
@@ -294,8 +336,10 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
                     if key not in cache:
                         chunk_manifest = read_json(source["package"] / c["manifest"])
                         glb = (source["package"] / c["manifest"]).parent / chunk_manifest["asset"]["glb"]
+                        for uri, expected in chunk_manifest.get("externalMeshes", {}).items():
+                            rc.external_resource(glb, uri, expected)
                         cache[key] = read_chunk(rc, pool, glb, chunk_manifest.get("externalResources") or {},
-                                                f"{source['region']}/{c['id']}")
+                                                f"{source['region']}/{c['id']}", retirement, checkout)
                         stats["chunkReads"] += 1
                     last_row[key] = row
                     used.add(source["region"])
@@ -306,13 +350,15 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
                 stats["emptyWindows"] += 1
                 continue
             stats["triangles"] += scene.triangle_count()
-            pixels = (int(hi[0] - lo[0]), int(hi[1] - lo[1]))
+            pixels = (int(hi[0] - lo[0]) * pixels_per_metre, int(hi[1] - lo[1]) * pixels_per_metre)
             rgb, _, _, counts = rc.raster(scene, colors, lo, hi, pixels, supersample, native_cache=native)
             stats["coveredSamples"] += counts["coveredSamples"]
             stats["samples"] += counts["sampleCount"]
             stats["nativeRenderer"] = counts["nativeRenderer"]
-            piece = rgb.crop((MARGIN_METRES, MARGIN_METRES, MARGIN_METRES + x1 - x0, MARGIN_METRES + z1 - z0))
-            picture.paste(piece, (x0 - int(low[0]), z0 - int(low[1])))
+            margin = MARGIN_METRES * pixels_per_metre
+            piece = rgb.crop((margin, margin, margin + (x1 - x0) * pixels_per_metre,
+                              margin + (z1 - z0) * pixels_per_metre))
+            picture.paste(piece, ((x0 - int(low[0])) * pixels_per_metre, (z0 - int(low[1])) * pixels_per_metre))
         # a chunk this row did not reach lies behind the window rows still to come
         for key in [k for k in cache if last_row.get(k, -1) < row]:
             del cache[key]
@@ -325,6 +371,8 @@ def render(checkout: Path, region: str, work: Path, supersample: int = 2, window
     (folder / PC.MINIMAP).write_bytes(encoded.getvalue())
     report = {"region": region, "tool": TOOL, "styleVersion": rc.STYLE_VERSION, "package": str(package),
               "worldMin": low, "worldMax": high, "imageSize": size, "supersample": supersample,
+              "pixelsPerMetre": pixels_per_metre,
+              "chunkReaderVersion": CHUNK_READER_VERSION, "retirementSha256": retirement_sha,
               "windowMetres": window, "marginMetres": MARGIN_METRES, "chunks": len(drawn[0]["chunks"]),
               "chunksSha256": digests[region],
               "neighbourChunksSha256": {k: v for k, v in sorted(digests.items()) if k != region},

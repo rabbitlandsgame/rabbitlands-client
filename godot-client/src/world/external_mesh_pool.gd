@@ -3,6 +3,7 @@ extends RefCounted
 const VramTextures := preload("res://src/world/vram_textures.gd")
 const ExternalTexturePool := preload("res://src/world/external_texture_pool.gd")
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 
 ## Prototype meshes that map packages name instead of carrying.
 ##
@@ -66,6 +67,8 @@ static func index_for(prototype_path: String) -> Dictionary:
 ## Safe on a worker thread: nothing here touches the scene tree, and the images
 ## take the prepared path rather than ResourceLoader's.
 static func acquire(key: String, path: String) -> Mesh:
+	if ArchivedModelPolicy.is_retired_prototype(key):
+		return null
 	var shared := _published(key)
 	if shared != null:
 		last_shared += 1

@@ -82,6 +82,8 @@ CHUNK_LATTICE = -1023.0
 CHUNK_ORIGIN = [CHUNK_LATTICE, CHUNK_LATTICE]
 CELL = 2.0
 DEFAULT_CHECKOUT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(DEFAULT_CHECKOUT / "eloria-assets" / "tools"))
+import publish_finish as PF  # noqa: E402
 TOOL = "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py"
 # Flat kit inlays and kit decks published as walk surfaces (see the module notes): their mesh nodes become
 # Walk_<region>_<suffix>. The pier trestles' and causeway arches' decks are kit solids, which carry no client
@@ -205,10 +207,11 @@ def territory_resources(out, names):
 
 
 # What a v2 cell's geometry counts against the stream budget (geometryResidentBytes), as a multiple of its GLB's
-# bytes. build_continent.py counts 5 x for the twelve territories and keeps doing so. The village-mem captures
-# measured the mesh memory a v2 cell really holds at 0.45-0.48 x its GLB, so 5 x (about ten times the truth) let 4-6
-# cells stay resident and left 46 framed holes in the wide and zoomed-out views. Owner call 2026-10-03: 1.0 x for
-# continent-v2 only (trials: 17 holes, 16-22 cells resident, 6-9 s to settle). tests/test_publish_client_geometry.py.
+# bytes. The village-mem captures measured the mesh memory a v2 cell really holds at 0.45-0.48 x its GLB, so 5 x
+# (about ten times the truth) let 4-6 cells stay resident and left 46 framed holes in the wide and zoomed-out views.
+# Owner call 2026-10-03: 1.0 x for continent-v2 (trials: 17 holes, 16-22 cells resident, 6-9 s to settle). The twelve
+# legacy territories followed on 2026-10-16 (publish_finish.py LEGACY_RESIDENT_FACTOR, measured the same way).
+# tests/test_publish_client_geometry.py.
 GEOMETRY_RESIDENT_FACTOR = 1.0
 
 
@@ -956,6 +959,17 @@ def main():
         trim_extensions(master)
         master.write()
         timings["master_s"] = round(time.time() - t, 1)
+    # Published as baked, every cell carries its own copy of each repeated kit
+    # prop and its normals at 32 bits. The space passes settle that, and the
+    # figures the manifests record about their own GLBs with it, including the
+    # pooled prototypes each cell now draws (sharedMeshResidentBytes) - so they
+    # run before the record below measures what shipped. GEOMETRY_RESIDENT_FACTOR
+    # goes with them: on a territory's first publish there is no
+    # publication.json yet to read it from, and the prototypes count at it too.
+    t = time.time()
+    PF.finish([out], factor=GEOMETRY_RESIDENT_FACTOR)
+    timings["space_passes_s"] = round(time.time() - t, 1)
+    manifest = json.loads((out / "world.json").read_text(encoding="utf-8"))
     glbs = sorted((out / "chunks").glob("*/world.glb"))
     sizes = [p.stat().st_size for p in glbs]
     record = {"region": REGION, "tool": TOOL,

@@ -14,6 +14,9 @@ extends Node
 ## The script declares no `class_name`: a global class is parsed before the
 ## autoload singletons are registered, and this reads `AppState` directly.
 
+const AudioMix := preload("res://src/audio/audio_mix.gd")
+const MusicProgramPlayer := preload("res://src/audio/music_program_player.gd")
+signal music_changed(title: String, creator: String)
 const CATALOG_PATH := "res://assets/audio/catalog.json"
 const AUDIO_DIRECTORY := "res://assets/audio/"
 ## Enough voices for a busy moment without letting one event drown the rest.
@@ -27,16 +30,17 @@ const FOOTSTEP_VARIANTS := 3
 var enabled := true:
 	set(value):
 		enabled = value
+		_update_master()
 		if not value:
-			stop_all()
-var volume_linear := 0.7:
+			stop_all(false)
+		else:
+			play_music(_requested_music)
+var volume_linear := AudioMix.MASTER_DEFAULT:
 	set(value):
 		volume_linear = clampf(value, 0.0, 1.0)
-		for player: AudioStreamPlayer in _voices:
-			player.volume_db = linear_to_db(maxf(0.0001,
-				volume_linear * float(player.get_meta("gain", 1.0))))
-		if _music_player != null:
-			_music_player.volume_db = linear_to_db(maxf(0.0001, volume_linear * 0.35))
+		_update_master()
+
+var category_volumes: Dictionary = {}
 
 ## The world supplies the surface at the authoritative tile, independent of
 ## actor presentation updates (which are coalesced until the end of a frame).
@@ -46,6 +50,10 @@ var _streams: Dictionary = {}
 var _music_streams: Dictionary = {}
 var _music_player: AudioStreamPlayer = null
 var _music_track := ""
+## Keep the server's latest choice while muted, so enabling audio resumes it.
+var _requested_music := ""
+var _program_player: Node
+var _music_entries: Array = []
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice := 0
 ## What the last authoritative snapshot said, so a restatement is not an event.
@@ -63,18 +71,36 @@ var _step_random := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	name = "AudioDirector"
+	AudioMix.ensure_buses()
+	_update_master()
+	for category: String in AudioMix.CATEGORIES:
+		set_category_volume(category, float(AudioMix.CATEGORIES[category].volume))
 	_step_random.randomize()
 	_load_catalog()
+	_program_player = MusicProgramPlayer.new()
+	add_child(_program_player)
+	_program_player.configure(_music_entries)
+	_program_player.track_changed.connect(func(title: String, creator: String) -> void:
+		music_changed.emit(title, creator))
 	AppState.sound_requested.connect(_on_sound_requested)
 	AppState.music_requested.connect(_on_music_requested)
 	for index: int in range(VOICE_COUNT):
 		var player := AudioStreamPlayer.new()
 		player.name = "Voice%d" % index
-		player.volume_db = linear_to_db(maxf(0.0001, volume_linear))
 		add_child(player)
 		_voices.append(player)
 	AppState.state_changed.connect(_on_state_changed)
 	AppState.special_effect_requested.connect(_on_special_effect)
+
+func _update_master() -> void:
+	AudioMix.ensure_buses()
+	AudioMix.set_volume(AudioMix.MASTER_BUS, volume_linear if enabled else 0.0)
+
+func set_category_volume(category: String, value: float) -> void:
+	if not AudioMix.CATEGORIES.has(category):
+		return
+	category_volumes[category] = clampf(value, 0.0, 1.0)
+	AudioMix.set_volume(AudioMix.CATEGORIES[category].bus, category_volumes[category])
 
 ## The sounds this client knows about, by name.
 func sound_names() -> Array[String]:
@@ -94,7 +120,8 @@ func play(name: String, pitch := 1.0, gain := 1.0) -> bool:
 	player.stream = _streams[name] as AudioStream
 	var mixed_gain: float = gain * (FOOTSTEP_GAIN if name.begins_with("footstep") else 1.0)
 	player.set_meta("gain", mixed_gain)
-	player.volume_db = linear_to_db(maxf(0.0001, volume_linear * mixed_gain))
+	player.bus = AudioMix.bus_for_sound(name)
+	player.volume_db = linear_to_db(maxf(0.0001, mixed_gain))
 	player.pitch_scale = pitch
 	player.play()
 	return true
@@ -102,20 +129,30 @@ func play(name: String, pitch := 1.0, gain := 1.0) -> bool:
 ## The music beds this client knows about, by name.
 func music_names() -> Array[String]:
 	var names: Array[String] = []
-	for key: Variant in _music_streams:
-		names.append(str(key))
+	for entry: Dictionary in _music_entries:
+		names.append(str(entry.name))
 	names.sort()
 	return names
 
 ## What is playing under the map, or "" for silence.
 func current_music() -> String:
+	if _requested_music.begins_with("@") and _program_player != null:
+		return str(_program_player.current_track())
 	return _music_track
 
 ## Plays the named music bed, looping, or stops the music for "". A track this
 ## client does not have is silence rather than a guess at a substitute, and it
 ## says so by returning false.
 func play_music(track: String) -> bool:
-	if track == _music_track:
+	_requested_music = track
+	if track.begins_with("@"):
+		if _music_player != null:
+			_music_player.stop()
+		_music_track = ""
+		return bool(_program_player.request(track)) if enabled and _program_player != null else false
+	if _program_player != null:
+		_program_player.stop()
+	if track == _music_track and _music_player != null and _music_player.playing:
 		return not track.is_empty()
 	_music_track = ""
 	if _music_player != null:
@@ -127,21 +164,25 @@ func play_music(track: String) -> bool:
 	if _music_player == null:
 		_music_player = AudioStreamPlayer.new()
 		_music_player.name = "Music"
-		_music_player.bus = "Master"
+		_music_player.bus = AudioMix.CATEGORIES.music.bus
 		add_child(_music_player)
 	_music_player.stream = _music_streams[track] as AudioStream
-	# Music sits under everything else rather than competing with it.
-	_music_player.volume_db = linear_to_db(maxf(0.0001, volume_linear * 0.35))
+	_music_player.volume_db = 0.0
 	_music_player.play()
 	_music_track = track
+	music_changed.emit(track.capitalize(), "")
 	return true
 
-func stop_all() -> void:
+func stop_all(clear_music_request := true) -> void:
+	if _program_player != null:
+		_program_player.stop()
 	for player: AudioStreamPlayer in _voices:
 		player.stop()
 	if _music_player != null:
 		_music_player.stop()
 	_music_track = ""
+	if clear_music_request:
+		_requested_music = ""
 
 ## True while any voice is sounding. Used by the tests rather than by the game.
 func is_playing() -> bool:
@@ -165,6 +206,10 @@ func _load_catalog() -> void:
 			_streams[str(sound.get("name", ""))] = stream as AudioStream
 	for raw_bed: Variant in (parsed as Dictionary).get("music", []):
 		var bed: Dictionary = raw_bed as Dictionary
+		_music_entries.append(bed)
+		# Retain legacy beds for old servers. Program tracks load on demand.
+		if str(bed.get("name", "")) not in ["settlement", "wilds", "depths"]:
+			continue
 		var music: Resource = load(AUDIO_DIRECTORY + str(bed.get("file", "")))
 		if music is AudioStream:
 			if music is AudioStreamOggVorbis:
@@ -181,7 +226,7 @@ func _load_catalog() -> void:
 ## no way of knowing - what somebody else is doing, and what the map sounds
 ## like - so they arrive on the wire instead.
 func _on_sound_requested(sound: Dictionary) -> void:
-	play(str(sound.get("name", "")))
+	play(str(sound.get("name", "")), 1.0, float(sound.get("gain", 1.0)))
 
 func _on_music_requested(track: String) -> void:
 	play_music(track)

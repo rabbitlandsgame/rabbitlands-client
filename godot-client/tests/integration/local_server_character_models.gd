@@ -71,7 +71,7 @@ func _verify_round_trip(host: String, port: int, actor_type: int, index: int) ->
 					EloriaProtocol.ClientMessage.PING_RESPONSE))
 	network.packet_received.connect(packet_handler)
 	root.add_child(network)
-	_expect(network.connect_to_server(host, port) == OK,
+	_expect(network.connect_to_server(host, port, false) == OK,
 		"actor type %d begins TCP connection" % actor_type)
 	var connected: Callable = func() -> bool:
 		return bool(state.get("connected", false)) or not str(state.get("error", "")).is_empty()

@@ -1,5 +1,9 @@
 # Rabbit Lands Client
 
+<img src="godot-client/assets/branding/rabbitlands-logo.png" alt="Rabbit Lands rabbit-ear RL logo" width="320">
+
+[Brand artwork and usage](godot-client/assets/branding/README.md)
+
 **Rabbit Lands (RL)** is an independently developed fantasy MMORPG featuring
 exploration, combat, crafting, magic, character progression and a persistent
 multiplayer world. Its name is a lighthearted nod to classic MMORPG traditions;
@@ -34,16 +38,28 @@ so the two directories are checked out together and move together.
 godot --path godot-client
 ```
 
-The client needs `rabbitlands-server` on direct TCP 2000. Point it at one with the login
-screen's server field, or `-- --server=127.0.0.1 --port=2000`. The default
-host is `game.rabbitlandsgame.com`. For a configured TLS listener, select port
-2001 and check **Encrypted connection (TLS)**; certificates and the hostname
-are verified. DNS, hosting and certificates must be configured separately;
+The client defaults to verified TLS at `game.rabbitlandsgame.com:2001`.
+Certificates and the hostname are verified, and failed TLS connections never
+fall back to plain TCP. Older saved settings are migrated to enable TLS;
+there is no player-facing encryption switch. Point at another TLS server with
+the login screen's server field, or `-- --server=HOST --port=PORT`.
+
+For a local `rabbitlands-server` without TLS, launch with
+`-- --dev-plain-tcp`. This developer option defaults to `127.0.0.1:2000`;
+`--server` and `--port` can override that address. It applies only to this
+launch and is never saved as a player preference. Local integration fixtures
+that use an unencrypted server also need this option unless they opt in directly.
+DNS, hosting and certificates must be configured separately;
 these names are configuration defaults, not a claim of live service.
 
 Player downloads are built with `godot-client/tools/package_client.py`.
 The package includes signed background updates and a restart installer;
 see [building and publishing client updates](docs/client-updates.md).
+Maintainers can use `godot-client/tools/build_release.py` to build both Windows
+and Linux downloads and replace the current GitHub release, starting as a draft.
+Only the latest compiled build is retained on GitHub.
+The Windows download is a small setup executable that downloads and verifies
+the game files during installation. Linux uses the supplied portable archive.
 
 For the integrated **Last Lantern** opening adventure, run
 [`prototypes/last-lantern/play.cmd`](prototypes/last-lantern/play.cmd). It starts
@@ -69,6 +85,10 @@ Storage opens in the compact classic layout. Right-click its title to choose
 remembered. The inventory's blue quantity shortcuts also control storage
 withdrawals and deposits. Double-click a stored item to withdraw it.
 
+Use the first eight backpack slots from the item quick bar with **1–8** or
+**Ctrl+1–8**. Hover a slot to see its active shortcuts, quantity and cooldown.
+Rebind item shortcuts in **Settings → Controls**.
+
 **Item Lists** opens named favorite sets. Create a list, add selected items with
 **+**, and edit each item's quantity. Clicking a list name swaps the favorite
 grid immediately. **Get list** tops up matching backpack quantities from the
@@ -93,8 +113,11 @@ godot --headless --path godot-client --script res://tests/test_classic_storage.g
 ```
 
 `check_provenance.py` fails if an Eternal Lands map name or engine file format
-(`.elm`, `.e3d`, Cal3D, `.dds`, `.bmp`) appears anywhere in the tree. GitHub Actions and automatic merge checks are not configured. The retained
-tests are optional; run the focused checks relevant to a change.
+(`.elm`, `.e3d`, Cal3D, `.dds`, `.bmp`) appears anywhere in the tree. The retained
+tests are optional; run the focused checks relevant to a change. The
+[desktop release workflow](docs/runner-builds.md) builds signed Windows and
+Linux downloads after merges into `master` and supports manual runs. It does
+not impose the historical suites as merge checks.
 
 ## Maps
 

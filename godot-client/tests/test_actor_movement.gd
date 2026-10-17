@@ -35,7 +35,130 @@ func advance(actor: TimedActor, seconds: float) -> void:
 	actor.clock_msec += roundi(seconds * 1000.0)
 	actor._physics_process(seconds)
 
+func add_animation_fixture(actor: TimedActor) -> void:
+	actor.resolver = AnimationResolver.new(JSON.parse_string(
+		FileAccess.get_file_as_string("res://data/animations/luminous.json")))
+	var player := AnimationPlayer.new()
+	actor.add_child(player)
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	var library := AnimationLibrary.new()
+	for clip: String in actor.resolver.required_clips():
+		var animation := Animation.new()
+		animation.length = 0.1
+		if actor.resolver.looping_clips.has(clip):
+			animation.loop_mode = Animation.LOOP_LINEAR
+		library.add_animation(clip, animation)
+	player.add_animation_library("", library)
+	actor.animation_player = player
+	player.animation_finished.connect(actor._on_animation_finished)
+
+func check_post_combat_movement() -> void:
+	for command: int in [22, 32]:
+		var action: StringName = &"run" if command == 32 else &"walk"
+		# Commands from one socket read are reduced before the actor is drawn.
+		# A combat-end command behind the step must not hide its locomotion.
+		var actor := spawn_actor()
+		add_animation_fixture(actor)
+		var dto := state(0, 0, 46, false)
+		dto["in_combat"] = true
+		dto = ActorReducer.apply_command(dto, command)
+		dto = ActorReducer.apply_command(dto, 19)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == action,
+			"coalesced combat end keeps the %s to the bag" % action)
+		var before := actor.global_position
+		advance(actor, actor._segment_duration * 0.5)
+		expect(actor.global_position.distance_to(before) > 0.1 and actor.current_action == action,
+			"the body moves with the %s animation during bag approach" % action)
+		actor.free()
+
+		# The same transition can arrive after the first movement frame, or
+		# be restated by a later health/equipment update during interpolation.
+		actor = spawn_actor()
+		add_animation_fixture(actor)
+		dto = ActorReducer.apply_command(state(0, 0, 19, false), command)
+		actor.apply_server_state(dto, adapter)
+		advance(actor, actor._segment_duration * 0.25)
+		dto = ActorReducer.apply_command(dto, 19)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == action,
+			"a later combat-end packet keeps the active %s" % action)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == action,
+			"a repeated combat-end state keeps the active %s" % action)
+		actor.play_action(&"pain", true)
+		actor.animation_player.advance(0.11)
+		expect(actor.current_action == action,
+			"a finished hit reaction resumes the %s while approaching the bag" % action)
+		advance(actor, 2.0)
+		actor.apply_server_state(dto, adapter)
+		expect(actor.current_action == &"idle" and actor.global_position.is_equal_approx(actor.server_target),
+			"arrival at the bag idles without restarting the %s" % action)
+		actor.play_action(&"pain", true)
+		actor.animation_player.advance(0.11)
+		expect(actor.current_action == &"idle", "a stationary hit reaction still returns to idle")
+		actor.free()
+
+func check_post_combat_pace() -> void:
+	for command: int in [22, 32]:
+		var pace := 0.2 if command == 32 else 0.6
+		var action := "running" if command == 32 else "walking"
+		var actor := spawn_actor()
+		# A brief fight after the first approach step must not become the
+		# first cadence sample: there is no established history to outvote it.
+		actor.apply_server_state(state(1, 0, command, false), adapter)
+		advance(actor, pace)
+		var dto := ActorReducer.apply_command(state(1, 0, command, false), 18)
+		actor.apply_server_state(dto, adapter)
+		advance(actor, 0.2)
+		dto = ActorReducer.apply_command(dto, 19)
+		dto = ActorReducer.apply_command(dto, command)
+		actor.apply_server_state(dto, adapter)
+		expect(is_equal_approx(actor._smoothed_server_interval, pace),
+			"a short fight does not teach a slower %s pace (%.3f s/tile)" % [action, actor._smoothed_server_interval])
+		expect(actor._segment_duration <= pace * actor.arrival_margin + 0.005,
+			"the first %s step onto the bag keeps its normal duration (%.3f s)" % [action, actor._segment_duration])
+		actor.free()
+
+		# A late packet earns a buffer during travel. A completed fight must
+		# not spend that old buffer slowing the single step onto the bag.
+		actor = spawn_actor()
+		for tile: int in range(1, 13):
+			actor.apply_server_state(state(tile, 0, command, false), adapter)
+			advance(actor, pace)
+		advance(actor, 0.18 if command == 32 else 0.3)
+		actor.apply_server_state(state(13, 0, command, false), adapter)
+		expect(actor._jitter_allowance > 0.1, "late packets still buffer an active %s route" % action)
+		dto = ActorReducer.apply_command(state(13, 0, command, false), 18)
+		actor.apply_server_state(dto, adapter)
+		advance(actor, 3.0)
+		dto = ActorReducer.apply_command(dto, 19)
+		dto = ActorReducer.apply_command(dto, command)
+		actor.apply_server_state(dto, adapter)
+		expect(actor._segment_duration <= pace * actor.arrival_margin + 0.005,
+			"pre-fight network buffering does not slow the %s onto the bag (%.3f s)" % [action, actor._segment_duration])
+		actor.free()
+
+	# Even when the transition is folded into a step and the intermediate
+	# combat flag is never drawn, retain the learned pace and haste.
+	var actor := spawn_actor()
+	actor._pace_histories[3] = PackedFloat32Array([0.105, 0.105, 0.105])
+	actor.apply_server_state(state(1, 0, 32, true), adapter)
+	advance(actor, 0.5)
+	actor._jitter_allowance = 0.2
+	var dto := ActorReducer.apply_command(state(1, 0, 32, true), 18)
+	dto = ActorReducer.apply_command(dto, 32)
+	dto = ActorReducer.apply_command(dto, 19)
+	actor.apply_server_state(dto, adapter)
+	expect(is_equal_approx(actor._smoothed_server_interval, 0.105),
+		"coalesced combat transitions preserve the learned hasted pace")
+	expect(actor._segment_duration <= 0.105 * actor.arrival_margin + 0.005,
+		"a coalesced combat end clears the old buffer for a hasted bag step")
+	actor.free()
+
 func run() -> void:
+	check_post_combat_movement()
+	check_post_combat_pace()
 	for running: bool in [false, true]:
 		var ordinary := spawn_actor()
 		var pace := 0.2 if running else 0.6

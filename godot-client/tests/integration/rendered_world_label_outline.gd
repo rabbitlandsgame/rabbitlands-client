@@ -25,7 +25,7 @@ func _run() -> void:
 	var marker := MapMarker3D.new()
 	stage.add_child(marker)
 	marker.configure({"marker_id": 1, "x": 0, "y": 0,
-		"label": "Follow Nesh's lantern"}, CoordinateAdapter.new())
+		"label": "Follow Nash's lantern"}, CoordinateAdapter.new())
 	# Centre the real marker's label, independent of the adapter's tile origin.
 	marker.position = Vector3.ZERO
 	var label := marker.get_node("WorldLabel") as Label3D

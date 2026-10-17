@@ -395,6 +395,7 @@ def build_interactives(client_root: Path, scratch: Path) -> dict:
 # ---------------------------------------------------------------------------
 
 def main() -> int:
+    raise RuntimeError('build_native_world_object_glbs.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
     parser = argparse.ArgumentParser(description=__doc__)
     repo_root = Path(__file__).resolve().parents[2]
     parser.add_argument("--client", type=Path,

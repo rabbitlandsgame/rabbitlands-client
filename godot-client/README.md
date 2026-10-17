@@ -25,27 +25,35 @@ The initial screen defaults to `game.rabbitlandsgame.com:2000`, connects over re
 
 - `W`/`S`: move forward/backward relative to facing. `A`/`D`: strafe without turning; combine keys for diagonal movement and hold Shift to run.
 - `Q`/`E`: turn the local character. `Space`: recenter the viewport on your character.
+- Hold the mouse wheel button and drag to rotate the view; scroll to zoom. The camera always stays focused on your player.
+- Right-click the world to cycle Move → Trade → Fight → Use → Pick up → Harvest → Talk → Look. Left-click applies the selected action. Move retains contextual interactions on hover; other tools ignore incompatible targets. Use also selects the inventory's use-item tool. Right-click first cancels a carried item or pending spell; `Esc` returns to Move.
 - `Ctrl+I`: toggle inventory. Drag its title bar to move it and its lower-right grip to scale the whole window proportionally. Right-click Sto All or Drop All to protect individual edge rows/columns; Get All opens and empties the ground bag on your tile subject to server slot/load validation.
-- `Tab`: toggle the full map. `Alt+M`: toggle the minimap; drag its thick compass border and right-click it for north-up, player-up, or viewport-up orientation.
-- `T`: open and focus chat; `Esc`: release typing focus. Close hides chat until `T` or the Chat button reopens it. Drag the header to move chat and its bottom-right corner to resize it; both are saved. All combines messages, category tabs filter them, and each joined channel gets its own tab. Party/Guild/channel tabs also address ordinary messages to that destination. Backtick/tilde toggles full chat history.
+- `Tab`: toggle the full map. Scroll over it to zoom; above 100% (up to 400%), the map zooms around the cursor and keeps the location under it in place. While zoomed in, left-click and drag to pan; the view stays where you leave it as your character moves. Choose **Current map** to recenter on your player. A click without dragging still walks there; hold Shift to run. At 100% or below it frames the region, with continent exteriors able to zoom out over their neighbors. `Alt+M`: toggle the minimap; drag its thick compass border and right-click it for north-up, player-up, or viewport-up orientation.
+- The Tab map fills the play area up to the right and bottom HUD. Its left sidebar has a fixed width and scrolls when needed. Hover or scroll over the map to read the cursor's X/Y coordinates beside the pointer. A red X marks your selected movement destination until arrival, cancellation, or a replacement movement order.
+- Regional Tab maps and the minimap use detailed renders at four pixels per metre. Detailed images load for the current region, nearby regions visible while zooming or panning, and the selected region preview. The cache retains at most five visible regions and one preview; the wider continent view uses smaller images.
+- `T`: open and focus conversations. `Esc` releases typing focus and preserves the draft; press `Esc` again outside a text field to clear it. If chat was hidden before `T`, it returns to hidden when typing ends with no draft, after the second `Esc` clears the draft, or after successfully sending it. A pending draft keeps the window visible, and `T` resumes it. Chat that was already visible stays visible. Use either window's × button to close it. Conversations start upper left and system messages lower left, with a soft, borderless fade behind the text. Drag either header to move that window and its bottom-right corner to resize it; both layouts are saved independently. Settings → Chat configures each window's visibility, lock, text size, background opacity, line spacing and idle dimming, or combines both feeds in the conversation window. The visible **To:** selector identifies the send destination; Private needs a selected player or `/name message`. Party/Guild/channel tabs select that destination, while reading the full log never retargets a draft. Backtick/tilde or either window's Log button opens session history with All, System, Chat, Local, Party, Guild, Private, numbered-channel and individual private-conversation filters.
+- Drag across text in either chat window or the full log to select it, then use `Ctrl+C` or right-click → Copy. The chat composer supports `Ctrl+V` and its native edit menu. **URLs** opens links seen this session, newest first, with Open in browser, Copy URL and double-click opening. `F2` opens the latest seen URL in the system default browser, including while typing a reply; it can be rebound in Settings → Controls. Links survive the message log's scrollback limit and clear on disconnect. Ignored/filtered messages do not contribute links.
 - Party uses a compact roster with health and ether bars, a leader crown, collapse and close buttons. Drag its header to move it or its bottom-right grip to resize it. Narrow layouts hide names and keep initials badges; hover a row for full details. The header's … menu switches bars to colored current/max numbers and resets window size. Position, size, collapse state and number preference are saved; health updates respect a closed roster.
 - `Alt+A`: attack the selected target. `Alt+S`: sit or stand.
 - The Eternal Lands window keys: `Ctrl+S` spells, `Ctrl+M` manufacture, `Ctrl+J` emotes, `Ctrl+G` quest journal, `Ctrl+B` buddies, `Ctrl+A` stats, `Ctrl+T` ranging, `Ctrl+H` help, `Ctrl+N` notepad, `Ctrl+O` options, `Ctrl+L` mail, `Ctrl+E` encyclopedia. All rebindable in Settings → Controls.
 - Every window moves by its title bar, and stays inside the viewport and clear of the right rail. The inventory and ground bag also scale from their lower-right grip and remember where they were left.
-- A HUD icon is drawn in colour whenever its action is available and greyed only when it is not; an open window is marked by the lit frame around its icon. The sit icon becomes the stand icon while you are seated.
+- A HUD icon is drawn in colour whenever its action is available and greyed only when it is not. An open window or armed mode is not marked yet: the quickbar icons are flat buttons, so the lit pressed frame set for them never draws. The sit icon becomes the stand icon while you are seated.
 - The right rail carries the legacy misc-window column: skill rows (click one to watch it on the experience bar), the countdown/stopwatch timer (click to start/stop, Shift+click for stopwatch, wheel to set), the knowledge bar, the digital and analog clocks, and the compass. The settings window's HUD tab shows or hides each, plus the FPS readout and the S H P M R G A indicator letters.
+
+The click, item-carry and movement-pacing contracts behind these controls are in [input and movement contracts](../docs/input-and-movement-contracts.md).
 
 ## Settings inventory
 
-The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scroll independently; tab arrows keep every category reachable on smaller screens. Right-clicking your character opens its Banners tab, right-clicking the lower HUD opens HUD, and the spell bar's settings shortcut opens Spells. Preferences apply immediately and retain their existing settings-file keys.
+The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scroll independently; tab arrows keep every category reachable on smaller screens. Right-clicking the lower HUD opens HUD, and the spell bar's settings shortcut opens Spells. Preferences apply immediately and retain their existing settings-file keys.
 
 | Tab | Available preferences |
 | --- | --- |
 | HUD | UI scale; FPS, clocks, seconds, knowledge, timer, stats, indicators and chat timestamps; combat HUD visibility and pinning; countdown duration and stopwatch mode; lower HUD bar order and visibility; watched experience skill; invasion assistant scale. |
+| Chat | Separate or combined feeds; independent visibility, movement/resize lock, text size, soft-fade opacity, line spacing, idle dimming and layout reset for the conversation and system windows. |
 | Minimap | Visibility, size, orientation, shape, border, map range, marker size, and all eleven marker categories. |
-| Banners | Names; health, ether, food and action bars and numbers; instance mode; speech bubbles; background; sit and ranging locks; right-click shortcut. |
+| Banners | Names; health, ether, food and action bars and numbers; instance mode; speech bubbles; background; sit and ranging locks. |
 | Graphics | Frame limit, painted look, quality, shadows, particles, nameplates and distance, character visibility through obstacles, map cache usage and clearing. |
-| Camera | Rotation sensitivity, pan sensitivity and player following. |
+| Camera | Rotation sensitivity. The camera stays focused on the player. |
 | Audio | Sound enablement and volume, with offline attribution credits. |
 | Inventory | Equipment side, inventory and ground bag scales, storage docking, six editable quantity shortcuts and active quantity, plus all eight Store All/Drop All protection switches. |
 | Spells | Spell bar visibility and docking, casting mode, number of visible shortcuts, and magic ring size. |
@@ -87,10 +95,17 @@ Open and run these scenes in Godot 4.7.2:
 
 A PASS label is evidence of source/runtime loading only. Record screenshots and review skeletons, materials, attachments, navigation, and coordinate placement before changing traceability to VERIFIED.
 
+Look and lighting checks:
+
+- `ELORIA_LOOK=0` or `1` forces the painted look off or on, and `ELORIA_LOOK_QUALITY=low`, `medium` or `high` forces the graphics quality, over the saved Settings → Graphics choices; the overridden control is greyed out (`src/world/look/look_profile.gd`, presets in `QUALITY_PRESETS`). Per-map look data lives in `src/world/look/regions/`, whose README covers the schema.
+- Check shadow and sun-elevation changes on vertical casters, such as Four Gates' walls in `src/dev/world_validation.tscn`: at grazing sun angles flat ground already faces away from the light (N·L ≤ 0) and shows no difference. Shadow strength is a package's `environment.sun.shadowOpacity`, or else `WorldEnvironmentBinder.sun_shadow_opacity` lets `SUN_SHADOW_LEAK_ENERGY` through. `ambient_light_energy` does not change sky-sourced ambient (see the comments in `src/world/world_environment_binder.gd`).
+
 ## Branding and local settings
 
-The temporary typographic Rabbit Lands/RL wordmark replaces the old visible
-logo without altering gameplay artwork. Final logo artwork remains future work.
+The login logo, compact HUD mark, application/updater icons and startup splash
+use the Rabbit Lands artwork adapted from the selected Discord crest. See
+[`assets/branding/README.md`](assets/branding/README.md) for the canonical kit,
+usage and provenance. Other gameplay artwork is unchanged.
 The application title is Rabbit Lands, while the existing Godot user directory
 `Godot/app_userdata/Eloria` (Linux: `godot/app_userdata/Eloria`) is retained so
 settings, notes and trusted local certificates continue to work. Internal

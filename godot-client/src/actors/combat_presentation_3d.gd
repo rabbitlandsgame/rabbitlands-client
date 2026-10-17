@@ -1,5 +1,6 @@
 class_name CombatPresentation3D
 extends Node3D
+const SPELL_MATERIALS = preload("res://src/world/spell_visual_material.gd")
 ## Visual cues use the AnimationPlayer clock, including speed changes and LOD.
 ## Skeletal attachments update after the skeleton evaluates, avoiding hand lag.
 var actor: ReplicatedActor3D
@@ -149,7 +150,6 @@ func update_pose() -> void:
 			return
 	if action == &"ranged_attack" and time >= 0.15:
 		return
-	_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _material)
 	var l := to_local(left)
 	var r := to_local(right)
 	var duration := maxf(0.01, actor.animation_player.current_animation_length)
@@ -162,6 +162,8 @@ func update_pose() -> void:
 		color = Color(1.0, 0.43, 0.16, fade)
 	if casting and action == _spell_action and _spell_color.a > 0.0:
 		color = Color(_spell_color, fade)
+	_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES,
+		SPELL_MATERIALS.geometry(color, spell_power) if casting else _material)
 	if casting:
 		var size := SpellPresentation.power_scale(spell_power)
 		var radius := SpellPresentation.power_radius(spell_power)

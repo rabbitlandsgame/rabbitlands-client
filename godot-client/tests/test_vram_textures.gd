@@ -544,7 +544,8 @@ func _check_shared_pool() -> void:
 	_expect(int(stats.get("imagesSidecar", -1)) == SIDECARS and int(stats.get("sidecarRejected", -1)) == 0
 		and right == SIDECARS and str(entry.get("path", "")) == expected,
 		"a pooled entry uploads the other pool's file (%s, %s): %s" % [entry.get("path", ""), formats, stats])
-	_expect(VramTextures.resident_bytes(sha, 999999999) == int(index.images[sha].gpuBytes),
+	_expect(VramTextures.resident_bytes(sha, 999999999,
+		PackedStringArray([second.path_join("shared-assets")])) == int(index.images[sha].gpuBytes),
 		"and the budget counts its sidecar's GPU bytes")
 	var line := VramTextures.self_test_pool(second.path_join("shared-assets"))
 	_expect(line.begins_with("vram_textures self_test pool ok pooled=%d of %d" % [SIDECARS, SIDECARS]),
@@ -610,8 +611,9 @@ func _check_stale_roles() -> void:
 		"the opaque base now a cutout and the ORM now a colour are decoded with mips; the cutout and normal keep BC7/BC5: %s"
 		% [formats])
 	var published := 64 * 64 * 4 * 4 / 3
-	_expect(VramTextures.resident_bytes(_image_sha(0), published) == published
-		and VramTextures.resident_bytes(_image_sha(3), published) == published,
+	var images := PackedStringArray([FIXTURE.path_join("shared-assets")])
+	_expect(VramTextures.resident_bytes(_image_sha(0), published, images) == published
+		and VramTextures.resident_bytes(_image_sha(3), published, images) == published,
 		"and the chunk budget counts those two at their published figure")
 	VramTextures.reconfigure()
 	_expect(int(_stats(_parse(true)).get("sidecarRoleMismatch", -1)) == 0,

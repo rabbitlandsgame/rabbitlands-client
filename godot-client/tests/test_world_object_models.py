@@ -37,13 +37,16 @@ GENERATOR = TOOLS / "build_native_world_object_glbs.py"
 # so every check below reads the same table the generator writes from.
 sys.path.insert(0, str(TOOLS))
 import imported_world_objects as imported  # noqa: E402
-# The server repository beside this one. The main checkouts are `eloria-client`
-# and `eloria-server`, but a feature is usually worked in a pair of worktrees
-# named `<something>` and `<something>-server`, and this test was silently
-# reading the main checkout from whatever branch it happened to be on - so a
-# rename made in the pair looked like a client that had lost its models.
+# The server repository beside this one. The main checkouts are
+# `rabbitlands-client` and `rabbitlands-server` (`eloria-client` and
+# `eloria-server` before the move to Rabbit Lands, kept as a fallback), but a
+# feature is usually worked in a pair of worktrees named `<something>` and
+# `<something>-server`, and this test was silently reading the main checkout
+# from whatever branch it happened to be on - so a rename made in the pair
+# looked like a client that had lost its models.
 NEIGHBOURS = CLIENT.parents[1]
 SERVER_CANDIDATES = (NEIGHBOURS / (CLIENT.parents[0].name + "-server"),
+                     NEIGHBOURS / "rabbitlands-server",
                      NEIGHBOURS / "eloria-server")
 # The interactive roles the server can state. `map_object_entries` sends
 # `role.replace("_", " ").title()`, so this is the label as well as the role.
@@ -57,11 +60,12 @@ OVERLAY = "config/eloria/continent-v2"
 
 
 def server_root() -> Path | None:
-    configured = os.environ.get("ELORIA_SERVER_ROOT")
-    if configured:
-        root = Path(configured).resolve()
+    variable = next((name for name in ("RABBITLANDS_SERVER_ROOT", "ELORIA_SERVER_ROOT")
+                     if os.environ.get(name)), None)
+    if variable:
+        root = Path(os.environ[variable]).resolve()
         if not (root / "config/eloria/harvesting.txt").is_file():
-            raise ValueError(f"ELORIA_SERVER_ROOT is not an Eloria server: {root}")
+            raise ValueError(f"{variable} is not a Rabbit Lands server: {root}")
         return root
     for candidate in SERVER_CANDIDATES:
         if (candidate / "config/eloria/harvesting.txt").is_file():
@@ -330,7 +334,7 @@ class WorldObjectModelTest(unittest.TestCase):
     def test_every_server_resource_has_a_model(self) -> None:
         root = server_root()
         if root is None:
-            self.skipTest("eloria-server is not checked out beside the client")
+            self.skipTest("rabbitlands-server is not checked out beside the client")
         resources = [
             line.split("|")[1].strip()
             for line in served_table_lines(root, "harvesting.txt")
@@ -343,7 +347,7 @@ class WorldObjectModelTest(unittest.TestCase):
     def test_every_server_interactive_role_has_a_model(self) -> None:
         root = server_root()
         if root is None:
-            self.skipTest("eloria-server is not checked out beside the client")
+            self.skipTest("rabbitlands-server is not checked out beside the client")
         roles = set()
         for line in served_table_lines(root, "interactives.txt"):
             if line.startswith("#") or "|" not in line:

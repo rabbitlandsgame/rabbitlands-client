@@ -1,5 +1,7 @@
 __pycache__/
 *.py[cod]
+# Local video model weights, Python runtime, caches, and generated clips.
+/.local/video-generation/
 godot-client/.godot/
 godot-client/test-artifacts/
 # Short Windows junction to the ignored engine-profile build, avoiding MAX_PATH.
@@ -22,9 +24,9 @@ xcuserdata/
 godot-client/Godot_v*.exe
 godot-client/Godot_v*
 
-# Godot editor artefacts. The godot-client project is imported by CI
-# ("godot --headless --path godot-client --editor --quit"), which regenerates
-# all of these, so none of them belong in the tree.
+# Godot editor artefacts. A headless import of the godot-client project
+# ("godot --headless --path godot-client --import") regenerates all of these
+# in a fresh checkout, so none of them belong in the tree.
 godot-client/.godot/
 *.import
 # Biome masks encode four independent numeric weights, including alpha.
@@ -37,7 +39,7 @@ godot-client/**/*.glb.report.json
 # Textures extracted by Godot from the self-contained Meshy storage GLB.
 godot-client/assets/world/interactives/storage_[0-9].jpg
 
-# Rendered test evidence. CI uploads it as a build artifact.
+# Rendered test evidence written by local test runs.
 godot-client/test-artifacts/
 
 # Validator reports written beside the map packages they describe.
@@ -101,3 +103,25 @@ godot-client/bin/**/native_crowd*
 # A checkout's own project-settings override. The continent-v2 viewer launcher and the editor-pass runners
 # write godot-client/override.cfg to bind the v2 territory catalog there (serve plan CV12a).
 godot-client/override.cfg
+
+# Preserve dense contact-constrained canine curves on clean imports.
+!godot-client/assets/actors/native/creatures/briarhide_wolf.glb.import
+!godot-client/assets/actors/native/creatures/crystal_dire_wolf.glb.import
+!godot-client/assets/actors/native/creatures/moss_armored_hound.glb.import
+!godot-client/assets/actors/native/creatures/mossbound_hound.glb.import
+!godot-client/assets/actors/native/creatures/red_fox.glb.import
+!godot-client/assets/actors/native/creatures/thornbark_wolf.glb.import
+!godot-client/assets/actors/native/creatures/thornhide_wolf.glb.import
+
+# Local high-resolution source assets and their authoring workspace.
+/.local/asset-authoring/
+
+# Local Claude Code files: settings, worktrees and skill discovery links.
+/.claude/
+
+# Preserve the approved native ursine contact curves.
+!godot-client/assets/actors/native/creatures/moss_bear.glb.import
+
+# Preserve the reviewed native rabbit-family contact curves.
+!godot-client/assets/actors/native/creatures/basic_expansion/rabbit.glb.import
+!godot-client/assets/actors/native/creatures/basic_expansion/jackalope.glb.import

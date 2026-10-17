@@ -1,5 +1,7 @@
 # Harvestable audit — 2026-08-28
 
+> Historical audit: the Eloria client below is the product name used on August 28, 2026. The current product is Rabbit Lands. These findings and counts describe that recorded pre-Godot snapshot, not the current client.
+
 Audit of the harvestable layer of the Eloria client data pack: the models, the
 materials, the client-side lookup that decides whether an object can be
 harvested at all, and how harvest nodes are distributed across the Nymara maps.

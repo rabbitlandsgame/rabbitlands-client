@@ -117,6 +117,7 @@ enum ServerMessage {
 	# What the NPCs just shown do for a living, the line under their names.
 	# The free number between the map digest (209) and the titles (211).
 	ELORIA_ACTOR_OCCUPATIONS = 210,
+	ELORIA_QUEST_OFFERS = 199,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -238,12 +239,14 @@ static func turn(left: bool) -> PackedByteArray:
 ## Grow this list in the same commit that lands the window which decodes the
 ## packet, never before.
 const CLIENT_CAPABILITIES: Array[String] = [
+	"music_program_v1",
 	"lantern_tutorial_v1",
 	"tutorial_rewards_v1",
 	"second_bell_v1",
 	"borrowed_sky_v1",
 	"spell_ring_v1",
 	"followup_tutorials_v1",
+	"field_dispatch_v1",
 	"signed_ashore_v1",
 	"actor16_v1",
 	"adjacent_actors_v1",
@@ -261,7 +264,9 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"merchant_window_v1",
 	"merchant_weights_v1",
 	"merchant_descriptions_v1",
+	"merchant_lots_v1",
 	"navigation_hud_v1",
+	"map_marker_actor_v1",
 	"party_window_v1",
 	"perk_catalog_v3",
 	"player_info_v1",
@@ -269,6 +274,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"achievements_catalog_v1",
 	"actor_titles_v1",
 	"actor_occupations_v1",
+	"quest_offers_v1",
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",
 	"attribute_state_v1",
@@ -282,6 +288,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"magic_book_v2",
 	"spell_visuals_v1",
 	"spell_impacts_v1",
+	"creature_status_v1",
 	"special_events_v1",
 	"storage_window_v1",
 	# Draws the continent-v2 maps (registry status continent-v2-served: the
@@ -1076,6 +1083,13 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_actor_titles(payload)
 		ServerMessage.ELORIA_ACTOR_OCCUPATIONS:
 			return decode_actor_occupations(payload)
+		ServerMessage.ELORIA_QUEST_OFFERS:
+			if payload.size() < 2 or payload.size() != 2 + u16(payload) * 2:
+				return {"type": "invalid", "error": "quest_offers_length"}
+			var offered_ids: Array[int] = []
+			for index: int in range(u16(payload)):
+				offered_ids.append(u16(payload, 2 + index * 2))
+			return {"type": "quest_offers", "actor_ids": offered_ids}
 		ServerMessage.ELORIA_ADJACENT_MAPS:
 			return decode_adjacent_maps(payload)
 		ServerMessage.ELORIA_MAP_DIGEST:
@@ -1947,6 +1961,18 @@ static func decode_merchant(payload: PackedByteArray) -> Dictionary:
 				return {"type": "invalid", "error": "merchant_description"}
 			entry["description"] = str(description.value)
 			offset = int(description.offset)
+	# Exact sale bundles allow prices such as two flowers for one gold.
+	if offset < payload.size():
+		if offset + 2 > payload.size() or u16(payload, offset) != items.size():
+			return {"type": "invalid", "error": "merchant_lots_count"}
+		offset += 2
+		if offset + items.size() * 2 != payload.size():
+			return {"type": "invalid", "error": "merchant_lots_length"}
+		for entry: Dictionary in items:
+			entry["sell_quantity"] = u16(payload, offset)
+			if int(entry.sell_quantity) < 1:
+				return {"type": "invalid", "error": "merchant_lot_zero"}
+			offset += 2
 	if offset != payload.size():
 		return {"type": "invalid", "error": "merchant_trailing"}
 	return {"type": "merchant", "actor_id": actor_id, "npc_name": str(name_field.value),
@@ -2344,18 +2370,24 @@ static func decode_player_info(payload: PackedByteArray) -> Dictionary:
 ## a tutorial pointer. The map arrives as the server's own file reference, which
 ## is still an Eternal Lands map path (`./maps/four_gates.elm`); the marker
 ## belongs to that map and no other.
+## map_marker_actor_v1 adds a uint16 actor id after the two NUL-terminated
+## strings so a creature beacon can follow rendered motion between packets.
 static func decode_map_marker(payload: PackedByteArray) -> Dictionary:
 	if payload.size() < 6:
 		return {"type": "invalid", "error": "map_marker_length"}
 	var text: Dictionary = _nul_run(payload, 6, 2)
 	if text.is_empty():
 		return {"type": "invalid", "error": "map_marker_text"}
-	if int(text.offset) != payload.size():
+	var remaining: int = payload.size() - int(text.offset)
+	if remaining != 0 and remaining != 2:
 		return {"type": "invalid", "error": "map_marker_trailing"}
 	var values: Array = text.values as Array
-	return {"type": "map_marker", "marker_id": u16(payload),
+	var marker := {"type": "map_marker", "marker_id": u16(payload),
 		"x": u16(payload, 2), "y": u16(payload, 4),
 		"map_id": map_id_from_reference(str(values[0])), "map_reference": str(values[0]), "label": str(values[1])}
+	if remaining == 2:
+		marker["actor_id"] = u16(payload, int(text.offset))
+	return marker
 
 ## `./maps/four_gates.elm` is the map id `four_gates`. The server names its own
 ## maps this way in every marker; matching on the reference itself would tie the
@@ -3075,7 +3107,7 @@ static func decode_lantern(payload: PackedByteArray, logical_coordinates := fals
 		return {"type":"invalid", "error":"lantern_version"}
 	if value.has("ring_training") and not value.ring_training is bool:
 		return {"type":"invalid", "error":"ring_training"}
-	if value.has("tutorial") and value.tutorial not in ["second_bell", "borrowed_sky", "followup", "signed_ashore", "watchpost"]:
+	if value.has("tutorial") and value.tutorial not in ["second_bell", "borrowed_sky", "followup", "signed_ashore", "watchpost", "field_dispatch"]:
 		return {"type":"invalid", "error":"tutorial_kind"}
 	# Signed Ashore, the landing isle's chapter: its four countersigns
 	# (grove/temple/gate/light) stand in for the Lantern's flags below. The

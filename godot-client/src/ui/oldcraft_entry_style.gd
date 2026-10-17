@@ -3,7 +3,7 @@ extends RefCounted
 ## Low-cost entry-screen styling inspired by Oldcraft's fantasy materials and
 ## open, scenic login composition.
 ##
-## The screens keep Eloria's logo, world painting, controls and navigation.
+## The screens keep the Rabbit Lands logo, world painting, controls and navigation.
 ## This helper supplies the visual language: a restrained floating login card,
 ## warm brass edges, burgundy action buttons, inset fields and a moonlit
 ## preview stage. Character creation keeps its heavier carved-stone treatment.
@@ -138,26 +138,6 @@ static func _style_login_layout(main: Control) -> void:
 		field.add_theme_stylebox_override("normal", field_normal)
 		field.add_theme_stylebox_override("focus", field_focus)
 		field.custom_minimum_size.y = maxf(field.custom_minimum_size.y, 36.0)
-	var secure := main.get_node_or_null("%Secure") as CheckBox
-	if secure != null:
-		# Connection security is a quiet utility choice, not a destructive red
-		# action. A faint translucent row leaves the check glyph clear without
-		# competing with Log In.
-		var secure_normal := _flat_box(Color(0.02, 0.024, 0.032, 0.20),
-			Color(GOLD_DARK, 0.28), 1, 8, 4.0)
-		var secure_hover := _flat_box(Color(0.055, 0.058, 0.07, 0.42),
-			Color(GOLD_DARK, 0.56), 1, 8, 4.0)
-		var secure_disabled := _flat_box(Color(0.02, 0.022, 0.028, 0.12),
-			Color(GOLD_DARK, 0.18), 1, 8, 4.0)
-		secure.add_theme_stylebox_override("normal", secure_normal)
-		secure.add_theme_stylebox_override("hover", secure_hover)
-		secure.add_theme_stylebox_override("pressed", secure_hover)
-		secure.add_theme_stylebox_override("hover_pressed", secure_hover)
-		secure.add_theme_stylebox_override("focus", secure_hover)
-		secure.add_theme_stylebox_override("disabled", secure_disabled)
-		secure.add_theme_color_override("font_color", WARM_TEXT)
-		secure.add_theme_color_override("font_hover_color", GOLD_BRIGHT)
-		secure.custom_minimum_size.y = maxf(secure.custom_minimum_size.y, 36.0)
 	var secondary_normal := _flat_box(Color(0.045, 0.046, 0.058, 0.48),
 		Color(GOLD_DARK, 0.76), 1, 9, 6.0)
 	var secondary_hover := _flat_box(Color(0.12, 0.115, 0.12, 0.82),

@@ -10,6 +10,7 @@ const VramTextures := preload("res://src/world/vram_textures.gd")
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const ExternalMeshPool := preload("res://src/world/external_mesh_pool.gd")
 const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
+const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
 # nodes that between them reference only 42 meshes, so almost every draw call
@@ -221,7 +222,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	# built with (VramTextures.cache_token); empty, and the key unchanged, for
 	# any other package.
 	cache_file = MapSceneCache.cache_path(manifest.asset_id(), package_digest,
-		VramTextures.cache_token(manifest.data, resolved_glb_path.get_base_dir()))
+		VramTextures.cache_token(manifest.data, resolved_glb_path.get_base_dir()) + ArchivedModelPolicy.cache_token())
 	mark = _phase(&"digest", mark)
 	if manifest.has_streaming_chunks():
 		# A partially resident territory must never be packed/read as a complete
@@ -282,6 +283,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	if groups > 0:
 		print_debug("world_load stage=regroup groups=", groups)
 	mark = _phase(&"regroup", mark)
+	ArchivedModelPolicy.apply_to_gltf_state(state, resolved_glb_path)
 	var generated: Node = document.generate_scene(state)
 	if generated == null:
 		push_error("world_load stage=scene_generate error=null_scene path=%s" % resolved_glb_path)
@@ -494,6 +496,9 @@ func _resolve_shared_meshes(package: WorldManifest, root: Node) -> int:
 			marked.append(node)
 	for node: Node in marked:
 		var key := str(node.get_meta(ExternalMeshPool.POOLED_META))
+		if ArchivedModelPolicy.is_retired_prototype(key):
+			node.set_meta("retired_model", true)
+			continue
 		var path: Variant = paths.get(key)
 		if path == null:
 			missing[key] = true

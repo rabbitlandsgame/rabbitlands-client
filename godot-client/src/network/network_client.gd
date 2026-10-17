@@ -9,6 +9,7 @@ signal protocol_error(message: String)
 signal magic_selection_completed
 signal coordinate_intents_invalidated
 signal coordinate_route_cancelled
+signal movement_requested(tile: Vector2i)
 const CoordinateContext = preload("res://src/network/coordinate_context.gd")
 var coordinates = CoordinateContext.new()
 var magic_pending: Dictionary = {}
@@ -154,7 +155,7 @@ var _last_heartbeat_msec := 0
 ## Whether this session wraps the socket in TLS. The protocol is identical
 ## either way: only the bytes between this client and the socket change, so
 ## nothing above `send_frame` and `_drain_packets` knows the difference.
-var _secure := false
+var _secure := true
 ## A certificate to trust in addition to the system store. A development
 ## server signs its own certificate, which no trust store will ever accept;
 ## pointing at that file is what lets a laptop connect without turning
@@ -172,7 +173,7 @@ func _link_ready() -> bool:
 func _link() -> StreamPeer:
 	return _tls if _secure else _peer
 
-func connect_to_server(host: String, port: int, secure := false,
+func connect_to_server(host: String, port: int, secure := true,
 		trusted_certificate_path := "") -> Error:
 	Diagnostics.record("connection_requested", {"host": host, "port": port, "tls": secure})
 	_reset_coordinate_session()
@@ -295,9 +296,11 @@ func login(username: String, password: String) -> Error:
 func move_to(tile: Vector2i, run := false) -> Error:
 	if not magic_pending.is_empty() and magic_scope in ["burst", "location"]:
 		return _finish_magic_selection({"x": tile.x, "y": tile.y})
-	if not coordinates.selected:
-		return send_frame(EloriaProtocol.move_to(tile.x, tile.y, run))
-	return _send_point(6 if run else 1, tile)
+	var error: Error = (send_frame(EloriaProtocol.move_to(tile.x, tile.y, run))
+		if not coordinates.selected else _send_point(6 if run else 1, tile))
+	if error == OK:
+		movement_requested.emit(tile)
+	return error
 
 func _send_point(command: int, tile: Vector2i) -> Error:
 	if not coordinates.ready():

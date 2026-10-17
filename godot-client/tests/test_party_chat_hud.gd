@@ -30,7 +30,7 @@ func _run() -> void:
 	await process_frame
 	_expect(chat.channel_buttons.size() == 3 and chat.buttons.has("all")
 		and chat.buttons.has("general") and chat.buttons.has("party")
-		and chat.buttons.has("system"), "All, category and every joined-channel tab exist")
+		and main.chat_log_tabs.buttons.has("system"), "All, category and every joined-channel tab exist")
 	_chat(0, "Ari: local message")
 	_chat(0, "[Party] Mira: party message", 4)
 	_chat(3, "system message")
@@ -43,13 +43,14 @@ func _run() -> void:
 	_expect(output.get_parsed_text().contains("local message")
 		and output.get_parsed_text().contains("channel four message"), "All includes all message categories")
 	for spec: Array in [["general", "local message", "party message"],
-			["party", "party message", "local message"], ["system", "system message", "guild message"],
+			["party", "party message", "local message"],
 			["guild", "guild message", "system message"], ["private", "private message", "channel four message"],
 			["channel:4", "channel four message", "channel twelve message"]]:
 		main.call("_on_chat_tab_pressed", str(spec[0]))
 		_expect(output.get_parsed_text().contains(str(spec[1]))
 			and not output.get_parsed_text().contains(str(spec[2])), "filter works: " + str(spec[0]))
-	_expect(main.call("_chat_message_for_tab", "hello") == "@hello", "a channel tab addresses the active channel")
+	_expect(main.system_chat_hud.output.get_parsed_text().contains("system message"), "system messages use their own feed")
+	_expect(main.call("_chat_message_for_tab", "hello") == "@@4 hello", "a channel tab addresses its numbered destination")
 	_expect(main.call("_chat_message_for_tab", "#party status") == "#party status", "commands stay commands on channel tabs")
 	main.call("_on_chat_tab_pressed", "party")
 	_expect(main.call("_chat_message_for_tab", "hello") == "#p hello", "Party sends to the party")
@@ -64,7 +65,7 @@ func _run() -> void:
 	_expect(app.get("active_channel_index") == 0, "a channel button uses its current server slot")
 	app.call("_on_packet", 71, PackedByteArray([0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
 	_expect(main.get("_chat_tab") == "all" and not chat.channel_buttons.has(4), "leaving the selected channel returns to All")
-	_chat(0, "[b]literal markup[/b]")
+	_chat(0, "Ari: [b]literal markup[/b]")
 	_expect(output.get_parsed_text().contains("[b]literal markup[/b]"), "message markup is never interpreted")
 	await _check_mix_reports(chat, output)
 	for index in range(110):
@@ -78,11 +79,12 @@ func _run() -> void:
 	main.call("_show_chat_input")
 	_expect(chat.visible and chat.input.has_focus(), "T reopens and focuses the same chat window")
 	main.call("_hide_chat_input")
-	_expect(chat.input.visible and not chat.input.has_focus(), "leaving input focus keeps the chat footer available")
+	_expect(not chat.visible and not chat.input.has_focus(), "leaving empty input restores the dismissed chat window")
+	chat.open_chat()
 	chat.position = Vector2(180, 220)
 	chat.resize_window(Vector2(520, 310))
 	chat.save_layout()
-	var remembered := WindowPreferences.stored_rect("chat_hud", Rect2(), settings_path)
+	var remembered := WindowPreferences.stored_rect("chat_soft", Rect2(), settings_path)
 	_expect(remembered == Rect2(chat.position, chat.size), "chat position and size are saved together")
 	config.load(settings_path)
 	_expect(int(config.get_value("unrelated", "keep", 0)) == 42, "saving the layout preserves other preferences")
@@ -93,7 +95,7 @@ func _run() -> void:
 	var position_before := chat.position
 	await _drag(chat.get_node("Frame/Layout/Header/Title"), Vector2(60, -70))
 	_expect(chat.position.is_equal_approx(position_before + Vector2(60, -70)), "dragging the header moves the real chat surface")
-	remembered = WindowPreferences.stored_rect("chat_hud", Rect2(), settings_path)
+	remembered = WindowPreferences.stored_rect("chat_soft", Rect2(), settings_path)
 	_expect(remembered == Rect2(chat.position, chat.size), "mouse release saves the changed layout")
 	chat.position = Vector2(4000, 4000)
 	chat.resize_window(Vector2(4000, 4000))
@@ -112,6 +114,8 @@ func _run() -> void:
 	var windows: Control = main.get("extension_windows")
 	windows.set("preferences_path", settings_path)
 	windows.set("_party_collapsed", false)
+	windows.set("_party_custom_size", false)
+	windows.set("_party_expanded_size", Vector2(244, 0))
 	app.call("_on_packet", 240, _hex("0102037800b40028003c000003e0014b656c6c616e00666f75725f676174657300045a0096000a0037009a00b6004d6172656e006d6972726f72686f6c6400000000"))
 	await process_frame
 	_expect(windows.party_panel.size.x <= 246 and not windows.has_open_window(), "party roster is narrow and does not act as a modal window")
@@ -151,6 +155,7 @@ func _run() -> void:
 ## The inventory and manufacturing windows show each finished mix as item
 ## text, so with either open the server's chat copy of it stays out of chat.
 func _check_mix_reports(chat: PanelContainer, output: RichTextLabel) -> void:
+	output = main.system_chat_hud.output
 	var inventory: Control = main.get("inventory_panel")
 	var manufacturing: Control = main.get("manufacturing_panel")
 	var console: RichTextLabel = main.get("console_output")
@@ -168,7 +173,7 @@ func _check_mix_reports(chat: PanelContainer, output: RichTextLabel) -> void:
 	_chat(0, "You successfully mixed Fire Essence.", 10)
 	_chat(0, "Ari: still talking")
 	_expect(not output.get_parsed_text().contains("Fire Essence")
-		and output.get_parsed_text().contains("still talking"),
+		and main.chat_output.get_parsed_text().contains("still talking"),
 		"an open manufacturing window keeps its mix reports out of chat, and nothing else")
 	_expect(chat.visible, "other lines still bring chat up while a window is open")
 	manufacturing.hide()
@@ -213,7 +218,7 @@ func _check_sending() -> void:
 		peer.poll()
 		if listener.is_connection_available():
 			break
-		await process_frame
+		await create_timer(0.01).timeout
 	var receiver: StreamPeerTCP = listener.take_connection()
 	if receiver == null:
 		_expect(false, "the local sending fixture connects")
@@ -223,17 +228,28 @@ func _check_sending() -> void:
 		(main.chat_hud.channel_buttons[12] as Button).pressed.emit()
 		_expect(await _received(receiver) == EloriaProtocol.set_active_channel(1), "channel clicks send the actual server slot")
 		main.call("_on_chat_submitted", "hello channel")
-		_expect(await _received(receiver) == EloriaProtocol.chat("@hello channel"), "channel text reaches the wire with channel addressing")
+		_expect(await _received(receiver) == EloriaProtocol.chat("@@12 hello channel"), "channel text reaches the wire with channel addressing")
 		app.call("_on_packet", 71, PackedByteArray([1, 12, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0]))
 		main.call("_on_chat_submitted", "after reorder")
-		var expected := EloriaProtocol.set_active_channel(0)
-		expected.append_array(EloriaProtocol.chat("@after reorder"))
-		_expect(await _received(receiver) == expected, "sending after slot reordering reselects this tab's channel first")
+		var expected := EloriaProtocol.chat("@@12 after reorder")
+		_expect(await _received(receiver) == expected, "sending after slot reordering retains the channel number")
 		for spec: Array in [["party", "ready", "#p ready"], ["guild", "hello", "#gm hello"],
 				["channel:12", "#party status", "#party status"]]:
 			main.call("_on_chat_tab_pressed", str(spec[0]))
 			main.call("_on_chat_submitted", str(spec[1]))
 			_expect(await _received(receiver) == EloriaProtocol.chat(str(spec[2])), "tab sends the expected protocol frame: " + str(spec[0]))
+		main.chat_hud.set_destination("local")
+		main.chat_hud.dismiss()
+		main.call("_show_chat_input")
+		main.chat_input.text = "resumed hidden draft"
+		main.call("_hide_chat_input")
+		main.call("_show_chat_input")
+		main.chat_input.text_submitted.emit(main.chat_input.text)
+		_expect(await _received(receiver) == EloriaProtocol.chat("resumed hidden draft"),
+			"a resumed draft reaches the local test connection")
+		_expect(not main.chat_hud.visible and not main.chat_input.has_focus() and main.chat_input.text.is_empty(),
+			"sending a resumed draft restores the previously hidden window")
+		main.chat_hud.open_chat()
 		receiver.disconnect_from_host()
 	peer.disconnect_from_host()
 	listener.stop()

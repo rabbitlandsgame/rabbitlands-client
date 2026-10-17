@@ -1,0 +1,822 @@
+{
+  "passed": true,
+  "inheritance": "Exact selected curves and static payloads bind reviewed checks to runtime; the selected attack is renamed Sword_Attack. Owlbear idle root-object translation is explicitly rebased with full key/half-key world/skin preservation in promotion.json.",
+  "actors": {
+    "obsidian_bear": {
+      "reviewed_runtime_source_sha256": "1ef0dd705c9f7684f24eac88d65ac7a4f9d861ba84460676b5ce26ef0aeecb4c",
+      "clips": {
+        "Walk": {
+          "full_skin_floor_min": 0.0018020467669060515,
+          "max_segment_length_error": 9.521428845360447e-08,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.0003408160363524672,
+              "support_floor_min": 0.002894003299099011,
+              "support_floor_max": 0.003124001528548222,
+              "declared_native_speed": 0.8411243208880297
+            },
+            "fore_right": {
+              "support_slide_rms": 0.0003694122899648196,
+              "support_floor_min": 0.0027568852746404442,
+              "support_floor_max": 0.0030491315837204505,
+              "declared_native_speed": 0.8411243208880297
+            },
+            "hind_left": {
+              "support_slide_rms": 0.00021831688092291358,
+              "support_floor_min": 0.0018279395089036378,
+              "support_floor_max": 0.0030264302030001285,
+              "declared_native_speed": 0.8411243208880297
+            },
+            "hind_right": {
+              "support_slide_rms": 0.0002466323754025834,
+              "support_floor_min": 0.002631738600939489,
+              "support_floor_max": 0.003004921944465817,
+              "declared_native_speed": 0.8411243208880297
+            }
+          },
+          "loop_world_gap": 4.440892098500626e-16,
+          "terminal_head_height": 0.6128118906790402,
+          "terminal_body_height": 0.42949134601716954,
+          "terminal_muzzle_height": 0.64655000179234,
+          "terminal_body_support_heights": {
+            "front": 0.3811604937789281,
+            "rear": 0.5377321337839662
+          },
+          "max_joint_speed": 6.812135907824353,
+          "worst_joint_speed": {
+            "node": 4,
+            "time": 1.0746738910675049
+          },
+          "max_adjacent_rotation_degrees": 0.9343566190308886,
+          "quaternion_norm_error": 4.10524771954357e-08,
+          "minimum_adjacent_dot": 0.9999667153632592
+        },
+        "Jog": {
+          "full_skin_floor_min": 0.0017587882966988862,
+          "max_segment_length_error": 1.4531602909872987e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.0010234277065975007,
+              "support_floor_min": 0.0022707055549851933,
+              "support_floor_max": 0.004084264792378226,
+              "declared_native_speed": 1.8739259708598475
+            },
+            "fore_right": {
+              "support_slide_rms": 0.004683618817786652,
+              "support_floor_min": 0.0022959095469029175,
+              "support_floor_max": 0.0032701770440431476,
+              "declared_native_speed": 1.8739259708598475
+            },
+            "hind_left": {
+              "support_slide_rms": 0.0008182249049701913,
+              "support_floor_min": 0.001989480370950059,
+              "support_floor_max": 0.003494010516761568,
+              "declared_native_speed": 1.8739259708598475
+            },
+            "hind_right": {
+              "support_slide_rms": 0.0018843922472435621,
+              "support_floor_min": 0.0017587882966988862,
+              "support_floor_max": 0.0035211849443700714,
+              "declared_native_speed": 1.8739259708598475
+            }
+          },
+          "loop_world_gap": 6.661338147750939e-16,
+          "terminal_head_height": 0.5782543500181461,
+          "terminal_body_height": 0.39673966813961403,
+          "terminal_muzzle_height": 0.6119553267192195,
+          "terminal_body_support_heights": {
+            "front": 0.38803374695366444,
+            "rear": 0.48580663914293254
+          },
+          "max_joint_speed": 8.57581454017858,
+          "worst_joint_speed": {
+            "node": 11,
+            "time": 0.5044565796852112
+          },
+          "max_adjacent_rotation_degrees": 1.160281624957342,
+          "quaternion_norm_error": 4.008457887838546e-08,
+          "minimum_adjacent_dot": 0.9999487153286298
+        },
+        "Death_A": {
+          "full_skin_floor_min": -0.0004675590645155402,
+          "max_segment_length_error": 3.0998387517966464e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.00044176447731688733,
+              "support_floor_min": 0.001424656500716715,
+              "support_floor_max": 0.0027594769377419937,
+              "declared_native_speed": 0
+            },
+            "fore_right": {
+              "support_slide_rms": 0.0005503519737924574,
+              "support_floor_min": 0.0011197871110749848,
+              "support_floor_max": 0.002679027803721883,
+              "declared_native_speed": 0
+            },
+            "hind_left": {
+              "support_slide_rms": 0.0009785161491073031,
+              "support_floor_min": -0.0004675590645155402,
+              "support_floor_max": 0.0034075931273641075,
+              "declared_native_speed": 0
+            },
+            "hind_right": {
+              "support_slide_rms": 0.0013299434046613115,
+              "support_floor_min": 0.0013557193483063638,
+              "support_floor_max": 0.0029784043939356814,
+              "declared_native_speed": 0
+            }
+          },
+          "loop_world_gap": null,
+          "terminal_head_height": 0.008614600407122764,
+          "terminal_body_height": 0.006736399269799839,
+          "terminal_muzzle_height": 0.008614600407122764,
+          "terminal_body_support_heights": {
+            "front": 0.006736399269799839,
+            "rear": 0.027927991071496114
+          },
+          "hold_world_error": 6.661338147750939e-16,
+          "max_joint_speed": 6.662436358378345,
+          "worst_joint_speed": {
+            "node": 18,
+            "time": 1.3385416269302368
+          },
+          "max_adjacent_rotation_degrees": 1.093340300592939,
+          "quaternion_norm_error": 5.078458698015709e-08,
+          "minimum_adjacent_dot": 0.9999545134759753
+        },
+        "Sword_Attack": {
+          "full_skin_floor_min": 0.0008826464844840587,
+          "max_segment_length_error": 1.8880659663489396e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.00015697897844494204,
+              "support_floor_min": 0.0027292619434527497,
+              "support_floor_max": 0.0029922048524930332,
+              "declared_native_speed": 0
+            },
+            "fore_right": {
+              "support_slide_rms": 0.00018716520292806103,
+              "support_floor_min": 0.0025241906355493297,
+              "support_floor_max": 0.0027936649984083815,
+              "declared_native_speed": 0
+            },
+            "hind_left": {
+              "support_slide_rms": 0.00016660502887611394,
+              "support_floor_min": 0.0008826464844840587,
+              "support_floor_max": 0.00232903077212912,
+              "declared_native_speed": 0
+            },
+            "hind_right": {
+              "support_slide_rms": 0.00012951417588877168,
+              "support_floor_min": 0.0024126244535749002,
+              "support_floor_max": 0.0032724666202140025,
+              "declared_native_speed": 0
+            }
+          },
+          "loop_world_gap": null,
+          "terminal_head_height": 0.6298501381072364,
+          "terminal_body_height": 0.44181598392548443,
+          "terminal_muzzle_height": 0.663653183941146,
+          "terminal_body_support_heights": {
+            "front": 0.520999978518882,
+            "rear": 0.5493027394502848
+          },
+          "hold_world_error": 0.0,
+          "max_joint_speed": 9.385374208341673,
+          "worst_joint_speed": {
+            "node": 8,
+            "time": 0.3691912293434143
+          },
+          "max_adjacent_rotation_degrees": 0.9128814383960823,
+          "quaternion_norm_error": 4.500056494105564e-08,
+          "minimum_adjacent_dot": 0.9999682284759295,
+          "authored_gesture_features": {
+            "fore_left": {
+              "forward_excursion": 0.8911986880085941,
+              "height_excursion": 2.3982346386815205,
+              "lateral_excursion": 0.34725313705336863
+            },
+            "fore_right": {
+              "forward_excursion": 0.7315067646730247,
+              "height_excursion": 2.491377708763265,
+              "lateral_excursion": 0.2986995475123325
+            }
+          }
+        }
+      },
+      "selected_attack_intent": {
+        "minimum_reach_fraction": {
+          "fore_left": 0.9998002429325871,
+          "fore_right": 0.9997999552264821
+        },
+        "minimum_elbow_angle_degrees": {
+          "fore_left": 177.70813140914618,
+          "fore_right": 177.7073418998626
+        },
+        "neutral_endpoint_world_error": 1.1102230246251565e-16,
+        "body_yaw_range_degrees": {
+          "previous": 14.215035227870803,
+          "updated": 4.264940623038094
+        },
+        "descending_wrist_lateral_range": {
+          "previous": {
+            "fore_left": 0.27458745456722655,
+            "fore_right": 0.301373809760538
+          },
+          "updated": {
+            "fore_left": 0.08311730938954598,
+            "fore_right": 0.09137831655519282
+          }
+        },
+        "top_98_percent_dwell_seconds": {
+          "previous": 0.0965,
+          "updated": 0.0735
+        },
+        "claw_roll": {
+          "fore_left": {
+            "top_elevation_degrees": 24.999995979736283,
+            "end_elevation_degrees": -19.786941587522193,
+            "previous_top_elevation_degrees": -39.73877066209904,
+            "maximum_small_backtrack_degrees": 0.5492824622604964
+          },
+          "fore_right": {
+            "top_elevation_degrees": 24.999999860252654,
+            "end_elevation_degrees": -24.39574910971128,
+            "previous_top_elevation_degrees": -41.38192642900673,
+            "maximum_small_backtrack_degrees": 0.32785599667463927
+          }
+        },
+        "request_definition": {
+          "label": "High descending combo - flowing claws",
+          "duration": 1.9,
+          "release": 0.14,
+          "opening": 0.16,
+          "apex": 0.6,
+          "hits": [
+            0.84,
+            1.12
+          ],
+          "lands": [
+            1.48,
+            1.59
+          ],
+          "recover": 1.78,
+          "lead": "fore_left",
+          "full_extension": 0.9998,
+          "straight_until": [
+            1.18,
+            1.26
+          ],
+          "lateral_factor": 0.3,
+          "body_yaw_factor": 0.3,
+          "claw_top_elevation_degrees": 25.0,
+          "description": "Quicker departure from the top, quieter sideways motion, and raised claws rolling down through the straight-arm strikes."
+        }
+      }
+    },
+    "crystal_polar_bear": {
+      "reviewed_runtime_source_sha256": "7897ead66c6f669e5ceaf6d41a979dabd8b8102be4d40d024bd9d5730711005f",
+      "clips": {
+        "Walk": {
+          "full_skin_floor_min": 0.002785775389925642,
+          "max_segment_length_error": 1.5386878382539493e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.0003059272852937815,
+              "support_floor_min": 0.0029998291767904424,
+              "support_floor_max": 0.0030003081780503225,
+              "declared_native_speed": 0.750363668976505
+            },
+            "fore_right": {
+              "support_slide_rms": 0.0002637446474636208,
+              "support_floor_min": 0.002999825783709931,
+              "support_floor_max": 0.003000201526633196,
+              "declared_native_speed": 0.750363668976505
+            },
+            "hind_left": {
+              "support_slide_rms": 0.0001979410562063878,
+              "support_floor_min": 0.0030051332355036965,
+              "support_floor_max": 0.0031256901398175507,
+              "declared_native_speed": 0.750363668976505
+            },
+            "hind_right": {
+              "support_slide_rms": 0.00019728396987656768,
+              "support_floor_min": 0.0028062284312628857,
+              "support_floor_max": 0.0030457321906370845,
+              "declared_native_speed": 0.750363668976505
+            }
+          },
+          "loop_world_gap": 6.661338147750939e-16,
+          "terminal_head_height": 0.3714636409518687,
+          "terminal_body_height": 0.36540212700281577,
+          "terminal_muzzle_height": 0.5344747839456363,
+          "terminal_body_support_heights": {
+            "front": 0.45605196932783565,
+            "rear": 0.45033355463961944
+          },
+          "max_joint_speed": 4.988872554072954,
+          "worst_joint_speed": {
+            "node": 30,
+            "time": 0.015655340626835823
+          },
+          "max_adjacent_rotation_degrees": 0.6668227545340968,
+          "quaternion_norm_error": 4.221941662940765e-08,
+          "minimum_adjacent_dot": 0.9999830280730508
+        },
+        "Jog": {
+          "full_skin_floor_min": 0.0022896926730803795,
+          "max_segment_length_error": 1.8644471450057765e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.0011260304843399276,
+              "support_floor_min": 0.002999584526141434,
+              "support_floor_max": 0.00300021434361839,
+              "declared_native_speed": 1.6717219226287685
+            },
+            "fore_right": {
+              "support_slide_rms": 0.002427718933849836,
+              "support_floor_min": 0.0029995551374803592,
+              "support_floor_max": 0.0030001912114774334,
+              "declared_native_speed": 1.6717219226287685
+            },
+            "hind_left": {
+              "support_slide_rms": 0.0009041962663626872,
+              "support_floor_min": 0.0030037737136227823,
+              "support_floor_max": 0.003066095378033092,
+              "declared_native_speed": 1.6717219226287685
+            },
+            "hind_right": {
+              "support_slide_rms": 0.0009175662532567004,
+              "support_floor_min": 0.0023022365505281357,
+              "support_floor_max": 0.0030252231909898004,
+              "declared_native_speed": 1.6717219226287685
+            }
+          },
+          "loop_world_gap": 5.551115123125783e-16,
+          "terminal_head_height": 0.3399520949843202,
+          "terminal_body_height": 0.3379322830776351,
+          "terminal_muzzle_height": 0.5028650629970143,
+          "terminal_body_support_heights": {
+            "front": 0.4262851431470933,
+            "rear": 0.40401479231343523
+          },
+          "max_joint_speed": 5.684899055256116,
+          "worst_joint_speed": {
+            "node": 19,
+            "time": 0.36000001430511475
+          },
+          "max_adjacent_rotation_degrees": 0.4901457576871579,
+          "quaternion_norm_error": 4.131369246707095e-08,
+          "minimum_adjacent_dot": 0.9999908421846141
+        },
+        "Death_A": {
+          "full_skin_floor_min": -0.0002575344428852877,
+          "max_segment_length_error": 4.343459580891107e-08,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.0004922956494068566,
+              "support_floor_min": 0.0029983016841616437,
+              "support_floor_max": 0.002998843738365484,
+              "declared_native_speed": 0
+            },
+            "fore_right": {
+              "support_slide_rms": 0.0004896728866363789,
+              "support_floor_min": 0.002989914768498691,
+              "support_floor_max": 0.002990474482113686,
+              "declared_native_speed": 0
+            },
+            "hind_left": {
+              "support_slide_rms": 0.00017974126987838413,
+              "support_floor_min": 0.0026872105431454086,
+              "support_floor_max": 0.004386283886147342,
+              "declared_native_speed": 0
+            },
+            "hind_right": {
+              "support_slide_rms": 0.00025791515215498745,
+              "support_floor_min": 0.0035062996054412913,
+              "support_floor_max": 0.004066373428188432,
+              "declared_native_speed": 0
+            }
+          },
+          "loop_world_gap": null,
+          "terminal_head_height": 0.008001432904940528,
+          "terminal_body_height": 0.11473744143268051,
+          "terminal_muzzle_height": 0.008001432904940528,
+          "terminal_body_support_heights": {
+            "front": 0.007999120785905813,
+            "rear": 0.007996880825415179
+          },
+          "hold_world_error": 6.106226635438361e-16,
+          "max_joint_speed": 6.2228242905646125,
+          "worst_joint_speed": {
+            "node": 5,
+            "time": 1.2760416269302368
+          },
+          "max_adjacent_rotation_degrees": 1.1115204921198307,
+          "quaternion_norm_error": 4.3048869802220224e-08,
+          "minimum_adjacent_dot": 0.9999529460243949
+        },
+        "Sword_Attack": {
+          "full_skin_floor_min": 0.0025030703900470698,
+          "max_segment_length_error": 5.1183095595153105e-08,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.00011415630578465138,
+              "support_floor_min": 0.002999923266952949,
+              "support_floor_max": 0.0030002112269554067,
+              "declared_native_speed": 0
+            },
+            "fore_right": {
+              "support_slide_rms": 9.028374019998785e-05,
+              "support_floor_min": 0.002999922171274666,
+              "support_floor_max": 0.0030002696337334523,
+              "declared_native_speed": 0
+            },
+            "hind_left": {
+              "support_slide_rms": 0.0001662675576619346,
+              "support_floor_min": 0.0025030703900470698,
+              "support_floor_max": 0.0032386403547857833,
+              "declared_native_speed": 0
+            },
+            "hind_right": {
+              "support_slide_rms": 0.0001741408725692263,
+              "support_floor_min": 0.002691440192692948,
+              "support_floor_max": 0.0030803309302228424,
+              "declared_native_speed": 0
+            }
+          },
+          "loop_world_gap": null,
+          "terminal_head_height": 0.3879669952822488,
+          "terminal_body_height": 0.37671091275688723,
+          "terminal_muzzle_height": 0.5511501376428168,
+          "terminal_body_support_heights": {
+            "front": 0.4704162251832769,
+            "rear": 0.4653592266575642
+          },
+          "hold_world_error": 0.0,
+          "max_joint_speed": 8.638682568205445,
+          "worst_joint_speed": {
+            "node": 14,
+            "time": 0.36137765645980835
+          },
+          "max_adjacent_rotation_degrees": 0.9972675374719654,
+          "quaternion_norm_error": 4.156449395775752e-08,
+          "minimum_adjacent_dot": 0.9999620992562326,
+          "authored_gesture_features": {
+            "fore_left": {
+              "forward_excursion": 0.9154553120504008,
+              "height_excursion": 2.127564621514323,
+              "lateral_excursion": 0.3497868944961446
+            },
+            "fore_right": {
+              "forward_excursion": 0.87836562060455,
+              "height_excursion": 2.1526513009000396,
+              "lateral_excursion": 0.34813254362093826
+            }
+          }
+        }
+      },
+      "selected_attack_intent": {
+        "minimum_reach_fraction": {
+          "fore_left": 0.9997999716640288,
+          "fore_right": 0.9997999417476949
+        },
+        "minimum_elbow_angle_degrees": {
+          "fore_left": 177.70777167392362,
+          "fore_right": 177.70776812399745
+        },
+        "neutral_endpoint_world_error": 2.517124114698177e-08,
+        "body_yaw_range_degrees": {
+          "previous": 14.215037055330491,
+          "updated": 4.2649417866174195
+        },
+        "descending_wrist_lateral_range": {
+          "previous": {
+            "fore_left": 0.25262662883745945,
+            "fore_right": 0.2701706070422652
+          },
+          "updated": {
+            "fore_left": 0.07646965215907053,
+            "fore_right": 0.08191731757125065
+          }
+        },
+        "top_98_percent_dwell_seconds": {
+          "previous": 0.095,
+          "updated": 0.073
+        },
+        "claw_roll": {
+          "fore_left": {
+            "top_elevation_degrees": 25.00000398855343,
+            "end_elevation_degrees": -21.787758845233604,
+            "previous_top_elevation_degrees": -41.773642383658355,
+            "maximum_small_backtrack_degrees": 0.5494529982001097
+          },
+          "fore_right": {
+            "top_elevation_degrees": 24.999998474364705,
+            "end_elevation_degrees": -25.36171144968511,
+            "previous_top_elevation_degrees": -42.07736009063074,
+            "maximum_small_backtrack_degrees": 0.3293905565887414
+          }
+        },
+        "request_definition": {
+          "label": "High descending combo - flowing claws",
+          "duration": 1.9,
+          "release": 0.14,
+          "opening": 0.16,
+          "apex": 0.6,
+          "hits": [
+            0.84,
+            1.12
+          ],
+          "lands": [
+            1.48,
+            1.59
+          ],
+          "recover": 1.78,
+          "lead": "fore_left",
+          "full_extension": 0.9998,
+          "straight_until": [
+            1.18,
+            1.26
+          ],
+          "lateral_factor": 0.3,
+          "body_yaw_factor": 0.3,
+          "claw_top_elevation_degrees": 25.0,
+          "description": "Quicker departure from the top, quieter sideways motion, and raised claws rolling down through the straight-arm strikes."
+        }
+      }
+    },
+    "owlbear": {
+      "reviewed_runtime_source_sha256": "ce2023e5e2e2fb2c484b5eb51e4a06a7e797111cb37075fba96059dda672c3dc",
+      "clips": {
+        "Walk": {
+          "full_skin_floor_min": 0.0006329745383643322,
+          "max_segment_length_error": 2.8904075544122776e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.0017896448668253103,
+              "support_floor_min": 0.0006329745383643322,
+              "support_floor_max": 0.0029933228748633064,
+              "declared_native_speed": 0.7503907390811497
+            },
+            "fore_right": {
+              "support_slide_rms": 0.0007748087874829934,
+              "support_floor_min": 0.0026734334094064803,
+              "support_floor_max": 0.0029991304544077085,
+              "declared_native_speed": 0.7503907390811497
+            },
+            "hind_left": {
+              "support_slide_rms": 0.000205030003506883,
+              "support_floor_min": 0.002999740829632867,
+              "support_floor_max": 0.0029999379695006736,
+              "declared_native_speed": 0.7503907390811497
+            },
+            "hind_right": {
+              "support_slide_rms": 0.0002025369793774584,
+              "support_floor_min": 0.003000276213016945,
+              "support_floor_max": 0.003000671716778499,
+              "declared_native_speed": 0.7503907390811497
+            }
+          },
+          "loop_world_gap": 4.440892098500626e-16,
+          "terminal_head_height": 0.6732434229157753,
+          "terminal_body_height": 0.3713846793201122,
+          "terminal_muzzle_height": 0.8472065685730658,
+          "terminal_body_support_heights": {
+            "front": 0.4512553227966069,
+            "rear": 0.4295369505600885
+          },
+          "max_joint_speed": 5.667959825460274,
+          "worst_joint_speed": {
+            "node": 14,
+            "time": 0.25603005290031433
+          },
+          "max_adjacent_rotation_degrees": 0.9537204943355937,
+          "quaternion_norm_error": 4.1248911508695585e-08,
+          "minimum_adjacent_dot": 0.9999653574740296
+        },
+        "Jog": {
+          "full_skin_floor_min": 0.0002591372636557391,
+          "max_segment_length_error": 4.341640722493878e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.0034642096272798515,
+              "support_floor_min": 0.0002591372636557391,
+              "support_floor_max": 0.0029947608139676563,
+              "declared_native_speed": 1.6717822316352589
+            },
+            "fore_right": {
+              "support_slide_rms": 0.0020734604640899124,
+              "support_floor_min": 0.002538035303881286,
+              "support_floor_max": 0.002999262459714016,
+              "declared_native_speed": 1.6717822316352589
+            },
+            "hind_left": {
+              "support_slide_rms": 0.0008852182943755943,
+              "support_floor_min": 0.002999458010098303,
+              "support_floor_max": 0.002999917458524946,
+              "declared_native_speed": 1.6717822316352589
+            },
+            "hind_right": {
+              "support_slide_rms": 0.0008775958521546587,
+              "support_floor_min": 0.0030001274621203116,
+              "support_floor_max": 0.003000891589394041,
+              "declared_native_speed": 1.6717822316352589
+            }
+          },
+          "loop_world_gap": 8.881784197001252e-16,
+          "terminal_head_height": 0.6501054268863369,
+          "terminal_body_height": 0.34745879516883865,
+          "terminal_muzzle_height": 0.8160982390075475,
+          "terminal_body_support_heights": {
+            "front": 0.43863124190666725,
+            "rear": 0.3707249949287773
+          },
+          "max_joint_speed": 7.725796646130035,
+          "worst_joint_speed": {
+            "node": 14,
+            "time": 0.05739130824804306
+          },
+          "max_adjacent_rotation_degrees": 1.0900427970183901,
+          "quaternion_norm_error": 4.139033238370615e-08,
+          "minimum_adjacent_dot": 0.9999547545493602
+        },
+        "Death_A": {
+          "full_skin_floor_min": 0.000846011321072981,
+          "max_segment_length_error": 4.950050809804374e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 0.0016523774531411876,
+              "support_floor_min": 0.003001345300289948,
+              "support_floor_max": 0.0030057717430069797,
+              "declared_native_speed": 0
+            },
+            "fore_right": {
+              "support_slide_rms": 0.0017619027302680646,
+              "support_floor_min": 0.0029941893917117546,
+              "support_floor_max": 0.0029975437127311433,
+              "declared_native_speed": 0
+            },
+            "hind_left": {
+              "support_slide_rms": 0.0014493002187725866,
+              "support_floor_min": 0.0029976987991571146,
+              "support_floor_max": 0.003034329491757427,
+              "declared_native_speed": 0
+            },
+            "hind_right": {
+              "support_slide_rms": 0.001654259816565759,
+              "support_floor_min": 0.0029945959866088893,
+              "support_floor_max": 0.003003186924867904,
+              "declared_native_speed": 0
+            }
+          },
+          "loop_world_gap": null,
+          "terminal_head_height": 0.02000001471445801,
+          "terminal_body_height": 0.0019999843950713626,
+          "terminal_muzzle_height": 0.02000001471445801,
+          "terminal_body_support_heights": {
+            "front": 0.0034276204362653807,
+            "rear": 0.0019999843950713626
+          },
+          "hold_world_error": 3.3306690738754696e-16,
+          "max_joint_speed": 3.5892390203265756,
+          "worst_joint_speed": {
+            "node": 10,
+            "time": 1.3333333730697632
+          },
+          "max_adjacent_rotation_degrees": 4.405731784699654,
+          "quaternion_norm_error": 4.07741861385702e-08,
+          "minimum_adjacent_dot": 0.9992610188482168
+        },
+        "Sword_Attack": {
+          "full_skin_floor_min": 0.0024397652443668705,
+          "max_segment_length_error": 1.5880982623395212e-07,
+          "legs": {
+            "fore_left": {
+              "support_slide_rms": 9.142346117989543e-05,
+              "support_floor_min": 0.002442259807659636,
+              "support_floor_max": 0.003002746343981136,
+              "declared_native_speed": 0
+            },
+            "fore_right": {
+              "support_slide_rms": 0.00010279933399909108,
+              "support_floor_min": 0.0029209667170602555,
+              "support_floor_max": 0.002997544360352669,
+              "declared_native_speed": 0
+            },
+            "hind_left": {
+              "support_slide_rms": 0.00011849915642375487,
+              "support_floor_min": 0.0030342694897449018,
+              "support_floor_max": 0.003034427254263731,
+              "declared_native_speed": 0
+            },
+            "hind_right": {
+              "support_slide_rms": 0.00010994581399421346,
+              "support_floor_min": 0.0030002651555091076,
+              "support_floor_max": 0.0030005055878340164,
+              "declared_native_speed": 0
+            }
+          },
+          "loop_world_gap": null,
+          "terminal_head_height": 0.7059330560641864,
+          "terminal_body_height": 0.3508862608747539,
+          "terminal_muzzle_height": 0.8630008265787096,
+          "terminal_body_support_heights": {
+            "front": 0.4502228192463066,
+            "rear": 0.43531190235749023
+          },
+          "hold_world_error": 0.0,
+          "max_joint_speed": 8.77312307394938,
+          "worst_joint_speed": {
+            "node": 18,
+            "time": 0.37049348652362823
+          },
+          "max_adjacent_rotation_degrees": 0.7908752472571008,
+          "quaternion_norm_error": 4.4185022307630106e-08,
+          "minimum_adjacent_dot": 0.9999761723924949,
+          "authored_gesture_features": {
+            "fore_left": {
+              "forward_excursion": 0.7734210942999282,
+              "height_excursion": 2.2627984560897354,
+              "lateral_excursion": 0.16695581871679546
+            },
+            "fore_right": {
+              "forward_excursion": 0.7355152367572646,
+              "height_excursion": 2.269687947646403,
+              "lateral_excursion": 0.17113753037058366
+            }
+          }
+        }
+      },
+      "selected_attack_intent": {
+        "minimum_reach_fraction": {
+          "fore_left": 0.9997998583148787,
+          "fore_right": 0.9997997572163084
+        },
+        "minimum_elbow_angle_degrees": {
+          "fore_left": 177.7023062608582,
+          "fore_right": 177.69969944601056
+        },
+        "neutral_endpoint_world_error": 2.220446049250313e-16,
+        "body_yaw_range_degrees": {
+          "previous": 14.215036779904155,
+          "updated": 4.264941744345277
+        },
+        "descending_wrist_lateral_range": {
+          "previous": {
+            "fore_left": 0.26349795175446106,
+            "fore_right": 0.2827013160151809
+          },
+          "updated": {
+            "fore_left": 0.07976046482271881,
+            "fore_right": 0.08571690255879433
+          }
+        },
+        "top_98_percent_dwell_seconds": {
+          "previous": 0.095,
+          "updated": 0.073
+        },
+        "claw_roll": {
+          "fore_left": {
+            "top_elevation_degrees": 24.999997915218366,
+            "end_elevation_degrees": -31.954021683184717,
+            "previous_top_elevation_degrees": -52.841736139299364,
+            "maximum_small_backtrack_degrees": 0.5499884152692687
+          },
+          "fore_right": {
+            "top_elevation_degrees": 24.999994992964023,
+            "end_elevation_degrees": -39.17457007831068,
+            "previous_top_elevation_degrees": -56.93760340440128,
+            "maximum_small_backtrack_degrees": 0.30971142895531756
+          }
+        },
+        "request_definition": {
+          "label": "High descending combo - flowing claws",
+          "duration": 1.9,
+          "release": 0.14,
+          "opening": 0.16,
+          "apex": 0.6,
+          "hits": [
+            0.84,
+            1.12
+          ],
+          "lands": [
+            1.48,
+            1.59
+          ],
+          "recover": 1.78,
+          "lead": "fore_left",
+          "full_extension": 0.9998,
+          "straight_until": [
+            1.18,
+            1.26
+          ],
+          "lateral_factor": 0.3,
+          "body_yaw_factor": 0.3,
+          "claw_top_elevation_degrees": 25.0,
+          "description": "Quicker departure from the top, quieter sideways motion, and raised claws rolling down through the straight-arm strikes."
+        }
+      }
+    }
+  }
+}

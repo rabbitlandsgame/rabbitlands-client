@@ -464,6 +464,7 @@ def build(slug: str, *, tacked: bool = False, scale: float = 1.0) -> dict:
 
 
 def main() -> int:
+    raise RuntimeError('creatures.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
     records = [build("sunmane_steppe_horse", tacked=False, scale=1.25),
                build("sunmane_dun_mare", tacked=False, scale=1.2),
                build("sunmane_grey_pony", tacked=True, scale=1.1)]

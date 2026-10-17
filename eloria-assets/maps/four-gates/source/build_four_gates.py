@@ -6,6 +6,8 @@ import argparse,copy,json,math,struct,sys,time
 import numpy as np
 HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
+sys.path.insert(0,str(HERE.parents[2]/'tools'))
+import publish_finish as PF
 import native_adapter as A
 from native_adapter import M,S,K,L,PALETTE as P,TOOLKIT
 from amberwood import terrain as TER, materials as MAT
@@ -448,6 +450,10 @@ def main():
     (a.out/'collision.bin').write_bytes(payload)
     render_minimap(b,a.out/'minimap.webp')
     (a.out/'world.json').write_text(json.dumps(manifest(b,stats,collision),indent=2)+'\n',encoding='utf-8')
+    # The space passes, after the manifest exists for them to record the pool
+    # references in: baked as it stands, the package holds a copy of every
+    # repeated prop and keeps its normals at 32 bits.
+    PF.finish([a.out/'world.glb'])
     print('Final package written',time.time()-started,flush=True)
 
 if __name__=='__main__':main()

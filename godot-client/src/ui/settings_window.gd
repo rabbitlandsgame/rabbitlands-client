@@ -13,6 +13,7 @@ extends Control
 ## The script declares no `class_name`: a global class is parsed before the
 ## autoload singletons are registered, and this reads `AppState` directly.
 
+const AudioMix := preload("res://src/audio/audio_mix.gd")
 const PANEL_SIZE := Vector2(960.0, 520.0)
 ## Nothing may cover the fixed resource rail down the right-hand edge.
 const RESERVED_RIGHT_RAIL := 96.0
@@ -45,7 +46,7 @@ const BINDABLE := {
 		"toggle_mail", "toggle_party", "toggle_guild", "toggle_achievements"],
 	"Actions": ["attack_selected", "combat_target", "summon_behavior",
 		"toggle_sit", "toggle_show_through_obstacles", "screenshot", "cancel",
-		"connect", "disconnect"],
+		"connect", "disconnect", "open_last_url"],
 	"Items": ["quick_item_1", "quick_item_2", "quick_item_3", "quick_item_4",
 		"quick_item_5", "quick_item_6", "quick_item_7", "quick_item_8"],
 	"Spells": ["quick_spell_1", "quick_spell_2", "quick_spell_3",
@@ -204,7 +205,15 @@ func restore_bindings(stored: Dictionary) -> int:
 		if event == null:
 			continue
 		InputMap.action_erase_events(name)
-		InputMap.action_add_event(name, event)
+		# Settings store the first shortcut. Restore every shipped shortcut
+		# when that value is the default, so saving cannot discard its aliases.
+		var defaults: Dictionary = ProjectSettings.get_setting("input/" + name, {})
+		var default_events: Array = defaults.get("events", [])
+		if not default_events.is_empty() and str(stored[action]) == _describe(default_events[0]):
+			for default_event: InputEvent in default_events:
+				InputMap.action_add_event(name, default_event)
+		else:
+			InputMap.action_add_event(name, event)
 		restored += 1
 	_refresh_bindings()
 	return restored
@@ -240,13 +249,19 @@ func _parse(described: String) -> InputEventKey:
 				event.physical_keycode = OS.find_keycode_from_string(part)
 	return event if event.physical_keycode != 0 else null
 
+func binding_text(action: String) -> String:
+	var descriptions: Array[String] = []
+	if InputMap.has_action(action):
+		for event: InputEvent in InputMap.action_get_events(action):
+			var described := _describe(event)
+			if not described.is_empty():
+				descriptions.append(described)
+	return " / ".join(descriptions) if not descriptions.is_empty() else tr("ELORIA_SETTINGS_UNBOUND")
+
 func _refresh_bindings() -> void:
 	for action: Variant in binding_rows:
 		var button: Button = binding_rows[action] as Button
-		var events: Array[InputEvent] = (InputMap.action_get_events(str(action))
-			if InputMap.has_action(str(action)) else [])
-		button.text = (_describe(events[0]) if not events.is_empty()
-			else tr("ELORIA_SETTINGS_UNBOUND"))
+		button.text = binding_text(str(action))
 
 func _build() -> void:
 	panel = PanelContainer.new()
@@ -281,6 +296,7 @@ func _build() -> void:
 	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(tabs)
 	_build_hud()
+	_build_chat()
 	_new_page("Minimap", "Minimap")
 	_new_page("Banners", "Banners")
 	_build_graphics()
@@ -357,6 +373,26 @@ func _build_hud() -> void:
 			row.reparent(switches, false)
 	page.resized.connect(func() -> void:
 		switches.columns = 2 if page.size.x >= 700.0 else 1)
+
+func _build_chat() -> void:
+	var page := _new_page("Chat", "Chat")
+	_add_toggle(page, "chat_combined", "Combine system messages and conversations", false)
+	for prefix: String in ["chat_", "system_chat_"]:
+		var caption := Label.new()
+		caption.text = "Conversation window" if prefix == "chat_" else "System window"
+		caption.add_theme_font_size_override("font_size", 18)
+		page.add_child(caption)
+		_add_toggle(page, prefix + "visible", "Show this window", true)
+		_add_toggle(page, prefix + "locked", "Lock position and size", false)
+		_add_number(page, prefix + "font_size", "Text size", 10, 28, 16 if prefix == "chat_" else 14)
+		_add_number(page, prefix + "background_opacity", "Soft-fade opacity (0 = transparent)", 0, 0.8, 0.30 if prefix == "chat_" else 0.25, 0.05)
+		_add_number(page, prefix + "line_spacing", "Line spacing", 0, 12, 2)
+		_add_number(page, prefix + "idle_fade", "Dim after idle seconds (0 = never)", 0, 120, 0)
+		_add_button(page, prefix + "reset_layout", "Reset position and size")
+	var hint := Label.new()
+	hint.text = "Drag either header to move it; drag its corner to resize. Each layout is saved.\nThe system window returns to its saved position when you separate the feeds."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(hint)
 
 func _build_graphics() -> void:
 	var page := _new_page("Graphics", tr("ELORIA_SETTINGS_GRAPHICS"))
@@ -538,8 +574,6 @@ func _refresh_map_cache() -> void:
 func _build_camera() -> void:
 	var page := _new_page("Camera", tr("ELORIA_SETTINGS_CAMERA"))
 	_add_slider(page, "rotation_sensitivity", tr("ELORIA_SETTINGS_ROTATION"), 0.05, 1.0, 0.25)
-	_add_slider(page, "pan_sensitivity", tr("ELORIA_SETTINGS_PAN"), 0.004, 0.05, 0.012)
-	_add_toggle(page, "follow_player", tr("ELORIA_SETTINGS_FOLLOW"), true)
 
 func _build_gameplay() -> void:
 	var page := _new_page("Gameplay", tr("ELORIA_SETTINGS_GAMEPLAY"))
@@ -550,7 +584,6 @@ func _build_gameplay() -> void:
 	_add_button(page, "target_mode_strong", tr("ELORIA_SETTINGS_TARGET_STRONG"))
 	_add_button(page, "target_mode_weak", tr("ELORIA_SETTINGS_TARGET_WEAK"))
 	_add_button(page, "autogather", tr("ELORIA_SETTINGS_AUTOGATHER"))
-	_add_toggle(page, "secure", "Secure connection (next login)", false)
 
 func _build_controls() -> void:
 	var list := _new_page("Controls", tr("ELORIA_SETTINGS_CONTROLS"))
@@ -578,7 +611,7 @@ func _build_controls() -> void:
 ## panel opens showing what the client actually has rather than the default it
 ## was built with.
 func restore_toggle(key: String, value: bool) -> bool:
-	var toggle: CheckBox = find_child(key, true, false) as CheckBox
+	var toggle: CheckBox = panel.find_child(key, true, false) as CheckBox
 	if toggle == null:
 		return false
 	toggle.set_pressed_no_signal(value)
@@ -610,7 +643,7 @@ func _add_slider(page: VBoxContainer, key: String, label: String,
 	slider.name = key
 	slider.min_value = minimum
 	slider.max_value = maximum
-	slider.step = 0.001 if key == "pan_sensitivity" else 0.01
+	slider.step = 0.01
 	slider.value = value
 	slider.custom_minimum_size = Vector2(220.0, 0.0)
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -664,10 +697,54 @@ func add_choice(section: String, key: String, label: String,
 		setting_changed.emit(section, key, option.get_item_metadata(index)))
 	row.add_child(option)
 
+func add_audio_controls() -> void:
+	var page := page_body("Audio")
+	var now_playing := Label.new()
+	now_playing.name = "NowPlaying"
+	now_playing.text = "Music: —"
+	now_playing.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(now_playing)
+	var director := get_tree().root.find_child("AudioDirector", true, false)
+	if director != null:
+		director.music_changed.connect(func(title: String, creator: String) -> void:
+			now_playing.text = "Music: —" if title.is_empty() else "Playing: " + title
+			now_playing.tooltip_text = creator)
+	for category: String in AudioMix.CATEGORIES:
+		var info: Dictionary = AudioMix.CATEGORIES[category]
+		var key := "audio_" + category
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		page.add_child(row)
+		var caption := Label.new()
+		caption.text = str(info.label)
+		caption.custom_minimum_size.x = 200.0
+		row.add_child(caption)
+		var slider := HSlider.new()
+		slider.name = key
+		slider.max_value = 1.0
+		slider.step = 0.01
+		slider.value = float(info.volume)
+		slider.custom_minimum_size.x = 200.0
+		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		slider.tooltip_text = "Adjust %s independently. 0%% mutes this category." % str(info.label).to_lower()
+		row.add_child(slider)
+		var reading := Label.new()
+		reading.name = key + "_value"
+		reading.custom_minimum_size.x = 52.0
+		reading.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		reading.text = "%d%%" % roundi(slider.value * 100.0)
+		row.add_child(reading)
+		slider.value_changed.connect(func(value: float) -> void:
+			reading.text = "%d%%" % roundi(value * 100.0)
+			setting_changed.emit("Audio", key, value))
+	# Credits stay at the end, below the controls they describe.
+	page.move_child(page.get_node("AudioCreditsButton"), page.get_child_count() - 1)
+
 ## Refreshing controls never saves or emits a change. This also covers values
 ## changed by a HUD shortcut while the settings window was closed.
 func restore_value(key: String, value: Variant) -> void:
-	var control := find_child(key, true, false)
+	var control := panel.find_child(key, true, false)
 	if control is OptionButton:
 		var option := control as OptionButton
 		for index: int in option.item_count:
@@ -678,9 +755,9 @@ func restore_value(key: String, value: Variant) -> void:
 		(control as BaseButton).set_pressed_no_signal(bool(value))
 	elif control is Range:
 		(control as Range).set_value_no_signal(float(value))
-		var reading := find_child(key + "_value", true, false) as Label
+		var reading := panel.find_child(key + "_value", true, false) as Label
 		if reading != null:
-			reading.text = "%.3f" % float(value)
+			reading.text = "%d%%" % roundi(float(value) * 100.0) if key.begins_with("audio_") else "%.3f" % float(value)
 
 func _add_button(page: VBoxContainer, key: String, label: String) -> void:
 	var button := Button.new()

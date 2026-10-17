@@ -28,6 +28,7 @@ gameplay metadata and full `world.glb` review export. It adds:
         "estimatedResidentBytes": 4194304,
         "geometryResidentBytes": 617280,
         "sharedResourceResidentBytes": {"<SHA256>": 1398102},
+        "sharedMeshResidentBytes": {"<prototype SHA256>": 472200},
         "packageDigest": "<64 lowercase SHA256 characters>"
       }
     ]
@@ -115,6 +116,29 @@ to count until their last resource is released. Accounting is per territory;
 the GPU pool also shares textures between adjacent territories, so their combined
 estimate remains conservative.
 
+Pooled props count the same way. The space passes move a prop repeated across
+files into `maps/_shared/meshes` and leave the chunk a placement naming it
+(`externalMeshes`); `ExternalMeshPool` draws one mesh for every resident user.
+The prop has left the chunk's `glbBytes` but not the GPU, so
+`publish_finish.py`'s restamp states each cell's prototypes in
+`sharedMeshResidentBytes`: the prototype's identity (its file stem) to the
+pool index's `bytes` times the cell's own geometry factor. Selection counts
+each identity once across the prospective resident set, and the walk that
+marks `blocking` floors it at 5 x like the cell's geometry.
+`estimatedResidentBytes` includes them. Prototype images are already among
+the cell's `sharedResourceResidentBytes`.
+
+Every exporter publishes geometry at 1.0 x its GLB bytes: continent-v2 since
+2026-10-03, and the twelve legacy territories (`publish_finish.py`
+`LEGACY_RESIDENT_FACTOR`) since 2026-10-16. The legacy ones wrote 5 x before.
+Measured with the village-mem method (`mesh_get_surface` bytes; a windowed
+`RENDER_BUFFER_MEM_USED` delta agreed within 2%), a legacy cell's pooled
+prototypes hold 0.83-0.96 x their GLB and none more than 1.0 x, and its own
+meshes 0.17-0.47 x. At 5 x Amberwood and Four Gates kept 6.4 and 6.9 cells
+per focus resident of about 16 in reach; at 1 x they keep 15.8 and 14.8,
+whose real cost stays under the 256 MiB budget (Four Gates peaks at 248 MiB).
+The blocking set is the same at either factor.
+
 Chunk retirement frees a bounded number of nodes per frame. Territory retirement
 pauses new work and waits by polling any existing worker before releasing its
 descendants. Continuous territory adoption transfers the same root and cell
@@ -137,6 +161,37 @@ the hit chunk. `cell_retiring` releases its animation bookkeeping and unused
 model cache, and normal chunk retirement frees the instance. Territory adoption
 retains the same wildlife controller and instances. Legacy unchunked maps keep
 their existing population behavior.
+
+### Threading and handoff rules
+
+A worker never holds a lock across a RenderingServer call. Texture creation is
+a round trip that only the main thread serves, so a main thread waiting for
+that lock would deadlock the client. `src/world/external_texture_pool.gd`
+decodes and uploads outside its `Mutex` and only publishes under it; the first
+publisher of a hash wins and later ones adopt its texture
+(`tests/test_external_texture_pool.gd`).
+
+The main thread never joins a live import worker. `_release_worker` orphans it,
+and `reap_orphans()` frees it once it reports finished
+(`src/world/continent_chunk_stream.gd`, `tests/test_continent_chunk_orphans.gd`).
+The known exception is `src/actors/native_animation_importer.gd`, whose
+`_source_scene` joins its prewarm thread; that is safe only while the animation
+library names no image by URI that a package imports.
+
+A script that quits after loading maps through main must stop the neighbour
+region stream first: `exterior_stream.clear()`, await `is_idle()`, then
+`ContinentChunkStream.drain_workers(tree)`, as
+`tests/integration/rendered_action_cursors.gd` does. `drain_workers` alone does
+not wait for the `ExteriorRegionStream` worker.
+
+Nothing that loads, decodes, uploads or compiles belongs inside a seamless
+handoff. Diagnose a handoff stall with `exterior_stream.last_handoff`, whose
+`binding_ms` and `binding_steps` `src/app/main.gd` records while it binds the
+adopted map, and by counting `arrival_reprime` and
+`world_load stage=manifest_open` lines in the client log against a passing run.
+Actors and map objects in cells that attach later are grounded again on
+`cell_ready` (`main.gd` `_on_chunk_surface_ready`;
+`tests/test_map_object_regrounding.gd`).
 
 ## Validation
 
@@ -162,6 +217,12 @@ selected child GLBs are imported. It also covers actual arrival priming,
 asynchronous replacement, node release, byte/count limits, external integrity,
 actual shared image identity, neighbor picking, continuous adoption and later
 preview collision ownership.
+
+`tests/test_continent_chunk_shared_meshes.gd` covers the prototype figures:
+once per identity across selection, residency and retirement, the 5 x blocking
+floor for a cell published at 1 x, and the manifest check. `test_publish_finish.py`
+and `_continent_v2/tests/test_publish_client_geometry.py` check the restamp and
+every committed territory's cells against the pool index.
 
 `tests/test_chunk_ambient_population.gd` uses actual translated physics terrain,
 a saved model scene, cold cells, preview collision and bounded retirement to

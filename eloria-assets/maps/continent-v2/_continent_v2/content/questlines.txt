@@ -14,8 +14,8 @@ key: isle_unsigned_line
 id: 26
 tier: 1
 title: The Unsigned Line
-region: <NPCMAP:Register Clerk Hemmen>
-start: Register Clerk Hemmen
+region: <NPCMAP:Hemmen>
+start: Hemmen
 summary: The line above yours has waited nine days for its first countersign.
 offer: Nine days that line has been open. Tavi Unhar, Orun, road the sea, and not one countersign under it. The ferry master has asked me twice to strike it and I have said no twice. Will you find out whether I am being kind or only stubborn?
 accepted: The grove-keeper saw him last, going north. North is the red light and not much else. Take food; it is further than it looks from the wall.
@@ -52,11 +52,11 @@ tier: 1
 title: The Sluice and the Beavers
 region: <NPCMAP:Odo Fenn>
 start: Odo Fenn
-summary: Three beavers have been at the castle sluice since spring, and Odo wants them off it, not out of the world.
-offer: The castle pays me to keep this brook running and the beavers pay me nothing and do most of the work. Three of them have been at my sluice since spring. Move them on. They come back; that is the arrangement. Then I will show you why a Ssarathi on a cold brook wears a cap.
-accepted: Upstream of the sluice, in the reeds. They bite like clerks. Come back when the sluice is clear.
+summary: Three beavers are blocking the castle sluice. Odo needs them killed before he can repair it.
+offer: The castle pays me to keep this brook running. Three beavers have blocked the sluice, and every time I clear the branches they build it shut again. I need you to kill those three. Leave the rest of the brook alone; I am keeping a waterway, not emptying one. Afterwards, I will teach you why a Ssarathi on a cold brook wears a cap.
+accepted: Upstream of the sluice, in the reeds. Kill three beavers there, then come back to me. They bite like clerks, only the beavers let go when the business is finished.
 complete: A cap you made yourself, on a brook you cleared yourself. That is standing, where I come from. Wear it to the mainland and tell them a Ssarathi on a ditch taught you.
-repeat: The beavers came back on the fourth day. The sluice is clear. We have an understanding.
+repeat: The sluice is still running. More beavers will find the brook soon enough; the castle has yet to send one that can read my maintenance notices.
 reward_xp: tailoring=600, attack=300, defense=300
 reward_gold: 300
 [stage]
@@ -64,9 +64,9 @@ kind: kill
 target: beaver
 amount: 3
 map: <MAP:twinbrook--opt-castle-brook-reed>
-objective: Drive three beavers off the castle sluice.
-prompt: Three. Not thirty. I want the sluice clear, not the brook empty.
-done: Clear. They will be back on the fourth day; build nothing you cannot rebuild.
+objective: Kill three Beavers at the castle sluice in Twinbrook.
+prompt: Kill the three beavers upstream of the sluice, and leave the others. Three, not thirty. I have enough trouble with the castle's accounts without adding the whole brook to the bill.
+done: Three, then. The water is moving again. I would rather mend a sluice than fight over one, but the castle will not accept that as a repair plan. Now cut me three Reed so I can replace the packing they stripped.
 xp: attack=250, defense=250
 [/stage]
 [stage]
@@ -78,16 +78,16 @@ x: <TX:twinbrook--opt-castle-brook-reed>
 y: <TY:twinbrook--opt-castle-brook-reed>
 objective: Cut three Reed at the castle brook so Odo can pack the sluice the beavers stripped.
 prompt: Three reeds, cut low. The beavers took my packing for their dam; I am taking it back for mine.
-done: Good reed. Here is a needle, thread and cloth for your trouble. That is everything you need to sew the cap.
+done: That will hold the water where it belongs. Now for your ears: here is a Needle, five Thread and ten Cloth Roll. Make an Earflap Cap from two Cloth Roll and one Thread, with the Needle in your pack. You have enough cloth for five attempts if a seam goes wrong.
 xp: harvesting=300
-items: Needle=1, Thread=1, Cloth Roll=2
+items: Needle=1, Thread=5, Cloth Roll=10
 [/stage]
 [stage]
 kind: mix
 target: Earflap Cap
 objective: Make an Earflap Cap: two Cloth Roll and a Thread, with the Needle.
-prompt: Open your manufacture window and choose Earflap Cap under tailoring. If it comes out wrong, try the seam again.
-done: Put it on. No, the flaps go down. There.
+prompt: A Ssarathi can argue with the cold, but the cold has all day. In Mixing, choose Tailoring and make an Earflap Cap from two Cloth Roll and one Thread, with the Needle in your pack. If a seam goes wrong, try again.
+done: A serviceable cap. Put it on. No, the flaps go down. There. The cold is very particular about ears.
 xp: tailoring=300
 [/stage]
 [/quest]

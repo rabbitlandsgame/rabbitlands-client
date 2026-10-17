@@ -7,6 +7,8 @@ extends SceneTree
 ##
 ## Uses the committed sidecar index of tests/fixtures/vram: four images with
 ## sidecars (BC7 base, BC7 cutout, BC5 normal, BC1 ORM) and three excluded.
+## An image is priced by the index of the directory it is loaded from, never
+## by another index that happens to list the same sha.
 ##
 ## Run: Godot_v4.7.2-stable_win64_console.exe --headless --path . \
 ##         --script res://tests/test_continent_chunk_budget.gd
@@ -18,6 +20,8 @@ const SCRATCH := "user://continent-chunk-budget-test"
 const GEOMETRY := 1000
 ## w*h*4*4/3 for a 64 px image, as scene_io.py writes it.
 const PUBLISHED := 21845
+## Where the fixture package loads its images from.
+var _fixture_images := PackedStringArray([FIXTURE.path_join("shared-assets")])
 
 var failures := 0
 var _index: Dictionary
@@ -47,6 +51,7 @@ func _run() -> void:
 	_check_territory_indexes()
 	_check_untrusted_entries()
 	_check_rejection_feedback()
+	_check_own_directory()
 	_set_mode("")
 	_remove_tree(SCRATCH)
 	print("continent chunk budget tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
@@ -64,24 +69,26 @@ func _gpu(recipe: String) -> int:
 func _check_resident_bytes() -> void:
 	_set_mode("force")
 	var base: String = _by_recipe.base
-	_expect(VramTextures.resident_bytes(base, PUBLISHED) == _gpu("base") and _gpu("base") * 3 < PUBLISHED,
+	_expect(VramTextures.resident_bytes(base, PUBLISHED, _fixture_images) == _gpu("base") and _gpu("base") * 3 < PUBLISHED,
 		"a sidecar image counts its BC7 bytes (%d of %d)" % [_gpu("base"), PUBLISHED])
-	_expect(VramTextures.resident_bytes(_by_recipe.orm, PUBLISHED) == _gpu("orm")
+	_expect(VramTextures.resident_bytes(_by_recipe.orm, PUBLISHED, _fixture_images) == _gpu("orm")
 		and _gpu("orm") * 7 < PUBLISHED, "an ORM counts its BC1 bytes (%d)" % _gpu("orm"))
 	var excluded_ok := true
 	for sha: String in _excluded:
-		excluded_ok = excluded_ok and VramTextures.resident_bytes(sha, PUBLISHED) == PUBLISHED
+		excluded_ok = excluded_ok and VramTextures.resident_bytes(sha, PUBLISHED, _fixture_images) == PUBLISHED
 	_expect(excluded_ok, "an excluded image keeps the published RGBA8 figure")
-	_expect(VramTextures.resident_bytes("f".repeat(64), 12345) == 12345, "an unknown sha keeps the published figure")
+	_expect(VramTextures.resident_bytes("f".repeat(64), 12345, _fixture_images) == 12345, "an unknown sha keeps the published figure")
+	_expect(VramTextures.resident_bytes(base, PUBLISHED, PackedStringArray()) == PUBLISHED,
+		"an image no directory is named for keeps the published figure, though a read index lists it")
 
 	_set_mode("force")
 	VramTextures.force_formats(VramTextures.FORMAT_BITS.bc1 | VramTextures.FORMAT_BITS.bc5)
-	_expect(VramTextures.resident_bytes(base, PUBLISHED) == PUBLISHED
-		and VramTextures.resident_bytes(_by_recipe.normal, PUBLISHED) == _gpu("normal"),
+	_expect(VramTextures.resident_bytes(base, PUBLISHED, _fixture_images) == PUBLISHED
+		and VramTextures.resident_bytes(_by_recipe.normal, PUBLISHED, _fixture_images) == _gpu("normal"),
 		"a format the renderer lacks keeps the published figure; one it samples does not")
 
 	_set_mode("0")
-	_expect(VramTextures.resident_bytes(base, PUBLISHED) == PUBLISHED, "=0 keeps every published figure")
+	_expect(VramTextures.resident_bytes(base, PUBLISHED, _fixture_images) == PUBLISHED, "=0 keeps every published figure")
 
 ## Five cells nearest-first, one image each; only the first is framed. Under a
 ## 40 000-byte budget the published (RGBA8) figures admit one cell; the real
@@ -117,7 +124,7 @@ func _territory(images_in := "", loadable := false) -> WorldManifest:
 func _primed(mode: String, budget := 0) -> Array:
 	_set_mode(mode)
 	var stream := ContinentChunkStream.new()
-	stream.configure(_territory("", true), false)
+	stream.configure(_territory(FIXTURE, true), false)
 	if budget > 0:
 		stream.maximum_resident_bytes = budget
 	stream.prime(Vector3.ZERO)
@@ -192,10 +199,10 @@ func _check_blocking_geometry() -> void:
 	_expect(ContinentChunkStream.incremental_cost(cell, {}, ContinentChunkStream.PUBLISHED_SHARED_KEY) == 3500
 		and ContinentChunkStream.incremental_cost(cell, {}) == 3500, "a legacy 5 x cell costs the same in both walks")
 
-func _selected(mode: String, read_index := true) -> Array:
+func _selected(mode: String, read_index := true, images_in := FIXTURE) -> Array:
 	_set_mode(mode, read_index)
 	var stream := ContinentChunkStream.new()
-	stream.configure(_territory(), false)
+	stream.configure(_territory(images_in), false)
 	var ids := []
 	for entry: Dictionary in stream.selection(Vector3.ZERO):
 		ids.append("%s%s" % [entry.id, "*" if entry.get("beyond_budget", false) else ""])
@@ -208,15 +215,19 @@ func _check_selection() -> void:
 	var real := _selected("force")
 	_expect(real == ["c0", "c1", "c2", "c3"],
 		"with the sidecars' bytes it admits the four compressed cells: %s" % [real])
-	# No index for these images: exactly today's selection.
-	var unindexed := _selected("force", false)
+	# A territory that does not say where its images live: exactly develop's
+	# selection, with no index read and with one read that lists them.
+	var unindexed := _selected("force", false, "")
 	_expect(unindexed == published, "with no index the selection is develop's exactly: %s" % [unindexed])
+	var unnamed := _selected("force", true, "")
+	_expect(unnamed == published,
+		"images the territory names no directory for keep their published figures, whatever index was read: %s" % [unnamed])
 	_check_blocking()
 	_check_blocking_geometry()
 	_set_mode("force")
 	VramTextures.force_formats(0)
 	var stream := ContinentChunkStream.new()
-	stream.configure(_territory(), false)
+	stream.configure(_territory(FIXTURE), false)
 	var ids := []
 	for entry: Dictionary in stream.selection(Vector3.ZERO):
 		ids.append(str(entry.id))
@@ -277,9 +288,10 @@ func _check_untrusted_entries() -> void:
 	_expect(int(info.get("skipped", -1)) == 3 and int(info.entries) == 1,
 		"entries without gpuBytes, with fewer gpuBytes than mip 0 holds, or without a hash are skipped: %s of %s"
 		% [info.get("skipped"), int(info.entries) + int(info.get("skipped", 0))])
-	_expect(VramTextures.resident_bytes(base, PUBLISHED) == PUBLISHED
-		and VramTextures.resident_bytes(normal, PUBLISHED) == PUBLISHED
-		and VramTextures.resident_bytes(orm, PUBLISHED) == PUBLISHED,
+	var images := PackedStringArray([directory.path_join("shared-assets")])
+	_expect(VramTextures.resident_bytes(base, PUBLISHED, images) == PUBLISHED
+		and VramTextures.resident_bytes(normal, PUBLISHED, images) == PUBLISHED
+		and VramTextures.resident_bytes(orm, PUBLISHED, images) == PUBLISHED,
 		"and keep the published figure in the budget")
 	_expect(VramTextures.sidecar_entry(base, directory.path_join("shared-assets")).is_empty(),
 		"and are never uploaded from their sidecar")
@@ -311,8 +323,51 @@ func _check_rejection_feedback() -> void:
 		"before the load the missing sidecars still count at BC7 size (%s); the load refuses both (%d)" % [before, rejected])
 	_expect(figure == PUBLISHED and after == ["c0"],
 		"after it, the budget counts them at the published RGBA8 figure (%d) and admits less: %s" % [figure, after])
-	_expect(VramTextures.resident_bytes(_by_recipe.normal, PUBLISHED) == _gpu("normal"),
+	_expect(VramTextures.resident_bytes(_by_recipe.normal, PUBLISHED,
+		PackedStringArray([directory.path_join("shared-assets")])) == _gpu("normal"),
 		"images whose sidecars loaded keep their sidecar figure")
+
+## Two indexes can disagree about one sha: the territory's own directory
+## excludes an image another directory's index lists a sidecar for (the
+## Nymara index excludes images the continent-v2 one encodes, and a session
+## reads Landfall's first). A load of the territory's image uses its own
+## directory's index and decodes it, so the budget counts the published
+## figure, not the other index's sidecar.
+func _check_own_directory() -> void:
+	var own := _copy_fixture("own_excludes")
+	var index_path := own.path_join("shared-assets/vram/index.json")
+	var index: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(index_path))
+	var dropped: Array = [_by_recipe.base_alpha, _by_recipe.normal]
+	for sha: String in dropped:
+		index.images.erase(sha)
+		index.excluded[sha] = "no_material_role"
+	var file := FileAccess.open(index_path, FileAccess.WRITE)
+	file.store_string(JSON.stringify(index, " "))
+	file.close()
+	# The other directory (the committed fixture) is read first, as Landfall's is.
+	_set_mode("force", true)
+	var images := PackedStringArray([own.path_join("shared-assets")])
+	_expect(not VramTextures.lookup(_by_recipe.normal).is_empty()
+		and VramTextures.resident_bytes(_by_recipe.normal, PUBLISHED, _fixture_images) == _gpu("normal"),
+		"another directory's index lists a sidecar for the image and prices it there (%d)" % _gpu("normal"))
+	_expect(VramTextures.resident_bytes(_by_recipe.normal, PUBLISHED, images) == PUBLISHED
+		and VramTextures.resident_bytes(_by_recipe.base, PUBLISHED, images) == _gpu("base"),
+		"its own directory excludes it: it keeps the published figure; one its own index lists keeps the sidecar's")
+	_expect(VramTextures.sidecar_entry(_by_recipe.normal, own.path_join("shared-assets")).is_empty(),
+		"which is what a load from its own directory does: it decodes the image")
+	_expect(VramTextures.resident_bytes(_by_recipe.normal, PUBLISHED, images + _fixture_images) == PUBLISHED,
+		"an image loaded from two directories keeps the published figure if either decodes it")
+	var stream := ContinentChunkStream.new()
+	stream.configure(_territory(own), false)
+	var ids := _ids(stream)
+	var figures := []
+	for entry: Dictionary in stream.entries:
+		figures.append(int((entry.sharedResourceResidentBytes as Dictionary).values()[0]))
+	stream.free()
+	_expect(figures[1] == PUBLISHED and figures[2] == PUBLISHED and figures[0] == _gpu("base")
+		and figures[3] == _gpu("orm"), "the stream prices each cell's image by the territory's directory: %s" % [figures])
+	_expect(ids == ["c0", "c1"],
+		"and admits what that budget holds, not the four the other index would price in: %s" % [ids])
 
 ## A copy of the fixture package (manifest, GLB, images, sidecars) under user://.
 func _copy_fixture(name: String) -> String:

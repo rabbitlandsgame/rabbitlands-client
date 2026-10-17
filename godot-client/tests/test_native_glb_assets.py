@@ -818,10 +818,13 @@ class NativeGlbAssetsTest(unittest.TestCase):
             "cave_salamander": 180,
             "gloom_wyvern": 180,
             "barnacle_ogre": 180,
-            # these two carry a constant facing correction in the
-            # animation itself, which the delivery notes call out
+            # The Kelpie's animated shoulders sit ahead of its hips on +Z.
+            # The old 270 correction left it sideways; a half turn aligns
+            # the animated body with the actor's logical -Z heading.
+            "mire_kelpie": 180,
+            # This rig carries a constant facing correction in the
+            # animation itself, which the delivery notes call out.
             "sapphire_peafowl": 270,
-            "mire_kelpie": 270,
         }
         declared = dict(set_by_eye)
         declared.update(set_by_classifier)

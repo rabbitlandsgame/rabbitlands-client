@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-16",
+  "status": "restored and verified",
+  "scope": "The nine original Landfall limestone garden-path overlays identified by the cleanup audit.",
+  "audit": "docs/qa/procedural-model-archive/ground-inlay-audit.json",
+  "sourceRecord": "eloria-assets/maps/continent-v2/sw_isle/source/garden-paving-record.json",
+  "restoredModelCount": 9,
+  "models": [
+    {
+      "asset": "kit-sw-garden-paving-5-10",
+      "rendered": true,
+      "source_sha256": "7d3d47c5ec63e48ea1dbd88aab48015e50d8668490c3e9f325e1c2cecfd050d8",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-5-11",
+      "rendered": true,
+      "source_sha256": "308c729304d5df8ae6cb74b31ca2ea789abe5f3adfe2107fddafa98eaf2cbb4f",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-6-10",
+      "rendered": true,
+      "source_sha256": "5e4661a535316d56f7f5a4de1a7a7ad8f356d8cad190a9e91c96a32baf68ed9f",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-6-12",
+      "rendered": true,
+      "source_sha256": "9747b3f4cbc152d06608d5d550601268b508c83f6e03e4d4b4b03df3f8387b5c",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-7-10",
+      "rendered": true,
+      "source_sha256": "71459352311fb073a76523c9c1a5bb91f1b1fc226f870c832ebeda5bbe896a09",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-7-11",
+      "rendered": true,
+      "source_sha256": "8301e18cca71968492a1d100a56889388914d42a5baf04f2620f19cd115479e6",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-7-12",
+      "rendered": true,
+      "source_sha256": "7766d62b18ef72d11bb8165286747c8ad0196ef0f91b00adc8d0f8a3765e2c94",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-8-10",
+      "rendered": true,
+      "source_sha256": "95dea57955a7d2850ad3a40ffe38682420817690a7f58522ca1f22ce9949c67b",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    },
+    {
+      "asset": "kit-sw-garden-paving-8-11",
+      "rendered": true,
+      "source_sha256": "919ff8757ef2d7c3386bfc1d08b1d1ba62a154e523f40269d1a621050fbd7229",
+      "texture_pixels": [
+        768,
+        768
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "path": "godot-client/world_authoring/regions/sw_isle/assets/textures/1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac.png",
+      "sha256": "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac"
+    },
+    {
+      "path": "godot-client/world_authoring/regions/sw_isle/assets/textures/3357dc9c8537065716459375936ff46babf709967db2e1e45b67d9ca37f06d33.jpg",
+      "sha256": "3357dc9c8537065716459375936ff46babf709967db2e1e45b67d9ca37f06d33"
+    }
+  ],
+  "verification": {
+    "original_model_and_texture_hashes_match": true,
+    "saved_scene_instances_restored": 9,
+    "authoring_catalogue_entries_restored": 9,
+    "runtime_walk_surfaces_restored": 9,
+    "runtime_texture_pixels": [
+      768,
+      768
+    ],
+    "runtime_map_cache_disabled": true,
+    "star_mosaic_retains_1024_pixel_texture": true,
+    "retired_runtime_paths_still_checked": 993,
+    "other_retired_map_meshes_still_filtered": 1216,
+    "other_retired_shared_prototypes_still_blocked": 73,
+    "focused_python_regressions_passed": 3,
+    "rendered_game_views_inspected": [
+      "plaza",
+      "north lane",
+      "east walk"
+    ]
+  },
+  "preservation": [
+    "Original geometry, UVs, textures, material settings and saved placement transforms are unchanged.",
+    "Map GLBs and manifests are unchanged; changing the retirement index invalidates older client scene caches.",
+    "Original retirement and audit receipts are unchanged. Procedural generation remains disabled."
+  ]
+}

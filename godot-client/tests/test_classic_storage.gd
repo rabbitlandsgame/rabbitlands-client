@@ -249,8 +249,7 @@ func _check_transfers(workspace: Node, state: Node) -> void:
 		_expect(receiver.get_available_bytes() == 0, "hot swapping lists sends no transfer packets")
 		workspace.call("collect_list")
 		await process_frame
-		receiver.poll()
-		var bytes: PackedByteArray = receiver.get_data(receiver.get_available_bytes())[1]
+		var bytes := _take(receiver)
 		_expect(bytes == Protocol.withdraw_storage(7, 4), "Get list sends only the missing quantity to the server position")
 		workspace.call("collect_list")
 		await process_frame
@@ -546,21 +545,32 @@ func _take(receiver: StreamPeerTCP) -> PackedByteArray:
 func _open_fixture() -> Dictionary:
 	var network: Node = root.get_node("Network")
 	var old_peer: StreamPeerTCP = network.get("_peer") as StreamPeerTCP
+	var old_secure: bool = network.get("_secure")
+	var was_processing := network.is_processing()
 	var peer := StreamPeerTCP.new()
 	var server := TCPServer.new()
 	if not _expect(server.listen(0, "127.0.0.1") == OK, "local transfer fixture listens"):
 		return {}
 	network.set_process(false)
 	network.set("_peer", peer)
-	peer.connect_to_host("127.0.0.1", server.get_local_port())
-	for attempt: int in range(20):
+	# This fixture exchanges raw protocol frames over loopback. Production
+	# connections still default to verified TLS; restore that mode afterwards.
+	network.set("_secure", false)
+	var fixture := {"server": server, "peer": peer, "receiver": null,
+		"old_peer": old_peer, "old_secure": old_secure, "was_processing": was_processing}
+	if not _expect(peer.connect_to_host("127.0.0.1", server.get_local_port()) == OK,
+			"local transfer fixture starts connecting"):
+		_close_fixture(fixture)
+		return {}
+	var deadline := Time.get_ticks_msec() + 2000
+	while Time.get_ticks_msec() < deadline:
 		peer.poll()
-		if server.is_connection_available():
+		if peer.get_status() == StreamPeerTCP.STATUS_CONNECTED and server.is_connection_available():
+			fixture.receiver = server.take_connection()
 			break
 		await process_frame
-	var receiver: StreamPeerTCP = server.take_connection()
-	var fixture: Dictionary = {"server": server, "peer": peer, "receiver": receiver, "old_peer": old_peer}
-	if not _expect(receiver != null, "local transfer fixture connects"):
+	if not _expect(fixture.receiver != null and bool(network.call("_link_ready")),
+			"local transfer fixture connects with a usable protocol transport"):
 		_close_fixture(fixture)
 		return {}
 	peer.poll()
@@ -573,7 +583,8 @@ func _close_fixture(fixture: Dictionary) -> void:
 		(fixture["receiver"] as StreamPeerTCP).disconnect_from_host()
 	(fixture["server"] as TCPServer).stop()
 	network.set("_peer", fixture["old_peer"])
-	network.set_process(true)
+	network.set("_secure", fixture["old_secure"])
+	network.set_process(bool(fixture["was_processing"]))
 
 func _expect(condition: bool, label: String) -> bool:
 	if not condition:

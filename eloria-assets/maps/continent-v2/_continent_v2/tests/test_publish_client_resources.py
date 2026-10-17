@@ -113,4 +113,14 @@ def test_sidecar_tool_plans_the_territory_into_the_pool(manifest_path):
     tool = pytest.importorskip("build_vram_textures")
     found = tool.inventory([manifest_path.parents[2]])
     directories = {directory for directory, _ in found}
-    assert directories == {(manifest_path.parents[2] / "_continent_v2" / "shared-assets").resolve()}
+    # The cells' own images are planned into the territory's pool. A shared
+    # prototype names its textures relative to the prototype pool, so the
+    # global image pool is reached through them as well; it carries no
+    # sidecars of its own, and the packager says so rather than guessing
+    # (package_client.py passes --skip-dir _shared/images, and the records it
+    # checks read excluded_by_caller). Nothing else may appear.
+    expected = {(manifest_path.parents[2] / "_continent_v2" / "shared-assets").resolve()}
+    images = (manifest_path.parents[3] / "_shared" / "images").resolve()
+    if images.is_dir():
+        expected.add(images)
+    assert directories == expected

@@ -31,7 +31,8 @@ seats generated models in the territory palette's kit
 (`godot-client/world_authoring/regions/amberwood/assets/prototypes/kit-*.glb`), beside the territory's
 published pieces. Each model is taken from the first folder that has it.
 
-- The Amberwood set, from `work-output/amberwood-2026-09-28/asset-prompts.md`: a great amber oak, a
+- The Amberwood set, from
+  `.local/asset-authoring/workspace/work-output/amberwood-2026-09-28/asset-prompts.md`: a great amber oak, a
   copper beech, a crimson maple, a golden larch, aspens, a sweet chestnut and a dark fir; autumn ferns, a
   toadstool ring, a bramble and a leaf pile; a resin-tapped pine, an amber drying rack, a woodcutter's
   block, a sawhorse, a hunter's hide, a forest shrine, a mushroom basket and a cider press; two amber

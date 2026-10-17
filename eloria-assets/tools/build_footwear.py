@@ -264,6 +264,7 @@ def _record(results: dict) -> None:
 
 
 def main() -> None:
+    raise RuntimeError('build_footwear.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--only", action="append", default=[],
                         help="build just these design slugs")

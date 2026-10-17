@@ -20,6 +20,7 @@ import torso_designs
 
 
 def main() -> None:
+    raise RuntimeError('rebuild_torso_pieces.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--client", type=Path, required=True)
     parser.add_argument("--slug", action="append", default=[],

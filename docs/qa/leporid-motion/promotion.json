@@ -1,0 +1,80 @@
+{
+  "status": "Reviewed delivery-v2 selected for client integration and develop publication by the user.",
+  "provenance": "Locally authored hopping and one-shot actions; four rejected local video attempts supplied no animation curves.",
+  "actors": {
+    "rabbit": {
+      "previous_runtime_sha256": "08c77aa8dfd5d41e12e6aaf558f92b6b21ecf521add6cbedda3177364deb467a",
+      "reviewed_and_runtime_sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
+      "bytes": 4268312,
+      "inherited_clip_arrays_exact": {
+        "Idle_A": true,
+        "Fighting_Idle": true,
+        "Hit_Chest": true
+      },
+      "intentional_skin_repair_vertices": 774,
+      "static_vs_reviewed": "Runtime file is byte-identical to the qualified selected GLB.",
+      "import_scale": 0.34999981,
+      "stride_metres_per_second_at_import_scale": {
+        "walk": 0.11249993892857145,
+        "run": 0.2508331971666667
+      },
+      "corrective_targets": 0
+    },
+    "jackalope": {
+      "previous_runtime_sha256": "3b9415dd6f0b649e21294815436b528355f9d67b4886791f09ef57a371831875",
+      "reviewed_and_runtime_sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c",
+      "bytes": 7209008,
+      "inherited_clip_arrays_exact": {
+        "Idle_A": true,
+        "Fighting_Idle": true,
+        "Hit_Chest": true
+      },
+      "intentional_skin_repair_vertices": 915,
+      "static_vs_reviewed": "Runtime file is byte-identical to the qualified selected GLB.",
+      "import_scale": 0.59999932,
+      "stride_metres_per_second_at_import_scale": {
+        "walk": 0.1928569242857143,
+        "run": 0.4299995126666667
+      },
+      "corrective_targets": 25
+    }
+  },
+  "scope": "Rabbit and Jackalope Walk, Jog, Sword_Attack and Death_A plus intentional shared skin repairs. Current idle, fighting idle and hit curves retained.",
+  "authoring_sources": "Original models, high-resolution inputs, failed videos and processing stages remain private and Git-ignored.",
+  "full_client_server_session": false,
+  "runtime_validation": {
+    "authored_motions": 8,
+    "authored_export_passed": true,
+    "runtime_slots": 14,
+    "runtime_passed": true,
+    "full_client_server_session": false
+  },
+  "review_manifest_sha256": "b8f69e43171594baf0d31b4a3bfd2106b00c2a95af575003e8ff2cf8c220b0c7",
+  "geometry_rest_bind_textures_morph_arrays_preserved": true,
+  "inherited_skin_note": "The requested shared-skin repair intentionally changes inherited surfaces; current Idle_A, Fighting_Idle and Hit_Chest joint/morph arrays remain exact.",
+  "fidelity": "Reviewed GLBs copied byte-for-byte;3072-Hz metadata and tracked policies match the qualified files. No approximate curve reduction.",
+  "files": {
+    ".gitignore": "f8dbaa4d825b324ff48b1b8e82c2927410aeb2927691f46bbc76ba686aeaaa89",
+    ".agents/skills/rabbitlands-creature-animation/SKILL.md": "9de3e08e96e8acfbdf91082e1438f1f8146022fe088fb86e43370374ee228227",
+    ".agents/skills/rabbitlands-video-motion-fitting/SKILL.md": "6345e3c87fa1366868156d7a568addb8e9d7272176200b326d74ce8f3a1a557f",
+    ".agents/skills/rabbitlands-video-motion-fitting/references/leporid-transfer.md": "04d59afc21c82102ed97f8ef786120fa6238d5205acf8f67acc49787e6822115",
+    "docs/leporid-motion.md": "bceced0ef1322e65ad126c3b5a0daf3a9cf92b297bf1381a83b4205a391a050c",
+    "eloria-assets/tools/video_motion/native_shapes.py": "885689531bdda3b6d972634155e4475b7625f04150a0bbce45f6c58f5eded557",
+    "eloria-assets/tools/test_leporid_motion.py": "d212bf38802af8df3d8b62c254fcb9b8d51f819d5bce2ae5f4094529c9b33b3c",
+    "godot-client/tests/test_leporid_motion.gd": "828936b11115de60847ef8d3edebb4c52faca617041ae23fd820d0e5517ab598",
+    "godot-client/tests/fixtures/leporid_motion_worlds.json": "50d685b4bde39b14baa0334ac672aa523f0b0d81c7fa4a84043538fdf874f1bb",
+    "docs/qa/leporid-motion/actors.json": "fe77d15025fc94add6f4adac0e20a01bbcc0df0145dff880e5c0bdc87bc26868",
+    "docs/qa/leporid-motion/deformation-review.json": "5bc202f8c477ef6b1abaf8ee25f7005920f6cf294dd80d02ec246f7912cca2ec",
+    "docs/qa/leporid-motion/fresh-blender-import.json": "76ed101628d49e12d5b570dd226240955f420a27beb1b04fead8970a0b80821e",
+    "docs/qa/leporid-motion/installed-export-validation.json": "934ff1bdac524a5cface0d1d78a8f3f2e1dbe055561780b5b0882682c1325b2b",
+    "docs/qa/leporid-motion/runtime-playback.json": "3c7d7773e7a490b825389255538485a6664fa5a21c7ad7fe81c9acbbf7173b56",
+    "docs/qa/leporid-motion/selected-export-validation.json": "2c91319f14996cd4c88b35458252c4b79541dd9e28d19a974e8958992c882825",
+    "docs/qa/leporid-motion/skin-repair.json": "a5f9517290c6cb052c6f3b1f975ef3af9ecca354e9b88053f0db14564b41c736",
+    "godot-client/assets/actors/native/creatures/basic_expansion/rabbit.glb": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
+    "godot-client/assets/actors/native/creatures/basic_expansion/rabbit.glb.import": "766342064b1cc3bdd04731cd6589025c5e9de785a117e04d03a9ade9b00ae285",
+    "godot-client/data/animations/basic_expansion/rabbit.json": "8b5748ad9c3fcd4005c9cb1904862609e679c28f52665fda9b42a7c45d41d7d6",
+    "godot-client/assets/actors/native/creatures/basic_expansion/jackalope.glb": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c",
+    "godot-client/assets/actors/native/creatures/basic_expansion/jackalope.glb.import": "45d58e9236f7b81cb42f77e29a0857317e3fa400ee9b5b9d31551af77f24c08e",
+    "godot-client/data/animations/basic_expansion/jackalope.json": "18baacf357d7a980faf989d83c4a7adc13646c8e9397eacf4633432e47875c13"
+  }
+}

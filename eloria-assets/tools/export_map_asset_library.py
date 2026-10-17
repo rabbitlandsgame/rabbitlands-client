@@ -38,6 +38,7 @@ for path in (CONTINENT, TOOLKIT):
 
 import object_edits as OE
 import scene_io as S
+import shared_meshes as SM
 
 
 def _read_json(path: Path) -> dict:
@@ -105,9 +106,19 @@ def _select_roots(asset_id: str, document: dict, names: list[str]) -> list[int]:
     occurrences: dict[str, list[int]] = {}
     for index, node in enumerate(document["nodes"]):
         occurrences.setdefault(str(node.get("name", "")), []).append(index)
+    parents = _parents(document)
+    scene_roots = set(document['scenes'][document.get('scene', 0)].get('nodes', []))
+    def complete_placement(index):
+        parent = parents.get(index)
+        return index in scene_roots or (parent is not None and
+            str(document['nodes'][parent].get('name', '')).endswith('_WorldPlacement'))
     indices = []
     for name in names:
         matches = occurrences.get(name, [])
+        # Generated transform wrappers may share their object's name. Only
+        # the complete placement is an extraction root; inner wrappers are fragments.
+        if len(matches) > 1:
+            matches = [index for index in matches if complete_placement(index)]
         if len(matches) != 1:
             raise ValueError(f"{asset_id} root {name!r} has {len(matches)} matches")
         if name.startswith(FORBIDDEN_ROOT_PREFIXES):
@@ -190,10 +201,54 @@ def _embed_external_images(document: dict, body: bytes, source_dir: Path,
     return document, bytes(packed)
 
 
+def _verify_shared_props(asset_id: str, source: Path, names: list[str]) -> list[str]:
+    """Check each pooled prop a selection places against its package certificate.
+
+    glb_reader.load puts a pooled mesh back on the placement that names it and
+    drops the reference, so the export reads pooled props like any other mesh.
+    It does not check the pool file, so read the package as it stands and
+    require every prototype in the selection to be listed in the package's
+    externalMeshes with the SHA-256 of the pool file glb_reader will read.
+    """
+    document, _ = S.GR.load(source, prototypes=False)
+    keys = set()
+    for index in S.descendants(document, _select_roots(asset_id, document, names)):
+        key = (document["nodes"][index].get("extras", {}).get("eloria") or {}).get("prototype")
+        if key is not None:
+            keys.add(str(key))
+    if not keys:
+        return []
+    manifest = _read_json(source.with_suffix(".json")).get("externalMeshes", {})
+    certified = {(source.parent / uri).resolve(): sha for uri, sha in manifest.items()}
+    for key in sorted(keys):
+        if not re.fullmatch(r"[0-9a-f]{64}", key):
+            raise ValueError(f"{asset_id} names an invalid shared map prototype: {key!r}")
+        path = (SM.POOL / f"{key}.glb").resolve()
+        expected = certified.get(path)
+        if expected is None or not path.is_file() or \
+                hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            raise ValueError(f"{asset_id} has a missing or changed shared map prototype: {key}")
+    return sorted(keys)
+
+
 def _extract_one(spec: dict, source: Path, slug: str, output: Path, shared_images: Path) -> dict:
+    names = [str(name) for name in spec["roots"]]
+    shared = _verify_shared_props(str(spec["id"]), source, names)
     document, body = S.GR.load(source)
-    roots = _select_roots(str(spec["id"]), document, [str(name) for name in spec["roots"]])
+    roots = _select_roots(str(spec["id"]), document, names)
     matrices, _ = S.GR.hierarchy(document)
+    for node_index in S.descendants(document, roots):
+        node = document['nodes'][node_index]
+        if 'mesh' not in node:
+            continue
+        for primitive in document['meshes'][node['mesh']]['primitives']:
+            vertices = S.GR.accessor(document, body, primitive['attributes']['POSITION'])
+            if not np.isfinite(vertices).all():
+                raise ValueError(str(spec['id']) + ' contains nonfinite geometry')
+            if 'indices' in primitive:
+                indices = S.GR.accessor(document, body, primitive['indices'])
+                if indices.size and int(indices.max()) >= len(vertices):
+                    raise ValueError(str(spec['id']) + ' contains out-of-range triangle indices')
     low, high = OE.subtree_bounds_all(S, document, body, roots)
     size = high - low
     if not np.isfinite(low).all() or not np.isfinite(high).all() or np.any(size <= 0.001):
@@ -224,6 +279,7 @@ def _extract_one(spec: dict, source: Path, slug: str, output: Path, shared_image
         "source": _report_path(source),
         "roots": list(spec["roots"]),
         "bounds": {"size": [round(float(value), 6) for value in size]},
+        "sharedPrototypes": shared,
         "sha256": hashlib.sha256(target.read_bytes()).hexdigest(),
     })
     return summary

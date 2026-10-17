@@ -79,6 +79,27 @@ def write_wav(path: Path, samples: np.ndarray) -> None:
         handle.setnchannels(samples.shape[1]); handle.setsampwidth(2)
         handle.setframerate(SAMPLE_RATE); handle.writeframes(pcm.tobytes())
 
+def normalize_music(samples: np.ndarray, executable: str, settings: dict) -> np.ndarray:
+    """Two-pass integrated loudness with a true-peak ceiling."""
+    samples = samples.astype('<f4')
+    target = float(settings['loudness_lufs'])
+    peak = float(settings.get('true_peak_db', -3))
+    base = [executable, '-nostdin', '-hide_banner', '-y', '-f', 'f32le',
+            '-ac', '2', '-ar', str(SAMPLE_RATE), '-i', '-']
+    analysis = subprocess.run(base + ['-af', f'loudnorm=I={target}:TP={peak}:LRA=15:print_format=json',
+                                     '-f', 'null', '-'], input=samples.tobytes(), capture_output=True, check=True)
+    report = analysis.stderr.decode('utf-8', errors='replace')
+    measured = json.loads(report[report.rfind('{'):report.rfind('}') + 1])
+    parameters = ':'.join(f'{key}={measured[value]}' for key, value in (
+        ('measured_I', 'input_i'), ('measured_TP', 'input_tp'),
+        ('measured_LRA', 'input_lra'), ('measured_thresh', 'input_thresh'),
+        ('offset', 'target_offset')))
+    result = subprocess.run(base + ['-v', 'error', '-af',
+        f'loudnorm=I={target}:TP={peak}:LRA=15:{parameters}:linear=true',
+        '-ar', str(SAMPLE_RATE), '-f', 'f32le', '-'],
+        input=samples.tobytes(), capture_output=True, check=True)
+    return np.frombuffer(result.stdout, dtype='<f4').reshape(-1, 2).copy()
+
 def describe_changes(asset: dict) -> str:
     s = asset["processing"]
     changes = ["Converted to 44.1 kHz", "stereo Ogg Vorbis" if asset["kind"] == "music" else "mono 16-bit PCM WAV", "level adjusted"]
@@ -88,15 +109,17 @@ def describe_changes(asset: dict) -> str:
     if s.get("lowpass"): changes.append(f"low-pass filtered at {s['lowpass']} Hz")
     if s.get("crossfade"): changes.append(f"{s['crossfade']}-second overlap crossfade for looping")
     if s.get("fade_in") or s.get("fade_out"): changes.append("short attack/release fades")
+    if "loudness_lufs" in s:
+        changes.append(f"two-pass loudness normalization to {s['loudness_lufs']} LUFS with {s.get('true_peak_db', -3)} dBTP ceiling")
     return "; ".join(changes) + "."
 
 def credits_text(manifest: dict) -> str:
-    lines = ["ELORIA AUDIO CREDITS", "", "Music and sound effects by the creators listed below.", "The audio retains its individual source licenses; it is not covered by", "Eloria's original-asset license. Credits do not imply creator endorsement.", "", "CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/", "CC BY 3.0 Unported: https://creativecommons.org/licenses/by/3.0/", "", "The CC BY recording and its adaptation may be reused under that license.", "Retain attribution, license and source links, and identify further changes.", "Do not impose additional legal restrictions or effective technological", "measures on that recording. Full license texts accompany these credits.", ""]
+    lines = ["RABBIT LANDS AUDIO CREDITS", "", "Music and sound effects by the creators listed below.", "The audio retains its individual source licenses; it is not covered by", "Rabbit Lands' original-asset license. Credits do not imply creator endorsement.", "", "CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/", "CC BY 3.0 Unported: https://creativecommons.org/licenses/by/3.0/", "CC BY 4.0 International: https://creativecommons.org/licenses/by/4.0/", "", "CC BY recordings and adaptations retain their respective licenses.", "Retain attribution, license and source links, and identify further changes.", "Do not impose additional legal restrictions or effective technological", "measures on those recordings. Full license texts accompany these credits.", "Playback includes overlap crossfades, playlist rotation and one-shot cues.", ""]
     for source_id, source in manifest["sources"].items():
         used = [a for a in manifest["assets"] if a["source"] == source_id]
         if not used: continue
-        lines += [source["title"], "Creator: " + source["creator"], "Source: " + source["url"], "License: " + source["license"] + " - " + source["license_url"], "Source notice: " + source["attribution_notice"]]
-        for a in used: lines += ["  " + a["file"], "    " + describe_changes(a)]
+        lines += [source["title"], "Creator: " + source["creator"], "Source: " + source["url"], "License: " + source["license"] + " - " + source["license_url"], "Source notice: " + " ".join(source["attribution_notice"].split())]
+        for a in used: lines += ["  " + a["file"] + (" — " + a["title"] if a.get("title") else ""), "    " + describe_changes(a)]
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
@@ -114,18 +137,28 @@ def build(output: Path, executable: str) -> dict:
         if sha256(original) != a["original_sha256"]:
             raise ValueError("source hash changed: " + a["original"])
         samples = process(decode(original, executable, int(a["processing"].get("channels", 1))), a["processing"])
+        if "loudness_lufs" in a["processing"]:
+            samples = normalize_music(samples, executable, a["processing"])
         target = output / a["file"]
         if a["kind"] == "music":
             subprocess.run([executable, "-nostdin", "-v", "error", "-y", "-f", "f32le", "-ac", "2", "-ar", str(SAMPLE_RATE), "-i", "-", "-c:a", "libvorbis", "-q:a", "5", "-map_metadata", "-1", "-fflags", "+bitexact", "-flags:a", "+bitexact", str(target)], input=samples.astype("<f4").tobytes(), check=True)
         else:
             write_wav(target, samples)
         entry = {"name": a["name"].removeprefix("music_") if a["kind"] == "music" else a["name"], "file": a["file"], "seconds": round(len(samples) / SAMPLE_RATE, 3), "source": a["source"], "sha256": sha256(target)}
+        if a.get('title'):
+            entry.update(title=a['title'], creator=manifest['sources'][a['source']]['creator'],
+                         loop=a.get('loop', True), review_id=a.get('review_id', ''))
         catalog["music" if a["kind"] == "music" else "sounds"].append(entry)
         provenance["assets"].append({**a, "sha256": entry["sha256"], "changes": describe_changes(a)})
         print(f"{target.name}: {entry['seconds']} seconds")
     for filename, content in (("catalog.json", catalog), ("provenance.json", provenance)):
-        (output / filename).write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8")
-    (output / "CREDITS.txt").write_text(credits_text(manifest), encoding="utf-8")
+        (output / filename).write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8", newline="\n")
+    (output / "CREDITS.txt").write_text(credits_text(manifest), encoding="utf-8", newline="\n")
+    program = SOURCE_DIRECTORY / 'music-program.json'
+    if program.is_file():
+        authored = json.loads(program.read_text(encoding='utf-8'))
+        (output / 'music-program.json').write_text(json.dumps({
+            'schema': authored['schema'], 'programs': authored['programs']}, indent=2) + '\n', encoding='utf-8', newline='\n')
     return catalog
 
 def main() -> int:

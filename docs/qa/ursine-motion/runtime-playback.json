@@ -1,0 +1,93 @@
+{
+  "candidate_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+  "clips": [
+    {
+      "attack_switch_error": 0.0,
+      "clip": "Idle_A",
+      "duration_seconds": 3.20000004768372,
+      "finite": true,
+      "idle_restore_error": 0.0,
+      "independent_glb_world_max_error": 2.06267915636715e-06,
+      "native_import_max_error": 1.32386253426375e-06,
+      "terminal_hold_error": 0.0
+    },
+    {
+      "attack_switch_error": 0.0,
+      "clip": "Fighting_Idle",
+      "duration_seconds": 2.71666669845581,
+      "finite": true,
+      "idle_restore_error": 0.0,
+      "independent_glb_world_max_error": 1.78448177101664e-06,
+      "native_import_max_error": 1.5915668427624e-06,
+      "terminal_hold_error": 0.0
+    },
+    {
+      "attack_switch_error": 0.0,
+      "clip": "Hit_Chest",
+      "duration_seconds": 1.04999995231628,
+      "finite": true,
+      "idle_restore_error": 0.0,
+      "independent_glb_world_max_error": 1.78448177101664e-06,
+      "native_import_max_error": 1.5679534044466e-06,
+      "terminal_hold_error": 0.0
+    },
+    {
+      "attack_switch_error": 0.0,
+      "clip": "Death_A",
+      "duration_seconds": 3.75,
+      "finite": true,
+      "idle_restore_error": 0.0,
+      "independent_glb_world_max_error": 6.83445418481199e-07,
+      "native_import_max_error": 3.38489314799517e-07,
+      "terminal_hold_error": 3.38489314799517e-07
+    },
+    {
+      "attack_switch_error": 0.0,
+      "clip": "Sword_Attack",
+      "duration_seconds": 3.5,
+      "finite": true,
+      "idle_restore_error": 0.0,
+      "independent_glb_world_max_error": 6.55516197101136e-07,
+      "native_import_max_error": 3.8426509263445e-07,
+      "terminal_hold_error": 2.52881079632061e-07
+    },
+    {
+      "attack_switch_error": 0.0,
+      "clip": "Walk",
+      "duration_seconds": 1.07500004768372,
+      "finite": true,
+      "idle_restore_error": 0.0,
+      "independent_glb_world_max_error": 6.35602202314622e-06,
+      "native_import_max_error": 4.5491270839193e-07,
+      "terminal_hold_error": 0.0
+    },
+    {
+      "attack_switch_error": 0.0,
+      "clip": "Jog",
+      "duration_seconds": 0.720000028610229,
+      "finite": true,
+      "idle_restore_error": 0.0,
+      "independent_glb_world_max_error": 6.53490084423503e-06,
+      "native_import_max_error": 5.23877019986685e-07,
+      "terminal_hold_error": 0.0
+    }
+  ],
+  "engine": {
+    "build": "official",
+    "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+    "hex": 263938,
+    "major": 4,
+    "minor": 7,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.7.2-stable (official)",
+    "timestamp": 0
+  },
+  "failures": [],
+  "passed": true,
+  "preservation_note": "All seven slots pass independent GLB world-pose witnesses. Exact inherited Walk/Jog and three old idle/hit clip payloads are checked separately in promotion.json.",
+  "scope": "Current runtime asset and dedicated map; imported scene cache and native library, all seven clips. Focused component integration, not a full client/server session.",
+  "skin_influences": [
+    4
+  ]
+}

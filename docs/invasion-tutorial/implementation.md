@@ -1,9 +1,11 @@
 # The Second Bell: playable client integration
 
-Bellwatch is implemented in the main Godot client and the sibling `dev-server`.
+Bellwatch is implemented in the main Godot client and the sibling `rabbitlands-server`.
 It contains 32 saved objectives across the ten storyboard scenes, on a private
 144 × 144 map with four gates. It uses normal inventory, storage, combat, flee,
 ranging, loot, chat, statistics, NPC dialogue and object interactions.
+
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
 
 ## Play it
 
@@ -106,10 +108,10 @@ already satisfy equipment, loot or recovery objectives.
 [`tools/build_bellwatch.py`](../../tools/build_bellwatch.py) builds the textured GLB,
 manifest, target layout, client walk grid and authoritative server grid from one
 layout. Outputs are in [`eloria-assets/maps/bellwatch`](../../eloria-assets/maps/bellwatch),
-`dev-server/config/eloria/bellwatch.json` and `dev-server/tools/collision/bellwatch.escg.gz`.
+`rabbitlands-server/config/eloria/bellwatch.json` and `rabbitlands-server/tools/collision/bellwatch.escg.gz`.
 The server wheel includes the quest layout.
 
-The controller is [`dev-server/eloria/bell.py`](../../../dev-server/eloria/bell.py).
+The controller is [`rabbitlands-server/eloria/bell.py`](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/bell.py).
 Client gate/prop presentation is [`bell_scene.gd`](../../godot-client/src/world/bell_scene.gd).
 The existing guide packet 207 and UI packet 203 are capability-gated by
 `second_bell_v1`; the client validates the additional counts and gate flags.
@@ -120,7 +122,7 @@ its embedded image or mesh payload.
 python tools/build_bellwatch.py
 ```
 
-Run that from `eloria-client`. Prepare the server's local terrain from `dev-server`:
+Run that from `rabbitlands-client`. Prepare the server's local terrain from `rabbitlands-server`:
 
 ```powershell
 python tools/prepare_local_maps.py build/local-maps

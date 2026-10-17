@@ -979,32 +979,7 @@ def _lighting(builder, layout: Layout) -> None:
 # Grazing herds, hitched mounts and paddock stock. These are declared for the
 # client's ambient population system rather than baked into the world mesh, so
 # they never become part of the static collision surface.
-HERDS = (
-    ("herd-north-pasture", "sunmane_steppe_horse", 7, (-39.0, -59.0), 5.4, "Idle_A"),
-    ("herd-east-paddock", "sunmane_dun_mare", 6, (40.0, -18.0), 5.6, "Idle_A"),
-    ("herd-saltmane-paddock", "sunmane_steppe_horse", 6, (57.0, 37.0), 5.8, "Idle_A"),
-    ("herd-duskrider-paddock", "sunmane_dun_mare", 6, (-28.0, 45.0), 6.2, "Idle_A"),
-    ("herd-south-paddock", "sunmane_steppe_horse", 5, (18.0, 40.0), 5.4, "Idle_A"),
-    ("herd-barrow-paddock", "sunmane_grey_pony", 5, (43.0, -51.0), 5.6, "Idle_A"),
-    ("herd-open-steppe-west", "sunmane_steppe_horse", 8, (-50.0, -8.0), 13.0, "Idle_A"),
-    ("herd-open-steppe-east", "sunmane_dun_mare", 8, (66.0, -8.0), 12.0, "Idle_A"),
-    ("herd-open-steppe-north", "sunmane_steppe_horse", 7, (-6.0, -64.0), 12.0, "Idle_A"),
-    ("herd-open-steppe-south", "sunmane_dun_mare", 7, (24.0, 50.0), 12.0, "Idle_A"),
-    ("mounts-crossroads", "sunmane_grey_pony", 4, (-21.0, 12.0), 2.6, "Idle_A"),
-    ("mounts-east-hitching", "sunmane_grey_pony", 4, (21.0, 13.0), 2.6, "Idle_A"),
-    ("mounts-west-caravanserai", "sunmane_grey_pony", 4, (-45.0, 12.0), 2.2, "Idle_A"),
-    ("mounts-east-caravanserai", "sunmane_grey_pony", 4, (45.0, 11.0), 2.2, "Idle_A"),
-    ("mounts-market", "sunmane_steppe_horse", 3, (-20.0, 12.0), 1.8, "Idle_A"),
-    # The desert road: strings of ponies waiting out the heat at the two water
-    # stations, and the picket lines of the three dune camps.
-    ("mounts-dune-station-west", "sunmane_grey_pony", 3, (4.0, -88.0), 2.8, "Idle_A"),
-    ("mounts-dune-station-east", "sunmane_grey_pony", 3, (64.0, -96.0), 2.8, "Idle_A"),
-    ("mounts-dune-camp-north", "sunmane_dun_mare", 3, (-19.0, -108.0), 3.0, "Idle_A"),
-    ("mounts-dune-camp-mid", "sunmane_grey_pony", 3, (46.0, -99.0), 3.0, "Idle_A"),
-    ("mounts-dune-camp-east", "sunmane_dun_mare", 3, (86.0, -79.0), 3.0, "Idle_A"),
-    ("herd-dune-margin", "sunmane_dun_mare", 6, (30.0, -78.0), 11.0, "Idle_A"),
-    ("herd-foothill-pasture", "sunmane_steppe_horse", 6, (104.0, -60.0), 11.0, "Idle_A"),
-)
+HERDS = ()  # Procedural livestock archived; do not repopulate retired models.
 
 # Server-owned population: NPCs, harvestables and hostile spawns the server
 # profile must register. Recorded here so the server pull request has an exact

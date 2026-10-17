@@ -7,7 +7,7 @@ the Creative Commons Attribution 4.0 International License (CC BY 4.0).
 
 The music and sound recordings in `source/audio/` and
 `../godot-client/assets/audio/` retain their individual third-party licenses
-(CC0 1.0 or CC BY 3.0); this original-asset license does not apply to them.
+(CC0 1.0, CC BY 3.0 or CC BY 4.0); this original-asset license does not apply to them.
 See `source/audio/manifest.json` and `../godot-client/assets/audio/CREDITS.txt`
 for creators, source links, modifications, and license notices. Full texts
 are included in `../godot-client/assets/audio/licenses/`.

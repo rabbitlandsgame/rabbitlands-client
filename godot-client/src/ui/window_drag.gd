@@ -25,6 +25,8 @@ signal moved(to: Vector2)
 var window: Control
 ## Optional fixed bottom surface, for HUDs taller than the default reserve.
 var bottom_hud: Control
+## Some HUD surfaces can be locked while their other controls remain usable.
+var enabled := true
 
 var _dragging := false
 var _grab_offset := Vector2.ZERO
@@ -59,7 +61,7 @@ static func attach(target: Control, handle: Control) -> WindowDrag:
 	return dragger
 
 func _on_handle_input(event: InputEvent, handle: Control) -> void:
-	if not is_instance_valid(window):
+	if not enabled or not is_instance_valid(window):
 		return
 	if event is InputEventMouseButton:
 		var click: InputEventMouseButton = event as InputEventMouseButton
@@ -67,7 +69,7 @@ func _on_handle_input(event: InputEvent, handle: Control) -> void:
 			return
 		_dragging = click.pressed
 		if click.pressed:
-			window.move_to_front()
+			preload("res://src/ui/window_stack.gd").activate(window)
 			_grab_offset = click.global_position - window.global_position
 		else:
 			moved.emit(window.position)

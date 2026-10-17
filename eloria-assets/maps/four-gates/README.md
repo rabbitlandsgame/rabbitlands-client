@@ -52,7 +52,7 @@ Each model is taken from the first folder that has it.
   posts, sundial and juniper.
 
 The Four Gates set (townhouses, autumn trees, garden pieces, street and farm props) is described in
-`work-output/four-gates-2026-09-28/asset-prompts.md`.
+`.local/asset-authoring/workspace/work-output/four-gates-2026-09-28/asset-prompts.md`.
 
 Each model is scaled to its size in `SIZES`, stood on the origin, and its textures shrunk and
 content-addressed into `assets/textures/`. `source/prepare-meshy-kit.json` records the input and
@@ -60,8 +60,8 @@ output digests, and `--check` verifies them.
 
 ## Checks and evidence
 
-`runtime-validation.json` records grounding and manifest checks. Artifacts under
-`work-output/coastal-rollout/four-gates` hold actual `World.find_path` proofs,
+`runtime-validation.json` records grounding and manifest checks. Artifacts in the local authoring archive under
+`.local/asset-authoring/workspace/work-output/coastal-rollout/four-gates` hold actual `World.find_path` proofs,
 complete practice-yard audits, frozen baseline scenes, matched gameplay-camera
 images and the annotated review. The elevated Sanctuary beacon is intentionally
 above ground and produces an expected landmark warning.

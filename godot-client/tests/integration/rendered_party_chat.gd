@@ -29,11 +29,11 @@ func _run() -> void:
 	_chat(0, "Mira: Meet at Rellan for the gauntlet.")
 	_chat(5, "Tavi: Heading to the bridge.", 7)
 	_chat(0, "[Party] Rowan: Ready when you are.", 4)
-	_chat(0, "[Party] Nesh: I have the sigils.", 4)
+	_chat(0, "[Party] Nash: I have the sigils.", 4)
 	_chat(6, "Ari: Buying Sunleaf at the market.", 2)
 	_chat(1, "Mira: Save a place for me.", 1)
 	var members: Array = []
-	var names := ["Kellan", "Mira", "Rowan", "Nesh", "Tavi", "Ilse"]
+	var names := ["Kellan", "Mira", "Rowan", "Nash", "Tavi", "Ilse"]
 	for index in range(names.size()):
 		members.append({"name": names[index], "leader": index == 0, "is_self": index == 0,
 			"online": index < 5, "health": [180, 135, 36, 170, 150, 0][index], "max_health": 180,

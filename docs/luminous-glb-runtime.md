@@ -1,5 +1,12 @@
 # Luminous animated GLB runtime
 
+> **Historical.** This describes the retired C client's Cal3D and
+> fixed-function path, removed on 2026-09-03; see
+> [../ELORIA_MODIFICATIONS.md](../ELORIA_MODIFICATIONS.md). The Godot client's
+> player action map is `godot-client/data/animations/luminous.json`, where
+> `walk` plays `Walk` and `run` plays `Run_Female`. The `actors/playable/native`
+> path below no longer exists.
+
 Luminous female (actor type 0) and male (actor type 1) are rendered directly
 from the original `Superhero_<sex>_FullBody.gltf` files under
 `actors/playable/native`. Other actors continue to use Cal3D. The runtime

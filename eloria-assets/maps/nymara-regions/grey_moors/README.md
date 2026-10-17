@@ -48,7 +48,8 @@ seats generated models in the territory palette's kit
 (`godot-client/world_authoring/regions/grey_moors/assets/prototypes/kit-*.glb`), beside the
 territory's published pieces. Each model is taken from the first folder that has it.
 
-- The Grey Moors set, from `work-output/grey-moors-2026-09-28/asset-prompts.md`: heather, gorse,
+- The Grey Moors set, from
+  `.local/asset-authoring/workspace/work-output/grey-moors-2026-09-28/asset-prompts.md`: heather, gorse,
   bog cotton, rushes and bracken; three standing stones, grave markers, candle stakes and a giant
   skeleton; peat stacks, a peat barrow and a peat winch, a turf shieling, dry-stone dykes and a
   sheepfold; a wisp lantern, a bog-oak stump, a raven snag and a ruined chapel; two bog pools; and a

@@ -8,7 +8,7 @@ The composition follows a practical ascent: boat landing and quay houses; physic
 
 `world.glb` and `world-lod2.glb` contain procedural geometry and embedded textures. `collision.bin` is a 720 × 720 half-metre grid. `minimap.webp` is rendered from the geometry. `world.json` declares all 45 original landmark IDs, 9 ordinary portals, 10 arrivals/returns and 13 exterior secret entrances; the provisioner's separate secret remains inside the seven-room insides map. Original concept references and earlier production captures remain under `references/` as historical evidence.
 
-Current gameplay-camera before/after evidence and the regional route audit live in `work-output/southern-rollout/verdant-stair/` in the integration workspace. The live server fixture is `live-fixture.json`; its served standing posts are audited after paired publication, including actual NPC and furniture occupancy.
+Current gameplay-camera before/after evidence and the regional route audit live in `.local/asset-authoring/workspace/work-output/southern-rollout/verdant-stair/`, in the local authoring archive (see `docs/asset-authoring.md`). The live server fixture is `live-fixture.json`; its served standing posts are audited after paired publication, including actual NPC and furniture occupancy.
 
 ## Reproduction
 
@@ -47,7 +47,8 @@ The old map remains visible in archived baseline evidence. Its broad tiled court
 ## Editor kit
 
 `source/prepare_meshy_kit.py --input <folder>` seats the generated models from
-`work-output/verdant-stair-2026-09-27/asset-prompts.md` in the territory palette's
+`.local/asset-authoring/workspace/work-output/verdant-stair-2026-09-27/asset-prompts.md`
+in the territory palette's
 kit (`godot-client/world_authoring/regions/verdant_stair/assets/prototypes/kit-*.glb`):
 mossy limestone crags and boulders, undergrowth, flowering shrubs, tree ferns and
 saplings, mossy logs and stumps, wildflower meadow patches, river reeds and stones,

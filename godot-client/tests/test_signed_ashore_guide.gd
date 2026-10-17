@@ -1,6 +1,6 @@
 extends SceneTree
 ## The guide card for Signed Ashore (`signed_ashore_v1`), fed through the real
-## decoder: its chapter label, Nesh's help button, a progress count for any
+## decoder: its chapter label, Nash's help button, a progress count for any
 ## fact that needs more than one, and a manufacture highlight that follows
 ## the recipe the server names. The Lantern's own card must not change.
 
@@ -43,7 +43,7 @@ func run() -> void:
 	guide.apply_state(card(ashore))
 	expect(guide.visible and guide.card.visible, "an active chapter shows the card")
 	expect(guide.chapter.text == "SIGNED ASHORE  ·  2 / 10", "chapter label is the chapter and its step: " + guide.chapter.text)
-	expect(guide.help.visible and guide.help.text == "Ask Nesh", "Nesh answers for the chapter")
+	expect(guide.help.visible and guide.help.text == "Ask Nash", "Nash answers for the chapter")
 	expect(guide.skip.text == "Skip tutorial…", "the chapter is skipped, not left")
 	expect(guide.instruction.text.ends_with("\nProgress: 2 / 5"), "a five-Olive fact counts: " + guide.instruction.text)
 	var single := ashore.duplicate(true)

@@ -131,7 +131,8 @@ def main() -> int:
         "recipes": entries,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(json.dumps(document, indent=2) + "\n",
+                           encoding="utf-8", newline="\n")
     print(f"wrote {len(entries)} recipes to {args.output}")
 
     if args.knowledge_output is not None:
@@ -148,7 +149,8 @@ def main() -> int:
         }
         args.knowledge_output.parent.mkdir(parents=True, exist_ok=True)
         args.knowledge_output.write_text(
-            json.dumps(knowledge_document, indent=2) + "\n", encoding="utf-8")
+            json.dumps(knowledge_document, indent=2) + "\n",
+            encoding="utf-8", newline="\n")
         print(f"wrote {len(knowledge_order)} knowledges"
               f" to {args.knowledge_output}")
     return 0

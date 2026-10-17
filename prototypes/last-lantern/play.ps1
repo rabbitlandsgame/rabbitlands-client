@@ -73,7 +73,7 @@ try {
     if (-not $ready) { throw "Local server did not start. See $profile\server-errors.log" }
     Write-Host 'Rabbit Lands is ready. Click Connect, then New Character to begin The Last Lantern.'
     Write-Host "Returning players: log in with the same local character. Saves: $database"
-    & $Godot --path $clientRoot -- "--server=127.0.0.1" "--port=$Port"
+    & $Godot --path $clientRoot -- --dev-plain-tcp "--server=127.0.0.1" "--port=$Port"
     if ($LASTEXITCODE -ne 0) { throw "Godot exited with code $LASTEXITCODE" }
 } finally {
     if ($localServer -and -not $localServer.HasExited) {

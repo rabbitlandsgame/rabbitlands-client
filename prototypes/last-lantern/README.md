@@ -1,6 +1,6 @@
 # The Last Lantern — in Eloria
 
-`play.cmd` now launches **the actual Eloria client and a private local dev-server**.
+`play.cmd` now launches **the actual Rabbit Lands client and a private local Rabbit Lands server**.
 Create a character to begin the rescue on Lantern Reach, a small coastal map
 that leads into Four Gates. The original standalone project remains a design reference.
 
@@ -18,7 +18,7 @@ The server listens only on `127.0.0.1:2008`, uses normal gameplay timing, and
 stops when this client closes. Terrain is prepared from the shipped collision
 grids. Local characters and client preferences live in `.local/native/`.
 `-Fresh` creates a separate profile without deleting previous saves.
-The matching `dev-server` checkout must sit beside `eloria-client`.
+The matching `rabbitlands-server` checkout must sit beside `rabbitlands-client`.
 
 ## The real gameplay route
 
@@ -53,8 +53,10 @@ Gates without awarding completion. Closing instructions never completes a lesson
 
 ## Implementation and design reference
 
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
 The client loads `eloria-assets/maps/lantern-reach/` through its normal map registry.
-Server integration lives in `dev-server/eloria/lantern.py`; gameplay remains in
+Server integration lives in `rabbitlands-server/eloria/lantern.py`; gameplay remains in
 the existing server handlers. Client rendering is in `src/world/lantern_scene.gd`
 and guidance in `src/ui/lantern_guide.gd`.
 

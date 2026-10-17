@@ -6,6 +6,8 @@ extends SceneTree
 ## effect it announced. Nothing plays on a guess, and a snapshot that restates
 ## what was already true is not a new event.
 
+const AudioMix := preload("res://src/audio/audio_mix.gd")
+
 var failures := 0
 var played: Array[String] = []
 
@@ -26,6 +28,9 @@ func _run() -> void:
 		quit(failures)
 		return
 	await process_frame
+	_expect(is_equal_approx(float(director.get("volume_linear")), AudioMix.MASTER_DEFAULT)
+		and is_equal_approx(float(director.get("category_volumes").interface), 0.2),
+		"fresh settings start with a softer master and quiet HUD sounds")
 
 	var names: Array = director.call("sound_names") as Array
 	_expect(names.size() == 31 and names.has("harvest_start")
@@ -111,12 +116,9 @@ func _run() -> void:
 	director.set("enabled", true)
 
 	# The setting is the player's own, and it is kept.
-	var toggle: CheckButton = main.get_node(
-		"GameView/SettingsLayer/SettingsWindow/SettingsBody/SettingsTabs/Audio/Audio/SoundRow/SoundEnabled") as CheckButton
-	var slider: HSlider = main.get_node(
-		"GameView/SettingsLayer/SettingsWindow/SettingsBody/SettingsTabs/Audio/Audio/SoundRow/SoundVolume") as HSlider
-	var readout: Label = main.get_node(
-		"GameView/SettingsLayer/SettingsWindow/SettingsBody/SettingsTabs/Audio/Audio/SoundRow/SoundVolumeValue") as Label
+	var toggle := main.get("sound_enabled") as CheckButton
+	var slider := main.get("sound_volume") as HSlider
+	var readout := main.get("sound_volume_value") as Label
 	main.call("_on_sound_volume_changed", 0.35)
 	await process_frame
 	_expect(is_equal_approx(float(director.get("volume_linear")), 0.35)
@@ -176,7 +178,7 @@ func _run() -> void:
 	var music_player := director.get("_music_player") as AudioStreamPlayer
 	main.call("_on_sound_volume_changed", 0.35)
 	_expect(music_player != null and music_player.playing
-		and is_equal_approx(db_to_linear(music_player.volume_db), 0.35 * 0.35),
+		and is_equal_approx(_output_gain(music_player), 0.35 * 0.55),
 		"volume changes apply to music already playing")
 	main.call("_on_sound_volume_changed", 0.7)
 	app_state.call("_on_packet", 54, _nul(""))
@@ -188,7 +190,7 @@ func _run() -> void:
 	_expect(str(director.call("current_music")).is_empty(),
 		"and a bed this client does not have stays quiet rather than guessing")
 
-	var credits_button := main.get_node("GameView/SettingsLayer/SettingsWindow/SettingsBody/SettingsTabs/Audio/Audio/AudioCreditsButton") as Button
+	var credits_button := main.find_child("AudioCreditsButton", true, false) as Button
 	credits_button.pressed.emit()
 	await process_frame
 	var dialog := main.get_node_or_null("AudioCredits") as AcceptDialog
@@ -205,10 +207,107 @@ func _run() -> void:
 		_expect(main.get_node("AudioCredits") == dialog, "reopening credits reuses the window")
 		dialog.hide()
 
+	await _test_audio_mix(main, director, app_state)
+
 	print("audio director tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	main.queue_free()
 	await process_frame
 	quit(failures)
+
+func _test_audio_mix(main: Control, director: Node, state: Node) -> void:
+	var window := main.get("settings_window") as Control
+	var panel := window.get("panel") as PanelContainer
+	window.call("open_tab", "Audio")
+	await process_frame
+	var cases := {"ui_click": "interface", "ui_close": "interface",
+		"footstep_stone_1": "footsteps", "combat_hit": "combat",
+		"spell_cast": "combat", "world_effect": "combat",
+		"harvest_start": "activity", "item_pickup": "activity",
+		"level_up": "activity", "civic_crowd": "ambience"}
+	for sound: String in cases:
+		director.call("play", sound)
+		var voices: Array = director.get("_voices")
+		var index := (int(director.get("_next_voice")) + voices.size() - 1) % voices.size()
+		_expect((voices[index] as AudioStreamPlayer).bus == AudioMix.CATEGORIES[cases[sound]].bus,
+			"the correct category controls " + sound)
+
+	director.call("stop_all")
+	state.call("_on_packet", 54, _nul("settlement"))
+	var music := director.get("_music_player") as AudioStreamPlayer
+	var position := music.get_playback_position()
+	state.call("_on_packet", 54, _nul("settlement"))
+	_expect(music.get_playback_position() >= position,
+		"repeating the current music request preserves playback position")
+	for category: String in AudioMix.CATEGORIES:
+		var slider := panel.find_child("audio_" + category, true, false) as HSlider
+		var readout := panel.find_child("audio_" + category + "_value", true, false) as Label
+		_expect(slider != null and readout != null, category + " has a volume control")
+		if slider == null or readout == null:
+			continue
+		slider.value = 0.31
+		var config := ConfigFile.new()
+		config.load(str(main.get("SETTINGS_PATH")))
+		_expect(readout.text == "31%"
+			and is_equal_approx(float(config.get_value("audio", category + "_volume", -1)), 0.31),
+			category + " applies and saves the player's slider choice")
+		var bus := AudioServer.get_bus_index(AudioMix.CATEGORIES[category].bus)
+		_expect(is_equal_approx(db_to_linear(AudioServer.get_bus_volume_db(bus)), 0.31),
+			category + " updates the live mix")
+		slider.value = 0.0
+		_expect(AudioServer.is_bus_mute(bus), category + " at zero is fully muted")
+		slider.value = 0.31
+	_expect(music.playing and is_equal_approx(_output_gain(music), 0.7 * 0.31),
+		"adjusting categories keeps the map music playing at the chosen level")
+	main.call("_load_hud_settings")
+	for category: String in AudioMix.CATEGORIES:
+		_expect(is_equal_approx(float(director.get("category_volumes")[category]), 0.31),
+			category + " is restored from saved settings")
+
+	main.call("_on_sound_enabled_toggled", false)
+	_expect(not music.playing, "disabling audio stops music immediately")
+	state.call("_on_packet", 54, _nul("wilds"))
+	main.call("_on_sound_enabled_toggled", true)
+	_expect(music.playing and str(director.call("current_music")) == "wilds",
+		"enabling audio starts the latest map track received while muted")
+	main.call("_on_sound_enabled_toggled", false)
+	state.call("_on_packet", 54, _nul(""))
+	main.call("_on_sound_enabled_toggled", true)
+	_expect(not music.playing, "a quiet map stays quiet after enabling audio")
+	state.call("_on_packet", 54, _nul("settlement"))
+	main.call("_on_sound_enabled_toggled", false)
+	state.call("_on_connection_state_changed", "disconnected")
+	main.call("_on_sound_enabled_toggled", true)
+	_expect(not music.playing, "disconnecting forgets the previous map's music")
+
+	state.call("_on_packet", 14, _sound_bytes("harvest_start", 1, 1, 50))
+	var voices: Array = director.get("_voices")
+	var last := (int(director.get("_next_voice")) + voices.size() - 1) % voices.size()
+	_expect(is_equal_approx(db_to_linear((voices[last] as AudioStreamPlayer).volume_db), 0.5),
+		"server sound gain is preserved beneath the player's category volume")
+
+	# Existing profiles keep the master choice and acquire the softer categories.
+	var legacy := ConfigFile.new()
+	legacy.set_value("audio", "enabled", true)
+	legacy.set_value("audio", "volume", 0.85)
+	legacy.save(str(main.get("SETTINGS_PATH")))
+	main.call("_load_hud_settings")
+	window.call("open_tab", "Audio")
+	_expect(is_equal_approx(float(director.get("volume_linear")), 0.85)
+		and is_equal_approx(float(director.get("category_volumes").interface), 0.2)
+		and (panel.find_child("audio_interface_value", true, false) as Label).text == "20%",
+		"legacy settings retain their master volume and receive softer category defaults")
+
+func _output_gain(player: AudioStreamPlayer) -> float:
+	var gain := db_to_linear(player.volume_db)
+	var bus := AudioServer.get_bus_index(player.bus)
+	while bus >= 0:
+		if AudioServer.is_bus_mute(bus):
+			return 0.0
+		gain *= db_to_linear(AudioServer.get_bus_volume_db(bus))
+		if bus == 0:
+			break
+		bus = AudioServer.get_bus_index(AudioServer.get_bus_send(bus))
+	return gain
 
 func _nul(value: String) -> PackedByteArray:
 	var bytes: PackedByteArray = value.to_utf8_buffer()

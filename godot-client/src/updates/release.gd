@@ -236,7 +236,7 @@ static func recover(root: String) -> String:
 	DirAccess.remove_absolute(journal)
 	return ""
 
-static func install(root: String, identity: Dictionary) -> String:
+static func install(root: String, identity: Dictionary, repair := false) -> String:
 	# Also protect games started directly, outside the restart launcher.
 	var running_cache := DirAccess.open(cache_for(root))
 	if running_cache != null:
@@ -259,7 +259,7 @@ static func install(root: String, identity: Dictionary) -> String:
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return release.error
 	var current := read_json(root.path_join("app/client-release.json"))
-	if contains_commit(current, release.commit):
+	if not repair and contains_commit(current, release.commit):
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return ""
 	if not check_file(cache.path_join("release.zip"), int(release.size), release.sha256):

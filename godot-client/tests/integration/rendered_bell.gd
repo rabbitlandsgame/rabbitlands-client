@@ -42,7 +42,7 @@ func go(tile: Vector2i) -> void:
 
 func nesh(response: int) -> void:
 	await go(Vector2i(68,76))
-	var id:=actor_id("Wayfinder Nesh")
+	var id:=actor_id("Nash")
 	net.touch_actor(id)
 	await create_timer(.4).timeout
 	main._on_dialogue_option(id,response)
@@ -101,7 +101,7 @@ func run() -> void:
 	state=root.get_node("AppState");net=root.get_node("Network")
 	main.host_edit.text="127.0.0.1"
 	main.port_edit.value=int(OS.get_environment("ELORIA_INTEGRATION_PORT"))
-	main.secure_check.button_pressed=false
+	main._dev_plain_tcp=true
 	main._on_connect_pressed()
 	if not await wait_until(func():return state.connection_state=="connected","connect"):return
 	main.user_edit.text="BellQA";main.password_edit.text="BellReview42"

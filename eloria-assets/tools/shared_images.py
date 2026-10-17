@@ -38,7 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import shared_meshes
 from shared_meshes import (INDEX, MAPS, POOL, SETS, _prune, package_glbs, manifest_for,  # noqa: E402
-                           read_glb, sha256, write_glb)
+                           read_glb, sha256, write_glb, write_manifest, write_package_glb)
 
 IMAGE_POOL = MAPS / "_shared" / "images"
 MANIFEST_KEY = "externalResources"
@@ -88,7 +88,7 @@ def externalise(glb: Path, dry_run: bool) -> dict:
     document, binary = _prune(document, binary)
     data = write_glb(document, binary)
     if not dry_run:
-        glb.write_bytes(data)
+        write_package_glb(glb, data)
     return {"moved": len(embedded), "bytes": before - len(data), "written": written, "uris": uris}
 
 
@@ -100,10 +100,7 @@ def record_manifest(glb: Path, uris: dict, dry_run: bool) -> bool:
     manifest = json.loads(text)
     resources = manifest.get(MANIFEST_KEY)
     manifest[MANIFEST_KEY] = dict(sorted({**(resources if isinstance(resources, dict) else {}), **uris}.items()))
-    rendered = json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
-    if "\r\n" in text:
-        rendered = rendered.replace("\n", "\r\n")
-    manifest_path.write_bytes(rendered.encode("utf-8"))
+    write_manifest(manifest_path, manifest, text)
     return True
 
 

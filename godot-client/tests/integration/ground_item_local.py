@@ -79,8 +79,8 @@ async def probe(port: int) -> None:
     reader, writer, _ = await login(port, name, password)
     try:
         await ask(writer, reader, "#clientcaps item_detail_v1")
-        granted = texts(await ask(writer, reader, "#give Deep Coal 4"))
-        check("the probe has something to drop", "Gave 4 Deep Coal" in granted,
+        granted = texts(await ask(writer, reader, "#give Coal 4"))
+        check("the probe has something to drop", "Gave 4 Coal" in granted,
               granted)
 
         # Drop whatever is in the first inventory slot. Which item that is

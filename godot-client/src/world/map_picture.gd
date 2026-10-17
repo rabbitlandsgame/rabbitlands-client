@@ -5,7 +5,8 @@ extends RefCounted
 ## A chunk-streamed territory holds only the chunks around the player, so a
 ## live render of the world framed to the whole region showed the resident
 ## chunks in a field of nothing. Every region ships its picture already:
-## `minimap.webp`, one pixel a metre, north up, framed by cartography.json
+## `minimap.webp`, north up, framed by cartography.json, with a higher-resolution
+## detail image for the active region when available. Both use the same extent,
 ## exactly as the full-map camera frames the region. This lays that picture on
 ## the ground a metre under the lowest terrain, on a visual layer only the map
 ## cameras render, so the Tab map and the minimap read the whole region

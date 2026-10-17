@@ -32,6 +32,21 @@ const GRAB := 13
 
 const CURSOR_COUNT := 14
 
+## Right-click follows this order, skipping actions unavailable under the
+## pointer; selection itself never sends a command.
+const WORLD_ACTIONS: Array[String] = [
+	"walk", "trade", "attack", "use", "pick", "harvest", "talk", "look"]
+const ACTION_CURSORS := {
+	"walk": WALK, "trade": TRADE, "attack": ATTACK, "use": USE,
+	"pick": PICK, "harvest": HARVEST, "talk": TALK, "look": EYE,
+}
+const ACTION_TARGETS := {
+	"trade": ["player"], "attack": ["player", "creature", "summon"],
+	"use": ["interactive", "portal"], "pick": ["bag"],
+	"harvest": ["harvest"], "talk": ["npc", "summon"],
+	"look": ["player", "self", "creature", "npc", "summon", "harvest", "portal", "interactive"],
+}
+
 ## The item-slot pointers, which live on the interface rather than in the
 ## world: the inventory's tool in hand decides which of the three a slot
 ## promises, so the pointer says "move", "use" or "look" before the click.
@@ -132,7 +147,7 @@ func install_text_caret() -> void:
 ##       or one of SLOT_CURSORS' keys, the targets that live on the interface
 ##       instead: an item slot whose click will move, use or look at the item.
 ##   alive: bool - the hovered actor is alive.
-##   mode: "walk" | "attack" | "trade" - the icon bar's interaction mode.
+##   mode: one of WORLD_ACTIONS - the selected interaction mode.
 ##   alt: bool - Alt is held, the click-to-attack preview.
 ##   spell_target: "" | "actor" | "location" - a cast is waiting for a target.
 static func choose(context: Dictionary) -> int:
@@ -148,12 +163,23 @@ static func choose(context: Dictionary) -> int:
 	# A spell waiting for an actor claims every actor under the pointer: the
 	# click will cast at them, whoever they are (TOUCH_PLAYER in the click
 	# handler), so nothing else the pointer could say matters.
-	if spell == "actor" and target in ["npc", "player", "self", "creature"]:
+	if spell == "actor" and target in ["npc", "player", "self", "creature", "summon"]:
 		return WAND
+	if spell == "location":
+		return WAND
+	# Explicit tools show their selected glyph over ground, and an arrow over
+	# incompatible targets. Walk retains contextual talk/attack/pick on hover.
+	if mode != "walk" and ACTION_CURSORS.has(mode):
+		if bool(context.get("alt", false)) and alive \
+				and target in ["player", "creature", "summon"]:
+			return ATTACK
+		if not target.is_empty() and (target not in ACTION_TARGETS[mode] \
+				or (mode in ["trade", "attack"] and not alive)):
+			return ARROW
+		return int(ACTION_CURSORS[mode])
 	match target:
 		"npc":
-			# The legacy client talks to NPCs in every mode short of look mode,
-			# which this client does not carry: a click is always a greeting.
+			# In the normal contextual mode a click on an NPC is a greeting.
 			return TALK
 		"creature":
 			# An alive creature defaults to attack-on-click even in walk mode
@@ -182,7 +208,4 @@ static func choose(context: Dictionary) -> int:
 			return EYE if bool(context.get("alt", false)) else ENTER
 		"interactive":
 			return USE
-	# Bare ground: a location cast claims the click, otherwise it walks.
-	if spell == "location":
-		return WAND
 	return WALK

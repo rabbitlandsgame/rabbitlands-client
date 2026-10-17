@@ -655,15 +655,12 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 32.0
-offset_right = -94.0
-offset_bottom = -86.0
+offset_right = -74.0
+offset_bottom = -67.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="MapLayout" type="Control" parent="GameView/FullMap" unique_id=1231044442]
-custom_minimum_size = Vector2(856, 560)
 layout_mode = 2
 
 [node name="Sidebar" type="PanelContainer" parent="GameView/FullMap/MapLayout" unique_id=1129579151]
@@ -671,34 +668,45 @@ layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 216.0
+clip_contents = true
 
-[node name="SidebarContent" type="VBoxContainer" parent="GameView/FullMap/MapLayout/Sidebar" unique_id=47257493]
+[node name="SidebarLayout" type="VBoxContainer" parent="GameView/FullMap/MapLayout/Sidebar"]
 layout_mode = 2
+
+[node name="SidebarScroll" type="ScrollContainer" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="SidebarContent" type="VBoxContainer" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll" unique_id=47257493]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="ContinentButton" type="TextureButton" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=1082257832]
+[node name="ContinentButton" type="TextureButton" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent" unique_id=1082257832]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(210, 150)
+custom_minimum_size = Vector2(0, 132)
 layout_mode = 2
 tooltip_text = "Show the Nymara continent"
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="CurrentMapButton" type="Button" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=45447814]
+[node name="CurrentMapButton" type="Button" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent" unique_id=45447814]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Return to your current server map"
 text = "Current map"
+clip_text = true
 
-[node name="LegendTitle" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=627063153]
+[node name="LegendTitle" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent" unique_id=627063153]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "LEGEND"
 horizontal_alignment = 1
 
-[node name="MapLegend" type="RichTextLabel" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=1862950269]
+[node name="MapLegend" type="RichTextLabel" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent" unique_id=1862950269]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(210, 354)
+custom_minimum_size = Vector2(0, 354)
 layout_mode = 2
 theme_override_font_sizes/normal_font_size = 14
 bbcode_enabled = true
@@ -723,7 +731,7 @@ text = "[color=#ef795f]●[/color] Tavern
 fit_content = true
 scroll_active = false
 
-[node name="MapMarkerTitle" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=627063154]
+[node name="MapMarkerTitle" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent" unique_id=627063154]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -731,24 +739,24 @@ theme_override_font_sizes/font_size = 20
 text = "MARKERS"
 horizontal_alignment = 1
 
-[node name="MapMarkerList" type="RichTextLabel" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=1862950270]
+[node name="MapMarkerList" type="RichTextLabel" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent" unique_id=1862950270]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(210, 0)
 layout_mode = 2
 theme_override_font_sizes/normal_font_size = 14
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="MapCoordinates" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarContent" unique_id=407150951]
+[node name="MapCoordinates" type="Label" parent="GameView/FullMap/MapLayout/Sidebar/SidebarLayout" unique_id=407150951]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-size_flags_vertical = 10
+theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(1, 0.9, 0.35, 1)
 text = "Coordinates: —"
-vertical_alignment = 2
-autowrap_mode = 2
+vertical_alignment = 1
+clip_text = true
 
 [node name="MapTitle" type="Label" parent="GameView/FullMap/MapLayout" unique_id=1012637189]
 unique_name_in_owner = true
@@ -764,15 +772,13 @@ horizontal_alignment = 1
 
 [node name="MapImage" type="TextureRect" parent="GameView/FullMap/MapLayout" unique_id=1760195381]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(480, 480)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 224.0
 offset_top = 32.0
-offset_right = -8.0
-offset_bottom = -8.0
+offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
@@ -819,6 +825,17 @@ grow_vertical = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+
+[node name="MapCursorCoordinates" type="Label" parent="GameView/FullMap/MapLayout"]
+unique_name_in_owner = true
+visible = false
+z_index = 1
+layout_mode = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.72, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 14
 
 [node name="ResourceHud" type="PanelContainer" parent="GameView" unique_id=1140901950]
 layout_mode = 1
@@ -1854,9 +1871,10 @@ theme_override_constants/separation = 10
 [node name="SoundEnabled" type="CheckButton" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341516]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "Play Rabbit Lands' sounds for what the server reports"
+tooltip_text = "Enable music, world sounds, and HUD sounds"
 button_pressed = true
-text = "Sound"
+text = "Master audio"
+custom_minimum_size = Vector2(200, 0)
 
 [node name="SoundVolume" type="HSlider" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341517]
 unique_name_in_owner = true
@@ -1866,13 +1884,13 @@ size_flags_horizontal = 3
 min_value = 0.0
 max_value = 1.0
 step = 0.05
-value = 0.7
+value = 0.6
 
 [node name="SoundVolumeValue" type="Label" parent="GameView/SettingsControls/Content/SoundRow" unique_id=429341518]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(52, 0)
 layout_mode = 2
-text = "70%"
+text = "60%"
 horizontal_alignment = 2
 
 [node name="ShowThroughObstacles" type="CheckButton" parent="GameView/SettingsControls/Content" unique_id=1502773650]
@@ -1960,7 +1978,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 16
-text = "MESSAGE CONSOLE  •  full session history  •  ~ to close"
+text = "CHAT LOG  •  full session history  •  ~ to close"
 
 [node name="ConsoleDiagnostics" type="Button" parent="GameView/ConsolePanel/Content/Header" unique_id=411902733]
 unique_name_in_owner = true
@@ -2861,7 +2879,7 @@ offset_left = 12.0
 offset_top = 92.0
 offset_right = 520.0
 offset_bottom = 126.0
-text = "LMB move  •  RMB drag rotate  •  MMB drag pan  •  Wheel zoom  •  Tab map"
+text = "LMB action  •  RMB cycle action  •  MMB drag rotate  •  Wheel zoom  •  Tab map"
 
 [node name="CarriedItem" type="TextureRect" parent="GameView" unique_id=311420778]
 unique_name_in_owner = true
@@ -3356,12 +3374,7 @@ unique_name_in_owner = true
 layout_mode = 2
 min_value = 1.0
 max_value = 65535.0
-value = 2000.0
-
-[node name="Secure" type="CheckBox" parent="LoginPanel/Content" unique_id=1774390021]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Encrypted connection (TLS)"
+value = 2001.0
 
 [node name="Username" type="LineEdit" parent="LoginPanel/Content" unique_id=1883658216]
 unique_name_in_owner = true

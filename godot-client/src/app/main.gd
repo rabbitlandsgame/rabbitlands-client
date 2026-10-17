@@ -3,12 +3,14 @@ extends Control
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
 const LanternGuideScript = preload("res://src/ui/lantern_guide.gd")
+const WindowStackScript = preload("res://src/ui/window_stack.gd")
 const LanternSceneScript = preload("res://src/world/lantern_scene.gd")
 const BellSceneScript = preload("res://src/world/bell_scene.gd")
 const RoadSceneScript = preload("res://src/world/road_scene.gd")
 const SkySceneScript = preload("res://src/world/sky_scene.gd")
 const CartographyOwnershipGeometry = preload("res://addons/map_authoring_workspace/ownership_geometry.gd")
 var lantern_guide: Control
+var window_stack: Node
 var lantern_scene: Node3D
 
 const AppearanceChoices = preload("res://src/actors/appearance_choices.gd")
@@ -43,7 +45,8 @@ const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
 @onready var preview_rim_light: DirectionalLight3D = %RimLight
 @onready var host_edit: LineEdit = %Host
 @onready var port_edit: SpinBox = %Port
-@onready var secure_check: CheckBox = %Secure
+## A launch-only override for local developer servers; never saved as a preference.
+var _dev_plain_tcp := false
 @onready var user_edit: LineEdit = %Username
 @onready var password_edit: LineEdit = %Password
 @onready var connect_button: Button = %Connect
@@ -66,6 +69,7 @@ const ContinentMapScript := preload("res://src/ui/continent_map.gd")
 const MinimapMarkerOverlayScript := preload("res://src/ui/minimap_marker_overlay.gd")
 const PlayerInfoPanelScript := preload("res://src/ui/player_info_panel.gd")
 const AudioDirectorScript := preload("res://src/audio/audio_director.gd")
+const AudioMix := preload("res://src/audio/audio_mix.gd")
 const FootstepSurface := preload("res://src/audio/footstep_surface.gd")
 const SpellsWindowScript := preload("res://src/ui/spells_window.gd")
 const SummoningWindowScript := preload("res://src/ui/summoning_window.gd")
@@ -73,6 +77,9 @@ const EmotesWindowScript := preload("res://src/ui/emotes_window.gd")
 const RangingWindowScript := preload("res://src/ui/ranging_window.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
+const ChatHudScript := preload("res://src/ui/chat_hud.gd")
+const ChatMessages := preload("res://src/ui/chat_messages.gd")
+const ChatLogTabsScript := preload("res://src/ui/chat_log_tabs.gd")
 const LoginBackdropScript := preload("res://src/ui/login_backdrop.gd")
 const ReferenceWindowScript := preload("res://src/ui/reference_window.gd")
 const ActiveBuffBarScript := preload("res://src/ui/active_buff_bar.gd")
@@ -115,6 +122,7 @@ var map_light_root: Node3D
 @onready var map_image: TextureRect = %MapImage
 @onready var map_title: Label = %MapTitle
 @onready var map_coordinates: Label = %MapCoordinates
+@onready var map_cursor_coordinates: Label = %MapCursorCoordinates
 @onready var continent_button: TextureButton = %ContinentButton
 @onready var current_map_button: Button = %CurrentMapButton
 @onready var region_preview: TextureRect = %RegionPreview
@@ -266,6 +274,8 @@ var _pending_purchase: Array[String] = []
 @onready var chat_input: LineEdit = %ChatInput
 @onready var chat_panel: PanelContainer = %ChatPanel
 @onready var chat_hud: PanelContainer = %ChatWindow
+var system_chat_hud: PanelContainer
+var chat_log_tabs: HFlowContainer
 @onready var console_panel: PanelContainer = %ConsolePanel
 @onready var connection_banner: Label = %ConnectionBanner
 @onready var harvest_banner: Label = %HarvestBanner
@@ -351,7 +361,6 @@ var _effects_enabled := true
 var _nameplates_enabled := true
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
 var _fps_limit := 0
-var _camera_follows_player := true
 var _player_notes := ""
 ## True while the loaded package lets the hour drive its environment. An
 ## interior does not, and neither does a package that opts out.
@@ -412,6 +421,10 @@ var _continent_textures: Dictionary = {}
 ## Overlay-local indices map to the combined cartography table's region indices.
 var _continent_region_indices: Array[int] = []
 var _tab_map_textures: Dictionary = {}
+## Keep detailed images for visible regions and the most recent preview.
+## The wider overview uses the small images warmed in _tab_map_textures.
+var _tab_map_detail_textures: Dictionary = {}
+var _map_detail_visible: Dictionary = {}
 ## Which region the big map is showing as a preview, or -1 for none, with
 ## that map's own adapter so the cursor can name the tile under it.
 var _preview_region_index := -1
@@ -506,12 +519,25 @@ var _current_map_display_name := "Unknown map"
 var _minimap_scale := 1.0
 var _minimap_orientation := MINIMAP_DEFAULT_ORIENTATION
 var _minimap_zoom := MINIMAP_ZOOM_DEFAULT
-## How far the Tab map is pulled back, and the framing it is pulled back from.
-## Only a map that frames its neighbours (a continent exterior) pulls back.
+## Tab map extent relative to its default framing. Below 1 it magnifies the
+## cursor's location; above 1 a continent exterior shows its neighbours.
 var _full_map_region_id := ""
 var _full_map_zoom := 1.0
 var _full_map_base_size := 0.0
+var _full_map_base_position := Vector3.ZERO
 var _full_map_zoomable := false
+## Cursor zoom and manual pan hold their world position until returning to
+## the current map restores player follow. Delay a click until release so a drag
+## never also sends a movement command.
+var _full_map_panned := false
+var _full_map_pan_position := Vector3.ZERO
+var _full_map_pan_press: InputEventMouseButton
+var _full_map_pan_origin := Vector3.ZERO
+var _full_map_pan_dragging := false
+var _full_map_cursor_inside := false
+var _full_map_cursor_position := Vector2.ZERO
+## The final map click, rather than an intermediate crossing in a route.
+var _map_walk_target: Dictionary = {}
 var _minimap_marker_scale := 1.0
 var _minimap_border := MINIMAP_DEFAULT_BORDER
 ## "square" or "round". A round minimap is the map masked to the circle its
@@ -638,8 +664,6 @@ var stats_skills: VBoxContainer
 var stats_overall: HBoxContainer
 var stats_perk_line: Label
 var counter_body: VBoxContainer
-var _right_mouse_down := false
-var _right_mouse_dragged := false
 var _interaction_mode := "walk"
 ## Alt held down. While it is, an ordinary click attacks whatever it lands on,
 ## so the move icon shows the attack icon to say so. It is a preview and not a
@@ -923,14 +947,15 @@ const RESERVED_RIGHT_RAIL_MARGIN := 96.0
 const EL_GUI_COLOUR := Color(0.77, 0.57, 0.39)
 const EL_GUI_INVERT_COLOUR := Color(0.32, 0.23, 0.15)
 const EL_GUI_BRIGHT_COLOUR := Color(0.95, 0.76, 0.52)
+## How much of the continent the Tab map frames: 1 is the region and the
+## collar of its neighbours. The wheel can magnify up to 400% around the
+## player or pull back over the continent's pictures.
+const FULL_MAP_ZOOM_STEP := 1.25
+const FULL_MAP_ZOOM_MIN := 0.25
+const FULL_MAP_ZOOM_MAX := 6.0
+const FULL_MAP_PAN_THRESHOLD := 6.0
 ## How many metres of ground the minimap camera covers, and the bounds the
 ## scroll wheel moves it between.
-## How much of the continent the Tab map frames: 1 is the region and the
-## collar of its neighbours it has always framed, and the wheel pulls back
-## from there to the whole continent, whose pictures stand whether or not
-## their packages are loaded.
-const FULL_MAP_ZOOM_STEP := 1.25
-const FULL_MAP_ZOOM_MAX := 6.0
 const MINIMAP_ZOOM_DEFAULT := 180.0
 const MINIMAP_ZOOM_MIN := 60.0
 const MINIMAP_ZOOM_MAX := 480.0
@@ -1019,7 +1044,7 @@ func _ready() -> void:
 	# extension edits a list that a worker import iterates (vram_textures.gd).
 	VramTextures.ensure_registered()
 	lantern_guide = LanternGuideScript.new()
-	add_child(lantern_guide)
+	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
@@ -1040,7 +1065,10 @@ func _ready() -> void:
 	world_root.add_child(exterior_stream)
 	exterior_stream.configure(map_registry)
 	exterior_stream.coordinate_context = Network.coordinates
-	Network.coordinate_route_cancelled.connect(func() -> void: exterior_stream.pending_walk.clear())
+	Network.coordinate_route_cancelled.connect(func() -> void:
+		exterior_stream.pending_walk.clear()
+		_clear_map_walk_target())
+	Network.movement_requested.connect(_on_movement_requested)
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_close_client)
 	world_object_models = _json("res://data/world/objects.json")
@@ -1111,6 +1139,13 @@ func _ready() -> void:
 	cartography_regions = (cartography.get("regions", []) as Array).duplicate()
 	_v2_cartography = _json("res://data/maps/cartography-continent-v2.json")
 	cartography_regions.append_array(_continent_v2_tab_maps(cartography))
+	var detail_maps: Dictionary = _json("res://data/maps/map-details.json").get("regions", {}) as Dictionary
+	for region: Dictionary in cartography_regions:
+		var detail: Dictionary = detail_maps.get(str(region.get("serverMap", "")), {}) as Dictionary
+		var tab_map: Dictionary = region.get("tabMap", {}) as Dictionary
+		if not detail.is_empty() and detail.get("worldMin") == tab_map.get("worldMin") \
+				and detail.get("worldMax") == tab_map.get("worldMax"):
+			tab_map["detail"] = detail
 	_region_polygons.clear()
 	equipment_config = preload(
 		"res://src/actors/equipment_registry_snapshot_cache.gd").prepare(
@@ -1152,10 +1187,11 @@ func _ready() -> void:
 	spell_wheel.tutorial_action.connect(_magic_ring_ui)
 	spell_wheel.anchor_provider = _spell_wheel_anchor
 	spell_wheel.can_open = _can_open_spell_wheel
-	spell_wheel.z_index = 20
+	spell_wheel.z_index = 250
 	game_view.add_child(spell_wheel)
 	spell_wheel.spell_chosen.connect(_begin_prepared_cast)
 	spell_wheel.opened.connect(func():
+		spell_wheel.move_to_front()
 		magic_selection.cancel()
 		spells_window.close()
 		_stop_keyboard_movement()
@@ -1210,6 +1246,7 @@ func _ready() -> void:
 	minimap_frame.gui_input.connect(_on_minimap_frame_gui_input)
 	map_image.gui_input.connect(_on_full_map_gui_input)
 	map_image.mouse_exited.connect(_on_full_map_mouse_exited)
+	map_image.visibility_changed.connect(_on_full_map_visibility_changed)
 	clock_face.gui_input.connect(_on_clock_gui_input)
 	compass_face.gui_input.connect(_on_compass_gui_input)
 	continent_button.pressed.connect(_on_continent_button_pressed)
@@ -1254,13 +1291,7 @@ func _ready() -> void:
 	_configure_cartography()
 	_load_hud_settings()
 	# Explicit launch options select a server without changing saved settings.
-	for argument in OS.get_cmdline_user_args():
-		if argument.begins_with("--server="):
-			host_edit.text = argument.trim_prefix("--server=")
-		elif argument.begins_with("--port="):
-			var value := argument.trim_prefix("--port=")
-			if value.is_valid_int() and int(value) > 0 and int(value) <= 65535:
-				port_edit.value = int(value)
+	_apply_connection_launch_options(OS.get_cmdline_user_args())
 	_configure_inventory_menus()
 	_configure_minimap_menu()
 	_build_inventory_slots()
@@ -1300,7 +1331,7 @@ func _ready() -> void:
 	_build_manufacturing_window()
 	chat_hud.tab_selected.connect(_on_chat_tab_pressed)
 	chat_hud.channel_selected.connect(_on_channel_tab_pressed)
-	chat_hud.options_requested.connect(_on_options_pressed)
+	_build_chat_surfaces()
 	_build_hud_layout_menu()
 	_configure_unified_settings()
 	_load_hud_layout()
@@ -1355,6 +1386,7 @@ func _ready() -> void:
 	_sync_saved_item_lists()
 	_sync_channel_tabs()
 	_sync_stats()
+	_configure_window_stack()
 	_start_client_diagnostics()
 
 func _start_client_diagnostics() -> void:
@@ -1447,8 +1479,10 @@ func _process(delta: float) -> void:
 		_queue_world_sync()
 	if game_view.visible:
 		_update_carried_item()
+		_update_attached_map_markers()
 		_update_map_viewports()
 		_update_local_actor_follow()
+		_update_map_walk_target()
 		if AppState.actors.has(AppState.local_actor_id):
 			exterior_stream.update_position(camera_rig.focus)
 		# Look pass: a chunk or neighbour finished under the switch's old
@@ -1494,6 +1528,7 @@ func _update_map_viewports() -> void:
 	var now: int = Time.get_ticks_msec()
 	if minimap_frame.visible and now >= _minimap_refresh_msec:
 		_minimap_refresh_msec = now + MINIMAP_REFRESH_MSEC
+		_update_map_detail_levels()
 		map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		# The marks are drawn over that image and follow the same camera, so
 		# they are collected when it is redrawn and never while it is hidden.
@@ -1503,10 +1538,15 @@ func _update_map_viewports() -> void:
 		_apply_day_night()
 	if full_map.visible and map_image.visible and now >= _full_map_refresh_msec:
 		_full_map_refresh_msec = now + FULL_MAP_REFRESH_MSEC
+		_update_full_map_focus()
+		_update_map_detail_levels()
+		if _full_map_cursor_inside:
+			_update_full_map_cursor(_full_map_cursor_position)
 		full_map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		# Refresh projected markers alongside the terrain, including visibility
 		# changes when the player enters a different secret section.
 		map_marker_overlay.set_live_marks(_collect_minimap_marks())
+		map_marker_overlay.set_markers(_current_map_markers())
 		map_marker_overlay.set_waypoints(_collect_map_waypoints())
 		map_marker_overlay.queue_redraw()
 
@@ -1647,6 +1687,18 @@ func _turn_local_actor(left: bool) -> void:
 	if actor_value is ReplicatedActor3D and is_instance_valid(actor_value as ReplicatedActor3D):
 		(actor_value as ReplicatedActor3D).predict_turn(PI / 4.0 if left else -PI / 4.0)
 
+func _apply_connection_launch_options(arguments: PackedStringArray) -> void:
+	_dev_plain_tcp = arguments.has("--dev-plain-tcp")
+	host_edit.text = "127.0.0.1" if _dev_plain_tcp else "game.rabbitlandsgame.com"
+	port_edit.value = 2000 if _dev_plain_tcp else 2001
+	for argument: String in arguments:
+		if argument.begins_with("--server="):
+			host_edit.text = argument.trim_prefix("--server=")
+		elif argument.begins_with("--port="):
+			var value := argument.trim_prefix("--port=")
+			if value.is_valid_int() and int(value) > 0 and int(value) <= 65535:
+				port_edit.value = int(value)
+
 func _on_connect_pressed() -> void:
 	if AppState.connection_state != "disconnected":
 		Network.disconnect_from_server()
@@ -1654,12 +1706,10 @@ func _on_connect_pressed() -> void:
 	connect_button.disabled = true
 	login_button.disabled = true
 	status_label.text = "Connecting…"
-	# Remembered per player rather than per session: someone who connects to a
-	# server that speaks TLS should not have to re-tick the box every launch.
 	_save_hud_settings()
 	var error := Network.connect_to_server(
 		host_edit.text.strip_edges(), int(port_edit.value),
-		secure_check.button_pressed, _trusted_certificate_path())
+		not _dev_plain_tcp, _trusted_certificate_path())
 	if error != OK:
 		status_label.text = "Connection failed: " + error_string(error)
 		connect_button.disabled = false
@@ -2116,7 +2166,7 @@ func _on_look_button_pressed() -> void:
 ## pointer turns to the trade glyph over players, and the next click on one
 ## asks them (`_actor_click_action`). A player already selected is asked at
 ## once. It used to be greyed out until a player was selected, which read as
-## broken. Esc, a right click, or the walk or attack icon puts the mode down.
+## broken. Esc or the walk icon puts the mode down; right-click cycles onward.
 func _on_trade_button_pressed() -> void:
 	_interaction_mode = "trade"
 	_cursor_refresh_msec = 0
@@ -2130,13 +2180,104 @@ func _on_trade_button_pressed() -> void:
 			push_warning("TRADE_WITH failed: " + error_string(error))
 	_sync_hud_button_states(true)
 
-func _disarm_trade_mode() -> void:
+func _reset_world_action() -> void:
 	_interaction_mode = "walk"
+	_set_inventory_tool("grab")
 	_cursor_refresh_msec = 0
+	_sync_hud_button_states(true)
+
+## Use the click handler's target priority and capabilities so cycling cannot
+## arm a tool that does nothing at this position. Move always remains a way
+## back to the normal contextual pointer.
+func _available_world_actions_at(viewport_position: Vector2) -> Array[String]:
+	var actions: Array[String] = ["walk"]
+	var actor_id: int = _pick_actor(viewport_position)
+	if actor_id >= 0:
+		if actor_id == AppState.local_actor_id and _ground_bag_below_player() >= 0:
+			actions.append("pick")
+		var dto: Dictionary = AppState.actors.get(actor_id, {})
+		for action: String in MouseCursors.WORLD_ACTIONS:
+			if action != "walk" and _actor_click_action(actor_id, dto, false, action) == action:
+				actions.append(action)
+		return actions
+	if _pick_ground_bag(viewport_position) >= 0:
+		actions.append("pick")
+		return actions
+	var map_object: MapObject3D = _pick_map_object(viewport_position)
+	if map_object != null:
+		actions.append("harvest" if map_object.is_harvestable() else "use")
+		actions.append("look")
+	return actions
+
+func _cycle_world_action(viewport_position: Vector2) -> void:
+	var actions: Array[String] = _available_world_actions_at(viewport_position)
+	var index: int = MouseCursors.WORLD_ACTIONS.find(_interaction_mode)
+	for step: int in range(1, MouseCursors.WORLD_ACTIONS.size() + 1):
+		var action: String = MouseCursors.WORLD_ACTIONS[
+			(index + step) % MouseCursors.WORLD_ACTIONS.size()]
+		if action in actions:
+			_interaction_mode = action
+			break
+	match _interaction_mode:
+		"use":
+			_set_inventory_tool("use")
+		"look":
+			_set_inventory_tool("inspect")
+		"walk":
+			_set_inventory_tool("grab")
+	_cursor_refresh_msec = 0
+	_update_action_cursor()
 	_sync_hud_button_states(true)
 
 func _on_chat_button_pressed() -> void:
 	_show_chat_input()
+
+func _build_chat_surfaces() -> void:
+	system_chat_hud = ChatHudScript.new()
+	system_chat_hud.name = "SystemChatWindow"
+	system_chat_hud.feed_role = "system"
+	system_chat_hud.preferences_path = chat_hud.preferences_path
+	game_view.add_child(system_chat_hud)
+	for surface: PanelContainer in [chat_hud, system_chat_hud]:
+		surface.z_index = 20
+		surface.options_requested.connect(func() -> void: settings_window.open_tab("Chat"))
+		surface.configuration_changed.connect(_on_chat_configuration_changed)
+		surface.urls_requested.connect(func() -> void: reference_window.call("open_urls"))
+		surface.log_requested.connect(func() -> void:
+			if not console_panel.visible:
+				_toggle_console()
+			chat_log_tabs.select("system" if surface == system_chat_hud else "chat")
+			_sync_console())
+	chat_log_tabs = ChatLogTabsScript.new()
+	var content := console_panel.get_node("Content")
+	console_output.context_menu_enabled = true
+	console_output.shortcut_keys_enabled = true
+	console_output.mouse_default_cursor_shape = Control.CURSOR_IBEAM
+	console_output.tooltip_text = "Drag to select text. Ctrl+C or right-click → Copy."
+	var urls_button := Button.new()
+	urls_button.name = "URLs"
+	urls_button.text = "URLs"
+	urls_button.tooltip_text = "Links seen this session; F2 opens the latest"
+	urls_button.pressed.connect(func() -> void: reference_window.call("open_urls"))
+	var log_header := content.get_node("Header")
+	log_header.add_child(urls_button)
+	log_header.move_child(urls_button, 1)
+	content.add_child(chat_log_tabs)
+	content.move_child(chat_log_tabs, 1)
+	chat_log_tabs.tab_selected.connect(func(_key: String) -> void: _sync_console())
+	chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
+	for line: Dictionary in AppState.chat_lines:
+		chat_hud.remember_peer(ChatMessages.peer(line))
+	_on_chat_configuration_changed("", null)
+
+func _on_chat_configuration_changed(key: String, _value: Variant) -> void:
+	var combined := bool(chat_hud.options.get("combined", false))
+	if key == "combined":
+		_chat_tab = "all"
+		chat_hud.select_tab("all")
+	system_chat_hud.set_feed_suppressed(combined)
+	_sync_chat()
+	_refresh_unified_settings()
 
 func _on_invasion_assistant_command_requested(command: String) -> void:
 	var error := Network.send_chat(command)
@@ -2145,13 +2286,14 @@ func _on_invasion_assistant_command_requested(command: String) -> void:
 			"Invasion assistant request failed: %s" % error_string(error))
 
 func _show_chat_input() -> void:
-	chat_hud.open_chat()
+	chat_hud.open_chat(true)
 	chat_input.show()
 	chat_input.grab_focus()
 	_sync_hud_button_states(true)
 
 func _hide_chat_input() -> void:
 	chat_input.release_focus()
+	chat_hud.finish_typing()
 	_sync_hud_button_states(true)
 
 ## Reacts to a map panel opening or closing. _update_map_viewports() owns the
@@ -2196,10 +2338,13 @@ func _toggle_console() -> void:
 		return
 	full_map.hide()
 	_close_settings()
+	console_diagnostics_button.set_pressed_no_signal(false)
+	_on_console_diagnostics_toggled(false)
 	_sync_console()
 	_sync_diagnostics()
 	console_panel.show()
 	console_panel.move_to_front()
+	chat_hud.input.release_focus()
 
 ## The console panel shows either the session message history or the protocol
 ## diagnostics. Undecoded packets and decode errors were reduced into AppState
@@ -2208,6 +2353,7 @@ func _toggle_console() -> void:
 func _on_console_diagnostics_toggled(enabled: bool) -> void:
 	console_output.visible = not enabled
 	diagnostics_output.visible = enabled
+	chat_log_tabs.visible = not enabled
 	if enabled:
 		_sync_diagnostics()
 
@@ -2306,11 +2452,16 @@ func _configure_unified_settings() -> void:
 			row.reparent(page, false)
 			if row_name == "UiScaleRow":
 				page.move_child(row, 0)
+	settings_window.add_audio_controls()
+	for category: String in audio_director.category_volumes:
+		settings_window.restore_value("audio_" + category,
+			audio_director.category_volumes[category])
 	# The banner controls themselves retain their names and persisted keys.
 	var actor_hud_menu := get_node("%BannerControls") as Control
 	(actor_hud_menu.get_node("Options") as Control).reparent(
 		settings_window.page_body("Banners"), false)
-	(%DisableMenu as CheckBox).text = "Disable right-click banner shortcut"
+	# Retain the stored option for compatibility; world right-click now cycles tools.
+	(%DisableMenu as CheckBox).hide()
 	actor_hud_menu.queue_free()
 	settings_panel = settings_window.panel
 	old_panel.queue_free()
@@ -2396,12 +2547,16 @@ func _refresh_unified_settings() -> void:
 		"spell_bar_docked": casting_bar.docked, "spell_bar_expanded": casting_bar.panel.visible,
 		"shadows": _shadows_enabled, "particles": _effects_enabled,
 		"nameplates": _nameplates_enabled, "rotation_sensitivity": camera_rig.rotation_sensitivity,
-		"pan_sensitivity": camera_rig.pan_sensitivity, "follow_player": _camera_follows_player,
-		"secure": secure_check.button_pressed, "start_backdrop": start_screen_backdrop.selected_id,
+		"start_backdrop": start_screen_backdrop.selected_id,
 		"start_animated": start_screen_backdrop.animation_enabled,
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
 	}
 	values.merge(_hud_element_options)
+	for option: String in chat_hud.options:
+		values["chat_" + option] = chat_hud.options[option]
+	if system_chat_hud != null:
+		for option: String in system_chat_hud.options:
+			values["system_chat_" + option] = system_chat_hud.options[option]
 	for type: StringName in MINIMAP_MARKER_TYPES:
 		values["minimap_marker_" + str(type)] = bool(_minimap_marker_types.get(type, true))
 	for index: int in _inventory_quantities.size():
@@ -2414,6 +2569,9 @@ func _refresh_unified_settings() -> void:
 	sound_enabled.set_pressed_no_signal(audio_director.enabled)
 	sound_volume.set_value_no_signal(audio_director.volume_linear)
 	sound_volume_value.text = "%d%%" % roundi(audio_director.volume_linear * 100.0)
+	for category: String in audio_director.category_volumes:
+		settings_window.restore_value("audio_" + category,
+			audio_director.category_volumes[category])
 	minimap_size.set_value_no_signal(_minimap_scale)
 	minimap_size_value.text = "%d%%" % roundi(_minimap_scale * 100.0)
 	ui_scale_slider.set_value_no_signal(_ui_scale)
@@ -3193,6 +3351,7 @@ func _exit_tree() -> void:
 	# and the cached tab-map textures are reported leaked at exit.
 	_remove_map_picture()
 	_tab_map_textures.clear()
+	_tab_map_detail_textures.clear()
 
 func _on_login_succeeded() -> void:
 	Diagnostics.record("login_succeeded", {"server_map": AppState.current_map})
@@ -3297,6 +3456,7 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	_clear_map_walk_target()
 	for raw_node: Variant in actor_nodes.values():
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
@@ -3356,16 +3516,31 @@ func _clear_world_presentation() -> void:
 	_close_settings()
 	minimap_frame.hide()
 	chat_output.clear()
+	system_chat_hud.output.clear()
+	chat_hud.preview_feed.clear_messages()
+	system_chat_hud.preview_feed.clear_messages()
+	console_output.clear()
+	chat_hud.reset_destinations()
+	chat_log_tabs.sync([], [])
+	chat_log_tabs.select("all")
+	_chat_tab = "all"
 	_chat_tail = {}
+	_console_tail = {}
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	# A drag can end over a window that consumes the release before gui_input.
+	if event is InputEventMouseButton and not event.pressed \
+			and event.button_index == MOUSE_BUTTON_MIDDLE:
+		camera_rig.handle_mouse_button(event as InputEventMouseButton)
 	if spell_wheel != null:
 		if spell_wheel.handle_event(event):
 			_set_attack_modifier(false)
 			get_viewport().set_input_as_handled()
 			return
 		if spell_wheel.visible: return
+	if window_stack != null:
+		window_stack.handle_pointer(event)
 	if event is InputEventKey and (event as InputEventKey).echo:
 		return
 	_track_attack_modifier(event)
@@ -3374,6 +3549,7 @@ func _input(event: InputEvent) -> void:
 
 func _can_open_spell_wheel() -> bool:
 	return game_view.visible and not _text_entry_active() \
+		and not popup_panel.visible and not purchase_confirm.visible \
 		and not dialogue_panel.visible and not trade_panel.visible \
 		and not storage_panel.visible and not full_map.visible \
 		and not console_panel.visible and not settings_panel.visible \
@@ -3412,6 +3588,9 @@ func _set_attack_modifier(held: bool) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT 			or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		_set_attack_modifier(false)
+		_cancel_full_map_drag()
+		if is_instance_valid(camera_rig):
+			camera_rig.cancel_rotation()
 
 ## Bindings that have to beat a focused HUD control, which is why they are
 ## resolved here instead of in _unhandled_input().
@@ -3422,6 +3601,23 @@ func _notification(what: int) -> void:
 ## and `toggle_console` were resolved twice - once by keycode here and once by
 ## action in _unhandled_input(). Returns true when the event was consumed.
 func _handle_bound_action(event: InputEvent) -> bool:
+	if settings_window != null and not str(settings_window.get("capturing")).is_empty():
+		return false
+	var focus := get_viewport().gui_get_focus_owner()
+	if (focus is LineEdit or focus is TextEdit or focus is RichTextLabel) \
+			and (event.is_action_pressed("ui_copy", false, true) \
+			or event.is_action_pressed("ui_cut", false, true) \
+			or event.is_action_pressed("ui_paste", false, true) \
+			or event.is_action_pressed("ui_text_select_all", false, true)):
+		return false # Text controls own clipboard shortcuts, even if rebound.
+	# F2 is useful while composing a reply too, and never opens on key repeat.
+	if game_view.visible and event.is_action_pressed("open_last_url", false, true):
+		var result: Error = reference_window.call("open_last_url")
+		if result == ERR_DOES_NOT_EXIST:
+			AppState.append_local_message("No URLs have appeared in chat this session.")
+		elif result != OK:
+			AppState.append_local_message("Could not open the browser. Use URLs to copy the link.")
+		return true
 	# A focused text field owns its own characters and its own clipboard
 	# shortcuts. Several of these actions default to bare printable keys, so
 	# without this a backtick typed into chat would also open the console.
@@ -3440,6 +3636,12 @@ func _handle_bound_action(event: InputEvent) -> bool:
 		return true
 	if not game_view.visible:
 		return false
+	# After leaving typing, a separate Escape discards the draft before
+	# the same press can close another window.
+	if event.is_action_pressed("cancel") and not chat_input.text.is_empty():
+		chat_input.clear()
+		_hide_chat_input()
+		return true
 	if event.is_action_pressed("toggle_inventory"):
 		_on_inventory_button_pressed()
 		return true
@@ -3473,7 +3675,6 @@ func _handle_bound_action(event: InputEvent) -> bool:
 	return false
 
 func _recenter_viewport_on_player() -> void:
-	camera_rig.reset_pan()
 	_update_local_actor_follow()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -3504,7 +3705,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	for slot: int in range(8):
 		# Compare modifiers too, including when the spell shortcut was rebound.
 		if event.is_action_pressed("quick_item_%d" % (slot + 1), false, true):
-			_use_inventory_slot(slot)
+			# Text controls can leave Ctrl+number unhandled; typing must not use an item.
+			if not _text_entry_active():
+				_use_inventory_slot(slot)
 			get_viewport().set_input_as_handled()
 			return
 	# toggle_map, toggle_minimap and toggle_console are deliberately absent:
@@ -3582,8 +3785,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			reference_window.close()
 		elif _has_carry():
 			_cancel_carry()
-		elif _interaction_mode == "trade" and not bool(AppState.trade.get("open", false)):
-			_disarm_trade_mode()
+		elif _interaction_mode != "walk" and not bool(AppState.trade.get("open", false)):
+			_reset_world_action()
 		elif chat_input.has_focus():
 			_hide_chat_input()
 		elif settings_panel.visible:
@@ -3620,6 +3823,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 func _on_world_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and not event.pressed \
+			and event.button_index == MOUSE_BUTTON_MIDDLE:
+		camera_rig.handle_mouse_button(event as InputEventMouseButton)
 	if (not game_view.visible or full_map.visible or dialogue_panel.visible
 			or trade_panel.visible or storage_panel.visible
 			or manufacturing_panel.visible):
@@ -3634,27 +3840,13 @@ func _on_world_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 		if mouse_button.button_index == MOUSE_BUTTON_RIGHT:
-			if mouse_button.pressed and not magic_selection.pending.is_empty():
-				magic_selection.cancel()
-				viewport_container.accept_event()
-				return
 			if mouse_button.pressed:
-				_right_mouse_down = true
-				_right_mouse_dragged = false
-			camera_rig.handle_mouse_button(mouse_button)
-			if not mouse_button.pressed:
-				_right_mouse_down = false
-				# A right click - not a drag of the camera - puts back the
-				# item in hand before it opens anything, then puts down an
-				# armed trade.
-				if not _right_mouse_dragged and _has_carry():
+				if not magic_selection.pending.is_empty():
+					magic_selection.cancel()
+				elif _has_carry():
 					_cancel_carry()
-				elif not _right_mouse_dragged and _interaction_mode == "trade":
-					_disarm_trade_mode()
-				elif not _right_mouse_dragged:
-					var local_position: Vector2 = _local_viewport_position(mouse_button.position)
-					if _pick_actor(local_position) == AppState.local_actor_id:
-						_open_actor_hud_menu(mouse_button.position + viewport_container.position)
+				else:
+					_cycle_world_action(_local_viewport_position(mouse_button.position))
 			viewport_container.accept_event()
 			return
 		if camera_rig.handle_mouse_button(mouse_button):
@@ -3665,8 +3857,6 @@ func _on_world_gui_input(event: InputEvent) -> void:
 			viewport_container.accept_event()
 	elif event is InputEventMouseMotion:
 		var mouse_motion: InputEventMouseMotion = event as InputEventMouseMotion
-		if _right_mouse_down and mouse_motion.relative.length_squared() > 4.0:
-			_right_mouse_dragged = true
 		if camera_rig.handle_mouse_motion(mouse_motion):
 			viewport_container.accept_event()
 
@@ -3756,6 +3946,8 @@ func _capture_speech_bubble_from_chat() -> void:
 	if not _banner_option("speech_bubbles") or AppState.chat_lines.is_empty():
 		return
 	var line: Dictionary = AppState.chat_lines.back() as Dictionary
+	if not _chat_line_allowed(line):
+		return
 	if int(line.get("channel", -1)) != 0:
 		return
 	var text: String = str(line.get("text", ""))
@@ -3878,28 +4070,41 @@ func _layout_actor_resource_overlay() -> void:
 func _on_chat_tab_pressed(tab: String) -> void:
 	_chat_tab = tab
 	chat_hud.select_tab(tab)
+	if tab in ["general", "local"]:
+		chat_hud.set_destination("local")
+	elif tab in ["party", "guild", "private"] or tab.begins_with("channel:"):
+		chat_hud.set_destination(tab)
 	_sync_chat()
-	_reveal_chat_messages()
+	chat_hud.open_chat()
 
 func _on_channel_tab_pressed(channel_index: int) -> void:
 	if channel_index < 0 or channel_index >= AppState.active_channels.size():
 		return
 	if int(AppState.active_channels[channel_index]) <= 0:
 		return
-	var error: Error = Network.set_active_channel(channel_index)
-	if error != OK:
-		push_warning("SET_ACTIVE_CHANNEL failed: " + error_string(error))
-	AppState.active_channel_index = channel_index
+	# The legacy selection packet has only three slots. Native sends address
+	# the channel number explicitly, including the fourth membership.
+	if channel_index < 3:
+		var error: Error = Network.set_active_channel(channel_index)
+		if error != OK:
+			push_warning("SET_ACTIVE_CHANNEL failed: " + error_string(error))
+		AppState.active_channel_index = channel_index
 	_on_chat_tab_pressed("channel:%d" % int(AppState.active_channels[channel_index]))
 
 func _sync_channel_tabs() -> void:
 	_chat_tab = chat_hud.sync_channels(AppState.active_channels, _chat_tab)
+	if chat_log_tabs != null:
+		chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
 	_sync_chat()
 
 func _reveal_chat_messages() -> void:
-	chat_panel.modulate.a = 1.0
-	chat_panel.show()
-	chat_hud.reveal_message()
+	var line := _last_chat_line()
+	if line.is_empty() or not _chat_line_allowed(line):
+		return
+	if _chat_line_shown(line):
+		chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line))
+	if ChatMessages.kind(line) == "system" and not bool(chat_hud.options.get("combined", false)):
+		system_chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line))
 
 func _on_minimap_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -3933,51 +4138,172 @@ func _apply_minimap_zoom() -> void:
 ## The scroll wheel over the Tab map frames more or less of the continent
 ## around the region. Every region's picture stands whether or not it is
 ## loaded, so zooming out shows the neighbours, and a click out there walks
-## the legs to it the way a click just past the seam always has.
-func _zoom_full_map(closer: bool) -> void:
-	if not _full_map_zoomable:
+## the legs to it the way a click just past the seam always has. Magnifying
+## past the default view holds the ground under the pointer in place.
+func _zoom_full_map(closer: bool, at := Vector2.INF) -> void:
+	if _full_map_base_size <= 0.0:
 		return
+	_cancel_full_map_drag()
+	var pixel: Variant = null
+	var anchor := Vector3.ZERO
+	if at.is_finite():
+		pixel = _texture_to_viewport_position(at, map_image, full_map_viewport.size)
+		if not pixel is Vector2:
+			return
+		anchor = full_map_camera.project_ray_origin(pixel)
 	var previous: float = _full_map_zoom
 	var step: float = 1.0 / FULL_MAP_ZOOM_STEP if closer else FULL_MAP_ZOOM_STEP
-	_full_map_zoom = clampf(_full_map_zoom * step, 1.0, FULL_MAP_ZOOM_MAX)
+	_full_map_zoom = clampf(_full_map_zoom * step, FULL_MAP_ZOOM_MIN,
+		FULL_MAP_ZOOM_MAX if _full_map_zoomable else 1.0)
+	# Always stop at the default framing when crossing it from either limit.
+	if (previous < 1.0 and _full_map_zoom > 1.0) or (previous > 1.0 and _full_map_zoom < 1.0) \
+			or is_equal_approx(_full_map_zoom, 1.0):
+		_full_map_zoom = 1.0
 	if is_equal_approx(previous, _full_map_zoom):
 		return
+	if _full_map_zoom < 1.0 and pixel is Vector2:
+		full_map_camera.size = _full_map_base_size * _full_map_zoom
+		_full_map_pan_position = full_map_camera.global_position + anchor \
+			- full_map_camera.project_ray_origin(pixel)
+		_full_map_panned = true
+	else:
+		_full_map_panned = false
 	_apply_full_map_zoom()
 
 func _apply_full_map_zoom() -> void:
 	if _full_map_base_size <= 0.0:
 		return
 	full_map_camera.size = _full_map_base_size * _full_map_zoom
+	_update_full_map_focus()
 	map_marker_overlay.configure(full_map_camera, adapter, full_map_viewport.size)
 	_request_map_redraw()
+
+func _update_full_map_focus() -> void:
+	if _full_map_base_size <= 0.0:
+		return
+	var focus := _full_map_base_position
+	if _full_map_zoom < 1.0:
+		if _full_map_panned:
+			focus.x = _full_map_pan_position.x
+			focus.z = _full_map_pan_position.z
+		else:
+			var actor_value: Variant = actor_nodes.get(AppState.local_actor_id)
+			if is_instance_valid(actor_value) and actor_value is Node3D:
+				var actor := actor_value as Node3D
+				focus.x = actor.global_position.x
+				focus.z = actor.global_position.z
+	full_map_camera.global_position = focus
+
+func _cancel_full_map_drag() -> void:
+	_full_map_pan_press = null
+	_full_map_pan_dragging = false
+
+func _handle_full_map_pan_input(event: InputEvent) -> bool:
+	if _full_map_zoom >= 1.0 or _full_map_base_size <= 0.0 or _map_input_blocked():
+		_cancel_full_map_drag()
+		return false
+	if event is InputEventMouseButton:
+		var mouse := event as InputEventMouseButton
+		if mouse.button_index != MOUSE_BUTTON_LEFT:
+			return false
+		var pixel: Variant = _texture_to_viewport_position(mouse.position, map_image, full_map_viewport.size)
+		if mouse.pressed:
+			if pixel is Vector2:
+				_full_map_pan_press = mouse.duplicate() as InputEventMouseButton
+				_full_map_pan_origin = full_map_camera.global_position
+				_full_map_pan_dragging = false
+		elif _full_map_pan_press != null:
+			_pan_full_map(mouse.position)
+			var click := _full_map_pan_press if not _full_map_pan_dragging else null
+			_cancel_full_map_drag()
+			if click != null and pixel is Vector2:
+				_handle_map_gui_input(click, map_image, full_map_viewport, full_map_camera, "full_map")
+		return true
+	if event is InputEventMouseMotion and _full_map_pan_press != null:
+		var motion := event as InputEventMouseMotion
+		if (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) == 0:
+			_cancel_full_map_drag()
+			return false
+		_pan_full_map(motion.position)
+		return true
+	return false
+
+## Translate the camera opposite the pointer so the grabbed ground follows
+## the hand. Use the displayed image size, including rectangular letterboxing,
+## and ray origins so the drag works at every zoom and window scale.
+func _pan_full_map(at: Vector2) -> void:
+	var drag := at - _full_map_pan_press.position
+	if not _full_map_pan_dragging and drag.length() < FULL_MAP_PAN_THRESHOLD:
+		return
+	var target := Vector2(full_map_viewport.size)
+	var displayed := map_image.size
+	if map_image.stretch_mode == TextureRect.STRETCH_KEEP_ASPECT_CENTERED:
+		displayed = target * minf(displayed.x / target.x, displayed.y / target.y)
+	if displayed.x <= 0.0 or displayed.y <= 0.0:
+		return
+	var pixels := drag * target / displayed
+	var world_delta := full_map_camera.project_ray_origin(pixels) - full_map_camera.project_ray_origin(Vector2.ZERO)
+	_full_map_pan_position = _full_map_pan_origin - world_delta
+	_full_map_panned = true
+	_full_map_pan_dragging = true
+	_update_full_map_focus()
+	map_marker_overlay.queue_redraw()
+	_request_map_redraw()
+	map_image.tooltip_text = ""
+	map_coordinates.text = "Coordinates: —"
 
 func _on_full_map_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var wheel: InputEventMouseButton = event as InputEventMouseButton
 		if wheel.pressed and (wheel.button_index == MOUSE_BUTTON_WHEEL_UP
 				or wheel.button_index == MOUSE_BUTTON_WHEEL_DOWN):
-			_zoom_full_map(wheel.button_index == MOUSE_BUTTON_WHEEL_UP)
+			_zoom_full_map(wheel.button_index == MOUSE_BUTTON_WHEEL_UP, wheel.position)
+			_update_full_map_cursor(wheel.position)
 			map_image.accept_event()
 			return
+	if _handle_full_map_pan_input(event):
+		if event is InputEventMouseMotion or event is InputEventMouseButton:
+			_update_full_map_cursor(event.position)
+		map_image.accept_event()
+		return
 	if event is InputEventMouseMotion:
 		var mouse_motion: InputEventMouseMotion = event as InputEventMouseMotion
-		map_image.tooltip_text = map_marker_overlay.label_at(mouse_motion.position)
-		var viewport_position_value: Variant = _texture_to_viewport_position(
-			mouse_motion.position, map_image, full_map_viewport.size)
-		if not viewport_position_value is Vector2:
-			map_coordinates.text = "Coordinates: outside map image"
-			return
-		var viewport_position: Vector2 = viewport_position_value as Vector2
-		var target_value: Variant = _map_target_tile(full_map_camera, viewport_position)
-		if target_value is Vector2i:
-			var tile: Vector2i = target_value as Vector2i
-			map_coordinates.text = "Coordinates: %d, %d" % [tile.x, tile.y]
-		else:
-			map_coordinates.text = "Coordinates: outside walkable map"
+		_update_full_map_cursor(mouse_motion.position)
 		return
 	_handle_map_gui_input(event, map_image, full_map_viewport, full_map_camera, "full_map")
 
+func _update_full_map_cursor(at: Vector2) -> void:
+	_full_map_cursor_inside = true
+	_full_map_cursor_position = at
+	map_cursor_coordinates.hide()
+	map_image.tooltip_text = map_marker_overlay.label_at(at)
+	var pixel: Variant = _texture_to_viewport_position(at, map_image, full_map_viewport.size)
+	if not pixel is Vector2:
+		map_coordinates.text = "Coordinates: outside map image"
+		return
+	var tile: Variant = _map_target_tile(full_map_camera, pixel)
+	if tile is Vector2i:
+		map_coordinates.text = "Coordinates: %d, %d" % [tile.x, tile.y]
+		_show_map_cursor_coordinates(map_image, at, tile)
+	else:
+		map_coordinates.text = "Coordinates: outside walkable map"
+
+func _show_map_cursor_coordinates(control: Control, at: Vector2, tile: Vector2i) -> void:
+	map_cursor_coordinates.text = "X: %d, Y: %d" % [tile.x, tile.y]
+	map_cursor_coordinates.reset_size()
+	var margin := Vector2(4, 4)
+	var maximum := (control.size - map_cursor_coordinates.size - margin).max(margin)
+	map_cursor_coordinates.position = control.position + (at + Vector2(14, 18)).clamp(margin, maximum)
+	map_cursor_coordinates.show()
+
+func _on_full_map_visibility_changed() -> void:
+	_cancel_full_map_drag()
+	_full_map_cursor_inside = false
+	map_cursor_coordinates.hide()
+
 func _on_full_map_mouse_exited() -> void:
+	_full_map_cursor_inside = false
+	map_cursor_coordinates.hide()
 	map_image.tooltip_text = ""
 	if map_image.visible:
 		map_coordinates.text = "Coordinates: —"
@@ -4031,11 +4357,13 @@ func _local_actor_server_tile() -> Variant:
 		return null
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
+func _map_input_blocked() -> bool:
+	return (not game_view.visible or dialogue_panel.visible or trade_panel.visible
+		or storage_panel.visible or manufacturing_panel.visible)
+
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		map_render_viewport: SubViewport, camera: Camera3D, source: String) -> void:
-	if (not game_view.visible or dialogue_panel.visible or trade_panel.visible
-			or storage_panel.visible
-			or manufacturing_panel.visible):
+	if _map_input_blocked():
 		return
 	if not event is InputEventMouseButton:
 		return
@@ -4071,10 +4399,13 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		exterior_stream.pending_walk.clear()
 		_clear_keyboard_movement_tracking()
 		_clear_local_turn_prediction()
+		var selecting_spell := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
 		var move_error: Error = Network.move_to(target_value as Vector2i,
 			mouse_button.shift_pressed)
 		if move_error != OK:
 			push_warning("%s MOVE_TO failed: %s" % [source, error_string(move_error)])
+		elif not selecting_spell:
+			_set_map_walk_target(MapRegistry.normalize_server_map_id(AppState.current_map), target_value)
 	map_control.accept_event()
 
 func _map_target_tile(camera: Camera3D, viewport_position: Vector2) -> Variant:
@@ -4172,13 +4503,70 @@ func _map_click_beyond(camera: Camera3D, viewport_position: Vector2, run: bool, 
 	var leg: Vector3 = leg_value as Vector3
 	_clear_keyboard_movement_tracking()
 	_clear_local_turn_prediction()
+	var selecting_spell := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
 	var move_error: Error = Network.move_to(adapter.godot_to_server(leg), run)
 	if move_error != OK:
 		exterior_stream.pending_walk.clear()
 		push_warning("%s MOVE_TO failed: %s" % [source, error_string(move_error)])
 		return
+	if not selecting_spell:
+		_set_map_walk_target(str(beyond.map), beyond.tile)
 	print_debug("map_input source=", source, " walk to ", beyond.map, " tile=", beyond.tile, " via seam leg=", leg)
 	_show_walk_highlight(adapter.godot_to_server(point), point.y)
+
+func _set_map_walk_target(map_id: String, tile: Vector2i) -> void:
+	_map_walk_target = {"map": map_id, "tile": tile,
+		"last_actor_tile": Vector2i(-99999, -99999), "last_progress_msec": Time.get_ticks_msec()}
+	_update_map_walk_target()
+
+func _clear_map_walk_target() -> void:
+	_map_walk_target.clear()
+	if map_marker_overlay != null:
+		map_marker_overlay.set_walk_target(null)
+
+func _on_movement_requested(tile: Vector2i) -> void:
+	# A route issues new seam legs as maps change. Other movement replaces
+	# the map click, including keyboard movement and clicks in the world.
+	if not exterior_stream.pending_walk.is_empty() \
+			and exterior_stream.pending_walk.get("leg_tile") == tile:
+		return
+	_clear_map_walk_target()
+
+func _update_map_walk_target() -> void:
+	if _map_walk_target.is_empty():
+		return
+	var here := MapRegistry.normalize_server_map_id(AppState.current_map)
+	var target_map: String = _map_walk_target.map
+	var tile: Vector2i = _map_walk_target.tile
+	var routed: bool = not exterior_stream.pending_walk.is_empty() \
+		and str(exterior_stream.pending_walk.get("map", "")) == target_map \
+		and exterior_stream.pending_walk.get("tile") == tile
+	if here != target_map and not routed:
+		_clear_map_walk_target()
+		return
+	var target_adapter := adapter if here == target_map else CoordinateAdapter.new(exterior_stream.region_coordinates(target_map))
+	var point := target_adapter.tile_center(tile.x, tile.y)
+	if here != target_map:
+		var frame: Variant = exterior_stream.region_transform(target_map)
+		if not frame is Transform3D:
+			_clear_map_walk_target()
+			return
+		point = frame * point
+	var actor_value: Variant = actor_nodes.get(AppState.local_actor_id)
+	if is_instance_valid(actor_value) and actor_value is Node3D:
+		var position: Vector3 = (actor_value as Node3D).global_position
+		var actor_tile := adapter.godot_to_server(position)
+		if actor_tile != _map_walk_target.last_actor_tile:
+			_map_walk_target.last_actor_tile = actor_tile
+			_map_walk_target.last_progress_msec = Time.get_ticks_msec()
+		if here == target_map and Vector2(position.x, position.z).distance_to(Vector2(point.x, point.z)) < adapter.metres_per_tile * 0.25:
+			_clear_map_walk_target()
+			return
+	# A blocked or interrupted walk must not leave a permanent destination.
+	if Time.get_ticks_msec() - int(_map_walk_target.last_progress_msec) > 3000:
+		_clear_map_walk_target()
+		return
+	map_marker_overlay.set_walk_target(point)
 
 static func _control_to_viewport_position(local_position: Vector2,
 		control_size: Vector2, target_size: Vector2i) -> Vector2:
@@ -4202,6 +4590,7 @@ static func _texture_to_viewport_position(local_position: Vector2,
 	return _control_to_viewport_position(local_position, control_size, target_size)
 
 func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector2) -> void:
+	_clear_map_walk_target()
 	exterior_stream.pending_walk.clear()
 	if not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]:
 		var tile: Variant = _map_target_tile(gameplay_camera, viewport_position)
@@ -4217,7 +4606,8 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 		# over. A pending actor spell still wins - clicking yourself casts
 		# at yourself.
 		if (picked_actor_id == AppState.local_actor_id
-				and AppState.pending_spell_target != "actor"):
+				and AppState.pending_spell_target != "actor"
+				and _interaction_mode in ["walk", "pick"]):
 			var bag_below: int = _ground_bag_below_player()
 			if bag_below >= 0:
 				_open_ground_bag(bag_below)
@@ -4239,16 +4629,27 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 				var touch_error: Error = Network.touch_actor(picked_actor_id)
 				if touch_error != OK:
 					push_warning("TOUCH_PLAYER failed: " + error_string(touch_error))
+			"look":
+				var look_error: Error = Network.look_at_player(picked_actor_id)
+				if look_error != OK:
+					push_warning("GET_PLAYER_INFO failed: " + error_string(look_error))
 		return
 	var picked_bag_id: int = _pick_ground_bag(viewport_position)
 	if AppState.pending_spell_target == "actor":
 		return
 	if picked_bag_id >= 0:
-		_open_ground_bag(picked_bag_id)
+		if _interaction_mode in ["walk", "pick"]:
+			_open_ground_bag(picked_bag_id)
 		return
 	var picked_object: MapObject3D = _pick_map_object(viewport_position)
 	if picked_object != null:
-		_activate_map_object(picked_object, event.alt_pressed)
+		if (_interaction_mode in ["walk", "look"]
+				or (_interaction_mode == "harvest" and picked_object.is_harvestable())
+				or (_interaction_mode == "use" and not picked_object.is_harvestable())):
+			_activate_map_object(picked_object, event.alt_pressed or _interaction_mode == "look")
+		return
+	# Other tools never turn a missed target into a movement order.
+	if _interaction_mode != "walk":
 		return
 	var ray_origin: Vector3 = camera_rig.ray_origin(viewport_position)
 	var ray_direction: Vector3 = camera_rig.ray_direction(viewport_position)
@@ -4415,6 +4816,8 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_counters()
 		&"actor_titles":
 			_sync_actor_titles()
+		&"quest_offers":
+			_sync_quest_offers()
 		&"actor_occupations":
 			_sync_actor_occupations()
 			# The dialogue header names what its person does, and the packet
@@ -5009,6 +5412,7 @@ func _spawn_actor(id: Variant) -> void:
 	node.set_nameplate_visible(_nameplate_visible_for(int(id)))
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
+	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	if int(id) == AppState.local_actor_id:
 		_sync_harvest_sparkle()
@@ -5019,6 +5423,12 @@ func _spawn_actor(id: Variant) -> void:
 ## name, which packs a colour byte, the name and the guild tag into one string
 ## that the decoder already unpicks by hand. So it is applied here, and on
 ## spawn, for whoever is on screen when it lands.
+func _sync_quest_offers() -> void:
+	for id: Variant in actor_nodes:
+		var node := actor_nodes[id] as ReplicatedActor3D
+		if is_instance_valid(node):
+			node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
+
 func _sync_actor_titles() -> void:
 	for id: Variant in actor_nodes:
 		var node_value: Variant = actor_nodes[id]
@@ -5204,6 +5614,8 @@ func _install_map_picture(manifest: WorldManifest) -> void:
 	if region_index >= 0 and not minimap.is_empty():
 		var region: Dictionary = cartography_regions[region_index] as Dictionary
 		texture = _tab_map_texture(region)
+		if texture != null:
+			texture = _tab_map_detail_texture(region)
 		tab_map = region.get("tabMap", {}) as Dictionary
 	var extent: Rect2 = MapPicture.extent(minimap, tab_map) if texture != null else Rect2()
 	if texture == null or extent.size.x <= 0.0 or extent.size.y <= 0.0:
@@ -5216,6 +5628,7 @@ func _install_map_picture(manifest: WorldManifest) -> void:
 	_install_neighbour_pictures()
 
 func _remove_map_picture() -> void:
+	_map_detail_visible.clear()
 	if is_instance_valid(_map_picture):
 		_map_picture.hide()
 		_map_picture.queue_free()
@@ -5283,6 +5696,7 @@ func _update_map_boundaries() -> void:
 ## first and stands in its own frame as before. Called after the current
 ## picture is laid and whenever the stream's resident table changes.
 func _install_neighbour_pictures() -> void:
+	var detail_plan_changed := false
 	if exterior_stream != null and not exterior_stream.residents_changed.is_connected(_install_neighbour_pictures):
 		exterior_stream.residents_changed.connect(_install_neighbour_pictures)
 	var residents: Dictionary = exterior_stream.residents if exterior_stream != null else {}
@@ -5301,12 +5715,16 @@ func _install_neighbour_pictures() -> void:
 			if is_instance_valid(stale):
 				(stale as Node).queue_free()
 			_neighbour_pictures.erase(stale_id)
+			detail_plan_changed = true
 	for map_id: String in wanted:
 		if _neighbour_pictures.has(map_id):
 			continue
 		var picture: Variant = _build_region_picture(map_id, residents.get(map_id, {}) as Dictionary)
 		if picture is MeshInstance3D:
 			_neighbour_pictures[map_id] = picture
+			detail_plan_changed = true
+	if detail_plan_changed:
+		_map_detail_visible.clear()
 
 ## One region's picture: its own minimap pixels, framed as the Tab map frames
 ## that region. A resident region is laid under its root at its manifest's
@@ -6177,7 +6595,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		candidates.append({"actor": actor, "id": int(raw_id), "priority": priority,
 			"distance": actor.global_position.distance_squared_to(camera_rig.focus),
 			"rect": overhead_block_rect(screen, str(dto.get("name", "")),
-				actor.occupation())})
+				actor.occupation(), actor.negative_status_count())})
 	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if a.priority != b.priority: return a.priority < b.priority
 		if a.distance != b.distance: return a.distance < b.distance
@@ -6205,7 +6623,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 ## own width and pushes the block's bottom down a line, so two NPCs standing
 ## close do not draw one's occupation through the other's name.
 static func overhead_block_rect(screen: Vector2, actor_name: String,
-		occupation: String = "") -> Rect2:
+		occupation: String = "", negative_status_count: int = 0) -> Rect2:
 	var width := maxf(110.0, ThemeDB.fallback_font.get_string_size(
 		actor_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0)
 	var height := 38.0
@@ -6213,7 +6631,14 @@ static func overhead_block_rect(screen: Vector2, actor_name: String,
 		width = maxf(width, ThemeDB.fallback_font.get_string_size("<%s>" % occupation,
 			HORIZONTAL_ALIGNMENT_LEFT, -1, ReplicatedActor3D.OCCUPATION_FONT_SIZE).x + 12.0)
 		height += ReplicatedActor3D.OCCUPATION_DROP
-	return Rect2(screen - Vector2(width * 0.5, 12), Vector2(width, height))
+	var top := 12.0
+	if negative_status_count > 0:
+		width = maxf(width, negative_status_count * (ReplicatedActor3D.NEGATIVE_STATUS_SIZE
+			+ ReplicatedActor3D.NEGATIVE_STATUS_GAP) - ReplicatedActor3D.NEGATIVE_STATUS_GAP + 8.0)
+		var rise: float = ReplicatedActor3D.NEGATIVE_STATUS_RISE
+		top = rise + ReplicatedActor3D.NEGATIVE_STATUS_SIZE * 0.5 + 2.0
+		height += top - 12.0
+	return Rect2(screen - Vector2(width * 0.5, top), Vector2(width, height))
 
 ## How much of an actor's overhead block shows at this distance from the
 ## player: all of it up to `NAME_FADE_METRES` short of the name distance,
@@ -6242,6 +6667,7 @@ func _update_secret_sections(force: bool = false) -> void:
 	var previous_section: String = secret_sections.current_section()
 	secret_sections.call("update", local_actor_node.global_position, force)
 	if secret_sections.current_section() != previous_section:
+		_full_map_panned = false
 		_configure_full_map(world_loader.manifest)
 		_request_map_redraw()
 	# whoever and whatever stands in another secret stays unseen
@@ -6258,6 +6684,7 @@ func _configure_interior_cutaway(manifest: WorldManifest) -> void:
 
 
 func _configure_full_map(manifest: WorldManifest) -> void:
+	_cancel_full_map_drag()
 	var map_id := MapRegistry.normalize_server_map_id(AppState.current_map)
 	if map_id.is_empty():
 		map_id = manifest.asset_id()
@@ -6265,19 +6692,19 @@ func _configure_full_map(manifest: WorldManifest) -> void:
 	if changed_map:
 		_full_map_region_id = map_id
 		_full_map_zoom = 1.0
+		_full_map_panned = false
 	# A continent exterior shows a buffer of its neighbours around it.
 	var buffer: float = MapViewScript.NEIGHBOUR_BUFFER_METRES if manifest.data.has("continentGeography") else 0.0
 	MapViewScript.configure(full_map_camera, full_map_viewport,
 		MapViewScript.bounds_for(manifest, secret_sections.current_section()), buffer)
-	# A map that frames its neighbours can be pulled back over the continent;
-	# one that does not (an interior, a secret) keeps its own framing.
+	# Every map can magnify around the cursor. Only continent exteriors can
+	# pull back past their default framing to show neighbouring regions.
 	_full_map_base_size = full_map_camera.size
+	_full_map_base_position = full_map_camera.global_position
 	_full_map_zoomable = buffer > 0.0
 	if not _full_map_zoomable:
-		_full_map_zoom = 1.0
-	elif _full_map_zoom > 1.0:
-		full_map_camera.size = _full_map_base_size * _full_map_zoom
-	map_marker_overlay.configure(full_map_camera, adapter, full_map_viewport.size)
+		_full_map_zoom = minf(_full_map_zoom, 1.0)
+	_apply_full_map_zoom()
 	_update_map_boundaries()
 	if changed_map and _cartography_loaded:
 		_show_current_map_view()
@@ -6444,6 +6871,72 @@ func _tab_map_texture(region: Dictionary) -> Texture2D:
 	_tab_map_textures[key] = texture
 	return texture
 
+func _tab_map_detail_texture(region: Dictionary) -> Texture2D:
+	var detail: Dictionary = (region.get("tabMap", {}) as Dictionary).get("detail", {}) as Dictionary
+	if detail.is_empty():
+		return _tab_map_texture(region)
+	var key: String = str(region.get("serverMap", ""))
+	if _tab_map_detail_textures.has(key):
+		var cached: Texture2D = _tab_map_detail_textures[key]
+		_tab_map_detail_textures.erase(key)
+		_tab_map_detail_textures[key] = cached
+		return cached
+	var image := Image.new()
+	var error := image.load(ProjectSettings.globalize_path(str(detail.get("texture", ""))))
+	if error != OK or image.is_empty():
+		return _tab_map_texture(region)
+	image.generate_mipmaps()
+	var texture := ImageTexture.create_from_image(image)
+	while _tab_map_detail_textures.size() >= maxi(2, _map_detail_visible.size() + 1):
+		var evicted := false
+		for old_key: String in _tab_map_detail_textures.keys():
+			if old_key != MapRegistry.normalize_server_map_id(AppState.current_map) and not _map_detail_visible.has(old_key):
+				_tab_map_detail_textures.erase(old_key)
+				evicted = true
+				break
+		if not evicted:
+			break
+	_tab_map_detail_textures[key] = texture
+	return texture
+
+## Zooming or panning onto a neighbour should expose its detail too. Sample
+## the visible ground's owners, keeping a bounded set of up to five regions.
+func _update_map_detail_levels() -> void:
+	if _neighbour_pictures.is_empty():
+		return
+	var wanted := {MapRegistry.normalize_server_map_id(AppState.current_map): true}
+	var views: Array[Array] = []
+	if full_map.visible and map_image.visible and _full_map_zoom < 1.0:
+		views.append([full_map_camera, full_map_viewport.size])
+	if minimap_frame.visible:
+		views.append([map_camera, map_viewport.size])
+	for view: Array in views:
+		var camera: Camera3D = view[0]
+		for fraction: Vector2 in [Vector2(.5, .5), Vector2(.1, .1), Vector2(.9, .1),
+				Vector2(.1, .9), Vector2(.9, .9), Vector2(.5, .1), Vector2(.5, .9),
+				Vector2(.1, .5), Vector2(.9, .5)]:
+			var owner := _map_owning_point(camera.project_ray_origin(Vector2(view[1]) * fraction))
+			if not owner.is_empty() and wanted.size() < 5:
+				wanted[owner] = true
+	if wanted == _map_detail_visible:
+		return
+	_map_detail_visible = wanted
+	for map_id: String in _neighbour_pictures:
+		var picture := _neighbour_pictures[map_id] as MeshInstance3D
+		if not is_instance_valid(picture):
+			continue
+		var region_index := _region_index_for_map(map_id)
+		if region_index < 0:
+			continue
+		var region: Dictionary = cartography_regions[region_index]
+		var material := picture.mesh.surface_get_material(0) as StandardMaterial3D
+		material.albedo_texture = (_tab_map_detail_texture(region) if wanted.has(map_id)
+			else _tab_map_texture(region))
+	# Release detailed images when their regions leave both map views.
+	for key: String in _tab_map_detail_textures.keys():
+		if not wanted.has(key) and key != str((cartography_regions[_preview_region_index] as Dictionary).get("serverMap", "") if _preview_region_index >= 0 else ""):
+			_tab_map_detail_textures.erase(key)
+
 ## A region's name as the cartography writes it, for a line the player reads.
 func _region_name_for_map(server_map: String) -> String:
 	var region_index: int = _region_index_for_map(server_map)
@@ -6476,6 +6969,12 @@ func _on_continent_button_pressed() -> void:
 		_show_continent_view()
 
 func _show_current_map_view() -> void:
+	_full_map_cursor_inside = false
+	map_cursor_coordinates.hide()
+	_layout_full_map()
+	_cancel_full_map_drag()
+	_full_map_panned = false
+	_update_full_map_focus()
 	_ensure_cartography_textures()
 	continent_view.hide()
 	region_preview.hide()
@@ -6488,6 +6987,7 @@ func _show_current_map_view() -> void:
 	map_coordinates.text = "Coordinates: —"
 
 func _show_continent_view() -> void:
+	map_cursor_coordinates.hide()
 	_ensure_cartography_textures()
 	map_image.hide()
 	region_preview.hide()
@@ -6525,7 +7025,7 @@ func _preview_region(region_index: int) -> void:
 	if region_index == _region_index_for_map(AppState.current_map):
 		_show_current_map_view()
 		return
-	var texture: Texture2D = _tab_map_texture(region)
+	var texture: Texture2D = _tab_map_detail_texture(region)
 	if texture == null:
 		map_coordinates.text = "No map of %s has been drawn yet." % str(
 			region.get("name", "that region"))
@@ -6554,7 +7054,7 @@ func _preview_region(region_index: int) -> void:
 	map_coordinates.text = "Coordinates: —"
 
 ## The server tile under a point on the preview. The image is north-up at a
-## known metre a pixel and the map's own transform turns metres into tiles,
+## known world extent and the map's own transform turns metres into tiles,
 ## so the sidebar reads the same numbers it would over the live map.
 func _preview_tile_at(local_position: Vector2) -> Variant:
 	if _preview_region_index < 0 or _preview_region_index >= cartography_regions.size():
@@ -6582,10 +7082,12 @@ func _preview_tile_at(local_position: Vector2) -> Variant:
 func _on_region_preview_gui_input(event: InputEvent) -> void:
 	if not event is InputEventMouseMotion:
 		return
+	map_cursor_coordinates.hide()
 	var tile_value: Variant = _preview_tile_at((event as InputEventMouseMotion).position)
 	if tile_value is Vector2i:
 		var tile: Vector2i = tile_value as Vector2i
 		map_coordinates.text = "Coordinates: %d, %d" % [tile.x, tile.y]
+		_show_map_cursor_coordinates(region_preview, event.position, tile)
 		var service_label: String = _service_preview_overlay.label_at((event as InputEventMouseMotion).position)
 		if not service_label.is_empty():
 			map_coordinates.text += " — " + service_label
@@ -6599,6 +7101,7 @@ func _on_region_preview_gui_input(event: InputEvent) -> void:
 		map_coordinates.text = "Coordinates: outside map image"
 
 func _on_region_preview_mouse_exited() -> void:
+	map_cursor_coordinates.hide()
 	if region_preview.visible:
 		map_coordinates.text = "Coordinates: —"
 
@@ -6617,9 +7120,14 @@ func _load_hud_settings() -> void:
 		var spell_bar_layout: Variant = config.get_value("hud", "spell_quickbar", {})
 		if spell_bar_layout is Dictionary:
 			casting_bar.restore_hud_layout(spell_bar_layout)
-		if secure_check != null:
-			secure_check.button_pressed = bool(config.get_value(
-				"connection", "secure", false))
+		# Older clients saved an opt-in TLS switch. Migrate it immediately so
+		# returning players use TLS too, even before changing any preferences.
+		# Host and port were never saved; the scene now defaults to TLS/2001.
+		if config.get_value("connection", "secure", false) != true:
+			config.set_value("connection", "secure", true)
+			var migration_error := config.save(SETTINGS_PATH)
+			if migration_error != OK:
+				push_warning("Could not migrate connection settings: " + error_string(migration_error))
 		_minimap_scale = clampf(float(config.get_value(
 			"hud", "minimap_scale", 1.0)), 0.75, 1.75)
 		_ui_scale = clampf(float(config.get_value(
@@ -6715,10 +7223,6 @@ func _load_hud_settings() -> void:
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
-		camera_rig.pan_sensitivity = float(config.get_value(
-			"camera", "pan_sensitivity", camera_rig.pan_sensitivity))
-		_camera_follows_player = bool(
-			config.get_value("camera", "follow_player", true))
 		var stored_bindings: Variant = config.get_value("controls", "bindings", {})
 		if stored_bindings is Dictionary:
 			settings_window.call("restore_bindings", stored_bindings)
@@ -6739,7 +7243,10 @@ func _load_hud_settings() -> void:
 			console_commands.aliases = (stored_aliases as Dictionary).duplicate()
 		audio_director.enabled = bool(config.get_value("audio", "enabled", true))
 		audio_director.volume_linear = clampf(float(config.get_value(
-			"audio", "volume", 0.7)), 0.0, 1.0)
+			"audio", "volume", AudioMix.MASTER_DEFAULT)), 0.0, 1.0)
+		for category: String in AudioMix.CATEGORIES:
+			audio_director.set_category_volume(category, float(config.get_value(
+				"audio", category + "_volume", AudioMix.CATEGORIES[category].volume)))
 		for banner_key: String in BANNER_OPTION_NODES:
 			var box: CheckBox = _banner_option_boxes[banner_key] as CheckBox
 			box.set_pressed_no_signal(bool(config.get_value(
@@ -6752,6 +7259,9 @@ func _load_hud_settings() -> void:
 	sound_volume.set_value_no_signal(float(audio_director.volume_linear))
 	sound_volume_value.text = "%d%%" % roundi(
 		float(audio_director.volume_linear) * 100.0)
+	for category: String in audio_director.category_volumes:
+		settings_window.restore_value("audio_" + category,
+			audio_director.category_volumes[category])
 	minimap_size.set_value_no_signal(_minimap_scale)
 	ui_scale_slider.set_value_no_signal(_ui_scale)
 	show_through_obstacles.set_pressed_no_signal(_show_through_obstacles)
@@ -6829,8 +7339,8 @@ func _save_hud_settings() -> void:
 	var config: ConfigFile = ConfigFile.new()
 	config.load(SETTINGS_PATH)
 	config.set_value("notes", "text", _player_notes)
-	config.set_value("connection", "secure",
-		secure_check != null and secure_check.button_pressed)
+	# A developer's plain TCP session must never become a saved player default.
+	config.set_value("connection", "secure", true)
 	config.set_value("encyclopedia", "bookmarks", _encyclopedia_bookmarks)
 	config.set_value("graphics", "shadows", _shadows_enabled)
 	config.set_value("graphics", "particles", _effects_enabled)
@@ -6850,9 +7360,6 @@ func _save_hud_settings() -> void:
 	config.set_value("hud", "spell_quickbar", casting_bar.hud_layout())
 	config.set_value("camera", "rotation_sensitivity",
 		float(camera_rig.rotation_sensitivity))
-	config.set_value("camera", "pan_sensitivity",
-		float(camera_rig.pan_sensitivity))
-	config.set_value("camera", "follow_player", _camera_follows_player)
 	config.set_value("controls", "bindings",
 		settings_window.call("stored_bindings"))
 	config.set_value("console", "marks", console_commands.marks)
@@ -6861,6 +7368,9 @@ func _save_hud_settings() -> void:
 	config.set_value("console", "aliases", console_commands.aliases)
 	config.set_value("audio", "enabled", bool(audio_director.enabled))
 	config.set_value("audio", "volume", float(audio_director.volume_linear))
+	for category: String in audio_director.category_volumes:
+		config.set_value("audio", category + "_volume",
+			float(audio_director.category_volumes[category]))
 	config.set_value("hud", "minimap_scale", _minimap_scale)
 	config.set_value("hud", "ui_scale", _ui_scale)
 	config.set_value("hud", "show_through_obstacles", _show_through_obstacles)
@@ -7484,23 +7994,35 @@ func _layout_minimap_cardinals() -> void:
 
 func _configure_window_layers() -> void:
 	actor_resource_overlay.z_index = 1
+	carried_item.z_index = 400
+	_make_scene_windows_draggable()
+
+func _configure_window_stack() -> void:
+	window_stack = WindowStackScript.new()
+	window_stack.name = "WindowStack"
+	game_view.add_child(window_stack)
+	window_stack.configure(game_view)
+	# Reminder cards are HUD surfaces below all windows, including for input.
+	game_view.move_child(lantern_guide, viewport_container.get_index() + 1)
+	var tracker: Control = extension_windows.get("tracked_quest")
+	tracker.reparent(game_view)
+	tracker.z_index = 8
+	game_view.move_child(tracker, lantern_guide.get_index() + 1)
 	for panel: Control in [full_map, stats_panel, inventory_panel, dialogue_panel,
-		trade_panel, storage_panel, ground_bag_panel, manufacturing_panel]:
-		panel.z_index = 20
-	carried_item.z_index = 40
-	item_lists_panel.z_index = 25
-	console_panel.z_index = 25
-	settings_panel.z_index = 30
-	# Every code-created window joins this list: the actor banner above draws
-	# at z 1 so it can clear the world viewport, and a window left at the
-	# default 0 slides underneath the local player's name and bars, which
-	# follow the player around the middle of the screen.
-	for window_layer: Control in [spells_window, summoning_window, emotes_window,
+			trade_panel, storage_panel, ground_bag_panel, manufacturing_panel,
+			item_lists_panel, console_panel, reading_panel, chat_hud, system_chat_hud]:
+		window_stack.register(panel)
+	for controller: Control in [spells_window, summoning_window, emotes_window,
 			ranging_window, guild_window, settings_window, reference_window,
 			player_info_panel]:
-		if window_layer != null:
-			window_layer.z_index = 26
-	_make_scene_windows_draggable()
+		window_stack.register(controller.get("panel"))
+	for panel: Control in extension_windows._cascade():
+		window_stack.register(panel)
+	window_stack.decorate(dialogue_panel, [get_node("%DialogueBackdrop"),
+		get_node("%DialogueFrameTexture")])
+	window_stack.attach_overlay(inventory_panel, inventory_quantity_edit)
+	window_stack.register(purchase_confirm, true)
+	window_stack.register(popup_panel, true)
 
 ## Every window moves by its title bar, as Eternal Lands moves all of its own.
 ## The inventory and the ground bag keep their own handlers: those two also
@@ -7529,159 +8051,152 @@ func _make_scene_windows_draggable() -> void:
 		WindowDrag.attach(panel, handle)
 
 func _sync_chat() -> void:
-	chat_output.clear()
-	chat_output.scroll_following = true
-	var matching: Array = AppState.chat_lines.filter(func(line: Dictionary) -> bool: return _chat_line_shown(line))
-	var first_line: int = (0 if _chat_tab == "history" else maxi(0, matching.size() - CHAT_PANEL_LINES))
-	for line_value: Variant in matching.slice(first_line):
-		var line: Dictionary = line_value as Dictionary
-		_append_chat_text(chat_output, line)
-	chat_output.scroll_to_line(maxi(0, chat_output.get_line_count() - 1))
+	_render_chat_feed(chat_output, AppState.chat_lines.filter(
+		func(line: Dictionary) -> bool: return _chat_line_shown(line)), CHAT_PANEL_LINES)
+	if system_chat_hud != null:
+		_render_chat_feed(system_chat_hud.output, AppState.chat_lines.filter(
+			func(line: Dictionary) -> bool: return _system_line_shown(line)), CHAT_PANEL_LINES)
 	_chat_tail = _last_chat_line()
 
+func _render_chat_feed(target: RichTextLabel, lines: Array, cap: int) -> void:
+	target.clear()
+	target.scroll_following = true
+	for line: Dictionary in lines.slice(maxi(0, lines.size() - cap)):
+		_append_chat_text(target, line)
+	target.scroll_to_line(maxi(0, target.get_line_count() - 1))
+
 func _sync_console() -> void:
-	console_output.clear()
-	for line_value: Variant in AppState.chat_lines:
-		_append_chat_text(console_output, line_value as Dictionary)
+	if chat_log_tabs == null:
+		return
+	chat_log_tabs.sync(AppState.active_channels, AppState.chat_lines)
+	_render_chat_feed(console_output, AppState.chat_lines.filter(
+		func(line: Dictionary) -> bool: return _console_line_shown(line)),
+		AppState.CHAT_LINE_LIMIT)
 	_console_tail = _last_chat_line()
 
 func _last_chat_line() -> Dictionary:
-	if AppState.chat_lines.is_empty():
-		return {}
-	return AppState.chat_lines.back() as Dictionary
+	return {} if AppState.chat_lines.is_empty() else AppState.chat_lines.back() as Dictionary
 
 func _chat_line_shown(line: Dictionary) -> bool:
 	if not _chat_line_allowed(line) or bool(line.get("in_window", false)):
 		return false
-	var is_party := str(line.get("text", "")).begins_with("[Party]")
-	if _chat_tab == "party":
-		return is_party
-	if _chat_tab == "general":
-		return int(line.get("channel", 0)) == 0 and not is_party
-	if _chat_tab.begins_with("channel:"):
-		return _chat_channel_number(line) == int(_chat_tab.trim_prefix("channel:"))
-	return _chat_line_visible(int(line.get("channel", 0)))
+	if ChatMessages.kind(line) == "system" and not bool(chat_hud.options.get("combined", false)):
+		return false
+	return ChatMessages.matches(line, _chat_tab)
+
+func _system_line_shown(line: Dictionary) -> bool:
+	return ChatMessages.kind(line) == "system" and _chat_line_allowed(line) and not bool(line.get("in_window", false))
+
+func _console_line_shown(line: Dictionary) -> bool:
+	return _chat_line_allowed(line) and ChatMessages.matches(line, chat_log_tabs.selected)
 
 func _chat_channel_number(line: Dictionary) -> int:
-	if line.has("channel_number"):
-		return int(line.channel_number)
-	var slot := int(line.get("channel", 0)) - 5
-	return int(AppState.active_channels[slot]) if slot >= 0 and slot < AppState.active_channels.size() else 0
+	return ChatMessages.channel_number(line)
 
-## One line arrived. Both logs used to be cleared and rebuilt for it - the
-## panel's hundred lines and the console's thousand, most of eight
-## milliseconds a line once the buffer was full, several times a second in a
-## fight. The line is appended to each instead, and the oldest paragraph
-## dropped once the log is past its cap. A log whose last rendered line is
-## no longer the line before this one - a reconnect cleared the buffer, a
-## fixture replaced it - is rebuilt, which keeps the two paths from ever
-## disagreeing about what is shown.
+## Append only the new matching line, preserving a reader's scroll position.
+## Filter and history changes rebuild deliberately; normal traffic does not.
 func _append_chat_line() -> void:
 	var lines: Array = AppState.chat_lines
-	var count: int = lines.size()
+	var count := lines.size()
 	var line: Dictionary = lines.back() as Dictionary if count > 0 else {}
 	var previous: Dictionary = lines[count - 2] as Dictionary if count >= 2 else {}
+	if chat_log_tabs != null:
+		chat_log_tabs.observe(line)
+	chat_hud.remember_peer(ChatMessages.peer(line))
 	if count >= 2 and is_same(previous, _chat_tail):
 		_chat_tail = line
 		if _chat_line_shown(line):
-			var scroll := chat_output.get_v_scroll_bar()
-			var following := scroll.value >= scroll.max_value - scroll.page - 2
-			chat_output.scroll_following = following
-			_append_chat_text(chat_output, line)
-			var cap: int = (AppState.CHAT_LINE_LIMIT if _chat_tab == "history"
-				else CHAT_PANEL_LINES)
-			# The paragraph after the last newline is empty, hence the one over.
-			while chat_output.get_paragraph_count() > cap + 1:
-				chat_output.remove_paragraph(0, true)
-			if following:
-				chat_output.scroll_to_line(maxi(0, chat_output.get_line_count() - 1))
+			_append_to_chat_feed(chat_output, line, CHAT_PANEL_LINES)
+		if _system_line_shown(line):
+			_append_to_chat_feed(system_chat_hud.output, line, CHAT_PANEL_LINES)
 	else:
 		_sync_chat()
 	if count >= 2 and is_same(previous, _console_tail):
 		_console_tail = line
-		_append_chat_text(console_output, line)
-		while console_output.get_paragraph_count() > AppState.CHAT_LINE_LIMIT + 1:
-			console_output.remove_paragraph(0, true)
+		if _console_line_shown(line):
+			_append_to_chat_feed(console_output, line, AppState.CHAT_LINE_LIMIT)
 	else:
 		_sync_console()
 
-## The server writes every finished mix to chat as well as to the item text
-## the inventory and manufacturing windows show, so with either window open a
-## batch reports each item twice and scrolls everything anyone said off the
-## chat. Eternal Lands kept its mix reports out of chat while the items or
-## manufacture window was showing them (multiplayer.c, INVENTORY_ITEM_TEXT).
-## The line is marked as it arrives rather than judged when drawn, so closing
-## the window afterwards does not bring a whole run's worth back; the console
-## still keeps every one.
+func _append_to_chat_feed(target: RichTextLabel, line: Dictionary, cap: int) -> void:
+	var scroll := target.get_v_scroll_bar()
+	var following := scroll.value >= scroll.max_value - scroll.page - 2
+	target.scroll_following = following
+	_append_chat_text(target, line)
+	while target.get_paragraph_count() > cap + 1:
+		target.remove_paragraph(0, true)
+	if following:
+		target.scroll_to_line(maxi(0, target.get_line_count() - 1))
+
 const MIX_REPORT_PREFIX := "You successfully mixed "
 
 func _hold_mix_report_in_window() -> void:
-	var line: Dictionary = _last_chat_line()
+	var line := _last_chat_line()
 	if (int(line.get("channel", -1)) == 0
 			and str(line.get("text", "")).begins_with(MIX_REPORT_PREFIX)
-			and (inventory_panel.is_visible_in_tree()
-				or manufacturing_panel.is_visible_in_tree())):
+			and (inventory_panel.is_visible_in_tree() or manufacturing_panel.is_visible_in_tree())):
 		line["in_window"] = true
 
-## The player's own ignore and filter lists. The line still arrived and is
-## still in state - this only decides whether they are shown it - so nothing
-## the server said is lost, and the console tab still shows everything.
 func _chat_line_allowed(line: Dictionary) -> bool:
-	if int(line.get("channel", 0)) == AppState.LOCAL_CHAT_CHANNEL:
+	if ChatMessages.kind(line) == "system":
 		return true
-	var text: String = str(line.get("text", ""))
-	var speaker: String = text.split(":", false, 1)[0] if text.contains(":") else ""
-	return console_commands.allows(speaker, text)
+	return console_commands.allows(ChatMessages.speaker(line), str(line.get("text", "")))
 
 func _chat_line_visible(channel: int) -> bool:
-	# `#gm` arrives on the legacy CHAT_GM channel and used to be findable only
-	# by reading past everything else in View All.
-	if _chat_tab == "guild":
-		return channel == AppState.GUILD_CHAT_CHANNEL
-	if _chat_tab == "private":
-		return channel == 1
-	if _chat_tab == "system":
-		return channel in [3, 4, 255, AppState.LOCAL_CHAT_CHANNEL]
-	return true
+	return ChatMessages.matches({"channel": channel}, _chat_tab)
 
 func _formatted_chat_line(line: Dictionary) -> String:
-	var channel: int = int(line.get("channel", 0))
-	var prefix: String = ""
-	match channel:
-		1: prefix = "[PM] "
-		AppState.GUILD_CHAT_CHANNEL: prefix = "[Guild] "
-		3, 255: prefix = "[System] "
-		AppState.LOCAL_CHAT_CHANNEL: prefix = "[Client] "
-		5, 6, 7:
-			var channel_number: int = _chat_channel_number(line)
-			prefix = ("[#%d] " % channel_number
-				if channel_number > 0 else "[Channel] ")
-	# Eternal Lands stamps every line "[12:14:49]", ahead of any tag. A line
-	# from before the stamps existed simply has none.
+	var category := ChatMessages.kind(line)
+	var prefix := ""
+	var text := str(line.get("text", ""))
+	match category:
+		"private":
+			prefix = "[Private] "
+			if text.begins_with("[PM from "):
+				text = text.trim_prefix("[PM from ").trim_suffix("]")
+			elif text.begins_with("[PM to "):
+				prefix = "[To %s] " % ChatMessages.peer(line)
+				text = text.substr(text.find(": ") + 2).trim_suffix("]")
+		"guild": prefix = "[Guild] "
+		"system": prefix = "[Client] " if int(line.get("channel", 0)) == AppState.LOCAL_CHAT_CHANNEL else "[System] "
+		"local": prefix = "[Local] "
+		"channel":
+			var number := _chat_channel_number(line)
+			prefix = "[#%d] " % number if number > 0 else "[Channel] "
+			text = text.trim_prefix("[%d] " % number)
 	if bool(_hud_element_options.get("chat_timestamps", true)):
-		var stamp: String = str(line.get("stamp", ""))
+		var stamp := str(line.get("stamp", ""))
 		if not stamp.is_empty():
 			prefix = "[%s] %s" % [stamp, prefix]
-	var body: String = prefix + str(line.get("text", ""))
-	return body
+	return prefix + text
+
+func _chat_line_colour(line: Dictionary) -> Color:
+	var palette := {"local": Color("eee3c8"), "party": Color("9bdff1"),
+		"private": Color("d2b4f4"), "guild": Color("e1cf92"), "channel": Color("b3dfad")}
+	var colour := int(line.get("colour", 0))
+	var category := ChatMessages.kind(line)
+	return palette.get(category,
+		EloriaProtocol.el_text_colour(colour) if colour > 0 else Color("d6cbaa"))
 
 func _append_chat_text(target: RichTextLabel, line: Dictionary) -> void:
-	# Programmatic colour keeps names and message text literal and safe,
-	# including strings that happen to contain BBCode delimiters.
-	var colour := int(line.get("colour", 0))
-	target.push_color(EloriaProtocol.el_text_colour(colour) if colour > 0 else Color("eee3c8"))
+	# Literal text prevents player-supplied BBCode from becoming UI markup.
+	target.push_color(_chat_line_colour(line))
 	target.add_text(_formatted_chat_line(line) + "\n")
 	target.pop()
 
 func _chat_message_for_tab(message: String) -> String:
 	if message.begins_with("/") or message.begins_with("#") or message.begins_with("@"):
 		return message
-	if _chat_tab.begins_with("channel:"):
-		return "@" + message
-	if _chat_tab == "party":
-		return "#p " + message
-	if _chat_tab == "guild":
-		return "#gm " + message
+	var target := str(chat_hud.destination_key)
+	if target.begins_with("channel:"):
+		var number := int(target.trim_prefix("channel:"))
+		return "@@%d %s" % [number, message] if number in AppState.active_channels else ""
+	if target.begins_with("pm:"):
+		return "/%s %s" % [target.trim_prefix("pm:"), message]
+	match target:
+		"party": return "#p " + message
+		"guild": return "#gm " + message
+		"private": return ""
 	return message
 
 func _sync_stats() -> void:
@@ -9649,6 +10164,7 @@ func _floating_feedback_row(preferred_y: float, lowest_y: float) -> float:
 	return candidates[candidates.size() - 1]
 
 func _on_window_size_changed() -> void:
+	_layout_full_map()
 	# Match the render viewport to the actual drawable area so resizing changes
 	# camera aspect instead of stretching a fixed 16:9 render target. The
 	# container reports canvas units, which the content-scale system multiplies
@@ -9662,6 +10178,15 @@ func _on_window_size_changed() -> void:
 	if main_viewport.size != target_size:
 		main_viewport.size = target_size
 	OldcraftDialogueStyleScript.layout(self)
+
+func _layout_full_map() -> void:
+	var area := viewport_container.get_rect()
+	area.end = Vector2(minf(area.end.x, right_rail.position.x),
+		minf(area.end.y, (%Quickbar as Control).position.y))
+	full_map.offset_left = area.position.x - full_map.anchor_left * game_view.size.x
+	full_map.offset_top = area.position.y - full_map.anchor_top * game_view.size.y
+	full_map.offset_right = area.end.x - full_map.anchor_right * game_view.size.x
+	full_map.offset_bottom = area.end.y - full_map.anchor_bottom * game_view.size.y
 
 func _sync_hud_button_states(force := false) -> void:
 	if _hud_icon_regions.is_empty():
@@ -9687,7 +10212,7 @@ func _sync_hud_button_states(force := false) -> void:
 		sitting,
 		_interaction_mode == "attack",
 		_interaction_mode == "trade" or bool(AppState.trade.get("open", false)),
-		bool(AppState.player_info.get("open", false)),
+		_interaction_mode == "look" or bool(AppState.player_info.get("open", false)),
 		inventory_panel.visible,
 		stats_open and stats_tab != 1,
 		stats_open and stats_tab == 1,
@@ -10189,6 +10714,7 @@ func _sync_equipment_slots() -> void:
 func _sync_quick_slots() -> void:
 	for slot: int in range(quick_slot_buttons.size()):
 		var quick_button: Button = quick_slot_buttons[slot]
+		var shortcut: String = settings_window.call("binding_text", "quick_item_%d" % (slot + 1))
 		var quick_item_value: Variant = AppState.inventory.get(slot)
 		if quick_item_value is Dictionary:
 			var quick_item: Dictionary = quick_item_value as Dictionary
@@ -10201,6 +10727,7 @@ func _sync_quick_slots() -> void:
 			var quick_tooltip: String = (_inventory_tooltip(quick_item, slot)
 				+ "\nQuick slot: %d  Quantity: %d" % [slot + 1,
 					int(quick_item.get("quantity", 0))])
+			quick_tooltip += "\nShortcut: " + shortcut
 			if cooldown_seconds > 0:
 				quick_tooltip += "\nCooldown: %d seconds" % cooldown_seconds
 			elif not usable:
@@ -10211,7 +10738,8 @@ func _sync_quick_slots() -> void:
 			quick_button.icon = null
 			quick_button.text = ""
 			quick_button.disabled = true
-			quick_button.tooltip_text = "Empty item quick slot\nScroll this column for more item shortcuts."
+			quick_button.tooltip_text = ("Empty item quick slot\nShortcut: " + shortcut
+				+ "\nScroll this column for more item shortcuts.")
 	if selected_inventory_slot >= 0:
 		var selected_value: Variant = AppState.inventory.get(selected_inventory_slot)
 		if selected_value is Dictionary:
@@ -10502,6 +11030,18 @@ func _set_name_distance(value: Variant) -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if section == "Audio" and key.begins_with("audio_"):
+		audio_director.set_category_volume(key.trim_prefix("audio_"), float(value))
+		_save_hud_settings()
+		return
+	if section == "Chat":
+		var surface: PanelContainer = system_chat_hud if key.begins_with("system_chat_") else chat_hud
+		var option := key.trim_prefix("system_chat_") if key.begins_with("system_chat_") else key.trim_prefix("chat_")
+		if option == "reset_layout":
+			surface.reset_layout()
+		else:
+			surface.set_option(option, value)
+		return
 	if key.begins_with("minimap_marker_") and key != "minimap_marker_scale":
 		var type := StringName(key.trim_prefix("minimap_marker_"))
 		if type in MINIMAP_MARKER_TYPES:
@@ -10568,8 +11108,6 @@ func _on_client_setting_changed(section: String, key: String,
 			_hud_timer_running = false
 			_hud_timer_seconds = 0 if _hud_timer_stopwatch else _hud_timer_start_seconds
 			_sync_hud_timer_label()
-		"secure":
-			secure_check.button_pressed = bool(value)
 		"start_backdrop":
 			start_screen_backdrop.select_backdrop(str(value))
 		"start_animated":
@@ -10595,6 +11133,9 @@ func _on_client_setting_changed(section: String, key: String,
 			for actor_value: Variant in actor_nodes.values():
 				if is_instance_valid(actor_value):
 					(actor_value as ReplicatedActor3D).set_combat_effects_enabled(_effects_enabled)
+			for object_value: Variant in map_object_nodes.values():
+				if is_instance_valid(object_value):
+					(object_value as MapObject3D).set_particles_enabled(_effects_enabled)
 			_sync_harvest_sparkle()
 		"nameplates":
 			_nameplates_enabled = bool(value)
@@ -10605,10 +11146,6 @@ func _on_client_setting_changed(section: String, key: String,
 			extension_windows.call("set_combat_hud_enabled", bool(value))
 		"rotation_sensitivity":
 			camera_rig.rotation_sensitivity = float(value)
-		"pan_sensitivity":
-			camera_rig.pan_sensitivity = float(value)
-		"follow_player":
-			_camera_follows_player = bool(value)
 		"target_mode_strong":
 			Network.send_chat("#targetmode strong")
 		"target_mode_weak":
@@ -10616,12 +11153,13 @@ func _on_client_setting_changed(section: String, key: String,
 		"autogather":
 			Network.send_chat("#autogather")
 	# Commands on Gameplay belong to the server; its local preferences still
-	# save immediately, including the secure connection choice for next login.
+	# save immediately.
 	if key not in ["target_mode_strong", "target_mode_weak", "autogather"]:
 		_save_hud_settings()
 
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()
+	_sync_quick_slots()
 	# The help page is generated from the bindings, so it follows a rebind.
 	reference_window.call("_refresh_help")
 
@@ -11491,10 +12029,13 @@ func _describe_slot(slot: int, with_window: bool) -> void:
 
 ## Right-clicking an item takes the next tool and describes what is under the
 ## cursor without opening anything, so the player can see what the new tool
-## would act on before using it.
+## would act on before using it. Skip Use unless this slot can use its item now.
 func _cycle_inventory_tool(slot: int) -> void:
 	var index: int = INVENTORY_TOOLS.find(_inventory_tool)
-	_set_inventory_tool(INVENTORY_TOOLS[(index + 1) % INVENTORY_TOOLS.size()])
+	var next_tool: String = INVENTORY_TOOLS[(index + 1) % INVENTORY_TOOLS.size()]
+	if next_tool == "use" and not _slot_click_uses_item(slot):
+		next_tool = "inspect"
+	_set_inventory_tool(next_tool)
 	if AppState.inventory.has(slot):
 		selected_inventory_slot = slot
 		_describe_slot(slot, false)
@@ -11744,6 +12285,9 @@ func _on_chat_submitted(text: String) -> void:
 		if local.changed:
 			_save_hud_settings()
 			_sync_map_markers()
+			# Apply ignore/unignore and word-filter changes to existing lines too.
+			_sync_chat()
+			_sync_console()
 		if local.send_on:
 			var sent: Error = Network.send_chat("#help")
 			if sent != OK:
@@ -11764,21 +12308,11 @@ func _on_chat_submitted(text: String) -> void:
 			else:
 				push_warning("DO_EMOTE failed: " + error_string(emote_error))
 			return
-	var is_private: bool = message.begins_with("/") and message.length() > 1
-	# Joined slots can move, and the server can report another active slot.
-	# Reassert this tab's destination before sending ordinary channel text.
-	if _chat_tab.begins_with("channel:") and not is_private and not message.begins_with("#"):
-		var selected_slot := AppState.active_channels.find(int(_chat_tab.trim_prefix("channel:")))
-		if selected_slot < 0:
-			_sync_channel_tabs()
-			return
-		if selected_slot != AppState.active_channel_index:
-			var channel_error := Network.set_active_channel(selected_slot)
-			if channel_error != OK:
-				push_warning("SET_ACTIVE_CHANNEL failed: " + error_string(channel_error))
-				return
-			AppState.active_channel_index = selected_slot
 	message = _chat_message_for_tab(message)
+	if message.is_empty():
+		AppState.append_local_message("Choose a private recipient or an available joined channel before sending.")
+		return
+	var is_private := message.begins_with("/") and message.length() > 1
 	var error: Error = (Network.send_private_message(message.substr(1))
 		if is_private else Network.send_chat(message))
 	if error == OK:
@@ -12176,21 +12710,32 @@ func _sync_selection() -> void:
 ## pointer offers them a look until attack mode or Alt says otherwise, and a
 ## stray click in a crowd must not open a fight with one.
 func _actor_click_action(actor_id: int, dto: Dictionary,
-		alt_pressed: bool) -> String:
+		alt_pressed: bool, mode := "") -> String:
+	if mode.is_empty():
+		mode = _interaction_mode
 	if dto.is_empty():
 		return "none"
 	# A spell waiting for an actor claims whoever is under the pointer, you
 	# included; every other action here is about somebody else.
 	if AppState.pending_spell_target == "actor":
 		return "spell"
+	if mode == "look" and int(dto.get("kind", 0)) in [1, 4] \
+			and not alt_pressed:
+		return "look"
 	if actor_id == AppState.local_actor_id:
 		return "none"
-	if _interaction_mode == "attack" and _is_attackable_actor(actor_id, dto):
-		return "attack"
-	if _interaction_mode == "trade" and _is_tradeable_player(actor_id, dto):
-		return "trade"
 	if alt_pressed and _is_attackable_actor(actor_id, dto):
 		return "attack"
+	match mode:
+		"attack":
+			return "attack" if _is_attackable_actor(actor_id, dto) else "none"
+		"trade":
+			return "trade" if _is_tradeable_player(actor_id, dto) else "none"
+		"use", "pick", "harvest", "look":
+			return "none"
+		"talk":
+			return "talk" if (int(dto.get("kind", 0)) == 2 \
+				or _is_tutorial_companion(actor_id) or ReplicatedActor3D.is_summon(dto)) else "none"
 	# NPCs and summons are the two actors a plain click talks to. TOUCH_PLAYER
 	# on your own summon is how the server opens the behaviour popup, so it
 	# has to outrank the attack below - a summon is a creature kind.
@@ -12468,6 +13013,7 @@ func _pick_map_object(viewport_position: Vector2) -> MapObject3D:
 ## a request: the server decides range, tools, level and whether anything
 ## happens at all.
 func _activate_map_object(map_object: MapObject3D, inspect: bool) -> void:
+	_clear_map_walk_target()
 	exterior_stream.pending_walk.clear()
 	if inspect:
 		var look_error: Error = Network.look_at_map_object(map_object.object_id)
@@ -12512,6 +13058,7 @@ func _sync_map_objects() -> void:
 		var landscape_crossing: bool = bool(region_entry.get("landscapeTransitions", false)) and str(dto_value.get("label", "")) == "Portal"
 		map_object.configure(dto_value as Dictionary, adapter, catalog, landscape_crossing,
 			_object_presentation(object_id))
+		map_object.set_particles_enabled(_effects_enabled)
 		_fit_lantern_map_marker(map_object, "MapMarker")
 		world_root.add_child(map_object)
 		map_object_nodes[object_id] = map_object
@@ -12785,9 +13332,27 @@ func _sync_map_markers() -> void:
 		marker.configure(dto, adapter)
 		_fit_lantern_map_marker(marker, "Pin")
 		_place_map_marker_on_surface(marker)
+	_update_attached_map_markers()
 	_sync_player_mark_nodes()
 	_sync_map_marker_list()
 	_request_map_redraw()
+
+func _update_attached_map_markers() -> void:
+	for raw_marker: Variant in map_marker_nodes.values():
+		if not is_instance_valid(raw_marker):
+			continue
+		var marker := raw_marker as MapMarker3D
+		if marker.target_actor_id < 0:
+			continue
+		var dto: Dictionary = AppState.actors.get(marker.target_actor_id, {})
+		if dto.is_empty() or str(dto.get("map", AppState.current_map)) != AppState.current_map:
+			continue
+		var actor_value: Variant = actor_nodes.get(marker.target_actor_id)
+		if not is_instance_valid(actor_value):
+			continue
+		var actor := actor_value as Node3D
+		if actor != null and not actor.is_queued_for_deletion():
+			marker.follow_actor(actor.global_position)
 
 func _sync_player_mark_nodes() -> void:
 	var wanted: Dictionary = {}
@@ -12857,7 +13422,11 @@ func _current_map_markers() -> Array[Dictionary]:
 			continue
 		var marker: Dictionary = marker_value as Dictionary
 		if str(marker.get("map_id", "")) == here:
-			markers.append(marker)
+			var projected: Dictionary = marker.duplicate()
+			var node: Variant = map_marker_nodes.get(int(marker.marker_id))
+			if is_instance_valid(node):
+				projected["position"] = (node as MapMarker3D).global_position
+			markers.append(projected)
 	return markers
 
 func _place_map_marker_on_surface(marker: MapMarker3D) -> void:
@@ -13076,6 +13645,7 @@ func _cursor_context_at(viewport_position: Vector2) -> Dictionary:
 			# same way. A pending actor spell still claims you - clicking
 			# yourself casts at yourself.
 			if AppState.pending_spell_target != "actor" \
+					and _interaction_mode in ["walk", "pick"] \
 					and _ground_bag_below_player() >= 0:
 				context["target"] = "bag"
 				return context
@@ -13105,33 +13675,21 @@ func _cursor_context_at(viewport_position: Vector2) -> Dictionary:
 			context["target"] = "interactive"
 	return context
 
-## Temporary typographic branding; keep the original scene controls and art paths
-## stable until the final Rabbit Lands visual identity is commissioned.
-func _apply_rabbitlands_wordmark() -> void:
+## Rabbit Lands artwork derived from the selected Discord identity.
+## Preserve existing scene controls and compatibility-sensitive resource paths.
+func _apply_rabbitlands_branding() -> void:
+	login_logo.texture = _external_texture("res://assets/branding/rabbitlands-logo.png")
+	hud_logo.texture = _external_texture("res://assets/branding/rabbitlands-mark.png")
 	for target: TextureRect in [login_logo, hud_logo]:
-		target.texture = null
 		target.tooltip_text = "Rabbit Lands"
-		var wordmark := target.get_node_or_null("RabbitLandsWordmark") as Label
-		if wordmark == null:
-			wordmark = Label.new()
-			wordmark.name = "RabbitLandsWordmark"
-			target.add_child(wordmark)
-		wordmark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		wordmark.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		wordmark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		wordmark.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		wordmark.text = "RABBIT\nLANDS" if target == login_logo else "RL"
-		wordmark.add_theme_font_size_override("font_size", 36 if target == login_logo else 23)
-		wordmark.add_theme_color_override("font_color", Color("e5c68c"))
-		wordmark.add_theme_color_override("font_outline_color", Color("211a13"))
-		wordmark.add_theme_constant_override("outline_size", 5 if target == login_logo else 3)
+
 
 func _apply_eloria_art() -> void:
 	login_background.texture = _external_texture(
 		"res://assets/ui/eloria_login_landfall_background.png")
 	%CreationBackdrop.texture = _external_texture(
 		"res://assets/ui/eloria_character_creation_background.jpg")
-	_apply_rabbitlands_wordmark()
+	_apply_rabbitlands_branding()
 	_hud_active_atlas = _external_texture("res://assets/ui/eloria_gamebuttons.png")
 	_hud_inactive_atlas = _external_texture("res://assets/ui/eloria_gamebuttons_inactive.png")
 	if _hud_active_atlas != null:
@@ -13215,6 +13773,10 @@ func _apply_eloria_theme() -> void:
 	eloria_theme.set_color("font_color", "Label", Color(0.91, 0.86, 0.70))
 	eloria_theme.set_color("font_color", "Button", Color(0.93, 0.80, 0.58))
 	theme = eloria_theme
+	var map_style := panel.duplicate() as StyleBoxFlat
+	map_style.set_border_width_all(0)
+	map_style.set_content_margin_all(0.0)
+	full_map.add_theme_stylebox_override("panel", map_style)
 	# The chat frame owns its border; the message area needs no second box.
 	chat_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	chat_output.add_theme_constant_override("outline_size", 1)

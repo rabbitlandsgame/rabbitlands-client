@@ -22,7 +22,7 @@ Do not rename player databases or Docker data volumes without explicitly mapping
 
 ## Public connection configuration
 
-The canonical configurable game hostname is `game.rabbitlandsgame.com`. Localhost and custom hosts remain supported. The game uses direct TCP on port 2000, with optional verified native TLS on TCP 2001. Website HTTPS reverse proxies do not replace the game's TCP listener. Update downloads use HTTPS separately.
+The canonical configurable game hostname is `game.rabbitlandsgame.com`. The client defaults to verified native TLS on TCP 2001. Localhost and custom hosts remain supported; the explicit `--dev-plain-tcp` launch option selects plain TCP for local testing (default `127.0.0.1:2000`) without saving an insecure player preference. Website HTTPS reverse proxies do not replace the game's TCP listener. Update downloads use HTTPS separately.
 
 Public play requires DNS pointing to the actual host, appropriate TCP firewall rules, and a valid certificate when TLS is enabled. Domain registration alone does not establish a running game service. Production DNS, hosting, certificates and existing player data are managed separately.
 ## Historical audit records

@@ -7,6 +7,9 @@ import struct
 import unittest
 
 CLIENT=Path(__file__).resolve().parents[1]
+# The server checkout beside this one; eloria-server and dev-server are its
+# names from before the move to Rabbit Lands.
+SERVERS=('rabbitlands-server','eloria-server','dev-server')
 PACKAGE=CLIENT/'eloria-assets/maps/reedway'
 
 
@@ -34,8 +37,8 @@ class ReedwayMapTests(unittest.TestCase):
         raw=(PACKAGE/'collision.bin').read_bytes()
         fine=bytes(v for y in range(size) for _ in range(2) for x in range(size) for v in (grid[y*size+x],)*2)
         self.assertEqual(raw,struct.pack('<4sHHII',b'EWCG',2,0,size*2,size*2)+fine)
-        server=CLIENT.parent/'dev-server'
-        if server.exists():
+        server=next((CLIENT.parent/name for name in SERVERS if (CLIENT.parent/name).exists()),None)
+        if server:
             self.assertEqual(json.loads((server/'config/eloria/reedway.json').read_text(encoding='utf-8')),self.layout)
             self.assertEqual(gzip.decompress((server/'tools/collision/reedway.escg.gz').read_bytes()),
                 struct.pack('<4sHHI',b'ESCG',1,200,size)+bytes(grid))

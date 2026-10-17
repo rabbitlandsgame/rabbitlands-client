@@ -38,7 +38,12 @@ def package(region):
     return MAPS / 'four-gates' if region == 'four_gates' else REGIONS / region
 
 
-def authored_snapshot(region):
+def authored_snapshot(region, snapshots_root=None):
+    if snapshots_root is not None:
+        import authoring_catalog
+        contract = next((c for c in authoring_catalog.authored_contracts() if c.id == region), None)
+        return None if contract is None else AUTHORING.load_snapshot(
+            Path(snapshots_root) / region / "continent-authoring.json", contract=contract)
     return next((snapshot for snapshot in AUTHORING.load_snapshots()
                  if snapshot.document['regionId'] == region), None)
 
@@ -51,8 +56,8 @@ def clean(value):
     return value
 
 
-def inputs(region):
-    snapshot = authored_snapshot(region)
+def inputs(region, snapshots_root=None):
+    snapshot = authored_snapshot(region, snapshots_root)
     if snapshot is not None:
         sources = set(TOOLKIT.rglob('*.py'))
         sources.update((Path(__file__).resolve(), HERE/'authoring.py', HERE/'scene_io.py',
@@ -126,8 +131,8 @@ def material_sets(module):
     return sets
 
 
-def build(region, output, force=False):
-    certificate = inputs(region)
+def build(region, output, force=False, snapshots_root=None):
+    certificate = inputs(region, snapshots_root)
     root = output/region
     root.mkdir(parents=True, exist_ok=True)
     proof = root/'source-certificate.json'
@@ -136,12 +141,12 @@ def build(region, output, force=False):
         if previous.get('inputs') == certificate and all((root/p).exists() and hashlib.sha256((root/p).read_bytes()).hexdigest() == digest for p,digest in previous.get('outputs',{}).items()):
             print(f'{region}: retained content is current', flush=True)
             return
-    snapshot = authored_snapshot(region)
+    snapshot = authored_snapshot(region, snapshots_root)
     if snapshot is not None:
         started = time.monotonic()
         print(f'{region}: exporting Godot-authored retained-content GLB', flush=True)
         products = AUTHORING.build_retained_library(snapshot, root)
-        if certificate != inputs(region):
+        if certificate != inputs(region, snapshots_root):
             raise RuntimeError('Godot authoring sources changed during retained-content export')
         proof.write_text(json.dumps({'schema':2, 'region':region, 'authority':'godot-continent-authoring',
             'snapshotSha256':snapshot.digest, 'inputs':certificate, 'outputs':products,
@@ -181,7 +186,7 @@ def build(region, output, force=False):
     metadata['region'] = region
     (root/'library.json').write_text(json.dumps(metadata,indent=2)+'\n',encoding='utf-8')
     np.savez_compressed(root/'foundation-samples.npz', x=built.terrain.gx[0], z=built.terrain.gz[:,0], height=built.terrain.height)
-    if certificate != inputs(region): raise RuntimeError('Source recipes changed during content composition')
+    if certificate != inputs(region, snapshots_root): raise RuntimeError('Source recipes changed during content composition')
     products = ('library.glb','library.json','foundation-samples.npz')
     proof.write_text(json.dumps({'schema':1,'region':region,'inputs':certificate,
         'outputs':{p:hashlib.sha256((root/p).read_bytes()).hexdigest() for p in products},
@@ -194,5 +199,6 @@ if __name__ == '__main__':
     parser.add_argument('--region',choices=BUILDERS,required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--force',action='store_true')
+    parser.add_argument("--snapshots-root", type=Path, help="Fresh isolated authored bakes, validated against the current territory contracts")
     args=parser.parse_args()
-    build(args.region,args.output.resolve(),args.force)
+    build(args.region,args.output.resolve(),args.force,args.snapshots_root.resolve() if args.snapshots_root else None)

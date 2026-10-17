@@ -1,0 +1,47 @@
+{
+  "actor": "moss_bear",
+  "runtime_sha256": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+  "previous_runtime_sha256": "5f5837fc557421c0ed6b11bc9fda400c190d40b122290da53baa1b76fb5ca8a8",
+  "approved_gait_sha256": "8cb83ba3464c3bb957f5ec496a7ded79b5e9cf218ea4e70812c4a1fde3290ce1",
+  "exact_approved_file_installed": true,
+  "exact_preserved_animation_payloads": [
+    "Walk",
+    "Jog",
+    "Idle_A",
+    "Fighting_Idle",
+    "Hit_Chest"
+  ],
+  "preservation_baselines": {
+    "Walk/Jog": "approved gait",
+    "Idle_A/Fighting_Idle/Hit_Chest": "previous runtime"
+  },
+  "mesh_skin_bind_rest_material_hierarchy_unchanged": true,
+  "clip_count": 7,
+  "import_bake_fps": 1536,
+  "stride_metres_per_second_after_import_scale": {
+    "walk": 0.7966527690404819,
+    "run": 1.7748486590038313
+  },
+  "unchanged_registry_fields": [
+    "scene",
+    "animationLibrary",
+    "import",
+    "attachments"
+  ],
+  "user_acceptance": "Approved revised 3D attack/death and explicitly requested runtime application; prior Walk/Jog acceptance retained.",
+  "limitations": [
+    "Localized dorsal leaf-plate stretch at strong poses remains as reviewed.",
+    "Attack/death retain 3.5/3.75 second reference durations; server combat scheduling is unchanged."
+  ],
+  "files": {
+    "godot-client/assets/actors/native/creatures/moss_bear.glb": "e27a2fedbfa57da44c0f3ff6ca10511f321367b63b0bbb69dfebcc30e498231c",
+    "godot-client/assets/actors/native/creatures/moss_bear.glb.import": "ca57da4a0d68789647ace396383e24cd59ccace5db43a801c144aab30b1edb4e",
+    "godot-client/data/animations/ursine/moss_bear.json": "2086fe1af089860e69ecabb1dc79a7df4a28c5dfd623e55a2bb71f650a97249f",
+    "godot-client/tests/test_ursine_video_motion.gd": "675f8def79342fe15284d2ee8b1cb40319e263da33d6066b48e5a6bd05dd7b07",
+    "godot-client/tests/fixtures/ursine_motion_worlds.json": "d7816f073ecba6d1abfc1a8a2dcb6cbdef3a91c81d00b3e0e3ac9ee7b2d21b1c",
+    "docs/qa/ursine-motion/runtime-playback.json": "e65b57ed28ed2bc4279f444dcb370d5284cd63c3dd3fbc07ac8ac0c381158e64",
+    "docs/qa/ursine-motion/export-validation.json": "09d468ff290caaae0ac4756d152b0cca31934944a0dfd02c95c7d8fbb245f950",
+    "docs/qa/ursine-motion/fresh-blender-import.json": "6e36f120c2df3c6bcac2308a917e96c8b8b46a77d4e61d6ffaefe288c6c0db07",
+    "docs/qa/ursine-motion/deformation-review.json": "e8164553e392d5188e08fc810c827413a211663d9856162cbfa7cd2d10adb039"
+  }
+}

@@ -153,6 +153,8 @@ var actor_titles: Dictionary = {}
 ## actor is removed, and a seamless land crossing that keeps the actors keeps
 ## their rows too.
 var actor_occupations: Dictionary = {}
+## NPCs with a new quest this player can accept, stated by the server.
+var quest_offer_actors: Dictionary = {}
 ## True lifetime experience per skill, keyed by skill name, and what it has
 ## bought past the level ceiling. Held separately from `stats` because the
 ## legacy stats packet carries the same numbers through a 32-bit window and
@@ -436,6 +438,7 @@ func _on_connection_state_changed(value: String) -> void:
 		achievements_catalog = {"worn_title": "", "entries": []}
 		actor_titles.clear()
 		actor_occupations.clear()
+		quest_offer_actors.clear()
 		experience64.clear()
 		# Per profile rather than per character, but a different server may
 		# size its creatures differently, so it is cleared with the rest.
@@ -617,6 +620,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				var removed_actor_id: int = int(removed_actor_value)
 				actors.erase(removed_actor_id)
 				actor_occupations.erase(removed_actor_id)
+				quest_offer_actors.erase(removed_actor_id)
 				if selected_actor_id == removed_actor_id:
 					selected_actor_id = -1
 					state_changed.emit(&"selection")
@@ -625,6 +629,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			Network.coordinate_route_cancelled.emit()
 			actors.clear()
 			actor_occupations.clear()
+			quest_offer_actors.clear()
 			state_changed.emit(&"actors")
 		"actor_commands":
 			for raw_command_event: Variant in event.commands:
@@ -1075,8 +1080,11 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"active_channels":
 			active_channels = [0, 0, 0]
 			var incoming_channels: Array = event.channels as Array
-			for index: int in range(mini(3, incoming_channels.size())):
-				active_channels[index] = int(incoming_channels[index])
+			for index: int in incoming_channels.size():
+				if index < active_channels.size():
+					active_channels[index] = int(incoming_channels[index])
+				else:
+					active_channels.append(int(incoming_channels[index]))
 			active_channel_index = clampi(int(event.active_index), 0, 2)
 			state_changed.emit(&"channels")
 		"chat":
@@ -1084,6 +1092,13 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			# stamps every chat line as it lands; rendering may show or hide it.
 			var slot := int(event.channel) - 5
 			var channel_number := int(active_channels[slot]) if slot >= 0 and slot < active_channels.size() else 0
+			# A fourth membership shares legacy display slot 7. The server's
+			# explicit numeric header is authoritative, not that display slot.
+			if int(event.channel) in [5, 6, 7]:
+				var text := str(event.text)
+				var end := text.find("] ")
+				if text.begins_with("[") and end > 1 and text.substr(1, end - 1).is_valid_int():
+					channel_number = int(text.substr(1, end - 1))
 			chat_lines.append({"channel": event.channel, "channel_number": channel_number, "text": event.text,
 				"colour": int(event.get("colour", 0)),
 				"stamp": Time.get_time_string_from_system()})
@@ -1159,6 +1174,11 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				else:
 					actor_occupations[occupied_id] = occupation
 			state_changed.emit(&"actor_occupations")
+		"quest_offers":
+			quest_offer_actors.clear()
+			for offered_id: int in event.actor_ids:
+				quest_offer_actors[offered_id] = true
+			state_changed.emit(&"quest_offers")
 		"map_digest":
 			# Which package the server was built against. Recorded rather than
 			# acted on: the map cache is keyed on the package this machine
@@ -1277,7 +1297,16 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				special_events.append(str(raw_line))
 			state_changed.emit(&"special_events")
 		"magic_state":
-			magic_state_received.emit(event.data)
+			var magic: Dictionary = event.data
+			if magic.get("kind") == "creature_status":
+				var status_actor_id := int(magic.get("actor_id", -1))
+				if actors.has(status_actor_id) and magic.get("effects") is Array:
+					var status_actor: Dictionary = actors[status_actor_id]
+					status_actor["negative_statuses"] = (magic.effects as Array).duplicate()
+					mark_actor_changed(status_actor_id)
+					state_changed.emit(&"actors")
+			else:
+				magic_state_received.emit(magic)
 		"spell_power":
 			spell_power.clear()
 			for raw_effect: Variant in event.effects:
@@ -1299,6 +1328,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				"marker_id": int(event.marker_id), "x": int(event.x),
 				"y": int(event.y), "map_id": str(event.map_id),
 				"label": str(event.label)}
+			if event.has("actor_id"):
+				marker["actor_id"] = int(event.actor_id)
 			if map_markers.get(marker_id) == marker:
 				return
 			map_markers[marker_id] = marker

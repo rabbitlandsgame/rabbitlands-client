@@ -22,14 +22,24 @@ const FRAMED_RADIUS := 64.0
 const VramTextures := preload("res://src/world/vram_textures.gd")
 ## Where configure() keeps a chunk's shared image figures as published.
 const PUBLISHED_SHARED_KEY := "publishedSharedResourceResidentBytes"
-## The geometry figure develop's exporters publish per GLB byte
-## (build_continent.py: 5 x glbBytes). The walk that marks `blocking` (what
-## prime() imports synchronously) never counts less than that: a publisher
-## that counts geometry nearer the GPU's real figure (continent-v2: 1 x
-## glbBytes) admits more cells to residency, but those stream in on the
-## worker instead of lengthening the arrival. Every legacy cell already
-## publishes exactly this figure, so its walk is unchanged.
+## The geometry figure the exporters published per GLB byte before it was
+## measured (build_continent.py: 5 x glbBytes until 2026-10-16). The walk that
+## marks `blocking` (what prime() imports synchronously) never counts less
+## than that: a publisher that counts geometry nearer the GPU's real figure
+## (1 x glbBytes: continent-v2 since 2026-10-03, the legacy territories since
+## 2026-10-16) admits more cells to residency, but those stream in on the
+## worker instead of lengthening the arrival.
 const BLOCKING_GEOMETRY_PER_GLB_BYTE := 5
+## A cell's pooled prototypes (publish_finish.py restamp): prototype identity ->
+## resident bytes, at the same factor as the cell's own geometry. A pooled prop
+## left the chunk's GLB but is drawn from ExternalMeshPool while the cell is
+## resident, so it is counted once while any resident cell names it, as a
+## shared image is. Since the space passes most of a cell's geometry is here:
+## Four Gates 02_07's GLB went from 1,295,400 to 18,336 bytes.
+const SHARED_MESHES_KEY := "sharedMeshResidentBytes"
+## Prototype identities and image hashes are both SHA256, so a walk's shared
+## figures keep prototypes under this prefix.
+const SHARED_MESH_PREFIX := "mesh:"
 
 signal cell_ready(identity: String, imported: Node3D)
 signal cell_retiring(identity: String, imported: Node3D)
@@ -61,6 +71,9 @@ var _physics_enabled := true
 var _preview_enabled := false
 ## VramTextures.budget_generation() when the entries were last corrected.
 var _corrected_generation := -1
+## Image sha -> the directories this territory loads it from
+## (VramTextures.image_directories_by_sha), which price it.
+var _image_directories: Dictionary = {}
 ## Import workers whose owner left the tree or re-primed before they finished.
 ## A worker may be waiting on rendering-server commands that only the main
 ## thread services, so joining it synchronously deadlocks the client; the
@@ -147,8 +160,12 @@ func configure(source: WorldManifest, cache_enabled: bool) -> void:
 	maximum_resident_bytes = maxi(1, int(config.get("maximumResidentBytes", DEFAULT_RESIDENT_BYTES)))
 	# The sidecar indexes of every image this territory names, read before any
 	# figure is corrected: the budget must not depend on a chunk import having
-	# read them first, nor on where the shared images live.
+	# read them first, nor on where the shared images live. Each image is
+	# priced by its own directory's index, the one its load uses, never by an
+	# index another territory read (continent-v2 lists sidecars for images the
+	# Nymara index excludes, and a Nymara chunk decodes those).
 	var indexes := VramTextures.read_indexes_for(source.data, source.glb_path().get_base_dir())
+	_image_directories = VramTextures.image_directories_by_sha(source.data, source.glb_path().get_base_dir())
 	for value: Dictionary in config.chunks:
 		var entry := value.duplicate(true)
 		entry.path = source.source_path.get_base_dir().path_join(str(entry.manifest))
@@ -186,7 +203,8 @@ func _correct_entries() -> Vector2i:
 		if not published is Dictionary or not shared is Dictionary:
 			continue
 		for identity: String in published:
-			var bytes := VramTextures.resident_bytes(identity, int(published[identity]))
+			var bytes := VramTextures.resident_bytes(identity, int(published[identity]),
+				_image_directories.get(identity, PackedStringArray()))
 			shared[identity] = bytes
 			counted[identity] = true
 			if bytes != int(published[identity]):
@@ -213,13 +231,21 @@ static func bounds_distance(position: Vector3, bounds: Dictionary) -> float:
 ## what this client really holds (the default), or PUBLISHED_SHARED_KEY.
 static func incremental_cost(entry: Dictionary, shared: Dictionary,
 		key := "sharedResourceResidentBytes") -> int:
-	# Decoded textures are pooled by content hash. Count each hash once across
-	# the prospective resident set, while keeping legacy all-in estimates valid.
+	# Decoded textures and pooled prototypes are shared by identity. Count each
+	# once across the prospective resident set, while keeping legacy all-in
+	# estimates (which already include a cell's prototypes) valid.
 	if not entry.has("geometryResidentBytes"):
 		return int(entry.estimatedResidentBytes)
 	var geometry := int(entry.geometryResidentBytes)
+	# The blocking walk counts geometry at no less than 5 x its GLB bytes. A
+	# cell's prototypes are stated at the factor of its own geometry, so they
+	# take the same floor: x5 for a cell published at 1 x, x1 for one at 5 x.
+	var prototype_scale := 1.0
 	if key == PUBLISHED_SHARED_KEY and entry.has("glbBytes"):
-		geometry = maxi(geometry, BLOCKING_GEOMETRY_PER_GLB_BYTE * int(entry.glbBytes))
+		var floor_bytes := BLOCKING_GEOMETRY_PER_GLB_BYTE * int(entry.glbBytes)
+		if floor_bytes > geometry:
+			prototype_scale = float(floor_bytes) / maxi(1, geometry)
+			geometry = floor_bytes
 	var cost := maxi(1, geometry)
 	var images: Dictionary = entry.get(key, entry.get("sharedResourceResidentBytes", {}))
 	for identity: String in images:
@@ -227,6 +253,14 @@ static func incremental_cost(entry: Dictionary, shared: Dictionary,
 		var previous := int(shared.get(identity, 0))
 		cost += maxi(0, bytes - previous)
 		shared[identity] = maxi(previous, bytes)
+	var prototypes: Variant = entry.get(SHARED_MESHES_KEY)
+	if prototypes is Dictionary:
+		for identity: String in prototypes:
+			var bytes := maxi(0, ceili(float(prototypes[identity]) * prototype_scale))
+			var slot := SHARED_MESH_PREFIX + identity
+			var previous := int(shared.get(slot, 0))
+			cost += maxi(0, bytes - previous)
+			shared[slot] = maxi(previous, bytes)
 	return cost
 
 func selection(position: Vector3, retain := false) -> Array[Dictionary]:

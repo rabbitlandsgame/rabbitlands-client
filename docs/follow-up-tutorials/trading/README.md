@@ -198,6 +198,8 @@ Target 5/6 completing mutual review/cancel and locating proceeds, and 4/6 comple
 
 ## Source audit
 
-- [Auction service](../../../../dev-server/eloria/auction.py) and [commands](../../../../dev-server/eloria/server.py): listing, expiry, partial purchases, cancellation and collection; help inconsistency recorded above.
-- [World trade and merchant runtime](../../../../dev-server/eloria/world.py), [shops](../../../../dev-server/eloria/shops.py), [item instances](../../../../dev-server/eloria/item_instances.py): atomic ownership, two-stage acceptance and routing.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+- [Auction service](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/auction.py) and [commands](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/server.py): listing, expiry, partial purchases, cancellation and collection; help inconsistency recorded above.
+- [World trade and merchant runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py), [shops](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/shops.py), [item instances](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/item_instances.py): atomic ownership, two-stage acceptance and routing.
 - [Native extension windows](../../../godot-client/src/ui/extension_windows.gd) and [main client](../../../godot-client/src/app/main.gd): actual merchant, Buy All, collection and trade controls.

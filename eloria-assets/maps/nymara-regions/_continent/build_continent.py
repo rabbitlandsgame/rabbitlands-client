@@ -26,6 +26,8 @@ REGIONS=HERE.parent
 MAPS=REGIONS.parent
 CLIENT=MAPS.parents[1]
 sys.path.insert(0,str(HERE))
+sys.path.insert(0,str(CLIENT/'eloria-assets'/'tools'))
+import publish_finish as PF
 import landscape as L
 import authoring as AUTHORING
 from saved_seam_profile import apply_saved_seam_profile
@@ -1191,9 +1193,10 @@ def export_geometry(world,content,output):
             # existing published chunks without this key still use it.
             c['objectMaterialOverrides']={'schema':'eloria-object-material-overrides-v1','entries':[]}
             json_write(chunk_root/'world.json',c)
-            # Conservative geometry + BVH + texture allowance. Runtime has an
-            # independent shared-texture pool; this deliberately overestimates.
-            geometry_bytes=chunk_stats['glbBytes']*5
+            # Geometry at the legacy resident factor (publish_finish.py, 1 x its
+            # GLB since the 2026-10-16 measurement; 5 x before). The space passes
+            # restate it, with the prototypes each cell draws, after the bake.
+            geometry_bytes=max(1,math.ceil(PF.LEGACY_RESIDENT_FACTOR*chunk_stats['glbBytes']))
             shared_bytes=chunk_stats['sharedResourceResidentBytes']
             estimated=geometry_bytes+sum(shared_bytes.values())
             manifest['streamingChunks']['chunks'].append({'id':name,'manifest':f'chunks/{name}/world.json','bounds':bounds,
@@ -1203,6 +1206,11 @@ def export_geometry(world,content,output):
         print(f'{region}: exported {len(chunks)} independent chunks from the shared master',flush=True)
         PROGRESS.step(region,world.ids.index(region)+1,len(world.ids))
     prune_retired_exports(manifests)
+    # Published as baked, a package carries a copy of every repeated prop and
+    # its normals at 32 bits. The space passes settle that, and the figures the
+    # manifests record about their own GLBs with it; they run before the export
+    # certificate below, which pins each region's published bytes.
+    PF.finish(sorted({package(region) for region in manifests}))
     if any(digest(HERE/name)!=sha for name,sha in export_sources.items()):
         raise ValueError('Geometry export source changed during the build; export again before publication')
     if geometry_dependencies()!=dependencies:raise ValueError('Geometry dependencies changed during export; export again before publication')

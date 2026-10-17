@@ -7,6 +7,7 @@ const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd"
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
+const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
 
 @export var walk_presentation_speed := 6.0
 @export var run_presentation_speed := 9.0
@@ -267,11 +268,15 @@ var _equipment_hides: Dictionary = {}
 var _hidden_body_surfaces: Dictionary = {}
 var _nameplate: Label3D
 var _overhead_crowded := false
+var _negative_statuses: Array[String] = []
+var _negative_status_icons: Node3D
 var _title_line: Label3D
 ## The occupation line under an NPC's name, and the occupation it shows
 ## without its brackets. Built on first use, like the title line.
 var _occupation_line: Label3D
 var _occupation := ""
+var _quest_marker: Label3D
+var _quest_marker_tween: Tween
 var _speech_bubble: Label3D
 var _speech_bubble_expiry_msec := 0
 var _health_bar_background: MeshInstance3D
@@ -388,6 +393,17 @@ const HEALTH_BAR_DROP := 16.0
 const HEALTH_LABEL_DROP := HEALTH_BAR_DROP
 const HEALTH_NUMBER_GAP := 5.0
 const OVERHEAD_BACKING := Color(0.0, 0.0, 0.0, 0.45)
+const NEGATIVE_STATUS_SIZE := 20.0
+const NEGATIVE_STATUS_GAP := 3.0
+const NEGATIVE_STATUS_RISE := 24.0
+const NEGATIVE_STATUS_TEXTURES := {
+	"poison": preload("res://assets/ui/status/poison.svg"),
+	"cripple": preload("res://assets/ui/status/cripple.svg"),
+	"expose_heat": preload("res://assets/ui/status/expose_heat.svg"),
+	"expose_cold": preload("res://assets/ui/status/expose_cold.svg"),
+	"expose_magic": preload("res://assets/ui/status/expose_magic.svg"),
+	"expose_radiation": preload("res://assets/ui/status/expose_radiation.svg"),
+}
 static var _health_gradient: GradientTexture2D
 static var _wardrobe_texture_cache: Dictionary = {}
 
@@ -491,6 +507,11 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 	_equipment_config = preload(
 		"res://src/actors/equipment_registry_snapshot_cache.gd").acquire(equipment_config)
 	_invalidate_hand_prop_ranged_cache()
+	if ARCHIVED_MODEL_POLICY.is_retired_actor_type(int(dto.get("actor_type", -1))) or bool(model_config.get("retired", false)):
+		# Keep identity, picking, nameplate and protocol state without drawing
+		# either the archived model or a replacement placeholder body.
+		set_meta("retired_model", true)
+		return []
 	var source_path := _external_path(str(model_config.get("scene", "")))
 	var errors := _load_native_scene(source_path)
 	if not errors.is_empty():
@@ -1032,6 +1053,62 @@ func _add_nameplate(dto: Dictionary) -> void:
 	_add_overhead_background()
 	_layout_overhead()
 	apply_vitals(int(dto.get("health", 0)), int(dto.get("max_health", 0)))
+	set_negative_statuses(dto.get("negative_statuses", []))
+
+## One icon per active negative effect, in a stable order. Only server status
+## snapshots change this list; a spell animation cannot prove an effect landed.
+func set_negative_statuses(effects: Array) -> void:
+	var next: Array[String] = []
+	for effect: String in NEGATIVE_STATUS_TEXTURES:
+		if effect in effects:
+			next.append(effect)
+	if next == _negative_statuses:
+		return
+	_negative_statuses = next
+	if not is_instance_valid(_negative_status_icons):
+		_negative_status_icons = Node3D.new()
+		_negative_status_icons.name = "NegativeStatusIcons"
+		_negative_status_icons.position.y = _nameplate.position.y
+		add_child(_negative_status_icons)
+	for child: Node in _negative_status_icons.get_children():
+		_negative_status_icons.remove_child(child)
+		child.queue_free()
+	for index: int in range(next.size()):
+		var icon := MeshInstance3D.new()
+		icon.name = next[index]
+		icon.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		icon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var quad := QuadMesh.new()
+		quad.size = Vector2.ONE * NEGATIVE_STATUS_SIZE * OVERHEAD_PIXEL
+		var material := _overhead_material(Color.WHITE, 4)
+		material.albedo_texture = NEGATIVE_STATUS_TEXTURES[next[index]]
+		quad.material = material
+		icon.mesh = quad
+		_negative_status_icons.add_child(icon)
+	_layout_negative_statuses()
+	_refresh_negative_statuses()
+
+func negative_status_count() -> int:
+	return _negative_statuses.size() if _health_current > 0 else 0
+
+func _layout_negative_statuses() -> void:
+	if not is_instance_valid(_negative_status_icons):
+		return
+	var rise := NEGATIVE_STATUS_RISE
+	if is_instance_valid(_title_line) and not _title_line.text.is_empty():
+		rise += TITLE_RISE
+	for index: int in range(_negative_status_icons.get_child_count()):
+		var icon := _negative_status_icons.get_child(index) as MeshInstance3D
+		(icon.mesh as QuadMesh).center_offset = Vector3(
+			(index - (_negative_statuses.size() - 1) * 0.5)
+				* (NEGATIVE_STATUS_SIZE + NEGATIVE_STATUS_GAP), rise, 0.0) * OVERHEAD_PIXEL
+
+func _refresh_negative_statuses() -> void:
+	if not is_instance_valid(_negative_status_icons):
+		return
+	_negative_status_icons.visible = _overhead_shown() and negative_status_count() > 0
+	for child: Node in _negative_status_icons.get_children():
+		_fade_quad(child as MeshInstance3D, 1.0)
 
 ## The overhead health bar and its numbers. Not drawn for everyone: every
 ## actor packet carries a health pair, scenery included, and a full bar over
@@ -1222,6 +1299,7 @@ func set_health_visible(enabled: bool) -> void:
 ## condition: a corpse at zero health keeps its empty frame rather than a
 ## sliver of colour.
 func _refresh_overhead_health() -> void:
+	_refresh_negative_statuses()
 	var showing: bool = (_overhead_shown() and _health_shown
 		and _health_maximum > 0)
 	if is_instance_valid(_health_bar_background):
@@ -1283,6 +1361,9 @@ func overhead_fade() -> float:
 	return _overhead_fade
 
 func _refresh_overhead() -> void:
+	if is_instance_valid(_quest_marker):
+		# Quest offers remain visible when nameplates are disabled or crowded.
+		_quest_marker.visible = _drawn and _overhead_fade > 0.0 and not _quest_marker.text.is_empty()
 	if is_instance_valid(_nameplate):
 		_nameplate.visible = _overhead_shown()
 		_fade_label(_nameplate)
@@ -1307,6 +1388,7 @@ func set_title(title: String) -> void:
 		if is_instance_valid(_title_line):
 			_title_line.text = ""
 			_title_line.hide()
+		_layout_negative_statuses()
 		return
 	if not is_instance_valid(_title_line):
 		var label: Label3D = Label3D.new()
@@ -1329,6 +1411,7 @@ func set_title(title: String) -> void:
 		add_child(label)
 		_title_line = label
 	_title_line.text = title
+	_layout_negative_statuses()
 	_title_line.visible = _overhead_shown()
 	_fade_label(_title_line)
 
@@ -1340,6 +1423,37 @@ func set_title(title: String) -> void:
 ## piece, so a second line inside the nameplate would take the name's colour
 ## and size. It fades, hides and declutters with the rest of the block, and
 ## the translucent backing grows to hold it.
+func set_quest_available(available: bool) -> void:
+	if not available:
+		if is_instance_valid(_quest_marker):
+			_quest_marker.text = ""
+			_quest_marker.hide()
+		if is_instance_valid(_quest_marker_tween):
+			_quest_marker_tween.kill()
+		return
+	if is_instance_valid(_quest_marker) and not _quest_marker.text.is_empty():
+		return
+	if not is_instance_valid(_quest_marker):
+		_quest_marker = Label3D.new()
+		_quest_marker.name = "QuestOfferMarker"
+		_quest_marker.position.y = _nameplate.position.y if is_instance_valid(_nameplate) else NAMEPLATE_HEIGHT
+		_quest_marker.offset = Vector2(0.0, 36.0)
+		_quest_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_quest_marker.no_depth_test = true
+		_quest_marker.fixed_size = true
+		_quest_marker.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		WORLD_LABEL_STYLE.apply(_quest_marker, 30, OVERHEAD_PIXEL, 2)
+		_quest_marker.outline_modulate = Color(0.28, 0.13, 0.01)
+		add_child(_quest_marker)
+	_quest_marker.text = "!"
+	_quest_marker.modulate = Color(1.0, 0.73, 0.13)
+	_quest_marker_tween = create_tween().set_loops()
+	_quest_marker_tween.tween_property(_quest_marker, "modulate", Color(1.5, 1.25, 0.5), 0.8)
+	_quest_marker_tween.parallel().tween_property(_quest_marker, "offset:y", 42.0 * WORLD_LABEL_STYLE.RASTER_SCALE, 0.8).set_trans(Tween.TRANS_SINE)
+	_quest_marker_tween.tween_property(_quest_marker, "modulate", Color(1.0, 0.73, 0.13), 0.8)
+	_quest_marker_tween.parallel().tween_property(_quest_marker, "offset:y", 36.0 * WORLD_LABEL_STYLE.RASTER_SCALE, 0.8).set_trans(Tween.TRANS_SINE)
+	_refresh_overhead()
+
 func set_occupation(occupation: String) -> void:
 	var text: String = occupation.strip_edges()
 	if text == _occupation and (text.is_empty() or is_instance_valid(_occupation_line)):
@@ -1460,9 +1574,9 @@ func _lift_overhead(factor: float) -> void:
 	# One height for the lot: the bar, the numbers and the bubble sit above or
 	# below the name inside the block rather than at world heights of their
 	# own, so the gaps between them hold their size along with the text.
-	for node_name: String in ["Nameplate", "TitleLine", "OccupationLine",
+	for node_name: String in ["Nameplate", "TitleLine", "OccupationLine", "QuestOfferMarker",
 			"HealthBarBackground", "HealthBarFill", "HealthNumbers", "SpeechBubble",
-			"OverheadBackground"]:
+			"OverheadBackground", "NegativeStatusIcons"]:
 		var node := get_node_or_null(node_name) as Node3D
 		if node != null:
 			node.position.y = height
@@ -1597,6 +1711,7 @@ func rebase_world(frame: Transform3D) -> void:
 	_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	set_negative_statuses(dto.get("negative_statuses", []))
 	# The capability handshake can correct an actor already spawned from the
 	# legacy clothing bytes. Update its dyes once, including under worn armour.
 	if dto.has("appearance") and dto.appearance != _appearance:
@@ -1623,10 +1738,22 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 	var previous_target: Vector3 = server_target
 	server_target = next_target
 	var actor_command: int = int(dto.get("command", -1))
+	var combat_changed: bool = bool(dto.get("in_combat", _in_combat)) != _in_combat
 	_in_combat = bool(dto.get("in_combat", _in_combat))
 	var command_sequence := int(dto.get("command_sequence", -1))
 	var fresh_command := command_sequence != _last_command_sequence
 	_last_command_sequence = command_sequence
+	# Combat interrupts the movement stream. Its duration is not a step
+	# interval, and the network buffer from the approach must not slow the
+	# short move onto the bag. Keep learned gaits and any step still rendering;
+	# only the next step's timing starts afresh. Explicit transition commands
+	# also cover entering and leaving combat within one reduced update.
+	if combat_changed or (fresh_command and actor_command in [18, 19]):
+		_last_movement_update_msec = -1
+		_unconfirmed_paces.clear()
+		_unconfirmed_gait = -1
+		_jitter_allowance = 0.0
+		_schedule_due = -1.0
 	# Which command the facing comes from, and which it does not. Everything
 	# arriving in one socket read is reduced to a single state and rendered
 	# once, so the last command of a frame is rarely the one that named a
@@ -1796,11 +1923,14 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
 
-## A movement command that moves the actor nowhere is the server restating the
-## last one, not a step. Taken at face value it restarted the walk clip on every
-## such packet, so an actor that had stopped kept walking on the spot forever.
+## Resting commands can arrive before the body finishes its buffered step,
+## including combat ending on the way to a dropped bag. Keep the step's gait
+## until arrival, even when the last command in a reduced burst names idle.
+## Conversely, a restated movement command must not restart a finished step.
 func _movement_aware_action(action: StringName,
 		target_changed: bool) -> StringName:
+	if _segment_duration > 0.0 and action in [&"idle", &"combat_idle", &"turn"]:
+		return _paced_travel_action(&"run" if _previous_step_gait & 1 else &"walk")
 	if action not in [&"walk", &"run"]:
 		return action
 	if target_changed or _segment_duration > 0.0 or _movement_coast_remaining > 0.0:
@@ -1960,6 +2090,15 @@ func _create_equipment_part(part: int, visual_id: int, allow_fallback: bool) -> 
 	if visual_id == 0 and bool(part_config.get("bareWhenEmpty", false)):
 		return
 	var model_config: Dictionary = _equipment_model_config(part, visual_id)
+	if ARCHIVED_MODEL_POLICY.is_retired_equipment(part, visual_id) or bool(model_config.get("retired", false)):
+		# Reserve the visual ID and lifecycle slot without a generated fallback.
+		var marker := Node3D.new()
+		marker.name = "RetiredEquipment_%d_%d" % [part, visual_id]
+		marker.set_meta("native_equipment", true)
+		marker.set_meta("retired_equipment", true)
+		_native_skeleton.add_child(marker)
+		_equipment_nodes[part] = [marker]
+		return
 	if part == 0:
 		_hand_prop_weapon_has_ranged_animation = model_config.has(
 			"rangedAnimationScene")
@@ -2982,7 +3121,7 @@ func play_action(action: StringName, restart := false) -> void:
 ## `Run_Female` covers 2.666 against a running 5.0 m/s (1.88x). Only Speed Hax
 ## on top of a run - 10 m/s - asks for more than the ceiling.
 func _playback_speed_for(action: StringName) -> float:
-	var stride: float = resolver.stride_speed_for_action(action)
+	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale)
 	if stride <= 0.0:
 		return resolver.playback_speed_for_action(action)
 	return clampf(_travel_speed() / stride, 0.35, 3.5)
@@ -3007,7 +3146,7 @@ func _on_animation_finished(_animation_name: StringName) -> void:
 		play_action(&"cast_channel")
 	elif current_action in [&"cast", &"cast_aggressive", &"cast_defensive", &"heal",
 		&"cast_exit", &"attack_primary", &"attack_secondary", &"defend", &"ranged_attack", &"pain"]:
-		play_action(&"combat_idle" if _in_combat else &"idle")
+		play_action(_movement_aware_action(&"combat_idle" if _in_combat else &"idle", false))
 
 func set_hand_props_visible(enabled: bool) -> void:
 	for part: int in [0, 1]:

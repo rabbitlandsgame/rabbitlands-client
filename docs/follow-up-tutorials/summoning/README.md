@@ -184,7 +184,7 @@ Optional pens last 4–6 minutes each and save separately. They are not required
 | Instant recipe versus summoning stone | Pen C · a sealed call | Use one catalog-valid stone through ordinary item use and compare its actual restrictions/consumption with a recipe |
 | Summon strength and skill/perks | Pen B | Inspect profile and actual spawned stats; do not infer power from appearance alone |
 
-Pen C requires new catalog content: the active Eloria item catalog currently has no summoning stones. The shared legacy stone table is not proof of available native content. Register an explicit stone mapped to a creature actually served by the profile, with its native icon and normal item-use route, before enabling the experiment. Do not teach a nonexistent dismissal, pet inventory, loyalty, feeding or precise move command.
+Pen C requires new catalog content: the active Rabbit Lands item catalog currently has no summoning stones. The shared legacy stone table is not proof of available native content. Register an explicit stone mapped to a creature actually served by the profile, with its native icon and normal item-use route, before enabling the experiment. Do not teach a nonexistent dismissal, pet inventory, loyalty, feeding or precise move command.
 
 ## Implementation dependencies and completion audit
 
@@ -200,7 +200,9 @@ For the later transfer, change creature appearance and ownership. For two-client
 
 ## Source audit
 
-- [Summoning rules and six behavior labels](../../../../dev-server/eloria/summoning.py), [world runtime](../../../../dev-server/eloria/world.py): ownership, behavior level, decay, mixing restrictions and spawn lifecycle.
-- [Current profile recipes](../../../../dev-server/config/eloria/recipes.txt): Mirrorfin Otter, Stag and Gate Turtle costs and mappings.
+> Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
+
+- [Summoning rules and six behavior labels](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/summoning.py), [world runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py): ownership, behavior level, decay, mixing restrictions and spawn lifecycle.
+- [Current profile recipes](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/config/eloria/recipes.txt): Mirrorfin Otter, Stag and Gate Turtle costs and mappings.
 - [Native Summoning window](../../../godot-client/src/ui/summoning_window.gd): cost/blocker presentation and real request path.
-- [Perks](../../../../dev-server/eloria/perks.py) and [parties](../../../../dev-server/eloria/parties.py): borrowed perk effects and actual ally membership.
+- [Perks](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/perks.py) and [parties](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/parties.py): borrowed perk effects and actual ally membership.

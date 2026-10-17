@@ -8,12 +8,15 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import zipfile
 from pathlib import Path
+from typing import BinaryIO
+from release_storage import PartWriter
 
 CHUNK_BYTES = 8 * 1024 * 1024
-PART_BYTES = 1024 * 1024 * 1024
+PART_BYTES = 256 * 1024 * 1024
 MAX_ANCESTORS = 100000
 
 
@@ -41,7 +44,7 @@ def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
             "ancestors": ancestors, "public_key": pem, "repository": repository}
 
 
-def build_payload(stage: Path, output: Path) -> tuple[int, int]:
+def build_payload(stage: Path, output: Path | BinaryIO) -> tuple[int, int]:
     inventory = []
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED, compresslevel=1, allowZip64=True) as archive:
         paths = sorted(path for root in ("app", "eloria-assets")
@@ -96,8 +99,12 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
         (scripts / name).write_bytes((source / "src" / "updates" / name).read_bytes())
     (project / "data").mkdir(exist_ok=True)
     (project / "data" / "client_release.json").write_text(json.dumps(metadata), encoding="utf-8")
+    branding = project / "assets" / "branding"
+    branding.mkdir(parents=True, exist_ok=True)
+    for name in ("rabbitlands-icon.png", "rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
+        shutil.copyfile(source / "assets" / "branding" / name, branding / name)
     (project / "project.godot").write_text(
-        'config_version=5\n[application]\nconfig/name="Rabbit Lands"\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\nconfig/custom_user_dir_name.linuxbsd="godot/app_userdata/Eloria"\nrun/main_scene="res://main.tscn"\n'
+        'config_version=5\n[application]\nconfig/name="Rabbit Lands"\nconfig/icon="res://assets/branding/rabbitlands-icon.png"\nboot_splash/image="res://assets/branding/rabbitlands-mark-64.png"\nboot_splash/bg_color=Color(0.035, 0.043, 0.055, 1)\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\nconfig/custom_user_dir_name.linuxbsd="godot/app_userdata/Eloria"\nrun/main_scene="res://main.tscn"\n'
         '[display]\nwindow/size/viewport_width=440\nwindow/size/viewport_height=100\n'
         '[rendering]\nrenderer/rendering_method="gl_compatibility"\n', encoding="utf-8")
     (project / "main.tscn").write_text(
@@ -120,18 +127,25 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
 
 
 def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
-                      godot: Path, source: Path, run_godot, logs: Path) -> list[Path]:
+                      godot: Path, source: Path, run_godot, logs: Path,
+                      *, accept_part=None, budget=None) -> list[Path]:
     commit = metadata["commit"]
     platform = metadata["platform"]
     tag = f"client-{commit}"
     base = f'https://github.com/{metadata["repository"]}/releases/download/{tag}'
     archive = stage.parent / f"{stage.name}.update.zip"
-    count, unpacked = build_payload(stage, archive)
-    parts = split_payload(archive, base)
+    if accept_part is None:
+        count, unpacked = build_payload(stage, archive)
+        parts = split_payload(archive, base)
+        size, checksum = archive.stat().st_size, digest(archive)
+    else:
+        with PartWriter(archive, base, PART_BYTES, accept_part, budget) as writer:
+            count, unpacked = build_payload(stage, writer)
+        parts, size, checksum = writer.parts, writer.size, writer.sha256
     release = {"schema": 1, "commit": commit, "platform": platform,
-               "version": stage.name, "size": archive.stat().st_size,
+               "version": stage.name, "size": size,
                "unpacked_size": unpacked, "file_count": count,
-               "sha256": digest(archive), "parts": parts}
+               "sha256": checksum, "parts": parts}
     payload = logs / "release-payload.json"
     payload.write_text(json.dumps(release, separators=(",", ":")), encoding="utf-8")
     manifest = stage.parent / f"{stage.name}-{platform}.json"
@@ -156,5 +170,42 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
         + f'\n\nAfter uploads complete, copy {policy.name} to the server profile as client_updates.json.\n'
         'Merge windows/linux manifest rows if publishing both platforms. Connected players are notified within 30 seconds.\n',
         encoding="utf-8")
-    archive.unlink()  # Players download the pieces; the unsplit archive is redundant.
+    if accept_part is None:
+        archive.unlink()  # Players download the pieces; the unsplit archive is redundant.
     return assets + [policy, instructions]
+
+
+def export_installer_helper(stage: Path, godot: Path, tools_source: Path,
+                            preset_text: str, run_godot, logs: Path) -> Path:
+    """Build the small setup helper; the selected game's bytes stay untouched."""
+    project = logs / "installer-project"
+    scripts = project / "src/updates"
+    scripts.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(tools_source / "src/updates/release.gd", scripts / "release.gd")
+    shutil.copyfile(tools_source / "tools/install_client_payload.gd", project / "install.gd")
+    data = project / "data"
+    data.mkdir(exist_ok=True)
+    shutil.copyfile(stage / "app/client-release.json", data / "client_release.json")
+    shutil.copyfile(stage.parent / f"{stage.name}-windows.json", data / "install_manifest.json")
+    branding = project / "assets/branding"
+    branding.mkdir(parents=True, exist_ok=True)
+    for name in ("rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
+        shutil.copyfile(stage / "app/assets/branding" / name, branding / name)
+    (project / "project.godot").write_text(
+        'config_version=5\n[application]\nconfig/name="Rabbit Lands Setup"\n'
+        'config/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\n'
+        'run/main_scene="res://main.tscn"\n[rendering]\nrenderer/rendering_method="gl_compatibility"\n', encoding="utf-8")
+    (project / "main.tscn").write_text(
+        '[gd_scene load_steps=2 format=3]\n[ext_resource type="Script" path="res://install.gd" id="1"]\n'
+        '[node name="Installer" type="Node"]\nscript=ExtResource("1")\n', encoding="utf-8")
+    preset_text = preset_text.replace('binary_format/embed_pck=false', 'binary_format/embed_pck=true')
+    (project / "export_presets.cfg").write_text(preset_text, encoding="utf-8")
+    run_godot(godot, ["--headless", "--path", str(project), "--import"], logs / "installer-import.log", timeout=120)
+    helper_hash = hashlib.sha256((project / "install.gd").read_bytes()
+        + (scripts / "release.gd").read_bytes() + (data / "install_manifest.json").read_bytes()).hexdigest()[:12]
+    binary = logs / f"RabbitLands-install-{helper_hash}.exe"
+    run_godot(godot, ["--headless", "--path", str(project), "--export-release", "Windows Desktop", str(binary)],
+              logs / "installer-export.log", timeout=120)
+    if not binary.is_file():
+        raise ValueError("The online installer helper export is incomplete.")
+    return binary

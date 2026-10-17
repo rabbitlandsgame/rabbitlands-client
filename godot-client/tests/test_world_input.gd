@@ -186,15 +186,15 @@ func _run() -> void:
 			full_map_viewport.size) == null,
 			"full-map letterbox margins do not report false coordinates")
 	_expect(InputMap.has_action("toggle_map")
-		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarContent/ContinentButton") is TextureButton
-		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapLegend") is RichTextLabel
-		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapCoordinates") is Label,
+		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/ContinentButton") is TextureButton
+		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/MapLegend") is RichTextLabel
+		and main.get_node("GameView/FullMap/MapLayout/Sidebar/SidebarLayout/MapCoordinates") is Label,
 		"Tab map exposes continent navigation, a legend, and hover coordinates")
 	var map_motion: InputEventMouseMotion = InputEventMouseMotion.new()
 	map_motion.position = full_map_image.size * 0.5
 	main.call("_on_full_map_gui_input", map_motion)
 	_expect((main.get_node(
-		"GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapCoordinates") as Label).text.contains(","),
+		"GameView/FullMap/MapLayout/Sidebar/SidebarLayout/MapCoordinates") as Label).text.contains(","),
 		"map hover reports the same server tile used by click-to-walk")
 	main.call("_on_map_button_pressed")
 	var gameplay_camera: Camera3D = camera_rig.get_node("Camera") as Camera3D
@@ -322,9 +322,9 @@ func _run() -> void:
 		PackedByteArray([1, 128, 91, 80, 77, 32, 102, 114, 111, 109, 32, 65, 108,
 			105, 99, 101, 58, 32, 104, 105, 93, 0]))
 	main.call("_sync_chat")
-	_expect(chat_output.get_parsed_text().contains("[PM] [PM from Alice: hi]"),
+	_expect(chat_output.get_parsed_text().contains("[Private] Alice: hi"),
 		"private chat receives its personal-channel label")
-	_expect(not chat_output.bbcode_enabled and chat_input.placeholder_text.contains("/name"),
+	_expect(not chat_output.bbcode_enabled and chat_input.tooltip_text.contains("/name"),
 		"chat remains markup-safe and exposes legacy addressing syntax")
 	app_state_inventory.call("_on_packet", 71,
 		PackedByteArray([1, 1, 0, 0, 0, 4, 0, 0, 0, 12, 0, 0, 0]))
@@ -443,8 +443,8 @@ func _run() -> void:
 		"legacy clock and compass use the existing Eloria HUD atlas")
 	_expect(clock_face.gui_input.is_connected(Callable(main, "_on_clock_gui_input"))
 		and compass_face.gui_input.is_connected(Callable(main, "_on_compass_gui_input"))
-		and main.get_node_or_null("GameView/EloriaLogoFrame/HudLogo/RabbitLandsWordmark") is Label,
-		"clock, compass, and top-right Rabbit Lands wordmark are interactive/present")
+		and (main.get_node("%HudLogo") as TextureRect).texture != null,
+		"clock, compass, and top-right Rabbit Lands crest are interactive/present")
 	_expect(InputMap.has_action("toggle_console")
 		and InputMap.has_action("toggle_inventory")
 		and InputMap.has_action("recenter_viewport")
@@ -1636,17 +1636,23 @@ func _run() -> void:
 	var right_down: InputEventMouseButton = InputEventMouseButton.new()
 	right_down.button_index = MOUSE_BUTTON_RIGHT
 	right_down.pressed = true
+	main.set("_interaction_mode", "walk")
 	main.call("_on_world_gui_input", right_down)
+	_expect(str(main.get("_interaction_mode")) == "walk",
+		"right click over empty ground keeps the Move action")
 	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
 	motion.relative = Vector2(40.0, 12.0)
 	var initial_yaw: float = camera_rig.yaw_degrees
 	main.call("_on_world_gui_input", motion)
-	_expect(not is_equal_approx(camera_rig.yaw_degrees, initial_yaw),
-		"right drag rotates camera")
+	_expect(is_equal_approx(camera_rig.yaw_degrees, initial_yaw),
+		"right drag never rotates or pans the camera")
 	var right_up: InputEventMouseButton = InputEventMouseButton.new()
 	right_up.button_index = MOUSE_BUTTON_RIGHT
 	right_up.pressed = false
 	main.call("_on_world_gui_input", right_up)
+	_expect(str(main.get("_interaction_mode")) == "walk",
+		"right release does not cycle a second time")
+	main.set("_interaction_mode", "walk")
 
 	var wheel: InputEventMouseButton = InputEventMouseButton.new()
 	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
@@ -1659,10 +1665,19 @@ func _run() -> void:
 	middle_down.button_index = MOUSE_BUTTON_MIDDLE
 	middle_down.pressed = true
 	main.call("_on_world_gui_input", middle_down)
-	var pan_motion: InputEventMouseMotion = InputEventMouseMotion.new()
-	pan_motion.relative = Vector2(25.0, -10.0)
-	main.call("_on_world_gui_input", pan_motion)
-	_expect(camera_rig.pan_offset.length() > 0.0, "middle drag pans camera")
+	var rotate_motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	rotate_motion.relative = Vector2(25.0, -10.0)
+	main.call("_on_world_gui_input", rotate_motion)
+	_expect(not is_equal_approx(camera_rig.yaw_degrees, initial_yaw)
+		and camera_rig.global_position.is_equal_approx(camera_rig.focus),
+		"middle drag rotates around the focus without panning")
+	var middle_up: InputEventMouseButton = middle_down.duplicate() as InputEventMouseButton
+	middle_up.pressed = false
+	main.call("_input", middle_up)
+	var released_yaw: float = camera_rig.yaw_degrees
+	main.call("_on_world_gui_input", rotate_motion)
+	_expect(is_equal_approx(camera_rig.yaw_degrees, released_yaw),
+		"middle release outside the world ends rotation")
 	var follow_actor: Node3D = Node3D.new()
 	world_viewport.get_node("WorldRoot").add_child(follow_actor)
 	follow_actor.global_position = Vector3(18.0, 47.0, -9.0)
@@ -1671,12 +1686,11 @@ func _run() -> void:
 	app_state.set("local_actor_id", 9001)
 	var fixture_actors: Dictionary = {9001: follow_actor}
 	main.set("actor_nodes", fixture_actors)
-	var saved_pan: Vector3 = camera_rig.pan_offset
 	main.call("_update_local_actor_follow")
 	_expect(camera_rig.focus.is_equal_approx(follow_actor.global_position),
 		"camera continuously follows the rendered local actor")
-	_expect(camera_rig.pan_offset.is_equal_approx(saved_pan),
-		"camera follow preserves the user pan offset")
+	_expect(camera_rig.global_position.is_equal_approx(follow_actor.global_position),
+		"camera focus never gains a pan offset")
 	main.set("_minimap_orientation", "viewport_up")
 	camera_rig.yaw_degrees = 37.0
 	main.call("_update_local_actor_follow")
@@ -1687,7 +1701,7 @@ func _run() -> void:
 	recenter_key.pressed = true
 	recenter_key.physical_keycode = KEY_SPACE
 	main.call("_input", recenter_key)
-	_expect(camera_rig.pan_offset.is_zero_approx(),
+	_expect(camera_rig.global_position.is_equal_approx(follow_actor.global_position),
 		"Space recenters the viewport on the local player when chat is inactive")
 	main.set("_minimap_orientation", "north_up")
 	app_state.set("local_actor_id", previous_local_actor_id)
@@ -2183,7 +2197,7 @@ func _run() -> void:
 			MapObject3D.INTERACTIVE_COLOUR),
 		"an interactive is orange on the map, as the legend says")
 	var map_legend: RichTextLabel = main.get_node(
-		"GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapLegend") as RichTextLabel
+		"GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/MapLegend") as RichTextLabel
 	_expect(map_legend != null and map_legend.text.contains("Harvest node")
 		and map_legend.text.contains("Interactive")
 		and map_legend.text.contains("Player / NPC")
@@ -2819,7 +2833,7 @@ func _run() -> void:
 	_expect(world_label != null and world_label.layers == MapMarker3D.GAMEPLAY_LAYER
 		and world_label.text == "Reed bank", "the marker also labels the gameplay view")
 	var marker_sidebar: RichTextLabel = main.get_node(
-		"GameView/FullMap/MapLayout/Sidebar/SidebarContent/MapMarkerList") as RichTextLabel
+		"GameView/FullMap/MapLayout/Sidebar/SidebarLayout/SidebarScroll/SidebarContent/MapMarkerList") as RichTextLabel
 	_expect(marker_sidebar.visible and marker_sidebar.text.contains("Reed bank")
 		and marker_sidebar.text.contains("780") and marker_sidebar.text.contains("481"),
 		"the map sidebar names the marker and its tile, which no pin drawn at"
@@ -3113,8 +3127,8 @@ func _check_actor_click_actions(main: Control) -> void:
 	_expect(str(main.call("_actor_click_action", 66, summon, false)) == "attack"
 		and str(main.call("_actor_click_action", 88, player, false)) == "attack",
 		"attack mode still reaches everything that can be attacked")
-	_expect(str(main.call("_actor_click_action", 99, npc, false)) == "talk",
-		"an NPC talks even in attack mode, the way the pointer says")
+	_expect(str(main.call("_actor_click_action", 99, npc, false)) == "none",
+		"the selected attack tool does not greet an NPC")
 	main.set("_interaction_mode", "walk")
 	# The promise and the delivery, side by side, for the same actor: the
 	# pointer may only draw the sword where the click sends ATTACK_SOMEONE.
@@ -3357,8 +3371,7 @@ func _check_trade_mode(main: Control) -> void:
 		and str(main.get("_interaction_mode")) == "trade",
 		"with a player selected the icon sends TRADE_WITH straight away")
 
-	# Every way out puts the mode down, and a plain click on a player is then
-	# a look again rather than a trade request.
+	# Escape puts the tool down; right-click advances to the next tool.
 	var escape: InputEventKey = InputMap.action_get_events(
 		"cancel")[0].duplicate() as InputEventKey
 	escape.pressed = true
@@ -3370,8 +3383,20 @@ func _check_trade_mode(main: Control) -> void:
 	state.set("selected_actor_id", -1)
 	_click(at, true, false, MOUSE_BUTTON_RIGHT)
 	_click(at, false, false, MOUSE_BUTTON_RIGHT)
-	_expect(str(main.get("_interaction_mode")) == "walk" and _take(receiver).is_empty(),
-		"a right click on the world puts an armed trade down")
+	_expect(str(main.get("_interaction_mode")) == "attack" and _take(receiver).is_empty(),
+		"a right click cycles trade to attack without issuing a command")
+	main.set("_interaction_mode", "walk")
+	var player_actions: Array[String] = ["trade", "attack", "look", "walk"]
+	for wanted: String in player_actions:
+		_click(at, true, false, MOUSE_BUTTON_RIGHT)
+		_click(at, false, false, MOUSE_BUTTON_RIGHT)
+		_expect(str(main.get("_interaction_mode")) == wanted and _take(receiver).is_empty(),
+			"right-click selects %s without activating the selected player" % wanted)
+		if wanted == "look":
+			_expect(str(main.get("_inventory_tool")) == "inspect",
+				"the look mode also arms the inventory inspect tool")
+	_expect(str(main.get("_inventory_tool")) == "grab",
+		"cycling back to Move restores the item grab tool")
 	main.call("_on_trade_button_pressed")
 	main.call("_on_walk_button_pressed")
 	_expect(str(main.get("_interaction_mode")) == "walk",

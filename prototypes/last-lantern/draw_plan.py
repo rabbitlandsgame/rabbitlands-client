@@ -13,7 +13,7 @@ def font(size, bold=False):
     return ImageFont.truetype(str(path),size)
 
 ink, muted, gold = "#edf1e8", "#a8c0c0", "#edc486"
-d.text((50,35),"ELORIA   /   OPENING ADVENTURE",font=font(18,True),fill=gold)
+d.text((50,35),"RABBIT LANDS   /   OPENING ADVENTURE",font=font(18,True),fill=gold)
 d.text((47,65),"Lantern Reach",font=font(48,True),fill=ink)
 d.text((50,132),"The Last Lantern · Map and quest draft",font=font(21),fill=muted)
 d.text((1080,67),"120 × 120 tiles",font=font(25,True),fill=ink)

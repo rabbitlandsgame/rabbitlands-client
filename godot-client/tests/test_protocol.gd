@@ -32,7 +32,9 @@ func _init() -> void:
 		"second_bell_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"borrowed_sky_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"followup_tutorials_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
+		"field_dispatch_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"signed_ashore_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
+		"landfall_underground_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
 		"tutorial_rewards_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"spell_ring_v1": EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE,
 		"magic_book_v2": EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE,
@@ -52,12 +54,15 @@ func _init() -> void:
 		"merchant_window_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"merchant_weights_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"merchant_descriptions_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
+		"merchant_lots_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"navigation_hud_v1": EloriaProtocol.ServerMessage.ELORIA_NAVIGATION_STATE,
+		"map_marker_actor_v1": EloriaProtocol.ServerMessage.SEND_MAP_MARKER,
 		"achievements_window_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACHIEVEMENTS_STATE,
 		"achievements_catalog_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACHIEVEMENTS_CATALOG,
 		"actor_titles_v1": EloriaProtocol.ServerMessage.ELORIA_ACTOR_TITLES,
+		"quest_offers_v1": EloriaProtocol.ServerMessage.ELORIA_QUEST_OFFERS,
 		"actor_occupations_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACTOR_OCCUPATIONS,
 		"adjacent_actors_v1": EloriaProtocol.ServerMessage.ELORIA_ADJACENT_MAPS,
@@ -85,6 +90,7 @@ func _init() -> void:
 		# continent-v2 map, which this client can draw (checked below).
 		"continent_v2_maps_v1": EloriaProtocol.ServerMessage.CHANGE_MAP}
 	var capability_probes: Dictionary = {
+		EloriaProtocol.ServerMessage.SEND_MAP_MARKER: "ea010c03e1012e2f6d6170732f666f75725f67617465732e656c6d00526565642062616e6b0060ea",
 		EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE: '{"version":1,"active":false}'.to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.ELORIA_ADJACENT_MAPS: "010100" + "whitehorn_range".to_utf8_buffer().hex_encode() + "00",
 		EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE: '{"kind":"recall","id":9,"entries":[]}'.to_utf8_buffer().hex_encode(),
@@ -145,6 +151,7 @@ func _init() -> void:
 		# One NPC on the map, with what they do.
 		EloriaProtocol.ServerMessage.ELORIA_ACTOR_OCCUPATIONS:
 			"01005b00" + "47726f76652d4b6565706572" + "00",
+		EloriaProtocol.ServerMessage.ELORIA_QUEST_OFFERS: "01005b00",
 		EloriaProtocol.ServerMessage.ELORIA_EXPERIENCE_STATE: "0000",
 		# No creature larger than one tile in this profile: a real
 		# answer, and the one an unchanged content pack still gives.
@@ -183,7 +190,7 @@ func _init() -> void:
 		"spell_ring_v1": '{"version":1,"active":false,"ring_training":true}'.to_utf8_buffer().hex_encode(),
 		"signed_ashore_v1": ('{"version":1,"active":true,"tutorial":"signed_ashore",'
 			+ '"chapter":"SIGNED ASHORE","stage":1,"total":10,"scene":1,"key":"signed_in",'
-			+ '"title":"Follow Nesh\'s lantern","hint":"Click Wayfinder Nesh to talk.",'
+			+ '"title":"Follow Nash\'s lantern","hint":"Click Nash to talk.",'
 			+ '"control":"world","item":"","map":"landfall","target_id":"wayfinder_nesh",'
 			+ '"target":[142,225],"count":0,"required":1,'
 			+ '"flags":{"grove":false,"temple":false,"gate":false,"light":false}}'
@@ -1388,14 +1395,13 @@ func _init() -> void:
 			# catalog_sources to its tables, and tests/test_catalog_sources.py
 			# holds this catalog's sources to that manifest whenever a server
 			# checkout is found.
-			# 545: the forty-two hand-authored recipes, which stay first in
-			# the file and so stay first here, the 499 the crafting ladder
-			# generates below them, and four recipes appended after it so no
-			# index moves (the watchpost's Bandage, Landfall's Feasting from
-			# Grapes and Cabbage and Gloam Wax from Rosemary, and Bread from
-			# Wheat and Salt).
+			# 539: the forty-two hand-authored recipes, the 493 remaining
+			# crafting ladder recipes after procedural equipment retirement,
+			# and four appended alternatives: the watchpost's Bandage, Landfall's
+			# Feasting from Grapes and Cabbage, Gloam Wax from Rosemary, and
+			# Bread from Wheat and Salt.
 			_expect(str(sources.get("profile", "")) == "eloria"
-				and manufacturing_recipes.size() == 545
+				and manufacturing_recipes.size() == 539
 				and str((manufacturing_recipes[0] as Dictionary).get("output", "")) == "Torch",
 				"manufacturing catalog matches the served profile's own recipes")
 			# Both catalogs come out of one generator run, so an index into the
@@ -2290,6 +2296,11 @@ func _init() -> void:
 		and str(marker.map_id) == "four_gates"
 		and str(marker.label) == "Reed bank",
 		"a map marker decodes its id, tile, map and label")
+	var attached: Dictionary = EloriaProtocol.decode_server(90, _hex(
+		"ea010c03e1012e2f6d6170732f666f75725f67617465732e656c6d00"
+		+ "526565642062616e6b0060ea"))
+	_expect(attached.type == "map_marker" and attached.actor_id == 60000,
+		"a creature marker decodes its explicit 16-bit actor identity")
 	_expect(EloriaProtocol.map_id_from_reference("./maps/four_gates.elm")
 			== "four_gates"
 		and EloriaProtocol.map_id_from_reference("four_gates") == "four_gates",

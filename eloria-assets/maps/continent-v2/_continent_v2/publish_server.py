@@ -254,9 +254,24 @@ def portrait_options(text):
             if key.strip()}
 
 
-def npc_portrait(actor_type, occupation=""):
+def npc_portrait(actor_type, occupation="", facing=""):
     """The portrait column of a published npcs.txt row: the body, then the occupation when there is one."""
-    return f"actor_type={int(actor_type)}" + (f",occupation={occupation}" if occupation else "")
+    return (f"actor_type={int(actor_type)}" + (f",occupation={occupation}" if occupation else "")
+            + (f",facing={facing}" if facing else ""))
+
+
+def npc_facing(record):
+    """Quantize the authoring marker's local X/Z vector to the wire compass."""
+    import math
+    vector = record.get("facing")
+    if vector is None:
+        return ""
+    if (not isinstance(vector, (list, tuple)) or len(vector) != 3
+            or any(type(v) not in (int, float) or not math.isfinite(v) for v in vector)
+            or math.hypot(vector[0], vector[2]) < 0.0001):
+        raise PublishError(f"{record.get('id')}: NPC facing needs a finite nonzero X/Z vector")
+    step = int(math.floor(math.atan2(vector[0], -vector[2]) / (math.pi / 4) + 0.5)) % 8
+    return ("N", "NE", "E", "SE", "S", "SW", "W", "NW")[step]
 
 
 def occupation_field(value, name, where):
@@ -798,7 +813,8 @@ def compose(ctx, *, log=say):
             person = {"map": region, "id": identity, "name": name, "tile": rec["tile"],
                       "role": plain_field(entry["role"], f"{identity} role"), "actorType": int(entry["actorType"]),
                       "greeting": plain_field(entry["greeting"], f"{identity} greeting"),
-                      "occupation": occupation_field(rec.get("occupation"), name, identity)}
+                      "occupation": occupation_field(rec.get("occupation"), name, identity),
+                      "facing": npc_facing(rec)}
             if entry["group"] == "new":
                 if name.casefold() in ctx.server.npc_lines:
                     raise PublishError(f"{identity}: {name} is already in the base npcs.txt; a new person needs a "
@@ -892,7 +908,8 @@ def compose(ctx, *, log=say):
             entry["approach"] = approach_for(region, tile, entry.get("radius", 3), walk, reached, npc_posts,
                                              triggers, ctx.frames)
             entry["why"] = "target shares an NPC post, harvest node or trigger"
-    cast = [{"name": p["name"], "map": p["map"], "tile": p["tile"]} for p in rehomed]
+    cast = [{"name": p["name"], "map": p["map"], "tile": p["tile"],
+             **({"facing": p["facing"]} if p.get("facing") else {})} for p in rehomed]
     landing_arrival = marker(lmap, land["arrival"])["tile"]
     by_marker = {r["id"]: r for r in interactive_rows}
     if land["register"] not in by_marker or land["ferry"] not in by_marker:
@@ -1281,7 +1298,7 @@ def overlay_files(ctx, pub):
         "continent-v2 overlay: the resources the isles add, and every harvest node (from the scene's markers).",
         GENERATED, "No row may carry a '#': this table's loader does not strip an inline comment."]))
     lines = [f"npc | {p['name']} | {p['map']} | {p['tile'][0]} | {p['tile'][1]} | {p['role']} | "
-             f"{npc_portrait(p['actorType'], p.get('occupation', ''))} | {p['greeting']}" for p in pub.new_people]
+             f"{npc_portrait(p['actorType'], p.get('occupation', ''), p.get('facing', ''))} | {p['greeting']}" for p in pub.new_people]
     files["npcs.txt"] = crlf(table_text(lines, [
         "continent-v2 overlay: the isles' new people at their scene posts.", GENERATED,
         "No row may carry a '#': this table's loader does not strip an inline comment."]))
@@ -1298,6 +1315,10 @@ def overlay_files(ctx, pub):
     lines = []
     for p in pub.rehomed:
         base = list(p["base"])
+        if p.get("facing"):
+            options = portrait_options(base[6])
+            options["facing"] = p["facing"]
+            base[6] = ",".join(f"{key}={value}" for key, value in options.items())
         row = ["npc", p["name"], p["map"], str(p["tile"][0]), str(p["tile"][1]), base[5], base[6], p["greeting"]]
         if len(base) == 9:
             row.append(base[8])
@@ -1305,7 +1326,7 @@ def overlay_files(ctx, pub):
     files["home_npcs.txt"] = crlf(table_text(lines, [
         "continent-v2 overlay: the people the home migration moves, at their isle posts.", GENERATED,
         "Read before npcs.txt, and only while home_map names a map other than four_gates (eloria/home.py): each row is",
-        "the person's npcs.txt row with only the map, the tile and the greeting changed.",
+        "the person's npcs.txt row with only the map, the tile, facing and the greeting changed.",
         "No row may carry a '#': the NPC loader does not strip an inline comment."]))
     for name in ("harvesting.txt", "npcs.txt", "interactives.txt", "questlines.txt", "home_npcs.txt"):
         for number, line in enumerate(files[name].decode("utf-8").splitlines(), 1):
@@ -1404,7 +1425,10 @@ def own_rules(pub):
                 ("approach" in entry and not tile_ok(entry["approach"])):
             raise PublishError(f"landing.json target {key} breaks eloria-landing-v1")
     if sorted(c["name"] for c in land["cast"]) != sorted({c["name"] for c in land["cast"]}) or \
-            not all(set(c) == {"name", "map", "tile"} and tile_ok(c["tile"]) for c in land["cast"]):
+            not all({"name", "map", "tile"} <= set(c) <= {"name", "map", "tile", "facing"}
+                    and tile_ok(c["tile"])
+                    and c.get("facing", "N") in ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+                    for c in land["cast"]):
         raise PublishError("landing.json cast breaks eloria-landing-v1")
     homes = pub.homes
     if set(homes) - {"schema", "homes", "provenance"} or homes["schema"] != HOMES_SCHEMA or not homes["homes"]:

@@ -130,6 +130,7 @@ def arrow():
 
 
 if __name__ == "__main__":
+    raise RuntimeError('build_ranger_assets.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
     bow("amberwood_ranger_bow.glb")
     bow("sunmane_ranger_bow.glb", True)
     arrow()

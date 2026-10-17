@@ -15,9 +15,15 @@ import hashlib
 import json
 import re
 import struct
+import sys
 from pathlib import Path
 
 import numpy as np
+
+TOOLS = Path(__file__).resolve().parents[3] / "tools"
+if str(TOOLS) not in sys.path:
+    sys.path.insert(0, str(TOOLS))
+import shared_meshes as SM  # noqa: E402
 
 # glTF component types: (numpy letter, bytes)
 COMPONENT = {5120: ("b", 1), 5121: ("B", 1), 5122: ("h", 2), 5123: ("H", 2),
@@ -34,11 +40,16 @@ HEADER = struct.Struct("<4sHHII")
 PART_URI = re.compile(r"^[^/\\]+\.part[0-9]+\.([0-9a-f]{64})\.bin$")
 
 
-def load(path: Path) -> tuple[dict, bytes]:
+def load(path: Path, prototypes: bool = True) -> tuple[dict, bytes]:
     """(the glTF document, the binary chunk) of a .glb.
 
     A region master too large for one file continues its binary in part files
     beside it; those are joined back on, so a reader always sees one buffer.
+
+    A placement whose mesh has moved to the shared prototype pool gets it back
+    on the node, so a package reads the same whether it shares its props or
+    not: without that, every tool here would see a package drawing nothing
+    where it draws a tree. `prototypes=False` reads the file as it stands.
     """
     raw = path.read_bytes()
     json_length = struct.unpack_from("<II", raw, 12)[0]
@@ -52,7 +63,9 @@ def load(path: Path) -> tuple[dict, bytes]:
             break
         offset += 8 + length
     if len(document.get("buffers", [])) > 1:
-        return join_parts(path, document, body)
+        document, body = join_parts(path, document, body)
+    if prototypes:
+        document, body = SM.inline_prototypes(path, document, body)
     return document, body
 
 

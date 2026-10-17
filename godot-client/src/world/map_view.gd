@@ -1,7 +1,7 @@
 extends RefCounted
 ## Shared framing for the live Tab map. Backdrop meshes are not map extents.
 
-const RESOLUTION := 1024
+const RESOLUTION := 2048
 const MARGIN := 1.04
 ## Metres of the neighbours shown around a continent exterior on the Tab map,
 ## where their pictures stand and a click walks across the seam.
