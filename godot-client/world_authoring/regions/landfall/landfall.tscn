@@ -39606,19 +39606,6 @@ extras = {
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151.5, 121.5, 18.5)
 
-[node name="lantern_mine-entrance" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("u_asset")
-asset_id = "lantern_mine-entrance"
-node_name = "Authored_lantern_mine_entrance"
-catalog_asset_id = "landfall-underground:mine-mouth"
-scene_path = "res://world_authoring/continent-v2/underground-assets/mine-mouth.glb"
-collision_role = "solid"
-metadata = {"undergroundSection": "lantern_mine"}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.5, 106.15, 161.5)
-
-[node name="Mouth" parent="AuthoredAssets/lantern_mine-entrance" type="Node3D"]
-
 [node name="lv_landfall-north-wall-farm_kit-lantern-post-1 25" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-lantern-post-1-landfall-north-wall-farm-025"

@@ -10487,19 +10487,6 @@ extras = {
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130.4, 64.5, -9)
 
-[node name="spindle_cavern-entrance" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("u_asset")
-asset_id = "spindle_cavern-entrance"
-node_name = "Authored_spindle_cavern_entrance"
-catalog_asset_id = "landfall-underground:crystal-mouth"
-scene_path = "res://world_authoring/continent-v2/underground-assets/crystal-mouth.glb"
-collision_role = "solid"
-metadata = {"undergroundSection": "spindle_cavern"}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.5, 85.7, -6.5)
-
-[node name="Mouth" parent="AuthoredAssets/spindle_cavern-entrance" type="Node3D"]
-
 [node name="lv_spindle_hill_Olive Tree 1 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
 asset_id = "lf_biomes-kit-olive-tree-1-spindle_hill-0001"

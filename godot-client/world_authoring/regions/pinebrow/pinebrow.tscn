@@ -8725,19 +8725,6 @@ extras = {
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 175.5, 142.9770, -133.5)
 
-[node name="pinebrow_workings-entrance" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("u_asset")
-asset_id = "pinebrow_workings-entrance"
-node_name = "Authored_pinebrow_workings_entrance"
-catalog_asset_id = "landfall-underground:mine-mouth"
-scene_path = "res://world_authoring/continent-v2/underground-assets/mine-mouth.glb"
-collision_role = "solid"
-metadata = {"undergroundSection": "pinebrow_workings"}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128.5, 155.95, -96.5)
-
-[node name="Mouth" parent="AuthoredAssets/pinebrow_workings-entrance" type="Node3D"]
-
 [node name="lv_pinebrow_Scots Pine Tree 1 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-scots-pine-tree-1-pinebrow-0001"

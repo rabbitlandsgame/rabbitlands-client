@@ -25011,19 +25011,6 @@ extras = {
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 176, 133.046, 47)
 
-[node name="boarsend_barrow-entrance" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("u_asset")
-asset_id = "boarsend_barrow-entrance"
-node_name = "Authored_boarsend_barrow_entrance"
-catalog_asset_id = "landfall-underground:barrow-mouth"
-scene_path = "res://world_authoring/continent-v2/underground-assets/barrow-mouth.glb"
-collision_role = "solid"
-metadata = {"undergroundSection": "boarsend_barrow"}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 143.5, 144.35, -60.5)
-
-[node name="Mouth" parent="AuthoredAssets/boarsend_barrow-entrance" type="Node3D"]
-
 [node name="lv_boarsend_Sweet Chestnut Summer 1 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-sweet-chestnut-summer-1-boarsend-0001"
