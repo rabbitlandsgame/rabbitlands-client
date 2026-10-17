@@ -115,26 +115,69 @@ func _run() -> void:
 	await process_frame
 	_expect(layer.is_raining(), "and turning them back on restores it")
 
-	# The sky follows what is falling, and more for a storm than a shower.
-	_expect(is_zero_approx(Weather3D.overcast_for(0, 0))
-		and is_zero_approx(Weather3D.overcast_for(1, 0))
-		and Weather3D.overcast_for(1, 90) > Weather3D.overcast_for(1, 10)
-		and Weather3D.overcast_for(2, 60) > Weather3D.overcast_for(1, 60)
-		and Weather3D.overcast_for(2, 100) <= 1.0,
-		"overcast grows with the rain and a storm is darker than a shower")
+	# A legacy pair is drawn as the nearest look: the rain falls exactly as
+	# hard as the pair says, and a storm is darker than a shower.
+	var light_shower: Array = Weather3D.legacy_look(1, 30)
+	var downpour: Array = Weather3D.legacy_look(1, 90)
+	var storm: Array = Weather3D.legacy_look(2, 60)
+	_expect(Weather3D.legacy_look(0, 0) == [0, 0, 0, 0, 0, 0, 0]
+		and int(light_shower[0]) == 1 and int(light_shower[1]) == 30 and int(downpour[1]) == 90
+		and int(storm[6]) > 0 and int(storm[4]) > int(Weather3D.legacy_look(1, 60)[4]),
+		"a legacy pair is the look a whole-sky server would have sent: %s %s" % [light_shower, storm])
 	layer.set_weather(2, 60, false, false)
-	_expect(not layer.is_raining()
-		and is_equal_approx(layer.overcast, Weather3D.overcast_for(2, 60))
-		and not layer.settling(),
-		"the particle switch turns the drops off, not the overcast; a sky met on arrival is already there")
+	_expect(not layer.is_raining() and layer.has_weather() and layer.gloom() > 0.05
+		and is_equal_approx(float(layer.look().precipitation), 0.6) and not layer.settling(),
+		"the particle switch turns the drops off, not the sky; a sky met on arrival is already there")
 	layer.set_weather(0, 0)
-	_expect(layer.settling() and layer.overcast > 0.0,
+	_expect(layer.settling() and layer.has_weather(),
 		"a sky that clears while the player stays eases out rather than cutting")
-	var eased := 0
-	while layer.settling() and eased < 1200:
-		await process_frame
-		eased += 1
-	_expect(is_zero_approx(layer.overcast), "and it does arrive at a clear sky")
+	await _settle(layer, 8.0)
+	_expect(not layer.has_weather(), "and it does arrive at a clear sky")
+
+	# A whole-sky server: the look now and the look it is becoming, eased over
+	# the seconds it gives. A sky met on arrival starts where the server's is.
+	var fog_bank: Array = [0, 0, 55, 85, 18, 5, 0]
+	var snowfall: Array = [2, 90, 100, 55, 35, 50, 0]
+	layer.set_state(fog_bank, snowfall, 0.6, true, true, "heavy_snow")
+	_expect(is_equal_approx(float(layer.look().fog), 0.85) and layer.settling()
+		and layer.state_name == "heavy_snow",
+		"arriving mid-change starts from the sky as it is")
+	await _settle(layer, 3.0)
+	_expect(is_equal_approx(float(layer.look().precipitation), 0.9)
+		and int(layer.look().fall) == 2 and layer.falling("snow") > 0
+		and layer.falling("rain") == 0 and not layer.is_raining(),
+		"and eases to the snow it is becoming: %s" % [layer.look()])
+	var quality := OS.get_environment(LookProfile.QUALITY_VARIABLE)
+	OS.set_environment(LookProfile.QUALITY_VARIABLE, "low")
+	layer.set_state(snowfall, snowfall, 0.0)
+	var low := layer.falling("snow")
+	OS.set_environment(LookProfile.QUALITY_VARIABLE, "high")
+	layer.set_state(snowfall, snowfall, 0.0)
+	_expect(low > 0 and low < layer.falling("snow"), "low graphics quality draws less of it")
+	if quality.is_empty():
+		OS.unset_environment(LookProfile.QUALITY_VARIABLE)
+	else:
+		OS.set_environment(LookProfile.QUALITY_VARIABLE, quality)
+	layer.set_state(snowfall, [4, 80, 40, 70, 30, 95, 0], 0.0)
+	_expect(layer.falling("sand") > 0 and layer.falling("snow") == 0,
+		"a kind of sky the server adds (a sandstorm) is drawn by what falls, not by its name")
+	layer.set_state([3, 45, 90, 45, 40, 15, 0], [3, 45, 90, 45, 40, 15, 0], 0.0)
+	_expect(layer.falling("ash") > 0, "and ash falls as ash")
+
+	# The frame itself, through AppState to the layer.
+	var frame := PackedByteArray([1, 0, 0, 0, 0, 0, 10, 0, 1, 85, 100, 40, 45, 55, 0, 200, 0, 10])
+	frame.append_array("heavy_rain".to_ascii_buffer())
+	app_state.call("_on_packet", EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE, frame)
+	await process_frame
+	var told: Dictionary = app_state.get("weather_state")
+	_expect(str(told.get("name", "")) == "heavy_rain" and is_equal_approx(float(told.seconds), 20.0)
+		and int((app_state.get("weather") as Dictionary).kind) == 1
+		and layer.state_name == "heavy_rain" and layer.settling() and layer.is_raining(),
+		"a whole-sky frame reaches the layer and eases over its own time: %s" % told)
+	app_state.call("_on_packet", 100, PackedByteArray([0, 0]))
+	await process_frame
+	_expect((app_state.get("weather_state") as Dictionary).is_empty() and not layer.is_raining(),
+		"a legacy frame after it is the whole story again")
 
 	# What the overcast does to the light (WeatherSky): the binders read the
 	# weathered copy exactly as they read the manifest.
@@ -171,11 +214,31 @@ func _run() -> void:
 		"the painted sky reads the weathered zenith as overcast")
 	_expect(lit.data == before and wet.source_path == lit.source_path,
 		"the manifest itself is left as it was")
+	# Each part of a look does its own work.
+	var partly := WeatherSky.weathered_look(lit, {"clouds": 0.45})
+	_expect(DayNightBinder._colour(partly.data.environment.sky.zenith, Color.BLACK).s
+			> dry_zenith.s * 0.9,
+		"a partly cloudy sky keeps its blue: the painted sky draws the clouds")
+	var fogged: Dictionary = WeatherSky.weathered_look(lit, {"clouds": 0.55, "fog": 0.85,
+		"darkness": 0.18}).data.environment
+	_expect(float(fogged.fog.density) > float(dry_env.fog.density) * 6.0
+		and float(fogged.sun.energy) > float(dry_env.sun.energy) * 0.7,
+		"a fog bank closes the view without putting the sun out")
+	var dark: Dictionary = WeatherSky.weathered_look(lit, {"darkness": 0.6}).data.environment
+	_expect(float(dark.sun.energy) < float(dry_env.sun.energy) * 0.5
+		and float(dark.ambient.energy) < float(dry_env.ambient.energy),
+		"darkness dims the sun and the ambient")
 
 	print("weather tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	main.queue_free()
 	await process_frame
 	quit(failures)
+
+## Lets the layer ease (real seconds, as the game runs), up to `limit`.
+func _settle(layer: Weather3D, limit: float) -> void:
+	var deadline := Time.get_ticks_msec() + int(limit * 1000.0)
+	while layer.settling() and Time.get_ticks_msec() < deadline:
+		await process_frame
 
 func _expect(value: bool, label: String) -> bool:
 	if not value:

@@ -110,6 +110,8 @@ enum ServerMessage {
 	ELORIA_MIX_STATE = 218,
 	ELORIA_GUILD_STATE = 213,
 	ELORIA_ACHIEVEMENTS_CATALOG = 219,
+	## The whole sky as it looks and as it is becoming (weather_state_v1).
+	ELORIA_WEATHER_STATE = 220,
 	# The worn titles of everyone on a map. Down here in the low run the
 	# extensions overflowed into rather than beside 244, because 219 was the
 	# last free number of the 215-219 block and this run continues downwards.
@@ -277,6 +279,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"quest_offers_v1",
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",
+	"weather_state_v1",
 	"attribute_state_v1",
 	"counter_layout_v1",
 	"degraded_items_v1",
@@ -1080,6 +1083,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_achievements_state(payload)
 		ServerMessage.ELORIA_ACHIEVEMENTS_CATALOG:
 			return decode_achievements_catalog(payload)
+		ServerMessage.ELORIA_WEATHER_STATE:
+			return decode_weather_state(payload)
 		ServerMessage.ELORIA_ACTOR_TITLES:
 			return decode_actor_titles(payload)
 		ServerMessage.ELORIA_ACTOR_OCCUPATIONS:
@@ -1432,6 +1437,31 @@ static func decode_achievements_state(payload: PackedByteArray) -> Dictionary:
 ## `ELORIA_ACHIEVEMENTS_STATE(244)` still arrives and still feeds the Counters
 ## tab. It is a different, older model - labelled counters plus finished names
 ## - and this sits beside it rather than replacing it.
+## The whole sky (weather_state_v1): version 1, the look the sky has now and
+## the look it is becoming (seven bytes each: what falls - 0 none, 1 rain,
+## 2 snow, 3 ash, 4 sand - then precipitation, clouds, fog, darkness, wind and
+## lightning, 0-100), the real seconds left until it gets there in tenths
+## (u16 LE), and the state's name. The client draws the numbers, not the
+## name, so a sky the server adds needs no new client.
+static func decode_weather_state(payload: PackedByteArray) -> Dictionary:
+	if payload.size() < 18 or int(payload[0]) != 1:
+		return {"type": "invalid", "error": "weather_state_length"}
+	var current: Array[int] = []
+	var target: Array[int] = []
+	for index: int in 7:
+		current.append(int(payload[1 + index]))
+		target.append(int(payload[8 + index]))
+	for look: Array[int] in [current, target]:
+		for index: int in range(1, 7):
+			if look[index] > 100:
+				return {"type": "invalid", "error": "weather_state_amount"}
+	var length: int = int(payload[17])
+	if payload.size() < 18 + length:
+		return {"type": "invalid", "error": "weather_state_name"}
+	return {"type": "weather_state", "current": current, "target": target,
+		"seconds": float(payload.decode_u16(15)) / 10.0,
+		"name": payload.slice(18, 18 + length).get_string_from_ascii()}
+
 static func decode_achievements_catalog(payload: PackedByteArray) -> Dictionary:
 	var worn: Dictionary = _nul_at(payload, 0)
 	if worn.is_empty():

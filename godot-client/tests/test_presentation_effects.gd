@@ -41,28 +41,28 @@ func _run() -> void:
 		"a coast that declares both gets a mist and a flock")
 	var focus := Vector3(10.0, 30.0, -5.0)
 	var haze := Color(0.3, 0.35, 0.45)
-	effects.update(focus, 0.0, 0.0, haze, 0.1)
+	effects.update(focus, 0.0, 0.0, 0.0, haze, 0.1)
 	_expect(mist.visible and mist.global_position.distance_to(focus) < 3.0,
 		"at night the mist is drawn round the camera's focus")
 	var drawn := (mist.draw_pass_1 as QuadMesh).material as StandardMaterial3D
 	_expect(is_equal_approx(drawn.albedo_color.r, haze.r * PresentationEffects.MIST_SHADE)
 		and drawn.albedo_color.a > 0.0,
 		"in the haze's own colour")
-	effects.update(focus, 0.0, 0.0, haze, 0.1, false)
+	effects.update(focus, 0.0, 0.0, 0.0, haze, 0.1, false)
 	_expect(not mist.visible, "the particle switch takes the mist away")
 	var quality := OS.get_environment(LookProfile.QUALITY_VARIABLE)
 	OS.set_environment(LookProfile.QUALITY_VARIABLE, "low")
-	effects.update(focus, 0.0, 0.0, haze, 0.1)
+	effects.update(focus, 0.0, 0.0, 0.0, haze, 0.1)
 	_expect(not mist.visible, "low graphics quality draws no mist (its cost is the transparency)")
 	OS.set_environment(LookProfile.QUALITY_VARIABLE, "high")
-	effects.update(focus, 0.0, 0.0, haze, 0.1)
+	effects.update(focus, 0.0, 0.0, 0.0, haze, 0.1)
 	_expect(mist.visible, "and high draws it again")
 	if quality.is_empty():
 		OS.unset_environment(LookProfile.QUALITY_VARIABLE)
 	else:
 		OS.set_environment(LookProfile.QUALITY_VARIABLE, quality)
 	for frame: int in 40:
-		effects.update(focus, 180.0, 0.0, haze, 0.25)
+		effects.update(focus, 180.0, 0.0, 0.0, haze, 0.25)
 	_expect(not mist.visible and gulls.visible and gulls.multimesh.visible_instance_count > 0,
 		"at noon the mist has gone and the gulls are out")
 	# The headless renderer keeps no instance transforms; the flight is read
@@ -83,11 +83,11 @@ func _run() -> void:
 		"mist": {"enabled": true, "zones": ["mill-pool"]},
 		"gulls": {"enabled": true, "density": 0.8, "zones": ["harbour"]}}}}
 	effects.bind(zoned)
-	effects.update(focus, 0.0, 0.0, haze, 0.1)
+	effects.update(focus, 0.0, 0.0, 0.0, haze, 0.1)
 	_expect(not mist.visible and not gulls.visible,
 		"a map whose entries are zoned (Nymara's) gets nothing until zones have a reader")
 	effects.bind(null)
-	effects.update(focus, 0.0, 0.0, haze, 0.1)
+	effects.update(focus, 0.0, 0.0, 0.0, haze, 0.1)
 	_expect(not mist.visible and not gulls.visible, "no manifest, no effects")
 
 	effects.queue_free()

@@ -30,6 +30,9 @@ signal ground_missile_fired(shot: Dictionary)
 var fires: Dictionary = {}
 ## The sky over this map, as {"kind": int, "intensity": int}.
 var weather: Dictionary = {"kind": 0, "intensity": 0}
+## The whole sky from a weather_state_v1 server: {current, target, seconds,
+## name, at_msec}; empty while the server speaks only the legacy frames.
+var weather_state: Dictionary = {}
 
 ## Which quest the NPC is talking about, and which quests have been finished
 ## this session. `quest_dialogue` is true only while the server has flagged the
@@ -453,6 +456,7 @@ func _on_connection_state_changed(value: String) -> void:
 		almanac = {}
 		fires = {}
 		weather = {"kind": 0, "intensity": 0}
+		weather_state = {}
 		quest_dialogue = false
 		current_quest_id = 0
 		finished_quests = []
@@ -1002,6 +1006,19 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"weather":
 			weather = {"kind": int(event.kind),
 				"intensity": int(event.intensity)}
+			weather_state = {}
+			state_changed.emit(&"weather")
+		"weather_state":
+			# The legacy pair kept beside it, as a server without the state
+			# would have said it: anything falling is rain, a storm if it
+			# lightens; cloud and fog are a clear sky to that pair.
+			var target: Array = event.target
+			var falling: bool = int(target[0]) > 0 and int(target[1]) > 0
+			weather = {"kind": (2 if int(target[6]) > 0 else 1) if falling else 0,
+				"intensity": int(target[1]) if falling else 0}
+			weather_state = {"current": event.current, "target": event.target,
+				"seconds": float(event.seconds), "name": str(event.name),
+				"at_msec": Time.get_ticks_msec()}
 			state_changed.emit(&"weather")
 		"rain":
 			# The legacy signal. It carries no kind, so it only ever confirms

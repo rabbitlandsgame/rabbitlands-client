@@ -40,6 +40,7 @@ func _init() -> void:
 		"magic_book_v2": EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE,
 		"actor16_v1": EloriaProtocol.ServerMessage.ADD_NEW_ACTOR_EXTENDED,
 		"actor_wardrobe_v1": EloriaProtocol.ServerMessage.ADD_NEW_ENHANCED_ACTOR,
+		"weather_state_v1": EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE,
 		"almanac_v1": EloriaProtocol.ServerMessage.ELORIA_ALMANAC_STATE,
 		"combat_hud_v1": EloriaProtocol.ServerMessage.ELORIA_COMBAT_STATE,
 		"inventory_names_v1": EloriaProtocol.ServerMessage.ELORIA_INVENTORY_NAMES,
@@ -90,6 +91,7 @@ func _init() -> void:
 		# continent-v2 map, which this client can draw (checked below).
 		"continent_v2_maps_v1": EloriaProtocol.ServerMessage.CHANGE_MAP}
 	var capability_probes: Dictionary = {
+		EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE: "01" + "00000000000a00" + "01555a28374000" + "c800" + "0a" + "heavy_rain".to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.SEND_MAP_MARKER: "ea010c03e1012e2f6d6170732f666f75725f67617465732e656c6d00526565642062616e6b0060ea",
 		EloriaProtocol.ServerMessage.ELORIA_LANTERN_STATE: '{"version":1,"active":false}'.to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.ELORIA_ADJACENT_MAPS: "010100" + "whitehorn_range".to_utf8_buffer().hex_encode() + "00",

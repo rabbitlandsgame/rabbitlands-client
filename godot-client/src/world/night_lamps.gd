@@ -68,11 +68,12 @@ var _refresh_at := 0.0
 func _ready() -> void:
 	name = "NightLamps"
 
-## How lit the lamps are at `minute` under `overcast` (Weather3D.overcast).
-static func strength_at(minute: float, overcast: float) -> float:
+## How lit the lamps are at `minute` under `gloom` (Weather3D.gloom: how
+## much the weather darkens the day).
+static func strength_at(minute: float, gloom: float) -> float:
 	var light := DayNightBinder.daylight(minute)
 	var night := 1.0 - smoothstep(NIGHT_FULL, DUSK_LIGHT, light)
-	return clampf(maxf(night, overcast * STORM_LAMPS), 0.0, 1.0)
+	return clampf(maxf(night, gloom * STORM_LAMPS), 0.0, 1.0)
 
 ## The kind of lamp a node is (a LAMPS key), or "".
 static func kind_of(node_name: String) -> String:
@@ -118,8 +119,8 @@ func lit_count() -> int:
 ## Every frame: lights the halos for the hour and, every REFRESH_SECONDS,
 ## hands the lights to the lamps nearest `focus`. `active` false (a map whose
 ## hour does not drive its light) puts every lamp out.
-func update(focus: Vector3, minute: float, overcast: float, active := true) -> void:
-	var strength := strength_at(minute, overcast) if active else 0.0
+func update(focus: Vector3, minute: float, gloom: float, active := true) -> void:
+	var strength := strength_at(minute, gloom) if active else 0.0
 	if not is_equal_approx(strength, _strength):
 		_strength = strength
 		_material_for_halos().set_shader_parameter(&"strength", strength)

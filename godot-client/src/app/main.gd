@@ -348,9 +348,11 @@ var weather_layer: Weather3D
 ## later change of weather eases in.
 var _weather_synced := false
 var _weather_lighting_at := 0
-## The overcast the light was last applied under, so the sky is applied again
-## until it matches the weather, its last eased step included.
-var _weather_applied_overcast := 0.0
+## The weather look the light was last applied under (Weather3D.look_version),
+## so the sky is applied again while the weather eases, its last step included.
+var _weather_applied_version := -1
+## Whether that look had any weather in it, so the haze is put back once it clears.
+var _weather_applied_active := false
 ## The streamed maps' own lamps, lit at dusk and through the night.
 var night_lamps: NightLamps
 ## The map's declared mist and gulls (environment.presentation).
@@ -1518,17 +1520,18 @@ func _process(delta: float) -> void:
 		# again until it has settled (the border update above does this on a
 		# map with streaming borders; the isles have none).
 		if weather_layer != null \
-				and not is_equal_approx(weather_layer.overcast, _weather_applied_overcast) \
+				and weather_layer.look_version != _weather_applied_version \
 				and Time.get_ticks_msec() >= _weather_lighting_at:
 			_weather_lighting_at = Time.get_ticks_msec() + 100
 			_apply_day_night()
-		var overcast := weather_layer.overcast if weather_layer != null else 0.0
+		var gloom := weather_layer.gloom() if weather_layer != null else 0.0
 		if night_lamps != null:
 			night_lamps.update(camera_rig.focus, AppState.continuous_game_minute(),
-				overcast, _day_night_active)
+				gloom, _day_night_active)
 		if presentation_effects != null and world_environment.environment != null:
 			presentation_effects.update(camera_rig.focus, AppState.continuous_game_minute(),
-				overcast, world_environment.environment.fog_light_color, delta, _effects_enabled)
+				weather_layer.mistiness() if weather_layer != null else 0.0, gloom,
+				world_environment.environment.fog_light_color, delta, _effects_enabled)
 		_update_animation_gate(delta)
 		# Rain is everywhere, so only the box the player is standing in is
 		# drawn. Left at the world origin it fell a hundred metres away from
@@ -5182,13 +5185,14 @@ func _apply_day_night() -> void:
 		world_environment, world_sun, AppState.continuous_game_minute(), world_moon)
 	# The binder leaves the haze's density as the map bound it; rain thickens
 	# it (the look's haze re-reads it below, with the look off this is it).
-	var overcast := weather_layer.overcast if weather_layer != null else 0.0
-	if (overcast > 0.0 or _weather_applied_overcast > 0.0) and lighting != null \
+	var active := weather_layer != null and weather_layer.has_weather()
+	if (active or _weather_applied_active) and lighting != null \
 			and world_environment.environment != null:
 		var fog: Variant = (lighting.data.get("environment", {}) as Dictionary).get("fog")
 		if fog is Dictionary and (fog as Dictionary).has("density"):
 			world_environment.environment.fog_density = float((fog as Dictionary).density)
-	_weather_applied_overcast = overcast
+	_weather_applied_active = active
+	_weather_applied_version = weather_layer.look_version if weather_layer != null else -1
 	_hold_shadow_switch()
 	_sync_map_environment()
 	# Look pass (a no-op with the look off): re-grade what the
@@ -5210,8 +5214,9 @@ func _hold_shadow_switch() -> void:
 ## The lighting the binders apply: the (border-blended) manifest at the
 ## camera's focus, under the weather the server says is falling (WeatherSky).
 func _lighting_manifest() -> WorldManifest:
-	return WeatherSky.weathered(exterior_stream.lighting_manifest(camera_rig.focus),
-		weather_layer.overcast if weather_layer != null else 0.0)
+	var lighting := exterior_stream.lighting_manifest(camera_rig.focus)
+	return WeatherSky.weathered_look(lighting, weather_layer.look()) \
+		if weather_layer != null else lighting
 
 func _update_border_lighting() -> void:
 	var lighting := _lighting_manifest()
@@ -10008,13 +10013,22 @@ func _sync_weather() -> void:
 		return
 	# The particle switch turns the drops off, not the weather: the sky still
 	# greys under rain the player has chosen not to draw. The first sky after
-	# logging in is already there; every change after it eases in
-	# (Weather3D.OVERCAST_RATE), a new map's included, so walking across a
-	# border into rain darkens the sky over a few steps rather than at the line.
+	# logging in is already there; every change after it eases in, a new
+	# map's included, so walking across a border into rain darkens the sky
+	# over a few steps rather than at the line. A weather_state_v1 server says
+	# how long the change takes (counted from when its frame arrived); a
+	# legacy one does not, and its change eases over LEGACY_EASE_SECONDS.
 	var first := not _weather_synced
 	_weather_synced = true
-	weather_layer.set_weather(int(AppState.weather.get("kind", 0)),
-		int(AppState.weather.get("intensity", 0)), _effects_enabled, not first)
+	var state: Dictionary = AppState.weather_state
+	if not state.is_empty():
+		var left := maxf(0.0, float(state.seconds)
+			- float(Time.get_ticks_msec() - int(state.at_msec)) / 1000.0)
+		weather_layer.set_state(state.current, state.target, left, _effects_enabled,
+			first, str(state.name))
+	else:
+		weather_layer.set_weather(int(AppState.weather.get("kind", 0)),
+			int(AppState.weather.get("intensity", 0)), _effects_enabled, not first)
 	if first:
 		_apply_day_night()
 

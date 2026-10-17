@@ -29,7 +29,9 @@ extends SceneTree
 ##
 ## A spec may set the hour, `minute` (0-359; 180, noon, by default), and the
 ## sky, `weather` ([kind, intensity]: 0 clear, 1 rain, 2 storm, 0-100), which
-## reach the client as the server's NEW_MINUTE and SEND_WEATHER packets. Each
+## reach the client as the server's NEW_MINUTE and SEND_WEATHER packets, or a
+## whole sky, `sky` (the seven look numbers) with `sky_name`, which arrives as
+## ELORIA_WEATHER_STATE. Each
 ## view's report records the lamp lights in use (`lamp_lights`).
 ##
 ## ELORIA_SURVEY_CHUNK_WAIT_S raises the 90 s the survey waits for the
@@ -184,6 +186,20 @@ func _run() -> void:
 		state.call("_on_packet", 5, PackedByteArray([minute & 0xff, (minute >> 8) & 0xff]))
 		var weather: Array = spec.get("weather", [0, 0])
 		state.call("_on_packet", 100, PackedByteArray([int(weather[0]), int(weather[1])]))
+		# `sky` ([kind, precipitation, clouds, fog, darkness, wind, lightning],
+		# 0-100, with `sky_name`) is a weather_state_v1 frame instead: the sky
+		# a scheduler state draws, already there.
+		var sky: Array = spec.get("sky", [])
+		if sky.size() == 7:
+			var frame := PackedByteArray([1])
+			for _look: int in 2:
+				for value: Variant in sky:
+					frame.append(int(value))
+			frame.append_array(PackedByteArray([0, 0]))
+			var label := str(spec.get("sky_name", "")).to_ascii_buffer()
+			frame.append(label.size())
+			frame.append_array(label)
+			state.call("_on_packet", EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE, frame)
 		main.call("_apply_day_night")
 		# Let camera interpolation and the HUD's one-second FPS window settle
 		# after a large package load before taking a composition/performance view.

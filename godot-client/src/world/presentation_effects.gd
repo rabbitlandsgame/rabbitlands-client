@@ -95,25 +95,28 @@ static func _density(entry: Variant) -> float:
 		return 0.0
 	return clampf(float(declared.get("density", 1.0)), 0.0, 1.0)
 
-## How thick the mist is at `minute` under `overcast`, 0..1 of its density.
-static func mist_strength(minute: float, overcast: float) -> float:
+## How thick the mist is at `minute` under the weather's own mistiness
+## (Weather3D.mistiness: its fog, or what falls), 0..1 of its density.
+static func mist_strength(minute: float, weather: float) -> float:
 	var light := DayNightBinder.daylight(minute)
-	return clampf(maxf(1.0 - smoothstep(0.25, 0.65, light), overcast * 0.8), 0.0, 1.0)
+	return clampf(maxf(1.0 - smoothstep(0.25, 0.65, light), weather * 0.8), 0.0, 1.0)
 
-## How many of the gulls are out at `minute` under `overcast`, 0..1.
-static func gull_strength(minute: float, overcast: float) -> float:
+## How many of the gulls are out at `minute` under `gloom` (Weather3D.gloom),
+## 0..1: none at night or in a storm.
+static func gull_strength(minute: float, gloom: float) -> float:
 	var light := DayNightBinder.daylight(minute)
-	return clampf(smoothstep(0.2, 0.45, light) * (1.0 - smoothstep(0.55, 0.85, overcast)), 0.0, 1.0)
+	return clampf(smoothstep(0.2, 0.45, light) * (1.0 - smoothstep(0.55, 0.85, gloom)), 0.0, 1.0)
 
 ## Every frame: the mist and the gulls follow the camera's focus, at the hour
 ## and under the weather. `haze` is the fog's current colour. `particles`
 ## false (the player's particle switch) draws no mist, nor does LOW quality.
-func update(focus: Vector3, minute: float, overcast: float, haze: Color, delta: float,
+func update(focus: Vector3, minute: float, mist_weather: float, gloom: float,
+		haze: Color, delta: float,
 		particles := true) -> void:
 	_time += delta
 	if _mist != null and mist_density > 0.0:
 		var drawn := particles and LookProfile.quality() != LookProfile.Quality.LOW
-		var strength := mist_strength(minute, overcast) if drawn else 0.0
+		var strength := mist_strength(minute, mist_weather) if drawn else 0.0
 		_mist.global_position = focus + Vector3(0.0, MIST_BOX.y * 0.5, 0.0)
 		_mist.visible = strength > 0.02
 		if not is_equal_approx(strength, _mist_strength) or not is_equal_approx(_mist_material.albedo_color.r, haze.r * MIST_SHADE):
@@ -121,7 +124,7 @@ func update(focus: Vector3, minute: float, overcast: float, haze: Color, delta: 
 			_mist_material.albedo_color = Color(haze.r * MIST_SHADE, haze.g * MIST_SHADE,
 				haze.b * MIST_SHADE, MIST_ALPHA * strength * mist_density)
 	if _gulls != null and gull_density > 0.0:
-		_update_gulls(focus, gull_strength(minute, overcast), delta)
+		_update_gulls(focus, gull_strength(minute, gloom), delta)
 
 func _update_gulls(focus: Vector3, strength: float, delta: float) -> void:
 	_gull_strength = move_toward(_gull_strength, strength, delta * 0.25)
