@@ -50,6 +50,17 @@ func _run() -> void:
 		"in the haze's own colour")
 	effects.update(focus, 0.0, 0.0, haze, 0.1, false)
 	_expect(not mist.visible, "the particle switch takes the mist away")
+	var quality := OS.get_environment(LookProfile.QUALITY_VARIABLE)
+	OS.set_environment(LookProfile.QUALITY_VARIABLE, "low")
+	effects.update(focus, 0.0, 0.0, haze, 0.1)
+	_expect(not mist.visible, "low graphics quality draws no mist (its cost is the transparency)")
+	OS.set_environment(LookProfile.QUALITY_VARIABLE, "high")
+	effects.update(focus, 0.0, 0.0, haze, 0.1)
+	_expect(mist.visible, "and high draws it again")
+	if quality.is_empty():
+		OS.unset_environment(LookProfile.QUALITY_VARIABLE)
+	else:
+		OS.set_environment(LookProfile.QUALITY_VARIABLE, quality)
 	for frame: int in 40:
 		effects.update(focus, 180.0, 0.0, haze, 0.25)
 	_expect(not mist.visible and gulls.visible and gulls.multimesh.visible_instance_count > 0,

@@ -19,6 +19,12 @@ extends Node3D
 ## own colour, so it reads as the far fog come close. Gulls wheel overhead by
 ## day and keep off in a storm. Both are built from primitives: nothing is
 ## imported.
+##
+## The mist is wide soft transparency over most of the view, so it is the one
+## part of this that costs: Landfall's town at night (mist density 0.3) took
+## 0.16 ms more GPU time in the 3D view with it than without (1.68 against
+## 1.84 ms median, RTX 5080 laptop, 1440x900, HIGH), about what SSIL costs.
+## LOW, which gives up every screen-space pass and the grass, gives it up too.
 
 const MIST_BOX := Vector3(80.0, 1.6, 80.0)
 ## Particles at full density.
@@ -101,12 +107,13 @@ static func gull_strength(minute: float, overcast: float) -> float:
 
 ## Every frame: the mist and the gulls follow the camera's focus, at the hour
 ## and under the weather. `haze` is the fog's current colour. `particles`
-## false (the player's particle switch) draws no mist.
+## false (the player's particle switch) draws no mist, nor does LOW quality.
 func update(focus: Vector3, minute: float, overcast: float, haze: Color, delta: float,
 		particles := true) -> void:
 	_time += delta
 	if _mist != null and mist_density > 0.0:
-		var strength := mist_strength(minute, overcast) if particles else 0.0
+		var drawn := particles and LookProfile.quality() != LookProfile.Quality.LOW
+		var strength := mist_strength(minute, overcast) if drawn else 0.0
 		_mist.global_position = focus + Vector3(0.0, MIST_BOX.y * 0.5, 0.0)
 		_mist.visible = strength > 0.02
 		if not is_equal_approx(strength, _mist_strength) or not is_equal_approx(_mist_material.albedo_color.r, haze.r * MIST_SHADE):
