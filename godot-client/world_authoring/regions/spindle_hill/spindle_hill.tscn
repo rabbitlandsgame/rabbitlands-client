@@ -587,7 +587,7 @@ shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
 shader_parameter/texture_scale = 1.0
 shader_parameter/roughness_multiplier = 1.0
 shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.16
+shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="s2_Resource_ghj86"]
@@ -623,7 +623,7 @@ shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
 shader_parameter/texture_scale = 1.0
 shader_parameter/roughness_multiplier = 1.0
 shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.16
+shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="s2_Resource_k5d2k"]
@@ -659,7 +659,7 @@ shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
 shader_parameter/texture_scale = 1.0
 shader_parameter/roughness_multiplier = 1.0
 shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.16
+shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="s2_Resource_x5dao"]
@@ -1017,13 +1017,125 @@ gizmo_extents = 0.7
 script = ExtResource("s2_8_ce08r")
 region_id = "th-sand2-02"
 enabled = true
-size = Vector2(134.3, 41.4)
+size = Vector2(44.9, 29.6)
 blend_width = 6.0
-opacity = 0.8
+opacity = 0.79
 priority = 25
 surface = SubResource("s2_Resource_r33nr")
-transform = Transform3D(-0.7144728, 0, -0.6996633, 0, 1, 0, 0.6996633, 0, -0.7144728, -11.82, 0.7404696, -220.72)
-clip_polygon = PackedVector2Array(-497.987755451, -291.538381394, -388.929150226, -171.595821824, -276.538750185, -99.7042651134, -199.871986025, 7.1704525632, -24.9561811944, 185.788631967, 176.525125173, -11.5163958821, -234.876847789, -431.626353841, -293.648558212, -491.64206212)
+transform = Transform3D(-0.7731539, 0, -0.6342184, 0, 1, 0, 0.6342184, 0, -0.7731539, 26.386, 0.7405, -185.251)
+clip_polygon = PackedVector2Array(-418.427891, -330.951011, -320.323431, -201.894764, -214.680418, -120.411306, -147.695103, -7.216927, 10.859502, 186.071555, 228.888910, 7.221961, -144.031520, -447.392549, -197.305867, -512.337479)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 34
+
+[node name="s2_th-sand2-02-p01" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-02-p01"
+enabled = true
+size = Vector2(46.4, 33.8)
+blend_width = 6.0
+opacity = 0.82
+priority = 25
+surface = SubResource("s2_Resource_r33nr")
+transform = Transform3D(-0.755351, 0, -0.6553205, 0, 1, 0, 0.6553205, 0, -0.755351, 17.616, 0.7405, -195.584)
+clip_polygon = PackedVector2Array(-440.800175, -321.331667, -339.170363, -195.032888, -231.318173, -116.496878, -161.233530, -5.194844, 2.596589, 183.642896, 215.605560, -1.157478, -169.722880, -445.303843, -224.769800, -508.753323)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 34
+
+[node name="s2_th-sand2-02-p02" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-02-p02"
+enabled = true
+size = Vector2(58.9, 32.3)
+blend_width = 6.0
+opacity = 0.80
+priority = 25
+surface = SubResource("s2_Resource_r33nr")
+transform = Transform3D(-0.9533342, 0, -0.3019172, 0, 1, 0, 0.3019172, 0, -0.9533342, 1.311, 0.7405, -205.955)
+clip_polygon = PackedVector2Array(-295.842438, -474.791620, -252.651856, -318.539984, -184.802595, -203.664060, -164.620042, -73.692277, -89.140742, 164.641261, 179.699489, 79.500610, 2.172174, -481.059871, -23.188871, -561.139939)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 34
+
+[node name="s2_th-sand2-02-p03" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-02-p03"
+enabled = true
+size = Vector2(52.1, 39.6)
+blend_width = 6.0
+opacity = 0.81
+priority = 25
+surface = SubResource("s2_Resource_r33nr")
+transform = Transform3D(-0.631419, 0, -0.7754419, 0, 1, 0, 0.7754419, 0, -0.631419, -18.068, 0.7405, -220.537)
+clip_polygon = PackedVector2Array(-531.369299, -228.836065, -409.536230, -121.893542, -289.786219, -63.072332, -201.607155, 34.520971, -7.746688, 192.375712, 170.313460, -26.298895, -285.646358, -397.573246, -350.783475, -450.612439)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 34
+
+[node name="s2_th-sand2-02-p04" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-02-p04"
+enabled = true
+size = Vector2(67.1, 40.2)
+blend_width = 6.0
+opacity = 0.78
+priority = 25
+surface = SubResource("s2_Resource_r33nr")
+transform = Transform3D(-0.5434773, 0, -0.8394239, 0, 1, 0, 0.8394239, 0, -0.5434773, -27.268, 0.7405, -234.121)
+clip_polygon = PackedVector2Array(-569.479362, -169.439188, -436.753559, -76.359322, -311.324138, -30.889989, -213.068581, 56.550537, -3.212615, 192.419862, 150.047983, -44.297668, -343.533249, -363.862320, -414.044854, -409.514413)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 34
+
+[node name="s2_th-sand2-02-p05" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-02-p05"
+enabled = true
+size = Vector2(59.2, 35.5)
+blend_width = 6.0
+opacity = 0.80
+priority = 25
+surface = SubResource("s2_Resource_r33nr")
+transform = Transform3D(-0.5706661, 0, -0.8211822, 0, 1, 0, 0.8211822, 0, -0.5706661, -47.159, 0.7405, -249.521)
+clip_polygon = PackedVector2Array(-587.625144, -180.445419, -458.017624, -83.070419, -334.143954, -33.519293, -238.803590, 57.090943, -33.508039, 199.757466, 127.419799, -31.815915, -355.435337, -367.367577, -424.414642, -415.303529)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 34
+
+[node name="s2_th-sand2-02-p06" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-02-p06"
+enabled = true
+size = Vector2(62.8, 33.3)
+blend_width = 6.0
+opacity = 0.79
+priority = 25
+surface = SubResource("s2_Resource_r33nr")
+transform = Transform3D(-0.6946965, 0, -0.7193029, 0, 1, 0, 0.7193029, 0, -0.6946965, -44.420, 0.7405, -261.080)
+clip_polygon = PackedVector2Array(-557.597615, -282.135786, -445.238718, -165.279130, -330.888440, -96.547668, -251.272988, 8.148941, -71.447253, 181.823075, 124.457171, -21.020354, -298.492959, -429.501918, -358.914406, -487.856428)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 34
+
+[node name="s2_th-sand2-02-p07" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-02-p07"
+enabled = true
+size = Vector2(36.4, 28.9)
+blend_width = 6.0
+opacity = 0.80
+priority = 25
+surface = SubResource("s2_Resource_r33nr")
+transform = Transform3D(-0.8034499, 0, -0.5953724, 0, 1, 0, 0.5953724, 0, -0.8034499, -2.279, 0.7405, -217.641)
+clip_polygon = PackedVector2Array(-443.936802, -360.113934, -352.307172, -226.382820, -250.805263, -139.795508, -189.475848, -23.439577, -40.632747, 177.422892, 185.940118, 9.527874, -164.138856, -462.900652, -214.150138, -530.390441)
 uv_anchor_continent = Vector2(2800, 7398)
 uv_anchor_continent_enabled = true
 source_layer_ordinal = 34
@@ -1033,13 +1145,125 @@ gizmo_extents = 0.7
 script = ExtResource("s2_8_ce08r")
 region_id = "th-sand2-06"
 enabled = true
-size = Vector2(95.4, 19.1)
+size = Vector2(32.3, 13.5)
 blend_width = 6.0
-opacity = 0.8
+opacity = 0.78
 priority = 25
 surface = SubResource("s2_Resource_uwsap")
-transform = Transform3D(-0.6306758, 0, -0.7760464, 0, 1, 0, 0.7760464, 0, -0.6306758, -80.58, 1.3091898, -124.99)
-clip_polygon = PackedVector2Array(-496.864108007, -119.554924562, -374.928643527, -12.7291643889, -255.12233509, 45.9772988052, -166.849817294, 143.486082789, 27.1617866525, 301.155035996, 205.01236587, 82.3099467443, -251.302926612, -288.527431199, -316.490825538, -341.504199477)
+transform = Transform3D(-0.652949, 0, -0.7574019, 0, 1, 0, 0.7574019, 0, -0.652949, -55.298, 1.3092, -95.919)
+clip_polygon = PackedVector2Array(-454.655871, -134.102496, -335.874458, -23.780350, -217.823743, 38.380961, -132.420476, 138.412366, 56.929997, 301.649612, 241.061610, 88.062278, -204.290703, -295.871723, -267.912462, -350.719437)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 38
+
+[node name="s2_th-sand2-06-p01" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-06-p01"
+enabled = true
+size = Vector2(23.8, 15.0)
+blend_width = 6.0
+opacity = 0.82
+priority = 25
+surface = SubResource("s2_Resource_uwsap")
+transform = Transform3D(-0.5480431, 0, -0.8364501, 0, 1, 0, 0.8364501, 0, -0.5480431, -59.729, 1.3092, -104.438)
+clip_polygon = PackedVector2Array(-477.864926, -74.315854, -345.648268, 19.485826, -220.468462, 65.637924, -122.690810, 153.612527, 86.421716, 290.623299, 240.969866, 54.744370, -250.862795, -267.504965, -321.124603, -313.540584)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 38
+
+[node name="s2_th-sand2-06-p02" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-06-p02"
+enabled = true
+size = Vector2(28.4, 14.6)
+blend_width = 6.0
+opacity = 0.78
+priority = 25
+surface = SubResource("s2_Resource_uwsap")
+transform = Transform3D(-0.7923985, 0, -0.6100037, 0, 1, 0, 0.6100037, 0, -0.7923985, -67.379, 1.3092, -108.464)
+clip_polygon = PackedVector2Array(-435.452004, -225.690559, -341.385792, -93.661972, -238.313351, -8.950273, -174.860838, 106.261613, -22.359907, 304.361249, 201.096483, 132.340199, -157.585707, -333.590146, -208.826019, -400.151624)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 38
+
+[node name="s2_th-sand2-06-p03" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-06-p03"
+enabled = true
+size = Vector2(40.1, 17.6)
+blend_width = 6.0
+opacity = 0.78
+priority = 25
+surface = SubResource("s2_Resource_uwsap")
+transform = Transform3D(-0.6511736, 0, -0.7589288, 0, 1, 0, 0.7589288, 0, -0.6511736, -76.202, 1.3092, -116.344)
+clip_polygon = PackedVector2Array(-484.082195, -130.472588, -365.042772, -20.428889, -246.846820, 41.455818, -161.209549, 141.286965, 28.522650, 304.080370, 212.153611, 90.062449, -234.096520, -292.827639, -297.846539, -347.526223)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 38
+
+[node name="s2_th-sand2-06-p04" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-06-p04"
+enabled = true
+size = Vector2(39.9, 19.7)
+blend_width = 6.0
+opacity = 0.79
+priority = 25
+surface = SubResource("s2_Resource_uwsap")
+transform = Transform3D(-0.64045, 0, -0.7679998, 0, 1, 0, 0.7679998, 0, -0.64045, -81.530, 1.3092, -126.710)
+clip_polygon = PackedVector2Array(-497.240247, -126.207873, -376.666972, -17.846970, -257.613492, 42.371539, -170.582513, 140.990040, 21.417448, 301.102547, 202.024356, 84.526592, -249.559551, -292.058026, -314.071538, -345.855829)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 38
+
+[node name="s2_th-sand2-06-p05" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-06-p05"
+enabled = true
+size = Vector2(40.1, 17.5)
+blend_width = 6.0
+opacity = 0.80
+priority = 25
+surface = SubResource("s2_Resource_uwsap")
+transform = Transform3D(-0.5861916, 0, -0.8101725, 0, 1, 0, 0.8101725, 0, -0.5861916, -92.261, 1.3092, -136.761)
+clip_polygon = PackedVector2Array(-519.167712, -88.957218, -391.436923, 10.866855, -268.528755, 62.766589, -174.930167, 155.174945, 27.612948, 301.722844, 192.918977, 73.254210, -283.462430, -271.426447, -351.516916, -320.666541)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 38
+
+[node name="s2_th-sand2-06-p06" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-06-p06"
+enabled = true
+size = Vector2(30.0, 15.7)
+blend_width = 6.0
+opacity = 0.79
+priority = 25
+surface = SubResource("s2_Resource_uwsap")
+transform = Transform3D(-0.3833381, 0, -0.9236081, 0, 1, 0, 0.9236081, 0, -0.3833381, -100.499, 1.3092, -145.627)
+clip_polygon = PackedVector2Array(-537.026629, 37.500492, -389.702149, 105.142917, -258.132955, 127.268631, -145.730667, 195.574749, 85.171352, 291.409280, 193.272703, 30.951802, -349.808846, -194.451016, -427.391925, -226.651418)
+uv_anchor_continent = Vector2(2800, 7398)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 38
+
+[node name="s2_th-sand2-06-p07" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s2_8_ce08r")
+region_id = "th-sand2-06-p07"
+enabled = true
+size = Vector2(27.3, 14.1)
+blend_width = 6.0
+opacity = 0.80
+priority = 25
+surface = SubResource("s2_Resource_uwsap")
+transform = Transform3D(-0.7591712, 0, -0.650891, 0, 1, 0, 0.650891, 0, -0.7591712, -105.511, 1.3092, -153.416)
+clip_polygon = PackedVector2Array(-504.941649, -211.750001, -404.052328, -84.858927, -296.661358, -5.693406, -227.228946, 106.016666, -64.506186, 295.809456, 149.580082, 112.258183, -233.143849, -334.134461, -287.818696, -397.904838)
 uv_anchor_continent = Vector2(2800, 7398)
 uv_anchor_continent_enabled = true
 source_layer_ordinal = 38
@@ -1073,7 +1297,7 @@ properties = {
 "terrainFeather": 2.0
 }
 default_width = 8.0
-point_widths = PackedFloat32Array(8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8)
+point_widths = PackedFloat32Array(9.2, 9.2, 8.76, 8.13, 7.45, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 7.12, 7.82, 8.51, 9.11, 9.2, 9.2, 9.2, 9.2, 9.2, 9.14, 8.73, 8.34, 7.99, 7.74, 7.57, 7.5, 7.49, 7.51, 7.55, 7.56, 7.54, 7.47, 7.39, 7.3, 7.23, 7.22, 7.28, 7.43, 7.67, 7.97, 8.31, 8.64, 8.92, 9.1, 9.16, 9.09, 8.89, 8.59, 8.24, 7.88, 7.57, 7.36, 7.28, 7.33, 7.51, 7.79, 8.11, 8.42, 8.66, 8.78, 8.76, 8.57, 8.24, 7.8, 7.33, 6.88, 6.8, 6.8, 6.8, 6.8, 6.92, 7.46, 8.1, 8.77, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.17, 8.58, 7.97, 7.42, 6.96, 6.8, 6.8, 6.8, 6.8, 6.81, 7.06, 7.32, 7.55, 7.74, 7.88, 7.99, 8.07, 8.16, 8.27, 8.41, 8.59, 8.79, 8.99, 9.16, 9.2, 9.2, 9.13, 8.88, 8.52, 8.08, 7.61, 7.15, 6.8, 6.8, 6.8, 6.8, 6.8, 7.17, 7.63, 8.1, 8.52, 8.83, 8.99, 8.99, 8.82, 8.53, 8.16, 7.77, 7.43, 7.2, 7.13, 7.22, 7.47, 7.86, 8.31, 8.78, 9.18, 9.2, 9.2, 9.2, 9.19, 8.75, 8.2, 7.61, 7.06, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 7.24, 7.71, 8.16, 8.54, 8.82, 8.99, 9.06, 9.05, 8.99, 8.9, 8.81, 8.73, 8.67, 8.62, 8.57, 8.48, 8.34, 8.13, 7.99)
 surface = SubResource("s2_Resource_ghj86")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 217, 0, -609)
 
@@ -1089,7 +1313,7 @@ properties = {
 "terrainFeather": 2.0
 }
 default_width = 8.0
-point_widths = PackedFloat32Array(8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8)
+point_widths = PackedFloat32Array(8.6, 9.1, 9.2, 9.2, 9.2, 9.2, 8.79, 8.26, 7.74, 7.33, 7.11, 7.1, 7.3, 7.67, 8.12, 8.56, 8.88, 9.02, 8.93, 8.61, 8.1, 7.51, 6.91, 6.8, 6.8, 6.8, 6.8, 6.86, 7.5, 8.22, 8.89, 9.2, 9.2, 9.2, 9.2, 9.2, 9.05, 8.6, 8.17, 7.81, 7.57, 7.43, 7.37, 7.35, 7.34, 7.31, 7.25, 7.17, 8.01, 8.28, 8.54, 8.81, 9.07, 9.33, 9.6, 9.34, 9.13, 9.2, 9.2)
 surface = SubResource("s2_Resource_k5d2k")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 217, 0, -609)
 
@@ -1104,7 +1328,7 @@ properties = {
 "terrainFeather": 2.0
 }
 default_width = 6.0
-point_widths = PackedFloat32Array(6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6)
+point_widths = PackedFloat32Array(6.9, 6.9, 6.74, 6.5, 6.28, 6.09, 5.98, 5.95, 5.99, 6.07, 6.15, 6.21, 6.21, 6.14, 6, 5.82, 5.61, 5.43, 5.3, 5.26, 5.32, 5.48, 5.71, 5.98, 6.24, 6.45, 6.57, 6.58, 6.48, 6.29, 6.04, 5.79, 5.59, 5.47, 5.47, 5.6, 5.84, 6.16, 6.5, 6.8, 6.9, 6.9, 6.9, 6.81, 6.46, 6.03, 5.57, 5.16, 5.1, 5.1, 5.1, 5.1, 5.1, 5.33, 5.7, 6.05, 6.35, 6.56, 6.68, 6.72, 6.7, 6.64, 6.59, 6.55, 6.55, 6.57, 6.61, 6.62, 6.58, 6.47, 6.27, 5.98, 5.62, 5.23, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.35, 5.9, 6.47, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.81, 6.38, 6.13, 6.33, 6.52, 6.72, 6.91, 7.1, 7.2)
 surface = SubResource("s2_Resource_x5dao")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 217, 0, -609)
 

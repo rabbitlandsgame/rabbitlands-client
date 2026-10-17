@@ -524,7 +524,7 @@ shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
 shader_parameter/texture_scale = 1.0
 shader_parameter/roughness_multiplier = 1.0
 shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.16
+shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="s0_Resource_03jxh"]
@@ -560,7 +560,7 @@ shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
 shader_parameter/texture_scale = 1.0
 shader_parameter/roughness_multiplier = 1.0
 shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.16
+shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="s0_Resource_m8qwg"]
@@ -925,253 +925,93 @@ gizmo_extents = 0.7
 script = ExtResource("s0_6_wgjx8")
 region_id = "sand-04"
 enabled = true
-size = Vector2(86.7, 23.9)
+size = Vector2(41.5, 31.6)
+blend_width = 8.0
+opacity = 0.78
+priority = 25
+surface = SubResource("s0_Resource_meiwo")
+transform = Transform3D(-0.4581831, 0, -0.8888578, 0, 1, 0, 0.8888578, 0, -0.4581831, -441.628, 3.9913, 142.050)
+clip_polygon = PackedVector2Array(465.483139, 61.769484, -14.500079, -185.649373, -58.942971, -208.558526, -76.995210, -195.363202, -150.304501, -53.145951, -243.041448, 214.061559, -167.720660, 635.400814, -249.277247, 793.617505, -188.834916, 824.773953, 17.380097, 931.072426)
+uv_anchor_continent = Vector2(1418, 7270)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 70
+
+[node name="s0_sand-04-p01" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s0_6_wgjx8")
+region_id = "sand-04-p01"
+enabled = true
+size = Vector2(50.8, 33.5)
+blend_width = 8.0
+opacity = 0.82
+priority = 25
+surface = SubResource("s0_Resource_meiwo")
+transform = Transform3D(-0.3044476, 0, -0.9525291, 0, 1, 0, 0.9525291, 0, -0.3044476, -437.756, 3.9913, 129.005)
+clip_polygon = PackedVector2Array(458.034788, -23.932076, -56.330902, -188.333775, -103.957355, -203.556154, -119.571597, -187.550050, -168.283212, -35.145401, -215.427375, 243.740638, -71.282001, 646.756891, -125.473673, 816.307063, -60.701697, 837.009499, 160.285044, 907.641341)
+uv_anchor_continent = Vector2(1418, 7270)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 70
+
+[node name="s0_sand-04-p02" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s0_6_wgjx8")
+region_id = "sand-04-p02"
+enabled = true
+size = Vector2(60.8, 31.0)
 blend_width = 8.0
 opacity = 0.80
 priority = 25
 surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(-0.08993728, 0, -0.9959474, 0, 1, 0, 0.9959474, 0, -0.08993728, -435.970, 3.9913, 99.020)
-clip_polygon = PackedVector2Array(412.155356, -127.478483, -125.656256, -176.044615, -175.453628, -180.541479, -187.211848, -161.521904, -201.601813, -2.170315, -186.946355, 280.292457, 41.421301, 642.298277, 25.412465, 819.576920, 93.136890, 825.692655, 324.196694, 846.558105)
+transform = Transform3D(0.05566119, 0, -0.9984497, 0, 1, 0, 0.9984497, 0, 0.05566119, -438.553, 3.9913, 113.476)
+clip_polygon = PackedVector2Array(403.849105, -184.211659, -135.313723, -154.154619, -185.236208, -151.371559, -194.107481, -130.845954, -185.201691, 28.905995, -129.678572, 306.245459, 148.843148, 631.246443, 158.750840, 808.970487, 226.645418, 805.185526, 458.285745, 792.272132)
 uv_anchor_continent = Vector2(1418, 7270)
 uv_anchor_continent_enabled = true
 source_layer_ordinal = 70
 
-[node name="s0_sand-04-l01" type="Marker3D" parent="Ground/Regions"]
+[node name="s0_sand-04-p03" type="Marker3D" parent="Ground/Regions"]
 gizmo_extents = 0.7
 script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l01"
+region_id = "sand-04-p03"
 enabled = true
-size = Vector2(33.0, 22.0)
+size = Vector2(67.4, 38.1)
+blend_width = 8.0
+opacity = 0.82
+priority = 25
+surface = SubResource("s0_Resource_meiwo")
+transform = Transform3D(0.05933634, 0, -0.998238, 0, 1, 0, 0.998238, 0, 0.05933634, -433.814, 3.9913, 87.945)
+clip_polygon = PackedVector2Array(377.400417, -188.912415, -161.648110, -156.870790, -211.560012, -153.903973, -220.355665, -133.345850, -210.861850, 26.372232, -154.318154, 303.505423, 125.398086, 627.478900, 135.959955, 805.165267, 203.840140, 801.130396, 435.431359, 787.364365)
+uv_anchor_continent = Vector2(1418, 7270)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 70
+
+[node name="s0_sand-04-p04" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s0_6_wgjx8")
+region_id = "sand-04-p04"
+enabled = true
+size = Vector2(42.7, 26.9)
+blend_width = 8.0
+opacity = 0.79
+priority = 25
+surface = SubResource("s0_Resource_meiwo")
+transform = Transform3D(-0.4384266, 0, -0.898767, 0, 1, 0, 0.898767, 0, -0.4384266, -429.586, 3.9913, 59.471)
+clip_polygon = PackedVector2Array(397.794405, 4.439357, -87.539753, -232.311009, -132.478102, -254.232340, -150.234303, -240.641267, -220.382560, -96.838553, -307.191332, 172.353260, -222.576968, 591.924944, -300.616904, 751.905463, -239.500750, 781.718472, -30.986816, 883.433445)
+uv_anchor_continent = Vector2(1418, 7270)
+uv_anchor_continent_enabled = true
+source_layer_ordinal = 70
+
+[node name="s0_sand-04-p05" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s0_6_wgjx8")
+region_id = "sand-04-p05"
+enabled = true
+size = Vector2(46.7, 26.6)
 blend_width = 8.0
 opacity = 0.78
 priority = 25
 surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(-0.001470813, 0, -0.9999989, 0, 1, 0, 0.9999989, 0, -0.001470813, -439.925, 1.3043, 143.324)
-clip_polygon = PackedVector2Array(377.508062, -94.404258, -153.897836, -190.361394, -203.102085, -199.246313, -216.496903, -181.341598, -244.928647, -23.887998, -255.320799, 258.763737, -59.876156, 639.554219, -91.506471, 814.721348, -24.588691, 826.804839, 203.719028, 868.030868)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l02" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l02"
-enabled = true
-size = Vector2(45.7, 19.2)
-blend_width = 8.0
-opacity = 0.64
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.3990027, 0, -0.9169498, 0, 1, 0, 0.9169498, 0, 0.3990027, -447.986, 1.5843, 134.718)
-clip_polygon = PackedVector2Array(394.836286, 60.669320, -53.707306, -240.010985, -95.239120, -267.851754, -114.681791, -256.807182, -203.772252, -123.905377, -326.455107, 130.945397, -299.806902, 558.133732, -398.920040, 705.986990, -342.436773, 743.850436, -149.729155, 873.031604)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l03" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l03"
-enabled = true
-size = Vector2(38.0, 25.2)
-blend_width = 8.0
-opacity = 0.64
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.972135, 0, 0.2344216, 0, 1, 0, -0.2344216, 0, 0.972135, -451.834, 3.4905, 106.386)
-clip_polygon = PackedVector2Array(5.623532, 427.823544, 224.206341, -65.959359, 244.445490, -111.679998, 230.205064, -128.919785, 83.899019, -193.685062, -188.327879, -270.447786, -604.471801, -170.326675, -767.237276, -242.378046, -794.762519, -180.197977, -888.672171, 31.945789)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l04" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l04"
-enabled = true
-size = Vector2(35.6, 21.1)
-blend_width = 8.0
-opacity = 0.66
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.8450542, 0, 0.5346807, 0, 1, 0, -0.5346807, 0, 0.8450542, -449.659, 4.1489, 85.529)
-clip_polygon = PackedVector2Array(-145.288824, 423.355619, 220.517264, 26.132879, 254.388199, -10.647005, 246.450432, -31.551355, 128.754805, -139.938344, -104.309289, -300.191669, -530.541353, -339.258627, -661.477738, -459.839153, -707.542209, -409.818511, -864.703343, -239.159853)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l05" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l05"
-enabled = true
-size = Vector2(36.6, 29.6)
-blend_width = 8.0
-opacity = 0.62
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.2901085, 0, 0.9569938, 0, 1, 0, -0.9569938, 0, 0.2901085, -439.357, 2.9793, 58.882)
-clip_polygon = PackedVector2Array(-415.153398, 223.324983, 121.327813, 161.778980, 171.001999, 156.080276, 178.657355, 135.070860, 160.421502, -23.886535, 88.769410, -297.503015, -208.287545, -605.654220, -228.574931, -782.494323, -296.131824, -774.744085, -526.620048, -748.302099)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l06" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l06"
-enabled = true
-size = Vector2(38.3, 26.1)
-blend_width = 8.0
-opacity = 0.68
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(-0.3229696, 0, 0.9464093, 0, 1, 0, -0.9464093, 0, -0.3229696, -429.388, 1.1524, 55.617)
-clip_polygon = PackedVector2Array(-467.321456, -71.448135, 4.228288, 191.688406, 47.890301, 216.052901, 66.368501, 203.460995, 144.334884, 63.742552, 245.846443, -200.256318, 184.482536, -623.853380, 271.220137, -779.290148, 211.839799, -812.425860, 9.248057, -925.477115)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l07" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l07"
-enabled = true
-size = Vector2(40.8, 20.6)
-blend_width = 8.0
-opacity = 0.69
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(-0.3365551, 0, 0.9416638, 0, 1, 0, -0.9416638, 0, -0.3365551, -424.608, -0.0478, 61.791)
-clip_polygon = PackedVector2Array(-458.822665, -80.588571, 8.891692, 189.306372, 52.198577, 214.296645, 70.856063, 201.971946, 150.824935, 63.389914, 256.124953, -199.120859, 200.863005, -623.557094, 289.828375, -777.729604, 230.931012, -811.716375, 29.987066, -927.671239)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l08" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l08"
-enabled = true
-size = Vector2(40.1, 27.3)
-blend_width = 8.0
-opacity = 0.78
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(-0.9628746, 0, 0.2699491, 0, 1, 0, -0.2699491, 0, -0.9628746, -420.174, 2.2777, 93.956)
-clip_polygon = PackedVector2Array(-186.619258, -391.157969, -136.352146, 146.497327, -131.697784, 196.280225, -110.853753, 204.375060, 48.451520, 189.481101, 323.512258, 123.590355, 637.833280, -166.930377, 815.060396, -183.499906, 808.730464, -251.204647, 787.134223, -482.197293)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l09" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l09"
-enabled = true
-size = Vector2(32.6, 18.6)
-blend_width = 8.0
-opacity = 0.58
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(-0.9934772, 0, 0.1140307, 0, 1, 0, -0.1140307, 0, -0.9934772, -422.232, 2.6716, 112.256)
-clip_polygon = PackedVector2Array(-122.265038, -397.363999, -157.792227, 141.466047, -161.081781, 191.357718, -141.783024, 202.651874, 17.870323, 213.178449, 299.895324, 191.686617, 656.264370, -45.381101, 833.878719, -33.670287, 838.352513, -101.522960, 853.616046, -333.020313)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l10" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l10"
-enabled = true
-size = Vector2(34.1, 22.4)
-blend_width = 8.0
-opacity = 0.67
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(-0.3559857, 0, -0.9344914, 0, 1, 0, 0.9344914, 0, -0.3559857, -430.111, 0.9394, 135.580)
-clip_polygon = PackedVector2Array(330.228720, -215.723360, -200.670664, -117.002322, -249.828015, -107.861485, -256.003150, -86.370378, -226.752472, 70.933144, -136.237906, 338.901637, 181.538007, 625.639268, 214.079386, 800.639436, 280.933383, 788.207898, 509.023489, 745.794415)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l11" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l11"
-enabled = true
-size = Vector2(16.7, 10.5)
-blend_width = 8.0
-opacity = 0.33
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.215452, 0, -0.9765144, 0, 1, 0, 0.9765144, 0, 0.215452, -462.609, 4.8437, 100.171)
-clip_polygon = PackedVector2Array(436.024029, -23.133321, -61.920583, -232.061931, -108.026565, -251.407172, -124.985858, -236.833828, -186.890632, -89.294683, -258.339199, 184.375012, -150.135733, 598.490950, -219.004793, 762.628248, -156.300657, 788.937776, 57.631102, 878.699698)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l12" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l12"
-enabled = true
-size = Vector2(10.6, 12.0)
-blend_width = 8.0
-opacity = 0.36
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.288283, 0, 0.9575452, 0, 1, 0, -0.9575452, 0, 0.288283, -437.729, 2.9064, 35.723)
-clip_polygon = PackedVector2Array(-438.223947, 227.650436, 98.373653, 167.127591, 148.058616, 161.523624, 155.754022, 140.528846, 137.821328, -18.463036, 66.691142, -292.215656, -229.777642, -600.932776, -249.727765, -777.811244, -317.299315, -770.189849, -547.837543, -744.187442)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l13" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l13"
-enabled = true
-size = Vector2(16.8, 12.6)
-blend_width = 8.0
-opacity = 0.36
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.9846519, 0, -0.1745298, 0, 1, 0, 0.1745298, 0, 0.9846519, -464.821, 6.4437, 83.743)
-clip_polygon = PackedVector2Array(193.230998, 409.792363, 195.763461, -130.201699, 195.997948, -180.201149, 176.045065, -190.294834, 16.046825, -191.045193, -264.137686, -152.358761, -605.353281, 106.043866, -783.351323, 105.209091, -783.670226, 173.208344, -784.758247, 405.205792)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l14" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l14"
-enabled = true
-size = Vector2(18.0, 7.7)
-blend_width = 8.0
-opacity = 0.31
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.3486176, 0, 0.9372651, 0, 1, 0, -0.9372651, 0, 0.3486176, -429.145, 1.0909, 42.564)
-clip_polygon = PackedVector2Array(-419.433972, 244.638347, 112.226175, 150.100057, 161.453966, 141.346511, 167.798106, 119.904685, 139.786761, -37.624247, 51.384673, -306.297042, -264.123951, -595.527587, -295.286572, -770.778525, -362.236368, -758.873703, -590.653320, -718.257252)
-uv_anchor_continent = Vector2(1418, 7270)
-uv_anchor_continent_enabled = true
-source_layer_ordinal = 70
-
-[node name="s0_sand-04-l15" type="Marker3D" parent="Ground/Regions"]
-gizmo_extents = 0.7
-script = ExtResource("s0_6_wgjx8")
-region_id = "sand-04-l15"
-enabled = true
-size = Vector2(14.5, 10.7)
-blend_width = 8.0
-opacity = 0.37
-priority = 25
-surface = SubResource("s0_Resource_meiwo")
-transform = Transform3D(0.7696654, 0, 0.6384475, 0, 1, 0, -0.6384475, 0, 0.7696654, -458.667, 2.2351, 147.034)
-clip_polygon = PackedVector2Array(-152.081192, 359.689088, 261.559479, 12.555979, 299.859541, -19.585976, 294.662771, -41.334392, 191.808517, -163.894590, -18.826479, -352.661374, -436.552093, -445.963632, -550.977451, -582.311853, -603.065536, -538.598795, -780.777824, -389.460125)
+transform = Transform3D(-0.2656735, 0, -0.9640631, 0, 1, 0, 0.9640631, 0, -0.2656735, -438.708, 3.9913, 54.997)
+clip_polygon = PackedVector2Array(385.091078, -61.182670, -135.502956, -204.646369, -183.706108, -217.930044, -198.660208, -201.305520, -241.167971, -47.055435, -276.994035, 233.509153, -116.666643, 630.365697, -163.956529, 801.968916, -98.400243, 820.034715, 125.262379, 881.670971)
 uv_anchor_continent = Vector2(1418, 7270)
 uv_anchor_continent_enabled = true
 source_layer_ordinal = 70
@@ -1285,7 +1125,7 @@ properties = {
 "terrainFeather": 2
 }
 default_width = 8.0
-point_widths = PackedFloat32Array(8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8)
+point_widths = PackedFloat32Array(9.06, 9.03, 8.95, 8.86, 8.75, 8.64, 8.52, 8.4, 8.28, 8.16, 8.05, 7.95, 7.85, 7.76, 7.69, 7.62, 7.57, 7.54, 7.52, 7.52, 7.54, 7.57, 7.6, 7.64, 7.71, 7.8, 7.89, 8, 8.1, 8.21, 8.31, 8.41, 8.5, 8.58, 8.64, 8.68, 8.7, 8.7, 8.68, 8.63, 8.56, 8.53, 8.47, 8.35, 8.22, 8.07, 7.91, 7.74, 7.56, 7.38, 7.21, 7.05, 6.91, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.81, 7, 7.19, 7.39, 7.59, 7.8, 8.01, 8.21, 8.41, 8.61, 8.79, 8.97, 9.14, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.13, 8.96, 8.79, 8.61, 8.43, 8.24, 8.05, 7.85, 7.65, 7.44, 7.23, 7.02, 6.81, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 7, 7.21, 7.41, 7.6, 7.77, 7.94, 8.12, 8.29, 8.46, 8.62, 8.76, 8.89, 9, 9.1, 9.18, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.12, 9.04, 8.94, 8.83, 8.71, 8.59, 8.46, 8.32, 8.18, 8.04, 7.9, 7.77, 7.65, 7.54, 7.45, 7.37, 7.31, 7.27, 7.25, 7.25, 7.27, 7.32, 7.39, 7.48, 7.59, 7.72, 7.87, 8.02, 8.18, 8.25, 8.35, 8.51, 8.58, 8.67, 8.81, 8.87, 8.94, 9.05, 9.09, 9.14, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.18, 9.14, 9.11, 9.02, 8.93, 8.87, 8.76, 8.62, 8.47, 8.31, 8.14, 7.98, 7.81, 7.64, 7.48, 7.31, 7.08, 6.9, 6.8, 6.8)
 surface = SubResource("s0_Resource_03jxh")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -641, 0, 749)
 
@@ -1302,7 +1142,7 @@ properties = {
 "terrainFeather": 2
 }
 default_width = 6.0
-point_widths = PackedFloat32Array(6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6)
+point_widths = PackedFloat32Array(6.66, 6.68, 6.68, 6.67, 6.65, 6.62, 6.58, 6.53, 6.48, 6.43, 6.38, 6.32, 6.27, 6.25, 6.23, 6.18, 6.14, 6.1, 6.06, 6.02, 5.99, 5.95, 5.91, 5.87, 5.82, 5.77, 5.72, 5.66, 5.6, 5.54, 5.47, 5.41, 5.34, 5.28, 5.22, 5.18, 5.14, 5.11, 5.1, 5.11, 5.13, 5.17, 5.22, 5.29, 5.36, 5.44, 5.53, 5.63, 5.74, 5.86, 5.98, 6.09, 6.21, 6.31, 6.41, 6.5, 6.57, 6.64, 6.69, 6.73, 6.75, 6.76, 6.74, 6.71, 6.66, 6.6, 6.53, 6.46, 6.38, 6.31, 6.23, 6.17, 6.1, 6.05, 6.01, 5.97, 5.94, 5.93, 5.94, 5.96, 6, 6.06, 6.12, 6.19, 6.26, 6.35, 6.44, 6.53, 6.61, 6.67, 6.71, 6.74, 6.75, 6.75, 6.73, 6.69, 6.63, 6.56, 6.46, 6.34, 6.22, 6.08, 5.93, 5.77, 5.59, 5.41, 5.23, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.17, 5.37, 5.59, 5.8, 6.01, 6.21, 6.4, 6.57, 6.73, 6.86, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.86, 6.73, 6.57, 6.39, 6.21, 6.04, 5.88, 5.75, 5.65, 5.57, 5.52, 5.49, 5.48, 5.5, 5.53, 5.59, 5.68, 5.78, 5.91, 6.06, 6.22, 6.38, 6.53, 6.67, 6.81, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.76, 6.51, 6.24, 5.95, 5.64, 5.34, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.21, 5.5, 5.8, 6.08, 6.35, 6.59, 6.79, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.85, 6.69, 6.52, 6.36, 6.21, 6.06, 5.92, 5.78, 5.67, 5.57, 5.49, 5.44, 5.4, 5.39, 5.4, 5.44, 5.5, 5.6, 5.73, 5.88, 6.04, 6.21, 6.35, 6.45, 6.65, 6.83, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.69, 6.44, 6.17, 5.89, 5.61)
 surface = SubResource("s0_Resource_m8qwg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -641, 0, 749)
 

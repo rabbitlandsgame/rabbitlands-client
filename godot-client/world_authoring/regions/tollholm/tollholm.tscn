@@ -975,7 +975,7 @@ shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
 shader_parameter/texture_scale = 1.0
 shader_parameter/roughness_multiplier = 1.0
 shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.16
+shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="s2_Resource_ghj86"]
@@ -1011,7 +1011,7 @@ shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
 shader_parameter/texture_scale = 1.0
 shader_parameter/roughness_multiplier = 1.0
 shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.16
+shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="s2_Resource_x5dao"]
@@ -1047,7 +1047,7 @@ shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
 shader_parameter/texture_scale = 1.0
 shader_parameter/roughness_multiplier = 1.0
 shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.16
+shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="s2_Resource_3hxk7"]
@@ -1172,8 +1172,8 @@ gizmo_extents = 0.7
 script = ExtResource("s2_8_ce08r")
 region_id = "tollholm-square"
 enabled = true
-size = Vector2(18, 18)
-blend_width = 1.0
+size = Vector2(18.89, 18.89)
+blend_width = 3.0
 opacity = 0.95
 priority = 46
 surface = SubResource("s2_Resource_rdhml")
@@ -1755,7 +1755,7 @@ properties = {
 "terrainFeather": 2.0
 }
 default_width = 8.0
-point_widths = PackedFloat32Array(8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8)
+point_widths = PackedFloat32Array(7.97, 7.95, 7.89, 7.81, 7.71, 7.59, 7.46, 7.34, 7.25, 7.2, 7.2, 7.26, 7.38, 7.54, 7.74, 7.96, 8.17, 8.35, 8.49, 8.57, 8.59, 8.56, 8.48, 8.38, 8.28, 8.19, 8.13, 8.12, 8.16, 8.24, 8.35, 8.47, 8.57, 8.62, 8.6, 8.5, 8.31, 8.03, 7.69, 7.31, 6.93, 6.8, 6.8, 6.8, 6.8, 6.8, 6.8, 7.2, 7.76, 8.37, 8.97, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 9.2, 8.77, 8.15, 7.56, 7.03, 6.8, 6.8, 6.8, 6.8, 6.8, 7.08, 7.52, 7.97, 8.37, 8.67, 8.84, 8.87, 8.75, 8.5, 8.16, 7.79, 7.42, 7.12, 6.93, 6.88, 6.98, 8.07, 8.34, 8.6, 8.87, 9.13, 9.4, 9.6)
 surface = SubResource("s2_Resource_ghj86")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130, 0, -609)
 
@@ -1770,7 +1770,7 @@ properties = {
 "terrainFeather": 2.0
 }
 default_width = 6.0
-point_widths = PackedFloat32Array(6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6)
+point_widths = PackedFloat32Array(6.46, 6.67, 6.9, 6.9, 6.9, 6.9, 6.78, 6.51, 6.18, 5.83, 5.5, 5.23, 5.1, 5.1, 5.1, 5.1, 5.28, 5.55, 5.86, 6.17, 6.46, 6.69, 6.85, 6.9, 6.9, 6.8, 6.64, 6.43, 6.19, 5.95, 5.74, 5.56, 5.43, 5.35, 5.33, 5.36, 5.43, 5.54, 5.66, 5.8, 5.94, 6.07, 6.2, 6.31, 6.4, 6.48, 6.54, 6.57, 6.57, 6.54, 6.47, 6.36, 6.21, 6.04, 5.84, 5.63, 5.44, 5.27, 5.15, 5.1, 5.11, 5.12)
 surface = SubResource("s2_Resource_x5dao")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130, 0, -609)
 
@@ -1785,7 +1785,7 @@ properties = {
 "terrainFeather": 2.0
 }
 default_width = 4.0
-point_widths = PackedFloat32Array(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4)
+point_widths = PackedFloat32Array(4.8, 4.7, 4.57, 4.44, 4.3, 4.17, 4.04, 4.04, 4.23, 4.38, 4.45, 4.43, 4.34, 4.19, 4.02, 3.88, 3.8, 3.8, 3.88, 4.02, 4.17, 4.31, 4.38, 4.36, 4.24, 4.04, 3.79, 3.54, 3.4, 3.4, 3.4, 3.4, 3.47, 3.72, 3.97, 4.19, 4.35, 4.41, 4.4, 4.33, 4.24, 4.17, 4.15, 4.19, 4.29, 4.44, 4.59, 4.6, 4.6, 4.6, 4.48, 4.21, 3.88, 3.54, 3.4, 3.4, 3.4, 3.4, 3.4, 3.4, 3.55, 3.76, 3.93, 4.03, 4.06, 4.05, 4.02, 4.03, 4.08, 4.21, 4.4, 4.6, 4.6, 4.6, 4.6, 4.6, 4.6, 4.6, 4.3, 3.93, 3.58, 3.4, 3.4, 3.4, 3.4, 3.4, 3.41, 3.55, 3.65, 3.69, 3.68, 3.64, 3.6, 3.6, 3.67, 3.83, 4.07, 4.35, 4.6, 4.6, 4.6, 4.6, 4.6, 4.6, 4.6, 4.29, 3.99, 3.74, 3.58, 3.54)
 surface = SubResource("s2_Resource_3hxk7")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130, 0, -609)
 
