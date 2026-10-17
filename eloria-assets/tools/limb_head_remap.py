@@ -657,6 +657,12 @@ def build(source, out, rig, kind, label, span=None):
     import design_fit
     body_file = io.RACES / f"{rig.source_slug}.glb"
     fit = None if is_head else design_fit.override(source, rig, body_file if body_file.exists() else None)
+    import headwear_fit
+    # A piece's own reshaping (headwear_fit.py, opt in per piece): a smaller
+    # or lower seat on every body, then on the Human bodies the head pushed
+    # clear and a hood's cowl drawn over its kit collar (rigid on Head, or
+    # skinned to the neck where the piece asks for it).
+    head_fit = headwear_fit.entry(source) if is_head else None
     used = np.arange(len(p))
     if region == "boots" and not full:
         # Meshy sometimes joins the two shoes with triangles. Separate their
@@ -668,6 +674,8 @@ def build(source, out, rig, kind, label, span=None):
         f = inverse.reshape(-1, 3)
     if is_head:
         p, report = head_frame(p, f, rig, label)
+        if head_fit is not None:
+            p = headwear_fit.frame(p, report, head_fit, rig, body_file)
     elif region == "legs" or full:
         p, report = leg_frame(p, f, rig, full)
     else:
@@ -720,6 +728,16 @@ def build(source, out, rig, kind, label, span=None):
     io._make_winding_coherent(surface)
     io._unwind_inverted_shells(surface)
     f = surface.indices.reshape(-1, 3)
+    cowl_skin = None
+    if head_fit is not None and rig.source_slug in headwear_fit.HUMAN:
+        # Vertices move, faces stay: a race fit is carried from this one
+        # vertex for vertex (refit_race_headwear.race_pass).
+        if head_fit.get("clear"):
+            p, report["headwearClear"] = headwear_fit.clear(p, f, head_fit, body_file)
+        if head_fit.get("cowl"):
+            p, joints, weights, report["headwearCowl"] = headwear_fit.cowl(p, f, head_fit, rig, body_file)
+            cowl_skin = None if joints is None else (joints, weights)
+        surface.positions = p
     n = normals(p, f)
     glb = ea.EquipmentGLB(generator="Eloria anatomical equipment retarget")
     if not is_head:
@@ -736,7 +754,16 @@ def build(source, out, rig, kind, label, span=None):
     glb.doc["materials"][material]["pbrMetallicRoughness"]["roughnessFactor"] = (
         original_material.get("pbrMetallicRoughness", {}).get("roughnessFactor", 0.8)
     )
-    if is_head:
+    if is_head and cowl_skin is not None:
+        # A cowl is skinned: rest positions in character space, the rig's
+        # skeleton, Head over the crown and the neck's own blend at the hem.
+        glb.skeleton(rig)
+        primitive = glb.primitive(
+            p, n, surface.uvs, f.ravel(), material, joints=cowl_skin[0], weights=cowl_skin[1]
+        )
+        glb.mesh(label, [primitive], skin=0)
+        glb.doc["meshes"][-1]["extras"] = {"coversHair": not report["openBand"]}
+    elif is_head:
         primitive = glb.primitive(
             p - io.socket_origin(rig, 3), n, surface.uvs, f.ravel(), material
         )
@@ -852,7 +879,7 @@ def build(source, out, rig, kind, label, span=None):
         "out": out.name,
         "kind": kind,
         "region": region,
-        "attach": "socket" if is_head else "skinned",
+        "attach": "socket" if is_head and cowl_skin is None else "skinned",
         "vertices": len(p),
         "triangles": len(f),
         "bytes": out.stat().st_size,

@@ -1,0 +1,61 @@
+{
+ "note": "Per-piece reshaping of fitted headwear, read by eloria-assets/tools/headwear_fit.py inside limb_head_remap.build (keyed by the Meshy source). From the owner's review of the class kits and the Phoenix set (2026-10-17, notes 4, 6, 9-12 and 17). frame: scale (one number, or one per sex) about the cranium centre (about: centre; or brow, socket) and drop, on every body. clear: on the Human bodies, push the head that then comes through out to this many metres. cowl: on the Human bodies, draw the hood's lower part over the collar of the torso it is designed with (over: registry key; overSource: that torso's Meshy source, whose design-fit npz holds the idle skinning) and skin it to the neck; pivot is metres along the idle neck axis from the Head joint, overlap how far under the collar's visible top the hem ends, clear the clearance over skin and art, blend the fade from Head to the neck's own weights. Race variants carry the Human fit (refit_race_headwear.py).",
+ "pieces": {
+  "Eight_grounded_militia_helmet_designs__r01_c02.glb": {
+   "key": "3:134",
+   "why": "note 6: the Leather Helm reads large; head_frame left a 30 mm (male) / 24 mm (female) median gap over the cranium",
+   "scale": {
+    "male": 0.9,
+    "female": 0.94
+   },
+   "about": "centre",
+   "clear": 0.006
+  },
+  "Eight_Legendary_Helms_of_Eloria__r01_c01.glb": {
+   "key": "3:125",
+   "why": "note 17: placement good but large; head_frame left an 82 mm (male) / 77 mm (female) median gap over the cranium",
+   "scale": {
+    "male": 0.9,
+    "female": 0.92
+   },
+   "about": "centre",
+   "clear": 0.006
+  },
+  "Eight_leather_adventurer_headwear_designs__r01_c03.glb": {
+   "key": "3:159",
+   "why": "notes 9 and 10: the Buckled Hood's back should come down to the collar and its front over it",
+   "cowl": {
+    "over": "5:225",
+    "overSource": "Eight_leather_ranger_torso_designs__r01_c02.glb",
+    "pivot": -0.01,
+    "overlap": 0.015,
+    "clear": 0.006,
+    "blend": 0.02
+   }
+  },
+  "Arcane_ethereal_headgear_design_sheet__r02_c03.glb": {
+   "key": "3:115",
+   "why": "notes 4 and 11: the Acolyte Hood cuts into the chin; back and front should reach over the collar",
+   "cowl": {
+    "over": "5:222",
+    "overSource": "Eloria_Arcane_Armor_Design_Sheet__r02_c03.glb",
+    "pivot": -0.01,
+    "overlap": 0.015,
+    "clear": 0.006,
+    "blend": 0.02
+   }
+  },
+  "Eight_amberwood_forest_headgear_designs__r02_c02.glb": {
+   "key": "3:122",
+   "why": "note 12: the Antler Hood's front should come forward over the collar (its back is fine)",
+   "cowl": {
+    "over": "5:189",
+    "overSource": "Amberwood_Woodland_Armor_Concept_Sheet__r02_c02.glb",
+    "pivot": -0.01,
+    "overlap": 0.015,
+    "clear": 0.006,
+    "blend": 0.02
+   }
+  }
+ }
+}

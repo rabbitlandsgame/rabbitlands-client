@@ -84,7 +84,7 @@ def tool_hashes():
     names = ['conform_equipment.py','equipment_authoring.py','torso_remap.py',
              'limb_head_remap.py','equipment_seams.py','equipment_seam_texture.py',
              'equipment_skinning.py','headwear_envelope.py','refit_canonical_equipment.py',
-             'design_fit.py']
+             'design_fit.py','headwear_fit.py']
     return {n:digest(Path(__file__).with_name(n)) for n in names}
 
 
@@ -122,6 +122,11 @@ def build_one(piece, race, tag, body_hash, code_hashes, resume, head_reference=N
     design = design_fit.path_for(source, rig)
     if design.exists():
         expected['design_fit_sha256'] = digest(design)
+    if piece.part == 3:
+        import headwear_fit
+        reshaped = headwear_fit.inputs_digest(source, rig)
+        if reshaped:
+            expected['headwear_fit_sha256'] = reshaped
     reference = Path(head_reference)/f'{race}.glb' if piece.part == 3 and head_reference else None
     if reference:
         expected['head_reference_sha256'] = digest(reference)
@@ -154,8 +159,12 @@ def build_one(piece, race, tag, body_hash, code_hashes, resume, head_reference=N
                   asset_sha256=digest(dest))
     variant={'scene':dest.as_posix(),'authoredFor':race,'fitProfile':'canonical'}
     if piece.part==3:
+        # A skinned cowl (headwear_fit.py) keeps the socket it would have had:
+        # the race carry and the measurements read it.
         variant['socket']={'bone':'Head','offset':(ce.socket_origin(rig,3)-rig.origin('Head')).tolist(),
                            'rotationDegrees':[0,0,0]}
+        if report.get('attach') == 'skinned':
+            variant['attach']='skinned'
     report['variant']=variant
     write_json(record,report)
     return report

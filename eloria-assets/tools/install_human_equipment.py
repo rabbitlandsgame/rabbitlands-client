@@ -140,7 +140,10 @@ def main() -> int:
             shutil.copyfile(stage / target, ROOT / target)
             entry = {'scene': 'res://' + target.relative_to('godot-client').as_posix(),
                      'authoredFor': folder, 'fitProfile': 'canonical'}
-            if 'socket' in variant:
+            if variant.get('attach') == 'skinned':
+                # a cowl (headwear_fit.py): skinned, no socket
+                entry['attach'] = 'skinned'
+            elif 'socket' in variant:
                 entry['socket'] = variant['socket']
             apply_variant(model, group, entry)
             installed += 1

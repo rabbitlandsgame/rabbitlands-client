@@ -470,15 +470,165 @@ Tests:
 
 **Not yet done.**
 
-- **Headwear (notes 4, 6, 9–12 and 17).** The Vanguard and Phoenix helms
-  read large, the Acolyte Hood cuts into the chin, and the three hoods end
-  above the torso collar. Headwear is sized by `limb_head_remap.head_frame`
-  and carried to the races by `refit_race_headwear.py`. It is socketed
-  rigidly to the Head bone, so a cowl lengthened over the collar would cut
-  through it whenever the head turns, unless the cowl follows the neck.
+- **Headwear (notes 4, 6, 9–12 and 17)** is fixed in the next section.
 - **Other torsos.** The open throat and the female conform reach only the
   five refitted torsos. Every other torso keeps the throat cover until it is
   refitted, and keeps its flat front until it has a set spec.
+
+### Headwear review fixes (2026-10-17)
+
+The seven headwear notes are fixed on the five pieces they name: the Leather
+Helm (3:134), the Phoenix Helm (3:125), the Buckled Hood (3:159), the Acolyte
+Hood (3:115) and the Antler Hood (3:122). `limb_head_remap.head_frame` seats
+every helm and hood with one uniform scale and a translation. A new opt-in
+step, `headwear_fit.py`, reshapes these five pieces after it. Its rows live in
+`eloria-assets/source/equipment-design-fit/headwear.json`, keyed by Meshy
+source like the set specs. The step runs inside the fitter: the frame on
+every body, the rest on the Human bodies. The race variants are therefore
+carried from the reshaped Human fit by `refit_race_headwear.py`, as before.
+`race_pass` now takes the Human fit itself, vertex for vertex, as its carry
+reference. Before, it rebuilt the reference from the race fit by `frame_map`,
+which gives the same thing only while both fits are similarity images of the
+source.
+
+**Helms read large (notes 6 and 17).** head_frame grows a helm until every ray
+from the cranium clears the skin by 9 mm, cheek guards and nape included. That
+left the Leather Helm 30 mm (male) / 24 mm (female) off the cranium at the
+median and 40 / 31 mm at the crown. The Phoenix Helm's sculpted shell stood
+82 / 77 mm off. Both are now scaled about the cranium centre that
+race_headwear_clearance fits behind the face. The Leather Helm takes 0.90
+(male) and 0.94 (female); the Phoenix Helm 0.90 and 0.92. The female fits
+were already tighter. Whatever of the head then comes within 6 mm (cranium,
+face and ears above the jaw) is pushed out radially. This is `radial_push`,
+the broad push the race passes give a helm: at most 8.5 mm on the Leather
+Helm, 16–27 mm under the Phoenix Helm's cheek plates. The push moves vertices
+only and never splits a face, so the race carry still matches vertex for
+vertex. The Leather Helm's median gap is now 17.6 / 16.2 mm (28 / 23 mm at the
+crown), the Phoenix Helm's 68 / 64 mm. Scaling about the brow was tried first.
+It pulled the Leather Helm's back into the skull and the Phoenix Helm's cheek
+plates into the cheeks, and the push then had to move them 16–30 mm back out.
+
+**Hoods over the collar (notes 9–12) and the Acolyte chin (note 4).** The
+torso fix above closed note 9's gap at the back: the collars now wrap the
+nape. Two problems remained. On all three kits the torso's front collar stood
+outside the hood's lower front: the Scout Vest's shirt collar points, the
+Acolyte Tunic's stand collar and the Furtrim Coat's high collar. And the
+Acolyte Hood's mouth wrap crossed the chin. headwear_fit's `cowl` now reshapes
+each hood against the torso it is designed with (`over` in the spec), in the
+idle pose. The design fit is solved there, and a torso's rest shell is an
+inverse-skinning image that stands up to 5 cm higher behind the neck than
+anything a player sees. Body and torso are skinned to idle with the matrices
+in the torso's design-fit npz, and the hood rides Head. Round the idle neck
+axis, on a 5° × 2.5 mm grid:
+
+- The hem follows the upper envelope of the collar's visible top, taken over
+  40° either side, so an open V-neck does not pull it down. Below a pivot 1 cm
+  under the Head joint, the hood is stretched down, linearly with depth, to
+  end 15 mm under that line (by at most 5 cm).
+- The shell is pushed out to 6 mm over the skin and over the art seen from
+  outside, by at most 6 cm. Every layer at a cell moves by the same amount.
+  Art more than 7 cm outside the shell is a hem tucked under by design, and is
+  left. The push flares up into the hood over 4 cm.
+- The move is smoothed over space (2 cm), so a wrap folds as one cloth and
+  its trims and beads stay on it. Smoothing along mesh edges had left the
+  Acolyte Hood's gold trims, which are separate pieces, standing off the
+  cloth like spikes.
+- Head's idle matrix carries the shape back to rest.
+
+The hoods' lower parts move by up to 6–10 cm, most on the Antler Hood. The
+Acolyte Hood's wrap now passes in front of the chin. Through the clips below,
+it crosses at most 27 (male) and 20 (female) skin triangles, against 88 and 75
+installed: those were the chin cut of note 4.
+
+**Rigid, not skinned.** The brief's question was whether a cowl lying on the
+collar lets the collar through when the head turns. The head moves a long way
+against the upper torso in the game's clips. Measured from idle, Head turns
+against spine_03 by 16° in Walk, 36° in Jog and 72° in Bow_Pull_Back. A ring
+9 cm round the neck at the collar, rigid with Head, moves 7–15 cm against
+spine_03. So `headwear_fit` can also skin the cowl (`skinned: true`). Head
+weights the crown. Below the pivot the shell takes the skin's own neck and
+yoke weights, the collar art's weights where it lies on the collar, and Head
+again over the chin. The fitter and `refit_race_headwear` then write a skinned
+piece. The runtime's skinned equipment path and its part-3 hair hiding need
+no change. Both kinds were measured through eight clips in Blender: posekit,
+torso skinned, inward rays square to the posed neck every 10° at 30 heights.
+"Collar over hood" counts the rays whose first surface is torso art with the
+hood beneath it. Stretch is the share of hood triangles past 1.8× their idle
+edge length (the sleeves' tearing measure). Male, most rays at any frame:
+
+| Hood | Kind | Idle | Jog | Bow_Pull_Back | Stretch, Bow / Sword |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Buckled | installed | 99 | 225 | 363 | 0 / 0 |
+| Buckled | rigid cowl (shipped) | 55 | 218 | 346 | 0 / 0 |
+| Buckled | skinned cowl | 55 | 184 | 332 | 5.9% / 6.8% |
+| Acolyte | installed | 88 | 253 | 346 | 0 / 0 |
+| Acolyte | rigid cowl (shipped) | 53 | 231 | 312 | 0 / 0 |
+| Acolyte | skinned cowl | 53 | 207 | 298 | 10.8% / 12.9% |
+| Antler | installed | 104 | 340 | 463 | 0 / 0 |
+| Antler | rigid cowl (shipped) | 115 | 302 | 447 | 0 / 0 |
+| Antler | skinned cowl | 115 | 262 | 397 | 10.9% / 11.4% |
+
+In motion a skinned cowl lets the collar through 4–16% less than the rigid
+one. But in the bow pull and sword swings it stretches 6–13% of its triangles
+past 1.8×, and the owner read the bow-pull sleeves as torn at 0.6–5%.
+Narrowing the weight blend made it worse (up to 18%). The shipped cowls are
+therefore rigid on Head. Across all eight clips (Idle_Subtle, Walk, Jog,
+Fighting_Idle, Bow_Pull_Back, Sword_Regular_A, Spell_Simple_Shoot, Hit_Head)
+and both bodies, they let the collar through no more often than the hoods they
+replace, with four exceptions, all small. The Antler Hood rises from 104 to
+115 rays in male idle and from 310 to 317 in female Jog, then +3 and +1
+elsewhere. Their skin contact is lower in every clip, and nothing stretches.
+In the engine, the motion frames match HEAD's.
+
+**Race gates.** `refit_race_headwear.py measure` covers the 14 race bodies in
+rest pose. The Leather Helm's body crossings fall from 251 to 30 and its
+collar clip from 67 to 33 cm². The Phoenix Helm's crossings fall from 2,790 to
+2,015 and its collar clip from 693 to 431 cm²; the neck and skin enclosed by
+its smaller shell rise from 3.3 to 6.0 and 0.25 to 2.1 cm². The Buckled Hood
+is about unchanged (3,118 to 3,059). The Acolyte and Antler hoods' body
+crossings rise from 66 to 132 and 35 to 181. Their lower fronts are shaped in
+idle and cross the rest-pose shoulders on some male races, up to 31 edges
+each. In idle on those bodies (Orun, Mycelari and Glasswarden male; Ssarathi,
+Votary and Greyhaven female; Stoneborn male) nothing shows. Collar crossings
+fall for the Acolyte Hood (56 to 26) and hold for the Antler Hood (198 to 208).
+
+**Install.** The ten Human variants were installed with
+`install_human_equipment.py`, then `share_human_equipment_textures.py`; the
+registry and catalogue were converted back to LF. The 70 race variants were
+installed with `refit_race_headwear.py install`, and its audit passes all 80
+assets. Every image matched a shipped texture, so there are no new textures.
+The registry and catalogue entries are byte-identical: scenes and sockets are
+unchanged. Godot's import was refreshed, and the seven creature `.import`
+files it rewrites were reverted.
+
+Tests:
+
+- The equipment, remapper and held-prop suites fail on the same 9 IDs as
+  clean develop at `224bb9b9`. `test_race_headwear_clearance.py` passes (4
+  tests, 1,968 subtests).
+- `creation_class_equipment_fit.gd` (54,666 checks), `torso_body_cover.gd`,
+  `character_appearance_fit.gd` (785 checks, helmets cover and restore hair),
+  `equipment_fit_profiles.gd`, and the registry snapshot, imported-actor LOD
+  and torso LOD tests pass.
+- `armour_body_cover.gd` reports the same 60 "restores sculpted hair
+  visibility" failures under helm 3:120 as before, line for line.
+
+Evidence: [the seven notes](design-fit/review-fixes-headwear.jpg), each the
+owner's view beside the installed fix, reshot with `--replay`; [hood fronts
+and the Leather Helm](design-fit/review-fixes-hood-fronts.jpg), three-quarter
+front, both bodies, before (the collar fix) and after.
+
+**Not yet done.**
+
+- Only the five noted pieces have a headwear.json row. Each cowl is shaped
+  over its own kit's collar. Worn over another torso with a tall collar it can
+  cross that collar, as any hood could before. Other helms keep head_frame's
+  fit, which clears every ray by 9 mm and so reads large wherever a design has
+  cheek or nape guards.
+- When the head turns hard against the chest (Bow_Pull_Back, the sword
+  swings), the tall kit collars still show beside or through the hoods, as
+  they did before. A skinned cowl reduces this but tears; cloth simulation or
+  a collar that follows the head more would be needed.
 
 ## Two body shapes, preserved race identity
 
@@ -649,6 +799,16 @@ install` refuses fits whose recorded fitter, race-pass, body or policy hashes no
 longer match the checkout, writes `variants["canonical_<race>"]` only and never
 touches `fitGroups`. Race bodies come from `rebase_race_body.py`; race hair from
 `fit_character_appearance.py --race`.
+
+Headwear with a row in `eloria-assets/source/equipment-design-fit/headwear.json`
+is reshaped inside the fitter (`headwear_fit.py`; see "Headwear review fixes").
+Its cowls read the installed kit torso and its design-fit npz, so refit them
+after any change to that torso. `refit_race_headwear.py fit --races all` builds
+the Human and race fits together. Install the two Human variants from a copy of
+`<tag>-variants.json` reduced to the `canonical_human_*` groups
+(`install_human_equipment.py`, then `share_human_equipment_textures.py`), and
+then the race variants (`refit_race_headwear.py install`). Convert the registry
+and catalogue back to LF after `install_human_equipment.py`.
 
 **Refit before reinstalling.** `tool_hashes()` hashes
 `refit_canonical_equipment.py` itself, and its retirement edit (2026-10-08)

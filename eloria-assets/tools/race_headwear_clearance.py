@@ -1637,8 +1637,11 @@ def edge_crossings(engine, a, b):
 
 
 def piece_triangles(path, socket_world):
-    """The piece's triangles in character space, hung at ``socket_world``."""
+    """The piece's triangles in character space, hung at ``socket_world``
+    (a skinned piece, a cowl from headwear_fit.py, is already there at rest)."""
     d, b = ea.read_glb(Path(path))
+    if d.get('skins'):
+        socket_world = np.zeros(3)
     world = ea.global_matrices(d)
     tris = []
     for i, node in enumerate(d['nodes']):

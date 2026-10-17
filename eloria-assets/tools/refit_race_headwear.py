@@ -135,16 +135,36 @@ def _read_piece(path: Path):
     import equipment_authoring as ea
     d, b = ea.read_glb(path)
     if len(d['meshes']) != 1 or len(d['meshes'][0]['primitives']) != 1:
-        raise ValueError(f'{path}: expected one socket mesh with one primitive')
+        raise ValueError(f'{path}: expected one headwear mesh with one primitive')
     p = d['meshes'][0]['primitives'][0]
     get = lambda i: ea.accessor_array(d, b, i)
     return (d, b, get(p['attributes']['POSITION']).astype(float), get(p['attributes']['TEXCOORD_0']).astype(float),
             get(p['indices']).astype(np.int64).reshape(-1, 3))
 
 
-def _write_piece(raw_doc, raw_bin, out: Path, positions, uvs, faces):
+def _skin_rows(d, b, bones):
+    """A skinned piece's weights as dense rows over ``bones`` (a cowl from
+    headwear_fit.py), or None for a socketed piece."""
+    import equipment_authoring as ea
+    if not d.get('skins'):
+        return None
+    names = [d['nodes'][j]['name'] for j in d['skins'][0]['joints']]
+    a = d['meshes'][0]['primitives'][0]['attributes']
+    joints = ea.accessor_array(d, b, a['JOINTS_0']).astype(int)
+    raw = ea.accessor_array(d, b, a['WEIGHTS_0'])
+    weights = raw.astype(float) / (255. if np.issubdtype(raw.dtype, np.integer) else 1.)
+    rows = np.zeros((len(joints), len(bones)))
+    for k, bone in enumerate(bones):
+        if bone in names:
+            rows[:, k] = np.where(joints == names.index(bone), weights, 0.).sum(1)
+    return rows / np.maximum(rows.sum(1, keepdims=True), 1e-9)
+
+
+def _write_piece(raw_doc, raw_bin, out: Path, positions, uvs, faces, skin=None):
     """Rewrite the raw fitter GLB with new geometry; images, material, node and
-    mesh extras are carried over unchanged."""
+    mesh extras are carried over unchanged.  ``skin`` (rig, joints, weights)
+    writes a skinned piece (character-space rest positions) instead of a
+    socketed one."""
     import copy
     import equipment_authoring as ea
     import limb_head_remap as lhr
@@ -159,8 +179,20 @@ def _write_piece(raw_doc, raw_bin, out: Path, positions, uvs, faces):
             views[image['bufferView']] = glb.view(data)
             image['bufferView'] = views[image['bufferView']]
     normals = lhr.normals(positions, faces)
-    primitive = glb.primitive(positions, normals, uvs, faces.ravel(),
-                              doc['meshes'][0]['primitives'][0]['material'])
+    material = doc['meshes'][0]['primitives'][0]['material']
+    if skin is not None:
+        rig, joints, weights = skin
+        for key in ('images', 'samplers', 'textures', 'materials', 'asset'):
+            if key in doc:
+                glb.doc[key] = doc[key]
+        glb.skeleton(rig)
+        primitive = glb.primitive(positions, normals, uvs, faces.ravel(), material, joints=joints, weights=weights)
+        glb.mesh(doc['meshes'][0].get('name', 'Headwear'), [primitive], skin=0)
+        if 'extras' in doc['meshes'][0]:
+            glb.doc['meshes'][-1]['extras'] = doc['meshes'][0]['extras']
+        glb.write(out)
+        return
+    primitive = glb.primitive(positions, normals, uvs, faces.ravel(), material)
     for key in ('images', 'samplers', 'textures', 'materials', 'nodes', 'scenes', 'scene', 'asset'):
         if key in doc:
             glb.doc[key] = doc[key]
@@ -181,6 +213,7 @@ def race_pass(body: Path, human: Path, key: str, raw: dict, human_raw: dict, out
     ``raw`` / ``human_raw`` are build_one's records of the same piece on the
     race body and on the Human body of the same sex.  Returns (socket offset
     from the race Head, pass reports, transfer record)."""
+    import headwear_fit
     import race_headwear_clearance as rc
     rule = rc.policy(key)
     g = rc.head_geometry(str(body))
@@ -190,10 +223,21 @@ def race_pass(body: Path, human: Path, key: str, raw: dict, human_raw: dict, out
     world = p + socket
     info = None
     kind = rule.get('kind')
+    # The reference is the Human fit itself, vertex for vertex.  The race raw
+    # fit and the Human one are similarity images of one source (frame_map)
+    # unless headwear_fit.py reshaped the Human (a cleared helm, a cowl),
+    # which moves vertices but never adds any.  A cowl's weights ride along.
+    hd, hbin, hp, _, hf = _read_piece(Path(human_raw['variant']['scene']))
+    cowl = _skin_rows(hd, hbin, headwear_fit.COWL_BONES)
+    human_world = hp if cowl is not None else hp + rc.head_geometry(str(human)).head[:3, 3] + np.asarray(
+        human_raw['variant']['socket']['offset'], dtype=float)
+    same = len(hp) == len(p) and np.array_equal(hf, f)
+    if cowl is not None and not (transfer and same):
+        raise ValueError(f'{key}: a skinned Human cowl is carried vertex for vertex (transfer, same faces)')
     if transfer:
         info = rc.head_transfer(str(body), str(human))
         to_human = rc.frame_map(_frame(raw), _frame(human_raw))
-        reference = to_human(world)
+        reference = human_world if same else to_human(world)
         world = rc.transfer_points(reference, info, drape=kind != 'helm')
         # The drape fade bends the carry over a few centimetres under the
         # chin: a bead or a buckle there would be turned inside out, so each
@@ -203,7 +247,7 @@ def race_pass(body: Path, human: Path, key: str, raw: dict, human_raw: dict, out
         # Every vertex carries its position in the Human fit through the
         # passes (as extra UV columns, interpolated wherever a pass splits or
         # cuts), so the collar pass can hold each point to the Human's clearance.
-        uv = np.hstack([uv, reference])
+        uv = np.hstack([uv, reference] + ([cowl] if cowl is not None else []))
         human_head = rc.head_geometry(str(human)).head[:3, 3]
         socket = rc.transfer_points(human_head + np.asarray(human_raw['variant']['socket']['offset'], dtype=float),
                                     info)
@@ -295,7 +339,20 @@ def race_pass(body: Path, human: Path, key: str, raw: dict, human_raw: dict, out
         # over by some pass and would read as a hole.
         reports.append(dict({'name': 'turned_over', 'flippedVsHuman': int(rc._flipped(uv[:, 2:5], world, f).sum()),
                              'triangles': int(len(f))}, **rc.seam_gaps(uv[:, 2:5], world)))
-    _write_piece(d, b, out, world - socket, uv[:, :2], f)
+    if cowl is not None:
+        # uv[:, 5:] are the Human cowl's weights, interpolated wherever a pass
+        # split a face: the race rig's same bones (below the neck every race
+        # wears the Human body).
+        import equipment_authoring as ea
+        rows = np.clip(uv[:, 5:5 + len(headwear_fit.COWL_BONES)], 0., None)
+        rig = ea.load_rig(body)
+        cols = np.array([rig.joint_names.index(n) for n in headwear_fit.COWL_BONES])
+        order = np.argsort(-rows, axis=1)[:, :4]
+        weights = np.take_along_axis(rows, order, 1)
+        weights /= np.maximum(weights.sum(1, keepdims=True), 1e-9)
+        _write_piece(d, b, out, world, uv[:, :2], f, skin=(rig, cols[order], weights))
+    else:
+        _write_piece(d, b, out, world - socket, uv[:, :2], f)
     return (socket - head).tolist(), reports, info
 
 
@@ -326,6 +383,8 @@ def _post_work(args):
                                           transfer, passes, out / f'{tag}-stages' if stages else None)
         variant = dict(raw['variant'], scene=final.as_posix())
         variant['socket'] = dict(raw['variant']['socket'], offset=offset)
+        if human_raw['variant'].get('attach') == 'skinned':
+            variant['attach'] = 'skinned'
         record.update(policy=rc.policy(key), transfer=info, humanRawSHA256=human_raw['asset_sha256'],
                       racePasses=reports)
     else:
@@ -469,8 +528,9 @@ def cmd_measure(args) -> int:
             rows.append((key, 'trial', variant['scene'], variant['socket']['offset']))
             installed = registry['models'][key].get('variants', {}).get(group)
             if installed:
+                # (a skinned cowl has no socket: piece_triangles reads its rest positions)
                 rows.append((key, 'installed', str(CLIENT / installed['scene'].removeprefix('res://')),
-                             installed['socket']['offset']))
+                             installed.get('socket', {}).get('offset', [0., 0., 0.])))
     # The installed variants do not change between trial tags: their rows are
     # cached by body and file digest.
     cache_path = args.out / f'installed-measure-cache-{measure_code_digest()[:12]}.json'
@@ -536,7 +596,9 @@ def cmd_human_check(args) -> int:
             same = len(d1['accessors']) == len(d2['accessors']) and all(
                 np.array_equal(ea.accessor_array(d1, b1, i), ea.accessor_array(d2, b2, i))
                 for i in range(len(d1['accessors'])))
-            socket = variants[group]['socket'] == registry['models'][key]['variants'][group]['socket']
+            mine, theirs = variants[group], registry['models'][key]['variants'][group]
+            socket = (theirs.get('attach') == 'skinned' if mine.get('attach') == 'skinned'
+                      else mine['socket'] == theirs.get('socket'))
             row = {'key': key, 'group': group, 'finalEqualsRaw': digest(final) == digest(raw),
                    'accessorsEqualInstalled': bool(same), 'socketEqualInstalled': socket}
             bad += not all(v for k, v in row.items() if k not in ('key', 'group'))
@@ -678,6 +740,10 @@ def cmd_install(args) -> int:
             shutil.copyfile(stage / target, dest)
             entry = {'scene': 'res://' + target.relative_to('godot-client').as_posix(),
                      'authoredFor': race, 'fitProfile': 'canonical', 'socket': variant['socket']}
+            if variant.get('attach') == 'skinned':
+                # a cowl (headwear_fit.py): skinned to the race rig, no socket
+                entry.pop('socket')
+                entry['attach'] = 'skinned'
             model.setdefault('variants', {})[group] = entry
             installed.append(dest)
     for texture in sorted(textures):
