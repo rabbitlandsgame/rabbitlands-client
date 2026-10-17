@@ -344,6 +344,17 @@ var world_effects: Array = []
 var harvest_sparkle: HarvestSparkle3D
 ## The sky and the fires the server placed on this map.
 var weather_layer: Weather3D
+## False until the first sky after logging in, which is set at once; every
+## later change of weather eases in.
+var _weather_synced := false
+var _weather_lighting_at := 0
+## The overcast the light was last applied under, so the sky is applied again
+## until it matches the weather, its last eased step included.
+var _weather_applied_overcast := 0.0
+## The streamed maps' own lamps, lit at dusk and through the night.
+var night_lamps: NightLamps
+## The map's declared mist and gulls (environment.presentation).
+var presentation_effects: PresentationEffects
 ## Objects the server placed into this map after it loaded, by object id.
 var placed_object_nodes: Dictionary = {}
 var audio_director: Node
@@ -1239,6 +1250,10 @@ func _ready() -> void:
 	AppState.teleport_seen.connect(_on_teleport_seen)
 	weather_layer = Weather3D.new()
 	world_root.add_child(weather_layer)
+	night_lamps = NightLamps.new()
+	world_root.add_child(night_lamps)
+	presentation_effects = PresentationEffects.new()
+	world_root.add_child(presentation_effects)
 	world_loader.load_completed.connect(_on_world_loaded)
 	world_loader.load_failed.connect(_on_world_load_failed)
 	if mouse_cursors.configure("res://assets/ui/cursors/cursors.json"):
@@ -1499,6 +1514,21 @@ func _process(delta: float) -> void:
 		if Time.get_ticks_msec() >= _stream_lighting_at:
 			_stream_lighting_at = Time.get_ticks_msec() + 100
 			_update_border_lighting()
+		# While rain arrives or clears the sky eases, so the light is applied
+		# again until it has settled (the border update above does this on a
+		# map with streaming borders; the isles have none).
+		if weather_layer != null \
+				and not is_equal_approx(weather_layer.overcast, _weather_applied_overcast) \
+				and Time.get_ticks_msec() >= _weather_lighting_at:
+			_weather_lighting_at = Time.get_ticks_msec() + 100
+			_apply_day_night()
+		var overcast := weather_layer.overcast if weather_layer != null else 0.0
+		if night_lamps != null:
+			night_lamps.update(camera_rig.focus, AppState.continuous_game_minute(),
+				overcast, _day_night_active)
+		if presentation_effects != null and world_environment.environment != null:
+			presentation_effects.update(camera_rig.focus, AppState.continuous_game_minute(),
+				overcast, world_environment.environment.fog_light_color, delta, _effects_enabled)
 		_update_animation_gate(delta)
 		# Rain is everywhere, so only the box the player is standing in is
 		# drawn. Left at the world origin it fell a hundred metres away from
@@ -3358,6 +3388,8 @@ func _exit_tree() -> void:
 
 func _on_login_succeeded() -> void:
 	Diagnostics.record("login_succeeded", {"server_map": AppState.current_map})
+	# A new session's first sky is already there, not eased in.
+	_weather_synced = false
 	spell_loadout.load_profile("%s:%d/%s" % [host_edit.text.strip_edges().to_lower(), int(port_edit.value), user_edit.text.strip_edges().to_lower()])
 	# Tell the server which Eloria extensions this client implements. Without
 	# it the server serves the legacy dialogue and raw-text fallback for every
@@ -5053,6 +5085,8 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 	if not _continuous_map_handoff:
 		WorldEnvironmentBinder.apply_camera(manifest, camera_rig)
 	_bind_light_markers(manifest)
+	if presentation_effects != null:
+		presentation_effects.bind(manifest)
 	binding_steps["light_markers"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
 	_apply_day_night()
 	binding_steps["day_night"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
@@ -5143,9 +5177,18 @@ func _update_console_location() -> void:
 func _apply_day_night() -> void:
 	if world_loader.manifest == null:
 		return
-	var lighting := exterior_stream.lighting_manifest(camera_rig.focus)
+	var lighting := _lighting_manifest()
 	_day_night_active = DayNightBinder.apply(lighting,
 		world_environment, world_sun, AppState.continuous_game_minute(), world_moon)
+	# The binder leaves the haze's density as the map bound it; rain thickens
+	# it (the look's haze re-reads it below, with the look off this is it).
+	var overcast := weather_layer.overcast if weather_layer != null else 0.0
+	if (overcast > 0.0 or _weather_applied_overcast > 0.0) and lighting != null \
+			and world_environment.environment != null:
+		var fog: Variant = (lighting.data.get("environment", {}) as Dictionary).get("fog")
+		if fog is Dictionary and (fog as Dictionary).has("density"):
+			world_environment.environment.fog_density = float((fog as Dictionary).density)
+	_weather_applied_overcast = overcast
 	_hold_shadow_switch()
 	_sync_map_environment()
 	# Look pass (a no-op with the look off): re-grade what the
@@ -5164,8 +5207,14 @@ func _hold_shadow_switch() -> void:
 	if not _shadows_enabled:
 		world_sun.shadow_enabled = false
 
+## The lighting the binders apply: the (border-blended) manifest at the
+## camera's focus, under the weather the server says is falling (WeatherSky).
+func _lighting_manifest() -> WorldManifest:
+	return WeatherSky.weathered(exterior_stream.lighting_manifest(camera_rig.focus),
+		weather_layer.overcast if weather_layer != null else 0.0)
+
 func _update_border_lighting() -> void:
-	var lighting := exterior_stream.lighting_manifest(camera_rig.focus)
+	var lighting := _lighting_manifest()
 	if lighting == null or not lighting.data.has("streamingBorders"):
 		return
 	# Reuse the bound sky; changing a border's colour must not allocate a new
@@ -9957,11 +10006,17 @@ func _on_teleport_seen(teleport: Dictionary) -> void:
 func _sync_weather() -> void:
 	if weather_layer == null:
 		return
-	if not _effects_enabled:
-		weather_layer.set_weather(0, 0)
-		return
+	# The particle switch turns the drops off, not the weather: the sky still
+	# greys under rain the player has chosen not to draw. The first sky after
+	# logging in is already there; every change after it eases in
+	# (Weather3D.OVERCAST_RATE), a new map's included, so walking across a
+	# border into rain darkens the sky over a few steps rather than at the line.
+	var first := not _weather_synced
+	_weather_synced = true
 	weather_layer.set_weather(int(AppState.weather.get("kind", 0)),
-		int(AppState.weather.get("intensity", 0)))
+		int(AppState.weather.get("intensity", 0)), _effects_enabled, not first)
+	if first:
+		_apply_day_night()
 
 ## The fires burning on this map, placed by tile. A fire the server removes
 ## goes out; one it has not mentioned was never lit.
@@ -11175,6 +11230,9 @@ func _on_client_setting_changed(section: String, key: String,
 				if is_instance_valid(object_value):
 					(object_value as MapObject3D).set_particles_enabled(_effects_enabled)
 			_sync_harvest_sparkle()
+			# The rain's drops follow the switch at once; the sky keeps its
+			# weather either way.
+			_sync_weather()
 		"nameplates":
 			_nameplates_enabled = bool(value)
 			_apply_banner_options()
@@ -13518,6 +13576,9 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 		chunk_stream.cell_ready.connect(_on_chunk_surface_ready)
 	if chunk_stream != null and not chunk_stream.cell_retiring.is_connected(_on_chunk_cell_retiring):
 		chunk_stream.cell_retiring.connect(_on_chunk_cell_retiring)
+	# The lamps the territory places, the neighbours' included.
+	if chunk_stream != null and night_lamps != null:
+		night_lamps.watch(chunk_stream)
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()

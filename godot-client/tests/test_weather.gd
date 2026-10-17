@@ -115,6 +115,63 @@ func _run() -> void:
 	await process_frame
 	_expect(layer.is_raining(), "and turning them back on restores it")
 
+	# The sky follows what is falling, and more for a storm than a shower.
+	_expect(is_zero_approx(Weather3D.overcast_for(0, 0))
+		and is_zero_approx(Weather3D.overcast_for(1, 0))
+		and Weather3D.overcast_for(1, 90) > Weather3D.overcast_for(1, 10)
+		and Weather3D.overcast_for(2, 60) > Weather3D.overcast_for(1, 60)
+		and Weather3D.overcast_for(2, 100) <= 1.0,
+		"overcast grows with the rain and a storm is darker than a shower")
+	layer.set_weather(2, 60, false, false)
+	_expect(not layer.is_raining()
+		and is_equal_approx(layer.overcast, Weather3D.overcast_for(2, 60))
+		and not layer.settling(),
+		"the particle switch turns the drops off, not the overcast; a sky met on arrival is already there")
+	layer.set_weather(0, 0)
+	_expect(layer.settling() and layer.overcast > 0.0,
+		"a sky that clears while the player stays eases out rather than cutting")
+	var eased := 0
+	while layer.settling() and eased < 1200:
+		await process_frame
+		eased += 1
+	_expect(is_zero_approx(layer.overcast), "and it does arrive at a clear sky")
+
+	# What the overcast does to the light (WeatherSky): the binders read the
+	# weathered copy exactly as they read the manifest.
+	var lit := WorldManifest.new()
+	lit.data = {"asset": {"id": "isle"}, "continentGeography": {}, "environment": {
+		"sky": {"zenith": [0.16, 0.42, 0.72], "horizon": [0.72, 0.87, 0.92]},
+		"sun": {"enabled": true, "energy": 1.1, "color": [1.0, 0.94, 0.83]},
+		"ambient": {"energy": 0.6, "color": [0.6, 0.67, 0.72]},
+		"fog": {"enabled": true, "color": [0.62, 0.8, 0.86], "density": 0.0004},
+		"saturation": 1.3,
+		"variants": {"dusk": {"sun": {"color": [1.0, 0.6, 0.4]}},
+			"night": {"sky": {"zenith": [0.1, 0.17, 0.32]}}}}}
+	var before := lit.data.duplicate(true)
+	_expect(WeatherSky.weathered(lit, 0.0) == lit,
+		"a dry sky is the manifest itself, not a copy")
+	var wet := WeatherSky.weathered(lit, 1.0)
+	var dry_env: Dictionary = lit.data.environment
+	var wet_env: Dictionary = wet.data.environment
+	var dry_zenith := DayNightBinder._colour(dry_env.sky.zenith, Color.BLACK)
+	var wet_zenith := DayNightBinder._colour(wet_env.sky.zenith, Color.BLACK)
+	_expect(wet_zenith.s < dry_zenith.s * 0.5 and wet_zenith.v < dry_zenith.v,
+		"a storm's sky is grey and darker: s %.2f -> %.2f" % [dry_zenith.s, wet_zenith.s])
+	_expect(float(wet_env.sun.energy) < float(dry_env.sun.energy) * 0.5
+		and float(wet_env.fog.density) > float(dry_env.fog.density) * 2.0
+		and float(wet_env.saturation) < float(dry_env.saturation),
+		"under a storm the sun dims, the haze thickens and the colours flatten")
+	var wet_dusk := DayNightBinder._colour(wet_env.variants.dusk.sun.color, Color.BLACK)
+	_expect(wet_dusk.s < 0.4 and DayNightBinder._colour(
+			wet_env.variants.night.sky.zenith, Color.BLACK).s
+			< DayNightBinder._colour(dry_env.variants.night.sky.zenith, Color.BLACK).s,
+		"a wet dusk does not glow orange, and a wet night is greyer too")
+	_expect(LookSky.clearness(wet, wet_env.sky, Color.BLACK)
+			< LookSky.clearness(lit, dry_env.sky, Color.BLACK) * 0.5,
+		"the painted sky reads the weathered zenith as overcast")
+	_expect(lit.data == before and wet.source_path == lit.source_path,
+		"the manifest itself is left as it was")
+
 	print("weather tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	main.queue_free()
 	await process_frame

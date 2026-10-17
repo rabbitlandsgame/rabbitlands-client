@@ -33,22 +33,54 @@ const FIRE_COLOURS: Array[Color] = [
 	Color(1.0, 0.62, 0.22), Color(1.0, 0.86, 0.55), Color(0.45, 1.0, 0.62)]
 const FIRE_SCALES: Array[float] = [1.0, 0.75, 1.5]
 
+## How overcast the sky is for what is falling (`overcast_for`): a light
+## shower greys it a little, a full storm all the way (WeatherSky).
+const SHOWER_OVERCAST := Vector2(0.35, 0.8)
+const STORM_OVERCAST := Vector2(0.65, 1.0)
+## How fast the sky follows a change of weather, per second: about four
+## seconds to close nine tenths of the gap, so rain arriving darkens the sky
+## as it comes rather than at a cut.
+const OVERCAST_RATE := 0.6
+
 var kind := 0
 var intensity := 0
+## How overcast the sky is now, 0..1, easing towards what is falling. The
+## binders weather the lighting manifest by it (main `_lighting_manifest`).
+var overcast := 0.0
 
 var _rain: GPUParticles3D
 var _flash: OmniLight3D
 var _flash_seconds := 0.0
 var _fires: Dictionary = {}
+var _overcast_target := 0.0
 
 func _ready() -> void:
 	name = "Weather"
 
+## How overcast a sky is for `weather_kind` at `weather_intensity` (0-100):
+## nothing for a clear sky, more for a storm than for a shower.
+static func overcast_for(weather_kind: int, weather_intensity: int) -> float:
+	if weather_kind <= 0 or weather_intensity <= 0:
+		return 0.0
+	var span: Vector2 = STORM_OVERCAST if weather_kind >= 2 else SHOWER_OVERCAST
+	return lerpf(span.x, span.y, clampf(float(weather_intensity) / 100.0, 0.0, 1.0))
+
+## True while the sky is still easing towards the weather.
+func settling() -> bool:
+	return not is_equal_approx(overcast, _overcast_target)
+
 ## What the server said, applied. Intensity is 0-100; a clear sky carries none.
-func set_weather(new_kind: int, new_intensity: int) -> void:
+## The sky follows it whatever `draw_rain` says: the player's particle switch
+## turns the drops off, not the weather. `ease` false sets the sky at once,
+## for a map just arrived on, whose weather was already there.
+func set_weather(new_kind: int, new_intensity: int, draw_rain := true,
+		ease := true) -> void:
 	kind = new_kind
 	intensity = new_intensity
-	if kind <= 0 or intensity <= 0:
+	_overcast_target = overcast_for(kind, intensity)
+	if not ease:
+		overcast = _overcast_target
+	if kind <= 0 or intensity <= 0 or not draw_rain:
 		if _rain != null:
 			_rain.emitting = false
 		return
@@ -123,11 +155,17 @@ func rain_particles() -> int:
 	return _rain.amount if _rain != null else 0
 
 func clear() -> void:
-	set_weather(0, 0)
+	set_weather(0, 0, true, false)
 	for tile: Variant in _fires.keys():
 		remove_fire(tile as Vector2i)
 
 func _process(delta: float) -> void:
+	if settling():
+		# Eases out, with a floor on the step so it arrives rather than
+		# creeping towards the target for ever.
+		var gap := absf(_overcast_target - overcast)
+		overcast = move_toward(overcast, _overcast_target,
+			maxf(gap * (1.0 - exp(-OVERCAST_RATE * delta)), 0.03 * delta))
 	if _flash_seconds > 0.0:
 		_flash_seconds -= delta
 		if _flash != null:

@@ -55,6 +55,7 @@ func _run() -> void:
 		manifests[region] = WorldManifest.load_file(ProjectSettings.globalize_path(registry[region].manifest))
 	_check_border("four_gates", "mirrorhold", manifests, loader)
 	_check_border("amberwood", "whitehorn_range", manifests, loader)
+	_check_isle_border("landfall", "warrenmead")
 	main.free()
 	stage.queue_free()
 	await process_frame
@@ -135,6 +136,43 @@ func _check_border(from: String, to: String, manifests: Dictionary, loader: Worl
 	_expect(sun.global_basis.is_equal_approx(original_basis), "%s restoring the hour restores the sun angle" % from)
 	_expect(near_manifest.data == near_original and far_manifest.data == far_original,
 		"border blending leaves both authored manifests untouched")
+
+## Two Landfall isles: their links publish no blend, and their light now blends
+## over ISLE_LIGHT_BLEND_METRES each side of the shared border (the owner's
+## ~260 m transition), measured from the border itself.
+func _check_isle_border(from: String, to: String) -> void:
+	var near := WorldManifest.load_file(ProjectSettings.globalize_path(registry[from].manifest))
+	var far := WorldManifest.load_file(ProjectSettings.globalize_path(registry[to].manifest))
+	stream.active_map = from
+	stream.active_manifest = near
+	stream.residents = {to: {"manifest": far}}
+	var join: Dictionary = {}
+	for candidate: Dictionary in stream._candidates(Vector3.ZERO):
+		if str(candidate.map) == to:
+			join = candidate
+	_expect(not join.is_empty() and float(join.here.frame.get("blendDistance", -1)) == 0.0
+		and stream._isle_border(join),
+		"%s and %s are isles whose link publishes no blend" % [from, to])
+	if join.is_empty():
+		return
+	var near_r := float(near.data.environment.sky.zenith[0])
+	var far_r := float(far.data.environment.sky.zenith[0])
+	_expect(absf(far_r - near_r) > 0.05, "%s and %s have their own skies" % [from, to])
+	var edge: Array = (join.here.preloadEdges as Array)[0]
+	var on_line := Vector3((float(edge[0][0]) + float(edge[1][0])) * 0.5, 0.0,
+		(float(edge[0][1]) + float(edge[1][1])) * 0.5)
+	var inward := -Vector3(float(join.here.frame.outward[0]), 0.0, float(join.here.frame.outward[1])).normalized()
+	var weights: Array[float] = []
+	for metres: float in [0.0, 20.0, 60.0, 100.0, 200.0]:
+		var point := on_line + inward * metres
+		var lighting := stream.lighting_manifest(point)
+		weights.append((float(lighting.data.environment.sky.zenith[0]) - near_r) / (far_r - near_r))
+	_expect(absf(weights[0] - 0.5) < 0.05,
+		"on the border line the light is half each isle's: %.2f" % weights[0])
+	_expect(weights[1] < weights[0] and weights[2] < weights[1] and weights[3] < weights[2]
+		and weights[3] > 0.0,
+		"it fades over a wide band rather than at a line: %s" % [weights])
+	_expect(is_zero_approx(weights[4]), "200 m inside it is the isle's own light alone")
 
 func _expect(ok: bool, message: String) -> void:
 	checks += 1

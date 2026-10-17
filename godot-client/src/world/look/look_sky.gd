@@ -85,9 +85,13 @@ static func sky_colours(lighting: WorldManifest, minute: float) -> Dictionary:
 	if DayNightBinder.drives(lighting):
 		light = DayNightBinder.daylight(minute)
 		var edge := DayNightBinder.twilight(minute)
-		top = top.lerp(DayNightBinder.NIGHT_SKY_TOP, 1.0 - light)
-		horizon = horizon.lerp(DayNightBinder.NIGHT_SKY_HORIZON, 1.0 - light) \
-			.lerp(DayNightBinder.DAWN_SUN_COLOUR, edge * 0.35)
+		# The map's own night and twilight (`environment.variants`), or the
+		# shared ones, exactly as the binder takes them.
+		var night := DayNightBinder.night_palette(declared)
+		var dusk := DayNightBinder.twilight_palette(declared, minute)
+		top = top.lerp(night.sky_top, 1.0 - light)
+		horizon = horizon.lerp(night.sky_horizon, 1.0 - light) \
+			.lerp(dusk.horizon, edge * 0.35)
 	# The painted sky is warmed by daylight only: at night it keeps the
 	# binder's moonlit colours. And only a clear sky is taken towards the
 	# painted blue day: a dusk, an overcast or a storm the region declared

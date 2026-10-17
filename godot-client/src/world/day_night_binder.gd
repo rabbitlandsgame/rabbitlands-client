@@ -81,6 +81,26 @@ const MOON_DAYLIGHT_FADE := 0.35
 ## light costs a whole shadow pass - measured at a fifth of the frame rate on
 ## the Four Gates capture - and what night was missing was the shading, not a
 ## second set of cast shadows.
+##
+## A map's own night and twilights. The constants above are every map's
+## night, so the Landfall isles, which already shared one noon, shared one
+## midnight and one sunset too. A package may name its own in
+## `environment.variants`, each block in the manifest's own spelling:
+##   "night": {"sky": {"zenith", "horizon"}, "fog": {"color"},
+##             "ambient": {"color"}, "sun": {"color"}, "moon": {"color"}}
+##   "dawn" / "dusk": {"sun": {"color"}, "sky": {"horizon"}, "fog": {"color"}}
+## Only colours are read: how dark the night is and how far the ambient falls
+## stay these constants, so every map stays playable at the same hour. A
+## colour a variant leaves out is the constant's; a map with no variants is
+## lit exactly as before. Dawn is the morning's twilight (before noon), dusk
+## the evening's. "golden-hour", which the isles' packages also carry, is a
+## fixed pose for a still frame (it turns the sun) and is not read here.
+const NIGHT_VARIANT := "night"
+const DAWN_VARIANT := "dawn"
+const DUSK_VARIANT := "dusk"
+## How much of a twilight's fog colour reaches the haze at the peak of
+## twilight. Without a variant the fog keeps its day-to-night path.
+const TWILIGHT_FOG := 0.35
 
 ## The server's own daylight curve, for a continuous minute.
 static func daylight(minute: float) -> float:
@@ -117,20 +137,22 @@ static func apply(manifest: WorldManifest, world_environment: WorldEnvironment,
 		sun: DirectionalLight3D, minute: float, moon: DirectionalLight3D = null) -> bool:
 	if not drives(manifest) or world_environment == null or sun == null:
 		return false
-	_apply_moon(moon, daylight(minute), sun)
+	var declared: Dictionary = manifest.data.get("environment", {}) as Dictionary
+	var night := night_palette(declared)
+	_apply_moon(moon, daylight(minute), sun, night.moon)
 	var environment: Environment = world_environment.environment
 	if environment == null:
 		return false
-	var declared: Dictionary = manifest.data.get("environment", {}) as Dictionary
 	var light: float = daylight(minute)
 	var edge: float = twilight(minute)
+	var dusk := twilight_palette(declared, minute)
 
 	var declared_sun: Dictionary = declared.get("sun", {}) as Dictionary
 	var noon_energy: float = float(declared_sun.get("energy", 1.0))
 	var noon_colour: Color = _colour(declared_sun.get("color"), Color.WHITE)
 	sun.light_energy = lerpf(noon_energy * NIGHT_SUN_ENERGY, noon_energy, light)
-	sun.light_color = noon_colour.lerp(NIGHT_SUN_COLOUR, 1.0 - light) \
-		.lerp(DAWN_SUN_COLOUR, edge * 0.55)
+	sun.light_color = noon_colour.lerp(night.sun, 1.0 - light) \
+		.lerp(dusk.sun, edge * 0.55)
 	sun.rotation_degrees.x = lerpf(MIDNIGHT_ELEVATION, NOON_ELEVATION, light)
 	# Gate on the elevation itself rather than a fraction of `light`: a fixed
 	# 0.08 cutoff on `light` was never the horizon - MIDNIGHT_ELEVATION is
@@ -167,7 +189,7 @@ static func apply(manifest: WorldManifest, world_environment: WorldEnvironment,
 		minf(noon_contribution, NIGHT_SKY_CONTRIBUTION), noon_contribution,
 		light)
 	environment.ambient_light_color = noon_ambient_colour.lerp(
-		NIGHT_AMBIENT_COLOUR, 1.0 - light)
+		night.ambient, 1.0 - light)
 
 	var sky_material: Variant = environment.sky.sky_material if environment.sky != null else null
 	if sky_material is ProceduralSkyMaterial:
@@ -175,26 +197,68 @@ static func apply(manifest: WorldManifest, world_environment: WorldEnvironment,
 		var material: ProceduralSkyMaterial = sky_material as ProceduralSkyMaterial
 		material.sky_top_color = _colour(
 			_either(declared_sky, "topColor", "zenith"), Color("3d7ec2")
-			).lerp(NIGHT_SKY_TOP, 1.0 - light)
+			).lerp(night.sky_top, 1.0 - light)
 		material.sky_horizon_color = _colour(
 			_either(declared_sky, "horizonColor", "horizon"), Color("bcc9cd")
-			).lerp(NIGHT_SKY_HORIZON, 1.0 - light).lerp(DAWN_SUN_COLOUR, edge * 0.35)
+			).lerp(night.sky_horizon, 1.0 - light).lerp(dusk.horizon, edge * 0.35)
 
 	if environment.fog_enabled:
 		var declared_fog: Dictionary = declared.get("fog", {}) as Dictionary
-		environment.fog_light_color = _colour(declared_fog.get("color"),
-			Color("d8c9a4")).lerp(NIGHT_FOG, 1.0 - light)
+		var fog: Color = _colour(declared_fog.get("color"),
+			Color("d8c9a4")).lerp(night.fog, 1.0 - light)
+		if dusk.fog is Color:
+			fog = fog.lerp(dusk.fog as Color, edge * TWILIGHT_FOG)
+		environment.fog_light_color = fog
 	return true
+
+## The night a manifest's environment declares (`variants.night`), each colour
+## falling back to the shared constant: {sky_top, sky_horizon, fog, ambient,
+## sun, moon}. LookSky paints its sky from the same answer.
+static func night_palette(declared: Dictionary) -> Dictionary:
+	var night := _variant(declared, NIGHT_VARIANT)
+	var sky: Dictionary = _block(night, "sky")
+	return {
+		"sky_top": _colour(_either(sky, "topColor", "zenith"), NIGHT_SKY_TOP),
+		"sky_horizon": _colour(_either(sky, "horizonColor", "horizon"), NIGHT_SKY_HORIZON),
+		"fog": _colour(_block(night, "fog").get("color"), NIGHT_FOG),
+		"ambient": _colour(_any(_block(night, "ambient"), ["color", "colour", "skyColor"]),
+			NIGHT_AMBIENT_COLOUR),
+		"sun": _colour(_block(night, "sun").get("color"), NIGHT_SUN_COLOUR),
+		"moon": _colour(_block(night, "moon").get("color"), MOON_COLOUR),
+	}
+
+## The twilight at `minute`: the dawn variant before noon, the dusk variant
+## after it, as {sun, horizon, fog}. Sun and horizon fall back to
+## DAWN_SUN_COLOUR; fog is null where the variant names none, and the haze then
+## keeps its day-to-night path.
+static func twilight_palette(declared: Dictionary, minute: float) -> Dictionary:
+	var morning := fposmod(minute, MINUTES_PER_DAY) < MINUTES_PER_DAY * 0.5
+	var variant := _variant(declared, DAWN_VARIANT if morning else DUSK_VARIANT)
+	var fog: Variant = _block(variant, "fog").get("color")
+	return {
+		"sun": _colour(_block(variant, "sun").get("color"), DAWN_SUN_COLOUR),
+		"horizon": _colour(_either(_block(variant, "sky"), "horizonColor", "horizon"),
+			DAWN_SUN_COLOUR),
+		"fog": _colour(fog, Color.BLACK) if fog != null else null,
+	}
+
+static func _variant(declared: Dictionary, name: String) -> Dictionary:
+	return _block(_block(declared, "variants"), name)
+
+static func _block(source: Dictionary, key: String) -> Dictionary:
+	var value: Variant = source.get(key)
+	return value as Dictionary if value is Dictionary else {}
 
 ## The moon on the sun's arc, half a day away: highest at midnight, below the
 ## horizon and dark by the time the sun is up. It takes the sun's own azimuth
 ## turned about, so its shading falls the other way from the day's.
-static func _apply_moon(moon: DirectionalLight3D, light: float, sun: DirectionalLight3D) -> void:
+static func _apply_moon(moon: DirectionalLight3D, light: float, sun: DirectionalLight3D,
+		colour: Color = MOON_COLOUR) -> void:
 	if moon == null:
 		return
 	var night: float = clampf(1.0 - light / MOON_DAYLIGHT_FADE, 0.0, 1.0)
 	moon.light_energy = MOON_ENERGY * night
-	moon.light_color = MOON_COLOUR
+	moon.light_color = colour
 	moon.rotation_degrees.x = lerpf(NOON_ELEVATION, MIDNIGHT_ELEVATION, light)
 	moon.rotation_degrees.y = sun.rotation_degrees.y + 180.0
 	moon.rotation_degrees.z = sun.rotation_degrees.z
