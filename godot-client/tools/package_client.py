@@ -2997,7 +2997,7 @@ def _main(argv=None, storage=None) -> int:
         if options.platform == "linux" and os.name != "nt":
             for script in stage.glob("RabbitLands*.sh"):
                 script.chmod(0o755)
-        if not options.no_smoke:
+        if not options.no_smoke and options.platform != "macos":
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
                          pool_test=pooled_sidecar_directory(stage))
 

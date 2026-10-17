@@ -66,29 +66,16 @@ def export(godot, project, app_dir, logs, run_godot):
     run_godot(godot, ["--headless", "--path", str(project), "--export-release", "macOS", str(target)],
               logs / "export.log", timeout=3600)
     contents = target / "Contents"
-    info = plistlib.loads((contents / "Info.plist").read_bytes())
-    original = contents / "MacOS" / info["CFBundleExecutable"]
-    helpers = contents / "Helpers"
-    helpers.mkdir(exist_ok=True)
-    original.rename(helpers / "RabbitLands")
-    (helpers / "RabbitLands").chmod(0o755)
-    # The original main-binary signature was sealed with its export bundle.
-    # Re-sign the relocated helper before its direct pre-bundle smoke launch.
-    subprocess.run(["codesign", "--force", "--sign", "-", str(helpers / "RabbitLands")], check=True)
     packs = list((contents / "Resources").glob("*.pck"))
     if len(packs) != 1:
         raise ValueError("Expected exactly one macOS game PCK.")
     packs[0].rename(app_dir / "RabbitLands.pck")
-    # Official 4.7 release templates prohibit --main-pack overrides. Their
-    # executable-adjacent PCK discovery still works. Link it for pre-bundle
-    # checks, then remove the redundant app-side name after those checks.
-    os.link(app_dir / "RabbitLands.pck", helpers / "RabbitLands.pck")
 
 
 def smoke(app_dir, logs, run_godot, failures):
     native()
-    target = bundle(app_dir.parent) / "Contents/Helpers/RabbitLands"
-    return smoke_binary(target, app_dir, logs / "smoke.log", run_godot, failures)
+    target = bundle(app_dir.parent) / "Contents/MacOS/RabbitLands"
+    return smoke_binary(target, app_dir.parent, logs / "smoke.log", run_godot, failures)
 
 
 def smoke_binary(binary, cwd, log, run_godot, failures, extra=()):
@@ -102,13 +89,13 @@ def smoke_binary(binary, cwd, log, run_godot, failures, extra=()):
 
 
 def sign(target: Path, identity="-"):
-    # Sign each Mach-O (including framework binaries and the Godot helper)
+    # Sign each Mach-O (including framework binaries and the game executable)
     # inside out, then seal the completed app. Never change files afterwards.
     magics = {b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf", b"\xca\xfe\xba\xbe", b"\xca\xfe\xba\xbf"}
     options = ["--force", "--sign", identity]
     if identity != "-":
         options += ["--timestamp", "--options", "runtime"]
-    metadata = target / "Contents/Resources/game/app/client-release.json"
+    metadata = target / "Contents/Resources/client-release.json"
     steam = metadata.is_file() and json.loads(metadata.read_text()).get("distribution") == "steam"
     with tempfile.TemporaryDirectory(prefix="rabbitlands-entitlements-") as temp:
         entitlements = Path(temp) / "steam.plist"
@@ -133,29 +120,30 @@ def finish(stage, project, metadata):
     native()
     target = bundle(stage)
     contents = target / "Contents"
-    game = contents / "Resources/game"
-    game.mkdir()
-    helper_pack = contents / "Helpers/RabbitLands.pck"
-    helper_pack.parent.mkdir(exist_ok=True)
-    if helper_pack.exists():
-        (stage / "app/RabbitLands.pck").unlink()
-    else:
-        (stage / "app/RabbitLands.pck").rename(helper_pack)
-    for name in ("app", "eloria-assets"):
-        (stage / name).rename(game / name)  # Rename, never copy the full game.
+    game = contents / "Resources"
+    # Godot 4.7 release templates force cwd to Resources before scripts run.
+    # Match it: assets/... lives here; ../eloria-assets lives under Contents.
+    app = stage / "app"
+    for path in app.iterdir():
+        destination = game / path.name
+        if destination.exists():
+            raise ValueError(f"Duplicate Mac bundle resource: {path.name}")
+        path.rename(destination)
+    app.rmdir()
+    (stage / "eloria-assets").rename(contents / "eloria-assets")
     for path in list(stage.iterdir()):
         if path.is_file() and path.name != ".eloria-package":
             path.rename(game / path.name)
     info_path = contents / "Info.plist"
     info = plistlib.loads(info_path.read_bytes())
+    original = contents / "MacOS" / info["CFBundleExecutable"]
+    binary = contents / "MacOS/RabbitLands"
+    if original != binary:
+        original.rename(binary)
     info["CFBundleExecutable"] = "RabbitLands"
     info["CFBundleDisplayName"] = "Rabbit Lands"
     info["CFBundleVersion"] = str(len(metadata.get("ancestors", [])) or 1)
     info_path.write_bytes(plistlib.dumps(info))
-    binary = contents / "MacOS/RabbitLands"
-    subprocess.run(["xcrun", "clang", "-arch", "x86_64", "-arch", "arm64", "-Os",
-                    "-mmacosx-version-min=11.0", str(Path(__file__).with_name("macos_launcher.c")),
-                    "-o", str(binary)], check=True)
     binary.chmod(0o755)
     (game / "BUILD.json").write_text(json.dumps({"commit": metadata["commit"],
         "distribution": metadata["distribution"], "signing": "ad-hoc-test-only"}, indent=2) + "\n")

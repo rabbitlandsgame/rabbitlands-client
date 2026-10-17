@@ -14,7 +14,7 @@ import sys
 LAYOUT = {
     "windows": ("app/client-release.json", "app/RabbitLands.exe", "app"),
     "linux": ("app/client-release.json", "app/RabbitLands.x86_64", "app"),
-    "macos": ("Rabbit Lands.app/Contents/Resources/game/app/client-release.json", "Rabbit Lands.app", ""),
+    "macos": ("Rabbit Lands.app/Contents/Resources/client-release.json", "Rabbit Lands.app", ""),
 }
 
 

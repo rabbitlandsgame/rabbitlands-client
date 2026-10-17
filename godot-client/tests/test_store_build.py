@@ -120,6 +120,7 @@ def test_macos_finish_moves_assets_without_extra_copy_and_seals_bundle(tmp_path,
     root.mkdir()
     app = macos_package.bundle(root)
     (app / "Contents/MacOS").mkdir(parents=True)
+    (app / "Contents/MacOS/Rabbit Lands").write_bytes(b"universal-game-binary")
     (app / "Contents/Resources").mkdir()
     (app / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "Rabbit Lands"}))
     (root / "app").mkdir()
@@ -129,17 +130,13 @@ def test_macos_finish_moves_assets_without_extra_copy_and_seals_bundle(tmp_path,
     asset.write_text("world")
     before = asset.stat().st_ino
     commands = []
-    def run(command, **kwargs):
-        commands.append(command)
-        if "clang" in command:
-            Path(command[-1]).write_bytes(b"launcher")
-    monkeypatch.setattr(macos_package.subprocess, "run", run)
     monkeypatch.setattr(macos_package, "sign", lambda path: commands.append(["seal", path]))
     macos_package.finish(root, tmp_path, {"commit": SHA, "distribution": "steam"})
-    assert (app / "Contents/Resources/game/eloria-assets/world.json").stat().st_ino == before
+    assert (app / "Contents/eloria-assets/world.json").stat().st_ino == before
+    assert (app / "Contents/Resources/RabbitLands.pck").read_bytes() == b"game pack"
+    assert (app / "Contents/MacOS/RabbitLands").read_bytes() == b"universal-game-binary"
     assert not (root / "app").exists()
     assert commands[-1] == ["seal", app]
-    assert "x86_64" in commands[0] and "arm64" in commands[0]
 
 
 def test_mac_cross_export_fails_instead_of_claiming_a_native_test(tmp_path, monkeypatch):

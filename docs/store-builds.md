@@ -139,13 +139,13 @@ integration. API features can be added separately after rights/plugin review.
 
 The macOS runner uses pinned Godot 4.7.2 and its official universal template,
 both S3TC/BPTC and ETC2/ASTC imports, and the existing Rabbit Lands `.icns` icon.
-It exports a normal bundle, places the loose game files in
-`Contents/Resources/game/{app,eloria-assets}`, and compiles a small universal native
-entry point. That entry point sets the required working directory and execs the
-Godot helper before any game script reads an asset. Asset placement uses renames.
-The final PCK sits once beside the helper in `Contents/Helpers`; no
-`--main-pack`/`--path` override is passed to an official release template.
-Both the helper and completed bundle are launched headless. This does not prove
+It exports a normal bundle, placing the PCK and loose app files in
+`Contents/Resources` and map assets in `Contents/eloria-assets`. Godot 4.7 sets its
+working directory to Resources before scripts run, preserving the existing
+`assets/...` and `../eloria-assets` paths. It uses Godot's original universal
+executable as the entry point. Asset placement uses renames, with one final PCK
+and no `--main-pack`/`--path` overrides.
+The completed signed bundle is launched headless. This does not prove
 GPU rendering, playability, or Intel/Apple Silicon hardware compatibility.
 
 Mac builds currently omit the BC-only map sidecars; source-image fallback is
