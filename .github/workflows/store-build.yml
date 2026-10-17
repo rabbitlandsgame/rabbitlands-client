@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: rabbitlands-store-build
+  group: rabbitlands-store-build-${{ github.ref }}-${{ inputs.platform }}-${{ inputs.distribution }}
   cancel-in-progress: false
 
 env:

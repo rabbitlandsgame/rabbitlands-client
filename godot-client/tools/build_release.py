@@ -323,15 +323,18 @@ def upload(bundle: Path, publish: bool = False) -> None:
     releases = github_releases()
     client_releases = [release for release in releases if re.fullmatch(r"client-[0-9a-f]{40}", release["tag_name"])]
     existing = next((release for release in client_releases if release["tag_name"] == tag), None)
-    if not existing and client_releases:
-        existing = max(client_releases, key=lambda release: release["id"])
+    if existing and not existing["draft"]:
+        raise ValueError("This client commit is already published. Build a newer commit instead of taking its downloads offline.")
+    drafts = [item for item in client_releases if item["draft"]]
+    if not existing and drafts:
+        existing = max(drafts, key=lambda release: release["id"])
     if not existing:
         gh("release", "create", tag, "--repo", REPOSITORY, "--target", sha, "--draft",
            "--title", f"Rabbit Lands {sha[:9]}", "--notes-file", str(notes))
         existing = github_release(tag)
     else:
-        # Reuse one release entry. Its commit-specific tag keeps signed update
-        # URLs tied to the actual build while compiled history is replaced.
+        # Reuse a draft only. Keep the working published downloads available
+        # until their verified replacement has actually been published.
         gh("release", "edit", existing["tag_name"], "--repo", REPOSITORY, "--draft", "--tag", tag,
            "--target", sha, "--title", f"Rabbit Lands {sha[:9]}", "--notes-file", str(notes))
         existing = github_release(tag)
@@ -358,11 +361,11 @@ def upload(bundle: Path, publish: bool = False) -> None:
             gh("api", "--method", "DELETE", f"repos/{REPOSITORY}/releases/assets/{asset['id']}")
     if {asset["name"]: asset["size"] for asset in github_assets(existing["id"])} != expected:
         raise ValueError("Old release assets could not be removed; the release remains a draft.")
-    for other in client_releases:
-        if other["id"] != existing["id"]:
-            gh("release", "delete", other["tag_name"], "--repo", REPOSITORY, "--yes")
     if publish:
         gh("release", "edit", tag, "--repo", REPOSITORY, "--draft=false", "--latest")
+    for other in client_releases:
+        if other["id"] != existing["id"] and (other["draft"] or publish):
+            gh("release", "delete", other["tag_name"], "--repo", REPOSITORY, "--yes")
     print(f"{'Published' if publish else 'Draft ready'}: https://github.com/{REPOSITORY}/releases/tag/{tag}")
     print("After publication and download verification, deploy client_updates.json to the served server profile.")
 

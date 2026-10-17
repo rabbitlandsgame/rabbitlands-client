@@ -16,6 +16,11 @@ release**. It builds both desktop platforms on GitHub's hosted runners, with
 Inno Setup 6 for Windows, and leaves the verified result as a draft. It does not
 publish the release or deploy the server's client-update policy.
 
+The currently published installer remains online while a replacement draft is
+built. Publishing the verified replacement triggers **Retire previous published
+client**, which checks the public asset inventory before removing older published
+compiled releases. It leaves any in-progress replacement draft alone.
+
 ## Enable and run the workflow
 
 One-time maintainer setup:
