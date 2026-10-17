@@ -11,15 +11,19 @@ RUNNER_BYTES = 14_000_000_000
 RESERVE_BYTES = 2_000_000_000
 
 
-def unique_bytes(roots: list[Path]) -> int:
+def unique_bytes(roots: list[Path], *, allow_internal_symlinks=False) -> int:
     """Count hard-linked files once, including Git objects and ignored caches."""
     seen = set()
     total = 0
+    def check_link(path):
+        if not allow_internal_symlinks or not any(path.resolve().is_relative_to(root.resolve()) for root in roots if root.is_dir()):
+            raise ValueError(f"Runner input link escapes its accounted roots: {path}")
+
     def count(path):
         nonlocal total
         if path.is_symlink():
-            raise ValueError(f"Runner inputs cannot contain symlinks: {path}")
-        stat = path.stat()
+            check_link(path)
+        stat = path.lstat()
         key = (stat.st_dev, stat.st_ino)
         if key not in seen:
             seen.add(key)
@@ -30,6 +34,11 @@ def unique_bytes(roots: list[Path]) -> int:
             count(root)
             continue
         for directory, folders, files in os.walk(root, followlinks=False):
+            for name in folders:
+                path = Path(directory) / name
+                if path.is_symlink():
+                    check_link(path)
+                    count(path)
             folders[:] = [name for name in folders if not (Path(directory) / name).is_symlink()]
             for name in files:
                 path = Path(directory) / name
@@ -38,19 +47,20 @@ def unique_bytes(roots: list[Path]) -> int:
 
 
 class DiskBudget:
-    def __init__(self, roots: list[Path], *, capacity=RUNNER_BYTES, reserve=RESERVE_BYTES):
+    def __init__(self, roots: list[Path], *, capacity=RUNNER_BYTES, reserve=RESERVE_BYTES, allow_internal_symlinks=False):
         self.roots = [root.resolve() for root in roots]
         volumes = {}
         for root in self.roots:
             volumes.setdefault(root.stat().st_dev, root if root.is_dir() else root.parent)
         self.volumes = list(volumes.values())
         self.capacity, self.reserve = capacity, reserve
+        self.allow_internal_symlinks = allow_internal_symlinks
         self.peak = 0
         self.planned_peak = 0
         self.samples = []
 
     def check(self, phase: str, additional: int = 0) -> None:
-        used = unique_bytes(self.roots)
+        used = unique_bytes(self.roots, allow_internal_symlinks=self.allow_internal_symlinks)
         self.peak = max(self.peak, used)
         self.planned_peak = max(self.planned_peak, used + additional)
         self.samples.append({"phase": phase, "bytes": used, "additional": additional})
