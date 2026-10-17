@@ -183,6 +183,43 @@ def seat_harness_soles(out, points, labels, rig):
     return out
 
 
+def shaft_cuff(out, points, labels, own):
+    """Height of one boot's cuff in the fitted ``out``.
+
+    The main shaft ends at the cuff; an ornamental spike above it must not
+    make the replacement stocking climb to the spike's tip. The shaft is the
+    largest tall component of the side ``own`` in the source ``points``.
+    """
+    candidates = [
+        label
+        for label in np.unique(labels[own])
+        if np.count_nonzero((labels == label) & own) > 50
+    ]
+    if not candidates:
+        candidates = np.unique(labels[own])
+    shell = max(
+        candidates,
+        key=lambda label: np.count_nonzero((labels == label) & own)
+        * np.ptp(points[(labels == label) & own, 1]),
+    )
+    return float(np.percentile(out[(labels == shell) & own, 1], 98))
+
+
+def seat_boot_soles(out, points, rig):
+    """Seat each separate boot of a design fit on its weighted sole.
+
+    The fit is solved in idle; its rest-pose sole need not land where the
+    runtime's foot does. As boot_frame does, each side's lowest point goes to
+    4 mm under that side's weighted sole, moving the boot whole so the shaft
+    keeps its shape. ``points`` (the source) picks the side.
+    """
+    for side, sign in (("l", 1.), ("r", -1.)):
+        own = points[:, 0] * sign >= 0
+        if own.any():
+            out[own, 1] += ea.weighted_sole(rig, side) - .004 * rig.fit_scale - float(out[own, 1].min())
+    return out
+
+
 def boot_frame(points, faces, rig):
     """Map each heel/toe span independently; retain the design's shaft height."""
     out = points.copy()
@@ -208,21 +245,7 @@ def boot_frame(points, faces, rig):
         target = (body_low + body_high) / 2
         target[1] = ea.weighted_sole(rig, side) - 0.004 * rig.fit_scale
         out[own] = (block - center) * scale + target
-        # The main shaft ends at the cuff; an ornamental spike above it must
-        # not make the replacement stocking climb to the spike's tip.
-        candidates = [
-            label
-            for label in np.unique(labels[own])
-            if np.count_nonzero((labels == label) & own) > 50
-        ]
-        if not candidates:
-            candidates = np.unique(labels[own])
-        shell = max(
-            candidates,
-            key=lambda label: np.count_nonzero((labels == label) & own)
-            * np.ptp(points[(labels == label) & own, 1]),
-        )
-        cuff = float(np.percentile(out[(labels == shell) & own, 1], 98))
+        cuff = shaft_cuff(out, points, labels, own)
         cuffs.append(cuff)
         report.append(
             {
@@ -657,6 +680,14 @@ def build(source, out, rig, kind, label, span=None):
         if full:
             # The fit is solved in idle; its rest soles still go on the weighted soles.
             seat_harness_soles(p, source_points, components(source_points, f), rig)
+        elif region == "boots":
+            # Separate boots: seat each sole, then take the stocking's cuff from
+            # the fitted shaft (boot_frame's cuff measured its own shell).
+            seat_boot_soles(p, source_points, rig)
+            labels = components(source_points, f)
+            cuff = min(shaft_cuff(p, source_points, labels, source_points[:, 0] * sign >= 0)
+                       for sign in (1., -1.))
+            report['designFitCuffY'] = cuff
         report['designFit'] = {'file': fit['file'], 'sha256': fit['sha256']}
     if full:
         clipped = clip(

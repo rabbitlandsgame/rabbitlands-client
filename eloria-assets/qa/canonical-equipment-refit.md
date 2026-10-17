@@ -128,9 +128,138 @@ and `test_equipment_registry_snapshot_cache.gd` pass. The new
 `GeneratedArmorBacking` textures replace two orphaned ones. The packed GLBs
 grow 0.1–4%.
 
+### Starter kits (2026-10-17)
+
+The four class starter kits, the gear every new player wears, now have set
+specs as well: `vanguard.json`, `ranger.json`, `arcanist.json` and
+`warden.json`. They cover twelve pieces on both bodies:
+
+| Kit | Torso | Legs | Boots |
+| --- | --- | --- | --- |
+| Vanguard | Studded Jack 5:209 | Leather Kneecops 4:220 | Banded Warboots 6:249 |
+| Ranger | Scout Vest 5:225 | Sidelace Breeches 4:230 | Laced Fieldboots 6:226 |
+| Arcanist | Acolyte Tunic 5:222 | Acolyte Legguards 4:185 | Acolyte Boots 6:198 |
+| Warden | Furtrim Coat 5:189 | Furtrim Legguards 4:176 | Furtrim Boots 6:205 |
+
+Their legs end at the ankle and their boots are separate sources. The Phoenix
+set never needed either, so `design_fit_blender.py` and the leg hook gained
+the pieces below. Each is opt-in per spec. Phoenix uses none of them, and
+re-solving it reproduces its committed overrides exactly.
+
+- **Calf/foot boot skeleton.** A boot's scale comes from its foot length (the
+  body's 0.27 m plus 0.02 m of room, as `boot_frame` sizes boots). The ankle
+  and ball sit where the body's do relative to the heel and sole. The calf
+  bone runs up the shaft's own lean, so neither bone stretches (k = 1.00).
+- **Sole seating.** `ground` seats each boot in the rest pose, 4 mm under the
+  weighted sole (`seat_soles`), and the idle shell follows. On the fit path,
+  `limb_head_remap.build` now seats separate boots as well
+  (`seat_boot_soles`). It takes the stocking's cuff from the fitted shaft
+  (`shaft_cuff`, factored out of `boot_frame`). Before this change both came
+  from `boot_frame`'s own shell, which the override discards, and only full
+  legendary harnesses called `seat_harness_soles`.
+- **Clearance surfaces.** A bone's `surfaces` limits what its clearance
+  clears. A boot shaft clears the default boot but not the default trouser
+  leg, which the runtime hides under a fitted boot (`generated_body_cover`).
+- **Limb split.** On the Vanguard, Arcanist and Warden torsos the sleeves hang
+  against the coat. `split_limbs` assigns them by distance over the surface, as
+  `torso_remap.connected_sleeve` does, instead of by nearest bone. Nearest
+  bone gave 31% of the Vanguard sleeve to the trunk; the surface split gives
+  11%, mostly cuff lining.
+- **Layering.** `tuck_into` tucks the trouser legs inside the set's own boots
+  wherever the boots cover them: 6 mm inside the shaft and never within 2 mm
+  of the body. Fitted apart, both shells cleared the same body by the same
+  margin, so they crossed and flickered through each other, worst under the
+  Vanguard's tall warboots. The Arcanist trousers are drawn to hang over their
+  boots, so they are not tucked.
+
+The skeletons were read off gridded orthographic renders of the raw sources.
+
+- **Torso.** The shoulder line at top − 0.17h maps to `neck_01`. Here h is the
+  height without loose fragments, which leaves out the thin strap hanging below
+  the Ranger's hem. The split is at `spine_02`. The girth scale comes from a
+  chest and waist clearance table: Vanguard 0.72, Ranger 1.00, Arcanist 0.78,
+  Warden 0.78. Trunk lengths follow the body's proportions at that scale.
+- **Sleeves.** The shoulder sits one sleeve radius below the cap, on the
+  sleeve's centre line. The wrist sits 4 cm above the cuff, and the elbow at
+  the body's upper-arm/forearm split.
+- **Legs.** The crotch maps to the body's crotch at 0.77 m. The knee falls at
+  the body's thigh/calf split, or on a knee cop where one is drawn. The ankle
+  sits just above the hem. Leg girth scales are 0.90, 0.95, 0.85 and 0.90.
+- **Leg and boot offsets.** These bones carry the measured offset of the body
+  leg's cross-section from its bone: the calf's centre sits 3.5–4 cm behind
+  the calf bone.
+
+The rules, measurements and renders are in the client's ignored
+`.local/asset-authoring/working/equipment-fit-2026-10-17-kits/` (`make_specs.py`).
+
+```powershell
+blender -b --factory-startup --python eloria-assets/tools/design_fit_blender.py -- --spec eloria-assets/source/equipment-design-fit/<kit>.json --body <bodies>/luminous_<sex>.glb --sources <generate_models/meshy-armor-individual-glb> --out eloria-assets/source/equipment-design-fit/luminous_<sex>
+python eloria-assets/tools/refit_human_bodies.py --bodies <bodies> --generated <generate_models/meshy-armor-individual-glb> --out <scratch> --pieces militia_torso_armor_02,militia_leg_armor_02,militia_greaves_02,leather_ranger_torso_02,rugged_ranger_legwear_04,frontier_boots_03,eloria_arcane_armor_07,arcane_leg_armor_07,arcane_fantasy_boots_07,amberwood_woodland_cuirass_06,amberwood_woodland_legguards_06,amberwood_woodland_boots_06 --tag <t> --jobs 4
+```
+
+**Starter-kit results.** The table gives silhouette IoU of each kit (all three
+pieces) against its solved target in idle (Blender, orthographic, backings
+hidden). "Old" is the per-piece fit installed before this change.
+
+| Kit | Body | Front old | Front new | Side old | Side new |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Vanguard | male | 0.857 | 0.994 | 0.794 | 0.994 |
+| Vanguard | female | 0.873 | 0.995 | 0.810 | 0.994 |
+| Ranger | male | 0.802 | 0.985 | 0.773 | 0.992 |
+| Ranger | female | 0.825 | 0.978 | 0.783 | 0.993 |
+| Arcanist | male | 0.835 | 0.986 | 0.746 | 0.967 |
+| Arcanist | female | 0.823 | 0.988 | 0.781 | 0.968 |
+| Warden | male | 0.877 | 0.993 | 0.777 | 0.977 |
+| Warden | female | 0.888 | 0.995 | 0.797 | 0.982 |
+
+At the 95th percentile, the installed visible art lies this close to the
+target in idle: torsos 0.2–0.7 mm, boots 2–6 mm and legs 4–15 mm. The old fits
+were 30–60 mm, 19–31 mm and 35–101 mm. The leg pipeline still recomputes
+rest-pose weights, and the Arcanist's long back drape moves the most.
+
+The poke check casts rays from each covered body bone's axis. It counts the
+share of rays on which the worn volume lies 2–25 mm outside the visible art;
+the worn volume includes the default clothes, which the runtime hides under
+the piece.
+
+| Piece | Design fit | Old fit |
+| --- | ---: | ---: |
+| Torsos | 0.2–2.8% | 3.4–13.9% |
+| Boots | 5.9–24% | 8.2–40% |
+| Legs | 5–12.5% | 2.3–19.5% |
+
+On the legs, the Vanguard and Warden figures rise because the tucked calves
+now sit on the hidden default trousers inside the boots. The Arcanist boots
+stay highest because their shaft cannot clear the hidden default boot within
+its 1.2 girth cap.
+
+Evidence:
+
+- [Blender target / design fit / old fit](design-fit/starter-kits-blender-old-new-target.jpg)
+- [in-engine before/after, idle](design-fit/starter-kits-engine-before-after.jpg)
+  (real `ReplicatedActor3D`, `canonical_equipment_preview.gd`)
+- [in-engine walk/run cycles](design-fit/starter-kits-engine-walk-run.jpg)
+
+The engine check used the real actor, before and after, on both bodies: Idle_Subtle front, side and back, plus 24-frame Walk and Run_Female cycles from the side. All 80 captures reported `CLIENT_CAPTURE_OK` with no script errors.
+
+- The Vanguard warboots and the Ranger fieldboots now show over the trousers. Before, the trousers flared over them.
+- The coats keep their drawn shoulders and sleeves.
+- The cycles show no tearing at the armpits, knees or boot cuffs.
+
+Two things carry over from the sources and the old pipeline:
+
+- A thin loose strap below the Scout Vest's hem now hangs at the right hip. The old fit threw it a metre to the side, out of frame.
+- The torso backing's wrist edge shows as a ragged fringe inside the wide Vanguard and Arcanist cuffs. It did so before as well.
+
+The equipment, remapper and held-prop suites fail on the same 9 test IDs as
+clean develop at `224bb9b9`. The Kneecops and Sidelace Breeches GLBs gain a
+`ReconstructedInseams` mesh, now that the fitted legs meet at the inseam. The
+packed GLBs change by −0.4% to +6.1%. The eight new fitted-cloth textures
+replace eight textures that no GLB references any more.
+
 **Not yet done.** Other sets keep their per-piece fits until they have a spec.
-Separate boots (sources without legs) need a calf/foot-only skeleton. Race
-headwear is untouched.
+There is still no automatic landmark finder, so each spec's skeleton is read
+off renders. Race headwear is untouched.
 
 ## Two body shapes, preserved race identity
 

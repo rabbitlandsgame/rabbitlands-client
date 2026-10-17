@@ -31,6 +31,15 @@ arm length).  This fits a set the way it was drawn, on the body that wears it:
    blend skinning at the idle pose, so the client's own skinning returns the
    fitted shell exactly in idle.
 
+Added 2026-10-17 for the class starter kits, whose boots are their own
+sources; each is opt-in per spec, so the Phoenix fit is unchanged.  A torso's
+``split_limbs`` gives sleeves hanging against the coat their surface, not the
+nearest bone (split_limbs).  A bone's ``surfaces`` limits which body surfaces
+its clearance clears (a boot shaft clears the default boot, not the trouser
+leg it hides).  ``ground`` seats separate boots' soles in the rest pose where
+limb_head_remap seats them (seat_soles).  ``tuck_into`` layers one piece
+inside another of the same set, such as trouser legs inside the boots (tuck).
+
 The output per source is ``<source>.npz``: rest positions in glTF axes,
 four joint names and weights per vertex, and a keep mask for triangles
 (bridges that the rest pose would stretch are opened; the fitted backing closes
@@ -140,21 +149,28 @@ class Body:
             pb = self.arm.pose.bones[n]
             self.skin[i] = AW @ np.array(pb.matrix) @ np.linalg.inv(np.array(pb.bone.matrix_local)) @ AWi
         dg = bpy.context.evaluated_depsgraph_get()
-        pos, rows = [], []
+        pos, rows, surface, rest = [], [], [], []
+        verts, polys = [], []
         for name in SURFACES:
             o = self.meshes[name]
             groups = [g.name for g in o.vertex_groups]
             ev = o.evaluated_get(dg); me = ev.to_mesh()
             P = [(o.matrix_world @ v.co)[:] for v in me.vertices]
+            polys += [[len(verts) + i for i in f.vertices] for f in me.polygons]
+            verts += [Vector(p) for p in P]
             ev.to_mesh_clear()
             for v, p in zip(o.data.vertices, P):
+                r = (o.matrix_world @ v.co)[:]
                 row = np.zeros(len(self.bones))
                 for g in v.groups:
                     if groups[g.group] in self.index:
                         row[self.index[groups[g.group]]] += g.weight
                 if row.sum() > 0:
-                    pos.append(p); rows.append(row / row.sum())
+                    pos.append(p); rows.append(row / row.sum()); surface.append(name); rest.append(r)
         self.points = np.array(pos)
+        self.bvh = BVHTree.FromPolygons(verts, polys)
+        self.rest_points = np.array(rest)
+        self.surface = np.array(surface)
         self.weights = np.array(rows)
         self.dominant = np.array(self.bones)[self.weights.argmax(1)]
 
@@ -165,6 +181,80 @@ class Body:
         end = "tail" if ref.endswith(".tail") else "head"
         pb = self.arm.pose.bones[ref[:-5] if end == "tail" else ref]
         return np.array((self.arm.matrix_world @ (pb.tail if end == "tail" else pb.head))[:])
+
+
+def split_limbs(P, tris, q, w, ps):
+    """Give each limb the surface joined to it, not just the nearest design bone.
+
+    Where a sleeve hangs against the coat, its inner wall can be nearer the
+    trunk axis than the arm's, and the coat's side nearer the arm's: distance
+    alone hands each to the wrong bone, so in a stride the sleeve wall stays
+    with the chest and the coat's side swings with the arm.  As torso_remap's
+    connected_sleeve does, surface (welded-graph) distance decides instead:
+    seeds on each limb's outer wall and on the coat's middle strip
+    (``trunk_seed_x``) grow over the mesh, each vertex joins the nearer seed
+    set, and blending keeps to its own group's bones.  A few rounds of graph
+    smoothing (``split_smooth``) soften the armhole seam.
+    Bones carry ``"limb": "<name>"``; bones without one are the trunk.
+    """
+    import heapq
+    bones = ps["bones"]
+    group = [b.get("limb", "") for b in bones]
+    names = sorted(set(group))
+    canon, n, pairs = welded_graph(P, tris)
+    first = np.zeros(n, int); first[canon] = np.arange(len(P))
+    length = np.linalg.norm(P[first[pairs[:, 0]]] - P[first[pairs[:, 1]]], axis=1)
+    adj = [[] for _ in range(n)]
+    for (a, b), d in zip(pairs, length):
+        adj[a].append((b, d)); adj[b].append((a, d))
+    trunk_x = float(ps.get("trunk_seed_x", 0.12))
+    dist = {}
+    for g in names:
+        cols = [i for i, x in enumerate(group) if x == g]
+        own = w[:, cols].sum(1)
+        if g == "":
+            # the middle strip of the coat, front, back and collar
+            seeds = (np.abs(P[:, 0]) < trunk_x) & (own > 0.98)
+        else:
+            # the limb's outer wall, which no coat panel reaches
+            seeds = np.zeros(len(P), bool)
+            for i in cols:
+                dh = np.array(bones[i]["design"][0], float); dt = np.array(bones[i]["design"][1], float)
+                foot, _ = seg_proj(P, dh, dt)
+                out_x = np.sign(dh[0] + dt[0]) * (P[:, 0] - foot[:, 0])
+                seeds |= (out_x > 0.3 * float(bones[i]["radius"])) & (q[:, i] < 2.0)
+            seeds &= own > 0.9
+        d = np.full(n, np.inf)
+        heap = [(0.0, int(c)) for c in np.unique(canon[seeds])]
+        for _, c in heap:
+            d[c] = 0.0
+        heapq.heapify(heap)
+        while heap:
+            dc, c = heapq.heappop(heap)
+            if dc > d[c]:
+                continue
+            for nb, dl in adj[c]:
+                if dc + dl < d[nb]:
+                    d[nb] = dc + dl; heapq.heappush(heap, (dc + dl, nb))
+        dist[g] = d[canon]
+    owner = np.array(names)[np.argmin(np.stack([dist[g] for g in names], 1), 1)]
+    tau = float(ps.get("tau", 0.15))
+    out = np.zeros_like(w)
+    for g in names:
+        cols = np.array([i for i, x in enumerate(group) if x == g])
+        rows = owner == g
+        qq = q[np.ix_(rows, cols)]
+        ww = np.exp(-(qq - qq.min(1, keepdims=True)) / tau)
+        out[np.ix_(rows, cols)] = ww / ww.sum(1, keepdims=True)
+    for _ in range(int(ps.get("split_smooth", 2))):
+        acc = np.zeros((n, w.shape[1])); np.add.at(acc, canon, out)
+        cnt = np.bincount(canon, minlength=n).astype(float)
+        node = acc / cnt[:, None]
+        nb_acc = node.copy(); nb_cnt = np.ones(n)
+        np.add.at(nb_acc, pairs[:, 0], node[pairs[:, 1]]); np.add.at(nb_acc, pairs[:, 1], node[pairs[:, 0]])
+        np.add.at(nb_cnt, pairs[:, 0], 1); np.add.at(nb_cnt, pairs[:, 1], 1)
+        out = (nb_acc / nb_cnt[:, None])[canon]
+    return out / out.sum(1, keepdims=True)
 
 
 def fit_piece(body, P, tris, ps):
@@ -189,6 +279,8 @@ def fit_piece(body, P, tris, ps):
     q = np.stack(q, 1)
     w = np.exp(-(q - q.min(1, keepdims=True)) / float(ps.get("tau", 0.15)))
     w /= w.sum(1, keepdims=True)
+    if ps.get("split_limbs"):
+        w = split_limbs(P, tris, q, w, ps)
     dom = w.argmax(1)
 
     def place():
@@ -210,6 +302,9 @@ def fit_piece(body, P, tris, ps):
                 continue
             bvh = BVHTree.FromPolygons([Vector(p) for p in out], faces.tolist())
             sel = np.isin(body.dominant, covers)
+            if "surfaces" in b:
+                # e.g. a boot shaft clears the default boot, not the trouser leg it hides
+                sel &= np.isin(body.surface, b["surfaces"])
             if "zmin" in b:
                 sel &= body.points[:, 2] >= b["zmin"]
             if "zmax" in b:
@@ -256,6 +351,90 @@ def fit_piece(body, P, tris, ps):
                                  "shift_mm": [round(1000 * x, 1) for x in m["t"]], "girth": round(m["g"], 3)}
         out = place()
     return out, w, dom, report
+
+
+def welded_graph(P, tris):
+    """Coincident vertices as one node: (vertex -> node, node count, unique node edges)."""
+    keys = np.round(P / 1e-5).astype(np.int64)
+    canon = np.unique(keys, axis=0, return_inverse=True)[1].ravel()
+    pairs = np.sort(canon[tris[:, [0, 1, 1, 2, 2, 0]].reshape(-1, 2)], axis=1)
+    return canon, int(canon.max()) + 1, np.unique(pairs[pairs[:, 0] != pairs[:, 1]], axis=0)
+
+
+def tuck(body, P, tris, posed, dom, ps, outer, outer_tris):
+    """Tuck a garment's covered part inside another piece of the set.
+
+    A set is worn together: trousers drawn to the ankle go inside boots drawn
+    to the calf.  Fitted on their own, both clear the same body by about the
+    same margin, so the two shells cross and flicker through each other.
+    Rays leave each named bone's posed body axis (``tuck_into.bones``) through
+    every vertex it owns; where they meet the outer piece's shell (``outer``,
+    already posed and seated) closer than the vertex plus ``margin``, the
+    vertex moves in along the ray to that shell less the margin, though never
+    to within ``floor`` of the body surface (default clothes included, so the
+    garment still covers them without the outer piece).  The move spreads a
+    few rings (``ease``) over the welded mesh so the garment eases in at the
+    cuff instead of stepping.  Returns the tucked posed shell and a report.
+    """
+    t = ps["tuck_into"]
+    margin, floor = float(t.get("margin", .006)), float(t.get("floor", .002))
+    shell = BVHTree.FromPolygons([Vector(p) for p in outer], outer_tris.tolist())
+    disp = np.zeros_like(posed); fixed = np.zeros(len(posed), bool)
+    for i, b in enumerate(ps["bones"]):
+        if b["name"] not in t["bones"]:
+            continue
+        a0 = body.joint(b["body"][0]) + np.array(b.get("offset", (0, 0, 0)), float)
+        a1 = body.joint(b["body"][1]) + np.array(b.get("offset_tail", b.get("offset", (0, 0, 0))), float)
+        own = np.flatnonzero(dom == i)
+        foot, _ = seg_proj(posed[own], a0, a1)
+        for v, p0 in zip(own, foot):
+            u = posed[v] - p0; r = float(np.linalg.norm(u))
+            if r < 1e-4:
+                continue
+            u /= r
+            hit = shell.ray_cast(Vector(p0), Vector(u), r + .08)
+            if hit[0] is None or r <= hit[3] - margin:
+                continue
+            reach = .4
+            skin = body.bvh.ray_cast(Vector(p0 + u * reach), Vector(-u), reach)
+            want = max(hit[3] - margin, (reach - skin[3] if skin[0] is not None else 0.) + floor)
+            if want < r:
+                disp[v] = (want - r) * u; fixed[v] = True
+    canon, n, pairs = welded_graph(P, tris)
+    node = np.zeros((n, 3)); np.add.at(node, canon, disp)
+    node /= np.bincount(canon, minlength=n)[:, None]
+    hold = np.zeros(n, bool); hold[canon[fixed]] = True
+    held = node.copy()
+    for _ in range(int(t.get("ease", 4))):
+        acc = node.copy(); cnt = np.ones(n)
+        np.add.at(acc, pairs[:, 0], node[pairs[:, 1]]); np.add.at(acc, pairs[:, 1], node[pairs[:, 0]])
+        np.add.at(cnt, pairs[:, 0], 1); np.add.at(cnt, pairs[:, 1], 1)
+        node = acc / cnt[:, None]; node[hold] = held[hold]
+    move = node[canon]
+    return posed + move, {"into": t["piece"], "tucked": int(fixed.sum()),
+                          "max_mm": round(1000 * float(np.linalg.norm(move, axis=1).max()), 1)}
+
+
+def seat_soles(body, P, rest, sink=0.004):
+    """Stand a pair of separate boots where limb_head_remap seats boots.
+
+    Clearance can lift or drop a boot whose insole does not sit where the
+    foot's sole does, and the idle foot is not the rest foot.  As
+    limb_head_remap does, each side (the source's x sign) moves whole in the
+    rest pose so its sole is ``sink`` under the weighted sole: the lowest rest
+    body point carried more than half by that foot chain
+    (equipment_authoring.weighted_sole).  Returns the shifts (mm).
+    """
+    shifts = {}
+    for side, sign in (("l", 1.), ("r", -1.)):
+        own = P[:, 0] * sign >= 0
+        cols = [body.index[b + "_" + side] for b in ("foot", "ball")]
+        carried = body.weights[:, cols].sum(1) > .5
+        if own.any() and carried.any():
+            dz = float(body.rest_points[carried, 2].min()) - sink - float(rest[own, 2].min())
+            rest[own, 2] += dz
+            shifts[side] = round(1000 * dz, 1)
+    return shifts
 
 
 def skin_weights(body, P, edges, canon, dom, ps, neighbours=2, smooth=3, rigid=250):
@@ -318,6 +497,7 @@ def main():
     summary = {"format": FORMAT, "spec": args.spec.name, "spec_sha256": digest(args.spec),
                "body": args.body.name, "body_sha256": digest(args.body), "pose": args.pose,
                "tool_sha256": digest(__file__), "posekit_sha256": digest(POSEKIT), "pieces": {}}
+    solved = {}
     for piece, ps in spec["pieces"].items():
         src_path = args.sources / (ps["source"] + ".orig")
         new = import_into(src_path, "src_" + piece)
@@ -328,10 +508,33 @@ def main():
         tris = np.array([t.vertices[:] for t in me.loop_triangles])
         posed, w, dom, report = fit_piece(body, P, tris, ps)
         edges = np.array([e.vertices[:] for e in me.edges])
+        solved[piece] = {"src": src_path, "P": P, "tris": tris, "edges": edges, "posed": posed, "dom": dom,
+                         "report": report}
+
+    def finish(piece):
+        ps, sv = spec["pieces"][piece], solved[piece]
+        posed, report = sv["posed"], sv["report"]
         canon = np.unique(np.round(posed / 1e-5).astype(np.int64), axis=0, return_inverse=True)[1].ravel()
-        top, tw, rigid = skin_weights(body, posed, edges, canon, dom, ps)
+        top, tw, rigid = skin_weights(body, posed, sv["edges"], canon, sv["dom"], ps)
         Mv = np.einsum("nk,nkij->nij", tw, body.skin[top])
         rest = np.einsum("nij,nj->ni", np.linalg.inv(Mv), np.c_[posed, np.ones(len(posed))])[:, :3]
+        if ps.get("ground"):
+            # seat the soles in the rest pose; the shell shown in idle follows
+            report["sole_seat_mm"] = seat_soles(body, sv["P"], rest)
+            posed = np.einsum("nij,nj->ni", Mv, np.c_[rest, np.ones(len(rest))])[:, :3]
+        sv.update(posed=posed, rest=rest, top=top, tw=tw, rigid=rigid)
+
+    # a garment tucked into another piece waits for that piece's final shell
+    for piece in sorted(spec["pieces"], key=lambda p: "tuck_into" in spec["pieces"][p]):
+        ps, sv = spec["pieces"][piece], solved[piece]
+        if "tuck_into" in ps:
+            outer = solved[ps["tuck_into"]["piece"]]
+            sv["posed"], sv["report"]["tuck"] = tuck(body, sv["P"], sv["tris"], sv["posed"], sv["dom"], ps,
+                                                     outer["posed"], outer["tris"])
+        finish(piece)
+    for piece, ps in spec["pieces"].items():
+        sv = solved[piece]
+        P, tris, posed, rest, src_path = sv["P"], sv["tris"], sv["posed"], sv["rest"], sv["src"]
         # Bridges the rest pose stretches far past their posed length cannot open into
         # an armpit; the fitted backing closes what is dropped (as torso_remap does).
         stretch = np.ones(len(tris))
@@ -344,15 +547,16 @@ def main():
         to_gltf = lambda a: np.c_[a[:, 0], a[:, 2], -a[:, 1]]
         out = args.out / (ps["source"] + ".npz")
         np.savez_compressed(out, format=FORMAT, positions=to_gltf(rest).astype(np.float64),
-                            posed=to_gltf(posed), joint_names=np.array(body.bones), joints=top.astype(np.uint16),
-                            weights=tw.astype(np.float64), keep=keep, scale=float(ps["scale"]),
-                            source_sha256=digest(src_path),
+                            posed=to_gltf(posed), joint_names=np.array(body.bones),
+                            joints=sv["top"].astype(np.uint16), weights=sv["tw"].astype(np.float64),
+                            keep=keep, scale=float(ps["scale"]), source_sha256=digest(src_path),
                             body_sha256=digest(args.body), spec_sha256=digest(args.spec))
         summary["pieces"][piece] = {"source": ps["source"], "vertices": len(P), "triangles": len(tris),
-                                    "opened": int((~keep).sum()), "rigidPlates": rigid,
-                                    "bones": report, "out": out.name, "sha256": digest(out)}
+                                    "opened": int((~keep).sum()), "rigidPlates": sv["rigid"],
+                                    "bones": sv["report"], "out": out.name, "sha256": digest(out)}
         print("DESIGN_FIT", piece, json.dumps(summary["pieces"][piece]))
-    (args.out / (args.spec.stem + ".report.json")).write_text(json.dumps(summary, indent=1) + "\n")
+    # LF on every platform (write_text would give CRLF on Windows)
+    (args.out / (args.spec.stem + ".report.json")).write_bytes((json.dumps(summary, indent=1) + "\n").encode())
 
 
 if __name__ == "__main__":
