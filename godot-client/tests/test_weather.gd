@@ -174,6 +174,16 @@ func _run() -> void:
 		and int((app_state.get("weather") as Dictionary).kind) == 1
 		and layer.state_name == "heavy_rain" and layer.settling() and layer.is_raining(),
 		"a whole-sky frame reaches the layer and eases over its own time: %s" % told)
+	# Walking into another map: its sky is as it is (no seconds left), and is
+	# still eased into rather than cut at the border.
+	await _settle(layer, 25.0)
+	app_state.set("current_map", "a_neighbour")
+	var still := PackedByteArray([1, 0, 0, 55, 85, 18, 5, 0, 0, 0, 55, 85, 18, 5, 0, 0, 0, 3])
+	still.append_array("fog".to_ascii_buffer())
+	app_state.call("_on_packet", EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE, still)
+	await process_frame
+	_expect(layer.settling() and layer.is_raining() == false and layer.state_name == "fog",
+		"a sky met by crossing into another map eases in over a few seconds")
 	app_state.call("_on_packet", 100, PackedByteArray([0, 0]))
 	await process_frame
 	_expect((app_state.get("weather_state") as Dictionary).is_empty() and not layer.is_raining(),

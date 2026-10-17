@@ -347,6 +347,9 @@ var weather_layer: Weather3D
 ## False until the first sky after logging in, which is set at once; every
 ## later change of weather eases in.
 var _weather_synced := false
+## The map the weather was last synced for: a sky met by crossing into
+## another map eases in over at least Weather3D.CROSSING_EASE_SECONDS.
+var _weather_map := ""
 var _weather_lighting_at := 0
 ## The weather look the light was last applied under (Weather3D.look_version),
 ## so the sky is applied again while the weather eases, its last step included.
@@ -10020,10 +10023,15 @@ func _sync_weather() -> void:
 	# legacy one does not, and its change eases over LEGACY_EASE_SECONDS.
 	var first := not _weather_synced
 	_weather_synced = true
+	var map := str(AppState.current_map)
+	var crossed := not first and map != _weather_map
+	_weather_map = map
 	var state: Dictionary = AppState.weather_state
 	if not state.is_empty():
 		var left := maxf(0.0, float(state.seconds)
 			- float(Time.get_ticks_msec() - int(state.at_msec)) / 1000.0)
+		if crossed:
+			left = maxf(left, Weather3D.CROSSING_EASE_SECONDS)
 		weather_layer.set_state(state.current, state.target, left, _effects_enabled,
 			first, str(state.name))
 	else:

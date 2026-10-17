@@ -49,6 +49,10 @@ const LEGACY_HEAVY_RAIN: Array[float] = [0.85, 1.0, 0.40, 0.45, 0.55, 0.0]
 const LEGACY_STORM: Array[float] = [1.0, 1.0, 0.45, 0.60, 0.85, 0.70]
 ## A legacy change has no time of its own; it eases over this.
 const LEGACY_EASE_SECONDS := 5.0
+## Walking into another map meets its sky as it is (no change of its own in
+## progress, so no seconds left); the client eases to it over at least this,
+## so a border between a clear isle and a wet one is crossed, not cut.
+const CROSSING_EASE_SECONDS := 8.0
 
 const FIRE_KINDS: Array[String] = ["hearth", "forge", "pyre"]
 ## Flame colour per kind: a hearth is warm, a forge is white-hot, a pyre burns
