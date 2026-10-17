@@ -213,6 +213,10 @@
     }
    ],
    "split_limbs": true,
+   "centre_cuffs": [
+    "lowerarm_l",
+    "lowerarm_r"
+   ],
    "conform": {
     "bodies": [
      "luminous_female"
@@ -232,6 +236,13 @@
     "to": 1.64,
     "clear": 0.015,
     "max": 0.08
+   },
+   "twist": {
+    "pelvis": 0.5,
+    "to": {
+     "spine_02": 0.4,
+     "spine_03": 0.6
+    }
    }
   },
   "legs": {
@@ -463,6 +474,22 @@
      },
      "follow": 0.8,
      "calf": 0.15
+    }
+   ],
+   "tuck_into": [
+    {
+     "piece": "torso",
+     "bones": [
+      "pelvis",
+      "thigh_l",
+      "thigh_r"
+     ],
+     "margin": 0.01,
+     "arc": [
+      110,
+      250
+     ],
+     "max": 0.04
     }
    ]
   },

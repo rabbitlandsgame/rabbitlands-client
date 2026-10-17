@@ -1,18 +1,18 @@
 {
  "format": 2,
  "spec": "vanguard.json",
- "spec_sha256": "4d656d3c6f6331995c52f054c8a6807000a1497ff268e5c9a6548707287d6be1",
+ "spec_sha256": "04cf25f119383c0ee1b953547e48cb25ac743f9d00bd1e1cbc4fffc3315eaa8d",
  "body": "luminous_female.glb",
  "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
  "pose": "Idle_Subtle",
- "tool_sha256": "59c72d5ca014cfaff9c4208288d4d0ed31efa63423eb07f6c12ea8d24ecc9726",
+ "tool_sha256": "55e0adc47a41478832a1db5561fae711dcc0709b1fa8d4dea206733778077ca8",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
    "source": "Militia_torso_armor_concept_sheet__r01_c02.glb",
    "vertices": 1496,
    "triangles": 1539,
-   "opened": 40,
+   "opened": 38,
    "rigidPlates": 7,
    "bones": {
     "trunk_lower": {
@@ -81,13 +81,31 @@
      "out_mm": 20.6,
      "in_mm": 19.8
     },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      27.8,
+      -14.1,
+      11.8
+     ],
+     "lowerarm_r": [
+      -22.4,
+      -8.3,
+      8.4
+     ]
+    },
     "collar": {
      "cells": 214,
      "max_mm": 77.0
-    }
+    },
+    "tuck_sleeves": {
+     "into": "self",
+     "tucked": 85,
+     "max_mm": 37.9
+    },
+    "twist_vertices": 516
    },
    "out": "Militia_torso_armor_concept_sheet__r01_c02.glb.npz",
-   "sha256": "362fcec8469ff5d99beba534d8cd0f5d8aa0415fb88b7c914cb0f6b83a0c3bc5"
+   "sha256": "7a316eabab46bad9dd9a62b57098efebd6f01843cd30b5329e448d2c782b6b7c"
   },
   "legs": {
    "source": "Eloria_Militia_Leg_Armor_Variants__r01_c02.glb",
@@ -146,14 +164,21 @@
      ],
      "girth": 1.075
     },
-    "tuck": {
-     "into": "boots",
-     "tucked": 420,
-     "max_mm": 52.9
-    }
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 67,
+      "max_mm": 38.4
+     },
+     {
+      "into": "boots",
+      "tucked": 420,
+      "max_mm": 52.9
+     }
+    ]
    },
    "out": "Eloria_Militia_Leg_Armor_Variants__r01_c02.glb.npz",
-   "sha256": "55ca5c6f0264bfa4405eaae840db4ad9365b6bdff9590536cf2bab46b4eb0b1c"
+   "sha256": "13d2c79c4bd77a82d6e3d97fbc6e0e3730be23a8e4033acdd27b9a8f410ca664"
   },
   "boots": {
    "source": "Eight_medieval_militia_greaves__r01_c02.glb",
@@ -208,7 +233,7 @@
     }
    },
    "out": "Eight_medieval_militia_greaves__r01_c02.glb.npz",
-   "sha256": "f285c8e8ae2edfe1614d2b93613b7dc0f31029a40209b91d9e717264b6d78d8f"
+   "sha256": "06c36c92fd966cbb2ef209126af4f992c7c91d3cb692dfcb52867358855109b1"
   }
  }
 }

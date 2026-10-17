@@ -1,11 +1,11 @@
 {
  "format": 2,
  "spec": "phoenix.json",
- "spec_sha256": "0c0e37f0c0f8897ef98c81b94ce42301f7a596f53cf3f33d99d08b9d43e09702",
+ "spec_sha256": "a087ad52f0991eb8e69e3abac435cf484dcf283e15aa971fc85c8df51348ab2c",
  "body": "luminous_male.glb",
  "body_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
  "pose": "Idle_Subtle",
- "tool_sha256": "59c72d5ca014cfaff9c4208288d4d0ed31efa63423eb07f6c12ea8d24ecc9726",
+ "tool_sha256": "55e0adc47a41478832a1db5561fae711dcc0709b1fa8d4dea206733778077ca8",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
@@ -75,13 +75,26 @@
      ],
      "girth": 1.098
     },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      -5.1,
+      -51.2,
+      17.2
+     ],
+     "lowerarm_r": [
+      4.0,
+      -37.5,
+      12.8
+     ]
+    },
     "collar": {
      "cells": 109,
      "max_mm": 23.0
-    }
+    },
+    "twist_vertices": 531
    },
    "out": "Eight_legendary_hero_armor_designs__r01_c01.glb.npz",
-   "sha256": "39b6c587a3d528d566dd958c49db22375afca0af1226093ac5d556b4e7ecbc97"
+   "sha256": "820f1f4365361b45a4a4f2fff39507c09b31bd46c0f90521cc1599049422c8f2"
   },
   "legs": {
    "source": "Eight_legendary_fantasy_leg_armor_designs__r01_c01.glb",
@@ -159,10 +172,15 @@
       9.0
      ],
      "girth": 1.1
+    },
+    "tuck": {
+     "into": "torso",
+     "tucked": 67,
+     "max_mm": 40.0
     }
    },
    "out": "Eight_legendary_fantasy_leg_armor_designs__r01_c01.glb.npz",
-   "sha256": "11bc8c7f0a8b492ba2458630b396c545650014acb118657086c349c53c21813e"
+   "sha256": "09c2d31fac44496b88fece16e66c34c8e6fed73e47e55324803f216d0ff62c7a"
   }
  }
 }

@@ -38,11 +38,14 @@ nearest bone (split_limbs).  A bone's ``surfaces`` limits which body surfaces
 its clearance clears (a boot shaft clears the default boot, not the trouser
 leg it hides).  ``ground`` seats separate boots' soles in the rest pose where
 limb_head_remap seats them (seat_soles).  ``tuck_into`` layers one piece
-inside another of the same set, such as trouser legs inside the boots (tuck).
+inside another of the same set, such as trouser legs inside the boots (tuck);
+it may name several pieces, as trousers tucked into both coat and boots.
 Later the same day, after the owner's review: ``conform`` lets a coat front
 follow the chest it covers on the bodies it names (conform), and ``drape``
 hangs tails from the belt instead of binding them to the leg behind (drape);
-``collar`` brings a collar's back out of the neck it was fitted into (collar).
+``collar`` brings a collar's back out of the neck it was fitted into (collar);
+``twist`` lets a coat's waist turn with the chest (twist), and
+``centre_cuffs`` puts each sleeve's end on its wrist (centre_cuffs).
 
 The output per source is ``<source>.npz``: rest positions in glTF axes,
 four joint names and weights per vertex, and a keep mask for triangles
@@ -423,6 +426,49 @@ def conform(body, posed, tris, w, ps):
                  "in_mm": round(1000 * float(-move.min()), 1)}
 
 
+def centre_cuffs(body, posed, w, ps):
+    """Centre each sleeve's end on the wrist it ends at, in idle.
+
+    Added 2026-10-17 (owner's second review, note 22: the Phoenix cuffs'
+    openings were not aligned with the hands).  The forearm bone's similarity
+    carries a cuff drawn off the middle of the concept's sleeve that far off
+    the wrist, and the clearance shift moves it further: in idle the Phoenix
+    cuff ring stood 4-5 cm in front of the wrist and the kit cuffs 1-3.6 cm
+    to the side.  Each bone named in ``centre_cuffs`` is measured in the
+    posed shell: the centre of the art it owns in the last 20% of the posed
+    lowerarm -> hand segment, against the centre of the forearm surface there
+    (skin and default shirt).  The difference across the forearm is taken
+    off the bone's art, all of it at the cuff and fading to none at 35% of
+    the way from the elbow, so the sleeve leans onto the wrist rather than
+    stepping.  Twice, as a fit step.  Returns the shell and the offsets
+    removed, per bone, in mm.
+    """
+    names = [b["name"] for b in ps["bones"]]
+    sm = lambda x, e0, e1: (lambda t: t * t * (3 - 2 * t))(np.clip((x - e0) / (e1 - e0), 0., 1.))
+    out, report = posed.copy(), {}
+    for name in ps["centre_cuffs"]:
+        i = names.index(name); side = name[-1]
+        e, h = body.joint("lowerarm_" + side), body.joint("hand_" + side)
+        ax = h - e; L = float(np.linalg.norm(ax)); ax = ax / L
+        dom = np.isin(body.dominant, ["lowerarm_" + side, "hand_" + side])
+        total = np.zeros(3)
+        for _ in range(2):
+            def band(P, t0, t1, rmax, mask):
+                t = (P - e) @ ax / L; r = P - (e + np.outer(t * L, ax))
+                return (t > t0) & (t < t1) & (np.linalg.norm(r, axis=1) < rmax) & mask, r
+            ring, ra = band(out, .80, 1.02, .12, w[:, i] > .5)
+            skin, rs = band(body.points, .80, 1.0, .06, dom)
+            if ring.sum() < 6 or skin.sum() < 6:
+                break
+            off = ra[ring].mean(0) - rs[skin].mean(0)
+            off -= ax * (off @ ax)
+            t = (out - e) @ ax / L
+            out -= np.outer(w[:, i] * sm(t, .35, .85), off)
+            total += off
+        report[name] = [round(1000 * float(x), 1) for x in total]
+    return out, report
+
+
 def collar(body, posed, tris, w, ps):
     """Bring a collar's back out of the neck it was fitted into.
 
@@ -519,10 +565,17 @@ def tuck(body, P, tris, posed, dom, ps, outer, outer_tris):
     to within ``floor`` of the body surface (default clothes included, so the
     garment still covers them without the outer piece).  The move spreads a
     few rings (``ease``) over the welded mesh so the garment eases in at the
-    cuff instead of stepping.  Returns the tucked posed shell and a report.
+    cuff instead of stepping.  ``arc`` ([from, to] degrees round the bone,
+    0 the front, 180 the back) limits the tuck to that side, and a vertex that
+    would have to move more than ``max`` stays where it is: a belt, a flap or
+    a tasset that far outside is a designed outer layer, not a poke-through
+    (owner's second review: tucking trousers into the coat all round pushed
+    the Ranger's belt under the vest and crushed the Warden's fur flaps by
+    14 cm).  Returns the tucked posed shell and a report.
     """
     t = ps["tuck_into"]
     margin, floor = float(t.get("margin", .006)), float(t.get("floor", .002))
+    arc = t.get("arc"); limit = float(t.get("max", np.inf))
     shell = BVHTree.FromPolygons([Vector(p) for p in outer], outer_tris.tolist())
     disp = np.zeros_like(posed); fixed = np.zeros(len(posed), bool)
     for i, b in enumerate(ps["bones"]):
@@ -537,13 +590,17 @@ def tuck(body, P, tris, posed, dom, ps, outer, outer_tris):
             if r < 1e-4:
                 continue
             u /= r
+            if arc is not None:
+                bearing = float(np.degrees(np.arctan2(u[0], -u[1]))) % 360  # 0 is the front (-Y)
+                if not (float(arc[0]) <= bearing <= float(arc[1])):
+                    continue
             hit = shell.ray_cast(Vector(p0), Vector(u), r + .08)
             if hit[0] is None or r <= hit[3] - margin:
                 continue
             reach = .4
             skin = body.bvh.ray_cast(Vector(p0 + u * reach), Vector(-u), reach)
             want = max(hit[3] - margin, (reach - skin[3] if skin[0] is not None else 0.) + floor)
-            if want < r:
+            if want < r and r - want <= limit:
                 disp[v] = (want - r) * u; fixed[v] = True
     canon, n, pairs = welded_graph(P, tris)
     node = np.zeros((n, 3)); np.add.at(node, canon, disp)
@@ -641,6 +698,48 @@ def drape(body, P, tris, top, tw, ps):
     return report
 
 
+def twist(body, posed, top, tw, w, ps):
+    """Let a coat's waist turn with the chest instead of shearing at the belt.
+
+    Added 2026-10-17 (owner's second review, notes 13 and 15).  Weights from
+    the nearest body surface give the coat what the skin has: the waist is
+    pelvis up to about 1.12 m and spine above, with no spine_01 at all, so in
+    a run or a drawn bow the chest turned and the belt and everything below
+    it stayed with the hips, sheared along one line.  ``twist`` caps the
+    pelvis share of trunk vertices on a smooth ramp, ``pelvis`` at the hip
+    joint falling to none at spine_02 (``hip`` / ``waist`` override the two
+    heights), and gives the excess to the bones in ``to`` (shares; default
+    spine_01 and spine_02 equally).  The clips turn the chest mostly at
+    spine_03: in Bow_Pull_Back spine_03 turns 65 degrees while spine_01 turns
+    the other way, so a belt meant to turn with the chest needs a spine_03
+    share.  Thigh shares stay, so a skirt still follows the legs.  Returns the
+    vertices changed.
+    """
+    c = ps["twist"]
+    hip = float(c.get("hip", body.joint("thigh_l")[2]))
+    waist = float(c.get("waist", body.joint("spine_02")[2]))
+    cap0 = float(c.get("pelvis", .7))
+    limb = np.array([bool(b.get("limb")) for b in ps["bones"]])
+    trunk = (w[:, ~limb].sum(1) if (~limb).any() else np.ones(len(posed))) > .5
+    sm = lambda x, e0, e1: (lambda t: t * t * (3 - 2 * t))(np.clip((x - e0) / (e1 - e0), 0., 1.))
+    cap = cap0 * (1 - sm(posed[:, 2], hip, waist))
+    pelvis = body.index["pelvis"]
+    to = {body.index[n]: float(v) for n, v in c.get("to", {"spine_01": .5, "spine_02": .5}).items()}
+    total = sum(to.values())
+    dense = np.zeros((len(posed), len(body.bones)))
+    np.add.at(dense, (np.repeat(np.arange(len(posed)), top.shape[1]), top.ravel()), tw.ravel())
+    excess = np.where(trunk, np.maximum(dense[:, pelvis] - cap, 0.), 0.)
+    dense[:, pelvis] -= excess
+    for col, share in to.items():
+        dense[:, col] += excess * share / total
+    changed = excess > 1e-6
+    t4 = np.argsort(-dense, 1)[:, :4]
+    w4 = np.take_along_axis(dense, t4, 1)
+    w4 /= np.maximum(w4.sum(1, keepdims=True), 1e-12)
+    top[changed], tw[changed] = t4[changed], w4[changed]
+    return int(changed.sum())
+
+
 def skin_weights(body, P, edges, canon, dom, ps, neighbours=2, smooth=3, rigid=250):
     """Nearest posed body surface weights, scoped per design bone, smoothed, plates rigid."""
     W = np.zeros((len(P), len(body.bones)))
@@ -713,8 +812,20 @@ def main():
         posed, w, dom, report = fit_piece(body, P, tris, ps)
         if "conform" in ps and args.body.stem in ps["conform"].get("bodies", []):
             posed, report["conform"] = conform(body, posed, tris, w, ps)
+        if "centre_cuffs" in ps:
+            posed, report["centre_cuffs"] = centre_cuffs(body, posed, w, ps)
         if "collar" in ps:
             posed, report["collar"] = collar(body, posed, tris, w, ps)
+        if "tuck_sleeves" in ps:
+            # A coat's own sleeves go under its shoulder panels (owner's second
+            # review, note 9: the Scout Vest's shirt sleeves came through the
+            # vest's back shoulder): the tuck, with the piece's trunk art as the
+            # outer shell and the upper-arm bones' own art moving in.
+            limb = np.array([bool(b.get("limb")) for b in ps["bones"]])
+            trunk = w[:, ~limb].sum(1) > .5
+            t = dict(ps["tuck_sleeves"], piece="self")
+            posed, report["tuck_sleeves"] = tuck(body, P, tris, posed, w.argmax(1), dict(ps, tuck_into=t),
+                                                 posed, tris[np.all(trunk[tris], axis=1)])
         edges = np.array([e.vertices[:] for e in me.edges])
         solved[piece] = {"src": src_path, "P": P, "tris": tris, "edges": edges, "posed": posed, "dom": dom,
                          "w": w, "report": report}
@@ -726,6 +837,8 @@ def main():
         top, tw, rigid = skin_weights(body, posed, sv["edges"], canon, sv["dom"], ps)
         if ps.get("drape"):
             report["drape_vertices"] = drape(body, sv["P"], sv["tris"], top, tw, ps)
+        if ps.get("twist"):
+            report["twist_vertices"] = twist(body, posed, top, tw, sv["w"], ps)
         Mv = np.einsum("nk,nkij->nij", tw, body.skin[top])
         rest = np.einsum("nij,nj->ni", np.linalg.inv(Mv), np.c_[posed, np.ones(len(posed))])[:, :3]
         if ps.get("ground"):
@@ -737,10 +850,23 @@ def main():
     # a garment tucked into another piece waits for that piece's final shell
     for piece in sorted(spec["pieces"], key=lambda p: "tuck_into" in spec["pieces"][p]):
         ps, sv = spec["pieces"][piece], solved[piece]
-        if "tuck_into" in ps:
-            outer = solved[ps["tuck_into"]["piece"]]
-            sv["posed"], sv["report"]["tuck"] = tuck(body, sv["P"], sv["tris"], sv["posed"], sv["dom"], ps,
-                                                     outer["posed"], outer["tris"])
+        tucks = ps.get("tuck_into", [])
+        reports = []
+        for t in [tucks] if isinstance(tucks, dict) else tucks:
+            # Into a coat, only its trunk counts: a sleeve or hand hanging
+            # beside the thigh is no shell to tuck under.
+            outer = solved[t["piece"]]
+            outer_ps = spec["pieces"][t["piece"]]
+            limb = np.array([bool(b.get("limb")) for b in outer_ps["bones"]])
+            tris = outer["tris"]
+            if limb.any():
+                trunk = outer["w"][:, ~limb].sum(1) > .5
+                tris = tris[np.all(trunk[tris], axis=1)]
+            sv["posed"], r = tuck(body, sv["P"], sv["tris"], sv["posed"], sv["dom"], dict(ps, tuck_into=t),
+                                  outer["posed"], tris)
+            reports.append(r)
+        if reports:
+            sv["report"]["tuck"] = reports if len(reports) > 1 else reports[0]
         finish(piece)
     for piece, ps in spec["pieces"].items():
         sv = solved[piece]

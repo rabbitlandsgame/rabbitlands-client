@@ -246,14 +246,17 @@ func _apply_equipment() -> void:
 		_debug_tint()
 
 
-## --debug-tint yes: generated backings magenta, body and wardrobe surfaces cyan,
-## so a hole can be told from a lining or the skin behind it.
+## --debug-tint yes: generated backings magenta, reconstructed inseams green,
+## body and wardrobe surfaces cyan, so a hole can be told from a lining or the
+## skin behind it.
 func _debug_tint() -> void:
-	var tints := {"backing": Color(1.0, 0.0, 1.0), "body": Color(0.0, 0.9, 0.9)}
+	var tints := {"backing": Color(1.0, 0.0, 1.0), "body": Color(0.0, 0.9, 0.9),
+		"inseam": Color(0.1, 0.9, 0.1)}
 	for node: Node in actor.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node := node as MeshInstance3D
 		var lower := mesh_node.name.to_lower()
 		var kind := ("backing" if lower.contains("backing") else
+			"inseam" if lower.contains("reconstructedinseams") else
 			"body" if lower in ["body", "char1", "mesh_node"] or lower.begins_with("wardrobe_") else "")
 		if options.get("debug-meshes", "no") == "yes":
 			var first := mesh_node.get_active_material(0) if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 0 else null

@@ -1,11 +1,11 @@
 {
  "format": 2,
  "spec": "warden.json",
- "spec_sha256": "b9ad2990b481fda91f38c3ddf88087a8fc31f773c0b546e4b4d7d0394a58613f",
+ "spec_sha256": "d0d700062b71cb085bb6dd9725bc537ef4f4946ed8fb4861bb569fa1201df1c1",
  "body": "luminous_female.glb",
  "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
  "pose": "Idle_Subtle",
- "tool_sha256": "59c72d5ca014cfaff9c4208288d4d0ed31efa63423eb07f6c12ea8d24ecc9726",
+ "tool_sha256": "55e0adc47a41478832a1db5561fae711dcc0709b1fa8d4dea206733778077ca8",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
@@ -81,13 +81,26 @@
      "out_mm": 11.9,
      "in_mm": 19.9
     },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      -2.0,
+      -6.3,
+      1.8
+     ],
+     "lowerarm_r": [
+      9.4,
+      -1.7,
+      -1.6
+     ]
+    },
     "collar": {
      "cells": 140,
      "max_mm": 49.8
-    }
+    },
+    "twist_vertices": 959
    },
    "out": "Amberwood_Woodland_Armor_Concept_Sheet__r02_c02.glb.npz",
-   "sha256": "e9ef5ad7d605ef2a741d1e74b6684bcc6e0fd525ec03c39590cd1621895bde01"
+   "sha256": "785420ec4daefa48a1fa471e9f24b3f2078d6a8b7039a1768b1cbe6015db0a82"
   },
   "legs": {
    "source": "Amberwood_Woodland_Legwear_Concept_Sheet__r02_c02.glb",
@@ -146,14 +159,21 @@
      ],
      "girth": 1.15
     },
-    "tuck": {
-     "into": "boots",
-     "tucked": 243,
-     "max_mm": 76.4
-    }
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 82,
+      "max_mm": 34.6
+     },
+     {
+      "into": "boots",
+      "tucked": 243,
+      "max_mm": 76.4
+     }
+    ]
    },
    "out": "Amberwood_Woodland_Legwear_Concept_Sheet__r02_c02.glb.npz",
-   "sha256": "563a8fce1557a1369b5a9efead6cd6f0de2036db252db3f3071c4f7c835c2c77"
+   "sha256": "bcb86da49651d5b1d216e17c1d97e8a977bd63a79374a4b67f62e818fb133235"
   },
   "boots": {
    "source": "Eight_amberwood_woodland_boot_designs__r02_c02.glb",
@@ -208,7 +228,7 @@
     }
    },
    "out": "Eight_amberwood_woodland_boot_designs__r02_c02.glb.npz",
-   "sha256": "0cd45aecad258bb8e47ba210b5cfc9ab9f673d8740ac9e844e130c713861d71e"
+   "sha256": "07555b053bff3d47ffdc77477723b90c17265fe701e5eba14d90a3e666e4b970"
   }
  }
 }

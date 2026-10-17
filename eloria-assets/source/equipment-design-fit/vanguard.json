@@ -213,6 +213,22 @@
     }
    ],
    "split_limbs": true,
+   "tuck_sleeves": {
+    "bones": [
+     "upperarm_l",
+     "upperarm_r"
+    ],
+    "margin": 0.006,
+    "arc": [
+     100,
+     260
+    ],
+    "max": 0.04
+   },
+   "centre_cuffs": [
+    "lowerarm_l",
+    "lowerarm_r"
+   ],
    "conform": {
     "bodies": [
      "luminous_female"
@@ -232,6 +248,13 @@
     "to": 1.64,
     "clear": 0.015,
     "max": 0.08
+   },
+   "twist": {
+    "pelvis": 0.5,
+    "to": {
+     "spine_02": 0.4,
+     "spine_03": 0.6
+    }
    }
   },
   "legs": {
@@ -436,14 +459,30 @@
      ]
     }
    ],
-   "tuck_into": {
-    "piece": "boots",
-    "bones": [
-     "calf_l",
-     "calf_r"
-    ],
-    "margin": 0.006
-   }
+   "tuck_into": [
+    {
+     "piece": "torso",
+     "bones": [
+      "pelvis",
+      "thigh_l",
+      "thigh_r"
+     ],
+     "margin": 0.01,
+     "arc": [
+      110,
+      250
+     ],
+     "max": 0.04
+    },
+    {
+     "piece": "boots",
+     "bones": [
+      "calf_l",
+      "calf_r"
+     ],
+     "margin": 0.006
+    }
+   ]
   },
   "boots": {
    "source": "Eight_medieval_militia_greaves__r01_c02.glb",

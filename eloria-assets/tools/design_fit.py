@@ -77,7 +77,33 @@ def inverse_skin(posed, joints, weights, skin):
     return np.linalg.solve(blend, np.c_[posed, np.ones(len(posed))][..., None])[:, :3, 0]
 
 
-def bind_sleeves(fit, rig, triangles, passes=2):
+def seam_distance(points, triangles, part, limit):
+    """Surface (welded-graph) distance from each vertex to the seam between parts, inf past ``limit``."""
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import dijkstra
+    key = np.unique(np.round(points / 1e-5).astype(np.int64), axis=0, return_inverse=True)[1].ravel()
+    count = int(key.max()) + 1
+    first = np.zeros(count, dtype=int); first[key] = np.arange(len(points))
+    edges = np.r_[triangles[:, [0, 1]], triangles[:, [1, 2]], triangles[:, [2, 0]]]
+    a, b = key[edges[:, 0]], key[edges[:, 1]]
+    length = np.maximum(np.linalg.norm(points[first[a]] - points[first[b]], axis=1), 1e-9)
+    graph = coo_matrix((length, (a, b)), shape=(count, count)).tocsr()
+    seam = np.unique(key[triangles[np.ptp(part[triangles], axis=1) > 0].ravel()])
+    if not len(seam):
+        return np.full(len(points), np.inf)
+    return dijkstra(graph, directed=False, indices=seam, min_only=True, limit=limit)[key]
+
+
+#: A sleeve/coat seam triangle the fit itself stretches past this multiple of
+#: its source size (the piece's scale) spans a gap the fit opened between
+#: sleeve and coat; it is cut, as before, and the fitted lining shows behind.
+SEAM_STRETCH = 1.6
+#: Width (rig units) of the band across the sleeve/coat seam over which the
+#: arm field and the fit's trunk weights blend: on the sleeve, on the coat.
+SLEEVE_BAND, COAT_BAND = .05, .06
+
+
+def bind_sleeves(fit, rig, triangles, passes=2, source=None):
     """Bind sleeves with torso_remap's continuous arm field, keeping the idle shell.
 
     The design fit weights every vertex from the posed body surface nearest it
@@ -87,42 +113,69 @@ def bind_sleeves(fit, rig, triangles, passes=2):
     vertex the fit gave to an arm (``arm_share`` > .5) instead follows that
     arm by its rest position along the upper arm and forearm (lowerarm from
     43% to 59% of the way to the wrist). The trunk keeps the fit's weights,
-    tassets on thighs included. The weights are smoothed over the mesh with
-    the sleeve/coat bridges opened, again as torso_remap does, except across the
-    shoulder yoke. The rest pose is then solved again from the idle shell
+    tassets on thighs included.
+
+    Across the seam the two blend (revised after the owner's second review,
+    2026-10-17). A hard switch with the sleeve/coat bridges opened let the arm
+    slide through the coat's arm hole in idle and walk and opened gaps at the
+    armpit and the back of the shoulder in a drawn bow. Now, over a band
+    SLEEVE_BAND wide on the sleeve and COAT_BAND on the coat (surface
+    distance from the seam), each side takes a share of the other's
+    weights, half at the seam and none at the band's edge, so the arm hole
+    moves with the arm and the seam stays sewn. The weights are smoothed over
+    the whole mesh, and the rest pose is then solved again from the idle shell
     (``inverse_skin``), so the client still returns the fitted shell exactly
     in idle; two passes let the arm field see the sleeves' new rest positions.
 
-    Returns rest positions, joints, weights and the triangles to keep.
+    Only seam triangles the fit already stretched in idle past SEAM_STRETCH
+    times their ``source`` size (raw art, the piece's scale applied) are cut:
+    sewn, they smeared the art across the gap (the Studded Jack's back beside
+    the sleeve). keep_triangles still opens any bridge the rest pose
+    overstretches. Returns rest positions, joints, weights and the triangles
+    to keep.
     """
     import equipment_seams
     from equipment_skinning import smoothstep
     posed, skin = fit["posed"], fit["skin"]
     part = np.where(fit["arm_share"][:, 0] > .5, 1, np.where(fit["arm_share"][:, 1] > .5, 2, 0))
     rest, joints, weights = fit["positions"], fit["joints"], fit["weights"]
-    # Bridges between a sleeve and the coat open; the shoulder yoke above the
-    # arm root stays sewn (torso_remap's shoulder_seam).
-    yoke = min(rig.origin("upperarm_l")[1], rig.origin("upperarm_r")[1]) - .03 * rig.fit_scale
-    same = np.ptp(part[triangles], axis=1) == 0
-    keep = same | (rest[triangles, 1].min(axis=1) > yoke)
     count = len(rig.joint_names)
+    trunk_fit = np.zeros((len(rest), count))
+    for slot in range(joints.shape[1]):
+        np.add.at(trunk_fit, (np.arange(len(rest)), joints[:, slot].astype(int)), weights[:, slot])
+    scale = rig.fit_scale
+    distance = seam_distance(posed, triangles, part, max(SLEEVE_BAND, COAT_BAND) * scale)
+    on_sleeve = .5 * (1 - smoothstep(distance, 0., SLEEVE_BAND * scale))
+    on_coat = .5 * (1 - smoothstep(distance, 0., COAT_BAND * scale))
     for _ in range(passes):
-        dense = np.zeros((len(rest), count))
-        for slot in range(joints.shape[1]):
-            np.add.at(dense, (np.arange(len(rest)), joints[:, slot].astype(int)), weights[:, slot])
+        dense = trunk_fit.copy()
         for col, side in enumerate("lr"):
-            own = part == col + 1
             root, wrist = rig.origin("upperarm_" + side), rig.origin("hand_" + side)
             axis = wrist - root
-            lower = smoothstep((rest[own] - root) @ axis / (axis @ axis), .43, .59)
-            dense[own] = 0.
-            dense[own, rig.joint_names.index("upperarm_" + side)] = 1 - lower
-            dense[own, rig.joint_names.index("lowerarm_" + side)] = lower
+            lower = smoothstep((rest - root) @ axis / (axis @ axis), .43, .59)
+            field = np.zeros((len(rest), count))
+            field[:, rig.joint_names.index("upperarm_" + side)] = 1 - lower
+            field[:, rig.joint_names.index("lowerarm_" + side)] = lower
+            own = part == col + 1
+            dense[own] = ((1 - on_sleeve[own])[:, None] * field[own]
+                          + on_sleeve[own][:, None] * trunk_fit[own])
+            near = (part == 0) & (on_coat > 0) & ((rest[:, 0] > 0) == (side == "l"))
+            dense[near] = ((1 - on_coat[near])[:, None] * trunk_fit[near]
+                           + on_coat[near][:, None] * field[near])
         joints = np.argsort(-dense, axis=1)[:, :4].astype(np.uint16)
         weights = np.take_along_axis(dense, joints.astype(int), axis=1)
         weights /= np.maximum(weights.sum(axis=1, keepdims=True), 1e-12)
-        joints, weights = equipment_seams.smooth_skin(rest, triangles[keep], joints, weights, count, strength=2.)
+        joints, weights = equipment_seams.smooth_skin(rest, triangles, joints, weights, count, strength=2.)
         rest = inverse_skin(posed, joints, weights, skin)
+    keep = np.ones(len(triangles), dtype=bool)
+    if source is not None:
+        seam = np.ptp(part[triangles], axis=1) > 0
+        stretch = np.ones(len(triangles))
+        for a, b in ((0, 1), (1, 2), (2, 0)):
+            fitted = np.linalg.norm(posed[triangles[:, a]] - posed[triangles[:, b]], axis=1)
+            drawn = np.linalg.norm(source[triangles[:, a]] - source[triangles[:, b]], axis=1) * fit["scale"]
+            stretch = np.maximum(stretch, fitted / np.maximum(drawn, 1e-9))
+        keep = ~(seam & (stretch > SEAM_STRETCH))
     return rest, joints, weights, keep
 
 

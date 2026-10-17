@@ -1,11 +1,11 @@
 {
  "format": 2,
  "spec": "warden.json",
- "spec_sha256": "b9ad2990b481fda91f38c3ddf88087a8fc31f773c0b546e4b4d7d0394a58613f",
+ "spec_sha256": "d0d700062b71cb085bb6dd9725bc537ef4f4946ed8fb4861bb569fa1201df1c1",
  "body": "luminous_male.glb",
  "body_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
  "pose": "Idle_Subtle",
- "tool_sha256": "59c72d5ca014cfaff9c4208288d4d0ed31efa63423eb07f6c12ea8d24ecc9726",
+ "tool_sha256": "55e0adc47a41478832a1db5561fae711dcc0709b1fa8d4dea206733778077ca8",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
@@ -75,13 +75,26 @@
      ],
      "girth": 1.0
     },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      -11.5,
+      -2.9,
+      -1.7
+     ],
+     "lowerarm_r": [
+      9.2,
+      1.5,
+      -2.8
+     ]
+    },
     "collar": {
      "cells": 224,
      "max_mm": 110.1
-    }
+    },
+    "twist_vertices": 1000
    },
    "out": "Amberwood_Woodland_Armor_Concept_Sheet__r02_c02.glb.npz",
-   "sha256": "b546252f78d9c4fd53ddd336790c9e33154db6da27c8fadd74222153c0cfb9a2"
+   "sha256": "0d3ab3400ca971a5cac56919d0a255d8880434c18b9d464cf4e7fd20c446a125"
   },
   "legs": {
    "source": "Amberwood_Woodland_Legwear_Concept_Sheet__r02_c02.glb",
@@ -140,14 +153,21 @@
      ],
      "girth": 1.068
     },
-    "tuck": {
-     "into": "boots",
-     "tucked": 215,
-     "max_mm": 84.0
-    }
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 59,
+      "max_mm": 39.9
+     },
+     {
+      "into": "boots",
+      "tucked": 215,
+      "max_mm": 84.0
+     }
+    ]
    },
    "out": "Amberwood_Woodland_Legwear_Concept_Sheet__r02_c02.glb.npz",
-   "sha256": "da5cf2714aed2f1002d73c57af191d7043fecc1a003b951eca09e1d5d2074f09"
+   "sha256": "14d70333c4e9bfeb7b83773284479294dbc106840c521a6698c3091148d1aee9"
   },
   "boots": {
    "source": "Eight_amberwood_woodland_boot_designs__r02_c02.glb",
@@ -202,7 +222,7 @@
     }
    },
    "out": "Eight_amberwood_woodland_boot_designs__r02_c02.glb.npz",
-   "sha256": "4989fbd4247afc7f309b229b3e0c3467ab0967d9055adbc396f69a9f8f7ce974"
+   "sha256": "19c9b33718b7ab8cf741b0302b9553f78c9ea94797b9dacf796080eee99626dc"
   }
  }
 }

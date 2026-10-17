@@ -1,11 +1,11 @@
 {
  "format": 2,
  "spec": "arcanist.json",
- "spec_sha256": "ef5e59d6b93eb05673d68775ba88f1e576ecade2aaa469c0fd420405f7fdb746",
+ "spec_sha256": "97460f37a87734451f90f10715164265a3b3289f4b6901fcb9c581381ec7ea82",
  "body": "luminous_male.glb",
  "body_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
  "pose": "Idle_Subtle",
- "tool_sha256": "59c72d5ca014cfaff9c4208288d4d0ed31efa63423eb07f6c12ea8d24ecc9726",
+ "tool_sha256": "55e0adc47a41478832a1db5561fae711dcc0709b1fa8d4dea206733778077ca8",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
@@ -75,13 +75,26 @@
      ],
      "girth": 1.0
     },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      -23.2,
+      -27.5,
+      4.3
+     ],
+     "lowerarm_r": [
+      12.8,
+      -16.4,
+      2.9
+     ]
+    },
     "collar": {
      "cells": 49,
      "max_mm": 38.1
-    }
+    },
+    "twist_vertices": 637
    },
    "out": "Eloria_Arcane_Armor_Design_Sheet__r02_c03.glb.npz",
-   "sha256": "f5efe038b37dbeb16f6ab6c453d83ef7b0840a3594c3cf86a767fcb54a567f5d"
+   "sha256": "d7ac6d8a688946fe83e93f44146705678b743fffbaf16bc3ade2a22f12971709"
   },
   "legs": {
    "source": "Eight_arcane_leg_armor_designs__r02_c03.glb",
@@ -140,6 +153,11 @@
      ],
      "girth": 1.09
     },
+    "tuck": {
+     "into": "torso",
+     "tucked": 0,
+     "max_mm": 0.0
+    },
     "drape_vertices": [
      {
       "+": 67,
@@ -148,7 +166,7 @@
     ]
    },
    "out": "Eight_arcane_leg_armor_designs__r02_c03.glb.npz",
-   "sha256": "e865c18daf16ced500b6154cf630742c27425e6da70dc714bffc1e8a44270f8c"
+   "sha256": "e53c66d19b33014fcf60e00c832796d1f27a36d6eea72f5fd82840adb0a8aa91"
   },
   "boots": {
    "source": "Arcane_Fantasy_Boots_Concept_Sheet__r02_c03.glb",
@@ -203,7 +221,7 @@
     }
    },
    "out": "Arcane_Fantasy_Boots_Concept_Sheet__r02_c03.glb.npz",
-   "sha256": "f4ed164141a8d992c41759eb684e3e62132f522b014105d8246613b40bed2e58"
+   "sha256": "57f7950772fbac9af4bd018635e86a689d201a5beecc6190ef3c654e4ee479c9"
   }
  }
 }

@@ -657,6 +657,142 @@ owner's shot and the reshoot, and the female body from the same view.
   they did before. A skinned cowl reduces this but tears; cloth simulation or
   a collar that follows the head more would be needed.
 
+### Owner's second review (2026-10-17)
+
+A second review (22 notes, at commit `ac868b73`, session
+`equipment-review/2026-10-17_18-18-43`) covered all five sets again. Note 3,
+the hole through the Leather Helm's crown, is the headwear section's
+(`54e7b083`). Note 2, the cape's curve, is left (see **Not yet done**). The
+other 20 are addressed here, on all 15 design-fit pieces and both Human bodies.
+
+**Arm holes and shoulder seams (notes 1, 4, 6, 9, 12, 14, 16, 18, 20).**
+`bind_sleeves` used to switch from the arm field to the coat's weights in one
+step, with the sleeve/coat bridges cut below the shoulder yoke. In idle and
+walk the arm slid through the coat's arm hole. In a drawn bow the cut seams
+opened onto the skin (Furtrim Coat, notes 14, 16, 18) or let a torn sleeve
+strip hang (Phoenix, note 20). Now, over a band 5 cm wide on the sleeve and
+6 cm on the coat (surface distance from the seam), each side takes a share of
+the other's weights, half at the seam, and the seam stays sewn. The arm hole
+moves with the arm. Only seam triangles that the fit has already stretched past
+1.6× their drawn size in idle are still cut, 0–16 per torso; the lining
+shows behind them. On the Scout Vest and the Studded Jack, the sleeve art at
+the back of the upper arm that stood outside the coat's own trunk art moves
+just inside it (`tuck_sleeves`, at most 4 cm): the shirt sleeve no longer
+comes through the vest's back shoulder (note 9), and the jack's arm hole wraps
+the sleeve at the back (note 1).
+
+Sewn seams stretch where cut ones used to open, so `stretch_check.py` counts
+more stretched triangles in Bow_Pull_Back than after the first review. The
+sewn seams show no gaps, skin or hanging strips in the noted views. The
+Studded Jack keeps a small flap at the front of its arm hole (note 6).
+
+| Torso | Male, first review | Male now | Female, first review | Female now |
+| --- | ---: | ---: | ---: | ---: |
+| Studded Jack | 0.94% | 4.29% | 0.81% | 3.57% |
+| Scout Vest | 0.35% | 3.12% | 0.21% | 2.71% |
+| Acolyte Tunic | 0.71% | 3.47% | 1.11% | 4.17% |
+| Furtrim Coat | 0.64% | 2.63% | 0.64% | 2.40% |
+| Phoenix Cuirass | 1.15% | 1.80% | 1.40% | 2.02% |
+
+**Trousers through the coat's back (notes 5, 10, 17, 21).** The legs specs
+now tuck the trousers into the set's torso as well as its boots (`tuck_into`
+takes a list): rays from the pelvis and thigh axes. The tuck is limited to the
+back (bearings 110–250°), and a vertex that would have to move more than 4 cm
+stays put. Tucked all round, it pushed the Sidelace Breeches' belt and buckle
+under the Scout Vest, though they are drawn over it, and crushed the Furtrim
+Legguards' front fur flaps by 14 cm.
+
+**The crotch and the seat (notes 7, 10, 11).** The debug tint showed the dark,
+"wet" patch to be the trousers' lining and reconstructed inseams. They were
+drawn in one flat colour with flat normals, wherever the Meshy art leaves a gap
+between the legs. Both now wear the trousers' own material and texture
+(`limb_head_remap.wear_art`). Each triangle takes the texture island of the art
+nearest its centre, and each corner the UV and normal of the nearest art
+vertex in that island; no UV blends across the two legs' islands. The leg
+`Backing` material is no longer written; boots keep theirs.
+
+**The waist turning with the chest (notes 13, 15).** A trunk vertex took the
+weights of the body surface nearest it: pelvis up to about 1.12 m, with no
+spine_01 at all. So the belt and everything below it stayed with the hips while
+the chest turned. The clips turn the chest mostly at spine_03 (65° in
+Bow_Pull_Back, with spine_01 turning the other way). `twist` caps the pelvis
+share on a ramp from half at the hip joint to none at spine_02, and gives the
+rest to spine_02 and spine_03 (40/60). Share of the chest's turn that the belt
+and the hem follow (`twist_check.py`, male):
+
+| Torso | Run_Female belt | hem | Bow_Pull_Back belt | hem |
+| --- | ---: | ---: | ---: | ---: |
+| Studded Jack | 0.64 | 0.22 | 0.56 | 0.21 |
+| Scout Vest | 0.65 | 0.26 | 0.59 | 0.22 |
+| Acolyte Tunic (belt before: run 0.18, bow 0.07) | 0.54 | 0.36 | 0.44 | 0.26 |
+| Furtrim Coat (belt before: run 0.13, bow 0.05) | 0.64 | 0.22 | 0.53 | 0.17 |
+| Phoenix Cuirass | 0.46 | 0.28 | 0.35 | 0.21 |
+
+**Cuffs on the wrists (note 22).** In idle the Phoenix cuff's ring stood 4–5 cm
+in front of the wrist. The forearm bone's similarity carries a cuff drawn off
+the middle of the concept's sleeve that far off. Moving the design bone's tail
+onto the art's cuff ring was tried first and was unreliable: coat art beside
+the wrist pulled the centroid. `centre_cuffs` measures the result instead:
+in the posed shell, the centre of the art each forearm bone owns in the last
+20% of the segment, against the forearm surface there. It takes the difference
+off that art, fully at the cuff and fading to none at 35% from the elbow.
+Distance of the sleeve end's centre from the wrist's, in idle:
+
+| Torso | Male l / r | Female l / r |
+| --- | ---: | ---: |
+| Phoenix Cuirass (before: 42 / 27 male, 45 / 45 female) | 6.8 / 6.7 mm | 5.8 / 7.5 mm |
+| Studded Jack | 13.7 / 11.8 mm | 14.9 / 8.3 mm |
+| Scout Vest | 14.8 / 18.1 mm | 18.3 / 24.9 mm |
+| Acolyte Tunic | 7.7 / 10.1 mm | 9.3 / 11.3 mm |
+| Furtrim Coat | 28.0 / 9.7 mm | 26.2 / 19.7 mm |
+
+**The Laced Fieldboots' shaft (note 8).** In idle the shaft stood 2.5–3.6 cm off
+the front of the shin, and the calf came through its back by up to 2 cm. The
+calf bones now also clear the default trousers' calf (girth cap 1.25), and the
+shaft's top sits 3.5 cm further back with its shift held to 1 cm. The back now
+clears the calf on both bodies (male within 1 mm, female 12–39 mm). Over the
+shin the gap is 0.3–2.8 cm; the 3.4–3.9 cm left at the instep is the boot's
+tongue as drawn.
+
+**The grey patch below the Phoenix belt (note 19)** no longer appears at the
+noted view, at five times through Fighting_Idle.
+
+The viewer's `--debug-tint` now also draws reconstructed inseams green.
+
+Tests, with all 15 pieces installed:
+
+- The equipment, remapper and held-prop suites fail on the same 9 IDs as
+  develop at `224bb9b9`.
+- `torso_body_cover.gd` passes: 16 races, cover and equip/unequip.
+- `creation_class_equipment_fit.gd` passes: 54,666 checks on 16 rigs.
+- The torso LOD, imported-actor LOD and registry snapshot tests pass.
+- `armour_body_cover.gd` keeps its 60 scalp lines (helm 3:120), as above.
+
+The equipment `textures/` folder keeps only its six older orphans.
+
+Evidence, installed before and after on each noted view, reshot with
+`--replay`: [arms and shoulders](design-fit/review2-arms.jpg) and
+[waist, crotch, cuffs and boots](design-fit/review2-waist-cuffs-boots.jpg).
+
+**Not yet done.**
+
+- **The cape's curve (note 2).** The cape hangs from three simulated chains
+  whose roots are pinned where the cape was authored, on the bare back.
+  `CapeDrape` pushes the cape's rigid yoke out over the worn torso, so over a
+  deep back such as the Studded Jack the cloth flares out at the shoulder
+  blades and then swings back in to hang from roots set near the legs. The
+  fix belongs in `cape_cloth.gd`: move each chain root out to the worn
+  torso's measured reach, so the cape hangs plumb from the armour. Its parity
+  tests compare the solver with frozen reference copies, armoured wearers
+  included, so a behaviour change means re-approving those baselines. Not
+  done here.
+- The Furtrim Coat still shows two small dark notches near its back hem
+  (note 17), where the fur band used to cover them. Shards of the legguards'
+  fur stay in the coat's back slit.
+- A small light shard shows above the Phoenix belt at the back (note 21).
+- The Studded Jack's arm hole keeps a small flap at the front in the bow
+  (note 6). The Furtrim Coat's left cuff is still 2.6–2.8 cm off the wrist.
+
 ## Two body shapes, preserved race identity
 
 There are **two body equipment fits**, with 200 torso/leg/boot designs each,

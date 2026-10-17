@@ -1659,7 +1659,7 @@ def build(source, out, rig, kind='cuirass', label='Remapped armour',
     if fit is not None:
         # The set's design fit supplies the shell; its sleeves are bound with
         # the arm field (design_fit.bind_sleeves). Backing and packing follow below.
-        points, joints, weights, sewn = design_fit.bind_sleeves(fit, design_rig, original_faces)
+        points, joints, weights, sewn = design_fit.bind_sleeves(fit, design_rig, original_faces, source=raw)
         fit = dict(fit, positions=points)
         canon_raw, edges_raw, count_raw = io._weld(raw, original_faces)
         labels = io._components(edges_raw, count_raw)[canon_raw]

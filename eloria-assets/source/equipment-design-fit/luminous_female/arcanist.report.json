@@ -1,11 +1,11 @@
 {
  "format": 2,
  "spec": "arcanist.json",
- "spec_sha256": "ef5e59d6b93eb05673d68775ba88f1e576ecade2aaa469c0fd420405f7fdb746",
+ "spec_sha256": "97460f37a87734451f90f10715164265a3b3289f4b6901fcb9c581381ec7ea82",
  "body": "luminous_female.glb",
  "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
  "pose": "Idle_Subtle",
- "tool_sha256": "59c72d5ca014cfaff9c4208288d4d0ed31efa63423eb07f6c12ea8d24ecc9726",
+ "tool_sha256": "55e0adc47a41478832a1db5561fae711dcc0709b1fa8d4dea206733778077ca8",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
@@ -81,13 +81,26 @@
      "out_mm": 23.2,
      "in_mm": 20.0
     },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      -18.2,
+      -19.4,
+      2.6
+     ],
+     "lowerarm_r": [
+      16.5,
+      -11.3,
+      0.2
+     ]
+    },
     "collar": {
      "cells": 65,
      "max_mm": 56.8
-    }
+    },
+    "twist_vertices": 639
    },
    "out": "Eloria_Arcane_Armor_Design_Sheet__r02_c03.glb.npz",
-   "sha256": "4bddfab1304336b4b6c7a0a7dcf9dad9baf6b1c5bc69439d3fe6eaeffba15a9a"
+   "sha256": "5598f197cba37b07e333f9d43aa26ad5aeb7c1745dd34af74decfbbee8a3a413"
   },
   "legs": {
    "source": "Eight_arcane_leg_armor_designs__r02_c03.glb",
@@ -146,6 +159,11 @@
      ],
      "girth": 1.068
     },
+    "tuck": {
+     "into": "torso",
+     "tucked": 42,
+     "max_mm": 16.7
+    },
     "drape_vertices": [
      {
       "+": 67,
@@ -154,7 +172,7 @@
     ]
    },
    "out": "Eight_arcane_leg_armor_designs__r02_c03.glb.npz",
-   "sha256": "c4386bb9e7dad038bf0298dcbf504e4bdafe61ca64a2d731142e4d53bf513ac5"
+   "sha256": "daa933426ae30d6d89b41ba3fc9985214d852e3fb58ee19d0cd281032c6177b8"
   },
   "boots": {
    "source": "Arcane_Fantasy_Boots_Concept_Sheet__r02_c03.glb",
@@ -209,7 +227,7 @@
     }
    },
    "out": "Arcane_Fantasy_Boots_Concept_Sheet__r02_c03.glb.npz",
-   "sha256": "00b6f1fe093a3e84cd06b96470d2177382dde02c3624e34de08ee2dbd772cb03"
+   "sha256": "c5054e6149a91b02a805bb5e6b3f644d547ff7a5585ebb44efb3d43614ed99c8"
   }
  }
 }

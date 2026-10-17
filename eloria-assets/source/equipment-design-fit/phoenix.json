@@ -224,7 +224,18 @@
     "to": 1.64,
     "clear": 0.015,
     "max": 0.08
-   }
+   },
+   "twist": {
+    "pelvis": 0.5,
+    "to": {
+     "spine_02": 0.4,
+     "spine_03": 0.6
+    }
+   },
+   "centre_cuffs": [
+    "lowerarm_l",
+    "lowerarm_r"
+   ]
   },
   "legs": {
    "source": "Eight_legendary_fantasy_leg_armor_designs__r01_c01.glb",
@@ -445,6 +456,22 @@
       "foot_r",
       "ball_r"
      ]
+    }
+   ],
+   "tuck_into": [
+    {
+     "piece": "torso",
+     "bones": [
+      "pelvis",
+      "thigh_l",
+      "thigh_r"
+     ],
+     "margin": 0.01,
+     "arc": [
+      110,
+      250
+     ],
+     "max": 0.04
     }
    ]
   }
