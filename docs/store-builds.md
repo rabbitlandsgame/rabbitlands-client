@@ -96,7 +96,7 @@ IDs or stored Steam credentials in this repository.
 
    `APP_ID`/depot placeholders must be replaced with assigned numeric IDs. The
    command rejects GitHub builds, mixed commits, duplicate IDs, update helpers,
-   signing material and a cache/script directory inside shipped game content.
+   private signing material and a cache/script directory inside shipped content.
    It creates `app-build.vdf`, per-depot VDFs and
    `steamworks-launch-settings.json`. It performs no upload.
 4. Enter the generated launch settings under Steamworks **Installation > General
@@ -145,7 +145,9 @@ working directory to Resources before scripts run, preserving the existing
 `assets/...` and `../eloria-assets` paths. It uses Godot's original universal
 executable as the entry point. Asset placement uses renames, with one final PCK
 and no `--main-pack`/`--path` overrides.
-The completed signed bundle is launched headless. This does not prove
+The completed signed bundle is launched headless, its code signature is checked
+again after startup, and the archive is restored and tested after the original
+stage is released. Both Intel/Apple Silicon slices are verified. This does not prove
 GPU rendering, playability, or Intel/Apple Silicon hardware compatibility.
 
 Mac builds currently omit the BC-only map sidecars; source-image fallback is

@@ -90,7 +90,23 @@ def build(options):
     (root / "artifact/depot.json").write_text(json.dumps(receipt, indent=2) + "\n")
     if (stage / package.MARKER).read_text().strip() != sha or stage.resolve().parent != root / "downloads":
         raise ValueError("Refusing to clean an unowned stage.")
+    unpacked = sum(path.stat().st_size for path in stage.rglob("*") if path.is_file() and not path.is_symlink())
     shutil.rmtree(stage)
+    if options.platform == "macos":
+        # Restore only after releasing the original stage: prove that the
+        # actual transport preserves signing, modes and resource paths without
+        # retaining two complete app bundles on a small runner.
+        storage.check("before Mac archive restore", unpacked)
+        restored = root / "verified-bundle"
+        extract(root / "artifact", restored)
+        bundle = package.macos_package.bundle(restored)
+        subprocess.run(["codesign", "--verify", "--deep", "--strict", str(bundle)], check=True)
+        logs = next((root / "downloads/.build/logs").glob("macos-*"))
+        package.macos_package.smoke_binary(bundle / "Contents/MacOS/RabbitLands", restored,
+            logs / "smoke-restored.log", package.run_godot, package.SMOKE_FAILURES)
+        subprocess.run(["codesign", "--verify", "--deep", "--strict", str(bundle)], check=True)
+        storage.check("Mac archive verified")
+        shutil.rmtree(restored)
     storage.check("workspace released")
     return receipt
 

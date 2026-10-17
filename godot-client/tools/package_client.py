@@ -3007,6 +3007,7 @@ def _main(argv=None, storage=None) -> int:
             if not options.no_smoke:
                 macos_package.smoke_binary(macos_package.bundle(stage) / "Contents/MacOS/RabbitLands",
                     stage, logs / "smoke-bundle.log", run_godot, SMOKE_FAILURES)
+                subprocess.run(["codesign", "--verify", "--deep", "--strict", str(macos_package.bundle(stage))], check=True)
         if updating:
             outputs.extend(client_release.publish_artifacts(stage, metadata, options.update_signing_key,
                                                             godot, project, run_godot, logs,
