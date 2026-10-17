@@ -2220,7 +2220,10 @@ func _apply_equipment_hides(part: int, part_config: Dictionary,
 ## Every other hair-covering piece
 ## hides the scalp and the features with the hair, which is also the default
 ## for a piece with no policy, so a new helm is safe without data. An explicit
-## "hide" hides the features even on a piece that leaves the hair alone.
+## "hide" hides the features even on a piece that leaves the hair alone. An
+## open-faced helm whose `scalp` is "show" (policy `scalp`) keeps the scalp
+## drawn too: a low camera looks up under its brow past the face's top edge,
+## and without the scalp sees the inside of the helm through the head.
 ##
 ## Mycelari shoulder growths go under any torso piece and any cape unless the
 ## item says "show", and under headwear whose `raceShoulders` is "hide" (the
@@ -2239,7 +2242,7 @@ func _race_feature_hides(part: int, model_config: Dictionary) -> Array[String]:
 					break
 		if covers_hair:
 			hides.append("hair")
-			if policy != "show":
+			if policy != "show" and str(model_config.get("scalp", "")) != "show":
 				hides.append("scalp")
 		if policy == "hide" or (covers_hair and policy != "show"):
 			hides.append(RACE_FEATURE_HEAD)

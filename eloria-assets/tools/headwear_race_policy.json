@@ -6,6 +6,7 @@
     "raceFeatures": "show: the race_feature_head node stays visible and the piece hides hair only, so the feature-free scalp stays drawn. hide: hair, scalp and race_feature_head are hidden. A model with no raceFeatures hides the features when the piece coversHair.",
     "ears": "tuck: on the Human fit the piece reaches over the ears (its side shell ends 3.9 to 26 cm below the eye line at the ear; only the right side of the female Drover Hat stops above it), so a race refit keeps the race ears inside it. none: an open band; the ears stay free.",
     "horns": "passThrough: a show piece that closes over the crown; Votary horns rise through it and the refit opens a rimmed hole at each horn root. none: the piece hides the features, or leaves the crown open.",
+    "scalp": "show (optional; default hidden): an open-faced helm keeps the scalp drawn although it hides hair and features. Under a brow that stands off the forehead a low camera looks up past the face's top edge, and without the scalp the head is open to the inside of the helm (owner review 2026-10-17 on the Leather Helm). The piece must clear the scalp: the race passes push it out of the scalp too, and refit_race_headwear.py measure gates scalp poke. equipment.json carries it as models[\"3:N\"].scalp \"show\".",
     "shoulders": "hide: the piece reaches the Mycelari shoulder growths (race_feature_shoulders): it cuts 5 mm or more into a growth on either Mycelari body in some played clip (the action map clips and the combat recipe sources, sampled at 10 fps; the canonical variant rigid on the Head bone, the growths skinned), so the runtime hides them under it. none: it stays clear in every played clip. Measured 2026-10-07 (race programme R2 in Idle_Subtle; the batch B review over every played clip); equipment.json carries it as models[\"3:N\"].raceShoulders \"hide\"."
   },
   "pieces": {
@@ -241,7 +242,8 @@
       "raceFeatures": "hide",
       "ears": "tuck",
       "horns": "none",
-      "shoulders": "hide"
+      "shoulders": "hide",
+      "scalp": "show"
     },
     "3:135": {
       "name": "Kettle Hat",

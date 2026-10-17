@@ -7,7 +7,8 @@ extends SceneTree
 ## with them:
 ##   - headwear follows models["3:N"].raceFeatures, which is copied from
 ##     eloria-assets/tools/headwear_race_policy.json (checked here too): a
-##     "hide" helm hides hair, scalp and the features; a "show" hood hides the
+##     "hide" helm hides hair, scalp and the features (an open-faced one with
+##     policy scalp "show" keeps the scalp); a "show" hood hides the
 ##     hair only and keeps scalp and features on a body with the feature node
 ##     (a body without one hides its scalp as before); an open band hides
 ##     nothing; a piece with no policy hides the features when it covers the
@@ -21,7 +22,10 @@ extends SceneTree
 ## feature material of its own; a body that has the node is used as it is.
 
 const POLICY_PATH := "../eloria-assets/tools/headwear_race_policy.json"
+## An open-faced helm that keeps the scalp (policy scalp "show") and a closed
+## one that hides it with the hair and the features.
 const LEATHER_HELM := 134
+const PHOENIX_HELM := 125
 const BUCKLED_HOOD := 159
 const SUN_HEADBAND := 170
 ## A hood whose scarf reaches the shoulder growths (policy shoulders "hide").
@@ -130,6 +134,8 @@ func _check_policy_table(equipment: Dictionary) -> void:
 			key + " equipment.json raceFeatures matches the policy table")
 		expect(str(model.get("raceShoulders", "none")) == str(row.get("shoulders", "")),
 			key + " equipment.json raceShoulders matches the policy table")
+		expect(str(model.get("scalp", "")) == str(row.get("scalp", "")) and str(row.get("scalp", "show")) == "show",
+			key + " equipment.json scalp matches the policy table")
 		if str(row.get("raceFeatures", "")) == "show":
 			shown += 1
 			expect(str(row.get("kind", "")) in ["hood", "band"], key + " only hoods and open bands show")
@@ -148,9 +154,12 @@ func _check_headwear(models: Dictionary, equipment: Dictionary) -> void:
 		actor.apply_appearance_variants({"hair": 1, "skin": 0})
 		expect(feature.visible and scalp.visible and _hair_shown(actor),
 			slug + " bare head shows features, scalp and hair")
-		actor.apply_equipment_visuals({3: LEATHER_HELM})
+		actor.apply_equipment_visuals({3: PHOENIX_HELM})
 		expect(not feature.visible and not scalp.visible and not _hair_shown(actor),
-			slug + " Leather Helm hides the features, the scalp and the hair")
+			slug + " Phoenix Helm hides the features, the scalp and the hair")
+		actor.apply_equipment_visuals({3: LEATHER_HELM})
+		expect(not feature.visible and scalp.visible and not _hair_shown(actor),
+			slug + " Leather Helm hides the features and the hair and keeps the scalp")
 		actor.apply_equipment_visuals({3: BUCKLED_HOOD})
 		expect(feature.visible, slug + " Buckled Hood shows the features")
 		expect(scalp.visible, slug + " Buckled Hood keeps the feature-free scalp")
@@ -199,8 +208,11 @@ func _check_headwear(models: Dictionary, equipment: Dictionary) -> void:
 	human.apply_equipment_visuals({3: BUCKLED_HOOD})
 	expect(_mesh(human, "scalp").visible and not _hair_shown(human),
 		"a show hood on a body without features preserves the scalp and hides hair")
+	human.apply_equipment_visuals({3: PHOENIX_HELM})
+	expect(not _mesh(human, "scalp").visible, "a closed helm still hides a Human scalp")
 	human.apply_equipment_visuals({3: LEATHER_HELM})
-	expect(not _mesh(human, "scalp").visible, "a helm still hides a Human scalp")
+	expect(_mesh(human, "scalp").visible and not _hair_shown(human),
+		"an open-faced helm (scalp show) keeps the Human scalp and hides hair")
 	human.apply_equipment_visuals({})
 	expect(_mesh(human, "scalp").visible and _hair_shown(human), "bare-headed the Human scalp and hair return")
 	human.free()

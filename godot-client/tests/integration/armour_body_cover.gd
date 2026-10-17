@@ -182,9 +182,12 @@ func run() -> void:
 				var covered_hair := active.has(3) and int(active[3]) != int(outfits[2][3])
 				# A hood whose policy shows race features hides the hair only, on a
 				# body that carries race_feature_head; any other body hides its
-				# scalp with the hair.
+				# scalp with the hair, unless the piece keeps the scalp (an
+				# open-faced helm, policy scalp "show").
 				var covered_scalp := covered_hair and (not has_feature_head or str((equipment["models"]["3:%d" % int(active[3])]
 					as Dictionary).get("raceFeatures", "")) != "show")
+				if covered_hair and str((equipment["models"]["3:%d" % int(active[3])] as Dictionary).get("scalp", "")) == "show":
+					covered_scalp = false
 				for node: Node in actor.find_children("*", "MeshInstance3D", true, false):
 					var mesh := node as MeshInstance3D
 					if mesh.name.to_lower() in ["hair", "scalp"]:

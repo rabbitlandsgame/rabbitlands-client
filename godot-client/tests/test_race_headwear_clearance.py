@@ -62,6 +62,7 @@ class RaceHeadwearClearanceTest(unittest.TestCase):
             with self.subTest(piece=key):
                 self.assertEqual(model.get('raceFeatures'), rule['raceFeatures'])
                 self.assertEqual(model.get('raceShoulders') == 'hide', rule['shoulders'] == 'hide')
+                self.assertEqual(model.get('scalp'), rule.get('scalp'))
             for slug in RACE_BODIES:
                 variant = model['variants'].get('canonical_' + slug)
                 with self.subTest(piece=key, body=slug):

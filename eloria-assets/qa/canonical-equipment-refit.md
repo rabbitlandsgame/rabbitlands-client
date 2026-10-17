@@ -618,6 +618,30 @@ owner's view beside the installed fix, reshot with `--replay`; [hood fronts
 and the Leather Helm](design-fit/review-fixes-hood-fronts.jpg), three-quarter
 front, both bodies, before (the collar fix) and after.
 
+**Hole above the forehead under the Leather Helm (second review, note 3).**
+The owner then saw, from a low front camera, "a hole in the top of the head"
+through which the inside of the helmet showed. It is not from the rescale:
+the old helm shows the same hole. A "hide" helm hides the scalp with the hair
+and the race features. The head is then open above the face skin's top edge,
+the jagged hairline, and under an open brow that stands off the forehead a
+camera that looks up sees past that edge into the helm. A hood already keeps
+its scalp for exactly this reason. The policy table therefore gains an
+optional `scalp: "show"` for open-faced helms, set on the Leather Helm and
+copied into `equipment.json` as `models["3:134"].scalp`. With it,
+`_race_feature_hides` still hides the hair and `race_feature_head` but keeps
+the scalp. The race passes then count the scalp as head the helm must clear,
+and the measure gate already reports scalp poke. The scalp comes through the
+Leather Helm on none of the 16 bodies (0 cm², both Human bodies and the 14
+races). Refitted with the scalp in the race push, every variant came out
+byte-identical, so no GLB changed. `race_feature_visibility.gd` used this helm
+as its example of a helm that hides the scalp; it now checks that the Leather
+Helm keeps it, and the Phoenix Helm (closed, still `hide`) for the hiding
+case: 892 checks, no failures. `armour_body_cover.gd` expects the kept scalp;
+its 60 failures are the same lines as before. `character_appearance_fit.gd`
+passes, and `test_race_headwear_clearance.py` checks the new field against
+the table. Evidence: [note 3](design-fit/review-fixes-helm-scalp.jpg), the
+owner's shot and the reshoot, and the female body from the same view.
+
 **Not yet done.**
 
 - Only the five noted pieces have a headwear.json row. Each cowl is shaped
@@ -625,6 +649,9 @@ front, both bodies, before (the collar fix) and after.
   cross that collar, as any hood could before. Other helms keep head_frame's
   fit, which clears every ray by 9 mm and so reads large wherever a design has
   cheek or nape guards.
+- Other open-faced helms with policy `hide` may show the same opening above
+  the forehead. Give them `scalp: "show"` once `refit_race_headwear.py
+  measure` shows no scalp poke on any body.
 - When the head turns hard against the chest (Bow_Pull_Back, the sword
   swings), the tall kit collars still show beside or through the hoods, as
   they did before. A skinned cowl reduces this but tears; cloth simulation or

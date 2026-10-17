@@ -272,6 +272,8 @@ def race_pass(body: Path, human: Path, key: str, raw: dict, human_raw: dict, out
     # only (rc._bulge): every headwear material is double sided.
     even = not all(m.get('doubleSided') for m in d.get('materials', []))
     show = rule.get('raceFeatures') == 'show'
+    # an open-faced helm that keeps the scalp drawn (policy scalp: show) clears it too
+    scalp = show or rule.get('scalp') == 'show'
     if passes:
         if rigid and info is not None:
             world, r = rc.helm_grow(g, world, f, info['anchor'])
@@ -327,7 +329,7 @@ def race_pass(body: Path, human: Path, key: str, raw: dict, human_raw: dict, out
         # throat (1830 on votary_male 3:159) for a few collar crossings.
         # (an open band too: a Ssarathi snout through a circlet's nose
         # pendant, a broad forehead through a headband's top)
-        world, f, uv, r = rc.head_bulge(g, world, f, uv, show, rigid, even)
+        world, f, uv, r = rc.head_bulge(g, world, f, uv, scalp, rigid, even)
         done(r)
         stage('s4head')
         if horns:
