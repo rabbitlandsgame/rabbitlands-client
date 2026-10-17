@@ -72,6 +72,9 @@ def export(godot, project, app_dir, logs, run_godot):
     helpers.mkdir(exist_ok=True)
     original.rename(helpers / "RabbitLands")
     (helpers / "RabbitLands").chmod(0o755)
+    # The original main-binary signature was sealed with its export bundle.
+    # Re-sign the relocated helper before its direct pre-bundle smoke launch.
+    subprocess.run(["codesign", "--force", "--sign", "-", str(helpers / "RabbitLands")], check=True)
     packs = list((contents / "Resources").glob("*.pck"))
     if len(packs) != 1:
         raise ValueError("Expected exactly one macOS game PCK.")

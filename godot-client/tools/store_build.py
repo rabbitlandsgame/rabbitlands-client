@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import shutil
+import subprocess
 import sys
 import tarfile
 
@@ -62,6 +63,9 @@ def build(options):
     storage.check("preflight", 7_000_000_000)
     config = setup_runner_tools.install(options.platform, root / "tools", installers=False)
     os.environ.update(config["env"])
+    version = subprocess.check_output([str(config["godot"]), "--headless", "--version"], text=True).strip()
+    if not version.startswith("4.7.2.stable"):
+        raise ValueError("Store builds require the pinned Godot 4.7.2-stable toolchain.")
     public = root / "update_public.pem"
     public.write_text(package.git("show", f"{sha}:godot-client/data/update_public.pem"), encoding="ascii")
     source = root / "source"
