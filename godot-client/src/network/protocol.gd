@@ -115,7 +115,8 @@ enum ServerMessage {
 	ELORIA_GUILD_STATE = 213,
 	ELORIA_ACHIEVEMENTS_CATALOG = 219,
 	## The whole sky as it looks and as it is becoming (weather_state_v1).
-	ELORIA_WEATHER_STATE = 220,
+	## 220 is ClientMessage.ELORIA_TECHNIQUE_REQUEST: the ids are one pool.
+	ELORIA_WEATHER_STATE = 221,
 	# The worn titles of everyone on a map. Down here in the low run the
 	# extensions overflowed into rather than beside 244, because 219 was the
 	# last free number of the 215-219 block and this run continues downwards.
