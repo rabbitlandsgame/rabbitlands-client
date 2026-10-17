@@ -965,8 +965,18 @@ touches `fitGroups`. Race bodies come from `rebase_race_body.py`; race hair from
 
 Headwear with a row in `eloria-assets/source/equipment-design-fit/headwear.json`
 is reshaped inside the fitter (`headwear_fit.py`; see "Headwear review fixes").
-Its cowls read the installed kit torso and its design-fit npz, so refit them
-after any change to that torso. `refit_race_headwear.py fit --races all` builds
+Its cowls read the installed kit torso and its design-fit npz. After a change
+to that torso, refit them into scratch and compare them with the installed ones
+through the clip check (collar over hood, skin contact, both bodies) before
+installing anything. Keep the installed fit unless the refit is better: the
+cowl push leaves art more than `reach` (7 cm) outside the shell alone, so a
+small torso change can flip part of a wrap between lifted over the collar and
+tucked under it. After `9dca4c2d` changed the kit torsos (sleeves, waist twist,
+cuffs), the refit moved the female Buckled Hood's front wrap 22 mm back on
+average (up to 80 mm). In idle it let the collar through in 112 rays, where
+the installed hood lets it through in 83. The male Antler Hood got slightly
+worse too (+2 to +4 rays in most clips), and the rest were unchanged. The installed hoods measured the same on the new torsos as
+on the old, so they were kept. `refit_race_headwear.py fit --races all` builds
 the Human and race fits together. Install the two Human variants from a copy of
 `<tag>-variants.json` reduced to the `canonical_human_*` groups
 (`install_human_equipment.py`, then `share_human_equipment_textures.py`), and
