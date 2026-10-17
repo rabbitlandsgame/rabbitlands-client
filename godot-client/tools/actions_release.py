@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import sys
 import tempfile
+import time
 from types import SimpleNamespace
 
 import build_release as release
@@ -49,7 +50,15 @@ def prepare() -> tuple[str, int]:
         tag = f"client-{sha}"
         release.gh("release", "create", tag, "--repo", release.REPOSITORY, "--draft", "--target", sha,
                    "--title", f"Rabbit Lands {sha[:9]}", "--notes", "Desktop builds are being prepared. This release remains a draft.")
-        draft = release.github_release(tag)
+        # A newly created draft can briefly be absent from the release listing.
+        # Re-read the same tag; never create a second destination on a retry.
+        draft = None
+        for delay in (0, 1, 2, 4, 8):
+            if delay:
+                time.sleep(delay)
+            draft = release.github_release(tag)
+            if draft is not None:
+                break
     if (not draft or not draft["draft"]
             or draft["author"]["login"] not in (release.ACCOUNT, "github-actions[bot]")):
         raise ValueError("The draft must belong to the Rabbit Lands account or this repository's workflow.")

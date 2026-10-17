@@ -16,6 +16,7 @@ extends Control
 ## autoload singletons are registered, and this reads `AppState` directly.
 
 const PANEL_SIZE := Vector2(560.0, 600.0)
+const TechniquesPanel := preload("res://src/ui/techniques_panel.gd")
 ## Nothing may cover the fixed resource rail down the right-hand edge.
 const RESERVED_RIGHT_RAIL := 96.0
 
@@ -127,6 +128,10 @@ func reserve_bottom_hud(control: Control) -> void:
 	_fit_panel()
 
 func edit_prepared_slot(index: int) -> void:
+	if loadout != null and not str(loadout.slots[index].get("technique", "")).is_empty():
+		open_tab("techniques")
+		return
+	set_tab("magic")
 	slot_picker.select(index)
 	var entry: Dictionary = loadout.slots[index]
 	if int(entry.id) >= 0:
@@ -176,12 +181,54 @@ func configure(spell_catalog: SpellCatalog, cast: Callable) -> void:
 func is_open() -> bool:
 	return panel.visible
 
+## Which tab is showing: "magic" or "techniques". Reopening the window shows
+## the tab it was closed on.
+var current_tab := "magic"
+## The Techniques tab (techniques_panel.gd): the technique ring and the quick
+## spell slots aim through it too.
+var techniques_panel: VBoxContainer
+var _magic_nodes: Array[Control] = []
+var _tab_buttons: Dictionary = {}
+
 func toggle() -> void:
 	panel.visible = not panel.visible
 	if panel.visible:
 		panel.move_to_front()
 		sync()
 		_fit_panel()
+
+## Ctrl+X: open on Techniques, or close the window when it already shows them.
+func toggle_techniques() -> void:
+	if panel.visible and current_tab == "techniques":
+		close()
+		return
+	open_tab("techniques")
+
+func open_tab(tab: String) -> void:
+	set_tab(tab)
+	if not panel.visible:
+		toggle()
+	else:
+		panel.move_to_front()
+
+func set_tab(tab: String) -> void:
+	var wanted := "techniques" if tab == "techniques" else "magic"
+	if wanted != current_tab:
+		# The magic controls show and hide themselves as spells are chosen,
+		# so what each was showing is kept and given back, not assumed.
+		for node: Control in _magic_nodes:
+			if wanted == "techniques":
+				node.set_meta("magic_visible", node.visible)
+				node.hide()
+			else:
+				node.visible = bool(node.get_meta("magic_visible", node.visible))
+	current_tab = wanted
+	if techniques_panel != null:
+		techniques_panel.visible = current_tab == "techniques"
+		if techniques_panel.visible:
+			techniques_panel.call("sync")
+	for name: String in _tab_buttons:
+		(_tab_buttons[name] as Button).set_pressed_no_signal(name == current_tab)
 
 func close() -> void:
 	panel.hide()
@@ -475,7 +522,7 @@ func _build() -> void:
 	_dragger = WindowDrag.attach(panel, header)
 	var title := Label.new()
 	title.name = "SpellsTitle"
-	title.text = "Spells"
+	title.text = "Spells & Techniques"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.add_child(title)
@@ -484,6 +531,19 @@ func _build() -> void:
 	close_button.text = "X"
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
+	var tabs := HBoxContainer.new()
+	tabs.name = "SpellsTabs"
+	column.add_child(tabs)
+	for tab: String in ["magic", "techniques"]:
+		var tab_button := Button.new()
+		tab_button.name = tab.capitalize() + "Tab"
+		tab_button.text = tab.capitalize()
+		tab_button.toggle_mode = true
+		tab_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tab_button.pressed.connect(set_tab.bind(tab))
+		tabs.add_child(tab_button)
+		_tab_buttons[tab] = tab_button
+	var first_magic_index := column.get_child_count()
 	_build_details(column)
 	_variant_picker = OptionButton.new()
 	_variant_picker.name = "SpellVariant"
@@ -605,6 +665,12 @@ func _build() -> void:
 	cast_button.size_flags_horizontal = Control.SIZE_SHRINK_END
 	cast_button.pressed.connect(_on_cast_pressed)
 	column.add_child(cast_button)
+	for index in range(first_magic_index, column.get_child_count()):
+		_magic_nodes.append(column.get_child(index) as Control)
+	techniques_panel = TechniquesPanel.new()
+	techniques_panel.hide()
+	column.add_child(techniques_panel)
+	set_tab("magic")
 	_fit_panel()
 
 ## Keep the selected spell visible while its browser scrolls independently.

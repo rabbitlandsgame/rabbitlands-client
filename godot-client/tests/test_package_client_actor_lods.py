@@ -149,7 +149,7 @@ def test_export_presets_never_filter_out_the_actor_tree():
         if line.startswith("exclude_filter=") and "assets/actors" in line
     ]
     assert not actor_exclusions
-    assert package.EXPORT_PRESETS.count('export_filter="all_resources"') == 2
+    assert package.EXPORT_PRESETS.count('export_filter="all_resources"') == len(package.PLATFORMS)
 
 
 def test_each_actor_file_ships_in_the_pck_loose_or_nowhere(tmp_path, monkeypatch):
@@ -581,6 +581,27 @@ def test_pck_directory_is_read_from_a_godot_47_pack(tmp_path):
     _write_pck(pck, ["assets/actors/native/face_masks/hero.png.import", "res://project.binary"])
     assert package.pck_paths(pck) == {
         "assets/actors/native/face_masks/hero.png.import", "project.binary"}
+
+
+def test_universal_mac_pack_checks_require_the_exported_desktop_variants(tmp_path, monkeypatch):
+    build, app = tmp_path / "build", tmp_path / "app"
+    _track(monkeypatch, _write_tree(build))
+    _import_mask(build)
+    _import_cloth_texture(build)
+    sidecar = build / "godot-client/assets/actors/native/equipment/textures/cloth.jpg.import"
+    text = sidecar.read_text()
+    desktop = ".godot/imported/cloth.jpg-test.s3tc.ctex"
+    mobile = ".godot/imported/cloth.jpg-test.etc2.ctex"
+    text = text.replace('"res://' + desktop + '"', '"res://' + desktop + '", "res://' + mobile + '"')
+    sidecar.write_text(text)
+    _write_pck(app / "RabbitLands.pck", GOOD_PCK)
+    package.stage_loose_client_files(build, app)
+    package.check_actor_pack(build, app, "macos")
+    with pytest.raises(package.PackageError, match="imported product"):
+        package.check_actor_pack(build, app)
+    _write_pck(app / "RabbitLands.pck", [path for path in GOOD_PCK if path != desktop])
+    with pytest.raises(package.PackageError, match="imported product"):
+        package.check_actor_pack(build, app, "macos")
 
 
 GOOD_PCK = ["assets/actors/native/face_masks/hero.png.import",

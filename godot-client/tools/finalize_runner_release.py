@@ -111,7 +111,7 @@ See [installation instructions](https://github.com/{release.REPOSITORY}/wiki/Acc
     if {asset["name"] for asset in final} != set(rows):
         raise ValueError("Previous build cleanup is incomplete; the release remains a draft.")
     for other in release.github_releases():
-        if other["id"] != release_id and re.fullmatch(r"client-[0-9a-f]{40}", other["tag_name"]):
+        if other["id"] != release_id and other.get("draft") and re.fullmatch(r"client-[0-9a-f]{40}", other["tag_name"]):
             release.gh("release", "delete", other["tag_name"], "--repo", release.REPOSITORY, "--yes")
     release.write_json(out / "client_updates.json", {"schema": 1, "required_commit": sha, "enforce": True,
         "manifests": {platform: f"{base}/{stage}-{platform}.json" for platform, stage in stages.items()}})

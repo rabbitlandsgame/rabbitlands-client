@@ -27,6 +27,13 @@ extends SceneTree
 ## puts it back once both captures are taken: a run by hand outside a scratch
 ## user directory leaves the player's own settings as they were.
 ##
+## A spec may set the hour, `minute` (0-359; 180, noon, by default), and the
+## sky, `weather` ([kind, intensity]: 0 clear, 1 rain, 2 storm, 0-100), which
+## reach the client as the server's NEW_MINUTE and SEND_WEATHER packets, or a
+## whole sky, `sky` (the seven look numbers) with `sky_name`, which arrives as
+## ELORIA_WEATHER_STATE. Each
+## view's report records the lamp lights in use (`lamp_lights`).
+##
 ## ELORIA_SURVEY_CHUNK_WAIT_S raises the 90 s the survey waits for the
 ## selected geometry chunks of a view (a render-only manifest that keeps a
 ## whole territory resident streams hundreds of cells one by one).
@@ -162,19 +169,66 @@ func _run() -> void:
 		var actors := {1: {"actor_id": 1, "x": tile.x, "y": tile.y,
 			"rotation": 0, "actor_type": 0, "kind": 1, "name": "Traveller",
 			"health": 100, "max_health": 100, "alive": true, "appearance": {}}}
+		# `crowd`: that many more humanoids two tiles apart round the player,
+		# for timing a view under load (crowd_benchmarks.gd's bare humanoid).
+		var crowd := int(spec.get("crowd", 0))
+		var columns := maxi(1, int(ceil(sqrt(float(crowd)))))
+		for index: int in crowd:
+			var id := 20000 + index
+			actors[id] = {"actor_id": id,
+				"x": tile.x + (index % columns - columns / 2) * 2,
+				"y": tile.y + (index / columns - columns / 2) * 2,
+				"rotation": (index * 977) % 65536, "actor_type": 1, "kind": 1,
+				"name": "Crowd", "health": 80, "max_health": 100, "alive": true,
+				"appearance": {}}
 		state.set("local_actor_id", 1)
 		state.set("actors", actors)
 		state.call("mark_all_actors_changed")
 		main.call("_sync_world")
+		var spawn_deadline := Time.get_ticks_msec() + 180000
+		while (main.get("actor_nodes") as Dictionary).size() < crowd + 1 \
+				and Time.get_ticks_msec() < spawn_deadline:
+			main.call("_sync_world", state.call("take_changed_actors"))
+			await process_frame
 		var rig: Node3D = main.get("camera_rig")
 		rig.set("yaw_degrees", float(spec.get("yaw", 0)))
 		# The spec may ask for a lower view (a wall or a horn above a site); the rig accepts -80..-15.
 		rig.set("pitch_degrees", clampf(float(spec.get("pitch", -60.0)), -80.0, -15.0))
 		rig.set("distance", float(spec.get("distance", 26)))
+		# The hour (`minute`, 0-359, noon 180 by default) and the sky
+		# (`weather`, [kind, intensity] as SEND_WEATHER carries them) arrive as
+		# the server would send them, so dusk, night and rain are the client's
+		# own answer to the same packets.
+		var minute := int(spec.get("minute", 180))
+		state.call("_on_packet", 5, PackedByteArray([minute & 0xff, (minute >> 8) & 0xff]))
+		var weather: Array = spec.get("weather", [0, 0])
+		state.call("_on_packet", 100, PackedByteArray([int(weather[0]), int(weather[1])]))
+		# `sky` ([kind, precipitation, clouds, fog, darkness, wind, lightning],
+		# 0-100, with `sky_name`) is a weather_state_v1 frame instead: the sky
+		# a scheduler state draws, already there.
+		var sky_look: Array = spec.get("sky", [])
+		if sky_look.size() == 7:
+			var frame := PackedByteArray([1])
+			for _look: int in 2:
+				for value: Variant in sky_look:
+					frame.append(int(value))
+			frame.append_array(PackedByteArray([0, 0]))
+			var label := str(spec.get("sky_name", "")).to_ascii_buffer()
+			frame.append(label.size())
+			frame.append_array(label)
+			state.call("_on_packet", EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE, frame)
+		main.call("_apply_day_night")
 		# Let camera interpolation and the HUD's one-second FPS window settle
 		# after a large package load before taking a composition/performance view.
 		for i in 120:
 			await physics_frame
+			await process_frame
+		# A change of sky on a map already bound eases in (Weather3D); a
+		# capture waits for it to arrive.
+		var sky: Node = main.get("weather_layer")
+		var sky_deadline := Time.get_ticks_msec() + 20000
+		while sky != null and sky.has_method("settling") and bool(sky.call("settling")) \
+				and Time.get_ticks_msec() < sky_deadline:
 			await process_frame
 		# A border capture must include the actual resident neighbor. Time-based
 		# camera settling alone can finish before a cold background import.
@@ -224,7 +278,10 @@ func _run() -> void:
 			render_timing = await _measure_render_time()
 		RenderingServer.force_draw(false)
 		root.get_texture().get_image().save_png(out.path_join(str(spec.id) + ".png"))
+		var lamps: Node = main.get("night_lamps")
 		report.append({"id":spec.id,"map":spec.map,"tile":[tile.x,tile.y],
+			"minute":minute, "weather":weather,
+			"lamp_lights":[lamps.call("lamp_count"), lamps.call("lit_count")] if lamps != null else [],
 			"render_ms":render_timing.get("render_ms", {}),
 			"uncapped_frame_ms":render_timing.get("uncapped_frame_ms", -1.0),
 			"manifest_source":active_loader.manifest.source_path,"glb_path":active_loader.manifest.glb_path(),

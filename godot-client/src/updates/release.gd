@@ -4,6 +4,26 @@ extends RefCounted
 const CHUNK_BYTES := 8 * 1024 * 1024
 const MAX_MANIFEST_BYTES := 1024 * 1024
 const ROOTS := ["app", "eloria-assets"]
+const DISTRIBUTION_SCHEMA := 1
+
+static func update_owner(identity: Dictionary) -> String:
+	# Missing field is a pre-channel GitHub installation. Never infer this from
+	# launch arguments, environment variables, or whether Steam is running.
+	return str(identity.get("distribution", "github"))
+
+static func external_update_message(identity: Dictionary) -> String:
+	if update_owner(identity) == "steam":
+		return "A game update is required. Close Rabbit Lands and let Steam update it. If no update appears, restart Steam or verify the installed files."
+	return "A game update is required. Download and install the latest Rabbit Lands build from its original download page."
+
+static func lease_process_running(pid: int) -> bool:
+	if pid <= 0:
+		return false
+	# Linux's Godot process table tracks children of this process. A game
+	# started by a different launcher is not its child; /proc covers both.
+	if OS.get_name() == "Linux":
+		return DirAccess.dir_exists_absolute("/proc/%d" % pid)
+	return OS.is_process_running(pid)
 
 static func read_json(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
@@ -55,6 +75,8 @@ static func valid_hash(value: Variant) -> bool:
 	return true
 
 static func verify_manifest(envelope: Dictionary, identity: Dictionary, target := "") -> Dictionary:
+	if update_owner(identity) != "github":
+		return {"error": "This installation is updated by its distribution service."}
 	if not envelope.get("payload") is String or not envelope.get("signature") is String:
 		return {"error": "The release information is invalid."}
 	var payload := Marshalls.base64_to_raw(envelope.payload)
@@ -211,7 +233,7 @@ static func extract(archive: String, destination: String, release: Dictionary, i
 	zip.close()
 	var descriptor := read_json(destination.path_join("app/client-release.json"))
 	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
-	if total != int(release.unpacked_size) or descriptor.get("commit") != release.commit or descriptor.get("platform") != identity.platform or descriptor.get("public_key") != identity.public_key or not FileAccess.file_exists(destination.path_join("app/" + binary)) or not FileAccess.file_exists(destination.path_join("app/RabbitLands.pck")) or not DirAccess.dir_exists_absolute(destination.path_join("eloria-assets")):
+	if total != int(release.unpacked_size) or descriptor.get("commit") != release.commit or descriptor.get("platform") != identity.platform or update_owner(descriptor) != "github" or descriptor.get("public_key") != identity.public_key or not FileAccess.file_exists(destination.path_join("app/" + binary)) or not FileAccess.file_exists(destination.path_join("app/RabbitLands.pck")) or not DirAccess.dir_exists_absolute(destination.path_join("eloria-assets")):
 		return "The update is missing required game files or has a different signing key."
 	if identity.platform == "linux":
 		if FileAccess.set_unix_permissions(destination.path_join("app/" + binary), 493) != OK:
@@ -237,6 +259,8 @@ static func recover(root: String) -> String:
 	return ""
 
 static func install(root: String, identity: Dictionary, repair := false) -> String:
+	if update_owner(identity) != "github":
+		return "This installation is updated by its distribution service."
 	# Also protect games started directly, outside the restart launcher.
 	var running_cache := DirAccess.open(cache_for(root))
 	if running_cache != null:
@@ -244,7 +268,7 @@ static func install(root: String, identity: Dictionary, repair := false) -> Stri
 			if name.begins_with("running-") and name.ends_with(".json"):
 				var path := cache_for(root).path_join(name)
 				var lease := read_json(path)
-				if OS.is_process_running(int(lease.get("pid", 0))):
+				if lease_process_running(int(lease.get("pid", 0))):
 					return "Close the running Rabbit Lands game before installing its update."
 				DirAccess.remove_absolute(path)
 	var recovery := recover(root)

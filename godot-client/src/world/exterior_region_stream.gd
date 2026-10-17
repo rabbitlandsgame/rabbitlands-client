@@ -447,6 +447,24 @@ func _drain_retired(max_nodes := RETIRE_NODES_PER_FRAME,
 	_retirement_draining = false
 	return freed
 
+## How far each side of a border between two Landfall isles their light
+## blends. The links publish no blend (blendDistance 0), so the sky, the sun
+## and the haze switched at a line through the link's anchor, and once every
+## isle had its own sky that line showed. The owner's rule for the isles is a
+## gradual change across about 260 m (the ground regrade's featherMetres 130
+## each side); the light now takes the same width.
+const ISLE_LIGHT_BLEND_METRES := 130.0
+
+## True for a seamless link between two continent-v2 isles that ships its
+## shared border (preloadEdges), whose distance is then the seam's.
+func _isle_border(candidate: Dictionary) -> bool:
+	if (candidate.here.get("preloadEdges", []) as Array).is_empty():
+		return false
+	for map_id: String in [active_map, str(candidate.map)]:
+		if str(MapRegistry.resolve(registry, map_id).get("status", "")) != "continent-v2-served":
+			return false
+	return true
+
 func lighting_manifest(position: Vector3) -> WorldManifest:
 	if active_manifest == null:
 		return null
@@ -457,6 +475,12 @@ func lighting_manifest(position: Vector3) -> WorldManifest:
 		var normal := Vector3(float(here.outward[0]), 0, float(here.outward[1]))
 		var depth := (position - _vector(here.anchor)).dot(normal)
 		var width := float(here.get("blendDistance", 65))
+		if width <= 0.0 and _isle_border(candidate):
+			# Measured from the shared border itself, which the player is
+			# always on this side of: half the neighbour's light on the line,
+			# none ISLE_LIGHT_BLEND_METRES in.
+			width = ISLE_LIGHT_BLEND_METRES
+			depth = -float(candidate.distance)
 		if depth <= -width:
 			continue
 		var weight := smoothstep(-width, width, depth)

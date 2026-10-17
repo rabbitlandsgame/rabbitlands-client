@@ -1,5 +1,8 @@
 # Desktop releases on runners with limited disk space
 
+For the separate Steam depot and macOS test workflow, see [store builds](store-builds.md).
+The GitHub installer workflow described here retains its current triggers and outputs.
+
 `godot-client/tools/runner_release.py` stages one platform in an existing draft
 release. Windows and Linux use **separate jobs**, pinned to the same full client
 commit. `finalize_runner_release.py` combines their small receipts after both
@@ -12,6 +15,11 @@ The workflow is `.github/workflows/desktop-release.yml`, named **Build desktop
 release**. It builds both desktop platforms on GitHub's hosted runners, with
 Inno Setup 6 for Windows, and leaves the verified result as a draft. It does not
 publish the release or deploy the server's client-update policy.
+
+The currently published installer remains online while a replacement draft is
+built. Publishing the verified replacement triggers **Retire previous published
+client**, which checks the public asset inventory before removing older published
+compiled releases. It leaves any in-progress replacement draft alone.
 
 ## Enable and run the workflow
 

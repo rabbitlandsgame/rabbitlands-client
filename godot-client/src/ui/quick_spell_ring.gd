@@ -123,7 +123,7 @@ func handle_event(event: InputEvent) -> bool:
 	var handled := super.handle_event(event)
 	if was_visible and not visible and event is InputEventKey and not event.pressed:
 		var key: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
-		if key == KEY_SHIFT and event.location == KEY_LOCATION_LEFT: tutorial_action.emit(22)
+		if HoldKeys.matches("spell_ring", event): tutorial_action.emit(22)
 	return handled
 
 func dismiss() -> void:
@@ -156,8 +156,6 @@ func resolve_spell(family: String) -> int:
 	var wanted := str(preferences.scopes.get(family, ""))
 	for id in variants:
 		if str(loadout.catalog.spell(id).scope) == wanted: return id
-	for id in variants:
-		if loadout.catalog.spell(id).scope == "target" and target_validator.is_valid() and target_validator.call(id, AppState.selected_actor_id): return id
 	for scope in ["self", "target", "allies", "burst", "location", "inventory", "destination"]:
 		for id in variants:
 			if loadout.catalog.spell(id).scope == scope: return id
@@ -340,7 +338,7 @@ func _update_details() -> void:
 		var scope := str(definition.scope)
 		var recipient := scope.capitalize()
 		if scope == "target":
-			recipient = str(AppState.actors.get(AppState.selected_actor_id, {}).get("name", "Pick target")) if target_validator.is_valid() and target_validator.call(id, AppState.selected_actor_id) else "Pick target"
+			recipient = "Click a target"
 		elif scope == "self": recipient = "You"
 		elif scope in ["burst", "location"]: recipient = "Pick ground"
 		_preview.text = "%s\n→ %s · %s" % [Book.EFFECT_LABELS.get(effect, effect.capitalize()), recipient, scope.capitalize()]
