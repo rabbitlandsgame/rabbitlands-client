@@ -14,7 +14,7 @@ import sys
 LAYOUT = {
     "windows": ("app/client-release.json", "app/RabbitLands.exe", "app"),
     "linux": ("app/client-release.json", "app/RabbitLands.x86_64", "app"),
-    "macos": ("Rabbit Lands.app/Contents/Resources/game/app/client-release.json", "Rabbit Lands.app", ""),
+    "macos": ("Rabbit Lands.app/Contents/Resources/client-release.json", "Rabbit Lands.app", ""),
 }
 
 
@@ -38,6 +38,7 @@ def validate(stage: Path, platform: str, expected: str):
     stage = stage.resolve(strict=True)
     metadata_path, executable, _ = LAYOUT[platform]
     metadata = json.loads((stage / metadata_path).read_text())
+    public_key_path = (stage / metadata_path).parent / "data/update_public.pem"
     if (metadata.get("commit") != expected or metadata.get("platform") != platform
             or metadata.get("distribution") != "steam" or expected not in metadata.get("ancestors", [])):
         raise ValueError("All depots must contain Steam builds of the same selected commit.")
@@ -47,6 +48,12 @@ def validate(stage: Path, platform: str, expected: str):
             raise ValueError("Private/build-only directory in Steam depot.")
         if path.is_symlink() and not path.resolve().is_relative_to(stage):
             raise ValueError("Steam depot link escapes its content root.")
+        if path == public_key_path and path.is_file():
+            public_key = path.read_text(encoding="ascii")
+            if ("PRIVATE KEY" in public_key or "PUBLIC KEY" not in public_key
+                    or public_key != metadata.get("public_key")):
+                raise ValueError("The packaged public key differs from its embedded identity.")
+            continue
         if path.is_file() and (path.suffix.lower() in {".pem", ".p12", ".pfx", ".key"}
                 or "updater" in path.name.lower() or path.name.lower() == "steam_appid.txt"):
             raise ValueError("Signing material, GitHub updater or development App ID file in Steam depot.")

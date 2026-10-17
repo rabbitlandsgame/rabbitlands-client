@@ -88,6 +88,21 @@ def test_artifact_stream_roundtrip_and_corruption(tmp_path, monkeypatch):
     assert not (tmp_path / "bad").exists()
 
 
+def test_depot_accepts_its_pinned_public_key_and_rejects_private_material(tmp_path):
+    source = stage(tmp_path / "source")
+    metadata = source / "app/client-release.json"
+    identity = json.loads(metadata.read_text())
+    identity["public_key"] = "-----BEGIN PUBLIC KEY-----\nfixture\n-----END PUBLIC KEY-----\n"
+    metadata.write_text(json.dumps(identity))
+    key = source / "app/data/update_public.pem"
+    key.parent.mkdir()
+    key.write_text(identity["public_key"])
+    assert steam_release.validate(source, "windows", SHA) == source
+    key.write_text("-----BEGIN PRIVATE KEY-----\nnever ship\n")
+    with pytest.raises(ValueError, match="public key differs"):
+        steam_release.validate(source, "windows", SHA)
+
+
 def test_archive_rejects_traversal_even_with_matching_receipt(tmp_path):
     import hashlib
     artifact = tmp_path / "artifact"
@@ -120,6 +135,7 @@ def test_macos_finish_moves_assets_without_extra_copy_and_seals_bundle(tmp_path,
     root.mkdir()
     app = macos_package.bundle(root)
     (app / "Contents/MacOS").mkdir(parents=True)
+    (app / "Contents/MacOS/Rabbit Lands").write_bytes(b"universal-game-binary")
     (app / "Contents/Resources").mkdir()
     (app / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleExecutable": "Rabbit Lands"}))
     (root / "app").mkdir()
@@ -129,17 +145,15 @@ def test_macos_finish_moves_assets_without_extra_copy_and_seals_bundle(tmp_path,
     asset.write_text("world")
     before = asset.stat().st_ino
     commands = []
-    def run(command, **kwargs):
-        commands.append(command)
-        if "clang" in command:
-            Path(command[-1]).write_bytes(b"launcher")
-    monkeypatch.setattr(macos_package.subprocess, "run", run)
+    monkeypatch.setattr(macos_package.subprocess, "run", lambda command, **kwargs: commands.append(command))
     monkeypatch.setattr(macos_package, "sign", lambda path: commands.append(["seal", path]))
     macos_package.finish(root, tmp_path, {"commit": SHA, "distribution": "steam"})
-    assert (app / "Contents/Resources/game/eloria-assets/world.json").stat().st_ino == before
+    assert (app / "Contents/eloria-assets/world.json").stat().st_ino == before
+    assert (app / "Contents/Resources/RabbitLands.pck").read_bytes() == b"game pack"
+    assert (app / "Contents/MacOS/RabbitLands").read_bytes() == b"universal-game-binary"
     assert not (root / "app").exists()
     assert commands[-1] == ["seal", app]
-    assert "x86_64" in commands[0] and "arm64" in commands[0]
+    assert commands[0][0] == "lipo" and commands[0][2:] == ["-verify_arch", "x86_64", "arm64"]
 
 
 def test_mac_cross_export_fails_instead_of_claiming_a_native_test(tmp_path, monkeypatch):
