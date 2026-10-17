@@ -519,14 +519,14 @@ var _minimap_scale := 1.0
 var _minimap_orientation := MINIMAP_DEFAULT_ORIENTATION
 var _minimap_zoom := MINIMAP_ZOOM_DEFAULT
 ## Tab map extent relative to its default framing. Below 1 it magnifies the
-## player's surroundings; above 1 a continent exterior shows its neighbours.
+## cursor's location; above 1 a continent exterior shows its neighbours.
 var _full_map_region_id := ""
 var _full_map_zoom := 1.0
 var _full_map_base_size := 0.0
 var _full_map_base_position := Vector3.ZERO
 var _full_map_zoomable := false
-## A manual pan holds its world position until zooming or returning to the
-## current map restores player follow. Delay a click until release so a drag
+## Cursor zoom and manual pan hold their world position until returning to
+## the current map restores player follow. Delay a click until release so a drag
 ## never also sends a movement command.
 var _full_map_panned := false
 var _full_map_pan_position := Vector3.ZERO
@@ -4131,11 +4131,18 @@ func _apply_minimap_zoom() -> void:
 ## around the region. Every region's picture stands whether or not it is
 ## loaded, so zooming out shows the neighbours, and a click out there walks
 ## the legs to it the way a click just past the seam always has. Magnifying
-## past the default view centres on the player, including inside interiors.
-func _zoom_full_map(closer: bool) -> void:
+## past the default view holds the ground under the pointer in place.
+func _zoom_full_map(closer: bool, at := Vector2.INF) -> void:
 	if _full_map_base_size <= 0.0:
 		return
 	_cancel_full_map_drag()
+	var pixel: Variant = null
+	var anchor := Vector3.ZERO
+	if at.is_finite():
+		pixel = _texture_to_viewport_position(at, map_image, full_map_viewport.size)
+		if not pixel is Vector2:
+			return
+		anchor = full_map_camera.project_ray_origin(pixel)
 	var previous: float = _full_map_zoom
 	var step: float = 1.0 / FULL_MAP_ZOOM_STEP if closer else FULL_MAP_ZOOM_STEP
 	_full_map_zoom = clampf(_full_map_zoom * step, FULL_MAP_ZOOM_MIN,
@@ -4144,10 +4151,15 @@ func _zoom_full_map(closer: bool) -> void:
 	if (previous < 1.0 and _full_map_zoom > 1.0) or (previous > 1.0 and _full_map_zoom < 1.0) \
 			or is_equal_approx(_full_map_zoom, 1.0):
 		_full_map_zoom = 1.0
-	var was_panned := _full_map_panned
-	_full_map_panned = false
-	if is_equal_approx(previous, _full_map_zoom) and not was_panned:
+	if is_equal_approx(previous, _full_map_zoom):
 		return
+	if _full_map_zoom < 1.0 and pixel is Vector2:
+		full_map_camera.size = _full_map_base_size * _full_map_zoom
+		_full_map_pan_position = full_map_camera.global_position + anchor \
+			- full_map_camera.project_ray_origin(pixel)
+		_full_map_panned = true
+	else:
+		_full_map_panned = false
 	_apply_full_map_zoom()
 
 func _apply_full_map_zoom() -> void:
@@ -4237,7 +4249,7 @@ func _on_full_map_gui_input(event: InputEvent) -> void:
 		var wheel: InputEventMouseButton = event as InputEventMouseButton
 		if wheel.pressed and (wheel.button_index == MOUSE_BUTTON_WHEEL_UP
 				or wheel.button_index == MOUSE_BUTTON_WHEEL_DOWN):
-			_zoom_full_map(wheel.button_index == MOUSE_BUTTON_WHEEL_UP)
+			_zoom_full_map(wheel.button_index == MOUSE_BUTTON_WHEEL_UP, wheel.position)
 			_update_full_map_cursor(wheel.position)
 			map_image.accept_event()
 			return
@@ -6670,7 +6682,7 @@ func _configure_full_map(manifest: WorldManifest) -> void:
 	var buffer: float = MapViewScript.NEIGHBOUR_BUFFER_METRES if manifest.data.has("continentGeography") else 0.0
 	MapViewScript.configure(full_map_camera, full_map_viewport,
 		MapViewScript.bounds_for(manifest, secret_sections.current_section()), buffer)
-	# Every map can magnify around the player. Only continent exteriors can
+	# Every map can magnify around the cursor. Only continent exteriors can
 	# pull back past their default framing to show neighbouring regions.
 	_full_map_base_size = full_map_camera.size
 	_full_map_base_position = full_map_camera.global_position

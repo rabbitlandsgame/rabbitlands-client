@@ -45,6 +45,8 @@ func _run() -> void:
 
 func _check_gestures(main: Control, actor: Node3D, manifest: WorldManifest) -> void:
 	main._full_map_zoom = 1.0
+	main._full_map_panned = false
+	main._apply_full_map_zoom()
 	_wheel(main, MOUSE_BUTTON_WHEEL_UP)
 	var camera: Camera3D = main.full_map_camera
 	var start: Vector2 = main.map_image.size * 0.5
@@ -99,12 +101,15 @@ func _check_gestures(main: Control, actor: Node3D, manifest: WorldManifest) -> v
 	_wheel(main, MOUSE_BUTTON_WHEEL_UP)
 	_button(main, start, true)
 	_motion(main, start + Vector2(70, 45))
-	_wheel(main, MOUSE_BUTTON_WHEEL_UP)
+	var scroll_at := start + Vector2(70, 45)
+	var scroll_pixel: Vector2 = main._texture_to_viewport_position(scroll_at, main.map_image, main.full_map_viewport.size)
+	var scroll_anchor: Vector3 = main._map_click_point(camera, scroll_pixel)
+	_wheel(main, MOUSE_BUTTON_WHEEL_UP, scroll_at)
 	_button(main, start + Vector2(70, 45), false)
-	_expect(main.map_clicks.is_empty() and not main._full_map_panned
-		and absf(camera.global_position.x - actor.global_position.x) < 0.01
-		and absf(camera.global_position.z - actor.global_position.z) < 0.01,
-		"scrolling during a drag cancels the gesture and recenters on the player")
+	var scroll_shown: Vector2 = main.map_marker_overlay._texture_position(camera.unproject_position(scroll_anchor))
+	_expect(main.map_clicks.is_empty() and main._full_map_pan_press == null
+		and not main._full_map_pan_dragging and scroll_shown.distance_to(scroll_at) < 0.02,
+		"scrolling during a drag cancels the gesture and zooms around the cursor")
 	_button(main, start, true)
 	_motion(main, start + Vector2(70, 45))
 	main._notification(Control.NOTIFICATION_WM_WINDOW_FOCUS_OUT)
@@ -168,10 +173,11 @@ func _motion(main: Control, at: Vector2) -> void:
 	event.button_mask = MOUSE_BUTTON_MASK_LEFT
 	main.map_image.gui_input.emit(event)
 
-func _wheel(main: Control, button: MouseButton) -> void:
+func _wheel(main: Control, button: MouseButton, at := Vector2.INF) -> void:
 	var event := InputEventMouseButton.new()
 	event.button_index = button
 	event.pressed = true
+	event.position = main.map_image.size * 0.5 if not at.is_finite() else at
 	main.map_image.gui_input.emit(event)
 
 func _expect(ok: bool, label: String) -> void:
