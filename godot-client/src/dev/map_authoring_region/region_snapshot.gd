@@ -632,6 +632,7 @@ func _gameplay_records(region: Node3D) -> Dictionary:
 		if not marker.label.is_empty(): record["label"] = marker.label
 		if marker.kind == "spawn":
 			record["default"] = marker.default_spawn
+		if marker.kind in ["spawn", "npc_marker"]:
 			record["facing"] = _vec3(marker.facing)
 		if not marker.destination_map.is_empty(): record["destinationMap"] = marker.destination_map
 		if not marker.destination_spawn.is_empty(): record["destinationSpawn"] = marker.destination_spawn

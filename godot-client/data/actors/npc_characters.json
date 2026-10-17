@@ -1066,11 +1066,11 @@
       "name": "Nash",
       "actorType": 307,
       "model": "luminous_male",
-      "homeRegion": "four_gates",
+      "homeRegion": "landfall",
       "role": "tutorial",
-      "outfit": "guide",
+      "outfit": "gilded_wayfinder",
       "backstory": "He teaches new arrivals to survive before they need rescuing.\n\nArrivals who finish the lessons, against arrivals who do not. It is not a flattering number and I do not show it to Ilyon.\n\nIt has improved since I moved from the plaza to the road. People will not walk back uphill to ask a question. They will ask one standing still.",
-      "appearanceStory": "He teaches new arrivals to survive before they need rescuing; a laced field tunic and kneepads dress a guide who demonstrates his advice.",
+      "appearanceStory": "Gilded vine plate, lion cuisses and matching sabatons show the field experience behind his lessons; a cavalry sword and lion shield make him ready to demonstrate them.",
       "dialogueTopics": [
         "the_tally",
         "corrow",
@@ -1088,9 +1088,11 @@
         "head": 0
       },
       "equipmentVisuals": {
-        "5": 237,
-        "4": 248,
-        "6": 226
+        "5": 202,
+        "4": 191,
+        "6": 242,
+        "0": 115,
+        "1": 116
       }
     },
     "tallykeeper ysolde": {
@@ -1251,11 +1253,11 @@
       },
       "equipmentVisuals": {}
     },
-    "register clerk hemmen": {
-      "name": "Register Clerk Hemmen",
+    "hemmen": {
+      "name": "Hemmen",
       "actorType": 312,
       "model": "luminous_male",
-      "homeRegion": "four_gates",
+      "homeRegion": "landfall",
       "role": "dialogue",
       "outfit": "clerk",
       "backstory": "Forty thousand names taught him to preserve entries he cannot verify, including six written in a freezing hand.\n\nI have copied out forty thousand names and I remember perhaps nine hundred. The ones I remember are the ones who spelled their own name wrong.\n\nThere is a volume from the year of the great freeze where six entries in a row are in the same shaking hand, all different names. Six people too cold to hold a pen, and one of them wrote for all of them. I think about that more than I should.",
@@ -6784,6 +6786,61 @@
         "5": 229,
         "4": 232,
         "6": 239
+      }
+    },
+    "tessa": {
+      "name": "Tessa",
+      "actorType": 305,
+      "model": "luminous_female",
+      "homeRegion": "landfall",
+      "role": "sigil",
+      "outfit": "twilight_tome_keeper",
+      "backstory": "She keeps Landfall's spell tomes within reach of new arrivals, explaining the first healing and fire spells before offering more demanding studies.",
+      "appearanceStory": "A coordinated Twilight coat, legguards and boots frame a crystal prism staff; her uncovered head keeps the tome keeper approachable.",
+      "dialogueTopics": [
+        "spell_tomes"
+      ],
+      "appearance": {
+        "skin": 2,
+        "hair": 264,
+        "eyes": 3,
+        "shirt": 8,
+        "pants": 8,
+        "boots": 0,
+        "head": 0
+      },
+      "equipmentVisuals": {
+        "5": 220,
+        "4": 183,
+        "6": 196,
+        "0": 186
+      }
+    },
+    "rellan": {
+      "name": "Rellan",
+      "actorType": 366,
+      "model": "stoneborn_male",
+      "homeRegion": "landfall",
+      "role": "gauntlet",
+      "outfit": "phoenix_gauntlet_keeper",
+      "backstory": "A Stoneborn veteran of the gauntlet roads, he gathers adventurers in Landfall and sends each party toward a challenge worthy of its strength.",
+      "appearanceStory": "The complete Phoenix heroic cuirass, legguards and boots mark a veteran of difficult roads; he wears no helmet so arrivals can see his Stoneborn face.",
+      "dialogueTopics": [
+        "landfall_gauntlet_party"
+      ],
+      "appearance": {
+        "skin": 3,
+        "hair": 160,
+        "eyes": 2,
+        "shirt": 2,
+        "pants": 4,
+        "boots": 0,
+        "head": 0
+      },
+      "equipmentVisuals": {
+        "5": 192,
+        "4": 195,
+        "6": 208
       }
     }
   },

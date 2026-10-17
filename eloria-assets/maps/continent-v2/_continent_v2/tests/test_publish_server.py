@@ -49,7 +49,7 @@ POLYGONS = {"landfall": [[40.0, 0.0], [100.0, 0.0], [100.0, 60.0], [40.0, 60.0]]
 FRAMES = {"landfall": SW, "tollholm": TH}
 V2 = "eloria-assets/maps/continent-v2"
 REHOMED = {"Gate Warden Ilyon": ("guide", 308), "Wayfinder Nesh": ("tutorial", 307),
-           "Ferryman Caldus": ("dialogue", 310), "Register Clerk Hemmen": ("dialogue", 312),
+           "Ferryman Caldus": ("dialogue", 310), "Hemmen": ("dialogue", 312),
            "Bettany Orl": ("shop", 303)}
 TARGETS = P.LANDING_TARGETS
 LAKE = (50.5, 45.5)                 # inside test_export_collision's lake: blocked

@@ -31,6 +31,24 @@ def test_a_marker_without_an_occupation_has_none():
     assert P.occupation_field("Light-Keeper", "Marta Quell", "m") == "Light-Keeper"
 
 
+@pytest.mark.parametrize("vector,facing", [
+    ([0, 0, -1], "N"), ([1, 0, -1], "NE"), ([1, 0, 0], "E"), ([1, 0, 1], "SE"),
+    ([0, 0, 1], "S"), ([-1, 0, 1], "SW"), ([-1, 0, 0], "W"), ([-1, 0, -1], "NW"),
+])
+def test_npc_marker_facing_survives_publication(vector, facing):
+    direction = P.npc_facing({"id": "npc", "facing": vector})
+    assert direction == facing
+    assert P.npc_portrait(312, "Register Clerk", direction) == (
+        f"actor_type=312,occupation=Register Clerk,facing={facing}")
+
+
+def test_missing_facing_preserves_old_bakes_and_degenerate_vectors_are_refused():
+    assert P.npc_facing({"id": "old"}) == ""
+    for vector in ([0, 0, 0], [1, 0], [float("nan"), 0, 1]):
+        with pytest.raises(P.PublishError, match="NPC facing"):
+            P.npc_facing({"id": "bad", "facing": vector})
+
+
 @pytest.mark.parametrize("value", ["", " Grove-Keeper", "Grove  Keeper", "Grove,Keeper", "<Grove-Keeper>",
                                    "Grove=Keeper", "Grove#Keeper", "x" * (P.OCCUPATION_LIMIT + 1), 7])
 def test_an_occupation_the_loader_would_refuse_is_refused_here(value):

@@ -6,8 +6,8 @@ extends SceneTree
 const SHOWCASE := ["Aven", "Mara Venn", "Sella", "Brannic", "Rowan Vale", "Ilyra",
 	"Captain Tor", "Pell", "Tamsin Quill", "Vestra", "Lens-Master Corvine Ast",
 	"Orrery Keeper Sabel Roon", "Quarry Foreman Hesk", "Salvage Mistress Gero Lund",
-	"Sunken Court Diver Teth-Sa", "Gate Warden Ilyon", "Nash", "Register Clerk Hemmen",
-	"Bettany Orl", "Banner-Rider Ashaia", "Snowline Ranger Kestrel Vane", "Ione Brass",
+	"Sunken Court Diver Teth-Sa", "Gate Warden Ilyon", "Nash", "Hemmen",
+	"Bettany Orl", "Tessa", "Rellan", "Banner-Rider Ashaia", "Snowline Ranger Kestrel Vane", "Ione Brass",
 	"Caravan Doctor Nesrin", "Motherroot Voice Sillow", "Canopy Rigger",
 	"Bog-Iron Smith Nella Doust", "Captain Iven", "Tessara", "Hatchery Keeper Nuu-Sesh",
 	"Old Pyke", "Widow Carrow", "Grinder Vell", "Ammet Sorrel",
@@ -75,8 +75,11 @@ func run() -> void:
 	camera.position = Vector3(0, 1.1, 4)
 	camera.look_at(Vector3(0, 1.1, 0))
 	var count := 0
+	var selected := OS.get_environment("ELORIA_NPC_NAMES").split(",", false)
 	for key: String in catalogue["npcs"]:
 		var person: Dictionary = catalogue["npcs"][key]
+		if not selected.is_empty() and str(person["name"]) not in selected:
+			continue
 		var dto := {"actor_id": 30000 + count, "x": 0, "y": 0, "rotation": 0,
 			"kind": 2, "actor_type": person["actorType"], "name": person["name"]}
 		if not packets.is_empty():

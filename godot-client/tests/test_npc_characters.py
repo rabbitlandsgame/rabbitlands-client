@@ -42,7 +42,7 @@ def test_every_person_has_an_unambiguous_wire_identity():
 
 def test_cast_has_individual_stories_and_wardrobes():
     people = list(CAST['npcs'].values())
-    assert len(people) == 257
+    assert len(people) == 259
     assert len({person['backstory'] for person in people}) == len(people)
     assert len({person['outfit'] for person in people}) >= 35
     for region in {p['homeRegion'] for p in people}:

@@ -38511,7 +38511,7 @@ extras = {
 "objectId": 20,
 "plan": "tutorial.json (interactives.txt draft)",
 "post": "obj_landing_register_desk",
-"tutorial": "step 1 \"Name, Road, Date\": Register Clerk Hemmen signs new arrivals in at this desk",
+"tutorial": "step 1 \"Name, Road, Date\": Hemmen signs new arrivals in at this desk",
 "type": "information"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.5, 121.494, 19.5)
@@ -39231,7 +39231,7 @@ script = ExtResource("s0_marker")
 record_id = "landfall--npc-wayfinder-nesh"
 kind = "npc_marker"
 label = "Nash"
-facing = Vector3(-0.73593, 0, 0.67706)
+facing = Vector3(1, 0, 0)
 extras = {
 "actorType": 307,
 "authority": "server",
@@ -39242,28 +39242,29 @@ extras = {
 "post": "npc_wayfinder_nesh",
 "race": "luminous",
 "role": "tutorial (guide card voice, recovery)",
-"rotationDegrees": 132.6,
+"rotationDegrees": 270,
 "status": "re-homed from Four Gates (npcs.txt:44, role tutorial, actor 307)"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -139.5, 121.494, 22.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.5, 121.494, 32.5)
 
 [node name="landfall--npc-register-clerk-hemmen" type="Marker3D" parent="Gameplay/NpcMarkers"]
 gizmo_extents = 0.8
 script = ExtResource("s0_marker")
 record_id = "landfall--npc-register-clerk-hemmen"
 kind = "npc_marker"
-label = "Register Clerk Hemmen"
-facing = Vector3(0.99887, 0, 0.04757)
+label = "Hemmen"
+facing = Vector3(0.707107, 0, 0.707107)
 extras = {
 "actorType": 312,
 "authority": "server",
-"name": "Register Clerk Hemmen",
+"name": "Hemmen",
+"occupation": "Register Clerk",
 "note": "planned (island content plan A4, owner-accepted 2026-10-02); served from the v2 publish path (B2) and the home migration",
 "plan": "tutorial.json cast (\"Signed Ashore\")",
 "post": "npc_register_clerk_hemmen",
 "race": "luminous",
 "role": "the Landing Register; starts S1",
-"rotationDegrees": 267.3,
+"rotationDegrees": 225,
 "status": "re-homed (npcs.txt:51, actor 312)"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.5, 121.494, 21.5)
@@ -39274,7 +39275,7 @@ script = ExtResource("s0_marker")
 record_id = "landfall--npc-grove-keeper-ammet-sorrel"
 kind = "npc_marker"
 label = "Ammet Sorrel"
-facing = Vector3(0.89443, 0, -0.44721)
+facing = Vector3(-0.707107, 0, -0.707107)
 extras = {
 "actorTypeBlock": [374, 377],
 "authority": "server",
@@ -39285,7 +39286,7 @@ extras = {
 "post": "npc_grove_keeper_ammet_sorrel",
 "race": "mycelari",
 "role": "countersign 1 (grove); sends you to Bettany",
-"rotationDegrees": 296.6,
+"rotationDegrees": 45,
 "status": "NEW"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.5, 121.494, -14.5)
@@ -39296,7 +39297,7 @@ script = ExtResource("s0_marker")
 record_id = "landfall--npc-bettany-orl"
 kind = "npc_marker"
 label = "Bettany Orl"
-facing = Vector3(0.83571, 0, -0.54918)
+facing = Vector3(0.707107, 0, -0.707107)
 extras = {
 "actorType": 303,
 "authority": "server",
@@ -39308,7 +39309,7 @@ extras = {
 "post": "npc_bettany_orl",
 "race": "luminous",
 "role": "step 3: buys Lemon (4) and Olive (1); Raw Meat proposed",
-"rotationDegrees": 303.3,
+"rotationDegrees": 315,
 "status": "re-homed (npcs.txt:52, shop, actor 303)"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -169.5, 121.494, 45.5)
@@ -39340,7 +39341,7 @@ script = ExtResource("s0_marker")
 record_id = "landfall--npc-gate-warden-ilyon"
 kind = "npc_marker"
 label = "Gate Warden Ilyon"
-facing = Vector3(0.84262, 0, 0.53851)
+facing = Vector3(0.707107, 0, 0.707107)
 extras = {
 "actorType": 308,
 "authority": "server",
@@ -39350,7 +39351,7 @@ extras = {
 "post": "npc_gate_warden_ilyon",
 "race": "luminous",
 "role": "tools and the sage errand (step 4); countersign 3 (gate)",
-"rotationDegrees": 237.4,
+"rotationDegrees": 225,
 "status": "re-homed (npcs.txt:43, role guide, actor 308)"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -218.5, 121.603, -8.5)
@@ -39361,7 +39362,7 @@ script = ExtResource("s0_marker")
 record_id = "landfall--npc-temple-warden-ostrid-hollin"
 kind = "npc_marker"
 label = "Ostrid Hollin"
-facing = Vector3(-0.1155, 0, -0.99331)
+facing = Vector3(-0.707107, 0, -0.707107)
 extras = {
 "actorTypeBlock": [314, 317],
 "authority": "server",
@@ -39372,7 +39373,7 @@ extras = {
 "post": "npc_temple_warden_ostrid_hollin",
 "race": "votary",
 "role": "countersign 2 (temple): takes the offering; pick points",
-"rotationDegrees": 6.6,
+"rotationDegrees": 45,
 "status": "NEW"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.5, 121.494, 52.5)
