@@ -71,6 +71,23 @@ def test_manual_develop_run_uses_its_exact_checkout(tmp_path, monkeypatch):
         actions.workflow_commit()
 
 
+def test_workflow_token_does_not_require_human_permissions_metadata(monkeypatch):
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REPOSITORY", actions.release.REPOSITORY)
+    calls = []
+    def gh(*args):
+        calls.append(args)
+        assert args[-1] == ".full_name"
+        return actions.release.REPOSITORY
+    monkeypatch.setattr(actions.release, "gh", gh)
+    actions.runner_release.authorize()
+    assert len(calls) == 1
+    monkeypatch.setenv("GITHUB_REPOSITORY", "other/repository")
+    with pytest.raises(ValueError, match="not executing"):
+        actions.runner_release.authorize()
+    assert len(calls) == 1
+
+
 @pytest.mark.parametrize("condition", ["missing-secret", "published-same-commit", "wrong-branch", "wrong-checkout"])
 def test_prepare_rejects_unusable_run_before_any_release_write(tmp_path, monkeypatch, condition):
     context(tmp_path, monkeypatch)
