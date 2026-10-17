@@ -1297,7 +1297,16 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				special_events.append(str(raw_line))
 			state_changed.emit(&"special_events")
 		"magic_state":
-			magic_state_received.emit(event.data)
+			var magic: Dictionary = event.data
+			if magic.get("kind") == "creature_status":
+				var status_actor_id := int(magic.get("actor_id", -1))
+				if actors.has(status_actor_id) and magic.get("effects") is Array:
+					var status_actor: Dictionary = actors[status_actor_id]
+					status_actor["negative_statuses"] = (magic.effects as Array).duplicate()
+					mark_actor_changed(status_actor_id)
+					state_changed.emit(&"actors")
+			else:
+				magic_state_received.emit(magic)
 		"spell_power":
 			spell_power.clear()
 			for raw_effect: Variant in event.effects:

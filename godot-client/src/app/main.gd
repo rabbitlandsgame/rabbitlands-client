@@ -6595,7 +6595,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		candidates.append({"actor": actor, "id": int(raw_id), "priority": priority,
 			"distance": actor.global_position.distance_squared_to(camera_rig.focus),
 			"rect": overhead_block_rect(screen, str(dto.get("name", "")),
-				actor.occupation())})
+				actor.occupation(), actor.negative_status_count())})
 	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if a.priority != b.priority: return a.priority < b.priority
 		if a.distance != b.distance: return a.distance < b.distance
@@ -6623,7 +6623,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 ## own width and pushes the block's bottom down a line, so two NPCs standing
 ## close do not draw one's occupation through the other's name.
 static func overhead_block_rect(screen: Vector2, actor_name: String,
-		occupation: String = "") -> Rect2:
+		occupation: String = "", negative_status_count: int = 0) -> Rect2:
 	var width := maxf(110.0, ThemeDB.fallback_font.get_string_size(
 		actor_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0)
 	var height := 38.0
@@ -6631,7 +6631,14 @@ static func overhead_block_rect(screen: Vector2, actor_name: String,
 		width = maxf(width, ThemeDB.fallback_font.get_string_size("<%s>" % occupation,
 			HORIZONTAL_ALIGNMENT_LEFT, -1, ReplicatedActor3D.OCCUPATION_FONT_SIZE).x + 12.0)
 		height += ReplicatedActor3D.OCCUPATION_DROP
-	return Rect2(screen - Vector2(width * 0.5, 12), Vector2(width, height))
+	var top := 12.0
+	if negative_status_count > 0:
+		width = maxf(width, negative_status_count * (ReplicatedActor3D.NEGATIVE_STATUS_SIZE
+			+ ReplicatedActor3D.NEGATIVE_STATUS_GAP) - ReplicatedActor3D.NEGATIVE_STATUS_GAP + 8.0)
+		var rise: float = ReplicatedActor3D.NEGATIVE_STATUS_RISE
+		top = rise + ReplicatedActor3D.NEGATIVE_STATUS_SIZE * 0.5 + 2.0
+		height += top - 12.0
+	return Rect2(screen - Vector2(width * 0.5, top), Vector2(width, height))
 
 ## How much of an actor's overhead block shows at this distance from the
 ## player: all of it up to `NAME_FADE_METRES` short of the name distance,

@@ -288,6 +288,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"magic_book_v2",
 	"spell_visuals_v1",
 	"spell_impacts_v1",
+	"creature_status_v1",
 	"special_events_v1",
 	"storage_window_v1",
 	# Draws the continent-v2 maps (registry status continent-v2-served: the

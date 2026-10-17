@@ -268,6 +268,8 @@ var _equipment_hides: Dictionary = {}
 var _hidden_body_surfaces: Dictionary = {}
 var _nameplate: Label3D
 var _overhead_crowded := false
+var _negative_statuses: Array[String] = []
+var _negative_status_icons: Node3D
 var _title_line: Label3D
 ## The occupation line under an NPC's name, and the occupation it shows
 ## without its brackets. Built on first use, like the title line.
@@ -391,6 +393,17 @@ const HEALTH_BAR_DROP := 16.0
 const HEALTH_LABEL_DROP := HEALTH_BAR_DROP
 const HEALTH_NUMBER_GAP := 5.0
 const OVERHEAD_BACKING := Color(0.0, 0.0, 0.0, 0.45)
+const NEGATIVE_STATUS_SIZE := 20.0
+const NEGATIVE_STATUS_GAP := 3.0
+const NEGATIVE_STATUS_RISE := 24.0
+const NEGATIVE_STATUS_TEXTURES := {
+	"poison": preload("res://assets/ui/status/poison.svg"),
+	"cripple": preload("res://assets/ui/status/cripple.svg"),
+	"expose_heat": preload("res://assets/ui/status/expose_heat.svg"),
+	"expose_cold": preload("res://assets/ui/status/expose_cold.svg"),
+	"expose_magic": preload("res://assets/ui/status/expose_magic.svg"),
+	"expose_radiation": preload("res://assets/ui/status/expose_radiation.svg"),
+}
 static var _health_gradient: GradientTexture2D
 static var _wardrobe_texture_cache: Dictionary = {}
 
@@ -1040,6 +1053,62 @@ func _add_nameplate(dto: Dictionary) -> void:
 	_add_overhead_background()
 	_layout_overhead()
 	apply_vitals(int(dto.get("health", 0)), int(dto.get("max_health", 0)))
+	set_negative_statuses(dto.get("negative_statuses", []))
+
+## One icon per active negative effect, in a stable order. Only server status
+## snapshots change this list; a spell animation cannot prove an effect landed.
+func set_negative_statuses(effects: Array) -> void:
+	var next: Array[String] = []
+	for effect: String in NEGATIVE_STATUS_TEXTURES:
+		if effect in effects:
+			next.append(effect)
+	if next == _negative_statuses:
+		return
+	_negative_statuses = next
+	if not is_instance_valid(_negative_status_icons):
+		_negative_status_icons = Node3D.new()
+		_negative_status_icons.name = "NegativeStatusIcons"
+		_negative_status_icons.position.y = _nameplate.position.y
+		add_child(_negative_status_icons)
+	for child: Node in _negative_status_icons.get_children():
+		_negative_status_icons.remove_child(child)
+		child.queue_free()
+	for index: int in range(next.size()):
+		var icon := MeshInstance3D.new()
+		icon.name = next[index]
+		icon.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		icon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var quad := QuadMesh.new()
+		quad.size = Vector2.ONE * NEGATIVE_STATUS_SIZE * OVERHEAD_PIXEL
+		var material := _overhead_material(Color.WHITE, 4)
+		material.albedo_texture = NEGATIVE_STATUS_TEXTURES[next[index]]
+		quad.material = material
+		icon.mesh = quad
+		_negative_status_icons.add_child(icon)
+	_layout_negative_statuses()
+	_refresh_negative_statuses()
+
+func negative_status_count() -> int:
+	return _negative_statuses.size() if _health_current > 0 else 0
+
+func _layout_negative_statuses() -> void:
+	if not is_instance_valid(_negative_status_icons):
+		return
+	var rise := NEGATIVE_STATUS_RISE
+	if is_instance_valid(_title_line) and not _title_line.text.is_empty():
+		rise += TITLE_RISE
+	for index: int in range(_negative_status_icons.get_child_count()):
+		var icon := _negative_status_icons.get_child(index) as MeshInstance3D
+		(icon.mesh as QuadMesh).center_offset = Vector3(
+			(index - (_negative_statuses.size() - 1) * 0.5)
+				* (NEGATIVE_STATUS_SIZE + NEGATIVE_STATUS_GAP), rise, 0.0) * OVERHEAD_PIXEL
+
+func _refresh_negative_statuses() -> void:
+	if not is_instance_valid(_negative_status_icons):
+		return
+	_negative_status_icons.visible = _overhead_shown() and negative_status_count() > 0
+	for child: Node in _negative_status_icons.get_children():
+		_fade_quad(child as MeshInstance3D, 1.0)
 
 ## The overhead health bar and its numbers. Not drawn for everyone: every
 ## actor packet carries a health pair, scenery included, and a full bar over
@@ -1230,6 +1299,7 @@ func set_health_visible(enabled: bool) -> void:
 ## condition: a corpse at zero health keeps its empty frame rather than a
 ## sliver of colour.
 func _refresh_overhead_health() -> void:
+	_refresh_negative_statuses()
 	var showing: bool = (_overhead_shown() and _health_shown
 		and _health_maximum > 0)
 	if is_instance_valid(_health_bar_background):
@@ -1318,6 +1388,7 @@ func set_title(title: String) -> void:
 		if is_instance_valid(_title_line):
 			_title_line.text = ""
 			_title_line.hide()
+		_layout_negative_statuses()
 		return
 	if not is_instance_valid(_title_line):
 		var label: Label3D = Label3D.new()
@@ -1340,6 +1411,7 @@ func set_title(title: String) -> void:
 		add_child(label)
 		_title_line = label
 	_title_line.text = title
+	_layout_negative_statuses()
 	_title_line.visible = _overhead_shown()
 	_fade_label(_title_line)
 
@@ -1504,7 +1576,7 @@ func _lift_overhead(factor: float) -> void:
 	# own, so the gaps between them hold their size along with the text.
 	for node_name: String in ["Nameplate", "TitleLine", "OccupationLine", "QuestOfferMarker",
 			"HealthBarBackground", "HealthBarFill", "HealthNumbers", "SpeechBubble",
-			"OverheadBackground"]:
+			"OverheadBackground", "NegativeStatusIcons"]:
 		var node := get_node_or_null(node_name) as Node3D
 		if node != null:
 			node.position.y = height
@@ -1639,6 +1711,7 @@ func rebase_world(frame: Transform3D) -> void:
 	_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	set_negative_statuses(dto.get("negative_statuses", []))
 	# The capability handshake can correct an actor already spawned from the
 	# legacy clothing bytes. Update its dyes once, including under worn armour.
 	if dto.has("appearance") and dto.appearance != _appearance:
