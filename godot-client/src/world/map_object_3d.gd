@@ -51,6 +51,9 @@ const PORTAL_GLYPH := "P"
 const EXIT_GLYPH := "X"
 const STORAGE_COLOUR := Color("d6bb7a")
 const STORAGE_WORLD_RANGE := 90.0
+## Decorative plaza paving sits above the navigation mesh (6.5 cm in Landfall).
+## Leave room for it while preserving the halo's normal scene occlusion.
+const STORAGE_GLOW_CLEARANCE := 0.12
 const GAMEPLAY_LAYER := 2
 ## The waygate texts the continent tool writes name where the gate leads in
 ## these words; the label beside the P on the full map is that name.
@@ -250,7 +253,8 @@ func set_surface_height(height: float) -> void:
 	global_position.y = height + 0.05
 	_drape_ring()
 	if is_instance_valid(_storage_glow):
-		var draped := GroundDrape.drape(_storage_glow, _storage_glow_flat)
+		var draped := GroundDrape.drape(_storage_glow, _storage_glow_flat,
+			STORAGE_GLOW_CLEARANCE)
 		_storage_glow.mesh = _storage_glow_flat if draped == null else draped
 
 ## Marks the node the player is currently harvesting. The ring is hidden while
