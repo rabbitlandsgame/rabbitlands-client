@@ -6,6 +6,16 @@
          [--collision <export work dir>/<region>.collision.json] \
          [--work <scratch dir>] [--chunks 05_11,06_11] [--budget-mib 256] [--master] [--checkout <worktree>]
 
+  python -B eloria-assets/maps/continent-v2/_continent_v2/publish_client.py --environment [--check] \
+         --region <catalog-id> --out eloria-assets/maps/continent-v2/<region>/client [--checkout <worktree>]
+
+--environment publishes the stub's environment block (sky, sun, ambient, fog, saturation and their variants) alone:
+the territory manifest and every chunk manifest take <region>/world.json's `environment`, and nothing else in the
+package is read or written. The block is copied from the stub verbatim by a full publish too, and no digest covers
+it (chunks_digest hashes the chunk GLBs, the server pins the walk grids), so a sky change needs no re-bake, no new
+chunks and no new map picture. A package not written by this tool is refused. --check writes nothing and exits 1
+when any manifest's block differs from the stub's (tests/test_publish_client_environment.py checks every territory).
+
 --region names an active catalog territory. The bake comes from the region bake
 (src/dev/map_authoring_region/region_bake_cli.gd, or the editor-pass check of that territory) of the committed scene;
 re-bake after every scene commit. The bootstrap owns <region>/world.json (the editor stub) and
@@ -333,6 +343,35 @@ def harvest_package(doc, placements, top_of):
 HARVEST_SCHEMA = "eloria-harvest-presentation-v1"     # harvest_presentation.SCHEMA (the tests keep them equal)
 
 
+def environment_restamp(out, region, checkout=DEFAULT_CHECKOUT, write=True):
+    """The environment publish (--environment): the stub's `environment` into the territory manifest at <out> and
+    into every chunk manifest it lists, exactly as a full publish copies it (manifest and chunk_manifest). Returns
+    the manifests whose block differed (and, with `write`, now matches). A package this tool did not write, or a chunk
+    manifest that is not this territory's, is refused before anything is written."""
+    out = Path(out)
+    stub = json.loads((Path(checkout) / "eloria-assets/maps/continent-v2" / region / "world.json")
+                      .read_text(encoding="utf-8"))
+    environment = stub["environment"]
+    territory_path = out / "world.json"
+    territory = json.loads(territory_path.read_text(encoding="utf-8"))
+    if territory.get("asset", {}).get("id") != region or territory.get("provenance", {}).get("tool") != TOOL:
+        raise SystemExit(f"refused: {territory_path} is not a {region} package written by {TOOL}")
+    documents = [(territory_path, territory)]
+    for chunk in territory["streamingChunks"]["chunks"]:
+        path = out / chunk["manifest"]
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if document.get("asset", {}).get("id") != f"{region}__chunk_{chunk['id']}":
+            raise SystemExit(f"refused: {path} is not {region}'s cell {chunk['id']}")
+        documents.append((path, document))
+    changed = [path for path, document in documents if document.get("environment") != environment]
+    if write:
+        for path, document in documents:
+            if path in changed:
+                document["environment"] = copy.deepcopy(environment)
+                json_write(path, document)
+    return changed
+
+
 def chunk_manifest(manifest, region, name, stats, bounds):
     """One 96 m cell's package manifest: the territory's, without what only the territory carries."""
     c = copy.deepcopy(manifest)
@@ -496,9 +535,12 @@ def source_texture_paths(snapshot, authoring, reader):
 def main():
     global REGION
     ap = argparse.ArgumentParser()
-    ap.add_argument("--snapshot", required=True, type=Path)
+    ap.add_argument("--snapshot", type=Path, help="the bake (required unless --environment)")
     ap.add_argument("--out", required=True, type=Path)
-    ap.add_argument("--shared", required=True, type=Path)
+    ap.add_argument("--shared", type=Path, help="the shared image pool (required unless --environment)")
+    ap.add_argument("--environment", action="store_true",
+                    help="publish only the stub's environment block into the package at --out")
+    ap.add_argument("--check", action="store_true", help="with --environment: write nothing, exit 1 on a difference")
     ap.add_argument("--work", type=Path, default=None)
     ap.add_argument("--chunks", default="", help="comma list cx_cz: export only these cells (a test publish)")
     ap.add_argument("--budget-mib", type=float, default=None, help="streamingChunks.maximumResidentBytes (default 256)")
@@ -509,6 +551,15 @@ def main():
                     help="export_collision.py's <region>.collision.json for this bake (stamps the served grid)")
     a = ap.parse_args()
     REGION = a.region
+    if a.environment:
+        changed = environment_restamp(a.out, REGION, a.checkout.resolve(), write=not a.check)
+        verb = "differ from" if a.check else "now carry"
+        print(f"{REGION}: {len(changed)} manifest(s) {verb} the stub's environment")
+        raise SystemExit(1 if a.check and changed else 0)
+    if a.check:
+        ap.error("--check needs --environment")
+    if a.snapshot is None or a.shared is None:
+        ap.error("--snapshot and --shared are required for a publish")
     t_start = time.time()
     timings = {}
     checkout = a.checkout.resolve()

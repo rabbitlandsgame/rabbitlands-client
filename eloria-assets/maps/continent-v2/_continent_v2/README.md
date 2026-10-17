@@ -22,6 +22,27 @@ Each `godot-client/world_authoring/regions/<map>/colour-grade.json` records thes
 `base-colors-graded.rgba8`; all fifteen maps use the same ones. Flora and ground-region bands that cross a border
 follow the same rule at roughly 150-250 m.
 
+## Light and weather
+
+Each map's sky, sun, ambient light, fog and saturation are its stub's `environment` block (`<map>/world.json`), and
+`publish_client.py` copies the block verbatim into the territory manifest and every chunk manifest. A light-only
+change needs no re-bake: edit the stub, then run `publish_client.py --environment --region <map> --out
+<map>/client`, which rewrites that block and nothing else (no digest covers it).
+`tests/test_publish_client_environment.py` fails while any package's block differs from its stub's.
+
+`environment.variants` names a map's own `night` (sky zenith and horizon, fog, ambient and moon colours), `dawn` and
+`dusk` (sun, sky horizon and fog colours); `DayNightBinder` and the painted sky blend towards them by the hour, and
+a colour a variant omits stays the shared one. Only colours move: how dark the night is stays the same everywhere.
+`golden-hour` is a fixed pose for a still frame and is not read. `environment.presentation` may declare map-wide
+`mist` (lying at dawn, dusk, night and in rain) and `gulls` (by day), each `{"enabled": true, "density": 0..1}`;
+`PresentationEffects` draws them around the camera. An entry with `zones` is left for a zone reader.
+
+Across a border the client blends two isles' light over `ExteriorRegionStream.ISLE_LIGHT_BLEND_METRES` (130 m) on
+each side of the shared border, the same width as the ground. Weather is the server's: climates are rows in
+`config/eloria/weather.txt` (the base profile, not the continent-v2 overlay), and rain greys the sky, dims the sun
+and thickens the haze in the client (`WeatherSky`). The kits' lantern posts, lamp buoys and lighthouses light at
+dusk by their model names (`NightLamps.LAMPS`), with a small pool of real lights for the lamps nearest the camera.
+
 ## Server publication
 
 After all active saved scenes are committed, bake every catalog map and publish its client package from that
