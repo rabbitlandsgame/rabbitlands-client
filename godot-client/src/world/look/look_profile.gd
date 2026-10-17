@@ -509,6 +509,44 @@ const PATCH_RIM := Vector3(0.42, 0.06, 0.1)
 ## showed through the square as a green veil.
 const PAVING_RIM := Vector3(0.12, 0.04, 0.05)
 const RIM_NOISE_METRES := 0.9
+## The cut also wanders in broad lobes (two octaves, the coarse one
+## RIM_LOBE_METRES across) and follows its texture's grain. With the fine
+## wobble alone, a rectangle's side, an ellipse's arc and a road's shoulder
+## read as ruled lines from the game camera (map audit 2026-10-17: Greenlight's
+## quay and lighthouse square, Landfall's gate yard). Each class's x moves the
+## cut by up to x vertex alpha either way in lobes; y moves it by y per unit of
+## relative luminance, so paving ends stone by stone and dark joints go first.
+## Neither carries an edge past its authored footprint: the exporter's ramp,
+## a road's one rim strip or a patch's blend width, is all there is to move in.
+const RIM_LOBE_METRES := 5.0
+const DECK_RIM_LOBE := Vector2(0.14, 0.25)
+const PATCH_RIM_LOBE := Vector2(0.18, 0.2)
+const PAVING_RIM_LOBE := Vector2(0.09, 0.3)
+const MEADOW_RIM_LOBE := Vector2(0.12, 0.12)
+
+## Detail textures a region may lay over its ground by class
+## (`ground.class_textures`, slot -> name, e.g. {"deck": "packed_earth"}).
+## Mapped in continent metres (`metres` per repeat) and rescaled to the source
+## texture's mean colour (painted_ground_surface.gdshaderinc), so a region's
+## palette and paint classes are unchanged and only the structure is new.
+## Generated for the Landfall isles (map audit 2026-10-17), which drew their
+## roads, sand, soil and lawns from one mottled ground texture under four
+## tints and their paving from wall masonry laid flat; provenance in
+## textures/README.md.
+const CLASS_TEXTURES := {
+	"packed_earth": {"path": "res://src/world/look/textures/packed-earth-path.png", "metres": 3.5},
+	"flagstone": {"path": "res://src/world/look/textures/flagstone-paving.png", "metres": 3.2},
+	"beach_sand": {"path": "res://src/world/look/textures/beach-sand.png", "metres": 4.0},
+}
+## The surfaces a class texture can cover: walk decks, pale paving, sand
+## glazes and green meadows (LookGround.class_slot). A meadow keeps its own
+## texture on the isles: a fine turf at a 4 m repeat averaged to flat green at
+## the game camera, losing the mottle the painted look leans on (audit renders,
+## 2026-10-17).
+const CLASS_TEXTURE_SLOTS := ["deck", "paving", "sand", "meadow"]
+## How much of a class texture's own hue survives its recolouring (0: the
+## source's mean colour exactly; 1: only its luminance is matched).
+const CLASS_TEXTURE_HUE := 0.5
 ## Every road is edged: on the far side of its rim, where its coverage has
 ## run out but its geometry has not (vertex alpha from EDGE_BAND_FROM up to the
 ## rim), whatever lies under it is darkened by EDGE_BAND (value x0.72) - the
@@ -1501,7 +1539,7 @@ const REGION_SECTIONS := {
 		"verge_value_earth", "verge_saturation", "verge_green_red", "deck_path",
 		"deck_road_colour", "deck_tint", "deck_chroma", "deck_grain", "path_detail",
 		"path_fine", "rock_value", "meadow_value", "meadow_chroma", "meadow_tint", "keep_patches",
-		"paving_tint", "verge_grain", "verge_grain_steep"],
+		"paving_tint", "verge_grain", "verge_grain_steep", "class_textures"],
 	"grass": ["root", "tip", "value", "layers", "open", "meadow", "open_green"],
 	"sky": ["top", "horizon", "paint", "clear", "haze_warmth"],
 	"water": ["decode_albedo", "inland_tint", "sea_value", "sea_chroma", "sea_tint"],
@@ -1510,7 +1548,8 @@ const REGION_SECTIONS := {
 	"props": ["keep_words", "keep_chroma", "keep_tint", "hole_words"],
 }
 const REGION_TABLE_KEYS := ["layers", "decode_albedo", "crown_materials", "tree_words",
-	"shrub_words", "untamed_words", "plain_words", "keep_words", "keep_patches", "hole_words"]
+	"shrub_words", "untamed_words", "plain_words", "keep_words", "keep_patches", "hole_words",
+	"class_textures"]
 const REGION_META_KEYS := ["id", "schema", "notes"]
 ## Keys whose values are colours: [r, g, b] display (sRGB) components, exactly
 ## as a Color() constant takes them, or "#rrggbb".
@@ -1753,6 +1792,8 @@ static func _expected(section: String, bare: String) -> String:
 		return "colour ([r, g, b] or \"#rrggbb\")"
 	if bare == "layers" or bare == "decode_albedo":
 		return "table of numbers"
+	if bare == "class_textures":
+		return "table of %s to class texture names" % [CLASS_TEXTURE_SLOTS]
 	if section == "foliage" or bare == "keep_words" or bare == "keep_patches" or bare == "hole_words":
 		return "list of strings"
 	return "number"
@@ -1770,6 +1811,18 @@ static func _typed_value(section: String, bare: String, value: Variant) -> Varia
 			return Color(float(parts[0]), float(parts[1]), float(parts[2]),
 				float(parts[3]) if parts.size() == 4 else 1.0)
 		return null
+	if bare == "class_textures":
+		if value is not Dictionary:
+			return null
+		var slots := {}
+		for slot: Variant in value:
+			var texture_name: Variant = (value as Dictionary)[slot]
+			if str(slot) not in CLASS_TEXTURE_SLOTS or texture_name is not String \
+					or not CLASS_TEXTURES.has(texture_name):
+				return null
+			slots[str(slot)] = texture_name
+		slots.make_read_only()
+		return slots
 	if bare == "layers" or bare == "decode_albedo":
 		if value is not Dictionary:
 			return null
