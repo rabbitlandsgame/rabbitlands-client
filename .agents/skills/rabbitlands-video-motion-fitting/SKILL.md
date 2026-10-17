@@ -47,3 +47,5 @@ The accepted walk is `.local/asset-authoring/workspace/generate_models/wolf_vide
 For the integrated seven-actor development selection and current engine fidelity requirements, also use [creature-animation integration](../rabbitlands-creature-animation/SKILL.md) and `docs/creature-video-motion.md`. Original source-pilot acceptance remains distinct from the later authorized runtime publication.
 
 For the approved Moss Bear source and current imported bear family, read [ursine transfer](references/ursine-transfer.md). It covers nonanatomical imported parenting, native planted-paw orientation, separate skin preparation and contact-aware death release. Retired procedural bears are excluded.
+
+For Rabbit and Jackalope hopping, native head/forelimb skin repair and authored attack/death, read [rabbit-family motion](references/leporid-transfer.md).

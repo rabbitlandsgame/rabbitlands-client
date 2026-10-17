@@ -1,0 +1,119 @@
+{
+  "scope": "Same-pose before/after skin strain diagnostic, not an artistic acceptance score. Rest edges shorter than .005 are excluded.",
+  "actors": {
+    "rabbit": {
+      "sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
+      "example_edge": [
+        522,
+        529
+      ],
+      "clips": {
+        "Walk": {
+          "original_skin": {
+            "maximum_stretch": 4.772156114140232,
+            "p99_stretch": 1.2745308896873946,
+            "known_defect_edge_max_stretch": 4.772152294525467
+          },
+          "repaired_skin": {
+            "maximum_stretch": 1.9377122644630966,
+            "p99_stretch": 1.2538253793571421,
+            "known_defect_edge_max_stretch": 1.00000000000001
+          }
+        },
+        "Jog": {
+          "original_skin": {
+            "maximum_stretch": 4.9094152499671635,
+            "p99_stretch": 1.3174918299742542,
+            "known_defect_edge_max_stretch": 4.909411320490733
+          },
+          "repaired_skin": {
+            "maximum_stretch": 2.4133983623115065,
+            "p99_stretch": 1.2965856097801025,
+            "known_defect_edge_max_stretch": 1.000000000000018
+          }
+        },
+        "Sword_Attack": {
+          "original_skin": {
+            "maximum_stretch": 8.039658247024102,
+            "p99_stretch": 1.2251193605658919,
+            "known_defect_edge_max_stretch": 8.039651812113632
+          },
+          "repaired_skin": {
+            "maximum_stretch": 2.1517552133082263,
+            "p99_stretch": 1.1986342074197676,
+            "known_defect_edge_max_stretch": 1.0000000000000036
+          }
+        },
+        "Death_A": {
+          "original_skin": {
+            "maximum_stretch": 17.716521308386767,
+            "p99_stretch": 1.6317472362458918,
+            "known_defect_edge_max_stretch": 17.71650712815361
+          },
+          "repaired_skin": {
+            "maximum_stretch": 3.6111539065991245,
+            "p99_stretch": 1.562164631240296,
+            "known_defect_edge_max_stretch": 1.0000000000000029
+          }
+        }
+      }
+    },
+    "jackalope": {
+      "sha256": "0de34ad9e4a2225190c382577c4b42e916cb32b517d96d9bab8490355e0cf38c",
+      "example_edge": [
+        1951,
+        3381
+      ],
+      "clips": {
+        "Walk": {
+          "original_skin": {
+            "maximum_stretch": 2.680231017924486,
+            "p99_stretch": 1.4961573176187524,
+            "known_defect_edge_max_stretch": 2.6802334957536087
+          },
+          "repaired_skin": {
+            "maximum_stretch": 2.4160052313267313,
+            "p99_stretch": 1.2946621476747284,
+            "known_defect_edge_max_stretch": 1.3673444376759878
+          }
+        },
+        "Jog": {
+          "original_skin": {
+            "maximum_stretch": 2.8440385175516125,
+            "p99_stretch": 1.567103330584403,
+            "known_defect_edge_max_stretch": 2.71762041460057
+          },
+          "repaired_skin": {
+            "maximum_stretch": 2.8440385175516125,
+            "p99_stretch": 1.3403652517874614,
+            "known_defect_edge_max_stretch": 1.3782867502773593
+          }
+        },
+        "Sword_Attack": {
+          "original_skin": {
+            "maximum_stretch": 2.1993355875884237,
+            "p99_stretch": 1.2367366242541624,
+            "known_defect_edge_max_stretch": 2.1993376208376976
+          },
+          "repaired_skin": {
+            "maximum_stretch": 2.1997558768093213,
+            "p99_stretch": 1.169837262958206,
+            "known_defect_edge_max_stretch": 1.2253107878007057
+          }
+        },
+        "Death_A": {
+          "original_skin": {
+            "maximum_stretch": 3.719769945656333,
+            "p99_stretch": 1.9614730408704857,
+            "known_defect_edge_max_stretch": 3.719773384521954
+          },
+          "repaired_skin": {
+            "maximum_stretch": 2.7296926717172076,
+            "p99_stretch": 1.5262483622779204,
+            "known_defect_edge_max_stretch": 1.5946735271582928
+          }
+        }
+      }
+    }
+  }
+}
