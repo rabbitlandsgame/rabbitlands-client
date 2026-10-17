@@ -1,5 +1,10 @@
 # Automatic client updates
 
+This page covers the GitHub Windows/Linux distribution. [Steam and macOS builds](store-builds.md)
+use an explicit distribution owner: Steam replaces its own game files, and
+standalone macOS updates replace the complete signed app. Those builds retain
+commit compatibility checks but never download or apply GitHub update payloads.
+
 The game server names the **client Git commit packaged for that server**. This
 is independent of the server repository's own commit. Client builds contain
 their full commit ID and complete ancestor list, generated from Git at package
