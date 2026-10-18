@@ -81,6 +81,7 @@ func update_pose() -> void:
 	if not is_instance_valid(actor) or _hand_l < 0 or _hand_r < 0:
 		return
 	var action := actor.current_action
+	var mounted := is_instance_valid(actor._mount_visual)
 	if action != _power_action:
 		if not (action == &"cast_channel" and _power_action == &"cast_channel_enter"):
 			spell_power = 1
@@ -91,17 +92,21 @@ func update_pose() -> void:
 	_material.albedo_color = Color(1.0, 1.0, 1.0, brightness)
 	var has_cue := action in [&"cast", &"cast_channel_enter", &"cast_channel", &"cast_aggressive",
 		&"cast_defensive", &"heal", &"attack_primary", &"attack_secondary", &"ranged_draw", &"ranged_hold", &"ranged_attack"]
-	if not has_cue and not _equipped_bow:
+	if not has_cue and (not _equipped_bow or mounted):
 		_spell_color = Color.TRANSPARENT
+		if mounted:
+			if bow != null:
+				bow.hide()
+			actor.set_hand_props_visible(false)
 		if action != _last_action:
 			_mesh.clear_surfaces()
 			_trail.clear()
 			if bow != null:
 				bow.hide()
-			actor.set_hand_props_visible(true)
+			actor.set_hand_props_visible(not mounted)
 		_last_action = action
 		return
-	var time := actor.animation_player.current_animation_position
+	var time := actor.presentation_action_time()
 	var advanced := not is_equal_approx(time, _last_time)
 	if action != _last_action or time < _last_time:
 		_trail.clear()
@@ -114,7 +119,7 @@ func update_pose() -> void:
 	if ranging:
 		_ensure_bow()
 	if bow != null:
-		bow.visible = ranging or _equipped_bow
+		bow.visible = ranging or (_equipped_bow and not mounted)
 	if bow != null and bow.visible:
 		# Relaxed carrying follows the closed fist; active draw/release keeps
 		# the authored aiming frame and nock positions from both hands.
@@ -127,7 +132,7 @@ func update_pose() -> void:
 			drawing, time if action == &"ranged_attack" else -1.0, size, skeleton_size)
 		if not ranging:
 			bow.global_basis = grip.basis.orthonormalized().scaled(Vector3.ONE * size)
-	actor.set_hand_props_visible(not ranging)
+	actor.set_hand_props_visible(not ranging and not mounted)
 	_mesh.clear_surfaces()
 	if not effects_enabled or not actor.is_visible_in_tree():
 		return
@@ -152,7 +157,7 @@ func update_pose() -> void:
 		return
 	var l := to_local(left)
 	var r := to_local(right)
-	var duration := maxf(0.01, actor.animation_player.current_animation_length)
+	var duration := maxf(0.01, actor.presentation_action_length())
 	var progress := time / duration
 	var fade := 1.0 if action == &"cast_channel" else smoothstep(0.0, 0.12, time) * (1.0 - smoothstep(0.72, 1.0, progress))
 	var color := Color(0.40, 0.72, 1.0, fade)

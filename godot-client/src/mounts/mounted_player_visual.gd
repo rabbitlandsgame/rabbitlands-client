@@ -3,6 +3,7 @@ extends Node3D
 const RiderPose := preload("res://src/mounts/rider_seat_pose.gd")
 const ReinVisual := preload("res://src/mounts/mount_reins.gd")
 const CapeSurface := preload("res://src/mounts/mount_cape_surface.gd")
+const UpperBody := preload("res://src/mounts/mounted_upper_body.gd")
 var actor: ReplicatedActor3D
 var pony: ReplicatedActor3D
 var pose := RiderPose.new()
@@ -16,6 +17,7 @@ var elapsed := 0.0
 var action := ""
 var modifiers: Dictionary = {}
 var cape_surface := CapeSurface.new()
+var upper := UpperBody.new()
 
 func configure(player: ReplicatedActor3D, models: Dictionary) -> Array[String]:
 	actor = player
@@ -56,6 +58,7 @@ func configure(player: ReplicatedActor3D, models: Dictionary) -> Array[String]:
 		player_anim.get_animation("Fighting_Idle"), actor.get_node("NativeModel") as Node3D)
 	if not errors.is_empty():
 		return errors
+	upper.configure(actor)
 	for modifier: Node in actor.get_skeleton().find_children("*", "SkeletonModifier3D", true, false):
 		modifiers[modifier] = (modifier as SkeletonModifier3D).active
 		(modifier as SkeletonModifier3D).active = false
@@ -70,7 +73,8 @@ func configure(player: ReplicatedActor3D, models: Dictionary) -> Array[String]:
 func _process(delta: float) -> void:
 	if not actor.is_drawn() or not visible:
 		return
-	var moving := actor.current_action in [&"walk", &"run"] or actor._segment_duration > 0.0
+	upper.advance(delta)
+	var moving := upper.ground_action in [&"walk", &"run"] or actor.current_action in [&"walk", &"run"] or actor._segment_duration > 0.0
 	var next := "idle"
 	if moving:
 		next = "walk" if state.get("gait") == "walk" else ("gallop" if state.get("gait") == "burst" else "trot")
@@ -95,6 +99,7 @@ func _process(delta: float) -> void:
 	var bone := pony.get_skeleton().global_transform * pony.get_skeleton().get_bone_global_pose(saddle)
 	var seat := Transform3D(bone.basis.orthonormalized(), bone * Vector3(float(offset[0]), float(offset[1]), float(offset[2])))
 	pose.fit(seat, action, elapsed, duration)
+	upper.apply()
 	if actor._cape_cloth != null and actor._cape_cloth_worn:
 		# Pose the body first, then cloth, once. The ordinary automatic modifier
 		# remains paused so it cannot overwrite this mounted pass afterward.
@@ -106,8 +111,20 @@ func _process(delta: float) -> void:
 	var bridle: Dictionary = {}
 	for side: String in ["l", "r"]:
 		bridle[side] = head_frame * (sockets[side] as Vector3)
-	reins.update_contact(bridle, actor.get_skeleton(), seat.basis)
+	var parked := {}
+	for side: String in ["l", "r"]:
+		var sign_value := 1.0 if side == "l" else -1.0
+		var grip := reins.grip_world(actor.get_skeleton(), side)
+		var exit := reins.grip_exit_world(actor.get_skeleton(), side)
+		var saddle_grip := seat.origin + seat.basis * Vector3(sign_value * .055, .12, .21)
+		parked[side] = [grip.lerp(saddle_grip, upper.grip_weight), exit.lerp(saddle_grip + Vector3.DOWN * .025, upper.grip_weight)]
+	reins.update_contact(bridle, actor.get_skeleton(), seat.basis, parked)
 	actor.set_hand_props_visible(false)
+	if actor.combat_presentation != null:
+		actor.combat_presentation.update_pose()
+
+func play_action(next: StringName, restart := false) -> void:
+	upper.request(next, restart)
 
 func restore() -> void:
 	if actor._cape_cloth != null:

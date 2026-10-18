@@ -3206,7 +3206,7 @@ func play_action(action: StringName, restart := false) -> void:
 	if _cinematic_active and action != _cinematic_action:
 		return
 	if is_instance_valid(_mount_visual):
-		current_action = action
+		_mount_visual.call("play_action", action, restart)
 		return
 	if animation_player == null or resolver == null:
 		return
@@ -3281,6 +3281,16 @@ func _on_animation_finished(_animation_name: StringName) -> void:
 	elif current_action in [&"cast", &"cast_aggressive", &"cast_defensive", &"heal",
 		&"cast_exit", &"attack_primary", &"attack_secondary", &"defend", &"ranged_attack", &"pain"]:
 		play_action(_movement_aware_action(&"combat_idle" if _in_combat else &"idle", false))
+
+func presentation_action_time() -> float:
+	if is_instance_valid(_mount_visual) and not _mount_visual.upper.action.is_empty():
+		return float(_mount_visual.upper.time)
+	return animation_player.current_animation_position if animation_player != null else 0.0
+
+func presentation_action_length() -> float:
+	if is_instance_valid(_mount_visual) and not _mount_visual.upper.action.is_empty():
+		return float(_mount_visual.upper.duration())
+	return animation_player.current_animation_length if animation_player != null else 0.0
 
 func set_hand_props_visible(enabled: bool) -> void:
 	for part: int in [0, 1]:

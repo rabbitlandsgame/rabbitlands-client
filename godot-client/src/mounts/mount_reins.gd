@@ -32,7 +32,7 @@ func grip_exit_world(rig: Skeleton3D, side: String) -> Vector3:
 	var thumb := rig.get_bone_global_pose(rig.find_bone("thumb_02_" + side)).origin
 	return rig.to_global((index + thumb) * .5)
 
-func update_contact(anchors: Dictionary, rig: Skeleton3D, seat_basis: Basis) -> void:
+func update_contact(anchors: Dictionary, rig: Skeleton3D, seat_basis: Basis, grips: Dictionary = {}) -> void:
 	visible = true
 	last_points.clear()
 	last_lengths.clear()
@@ -42,6 +42,8 @@ func update_contact(anchors: Dictionary, rig: Skeleton3D, seat_basis: Basis) -> 
 	for side: String in ["l", "r"]:
 		var start: Vector3 = anchors[side]
 		var finish := grip_world(rig, side)
+		if grips.has(side):
+			finish = grips[side][0]
 		var sign_value := 1.0 if side == "l" else -1.0
 		var points := PackedVector3Array()
 		var length := 0.0
@@ -61,6 +63,8 @@ func update_contact(anchors: Dictionary, rig: Skeleton3D, seat_basis: Basis) -> 
 		# palm and emerges beside the thumb. A short hanging end makes the
 		# actual hold readable from the game camera as well as the side.
 		var exit := grip_exit_world(rig, side)
+		if grips.has(side):
+			exit = grips[side][1]
 		var tail := exit + Vector3.DOWN * float(settings.looseEndLengthMetres)
 		tail += seat_basis.x * sign_value * float(settings.looseEndSpreadMetres) - seat_basis.z * .025
 		var grip_points := PackedVector3Array([to_local(finish), to_local(exit)])
