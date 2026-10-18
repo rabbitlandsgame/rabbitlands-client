@@ -49,6 +49,12 @@ hangs tails from the belt instead of binding them to the leg behind (drape);
 Added 2026-10-18 for the Sunmane sets of the equipment audit: ``hug`` draws
 tails and sash panels that the concept blows out behind the body in to a
 capped standoff, so a cape hanging plumb from the shoulders clears them (hug).
+``split_islands: "bones"`` gives a welded island that no limb or trunk seed
+reaches (a bracer, a strap) to the group its nearest design bones belong to,
+instead of the trunk (split_limbs). ``limb_seed_end`` keeps limb seeds off the
+last part of a limb's end bone, where a hem flares beside the hanging hand,
+and ``limb_seed_own`` lowers the arm share a limb seed needs, for short sleeves
+on a bulky coat (split_limbs).
 
 The output per source is ``<source>.npz``: rest positions in glTF axes,
 four joint names and weights per vertex, and a keep mask for triangles
@@ -231,12 +237,23 @@ def split_limbs(P, tris, q, w, ps):
         else:
             # the limb's outer wall, which no coat panel reaches
             seeds = np.zeros(len(P), bool)
+            heads = [tuple(bones[i]["design"][0]) for i in cols]
             for i in cols:
                 dh = np.array(bones[i]["design"][0], float); dt = np.array(bones[i]["design"][1], float)
                 foot, _ = seg_proj(P, dh, dt)
                 out_x = np.sign(dh[0] + dt[0]) * (P[:, 0] - foot[:, 0])
-                seeds |= (out_x > 0.3 * float(bones[i]["radius"])) & (q[:, i] < 2.0)
-            seeds &= own > 0.9
+                wall = (out_x > 0.3 * float(bones[i]["radius"])) & (q[:, i] < 2.0)
+                if "limb_seed_end" in ps and tuple(bones[i]["design"][1]) not in heads:
+                    # Where the concept's hands hang beside a flared hem, the hem's side passed for the
+                    # forearm's outer wall and stood out 24-27 cm in the bow pull (Militia 04 and 07, audit
+                    # 2026-10-18): no seeds past this share of the limb's last bone. A cuff still joins its
+                    # sleeve over the surface.
+                    ab = dt - dh
+                    wall &= ((P - dh) @ ab) / (ab @ ab) <= float(ps["limb_seed_end"])
+                seeds |= wall
+            # A bulky coat's wide trunk radius leaves a short sleeve short of 0.9 (Militia 03): the sleeve got
+            # no seeds and stayed with the chest as the arm rose. ``limb_seed_own`` lowers the bar.
+            seeds &= own > float(ps.get("limb_seed_own", 0.9))
         d = np.full(n, np.inf)
         heap = [(0.0, int(c)) for c in np.unique(canon[seeds])]
         for _, c in heap:
@@ -251,6 +268,18 @@ def split_limbs(P, tris, q, w, ps):
                     d[nb] = dc + dl; heapq.heappush(heap, (dc + dl, nb))
         dist[g] = d[canon]
     owner = np.array(names)[np.argmin(np.stack([dist[g] for g in names], 1), 1)]
+    if ps.get("split_islands") == "bones":
+        # A welded island no seed reaches (a bracer, a strap) is infinitely far from every group and fell to the
+        # first, the trunk: a forearm bracer hanging by the hip in idle then took hip weights and stayed behind
+        # as the arm rose. Each such island joins the group its vertices' nearest design bones mostly belong to
+        # (audit 2026-10-18).
+        lost = ~np.isfinite(np.stack([dist[g] for g in names], 1)).any(1)
+        if lost.any():
+            labels = components(P, tris)
+            share = np.stack([w[:, [i for i, x in enumerate(group) if x == g]].sum(1) for g in names], 1)
+            for lab in np.unique(labels[lost]):
+                own = labels == lab
+                owner[own] = names[int(np.argmax(share[own].sum(0)))]
     tau = float(ps.get("tau", 0.15))
     out = np.zeros_like(w)
     for g in names:

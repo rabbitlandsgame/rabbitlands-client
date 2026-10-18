@@ -1,0 +1,242 @@
+{
+ "format": 2,
+ "spec": "amberwood_05.json",
+ "spec_sha256": "ce6b7ba62f6e056e451b20f3ab2a5f19a23d7df58371f32cf38145974f30c30c",
+ "body": "luminous_female.glb",
+ "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+ "pose": "Idle_Subtle",
+ "tool_sha256": "6896841bfdd40695eb089f3c7e6dad52e76628bc7dafa8f172e99ef2fc4c81ad",
+ "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
+ "pieces": {
+  "torso": {
+   "source": "Amberwood_Woodland_Armor_Concept_Sheet__r02_c01.glb",
+   "vertices": 3076,
+   "triangles": 2546,
+   "opened": 16,
+   "rigidPlates": 39,
+   "bones": {
+    "trunk_lower": {
+     "k": 1.001,
+     "rays": 1655,
+     "shift_mm": [
+      8.1,
+      -13.5,
+      -2.0
+     ],
+     "girth": 1.0
+    },
+    "trunk_upper": {
+     "k": 1.0,
+     "rays": 1656,
+     "shift_mm": [
+      -1.3,
+      -28.4,
+      3.2
+     ],
+     "girth": 1.0
+    },
+    "upperarm_l": {
+     "k": 0.975,
+     "rays": 465,
+     "shift_mm": [
+      -0.7,
+      -18.6,
+      -1.0
+     ],
+     "girth": 1.0
+    },
+    "lowerarm_l": {
+     "k": 0.959,
+     "rays": 441,
+     "shift_mm": [
+      -9.4,
+      5.4,
+      -4.2
+     ],
+     "girth": 1.0
+    },
+    "upperarm_r": {
+     "k": 0.975,
+     "rays": 456,
+     "shift_mm": [
+      8.4,
+      -11.7,
+      -2.5
+     ],
+     "girth": 1.0
+    },
+    "lowerarm_r": {
+     "k": 0.959,
+     "rays": 731,
+     "shift_mm": [
+      13.2,
+      9.1,
+      -6.5
+     ],
+     "girth": 1.0
+    },
+    "conform": {
+     "cells": 986,
+     "standoff_mm": 29.5,
+     "out_mm": 18.2,
+     "in_mm": 19.6
+    },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      12.7,
+      4.7,
+      1.4
+     ],
+     "lowerarm_r": [
+      -7.6,
+      14.5,
+      -3.5
+     ]
+    },
+    "collar": {
+     "cells": 145,
+     "max_mm": 27.0
+    },
+    "hug": {
+     "moved": 159,
+     "max_mm": 155.7
+    },
+    "twist_vertices": 579
+   },
+   "out": "Amberwood_Woodland_Armor_Concept_Sheet__r02_c01.glb.npz",
+   "sha256": "5dbaaf5230981da0ccece6220908a102dcb578f580879288a2fd6e20194d3da5"
+  },
+  "legs": {
+   "source": "Amberwood_Woodland_Legwear_Concept_Sheet__r02_c01.glb",
+   "vertices": 1782,
+   "triangles": 1418,
+   "opened": 4,
+   "rigidPlates": 33,
+   "bones": {
+    "pelvis": {
+     "k": 0.869,
+     "rays": 412,
+     "shift_mm": [
+      3.4,
+      7.8,
+      1.6
+     ],
+     "girth": 1.073
+    },
+    "thigh_l": {
+     "k": 1.035,
+     "rays": 354,
+     "shift_mm": [
+      -18.6,
+      23.5,
+      0.0
+     ],
+     "girth": 1.15
+    },
+    "calf_l": {
+     "k": 1.04,
+     "rays": 1279,
+     "shift_mm": [
+      -3.9,
+      1.4,
+      -0.2
+     ],
+     "girth": 1.014
+    },
+    "thigh_r": {
+     "k": 1.035,
+     "rays": 379,
+     "shift_mm": [
+      15.8,
+      25.5,
+      0.3
+     ],
+     "girth": 1.15
+    },
+    "calf_r": {
+     "k": 1.04,
+     "rays": 1268,
+     "shift_mm": [
+      2.7,
+      0.3,
+      -0.2
+     ],
+     "girth": 1.0
+    },
+    "hug": {
+     "moved": 283,
+     "max_mm": 240.8
+    },
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 243,
+      "max_mm": 64.1
+     },
+     {
+      "into": "boots",
+      "tucked": 325,
+      "max_mm": 83.6
+     }
+    ]
+   },
+   "out": "Amberwood_Woodland_Legwear_Concept_Sheet__r02_c01.glb.npz",
+   "sha256": "719d6e9157894ed585ffa34bf37f475cdcd70bce8c737ee52ac6c37e2709fccb"
+  },
+  "boots": {
+   "source": "Eight_amberwood_woodland_boot_designs__r02_c01.glb",
+   "vertices": 1824,
+   "triangles": 1312,
+   "opened": 0,
+   "rigidPlates": 14,
+   "bones": {
+    "calf_l": {
+     "k": 1.0,
+     "rays": 549,
+     "shift_mm": [
+      13.1,
+      -8.5,
+      0.7
+     ],
+     "girth": 1.2
+    },
+    "foot_l": {
+     "k": 1.001,
+     "rays": 659,
+     "shift_mm": [
+      10.8,
+      -8.6,
+      15.7
+     ],
+     "girth": 1.1
+    },
+    "calf_r": {
+     "k": 1.0,
+     "rays": 558,
+     "shift_mm": [
+      -10.7,
+      -4.0,
+      0.6
+     ],
+     "girth": 1.2
+    },
+    "foot_r": {
+     "k": 1.001,
+     "rays": 715,
+     "shift_mm": [
+      -8.9,
+      -9.3,
+      16.8
+     ],
+     "girth": 1.1
+    },
+    "sole_seat_mm": {
+     "l": 13.7,
+     "r": 14.3
+    }
+   },
+   "out": "Eight_amberwood_woodland_boot_designs__r02_c01.glb.npz",
+   "sha256": "2e010d3e0d6e68486f8d7a63f42d357cf60508cd1d163e78373108fd69ec0a43"
+  }
+ }
+}

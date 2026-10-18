@@ -1,0 +1,242 @@
+{
+ "format": 2,
+ "spec": "ranger_01.json",
+ "spec_sha256": "16ca2d0137f315a9c67093b70e1cff5534221e35ec315a9910dd303383cccb0f",
+ "body": "luminous_female.glb",
+ "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+ "pose": "Idle_Subtle",
+ "tool_sha256": "6896841bfdd40695eb089f3c7e6dad52e76628bc7dafa8f172e99ef2fc4c81ad",
+ "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
+ "pieces": {
+  "torso": {
+   "source": "Eight_leather_ranger_torso_designs__r01_c01.glb",
+   "vertices": 1746,
+   "triangles": 1353,
+   "opened": 18,
+   "rigidPlates": 16,
+   "bones": {
+    "trunk_lower": {
+     "k": 1.001,
+     "rays": 1575,
+     "shift_mm": [
+      10.1,
+      -19.3,
+      -3.0
+     ],
+     "girth": 1.12
+    },
+    "trunk_upper": {
+     "k": 1.0,
+     "rays": 1300,
+     "shift_mm": [
+      0.6,
+      -40.5,
+      4.5
+     ],
+     "girth": 1.05
+    },
+    "upperarm_l": {
+     "k": 1.059,
+     "rays": 283,
+     "shift_mm": [
+      4.5,
+      1.9,
+      1.1
+     ],
+     "girth": 1.0
+    },
+    "lowerarm_l": {
+     "k": 1.031,
+     "rays": 447,
+     "shift_mm": [
+      -7.8,
+      -7.4,
+      0.8
+     ],
+     "girth": 1.089
+    },
+    "upperarm_r": {
+     "k": 1.059,
+     "rays": 229,
+     "shift_mm": [
+      4.6,
+      11.0,
+      -0.7
+     ],
+     "girth": 1.075
+    },
+    "lowerarm_r": {
+     "k": 1.031,
+     "rays": 718,
+     "shift_mm": [
+      10.8,
+      -3.8,
+      -1.2
+     ],
+     "girth": 1.094
+    },
+    "conform": {
+     "cells": 1002,
+     "standoff_mm": 0.9,
+     "out_mm": 7.3,
+     "in_mm": 15.7
+    },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      11.2,
+      -2.4,
+      3.6
+     ],
+     "lowerarm_r": [
+      6.2,
+      -4.8,
+      0.3
+     ]
+    },
+    "collar": {
+     "cells": 182,
+     "max_mm": 69.8
+    },
+    "hug": {
+     "moved": 34,
+     "max_mm": 125.5
+    },
+    "twist_vertices": 470
+   },
+   "out": "Eight_leather_ranger_torso_designs__r01_c01.glb.npz",
+   "sha256": "a4a87049ef6258bea4d95c454c407e0b2d5070aa1e5be10e07f54d8b1e7f2c66"
+  },
+  "legs": {
+   "source": "Eight_rugged_ranger_legwear_designs__r01_c01.glb",
+   "vertices": 1654,
+   "triangles": 1486,
+   "opened": 4,
+   "rigidPlates": 8,
+   "bones": {
+    "pelvis": {
+     "k": 0.867,
+     "rays": 429,
+     "shift_mm": [
+      0.9,
+      -29.4,
+      -5.9
+     ],
+     "girth": 1.15
+    },
+    "thigh_l": {
+     "k": 1.02,
+     "rays": 387,
+     "shift_mm": [
+      -12.6,
+      0.7,
+      -0.6
+     ],
+     "girth": 1.0
+    },
+    "calf_l": {
+     "k": 1.022,
+     "rays": 1430,
+     "shift_mm": [
+      -0.3,
+      -30.0,
+      -0.3
+     ],
+     "girth": 1.15
+    },
+    "thigh_r": {
+     "k": 1.02,
+     "rays": 404,
+     "shift_mm": [
+      3.1,
+      -0.3,
+      -0.2
+     ],
+     "girth": 1.011
+    },
+    "calf_r": {
+     "k": 1.022,
+     "rays": 1387,
+     "shift_mm": [
+      -4.6,
+      -29.7,
+      0.1
+     ],
+     "girth": 1.15
+    },
+    "hug": {
+     "moved": 138,
+     "max_mm": 59.3
+    },
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 96,
+      "max_mm": 65.6
+     },
+     {
+      "into": "boots",
+      "tucked": 177,
+      "max_mm": 48.7
+     }
+    ]
+   },
+   "out": "Eight_rugged_ranger_legwear_designs__r01_c01.glb.npz",
+   "sha256": "2523808bf7ad3b31e0e6197b93f750d83166f36e89ffe2a00c0170a208f61104"
+  },
+  "boots": {
+   "source": "Eight_leather_adventurer_boot_designs__r01_c01.glb",
+   "vertices": 1516,
+   "triangles": 1296,
+   "opened": 0,
+   "rigidPlates": 14,
+   "bones": {
+    "calf_l": {
+     "k": 1.0,
+     "rays": 469,
+     "shift_mm": [
+      15.3,
+      -15.5,
+      0.8
+     ],
+     "girth": 1.2
+    },
+    "foot_l": {
+     "k": 1.001,
+     "rays": 635,
+     "shift_mm": [
+      11.9,
+      -9.6,
+      17.4
+     ],
+     "girth": 1.1
+    },
+    "calf_r": {
+     "k": 1.0,
+     "rays": 446,
+     "shift_mm": [
+      -14.4,
+      -16.1,
+      0.8
+     ],
+     "girth": 1.2
+    },
+    "foot_r": {
+     "k": 1.001,
+     "rays": 629,
+     "shift_mm": [
+      -11.7,
+      -10.6,
+      19.4
+     ],
+     "girth": 1.1
+    },
+    "sole_seat_mm": {
+     "l": 12.4,
+     "r": 13.2
+    }
+   },
+   "out": "Eight_leather_adventurer_boot_designs__r01_c01.glb.npz",
+   "sha256": "c275c8a037d41b9e83f19285533598ff14e7a4fc7743998c8253e0805241ac27"
+  }
+ }
+}

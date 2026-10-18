@@ -1283,6 +1283,233 @@ for the third review above:
 - The batch's headwear is unchanged (Steppe Headcloth, Rider Helm, Sundisc
   Helm, Sun Headband).
 
+### Audit batch 2: every remaining set (2026-10-18)
+
+The owner went through the audit sets in the viewer. Their notes: Militia 01
+"the legs are not straight", Militia 03 "the arms and sleeves are not mapped
+well from the back", and on batch 1's Sunmane 05 "tearing below arm" (bow
+pull) and "collar is clipping into the helmet". Then: most of the new sets do
+not have straight legs, "possibly due to misalignment of the boots with the
+pants", and many have the pants clipping through the torso armour. They asked
+for the whole set to be checked, not only the noted ones. So all 56 sets not
+in batch 1 were measured, and then design-fitted together. That covers
+batches 2-11 of the audit.
+
+**A straight-leg measure.** The installed trousers and boots keep their
+source's vertex order, and so does the set's solved concept target, so the
+same vertices can be compared (`legtilt.py`). On each leg, the target's
+vertices of that side are sliced by the target's height (2 cm). A line is
+fitted through the slice centroids for the shin (0.16-0.48 m), the thigh
+(0.50-0.70 m) and the boot shaft (0.14-0.40 m), once on the target's
+positions and once on the installed ones. The difference of the slopes is
+the segment's tilt off the concept, in the front view (splay) and the side
+view (lean). Drawn features ride the same vertices in both, so they cancel.
+The boot's step is how far the boot's centre sits from the trouser leg's at
+the boot top, installed minus target.
+
+On the old fits, 97 of the 98 body fits had a segment tilted more than 3° off
+the concept, and 92 more than 5°. The legendary sets are excluded: their legs
+carry the sabatons. The worst segment's median was 11.8° (p90 20.7°, max
+33.7°). The boots stood off the trouser line by a median 25 mm (p90 46, max
+155). Each old piece was fitted to the body on its own, so nothing put a set's
+trousers and boots on one line. The owner's guess was right.
+
+**The design fit.** The 56 specs were drafted by the audit's rules (the kits'
+`make_specs` rules, see batch 1). They carry the kits' `collar`, `twist`,
+`centre_cuffs`, `conform` and `tuck_into`. They also carry these defaults,
+learned on the Sunmane batch and the first pass of this one:
+
+- `hug` on the coat's lower trunk (bearings 125-235°, 0.55-1.25 m, 4 cm start,
+  7 cm cap), and on the trousers' pelvis, thighs and calves (115-245°,
+  0.45-1.15 m), so tails and skirt backs hang inside the cape.
+- The trousers go under the coat's back by up to 8 cm (`tuck_torso_max`, as
+  for Sunmane 05) and into the boots.
+- `trunk_seed_x: 0.25`. The Vanguard kit took 0.20. With the narrower strip, a
+  mail skirt's sides and a sleeve's inner wall fell to the forearm and tore in
+  the bow pull (Militia 04 11% → 6.8%, Militia 07 6.5 → 3.5%).
+- Short sleeves are not stretched to the wrist: a sleeve whose drawn length,
+  at the girth scale, is under 0.65 of the body's arm keeps its length (the
+  Splinted Vest and Mail Shirt no longer get long bell sleeves).
+- `split_islands: "bones"` (new). A welded island that no seed reaches, such
+  as a forearm bracer, joins the group its nearest design bones belong to.
+  Before, it fell to the trunk, took hip weights and stayed behind as the arm
+  rose.
+- Legendary 02-08 get Phoenix-style harness specs: the legs carry their
+  sabatons (ankle at half the foot length from the toe, 0.075 above the sole,
+  ball at 20%, foot scale 1.23 × the legs' scale). The crotch is at least 0.2
+  source units, and the legs' scale is held to 0.95-1.1. The sabatons are
+  refitted from the legs' fit.
+
+Hand readings (`overrides.json`): a crotch of 0.15 under a skirt or flap
+(Knightly 05, Amberwood 05 and 08, Arcane 01, 03 and 08, Frontier 08), and
+the bow-pull keys below for Militia 03, 04 and 07. Kit pieces inside a set
+stay as installed: Ranger 02's Scout Vest, Ranger 04's Sidelace Breeches and
+Frontier 03's Laced Fieldboots. Their spec entries are copied from
+`ranger.json`, so the set's other pieces fit against the same shells.
+
+**The bow pull.** The first install threw coat art 24-27 cm off the body in
+Bow_Pull_Back on Militia 03, 04 and 07; the old fits reached 10-13 cm. The
+split was traced vertex by vertex (`farverts.py`, `split_rules.py`). There
+were two causes:
+
+- In these concepts the hands hang beside a flared hem. The hem's side passed
+  `split_limbs`' test for the forearm's outer wall, so it became arm seeds:
+  40 of Militia 07's 52 far vertices were coat skirt owned by the forearm.
+  `limb_seed_end` (new) places no limb seeds past that share of a limb's last
+  bone. At 0.9 only the hem beside the wrists goes back to the trunk (61-62
+  vertices). On four other coats tried, no owner changes. A cuff still joins
+  its sleeve over the surface.
+- The Splinted Vest's wide trunk radius left its short sleeves below the 0.9
+  arm share that a limb seed needs, so they got no seeds. They stayed with the
+  chest and hung as a flap when the arm rose. `limb_seed_own` (new) lowers the
+  bar; at 0.5 the sleeves follow the arms.
+
+Without the keys, specs re-solve byte-identically (Militia 01 checked), and
+only the three Militia specs use them. Afterwards the bow pull's farthest coat
+art is 10 cm on Militia 07 (27 before), 12-16 cm on Militia 04 (22-24) and
+20 cm on Militia 03 (25). Walk and run are back to 10-12 cm (16-20). What is
+left on Militia 03 and 04 is about 30 armpit vertices split half and half
+between arm and trunk: the underarm seam opens as it does on the kits.
+
+On ten more coats the bow pull reaches 5+ cm further than the old fit:
+Militia 01 and 08, Knightly 06 and 07, Amberwood 03 and 07, Arcane 01,
+Ranger 05, Frontier 06 and Sunmane 07 (15-28 cm). In the engine's bow views
+these look as they did before. The far vertices are a few seam and plate
+vertices with mixed weights. Knightly 07's are its mantle, which drapes over
+the right arm. The split keys do not change them.
+
+The kit session (owner of these tools) and the cape session were told before
+each tool change.
+
+**Results.** The audit's measures over the 56 sets and both bodies (112 body
+fits), old → new, worst frame through the five clips. Median / p90 / max, and
+how many body fits got worse:
+
+| Measure | Old | New | Worse |
+| --- | --- | --- | ---: |
+| Leg tilt off the concept, worst segment (°) | 11.8 / 20.7 / 33.7 | 1.2 / 4.4 / 14.9 | 2 of 98 |
+| Boot's step from the trouser line (mm) | 25 / 46 / 155 | 3 / 10 / 13 | 0 of 96 |
+| Trousers over the coat, front (%) | 39 / 81 / 98 | 23 / 50 / 77 | 27 |
+| Trousers over the coat, back (%) | 31 / 67 / 87 | 10 / 23 / 57 | 24 |
+| Collar inside the nape (cells) | 112 / 150 / 203 | 3 / 33 / 71 | 0 |
+| Trousers behind the back plane (cm) | −2.2 / 1.9 / 9.4 | −5.5 / −3.5 / −1.8 | 9 |
+| Coat behind the back plane (cm) | −1.2 / 1.9 / 7.0 | −2.0 / −0.2 / 1.9 | 34 |
+| Gap between trousers and boots (%) | 0.8 / 3.9 / 15.6 | 0.8 / 1.7 / 5.6 | 59 |
+| Farthest coat art, idle, walk, run (cm) | 12.1 / 17.6 / 23.9 | 11.9 / 17.3 / 23.1 | 43 |
+| Farthest coat art, bow pull (cm) | 11.4 / 17.5 / 23.8 | 13.4 / 18.0 / 28.4 | 73 |
+| Torn coat art in the bow pull (%) | 0.4 / 1.0 / 2.1 | 1.5 / 3.3 / 5.8 | 104 |
+| Torn trouser art, walk and run (%) | 0.4 / 0.9 / 1.9 | 0.9 / 1.9 / 2.6 | 99 |
+| Collar over the helm's lower edge (rays) | 15 / 105 / 205 | 38 / 145 / 335 | 87 |
+
+Silhouette IoU against the solved targets (Blender, idle, backings hidden;
+the 53 sets without a kit piece, 106 body fits): front 0.853 → 0.987 (median;
+lowest 0.734 → 0.951) and side 0.798 → 0.985 (lowest 0.716 → 0.941, Ranger 05's
+chaps). Every theme's median is 0.98-0.99 after.
+
+Per theme (medians, old → new):
+
+| Theme | Sets | Leg tilt (°) | Boot step (mm) | Over coat, front (%) | Over coat, back (%) | Collar in nape | Bow pull far (cm) | Torn coat, bow (%) |
+| --- | ---: | --- | --- | --- | --- | --- | --- | --- |
+| Militia | 7 | 10.0→1.1 | 29→1 | 45→10 | 55→12 | 116→15 | 11→14 | 0.7→3.2 |
+| Knightly | 8 | 11.3→1.5 | 28→6 | 32→41 | 31→17 | 113→0 | 11→11 | 0.4→1.4 |
+| Legendary | 7 | — | — | 78→31 | 49→12 | 90→6 | 14→14 | 0.2→1.4 |
+| Amberwood | 7 | 10.7→2.5 | 25→4 | 46→31 | 34→12 | 121→0 | 11→15 | 0.2→1.3 |
+| Arcane | 7 | 17.8→1.6 | 43→3 | 21→20 | 2→4 | 136→1 | 14→15 | 0.3→0.7 |
+| Ranger | 8 | 10.4→1.1 | 19→3 | 37→29 | 14→10 | 130→12 | 11→13 | 0.4→1.1 |
+| Frontier | 8 | 14.5→1.1 | 19→4 | 31→14 | 41→5 | 74→2 | 12→11 | 0.8→2.6 |
+| Sunmane | 4 | 12.3→1.1 | 20→4 | 36→24 | 47→10 | 134→17 | 10→13 | 0.7→1.8 |
+
+Reading the table:
+
+- **Legs.** 12 body fits still tilt more than 3° somewhere, 6 more than 5°.
+  Militia 08 measures 13-15° of thigh lean, but its legs stand straight in
+  the engine. The slices there are full of hip plates, which the fit hangs
+  differently from the target. Knightly 05's left thigh splays 6-8° (the Lion
+  Cuisses' flared plate). Amberwood 02 leans 5°. The boot shafts of Sunmane 07
+  and Amberwood 04 splay 5°, but look straight in the engine.
+- **Trousers through the coat.** The back share fell from 31% to 10%. The
+  front share fell less, and rose on the Knightly line, because there the
+  trousers' own belt or tassets are drawn over the coat's hem. Knightly 01, 03,
+  04 and 07, Amberwood 04 and Ranger 01 match their concept targets
+  ([sheet](design-fit/audit-batch2-front-layers.jpg)).
+- **The trouser-to-boot gap** rose on Knightly 04 male (0.2 → 5.6% of the calf
+  rays in idle). Those rays pass between the greaves' straps. In the engine,
+  the grey default trousers that showed at the back of the calves before are
+  gone.
+- **Tearing** in the bow pull rose as the kits' did when their seams were sewn
+  (0.4-2.3%). Thirteen body fits pass 3%: Militia 03, 04, 07 and 08, and
+  Frontier 01, 02 and 06 (up to 5.8%). At the engine's distance it shows as
+  thin strips under the forearm and at the armpit.
+- **Collar over the helm** got worse on 87 body fits: median 15 → 38 rays. The
+  collars now stand out of the nape, so more of them reach a helm's lower
+  edge, and the headwear was not refitted (see "Not yet done").
+
+The owner's notes on the audit sets
+([their shot and the set now](design-fit/audit-batch2-owner-notes.jpg)):
+Militia 01's legs stand straight in the Shinplate Boots (worst segment 20.5° →
+1.0°). Militia 03's Splinted Vest keeps its short sleeves as drawn. They used
+to be stretched into wide bell sleeves that gaped at the back; now they ride
+on the upper arms, and the forearms show the lining. Sunmane 05's two notes
+are not fixed yet (below).
+
+In the engine (review viewer, `--replay` of the audit's views, real actor),
+the legs stand straight with the boots under the trousers, and the coats'
+belts and hems lie over the trousers. Evidence, before and after per theme
+(male: idle side and front, walk side, idle back):
+[militia](design-fit/audit-batch2-militia.jpg),
+[knightly](design-fit/audit-batch2-knightly.jpg),
+[legendary](design-fit/audit-batch2-legendary.jpg),
+[amberwood](design-fit/audit-batch2-amberwood.jpg),
+[arcane](design-fit/audit-batch2-arcane.jpg),
+[ranger](design-fit/audit-batch2-ranger.jpg),
+[frontier](design-fit/audit-batch2-frontier.jpg),
+[sunmane](design-fit/audit-batch2-sunmane.jpg);
+the bow pull on Militia 03, 04 and 07
+([before, first pass, final](design-fit/audit-batch2-bow.jpg)).
+
+**Install.** All 330 Human variants of the 165 pieces were refitted in three
+tags. `full1` covered every piece. `full2` covered the coats again, after
+`trunk_seed_x` and `split_islands`, together with the trousers that tuck
+under them and the legendary sabatons. `full3` covered Militia 03, 04 and 07's
+coats and trousers, after the bow-pull keys. Each was installed with
+`install_human_equipment.py`, then `share_human_equipment_textures.py`. The
+registry is byte-identical, and the catalogue changes only its 44 validation
+lines (converted back to LF). 110 new fitted-cloth textures replace the 110
+that no GLB references any more; the six older orphans stay. Godot's import
+was refreshed, and the creature `.import` files it rewrites were reverted.
+
+Tests, after the last install, against the baseline at `82ae2326` and batch
+1's results:
+
+| Suite | After | Before |
+| --- | --- | --- |
+| Equipment, remapper and held-prop pytest | 9 failed, 70 passed | the same 9 IDs |
+| torso_body_cover, torso LOD, imported-actor LOD, registry snapshot | pass | pass |
+| creation_class_equipment_fit | 54,666 checks, 0 failures | the same |
+| armour_body_cover | 60 failures, all "restores sculpted hair visibility" | the same 60 |
+| test_cape_cloth, test_cape_drape, test_cape_idle, pose and capsule caches, rendered_cape_clipping | pass | pass |
+| test_mounted_cape (44 checks), test_mounted_player (1,130), test_mount_hotkeys, test_mount_preview_state, test_mount_protocol | pass | pass |
+| test_cape_cloth_native_constraint | 17 failures (no native extension) | 17 |
+| rendered_cape_over_armour | 4 bodies clip: 225, 184, 213, 197 | the same 4, the same figures (225: sheet 69 mm, collar 160 mm) |
+
+**Not yet done.**
+
+- Headwear. The collars now stand clear of the nape, so more of them meet the
+  helms. Sunmane 05's collar top sits at 1.617 m and the Sundisc Helm's
+  aventail bottom at 1.575 m: the owner's "collar is clipping into the
+  helmet". The audit's headwear track (`frame` rows for helm size, cowls over
+  the set's own collar, refit on 16 bodies) is the fix.
+- Sunmane 05's "tearing below arm" is a strip of 13 sleeve triangles against
+  the coat's side in the bow pull. The coat was not refitted in this pass.
+- The bow-pull seam strips on the ten coats listed above, and the torn share
+  over 3% on Militia 03, 04, 07 and 08 and Frontier 01, 02 and 06.
+- Knightly 05's thigh splay.
+- Ranger 02's trousers were fitted against the Scout Vest as installed here.
+  The kits' later vest fix ("The Scout Vest under a cape", on
+  feature/equipment-set-fit) hugs the vest's back flaps. When the branches
+  meet, `ranger_02.json` takes the new `ranger.json` torso entry and its legs
+  are refitted.
+
 ## Two body shapes, preserved race identity
 
 There are **two body equipment fits**, with 200 torso/leg/boot designs each,
