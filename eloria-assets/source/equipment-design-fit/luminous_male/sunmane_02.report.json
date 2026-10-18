@@ -1,0 +1,236 @@
+{
+ "format": 2,
+ "spec": "sunmane_02.json",
+ "spec_sha256": "5b602208b826c02b104600cac90abf9f64b8fa3f178a6af31e47ea630468db29",
+ "body": "luminous_male.glb",
+ "body_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+ "pose": "Idle_Subtle",
+ "tool_sha256": "005a85d3f799fa436d0ee5c3911c6968ea0a31883788f17fafcbcfa99ef299dd",
+ "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
+ "pieces": {
+  "torso": {
+   "source": "Sunmane_Steppe_Shirts_and_Armor__r01_c02.glb",
+   "vertices": 1558,
+   "triangles": 1300,
+   "opened": 13,
+   "rigidPlates": 22,
+   "bones": {
+    "trunk_lower": {
+     "k": 1.001,
+     "rays": 2625,
+     "shift_mm": [
+      3.0,
+      29.4,
+      5.3
+     ],
+     "girth": 1.074
+    },
+    "trunk_upper": {
+     "k": 1.0,
+     "rays": 951,
+     "shift_mm": [
+      12.9,
+      6.8,
+      -0.6
+     ],
+     "girth": 1.12
+    },
+    "upperarm_l": {
+     "k": 1.227,
+     "rays": 238,
+     "shift_mm": [
+      -11.1,
+      3.5,
+      -2.5
+     ],
+     "girth": 1.25
+    },
+    "lowerarm_l": {
+     "k": 1.14,
+     "rays": 828,
+     "shift_mm": [
+      -21.9,
+      17.1,
+      -11.4
+     ],
+     "girth": 1.0
+    },
+    "upperarm_r": {
+     "k": 1.227,
+     "rays": 299,
+     "shift_mm": [
+      15.9,
+      14.0,
+      -3.2
+     ],
+     "girth": 1.204
+    },
+    "lowerarm_r": {
+     "k": 1.14,
+     "rays": 734,
+     "shift_mm": [
+      23.5,
+      12.9,
+      -10.4
+     ],
+     "girth": 1.0
+    },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      -44.8,
+      -49.9,
+      7.1
+     ],
+     "lowerarm_r": [
+      31.6,
+      -45.0,
+      8.9
+     ]
+    },
+    "collar": {
+     "cells": 342,
+     "max_mm": 80.2
+    },
+    "hug": {
+     "moved": 75,
+     "max_mm": 86.6
+    },
+    "twist_vertices": 642
+   },
+   "out": "Sunmane_Steppe_Shirts_and_Armor__r01_c02.glb.npz",
+   "sha256": "93c87904a87331b3e0bcdcdb224603e718c1bd4198576bf7f07fa2e4587efd55"
+  },
+  "legs": {
+   "source": "Sunmane_Steppe_Legwear_Concept_Sheet__r01_c02.glb",
+   "vertices": 1928,
+   "triangles": 1512,
+   "opened": 2,
+   "rigidPlates": 22,
+   "bones": {
+    "pelvis": {
+     "k": 0.869,
+     "rays": 524,
+     "shift_mm": [
+      -5.9,
+      9.9,
+      1.8
+     ],
+     "girth": 1.004
+    },
+    "thigh_l": {
+     "k": 1.027,
+     "rays": 189,
+     "shift_mm": [
+      -29.1,
+      7.1,
+      -1.2
+     ],
+     "girth": 1.0
+    },
+    "calf_l": {
+     "k": 1.044,
+     "rays": 870,
+     "shift_mm": [
+      -19.5,
+      22.8,
+      -1.0
+     ],
+     "girth": 1.017
+    },
+    "thigh_r": {
+     "k": 1.027,
+     "rays": 151,
+     "shift_mm": [
+      -0.1,
+      30.0,
+      1.3
+     ],
+     "girth": 1.0
+    },
+    "calf_r": {
+     "k": 1.044,
+     "rays": 764,
+     "shift_mm": [
+      -10.5,
+      28.1,
+      0.8
+     ],
+     "girth": 1.0
+    },
+    "hug": {
+     "moved": 244,
+     "max_mm": 241.3
+    },
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 91,
+      "max_mm": 39.6
+     },
+     {
+      "into": "boots",
+      "tucked": 535,
+      "max_mm": 110.1
+     }
+    ]
+   },
+   "out": "Sunmane_Steppe_Legwear_Concept_Sheet__r01_c02.glb.npz",
+   "sha256": "9dd9454e9c910e55c47e6bde3e0affcb439291336d0cbc83a6778bb3a842bc14"
+  },
+  "boots": {
+   "source": "Eight_Sunmane_Steppe_Boot_Designs__r01_c02.glb",
+   "vertices": 1887,
+   "triangles": 1346,
+   "opened": 0,
+   "rigidPlates": 27,
+   "bones": {
+    "calf_l": {
+     "k": 1.0,
+     "rays": 180,
+     "shift_mm": [
+      23.0,
+      -1.4,
+      1.4
+     ],
+     "girth": 1.2
+    },
+    "foot_l": {
+     "k": 1.001,
+     "rays": 566,
+     "shift_mm": [
+      19.1,
+      -7.8,
+      14.2
+     ],
+     "girth": 1.1
+    },
+    "calf_r": {
+     "k": 1.0,
+     "rays": 145,
+     "shift_mm": [
+      -16.4,
+      -0.9,
+      1.0
+     ],
+     "girth": 1.2
+    },
+    "foot_r": {
+     "k": 1.001,
+     "rays": 504,
+     "shift_mm": [
+      -18.3,
+      -8.2,
+      14.9
+     ],
+     "girth": 1.1
+    },
+    "sole_seat_mm": {
+     "l": 7.4,
+     "r": 12.1
+    }
+   },
+   "out": "Eight_Sunmane_Steppe_Boot_Designs__r01_c02.glb.npz",
+   "sha256": "f1038c5edfd025ae7f8c85ba0fed5fe37aa14f8ce082e9a2e417a58be925a6da"
+  }
+ }
+}

@@ -46,6 +46,9 @@ hangs tails from the belt instead of binding them to the leg behind (drape);
 ``collar`` brings a collar's back out of the neck it was fitted into (collar);
 ``twist`` lets a coat's waist turn with the chest (twist), and
 ``centre_cuffs`` puts each sleeve's end on its wrist (centre_cuffs).
+Added 2026-10-18 for the Sunmane sets of the equipment audit: ``hug`` draws
+tails and sash panels that the concept blows out behind the body in to a
+capped standoff, so a cape hanging plumb from the shoulders clears them (hug).
 
 The output per source is ``<source>.npz``: rest positions in glTF axes,
 four joint names and weights per vertex, and a keep mask for triangles
@@ -617,6 +620,59 @@ def tuck(body, P, tris, posed, dom, ps, outer, outer_tris):
                           "max_mm": round(1000 * float(np.linalg.norm(move, axis=1).max()), 1)}
 
 
+def hug(body, posed, dom, ps):
+    """Cap how far a piece's art stands off the body over a band, behind it.
+
+    Added 2026-10-18 (equipment audit, Sunmane 02 and 06). A concept can draw
+    a sash tail or a scarf end blown out behind the wearer; carried onto the
+    body it stood 10-16 cm behind the back and the seat, where a cape hanging
+    plumb from the shoulders met it. Each ``hug`` entry names design ``bones``;
+    every vertex they own whose bearing round the bone (0 the front, 180 the
+    back) lies in ``arc`` and whose height lies in ``z`` is measured along the
+    ray from the bone's posed axis: its standoff d over the body surface
+    (default clothes included) is mapped to ``start`` + (``max`` - ``start``)
+    tanh((d - ``start``) / (``max`` - ``start``)) past ``start``. The map is
+    monotonic, so layers lying behind one another keep their order and never
+    cross; it fades in over ``fade`` at the band's ends and 15 degrees at the
+    arc's. Returns the vertices moved and the largest move.
+    """
+    from math import tanh
+    moved, largest = 0, 0.
+    sm = lambda x, e0, e1: (lambda t: t * t * (3 - 2 * t))(np.clip((x - e0) / (e1 - e0), 0., 1.))
+    for h in ps["hug"] if isinstance(ps["hug"], list) else [ps["hug"]]:
+        a, b = float(h.get("start", .04)), float(h["max"])
+        arc = h.get("arc", [120, 240]); z0, z1 = h.get("z", [-1., 3.]); fade = float(h.get("fade", .04))
+        for i, bone in enumerate(ps["bones"]):
+            if bone["name"] not in h["bones"]:
+                continue
+            a0 = body.joint(bone["body"][0]) + np.array(bone.get("offset", (0, 0, 0)), float)
+            a1 = body.joint(bone["body"][1]) + np.array(bone.get("offset_tail", bone.get("offset", (0, 0, 0))), float)
+            own = np.flatnonzero(dom == i)
+            foot, _ = seg_proj(posed[own], a0, a1)
+            for v, p0 in zip(own, foot):
+                u = posed[v] - p0; r = float(np.linalg.norm(u))
+                if r < 1e-4:
+                    continue
+                u /= r
+                bearing = float(np.degrees(np.arctan2(u[0], -u[1]))) % 360
+                k = (sm(bearing, arc[0], arc[0] + 15) * (1 - sm(bearing, arc[1] - 15, arc[1]))
+                     * sm(posed[v, 2], z0, z0 + fade) * (1 - sm(posed[v, 2], z1 - fade, z1)))
+                if k <= 0:
+                    continue
+                reach = .5
+                skin = body.bvh.ray_cast(Vector(p0 + u * reach), Vector(-u), reach)
+                if skin[0] is None:
+                    continue
+                d = r - (reach - skin[3])
+                if d <= a:
+                    continue
+                want = a + (b - a) * tanh((d - a) / (b - a))
+                step = k * (d - want)
+                posed[v] -= u * step
+                moved += 1; largest = max(largest, step)
+    return posed, {"moved": moved, "max_mm": round(1000 * largest, 1)}
+
+
 def seat_soles(body, P, rest, sink=0.004):
     """Stand a pair of separate boots where limb_head_remap seats boots.
 
@@ -824,6 +880,8 @@ def main():
             posed, report["centre_cuffs"] = centre_cuffs(body, posed, w, ps)
         if "collar" in ps:
             posed, report["collar"] = collar(body, posed, tris, w, ps)
+        if "hug" in ps:
+            posed, report["hug"] = hug(body, posed, w.argmax(1), ps)
         if "tuck_sleeves" in ps:
             # A coat's own sleeves go under its shoulder panels (owner's second
             # review, note 9: the Scout Vest's shirt sleeves came through the

@@ -298,8 +298,10 @@ real client actor (`tools/equipment_review/`). It is configured the way
 
 - **Drop-downs:** race (all eight), sex, armour set and animation. The sets
   are the four class starter kits from `CreationArchetypes`, plus those in
-  `tools/equipment_review/review_sets.json`. The chosen clip loops at the
-  game's playback speed.
+  `tools/equipment_review/review_sets.json`. Since the audit (2026-10-18)
+  that file also lists the 60 other generated sets as "Audit <Theme> <index>
+  (<torso>)", each with its theme's weapon and the Red Cape. The chosen clip
+  loops at the game's playback speed.
 - **Toggles:** headwear, weapons and cape, and hair.
 - **Camera:** mouse orbit, pan and zoom, keyboard turning, and preset views
   on 1–5. Space pauses, `,` and `.` step a frame, and `[` and `]` change the
@@ -1010,6 +1012,160 @@ lower sheet by 69 mm, where develop shows none; it did so already at
   collar with the develop solver. On the solver's own output, at
   Idle_Subtle 2.03 s, the vest clips the sheet by 17 mm with either solver
   (the cape session's measurement, at `aa5709ca`).
+
+### Audit batch 1: Sunmane (2026-10-18)
+
+The owner asked for the same audit on the other sets. It is in
+[design-fit/audit-2026-10.md](design-fit/audit-2026-10.md): all 60 remaining
+sets, on both Human bodies, measured through five clips, shot in the review
+viewer and compared with a concept target solved from each set's raw pieces,
+then ranked by how bad and how widely worn they are. The Sunmane Steppe line
+is the starting tier (0-1 armour per piece) and four of its sets rank among
+the worst nine, so they are the first batch:
+
+| Set | Torso | Legs | Boots |
+| --- | --- | --- | --- |
+| Sunmane 02 | Fringed Kaftan 5:241 | Wrapskirt Trousers 4:236 | Steppe Wrap Boots 6:217 |
+| Sunmane 03 | Rider Vest 5:242 | Steppe Chaps 4:237 | Bronze Boots 6:218 |
+| Sunmane 05 | Sundisc Cuirass 5:244 | Bronze Tassets 4:239 | Sunplate Boots 6:220 |
+| Sunmane 06 | Red Sash Wrap 5:245 | Sashcord Trousers 4:240 | Sashed Boots 6:221 |
+
+What the audit found on them: the trousers and tassets lay over the coats'
+fronts (65-97% of the covered rays) and backs; every collar sat in the nape
+(104-215 cells, up to 10 cm deep); the Bronze Tassets belled out and stood
+8-10 cm behind the back plane; Sunmane 06's scarf end and sash tails stood
+7-15 cm behind the back and its trousers left a 9% gap above the boots; the
+Steppe Chaps' fringe was scattered over both legs as dark shards. The headwear
+is not part of this batch.
+
+**Specs.** `sunmane_02.json`, `sunmane_03.json`, `sunmane_05.json` and
+`sunmane_06.json` were drafted by the audit's rules, the kits' `make_specs`
+rules with girth scales chosen from the same chest/waist and thigh clearance
+tables (the rules reproduce the four kit scales to within 0.04), and they
+carry the kits' `collar`, `twist`, `centre_cuffs`, `conform` (female) and
+`tuck_into` (coat at the back, boots). Four readings were made by hand:
+
+- **Drop-crotch trousers** (Sunmane 02 and 06). A wrap or sash skirt hides the
+  crotch, and the trousers are drawn baggy with a low crotch. The crotch is
+  read at 0.15 source units, so the waistband lands at the body's waist and
+  the baggy seat hangs below the body's crotch as drawn.
+- **A sleeveless vest** (Sunmane 03). The sleeve finder took the Rider Vest's
+  side panels for sleeves; the spec has no arm bones.
+- **Back tuck to 8 cm** (Sunmane 05), the Phoenix precedent: at 4 cm the
+  trousers' waist still showed above the tassets at the cuirass's back.
+- **`hug`** (Sunmane 02 and 06), below.
+
+**Two opt-in tool changes.** Both leave every earlier spec as it was: the
+Vanguard and Phoenix specs re-solve byte-identically, and a sleeved torso
+takes the old lining path.
+
+- `design_fit_blender.py` gains the spec key `hug`. A concept can draw a sash
+  tail or a scarf end blown out behind the wearer; carried onto the body,
+  Sunmane 06's stood 7-15 cm behind the back and the seat, where a cape
+  hanging plumb from the shoulders meets it. For the design bones it names,
+  over a height band and an arc of bearings round each bone (here about
+  120-240°, the back), each vertex's standoff over the body surface d is mapped to
+  `start` + (`max` − `start`) tanh((d − `start`) / (`max` − `start`)) past
+  `start` (3 and 6 cm here). The map is monotonic, so layers lying behind one
+  another keep their order, and it fades in at the band's ends and the arc's.
+  It runs before any tuck. The tails then hang straight down the back.
+- `torso_remap.art_lining_weights(..., sleeveless=...)`. A design-fit lining
+  takes the weights of the art it lies under. Over the arms of a sleeveless
+  vest no art lies, so the nearest art was the vest and the arm lining stayed
+  in the rest pose with the trunk: the arms stuck out sideways. When a
+  design fit gives no vertex to an arm, the lining over the arms now keeps
+  lining_weights' own arm field.
+
+The kit session (owner of these tools) and the cape session were told before
+either change.
+
+**Results.** Silhouette IoU against the solved targets, idle, front and side
+(Blender, backings hidden):
+
+| Set | Body | Front old | Front new | Side old | Side new |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Sunmane 02 | male | 0.837 | 0.993 | 0.764 | 0.985 |
+| Sunmane 02 | female | 0.846 | 0.992 | 0.778 | 0.981 |
+| Sunmane 03 | male | 0.799 | 0.968 | 0.752 | 0.980 |
+| Sunmane 03 | female | 0.798 | 0.970 | 0.760 | 0.976 |
+| Sunmane 05 | male | 0.870 | 0.977 | 0.763 | 0.972 |
+| Sunmane 05 | female | 0.862 | 0.978 | 0.781 | 0.972 |
+| Sunmane 06 | male | 0.879 | 0.992 | 0.685 | 0.986 |
+| Sunmane 06 | female | 0.898 | 0.991 | 0.686 | 0.986 |
+
+At the 95th percentile the installed art lies within 0.1-0.3 mm of the target
+for the coats, 7-14 mm for the legs and 2-15 mm for the boots; the old fits
+were 28-79 mm, 56-150 mm and 18-28 mm.
+
+The audit's measures, old → new, worst frame through the five clips, male /
+female:
+
+| Measure | Sunmane 02 | Sunmane 03 | Sunmane 05 | Sunmane 06 |
+| --- | --- | --- | --- | --- |
+| Trousers over the coat, front (%) | 72→28 / 52→34 | 47→9 / 38→6 | 97→24 / 89→15 | 66→14 / 67→26 |
+| Trousers over the coat, back (%) | 61→48 / 61→59 | 62→5 / 75→33 | 30→23 / 43→40 | 21→39 / 35→59 |
+| Collar inside the nape (cells) | 215→26 / 181→63 | 160→12 / 159→23 | 129→5 / 104→10 | 127→12 / 112→16 |
+| Trousers behind the back plane (cm) | 2.2→−3.4 / 4.9→−2.7 | 1.2→3.8 / 2.3→4.5 | 9.7→2.3 / 8.0→2.4 | −2.6→−5.9 / −0.7→−4.3 |
+| Coat behind the back plane (cm) | 1.5→4.7 / 2.1→3.9 | −0.6→4.0 / 1.2→2.3 | −0.5→−0.8 / −2.0→−0.8 | 6.5→0.0 / 7.4→−1.2 |
+| Gap between trousers and boots (%) | 2.1→1.1 / 0.8→1.0 | 0.8→1.2 / 0.8→0.8 | 1.4→0.6 / 1.1→0.3 | 8.9→0.9 / 9.4→0.5 |
+| Torn art in the bow pull, coat (%) | 0.4→1.3 / 0.3→1.2 | 0.6→1.0 / 0.5→0.8 | 0.7→0.9 / 0.4→0.8 | 1.1→0.8 / 1.1→1.2 |
+
+The coats' torn share rises as the kits' did when their seams were sewn
+(second review), and stays within the kits' 0.4-2.3%. The trousers tuck into
+the knee boots: the tuck moves the baggy Steppe trousers by up to 25 cm below
+the knee, all of it inside the shafts.
+
+In the engine (review viewer, `--replay` of the audit's views, real actor):
+the coats' belts and sashes now lie over the trousers and tassets; the tassets
+hang on the thighs; the boots show; the Steppe Chaps' fringe stays on the
+outer seams; Sunmane 06's tails hang straight and no longer show under the
+cape's hem; and the debug tint shows less lining at the arms and down
+Sunmane 06's trousers. Evidence:
+
+- [Blender target / design fit / previous fit](design-fit/audit-batch1-blender-target-new-old.jpg)
+- [in-engine before/after, idle and cape](design-fit/audit-batch1-engine-idle-cape.jpg)
+- [in-engine before/after, walk, run, bow, fighting idle](design-fit/audit-batch1-engine-motion.jpg)
+
+**Install.** The 24 Human variants were refitted
+(`refit_human_bodies.py --tag audit2`, Sunmane 05's legs again as `audit3`
+after the tuck change), installed with `install_human_equipment.py`, then
+`share_human_equipment_textures.py`. The registry and catalogue were converted
+back to LF and are byte-identical to before: scenes and sockets are
+unchanged. The eight new fitted-cloth textures replace eight that no GLB
+references any more; the six older orphans stay. The packed GLBs change by
+−1.4% to +6.7%. Godot's import was refreshed, and the seven creature `.import`
+files it rewrites were reverted.
+
+Tests. The pytest suites were also run on this branch's base (`82ae2326`)
+before the install; the Godot suites are compared with the results recorded
+for the third review above:
+
+| Suite | After | Before |
+| --- | --- | --- |
+| Equipment, remapper and held-prop pytest | 9 failed, 70 passed | the same 9 IDs at `82ae2326` (and at `224bb9b9`) |
+| torso_body_cover, torso LOD, imported-actor LOD, registry snapshot | pass | |
+| creation_class_equipment_fit | 54,666 checks, 0 failures | |
+| armour_body_cover | 60 failures, all "restores sculpted hair visibility" (helm 3:120) | the same 60 (third review) |
+| test_cape_cloth, test_cape_drape, test_cape_idle, pose and capsule caches, rendered_cape_clipping | pass | |
+| test_mounted_cape (44 checks), test_mounted_player (1,130), test_mount_hotkeys, test_mount_preview_state, test_mount_protocol | pass | |
+| test_cape_cloth_native_constraint | 17 failures (no native extension) | 17 (third review) |
+| rendered_cape_over_armour | 4 bodies clip: 225, 184, 213, 197 | the same 4, the same figures (225: sheet 69 mm, collar 160 mm) |
+
+**Not yet done.**
+
+- Sunmane 06's sash still lies over the Red Sash Wrap's back hem (39% male,
+  59% female of the back rays), and Sunmane 05's tassets over the cuirass's
+  back skirt (40% female). Both are drawn that way; tucking them would bury
+  the sash and the tassets' tops.
+- The Steppe Chaps reach their girth cap (1.15): 20% of the calf rays meet the
+  hidden default trousers outside the art, all inside the boots.
+- A wide Fringed Kaftan cuff shows a grey disc at the female wrist in the bow
+  pull and Fighting_Idle.
+- Sunmane 03's arms are the lining, in the vest's cloth colour, as before.
+- Coats 02 and 03 stand 4 cm behind the back plane at the seat (the kaftan's
+  skirt and the vest's peplum); they were not hugged.
+- The batch's headwear is unchanged (Steppe Headcloth, Rider Helm, Sundisc
+  Helm, Sun Headband).
 
 ## Two body shapes, preserved race identity
 

@@ -1550,7 +1550,8 @@ def lining(rig, armour, triangles, binding_rig=None):
     return equipment_seams.thickened_sheets(outer, inner, normals, faces, j, w)
 
 
-def art_lining_weights(points, joints, weights, art, art_joints, art_weights, rig, neighbours=6):
+def art_lining_weights(points, joints, weights, art, art_joints, art_weights, rig, neighbours=6,
+                       sleeveless=False):
     """Lining weights from the art it lies under, for a design-fit torso.
 
     Added 2026-10-17 (owner's third review, notes 7-9, 12-14). lining_weights
@@ -1562,6 +1563,11 @@ def art_lining_weights(points, joints, weights, art, art_joints, art_weights, ri
     the blend of its nearest art vertices (rest pose, inverse distance
     squared). Over the forearm's last stretch, where the lining holds the
     wrist skin (wrist_cover), it keeps lining_weights' own binding.
+
+    ``sleeveless`` (2026-10-18, a vest whose design fit gives no vertex to an
+    arm): no art lies over the arms, so the nearest art is the vest and the
+    arm lining stayed in the rest pose with the trunk. There the lining keeps
+    its own arm field (lining_weights' arm region) as well.
     """
     from scipy.spatial import cKDTree
     from equipment_skinning import smoothstep
@@ -1583,6 +1589,9 @@ def art_lining_weights(points, joints, weights, art, art_joints, art_weights, ri
         axis = wrist - root
         travel = (points - root) @ axis / (axis @ axis)
         keep = np.maximum(keep, smoothstep(travel, .7, .85) * ((points[:, 0] > 0) == (side == 'l')))
+    if sleeveless:
+        keep = np.maximum(keep, smoothstep(np.abs(points[:, 0]) / rig.fit_scale, .13, .245)
+                          * smoothstep(points[:, 1] / rig.fit_scale, 1.28, 1.40))
     dense = (1 - keep)[:, None] * dense + keep[:, None] * own
     j = np.argsort(-dense, axis=1)[:, :4]
     w = np.take_along_axis(dense, j, axis=1)
@@ -1755,7 +1764,8 @@ def build(source, out, rig, kind='cuirass', label='Remapped armour',
     p, n, uv, idx, j, w = lining(
         rig, points, triangles, design_rig)
     if fit is not None:
-        j, w = art_lining_weights(p, j, w, points, joints, weights, design_rig)
+        j, w = art_lining_weights(p, j, w, points, joints, weights, design_rig,
+                                  sleeveless=not (fit['arm_share'] > .5).any())
     liner_mat = len(glb.doc['materials'])
     glb.doc['materials'].append({'name': label + ' Backing', 'pbrMetallicRoughness': {
         'baseColorFactor': cloth_colour, 'metallicFactor': 0., 'roughnessFactor': 1.}})
