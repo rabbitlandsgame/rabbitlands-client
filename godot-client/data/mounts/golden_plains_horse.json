@@ -177,7 +177,16 @@
     "trot": "Jog",
     "gallop": "Gallop"
   },
-  "notes": "User-approved horse riding visuals reused for the normal-server playtest alongside Moor Pony. Existing horse model and all motion payloads remain unchanged.",
+  "hindLegPose": {
+    "bodyBone": "hips",
+    "thighMaxDegrees": 55.0,
+    "softLimitDegrees": 6.0,
+    "chains": [
+      ["back_leg_pelvis_l", "back_leg_upper_l", "back_leg_lower_l", "back_leg_ankle_l"],
+      ["back_leg_pelvis_r", "back_leg_upper_r", "back_leg_lower_r", "back_leg_ankle_r"]
+    ]
+  },
+  "notes": "Horse riding playtest alongside Moor Pony. A mounted-only hind-leg adapter limits thigh lift and outward swing while retaining authored hoof paths. Existing horse GLB and all source motion payloads remain unchanged; the corrected mounted articulation awaits user review.",
   "displayName": "Golden Plains Horse",
   "visualScale": 1.2,
   "seatPositionNative": [

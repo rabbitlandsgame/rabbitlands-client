@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Mounted Golden Plains Horse hind-leg articulation v1",
+  "problem": "Native thigh lift reaches 139 degrees and pulls the weighted hindquarters upward while riding; reported during both normal riding and gallop.",
+  "method": "Mount-only profile adapter softly limits forward femur lift to 55 degrees, retains the native lateral hip/stifle offset and solves the serial hock/fetlock chain back to the authored contact. Fetlock/hoof world orientation is restored exactly.",
+  "preservation": {
+    "sourceGlbReplaced": false,
+    "newModelsGenerated": false,
+    "skinWeightsChanged": false,
+    "nativeClipsChanged": false,
+    "runtimeActorScope": "Mounted horse only; ordinary horse NPCs and Moor Pony retain their existing motion",
+    "unchanged": "Source motion timing, hooves/soles, body/front-leg/tail motion, saddle, rider, reins, cape and controls."
+  },
+  "validation": {
+    "baseline_max_thigh_degrees": 139.139704134023,
+    "baseline_segment_length_error_metres": 2.68220901489258e-06,
+    "checks": 60887,
+    "failures": 0,
+    "max_hock_step_at_480hz": 0.022241972386837,
+    "max_hoof_position_error_metres": 5.04320678373915e-06,
+    "max_rotation_step_radians_at_480hz": 0.0752954930067062,
+    "max_segment_length_error_metres": 2.71201133728027e-06,
+    "max_thigh_degrees": 55.0001634342501
+  },
+  "regressions": {
+    "horseRiderFitChecks": 11741,
+    "horseUpperBodyActionChecks": 3070,
+    "ponyUpperBodyActionChecks": 3070,
+    "failures": 0,
+    "maxRiderContactErrorMetres": 4.215241279e-05,
+    "maxCapeLinkErrorMetres": 0.00571274757385
+  },
+  "soleAudit": {
+    "hindLeftVertices": 19,
+    "hindRightVertices": 17,
+    "minimumAnkleAndHoofOwnership": 1.0,
+    "note": "All certified sole vertices are wholly owned by joints whose world transforms are preserved."
+  },
+  "gates": {
+    "sourceAuthoring": "Runtime articulation only; native anatomy, serial chain and sole ownership audited. No geometry or rig export.",
+    "exportFidelity": "Not applicable: source GLB, skin, bind/rest and native animation channels are unchanged.",
+    "godotIntegration": "480 Hz full-cycle native playback, authored contacts, segment lengths, unaffected joints, loops and no pole flips pass; equipped rider and action regressions pass.",
+    "visualReview": "Full cycles rendered at 30 FPS from side, rear and gameplay camera, with cape. Sampled phases and before/after pose sheets inspected.",
+    "userApproval": "Pending user review of corrected mounted hind-leg motion."
+  },
+  "sourceSha256": {
+    "godot-client/data/mounts/golden_plains_horse.json": "4d494ba5018fb2da713302f0bcf06881cda4cf28a8333d5c88f17febaea6fb49",
+    "godot-client/src/mounts/mount_hind_leg_pose.gd": "f95daca417456ced3eec52792c27583aba0f653178cadd850e7dcf808860455d",
+    "godot-client/src/mounts/mounted_player_visual.gd": "5f4c2d620d47daad561f45eabc2c1ccf8fc659b269f28a30a9c99690bb801843",
+    "godot-client/tests/test_mount_hind_legs.gd": "1846b5ff632f7c45095ac23737702bbafbd154d3d6d99aa77967307e385753d0"
+  },
+  "unchangedInputSha256": {
+    "golden_plains_horse.glb": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+    "moor_pony.glb": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902"
+  },
+  "review": {
+    "localFolder": ".local/qa/horse-hind-legs-v1",
+    "video": "horse-hind-legs-v1.mp4",
+    "seconds": 6,
+    "frames": 180,
+    "fps": 30,
+    "videoSha256": "6e175bb4b5fe8453d04b428c39ad3c5ef1789bab012bcf88b5d1072f1fd56877"
+  },
+  "limitations": [
+    "Artistic quality of the revised mounted motion awaits user approval. This change does not revise unmounted creature animation."
+  ]
+}

@@ -6,6 +6,7 @@ const CapeSurface := preload("res://src/mounts/mount_cape_surface.gd")
 const UpperBody := preload("res://src/mounts/mounted_upper_body.gd")
 const Profiles := preload("res://src/mounts/mount_profiles.gd")
 const BorrowedTack := preload("res://src/mounts/borrowed_mount_tack.gd")
+const HindLegPose := preload("res://src/mounts/mount_hind_leg_pose.gd")
 var actor: ReplicatedActor3D
 var pony: ReplicatedActor3D
 var pose := RiderPose.new()
@@ -23,6 +24,7 @@ var upper := UpperBody.new()
 var seat_rest_inverse := Transform3D.IDENTITY
 var tack: Node3D
 var bridle_paths: Array[PackedVector3Array] = []
+var hind_legs := HindLegPose.new()
 
 func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony") -> Array[String]:
 	actor = player
@@ -53,6 +55,9 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 	if saddle < 0 or head < 0:
 		return [mount_id + " seat/bridle attachment missing"]
 	seat_rest_inverse = pony.get_skeleton().get_bone_global_rest(saddle).affine_inverse()
+	var hind_errors := hind_legs.configure(pony.get_skeleton(), profile.get("hindLegPose", {}))
+	if not hind_errors.is_empty():
+		return hind_errors
 	var head_rest := pony.get_skeleton().get_bone_global_rest(head)
 	for side: String in ["l", "r"]:
 		var values: Array = profile.reins.bridleAnchorsNative[side]
@@ -114,6 +119,7 @@ func _process(delta: float) -> void:
 	pony.animation_player.seek(fposmod(elapsed, duration), true)
 	pony.animation_player.pause()
 	pony.get_skeleton().force_update_all_bone_transforms()
+	hind_legs.apply(action)
 	actor.animation_player.pause()
 	var bone := pony.get_skeleton().global_transform * pony.get_skeleton().get_bone_global_pose(saddle)
 	var seat: Transform3D
