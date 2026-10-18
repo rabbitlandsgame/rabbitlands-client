@@ -6,8 +6,8 @@ extends RefCounted
 ## inspectable, a speech bubble over an NPC, a sword over an enemy, a sack over
 ## a dropped bag - so the pointer itself answers "what happens if I click
 ## here?" before the click is spent. This class owns both halves of that:
-## the glyph set (original Eloria art, drawn by tools/make_action_cursors.py
-## in the legacy white-fill black-outline language) and the decision table,
+## the glyph set (original Rabbit Lands ivory-and-metal artwork, validated
+## and exported by tools/make_action_cursors.py) and the decision table,
 ## ported from the legacy client's check_cursor_change (gamewin.c).
 ##
 ## The ids mirror cursors.h in the legacy client so a mode here can be read

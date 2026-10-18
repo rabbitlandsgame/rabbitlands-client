@@ -42,9 +42,10 @@ func _run() -> void:
 	if cursors == null or not cursors.loaded():
 		_finish()
 		return
-	cursors.apply(MouseCursors.WALK)
-	_expect(cursors.current() == MouseCursors.WALK,
-		"the hardware pointer accepts a glyph")
+	for cursor_id: int in range(MouseCursors.CURSOR_COUNT):
+		cursors.apply(cursor_id)
+		_expect(cursors.current() == cursor_id,
+			"the hardware pointer accepts " + cursors.name_of(cursor_id))
 
 	var app_state: Node = root.get_node("AppState")
 	app_state.set("authenticated", true)
@@ -144,7 +145,7 @@ func _run() -> void:
 	_main.set("_interaction_mode", "attack")
 	_check_spot("player-attack-mode", _actor_position(103), "player",
 		MouseCursors.ATTACK, [])
-	_check_spot("ground-attack-mode", ground, "", MouseCursors.WALK, [])
+	_check_spot("ground-attack-mode", ground, "", MouseCursors.ATTACK, [])
 	_main.set("_interaction_mode", "walk")
 	_main.set("_alt_attack_preview", true)
 	_check_spot("player-alt-held", _actor_position(103), "player",
