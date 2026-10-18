@@ -60,11 +60,13 @@ pieces never add up. The visible shape is the union of each piece's own cut cont
   measured against Landfall `meadow-16`'s exported mesh, whose long axis is
   (-0.921, 0.389). Reading them as columns mirrors every rotated piece. The content
   pass did that once, then fixed it (f4945e14).
-- Older ground-region `clip_polygon`s were written in the transposed frame. Read with
-  axes `(t0, t2)` and `(t6, t8)`, each one equals its territory's ownership ring. The
-  exporter reads them with the true axes, so a rotated original patch near a border
-  is clipped by a turned ring. This is known and was left alone. Write new pieces'
-  rings in their true frame.
+- The 15-map split wrote ground-region `clip_polygon`s in the transposed frame,
+  because its reader took the basis as columns. The exporter
+  (`terrain_export.ground_region_faces`) reads them with the row axes, so 189 rotated
+  isle patches near borders were clipped by a turned ring. 0df9dfc3 re-expressed those
+  rings in their true frame. 7cceb3a9 fixed `continent_v2_territories`' readers and
+  the split's writer. Write any new ring in the true frame, and check it by reading it
+  back with the row axes.
 - Godot 4.7 writes `unique_id=NNN` (and can write more) after `parent=` in node
   headers. Every Nymara region scene has it, and the isles do not. Allow a trailing
   remainder when matching headers. When nodes under a parent you read go unmatched,
