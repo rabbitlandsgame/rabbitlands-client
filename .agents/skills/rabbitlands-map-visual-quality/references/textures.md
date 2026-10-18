@@ -13,9 +13,14 @@ the two faults that show in a game: a repeat grid and a stripe.
   `weathered-limestone-masonry`, an architecture (wall) texture in regular brick
   courses. Laid flat it reads as a brick wall on the ground.
 - **A repeat grid.** Generators darken tile edges, and the darker band repeats as
-  a lattice even when the pixels wrap (the coastal limestone gravel). Measure it
-  as edge-to-edge difference against neighbour difference;
-  `scripts/make_seamless.py` prints both.
+  a lattice even when the pixels wrap. Measure it as edge-to-edge difference
+  against neighbour difference; `scripts/make_seamless.py` prints both.
+- **An alpha vignette.** Some generated tiles come back RGBA with an alpha that
+  falls off towards the edges. The coastal limestone gravel pack's alpha is about
+  0.3 in the corners and 0.58 along the edges. The look multiplies a patch's
+  coverage by its texture's alpha, so each tile edge opens to the ground beneath:
+  the isles' scree showed a grid of green grout lines that no colour fix removed.
+  Check the alpha channel of any RGBA tile; `make_seamless.py` writes RGB.
 - **Stripes.** Directional detail (wear streaks, ripples) at a 3-4 m repeat
   becomes stripes across a field. Flatten it, or prompt it out.
 
@@ -50,8 +55,13 @@ There are two routes. Neither needs the other.
   - The shader maps it in continent metres, the same on every deck and patch, and
     rescales it to the source texture's mean colour. Palette and paint classes are
     unchanged; only structure changes.
-  - Slots: `deck` (worn walk decks), `paving`, `sand` and `meadow`. Kept patches and
-    rock keep their own textures.
+  - Slots: `deck` (worn walk decks), `paving`, `sand`, `meadow`, `rock` and `soil`
+    (`LookGround.class_slot`). Kept patches keep their own textures.
+  - A scene's patch reaches the runtime as a tint and a texture, not as its preset
+    name, so a slot is the runtime route to a preset. On the isles every `rock`
+    patch is "Coastal limestone gravel" and every `soil` patch is "Soil"
+    (`LookProfile.SOIL_TINT`). Check this with the chunk GLBs' materials before
+    opting a map in elsewhere: on Nymara maps rock is also granite and lilac scree.
   - `.import` files are not versioned, so `LookGround.class_texture` builds the
     mipmaps itself.
 - **Authored preset (republish).** Add a texture pack folder and a preset in
@@ -59,7 +69,9 @@ There are two routes. Neither needs the other.
   in the scenes. The bake publishes it content-addressed into
   `_continent_v2/shared-assets/`.
   - Use this route for a texture a whole map's design should own, or for a surface the
-    look does not class (gravel, forest floor, soil).
+    look cannot tell apart by tint (on the isles, forest floor is a plain glaze).
+  - A seam fix to a pack tile belongs here too, as a new pack version. Until a
+    republish ships it, the runtime slot carries it (the isles' coastal gravel).
   - It needs the full publication order: bake every catalog map and run
     `publish_client`, then `publish_server`.
 

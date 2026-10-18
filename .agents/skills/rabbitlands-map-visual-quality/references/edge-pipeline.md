@@ -34,6 +34,44 @@ Traced on 2026-10-17 for the Landfall isles. Paths are from the client checkout.
 With the look off, a blended import ignores vertex alpha and every patch is its
 cell-stepped triangle footprint. The look is on by default.
 
+### Splitting or resizing a patch
+
+Each authored patch is its own mesh, and the runtime cuts each one separately at
+its class's threshold (`look_ground.gd` picks the rim per material):
+`PATCH_RIM.x` 0.42, `MEADOW_RIM.x` 0.14 (Grass) and `PAVING_RIM.x` 0.12. Overlapping
+pieces never add up. The visible shape is the union of each piece's own cut contour.
+- A piece becomes visible `blend × smoothstep⁻¹(cut / opacity)` inside its outline.
+  At opacity 1 that is 0.45 of the blend for a patch (2.7 m on a 6 m blend), 0.24
+  for a meadow and 0.22 for paving. At opacity 0.8 a patch's inset is 0.52 of the
+  blend.
+- So every piece of a split patch keeps the original opacity. Lowering it to
+  "share" the coverage only pushes each cut inward.
+- Every piece must be wider than twice the inset, or it vanishes. The 2026-10-17
+  content pass kept each piece's half-width at least the inset plus 1.5 m.
+- Widening a paving blend moves its 0.12 contour inward. Grow the size by
+  `2 × smoothstep⁻¹(0.12 / opacity) × (new blend − old blend)` (about 0.43 m per
+  metre of extra blend at opacity 1) so the paving edge stays where it was.
+
+## Reading scenes by script
+
+- A `.tscn` `Transform3D(t0 … t11)` lists the basis ROWS, then the origin:
+  `world = (t0 x + t1 y + t2 z + t9, t3 x + t4 y + t5 z + t10, t6 x + t7 y + t8 z + t11)`.
+  In x/z the node's X axis is `(t0, t6)` and its Z axis is `(t2, t8)`. This was
+  measured against Landfall `meadow-16`'s exported mesh, whose long axis is
+  (-0.921, 0.389). Reading them as columns mirrors every rotated piece. The content
+  pass did that once, then fixed it (f4945e14).
+- The 15-map split wrote ground-region `clip_polygon`s in the transposed frame,
+  because its reader took the basis as columns. The exporter
+  (`terrain_export.ground_region_faces`) reads them with the row axes, so 189 rotated
+  isle patches near borders were clipped by a turned ring. 0df9dfc3 re-expressed those
+  rings in their true frame. 7cceb3a9 fixed `continent_v2_territories`' readers and
+  the split's writer. Write any new ring in the true frame, and check it by reading it
+  back with the row axes.
+- Godot 4.7 writes `unique_id=NNN` (and can write more) after `parent=` in node
+  headers. Every Nymara region scene has it, and the isles do not. Allow a trailing
+  remainder when matching headers. When nodes under a parent you read go unmatched,
+  fail instead of reporting zero.
+
 ## Roads (scene `Roads`)
 
 - Each road is a `Path3D` polyline (Curve3D points with zero handles) plus
@@ -110,5 +148,5 @@ merge the same keys into the region file. Update `notes.overrides.sha256`, and t
 indentation; a round trip of an unchanged file is byte-identical.
 
 The ground keys a region may set are in `LookProfile.REGION_SECTIONS["ground"]`.
-`class_textures` maps the slots `deck`, `paving`, `sand` and `meadow` to the names in
-`LookProfile.CLASS_TEXTURES`.
+`class_textures` maps the slots `deck`, `paving`, `sand`, `meadow`, `rock` and `soil` to
+the names in `LookProfile.CLASS_TEXTURES`.

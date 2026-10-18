@@ -29,6 +29,12 @@ Run `python scripts/map_audit.py overlay --out <dir>` and read each map's image.
 - `map_audit.py drift`: which saved scenes are not yet published. A content fix there
   ships those changes too.
 
+`roads` and `patches` exit non-zero, naming the scene and the first header they
+could not read, when a node under `Roads` or `Ground/Regions` goes unread. Before
+that check existed, the Godot 4.7 `unique_id` attribute hid all 323 Nymara roads and
+454 patches behind a clean report of zero. Treat a map that reports zero roads as a
+fact to confirm in its scene, not as a pass.
+
 ## 3. In game: edges and textures
 
 Render the same views before and after with the trailer camera's `--preview`, from
@@ -64,8 +70,8 @@ about 260 m wide, interfingered, not a line. Check a border walk with
 |---|---|
 | Edge too crisp or too straight within the authored blend | runtime look constants |
 | Surface lacks structure, wrong texture family | runtime class texture, or authored preset |
-| Shape is a primitive (disc, square, oval) | content: break into overlapping irregular shapes |
-| Blend too narrow for a soft edge | content: raise `blend_width` |
+| Shape is a primitive (disc, square, oval) | content: break into overlapping irregular shapes, each keeping the original opacity and wider than its cut's inset (`edge-pipeline.md`) |
+| Blend too narrow for a soft edge | content: raise `blend_width` (grow paving so its 0.12 contour stays put) |
 | Road jog or kink | content: round within the corridor |
 | Hairpin, or a road on the wrong line | content: reroute plus re-grade, with owner confirmation |
 | Repeat grid in a source texture | re-process with `make_seamless.py`, then route as above |
@@ -80,3 +86,12 @@ about 260 m wide, interfingered, not a line. Check a border walk with
   constants: they apply to every map.
 - For content: run the publication checks and the served-grid reach checks, and walk
   the changed roads.
+  - Preview split patches as the union of each piece's own cut contour, old beside
+    new. Overlapping pieces do not add their coverage.
+  - Check rotated pieces against the exported mesh once. A basis read as columns
+    instead of rows mirrors them.
+  - After a reroute, list deck cells newly steeper than 0.65 (`road-shapes.md`,
+    "Grading a reroute").
+  - Expect the three retirement guards on a republish: pinned chunk hashes,
+    wrappers naming deleted models, and the underground builder digest
+    (`road-shapes.md`, "Publishing").
