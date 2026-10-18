@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "stage": "develop-integration",
+  "techniques": [
+    "charge",
+    "heavy_blow",
+    "executioners_stroke",
+    "sunder"
+  ],
+  "motionRecipeCount": 17,
+  "sourceGlbChanges": false,
+  "meshSkeletonSkinBindChanges": false,
+  "newPaidGeneration": false,
+  "charge": {
+    "approachRangeTiles": 6,
+    "minimumLeapSeconds": 0.24,
+    "maximumLeapSeconds": 0.42,
+    "maximumRouteSteps": 12,
+    "landing": "collision-checked adjacent tile outside the target footprint",
+    "strike": "after landing",
+    "particlesRequiredForFlight": false,
+    "wallBypass": false,
+    "immunityGranted": false
+  },
+  "checks": {
+    "serverTechniqueAndMountedCombatTests": 59,
+    "playerRigs": 16,
+    "actorMovementChecks": 37,
+    "techniquePresentationAndLiveDispatch": "passed",
+    "chargeArcAndDelayedLanding": "passed",
+    "techniquesUi": "passed",
+    "nativeRenderedTechniques": 24,
+    "fullMotionFrames": 216,
+    "fullMotionSampleHz": 30,
+    "uprightStrikeSamplesPerTechnique": 16,
+    "finalChargeChecks": 6
+  },
+  "reviewScene": "godot-client/src/dev/technique_showcase.tscn",
+  "motionRenderScript": "godot-client/tests/integration/rendered_charge_revision.gd",
+  "visualReview": "Native full-motion frames reviewed locally; integration requested by the user. No separate visual-acceptance receipt or live multiplayer playtest claimed.",
+  "inputs": [
+    {
+      "repository": "client",
+      "path": "godot-client/assets/actors/native/shared/Universal_Animation_Library.glb",
+      "sha256": "161f9b54aed6a172ac5b1a37960264f106015bbc8622cd33af2061c9c4f6d69c"
+    },
+    {
+      "repository": "client",
+      "path": "godot-client/src/actors/technique_animation_library.gd",
+      "sha256": "5689ddaa95ea390f9c4927c3f0987adbc7c086ceeff7b678a313d8c1766f2e3f"
+    },
+    {
+      "repository": "client",
+      "path": "godot-client/src/actors/charge_leap_motion.gd",
+      "sha256": "4391212defef01d4d37c9d985405f8f2e78d901b647413d64124c0175ab9d580"
+    },
+    {
+      "repository": "client",
+      "path": "godot-client/src/world/technique_presentation.gd",
+      "sha256": "1dde83acfb22498a1b98b66924c9fdc6c58260ac6db9f9989c6f00eed79cbe38"
+    },
+    {
+      "repository": "client",
+      "path": "godot-client/src/ui/technique_effect_preview.gd",
+      "sha256": "e6323380406019f70107d02b86f761736f12c9b93b82d9c1e3e327d0fc01b1f8"
+    },
+    {
+      "repository": "server",
+      "path": "eloria/technique_runtime.py",
+      "sha256": "29c02ea8be79e167957dc52f5f076713602ac743fdb2bb60a33e4cd56f771e89"
+    },
+    {
+      "repository": "server",
+      "path": "eloria/techniques.py",
+      "sha256": "e68dab41447a8b8173b117b6b2dca082d89b734b0982d67fe80baaad9c7dcacc"
+    }
+  ]
+}

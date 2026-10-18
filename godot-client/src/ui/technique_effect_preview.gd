@@ -100,6 +100,8 @@ func _build_stage() -> void:
 
 func replay() -> void:
 	if stage == null: return
+	source.end_charge_leap()
+	source.set_physics_process(false)
 	clock = 0.0
 	_released = false
 	_flurry_hits = 0
@@ -111,6 +113,10 @@ func replay() -> void:
 	_fit_camera()
 	source.position = Vector3(-1.5 if ranged else -0.75, 0, 0)
 	target.position = Vector3(1.5 if ranged else 0.75, 0, 0)
+	if key == "charge":
+		source.position.x = -2.4
+		target.position.x = 0.9
+	source.server_target = source.position
 	source.rotation.y = -PI * 0.5
 	target.rotation.y = PI * 0.5
 	target.visible = not support or key in ["intercept", "challenge", "riposte"]
@@ -136,6 +142,23 @@ func _process(delta: float) -> void:
 	var key := str(row.get("key", ""))
 	var ranged := key in Presentation.RANGED
 	var release := 0.85 if ranged else 0.3
+	if key == "charge":
+		if clock >= release and not _released:
+			_released = true
+			var landing := Vector3(-0.45, 0, 0)
+			_emit_cue(key, "activate", false)
+			source.begin_charge_leap(PackedVector3Array([source.position, landing]), 0.36)
+			source.server_target = landing
+			source.set_physics_process(false)
+		if _released and not _countered:
+			source._physics_process(delta)
+			if clock >= release + 0.36:
+				_countered = true
+				source.end_charge_leap()
+				_emit_cue(key, "land", false)
+				_emit_cue(key, "strike", true)
+		if clock >= LOOP_SECONDS: replay()
+		return
 	if clock >= release and not _released:
 		_released = true
 		var phase := "shot" if ranged else "activate" if key in Presentation.SUPPORT else "strike"
@@ -164,7 +187,7 @@ func _emit_cue(key: String, phase: String, landed: bool) -> void:
 func _fit_camera() -> void:
 	if _camera == null: return
 	var key := str(row.get("key", ""))
-	var width := 5.8 if key in Presentation.RANGED or key == "war_cry" else 3.9
+	var width := 6.2 if key == "charge" else 5.8 if key in Presentation.RANGED or key == "war_cry" else 3.9
 	# The book is a wide strip, while the review scene is nearly square.
 	# Preserve enough vertical room for heads, feet and overhead impact cues.
 	_camera.size = maxf(width, 2.6 * size.x / maxf(1.0, size.y))

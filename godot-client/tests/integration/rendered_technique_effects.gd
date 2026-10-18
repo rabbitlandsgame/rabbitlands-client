@@ -20,6 +20,7 @@ func run() -> void:
 		preview.set_process(false)
 		preview.stage.process_mode = Node.PROCESS_MODE_DISABLED
 		preview._process(0.86 if key in Presentation.RANGED else 0.31)
+		if key == "charge": preview._process(0.37)
 		if key == "riposte":
 			for effect in preview.effects.get_children(): effect.free()
 			preview._emit_cue(key, "counter", true)

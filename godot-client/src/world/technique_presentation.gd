@@ -5,16 +5,16 @@ const PROFILES := {
 	"heavy_blow": ["dcb77c", "Technique_Heavy", "attack_primary", 0.34],
 	"measured_strike": ["d7edf1", "Technique_Precise", "attack_primary", 0.26],
 	"fighting_retreat": ["9bb9ce", "", "", 0.0],
-	"charge": ["e4c28a", "Technique_Heavy", "attack_primary", 0.28],
+	"charge": ["e4c28a", "Technique_Charge_Strike", "attack_primary", 0.22],
 	"challenge": ["dd996e", "Technique_Challenge", "defend", 0.0],
 	"second_wind": ["88c8b3", "Technique_Breath", "defend", 0.0],
 	"war_cry": ["e6c780", "Technique_Rally", "defend", 0.0],
-	"executioners_stroke": ["db8b75", "Technique_Heavy", "attack_primary", 0.34],
+	"executioners_stroke": ["db8b75", "Technique_Executioner", "attack_primary", 0.42],
 	"shield_bash": ["e2c47e", "Technique_Shield_Bash", "attack_primary", 0.30],
 	"brace": ["a1bfd5", "Technique_Brace", "defend", 0.0],
 	"intercept": ["8bcbbd", "Technique_Brace", "defend", 0.0],
 	"cleave": ["d7d5b3", "Technique_Cleave", "attack_secondary", 0.30],
-	"sunder": ["d9a477", "Technique_Heavy", "attack_primary", 0.34],
+	"sunder": ["d9a477", "Technique_Sunder", "attack_primary", 0.28],
 	"flurry": ["d1e6e8", "Technique_Flurry", "attack_primary", 0.19],
 	"hamstring": ["c9988c", "Technique_Low_Cut", "attack_secondary", 0.26],
 	"riposte": ["c5ddea", "Technique_Brace", "defend", 0.0],
@@ -35,7 +35,8 @@ static func color_for(key: String) -> Color:
 
 static func motion_for(key: String, phase: String) -> Array:
 	if not PROFILES.has(key) or phase in ["impact", "pulse"]: return []
-	if key == "charge" and phase == "activate": return []
+	if key == "charge" and phase == "activate": return ["Technique_Charge_Leap", "defend"]
+	if key == "charge" and phase == "land": return ["Technique_Charge_Land", "defend"]
 	if key == "riposte" and phase == "counter": return ["Technique_Riposte", "attack_primary"]
 	var profile: Array = PROFILES[key]
 	return [profile[1], profile[2]] if not str(profile[1]).is_empty() else []

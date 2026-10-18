@@ -11810,8 +11810,15 @@ func _on_technique_effect(data: Dictionary) -> void:
 	var source := actor_nodes.get(int(data.get("actor_id", -1))) as ReplicatedActor3D
 	if not is_instance_valid(source) or source.current_action == &"death": return
 	var phase := str(data.get("phase", "strike"))
-	if phase not in ["strike", "counter", "activate", "shot", "impact", "pulse"]: return
-	source.play_technique(key, phase)
+	if phase not in ["strike", "counter", "activate", "shot", "impact", "pulse", "land"]: return
+	if phase == "land" and key != "charge": return
+	if key == "charge" and phase == "activate" and data.has("leap"):
+		var route := _charge_leap_route(source, data.leap)
+		if route.size() < 2: return
+		source.begin_charge_leap(route, float(data.leap.get("duration", 0.36)))
+	else:
+		if key == "charge" and phase in ["land", "strike"]: source.end_charge_leap()
+		source.play_technique(key, phase)
 	if not _effects_enabled or get_tree().get_nodes_in_group("technique_visual_effects").size() >= 48: return
 	var target := actor_nodes.get(int(data.get("target_id", -1))) as Node3D
 	var effect = preload("res://src/world/technique_effect_3d.gd").new()
@@ -11819,6 +11826,31 @@ func _on_technique_effect(data: Dictionary) -> void:
 	effect.configure(key, phase, source, target, bool(data.get("hit", false)))
 	world_effects.append(effect)
 	world_effects = world_effects.filter(func(node: Variant) -> bool: return is_instance_valid(node))
+
+func _charge_leap_route(source: ReplicatedActor3D, value: Variant) -> PackedVector3Array:
+	var route := PackedVector3Array()
+	if not value is Dictionary: return route
+	var origin: Variant = value.get("origin", [])
+	var offsets: Variant = value.get("offsets", [])
+	if not origin is Array or origin.size() != 2 or not offsets is Array or offsets.size() < 2 or offsets.size() > 13: return route
+	var record: Dictionary = AppState.actors.get(source.actor_id, {}) as Dictionary
+	var actor_adapter := _adapter_for_actor(record)
+	if actor_adapter == null: return route
+	var mask: int = WorldLoader.NAVIGATION_SURFACE_LAYER
+	if source.actor_id != AppState.local_actor_id and str(record.get("map", AppState.current_map)) != AppState.current_map:
+		mask |= ExteriorRegionStream.PREVIEW_SURFACE_LAYER
+	for offset: Variant in offsets:
+		if not offset is Array or offset.size() != 2: return PackedVector3Array()
+		if absf(float(offset[0])) > 12 or absf(float(offset[1])) > 12: return PackedVector3Array()
+		var point := actor_adapter.footprint_center(int(origin[0]) + int(offset[0]), int(origin[1]) + int(offset[1]), source.footprint)
+		point.y = source.server_target.y
+		if gameplay_world != null:
+			var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 2000.0, point + Vector3.DOWN * 2000.0,
+				mask)
+			var hit := gameplay_world.direct_space_state.intersect_ray(query)
+			if hit.get("position") is Vector3: point.y = (hit.position as Vector3).y + 0.02
+		route.append(point)
+	return route
 
 ## The emote picker's seam onto the network: the same packet `#emote <name>`
 ## already sends. The server stays the judge of what the name means.

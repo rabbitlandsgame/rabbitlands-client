@@ -135,6 +135,7 @@ var _death_snapshot_msec := -1
 var _corpse_transparency := -1.0
 var _corpse_geometry: Array[GeometryInstance3D] = []
 var _cinematic_active := false
+var _charge_leap: RefCounted
 var _cinematic_position := Vector3.ZERO
 var _cinematic_yaw := 0.0
 var _cinematic_action: StringName = &"idle"
@@ -1728,6 +1729,7 @@ static func footprint_outline(width_m: float, depth_m: float) -> ArrayMesh:
 	return mesh
 
 func rebase_world(frame: Transform3D) -> void:
+	if _charge_leap != null: _charge_leap.rebase(frame)
 	global_position = frame * global_position
 	server_target = frame * server_target
 	_segment_start = frame * _segment_start
@@ -1738,6 +1740,7 @@ func rebase_world(frame: Transform3D) -> void:
 	_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	if teleport and _charge_leap != null: end_charge_leap()
 	_sync_death_presentation(dto)
 	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
 	# The capability handshake can correct an actor already spawned from the
@@ -3306,7 +3309,36 @@ func play_technique(key: String, phase: String) -> void:
 	play_action(StringName(action), true)
 	resolver.action_to_clip[action] = original
 
+func begin_charge_leap(route: PackedVector3Array, seconds: float) -> void:
+	if current_action == &"death" or _cinematic_active or route.size() < 2: return
+	for point in route:
+		if not point.is_finite(): return
+	var rendered_route := route.duplicate()
+	rendered_route[0] = global_position
+	_charge_leap = preload("res://src/actors/charge_leap_motion.gd").new(rendered_route, seconds)
+	_snap_pending = false
+	play_technique("charge", "activate")
+	if animation_player != null and str(animation_player.current_animation) == "Technique_Charge_Leap":
+		animation_player.speed_scale = animation_player.current_animation_length / _charge_leap.duration
+	_wake()
+	set_physics_process(true)
+
+func end_charge_leap() -> void:
+	if _charge_leap == null: return
+	_charge_leap = null
+	global_position = server_target
+	_segment_start = server_target
+	_segment_duration = 0.0
+	_movement_coast_remaining = 0.0
+	_last_movement_update_msec = -1
+	_schedule_due = -1.0
+	_travel_yaw_active = false
+	_wake()
+
 func play_action(action: StringName, restart := false) -> void:
+	if _charge_leap != null:
+		if action in [&"walk", &"run", &"idle", &"combat_idle", &"turn"]: return
+		if action in [&"death", &"pain"]: end_charge_leap()
 	# Death can precede the server's dismount snapshot. Release the seated
 	# layer first so an active shot/channel cannot mask the full death clip.
 	if action == &"death" and is_instance_valid(_mount_visual):
@@ -3387,6 +3419,7 @@ func _playback_speed_for(action: StringName) -> float:
 ## Metres per second the presentation is currently moving this actor. Falls
 ## back to the nominal speed for the command before the first step is timed.
 func _travel_speed() -> float:
+	if _charge_leap != null: return _charge_leap.length / _charge_leap.duration
 	if _cinematic_active:
 		return _cinematic_speed
 	if _segment_duration <= 0.0:
@@ -3607,6 +3640,9 @@ func set_selected(value: bool) -> void:
 ## that never reached the body would leave it embedded in the ground it was
 ## measured against.
 func set_surface_height(value: float) -> void:
+	if _charge_leap != null:
+		server_target.y = value
+		return
 	if not _snap_pending and is_equal_approx(server_target.y, value):
 		return
 	server_target.y = value
@@ -3716,6 +3752,19 @@ func _physics_process(delta: float) -> void:
 		_level_selection_ring()
 		_advance_facing_offset(delta)
 		return
+	if _charge_leap != null:
+		_charge_leap.elapsed += delta
+		global_position = _charge_leap.position_at(_charge_leap.elapsed)
+		var forward: Vector3 = _charge_leap.points[-1] - _charge_leap.points[0]
+		rotation.y = rotate_toward(rotation.y, atan2(-forward.x, -forward.z), turn_speed_radians * delta)
+		_advance_facing_offset(delta)
+		# A delayed final movement packet must not pull the landed player back
+		# to the previous tile. Briefly hold the approved endpoint for confirmation.
+		if _charge_leap.elapsed >= _charge_leap.duration and (server_target.distance_to(_charge_leap.points[-1]) < 0.15 \
+				or _charge_leap.elapsed >= _charge_leap.duration + 0.35):
+			end_charge_leap()
+			play_technique("charge", "land")
+		return
 	if _snap_pending:
 		global_position = server_target
 		rotation.y = _target_yaw
@@ -3753,7 +3802,7 @@ func _physics_process(delta: float) -> void:
 ## stops until the next packet, keypress or surface sample wakes it. Nothing
 ## about the resulting pose differs from the value the loop kept rewriting.
 func _settle_if_idle() -> void:
-	if _cinematic_active:
+	if _cinematic_active or _charge_leap != null:
 		return
 	if _snap_pending or _segment_duration > 0.0 or _movement_coast_remaining > 0.0:
 		return
@@ -3772,6 +3821,7 @@ func _settle_if_idle() -> void:
 ## A per-view greeting temporarily owns the rendered pose. Network targets
 ## continue updating normally and are restored when the greeting ends.
 func set_cinematic_presentation(point: Vector3, yaw: float, action: StringName, speed := 0.0) -> void:
+	end_charge_leap()
 	_cinematic_active = true
 	_cinematic_position = point
 	_cinematic_yaw = yaw
