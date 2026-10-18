@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-17",
+  "scope": "normal Landfall Moor Pony rollout",
+  "visualsAndControls": "unchanged from approved develop integration",
+  "ponySha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+  "checks": {
+    "serverRulesPersistenceAccessAndMovementTests": 91,
+    "normalSettingsMultiplayerWire": "passed without --mount-prototype",
+    "normalLandfallRealGameSmokeFailures": 0,
+    "realTerrainQualifiedOutdoorMaps": 15
+  },
+  "limits": [
+    "Interiors and practice instances remain on foot",
+    "Map changes dismount; reconnect retains ownership and starts on foot",
+    "A mount-capable client is required; publishing a stable client is separate"
+  ]
+}

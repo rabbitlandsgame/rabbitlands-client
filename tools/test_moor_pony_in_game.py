@@ -51,22 +51,26 @@ def place_test_character(live, username):
     # Only this harness's newly created disposable database is writable here.
     path = Path(live._workdir.name) / "eloria.sqlite3"
     with sqlite3.connect(path) as db:
-        db.execute("UPDATE characters SET map_id='four_gates', x=?, y=?, quest_state=? WHERE username=?", (*live.mount_spawn, json.dumps({"nymara_intro": 99, "nymara_intro_skipped": 1}), username))
+        db.execute("UPDATE characters SET map_id=?, x=?, y=?, quest_state=? WHERE username=?", (live.mount_map, *live.mount_spawn, json.dumps({"nymara_intro": 99, "nymara_intro_skipped": 1}), username))
 
 
-def test_spawn(server, terrain):
+def test_spawn(server, terrain, map_id="four_gates"):
     sys.path.insert(0, str(server))
     from eloria.collision import load_elm_collision
-    collision = load_elm_collision(terrain / "maps/nymara/four_gates.elm")
+    collision = load_elm_collision(terrain / f"maps/nymara/{map_id}.elm")
+    arrival = (309, 162)
+    if map_id != "four_gates":
+        publication = json.loads((server / "config/eloria/client_content_manifest.json").read_text())
+        arrival = publication["continentV2"]["maps"][map_id]["arrival"]
     # An open flat patch beyond the arrival NPCs, found from current terrain.
     for radius in range(12, 100):
-        for x, y in ((309 + dx, 162 + dy) for dx in range(-radius, radius + 1)
+        for x, y in ((arrival[0] + dx, arrival[1] + dy) for dx in range(-radius, radius + 1)
                      for dy in (-radius, radius)):
             if all(collision.walkable(x + dx, y + dy)
                    and collision.can_step(x, y, x + dx, y + dy, 2)
                    for dx in range(-3, 4) for dy in range(-3, 4)):
                 return x, y
-    raise RuntimeError("No open mounted test area near Four Gates arrival")
+    raise RuntimeError(f"No open mounted test area near {map_id} arrival")
 
 
 async def probe(live):
@@ -78,8 +82,9 @@ async def probe(live):
     peers = [await login(port, *user) for user in users]
     (reader, writer, actor_id), (watch, watch_writer, _), (legacy, _, _) = peers
     try:
-        await chat(writer, "#clientcaps mounts_v1")
-        await chat(watch_writer, "#clientcaps mounts_v1")
+        capabilities = "mounts_v1,continent_v2_maps_v1"
+        await chat(writer, "#clientcaps " + capabilities)
+        await chat(watch_writer, "#clientcaps " + capabilities)
         ready = await state(reader, actor_id, "on_foot")
         assert ready["can_summon"], ready
         await chat(writer, "#mount")
@@ -96,7 +101,7 @@ async def probe(live):
         await writer.drain()
         await state(reader, actor_id, "on_foot")
         await state(watch, actor_id, "on_foot")
-        await chat(writer, "#clientcaps mounts_v1")
+        await chat(writer, "#clientcaps " + capabilities)
         await state(reader, actor_id, "on_foot")
         print("PASS: real login, capability handshake, summon, observer replication, gallop, forced dismount, restatement and legacy client")
     finally:
@@ -119,6 +124,8 @@ def main():
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--headless", action="store_true")
+    parser.add_argument("--landfall", action="store_true",
+                        help="Test normal Landfall settings without --mount-prototype")
     args = parser.parse_args()
     server = args.server_root.resolve()
     work = ROOT / ".local/qa/moor-pony-game"
@@ -133,10 +140,12 @@ def main():
                    cwd=server, check=True, stdout=subprocess.DEVNULL)
     os.environ["RABBITLANDS_DATA_DIRECTORY"] = str(terrain)
     settings = (server / "config/eloria/server.txt").read_text()
-    settings = re.sub(r"(?m)^home_map\s*=.*$", "home_map = four_gates", settings)
+    if not args.landfall:
+        settings = re.sub(r"(?m)^home_map\s*=.*$", "home_map = four_gates", settings)
     with LocalServer(server, prefix="moor-pony-game-", overrides={"--settings": settings},
-                     extra_arguments=["--mount-prototype"]) as live:
-        live.mount_spawn = test_spawn(server, terrain)
+                     extra_arguments=[] if args.landfall else ["--mount-prototype"]) as live:
+        live.mount_map = "landfall" if args.landfall else "four_gates"
+        live.mount_spawn = test_spawn(server, terrain, live.mount_map)
         if args.probe:
             asyncio.run(probe(live))
             return
