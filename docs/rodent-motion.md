@@ -1,0 +1,9 @@
+# Rodent motion
+
+The approved Squirrel, Dormouse and Beaver sets use Walk (0.70 s), Jog/scurry (0.36 s), Sword_Attack/dart-and-bite (1.60 s) and Death_A/supported collapse (2.60 s), plus inherited idle, fighting idle and hit. Attack and death hold from 1.45 s and 2.05 s.
+
+Each actor uses its own anatomical guides and physical paw surfaces. Squirrel and Dormouse have repaired shoulders, coherent face/belly skin and whole-forearm transitions. Beaver separates rump fur and complete hocks from its tail stem and broad paddle, with a restrained head turn during collapse. Horizontal tail centering and these explicit guide/skin/bind preparations preserve the intended native silhouette. Topology, UVs, embedded image bytes and node hierarchy are unchanged; declared differences are recorded in `docs/qa/rodent-motion/preservation.json`.
+
+Dedicated maps under `data/animations/rodent/` retain the existing gameplay action names. Measured stride speed uses each actor's existing registry scale; facing and attachments are unchanged. Actor-specific importer policies retain 3072 FPS with optimization/compression disabled. Independent off-grid physical and surface witnesses cover all 21 slots and actual eight-influence meshes. Dense selected-export qualification covers 113,202 native samples across the four authored actions; inherited slots retain their documented source floor baseline.
+
+Run `python eloria-assets/tools/test_rodent_motion.py` with NumPy and SciPy. After importing, run `tests/test_rodent_motion.gd`. The native check covers contact, surface floor, serial lengths, loops, terminal holds, rigid facial and abdomen patches, and Beaver paddle rigidity. Current-client component playback checks witnesses, action switching, RESET and idle restoration. These establish component playback, not a full client/server session or crowd-performance benchmark. Full-resolution sources, processing stages and six-angle normal-speed review videos remain ignored.

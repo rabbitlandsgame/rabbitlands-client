@@ -1,0 +1,58 @@
+{
+  "passed": true,
+  "human_visual_acceptance": true,
+  "runtime_installed": true,
+  "actors": {
+    "squirrel": {
+      "previous_sha256": "20fd8b27e55ec35533b7a8fb7f943255332dd3c04c68fe1eb0b5cda4d74f504e",
+      "sha256": "60a9d6d96e27ea95ac59863eb87b9b802a543cc11234964c37a2a44b0c677a2d",
+      "node_names_and_parenting_exact": true,
+      "topology_uv_images_exact": true,
+      "original_static_attributes_exact": {
+        "POSITION": false,
+        "NORMAL": false,
+        "TEXCOORD_0": true
+      },
+      "original_rest_world_exact": false,
+      "preparation": "Actor-specific shoulder/elbow guides, physical whole-forearm and paw fields, coherent face/abdomen and centered tail; inherited local channels and binds explicitly rebased."
+    },
+    "dormouse": {
+      "previous_sha256": "8ab00afab0422e7414c2b676f97245bf5a9a2d5d68f2f117c640e232929d7b86",
+      "sha256": "ec8285ba0059b02a27fe779d44419889c4884b1afe091eb37cb12d89d145b64d",
+      "node_names_and_parenting_exact": true,
+      "topology_uv_images_exact": true,
+      "original_static_attributes_exact": {
+        "POSITION": false,
+        "NORMAL": false,
+        "TEXCOORD_0": true
+      },
+      "original_rest_world_exact": false,
+      "preparation": "Raised anatomical shoulder guides and matching elbows, physical whole-paw fields, coherent face/abdomen and continuous socket/neck skin; centered native tail."
+    },
+    "beaver": {
+      "previous_sha256": "3e2a5a80c7752bd6a91c447c9bd73e95b70aac6fd5b9da1113caafb75650d757",
+      "sha256": "191a024c6586f578dda73a8cf00f92454631561bf81d7a5274f03e058a5787f6",
+      "node_names_and_parenting_exact": true,
+      "topology_uv_images_exact": true,
+      "original_static_attributes_exact": {
+        "POSITION": false,
+        "NORMAL": false,
+        "TEXCOORD_0": true
+      },
+      "original_rest_world_exact": false,
+      "preparation": "Anatomical shoulders, coherent face and abdomen, harmonic neck and whole-hock transitions; rump fur kept separate from the tail stem and rigid paddle; moderate supported-collapse head and tail turns."
+    }
+  },
+  "authored_clips": [
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A"
+  ],
+  "checked_client_slots": 21,
+  "native_witnesses_and_skin_patches_passed": true,
+  "current_client_components_passed": true,
+  "registry_scope": "Only three animationMap fields; scales, facing, attachments and all other entries unchanged.",
+  "import_bake_fps": 3072,
+  "verification_scope": "Installed exact reviewed exports, native skin/contact checks and fresh current-client component playback; no full client/server session."
+}
