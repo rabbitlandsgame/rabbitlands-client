@@ -182,7 +182,7 @@ def regions(text: str) -> list[dict]:
             return f.group(1) if f else default
 
         size = floats(field('size', 'Vector2(0, 0)').replace('Vector2', ''))
-        transform = floats(field('transform'))
+        transform = floats(field('transform').replace('Transform3D', ''))
         surface = re.search(r'SubResource\("([^"]+)"\)', field('surface'))
         out.append({
             'node': m.group(1), 'shape': 'rectangle' if field('shape') == '1' else 'ellipse',
