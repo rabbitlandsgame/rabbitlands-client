@@ -1,8 +1,10 @@
 extends PanelContainer
+signal choose_mount_requested
 const Hotkeys := preload("res://src/mounts/mount_hotkeys.gd")
 const OPTION_LABELS := {
 	"show_banner": "Show mount banner",
 	"mount_button": "Show mount / dismount button",
+	"choose_button": "Show mount selection button",
 	"gallop_button": "Show gallop button",
 	"status": "Show gait and calling status",
 	"endurance": "Show gallop endurance",
@@ -11,6 +13,7 @@ const OPTION_LABELS := {
 var options: Dictionary = default_options()
 var toggle := Button.new()
 var gallop := Button.new()
+var choose := Button.new()
 var status := Label.new()
 var _banner: Control
 var _has_mount_state := false
@@ -31,9 +34,11 @@ func _ready() -> void:
 	add_child(row)
 	row.add_child(toggle)
 	row.add_child(gallop)
+	row.add_child(choose)
 	row.add_child(status)
-	for button: Button in [toggle, gallop]:
+	for button: Button in [toggle, gallop, choose]:
 		_style_button(button)
+		button.focus_mode = Control.FOCUS_NONE
 	status.add_theme_font_size_override("font_size", 11)
 	status.add_theme_color_override("font_color", Color.WHITE)
 	status.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -42,7 +47,10 @@ func _ready() -> void:
 	status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	toggle.focus_mode = Control.FOCUS_NONE
 	gallop.focus_mode = Control.FOCUS_NONE
-	toggle.tooltip_text = "Call your Moor Pony while standing or moving, or dismount."
+	toggle.tooltip_text = "Call your selected mount while standing or moving, or dismount."
+	choose.text = "Mounts"
+	choose.tooltip_text = "Choose between your mounts."
+	choose.pressed.connect(func() -> void: choose_mount_requested.emit())
 	gallop.tooltip_text = "Toggle gallop while running (hold Shift for keyboard running). Eight seconds of endurance."
 	toggle.pressed.connect(func() -> void: Network.send_chat("#mount"))
 	gallop.pressed.connect(func() -> void: Network.send_chat("#gallop"))
@@ -75,7 +83,7 @@ func set_options(values: Dictionary) -> void:
 
 func wants_banner() -> bool:
 	return _has_mount_state and AppState.authenticated and bool(options.show_banner) \
-		and (toggle.visible or gallop.visible or status.visible)
+		and (toggle.visible or gallop.visible or choose.visible or status.visible)
 
 static func _style_button(button: Button) -> void:
 	button.add_theme_font_size_override("font_size", 11)
@@ -108,8 +116,10 @@ func _refresh() -> void:
 	var state: Dictionary = AppState.actor_mounts.get(AppState.local_actor_id, {})
 	_has_mount_state = not state.is_empty()
 	var mode: String = state.get("mode", "on_foot")
-	toggle.text = "Dismount" if mode == "mounted" else ("Cancel" if mode == "summoning" else "Mount pony")
+	var selected := str(state.get("selected_mount_id", "moor_pony"))
+	toggle.text = "Dismount" if mode == "mounted" else ("Cancel" if mode == "summoning" else ("Mount horse" if selected == "golden_plains_horse" else "Mount pony"))
 	toggle.visible = bool(options.mount_button)
+	choose.visible = bool(options.choose_button)
 	gallop.visible = bool(options.gallop_button)
 	if options.key_hints:
 		toggle.text += Hotkeys.key_hint("toggle_mount")

@@ -4,6 +4,7 @@ extends RefCounted
 ## cannot infer a successful summon from sending a request.
 
 const MOUNT_ID := "moor_pony"
+const MOUNT_IDS := ["moor_pony", "golden_plains_horse"]
 const REASONS := ["", "disabled", "not_owned", "dead", "combat", "restricted_area",
 	"no_clearance", "immobilized", "moving", "already_summoning"]
 var actor_id := -1
@@ -49,19 +50,33 @@ func apply_snapshot(value: Variant) -> bool:
 	var selected: Variant = incoming.get("selected_mount_id")
 	if (mode not in ["on_foot", "summoning", "mounted"]
 			or gait not in ["on_foot", "walk", "cruise", "burst"]
-			or selected not in ["", MOUNT_ID]
+			or (selected != "" and selected not in MOUNT_IDS)
 			or typeof(incoming.get("can_summon")) != TYPE_BOOL
 			or incoming.get("blocked_reason") not in REASONS):
 		last_error = "invalid_mode"
 		return false
 	if ((mode == "on_foot" and (mount != "" or gait != "on_foot"))
-			or (mode == "summoning" and (mount != MOUNT_ID or gait != "on_foot"))
-			or (mode == "mounted" and (mount != MOUNT_ID or gait == "on_foot"))
+			or (mode == "summoning" and (mount not in MOUNT_IDS or gait != "on_foot"))
+			or (mode == "mounted" and (mount not in MOUNT_IDS or gait == "on_foot"))
 			or (mode != "on_foot" and selected != mount)
-			or (incoming.can_summon and (mode != "on_foot" or selected != MOUNT_ID
+			or (incoming.can_summon and (mode != "on_foot" or selected not in MOUNT_IDS
 				or incoming.blocked_reason != ""))):
 		last_error = "inconsistent_mode"
 		return false
+	if incoming.has("owned_mount_ids"):
+		var owned: Variant = incoming.owned_mount_ids
+		if not owned is Array or owned.size() > MOUNT_IDS.size():
+			last_error = "invalid_ownership"
+			return false
+		var seen := {}
+		for id: Variant in owned:
+			if id not in MOUNT_IDS or seen.has(id):
+				last_error = "invalid_ownership"
+				return false
+			seen[id] = true
+		if selected != "" and selected not in owned:
+			last_error = "invalid_ownership"
+			return false
 	for spec: Array in [["step_us", 10000, 2000000], ["endurance_ms", 0, 8000],
 		["summon_remaining_ms", 0, 1500], ["combat_remaining_ms", 0, 10000]]:
 		if not _integer(incoming.get(spec[0]), spec[1], spec[2]):
@@ -82,18 +97,19 @@ static func request(action: String, argument: Variant = null) -> Dictionary:
 	if action == "burst" and typeof(argument) == TYPE_BOOL:
 		message["enabled"] = argument
 		return message
-	if action == "select" and argument == MOUNT_ID:
+	if action == "select" and argument in MOUNT_IDS:
 		message["mount_id"] = argument
 		return message
 	return {}
 
 func display_status() -> String:
+	var mount_name := preload("res://src/mounts/mount_profiles.gd").display_name(str(state.get("selected_mount_id", "")))
 	if state.is_empty():
 		return "Waiting for the preview server"
 	if state.mode == "summoning":
-		return "Summoning Moor Pony"
+		return "Summoning " + mount_name
 	if state.mode == "mounted":
-		return "Riding Moor Pony — " + str(state.gait).capitalize()
+		return "Riding " + mount_name + " — " + str(state.gait).capitalize()
 	match state.blocked_reason:
 		"combat": return "On foot — wait for combat to end"
 		"restricted_area": return "On foot — riding is unavailable here"

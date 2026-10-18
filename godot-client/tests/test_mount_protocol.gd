@@ -18,6 +18,15 @@ func _init() -> void:
 		"can_summon": false, "blocked_reason": "", "map": "four_gates", "owner": "Rider"}
 	var message := {"schema_version": 1, "map": "four_gates", "states": [row]}
 	check(decode(message).type == "mount_states")
+	var horse: Dictionary = message.duplicate(true)
+	horse.states[0].mount_id = "golden_plains_horse"
+	horse.states[0].selected_mount_id = "golden_plains_horse"
+	horse.states[0].owned_mount_ids = ["moor_pony", "golden_plains_horse"]
+	check(decode(horse).type == "mount_states")
+	for bad: Variant in [["moor_pony"], ["golden_plains_horse", "golden_plains_horse"], ["unicorn"], "all", [null]]:
+		var copy: Dictionary = horse.duplicate(true)
+		copy.states[0].owned_mount_ids = bad
+		check(decode(copy).type == "invalid")
 	check(decode({"schema_version": 1, "map": "four_gates", "states": []}).states.is_empty())
 	check(Codec.decode("{".to_utf8_buffer()).type == "invalid")
 	for bad: Variant in [false, -1, 65536, 1.5, "42"]:

@@ -42,7 +42,7 @@ func run() -> void:
 	expect(controls.gallop.text == "Gallop" and controls.status.text == "8.0s", "key hints and gait can be hidden while keeping endurance")
 	controls.set_options({"endurance": false})
 	expect(controls.status.text == "Trot", "gait can remain without endurance")
-	controls.set_options({"mount_button": false, "gallop_button": false, "status": false, "endurance": false})
+	controls.set_options({"mount_button": false, "gallop_button": false, "choose_button": false, "status": false, "endurance": false})
 	expect(not controls.wants_banner(), "hiding every component leaves no empty banner")
 	controls.set_options({"show_banner": false})
 	expect(not controls.visible, "master preference hides mount banner")

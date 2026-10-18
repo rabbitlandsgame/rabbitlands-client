@@ -78,6 +78,7 @@ const SpellsWindowScript := preload("res://src/ui/spells_window.gd")
 const SummoningWindowScript := preload("res://src/ui/summoning_window.gd")
 const EmotesWindowScript := preload("res://src/ui/emotes_window.gd")
 const RangingWindowScript := preload("res://src/ui/ranging_window.gd")
+const MountsWindowScript := preload("res://src/ui/mounts_window.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
 const ChatHudScript := preload("res://src/ui/chat_hud.gd")
@@ -371,6 +372,7 @@ var spells_window: Control
 var summoning_window: Control
 var emotes_window: Control
 var ranging_window: Control
+var mounts_window: Control
 ## The Techniques tab inside the Spells & Techniques window. The Tab-held
 ## technique ring and the quick spell slots aim through it.
 var techniques_panel: VBoxContainer
@@ -1159,6 +1161,9 @@ func _ready() -> void:
 	emotes_window.call("configure", _perform_emote)
 	ranging_window = RangingWindowScript.new()
 	game_view.add_child(ranging_window)
+	mounts_window = MountsWindowScript.new()
+	game_view.add_child(mounts_window)
+	game_view.get_node("MountControls").choose_mount_requested.connect(func() -> void: mounts_window.call("toggle"))
 	guild_window = GuildWindowScript.new()
 	game_view.add_child(guild_window)
 	guild_window.call("configure", Network.send_chat)
@@ -3953,6 +3958,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			summoning_window.call("close")
 		elif emotes_window != null and bool(emotes_window.call("is_open")):
 			emotes_window.call("close")
+		elif mounts_window != null and bool(mounts_window.call("is_open")):
+			mounts_window.call("close")
 		elif ranging_window != null and bool(ranging_window.call("is_open")):
 			ranging_window.call("close")
 		elif techniques_panel != null and str(techniques_panel.get("pending_key")) != "":
@@ -4066,8 +4073,13 @@ func _configure_banner_menu() -> void:
 	_actor_hud_menu.add_child(_mount_banner_menu)
 	_actor_hud_menu.add_submenu_node_item("Character banner", _character_banner_menu)
 	_actor_hud_menu.add_submenu_node_item("Mount banner", _mount_banner_menu)
+	_actor_hud_menu.add_item("Mounts…", 3)
 	_actor_hud_menu.add_item("All banner settings…", 2)
-	_actor_hud_menu.id_pressed.connect(func(_id: int) -> void: settings_window.open_tab("Banners"))
+	_actor_hud_menu.id_pressed.connect(func(id: int) -> void:
+		if id == 3:
+			mounts_window.call("open")
+		else:
+			settings_window.open_tab("Banners"))
 	_character_banner_menu.hide_on_checkable_item_selection = false
 	_mount_banner_menu.hide_on_checkable_item_selection = false
 	for key: String in BANNER_OPTION_NODES:
@@ -8320,7 +8332,7 @@ func _configure_window_stack() -> void:
 			item_lists_panel, console_panel, reading_panel, chat_hud, system_chat_hud]:
 		window_stack.register(panel)
 	for controller: Control in [spells_window, summoning_window, emotes_window,
-			ranging_window, guild_window, settings_window,
+			ranging_window, mounts_window, guild_window, settings_window,
 			reference_window, player_info_panel]:
 		window_stack.register(controller.get("panel"))
 	for panel: Control in extension_windows._cascade():
