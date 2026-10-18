@@ -371,6 +371,68 @@ func _run() -> void:
 		"a region may keep all of its verge's texture grain; VERGE_GRAIN elsewhere")
 	LookProfile.reload_regions()
 
+	# Opaque kit paving a region names (`ground.kit_paving`) takes a coverage,
+	# 0 along its outer edge, and is painted as pale paving cut along it.
+	LookProfile.define_region("kit_paving_test", {"id": "kit_paving_test", "schema": 1,
+		"ground": {"kit_paving": ["Garden_Paving"]}})
+	var kit_root := Node3D.new()
+	root.add_child(kit_root)
+	var walk_material := StandardMaterial3D.new()
+	walk_material.resource_name = "kit-sw-garden-paving"
+	walk_material.albedo_color = Color(0.95, 0.93, 0.89)
+	var walk := MeshInstance3D.new()
+	walk.name = "Walk_test_garden_paving_1_1"
+	walk.mesh = _walk_piece(walk_material)
+	kit_root.add_child(walk)
+	var walk_mesh := walk.mesh
+	var kit_bridge := _mesh(kit_root, "Walk_test_bridge", walk_material, false)
+	LookGround.paint(kit_root, "kit_paving_test")
+	var walk_paint := walk.get_surface_override_material(0) as ShaderMaterial
+	var feathered := walk.mesh
+	var alpha := {}
+	var feathered_arrays := feathered.surface_get_arrays(0)
+	var feathered_vertices: PackedVector3Array = feathered_arrays[Mesh.ARRAY_VERTEX]
+	var feathered_colours: PackedColorArray = feathered_arrays[Mesh.ARRAY_COLOR]
+	for index: int in feathered_vertices.size():
+		var place := Vector2i(roundi(feathered_vertices[index].x * 10.0), roundi(feathered_vertices[index].z * 10.0))
+		alpha[place] = minf(float(alpha.get(place, 1.0)), feathered_colours[index].a)
+	var sides := true
+	var cap := true
+	for place: Vector2i in alpha:
+		if absi(place.y) == 20 or place.x < 299:
+			sides = sides and float(alpha[place]) == 0.0
+			cap = cap and (place.x >= 299 or float(alpha[place]) == 0.0)
+	_expect(feathered != walk_mesh and feathered.has_meta(LookGround.KIT_MESH_META)
+		and (walk_mesh.surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR) == 0
+		and sides and cap,
+		"a kit walk's copy has no coverage along its sides and round end; its own mesh is untouched")
+	_expect(float(alpha.get(Vector2i(360, 0), 0.0)) == 1.0
+		and float(alpha.get(Vector2i(300, 10), 0.0)) == 1.0 and float(alpha.get(Vector2i(300, 0), 0.0)) == 1.0
+		and float(alpha.get(Vector2i(480, 10), 0.0)) == 1.0 and float(alpha.get(Vector2i(480, -10), 0.0)) == 1.0,
+		"inside, where its round end meets the strip, and where it was cut from the next chunk's piece it is whole")
+	_expect(walk_paint != null and walk_paint.get_meta(LookProfile.SOURCE_META) == walk_material
+		and bool(walk_paint.get_shader_parameter(&"use_vertex_alpha"))
+		and walk_paint.get_shader_parameter(&"look_rim") == LookProfile.KIT_PAVING_RIM
+		and float(walk_paint.get_shader_parameter(&"look_opacity")) == 1.0
+		and float(walk_paint.get_shader_parameter(&"look_keep")) == 1.0
+		and float(walk_paint.get_shader_parameter(&"look_keep_chroma")) == 1.0
+		and walk_paint.get_shader_parameter(&"look_surface_tint") == Vector3.ONE
+		and float(walk_paint.get_shader_parameter(&"look_class_metres")) == 0.0
+		and kit_bridge.get_surface_override_material(0) == null,
+		"it is cut along that coverage in its own texture and colour; an unnamed opaque deck stays a bridge")
+	LookGround.paint(kit_root, "kit_paving_test")
+	var plain_root := Node3D.new()
+	root.add_child(plain_root)
+	var plain_walk := MeshInstance3D.new()
+	plain_walk.name = "Walk_test_garden_paving_2_1"
+	plain_walk.mesh = walk_mesh
+	plain_root.add_child(plain_walk)
+	LookGround.paint(plain_root, "no_such_region")
+	_expect(walk.mesh == feathered and plain_walk.mesh == walk_mesh
+		and plain_walk.get_surface_override_material(0) == null,
+		"painting again keeps the one copy; a region that names no kit paving leaves it alone")
+	LookProfile.reload_regions()
+
 	# The continent's sea is decoded in Forward+ as a copy, never in place.
 	var sea_root := Node3D.new()
 	root.add_child(sea_root)
@@ -429,6 +491,37 @@ func _mesh(parent: Node, node_name: String, material: Material,
 	node.mesh = mesh
 	parent.add_child(node)
 	return node
+
+## A kit walk piece as garden_paving.py draws one: a 4 m strip along x from
+## 30 m, its rows a metre apart and its columns two, a round end fanned about
+## (30, 0) on vertices of its own, and only the triangles whose centroid lies
+## inside the publish chunk (x under 48 m, its side about the piece's origin).
+func _walk_piece(material: Material) -> ArrayMesh:
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var corners: Array[Vector3] = []
+	for column: int in 10:
+		for row: int in 4:
+			var x := 30.0 + column * 2.0
+			var z := -2.0 + row
+			var quad: Array[Vector3] = [Vector3(x, 0, z), Vector3(x + 2.0, 0, z),
+				Vector3(x, 0, z + 1.0), Vector3(x + 2.0, 0, z + 1.0)]
+			for triangle: Array in [[quad[0], quad[2], quad[1]], [quad[1], quad[2], quad[3]]]:
+				if ((triangle[0] as Vector3) + triangle[1] + triangle[2]).x / 3.0 < 48.0:
+					corners.append_array(triangle)
+	var centre := Vector3(30.0, 0.0, 0.0)
+	for segment: int in 8:
+		var a := PI * segment / 8.0
+		var b := PI * (segment + 1) / 8.0
+		corners.append_array([centre, centre + Vector3(-sin(b), 0, cos(b)) * 2.0,
+			centre + Vector3(-sin(a), 0, cos(a)) * 2.0])
+	for corner: Vector3 in corners:
+		tool.set_normal(Vector3.UP)
+		tool.set_uv(Vector2(corner.x, corner.z) / 7.35)
+		tool.add_vertex(corner)
+	var mesh := tool.commit()
+	mesh.surface_set_material(0, material)
+	return mesh
 
 func _properties(material: StandardMaterial3D) -> Array:
 	return [material.albedo_color, material.vertex_color_use_as_albedo,

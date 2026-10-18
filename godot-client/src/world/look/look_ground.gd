@@ -108,6 +108,8 @@ vec3 look_biome_reference(vec4 weights, vec4 secondary) {
 
 ## Marks a material this layer made, so painting a root twice is harmless.
 const PAINTED_META := &"look_painted_ground"
+## Marks the copy of a kit paving deck's mesh that carries a coverage.
+const KIT_MESH_META := &"look_kit_paving_mesh"
 ## WorldLoader.BATCH_META: the node is hidden and a MultiMesh draws it.
 const BATCH_META := &"static_batch"
 
@@ -322,14 +324,18 @@ static func paint(root: Node, region := "", sun_heading := Vector2.ZERO) -> int:
 	var surfaces := 0
 	for mesh_instance: MeshInstance3D in ground:
 		var kind := kind_of(String(mesh_instance.name))
+		var kit := kind == Kind.DECK and is_kit_paving(String(mesh_instance.name), region) \
+			and feather_kit_paving(mesh_instance)
 		for surface: int in mesh_instance.mesh.get_surface_count():
 			var source: Material = mesh_instance.get_active_material(surface)
 			if source == null or source.has_meta(PAINTED_META):
 				continue
-			var key := source.get_instance_id()
+			var area: Rect2 = areas.get(source.get_instance_id(), Rect2())
+			var key: Variant = "kit_%d" % source.get_instance_id() if kit else source.get_instance_id()
 			if not made.has(key):
-				made[key] = painted_for(source, kind, mesh_instance.mesh, surface,
-					region, paving, areas.get(key, Rect2()))
+				made[key] = paint_kit_paving(source, mesh_instance.mesh, surface, region, area) \
+					if kit else painted_for(source, kind, mesh_instance.mesh, surface,
+						region, paving, area)
 				if made[key] is ShaderMaterial:
 					(made[key] as ShaderMaterial).set_shader_parameter(&"look_sun_heading",
 						sun_heading)
@@ -346,6 +352,166 @@ static func paint(root: Node, region := "", sun_heading := Vector2.ZERO) -> int:
 		print("look_ground stage=painted root=%s surfaces=%d materials=%d"
 			% [root.name, surfaces, materials])
 	return surfaces
+
+## True when a walk deck is one of `region`'s opaque kit paving pieces
+## (`ground.kit_paving`, LookProfile.KIT_PAVING_CHUNK_METRES).
+static func is_kit_paving(node_name: String, region: String) -> bool:
+	var lowered := node_name.to_lower()
+	for word: Variant in LookProfile.kit_paving(region):
+		if lowered.contains(str(word)):
+			return true
+	return false
+
+## Gives a kit paving deck the coverage the exporter gives a road deck
+## (`kit_paving_mesh`), as a copy of its mesh made once. The copy draws the
+## same under the loader's own opaque material, which reads no vertex colour,
+## so switching the look off needs nothing put back. False when the mesh has
+## a vertex colour of its own (the piece is no longer what the tool drew).
+static func feather_kit_paving(mesh_instance: MeshInstance3D) -> bool:
+	var mesh := mesh_instance.mesh
+	if mesh.has_meta(KIT_MESH_META):
+		return true
+	for surface: int in mesh.get_surface_count():
+		if (mesh.surface_get_format(surface) & Mesh.ARRAY_FORMAT_COLOR) != 0:
+			return false
+	var copy := kit_paving_mesh(mesh)
+	copy.set_meta(KIT_MESH_META, true)
+	mesh_instance.mesh = copy
+	return true
+
+## `mesh` with a coverage in its vertex alpha: 0 at every vertex on its outer
+## edge, 1 elsewhere, white throughout. The outer edge is every edge only one
+## triangle uses, vertices joined by position first, but two kinds:
+## - a T-junction: a strip's round end is a fan whose spokes span two of the
+##   strip's rows, so a spoke and the strip's end edges lie along one line with
+##   their triangles either side of it;
+## - a join: garden_paving.py gave each triangle to the publish chunk
+##   (LookProfile.KIT_PAVING_CHUNK_METRES across about the piece's origin) its
+##   centroid falls in, so an open edge within KIT_PAVING_JOIN_METRES of the
+##   chunk's side whose missing neighbour (its triangle mirrored across it)
+##   would centre beyond that side meets the next chunk's piece. A walk's own
+##   side, where it crosses the chunk's, is not one.
+## Two walks whose sides run together keep both edges: their triangles lie on
+## the same side.
+static func kit_paving_mesh(mesh: Mesh) -> ArrayMesh:
+	var copy := ArrayMesh.new()
+	copy.resource_name = mesh.resource_name
+	var half := LookProfile.KIT_PAVING_CHUNK_METRES * 0.5
+	for surface: int in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(surface)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null \
+			else PackedInt32Array(range(vertices.size()))
+		var joined := PackedInt32Array()
+		var places := {}
+		var positions := PackedVector3Array()
+		for vertex: Vector3 in vertices:
+			var place := Vector3i((vertex * 1000.0).round())
+			if not places.has(place):
+				places[place] = positions.size()
+				positions.append(vertex)
+			joined.append(int(places[place]))
+		# Each edge: how many triangles use it, and the centroid of the last.
+		var edges := {}
+		for start: int in range(0, indices.size() - 2, 3):
+			var centroid := (positions[joined[indices[start]]] + positions[joined[indices[start + 1]]]
+				+ positions[joined[indices[start + 2]]]) / 3.0
+			for corner: int in 3:
+				var a := joined[indices[start + corner]]
+				var b := joined[indices[start + (corner + 1) % 3]]
+				var edge := Vector2i(mini(a, b), maxi(a, b))
+				var seen: Array = edges.get(edge, [0, centroid])
+				edges[edge] = [int(seen[0]) + 1, centroid]
+		var open: Array[Vector2i] = []
+		var cells := {}
+		for edge: Vector2i in edges:
+			if int((edges[edge] as Array)[0]) != 1:
+				continue
+			open.append(edge)
+			var cell := Vector2i(((_xz(positions[edge.x]) + _xz(positions[edge.y])) * 0.25).floor())
+			if not cells.has(cell):
+				cells[cell] = []
+			(cells[cell] as Array).append(edge)
+		var inside := {}
+		for edge: Vector2i in open:
+			var centroid: Vector3 = (edges[edge] as Array)[1]
+			var middle := (positions[edge.x] + positions[edge.y]) * 0.5
+			if _kit_join(middle, middle * 2.0 - centroid, half):
+				inside[edge] = true
+				continue
+			var spot := _xz(middle)
+			var cell := Vector2i((spot * 0.5).floor())
+			for step: int in 9:
+				for other: Vector2i in cells.get(cell + Vector2i(step % 3 - 1, step / 3 - 1), []):
+					if other == edge:
+						continue
+					var a := _xz(positions[other.x])
+					var b := _xz(positions[other.y])
+					if Geometry2D.get_closest_point_to_segment(spot, a, b).distance_to(spot) < 0.01 \
+							and _side(a, b, centroid) * _side(a, b, (edges[other] as Array)[1]) < 0.0:
+						inside[edge] = true
+						inside[other] = true
+		var outer := {}
+		for edge: Vector2i in open:
+			if not inside.has(edge):
+				outer[edge.x] = true
+				outer[edge.y] = true
+		var colours := PackedColorArray()
+		colours.resize(vertices.size())
+		for index: int in vertices.size():
+			colours[index] = Color(1, 1, 1, 0.0 if outer.has(joined[index]) else 1.0)
+		arrays[Mesh.ARRAY_COLOR] = colours
+		copy.add_surface_from_arrays(mesh.surface_get_primitive_type(surface), arrays)
+		if mesh is ArrayMesh:
+			copy.surface_set_name(surface, (mesh as ArrayMesh).surface_get_name(surface))
+		copy.surface_set_material(surface, mesh.surface_get_material(surface))
+	return copy
+
+static func _xz(point: Vector3) -> Vector2:
+	return Vector2(point.x, point.z)
+
+## Which side of the line through `a` and `b` (x, z) `point` lies on.
+static func _side(a: Vector2, b: Vector2, point: Vector3) -> float:
+	return signf((b.x - a.x) * (point.z - a.y) - (b.y - a.y) * (point.x - a.x))
+
+## True when an open edge at `middle` whose missing neighbour would centre at
+## `mirrored` was cut along the side of the chunk `half` metres about the origin.
+static func _kit_join(middle: Vector3, mirrored: Vector3, half: float) -> bool:
+	var near := LookProfile.KIT_PAVING_JOIN_METRES
+	return (absf(absf(middle.x) - half) <= near and absf(mirrored.x) > half) \
+		or (absf(absf(middle.z) - half) <= near and absf(mirrored.z) > half)
+
+## The painted stand-in for a kit paving deck's opaque `source`: made blended
+## and painted as an authored paving patch is (`painted_for`), then drawn in
+## its own texture and colour, as a kept inlay is, and cut along the coverage
+## `kit_paving_mesh` gave it at LookProfile.KIT_PAVING_RIM. Painted as paving, Landfall's
+## garden walks took its warm paving tint and flagstone and read brown again,
+## the dirt garden_paving.py paved them in cream limestone to replace (owner,
+## 2026-10-02). Names `source` as the material it stands in for.
+static func paint_kit_paving(source: Material, mesh: Mesh, surface: int, region: String,
+		area: Rect2) -> Material:
+	var standard := source as BaseMaterial3D
+	if standard == null or standard.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
+		return null
+	var blended := standard.duplicate() as BaseMaterial3D
+	blended.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS
+	var painted := painted_for(blended, Kind.PATCH, mesh, surface, region, PackedVector4Array(), area) \
+		as ShaderMaterial
+	if painted == null:
+		return null
+	painted.set_meta(LookProfile.SOURCE_META, source)
+	painted.set_shader_parameter(&"look_yard", 0.0)
+	painted.set_shader_parameter(&"look_keep", 1.0)
+	painted.set_shader_parameter(&"look_keep_tint", Vector3.ONE)
+	painted.set_shader_parameter(&"look_keep_chroma", 1.0)
+	painted.set_shader_parameter(&"look_surface_tint", Vector3.ONE)
+	painted.set_shader_parameter(&"look_class_metres", 0.0)
+	painted.set_shader_parameter(&"look_opacity", 1.0)
+	painted.set_shader_parameter(&"look_rim", LookProfile.KIT_PAVING_RIM)
+	painted.set_shader_parameter(&"look_rim_lobe",
+		Vector2(LookProfile.KIT_PAVING_RIM_LOBE.x, LookProfile.RIM_LOBE_METRES))
+	painted.set_shader_parameter(&"look_rim_grain", LookProfile.KIT_PAVING_RIM_LOBE.y)
+	return painted
 
 ## The ground class a mesh belongs to, from the names the continent exporter
 ## and the island scenes give it.
