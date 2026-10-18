@@ -37,15 +37,32 @@ shoulder spacing while clearing the animated saddle and rump. Dismounting
 restores the normal on-foot cape simulation. This drape is ready for visual
 review; the pony asset and accepted torso/hand pose are unchanged.
 
-Normal servers keep mounts disabled. The server's `--mount-prototype` switch
-requires a loopback listener and grants test characters a Moor Pony. No remote
-deployment, release or regular account migration is part of this test.
+## Normal Landfall server
+
+The independent server profile enables the Moor Pony for every character on
+all 15 Landfall outdoor maps. Ownership is saved automatically on login,
+including for characters using an older client. Riding and mount visibility
+require a client with `mounts_v1`; use the client containing the reviewed
+Moor Pony implementation. The visuals, R/Space shortcuts and test paces above
+also apply to the normal server.
+
+Interiors, underground areas and practice instances remain on foot. Tight
+terrain, activities, combat and map changes dismount the rider. On reconnect,
+the pony remains owned and the character starts on foot.
+
+Operators can disable riding without deleting ownership. Server settings and
+deployment instructions are maintained in the private server handbook.
+
+The separate `--mount-prototype` switch still requires a loopback listener
+and uses the original three-map disposable test area.
 
 Focused checks:
 
 ```powershell
 python tools/test_moor_pony_in_game.py --probe
 python tools/test_moor_pony_in_game.py --godot <Godot executable> --smoke
+python tools/test_moor_pony_in_game.py --landfall --probe
+python tools/test_moor_pony_in_game.py --landfall --godot <Godot executable> --smoke
 ```
 
 The smoke run drives the real game through mounting, walking, trotting,
