@@ -19,6 +19,8 @@ const OldcraftDialogueStyleScript = preload("res://src/ui/oldcraft_dialogue_styl
 const CreationArchetypes = preload("res://src/ui/creation_archetypes.gd")
 const CreationClassIcons = preload("res://src/ui/creation_class_icons.gd")
 const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
+const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd")
+var character_intro := NewCharacterIntroScript.new()
 
 @onready var login_panel: Control = %LoginPanel
 @onready var game_view: Control = %GameView
@@ -1076,6 +1078,9 @@ const EXPERIENCE_SKILLS: Array[String] = [
 	"ranging", "overall"]
 
 func _ready() -> void:
+	add_child(character_intro)
+	character_intro.conversation_requested.connect(_request_arrival_conversation)
+	character_intro.conversation_ended.connect(_end_arrival_conversation)
 	Diagnostics.record("main_scene_initializing")
 	var client_updates := preload("res://src/updates/client_updates.gd").new()
 	add_child(client_updates)
@@ -1545,8 +1550,9 @@ func _process(delta: float) -> void:
 		_update_attached_map_markers()
 		_update_map_viewports()
 		_update_local_actor_follow()
+		_update_character_intro(delta)
 		_update_map_walk_target()
-		if AppState.actors.has(AppState.local_actor_id):
+		if AppState.actors.has(AppState.local_actor_id) and not character_intro.blocks_input():
 			exterior_stream.update_position(camera_rig.focus)
 		# Look pass: a chunk or neighbour finished under the switch's old
 		# answer follows the new one as it arrives, before anything fades it.
@@ -1648,6 +1654,9 @@ func _text_entry_active() -> bool:
 	return focus is LineEdit or focus is TextEdit
 
 func _update_keyboard_movement() -> void:
+	if character_intro.blocks_input():
+		_stop_keyboard_movement()
+		return
 	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
 			or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
 			or storage_panel.visible or full_map.visible \
@@ -1809,8 +1818,10 @@ func _on_new_character_pressed() -> void:
 	_set_login_screen_visible(false)
 	creation_panel.show()
 	_refresh_creation_preview()
+	character_intro.prewarm(MapRegistry.resolve(map_registry, NewCharacterIntroScript.MAP), world_root)
 
 func _on_creation_back_pressed() -> void:
+	character_intro.cancel()
 	_clear_pending_creation()
 	creation_panel.hide()
 	_set_login_screen_visible(true)
@@ -1899,6 +1910,12 @@ func _on_create_pressed() -> void:
 		_clear_pending_creation()
 
 func _on_character_created() -> void:
+	# Only an accepted creation in this session arms the arrival; ordinary
+	# logins, reconnects and later map changes never replay it.
+	if pending_create_username.is_empty():
+		return
+	character_intro.prewarm(MapRegistry.resolve(map_registry, NewCharacterIntroScript.MAP), world_root)
+	character_intro.arm(main_viewport)
 	create_status.text = "Character created. Entering Eloria…"
 	user_edit.text = pending_create_username
 	var username := pending_create_username
@@ -1909,6 +1926,7 @@ func _on_character_created() -> void:
 	var error := Network.login(username, password)
 	if error != OK:
 		create_status.text = "Created, but login failed to send: " + error_string(error)
+		character_intro.cancel()
 		creation_panel.hide()
 		_set_login_screen_visible(true)
 
@@ -2181,6 +2199,7 @@ func _aim_preview_light(light: DirectionalLight3D, yaw: float, pitch: float) -> 
 		Vector3(0.0, 1.0, 0.0), Vector3.UP)
 
 func _on_login_pressed() -> void:
+	character_intro.cancel()
 	if AppState.authenticated:
 		return
 	if AppState.connection_state != "connected":
@@ -3428,6 +3447,8 @@ func _on_disconnect_pressed() -> void:
 func _close_client() -> void:
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
+	character_intro.cancel()
+	await get_tree().process_frame
 	exterior_stream.clear()
 	while not exterior_stream.is_idle():
 		await get_tree().process_frame
@@ -3483,12 +3504,17 @@ func _on_login_succeeded() -> void:
 	_record_client_snapshot_after_frames()
 
 func _on_login_failed(message: String) -> void:
+	if character_intro.blocks_input():
+		character_intro.cancel()
+		creation_panel.hide()
+		_set_login_screen_visible(true)
 	Diagnostics.record("login_failed")
 	status_label.text = "Login failed: " + message
 	login_button.disabled = false
 
 func _on_connection_state_changed(value: String) -> void:
 	if value == "disconnected":
+		character_intro.cancel()
 		_pickpoint_draft.clear()
 		_pickpoint_submitting = false
 	status_label.text = ("Securing the connection…" if value == "securing"
@@ -3548,6 +3574,7 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	character_intro.cancel()
 	_clear_map_walk_target()
 	for raw_node: Variant in actor_nodes.values():
 		if is_instance_valid(raw_node):
@@ -3621,6 +3648,19 @@ func _clear_world_presentation() -> void:
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	if character_intro.blocks_input():
+		if character_intro.allows_dialogue():
+			if event is InputEventKey and event.is_pressed() \
+					and (event as InputEventKey).physical_keycode == KEY_ESCAPE:
+				AppState.close_dialogue()
+				character_intro.dismiss_conversation()
+				get_viewport().set_input_as_handled()
+			return # Dialogue buttons and their keyboard navigation remain usable.
+		if character_intro.playing and event is InputEventKey and event.is_pressed() \
+				and (event as InputEventKey).physical_keycode == KEY_ESCAPE:
+			character_intro.finish(camera_rig, actor_nodes.get(AppState.local_actor_id) as Node3D)
+		get_viewport().set_input_as_handled()
+		return
 	if _trailer_capture_enabled and event is InputEventKey and (event as InputEventKey).pressed \
 			and not (event as InputEventKey).echo \
 			and (event as InputEventKey).physical_keycode == TRAILER_CAPTURE_KEY:
@@ -3660,7 +3700,7 @@ func _can_open_spell_wheel() -> bool:
 	return _ring_allowed() and not (technique_ring != null and technique_ring.visible)
 
 func _ring_allowed() -> bool:
-	return game_view.visible and not _text_entry_active() \
+	return game_view.visible and not character_intro.blocks_input() and not _text_entry_active() \
 		and not popup_panel.visible and not purchase_confirm.visible \
 		and not dialogue_panel.visible and not trade_panel.visible \
 		and not storage_panel.visible and not full_map.visible \
@@ -3799,6 +3839,8 @@ func _recenter_viewport_on_player() -> void:
 	_update_local_actor_follow()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if character_intro.blocks_input():
+		return
 	if not game_view.visible:
 		return
 	# While the settings window is waiting for a key, every key press belongs
@@ -3950,6 +3992,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 func _on_world_gui_input(event: InputEvent) -> void:
+	if character_intro.blocks_input():
+		viewport_container.accept_event()
+		return
 	if event is InputEventMouseButton and not event.pressed \
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
 		camera_rig.handle_mouse_button(event as InputEventMouseButton)
@@ -4143,6 +4188,8 @@ func _capture_speech_bubble_from_chat() -> void:
 ## the deliberate override, and Ranging Lock while a bow is in hand
 ## (gamewin.c, CURSOR_WALK and CURSOR_ATTACK).
 func _movement_locked(ctrl_pressed: bool) -> bool:
+	if character_intro.blocks_input():
+		return true
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	if (_banner_option("sit_lock") and not ctrl_pressed
 			and bool(local_actor.get("sitting", false))):
@@ -4527,7 +4574,7 @@ func _local_actor_server_tile() -> Variant:
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
 func _map_input_blocked() -> bool:
-	return (not game_view.visible or dialogue_panel.visible or trade_panel.visible
+	return (character_intro.blocks_input() or not game_view.visible or dialogue_panel.visible or trade_panel.visible
 		or storage_panel.visible or manufacturing_panel.visible)
 
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
@@ -5102,6 +5149,13 @@ func _load_server_map() -> void:
 			AppState.current_map, normalized_map, map_registry.keys()])
 		return
 	var handoff := exterior_stream.take_ready(normalized_map, world_loader, camera_rig.focus)
+	if character_intro.blocks_input():
+		if normalized_map == NewCharacterIntroScript.MAP and character_intro.pending:
+			var preloaded: Dictionary = character_intro.take_preload(normalized_map)
+			if not preloaded.is_empty():
+				handoff = {"resident": preloaded, "continuous": false}
+		else:
+			character_intro.cancel()
 	_continuous_map_handoff = bool(handoff.get("continuous", false))
 	_retained_traveller = AppState.local_actor_id if _continuous_map_handoff else -1
 	_retained_until = Time.get_ticks_msec() + 3000
@@ -5480,6 +5534,16 @@ func _on_world_load_failed(errors: Array[String]) -> void:
 ## An actor with no node yet is built either way, at most ACTOR_SPAWN_BUDGET
 ## of them per pass; the rest are picked up on the following frames.
 func _sync_world(changed: Variant = null) -> void:
+	# The background worker owns arrival imports during creation. Let it finish
+	# the actual spawn instead of falling back to a synchronous login prime.
+	if character_intro.pending and world_loader.world_root is ContinentChunkStream \
+			and (world_loader.world_root as ContinentChunkStream).has_focus \
+			and adapter != null and AppState.actors.has(AppState.local_actor_id):
+		var arriving: Dictionary = AppState.actors[AppState.local_actor_id]
+		if not (world_loader.world_root as ContinentChunkStream).arrival_resident(
+				adapter.tile_center(int(arriving.x), int(arriving.y))):
+			_spawn_backlog = true
+			return
 	if adapter != null and AppState.actors.has(AppState.local_actor_id):
 		var arrival_actor: Dictionary = AppState.actors[AppState.local_actor_id]
 		# Across a seamless crossing the record keeps the map it was spawned on
@@ -5685,7 +5749,8 @@ func _update_local_actor_follow() -> void:
 	if not is_instance_valid(target):
 		return
 	var focus_position: Vector3 = target.global_position
-	camera_rig.set_focus(focus_position)
+	if not character_intro.blocks_input():
+		camera_rig.set_focus(focus_position)
 	map_camera.global_position = focus_position + Vector3(0, 220, 0)
 	var minimap_heading := 0.0
 	if _minimap_orientation == "player_up":
@@ -5701,6 +5766,31 @@ func _update_local_actor_follow() -> void:
 	# local-position dot in either top-down map camera.
 	player_map_marker.global_position = focus_position + Vector3(0, 5.0, 0)
 	player_map_marker.visible = true
+
+func _update_character_intro(delta: float) -> void:
+	if not character_intro.blocks_input():
+		return
+	var guide_ready := false
+	var guide: Node3D
+	var guide_id := -1
+	for id: Variant in actor_nodes:
+		var dto: Dictionary = AppState.actors.get(id, {})
+		if int(dto.get("kind", 0)) == 2 and str(dto.get("name", "")) == "Nash":
+			guide = actor_nodes[id] as Node3D
+			guide_id = int(id)
+			guide_ready = AppState.quest_offer_actors.has(guide_id)
+			break
+	character_intro.update(delta, camera_rig,
+		actor_nodes.get(AppState.local_actor_id) as Node3D,
+		_grounded_actors.has(AppState.local_actor_id), guide_ready, guide, guide_id, AppState.npc_dialogue)
+
+func _request_arrival_conversation(actor_id: int) -> void:
+	AppState.close_dialogue()
+	Network.send_chat("#arrival_intro talk %d" % actor_id)
+
+func _end_arrival_conversation() -> void:
+	if AppState.authenticated and Network._link_ready():
+		Network.send_chat("#arrival_intro end")
 
 ## The ray sample only changes when the actor stands somewhere else, but this
 ## used to fire for every actor on every actor packet - hundreds of physics

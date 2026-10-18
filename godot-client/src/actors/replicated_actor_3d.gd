@@ -125,6 +125,11 @@ var _swing_index := 0
 var _trail_weapon_mesh: MeshInstance3D
 var _trail_weapon_tip := Vector3.ZERO
 var current_action: StringName = &"idle"
+var _cinematic_active := false
+var _cinematic_position := Vector3.ZERO
+var _cinematic_yaw := 0.0
+var _cinematic_action: StringName = &"idle"
+var _cinematic_speed := 0.0
 var _snap_pending := true
 var _target_yaw := 0.0
 var _presentation_speed := 6.0
@@ -3198,6 +3203,8 @@ func _equipment_fallback_mesh(shape: String) -> MeshInstance3D:
 	return instance
 
 func play_action(action: StringName, restart := false) -> void:
+	if _cinematic_active and action != _cinematic_action:
+		return
 	if is_instance_valid(_mount_visual):
 		current_action = action
 		return
@@ -3254,6 +3261,8 @@ func _playback_speed_for(action: StringName) -> float:
 ## Metres per second the presentation is currently moving this actor. Falls
 ## back to the nominal speed for the command before the first step is timed.
 func _travel_speed() -> float:
+	if _cinematic_active:
+		return _cinematic_speed
 	if _segment_duration <= 0.0:
 		return _presentation_speed
 	return _segment_start.distance_to(server_target) / _segment_duration
@@ -3556,6 +3565,12 @@ func _physics_process(delta: float) -> void:
 	if (_speech_bubble_expiry_msec > 0
 			and Time.get_ticks_msec() >= _speech_bubble_expiry_msec):
 		clear_speech_bubble()
+	if _cinematic_active:
+		global_position = _cinematic_position
+		rotation.y = rotate_toward(rotation.y, _cinematic_yaw, turn_speed_radians * delta)
+		_level_selection_ring()
+		_advance_facing_offset(delta)
+		return
 	if _snap_pending:
 		global_position = server_target
 		rotation.y = _target_yaw
@@ -3593,6 +3608,8 @@ func _physics_process(delta: float) -> void:
 ## stops until the next packet, keypress or surface sample wakes it. Nothing
 ## about the resulting pose differs from the value the loop kept rewriting.
 func _settle_if_idle() -> void:
+	if _cinematic_active:
+		return
 	if _snap_pending or _segment_duration > 0.0 or _movement_coast_remaining > 0.0:
 		return
 	if absf(wrapf(_target_yaw - rotation.y, -PI, PI)) > SETTLED_YAW_EPSILON:
@@ -3606,6 +3623,33 @@ func _settle_if_idle() -> void:
 	rotation.y = _target_yaw
 	_settled = true
 	set_physics_process(false)
+
+## A per-view greeting temporarily owns the rendered pose. Network targets
+## continue updating normally and are restored when the greeting ends.
+func set_cinematic_presentation(point: Vector3, yaw: float, action: StringName, speed := 0.0) -> void:
+	_cinematic_active = true
+	_cinematic_position = point
+	_cinematic_yaw = yaw
+	_cinematic_action = action
+	_cinematic_speed = speed
+	global_position = point
+	play_action(action)
+	_wake()
+
+func cinematic_action_duration(action: StringName) -> float:
+	if resolver == null or animation_player == null:
+		return 2.0
+	var clip := resolver.clip_for_action(action)
+	if not animation_player.has_animation(clip):
+		return 2.0
+	return animation_player.get_animation(clip).length / resolver.playback_speed_for_action(action)
+
+func end_cinematic_presentation() -> void:
+	_cinematic_active = false
+	global_position = server_target
+	rotation.y = _target_yaw
+	play_action(&"idle")
+	_wake()
 
 ## Eases the model's facing correction toward the current action's value across
 ## the animation crossfade and writes it onto the visual root. A no-op once the

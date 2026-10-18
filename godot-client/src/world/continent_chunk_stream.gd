@@ -74,6 +74,9 @@ var _corrected_generation := -1
 ## Image sha -> the directories this territory loads it from
 ## (VramTextures.image_directories_by_sha), which price it.
 var _image_directories: Dictionary = {}
+## A short cinematic holds the union of its views until the camera hands back.
+## The same worker imports them during character creation; no blocking prime.
+var _preload_views: Array[Dictionary] = []
 ## Import workers whose owner left the tree or re-primed before they finished.
 ## A worker may be waiting on rendering-server commands that only the main
 ## thread services, so joining it synchronously deadlocks the client; the
@@ -264,6 +267,8 @@ static func incremental_cost(entry: Dictionary, shared: Dictionary,
 	return cost
 
 func selection(position: Vector3, retain := false) -> Array[Dictionary]:
+	if not _preload_views.is_empty():
+		return _preload_views
 	_refresh_corrections()
 	var candidates: Array[Dictionary] = []
 	for entry: Dictionary in entries:
@@ -304,6 +309,46 @@ func selection(position: Vector3, retain := false) -> Array[Dictionary]:
 		estimated += cost
 		published_estimated += published_cost
 	return selected
+
+func preload_views(points: PackedVector3Array, radius := FRAMED_RADIUS) -> void:
+	_preload_views.clear()
+	if points.is_empty():
+		return
+	# Arrival first, so the player's ground is ready even if creation is quick.
+	for entry: Dictionary in entries:
+		var nearest := INF
+		for point: Vector3 in points:
+			nearest = minf(nearest, bounds_distance(point, entry.bounds))
+		if nearest <= radius:
+			var candidate := entry.duplicate()
+			candidate.distance = bounds_distance(points[0], entry.bounds)
+			_preload_views.append(candidate)
+	_preload_views.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.id) < str(b.id) if is_equal_approx(a.distance, b.distance) else a.distance < b.distance)
+	# Each required view has the same residency guarantee as the normal frame.
+	# Ordinary byte-budget selection resumes as soon as the intro ends.
+	focus = points[0]
+	initial_focus = focus
+	has_focus = true
+	_next_update = 0
+
+func views_ready() -> bool:
+	if _preload_views.is_empty():
+		return false
+	for entry: Dictionary in _preload_views:
+		if not cells.has(str(entry.id)):
+			return false
+	return true
+
+func views_failed() -> bool:
+	for entry: Dictionary in _preload_views:
+		if _retry_after.has(str(entry.id)):
+			return true
+	return false
+
+func release_views() -> void:
+	_preload_views.clear()
+	_next_update = 0
 
 ## Called before the first actor grounding, with the server's actual arrival.
 ## No default-spawn cells are read when the client is waiting for that packet.
@@ -386,7 +431,7 @@ func update_focus(position: Vector3) -> void:
 	if _thread != null or not _retiring.is_empty():
 		return
 	for entry: Dictionary in selected:
-		if cells.has(str(entry.id)) or float(entry.distance) > preload_distance:
+		if cells.has(str(entry.id)) or (_preload_views.is_empty() and float(entry.distance) > preload_distance):
 			continue
 		if Time.get_ticks_msec() < int(_retry_after.get(str(entry.id), 0)):
 			continue
