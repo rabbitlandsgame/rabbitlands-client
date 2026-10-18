@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "stage": "develop-integration",
+  "techniqueCount": 24,
+  "motionRecipeCount": 12,
+  "motionSampleHz": 60,
+  "looping": false,
+  "runtimeRootMotion": false,
+  "sourceGlbChanges": false,
+  "newPaidGeneration": false,
+  "newUploads": false,
+  "maximumCueSeconds": 2.1,
+  "maximumLiveCues": 48,
+  "inputs": [
+    {
+      "path": "godot-client/assets/actors/native/shared/Universal_Animation_Library.glb",
+      "sha256": "161f9b54aed6a172ac5b1a37960264f106015bbc8622cd33af2061c9c4f6d69c"
+    },
+    {
+      "path": "godot-client/assets/actors/native/equipment/amberwood_longbow.glb",
+      "sha256": "89b3af8d1876eff7405c7fb4cc133e743dcde4e3a22105b1de42ca1210afb18b"
+    },
+    {
+      "path": "godot-client/assets/actors/native/equipment/sunmane_recurve_bow.glb",
+      "sha256": "2c221a1eea53a89cbb221f7320fb7bdef415a9cb527fdfda5398ba6344df1b47"
+    },
+    {
+      "path": "godot-client/src/actors/technique_animation_library.gd",
+      "sha256": "d7c0882e2adc225ee899be228581e648be8cc3e20c65554f570cb9d9b87d9b8b"
+    },
+    {
+      "path": "godot-client/src/world/technique_presentation.gd",
+      "sha256": "4c964c4923b9a17f4d08fcd6522293f72226c42e73a8c84c38495bf08bf3d298"
+    },
+    {
+      "path": "godot-client/src/world/technique_effect_3d.gd",
+      "sha256": "4a4538a64ca98bcefece9e92953a693fb8f46e39d714ef1053b0a21bfd68c7b3"
+    }
+  ],
+  "checks": [
+    "43 server technique tests",
+    "24 technique presentation and live-dispatch checks",
+    "24 native rendered technique previews",
+    "Review batch launcher exercised headless and with native OpenGL rendering",
+    "Technique menu and shared quick-slot checks",
+    "Native book layout at 1280x720, 960x540, 800x450 and 150% UI"
+  ],
+  "reviewScene": "godot-client/src/dev/technique_showcase.tscn",
+  "renderCheck": "godot-client/tests/integration/rendered_technique_effects.gd",
+  "userVisualApproval": "integration requested; separate visual review not recorded",
+  "limitations": [
+    "Existing imported bow meshes use a live string with rigid limbs.",
+    "Retired arrow geometry is not restored; flight uses the existing tracer.",
+    "Runtime recipes reuse existing source motions; no newly captured or exported skeletal animation asset is claimed."
+  ]
+}

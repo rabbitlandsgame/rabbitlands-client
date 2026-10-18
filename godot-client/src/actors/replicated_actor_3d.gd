@@ -549,6 +549,10 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 			apply_appearance_variants(dto.get("appearance", {}) as Dictionary)
 			var animation_path := _external_path(str(model_config.get("animationLibrary", "")))
 			var wanted_clips := resolver.required_clips()
+			# Player techniques use the same immutable imported rig/library cache.
+			if resolver.action_to_clip.has("cast_channel"):
+				for technique_clip: String in preload("res://src/actors/technique_animation_library.gd").RECIPES:
+					wanted_clips.append(technique_clip)
 			if model_config.has("culture") and not wanted_clips.has("Rest_Pose"):
 				wanted_clips.append("Rest_Pose")
 			var imported := NativeAnimationImporter.import_library(self,
@@ -2021,9 +2025,7 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		_weapon_carry.call("refresh_equipment")
 	if combat_presentation != null:
 		var weapon := _equipment_model_config(0, int(_equipment_visuals.get(0, 0)))
-		var bow_path := str(weapon.get("rangedAnimationScene", ""))
-		if str(weapon.get("attach", "")) == "ranged_bow":
-			bow_path = str(weapon.get("scene", ""))
+		var bow_path := _ranged_bow_path(weapon)
 		combat_presentation.set_equipped_bow(bow_path)
 	# Equipment adds and removes mesh instances, so the silhouette's clone set
 	# has to be built again against what the actor is now made of.
@@ -2122,8 +2124,7 @@ func _create_equipment_part(part: int, visual_id: int, allow_fallback: bool) -> 
 		_equipment_nodes[part] = [marker]
 		return
 	if part == 0:
-		_hand_prop_weapon_has_ranged_animation = model_config.has(
-			"rangedAnimationScene")
+		_hand_prop_weapon_has_ranged_animation = not _ranged_bow_path(model_config).is_empty()
 		_hand_prop_ranged_cache_valid = true
 	if str(model_config.get("attach", "")) == "ranged_bow" and combat_presentation != null:
 		# The presentation follows both hands; ordinary equipment follows one socket.
@@ -3202,6 +3203,19 @@ func _equipment_fallback_mesh(shape: String) -> MeshInstance3D:
 	instance.material_override = material
 	return instance
 
+func play_technique(key: String, phase: String) -> void:
+	if animation_player == null or resolver == null: return
+	var motion := preload("res://src/world/technique_presentation.gd").motion_for(key, phase)
+	if motion.is_empty() or not animation_player.has_animation(motion[0]): return
+	var action := str(motion[1])
+	if not resolver.action_to_clip.has(action): return
+	var original: String = resolver.action_to_clip[action]
+	# Override just this playback. The next ordinary attack keeps its normal
+	# animation, including after an interrupted technique or changed equipment.
+	resolver.action_to_clip[action] = str(motion[0])
+	play_action(StringName(action), true)
+	resolver.action_to_clip[action] = original
+
 func play_action(action: StringName, restart := false) -> void:
 	if _cinematic_active and action != _cinematic_action:
 		return
@@ -3304,12 +3318,17 @@ func _invalidate_hand_prop_ranged_cache() -> void:
 	_hand_prop_ranged_cache_valid = false
 	_hand_prop_weapon_has_ranged_animation = false
 
+func _ranged_bow_path(weapon: Dictionary) -> String:
+	var path := str(weapon.get("rangedAnimationScene", ""))
+	var scene := str(weapon.get("scene", ""))
+	if str(weapon.get("attach", "")) == "ranged_bow" or RangerBow3D.supports_asset(scene): path = scene
+	return path
+
 func _hand_prop_uses_ranged_animation() -> bool:
 	if not _hand_prop_ranged_cache_valid:
 		var weapon := _equipment_model_config(0,
 			int(_equipment_visuals.get(0, 0)))
-		_hand_prop_weapon_has_ranged_animation = weapon.has(
-			"rangedAnimationScene")
+		_hand_prop_weapon_has_ranged_animation = not _ranged_bow_path(weapon).is_empty()
 		_hand_prop_ranged_cache_valid = true
 	return _hand_prop_weapon_has_ranged_animation
 

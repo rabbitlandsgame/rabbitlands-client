@@ -2,7 +2,10 @@ class_name RangerBow3D
 extends Node3D
 ## Shared native prop meshes; string and nocked arrow follow both posed hands.
 const ARROW_PATH := "res://assets/actors/native/equipment/ranger_arrow.glb"
-const DEFAULT_BOW := "res://assets/actors/native/equipment/amberwood_ranger_bow.glb"
+const DEFAULT_BOW := "res://assets/actors/native/equipment/amberwood_longbow.glb"
+const CURRENT_BOWS := [DEFAULT_BOW, "res://assets/actors/native/equipment/sunmane_recurve_bow.glb"]
+static func supports_asset(path: String) -> bool:
+	return path in CURRENT_BOWS
 # The ranged bow replaces the registry hand prop, so its own root needs the
 # small presentation fit that places the handle through the relaxed palm.
 # This transform is toggled only when entering or leaving idle; draw/release
@@ -26,6 +29,7 @@ var _lower_limbs: Array[Node3D] = []
 var _local_geometry_valid := false
 var _last_draw_point := Vector3.ZERO
 var _last_flex := 0.0
+var _asset_fit := Transform3D.IDENTITY
 
 func _init() -> void:
 	name = "RangerBow"
@@ -54,10 +58,15 @@ func set_asset(path: String) -> void:
 		bow.queue_free()
 	bow = instance
 	_path = path
-	_tip_y = 0.64 if path.contains("sunmane") else 0.68
-	_tip_z = 0.16 if path.contains("sunmane") else 0.18
+	# Current imported bows stand on Y and curve in X; the live string curves
+	# in Z. These grip/tip samples refer to the unmodified shipped meshes.
+	var current := supports_asset(path)
+	var grip_x := 0.01556 if path.contains("sunmane") else 0.02325
+	_asset_fit = Transform3D(Basis(Vector3.UP, -PI * 0.5), Vector3(0, 0, -grip_x)) if current else Transform3D.IDENTITY
+	_tip_y = 0.609 if current else 0.64 if path.contains("sunmane") else 0.68
+	_tip_z = 0.041 if current else 0.16 if path.contains("sunmane") else 0.18
 	add_child(bow)
-	bow.transform = IDLE_FIT_TRANSFORM if _idle_fit_enabled else Transform3D.IDENTITY
+	bow.transform = (IDLE_FIT_TRANSFORM if _idle_fit_enabled else Transform3D.IDENTITY) * _asset_fit
 	var rest_string := bow.find_child("RestString", true, false) as Node3D
 	if rest_string != null:
 		rest_string.hide()
@@ -78,7 +87,7 @@ func set_idle_fit(enabled: bool) -> void:
 	_idle_fit_enabled = enabled
 	var fit := IDLE_FIT_TRANSFORM if enabled else Transform3D.IDENTITY
 	if bow != null:
-		bow.transform = fit
+		bow.transform = fit * _asset_fit
 	if _string_node != null:
 		_string_node.transform = fit
 
@@ -103,6 +112,7 @@ func pose(grip: Vector3, draw_hand: Vector3, up: Vector3, forward: Vector3,
 	if release_time >= 0.0:
 		draw_point.z += sin(release_time * 95.0) * exp(-release_time * 24.0) * 0.055
 	var flex := clampf((draw_point.z-_tip_z)*0.18, -0.025, 0.11)
+	if _upper_limbs.is_empty() and _lower_limbs.is_empty(): flex = 0.0
 	if not _local_geometry_valid or draw_point != _last_draw_point or flex != _last_flex:
 		for limb: Node3D in _upper_limbs:
 			limb.rotation.x = flex
@@ -130,4 +140,4 @@ func pose(grip: Vector3, draw_hand: Vector3, up: Vector3, forward: Vector3,
 		arrow.rotation = Vector3.ZERO
 
 func nock_position() -> Vector3:
-	return arrow.global_position if arrow != null else global_position
+	return arrow.global_position if arrow != null else global_transform * _last_draw_point
