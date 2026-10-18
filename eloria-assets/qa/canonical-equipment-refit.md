@@ -299,8 +299,17 @@ real client actor (`tools/equipment_review/`). It is configured the way
 - **Drop-downs:** race (all eight), sex, armour set and animation. The sets
   are the four class starter kits from `CreationArchetypes`, plus those in
   `tools/equipment_review/review_sets.json`. The chosen clip loops at the
-  game's playback speed.
-- **Toggles:** headwear, weapons and cape, and hair.
+  game's playback speed. A walk or a run plays at the speed the client gives
+  it for its own pace: Walk at 2.17× for 1.67 m/s and Run_Female at 1.81× for
+  5.0 m/s (before 2026-10-18 the viewer played them at 3.5× and 2.17×).
+- **Toggles:** headwear, weapons and cape, hair, and travel.
+- **Travel** (T, or `--travel yes`): a walk or a run moves the actor through
+  the scene at that pace, along the way it faces, with the camera following
+  and a metre grid on the floor. On the spot the cape cloth never sees the
+  actor move, so it hangs into the arms and legs as it never does in play.
+  Travelling, the clip, the actor and the cloth advance together in game
+  frames: a pause freezes the cloth where it was, `.` plays one frame on, and
+  slow motion shows each frame for longer instead of making it shorter.
 - **Camera:** mouse orbit, pan and zoom, keyboard turning, and preset views
   on 1–5. Space pauses, `,` and `.` step a frame, and `[` and `]` change the
   speed.
@@ -315,7 +324,9 @@ Notes go to `<checkout>/.local/asset-authoring/working/equipment-review/<session
 Each session folder holds:
 
 - `notes.jsonl`: one line per note, with the race, sex, set, each piece's key
-  and resolved scene, the clip and its time, the camera, and the commit;
+  and resolved scene, the clip and its time, the travel toggle with its pace
+  and clip speed, the camera (its target is relative to the actor's ground
+  point), and the commit;
 - `notes.md`, the same notes in readable form;
 - `shot_NNN.png`, the screenshots;
 - `session.json`.
@@ -332,6 +343,9 @@ The viewer also reshoots a review without anyone at the keyboard:
 - `--equipment <equipment.json>` reads a copy that points at candidate GLBs,
   so a fix is seen on the noted view before it is installed.
 - `--headwear yes|no` overrides the notes' headwear toggle.
+- `--travel yes|no` overrides the notes' travel toggle. Travelling, a replay
+  plays 2 s of the clip at 60 frames a second, ending on the noted time, so
+  the cloth is streaming on the noted frame.
 - `--debug-tint yes` draws generated backings magenta and body surfaces cyan.
   It tells a hole from a dark lining, or from the skin behind it.
 
@@ -1037,10 +1051,15 @@ The Warden's sleeves read up to 13 mm in idle, which is this measure's floor.
 | 2. Warden, Run_Female 0.28 s, leg | worst 40 mm | 0 mm |
 | 3. Warden, Walk 0.06 s, hand | 38 mm (worst 38) | 0 mm |
 
-**Notes 1–3 are motion-only and are left as they are.** The viewer plays a
-run or a walk on the spot, so the cloth never sees the actor travel. In
+**Notes 1–3 are motion-only and are left as they are.** The viewer played a
+run or a walk on the spot, so the cloth never saw the actor travel. In
 motion the cape streams back off the arms, legs and hands at both noted
 times and through every sample.
+
+The viewer now has a travel option (see **Reviewing fits in the client**).
+`--replay notes.jsonl --notes 1,2,3 --travel yes` reshoots the three views
+with the actor moving, and the cape streams clear of the arm, the leg and the
+hand: [in place and travelling](design-fit/review4-travel.jpg).
 
 **Note 4 (Phoenix set, Red Cape 2:12, Fighting_Idle 0.01 s) is fixed.**
 
@@ -1106,9 +1125,6 @@ Scratch harnesses: the client's
 - Note 4 still reads up to 17 mm at a few frames of the Fighting_Idle cycle.
 - Arms are not collided with the cape's sides. In place, a swinging elbow
   passes through them (notes 1 and 3); in motion it does not.
-- The viewer plays locomotion on the spot, so its cape never streams. A
-  "travel" option in `tools/equipment_review/` would let reviews see the
-  cape as it moves in play.
 
 ## Two body shapes, preserved race identity
 

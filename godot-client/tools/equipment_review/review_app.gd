@@ -7,6 +7,13 @@ extends Node3D
 ## Race, sex, armour set and animation are chosen from drop-downs. The chosen
 ## clip loops. The camera orbits the character.
 ##
+## Travel (T, or --travel yes) moves the actor through the scene while a walk or
+## a run plays, at the client's own pace and clip speed, with the camera and
+## floor following. In place the cape cloth never sees the actor move, so it
+## hangs into the arms and legs as it never does in play. Travelling, the clip,
+## the actor and the cloth advance together in the game's frames, so a pause
+## freezes the cloth where it was rather than letting it drop.
+##
 ## F2 (or C) takes a screenshot of the current view, without the panels, and
 ## asks for a note. Each note is appended to notes.jsonl, with the full state
 ## needed to reproduce the view, and to notes.md, in one session folder under
@@ -26,6 +33,28 @@ const HEAD_PART := 3
 const EXTRA_PARTS: Array[int] = [0, 1, 2]
 const SETS_FILE := "res://tools/equipment_review/review_sets.json"
 const VIEWS := {KEY_1: 0.0, KEY_2: 90.0, KEY_3: 180.0, KEY_4: -90.0, KEY_5: 35.0}
+## Travelled this far from the origin, the actor and its cloth are carried back
+## by whole metres, so a long run stays clear of float precision.
+const TRAVEL_WRAP := 1000.0
+## How long a replay travels before the noted frame, so the cloth is streaming.
+const REPLAY_LEAD := 2.0
+const FLOOR_SIZE := 12.0
+## Travelling, the floor is this much wider, so its edge stays out of view.
+const TRAVEL_FLOOR_SCALE := 4.0
+const GRID_SHADER := """
+shader_type spatial;
+uniform vec3 floor_color : source_color;
+uniform vec3 line_color : source_color;
+varying vec2 ground;
+void vertex() {
+	ground = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
+}
+void fragment() {
+	// Metre lines fixed to the world, about a pixel wide at any distance.
+	vec2 edge = abs(fract(ground + 0.5) - 0.5) / max(fwidth(ground), vec2(1e-4));
+	ALBEDO = mix(floor_color, line_color, 1.0 - clamp(min(edge.x, edge.y) - 0.5, 0.0, 1.0));
+}
+"""
 
 ## Command-line options (set by equipment_review.gd before _ready).
 var options: Dictionary = {}
@@ -47,9 +76,18 @@ var _paused := false
 var _speed := 1.0
 var _base_speed := 1.0
 var _raw_loaded: PackedStringArray = []
+var _travel := false
+## Metres per second the chosen clip carries the actor: the client's walking or
+## running pace, or 0 for a clip that stays on the spot.
+var _travel_speed := 0.0
+## Played seconds owed to the travelling actor, in whole frames.
+var _travel_owed := 0.0
 
 var _cam: Camera3D
 var _key_light: DirectionalLight3D
+var _floor: MeshInstance3D
+var _floor_material: StandardMaterial3D
+var _grid_material: ShaderMaterial
 var _yaw := 0.0
 var _pitch := 0.10
 var _distance := 3.1
@@ -62,6 +100,7 @@ var _sex_opt: OptionButton
 var _set_opt: OptionButton
 var _clip_opt: OptionButton
 var _pause_button: Button
+var _travel_check: CheckBox
 var _clip_label: Label
 var _status: Label
 var _toast: Label
@@ -93,6 +132,7 @@ func _ready() -> void:
 	_race = str(options.get("race", _race))
 	_sex = str(options.get("sex", _sex))
 	_clip = str(options.get("clip", _clip))
+	_travel = options.get("travel", "no") == "yes"
 	var wanted_set := str(options.get("set", ""))
 	for i in range(_sets.size()):
 		if str(_sets[i]["name"]).to_lower().begins_with(wanted_set.to_lower()) and not wanted_set.is_empty():
@@ -166,14 +206,20 @@ func _build_stage() -> void:
 	fill.light_energy = 0.35
 	fill.rotation_degrees = Vector3(-20, 150, 0)
 	add_child(fill)
-	var floor_mesh := MeshInstance3D.new()
+	_floor = MeshInstance3D.new()
 	var plane := PlaneMesh.new()
-	plane.size = Vector2(12, 12)
-	floor_mesh.mesh = plane
-	var floor_material := StandardMaterial3D.new()
-	floor_material.albedo_color = Color(0.21, 0.24, 0.25)
-	floor_mesh.material_override = floor_material
-	add_child(floor_mesh)
+	plane.size = Vector2(FLOOR_SIZE, FLOOR_SIZE)
+	_floor.mesh = plane
+	_floor_material = StandardMaterial3D.new()
+	_floor_material.albedo_color = Color(0.21, 0.24, 0.25)
+	# A plain floor gives no sense of travel: moving, it carries a metre grid.
+	_grid_material = ShaderMaterial.new()
+	_grid_material.shader = Shader.new()
+	_grid_material.shader.code = GRID_SHADER
+	_grid_material.set_shader_parameter("floor_color", _floor_material.albedo_color)
+	_grid_material.set_shader_parameter("line_color", Color(0.33, 0.37, 0.38))
+	add_child(_floor)
+	_update_floor()
 	_cam = Camera3D.new()
 	_cam.fov = 35.0
 	# The actor's nameplate, health bar and their backing are gameplay overlays,
@@ -184,14 +230,31 @@ func _build_stage() -> void:
 	_update_camera()
 
 
+## The orbit target is held relative to the actor's ground point, so the camera
+## follows a travelling actor; on the spot that point is the origin.
 func _update_camera() -> void:
 	var direction := Vector3(sin(_yaw) * cos(_pitch), sin(_pitch), cos(_yaw) * cos(_pitch))
-	_cam.global_position = _target + direction * _distance
-	_cam.look_at(_target)
+	var focus := _target + _ground_point()
+	_cam.global_position = focus + direction * _distance
+	_cam.look_at(focus)
 	if _light_follows:
 		_key_light.rotation = Vector3(deg_to_rad(-35.0), _yaw + deg_to_rad(-30.0), 0.0)
 	elif _key_light.rotation == Vector3.ZERO:
 		_key_light.rotation_degrees = Vector3(-35, -30, 0)
+
+
+func _ground_point() -> Vector3:
+	if actor == null:
+		return Vector3.ZERO
+	return Vector3(actor.global_position.x, 0.0, actor.global_position.z)
+
+
+## The floor stays under the actor; travelling it is wider and gridded, and the
+## grid is fixed to the world, so it is the floor that reads as moving by.
+func _update_floor() -> void:
+	_floor.global_position = _ground_point()
+	_floor.scale = Vector3.ONE * (TRAVEL_FLOOR_SCALE if _travel else 1.0)
+	_floor.material_override = _grid_material if _travel else _floor_material
 
 
 # ---------------------------------------------------------------- actor
@@ -375,15 +438,137 @@ func _play_clip(clip: String) -> void:
 	player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
 	var action := _action_for(clip)
 	_base_speed = 1.0
+	_travel_speed = _pace_for(action)
 	if action != &"":
-		# The action sets the game's playback speed and held-weapon pose.
+		# The action sets the game's playback speed and held-weapon pose. The
+		# actor reads a walk or run speed off the pace it is travelling at.
+		if _travel_speed > 0.0:
+			actor._presentation_speed = _travel_speed
 		actor.play_action(action, true)
 		_base_speed = player.speed_scale
 	actor._advance_facing_offset(1.0)
 	player.play(clip)
-	player.speed_scale = _base_speed * _speed
+	_apply_travel_mode()
 	if _paused:
 		player.pause()
+		if _travel:
+			_hold_pose()
+
+
+## The client's own pace for a walk or a run: a metre tile per step, at the
+## step length the actor assumes for that gait before it has timed the
+## server's. Zero for anything that is not locomotion.
+func _pace_for(action: StringName) -> float:
+	if actor == null or action not in [&"walk", &"run"]:
+		return 0.0
+	# Gait 1 is a run and 0 a walk, as ReplicatedActor3D.pace_gait numbers them.
+	return actor._metres_per_tile / actor._pace_for_gait(1 if action == &"run" else 0)
+
+
+## Travelling, the clip and the cloth are advanced here, frame by frame, rather
+## than by the engine: in step, and not at all while paused.
+func _apply_travel_mode() -> void:
+	if actor == null or actor.animation_player == null:
+		return
+	actor.animation_player.callback_mode_process = (
+		AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL if _travel
+		else AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE)
+	for skeleton: Skeleton3D in _skeletons():
+		skeleton.modifier_callback_mode_process = (
+			Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL if _travel
+			else Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE)
+	_apply_speed()
+
+
+## Travelling, the speed changes how many frames run, not how long each is.
+func _apply_speed() -> void:
+	if actor != null and actor.animation_player != null:
+		actor.animation_player.speed_scale = _base_speed * (1.0 if _travel else _speed)
+
+
+func _skeletons() -> Array[Skeleton3D]:
+	var found: Array[Skeleton3D] = []
+	if actor != null:
+		for node: Node in actor.find_children("*", "Skeleton3D", true, false):
+			found.append(node as Skeleton3D)
+	return found
+
+
+func _set_travel(on: bool) -> void:
+	_travel = on
+	if _travel_check != null:
+		_travel_check.set_pressed_no_signal(on)
+	_travel_owed = 0.0
+	if actor != null:
+		actor.global_position = Vector3.ZERO
+		var cloth: Node = actor._cape_cloth
+		if cloth != null:
+			cloth.call("reset")
+	_play_clip(_clip)
+	_update_floor()
+	_update_camera()
+	_toast_message("Travel on: walks and runs move" if on else "Travel off: clips play on the spot")
+
+
+## The way the actor faces, and travels, as the client moves it.
+func _heading() -> Vector3:
+	var ahead := -actor.global_transform.basis.z
+	ahead.y = 0.0
+	return ahead.normalized()
+
+
+## One frame of play, `seconds` long: the clip advances, the actor travels and
+## the cloth steps, together, as in the game. Works paused. The skeleton runs
+## its modifiers once at the end of the frame, with the time it was given
+## summed, so a frame is the finest step there is: call this once per frame.
+func _travel_frame(seconds: float) -> void:
+	if actor == null or actor.animation_player == null or seconds <= 0.0:
+		return
+	var player := actor.animation_player
+	var held := not player.is_playing()
+	if held:
+		player.play()
+	player.advance(seconds)
+	if held:
+		player.pause()
+	actor.global_position += _heading() * _travel_speed * seconds
+	for skeleton: Skeleton3D in _skeletons():
+		skeleton.advance(seconds)
+	_carry_back()
+	_update_floor()
+	_update_camera()
+
+
+## A pose set with the clip held (a seek, a new clip) is drawn with the cloth
+## left where it was. Without this the cape would show its bind shape: the
+## skeleton only keeps the cloth's bones for an update it was advanced in.
+func _hold_pose() -> void:
+	if actor == null or actor.animation_player == null or not actor.animation_player.has_animation(_clip):
+		return
+	actor.animation_player.seek(actor.animation_player.current_animation_position, true)
+	for skeleton: Skeleton3D in _skeletons():
+		skeleton.advance(0.0)
+
+
+## Past TRAVEL_WRAP, carry the actor back by whole metres, cloth and all, so
+## the grid and the cape see nothing happen.
+func _carry_back(limit := TRAVEL_WRAP) -> void:
+	var offset := _ground_point()
+	if offset.length() < limit:
+		return
+	offset = offset.round()
+	actor.global_position -= offset
+	var cloth: Node = actor._cape_cloth
+	if cloth == null:
+		return
+	for state: String in ["_points", "_previous"]:
+		var chains: Array = cloth.get(state)
+		for chain in range(chains.size()):
+			var points: PackedVector3Array = chains[chain]
+			for i in range(points.size()):
+				points[i] -= offset
+			chains[chain] = points
+	cloth.set("_last_anchor", (cloth.get("_last_anchor") as Vector3) - offset)
 
 
 func _set_paused(paused: bool) -> void:
@@ -403,7 +588,18 @@ func _step(frames: int) -> void:
 	_set_paused(true)
 	var player := actor.animation_player
 	var length := player.get_animation(_clip).length
+	var seconds := frames / 30.0 / maxf(_base_speed, 0.01)
+	if _travel and frames > 0:
+		# Forward, play the step as a frame, so the cloth moves with the body.
+		_travel_frame(seconds)
+		return
 	player.seek(fposmod(player.current_animation_position + frames / 30.0, length), true)
+	if _travel:
+		# Back, the actor steps back too; the cloth cannot run backwards, so it holds.
+		actor.global_position += _heading() * _travel_speed * seconds
+		_hold_pose()
+		_update_floor()
+		_update_camera()
 
 
 # ---------------------------------------------------------------- UI
@@ -462,6 +658,8 @@ func _build_ui() -> void:
 	_check(box, "Light follows camera", _light_follows, func(on: bool) -> void:
 		_light_follows = on
 		_update_camera())
+	_travel_check = _check(box, "Travel: walks and runs move (T)", _travel, func(on: bool) -> void:
+		_set_travel(on))
 	var buttons := HBoxContainer.new()
 	box.add_child(buttons)
 	_pause_button = _button(buttons, "Pause (Space)", func() -> void: _set_paused(not _paused))
@@ -483,7 +681,7 @@ func _build_ui() -> void:
 		+ "Wheel or Q/E: zoom. A/D, arrows: turn. W/S: tilt.\n"
 		+ "1 front, 2 side, 3 back, 4 other side, 5 three-quarter.\n"
 		+ "R: reset view. Space: pause. , and .: step a frame.\n"
-		+ "[ and ]: speed. H: hide panels. F5: reload from disk.\n"
+		+ "[ and ]: speed. T: travel. H: hide panels. F5: reload.\n"
 		+ "F2 or C: screenshot and note.")
 	box.add_child(help)
 	_toast = Label.new()
@@ -506,13 +704,14 @@ func _option(box: VBoxContainer, label: String) -> OptionButton:
 	return option
 
 
-func _check(box: VBoxContainer, label: String, on: bool, toggled: Callable) -> void:
+func _check(box: VBoxContainer, label: String, on: bool, toggled: Callable) -> CheckBox:
 	var check := CheckBox.new()
 	check.text = label
 	check.button_pressed = on
 	check.focus_mode = Control.FOCUS_NONE
 	check.toggled.connect(toggled)
 	box.add_child(check)
+	return check
 
 
 func _button(box: HBoxContainer, label: String, pressed: Callable) -> Button:
@@ -651,9 +850,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_step(1)
 		KEY_BRACKETLEFT, KEY_BRACKETRIGHT:
 			_speed = clampf(_speed * (0.5 if key.keycode == KEY_BRACKETLEFT else 2.0), 0.125, 4.0)
-			if actor != null and actor.animation_player != null:
-				actor.animation_player.speed_scale = _base_speed * _speed
+			_apply_speed()
 			_toast_message("Speed x%s" % _speed)
+		KEY_T:
+			_set_travel(not _travel)
 		_:
 			if VIEWS.has(key.keycode):
 				_yaw = deg_to_rad(float(VIEWS[key.keycode]))
@@ -679,10 +879,21 @@ func _process(delta: float) -> void:
 	if _toast_until > 0 and Time.get_ticks_msec() > _toast_until:
 		_toast.text = ""
 		_toast_until = 0
+	if _travel and not _paused:
+		# Whole frames, as many as the speed asks for. Slowed, the frames come
+		# less often rather than shorter, so the cloth damps as it does in play.
+		_travel_owed += delta * _speed
+		var frame := minf(delta, 1.0 / 30.0)
+		if _travel_owed >= frame * 0.5:
+			var run := maxf(frame, minf(_travel_owed, frame * 4.0))
+			_travel_frame(run)
+			_travel_owed = clampf(_travel_owed - run, -frame, frame)
 	if actor != null and actor.animation_player != null and actor.animation_player.has_animation(_clip):
 		var player := actor.animation_player
-		_clip_label.text = "%s  %.2f / %.2f s  x%s%s" % [_clip, player.current_animation_position,
-			player.get_animation(_clip).length, _speed, "  (paused)" if _paused else ""]
+		_clip_label.text = "%s  %.2f / %.2f s  x%s%s%s" % [_clip, player.current_animation_position,
+			player.get_animation(_clip).length, _speed, "  (paused)" if _paused else "",
+			"\nTravelling %.2f m/s, clip x%.2f" % [_travel_speed, _base_speed]
+			if _travel and _travel_speed > 0.0 else ""]
 
 
 # ---------------------------------------------------------------- notes
@@ -739,6 +950,10 @@ func _state() -> Dictionary:
 		"headwear": _show_head, "weapons_and_cape": _show_extras, "hair": _show_hair,
 		"pieces": pieces, "clip": _clip, "clip_time": snappedf(time, 0.001),
 		"clip_length": snappedf(length, 0.001), "paused": _paused, "speed": _speed,
+		# The camera target is relative to the actor's ground point, which only
+		# leaves the origin while travelling.
+		"travel": _travel, "travel_speed": snappedf(_travel_speed if _travel else 0.0, 0.001),
+		"clip_playback": snappedf(_base_speed, 0.001),
 		"camera": {"yaw_degrees": snappedf(rad_to_deg(_yaw), 0.1), "pitch_degrees": snappedf(rad_to_deg(_pitch), 0.1),
 			"distance": snappedf(_distance, 0.001), "target": [snappedf(_target.x, 0.001),
 			snappedf(_target.y, 0.001), snappedf(_target.z, 0.001)]},
@@ -761,8 +976,9 @@ func _begin_note() -> void:
 	_pending_shot = get_viewport().get_texture().get_image()
 	for item: CanvasItem in shown:
 		item.visible = true
-	_dialog_label.text = "Note %d: %s, %s, %s at %.2f s. Ctrl+Enter saves, Esc cancels." % [
-		_note_count + 1, _race_label(), _sets[_set_index]["name"], _clip, _pending_state["clip_time"]]
+	_dialog_label.text = "Note %d: %s, %s, %s at %.2f s%s. Ctrl+Enter saves, Esc cancels." % [
+		_note_count + 1, _race_label(), _sets[_set_index]["name"], _clip, _pending_state["clip_time"],
+		_travel_words(_pending_state)]
 	_dialog_text.text = ""
 	_dialog.visible = true
 	_dialog.reset_size()
@@ -793,12 +1009,20 @@ func _save_note() -> void:
 	var parts := PackedStringArray()
 	for piece: Dictionary in entry["pieces"]:
 		parts.append("%s %s" % [piece["key"], piece["name"]])
-	file.store_string("## %d. %s, %s\n\n%s at %.2f s, camera yaw %s, pitch %s. Pieces: %s.\n\n%s\n\n![](%s)\n\n" % [
-		_note_count, _race_label(), entry["set"], entry["clip"], entry["clip_time"],
+	file.store_string("## %d. %s, %s\n\n%s at %.2f s%s, camera yaw %s, pitch %s. Pieces: %s.\n\n%s\n\n![](%s)\n\n" % [
+		_note_count, _race_label(), entry["set"], entry["clip"], entry["clip_time"], _travel_words(entry),
 		entry["camera"]["yaw_degrees"], entry["camera"]["pitch_degrees"], ", ".join(parts),
 		comment if not comment.is_empty() else "(no comment)", shot])
 	_close_note()
 	_toast_message("Saved note %d (%s)" % [_note_count, shot])
+
+
+func _travel_words(state: Dictionary) -> String:
+	if not bool(state.get("travel", false)):
+		return ""
+	if float(state.get("travel_speed", 0.0)) <= 0.0:
+		return " (travel on, on the spot)"
+	return " travelling at %.2f m/s (clip x%.2f)" % [float(state["travel_speed"]), float(state["clip_playback"])]
 
 
 func _close_note() -> void:
@@ -835,12 +1059,18 @@ func _selftest() -> void:
 			" | equipment ", actor.equipment_diagnostics() if actor != null else {})
 	_yaw = deg_to_rad(35.0)
 	_update_camera()
-	await get_tree().create_timer(0.5).timeout
+	# Travel: a run carries the actor at the client's pace, and the note says so.
+	_play_clip("Run_Female")
+	_set_travel(true)
+	await get_tree().create_timer(1.0).timeout
+	print("SELFTEST travel ", _clip, " ", snappedf(_travel_speed, 0.01), " m/s, clip x",
+		snappedf(_base_speed, 0.01), ", at ", _ground_point())
 	await _begin_note()
 	_dialog_text.text = "self-test note"
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(_review_dir.path_join("dialog_check.png"))
 	_save_note()
+	_set_travel(false)
 	print("SELFTEST_OK ", _review_dir)
 	await get_tree().create_timer(0.3).timeout
 	get_tree().quit()
@@ -868,10 +1098,13 @@ func _replay() -> void:
 			else options["headwear"] == "yes")
 		_show_extras = bool(note.get("weapons_and_cape", false))
 		_show_hair = bool(note.get("hair", true))
+		_travel = (bool(note.get("travel", false)) if not options.has("travel")
+			else options["travel"] == "yes")
 		_speed = float(note.get("speed", 1.0))
 		_clip = str(note["clip"])
 		_paused = true
 		await _rebuild_actor()
+		_update_floor()
 		var camera: Dictionary = note["camera"] as Dictionary
 		_yaw = deg_to_rad(float(camera["yaw_degrees"]))
 		_pitch = deg_to_rad(float(camera["pitch_degrees"]))
@@ -880,11 +1113,31 @@ func _replay() -> void:
 		_target = Vector3(float(target[0]), float(target[1]), float(target[2]))
 		_update_camera()
 		if actor != null and actor.animation_player != null and actor.animation_player.has_animation(_clip):
-			actor.animation_player.seek(float(note["clip_time"]), true)
+			if _travel:
+				await _travel_up_to(float(note["clip_time"]))
+			else:
+				actor.animation_player.seek(float(note["clip_time"]), true)
 		for _frame in range(3):
 			await RenderingServer.frame_post_draw
 		var shot := out.path_join("replay_%03d.png" % int(note["n"]))
 		get_viewport().get_texture().get_image().save_png(shot)
-		print("REPLAY ", int(note["n"]), " -> ", shot)
+		print("REPLAY ", int(note["n"]), " -> ", shot, "  travel %.2f m/s, clip x%.2f, %.2f m" % [
+			_travel_speed if _travel else 0.0, _base_speed, _ground_point().length()] if _travel else "")
 	print("REPLAY_OK ", out)
 	get_tree().quit()
+
+
+## REPLAY_LEAD seconds of play that end on the noted clip time, one 60 Hz game
+## frame per drawn frame, so the noted frame has the cloth in motion.
+func _travel_up_to(clip_time: float) -> void:
+	var player := actor.animation_player
+	var frame := 1.0 / 60.0
+	var frames := roundi(REPLAY_LEAD / frame)
+	player.seek(fposmod(clip_time - frames * frame * _base_speed, player.get_animation(_clip).length), true)
+	actor.global_position = Vector3.ZERO
+	var cloth: Node = actor._cape_cloth
+	if cloth != null:
+		cloth.call("reset")
+	for _i in range(frames):
+		_travel_frame(frame)
+		await get_tree().process_frame
