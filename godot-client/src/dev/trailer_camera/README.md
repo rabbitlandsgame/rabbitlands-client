@@ -94,6 +94,10 @@ missing from the first loaded frame and fully grown by the first shot frame. The
 grass then follows the camera during the shot as it follows the game camera, so
 on a very fast move its far edge can still be growing.
 
+Preview stills (`--preview`) place the whole grass bed before each still,
+whatever its per-frame budget, so a still shows the bed as it stands once
+grown.
+
 A chunk is resident only if it lies within `streamRadius` horizontally of the
 path. For a high flyover that sees the whole region, raise `streamRadius` past
 the region's size. Landfall (26 of its 32 chunks) loaded in 5-8 s and Greenlight

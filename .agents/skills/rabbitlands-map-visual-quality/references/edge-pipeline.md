@@ -86,6 +86,42 @@ pieces never add up. The visible shape is the union of each piece's own cut cont
 - At runtime a deck is cut with `DECK_RIM` and its lobe and grain. Beyond the cut,
   `EDGE_BAND` darkens a verge strip (a curb inside paving, `EDGE_BAND_PAVING`).
 
+## Grass at paving (`src/world/look/grass_beds.gd`)
+
+- The grass beds read pale paving's own coverage (`_paving_share`) and work out the
+  paint's cut with the paint's noise (`paving_share`: `PAVING_RIM`, `PAVING_RIM_LOBE`,
+  `paint_noise` is the shader's `look_value_noise`). They stop `GRASS_PAVING_PULL` short
+  of it and thin out over `GRASS_PAVING_FEATHER`, so the grass follows a turned or
+  round court and its wandering edge.
+- Seams between paving patches stay bare: a spot on two paving footprints, or with
+  painted paving on both sides within `GRASS_PAVING_SEAM_METRES` across x or z.
+  Footprints of patches that only touch abut without overlapping, so the first test
+  alone let grass up the seam.
+- A candidate's tufts spread half a cell (about 0.3 m) round it, so beside paving
+  each tuft's foot is judged again.
+- Until 2026-10-17 grass stopped at each paving patch's AABB grown by 0.5 m: every
+  turned court, round court or diagonal avenue stood in a bald axis-aligned
+  rectangle.
+- `tests/look/probe_paving_grass.gd` draws the bed around paving from above
+  (headless) and counts tufts on the paint and bald ground inside the old bounds.
+
+## Opaque kit paving (`ground.kit_paving`)
+
+- Landfall's garden walks (`garden_paving.py`) are opaque `Walk_` strips with no
+  vertex colour, so the look left them alone and they ended on their raw mesh edges.
+- A region names such decks in `ground.kit_paving` (words in the node name). The look
+  then gives the deck's mesh a coverage, as a copy (`LookGround.kit_paving_mesh`): 0
+  on its outer edge, 1 from the next vertex in. It cuts that coverage at
+  `KIT_PAVING_RIM` and `KIT_PAVING_RIM_LOBE` in the deck's own texture and colour.
+  - Painted as paving instead, the walks took Landfall's paving tint and flagstone and
+    turned brown, the dirt they were paved to replace.
+- What is not an outer edge in `garden_paving.py`'s meshes:
+  - edges along the 96 m publish-chunk sides a walk was cut on (local ±48 m);
+  - T-junctions where a round end's fan spoke spans two strip rows.
+  - Two walks whose sides coincide keep both edges.
+- The arrival rosette is an inlay on the plaza's paving, kept by `props.keep_words`,
+  and left crisp.
+
 ## Every place an edge gets hard
 
 | Cause | Where | Fix layer |
@@ -96,8 +132,8 @@ pieces never add up. The visible shape is the union of each piece's own cut cont
 | No geometry outside the footprint | export | content: enlarge the shape when the edge must reach further out |
 | Road ramp is one lateral strip | `lateral_steps`, `edgeFeather` | content: raise `edge_feather` on the road surface (needs a republish) |
 | Dark edging band outlines roads | `EDGE_BAND` | runtime |
-| Grass stops on straight, axis-aligned lines round paving | `grass_beds.gd` paving AABB + `GRASS_PAVING_MARGIN` | runtime (open) |
-| Opaque kit decks (garden paving, plaza rosette) have no coverage | `publish_client.py` kit `Walk_` decks | content: dress their edges with props or a blended patch |
+| Grass stops on straight, axis-aligned lines round paving | `grass_beds.gd` paving AABB + `GRASS_PAVING_MARGIN` | runtime (done 2026-10-17: follows the coverage, `_paving_share`) |
+| Opaque kit decks (garden paving) have no coverage | `garden_paving.py` strips, published as `Walk_` decks | runtime (done 2026-10-17: `ground.kit_paving`, Landfall) |
 | Hard clip at the map edge | `clip_weighted_ground_faces` | expected: the neighbour owns the ground beyond |
 
 ## Per-map tuning

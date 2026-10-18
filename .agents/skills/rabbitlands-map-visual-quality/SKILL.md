@@ -53,6 +53,7 @@ distance) to a JSON file and turn them into trailer-camera shots with
 |---|---|---|
 | Edges too crisp or straight within the authored blend; dark outlines on roads | Look constants in `godot-client/src/world/look/look_profile.gd` (`*_RIM`, `*_RIM_LOBE`, `RIM_LOBE_METRES`, `EDGE_BAND`) | Runtime only, all maps |
 | A surface has no structure, or the wrong family (wall masonry as paving) | Runtime class texture: `ground.class_textures` in the map's look overrides | Runtime only, per map |
+| An opaque kit deck (paving drawn as a kit piece) ends on its raw mesh edge | `ground.kit_paving` in the map's look overrides | Runtime only, per map |
 | A patch is a primitive shape; its blend is too narrow; a texture needs to belong to the authored design | Edit the scene's `Ground/Regions` and surfaces | Republish |
 | A road jogs, kinks or hairpins | Edit the scene's `Roads`; re-grade for hairpins | Republish, owner confirmation for reroutes |
 
@@ -139,6 +140,10 @@ gets hard, is in `references/edge-pipeline.md`. Read it before changing a consta
   - Paving gained the most: it now ends stone by stone.
   - Roads changed texture, but their edges can only move within the exporter's one
     1.3 m rim strip.
+  - Grass follows paving's coverage, not its bounding box. The turned and round courts
+    and the diagonal avenue lost their bald rectangles.
+  - Landfall's garden walks break up along their edges (`ground.kit_paving`). They keep
+    their own cream stone.
   - A meadow turf texture was tried and dropped: its fine detail went flat green at
     the game camera.
   - Second pass: the coastal gravel pack tile made seamless and opaque (slot `rock`;

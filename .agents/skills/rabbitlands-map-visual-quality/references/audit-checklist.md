@@ -53,7 +53,8 @@ Look for:
 - one pattern recoloured across surfaces that should differ (road, sand, soil);
 - wall textures used as ground;
 - a visible repeat grid or stripes at 3-4 m;
-- opaque kit decks (garden paving, rosettes) with raw mesh edges;
+- opaque kit decks (garden paving, rosettes) with raw mesh edges (a deck on grass can
+  be named in the map's `ground.kit_paving`);
 - holes or a green veil where two paving patches meet. This is the risk whenever
   paving's cut moves inward.
 

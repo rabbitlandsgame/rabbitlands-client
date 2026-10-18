@@ -533,6 +533,26 @@ const DECK_RIM_LOBE := Vector2(0.14, 0.25)
 const PATCH_RIM_LOBE := Vector2(0.18, 0.2)
 const PAVING_RIM_LOBE := Vector2(0.09, 0.3)
 const MEADOW_RIM_LOBE := Vector2(0.12, 0.12)
+## Opaque kit paving among a region's walk decks (`ground.kit_paving`):
+## Landfall's garden walks, which garden_paving.py draws as strips without a
+## coverage, ended on their raw mesh edges against the grass (map audit
+## 2026-10-17). The look gives each piece one (LookGround.kit_paving_mesh): 0
+## on its outer edge and 1 from the next vertex in (the strips' rows are at
+## most a metre apart), and paints it in its own colour, cut at
+## KIT_PAVING_RIM and KIT_PAVING_RIM_LOBE (read as the *_RIM and *_RIM_LOBE
+## above). Its ramp is that one row, so it is cut further in and wanders
+## further than authored paving's 3 m and wider blends: at PAVING_RIM its edge
+## moved 0-0.25 m into a 1 m row and the walks still read as ruled curves from
+## the game camera; here it wanders about 0-0.55 m. Cut at 0.3, the walks came
+## out narrower than drawn: garden_paving.py pads each by 0.25 m a side.
+## garden_paving.py groups a walk's triangles by the publish chunk they fall
+## in, KIT_PAVING_CHUNK_METRES across about each piece's origin: a boundary
+## edge within KIT_PAVING_JOIN_METRES of those lines joins the next chunk's
+## piece and keeps its coverage.
+const KIT_PAVING_RIM := Vector3(0.22, 0.05, 0.1)
+const KIT_PAVING_RIM_LOBE := Vector2(0.25, 0.35)
+const KIT_PAVING_CHUNK_METRES := 96.0
+const KIT_PAVING_JOIN_METRES := 2.5
 
 ## Detail textures a region may lay over its ground by class
 ## (`ground.class_textures`, slot -> name, e.g. {"deck": "packed_earth"}).
@@ -1019,11 +1039,20 @@ const GRASS_BARE_PATCH := Vector2(0.6, 0.35)
 const GRASS_BARE_EDGE_METRES := 1.3
 const GRASS_BARE_EDGE_JITTER := 0.2
 const GRASS_BARE_EDGE_FEATHER := 0.25
-## No grass within pale paving's bounds, nor this many metres beyond them:
-## judged by its coverage, the grass came up through the one-cell seams
-## between the Four Gates plaza's patches and along the rims of the avenue
-## decks that cross it.
-const GRASS_PAVING_MARGIN := 0.5
+## Where the grass stops at pale paving (LookGrassBeds.paving_share): it
+## follows the paving's coverage and the paint's own wandering cut
+## (PAVING_RIM, PAVING_RIM_LOBE), ends GRASS_PAVING_PULL of coverage short of
+## where the paint's step begins and thins out over GRASS_PAVING_FEATHER of
+## coverage before that. It used to stop at the paving's bounds grown by half
+## a metre, which cut every turned or round court out of the lawn as an
+## axis-aligned rectangle (map audit 2026-10-17, Landfall's courts). A seam
+## between two paving patches still grows none: a spot on both, or with paint
+## on both sides of it within GRASS_PAVING_SEAM_METRES (judged by coverage
+## alone, the grass came up through the one-cell seams between the Four Gates
+## plaza's patches).
+const GRASS_PAVING_PULL := 0.04
+const GRASS_PAVING_FEATHER := 0.1
+const GRASS_PAVING_SEAM_METRES := 1.5
 ## A terrain road (the worn colour the exporter paints into the terrain's
 ## vertex colour, LookProfile.TERRAIN_ROAD_COLOUR) is road from this weight
 ## and verge from this one.
@@ -1568,7 +1597,7 @@ const REGION_SECTIONS := {
 		"verge_value_earth", "verge_saturation", "verge_green_red", "deck_path",
 		"deck_road_colour", "deck_tint", "deck_chroma", "deck_grain", "path_detail",
 		"path_fine", "rock_value", "meadow_value", "meadow_chroma", "meadow_tint", "keep_patches",
-		"paving_tint", "verge_grain", "verge_grain_steep", "class_textures"],
+		"paving_tint", "verge_grain", "verge_grain_steep", "class_textures", "kit_paving"],
 	"grass": ["root", "tip", "value", "layers", "open", "meadow", "open_green"],
 	"sky": ["top", "horizon", "paint", "clear", "haze_warmth"],
 	"water": ["decode_albedo", "inland_tint", "sea_value", "sea_chroma", "sea_tint"],
@@ -1578,7 +1607,7 @@ const REGION_SECTIONS := {
 }
 const REGION_TABLE_KEYS := ["layers", "decode_albedo", "crown_materials", "tree_words",
 	"shrub_words", "untamed_words", "plain_words", "keep_words", "keep_patches", "hole_words",
-	"class_textures"]
+	"class_textures", "kit_paving"]
 const REGION_META_KEYS := ["id", "schema", "notes"]
 ## Keys whose values are colours: [r, g, b] display (sRGB) components, exactly
 ## as a Color() constant takes them, or "#rrggbb".
@@ -1725,6 +1754,14 @@ static func keep_patches(id: String) -> Array:
 	var words: Variant = region_section(id, "ground").get("keep_patches")
 	return words if words is Array else []
 
+## The words naming `id`'s opaque kit paving among its walk decks (its file's
+## `ground.kit_paving`, lower case, contained in the deck's node name), which
+## the look feathers and paints as pale paving (LookGround.paint_kit_paving);
+## empty for most regions.
+static func kit_paving(id: String) -> Array:
+	var words: Variant = region_section(id, "ground").get("kit_paving")
+	return words if words is Array else []
+
 ## The words naming `id`'s landmarks that keep a hole round the player when
 ## they fade, never vanishing whole (its file's `props.hole_words`, lower
 ## case, contained in the occluding mesh's node name; LookFade.mode_of);
@@ -1823,7 +1860,7 @@ static func _expected(section: String, bare: String) -> String:
 		return "table of numbers"
 	if bare == "class_textures":
 		return "table of %s to class texture names" % [CLASS_TEXTURE_SLOTS]
-	if section == "foliage" or bare == "keep_words" or bare == "keep_patches" or bare == "hole_words":
+	if section == "foliage" or bare in ["keep_words", "keep_patches", "hole_words", "kit_paving"]:
 		return "list of strings"
 	return "number"
 
@@ -1863,7 +1900,7 @@ static func _typed_value(section: String, bare: String, value: Variant) -> Varia
 			table[str(word)] = float(weight)
 		table.make_read_only()
 		return table
-	if bare == "keep_words" or bare == "keep_patches" or bare == "hole_words":
+	if bare in ["keep_words", "keep_patches", "hole_words", "kit_paving"]:
 		if value is not Array:
 			return null
 		var words: Array = []
