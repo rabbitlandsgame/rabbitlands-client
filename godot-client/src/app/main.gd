@@ -1531,6 +1531,12 @@ func _process(delta: float) -> void:
 		Network.send_chat("#inventory")
 	_update_preview_viewport()
 	_update_action_cursor()
+	if audio_director != null and weather_layer != null:
+		var weather_map := MapRegistry.resolve(map_registry, AppState.current_map)
+		var outdoors := not weather_map.is_empty() and not weather_map.has("interiorOf") \
+			and not weather_map.has("insidesOf")
+		audio_director.set_weather(weather_layer.look() \
+			if AppState.authenticated and outdoors else {})
 	if _spawn_backlog:
 		_spawn_backlog = false
 		_queue_world_sync()

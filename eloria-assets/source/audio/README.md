@@ -1,6 +1,6 @@
 # Licensed game audio
 
-The game uses 31 sound effects and 39 music tracks, including 36 additional
+The game uses 32 sound effects and 39 music tracks, including 36 additional
 selections approved on October 16, 2026. Most are CC0 1.0. The waterfall and
 MouthlessGames' three home/interior tracks use CC BY 3.0; Angus Macnaughton's
 **Fantasy Music - Night Town** uses CC BY 4.0. Each recording and its
@@ -82,6 +82,14 @@ with a 2.2 kHz low-pass filter and a one-second overlap crossfade. These changes
 are declared beside the corresponding filenames in the shipped credits.
 
 ## Distribution
+
+Rain uses the first recording from [Rain (loopable)](https://opengameart.org/content/rain-loopable)
+by Ylmir, under CC0 1.0. The retained `rain/1.ogg` is converted to mono 44.1 kHz
+PCM, level-adjusted to a 0.6 sample peak, and given a 0.6-second overlap crossfade.
+The continuous rain bed follows the shown rain intensity, with a short fade to
+avoid abrupt starts and stops. It uses the world ambience bus, continues when
+particles are hidden, and stops indoors, on disconnect, or when sound is disabled.
+Source and output hashes, creator credit, and license links ship with the audio.
 
 The game reads `assets/audio/CREDITS.txt` through **Settings → Audio credits**.
 Credits include each creator, original title, source URL, license URL, source

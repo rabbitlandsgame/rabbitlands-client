@@ -384,12 +384,14 @@ static func _amounts(look: Array) -> PackedFloat32Array:
 			result[index] = clampf(float(look[index + 1]) / 100.0, 0.0, 1.0)
 	return result
 
-## One drop: a thin vertical quad, so it reads as a streak rather than a dot.
+## Short, translucent streaks stay legible from the game camera without
+## turning a shower into a curtain. The soft edges avoid bright rectangles.
 func _drop_mesh() -> Mesh:
 	var mesh := QuadMesh.new()
-	mesh.size = Vector2(0.07, 1.1)
+	mesh.size = Vector2(0.055, 0.8)
 	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.80, 0.88, 1.0, 0.75)
+	material.albedo_color = Color(0.78, 0.84, 0.90, 0.58)
+	material.albedo_texture = _soft_streak()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	# Fixed-Y billboarding keeps a drop upright as the camera turns. Plain
@@ -399,6 +401,17 @@ func _drop_mesh() -> Mesh:
 	material.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
 	mesh.material = material
 	return mesh
+
+func _soft_streak() -> Texture2D:
+	var image := Image.create(16, 64, false, Image.FORMAT_RGBA8)
+	for y: int in 64:
+		var along := float(y) / 63.0
+		var tip := smoothstep(0.0, 0.14, along) * (1.0 - smoothstep(0.78, 1.0, along))
+		for x: int in 16:
+			var across := absf(float(x) / 15.0 * 2.0 - 1.0)
+			var edge := 1.0 - smoothstep(0.55, 1.0, across)
+			image.set_pixel(x, y, Color(1.0, 1.0, 1.0, edge * tip))
+	return ImageTexture.create_from_image(image)
 
 ## A flake (snow, ash, sand): a soft dot facing the camera.
 func _flake_mesh(colour: Color, size: float) -> Mesh:

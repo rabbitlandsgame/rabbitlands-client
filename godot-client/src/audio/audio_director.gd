@@ -26,6 +26,8 @@ const VOICE_COUNT := 8
 const STEP_INTERVAL_MSEC := 280
 const FOOTSTEP_GAIN := 0.32
 const FOOTSTEP_VARIANTS := 3
+const RAIN_GAIN := 0.85
+const RAIN_FADE_RATE := 0.6
 
 var enabled := true:
 	set(value):
@@ -68,6 +70,9 @@ var _last_step_msec := -STEP_INTERVAL_MSEC
 var _step_actor_id := -1
 var _last_step_variant := -1
 var _step_random := RandomNumberGenerator.new()
+var _rain_player: AudioStreamPlayer
+var _rain_amount := 0.0
+var _rain_gain := 0.0
 
 func _ready() -> void:
 	name = "AudioDirector"
@@ -101,6 +106,32 @@ func set_category_volume(category: String, value: float) -> void:
 		return
 	category_volumes[category] = clampf(value, 0.0, 1.0)
 	AudioMix.set_volume(AudioMix.CATEGORIES[category].bus, category_volumes[category])
+
+## The shown precipitation already follows the server's weather transition.
+## The caller supplies an empty look indoors or outside an authenticated game.
+## Particle visibility is a graphics choice and does not mute the weather.
+func set_weather(look: Dictionary) -> void:
+	_rain_amount = clampf(float(look.get("precipitation", 0.0)), 0.0, 1.0) \
+		if int(look.get("fall", 0)) == 1 else 0.0
+
+func _process(delta: float) -> void:
+	_rain_gain = move_toward(_rain_gain, _rain_amount * RAIN_GAIN if enabled else 0.0,
+		delta * RAIN_FADE_RATE)
+	if _rain_gain <= 0.0:
+		if _rain_player != null:
+			_rain_player.stop()
+		return
+	if _rain_player == null:
+		if not _streams.has("rain"):
+			return
+		_rain_player = AudioStreamPlayer.new()
+		_rain_player.name = "RainAmbience"
+		_rain_player.bus = AudioMix.CATEGORIES.ambience.bus
+		_rain_player.stream = AmbientAudioBinder._looping(_streams["rain"] as AudioStream)
+		add_child(_rain_player)
+	_rain_player.volume_db = linear_to_db(_rain_gain)
+	if not _rain_player.playing:
+		_rain_player.play()
 
 ## The sounds this client knows about, by name.
 func sound_names() -> Array[String]:
@@ -174,6 +205,10 @@ func play_music(track: String) -> bool:
 	return true
 
 func stop_all(clear_music_request := true) -> void:
+	_rain_amount = 0.0
+	_rain_gain = 0.0
+	if _rain_player != null:
+		_rain_player.stop()
 	if _program_player != null:
 		_program_player.stop()
 	for player: AudioStreamPlayer in _voices:

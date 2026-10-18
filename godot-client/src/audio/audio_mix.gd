@@ -41,6 +41,6 @@ static func bus_for_sound(sound: String) -> StringName:
 		return CATEGORIES.footsteps.bus
 	if sound.begins_with("combat_") or sound in ["spell_cast", "world_effect"]:
 		return CATEGORIES.combat.bus
-	if sound in ["civic_crowd", "waterfall"]:
+	if sound in ["civic_crowd", "waterfall", "rain"]:
 		return CATEGORIES.ambience.bus
 	return CATEGORIES.activity.bus

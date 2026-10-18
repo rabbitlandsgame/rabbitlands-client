@@ -469,6 +469,18 @@
       "attribution_notice": "Credit CodeManu.",
       "verified_on": "2026-10-16",
       "source_page_sha256": "6290c219b0d901f10bf30fe353b96762011a762f1a6c9d463756d55334649dd8"
+    },
+    "rain": {
+      "title": "Rain (loopable)",
+      "creator": "Ylmir",
+      "url": "https://opengameart.org/content/rain-loopable",
+      "download_url": "https://opengameart.org/sites/default/files/Rain%20OGG.zip",
+      "download_sha256": "e68f3e1c77493cf43bec84cebff5043bff6be9ce16d59b24caa988cd460aa75b",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_notice": "CC0; attribution optional. Rain recording by Ylmir.",
+      "verified_on": "2026-10-18",
+      "source_page_sha256": "2e23a6fd0ad86fd30fab4c72e2611a5b0da11de1e3ffa313793a8fc6e03ba84c"
     }
   },
   "assets": [
@@ -1767,6 +1779,21 @@
       "review_id": "36",
       "sha256": "7622c9009a89bfb3b899a21832c037caf7909ad89f61fb2aa25d057974507e6a",
       "changes": "Converted to 44.1 kHz; stereo Ogg Vorbis; level adjusted; two-pass loudness normalization to -24.0 LUFS with -3.0 dBTP ceiling."
+    },
+    {
+      "name": "rain",
+      "file": "rain.wav",
+      "kind": "sound",
+      "source": "rain",
+      "original": "rain/1.ogg",
+      "original_sha256": "4f659f68cf5219007d0bb0969a1862491ceee4057fda4c491c6001e8608fa2cb",
+      "processing": {
+        "channels": 1,
+        "crossfade": 0.6,
+        "peak": 0.6
+      },
+      "sha256": "a63a95baad0bbed55a54b51bf40ed3435956a1c4a5094b9e694911ea438c3a3b",
+      "changes": "Converted to 44.1 kHz; mono 16-bit PCM WAV; level adjusted; 0.6-second overlap crossfade for looping."
     }
   ]
 }

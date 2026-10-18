@@ -33,7 +33,7 @@ func _run() -> void:
 		"fresh settings start with a softer master and quiet HUD sounds")
 
 	var names: Array = director.call("sound_names") as Array
-	_expect(names.size() == 31 and names.has("harvest_start")
+	_expect(names.size() == 32 and names.has("rain") and names.has("harvest_start")
 		and names.has("combat_hit") and names.has("world_effect")
 		and names.has("footstep") and names.has("civic_crowd")
 		and names.has("waterfall"),
@@ -208,11 +208,46 @@ func _run() -> void:
 		dialog.hide()
 
 	await _test_audio_mix(main, director, app_state)
+	_test_rain_map_gating(main, director, app_state)
 
 	print("audio director tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	main.queue_free()
 	await process_frame
 	quit(failures)
+
+func _test_rain_map_gating(main: Control, director: Node, state: Node) -> void:
+	var saved_map: String = state.get("current_map")
+	var weather: Weather3D = main.get("weather_layer")
+	weather.set_weather(1, 80, false, false)
+	state.set("authenticated", true)
+	state.set("current_map", "four_gates")
+	director.set("enabled", true)
+	main.call("_process", 0.016)
+	director.call("_process", 2.0)
+	var rain := director.get_node_or_null("RainAmbience") as AudioStreamPlayer
+	_expect(rain != null and rain.playing,
+		"the client feeds outdoor rain to the director with particles hidden")
+	var registry: Dictionary = main.get("map_registry")
+	var inside := ""
+	for map_id: String in registry:
+		var entry: Dictionary = registry[map_id]
+		if entry.has("interiorOf") or entry.has("insidesOf"):
+			inside = map_id
+			break
+	_expect(not inside.is_empty(), "the shipped registry includes interior maps")
+	state.set("current_map", inside)
+	main.call("_process", 0.016)
+	director.call("_process", 2.0)
+	_expect(rain != null and not rain.playing,
+		"entering an interior suppresses the outdoor rain bed")
+	state.set("current_map", "four_gates")
+	state.set("authenticated", false)
+	main.call("_process", 0.016)
+	director.call("_process", 2.0)
+	_expect(rain != null and not rain.playing, "rain stays silent outside authenticated play")
+	weather.clear()
+	state.set("current_map", saved_map)
+	director.call("stop_all")
 
 func _test_audio_mix(main: Control, director: Node, state: Node) -> void:
 	var window := main.get("settings_window") as Control

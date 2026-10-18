@@ -27,7 +27,7 @@ class NativeSoundTests(unittest.TestCase):
         cls.manifest = json.loads((SOURCE / "manifest.json").read_text(encoding="utf-8"))
 
     def test_catalog_covers_gameplay_and_every_surface(self):
-        required = {"civic_crowd", "waterfall", "footstep", "combat_hit", "combat_miss", "harvest_start", "harvest_gather", "item_pickup", "spell_cast", "world_effect", "ui_click", "ui_close", "level_up"}
+        required = {"civic_crowd", "waterfall", "rain", "footstep", "combat_hit", "combat_miss", "harvest_start", "harvest_gather", "item_pickup", "spell_cast", "world_effect", "ui_click", "ui_close", "level_up"}
         required.update(f"footstep_{s}_{i}" for s in ("dirt", "grass", "stone", "wood", "sand", "snow") for i in range(1, 4))
         self.assertEqual({s["name"] for s in self.catalog["sounds"]}, required)
         self.assertEqual(len(self.catalog["sounds"]), len(required))
