@@ -44,9 +44,7 @@ Landfall isles); pass `--maps` for others.
 Then look in game. Write views (a target point, a compass heading, a pitch and a
 distance) to a JSON file and turn them into trailer-camera shots with
 `scripts/audit_shots.py`. Render stills before and after with the trailer camera's
-`--preview` mode (`godot-client/src/dev/trailer_camera/README.md`). The camera was on
-client branch `feature/trailer-camera` when this skill was written; until it is merged,
-copy that folder into your worktree, untracked, to render.
+`--preview` mode (`godot-client/src/dev/trailer_camera/README.md`, on develop).
 `references/audit-checklist.md` lists what to look at and in which views.
 
 ## 2. Choose the layer
@@ -108,7 +106,9 @@ gets hard, is in `references/edge-pipeline.md`. Read it before changing a consta
     `publish_client`, collision and crossings, then `publish_server --apply`, commit,
     and apply again.
   - Check served reach and walk the changed roads.
-  - `references/road-shapes.md` has the road specifics.
+  - `references/road-shapes.md` has the road specifics, reroute grading and the
+    guards a republish trips. `references/edge-pipeline.md` covers splitting a
+    patch and reading scene transforms.
 
 ## 5. Verify and record
 
@@ -146,5 +146,6 @@ gets hard, is in `references/edge-pipeline.md`. Read it before changing a consta
     (slot `soil`) on all 15 isles. Forest floor got no slot: its moss pack is its own
     texture and wraps cleanly. Its patches are authored at opacity 0.4, under the
     0.42 patch cut, so most of each is cut away; that is a look or content fix.
-- **Still need a republish:** road shapes, patch shapes, narrow blends and road edge
-  ramps. They are recorded as follow-ups.
+- **Republished in the content pass** (client 3523bffd): four hairpin reroutes, the
+  smaller road kinks, rebuilt patches, wider paving blends and road `edge_feather`
+  0.16 → 0.45. Its lessons are in the references.

@@ -39,6 +39,26 @@ patches (cyan squares) over each `map-detail.webp`.
   - Served walkability needs grades of 0.65 or less and a fresh served-grid
     reach check.
 
+## Grading a reroute
+
+These are from the 2026-10-17 content pass (Boarsend R41, Hearthcroft R30, R32 and R27).
+- Fade the new bed in from each join over 6 m of the rerouted span (a smoothstep
+  weight on the height change). At the joins the old road's bed is already right.
+- Do not smooth the height change. A Gaussian on it blurred the bed into its banks
+  and steepened the centreline to grades of 0.82.
+- Do not add a flat shoulder past the widest deck edge. 1 m of shoulder pushed fill
+  banks out to 6 m on steep slopes. Bank straight out from the deck edge (the pass
+  used slope 0.7, banks 3-6 m wide).
+- Afterwards, check the terrain gradient in every 2 m cell under the decks (road
+  half-width × 1.15) against 0.65, `export_collision.py`'s `MAX_GRADE`. Compare with
+  the scene before the change and list the cells that are newly steep. A rerouted
+  deck over a steep cell is unwalkable on the served grid.
+- Then compare served reach from the arrival point, before and after. Hearthcroft's
+  reroute banks blocked 475 tiles and closed three small pockets. The publisher rows
+  still passed.
+
+## Publishing
+
 Every road change is authored content. It changes the walk decks, `collision.bin`
 and the server's served grid, so it needs the full publication order in
 `eloria-assets/maps/continent-v2/_continent_v2/README.md`:
@@ -49,6 +69,26 @@ and the server's served grid, so it needs the full publication order in
 Run `map_audit.py drift` first: a map whose saved scene already differs from its
 last bake will publish those other changes too. Coordinate with anyone else
 publishing; generated files are regenerated after a merge, never hand-merged.
+
+The 2026-10-16 procedural-model retirement left three guards that a republish trips.
+Patch rebuilds trip them too:
+- **Pinned chunk hashes.** `godot-client/data/assets/retired_procedural_models.json`
+  `mapMeshCopies` pins the SHA-256 (and retired mesh indices) of chunk GLBs that held
+  a retired mesh. `render_minimap.py` refuses a rebuilt chunk whose bytes changed
+  ("retired mesh index needs refresh"). Refresh the entry, or drop it when the chunk
+  no longer contains a retired mesh. The content pass dropped the four cave-mouth
+  chunks' entries. `godot-client/tests/test_retired_procedural_models.gd` reads the same index.
+- **Wrappers naming deleted models.** The retirement emptied some `AuthoredAssets`
+  wrappers but left their `catalog_asset_id` naming the deleted model. Those scenes
+  stop baking with "source asset is missing" (`region_snapshot.gd`). The content pass
+  removed six of them with the owner's approval (fecac386). Look for others in any
+  scene you bake.
+- **Builder digest.** `underground.py` checks each underground package's
+  `provenance.builderSha256` against `build_underground.py`. The retirement added a
+  raising guard to that builder, which changed its digest, so `publish_server`
+  refused every continent-v2 publish. The builder can no longer run. The owner chose
+  to advance `landfall_insides`' `builderSha256` to the guarded builder's digest
+  (e7fd821c) rather than patch the check. Do the same if the builder changes again.
 
 ## Path character beyond geometry
 
