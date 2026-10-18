@@ -1,0 +1,11 @@
+# Mustelid motion
+
+The seven approved sets are Moss Badger, Mossback Badger, Giant Badger, Ice Wolverine, River Otter, Riverglass Otter and Stoat. They use native Walk (1.12 s), Jog/scurry (0.66 s), Sword_Attack/lunge-and-rake (1.60 s) and Death_A/supported collapse (2.60 s), plus inherited idle, fighting idle and hit. Attack and death hold from 1.45 s and 2.05 s.
+
+Actor-specific physical chains and whole-paw surfaces drive contact. Mossback hind tracks sit farther behind its forelegs. Heavy Giant Badger skin is consolidated anatomically into eight influences. Curled tails are centered with explicit guide, geometry and bind preparations. River Otter's cloak, straps and basket follow the torso. Stoat uses a corrected anatomical body frame, a localized cheek-spike repair and full-width belly weights with protected upper-leg sockets; its accepted curves and 527 protected paw rows are exact through the final belly repair.
+
+Topology, UVs, image bytes and node hierarchy remain unchanged. Reviewed tail/body-frame and cheek geometry changes are declared separately in `docs/qa/mustelid-motion/preservation.json`; rest/binds are intentionally prepared on affected actors. Wrapper translation is baked into all physical sibling roots where required. Inherited slots retain their previous floor baseline; dense floor/contact qualification covers the four authored actions.
+
+Dedicated maps under `data/animations/mustelid/` preserve server action names and authored cadence. Strides use existing registry import scales; facing, scales and attachments are unchanged. Tracked importer policies retain 3072 FPS with optimization/compression disabled. Independent off-grid physical and deformed-surface witnesses cover all 49 slots, including repaired surfaces and eight-influence meshes.
+
+Run `python eloria-assets/tools/test_mustelid_motion.py` with NumPy and SciPy. After importing the project, run `tests/test_mustelid_motion.gd`. Portable native checks cover contacts, surface floor, serial lengths, loops and terminal holds. Current-client component playback checks witnesses, action switching, RESET and idle restoration. They do not establish a full client/server session or crowd performance. High-resolution sources, processing stages and six-angle normal-speed review videos remain ignored.
