@@ -379,6 +379,16 @@ const STONE_TINT_LEAD := Vector2(0.1, 0.03)
 ## sand shares its texture with the Four Gates plaza's paving, so its tint is
 ## all that tells them apart.
 const SAND_TINT := Vector2(0.95, 0.1)
+## A glazed patch whose tint is a mid-value warm earth is bare soil
+## (LookGround.soil_tint): at most x bright (display value), at least y
+## saturated, its red ahead of its blue by at least z, and not green. The
+## isles' ploughed fields (the Soil preset at #a88c6b: value 0.66, saturation
+## 0.36, red ahead by 0.24) are soil; their forest floor (the moss pack under
+## #858066: saturation 0.23, red ahead by 0.12) and ripe wheat (#edd685, value
+## 0.93) are not. It only chooses a class texture (the `soil` slot): soil is
+## painted as the glaze it was. Four Gates' orange soil (#ffa85c, value 1.0)
+## is not caught; no Nymara region names a soil texture.
+const SOIL_TINT := Vector3(0.8, 0.3, 0.15)
 ## At most this many paving patches are handed to a root's roads, the largest
 ## first; a chunk holds two or three.
 const PAVING_RECTS_MAX := 8
@@ -509,6 +519,57 @@ const PATCH_RIM := Vector3(0.42, 0.06, 0.1)
 ## showed through the square as a green veil.
 const PAVING_RIM := Vector3(0.12, 0.04, 0.05)
 const RIM_NOISE_METRES := 0.9
+## The cut also wanders in broad lobes (two octaves, the coarse one
+## RIM_LOBE_METRES across) and follows its texture's grain. With the fine
+## wobble alone, a rectangle's side, an ellipse's arc and a road's shoulder
+## read as ruled lines from the game camera (map audit 2026-10-17: Greenlight's
+## quay and lighthouse square, Landfall's gate yard). Each class's x moves the
+## cut by up to x vertex alpha either way in lobes; y moves it by y per unit of
+## relative luminance, so paving ends stone by stone and dark joints go first.
+## Neither carries an edge past its authored footprint: the exporter's ramp,
+## a road's one rim strip or a patch's blend width, is all there is to move in.
+const RIM_LOBE_METRES := 5.0
+const DECK_RIM_LOBE := Vector2(0.14, 0.25)
+const PATCH_RIM_LOBE := Vector2(0.18, 0.2)
+const PAVING_RIM_LOBE := Vector2(0.09, 0.3)
+const MEADOW_RIM_LOBE := Vector2(0.12, 0.12)
+
+## Detail textures a region may lay over its ground by class
+## (`ground.class_textures`, slot -> name, e.g. {"deck": "packed_earth"}).
+## Mapped in continent metres (`metres` per repeat) and rescaled to the source
+## texture's mean colour (painted_ground_surface.gdshaderinc), so a region's
+## palette and paint classes are unchanged and only the structure is new.
+## Generated for the Landfall isles (map audit 2026-10-17), which drew their
+## roads, sand, soil and lawns from one mottled ground texture under four
+## tints and their paving from wall masonry laid flat; provenance in
+## textures/README.md. `coastal_gravel` is the isles' own coastal limestone
+## gravel pack tile made seamless and opaque: the pack's alpha is a vignette,
+## and its scree and shingle patches showed the 4 m repeat as a grid of green
+## grout lines (painted_ground_surface.gdshaderinc). `tilled_soil` replaced
+## the ground texture their ploughed fields still shared with the lawns.
+const CLASS_TEXTURES := {
+	"packed_earth": {"path": "res://src/world/look/textures/packed-earth-path.png", "metres": 3.5},
+	"flagstone": {"path": "res://src/world/look/textures/flagstone-paving.png", "metres": 3.2},
+	"beach_sand": {"path": "res://src/world/look/textures/beach-sand.png", "metres": 4.0},
+	"coastal_gravel": {"path": "res://src/world/look/textures/coastal-gravel.png", "metres": 4.0},
+	"tilled_soil": {"path": "res://src/world/look/textures/tilled-soil.png", "metres": 3.5},
+}
+## The surfaces a class texture can cover: walk decks, pale paving, sand
+## glazes, green meadows, bare rock and bare soil (LookGround.class_slot). A
+## meadow keeps its own texture on the isles: a fine turf at a 4 m repeat
+## averaged to flat green at the game camera, losing the mottle the painted
+## look leans on (audit renders, 2026-10-17). The isles' patches carry their
+## authored preset only as a tint and a texture, so a slot is how the runtime
+## reaches a preset: every isle patch classed rock is "Coastal limestone
+## gravel" (410 patch meshes on the 15 isles) and every one classed soil is
+## "Soil". Their "Forest floor moss" patches are plain glazes and have no slot:
+## the moss pack is their own texture already, and it wraps without a grid.
+## What they lack at the game camera is coverage, not texture: authored at
+## opacity 0.4, under PATCH_RIM's 0.42 cut, most of each is cut away.
+const CLASS_TEXTURE_SLOTS := ["deck", "paving", "sand", "meadow", "rock", "soil"]
+## How much of a class texture's own hue survives its recolouring (0: the
+## source's mean colour exactly; 1: only its luminance is matched).
+const CLASS_TEXTURE_HUE := 0.5
 ## Every road is edged: on the far side of its rim, where its coverage has
 ## run out but its geometry has not (vertex alpha from EDGE_BAND_FROM up to the
 ## rim), whatever lies under it is darkened by EDGE_BAND (value x0.72) - the
@@ -1201,6 +1262,12 @@ const HAZE_CURVE := 2.0
 const HAZE_DENSITY := 0.75
 const HAZE_DENSITY_PER_DECLARED := 100.0
 const HAZE_DENSITY_MAX := 0.92
+## The haze a fog bank closes it to (WeatherSky marks the weather's fog in the
+## manifest's `fog.weather`, 0..1): from HAZE_BEGIN-HAZE_END to these at full
+## fog, and up to full density. Begun at 80 m, the haze could only ever grey
+## the far half of a frame, so a fog state read as an overcast one.
+const WEATHER_HAZE_BEGIN := 6.0
+const WEATHER_HAZE_END := 150.0
 ## How much of the haze also veils the sky itself, clouds and zenith alike.
 ## Little: the painted sky draws its own haze where it belongs, at the horizon.
 const HAZE_SKY_AFFECT := 0.1
@@ -1501,7 +1568,7 @@ const REGION_SECTIONS := {
 		"verge_value_earth", "verge_saturation", "verge_green_red", "deck_path",
 		"deck_road_colour", "deck_tint", "deck_chroma", "deck_grain", "path_detail",
 		"path_fine", "rock_value", "meadow_value", "meadow_chroma", "meadow_tint", "keep_patches",
-		"paving_tint", "verge_grain", "verge_grain_steep"],
+		"paving_tint", "verge_grain", "verge_grain_steep", "class_textures"],
 	"grass": ["root", "tip", "value", "layers", "open", "meadow", "open_green"],
 	"sky": ["top", "horizon", "paint", "clear", "haze_warmth"],
 	"water": ["decode_albedo", "inland_tint", "sea_value", "sea_chroma", "sea_tint"],
@@ -1510,7 +1577,8 @@ const REGION_SECTIONS := {
 	"props": ["keep_words", "keep_chroma", "keep_tint", "hole_words"],
 }
 const REGION_TABLE_KEYS := ["layers", "decode_albedo", "crown_materials", "tree_words",
-	"shrub_words", "untamed_words", "plain_words", "keep_words", "keep_patches", "hole_words"]
+	"shrub_words", "untamed_words", "plain_words", "keep_words", "keep_patches", "hole_words",
+	"class_textures"]
 const REGION_META_KEYS := ["id", "schema", "notes"]
 ## Keys whose values are colours: [r, g, b] display (sRGB) components, exactly
 ## as a Color() constant takes them, or "#rrggbb".
@@ -1753,6 +1821,8 @@ static func _expected(section: String, bare: String) -> String:
 		return "colour ([r, g, b] or \"#rrggbb\")"
 	if bare == "layers" or bare == "decode_albedo":
 		return "table of numbers"
+	if bare == "class_textures":
+		return "table of %s to class texture names" % [CLASS_TEXTURE_SLOTS]
 	if section == "foliage" or bare == "keep_words" or bare == "keep_patches" or bare == "hole_words":
 		return "list of strings"
 	return "number"
@@ -1770,6 +1840,18 @@ static func _typed_value(section: String, bare: String, value: Variant) -> Varia
 			return Color(float(parts[0]), float(parts[1]), float(parts[2]),
 				float(parts[3]) if parts.size() == 4 else 1.0)
 		return null
+	if bare == "class_textures":
+		if value is not Dictionary:
+			return null
+		var slots := {}
+		for slot: Variant in value:
+			var texture_name: Variant = (value as Dictionary)[slot]
+			if str(slot) not in CLASS_TEXTURE_SLOTS or texture_name is not String \
+					or not CLASS_TEXTURES.has(texture_name):
+				return null
+			slots[str(slot)] = texture_name
+		slots.make_read_only()
+		return slots
 	if bare == "layers" or bare == "decode_albedo":
 		if value is not Dictionary:
 			return null

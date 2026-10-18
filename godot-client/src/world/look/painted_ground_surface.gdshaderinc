@@ -14,7 +14,22 @@
 // StandardMaterial3D never reads vertex colour on a blended surface, so on
 // develop those edges are hard steps along the terrain cells. Here the
 // coverage is cut at look_rim.x with a narrow step and a noise wobble: a
-// broken brush edge, not an airbrushed ramp (see LookProfile.DECK_RIM).
+// broken brush edge, not an airbrushed ramp (see LookProfile.DECK_RIM). The
+// cut also wanders in broad lobes a few metres across (look_rim_lobe), so a
+// rectangle's side or an ellipse's arc does not read as a ruled line, and
+// follows the texture's own grain (look_rim_grain): paving ends stone by
+// stone and gravel grain by grain, the light stones outlasting the dark
+// joints, as worn ground does.
+//
+// A region may lay a class texture over its decks and patches
+// (LookProfile.CLASS_TEXTURES): its detail, mapped in continent metres, is
+// rescaled to the source texture's own mean colour, so the paint classes,
+// the palette and every look trim see the colour they always did and only
+// the surface's structure changes. Its alpha replaces the source's too: the
+// coastal limestone gravel pack came out of the generator with a vignette in
+// its alpha (about 0.3 in the corners, 0.58 along the edges, 0.94 inside), and
+// multiplied into coverage it opened every 4 m tile edge to the grass beneath,
+// a grid of green grout lines over the isles' scree (map audit 2026-10-17).
 //
 // A shader that also defines LOOK_GROUND_EDGE_BAND (the walk decks) darkens
 // the ground beyond that edge by look_edge_band, where the deck's geometry
@@ -38,6 +53,16 @@ uniform float look_opacity = 1.0;
 // noise wobble.
 uniform vec3 look_rim = vec3(0.5, 0.06, 0.1);
 uniform float look_rim_noise_metres = 0.9;
+// Broad lobes in the cut: amplitude (vertex alpha) and size in metres.
+uniform vec2 look_rim_lobe = vec2(0.0, 5.0);
+// How far the texture's grain moves the cut (vertex alpha per unit of
+// relative luminance): light stones stay, dark joints go first.
+uniform float look_rim_grain = 0.0;
+// A class texture laid over the source's (look_class_metres 0: none), and how
+// much of its own hue it keeps against the source's mean colour.
+uniform sampler2D look_class_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float look_class_metres = 0.0;
+uniform float look_class_hue = 0.5;
 // Darkening beyond a road's edge, and the vertex alpha where it begins.
 uniform float look_edge_band = 0.0;
 uniform float look_edge_band_from = 0.1;
@@ -76,6 +101,17 @@ void vertex() {
 
 void fragment() {
 	vec4 texel = texture(albedo_texture, UV);
+	// The texture's mean colour: the class texture is rescaled to it, and the
+	// grain the cut follows is measured against it.
+	vec3 texel_mean = textureLod(albedo_texture, UV, 16.0).rgb;
+	if (look_class_metres > 0.0) {
+		vec2 class_uv = look_ground_xz / look_class_metres;
+		vec4 detail = texture(look_class_texture, class_uv);
+		vec3 detail_mean = max(textureLod(look_class_texture, class_uv, 16.0).rgb, vec3(0.02));
+		vec3 recoloured = detail.rgb * texel_mean / detail_mean;
+		vec3 own_hue = detail.rgb * (look_luma(texel_mean) / max(look_luma(detail_mean), 0.02));
+		texel = vec4(mix(recoloured, own_hue, look_class_hue), detail.a);
+	}
 	vec3 albedo = texel.rgb * albedo_color.rgb;
 	vec3 vertex_colour = COLOR.rgb;
 	if (vertex_albedo_srgb) {
@@ -84,7 +120,7 @@ void fragment() {
 	}
 	// The smallest mip is the texture's mean colour: the reference the paint
 	// classes and lifts by, so a lifted path keeps its texture's grain.
-	vec3 reference = textureLod(albedo_texture, UV, 16.0).rgb * albedo_color.rgb;
+	vec3 reference = texel_mean * albedo_color.rgb;
 	if (use_vertex_albedo) {
 		albedo *= vertex_colour;
 		reference *= vertex_colour;
@@ -110,8 +146,13 @@ void fragment() {
 	float coverage = 1.0;
 	float band = 0.0;
 	if (use_vertex_alpha) {
+		vec2 lobe_p = look_ground_xz / look_rim_lobe.y;
+		float lobe = 0.65 * look_value_noise(lobe_p + vec2(41.3, 17.9))
+			+ 0.35 * look_value_noise(lobe_p * 2.7 + vec2(7.1, 29.3)) - 0.5;
+		float grain = look_luma(texel.rgb) / max(look_luma(texel_mean), 0.02) - 1.0;
 		float weight = COLOR.a + (look_value_noise(look_ground_xz / look_rim_noise_metres)
-			- 0.5) * 2.0 * look_rim.z;
+			- 0.5) * 2.0 * look_rim.z + lobe * 2.0 * look_rim_lobe.x
+			+ clamp(grain, -1.0, 1.0) * look_rim_grain;
 		coverage = smoothstep(look_rim.x - look_rim.y, look_rim.x + look_rim.y, weight);
 		if (look_debug == 0) {
 			band = mix(look_edge_band, look_edge_band_paving,

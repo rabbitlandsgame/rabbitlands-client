@@ -239,6 +239,53 @@ func _run() -> void:
 		and is_equal_approx(sun.light_energy, 3.0),
 		"an interior's lighting is left exactly as its package set it")
 
+	# A map's own night and twilights. Without variants every colour is the
+	# shared constant, so a package that names none is lit exactly as before.
+	var shared_night := DayNightBinder.night_palette(outdoor.data.environment)
+	_expect(shared_night.sky_top == DayNightBinder.NIGHT_SKY_TOP
+		and shared_night.fog == DayNightBinder.NIGHT_FOG
+		and shared_night.ambient == DayNightBinder.NIGHT_AMBIENT_COLOUR
+		and shared_night.moon == DayNightBinder.MOON_COLOUR
+		and DayNightBinder.twilight_palette(outdoor.data.environment, 90.0).sun
+			== DayNightBinder.DAWN_SUN_COLOUR
+		and DayNightBinder.twilight_palette(outdoor.data.environment, 270.0).fog == null,
+		"a package with no variants keeps the shared night and twilight")
+	var isle := WorldManifest.new()
+	isle.data = outdoor.data.duplicate(true)
+	var cold_fog := Color(0.2, 0.23, 0.29)
+	var rose_dusk := Color(1.0, 0.58, 0.36)
+	isle.data.environment["variants"] = {
+		"night": {"sky": {"zenith": [0.09, 0.11, 0.18], "horizon": [0.2, 0.23, 0.3]},
+			"fog": {"color": [cold_fog.r, cold_fog.g, cold_fog.b]},
+			"ambient": {"color": [0.5, 0.55, 0.66]}, "moon": {"color": [0.48, 0.56, 0.8]}},
+		"dawn": {"sun": {"color": [0.92, 0.82, 0.74]}},
+		"dusk": {"sun": {"color": [rose_dusk.r, rose_dusk.g, rose_dusk.b]},
+			"fog": {"color": [0.6, 0.54, 0.54]}}}
+	var isle_moon := DirectionalLight3D.new()
+	root.add_child(isle_moon)
+	WorldEnvironmentBinder.apply(isle, world_environment, sun)
+	DayNightBinder.apply(isle, world_environment, sun, 0.0, isle_moon)
+	_expect(world_environment.environment.fog_light_color.is_equal_approx(cold_fog)
+		and isle_moon.light_color.is_equal_approx(Color(0.48, 0.56, 0.8))
+		and world_environment.environment.ambient_light_color.is_equal_approx(
+			Color(0.5, 0.55, 0.66)),
+		"at midnight a map's own night variant is its fog, moon and ambient")
+	_expect(is_equal_approx(world_environment.environment.ambient_light_energy,
+			maxf(noon_ambient * DayNightBinder.NIGHT_AMBIENT_ENERGY,
+				DayNightBinder.NIGHT_AMBIENT_FLOOR)),
+		"a night variant moves colours only: the night is exactly as bright")
+	DayNightBinder.apply(isle, world_environment, sun, 270.0)
+	var dusk_sun := sun.light_color
+	DayNightBinder.apply(outdoor, world_environment, sun, 270.0)
+	_expect(dusk_sun != sun.light_color
+		and DayNightBinder.twilight_palette(isle.data.environment, 270.0).sun == rose_dusk
+		and DayNightBinder.twilight_palette(isle.data.environment, 90.0).sun
+			== Color(0.92, 0.82, 0.74),
+		"dusk takes the evening's variant and dawn the morning's")
+	isle_moon.queue_free()
+	WorldEnvironmentBinder.apply(outdoor, world_environment, sun)
+	environment = world_environment.environment
+
 	# The clock the client carries forward between packets.
 	var app_state: Node = root.get_node("/root/AppState")
 	app_state.call("_on_packet", 5, PackedByteArray([100, 0]))

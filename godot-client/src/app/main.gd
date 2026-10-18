@@ -83,6 +83,8 @@ const ChatLogTabsScript := preload("res://src/ui/chat_log_tabs.gd")
 const LoginBackdropScript := preload("res://src/ui/login_backdrop.gd")
 const ReferenceWindowScript := preload("res://src/ui/reference_window.gd")
 const ActiveBuffBarScript := preload("res://src/ui/active_buff_bar.gd")
+const StatusEffectIcons := preload("res://src/ui/status_effect_icons.gd")
+const KeyBindings := preload("res://src/ui/key_bindings.gd")
 const VramTextures := preload("res://src/world/vram_textures.gd")
 var interior_cutaway: RefCounted = InteriorCutawayScript.new()
 ## On a secrets map, only the secret the player stands in is drawn; the rest
@@ -343,6 +345,22 @@ var world_effects: Array = []
 var harvest_sparkle: HarvestSparkle3D
 ## The sky and the fires the server placed on this map.
 var weather_layer: Weather3D
+## False until the first sky after logging in, which is set at once; every
+## later change of weather eases in.
+var _weather_synced := false
+## The map the weather was last synced for: a sky met by crossing into
+## another map eases in over at least Weather3D.CROSSING_EASE_SECONDS.
+var _weather_map := ""
+var _weather_lighting_at := 0
+## The weather look the light was last applied under (Weather3D.look_version),
+## so the sky is applied again while the weather eases, its last step included.
+var _weather_applied_version := -1
+## Whether that look had any weather in it, so the haze is put back once it clears.
+var _weather_applied_active := false
+## The streamed maps' own lamps, lit at dusk and through the night.
+var night_lamps: NightLamps
+## The map's declared mist and gulls (environment.presentation).
+var presentation_effects: PresentationEffects
 ## Objects the server placed into this map after it loaded, by object id.
 var placed_object_nodes: Dictionary = {}
 var audio_director: Node
@@ -351,6 +369,10 @@ var spells_window: Control
 var summoning_window: Control
 var emotes_window: Control
 var ranging_window: Control
+## The Techniques tab inside the Spells & Techniques window. The Tab-held
+## technique ring and the quick spell slots aim through it.
+var techniques_panel: VBoxContainer
+var technique_ring: Control
 var guild_window: Control
 var settings_window: Control
 var reference_window: Control
@@ -359,6 +381,12 @@ var reference_window: Control
 var _shadows_enabled := true
 var _effects_enabled := true
 var _nameplates_enabled := true
+## Trailer capture (`_configure_trailer_capture`): off unless the client was
+## launched with TRAILER_CAPTURE_ARGUMENT. 0 draws the HUD, 1 the world alone,
+## 2 the world without nameplates. Never saved.
+var _trailer_capture_enabled := false
+var _trailer_capture_level := 0
+var _trailer_capture_layer: CanvasLayer
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
 var _fps_limit := 0
 var _player_notes := ""
@@ -379,6 +407,8 @@ var spell_wheel: Control
 var _magic_area_preview: MeshInstance3D
 var player_info_panel: Control
 var active_buff_bar: Control
+var local_status_grid: GridContainer
+var _local_status_effects: Array[String] = []
 ## Server map objects whose tile has no navigation surface beneath it on the
 ## rendered map. Misplaced content rather than a client fault, but silent
 ## unless somebody counts it.
@@ -1002,6 +1032,10 @@ const MAP_PICTURE_SINK_METRES := 0.05
 ## The slider's range lives with the slider, in settings_window.gd.
 const NAME_DISTANCE_DEFAULT_METRES := SettingsWindowScript.NAME_DISTANCE_DEFAULT
 const NAME_FADE_METRES := 5.0
+## The launch argument (after `--`) that arms trailer capture, and the fixed,
+## unbindable key that cycles it (`_configure_trailer_capture`).
+const TRAILER_CAPTURE_ARGUMENT := "--trailer-capture"
+const TRAILER_CAPTURE_KEY := KEY_F9
 ## How many actors `_sync_world` builds in one pass. A spawn is a couple of
 ## milliseconds of model, skin and equipment work, so a pack of twenty
 ## arriving together was one long frame; the rest follow on the next frames.
@@ -1046,6 +1080,7 @@ func _ready() -> void:
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
+	game_view.add_child(preload("res://src/mounts/mount_controls.gd").new())
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
 	actor_type_models = model_registry.get("actorTypes", {})
@@ -1098,6 +1133,10 @@ func _ready() -> void:
 	spells_window = SpellsWindowScript.new()
 	game_view.add_child(spells_window)
 	spells_window.reserve_bottom_hud($GameView/Quickbar)
+	techniques_panel = spells_window.get("techniques_panel") as VBoxContainer
+	techniques_panel.call("configure", Network.technique_request,
+		_technique_creature_target, _technique_player_target)
+	techniques_panel.connect("place_on_bar", _place_technique_on_bar)
 	# Configured further down, once the spell catalog has read its data file:
 	# the window builds its group rows from the catalog it is handed.
 	summoning_window = SummoningWindowScript.new()
@@ -1197,6 +1236,14 @@ func _ready() -> void:
 		_stop_keyboard_movement()
 		_magic_ring_ui(20))
 	casting_bar.open_wheel.connect(spell_wheel.open_wheel)
+	# Hold Tab (technique_ring) for the technique ring; it aims through the
+	# Techniques tab exactly as the tab and the quick slots do.
+	technique_ring = preload("res://src/ui/technique_ring.gd").new()
+	technique_ring.set("techniques", techniques_panel)
+	technique_ring.set("anchor_provider", _spell_wheel_anchor)
+	technique_ring.set("can_open", _can_open_technique_ring)
+	technique_ring.z_index = 250
+	game_view.add_child(technique_ring)
 	spell_loadout.changed.connect(func():
 		magic_selection.target_mode = spell_loadout.targeting_mode()
 		spell_wheel.preferences = spell_loadout.ring_preferences
@@ -1236,6 +1283,10 @@ func _ready() -> void:
 	AppState.teleport_seen.connect(_on_teleport_seen)
 	weather_layer = Weather3D.new()
 	world_root.add_child(weather_layer)
+	night_lamps = NightLamps.new()
+	world_root.add_child(night_lamps)
+	presentation_effects = PresentationEffects.new()
+	world_root.add_child(presentation_effects)
 	world_loader.load_completed.connect(_on_world_loaded)
 	world_loader.load_failed.connect(_on_world_load_failed)
 	if mouse_cursors.configure("res://assets/ui/cursors/cursors.json"):
@@ -1292,6 +1343,7 @@ func _ready() -> void:
 	_load_hud_settings()
 	# Explicit launch options select a server without changing saved settings.
 	_apply_connection_launch_options(OS.get_cmdline_user_args())
+	_configure_trailer_capture(OS.get_cmdline_user_args())
 	_configure_inventory_menus()
 	_configure_minimap_menu()
 	_build_inventory_slots()
@@ -1496,6 +1548,22 @@ func _process(delta: float) -> void:
 		if Time.get_ticks_msec() >= _stream_lighting_at:
 			_stream_lighting_at = Time.get_ticks_msec() + 100
 			_update_border_lighting()
+		# While rain arrives or clears the sky eases, so the light is applied
+		# again until it has settled (the border update above does this on a
+		# map with streaming borders; the isles have none).
+		if weather_layer != null \
+				and weather_layer.look_version != _weather_applied_version \
+				and Time.get_ticks_msec() >= _weather_lighting_at:
+			_weather_lighting_at = Time.get_ticks_msec() + 100
+			_apply_day_night()
+		var gloom := weather_layer.gloom() if weather_layer != null else 0.0
+		if night_lamps != null:
+			night_lamps.update(camera_rig.focus, AppState.continuous_game_minute(),
+				gloom, _day_night_active)
+		if presentation_effects != null and world_environment.environment != null:
+			presentation_effects.update(camera_rig.focus, AppState.continuous_game_minute(),
+				weather_layer.mistiness() if weather_layer != null else 0.0, gloom,
+				world_environment.environment.fog_light_color, delta, _effects_enabled)
 		_update_animation_gate(delta)
 		# Rain is everywhere, so only the box the player is standing in is
 		# drawn. Left at the world origin it fell a hundred metres away from
@@ -1569,7 +1637,8 @@ func _text_entry_active() -> bool:
 	return focus is LineEdit or focus is TextEdit
 
 func _update_keyboard_movement() -> void:
-	if (spell_wheel != null and spell_wheel.visible) or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
+	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
+			or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
 			or storage_panel.visible or full_map.visible \
 			or console_panel.visible or settings_panel.visible or item_lists_panel.visible \
 			or Input.is_key_pressed(KEY_ALT) or Input.is_key_pressed(KEY_CTRL):
@@ -3355,6 +3424,8 @@ func _exit_tree() -> void:
 
 func _on_login_succeeded() -> void:
 	Diagnostics.record("login_succeeded", {"server_map": AppState.current_map})
+	# A new session's first sky is already there, not eased in.
+	_weather_synced = false
 	spell_loadout.load_profile("%s:%d/%s" % [host_edit.text.strip_edges().to_lower(), int(port_edit.value), user_edit.text.strip_edges().to_lower()])
 	# Tell the server which Eloria extensions this client implements. Without
 	# it the server serves the legacy dialogue and raw-text fallback for every
@@ -3529,10 +3600,22 @@ func _clear_world_presentation() -> void:
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	if _trailer_capture_enabled and event is InputEventKey and (event as InputEventKey).pressed \
+			and not (event as InputEventKey).echo \
+			and (event as InputEventKey).physical_keycode == TRAILER_CAPTURE_KEY:
+		_cycle_trailer_capture()
+		get_viewport().set_input_as_handled()
+		return
 	# A drag can end over a window that consumes the release before gui_input.
 	if event is InputEventMouseButton and not event.pressed \
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
 		camera_rig.handle_mouse_button(event as InputEventMouseButton)
+	if technique_ring != null:
+		if technique_ring.call("handle_event", event):
+			_stop_keyboard_movement()
+			get_viewport().set_input_as_handled()
+			return
+		if technique_ring.visible: return
 	if spell_wheel != null:
 		if spell_wheel.handle_event(event):
 			_set_attack_modifier(false)
@@ -3547,7 +3630,15 @@ func _input(event: InputEvent) -> void:
 	if _handle_bound_action(event):
 		get_viewport().set_input_as_handled()
 
+## Each ring may open (and stay open) only while the other is shut; the rest
+## of the rules are the same for both (`_ring_allowed`).
+func _can_open_technique_ring() -> bool:
+	return _ring_allowed() and not (spell_wheel != null and spell_wheel.visible)
+
 func _can_open_spell_wheel() -> bool:
+	return _ring_allowed() and not (technique_ring != null and technique_ring.visible)
+
+func _ring_allowed() -> bool:
 	return game_view.visible and not _text_entry_active() \
 		and not popup_panel.visible and not purchase_confirm.visible \
 		and not dialogue_panel.visible and not trade_panel.visible \
@@ -3636,6 +3727,13 @@ func _handle_bound_action(event: InputEvent) -> bool:
 		return true
 	if not game_view.visible:
 		return false
+	# Before focused HUD buttons. Text entry and key
+	# capture were excluded above; Ctrl+R remains the guild window shortcut.
+	var mount_request := preload("res://src/mounts/mount_hotkeys.gd").request_for_event(
+		event, AppState.actor_mounts.get(AppState.local_actor_id, {}))
+	if not mount_request.is_empty():
+		Network.send_chat(mount_request)
+		return true
 	# After leaving typing, a separate Escape discards the draft before
 	# the same press can close another window.
 	if event.is_action_pressed("cancel") and not chat_input.text.is_empty():
@@ -3645,7 +3743,9 @@ func _handle_bound_action(event: InputEvent) -> bool:
 	if event.is_action_pressed("toggle_inventory"):
 		_on_inventory_button_pressed()
 		return true
-	if event.is_action_pressed("toggle_map"):
+	# Exact match: the map is a bare M, and Alt+M (minimap) and Ctrl+M
+	# (manufacture) must not open it as well.
+	if event.is_action_pressed("toggle_map", false, true):
 		_toggle_full_map()
 		return true
 	if event.is_action_pressed("toggle_minimap"):
@@ -3733,6 +3833,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		["toggle_buddy", _on_buddy_button_pressed],
 		["toggle_stats", _on_stats_button_pressed],
 		["toggle_ranging", _on_ranging_button_pressed],
+		["toggle_techniques", _on_techniques_button_pressed],
 		["toggle_help", _on_help_button_pressed],
 		["toggle_notepad", _on_info_button_pressed],
 		["toggle_options", _on_options_pressed],
@@ -3765,6 +3866,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if popup_panel.visible:
 			# The popup is modal: it takes the cancel before anything under it.
 			_on_popup_dismiss_pressed()
+		elif bool(AppState.autocast.get("active", false)):
+			# Escape stops repeat casting before it closes anything else.
+			Network.magic_request({"op": "cancel"})
 		elif extension_windows != null and extension_windows.close_top():
 			pass
 		elif player_info_panel != null and player_info_panel.is_open():
@@ -3777,6 +3881,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			emotes_window.call("close")
 		elif ranging_window != null and bool(ranging_window.call("is_open")):
 			ranging_window.call("close")
+		elif techniques_panel != null and str(techniques_panel.get("pending_key")) != "":
+			techniques_panel.call("cancel_pending")
 		elif guild_window != null and bool(guild_window.call("is_open")):
 			guild_window.call("close")
 		elif settings_window != null and settings_window.is_open():
@@ -3995,7 +4101,7 @@ func _banner_row(row_name: String) -> HBoxContainer:
 func _nameplate_visible_for(actor_id: int) -> bool:
 	if actor_id == AppState.local_actor_id:
 		return false
-	if not _nameplates_enabled:
+	if not _nameplates_enabled or _trailer_capture_level >= 2:
 		return false
 	if _banner_option("instance_mode"):
 		return false
@@ -4601,6 +4707,11 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 		return
 	var picked_actor_id: int = _pick_actor(viewport_position)
 	if picked_actor_id >= 0:
+		# A technique armed from the Techniques window takes the creature
+		# clicked next, the way a pending spell takes its target.
+		if techniques_panel != null and bool(techniques_panel.call("fire_at", picked_actor_id)):
+			AppState.select_actor(picked_actor_id)
+			return
 		# A bag at your own feet outranks your own body: you are not a click
 		# target for yourself, so the click opens the sack you are standing
 		# over. A pending actor spell still wins - clicking yourself casts
@@ -4786,8 +4897,10 @@ func _on_state_changed(path: StringName) -> void:
 			_update_legacy_clock_and_compass()
 			_apply_day_night()
 			_sync_diagnostics()
-		&"attributes":
+		&"attributes", &"techniques":
 			_sync_stats()
+		&"autocast":
+			_sync_autocast()
 		&"perks", &"perk_catalog":
 			_sync_stats()
 			_sync_perk_catalog()
@@ -4824,6 +4937,9 @@ func _on_state_changed(path: StringName) -> void:
 			# can land after the window has opened.
 			if bool(AppState.npc_dialogue.get("open", false)):
 				_sync_dialogue()
+		&"mount_states":
+			for mount_actor_id: Variant in actor_nodes:
+				_apply_actor_mount(mount_actor_id)
 		&"experience_state":
 			_sync_stats()
 		&"worn_slots", &"degraded_items":
@@ -5050,6 +5166,8 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 	if not _continuous_map_handoff:
 		WorldEnvironmentBinder.apply_camera(manifest, camera_rig)
 	_bind_light_markers(manifest)
+	if presentation_effects != null:
+		presentation_effects.bind(manifest)
 	binding_steps["light_markers"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
 	_apply_day_night()
 	binding_steps["day_night"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
@@ -5140,9 +5258,19 @@ func _update_console_location() -> void:
 func _apply_day_night() -> void:
 	if world_loader.manifest == null:
 		return
-	var lighting := exterior_stream.lighting_manifest(camera_rig.focus)
+	var lighting := _lighting_manifest()
 	_day_night_active = DayNightBinder.apply(lighting,
 		world_environment, world_sun, AppState.continuous_game_minute(), world_moon)
+	# The binder leaves the haze's density as the map bound it; rain thickens
+	# it (the look's haze re-reads it below, with the look off this is it).
+	var active := weather_layer != null and weather_layer.has_weather()
+	if (active or _weather_applied_active) and lighting != null \
+			and world_environment.environment != null:
+		var fog: Variant = (lighting.data.get("environment", {}) as Dictionary).get("fog")
+		if fog is Dictionary and (fog as Dictionary).has("density"):
+			world_environment.environment.fog_density = float((fog as Dictionary).density)
+	_weather_applied_active = active
+	_weather_applied_version = weather_layer.look_version if weather_layer != null else -1
 	_hold_shadow_switch()
 	_sync_map_environment()
 	# Look pass (a no-op with the look off): re-grade what the
@@ -5161,8 +5289,15 @@ func _hold_shadow_switch() -> void:
 	if not _shadows_enabled:
 		world_sun.shadow_enabled = false
 
-func _update_border_lighting() -> void:
+## The lighting the binders apply: the (border-blended) manifest at the
+## camera's focus, under the weather the server says is falling (WeatherSky).
+func _lighting_manifest() -> WorldManifest:
 	var lighting := exterior_stream.lighting_manifest(camera_rig.focus)
+	return WeatherSky.weathered_look(lighting, weather_layer.look()) \
+		if weather_layer != null else lighting
+
+func _update_border_lighting() -> void:
+	var lighting := _lighting_manifest()
 	if lighting == null or not lighting.data.has("streamingBorders"):
 		return
 	# Reuse the bound sky; changing a border's colour must not allocate a new
@@ -5379,6 +5514,7 @@ func _present_actor(id: Variant) -> void:
 	if actor_adapter == null:
 		return
 	existing_actor.apply_server_state(dto, actor_adapter)
+	_apply_actor_mount(id)
 	# Before apply_vitals, which is what overwrites the old value.
 	_report_health_change(int(id), int(dto.get("health", 0)),
 		int(dto.get("max_health", 0)), existing_actor)
@@ -5413,16 +5549,23 @@ func _spawn_actor(id: Variant) -> void:
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
+	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	if int(id) == AppState.local_actor_id:
 		_sync_harvest_sparkle()
 
-## Push the worn titles onto the actors wearing them.
-##
-## The title arrives on its own packet rather than in the actor's display
-## name, which packs a colour byte, the name and the guild tag into one string
-## that the decoder already unpicks by hand. So it is applied here, and on
-## spawn, for whoever is on screen when it lands.
+## Bind mount presentation to the current player identity and map, including
+## state received before a visible actor's model finished loading.
+func _apply_actor_mount(id: Variant) -> void:
+	var node := actor_nodes.get(id) as ReplicatedActor3D
+	if node == null:
+		return
+	var state: Dictionary = AppState.actor_mounts.get(int(id), {})
+	var dto: Dictionary = AppState.actors.get(id, {})
+	if state.get("map", "") != dto.get("map", "") or str(state.get("owner", "")).to_lower() != str(dto.get("name", "")).to_lower():
+		state = {}
+	node.set_mount_state(state, models)
+
 func _sync_quest_offers() -> void:
 	for id: Variant in actor_nodes:
 		var node := actor_nodes[id] as ReplicatedActor3D
@@ -6595,7 +6738,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		candidates.append({"actor": actor, "id": int(raw_id), "priority": priority,
 			"distance": actor.global_position.distance_squared_to(camera_rig.focus),
 			"rect": overhead_block_rect(screen, str(dto.get("name", "")),
-				actor.occupation())})
+				actor.occupation(), actor.status_effect_count())})
 	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if a.priority != b.priority: return a.priority < b.priority
 		if a.distance != b.distance: return a.distance < b.distance
@@ -6623,7 +6766,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 ## own width and pushes the block's bottom down a line, so two NPCs standing
 ## close do not draw one's occupation through the other's name.
 static func overhead_block_rect(screen: Vector2, actor_name: String,
-		occupation: String = "") -> Rect2:
+		occupation: String = "", negative_status_count: int = 0) -> Rect2:
 	var width := maxf(110.0, ThemeDB.fallback_font.get_string_size(
 		actor_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0)
 	var height := 38.0
@@ -6631,7 +6774,13 @@ static func overhead_block_rect(screen: Vector2, actor_name: String,
 		width = maxf(width, ThemeDB.fallback_font.get_string_size("<%s>" % occupation,
 			HORIZONTAL_ALIGNMENT_LEFT, -1, ReplicatedActor3D.OCCUPATION_FONT_SIZE).x + 12.0)
 		height += ReplicatedActor3D.OCCUPATION_DROP
-	return Rect2(screen - Vector2(width * 0.5, 12), Vector2(width, height))
+	var top := 12.0
+	if negative_status_count > 0:
+		width = maxf(width, StatusEffectIcons.width(negative_status_count) + 8.0)
+		var rise: float = ReplicatedActor3D.NEGATIVE_STATUS_RISE
+		top = rise + ReplicatedActor3D.NEGATIVE_STATUS_SIZE * 0.5 + 2.0 + StatusEffectIcons.extra_height(negative_status_count)
+		height += top - 12.0
+	return Rect2(screen - Vector2(width * 0.5, top), Vector2(width, height))
 
 ## How much of an actor's overhead block shows at this distance from the
 ## player: all of it up to `NAME_FADE_METRES` short of the name distance,
@@ -7216,8 +7365,10 @@ func _load_hud_settings() -> void:
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
+		# keys.ini holds the bindings now. The settings file's old copy is read
+		# only when there is no keys.ini yet, to carry a player's keys over.
 		var stored_bindings: Variant = config.get_value("controls", "bindings", {})
-		if stored_bindings is Dictionary:
+		if stored_bindings is Dictionary and not FileAccess.file_exists(KeyBindings.PATH):
 			settings_window.call("restore_bindings", stored_bindings)
 		var stored_marks: Variant = config.get_value("console", "marks", [])
 		if stored_marks is Array:
@@ -7270,6 +7421,7 @@ func _load_hud_settings() -> void:
 	_apply_inventory_scale(_inventory_scale)
 	_apply_ground_bag_scale(_ground_bag_scale)
 	_apply_banner_options()
+	settings_window.call("load_keys_file")
 	_refresh_unified_settings()
 
 func _on_ui_scale_changed(value: float) -> void:
@@ -7353,8 +7505,6 @@ func _save_hud_settings() -> void:
 	config.set_value("hud", "spell_quickbar", casting_bar.hud_layout())
 	config.set_value("camera", "rotation_sensitivity",
 		float(camera_rig.rotation_sensitivity))
-	config.set_value("controls", "bindings",
-		settings_window.call("stored_bindings"))
 	config.set_value("console", "marks", console_commands.marks)
 	config.set_value("console", "ignored", console_commands.ignored)
 	config.set_value("console", "filters", console_commands.filters)
@@ -8006,8 +8156,8 @@ func _configure_window_stack() -> void:
 			item_lists_panel, console_panel, reading_panel, chat_hud, system_chat_hud]:
 		window_stack.register(panel)
 	for controller: Control in [spells_window, summoning_window, emotes_window,
-			ranging_window, guild_window, settings_window, reference_window,
-			player_info_panel]:
+			ranging_window, guild_window, settings_window,
+			reference_window, player_info_panel]:
 		window_stack.register(controller.get("panel"))
 	for panel: Control in extension_windows._cascade():
 		window_stack.register(panel)
@@ -8204,8 +8354,9 @@ func _sync_stats() -> void:
 	var carried: int = int(stats.get("carried", 0))
 	var capacity: int = maxi(0, int(stats.get("capacity", 0)))
 	var free_space: int = clampi(capacity - carried, 0, capacity)
-	var action: int = int(stats.get("action_points", 0))
-	var max_action: int = maxi(1, int(stats.get("max_action_points", 1)))
+	var action_pool := _action_pool(stats)
+	var action: int = action_pool.x
+	var max_action: int = action_pool.y
 	_set_meter(health_bar, health_text, health, max_health, "Health")
 	_set_meter(mana_bar, mana_text, ether, max_ether, "Ethereality")
 	_set_meter(action_bar, action_text, action, max_action, "Action")
@@ -8362,8 +8513,9 @@ func _sync_statistics_document(stats: Dictionary) -> void:
 	var max_health: int = maxi(1, int(stats.get("max_health", 1)))
 	var ether: int = int(stats.get("ether", 0))
 	var max_ether: int = maxi(1, int(stats.get("max_ether", 1)))
-	var action: int = int(stats.get("action_points", 0))
-	var max_action: int = maxi(1, int(stats.get("max_action_points", 1)))
+	var action_pool := _action_pool(stats)
+	var action: int = action_pool.x
+	var max_action: int = action_pool.y
 	for pool: Array in [["Material", health, max_health],
 			["Ethereal", ether, max_ether], ["Action", action, max_action]]:
 		stats_pools.add_child(_stats_pool(str(pool[0]), int(pool[1]),
@@ -9791,6 +9943,7 @@ func _update_legacy_clock_and_compass() -> void:
 	compass_needle.rotation = deg_to_rad(-camera_rig.yaw_degrees)
 
 func _update_actor_resource_overlay() -> void:
+	_sync_local_status_icons()
 	if not _banner_has_content():
 		if actor_resource_overlay.visible:
 			actor_resource_overlay.hide()
@@ -9831,7 +9984,42 @@ func _above_head(actor_node: Node3D) -> Vector3:
 		if actor_node.has_method("head_height") else 2.8 - BANNER_HEAD_CLEARANCE)
 	return actor_node.global_position + Vector3(0.0, head + BANNER_HEAD_CLEARANCE, 0.0)
 
+func _sync_local_status_icons() -> void:
+	var dto: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	var next: Array[String] = StatusEffectIcons.known(dto.get("status_effects", dto.get("negative_statuses", [])))
+	if not _nameplates_enabled or int(dto.get("health", 0)) <= 0:
+		next.clear()
+	if next == _local_status_effects:
+		return
+	_local_status_effects = next
+	if not is_instance_valid(local_status_grid):
+		local_status_grid = GridContainer.new()
+		local_status_grid.name = "LocalStatusIcons"
+		local_status_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		local_status_grid.add_theme_constant_override("h_separation", int(StatusEffectIcons.GAP))
+		local_status_grid.add_theme_constant_override("v_separation", int(StatusEffectIcons.GAP))
+		var rows := actor_resource_overlay.get_node("Rows")
+		rows.add_child(local_status_grid)
+		rows.move_child(local_status_grid, 0)
+	for child: Node in local_status_grid.get_children():
+		local_status_grid.remove_child(child)
+		child.queue_free()
+	local_status_grid.columns = maxi(1, mini(StatusEffectIcons.COLUMNS, next.size()))
+	local_status_grid.visible = not next.is_empty()
+	for effect: String in next:
+		var icon := TextureRect.new()
+		icon.name = effect
+		icon.custom_minimum_size = Vector2.ONE * StatusEffectIcons.SIZE
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.texture = StatusEffectIcons.TEXTURES[effect]
+		icon.tooltip_text = effect.replace("expose_", "Weakness: ").replace("_", " ").capitalize()
+		icon.mouse_filter = Control.MOUSE_FILTER_PASS
+		local_status_grid.add_child(icon)
+
 func _banner_has_content() -> bool:
+	if not _local_status_effects.is_empty():
+		return true
 	if _banner_option("show_names"):
 		return true
 	for row_spec: Array in BANNER_ROWS:
@@ -9912,11 +10100,31 @@ func _on_teleport_seen(teleport: Dictionary) -> void:
 func _sync_weather() -> void:
 	if weather_layer == null:
 		return
-	if not _effects_enabled:
-		weather_layer.set_weather(0, 0)
-		return
-	weather_layer.set_weather(int(AppState.weather.get("kind", 0)),
-		int(AppState.weather.get("intensity", 0)))
+	# The particle switch turns the drops off, not the weather: the sky still
+	# greys under rain the player has chosen not to draw. The first sky after
+	# logging in is already there; every change after it eases in, a new
+	# map's included, so walking across a border into rain darkens the sky
+	# over a few steps rather than at the line. A weather_state_v1 server says
+	# how long the change takes (counted from when its frame arrived); a
+	# legacy one does not, and its change eases over LEGACY_EASE_SECONDS.
+	var first := not _weather_synced
+	_weather_synced = true
+	var map := str(AppState.current_map)
+	var crossed := not first and map != _weather_map
+	_weather_map = map
+	var state: Dictionary = AppState.weather_state
+	if not state.is_empty():
+		var left := maxf(0.0, float(state.seconds)
+			- float(Time.get_ticks_msec() - int(state.at_msec)) / 1000.0)
+		if crossed:
+			left = maxf(left, Weather3D.CROSSING_EASE_SECONDS)
+		weather_layer.set_state(state.current, state.target, left, _effects_enabled,
+			first, str(state.name))
+	else:
+		weather_layer.set_weather(int(AppState.weather.get("kind", 0)),
+			int(AppState.weather.get("intensity", 0)), _effects_enabled, not first)
+	if first:
+		_apply_day_night()
 
 ## The fires burning on this map, placed by tile. A fire the server removes
 ## goes out; one it has not mentioned was never lit.
@@ -10250,7 +10458,8 @@ func _sync_hud_button_states(force := false) -> void:
 		# an open window says so with the lit frame its pressed style carries.
 		var atlas: Texture2D = (_hud_inactive_atlas if button.disabled
 			else _hud_active_atlas)
-		if atlas != null:
+		# A button the atlas has no art for yet (Techniques) keeps its label.
+		if atlas != null and _hud_icon_regions.has(button):
 			button.icon = _atlas_region(atlas, _icon_region_for(button, sitting))
 	_apply_attack_preview(attack_preview)
 
@@ -10813,6 +11022,47 @@ func _sync_spell_power_controls() -> void:
 	spell_power_down.disabled = requested_spell_power <= 1
 	spell_power_up.disabled = requested_spell_power >= ceiling
 
+## Trailer capture, for filming and never a player setting: launched with
+## `-- --trailer-capture`, TRAILER_CAPTURE_KEY cycles the HUD, a clean feed of
+## the world alone, and the clean feed without nameplates (see
+## src/dev/trailer_camera/README.md). The clean feed draws the world
+## viewport's own texture over everything, so a window, popup or chat line
+## that opens underneath during a take never reaches the recording; the HUD
+## still takes input beneath it. Without the argument the key does nothing.
+func _configure_trailer_capture(arguments: PackedStringArray) -> void:
+	_trailer_capture_enabled = arguments.has(TRAILER_CAPTURE_ARGUMENT)
+	if not _trailer_capture_enabled or _trailer_capture_layer != null:
+		return
+	_trailer_capture_layer = CanvasLayer.new()
+	_trailer_capture_layer.name = "TrailerCaptureFeed"
+	_trailer_capture_layer.layer = 128
+	_trailer_capture_layer.visible = false
+	var feed := TextureRect.new()
+	feed.name = "WorldFeed"
+	feed.texture = main_viewport.get_texture()
+	feed.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	feed.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	feed.stretch_mode = TextureRect.STRETCH_SCALE
+	feed.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_trailer_capture_layer.add_child(feed)
+	add_child(_trailer_capture_layer)
+	game_view.visibility_changed.connect(_sync_trailer_capture)
+	print("trailer_capture enabled: %s cycles HUD, clean feed, clean feed without nameplates" % [
+		OS.get_keycode_string(TRAILER_CAPTURE_KEY)])
+
+func _cycle_trailer_capture() -> void:
+	_trailer_capture_level = (_trailer_capture_level + 1) % 3
+	_sync_trailer_capture()
+	# Nameplates follow level 2 through _nameplate_visible_for.
+	_apply_banner_options()
+	print("trailer_capture level=", _trailer_capture_level)
+
+## The clean feed only ever covers the game view: at the login screen, or
+## after a disconnect, there is no world to film.
+func _sync_trailer_capture() -> void:
+	if _trailer_capture_layer != null:
+		_trailer_capture_layer.visible = _trailer_capture_level > 0 and game_view.visible
+
 ## Saves what is on screen. The legacy client bound this to a dedicated key
 ## and so does this one; the file goes to the user directory, because a client
 ## may be installed somewhere it cannot write.
@@ -11130,6 +11380,9 @@ func _on_client_setting_changed(section: String, key: String,
 				if is_instance_valid(object_value):
 					(object_value as MapObject3D).set_particles_enabled(_effects_enabled)
 			_sync_harvest_sparkle()
+			# The rain's drops follow the switch at once; the sky keeps its
+			# weather either way.
+			_sync_weather()
 		"nameplates":
 			_nameplates_enabled = bool(value)
 			_apply_banner_options()
@@ -11145,14 +11398,22 @@ func _on_client_setting_changed(section: String, key: String,
 			Network.send_chat("#targetmode weak")
 		"autogather":
 			Network.send_chat("#autogather")
+		"magic_autocast":
+			Network.magic_request({"op": "autocast", "enabled": bool(value)})
 	# Commands on Gameplay belong to the server; its local preferences still
 	# save immediately.
-	if key not in ["target_mode_strong", "target_mode_weak", "autogather"]:
+	if key not in ["target_mode_strong", "target_mode_weak", "autogather", "magic_autocast"]:
 		_save_hud_settings()
 
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()
+	var mount_controls := game_view.get_node_or_null("MountControls")
+	if mount_controls != null:
+		mount_controls.call("_refresh")
 	_sync_quick_slots()
+	# Quick spell badges and the Techniques hint name the keys they use.
+	casting_bar.refresh()
+	techniques_panel.call("sync")
 	# The help page is generated from the bindings, so it follows a rebind.
 	reference_window.call("_refresh_help")
 
@@ -11232,6 +11493,52 @@ func _on_emotes_button_pressed() -> void:
 func _on_quest_button_pressed() -> void:
 	extension_windows.call("toggle_quest_journal")
 	_sync_hud_button_states(true)
+
+## Ctrl+X: the Spells & Techniques window, opened on Techniques.
+func _on_techniques_button_pressed() -> void:
+	spells_window.call("toggle_techniques")
+	audio_director.play("ui_click" if spells_window.is_open() else "ui_close")
+	_sync_hud_button_states(true)
+
+## The Techniques tab's "+": the first empty quick spell slot takes it.
+func _place_technique_on_bar(key: String) -> void:
+	var index: int = int(spell_loadout.call("first_empty_slot"))
+	if index < 0:
+		AppState.append_local_message("Every quick spell slot is in use. Drag the technique onto the one to replace.")
+		return
+	spell_loadout.call("assign_technique", index, key)
+	AppState.append_local_message("%s is on quick spell slot %d." % [
+		str(techniques_panel.get("rows").get(key, {}).get("name", key)), index + 1])
+
+## A creature a technique may be aimed at: something this player could attack
+## that is not another player.
+func _technique_creature_target(actor_id: int) -> bool:
+	var actor: Dictionary = AppState.actors.get(actor_id, {})
+	return int(actor.get("kind", 0)) not in [1, 4] and _is_attackable_actor(actor_id, actor)
+
+## Another player, for Intercept; the server checks they are in the party.
+func _technique_player_target(actor_id: int) -> bool:
+	var actor: Dictionary = AppState.actors.get(actor_id, {})
+	return actor_id != AppState.local_actor_id and int(actor.get("kind", 0)) in [1, 4]
+
+## The action points a meter shows. The legacy stats slots 113/114 carry pick
+## points on this server, so a techniques_v1 server's real pool wins.
+func _action_pool(stats: Dictionary) -> Vector2i:
+	if AppState.techniques.has("action_points"):
+		return Vector2i(int(AppState.techniques.get("action_points", 0)),
+			maxi(1, int(AppState.techniques.get("max_action_points", 1))))
+	return Vector2i(int(stats.get("action_points", 0)),
+		maxi(1, int(stats.get("max_action_points", 1))))
+
+## Repeat casting: the Gameplay box follows the server, and while a spell is
+## repeating the spell status line says so and how to stop it.
+func _sync_autocast() -> void:
+	settings_window.call("restore_toggle", "magic_autocast", bool(AppState.autocast.get("enabled", false)))
+	if bool(AppState.autocast.get("active", false)):
+		var spell: Dictionary = spell_catalog.spell(int(AppState.autocast.get("spell_id", -1))) if spell_catalog != null else {}
+		spell_status.text = "Repeating %s every round · click elsewhere or press Esc to stop" % str(spell.get("name", "a spell"))
+	elif spell_status.text.begins_with("Repeating "):
+		spell_status.text = ""
 
 func _on_ranging_button_pressed() -> void:
 	ranging_window.toggle()
@@ -11364,6 +11671,10 @@ func _spell_result_text(result: Dictionary) -> String:
 func _cast_spell_slot(slot: int) -> void:
 	if slot < 0 or slot >= spell_loadout.slots.size(): return
 	var entry: Dictionary = spell_loadout.slots[slot]
+	if not str(entry.get("technique", "")).is_empty():
+		# A technique on the quick bar is aimed like one from the ring or tab.
+		techniques_panel.call("use", str(entry.technique))
+		return
 	if int(entry.id) < 0:
 		spells_window.edit_prepared_slot(slot)
 		return
@@ -13473,6 +13784,9 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 		chunk_stream.cell_ready.connect(_on_chunk_surface_ready)
 	if chunk_stream != null and not chunk_stream.cell_retiring.is_connected(_on_chunk_cell_retiring):
 		chunk_stream.cell_retiring.connect(_on_chunk_cell_retiring)
+	# The lamps the territory places, the neighbours' included.
+	if chunk_stream != null and night_lamps != null:
+		night_lamps.watch(chunk_stream)
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()

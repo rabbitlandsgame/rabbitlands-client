@@ -21,10 +21,11 @@ func _ready() -> void:
 	if identity.get("platform", "source") == "source" or identity.get("public_key", "") == "":
 		set_process(false)
 		return
-	var cache := Release.cache_for(Release.install_root())
-	if DirAccess.make_dir_recursive_absolute(cache) == OK:
-		_lease = cache.path_join("running-%d.json" % OS.get_process_id())
-		Release.save_json(_lease, {"pid": OS.get_process_id()})
+	if Release.update_owner(identity) == "github":
+		var cache := Release.cache_for(Release.install_root())
+		if DirAccess.make_dir_recursive_absolute(cache) == OK:
+			_lease = cache.path_join("running-%d.json" % OS.get_process_id())
+			Release.save_json(_lease, {"pid": OS.get_process_id()})
 	var layer := CanvasLayer.new()
 	layer.layer = 100
 	add_child(layer)
@@ -32,6 +33,7 @@ func _ready() -> void:
 	_status.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_status.position = Vector2(-500, 14)
 	_status.size = Vector2(480, 56)
+	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_status.add_theme_color_override("font_color", Color("ffd58c"))
@@ -43,6 +45,9 @@ func _ready() -> void:
 	get_node("/root/Network").connect("connection_state_changed", func(state: String) -> void:
 		if state == "connected" and not _busy:
 			_target = "")
+	if Release.update_owner(identity) != "github":
+		set_process(false)
+		return
 	var pending := Release.read_json(Release.cache_for(Release.install_root()).path_join("pending.json"))
 	if not pending.is_empty():
 		var release := Release.verify_manifest(pending, identity)
@@ -71,6 +76,14 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		return
 	var notice: Variant = JSON.parse_string(payload.get_string_from_utf8())
 	if not notice is Dictionary or notice.get("schema") != 1:
+		return
+	if Release.update_owner(identity) != "github":
+		# No pending-cache read/write, HTTP request, download, or install for
+		# Steam and manually replaced bundles, including stale GitHub notices.
+		if notice.get("disabled", false) == true:
+			_status.text = ""
+		elif Release.valid_commit(notice.get("required_commit")):
+			_status.text = "" if Release.contains_commit(identity, notice.required_commit) else Release.external_update_message(identity)
 		return
 	if notice.get("disabled", false) == true:
 		_generation += 1
@@ -157,6 +170,8 @@ func _run_worker(callable: Callable) -> Variant:
 	return result
 
 func _download(url: String, commit: String, generation: int) -> void:
+	if Release.update_owner(identity) != "github":
+		return
 	_status.text = "A game update is available. Checking release information…"
 	var fetched := await _fetch(url)
 	if generation != _generation:

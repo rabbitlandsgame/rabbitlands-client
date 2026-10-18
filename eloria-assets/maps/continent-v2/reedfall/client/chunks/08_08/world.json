@@ -212,6 +212,87 @@
      ],
      "density": 0.0016
     }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.82,
+      0.66
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.96,
+      0.86,
+      0.78
+     ]
+    },
+    "fog": {
+     "color": [
+      0.86,
+      0.86,
+      0.84
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.68,
+      0.46
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.96,
+      0.72,
+      0.56
+     ]
+    },
+    "fog": {
+     "color": [
+      0.8,
+      0.7,
+      0.62
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.13,
+      0.17,
+      0.27
+     ],
+     "horizon": [
+      0.3,
+      0.35,
+      0.42
+     ]
+    },
+    "fog": {
+     "color": [
+      0.32,
+      0.36,
+      0.42
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.58,
+      0.62,
+      0.7
+     ]
+    },
+    "moon": {
+     "color": [
+      0.56,
+      0.62,
+      0.84
+     ]
+    }
    }
   },
   "water": {
@@ -227,6 +308,12 @@
    ],
    "causticsEnabled": true,
    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.9
+   }
   }
  },
  "continentGeography": {
@@ -388,8 +475,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "eb16beff22fdc2aa795a881fc6b137ecc9d08dacd8ebfe1bb8b0e788ce2a5589",
-  "sceneSha256": "f724e934c9191f4390069b1ec0476d4fa72bcf0bb07d6a3962dfdf3c995d4bcd"
+  "snapshotSha256": "87ada12425182383011848c88453f48714f4d09f31b1009a39f5141b0f717ccf",
+  "sceneSha256": "1321a67953914d7899e82b1f36e7293c13b962c5feb751d96b86205475d5763f"
  },
  "externalResources": {
   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
@@ -460,7 +547,7 @@
   ]
  },
  "performance": {
-  "glbBytes": 1776684,
+  "glbBytes": 1788224,
   "nodes": 99,
   "meshes": 3,
   "externalResources": {

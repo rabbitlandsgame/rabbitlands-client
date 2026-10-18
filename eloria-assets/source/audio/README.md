@@ -1,9 +1,10 @@
 # Licensed game audio
 
-The game uses 31 sound effects and three music tracks selected from free online
-sources on October 11, 2026. All are CC0 1.0 except kurt's **Stream Sounds**
-waterfall recording, which is CC BY 3.0 Unported. Each recording and its
-adaptation retain the license named in `manifest.json`; Eloria's original-asset
+The game uses 31 sound effects and 39 music tracks, including 36 additional
+selections approved on October 16, 2026. Most are CC0 1.0. The waterfall and
+MouthlessGames' three home/interior tracks use CC BY 3.0; Angus Macnaughton's
+**Fantasy Music - Night Town** uses CC BY 4.0. Each recording and its
+adaptation retain the license named in `manifest.json`; Rabbit Lands' original-asset
 license does not apply to these recordings.
 
 ## Sources and use
@@ -31,6 +32,38 @@ The original Kenney notices and both full Creative Commons legal texts are
 retained in `godot-client/assets/audio/licenses/` relative to the repository root.
 
 ## Rebuilding
+
+`music-program.json` is the authored playlist and map allocation. It supplies
+day/night pools for every served exterior, room types for shared interiors,
+gauntlet preparation/combat/boss pools, and invasion warning/wave/surge/boss/
+aftermath choices. Day is game minute 90 through 269 of the 360-minute cycle.
+Windowless caves and temples retain their place-based music across the clock.
+
+`python eloria-assets/tools/sync_music_program.py` publishes the context rules
+to the sibling server. It derives interior zones from the current map manifests
+and registry transforms, including disconnected sections' actual entry points.
+Re-run it after changing an interior's authored geometry or coordinate frame.
+New clients advertise `music_program_v1`; older clients keep `music.txt` beds.
+
+The server updates music on arrival, clock changes and its encounter upkeep.
+Only nearby ordinary invasion threats override outdoor music; a different map
+or an unrelated building keeps its own pool. Gauntlets use actual live combat
+and bosses rather than a map name alone. An aftermath plays once and restores
+the current place/time pool; an administrative clear does not earn a victory.
+
+The client rotates complete pieces without immediate repeats, keeps a shared
+piece playing across compatible contexts, crossfades normal changes over five
+seconds and combat changes over 1.5 seconds, and holds rapid ambient changes for
+six seconds. A four-resource cache bounds music loading. Audio settings show
+the current title and the creator in its tooltip, alongside the existing mix
+controls and offline credits. Disable/disconnect stops both crossfade voices.
+
+The 36 additions are built from their retained originals under `expanded/`,
+normalized in two passes to -24 LUFS with a -3 dBTP ceiling, and encoded as
+stereo Ogg Vorbis. Unconfirmed loop seams receive a documented 0.75-second
+overlap. The finite aftermath piece is not looped. Source links, original and
+output hashes, creator notices and all changes remain in the manifest,
+provenance, credits and license-evidence records.
 
 Run `python eloria-assets/tools/build_native_sounds.py` from the repository root.
 It reads the retained originals here and never contacts the network. Install

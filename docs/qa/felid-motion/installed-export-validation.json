@@ -1,0 +1,936 @@
+{
+  "passed": true,
+  "actors": {
+    "puma": {
+      "sha256": "bc2a83e4af3d03e53d597e1b89fbff06f8db2bb3c9f6d0458a4c7025d2fdfa16",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "duration": 1.1200000047683716,
+          "native_forward_speed": 0.2924458368312239,
+          "export_keys": 1725,
+          "audit_samples": 3877,
+          "floor_min": 0.0009998864249949435,
+          "max_paw_slide": 0.00034665710524495083,
+          "native_length_error": 4.892772913211996e-08,
+          "world_loop_seam_error": 3.3306690738754696e-16,
+          "max_adjacent_rotation_radians": 0.009568340648197041,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.00034665710524495083,
+              "stance_samples": 2481
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0003397341332404552,
+              "stance_samples": 2482
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.00014922883035496632,
+              "stance_samples": 2482
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.00011532538365354967,
+              "stance_samples": 2482
+            }
+          }
+        },
+        "Jog": {
+          "passed": true,
+          "duration": 0.6600000262260437,
+          "native_forward_speed": 0.763494931538969,
+          "export_keys": 2031,
+          "audit_samples": 4313,
+          "floor_min": 0.0009997691784138728,
+          "max_paw_slide": 0.002669418293273211,
+          "native_length_error": 4.895366959023484e-08,
+          "world_loop_seam_error": 7.771561172376096e-16,
+          "max_adjacent_rotation_radians": 0.006926623266337774,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0023496928643327412,
+              "stance_samples": 1812
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.002669418293273211,
+              "stance_samples": 1811
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0011047068231322536,
+              "stance_samples": 1811
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0011036099355673334,
+              "stance_samples": 1812
+            }
+          }
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "duration": 1.600000023841858,
+          "export_keys": 2468,
+          "audit_samples": 5241,
+          "floor_min": 0.0009997981311416922,
+          "max_paw_slide": 0.0016091372812255954,
+          "native_length_error": 4.851605936440073e-08,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.0049221570001427555,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0013942028374895955,
+              "stance_samples": 2752
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0016091372812255954,
+              "stance_samples": 2752
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0005981803752140053,
+              "stance_samples": 2657
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0005889441033289145,
+              "stance_samples": 2657
+            }
+          },
+          "muzzle_forward_reach_at_strike": 0.21174776881714752
+        },
+        "Death_A": {
+          "passed": true,
+          "duration": 2.5999999046325684,
+          "export_keys": 4001,
+          "audit_samples": 8499,
+          "floor_min": 0.0009996681238473928,
+          "max_paw_slide": 0.0004484643761694372,
+          "native_length_error": 4.8773467417606575e-08,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.005135252172862123,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0004174075348201603,
+              "stance_samples": 1634
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0004484643761694372,
+              "stance_samples": 1634
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.00019266213230094672,
+              "stance_samples": 2191
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.00014613140798163218,
+              "stance_samples": 2191
+            }
+          },
+          "fallen_muzzle_minimum_height": 0.0016000676670670155,
+          "fallen_body_and_proximal_limb_minimum_height": 0.0016076593287606394,
+          "native_head_yaw_degrees": 44.194384209190055,
+          "fallen_upper_snout_minimum_height": 0.0016000676670670155,
+          "body_roll_degrees": 88,
+          "support_scope": [
+            "Physical forward face and cheek.",
+            "Torso and proximal haunch/shoulder side."
+          ]
+        }
+      }
+    },
+    "leopard": {
+      "sha256": "d4f4df9bd9d38db7ac2c4d262d22bda84eed28cd5d393f146d91402c37bc77a9",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "duration": 1.1200000047683716,
+          "native_forward_speed": 0.279410365797821,
+          "export_keys": 1725,
+          "audit_samples": 3877,
+          "floor_min": 0.0009998450667531482,
+          "max_paw_slide": 0.0003591169098500188,
+          "native_length_error": 9.229879144312392e-08,
+          "world_loop_seam_error": 4.440892098500626e-16,
+          "max_adjacent_rotation_radians": 0.008610440469731596,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0003591169098500188,
+              "stance_samples": 2481
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0003286990090815653,
+              "stance_samples": 2482
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.00011063769150678855,
+              "stance_samples": 2482
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.00011816966824574178,
+              "stance_samples": 2482
+            }
+          }
+        },
+        "Jog": {
+          "passed": true,
+          "duration": 0.6600000262260437,
+          "native_forward_speed": 0.7294629337780643,
+          "export_keys": 2031,
+          "audit_samples": 4313,
+          "floor_min": 0.0009997661450225966,
+          "max_paw_slide": 0.0024138274810561553,
+          "native_length_error": 9.228386772808239e-08,
+          "world_loop_seam_error": 8.881784197001252e-16,
+          "max_adjacent_rotation_radians": 0.006205870609119729,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0023853383657133826,
+              "stance_samples": 1812
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0024138274810561553,
+              "stance_samples": 1811
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0010706557368668887,
+              "stance_samples": 1811
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0010978649553795865,
+              "stance_samples": 1812
+            }
+          }
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "duration": 1.600000023841858,
+          "export_keys": 2468,
+          "audit_samples": 5241,
+          "floor_min": 0.000999780511580516,
+          "max_paw_slide": 0.0014301367366675883,
+          "native_length_error": 9.121309274551237e-08,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.004980962599523398,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.001381873368337433,
+              "stance_samples": 2752
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0014301367366675883,
+              "stance_samples": 2752
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.000574176817289601,
+              "stance_samples": 2657
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0005984942900574468,
+              "stance_samples": 2657
+            }
+          },
+          "muzzle_forward_reach_at_strike": 0.19864165971611975
+        },
+        "Death_A": {
+          "passed": true,
+          "duration": 2.5999999046325684,
+          "export_keys": 4001,
+          "audit_samples": 8499,
+          "floor_min": 0.0009996247694573912,
+          "max_paw_slide": 0.00042460672070679574,
+          "native_length_error": 9.174527502986418e-08,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.004908949912747196,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.00042460672070679574,
+              "stance_samples": 1634
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.00041605690520573984,
+              "stance_samples": 1634
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0001312196733661133,
+              "stance_samples": 2191
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 8.988965017685901e-05,
+              "stance_samples": 2191
+            }
+          },
+          "fallen_muzzle_minimum_height": 0.00153664361091198,
+          "fallen_body_and_proximal_limb_minimum_height": 0.001540023965261904,
+          "native_head_yaw_degrees": 81.00019333861322,
+          "fallen_upper_snout_minimum_height": 0.00153664361091198,
+          "body_roll_degrees": 88,
+          "support_scope": [
+            "Physical forward face and cheek.",
+            "Torso and proximal haunch/shoulder side."
+          ]
+        }
+      }
+    },
+    "cheetah": {
+      "sha256": "7cd5593eb836745f7cc21c6573f38571a475ee5c9ac1103eca16c3b6e0290dbd",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "duration": 1.1200000047683716,
+          "native_forward_speed": 0.29131280090802397,
+          "export_keys": 1725,
+          "audit_samples": 3877,
+          "floor_min": 0.0009998706533028917,
+          "max_paw_slide": 0.0002284121379372967,
+          "native_length_error": 1.0961372876039377e-07,
+          "world_loop_seam_error": 4.440892098500626e-16,
+          "max_adjacent_rotation_radians": 0.0060651195621932415,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0002158230340580319,
+              "stance_samples": 2481
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0002284121379372967,
+              "stance_samples": 2482
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 9.057706860228866e-05,
+              "stance_samples": 2482
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 9.980067047535933e-05,
+              "stance_samples": 2482
+            }
+          }
+        },
+        "Jog": {
+          "passed": true,
+          "duration": 0.6600000262260437,
+          "native_forward_speed": 0.7605368891404584,
+          "export_keys": 2031,
+          "audit_samples": 4313,
+          "floor_min": 0.0009998057666938034,
+          "max_paw_slide": 0.002287757702565933,
+          "native_length_error": 1.0968265842792313e-07,
+          "world_loop_seam_error": 6.661338147750939e-16,
+          "max_adjacent_rotation_radians": 0.004202912391131824,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0019592706459448804,
+              "stance_samples": 1812
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.002287757702565933,
+              "stance_samples": 1811
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0010462914045724693,
+              "stance_samples": 1811
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0010398672337227502,
+              "stance_samples": 1812
+            }
+          }
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "duration": 1.600000023841858,
+          "export_keys": 2468,
+          "audit_samples": 5241,
+          "floor_min": 0.0009996289212988205,
+          "max_paw_slide": 0.001475171189901431,
+          "native_length_error": 1.091820353571471e-07,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.0047813400436337765,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0011959899707763273,
+              "stance_samples": 2752
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.001475171189901431,
+              "stance_samples": 2752
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.001123549793549074,
+              "stance_samples": 2657
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0006468113355963228,
+              "stance_samples": 2657
+            }
+          },
+          "muzzle_forward_reach_at_strike": 0.21084030159549805
+        },
+        "Death_A": {
+          "passed": true,
+          "duration": 2.5999999046325684,
+          "export_keys": 4001,
+          "audit_samples": 8499,
+          "floor_min": 0.0009996131492819305,
+          "max_paw_slide": 0.0003821025505548145,
+          "native_length_error": 1.0963885352377467e-07,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.0034598910047022174,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0003588257606894,
+              "stance_samples": 1634
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0003821025505548145,
+              "stance_samples": 1634
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.00024307506209574317,
+              "stance_samples": 2191
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.00021185258214352555,
+              "stance_samples": 2191
+            }
+          },
+          "fallen_muzzle_minimum_height": 0.001599956640565248,
+          "fallen_body_and_proximal_limb_minimum_height": 0.0015973939831263797,
+          "native_head_yaw_degrees": 84.7669030238988,
+          "fallen_upper_snout_minimum_height": 0.001599956640565248,
+          "body_roll_degrees": 88,
+          "support_scope": [
+            "Physical forward face and cheek.",
+            "Torso and proximal haunch/shoulder side."
+          ]
+        }
+      }
+    },
+    "moonshadow_lynx": {
+      "sha256": "cbc147ac6ace8da81d491b12a665b028fb925edf14819542164b3067acfe3cf3",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "duration": 1.1200000047683716,
+          "native_forward_speed": 0.9872315488545377,
+          "export_keys": 3448,
+          "audit_samples": 7323,
+          "floor_min": 0.0034020908220735013,
+          "max_paw_slide": 0.0005994992375762154,
+          "native_length_error": 2.525980313805576e-07,
+          "world_loop_seam_error": 3.874501164347066e-09,
+          "max_adjacent_rotation_radians": 0.0049671687353479484,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0005224495838052949,
+              "stance_samples": 4687
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0004224417955410247,
+              "stance_samples": 4688
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0005994992375762154,
+              "stance_samples": 4688
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.00047579543324808297,
+              "stance_samples": 4688
+            }
+          }
+        },
+        "Jog": {
+          "passed": true,
+          "duration": 0.6600000262260437,
+          "native_forward_speed": 2.577387635170225,
+          "export_keys": 8121,
+          "audit_samples": 16493,
+          "floor_min": 0.003402105068259146,
+          "max_paw_slide": 0.0017011714335839886,
+          "native_length_error": 4.6572748424456023e-07,
+          "world_loop_seam_error": 6.295472498862864e-08,
+          "max_adjacent_rotation_radians": 0.0016360512511135934,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0012496603074898009,
+              "stance_samples": 6924
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0014645892956191076,
+              "stance_samples": 6923
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0017011714335839886,
+              "stance_samples": 6923
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0010969311572747928,
+              "stance_samples": 6924
+            }
+          }
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "duration": 1.600000023841858,
+          "export_keys": 4923,
+          "audit_samples": 10151,
+          "floor_min": 0.003401956367962583,
+          "max_paw_slide": 0.004827913942881627,
+          "native_length_error": 2.3651105784949777e-07,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.002392683742173968,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0015119638310978492,
+              "stance_samples": 5330
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0014658847868886707,
+              "stance_samples": 5330
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.004827913942881627,
+              "stance_samples": 4762
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0046370483396514246,
+              "stance_samples": 4762
+            }
+          },
+          "muzzle_forward_reach_at_strike": 0.6467178971376815
+        },
+        "Death_A": {
+          "passed": true,
+          "duration": 2.5999999046325684,
+          "export_keys": 4001,
+          "audit_samples": 8499,
+          "floor_min": 0.0034015442395052553,
+          "max_paw_slide": 0.001258302941838933,
+          "native_length_error": 1.5594268548690948e-07,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.004777015542752038,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0012270337677317185,
+              "stance_samples": 1634
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0007375579141717717,
+              "stance_samples": 1634
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.001258302941838933,
+              "stance_samples": 2191
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0012266453996980374,
+              "stance_samples": 2191
+            }
+          },
+          "fallen_muzzle_minimum_height": 0.00345077786936546,
+          "fallen_body_and_proximal_limb_minimum_height": 0.0034521466269644696,
+          "native_head_yaw_degrees": 32.5656111436737,
+          "fallen_upper_snout_minimum_height": 0.00345077786936546,
+          "body_roll_degrees": 60.00005672096363,
+          "support_scope": [
+            "Physical forward face and cheek, including native jaw volume; not the upper nose alone.",
+            "Torso, shoulder/haunch and proximal limb/armor side; distal paws and the tail excluded."
+          ]
+        }
+      }
+    },
+    "ice_snow_leopard": {
+      "sha256": "a544755545503f970e1bd9d60e05c4ef11353f85da69b569ecc33c5e742b88f1",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "duration": 1.1200000047683716,
+          "native_forward_speed": 0.9866106278105393,
+          "export_keys": 1725,
+          "audit_samples": 3877,
+          "floor_min": 0.0033996358231735773,
+          "max_paw_slide": 0.0012041326747641574,
+          "native_length_error": 1.0417554863195733e-07,
+          "world_loop_seam_error": 7.771561172376096e-16,
+          "max_adjacent_rotation_radians": 0.00829025698860984,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0006921617114999246,
+              "stance_samples": 2481
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0007147721707508204,
+              "stance_samples": 2482
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0008732067530207141,
+              "stance_samples": 2482
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0012041326747641574,
+              "stance_samples": 2482
+            }
+          }
+        },
+        "Jog": {
+          "passed": true,
+          "duration": 0.6600000262260437,
+          "native_forward_speed": 2.5757665826186984,
+          "export_keys": 2031,
+          "audit_samples": 4313,
+          "floor_min": 0.0033994781080231955,
+          "max_paw_slide": 0.004192898902085841,
+          "native_length_error": 1.1643990227572232e-07,
+          "world_loop_seam_error": 6.661338147750939e-16,
+          "max_adjacent_rotation_radians": 0.0074559370723191725,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.003789684690514357,
+              "stance_samples": 1812
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.004192898902085841,
+              "stance_samples": 1811
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0035306389701706656,
+              "stance_samples": 1811
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0032877215611381784,
+              "stance_samples": 1812
+            }
+          }
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "duration": 1.600000023841858,
+          "export_keys": 2468,
+          "audit_samples": 5241,
+          "floor_min": 0.003399488477751072,
+          "max_paw_slide": 0.004140089971716825,
+          "native_length_error": 1.172751808997674e-07,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.010530138966516769,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0035517763715129575,
+              "stance_samples": 2752
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.004140089971716825,
+              "stance_samples": 2752
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0026107737213887463,
+              "stance_samples": 2657
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0029899081660795107,
+              "stance_samples": 2657
+            }
+          },
+          "muzzle_forward_reach_at_strike": 0.5953742621053941
+        },
+        "Death_A": {
+          "passed": true,
+          "duration": 2.5999999046325684,
+          "export_keys": 4001,
+          "audit_samples": 8499,
+          "floor_min": 0.0033983004530205307,
+          "max_paw_slide": 0.0007634253433947088,
+          "native_length_error": 6.834336008232356e-08,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.0021276222561118,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0007344413552882349,
+              "stance_samples": 1634
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0006707047321361972,
+              "stance_samples": 1634
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0007294833750047915,
+              "stance_samples": 2191
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0007634253433947088,
+              "stance_samples": 2191
+            }
+          },
+          "fallen_muzzle_minimum_height": 0.003959962729255165,
+          "fallen_body_and_proximal_limb_minimum_height": 0.003960070034304502,
+          "native_head_yaw_degrees": 57.342780267389394,
+          "fallen_upper_snout_minimum_height": 0.003959962729255165,
+          "body_roll_degrees": 88,
+          "support_scope": [
+            "Physical forward face and cheek, including native jaw volume; not the upper nose alone.",
+            "Torso, shoulder/haunch and proximal limb/armor side; distal paws and the tail excluded."
+          ]
+        }
+      }
+    },
+    "stormmane_lion": {
+      "sha256": "0aefe7490edecdae8720be283dda2d29809106d277890266269fbbd201504b38",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "duration": 1.1200000047683716,
+          "native_forward_speed": 0.9866066383982307,
+          "export_keys": 3448,
+          "audit_samples": 7323,
+          "floor_min": 0.003399932096700277,
+          "max_paw_slide": 0.0005365977031747423,
+          "native_length_error": 1.3051687758336428e-07,
+          "world_loop_seam_error": 4.578891946160901e-09,
+          "max_adjacent_rotation_radians": 0.005125801364846965,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0004677961734174507,
+              "stance_samples": 4687
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.00041493131993319333,
+              "stance_samples": 4688
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0005365977031747423,
+              "stance_samples": 4688
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.00036923780058701754,
+              "stance_samples": 4688
+            }
+          }
+        },
+        "Jog": {
+          "passed": true,
+          "duration": 0.6600000262260437,
+          "native_forward_speed": 2.57575616737015,
+          "export_keys": 8121,
+          "audit_samples": 16493,
+          "floor_min": 0.0033999438629051327,
+          "max_paw_slide": 0.00159778293000071,
+          "native_length_error": 4.314723650034047e-07,
+          "world_loop_seam_error": 6.447463418712829e-08,
+          "max_adjacent_rotation_radians": 0.001877086386056629,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0012720272789978502,
+              "stance_samples": 6924
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.00159778293000071,
+              "stance_samples": 6923
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0014793205716681925,
+              "stance_samples": 6923
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0011132862351749533,
+              "stance_samples": 6924
+            }
+          }
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "duration": 1.600000023841858,
+          "export_keys": 4923,
+          "audit_samples": 10151,
+          "floor_min": 0.0033998042615746415,
+          "max_paw_slide": 0.0016536081516845386,
+          "native_length_error": 1.1681800687890487e-07,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.003516030254671062,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0012266099644646863,
+              "stance_samples": 5330
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0012163450334935677,
+              "stance_samples": 5330
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0016536081516845386,
+              "stance_samples": 5141
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0016371901059692377,
+              "stance_samples": 5141
+            }
+          },
+          "muzzle_forward_reach_at_strike": 0.6666225778053687
+        },
+        "Death_A": {
+          "passed": true,
+          "duration": 2.5999999046325684,
+          "export_keys": 4001,
+          "audit_samples": 8499,
+          "floor_min": 0.0033955854066998886,
+          "max_paw_slide": 0.001199997758163693,
+          "native_length_error": 6.933401403008688e-08,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.002023708526247882,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0007979246429524481,
+              "stance_samples": 1634
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0009261726826939048,
+              "stance_samples": 1634
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.000867871272035777,
+              "stance_samples": 2191
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.001199997758163693,
+              "stance_samples": 2191
+            }
+          },
+          "fallen_muzzle_minimum_height": 0.0034000133680812446,
+          "fallen_body_and_proximal_limb_minimum_height": 0.0034000121779076626,
+          "native_head_yaw_degrees": 22.311553365471738,
+          "fallen_upper_snout_minimum_height": 0.23857116100930517,
+          "body_roll_degrees": 77.14701516419798,
+          "support_scope": [
+            "Native head, mane, jaw and beard contact envelope; upper snout measured separately.",
+            "Torso, shoulder/haunch and proximal limb/armor side; distal paws and the tail excluded."
+          ]
+        }
+      }
+    },
+    "tidal_crystal_lion": {
+      "sha256": "ba107b81be64fe16a6a9025d697371d5379b8a9fb907223ef19c685d9f2f33b9",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "duration": 1.1200000047683716,
+          "native_forward_speed": 0.9866089860186978,
+          "export_keys": 3448,
+          "audit_samples": 7323,
+          "floor_min": 0.0033998273197602597,
+          "max_paw_slide": 0.0005313771873866061,
+          "native_length_error": 6.97942992955447e-07,
+          "world_loop_seam_error": 6.177022005005028e-09,
+          "max_adjacent_rotation_radians": 0.003893730584260949,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0004748379033181419,
+              "stance_samples": 4687
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0004111714497014289,
+              "stance_samples": 4688
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0005313771873866061,
+              "stance_samples": 4688
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0005067204261613757,
+              "stance_samples": 4688
+            }
+          }
+        },
+        "Jog": {
+          "passed": true,
+          "duration": 0.6600000262260437,
+          "native_forward_speed": 2.575762296355768,
+          "export_keys": 2031,
+          "audit_samples": 4313,
+          "floor_min": 0.003397950383916243,
+          "max_paw_slide": 0.0046496940978428755,
+          "native_length_error": 6.917407492368355e-07,
+          "world_loop_seam_error": 7.166530902047441e-08,
+          "max_adjacent_rotation_radians": 0.005413009883844588,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0039049250242271447,
+              "stance_samples": 1812
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0042210105560791565,
+              "stance_samples": 1811
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.004575512981714131,
+              "stance_samples": 1811
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0046496940978428755,
+              "stance_samples": 1812
+            }
+          }
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "duration": 1.600000023841858,
+          "export_keys": 4923,
+          "audit_samples": 10151,
+          "floor_min": 0.0029266481318039276,
+          "max_paw_slide": 0.0018825664053404528,
+          "native_length_error": 4.974824606707173e-07,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.0032952798441378077,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.0013931432200582454,
+              "stance_samples": 5330
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0013641032374837113,
+              "stance_samples": 5330
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0018696972562171265,
+              "stance_samples": 4762
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0018825664053404528,
+              "stance_samples": 4762
+            }
+          },
+          "muzzle_forward_reach_at_strike": 0.6556704639083235
+        },
+        "Death_A": {
+          "passed": true,
+          "duration": 2.5999999046325684,
+          "export_keys": 4001,
+          "audit_samples": 8499,
+          "floor_min": 0.0033998687240281164,
+          "max_paw_slide": 0.0015079398526495072,
+          "native_length_error": 4.489720130118613e-07,
+          "terminal_hold_world_error": 0.0,
+          "max_adjacent_rotation_radians": 0.001642665538587673,
+          "contacts": {
+            "fore_left": {
+              "max_supported_surface_speed": 0.000622647327486386,
+              "stance_samples": 1634
+            },
+            "fore_right": {
+              "max_supported_surface_speed": 0.0005354008062082386,
+              "stance_samples": 1634
+            },
+            "hind_left": {
+              "max_supported_surface_speed": 0.0015079398526495072,
+              "stance_samples": 2191
+            },
+            "hind_right": {
+              "max_supported_surface_speed": 0.0005936173060168954,
+              "stance_samples": 2191
+            }
+          },
+          "fallen_muzzle_minimum_height": 0.003909882587704223,
+          "fallen_body_and_proximal_limb_minimum_height": 0.003909826639933608,
+          "native_head_yaw_degrees": 76.591858625394,
+          "fallen_upper_snout_minimum_height": 0.003909882587704223,
+          "body_roll_degrees": 65.88972518994827,
+          "support_scope": [
+            "Physical forward face and cheek, including native jaw volume; not the upper nose alone.",
+            "Torso, shoulder/haunch and proximal limb/armor side; distal paws and the tail excluded."
+          ]
+        }
+      }
+    }
+  }
+}

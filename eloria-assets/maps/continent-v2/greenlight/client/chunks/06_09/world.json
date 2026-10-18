@@ -133,13 +133,13 @@
   "sky": {
    "type": "gradient",
    "zenith": [
-    0.16,
-    0.42,
-    0.72
+    0.2,
+    0.5,
+    0.8
    ],
    "horizon": [
-    0.72,
-    0.87,
+    0.82,
+    0.92,
     0.92
    ],
    "curve": 0.14,
@@ -181,11 +181,11 @@
   "fog": {
    "enabled": true,
    "color": [
-    0.62,
-    0.8,
-    0.86
+    0.7,
+    0.86,
+    0.84
    ],
-   "density": 0.00035,
+   "density": 0.0005,
    "heightFalloff": 0.0022
   },
   "variants": {
@@ -212,6 +212,87 @@
      ],
      "density": 0.0016
     }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.84,
+      0.66
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.92,
+      0.9,
+      0.78
+     ]
+    },
+    "fog": {
+     "color": [
+      0.8,
+      0.88,
+      0.82
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.7,
+      0.48
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.98,
+      0.76,
+      0.56
+     ]
+    },
+    "fog": {
+     "color": [
+      0.82,
+      0.76,
+      0.66
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.1,
+      0.17,
+      0.28
+     ],
+     "horizon": [
+      0.22,
+      0.34,
+      0.4
+     ]
+    },
+    "fog": {
+     "color": [
+      0.22,
+      0.34,
+      0.38
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.52,
+      0.64,
+      0.72
+     ]
+    },
+    "moon": {
+     "color": [
+      0.52,
+      0.68,
+      0.86
+     ]
+    }
    }
   },
   "water": {
@@ -227,6 +308,16 @@
    ],
    "causticsEnabled": true,
    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.4
+   },
+   "gulls": {
+    "enabled": true,
+    "density": 0.8
+   }
   }
  },
  "continentGeography": {
@@ -332,8 +423,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "b481efd6989b5f096976b2c0e4fdaf6b16b299fdbd69d989978f7e2007535bea",
-  "sceneSha256": "2ad483bbacb0f3cc6d5bc01cfc2f2ee593ba67f65870b295c84429a86ae42640"
+  "snapshotSha256": "a5b47d24c15eeaaf2a9e4b2b8966499d9e2fccf2f4ffbe8c291b3cf8c23f0fd9",
+  "sceneSha256": "78c8728893fd4e717c3f7c37443d8e76905c5d656c98a082669efa182691402e"
  },
  "externalResources": {
   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
@@ -396,7 +487,7 @@
   ]
  },
  "performance": {
-  "glbBytes": 498808,
+  "glbBytes": 545860,
   "nodes": 116,
   "meshes": 4,
   "externalResources": {

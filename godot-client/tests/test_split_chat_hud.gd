@@ -55,6 +55,17 @@ func _run() -> void:
 		and not system.output.get_parsed_text().contains("Tavi:"), "system feed excludes player conversations")
 	_expect(chat.channel_buttons.has(4) and main.call("_chat_channel_number", (app.get("chat_lines") as Array)[5]) == 4,
 		"the fourth joined channel has its own identity and tab")
+	_chat(0, "Gathered: 5 Gold Coins")
+	_chat(3, "Gathered: 1 Raw Meat")
+	_chat(0, "[Loot] Tavi gathered: 1 Ancient Relic.")
+	await _settle()
+	_expect(system.output.get_parsed_text().contains("Gathered: 5 Gold Coins")
+		and system.output.get_parsed_text().contains("Gathered: 1 Raw Meat")
+		and not chat.output.get_parsed_text().contains("Gathered:"),
+		"current and legacy pickup feedback appears only in System")
+	_expect(chat.output.get_parsed_text().contains("[Loot] Tavi gathered:")
+		and not system.output.get_parsed_text().contains("[Loot]"),
+		"nearby loot announcements appear only in Local")
 	await _capture("01-separate.png")
 	main.call("_on_client_setting_changed", "Chat", "chat_combined", true)
 	_expect(not system.visible and chat.output.get_parsed_text().contains("Torch crafted")

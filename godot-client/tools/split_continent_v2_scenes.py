@@ -44,7 +44,8 @@ class SplitError(ValueError): pass
 def jbytes(value): return F.json_bytes(value)
 def scalar(text,default=''): return json.loads(text) if text is not None else default
 def packed(kind,values): return kind+'('+', '.join(format(float(v),'.12g') for v in np.asarray(values).ravel())+')'
-def matrix_text(matrix): return packed('Transform3D',np.r_[matrix[:3,:3].T.ravel(),matrix[:3,3]])
+# Godot lists Transform3D's basis rows; the matrix's columns are the node's axes (T.transform reads it back).
+def matrix_text(matrix): return packed('Transform3D',np.r_[matrix[:3,:3].ravel(),matrix[:3,3]])
 def properties_text(section): return '\n'.join(f'{k} = {v}' for k,v in section.properties.items())
 def polygons(geometry):
     if geometry.is_empty: return []

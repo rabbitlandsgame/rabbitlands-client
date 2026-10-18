@@ -265,13 +265,21 @@ def test_prospective_entries_preserve_served_new_ids(tmp_path):
     assert T.served_frames(catalog,[])=={}
 
 
-def test_scene_hierarchy_applies_position_rotation_scale_and_column_basis():
+def test_scene_hierarchy_applies_position_rotation_scale_and_row_listed_basis():
     parent=T.Section("node",{}, {"position":"Vector3(10, 2, 20)","rotation_degrees":"Vector3(0, 90, 0)","scale":"Vector3(2, 1, 3)"})
     child=T.Section("node",{}, {"position":"Vector3(1, 0, 0)"})
     scene=T.Scene(Path("fixture.tscn"),{}, {}, {"Wrapper":parent,"Wrapper/Child":child})
     assert np.allclose(scene.world("Wrapper/Child")[:3,3],[10,2,18])
-    matrix=T.transform("Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 10, 2, 20)")
-    assert np.allclose(matrix @ [1,0,0,1],[10,2,19,1])
+    # Godot 4.7.2 saves that parent node as this text. The nine values are the basis ROWS, so in x/z the X axis is
+    # (t0, t6) = (0, -2) and the Z axis (t2, t8) = (3, 0); read as columns, the X axis would be (0, 3).
+    saved="Transform3D(-8.742278e-08, 0, 3, 0, 1, 0, -2, 0, -1.3113416e-07, 10, 2, 20)"
+    euler=T.transform_matrix("\n".join(f"{k} = {v}" for k,v in parent.properties.items()))
+    for matrix in (T.transform(saved), T.transform_matrix("transform = "+saved)):
+        assert np.allclose(matrix[:3,0],[0,0,-2],atol=1e-6) and np.allclose(matrix[:3,2],[3,0,0],atol=1e-6)
+        assert np.allclose(matrix,euler,atol=1e-6)
+        assert np.allclose(matrix @ [1,0,0,1],[10,2,18,1],atol=1e-6)
+    scene.nodes["Wrapper"]=T.Section("node",{}, {"transform":saved})
+    assert np.allclose(scene.world("Wrapper/Child")[:3,3],[10,2,18],atol=1e-6)
 
 
 def test_bad_frame_cell_and_translation_contracts_are_caught(territories):

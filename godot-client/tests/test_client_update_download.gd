@@ -10,7 +10,7 @@ class Downloader extends "res://src/updates/client_updates.gd":
 		var request := HTTPRequest.new()
 		var certificate := X509Certificate.new()
 		certificate.load(certificate_path)
-		request.set_tls_options(TLSOptions.client(certificate))
+		request.set_tls_options(TLSOptions.client(certificate, "localhost"))
 		return request
 
 func _initialize() -> void:

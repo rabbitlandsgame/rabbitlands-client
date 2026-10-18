@@ -30,6 +30,9 @@ signal ground_missile_fired(shot: Dictionary)
 var fires: Dictionary = {}
 ## The sky over this map, as {"kind": int, "intensity": int}.
 var weather: Dictionary = {"kind": 0, "intensity": 0}
+## The whole sky from a weather_state_v1 server: {current, target, seconds,
+## name, at_msec}; empty while the server speaks only the legacy frames.
+var weather_state: Dictionary = {}
 
 ## Which quest the NPC is talking about, and which quests have been finished
 ## this session. `quest_dialogue` is true only while the server has flagged the
@@ -100,6 +103,17 @@ var chat_lines: Array[Dictionary] = []
 var active_channels: Array[int] = [0, 0, 0]
 var active_channel_index := 0
 var selected_actor_id := -1
+## The server's technique state (ELORIA_MAGIC_STATE kind "techniques"): the
+## rows, the real action points, what is readied and held. Empty until a
+## techniques_v1 server says otherwise. `received_msec` dates the cooldowns.
+var techniques: Dictionary = {}
+## Repeat casting as the server states it (kind "autocast"): `enabled` is the
+## player's switch, `active` whether a spell is repeating now and which.
+var autocast: Dictionary = {}
+## Debuffs shown under a creature's name. Keep in step with
+## status_effect_icons.gd NEGATIVE (that script preloads art; this one must not).
+const NEGATIVE_STATUSES := ["poison", "cripple", "expose_heat", "expose_cold",
+	"expose_magic", "expose_radiation", "stun", "root", "sunder", "mark", "challenge"]
 var npc_dialogue: Dictionary = {"open": false, "name": "", "text": "",
 	"options": [], "quest": false, "quest_id": 0}
 var trade: Dictionary = {"open": false, "partner": "", "storage_available": false,
@@ -153,6 +167,7 @@ var actor_titles: Dictionary = {}
 ## actor is removed, and a seamless land crossing that keeps the actors keeps
 ## their rows too.
 var actor_occupations: Dictionary = {}
+var actor_mounts: Dictionary = {}
 ## NPCs with a new quest this player can accept, stated by the server.
 var quest_offer_actors: Dictionary = {}
 ## True lifetime experience per skill, keyed by skill name, and what it has
@@ -416,6 +431,8 @@ func _on_connection_state_changed(value: String) -> void:
 		adjacent_maps.clear()
 		lantern_tutorial.clear()
 		selected_actor_id = -1
+		techniques.clear()
+		autocast.clear()
 		npc_dialogue = {"open": false, "name": "", "text": "", "options": [],
 			"quest": false, "quest_id": 0}
 		trade = _empty_trade_state()
@@ -438,6 +455,7 @@ func _on_connection_state_changed(value: String) -> void:
 		achievements_catalog = {"worn_title": "", "entries": []}
 		actor_titles.clear()
 		actor_occupations.clear()
+		actor_mounts.clear()
 		quest_offer_actors.clear()
 		experience64.clear()
 		# Per profile rather than per character, but a different server may
@@ -453,6 +471,7 @@ func _on_connection_state_changed(value: String) -> void:
 		almanac = {}
 		fires = {}
 		weather = {"kind": 0, "intensity": 0}
+		weather_state = {}
 		quest_dialogue = false
 		current_quest_id = 0
 		finished_quests = []
@@ -574,6 +593,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"clock")
 		"change_map":
 			current_map = event.map_name
+			actor_mounts.clear()
 			# The new map's objects arrive in their own packet; anything held
 			# for the old map is stale the moment the change lands.
 			map_objects.clear()
@@ -620,6 +640,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				var removed_actor_id: int = int(removed_actor_value)
 				actors.erase(removed_actor_id)
 				actor_occupations.erase(removed_actor_id)
+				actor_mounts.erase(removed_actor_id)
 				quest_offer_actors.erase(removed_actor_id)
 				if selected_actor_id == removed_actor_id:
 					selected_actor_id = -1
@@ -629,6 +650,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			Network.coordinate_route_cancelled.emit()
 			actors.clear()
 			actor_occupations.clear()
+			actor_mounts.clear()
 			quest_offer_actors.clear()
 			state_changed.emit(&"actors")
 		"actor_commands":
@@ -1002,6 +1024,19 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"weather":
 			weather = {"kind": int(event.kind),
 				"intensity": int(event.intensity)}
+			weather_state = {}
+			state_changed.emit(&"weather")
+		"weather_state":
+			# The legacy pair kept beside it, as a server without the state
+			# would have said it: anything falling is rain, a storm if it
+			# lightens; cloud and fog are a clear sky to that pair.
+			var target: Array = event.target
+			var falling: bool = int(target[0]) > 0 and int(target[1]) > 0
+			weather = {"kind": (2 if int(target[6]) > 0 else 1) if falling else 0,
+				"intensity": int(target[1]) if falling else 0}
+			weather_state = {"current": event.current, "target": event.target,
+				"seconds": float(event.seconds), "name": str(event.name),
+				"at_msec": Time.get_ticks_msec()}
 			state_changed.emit(&"weather")
 		"rain":
 			# The legacy signal. It carries no kind, so it only ever confirms
@@ -1162,6 +1197,10 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				else:
 					actor_titles[actor_id] = worn
 			state_changed.emit(&"actor_titles")
+		"mount_states":
+			if str(event.map) == current_map:
+				actor_mounts = (event.states as Dictionary).duplicate(true)
+				state_changed.emit(&"mount_states")
 		"actor_occupations":
 			# An empty row is honoured the way an empty title is: it takes the
 			# line off rather than leaving the last one standing.
@@ -1297,7 +1336,25 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				special_events.append(str(raw_line))
 			state_changed.emit(&"special_events")
 		"magic_state":
-			magic_state_received.emit(event.data)
+			var magic: Dictionary = event.data
+			if magic.get("kind") == "techniques":
+				techniques = magic.duplicate(true)
+				techniques["received_msec"] = Time.get_ticks_msec()
+				state_changed.emit(&"techniques")
+			elif magic.get("kind") == "autocast":
+				autocast = magic.duplicate(true)
+				state_changed.emit(&"autocast")
+			elif magic.get("kind") in ["creature_status", "actor_status"]:
+				var status_actor_id := int(magic.get("actor_id", -1))
+				if actors.has(status_actor_id) and magic.get("effects") is Array:
+					var status_actor: Dictionary = actors[status_actor_id]
+					status_actor["negative_statuses"] = (magic.effects as Array).filter(
+						func(effect: Variant) -> bool: return effect in NEGATIVE_STATUSES)
+					status_actor["status_effects"] = (magic.effects as Array).duplicate()
+					mark_actor_changed(status_actor_id)
+					state_changed.emit(&"actors")
+			else:
+				magic_state_received.emit(magic)
 		"spell_power":
 			spell_power.clear()
 			for raw_effect: Variant in event.effects:

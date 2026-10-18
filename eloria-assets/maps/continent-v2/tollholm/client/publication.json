@@ -2,24 +2,24 @@
  "region": "tollholm",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "495d9ef0d69f7002d62141b4ae538fc1f9269e45a0631847ae46a36d6481e52a",
-  "sceneSha256": "37861c9f703df09c2f060b44d2f951ef4360465357eaa020b484bdba9827d9b4",
+  "sha256": "1f13323fcd0b291d0237d66d5da8d5cd08f7ca6eb4330e75b9e67a91a4c9672b",
+  "sceneSha256": "ee32f9349ab222ce364883d659f9b9ad0301eb7b1f9ad89d9af0d91f71a0b3c4",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/tollholm/tollholm.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "627986e895d371765f405bfe6910bc00ac302fdfc14a480e0d63f1803a90834a",
-  "collisionSha256": "c042bf7cad2c8a3ed3e2b2640119fca027abcddd53b7225776bf5c8f71bd0a2f",
-  "servedGridSha256": "6ca48117e1dec5d81ad4e20bbcc58d586f86ff045dd5b6611f1f8e57985aabc8",
-  "walkableCells": 301820,
+  "sidecarSha256": "98ef54a31eb627357965294a097eefbfd4f24ad78f800e44c6a0adc7242c9142",
+  "collisionSha256": "91b17ff0c59635b790c163d6263f8bfa84aab3ac4baf2143371379fc07e55649",
+  "servedGridSha256": "314200041fcec74f570e7cf411274f48ca723ddc8b9871656f690342b6c6041b",
+  "walkableCells": 301821,
   "openTiles": 72693,
-  "sourceSnapshotSha256": "495d9ef0d69f7002d62141b4ae538fc1f9269e45a0631847ae46a36d6481e52a"
+  "sourceSnapshotSha256": "1f13323fcd0b291d0237d66d5da8d5cd08f7ca6eb4330e75b9e67a91a4c9672b"
  },
  "chunks": 43,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 28142336,
-  "max": 2668088,
+  "total": 28260084,
+  "max": 2660464,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -31,7 +31,7 @@
   "08_08": 154.2,
   "08_09": 247.1,
   "08_10": 438.7,
-  "08_11": 181.3,
+  "08_11": 181.4,
   "08_12": 197.4,
   "08_13": 88.3,
   "09_06": 11.1,
@@ -68,18 +68,19 @@
   "12_13": 11.0
  },
  "timings": {
-  "snapshot_s": 23.8,
+  "snapshot_s": 1.4,
   "terrain_s": 0.1,
   "water_s": 0.0,
   "overlays_s": 0.6,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 147997328,
+  "surface_glb_bytes": 148184240,
   "walk_kit_nodes": 4,
-  "library_s": 0.4,
+  "library_s": 0.3,
   "harvest_nodes": 136,
-  "chunks_s": 3.0
+  "chunks_s": 1.8,
+  "space_passes_s": 3.2
  },
- "seconds": 51.1,
+ "seconds": 13.5,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 16,
@@ -119,173 +120,9 @@
    -961
   ],
   "maximumPlacements": 168,
-  "maximumTriangles": 362195,
+  "maximumTriangles": 362285,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "certifiedTextureAliases": [
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/02905b6c3a2141ce7c1f3ed50581f6e3c45ab978e9404740d71c5e3c85135142.jpg",
-   "sha256": "02905b6c3a2141ce7c1f3ed50581f6e3c45ab978e9404740d71c5e3c85135142",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb",
-   "sourceModelSha256": "7213921a236aab46bb7b729d0182af508c98b0745e0236a4482f534bb1ed4fe0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039.jpg",
-   "sha256": "0e6d52c15b5f9f217f3547b4eba4f21bf47ae2115a18d1850b4a672cd8a3d039",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-umbrella-pine-tree-1.glb",
-   "sourceModelSha256": "13a46cf72a509eff045ebd4f021d22dbd2dae6c33cc3480fc2b2382f6a2d4396"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13.jpg",
-   "sha256": "122bdb504a9f663b0df8da74d61591166d42c387141ac11c4720c09d03ec3b13",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-umbrella-pine-tree-1.glb",
-   "sourceModelSha256": "13a46cf72a509eff045ebd4f021d22dbd2dae6c33cc3480fc2b2382f6a2d4396"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/27c3b8dd16ba115977a8306469a7c5c738e654cb3fb34c9b95fa56c0509e1057.jpg",
-   "sha256": "27c3b8dd16ba115977a8306469a7c5c738e654cb3fb34c9b95fa56c0509e1057",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-rock-rose-shrub-1.glb",
-   "sourceModelSha256": "78e0361fa6ea0b231f0a09e9286758d67d9a34be1fe5e12a85fc265f64e1172c"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/2eb899454d99e54b90f53d527a80801febd73a0fb608afef6d3c2d48ab061a68.jpg",
-   "sha256": "2eb899454d99e54b90f53d527a80801febd73a0fb608afef6d3c2d48ab061a68",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb",
-   "sourceModelSha256": "40833adcae9838b0860750da47eba0dcd44d630c907e2bb2ab90dbe420e4da68"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb.jpg",
-   "sha256": "3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26.jpg",
-   "sha256": "47dd31db8b6238e4242890f51a872300b11ad231988fa2c40f9a50a96f900f26",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-2.glb",
-   "sourceModelSha256": "932cfa421e31ec2230277b180ea55fdb40eb2bdee4af70e1f29cd883aca170b9"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/5a36096188b24a1811e42f3d831ea22e631288e755f648dfad9e82182aed6998.jpg",
-   "sha256": "5a36096188b24a1811e42f3d831ea22e631288e755f648dfad9e82182aed6998",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb",
-   "sourceModelSha256": "7213921a236aab46bb7b729d0182af508c98b0745e0236a4482f534bb1ed4fe0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/5a40c445e49e2ea0863eca0e718bcd2f584adc06722db5c1f6ee13bf1313f567.jpg",
-   "sha256": "5a40c445e49e2ea0863eca0e718bcd2f584adc06722db5c1f6ee13bf1313f567",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lavender-clump-1.glb",
-   "sourceModelSha256": "868093138cfdf5d3b99fc2a9343d6d0f2e36a62333862af64b984aec9e78f894"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f.jpg",
-   "sha256": "715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7.jpg",
-   "sha256": "81c1564f19b98b6587eda57965d3f63a0694ef8c0d258fac43431d0f8c2963b7",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb",
-   "sourceModelSha256": "b7246d0403500e6e991a512444b5bb4c4d66764012f25585c6697b56998f8f71"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581.jpg",
-   "sha256": "88cf9a1d632f9ae3a282147bbd04313fe18f61e39b89328798907a028ddc8581",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb",
-   "sourceModelSha256": "b7246d0403500e6e991a512444b5bb4c4d66764012f25585c6697b56998f8f71"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/8df229531ce206b6ce680bb01df6b7a9ea1197762bfff535253b81e425765149.jpg",
-   "sha256": "8df229531ce206b6ce680bb01df6b7a9ea1197762bfff535253b81e425765149",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-cypress-tree-1.glb",
-   "sourceModelSha256": "9df27d860ea5f0e9b053fe981e04a2c226e0087b47403b5a5574e0fa9bb1ca23"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/9a22b8cfcb16282670a32910269814f9e49e884229dbad84b9840d6cd76f0cab.jpg",
-   "sha256": "9a22b8cfcb16282670a32910269814f9e49e884229dbad84b9840d6cd76f0cab",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb",
-   "sourceModelSha256": "7213921a236aab46bb7b729d0182af508c98b0745e0236a4482f534bb1ed4fe0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/9aaad1880c58a5acf978bbed4fff1e356677622eb7516fbe3d1038e2d26aac54.jpg",
-   "sha256": "9aaad1880c58a5acf978bbed4fff1e356677622eb7516fbe3d1038e2d26aac54",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-cypress-tree-1.glb",
-   "sourceModelSha256": "9df27d860ea5f0e9b053fe981e04a2c226e0087b47403b5a5574e0fa9bb1ca23"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996.jpg",
-   "sha256": "a4eba70a3461958f950306e485bc501da422d1d79473c222b4f8794f32a73996",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-2.glb",
-   "sourceModelSha256": "932cfa421e31ec2230277b180ea55fdb40eb2bdee4af70e1f29cd883aca170b9"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/a7c8f53b69a119a5822556fb42336e792a91bfe90f843e62416555469f53b5e0.jpg",
-   "sha256": "a7c8f53b69a119a5822556fb42336e792a91bfe90f843e62416555469f53b5e0",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lavender-clump-1.glb",
-   "sourceModelSha256": "868093138cfdf5d3b99fc2a9343d6d0f2e36a62333862af64b984aec9e78f894"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/aaa59755ab9b2e0802c358f1dd9f73a4290696cebf769a86f8294a7adf8f3a73.jpg",
-   "sha256": "aaa59755ab9b2e0802c358f1dd9f73a4290696cebf769a86f8294a7adf8f3a73",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-cypress-tree-1.glb",
-   "sourceModelSha256": "9df27d860ea5f0e9b053fe981e04a2c226e0087b47403b5a5574e0fa9bb1ca23"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2.jpg",
-   "sha256": "ac9d858275ae3947431d90a493f8e4cb3a919cbe5413b88117743d26ebde62a2",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-2.glb",
-   "sourceModelSha256": "932cfa421e31ec2230277b180ea55fdb40eb2bdee4af70e1f29cd883aca170b9"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/af60b4a022d4032e5b4404f8e79c5fb1d3a69d4470ebcf2f4e467291fe266496.jpg",
-   "sha256": "af60b4a022d4032e5b4404f8e79c5fb1d3a69d4470ebcf2f4e467291fe266496",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb",
-   "sourceModelSha256": "40833adcae9838b0860750da47eba0dcd44d630c907e2bb2ab90dbe420e4da68"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/b648b5a3c10c2c1df59014f66febbd05a6d7e321e428097e6d5937a544abdede.jpg",
-   "sha256": "b648b5a3c10c2c1df59014f66febbd05a6d7e321e428097e6d5937a544abdede",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lavender-clump-1.glb",
-   "sourceModelSha256": "868093138cfdf5d3b99fc2a9343d6d0f2e36a62333862af64b984aec9e78f894"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/c0113629c06816b41d4db522d304c5ee8c872e9644b4e3e9fa039d122b501ee6.jpg",
-   "sha256": "c0113629c06816b41d4db522d304c5ee8c872e9644b4e3e9fa039d122b501ee6",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-rock-rose-shrub-1.glb",
-   "sourceModelSha256": "78e0361fa6ea0b231f0a09e9286758d67d9a34be1fe5e12a85fc265f64e1172c"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/cb19d387b15f1b549e329e023efa126567d255e2fb00dca7f3600551ecda4a36.jpg",
-   "sha256": "cb19d387b15f1b549e329e023efa126567d255e2fb00dca7f3600551ecda4a36",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-rock-rose-shrub-1.glb",
-   "sourceModelSha256": "78e0361fa6ea0b231f0a09e9286758d67d9a34be1fe5e12a85fc265f64e1172c"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72.jpg",
-   "sha256": "d500922ba4e27ec1553f745bebb9cf3b0f3fb9d5ee4fe0a7888dcec10f525d72",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-umbrella-pine-tree-1.glb",
-   "sourceModelSha256": "13a46cf72a509eff045ebd4f021d22dbd2dae6c33cc3480fc2b2382f6a2d4396"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f04e4bb85a27dacb264f7300ff1171ff0706dcd61b364e40e1d3090ae61127ed.jpg",
-   "sha256": "f04e4bb85a27dacb264f7300ff1171ff0706dcd61b364e40e1d3090ae61127ed",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb",
-   "sourceModelSha256": "40833adcae9838b0860750da47eba0dcd44d630c907e2bb2ab90dbe420e4da68"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f.jpg",
-   "sha256": "f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7.jpg",
-   "sha256": "fc1d556975b86289b120a4e0b211f1b710cc3ff2a0ba44b53a2e97defe5d40d7",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb",
-   "sourceModelSha256": "b7246d0403500e6e991a512444b5bb4c4d66764012f25585c6697b56998f8f71"
-  }
- ]
+ }
 }

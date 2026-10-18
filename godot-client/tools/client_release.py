@@ -12,6 +12,8 @@ import shutil
 import subprocess
 import zipfile
 from pathlib import Path
+from typing import BinaryIO
+from release_storage import PartWriter
 
 CHUNK_BYTES = 8 * 1024 * 1024
 PART_BYTES = 256 * 1024 * 1024
@@ -24,7 +26,9 @@ def digest(path: Path) -> str:
 
 
 def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
-             repository: str) -> dict:
+             repository: str, distribution: str = "github") -> dict:
+    if distribution not in {"github", "steam", "standalone"}:
+        raise ValueError("unsupported client distribution")
     if not re.fullmatch(r"[0-9a-f]{40}", sha):
         raise ValueError("client release requires a full Git commit")
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
@@ -39,10 +43,11 @@ def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
     if public_key and ("PRIVATE KEY" in pem or "PUBLIC KEY" not in pem):
         raise ValueError("update-public-key must contain a public RSA key only")
     return {"schema": 1, "commit": sha, "platform": platform,
-            "ancestors": ancestors, "public_key": pem, "repository": repository}
+            "ancestors": ancestors, "public_key": pem, "repository": repository,
+            "distribution": distribution}
 
 
-def build_payload(stage: Path, output: Path) -> tuple[int, int]:
+def build_payload(stage: Path, output: Path | BinaryIO) -> tuple[int, int]:
     inventory = []
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED, compresslevel=1, allowZip64=True) as archive:
         paths = sorted(path for root in ("app", "eloria-assets")
@@ -125,18 +130,25 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
 
 
 def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
-                      godot: Path, source: Path, run_godot, logs: Path) -> list[Path]:
+                      godot: Path, source: Path, run_godot, logs: Path,
+                      *, accept_part=None, budget=None) -> list[Path]:
     commit = metadata["commit"]
     platform = metadata["platform"]
     tag = f"client-{commit}"
     base = f'https://github.com/{metadata["repository"]}/releases/download/{tag}'
     archive = stage.parent / f"{stage.name}.update.zip"
-    count, unpacked = build_payload(stage, archive)
-    parts = split_payload(archive, base)
+    if accept_part is None:
+        count, unpacked = build_payload(stage, archive)
+        parts = split_payload(archive, base)
+        size, checksum = archive.stat().st_size, digest(archive)
+    else:
+        with PartWriter(archive, base, PART_BYTES, accept_part, budget) as writer:
+            count, unpacked = build_payload(stage, writer)
+        parts, size, checksum = writer.parts, writer.size, writer.sha256
     release = {"schema": 1, "commit": commit, "platform": platform,
-               "version": stage.name, "size": archive.stat().st_size,
+               "version": stage.name, "size": size,
                "unpacked_size": unpacked, "file_count": count,
-               "sha256": digest(archive), "parts": parts}
+               "sha256": checksum, "parts": parts}
     payload = logs / "release-payload.json"
     payload.write_text(json.dumps(release, separators=(",", ":")), encoding="utf-8")
     manifest = stage.parent / f"{stage.name}-{platform}.json"
@@ -161,7 +173,8 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
         + f'\n\nAfter uploads complete, copy {policy.name} to the server profile as client_updates.json.\n'
         'Merge windows/linux manifest rows if publishing both platforms. Connected players are notified within 30 seconds.\n',
         encoding="utf-8")
-    archive.unlink()  # Players download the pieces; the unsplit archive is redundant.
+    if accept_part is None:
+        archive.unlink()  # Players download the pieces; the unsplit archive is redundant.
     return assets + [policy, instructions]
 
 

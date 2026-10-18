@@ -212,6 +212,87 @@
      ],
      "density": 0.0016
     }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.8,
+      0.7
+     ]
+    },
+    "sky": {
+     "horizon": [
+      1.0,
+      0.82,
+      0.76
+     ]
+    },
+    "fog": {
+     "color": [
+      0.88,
+      0.82,
+      0.8
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.7,
+      0.5
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.98,
+      0.74,
+      0.58
+     ]
+    },
+    "fog": {
+     "color": [
+      0.86,
+      0.74,
+      0.64
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.13,
+      0.17,
+      0.28
+     ],
+     "horizon": [
+      0.3,
+      0.34,
+      0.44
+     ]
+    },
+    "fog": {
+     "color": [
+      0.3,
+      0.33,
+      0.42
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.6,
+      0.62,
+      0.72
+     ]
+    },
+    "moon": {
+     "color": [
+      0.62,
+      0.66,
+      0.84
+     ]
+    }
    }
   },
   "water": {
@@ -227,6 +308,12 @@
    ],
    "causticsEnabled": true,
    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.3
+   }
   }
  },
  "continentGeography": {
@@ -356,8 +443,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "aa2dcd9a14dc1d3bbf1d5062406dc64200759c9c64f65c779935cf76afe24647",
-  "sceneSha256": "9cf837b68c075cb6a5e0b227f6410479ddf1817325c090c57d283eb366a25f56"
+  "snapshotSha256": "f5af39fca39daabdeb52f894eeefde0ef825136047f8b00f727d9b429cbfb87e",
+  "sceneSha256": "5d1e25199411131bec2d8ca8fb8d20b3bf8946c689196ece4e02fa20fbbb4a6f"
  },
  "externalResources": {
   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
@@ -405,9 +492,9 @@
   ]
  },
  "performance": {
-  "glbBytes": 616704,
-  "nodes": 112,
-  "meshes": 6,
+  "glbBytes": 641944,
+  "nodes": 118,
+  "meshes": 9,
   "externalResources": {
    "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
    "../../../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",

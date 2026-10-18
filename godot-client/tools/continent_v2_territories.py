@@ -157,12 +157,15 @@ def _numbers(text: str, kind: str) -> list[float]:
 
 
 def transform(text: str | None) -> np.ndarray:
-    """A 4x4 matrix from Godot's Transform3D text (basis columns, then the origin)."""
+    """A 4x4 matrix from Godot's Transform3D text, whose columns are the node's X, Y and Z axes.
+
+    Godot writes the three basis ROWS, then the origin: in x/z the X axis is (t0, t6) and the Z axis (t2, t8).
+    """
     matrix = np.eye(4)
     if text is None:
         return matrix
     values = _numbers(text, "Transform3D")
-    matrix[:3, :3] = np.asarray(values[:9]).reshape(3, 3).T
+    matrix[:3, :3] = np.asarray(values[:9]).reshape(3, 3)
     matrix[:3, 3] = values[9:12]
     return matrix
 
@@ -177,17 +180,18 @@ def _property(body, name, kind):
 
 
 def transform_matrix(body):
-    """Godot Transform3D stores three basis columns, followed by the origin.
+    """A node's local 4x4 matrix; its columns are the node's X, Y and Z axes.
 
-    Otherwise compose Node3D's position, Euler rotation (Godot's intrinsic
-    rotation_order, default YXZ), or quaternion, and scale.
+    Godot's Transform3D lists the three basis rows, followed by the origin
+    (see transform). Otherwise compose Node3D's position, Euler rotation
+    (Godot's intrinsic rotation_order, default YXZ), or quaternion, and scale.
     """
     result = np.eye(4)
     values = _property(body, "transform", "Transform3D")
     if values is not None:
         if len(values) != 12:
             raise ValueError("Transform3D needs 12 values")
-        result[:3, :3] = values[:9].reshape(3, 3).T
+        result[:3, :3] = values[:9].reshape(3, 3)
         result[:3, 3] = values[9:]
         return result
     position = _property(body, "position", "Vector3")

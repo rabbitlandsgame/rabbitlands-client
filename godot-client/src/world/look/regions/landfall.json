@@ -25,7 +25,14 @@
 			0.42
 		],
 		"verge_grain_forward": 1.0,
-		"verge_grain_steep_forward": 0.3
+		"verge_grain_steep_forward": 0.3,
+		"class_textures": {
+			"deck": "packed_earth",
+			"paving": "flagstone",
+			"sand": "beach_sand",
+			"rock": "coastal_gravel",
+			"soil": "tilled_soil"
+		}
 	},
 	"grass": {
 		"root": [
@@ -91,10 +98,14 @@
 		]
 	},
 	"notes": {
-		"origin": "Derived from the frozen source palettes for this section; prop signature words retain the union of its contributing shared model libraries.",
+		"origin": "Derived from the frozen source palettes for this section; prop signature words retain the union of its contributing shared model libraries. The section identity in content/look-overrides.json is merged over the derived palette.",
 		"sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
 		"sourceProfiles": {
 			"godot-client/src/world/look/regions/sw_isle.json": "2487485ac4f32e62525a71740e1a2561d554a140fe9db80b82d9d9bc0bc849cf"
+		},
+		"overrides": {
+			"path": "eloria-assets/maps/continent-v2/landfall/content/look-overrides.json",
+			"sha256": "4dca9b98b1b748fc418cffbc29496cbb15d644ed8c145d11215f0899d3e50202"
 		}
 	}
 }

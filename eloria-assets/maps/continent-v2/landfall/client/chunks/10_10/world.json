@@ -133,14 +133,14 @@
   "sky": {
    "type": "gradient",
    "zenith": [
-    0.16,
+    0.12,
     0.42,
-    0.72
+    0.78
    ],
    "horizon": [
-    0.72,
-    0.87,
-    0.92
+    0.7,
+    0.88,
+    0.95
    ],
    "curve": 0.14,
    "groundHorizon": [
@@ -181,11 +181,11 @@
   "fog": {
    "enabled": true,
    "color": [
-    0.62,
+    0.58,
     0.8,
-    0.86
+    0.9
    ],
-   "density": 0.00035,
+   "density": 0.0003,
    "heightFalloff": 0.0022
   },
   "variants": {
@@ -212,6 +212,87 @@
      ],
      "density": 0.0016
     }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.78,
+      0.58
+     ]
+    },
+    "sky": {
+     "horizon": [
+      1.0,
+      0.8,
+      0.64
+     ]
+    },
+    "fog": {
+     "color": [
+      0.86,
+      0.8,
+      0.74
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.66,
+      0.4
+     ]
+    },
+    "sky": {
+     "horizon": [
+      1.0,
+      0.7,
+      0.48
+     ]
+    },
+    "fog": {
+     "color": [
+      0.86,
+      0.7,
+      0.58
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.1,
+      0.17,
+      0.32
+     ],
+     "horizon": [
+      0.22,
+      0.33,
+      0.46
+     ]
+    },
+    "fog": {
+     "color": [
+      0.22,
+      0.32,
+      0.44
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.54,
+      0.62,
+      0.76
+     ]
+    },
+    "moon": {
+     "color": [
+      0.54,
+      0.64,
+      0.9
+     ]
+    }
    }
   },
   "water": {
@@ -227,6 +308,16 @@
    ],
    "causticsEnabled": true,
    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.3
+   },
+   "gulls": {
+    "enabled": true,
+    "density": 0.7
+   }
   }
  },
  "continentGeography": {
@@ -364,8 +455,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "533b49fbb688a637be9f1015c121d4d910e15e9cc73a307540459b258c23d4b2",
-  "sceneSha256": "17a4812718255d72796fe7576ca5dc78bfbc26ed98dc7198dcbd49d03a0dc624"
+  "snapshotSha256": "2571681b21df6949b976b4af8e3654bf98f874540b95644250e3e6972e6cda91",
+  "sceneSha256": "5b4bca47bb1ba07d4d455c360654bb34decf28f5190a3ab6c67ab7a8d911cf9e"
  },
  "externalResources": {
   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",

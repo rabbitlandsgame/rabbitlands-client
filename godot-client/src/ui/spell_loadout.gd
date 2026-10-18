@@ -42,6 +42,10 @@ func load_profile(key: String) -> void:
 		if saved is Array:
 			for index in range(mini(saved.size(), SLOT_COUNT)):
 				if saved[index] is Dictionary:
+					var technique := str(saved[index].get("technique", ""))
+					if _technique_key(technique):
+						slots[index] = {"id": -1, "power": 1, "technique": technique}
+						continue
 					var id := int(saved[index].get("id", -1))
 					if id == -1 or id in catalog.spell_ids():
 						slots[index] = {"id": id, "power": clampi(int(saved[index].get("power", 1)), 1, 10)}
@@ -57,6 +61,35 @@ func assign_slot(index: int, spell_id: int, power: int) -> void:
 	slots[index] = {"id": spell_id, "power": clampi(power, 1, 10)}
 	_save()
 	changed.emit()
+
+## A quick slot may hold a combat technique instead of a spell (the server's
+## technique key). The slot fires it through the Techniques tab, which aims it.
+func assign_technique(index: int, key: String) -> void:
+	if index < 0 or index >= SLOT_COUNT or not _technique_key(key):
+		return
+	slots[index] = {"id": -1, "power": 1, "technique": key}
+	_save()
+	changed.emit()
+
+func technique_at(index: int) -> String:
+	if index < 0 or index >= slots.size():
+		return ""
+	return str(slots[index].get("technique", ""))
+
+## The first slot holding neither a spell nor a technique, or -1.
+func first_empty_slot() -> int:
+	for index in range(slots.size()):
+		if int(slots[index].get("id", -1)) < 0 and technique_at(index).is_empty():
+			return index
+	return -1
+
+static func _technique_key(key: String) -> bool:
+	if key.is_empty() or key.length() > 40:
+		return false
+	for character in key:
+		if not (character == "_" or (character >= "a" and character <= "z")):
+			return false
+	return true
 
 func power_for(spell_id: int) -> int:
 	return int(powers.get(spell_id, 1))
@@ -88,7 +121,8 @@ func set_wheel_power(power: int) -> void:
 	changed.emit()
 
 func set_mode(value: String) -> void:
-	mode = value if value in ["prepared", "aimed", "wheel"] else "wheel"
+	# "aimed" was a mode until target spells always waited for a click.
+	mode = "prepared" if value == "aimed" else value if value in ["prepared", "wheel"] else "wheel"
 	changed.emit()
 
 func set_ring_size(percent: int) -> void:

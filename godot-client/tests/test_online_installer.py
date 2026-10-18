@@ -13,9 +13,11 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 CLIENT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CLIENT / "tools"))
 import client_release
+from release_storage import PartWriter
 
 
-def test_online_install_fresh_repair_and_corrupt_download_preserves_game(tmp_path):
+@pytest.mark.parametrize("streamed", [False, True])
+def test_online_install_fresh_repair_and_corrupt_download_preserves_game(tmp_path, streamed):
     godot = CLIENT / "Godot_v4.7.2-stable_win64.exe"
     if not godot.is_file() or os.name != "nt":
         pytest.skip("Run this focused integration check on the Windows packaging host.")
@@ -34,11 +36,19 @@ def test_online_install_fresh_repair_and_corrupt_download_preserves_game(tmp_pat
     parts = tmp_path / "parts"
     parts.mkdir()
     archive = parts / "fixture.zip"
-    count, unpacked = client_release.build_payload(stage, archive)
+    if streamed:
+        # The hosted runner writes a non-seekable ZIP directly into parts.
+        # Exercise Godot's actual reader with that data-descriptor/ZIP64 format.
+        with PartWriter(archive, "https://github.com/rabbitlandsgame/rabbitlands-client/releases/download/test", 1024) as writer:
+            count, unpacked = client_release.build_payload(stage, writer)
+        payload_parts, payload_size, payload_hash = writer.parts, writer.size, writer.sha256
+    else:
+        count, unpacked = client_release.build_payload(stage, archive)
+        payload_size, payload_hash = archive.stat().st_size, client_release.digest(archive)
+        payload_parts = client_release.split_payload(archive, "https://github.com/rabbitlandsgame/rabbitlands-client/releases/download/test", 1024)
     payload = {"schema": 1, "commit": identity["commit"], "platform": "windows",
-        "size": archive.stat().st_size, "unpacked_size": unpacked, "file_count": count,
-        "sha256": client_release.digest(archive),
-        "parts": client_release.split_payload(archive, "https://github.com/rabbitlandsgame/rabbitlands-client/releases/download/test", 1024)}
+        "size": payload_size, "unpacked_size": unpacked, "file_count": count,
+        "sha256": payload_hash, "parts": payload_parts}
     raw = json.dumps(payload, separators=(",", ":")).encode()
     envelope = {"payload": base64.b64encode(raw).decode(), "signature": base64.b64encode(
         key.sign(raw, padding.PKCS1v15(), hashes.SHA256())).decode()}

@@ -84,6 +84,20 @@ func _run() -> void:
 			and painted.get_shader_parameter(&"radiance_horizon")
 				== reference.sky_horizon_color,
 			"at minute %d the radiance sky is the binder's procedural sky" % int(minute))
+	# A map's own night and twilights (environment.variants) reach the painted
+	# sky exactly as they reach the binder's.
+	var varied := WorldManifest.new()
+	varied.data = region.data.duplicate(true)
+	varied.data.environment["variants"] = {
+		"night": {"sky": {"zenith": [0.09, 0.11, 0.18], "horizon": [0.2, 0.23, 0.3]}},
+		"dawn": {"sky": {"horizon": [0.82, 0.78, 0.76]}},
+		"dusk": {"sky": {"horizon": [1.0, 0.6, 0.44]}}}
+	for minute: float in [0.0, 75.0, 285.0]:
+		var reference := _procedural_at(varied, minute)
+		var own := LookSky.sky_colours(varied, minute)
+		_expect(own.top == reference.sky_top_color and own.horizon == reference.sky_horizon_color
+			and own.horizon != LookSky.sky_colours(region, minute).horizon,
+			"at minute %d a map's own variant sky is the binder's, not the shared one" % int(minute))
 
 	# The haze meets the painted horizon.
 	DayNightBinder.apply(region, world_environment, sun, 180.0)

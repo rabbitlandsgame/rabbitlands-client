@@ -212,6 +212,87 @@
      ],
      "density": 0.0016
     }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.86,
+      0.72
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.98,
+      0.9,
+      0.84
+     ]
+    },
+    "fog": {
+     "color": [
+      0.9,
+      0.88,
+      0.86
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.72,
+      0.52
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.98,
+      0.78,
+      0.64
+     ]
+    },
+    "fog": {
+     "color": [
+      0.88,
+      0.78,
+      0.7
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.14,
+      0.19,
+      0.3
+     ],
+     "horizon": [
+      0.32,
+      0.38,
+      0.46
+     ]
+    },
+    "fog": {
+     "color": [
+      0.33,
+      0.38,
+      0.45
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.6,
+      0.64,
+      0.74
+     ]
+    },
+    "moon": {
+     "color": [
+      0.58,
+      0.64,
+      0.86
+     ]
+    }
    }
   },
   "water": {
@@ -227,6 +308,16 @@
    ],
    "causticsEnabled": true,
    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.7
+   },
+   "gulls": {
+    "enabled": true,
+    "density": 0.6
+   }
   }
  },
  "continentGeography": {
@@ -348,8 +439,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "d9aa9ee80607598c7d698e5066d8336ece680ceff98b3c4d2fe0083cc58cee0a",
-  "sceneSha256": "c7a0a45ebc52e81a26b348e73a7e15003d28c79883ed431855c09751fbf208cf"
+  "snapshotSha256": "40a518fde675ca3f5a137d27499532b7bee518a626e5a9e9ed8721a647c7a8a2",
+  "sceneSha256": "8286670ca0fdb28249875c7110113a9fe72b8ca3cf96a75e692f03ebe81eac8d"
  },
  "externalResources": {
   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",

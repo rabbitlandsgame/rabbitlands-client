@@ -2,32 +2,32 @@
  "region": "greenlight",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "b481efd6989b5f096976b2c0e4fdaf6b16b299fdbd69d989978f7e2007535bea",
-  "sceneSha256": "2ad483bbacb0f3cc6d5bc01cfc2f2ee593ba67f65870b295c84429a86ae42640",
+  "sha256": "a5b47d24c15eeaaf2a9e4b2b8966499d9e2fccf2f4ffbe8c291b3cf8c23f0fd9",
+  "sceneSha256": "78c8728893fd4e717c3f7c37443d8e76905c5d656c98a082669efa182691402e",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/greenlight/greenlight.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "20f89f2c82a2819f2f6244183770e9265cfd10ebace1416e22a9fed61732e396",
-  "collisionSha256": "52551250043411532cdda696a48433d1ae86dc6497b3d0ea6276c78bd1559122",
-  "servedGridSha256": "d056608508ef7e37695ca54d7055524532260a8a2702db258bbec95c87363378",
-  "walkableCells": 238215,
-  "openTiles": 57506,
-  "sourceSnapshotSha256": "b481efd6989b5f096976b2c0e4fdaf6b16b299fdbd69d989978f7e2007535bea"
+  "sidecarSha256": "0bc63b4bd895c17f6b8459c85f3ddf751e4ffcddad4aa62315144859c6e2f7aa",
+  "collisionSha256": "ac88bf91ba342162ef201e2583b7715473e063377d56fc731e4d2bd1d9fa3da8",
+  "servedGridSha256": "ee0041e9c2e463b5a5f1aa7faebdb60b2aa8175f36c00cf362f8b70606e06dae",
+  "walkableCells": 238214,
+  "openTiles": 57507,
+  "sourceSnapshotSha256": "a5b47d24c15eeaaf2a9e4b2b8966499d9e2fccf2f4ffbe8c291b3cf8c23f0fd9"
  },
  "chunks": 72,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 49296624,
-  "max": 3479072,
+  "total": 50994172,
+  "max": 3520284,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
   "05_07": 19.0,
-  "05_08": 40.9,
+  "05_08": 41.0,
   "06_07": 43.2,
   "06_08": 197.0,
-  "06_09": 108.1,
+  "06_09": 108.2,
   "06_10": 11.2,
   "06_11": 11.1,
   "06_12": 11.1,
@@ -63,16 +63,16 @@
   "10_08": 11.1,
   "10_09": 11.4,
   "10_10": 11.4,
-  "10_11": 219.7,
-  "10_12": 101.3,
+  "10_11": 220.4,
+  "10_12": 101.5,
   "10_13": 11.4,
   "10_14": 11.2,
   "11_08": 11.1,
   "11_09": 11.4,
   "11_10": 11.4,
-  "11_11": 122.8,
-  "11_12": 126.2,
-  "11_13": 116.5,
+  "11_11": 123.1,
+  "11_12": 126.3,
+  "11_13": 116.6,
   "11_14": 11.2,
   "12_08": 11.1,
   "12_09": 11.4,
@@ -80,7 +80,7 @@
   "12_11": 111.5,
   "12_12": 64.0,
   "12_13": 134.3,
-  "12_14": 147.5,
+  "12_14": 147.6,
   "13_08": 11.1,
   "13_09": 11.4,
   "13_10": 11.4,
@@ -97,18 +97,19 @@
   "14_14": 11.0
  },
  "timings": {
-  "snapshot_s": 15.7,
-  "terrain_s": 0.2,
+  "snapshot_s": 1.4,
+  "terrain_s": 0.1,
   "water_s": 0.0,
-  "overlays_s": 0.9,
+  "overlays_s": 0.6,
   "bridges_s": 0.1,
-  "surface_glb_bytes": 86385664,
+  "surface_glb_bytes": 123667372,
   "walk_kit_nodes": 93,
-  "library_s": 0.3,
+  "library_s": 0.2,
   "harvest_nodes": 37,
-  "chunks_s": 3.9
+  "chunks_s": 1.7,
+  "space_passes_s": 3.6
  },
- "seconds": 44.2,
+ "seconds": 14.4,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 0,
@@ -135,65 +136,9 @@
    -968
   ],
   "maximumPlacements": 112,
-  "maximumTriangles": 160762,
+  "maximumTriangles": 168083,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "certifiedTextureAliases": [
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/1e997eb6c9bcdcffabbe082fbf97451848a0770f9ae7eef0532e48e81301a603.jpg",
-   "sha256": "1e997eb6c9bcdcffabbe082fbf97451848a0770f9ae7eef0532e48e81301a603",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tide-pool-rocks-1.glb",
-   "sourceModelSha256": "045746595a3d3558ffe79c67a3becd3c795f76085ae512da39bab05f468e19bb"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb.jpg",
-   "sha256": "3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f.jpg",
-   "sha256": "715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/9ce6bfe2dc883989e194dc9245efa8c4b7918ec6ed522f56f4d4cbc7a411a1bd.jpg",
-   "sha256": "9ce6bfe2dc883989e194dc9245efa8c4b7918ec6ed522f56f4d4cbc7a411a1bd",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tide-pool-rocks-1.glb",
-   "sourceModelSha256": "045746595a3d3558ffe79c67a3becd3c795f76085ae512da39bab05f468e19bb"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f.jpg",
-   "sha256": "f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f7781d352a6dc9e097ac375de9d40b0f35449301c0f263592044ba8ecaecb539.jpg",
-   "sha256": "f7781d352a6dc9e097ac375de9d40b0f35449301c0f263592044ba8ecaecb539",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tide-pool-rocks-1.glb",
-   "sourceModelSha256": "045746595a3d3558ffe79c67a3becd3c795f76085ae512da39bab05f468e19bb"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/71d7dd0b736b117da5fac3e9f4ccb78a92fa225ec9f36e4b8cb16ff0f52fe119.jpg",
-   "sha256": "71d7dd0b736b117da5fac3e9f4ccb78a92fa225ec9f36e4b8cb16ff0f52fe119",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-driftwood-1.glb",
-   "sourceModelSha256": "33a187a9914e39ee3e96529326f8e3480fd2192a8f251ba9e158464d3bc7b61c"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/a1fee28b8bf81898429193eb466740fac8218ad7f9ebcef0d9f9d9f356c19135.jpg",
-   "sha256": "a1fee28b8bf81898429193eb466740fac8218ad7f9ebcef0d9f9d9f356c19135",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-driftwood-1.glb",
-   "sourceModelSha256": "33a187a9914e39ee3e96529326f8e3480fd2192a8f251ba9e158464d3bc7b61c"
-  },
-  {
-   "path": "godot-client/world_authoring/regions/gull_skerries/assets/textures/e756622340edb55cfaed2dcb9a246798ea95d930adad68b0958d3cdc81558ec1.jpg",
-   "sha256": "e756622340edb55cfaed2dcb9a246798ea95d930adad68b0958d3cdc81558ec1",
-   "sourceModel": "godot-client/world_authoring/regions/gull_skerries/assets/prototypes/kit-driftwood-1.glb",
-   "sourceModelSha256": "33a187a9914e39ee3e96529326f8e3480fd2192a8f251ba9e158464d3bc7b61c"
-  }
- ]
+ }
 }

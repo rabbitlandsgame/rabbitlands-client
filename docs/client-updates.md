@@ -1,5 +1,10 @@
 # Automatic client updates
 
+This page covers the GitHub Windows/Linux distribution. [Steam and macOS builds](store-builds.md)
+use an explicit distribution owner: Steam replaces its own game files, and
+standalone macOS updates replace the complete signed app. Those builds retain
+commit compatibility checks but never download or apply GitHub update payloads.
+
 The game server names the **client Git commit packaged for that server**. This
 is independent of the server repository's own commit. Client builds contain
 their full commit ID and complete ancestor list, generated from Git at package
@@ -116,6 +121,10 @@ reused across builds.
 
 ## Upload a complete desktop release
 
+For bounded-storage hosted builds, see [runner builds](runner-builds.md). That
+path builds one platform per job, streams verified parts into an existing draft,
+and finalizes small receipts without copying full builds between jobs.
+
 First push the selected client commit through the repository's configured SSH
 identity. Uploads require GitHub CLI authenticated as **rabbitlandsgame** with
 write access. SSH authentication and CLI authentication are separate; the
@@ -126,12 +135,13 @@ $RabbitLandsRelease = "C:\rabbitlands\dist\releases\client-<full-client-commit>\
 python godot-client/tools/build_release.py upload --bundle $RabbitLandsRelease
 ```
 
-This creates or reuses the **one current client release entry**, using
-`RELEASE-NOTES.md` as its description. Replacing a published build first returns
-that entry to **draft**, updates its tag to `client-<full-client-commit>`, then
-uploads the replacement files. After the replacement downloads pass verification,
-the previous compiled files are removed. Older generated client-release entries,
-if any, are also removed. GitHub keeps only the current compiled build.
+This creates or reuses the **current client draft**, using `RELEASE-NOTES.md` as
+its description. The working published release stays available while its
+replacement is prepared and reviewed. Older files in the draft are removed only
+after all replacement files pass verification. After the replacement is published,
+the **Retire previous published client** workflow verifies its checksum inventory
+and retires older published compiled releases. A published release and replacement
+draft can coexist temporarily; compiled version history is not retained afterwards.
 
 The commit-specific tag keeps signed update URLs tied to the actual build. The
 script verifies that commit exists in the public client repository and refuses
@@ -152,7 +162,7 @@ by GitHub with the expected size and SHA-256 are reused. The script checks the
 remote asset list, upload states, sizes and SHA-256 checksums before publication; failures
 leave the draft unpublished. `--publish` marks the completed release as latest.
 Players can find it on the [client Releases page](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
-No GitHub Actions workflow is required.
+This local command remains available alongside the [hosted release workflow](runner-builds.md).
 
 After publishing, verify anonymous downloads and deploy the generated combined
 `client_updates.json` to the served server profile when ready to roll out the
@@ -254,5 +264,6 @@ For relevant download/retry changes, the optional local HTTPS harness is
 
 The runtime runner creates an isolated project, test keys, HTTPS server and
 certificate. Its fixtures never change an installed game or the production
-signing keys. No GitHub Actions workflows ship in this repository; these checks
-are manual and the full historical suites are not release gates.
+signing keys. These checks are manual, and the full historical suites are not
+release gates. The desktop release workflow runs the packaging checks for its
+selected source commit.

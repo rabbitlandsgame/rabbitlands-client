@@ -51,7 +51,11 @@ enum ClientMessage {
 	# Eternal Lands spoke for everything below 200, so what this client asks
 	# for that Eternal Lands never had is numbered from there up.
 	ELORIA_MIX_REQUEST = 200, ELORIA_TOOL_REQUEST = 201, ELORIA_TUTORIAL_UI = 203,
-	ELORIA_MAP_COMMAND = 204, ELORIA_CLIENT_RELEASE = 205
+	ELORIA_MAP_COMMAND = 204, ELORIA_CLIENT_RELEASE = 205,
+	# Use a combat technique: {"op": "use", "key", "target_id"}. Carries only
+	# an actor id, so it is never coordinate-framed. The state comes back on
+	# ELORIA_MAGIC_STATE as kind "techniques".
+	ELORIA_TECHNIQUE_REQUEST = 220
 }
 
 enum ServerMessage {
@@ -110,6 +114,9 @@ enum ServerMessage {
 	ELORIA_MIX_STATE = 218,
 	ELORIA_GUILD_STATE = 213,
 	ELORIA_ACHIEVEMENTS_CATALOG = 219,
+	## The whole sky as it looks and as it is becoming (weather_state_v1).
+	## 220 is ClientMessage.ELORIA_TECHNIQUE_REQUEST: the ids are one pool.
+	ELORIA_WEATHER_STATE = 221,
 	# The worn titles of everyone on a map. Down here in the low run the
 	# extensions overflowed into rather than beside 244, because 219 was the
 	# last free number of the 215-219 block and this run continues downwards.
@@ -117,6 +124,7 @@ enum ServerMessage {
 	# What the NPCs just shown do for a living, the line under their names.
 	# The free number between the map digest (209) and the titles (211).
 	ELORIA_ACTOR_OCCUPATIONS = 210,
+	ELORIA_MOUNT_STATES = 198,
 	ELORIA_QUEST_OFFERS = 199,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
@@ -239,6 +247,7 @@ static func turn(left: bool) -> PackedByteArray:
 ## Grow this list in the same commit that lands the window which decodes the
 ## packet, never before.
 const CLIENT_CAPABILITIES: Array[String] = [
+	"music_program_v1",
 	"lantern_tutorial_v1",
 	"tutorial_rewards_v1",
 	"second_bell_v1",
@@ -273,9 +282,11 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"achievements_catalog_v1",
 	"actor_titles_v1",
 	"actor_occupations_v1",
+	"mounts_v1",
 	"quest_offers_v1",
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",
+	"weather_state_v1",
 	"attribute_state_v1",
 	"counter_layout_v1",
 	"degraded_items_v1",
@@ -287,6 +298,8 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"magic_book_v2",
 	"spell_visuals_v1",
 	"spell_impacts_v1",
+	"creature_status_v1",
+	"actor_status_v1",
 	"special_events_v1",
 	"storage_window_v1",
 	# Draws the continent-v2 maps (registry status continent-v2-served: the
@@ -294,12 +307,24 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# to a client that claims this, and moves a client that does not off it.
 	"continent_v2_maps_v1",
 	"landfall_underground_v1",
+	# The Techniques window and the real action-point pool, sent as
+	# ELORIA_MAGIC_STATE kind "techniques".
+	"techniques_v1",
+	# Repeat casting: whether it is on and running, ELORIA_MAGIC_STATE kind
+	# "autocast"; switched with magic_request {"op": "autocast"}.
+	"magic_autocast_v1",
 ]
 
 ## `#clientcaps` is an ordinary chat command; the server parses it out of
 ## RAW_TEXT and stores the set on the session.
 static func client_capabilities() -> PackedByteArray:
 	return chat("#clientcaps " + ",".join(PackedStringArray(CLIENT_CAPABILITIES)))
+
+## Ask the server to use a combat technique. The server checks everything -
+## manual, level, gear, cooldown, action points - and answers in chat and with
+## a fresh technique state.
+static func technique_request(data: Dictionary) -> PackedByteArray:
+	return encode(ClientMessage.ELORIA_TECHNIQUE_REQUEST, JSON.stringify(data).to_utf8_buffer())
 
 ## Ask the server to play an emote. The name rather than a legacy numeric id:
 ## this server has no such id namespace, and mirroring one here would be a
@@ -1077,10 +1102,14 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_achievements_state(payload)
 		ServerMessage.ELORIA_ACHIEVEMENTS_CATALOG:
 			return decode_achievements_catalog(payload)
+		ServerMessage.ELORIA_WEATHER_STATE:
+			return decode_weather_state(payload)
 		ServerMessage.ELORIA_ACTOR_TITLES:
 			return decode_actor_titles(payload)
 		ServerMessage.ELORIA_ACTOR_OCCUPATIONS:
 			return decode_actor_occupations(payload)
+		ServerMessage.ELORIA_MOUNT_STATES:
+			return preload("res://src/mounts/mount_protocol.gd").decode(payload)
 		ServerMessage.ELORIA_QUEST_OFFERS:
 			if payload.size() < 2 or payload.size() != 2 + u16(payload) * 2:
 				return {"type": "invalid", "error": "quest_offers_length"}
@@ -1429,6 +1458,31 @@ static func decode_achievements_state(payload: PackedByteArray) -> Dictionary:
 ## `ELORIA_ACHIEVEMENTS_STATE(244)` still arrives and still feeds the Counters
 ## tab. It is a different, older model - labelled counters plus finished names
 ## - and this sits beside it rather than replacing it.
+## The whole sky (weather_state_v1): version 1, the look the sky has now and
+## the look it is becoming (seven bytes each: what falls - 0 none, 1 rain,
+## 2 snow, 3 ash, 4 sand - then precipitation, clouds, fog, darkness, wind and
+## lightning, 0-100), the real seconds left until it gets there in tenths
+## (u16 LE), and the state's name. The client draws the numbers, not the
+## name, so a sky the server adds needs no new client.
+static func decode_weather_state(payload: PackedByteArray) -> Dictionary:
+	if payload.size() < 18 or int(payload[0]) != 1:
+		return {"type": "invalid", "error": "weather_state_length"}
+	var current: Array[int] = []
+	var target: Array[int] = []
+	for index: int in 7:
+		current.append(int(payload[1 + index]))
+		target.append(int(payload[8 + index]))
+	for look: Array[int] in [current, target]:
+		for index: int in range(1, 7):
+			if look[index] > 100:
+				return {"type": "invalid", "error": "weather_state_amount"}
+	var length: int = int(payload[17])
+	if payload.size() < 18 + length:
+		return {"type": "invalid", "error": "weather_state_name"}
+	return {"type": "weather_state", "current": current, "target": target,
+		"seconds": float(payload.decode_u16(15)) / 10.0,
+		"name": payload.slice(18, 18 + length).get_string_from_ascii()}
+
 static func decode_achievements_catalog(payload: PackedByteArray) -> Dictionary:
 	var worn: Dictionary = _nul_at(payload, 0)
 	if worn.is_empty():

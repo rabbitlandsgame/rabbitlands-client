@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "fallbackAction": "idle",
   "playbackSpeeds": {
-    "walk": 1.15,
-    "run": 1.25
+    "walk": 1.0,
+    "run": 1.0
   },
   "actions": {
     "idle": "Idle_A",
@@ -65,37 +65,33 @@
     "id": 78,
     "slug": "078_jackalope",
     "name": "Jackalope",
-    "motion": "tusk",
+    "motion": "antler_jab",
     "label": "Hopping antler jab",
-    "duration_seconds": 0.95,
+    "duration_seconds": 1.65,
     "source_key": "fantasy",
     "source_title": "Wizards of the Coast: SRD 5.2.1 creature actions",
     "source_url": "https://media.dndbeyond.com/compendium-images/srd/5.2/SRD_CC_v5.2.1.pdf",
-    "interpretation": "Game choreography inferred from anatomy or fantasy archetype; timing and amplitude are authored for readability.",
-    "revision_4_motion": "planted-foot crouch, rear-leg drive, reaching forefeet and landing recovery"
-  },
-  "locomotion_retiming": {
-    "walk": 1.35,
-    "jog": 1.5,
-    "baked_into_clip_timestamps": true
+    "interpretation": "Game choreography inferred from anatomy or fantasy archetype; timing and amplitude are authored for readability."
   },
   "revision": 11,
-  "corrective_clips": [
-    "Sword_Attack"
-  ],
+  "corrective_clips": [],
   "surface_correctives": {
-    "morph_targets": 49,
-    "clips": [
-      "Sword_Attack"
-    ],
+    "morph_targets": 25,
+    "clips": [],
     "reset_unrelated_shapes": true,
-    "preserve_on_export": true
+    "preserve_on_export": true,
+    "revised_clips_use_neutral_shapes": true
   },
-  "facial_binding_report": "078_jackalope_face_binding_r11.json",
   "loopingClips": [
     "Idle_A",
     "Fighting_Idle",
     "Walk",
     "Jog"
-  ]
+  ],
+  "strideMetresPerSecond": {
+    "walk": 0.1928569242857143,
+    "run": 0.4299995126666667
+  },
+  "strideScalesWithActor": true,
+  "motionRevision": "leporid-authored-1"
 }

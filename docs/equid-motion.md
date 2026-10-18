@@ -1,0 +1,17 @@
+# Equid motion
+
+The six approved family transfers are Dun Sunmane Foal, Grey Sunmane Foal, Golden Plains Horse, Moonlit Unicorn, Donkey and Zebra. Each has a four-beat Walk (1.12 s), diagonal Jog (0.66 s), four-foot Gallop (0.56 s), forehoof strike (1.60 s), supported side-collapse Death (2.60 s), and idle, fighting-idle and hit clips. The reviewed family set is installed in their existing runtime model paths. The separately developed mounted Moor Pony and its mapping remain unchanged.
+
+Dedicated maps under `data/animations/equid/` retain existing server commands. Ordinary walk/run select Walk/Jog; the explicit `gallop` action selects Gallop. All three play at authored speed, with stride speeds measured using each actor's actual import scale and adjusted by runtime actor scale. Gallop is a left-lead cycle: right hind, left hind, right fore, left fore, followed by gathered flight. Its duration is shared, while stride and recovery respect native proportions.
+
+The family preparation repairs complete hoof ownership, torso/leg attachments, foreleg volume, foal neck and thigh motion, and the unicorn's mane roots. The Dun's left ankle and physical shin field are aligned across Walk, Jog and Gallop. Localized corrective shapes retain muscle dimensions through the fold while preserving low-hoof paths. Each actor retains its native rig and geometry. Eight-influence skin and every corrective target are retained. Lossless runtime packing removes unreachable data and exactly constant interior keys; it does not approximate the reviewed curves.
+
+`docs/qa/equid-family-motion/actors.json` binds installed hashes, native anatomy, contact timing and measured strides. Independent bone, shape and physical-surface witnesses are in `tests/fixtures/equid_family_motion_worlds.json`. The tracked import policies retain the qualified 3072 FPS bake cadence with animation optimization and compression disabled. High-resolution inputs, processing stages and review videos remain in the ignored authoring workspace.
+
+Run `python eloria-assets/tools/test_equid_family_motion.py` from the repository root with NumPy and SciPy. After importing Godot, run `tests/test_equid_family_motion.gd`. The native check covers all 48 slots and all 18 gaits; the engine check uses the current scene cache, native importer and action resolver, including shape/surface witnesses, action switching, held endpoints and RESET. These are focused component checks; a crowded gameplay performance test has not been completed. The foals use many corrective targets, so visual qualification alone does not establish crowd rendering cost.
+
+## Moor Pony and mounting
+
+Moor Pony keeps its approved walk, trot, rearing forehoof strike, collapse and separate mounted Gallop. Saddle, girth and stirrup pieces follow the torso; bridle pieces follow the head, with a smooth body-to-neck transition for mane and straps. The saddle attachment starts at node 24, `Bone_021`. Use the complete registry scale/facing transform once; native coordinates face +Z and use Y-up. Rider placement and mounted behavior are maintained by the riding integration, separately from the six family transfers above.
+
+The original pony authoring evidence remains under `docs/qa/equid-motion/`. Its historical checksum fixture describes that original selection and should not be used as the current mounted-file checksum. Current mounting checks are documented with the riding implementation.

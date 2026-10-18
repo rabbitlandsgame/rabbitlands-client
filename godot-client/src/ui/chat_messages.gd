@@ -18,6 +18,12 @@ static func kind(line: Dictionary) -> String:
 	var text := str(line.get("text", ""))
 	if text.begins_with("[Party] "):
 		return "party"
+	if text.begins_with("[Loot] "):
+		return "local"
+	# Older servers sent pickup feedback on the local channel. Its colon
+	# introduces the item list, rather than a player speaking.
+	if text.begins_with("Gathered: "):
+		return "system"
 	return "local" if not _plain_speaker(text).is_empty() else "system"
 
 static func _plain_speaker(text: String) -> String:

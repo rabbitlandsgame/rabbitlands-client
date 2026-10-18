@@ -510,9 +510,30 @@ func _run() -> void:
 	await process_frame
 	_expect(full_map_panel.visible != map_was_open
 		and root.gui_get_focus_owner() == map_hud_button,
-		"Tab opens the map instead of moving focus, even from a focused button")
+		"the map key (M) opens the map instead of moving focus, even from a focused button")
 	root.push_input(tab_press)
 	await process_frame
+	# Tab is the technique ring's hold key now: it opens the ring and moves
+	# no focus either, and letting go closes it.
+	var ring: Control = main.get("technique_ring") as Control
+	# Rings stay shut over the map; close it whatever the map key did above.
+	(main.get("full_map") as Control).hide()
+	var ring_press: InputEventKey = (InputMap.action_get_events(
+		"technique_ring")[0].duplicate() as InputEventKey)
+	ring_press.pressed = true
+	var focus_before: Control = root.gui_get_focus_owner()
+	root.push_input(ring_press)
+	await process_frame
+	_expect(root.gui_get_focus_owner() == focus_before, "holding Tab never moves focus")
+	# Rings stay shut while a modal, the console or a text box is up; when
+	# nothing blocks them, Tab opens the technique ring.
+	_expect(ring != null and (ring.visible or not bool(main.call("_ring_allowed"))),
+		"holding Tab opens the technique ring whenever rings are allowed")
+	var ring_release := ring_press.duplicate() as InputEventKey
+	ring_release.pressed = false
+	root.push_input(ring_release)
+	await process_frame
+	_expect(ring != null and not ring.visible, "releasing Tab closes the technique ring")
 	map_hud_button.focus_mode = map_hud_focus as Control.FocusMode
 	map_hud_button.release_focus()
 	for rebindable: String in ["turn_left", "turn_right", "toggle_map",

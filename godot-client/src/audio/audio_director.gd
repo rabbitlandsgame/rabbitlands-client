@@ -15,6 +15,8 @@ extends Node
 ## autoload singletons are registered, and this reads `AppState` directly.
 
 const AudioMix := preload("res://src/audio/audio_mix.gd")
+const MusicProgramPlayer := preload("res://src/audio/music_program_player.gd")
+signal music_changed(title: String, creator: String)
 const CATALOG_PATH := "res://assets/audio/catalog.json"
 const AUDIO_DIRECTORY := "res://assets/audio/"
 ## Enough voices for a busy moment without letting one event drown the rest.
@@ -50,6 +52,8 @@ var _music_player: AudioStreamPlayer = null
 var _music_track := ""
 ## Keep the server's latest choice while muted, so enabling audio resumes it.
 var _requested_music := ""
+var _program_player: Node
+var _music_entries: Array = []
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice := 0
 ## What the last authoritative snapshot said, so a restatement is not an event.
@@ -73,6 +77,11 @@ func _ready() -> void:
 		set_category_volume(category, float(AudioMix.CATEGORIES[category].volume))
 	_step_random.randomize()
 	_load_catalog()
+	_program_player = MusicProgramPlayer.new()
+	add_child(_program_player)
+	_program_player.configure(_music_entries)
+	_program_player.track_changed.connect(func(title: String, creator: String) -> void:
+		music_changed.emit(title, creator))
 	AppState.sound_requested.connect(_on_sound_requested)
 	AppState.music_requested.connect(_on_music_requested)
 	for index: int in range(VOICE_COUNT):
@@ -120,13 +129,15 @@ func play(name: String, pitch := 1.0, gain := 1.0) -> bool:
 ## The music beds this client knows about, by name.
 func music_names() -> Array[String]:
 	var names: Array[String] = []
-	for key: Variant in _music_streams:
-		names.append(str(key))
+	for entry: Dictionary in _music_entries:
+		names.append(str(entry.name))
 	names.sort()
 	return names
 
 ## What is playing under the map, or "" for silence.
 func current_music() -> String:
+	if _requested_music.begins_with("@") and _program_player != null:
+		return str(_program_player.current_track())
 	return _music_track
 
 ## Plays the named music bed, looping, or stops the music for "". A track this
@@ -134,6 +145,13 @@ func current_music() -> String:
 ## says so by returning false.
 func play_music(track: String) -> bool:
 	_requested_music = track
+	if track.begins_with("@"):
+		if _music_player != null:
+			_music_player.stop()
+		_music_track = ""
+		return bool(_program_player.request(track)) if enabled and _program_player != null else false
+	if _program_player != null:
+		_program_player.stop()
 	if track == _music_track and _music_player != null and _music_player.playing:
 		return not track.is_empty()
 	_music_track = ""
@@ -152,9 +170,12 @@ func play_music(track: String) -> bool:
 	_music_player.volume_db = 0.0
 	_music_player.play()
 	_music_track = track
+	music_changed.emit(track.capitalize(), "")
 	return true
 
 func stop_all(clear_music_request := true) -> void:
+	if _program_player != null:
+		_program_player.stop()
 	for player: AudioStreamPlayer in _voices:
 		player.stop()
 	if _music_player != null:
@@ -185,6 +206,10 @@ func _load_catalog() -> void:
 			_streams[str(sound.get("name", ""))] = stream as AudioStream
 	for raw_bed: Variant in (parsed as Dictionary).get("music", []):
 		var bed: Dictionary = raw_bed as Dictionary
+		_music_entries.append(bed)
+		# Retain legacy beds for old servers. Program tracks load on demand.
+		if str(bed.get("name", "")) not in ["settlement", "wilds", "depths"]:
+			continue
 		var music: Resource = load(AUDIO_DIRECTORY + str(bed.get("file", "")))
 		if music is AudioStream:
 			if music is AudioStreamOggVorbis:

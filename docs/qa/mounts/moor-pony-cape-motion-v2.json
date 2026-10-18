@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-17",
+  "scope": "local Moor Pony cape motion prototype",
+  "previousDrapeReceipt": "moor-pony-cape-hotkeys.json",
+  "behavior": {
+    "walkTrot": "lower hang along the back and hindquarters",
+    "gallop": "blend toward the previously reviewed trailing silhouette with a travelling hem ripple",
+    "paceBlendSeconds": 0.4,
+    "slowing": "return to lower drape and settle the ripple",
+    "sheetConstraints": "preserve link lengths, limit lateral column spread, project onto animated pony contact"
+  },
+  "ponySha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+  "sourceSha256": {
+    "godot-client/src/mounts/mount_cape_surface.gd": "3c9b63a5540c5b6d74185f687d27cd4efe4237678bbfd2d9ad724b665798bf10",
+    "godot-client/src/mounts/mounted_player_visual.gd": "dc22a73fd9875395ac7da096e724ad6ddd8d139527603190de6a226b7bbe9d00",
+    "godot-client/src/actors/cape_cloth.gd": "f01e695a9a9f7c1ef90c031d2388d6fa3036449da7ea2e75a4516a275f5d3b28",
+    "godot-client/tests/test_mounted_cape.gd": "fced9ea7d90bf2f786845e5c0ef3764d2b580a09c55b46ab75a905e2918186c1",
+    "tools/asset-authoring/check_mounted_cape.py": "23a91dc2c339e381e129977763e298d47dc74412520c4fbc045021e9a43fec80"
+  },
+  "validation": {
+    "capeChecks": 40,
+    "capeFailures": 0,
+    "gaitSequence": [
+      "idle",
+      "walk",
+      "trot",
+      "gallop",
+      "return_trot"
+    ],
+    "actualCapeSurfaceSamples": 114,
+    "gaitTimeCombinations": 38,
+    "transitionFramesIncluded": [
+      12,
+      24
+    ],
+    "verticesEdgesFacesChecked": true,
+    "minimumMeasuredCapePonyGapMetres": 0.04942024918417687,
+    "maximumMaterialLinkErrorMetres": 0.000769764184951782,
+    "maximumSampledCapeEdgeRatio": 1.44714509283625,
+    "frozenPonyPoseMotion": [
+      {
+        "body": "luminous_male",
+        "collar_drift_m": 0.0,
+        "frozen_pose_gallop_lift_m": 0.123021971186002,
+        "largest_hem_frame_step_m": 0.0189306847751141,
+        "settled_trot_hem_motion_m": 0.00321181793697178,
+        "steady_gallop_hem_motion_m": 0.0166627801954746
+      },
+      {
+        "body": "luminous_female",
+        "collar_drift_m": 0.0,
+        "frozen_pose_gallop_lift_m": 0.123021818200747,
+        "largest_hem_frame_step_m": 0.0189306475222111,
+        "settled_trot_hem_motion_m": 0.00321181793697178,
+        "steady_gallop_hem_motion_m": 0.0166643392294645
+      }
+    ],
+    "riderContactChecks": 1118,
+    "onFootCapeRegression": "passed",
+    "realGameSmoke": "passed: mounting, R/Space, chat focus, walk, trot, gallop, dismount",
+    "gameCameraImagesInspected": [
+      "cruise-game.png",
+      "burst-game.png"
+    ]
+  },
+  "limits": [
+    "actual pony contact geometry sampled with the current Luminous male test wardrobe",
+    "male and female deformation, transition and frozen-pose motion checks pass; other wardrobes need visual review",
+    "existing sparse cloth chains and padded contact envelopes remain a visual prototype"
+  ]
+}

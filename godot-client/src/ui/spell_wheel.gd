@@ -1,8 +1,10 @@
 extends Control
-## Left Shift owns ring input until released. Alt remains available to quick slots.
+## The spell_ring key (Left Shift by default) owns ring input until released.
+## Alt remains available to quick slots.
 signal spell_chosen(id: int, power: int)
 signal opened
 const Book := preload("res://src/ui/spells_window.gd")
+const HoldKeys := preload("res://src/ui/hold_keys.gd")
 const CLASSES := ["Healing", "Defense", "Offense", "Support", "Utility"]
 const SCOPES := ["self", "target", "allies", "burst", "utility"]
 const PAGE_SIZE := 8
@@ -92,10 +94,11 @@ func handle_event(event: InputEvent) -> bool:
 	if event is InputEventKey:
 		var key: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
 		# Alt belongs to the quickbar and operating system, even while a ring is open.
-		if event.ctrl_pressed or event.alt_pressed or key == KEY_ALT:
+		var ring_key := HoldKeys.matches("spell_ring", event)
+		if (event.ctrl_pressed or event.alt_pressed or key == KEY_ALT) and not ring_key:
 			reset()
 			return false
-		if key == KEY_SHIFT and event.location == KEY_LOCATION_LEFT:
+		if ring_key:
 			if event.pressed:
 				if event.echo: return visible or _latched
 				if can_open.is_valid() and not can_open.call(): return false

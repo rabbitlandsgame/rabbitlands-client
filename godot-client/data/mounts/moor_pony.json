@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "status": "approved_mounted_v8_in_game_prototype",
+  "mount": "moor_pony",
+  "ponySha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+  "approvedBasePonySha256": "50589ff68ad7c9586e49681dcf8c5012d19fe32f9aecdd0340d75e13e8e8421f",
+  "saddleBone": "Bone_021",
+  "seatOffsetNative": [
+    0.0,
+    0.18,
+    -0.16
+  ],
+  "footOffsetMetres": [
+    0.31,
+    -0.6,
+    0.04
+  ],
+  "kneePoleOffsetMetres": [
+    0.42,
+    -0.2,
+    0.4
+  ],
+  "handOffsetMetres": [
+    0.12,
+    0.16,
+    0.34
+  ],
+  "elbowPoleOffsetMetres": [
+    0.3,
+    0.02,
+    -0.04
+  ],
+  "pelvisLeanDegrees": 3.0,
+  "torsoStabilization": 0.55,
+  "fingerGripWeight": 0.95,
+  "fingerCurlDegrees": [
+    55.0,
+    70.0,
+    50.0
+  ],
+  "footToeOutDegrees": 8.0,
+  "armMotion": {
+    "weight": 1.0,
+    "idle": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.002,
+      "elbowGiveMetres": 0.003
+    },
+    "walk": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    },
+    "trot": {
+      "beatsPerCycle": 2,
+      "handFollowMetres": 0.009,
+      "elbowGiveMetres": 0.014
+    },
+    "gallop": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    }
+  },
+  "reins": {
+    "headBone": "head",
+    "bridleAnchorsNative": {
+      "l": [
+        0.04366,
+        1.07227,
+        1.12845
+      ],
+      "r": [
+        -0.11053,
+        1.06983,
+        1.12357
+      ]
+    },
+    "widthMetres": 0.02,
+    "thicknessMetres": 0.006,
+    "crossSectionRollDegrees": 35.0,
+    "sideClearanceMetres": 0.18,
+    "sagMetres": 0.015,
+    "looseEndLengthMetres": 0.1,
+    "looseEndSpreadMetres": 0.065,
+    "segments": 20,
+    "colour": "98703e"
+  },
+  "walkStrideMetresPerSecond": 0.5625018284987413,
+  "trotStrideMetresPerSecond": 1.4545501827846241,
+  "gallopStrideMetresPerSecond": 3.7500121899916086,
+  "playbackRateMultipliers": {
+    "trot": 0.5
+  },
+  "clips": {
+    "idle": "Idle_A",
+    "walk": "Walk",
+    "trot": "Jog",
+    "gallop": "Gallop"
+  },
+  "notes": "Adds the approved Gallop clip in the isolated mounted preview. The original seven pony clips, mesh/skin/rest, current rider fit and visible reins are preserved. Production run mapping remains Jog. Mounted v6 revises only Gallop hind-leg recovery to clear the saddle; rider, reins, stride, contact events and all other pony clips remain unchanged. Mounted v7 adds two cloth-only corrective shapes during Gallop, with neutral resets in all other actions; existing bone animations and rider settings are exact. Mounted v8 replaces stretching cloth shapes with two rigid panel hinges and locally corrects olive cloth texels while protecting saddle/body texels."
+}

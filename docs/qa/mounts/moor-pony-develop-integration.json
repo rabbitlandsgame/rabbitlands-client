@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-17",
+  "scope": "reviewed Moor Pony prototype integration into develop",
+  "visualSelection": "user-reviewed v4 cape ripple and half-speed trot; preserved rider torso, grip, reins and approved pony",
+  "rollout": "disabled on normal servers; explicit loopback-only test flag",
+  "ponySha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+  "sourceSha256": {
+    "godot-client/src/mounts/mounted_player_visual.gd": "fd3aa7914d4a6dfd1fe4b8cdd44988655a5217747a51a5c58b92d4f1898386bc",
+    "godot-client/src/mounts/mount_cape_surface.gd": "4a178416a4f5335ca695d4810eac4e768b783bb8644b01264236c04c0272db35",
+    "godot-client/src/actors/cape_cloth.gd": "d7b32c29d26cae7cc5833314d41bbe194da79e54821009b1b417cf843e5fead7",
+    "godot-client/data/mounts/moor_pony.json": "84100fc70888ebcd645d1f4f20745930f89ff56eb91075a776a11701414a4639",
+    "godot-client/tests/test_mounted_cape.gd": "239f4d9d3cd5748f0a9074f9bad38661857c1986e8b1ad52c75fcbe856a0473d",
+    "godot-client/tests/test_mounted_player.gd": "d5e3b3b44c0f7b1fed8516eba5d5543a5198827f97b54ea4f687a7834a063f8f"
+  },
+  "checks": {
+    "serverMountMovementAndWeatherTests": 154,
+    "clientRiderAndCadence": 1130,
+    "clientCape": 44,
+    "clientHotkeysAndSettings": 18,
+    "clientPacketValidation": 13,
+    "clientStateReducer": 39,
+    "ordinaryClientMovement": 37,
+    "onFootCape": "passed",
+    "multiplayerWire": "passed: rider, observer, legacy client",
+    "nonLoopbackStartup": "rejected before database creation",
+    "realGameSmoke": "passed: mount, controls, walk, trot, gallop, dismount",
+    "actualCapeSurfaceSamples": 114,
+    "minimumMeasuredCapePonyGapMetres": 0.027597447733049174
+  },
+  "integrationCorrections": [
+    "retain both weather and mount initialization/capability snapshots",
+    "ignore all disposable .local/qa accounts and render outputs",
+    "validate both named and indexed skin bindings and fail invalid bindings in mesh checks"
+  ],
+  "limits": [
+    "actual cape contact geometry sampled on current Luminous male wardrobe; both Luminous body poses and material deformation checked",
+    "other wardrobes and body combinations still need visual review",
+    "local prototype includes immediate mount/dismount poses and provisional travel balance",
+    "Godot emits existing resource-cleanup diagnostics at test shutdown"
+  ]
+}

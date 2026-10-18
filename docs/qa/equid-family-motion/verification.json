@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "visual_acceptance": true,
+  "actors": [
+    "sunmane_foal_dun",
+    "sunmane_foal_grey",
+    "golden_plains_horse",
+    "moonlit_unicorn",
+    "donkey",
+    "zebra"
+  ],
+  "slots_checked": 48,
+  "gaits_checked": 18,
+  "lossless_runtime_pack": true,
+  "native_supported_hoof_speed_max": 8.63199959478924e-05,
+  "engine_surface_error_max": 0.000115931426989846,
+  "mounted_pony_unchanged": true,
+  "engine": {
+    "build": "official",
+    "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+    "hex": 263938,
+    "major": 4,
+    "minor": 7,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.7.2-stable (official)",
+    "timestamp": 0
+  },
+  "checks": {
+    "native": "test_equid_family_motion.py",
+    "client": "test_equid_family_motion.gd"
+  },
+  "scope": "Exact reviewed curves in losslessly packed runtime files. Independent native/world/shape/surface witnesses, all48 slots, action switching, holds and RESET. Focused component checks; crowd performance and a full client/server play session are not measured."
+}

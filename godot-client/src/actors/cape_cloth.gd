@@ -77,6 +77,10 @@ var _collision_spans := PackedFloat64Array()
 var _collision_radii := PackedFloat64Array()
 var _collision_reaches: Array[PackedFloat32Array] = []
 var _empty_reach := PackedFloat32Array()
+## Optional mounted contact, supplied by the mount visual after rider posing.
+var _mount_surface: RefCounted
+var _mount_last_frame := Transform3D.IDENTITY
+var _mount_frame_ready := false
 ## Optional arithmetic-only extension. GDScript remains the complete fallback;
 ## the native object never reads the skeleton or writes a bone.
 var _native_constraint_kernel: RefCounted
@@ -127,6 +131,11 @@ const BACK_OFFSET := -0.02
 ## what hangs plumb from the yoke and what the body pushes out.
 var _fabric_rest: Array[PackedVector3Array] = []
 var _anchor_rest_inverse := Basis.IDENTITY
+
+func set_mount_surface(surface: RefCounted) -> void:
+	_mount_surface = surface
+	_mount_frame_ready = false
+	reset()
 
 
 func _cache(skeleton: Skeleton3D) -> bool:
@@ -400,6 +409,8 @@ func _push_out_of_collision_snapshot(to_world: Transform3D,
 			_collision_world[pair.x], _collision_axes[capsule],
 			_collision_spans[capsule], _collision_radii[capsule],
 			_collision_reaches[capsule])
+	if _mount_surface != null:
+		point = _mount_surface.call("project", point)
 	return point
 
 
@@ -452,6 +463,22 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 	var to_world := skeleton.global_transform
 	var to_local := to_world.affine_inverse()
+	if _mount_surface != null:
+		# Mounted cloth travels with the rider. Damping absolute world velocity
+		# acted like extreme air drag and flattened the cape at riding speed.
+		# Carry both Verlet states, then simulate the remaining local response.
+		if _mount_frame_ready:
+			var carry := to_world * _mount_last_frame.affine_inverse()
+			for chain: int in range(_points.size()):
+				var carried := _points[chain]
+				var carried_previous := _previous[chain]
+				for i: int in range(carried.size()):
+					carried[i] = carry * carried[i]
+					carried_previous[i] = carry * carried_previous[i]
+				_points[chain] = carried
+				_previous[chain] = carried_previous
+		_mount_last_frame = to_world
+		_mount_frame_ready = true
 	var step := minf(maxf(delta, 0.0), MAX_STEP)
 	# Snapshot all animated inputs before any cape output is written. Cape bones
 	# are descendants; their writes cannot leak into a later chain's body reads.
@@ -462,8 +489,8 @@ func _process_modification_with_delta(delta: float) -> void:
 		anchor_world.distance_to(_last_anchor) / step)
 	_last_anchor = anchor_world
 	var still := anchor_speed < SETTLE_SPEED
-	var fall := GRAVITY * (SETTLE_GRAVITY if still else 1.0) * step * step
-	var damping := SETTLE_DAMPING if still else DAMPING
+	var fall := GRAVITY * (SETTLE_GRAVITY if still and _mount_surface == null else 1.0) * step * step
+	var damping := SETTLE_DAMPING if still or _mount_surface != null else DAMPING
 	# The back-of-the-torso plane, held for every chain this frame: a cape
 	# swings and cannot pass to the chest, which is what an attack's lean and
 	# twist made it do.
@@ -471,41 +498,47 @@ func _process_modification_with_delta(delta: float) -> void:
 	var plane_at := anchor_world.dot(forward) + BACK_OFFSET \
 		if forward != Vector3.ZERO else 0.0
 	var down := (to_world.basis * anchor_pose.basis * _hang_local).normalized()
-	var carried := to_world.basis * anchor_pose.basis * _anchor_rest_inverse
-	if _native_constraint_kernel != null and _try_native_constraint_step(
-			skeleton, to_world, to_local, anchor_pose, down, carried, fall,
+	var anchor_carry := to_world.basis * anchor_pose.basis * _anchor_rest_inverse
+	# A mounted cape stays on the GDScript solver: the native kernel has no mount surface.
+	if _mount_surface == null and _native_constraint_kernel != null and _try_native_constraint_step(
+			skeleton, to_world, to_local, anchor_pose, down, anchor_carry, fall,
 			damping, forward, plane_at, anchor_world.y):
 		_settled = true
 		return
 
 	for chain in range(_bones.size()):
 		var rest := _rest_joints_from_pose(to_world, chain, anchor_pose, down)
-		var fabric := _fabric_joints(rest, chain, carried)
+		var fabric := _fabric_joints(rest, chain, anchor_carry)
 		if _fabric_measured(chain):
 			rest = _hang_from(fabric[0], chain, down)
 		var points := _points[chain]
 		if points.size() != rest.size() or not _settled:
-			points = rest.duplicate()
-			_previous[chain] = rest.duplicate()
+			points = rest.duplicate() if _mount_surface == null else _mount_surface.call("seed", rest, _lengths[chain])
+			_previous[chain] = points.duplicate()
 		# The root joint is carried by the spine and never simulated.
 		points[0] = rest[0]
 		var previous := _previous[chain]
 		previous[0] = rest[0]
 		if points[1].distance_to(rest[1]) > TELEPORT:
-			points = rest.duplicate()
-			previous = rest.duplicate()
+			points = rest.duplicate() if _mount_surface == null else _mount_surface.call("seed", rest, _lengths[chain])
+			previous = points.duplicate()
 		for index in range(1, points.size()):
 			var current := points[index]
 			points[index] = current + (current - previous[index]) * damping + fall
+			if _mount_surface != null:
+				var flow: Vector3 = _mount_surface.call("flow_acceleration", chain, float(index) / LINKS)
+				points[index] += flow * step * step
 			previous[index] = current
-		for _pass in range(RELAX_PASSES):
+		for _pass in range(RELAX_PASSES if _mount_surface == null else 16):
 			for index in range(1, points.size()):
 				var offset := points[index] - points[index - 1]
 				var length := offset.length()
 				if length > 1e-6:
 					points[index] = points[index - 1] + offset * (
 						_lengths[chain][index - 1] / length)
+			var material_length := 0.0
 			for index in range(1, points.size()):
+				material_length += _lengths[chain][index - 1]
 				points[index] = _push_out_of_collision_snapshot(to_world, points[index])
 				if forward != Vector3.ZERO:
 					var ahead := points[index].dot(forward) - plane_at
@@ -518,6 +551,8 @@ func _process_modification_with_delta(delta: float) -> void:
 				# this frees the whole billow and only stops the spike.
 				if points[index].y > anchor_world.y:
 					points[index].y = anchor_world.y
+				if _mount_surface != null:
+					points[index] = _mount_surface.call("limit_lift", points[index], rest[0], material_length, float(index) / LINKS)
 		_points[chain] = points
 		_previous[chain] = previous
 		_write_chain_bones(skeleton, chain, fabric, anchor_pose, to_world, to_local)

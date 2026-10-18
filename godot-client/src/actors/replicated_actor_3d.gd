@@ -8,6 +8,7 @@ const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
+const STATUS_ICONS := preload("res://src/ui/status_effect_icons.gd")
 
 @export var walk_presentation_speed := 6.0
 @export var run_presentation_speed := 9.0
@@ -237,6 +238,8 @@ var _native_skeleton: Skeleton3D
 ## walk does not snap the body. Poses meant to face off - a bladed combat idle, a
 ## sword lunge - declare nothing and are left as authored.
 var _native_model: Node3D
+var _mount_visual: Node3D
+var mount_state: Dictionary = {}
 ## Authored body bounds, cached before equipment or animation can move them.
 var _native_body_bounds := AABB()
 var _base_model_yaw := 0.0
@@ -268,6 +271,8 @@ var _equipment_hides: Dictionary = {}
 var _hidden_body_surfaces: Dictionary = {}
 var _nameplate: Label3D
 var _overhead_crowded := false
+var _status_effects: Array[String] = []
+var _status_icons: Node3D
 var _title_line: Label3D
 ## The occupation line under an NPC's name, and the occupation it shows
 ## without its brackets. Built on first use, like the title line.
@@ -391,6 +396,10 @@ const HEALTH_BAR_DROP := 16.0
 const HEALTH_LABEL_DROP := HEALTH_BAR_DROP
 const HEALTH_NUMBER_GAP := 5.0
 const OVERHEAD_BACKING := Color(0.0, 0.0, 0.0, 0.45)
+const NEGATIVE_STATUS_SIZE := 20.0
+const NEGATIVE_STATUS_GAP := 3.0
+const NEGATIVE_STATUS_RISE := 24.0
+const STATUS_TEXTURES := STATUS_ICONS.TEXTURES
 static var _health_gradient: GradientTexture2D
 static var _wardrobe_texture_cache: Dictionary = {}
 
@@ -530,9 +539,12 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 			_attach_cape_cloth(skeleton)
 			apply_appearance_variants(dto.get("appearance", {}) as Dictionary)
 			var animation_path := _external_path(str(model_config.get("animationLibrary", "")))
+			var wanted_clips := resolver.required_clips()
+			if model_config.has("culture") and not wanted_clips.has("Rest_Pose"):
+				wanted_clips.append("Rest_Pose")
 			var imported := NativeAnimationImporter.import_library(self,
 					animation_path, skeleton, model_config.get("boneAliases", {}),
-					resolver.required_clips(), resolver.looping_clips)
+					wanted_clips, resolver.looping_clips)
 			animation_player = imported.player
 			errors.append_array(Array(imported.errors))
 			if animation_player != null:
@@ -1040,6 +1052,68 @@ func _add_nameplate(dto: Dictionary) -> void:
 	_add_overhead_background()
 	_layout_overhead()
 	apply_vitals(int(dto.get("health", 0)), int(dto.get("max_health", 0)))
+	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
+
+## One icon per active effect, in a stable order. Only server status
+## snapshots change this list; a spell animation cannot prove an effect landed.
+func set_status_effects(effects: Array) -> void:
+	var next: Array[String] = STATUS_ICONS.known(effects)
+	if next == _status_effects:
+		return
+	_status_effects = next
+	if not is_instance_valid(_status_icons):
+		_status_icons = Node3D.new()
+		_status_icons.name = "StatusIcons"
+		_status_icons.position.y = _nameplate.position.y
+		add_child(_status_icons)
+	for child: Node in _status_icons.get_children():
+		_status_icons.remove_child(child)
+		child.queue_free()
+	for index: int in range(next.size()):
+		var icon := MeshInstance3D.new()
+		icon.name = next[index]
+		icon.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		icon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var quad := QuadMesh.new()
+		quad.size = Vector2.ONE * NEGATIVE_STATUS_SIZE * OVERHEAD_PIXEL
+		var material := _overhead_material(Color.WHITE, 4)
+		material.albedo_texture = STATUS_TEXTURES[next[index]]
+		quad.material = material
+		icon.mesh = quad
+		_status_icons.add_child(icon)
+	_layout_status_effects()
+	_refresh_status_effects()
+
+func status_effect_count() -> int:
+	return _status_effects.size() if _health_current > 0 else 0
+
+func set_negative_statuses(effects: Array) -> void:
+	set_status_effects(effects.filter(func(effect: Variant) -> bool: return effect in STATUS_ICONS.NEGATIVE))
+
+func negative_status_count() -> int:
+	return _status_effects.filter(func(effect: String) -> bool: return effect in STATUS_ICONS.NEGATIVE).size() if _health_current > 0 else 0
+
+func _layout_status_effects() -> void:
+	if not is_instance_valid(_status_icons):
+		return
+	var rise := NEGATIVE_STATUS_RISE
+	if is_instance_valid(_title_line) and not _title_line.text.is_empty():
+		rise += TITLE_RISE
+	for index: int in range(_status_icons.get_child_count()):
+		var icon := _status_icons.get_child(index) as MeshInstance3D
+		var row: int = index / STATUS_ICONS.COLUMNS
+		var columns := mini(STATUS_ICONS.COLUMNS, _status_effects.size() - row * STATUS_ICONS.COLUMNS)
+		(icon.mesh as QuadMesh).center_offset = Vector3(
+			(index % STATUS_ICONS.COLUMNS - (columns - 1) * 0.5)
+				* (NEGATIVE_STATUS_SIZE + NEGATIVE_STATUS_GAP),
+			rise + row * (NEGATIVE_STATUS_SIZE + NEGATIVE_STATUS_GAP), 0.0) * OVERHEAD_PIXEL
+
+func _refresh_status_effects() -> void:
+	if not is_instance_valid(_status_icons):
+		return
+	_status_icons.visible = _overhead_shown() and status_effect_count() > 0
+	for child: Node in _status_icons.get_children():
+		_fade_quad(child as MeshInstance3D, 1.0)
 
 ## The overhead health bar and its numbers. Not drawn for everyone: every
 ## actor packet carries a health pair, scenery included, and a full bar over
@@ -1230,6 +1304,7 @@ func set_health_visible(enabled: bool) -> void:
 ## condition: a corpse at zero health keeps its empty frame rather than a
 ## sliver of colour.
 func _refresh_overhead_health() -> void:
+	_refresh_status_effects()
 	var showing: bool = (_overhead_shown() and _health_shown
 		and _health_maximum > 0)
 	if is_instance_valid(_health_bar_background):
@@ -1318,6 +1393,7 @@ func set_title(title: String) -> void:
 		if is_instance_valid(_title_line):
 			_title_line.text = ""
 			_title_line.hide()
+		_layout_status_effects()
 		return
 	if not is_instance_valid(_title_line):
 		var label: Label3D = Label3D.new()
@@ -1340,6 +1416,7 @@ func set_title(title: String) -> void:
 		add_child(label)
 		_title_line = label
 	_title_line.text = title
+	_layout_status_effects()
 	_title_line.visible = _overhead_shown()
 	_fade_label(_title_line)
 
@@ -1504,7 +1581,7 @@ func _lift_overhead(factor: float) -> void:
 	# own, so the gaps between them hold their size along with the text.
 	for node_name: String in ["Nameplate", "TitleLine", "OccupationLine", "QuestOfferMarker",
 			"HealthBarBackground", "HealthBarFill", "HealthNumbers", "SpeechBubble",
-			"OverheadBackground"]:
+			"OverheadBackground", "StatusIcons"]:
 		var node := get_node_or_null(node_name) as Node3D
 		if node != null:
 			node.position.y = height
@@ -1639,6 +1716,7 @@ func rebase_world(frame: Transform3D) -> void:
 	_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
 	# The capability handshake can correct an actor already spawned from the
 	# legacy clothing bytes. Update its dyes once, including under worn armour.
 	if dto.has("appearance") and dto.appearance != _appearance:
@@ -1697,7 +1775,7 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		_target_yaw, facing_command, int(dto.rotation), adapter)
 	_target_yaw = _predicted_turn_yaw if _predicted_turn_pending else authoritative_yaw
 	_hastened = (int(dto.get("buffs", 0))
-		& EloriaProtocol.ACTOR_BUFF_DOUBLE_SPEED) != 0
+		& EloriaProtocol.ACTOR_BUFF_DOUBLE_SPEED) != 0 or "haste" in _status_effects
 	_presentation_speed = walk_presentation_speed
 	if _hastened or (actor_command >= 30 and actor_command <= 37):
 		_presentation_speed = run_presentation_speed
@@ -2145,6 +2223,7 @@ func _refresh_cape_cloth_activity(reset_when_enabled: bool = false) -> void:
 	if _cape_cloth == null:
 		return
 	var enabled := (_cape_cloth_worn
+		and not is_instance_valid(_mount_visual)
 		and _animation_tier != AnimationGate.Tier.PAUSED
 		and ACTOR_RENDER_QUALITY.cape_enabled(
 			_render_quality, _render_quality_local_actor))
@@ -2436,6 +2515,38 @@ func occlusion_silhouette_enabled() -> bool:
 
 func get_skeleton() -> Skeleton3D:
 	return _native_skeleton
+
+func set_mount_state(state: Dictionary, models: Dictionary) -> void:
+	var was_mounted := is_instance_valid(_mount_visual)
+	var riding: bool = state.get("mode") == "mounted" and state.get("mount_id") == "moor_pony"
+	mount_state = state.duplicate(true)
+	if riding and not was_mounted:
+		var visual := (load("res://src/mounts/mounted_player_visual.gd") as Script).new() as Node3D
+		add_child(visual)
+		# Configure before marking mounted: reference poses must play normally.
+		var errors: Array = visual.call("configure", self, models)
+		if not errors.is_empty():
+			visual.call("restore")
+			visual.free()
+			push_warning("Mount: " + str(errors))
+			play_action(&"idle", true)
+			return
+		_mount_visual = visual
+		_mount_visual.name = "MountedPony"
+		_pace_histories.clear()
+		_last_movement_update_msec = -1
+		current_action = &"idle"
+	elif not riding and was_mounted:
+		var previous := _mount_visual
+		_mount_visual = null
+		previous.call("restore")
+		previous.free()
+		_pace_histories.clear()
+		_last_movement_update_msec = -1
+		current_action = &"idle"
+		play_action(&"walk" if _segment_duration > 0.0 else &"idle", true)
+	if is_instance_valid(_mount_visual):
+		_mount_visual.set("state", mount_state)
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
 	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary
@@ -3034,6 +3145,9 @@ func _equipment_fallback_mesh(shape: String) -> MeshInstance3D:
 	return instance
 
 func play_action(action: StringName, restart := false) -> void:
+	if is_instance_valid(_mount_visual):
+		current_action = action
+		return
 	if animation_player == null or resolver == null:
 		return
 	if not resolver.action_to_clip.has(String(action)):
@@ -3318,6 +3432,8 @@ static func pace_gait(command: int, hastened: bool) -> int:
 ## buff changes, then let this gait's own measurements take over. Falling back
 ## to the previous step's interval carried walking pace into a new run/haste.
 func _pace_for_gait(gait: int) -> float:
+	if is_instance_valid(_mount_visual):
+		return float(mount_state.get("step_us", 200000)) / 1000000.0
 	var history: PackedFloat32Array = _pace_histories.get(gait, PackedFloat32Array())
 	if not history.is_empty():
 		return median_of(history, initial_server_interval)
@@ -3442,6 +3558,8 @@ func _settle_if_idle() -> void:
 ## the animation crossfade and writes it onto the visual root. A no-op once the
 ## two agree, so a resting actor pays nothing for it.
 func _advance_facing_offset(delta: float) -> void:
+	if is_instance_valid(_mount_visual):
+		return
 	if _native_model == null or is_equal_approx(_facing_offset, _facing_offset_to):
 		return
 	_facing_offset_elapsed += delta
@@ -3510,6 +3628,8 @@ func is_drawn() -> bool:
 ## full rate whatever the tier asks. Paused, the actor would be left caught
 ## mid-move and then seen finishing it when it came back into view.
 func set_animation_tier(tier: int, gate: AnimationGate) -> void:
+	if is_instance_valid(_mount_visual):
+		return
 	if animation_player == null:
 		return
 	if tier != AnimationGate.Tier.FULL and _playing_one_shot():

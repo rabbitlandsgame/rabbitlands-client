@@ -2,24 +2,24 @@
  "region": "ringholm",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "eeb7435e5fcd43c4637aae93dd853a80aa6708ba263f095b54caa27aa3f0e0f5",
-  "sceneSha256": "36796a8a314cea3e111aed0dbc00f7980ce6272142ddec49134fcbadd52f78f6",
+  "sha256": "7887d2c05a5d200bf149ada54455883eae6d4fe9ebcf3c636cebe3d9f692a47e",
+  "sceneSha256": "ed72004265ebe985d2a773505dcc2cfb89f461b75cec76a1dcd1db8e1d6f17e3",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/ringholm/ringholm.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "6a30e985dc193259dbae3bab1a5496f96ece73676e15e2d5ee113de0eaee6c48",
-  "collisionSha256": "5b4295198184f7518a5792880a02036dec2ae3c1f3246e7473d0ef4c3e13f593",
-  "servedGridSha256": "b87259208207590aa8e72ca3c7dc66cc14516dbacf66606d3444360b2c11f34c",
-  "walkableCells": 538176,
+  "sidecarSha256": "423656327cc53b8f14a12234e703aba72f85e4c20f3e154a42d4ffe219b69333",
+  "collisionSha256": "8b648869dcedc3caf1a5bf09b0a0215605ecc20c3fba7ea826f6a046ca93e815",
+  "servedGridSha256": "6887cd8180d45e12e375dfbfc47e653d8ebc08acf16379060409ef87176cab9b",
+  "walkableCells": 538180,
   "openTiles": 132836,
-  "sourceSnapshotSha256": "eeb7435e5fcd43c4637aae93dd853a80aa6708ba263f095b54caa27aa3f0e0f5"
+  "sourceSnapshotSha256": "7887d2c05a5d200bf149ada54455883eae6d4fe9ebcf3c636cebe3d9f692a47e"
  },
  "chunks": 66,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 40237780,
-  "max": 2086916,
+  "total": 41297200,
+  "max": 2111288,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -30,7 +30,7 @@
   "05_10": 11.1,
   "05_11": 11.0,
   "06_06": 10.9,
-  "06_07": 149.2,
+  "06_07": 149.3,
   "06_08": 126.3,
   "06_09": 117.0,
   "06_10": 123.1,
@@ -38,7 +38,7 @@
   "06_12": 11.0,
   "07_06": 10.9,
   "07_07": 139.7,
-  "07_08": 64.0,
+  "07_08": 72.8,
   "07_09": 89.0,
   "07_10": 77.2,
   "07_11": 141.1,
@@ -46,7 +46,7 @@
   "07_13": 11.0,
   "08_06": 10.9,
   "08_07": 95.4,
-  "08_08": 97.3,
+  "08_08": 97.4,
   "08_09": 72.4,
   "08_10": 64.1,
   "08_11": 104.9,
@@ -54,22 +54,22 @@
   "08_13": 11.2,
   "09_06": 10.9,
   "09_07": 11.4,
-  "09_08": 173.8,
+  "09_08": 174.0,
   "09_09": 48.2,
   "09_10": 88.5,
   "09_11": 176.3,
   "09_12": 147.8,
   "09_13": 11.2,
   "10_07": 11.2,
-  "10_08": 108.2,
-  "10_09": 117.5,
+  "10_08": 117.0,
+  "10_09": 117.7,
   "10_10": 119.3,
   "10_11": 118.9,
   "10_12": 11.4,
   "10_13": 11.2,
   "11_07": 10.8,
   "11_08": 11.1,
-  "11_09": 129.4,
+  "11_09": 129.6,
   "11_10": 80.4,
   "11_11": 103.0,
   "11_12": 11.4,
@@ -91,21 +91,22 @@
   "14_13": 11.1
  },
  "timings": {
-  "snapshot_s": 43.6,
-  "terrain_s": 0.2,
+  "snapshot_s": 1.9,
+  "terrain_s": 0.1,
   "water_s": 0.0,
-  "overlays_s": 1.0,
+  "overlays_s": 0.8,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 171465080,
+  "surface_glb_bytes": 274834968,
   "walk_kit_nodes": 0,
-  "library_s": 1.0,
+  "library_s": 0.8,
   "harvest_nodes": 54,
-  "chunks_s": 3.9
+  "chunks_s": 3.1,
+  "space_passes_s": 4.3
  },
- "seconds": 81.8,
+ "seconds": 20.4,
  "imagePolicy": {
   "surface": {
-   "imagesResampled": 22,
+   "imagesResampled": 34,
    "resampledImages": [
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
@@ -121,6 +122,18 @@
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
     "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
     "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
     "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
@@ -152,317 +165,9 @@
    -980
   ],
   "maximumPlacements": 165,
-  "maximumTriangles": 309685,
+  "maximumTriangles": 309688,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "certifiedTextureAliases": [
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/02905b6c3a2141ce7c1f3ed50581f6e3c45ab978e9404740d71c5e3c85135142.jpg",
-   "sha256": "02905b6c3a2141ce7c1f3ed50581f6e3c45ab978e9404740d71c5e3c85135142",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb",
-   "sourceModelSha256": "7213921a236aab46bb7b729d0182af508c98b0745e0236a4482f534bb1ed4fe0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/06098eff09b16e138091cf72ea2a967f1500fcb8ed235ffc594e667293aaf1b8.jpg",
-   "sha256": "06098eff09b16e138091cf72ea2a967f1500fcb8ed235ffc594e667293aaf1b8",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb",
-   "sourceModelSha256": "4bd35e6f009ec51aed620daa43ffba481948c5e383654850d1f2c5250456db08"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/08b4fc4d8e335c794a1a865e02d90176e6c09227156960bd8a52122a4c966b85.jpg",
-   "sha256": "08b4fc4d8e335c794a1a865e02d90176e6c09227156960bd8a52122a4c966b85",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-broch-1.glb",
-   "sourceModelSha256": "3adf528fb8ecd69f2d82bff04fe3995d338d013b1c52599375a1bed0e5558bfa"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/0a8551cbcd87122b8250d2f88a633bcb022f76222f894ce5f955fd658a843596.jpg",
-   "sha256": "0a8551cbcd87122b8250d2f88a633bcb022f76222f894ce5f955fd658a843596",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-alpine-flower-cushion-1.glb",
-   "sourceModelSha256": "5e64c34d8494c80bd3db14d026007a2af45fdd455942c4b1f95700ed39b08361"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/19ea9f43d54a4e15753a7247cf0116c7b4ff31db23e7365f153660f3913749d2.jpg",
-   "sha256": "19ea9f43d54a4e15753a7247cf0116c7b4ff31db23e7365f153660f3913749d2",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb",
-   "sourceModelSha256": "550843a9bde13abd99becec670625679b0d40219e873bc597b34376c887827d5"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/2b04c60ff318952ae34d2e2e4a84db609ba2cabc1179523d0008a9108128963c.jpg",
-   "sha256": "2b04c60ff318952ae34d2e2e4a84db609ba2cabc1179523d0008a9108128963c",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-broch-1.glb",
-   "sourceModelSha256": "3adf528fb8ecd69f2d82bff04fe3995d338d013b1c52599375a1bed0e5558bfa"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/2eb899454d99e54b90f53d527a80801febd73a0fb608afef6d3c2d48ab061a68.jpg",
-   "sha256": "2eb899454d99e54b90f53d527a80801febd73a0fb608afef6d3c2d48ab061a68",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb",
-   "sourceModelSha256": "40833adcae9838b0860750da47eba0dcd44d630c907e2bb2ab90dbe420e4da68"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/31368593a9c8ae4521f59bc320ad0e7b1ff682a9fcdd6927515b8e7cc34ba1c8.jpg",
-   "sha256": "31368593a9c8ae4521f59bc320ad0e7b1ff682a9fcdd6927515b8e7cc34ba1c8",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-cairn-tower-1.glb",
-   "sourceModelSha256": "c4b4ea5238ddcbd5af9c1a0305e00ee39dff49358a1743fbec4bdf3888cef99a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/31c20eb5b5a8ab713afa89e4afe5a76d98133313f80032cf75e9c57622a7f981.jpg",
-   "sha256": "31c20eb5b5a8ab713afa89e4afe5a76d98133313f80032cf75e9c57622a7f981",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb",
-   "sourceModelSha256": "b20218925337344171c512aaf401d37b58ac2a8fd975e5d20d61bb4e8353c615"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/3c89c34c40856bcf89c082aa3ec4753af92044e6a7cba329889524ec29a31387.jpg",
-   "sha256": "3c89c34c40856bcf89c082aa3ec4753af92044e6a7cba329889524ec29a31387",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb",
-   "sourceModelSha256": "4bd35e6f009ec51aed620daa43ffba481948c5e383654850d1f2c5250456db08"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb.jpg",
-   "sha256": "3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/3fffc326c809cd87d6ab2918e2a5b7091dd67c68b407ba346b22afed95344e70.jpg",
-   "sha256": "3fffc326c809cd87d6ab2918e2a5b7091dd67c68b407ba346b22afed95344e70",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-stone-windbreak-1.glb",
-   "sourceModelSha256": "3efbc77ac00e24792026f0033b54a990ef3adb64feed80c39bd0d2f3569bbd5a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/41d237ed2ff1bc97e3783c78dc2532f2437168529349430947e06c20c1fc06d1.jpg",
-   "sha256": "41d237ed2ff1bc97e3783c78dc2532f2437168529349430947e06c20c1fc06d1",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-1.glb",
-   "sourceModelSha256": "747656bc3e9c6a618ab75a9359f52a572534fbee6a824e3a594bfd693979a637"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/49d86af2235d481448370aa3fc60f7eadeedfee7a04ceccfe1c7014385ac3f53.jpg",
-   "sha256": "49d86af2235d481448370aa3fc60f7eadeedfee7a04ceccfe1c7014385ac3f53",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-windbent-pine-tree-1.glb",
-   "sourceModelSha256": "a8ebf57a86516267263813f3160b6b221e7396b2514025de0ae3873153185621"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/49ebbb5f28cdacbaf34ce4242ff7c9dd45313958b7745a71c3e861eaf586e6d9.jpg",
-   "sha256": "49ebbb5f28cdacbaf34ce4242ff7c9dd45313958b7745a71c3e861eaf586e6d9",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-cairn-tower-1.glb",
-   "sourceModelSha256": "c4b4ea5238ddcbd5af9c1a0305e00ee39dff49358a1743fbec4bdf3888cef99a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/545ca75d4c0e58f258d06f43e32e8e724aa5ee2bc7a83d3e83d1e419b43e563a.jpg",
-   "sha256": "545ca75d4c0e58f258d06f43e32e8e724aa5ee2bc7a83d3e83d1e419b43e563a",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-windbent-pine-tree-1.glb",
-   "sourceModelSha256": "a8ebf57a86516267263813f3160b6b221e7396b2514025de0ae3873153185621"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/5a36096188b24a1811e42f3d831ea22e631288e755f648dfad9e82182aed6998.jpg",
-   "sha256": "5a36096188b24a1811e42f3d831ea22e631288e755f648dfad9e82182aed6998",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb",
-   "sourceModelSha256": "7213921a236aab46bb7b729d0182af508c98b0745e0236a4482f534bb1ed4fe0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/5c208c0903f87f2c9c1e64f5af418dbe4ec519af4fb1ad1c112c66ce855fa4b8.jpg",
-   "sha256": "5c208c0903f87f2c9c1e64f5af418dbe4ec519af4fb1ad1c112c66ce855fa4b8",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-1.glb",
-   "sourceModelSha256": "747656bc3e9c6a618ab75a9359f52a572534fbee6a824e3a594bfd693979a637"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/5eb070177604458b13bb1fc7baaa751022ec495bfe71546a9bfc95a6ab89759c.jpg",
-   "sha256": "5eb070177604458b13bb1fc7baaa751022ec495bfe71546a9bfc95a6ab89759c",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb",
-   "sourceModelSha256": "b20218925337344171c512aaf401d37b58ac2a8fd975e5d20d61bb4e8353c615"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/60f656355d95d82471bc2e6d969cdd31a951b16b3f6231165123c1baa8f3f7b4.jpg",
-   "sha256": "60f656355d95d82471bc2e6d969cdd31a951b16b3f6231165123c1baa8f3f7b4",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-2.glb",
-   "sourceModelSha256": "6221fda4a6dd58f27f6ffeb97e430a6736811ac86ede3716840bb66545de88af"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/6dcc8485a950df6d13822656718287cda168e4ccb199106df8a5451d48169be9.jpg",
-   "sha256": "6dcc8485a950df6d13822656718287cda168e4ccb199106df8a5451d48169be9",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-1.glb",
-   "sourceModelSha256": "747656bc3e9c6a618ab75a9359f52a572534fbee6a824e3a594bfd693979a637"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f.jpg",
-   "sha256": "715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/759e934b5558c9de47a1a7f9bde94faa8e596d7b5c978daea41707a8d63d17b9.jpg",
-   "sha256": "759e934b5558c9de47a1a7f9bde94faa8e596d7b5c978daea41707a8d63d17b9",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb",
-   "sourceModelSha256": "b20218925337344171c512aaf401d37b58ac2a8fd975e5d20d61bb4e8353c615"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/78d24dd9ce94bac0225f50d879e3cd4021b8cc1e039d66a6f429c13bb97283d5.jpg",
-   "sha256": "78d24dd9ce94bac0225f50d879e3cd4021b8cc1e039d66a6f429c13bb97283d5",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb",
-   "sourceModelSha256": "4bd35e6f009ec51aed620daa43ffba481948c5e383654850d1f2c5250456db08"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/7944c3205d83f66649cfef8f9887785df17e59a481c00b82d0980783f7284a57.jpg",
-   "sha256": "7944c3205d83f66649cfef8f9887785df17e59a481c00b82d0980783f7284a57",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb",
-   "sourceModelSha256": "550843a9bde13abd99becec670625679b0d40219e873bc597b34376c887827d5"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/7b507baa21f080f420fda10003c94e02c951312dcea1efb6ff7a6c5cb4e71dcc.jpg",
-   "sha256": "7b507baa21f080f420fda10003c94e02c951312dcea1efb6ff7a6c5cb4e71dcc",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-trilithon-1.glb",
-   "sourceModelSha256": "a8a13102fc604d59b8a361cb8c494b18721969c513b2245b15e8a58bba0de8a6"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/7d536075548ceaa0109542c0d3f0a4d1a6a113e8398600705c26c61faf6d3934.jpg",
-   "sha256": "7d536075548ceaa0109542c0d3f0a4d1a6a113e8398600705c26c61faf6d3934",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb",
-   "sourceModelSha256": "7011920b26167774560126bc62d95d4c3521cacd4a8ce1144b1d0c140f16d893"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/7f32a7d1942e43ac5cba50decff4091f326851bb504d9c1efaf7730f6be6a39b.jpg",
-   "sha256": "7f32a7d1942e43ac5cba50decff4091f326851bb504d9c1efaf7730f6be6a39b",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-windbent-pine-tree-1.glb",
-   "sourceModelSha256": "a8ebf57a86516267263813f3160b6b221e7396b2514025de0ae3873153185621"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/7f5b509beefbb4ce20edc2d13fd89cc1f9c8bf69e7556161182e7ad59f1dc854.jpg",
-   "sha256": "7f5b509beefbb4ce20edc2d13fd89cc1f9c8bf69e7556161182e7ad59f1dc854",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-stone-windbreak-1.glb",
-   "sourceModelSha256": "3efbc77ac00e24792026f0033b54a990ef3adb64feed80c39bd0d2f3569bbd5a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/80ba9efadeb8e930e800063f92f3abc91fd1a4ea3ae19f5fd9dc0e89bb152d5f.jpg",
-   "sha256": "80ba9efadeb8e930e800063f92f3abc91fd1a4ea3ae19f5fd9dc0e89bb152d5f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb",
-   "sourceModelSha256": "7011920b26167774560126bc62d95d4c3521cacd4a8ce1144b1d0c140f16d893"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/8fca4f590ef08b1fa30e5a85fa3ed92f220d61b78e5eb100c4e2129978f54660.jpg",
-   "sha256": "8fca4f590ef08b1fa30e5a85fa3ed92f220d61b78e5eb100c4e2129978f54660",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-sheepfold-1.glb",
-   "sourceModelSha256": "7e3f9de921b394775ef8e20b33ce181ef8c5b6f4f2219e6fc3d589da3ae909cd"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/965d906c483db7768ed4c697a1af4fff941b69f2c3be3896f07e928ce7f74c3b.jpg",
-   "sha256": "965d906c483db7768ed4c697a1af4fff941b69f2c3be3896f07e928ce7f74c3b",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-stone-windbreak-1.glb",
-   "sourceModelSha256": "3efbc77ac00e24792026f0033b54a990ef3adb64feed80c39bd0d2f3569bbd5a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/99105a6aa15b42fbfd4dfa12c3b32e2575c3a0b244893fe1ceedc4ef6cb47ca2.jpg",
-   "sha256": "99105a6aa15b42fbfd4dfa12c3b32e2575c3a0b244893fe1ceedc4ef6cb47ca2",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-alpine-flower-cushion-1.glb",
-   "sourceModelSha256": "5e64c34d8494c80bd3db14d026007a2af45fdd455942c4b1f95700ed39b08361"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/9a22b8cfcb16282670a32910269814f9e49e884229dbad84b9840d6cd76f0cab.jpg",
-   "sha256": "9a22b8cfcb16282670a32910269814f9e49e884229dbad84b9840d6cd76f0cab",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb",
-   "sourceModelSha256": "7213921a236aab46bb7b729d0182af508c98b0745e0236a4482f534bb1ed4fe0"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/a3278ea75dd7cc0e852e8d7822fe2bb288a2e8315aa2cad3ebe00df99c75cc60.jpg",
-   "sha256": "a3278ea75dd7cc0e852e8d7822fe2bb288a2e8315aa2cad3ebe00df99c75cc60",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb",
-   "sourceModelSha256": "7011920b26167774560126bc62d95d4c3521cacd4a8ce1144b1d0c140f16d893"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/a9090b1854404f810929fb4a2074e866c0f6b951510c2e09838978021d853e89.jpg",
-   "sha256": "a9090b1854404f810929fb4a2074e866c0f6b951510c2e09838978021d853e89",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-sheepfold-1.glb",
-   "sourceModelSha256": "7e3f9de921b394775ef8e20b33ce181ef8c5b6f4f2219e6fc3d589da3ae909cd"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/af60b4a022d4032e5b4404f8e79c5fb1d3a69d4470ebcf2f4e467291fe266496.jpg",
-   "sha256": "af60b4a022d4032e5b4404f8e79c5fb1d3a69d4470ebcf2f4e467291fe266496",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb",
-   "sourceModelSha256": "40833adcae9838b0860750da47eba0dcd44d630c907e2bb2ab90dbe420e4da68"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/b06a931960c3eed4fa9797daacfbeb46776325c468c2fd6de2d4b4ac94749410.jpg",
-   "sha256": "b06a931960c3eed4fa9797daacfbeb46776325c468c2fd6de2d4b4ac94749410",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-3.glb",
-   "sourceModelSha256": "bd687fab4eb4c431290449a886e7f9c9d5a1b4f6c67a45577eb7c6480fbcde73"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/ca725e9be5c8e940f5be6d212920c1bcb2408be9954e112a667062b3704e67af.jpg",
-   "sha256": "ca725e9be5c8e940f5be6d212920c1bcb2408be9954e112a667062b3704e67af",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-2.glb",
-   "sourceModelSha256": "6221fda4a6dd58f27f6ffeb97e430a6736811ac86ede3716840bb66545de88af"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/ccdcf58703c63bec6cbb828fad73b8dc46f06a04ec754afc1b3f99323c8f2d0f.jpg",
-   "sha256": "ccdcf58703c63bec6cbb828fad73b8dc46f06a04ec754afc1b3f99323c8f2d0f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-3.glb",
-   "sourceModelSha256": "bd687fab4eb4c431290449a886e7f9c9d5a1b4f6c67a45577eb7c6480fbcde73"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/d346b4093e37318f7c9b51aa4dc0bcec241ab3a97440a635a6800d48654bc320.jpg",
-   "sha256": "d346b4093e37318f7c9b51aa4dc0bcec241ab3a97440a635a6800d48654bc320",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-cairn-tower-1.glb",
-   "sourceModelSha256": "c4b4ea5238ddcbd5af9c1a0305e00ee39dff49358a1743fbec4bdf3888cef99a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/d5e922f5a5d88b40db797cc2c886ded94d4b8708e27d1aa58b3b0e64b85ea9df.jpg",
-   "sha256": "d5e922f5a5d88b40db797cc2c886ded94d4b8708e27d1aa58b3b0e64b85ea9df",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb",
-   "sourceModelSha256": "550843a9bde13abd99becec670625679b0d40219e873bc597b34376c887827d5"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/d831bf812e0c43a8119294c1739eddb80be6b50c13b774c13883a16fa9b93e08.jpg",
-   "sha256": "d831bf812e0c43a8119294c1739eddb80be6b50c13b774c13883a16fa9b93e08",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-3.glb",
-   "sourceModelSha256": "bd687fab4eb4c431290449a886e7f9c9d5a1b4f6c67a45577eb7c6480fbcde73"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/dab2cdbe4ca331ba776c29ad6377d17a863fe352ac2766856d119b1f424bb377.jpg",
-   "sha256": "dab2cdbe4ca331ba776c29ad6377d17a863fe352ac2766856d119b1f424bb377",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-alpine-flower-cushion-1.glb",
-   "sourceModelSha256": "5e64c34d8494c80bd3db14d026007a2af45fdd455942c4b1f95700ed39b08361"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/e80bde702cb44a6961f8965ee7c749a0fe8ca614b80ac20306af771d4f21cc68.jpg",
-   "sha256": "e80bde702cb44a6961f8965ee7c749a0fe8ca614b80ac20306af771d4f21cc68",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-trilithon-1.glb",
-   "sourceModelSha256": "a8a13102fc604d59b8a361cb8c494b18721969c513b2245b15e8a58bba0de8a6"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/ed19730aad4712dd0488c77fb057cfc1549062e55b946a6f6e58ac92231bcd2b.jpg",
-   "sha256": "ed19730aad4712dd0488c77fb057cfc1549062e55b946a6f6e58ac92231bcd2b",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-sheepfold-1.glb",
-   "sourceModelSha256": "7e3f9de921b394775ef8e20b33ce181ef8c5b6f4f2219e6fc3d589da3ae909cd"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f04e4bb85a27dacb264f7300ff1171ff0706dcd61b364e40e1d3090ae61127ed.jpg",
-   "sha256": "f04e4bb85a27dacb264f7300ff1171ff0706dcd61b364e40e1d3090ae61127ed",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb",
-   "sourceModelSha256": "40833adcae9838b0860750da47eba0dcd44d630c907e2bb2ab90dbe420e4da68"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f.jpg",
-   "sha256": "f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb",
-   "sourceModelSha256": "054f5acb9c8d252929323259b8f773726c48798e3ba48708297ad2c3c343c42a"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f4da72fa3bb9c4b362ced5770abfdb23ebae8568d025e37118b99360d7170908.jpg",
-   "sha256": "f4da72fa3bb9c4b362ced5770abfdb23ebae8568d025e37118b99360d7170908",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-trilithon-1.glb",
-   "sourceModelSha256": "a8a13102fc604d59b8a361cb8c494b18721969c513b2245b15e8a58bba0de8a6"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f61385b6cc5180d44743118595014206f7e954261701da3af3a23835318668c4.jpg",
-   "sha256": "f61385b6cc5180d44743118595014206f7e954261701da3af3a23835318668c4",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-moor-standing-stone-2.glb",
-   "sourceModelSha256": "6221fda4a6dd58f27f6ffeb97e430a6736811ac86ede3716840bb66545de88af"
-  },
-  {
-   "path": "godot-client/world_authoring/continent-v2/kits/lf-biomes/textures/f8c26054775cebd2760fe2d104bb39da113f411515a17b3a7cab98db8f19817e.jpg",
-   "sha256": "f8c26054775cebd2760fe2d104bb39da113f411515a17b3a7cab98db8f19817e",
-   "sourceModel": "godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-broch-1.glb",
-   "sourceModelSha256": "3adf528fb8ecd69f2d82bff04fe3995d338d013b1c52599375a1bed0e5558bfa"
-  }
- ]
+ }
 }
