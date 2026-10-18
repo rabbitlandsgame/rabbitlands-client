@@ -1241,7 +1241,7 @@ func _ready() -> void:
 		_stop_keyboard_movement()
 		_magic_ring_ui(20))
 	casting_bar.open_wheel.connect(spell_wheel.open_wheel)
-	# Hold Tab (technique_ring) for the technique ring; it aims through the
+	# Hold Z (technique_ring) for the technique ring; it aims through the
 	# Techniques tab exactly as the tab and the quick slots do.
 	technique_ring = preload("res://src/ui/technique_ring.gd").new()
 	technique_ring.set("techniques", techniques_panel)
@@ -3758,8 +3758,8 @@ func _handle_bound_action(event: InputEvent) -> bool:
 	if event.is_action_pressed("toggle_inventory"):
 		_on_inventory_button_pressed()
 		return true
-	# Exact match: the map is a bare M, and Alt+M (minimap) and Ctrl+M
-	# (manufacture) must not open it as well.
+	# Exact match: the map is a bare Tab, so Alt+Tab (switching windows),
+	# Ctrl+Tab and Shift+Tab do not open it as well.
 	if event.is_action_pressed("toggle_map", false, true):
 		_toggle_full_map()
 		return true
