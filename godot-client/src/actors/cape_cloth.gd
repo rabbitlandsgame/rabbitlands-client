@@ -113,6 +113,20 @@ var _hang_local := Vector3.DOWN
 ## middle of the torso, so a small negative keeps cloth off the chest and the
 ## sternum while never disturbing a cape already hanging down the back.
 const BACK_OFFSET := -0.02
+## Where the cloth itself hangs, per chain and joint, as offsets from the
+## material line in the skeleton's rest space. Empty means the material line.
+##
+## The material line drops from each chain's root bone, which sits against the
+## spine; the sheet the chain carries hangs a hand's width behind it, and the
+## cape was conformed offline to the bare legs, so below the seat it leans in
+## on them. Simulating the material line put the capsules' clearance on the
+## wrong line: the trunk pushed it out to its own surface and the sheet stood
+## that hand's width further out again - a flare over the shoulder blades -
+## while the hem, carrying the authored lean, followed the legs. The wearer
+## measures where the sheet is (`CapeDrape.fabric_line`), and that line is
+## what hangs plumb from the yoke and what the body pushes out.
+var _fabric_rest: Array[PackedVector3Array] = []
+var _anchor_rest_inverse := Basis.IDENTITY
 
 
 func _cache(skeleton: Skeleton3D) -> bool:
@@ -179,7 +193,8 @@ func _cache(skeleton: Skeleton3D) -> bool:
 	# turns with the torso and not the arms. Which of its local axes points at
 	# the chest is found once, against the rest hang the cape drapes opposite.
 	var anchor_rest := skeleton.get_bone_global_rest(_anchor)
-	_hang_local = anchor_rest.basis.inverse() * Vector3.DOWN
+	_anchor_rest_inverse = anchor_rest.basis.inverse()
+	_hang_local = _anchor_rest_inverse * Vector3.DOWN
 	var up_rest := Vector3.UP
 	var neck := skeleton.find_bone("neck_01")
 	if neck >= 0:
@@ -301,6 +316,44 @@ func _rest_joints_from_pose(to_world: Transform3D, chain: int,
 	return joints
 
 
+func _fabric_measured(chain: int) -> bool:
+	return chain < _fabric_rest.size() and _fabric_rest[chain].size() == LINKS + 1
+
+
+## Where the cloth of one chain stands as authored, carried by the spine: the
+## material line plus the measured offsets. `carried` turns a rest-space
+## offset into world space for this frame.
+func _fabric_joints(rest: PackedVector3Array, chain: int,
+		carried: Basis) -> PackedVector3Array:
+	if not _fabric_measured(chain):
+		return rest
+	var offsets: PackedVector3Array = _fabric_rest[chain]
+	var joints := PackedVector3Array()
+	for index: int in range(rest.size()):
+		joints.append(rest[index] + carried * offsets[index])
+	return joints
+
+
+## The hang the solver relaxes toward: plumb from the top of the cloth, which
+## is where the rigid yoke lets go of it.
+func _hang_from(top: Vector3, chain: int, down: Vector3) -> PackedVector3Array:
+	var joints := PackedVector3Array()
+	joints.append(top)
+	for link in range(LINKS):
+		joints.append(joints[link] + down * _lengths[chain][link])
+	return joints
+
+
+## Where the cloth hangs behind each chain's material line, joint by joint, in
+## the skeleton's rest space (`CapeDrape.fabric_line`); empty for the material
+## line itself. The chains drop back onto the new hang.
+func set_fabric_line(offsets: Array) -> void:
+	_fabric_rest.clear()
+	for chain: Variant in offsets:
+		_fabric_rest.append(PackedVector3Array(chain))
+	_settled = false
+
+
 ## The reach the worn torso was measured to have, along each capsule. Empty
 ## arrays mean a bare chest, which the constant already clears.
 func set_torso_reach(trunk: PackedFloat32Array,
@@ -418,14 +471,18 @@ func _process_modification_with_delta(delta: float) -> void:
 	var plane_at := anchor_world.dot(forward) + BACK_OFFSET \
 		if forward != Vector3.ZERO else 0.0
 	var down := (to_world.basis * anchor_pose.basis * _hang_local).normalized()
+	var carried := to_world.basis * anchor_pose.basis * _anchor_rest_inverse
 	if _native_constraint_kernel != null and _try_native_constraint_step(
-			skeleton, to_world, to_local, anchor_pose, down, fall, damping, forward,
-			plane_at, anchor_world.y):
+			skeleton, to_world, to_local, anchor_pose, down, carried, fall,
+			damping, forward, plane_at, anchor_world.y):
 		_settled = true
 		return
 
 	for chain in range(_bones.size()):
 		var rest := _rest_joints_from_pose(to_world, chain, anchor_pose, down)
+		var fabric := _fabric_joints(rest, chain, carried)
+		if _fabric_measured(chain):
+			rest = _hang_from(fabric[0], chain, down)
 		var points := _points[chain]
 		if points.size() != rest.size() or not _settled:
 			points = rest.duplicate()
@@ -463,38 +520,25 @@ func _process_modification_with_delta(delta: float) -> void:
 					points[index].y = anchor_world.y
 		_points[chain] = points
 		_previous[chain] = previous
-
-		# Carry the authored bone frame with the material segment. Its origin
-		# is offset from that segment, increasingly so down a tilted bind
-		# chain. Rotating bones alone turns that offset into an outward hem
-		# slope, even when every simulated segment has settled vertically.
-		var parent := anchor_pose
-		var authored := to_world * parent
-		var rest_direction := (rest[1] - rest[0]).normalized()
-		for link in range(LINKS):
-			var bone := _bones[chain][link]
-			var bone_rest: Transform3D = _bone_rests[chain][link]
-			authored = authored * bone_rest
-			var wanted := (points[link + 1] - points[link]).normalized()
-			var turn := Basis.IDENTITY
-			if wanted.length_squared() > 0.5:
-				turn = Basis(Quaternion(rest_direction, wanted))
-			var posed := to_local * Transform3D(turn * authored.basis,
-				points[link] + turn * (authored.origin - rest[link]))
-			var local_pose := parent.affine_inverse() * posed
-			skeleton.set_bone_pose_position(bone, local_pose.origin)
-			skeleton.set_bone_pose_rotation(bone, local_pose.basis.get_rotation_quaternion())
-			parent = posed
+		_write_chain_bones(skeleton, chain, fabric, anchor_pose, to_world, to_local)
 	_settled = true
 
 
 func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
-		to_local: Transform3D, anchor_pose: Transform3D, down: Vector3, fall: Vector3,
-		damping: float, forward: Vector3, plane_at: float,
-		anchor_y: float) -> bool:
+		to_local: Transform3D, anchor_pose: Transform3D, down: Vector3,
+		carried: Basis, fall: Vector3, damping: float, forward: Vector3,
+		plane_at: float, anchor_y: float) -> bool:
+	# The kernel simulates whatever line it is handed: the cloth's own hang
+	# when it was measured, the material line otherwise.
 	var rests: Array[PackedVector3Array] = []
+	var fabrics: Array[PackedVector3Array] = []
 	for chain: int in range(_bones.size()):
-		rests.append(_rest_joints_from_pose(to_world, chain, anchor_pose, down))
+		var rest := _rest_joints_from_pose(to_world, chain, anchor_pose, down)
+		var fabric := _fabric_joints(rest, chain, carried)
+		if _fabric_measured(chain):
+			rest = _hang_from(fabric[0], chain, down)
+		rests.append(rest)
+		fabrics.append(fabric)
 	var solved := bool(_native_constraint_kernel.call("step",
 		_points, _previous, rests, _lengths,
 		_collision_world, _collision_pairs, _collision_axes,
@@ -505,28 +549,39 @@ func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
 		return false
 	_native_constraint_calls += 1
 	for chain: int in range(_bones.size()):
-		_write_native_chain_bones(skeleton, chain, rests[chain], anchor_pose,
+		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose,
 			to_world, to_local)
 	return true
 
 
-func _write_native_chain_bones(skeleton: Skeleton3D, chain: int,
-		rest: PackedVector3Array, anchor_pose: Transform3D,
+## Carry the authored bone frames with the simulated cloth. A bone's origin is
+## offset from the cloth it carries, increasingly so down a tilted bind chain;
+## rotating bones alone turns that offset into an outward hem slope, even when
+## every simulated segment has settled vertically. So each frame is turned from
+## the direction its own stretch of cloth was authored in to the simulated one,
+## about the cloth, and the offset rides along. Without a measured line the
+## material line stands in for the cloth and every segment starts straight
+## down; with one, an authored lean onto the legs is what gets straightened.
+func _write_chain_bones(skeleton: Skeleton3D, chain: int,
+		fabric: PackedVector3Array, anchor_pose: Transform3D,
 		to_world: Transform3D, to_local: Transform3D) -> void:
 	var points := _points[chain]
+	var measured := _fabric_measured(chain)
 	var parent := anchor_pose
 	var authored := to_world * parent
-	var rest_direction := (rest[1] - rest[0]).normalized()
+	var rest_direction := (fabric[1] - fabric[0]).normalized()
 	for link in range(LINKS):
 		var bone := _bones[chain][link]
 		var bone_rest: Transform3D = _bone_rests[chain][link]
 		authored = authored * bone_rest
+		if measured:
+			rest_direction = (fabric[link + 1] - fabric[link]).normalized()
 		var wanted := (points[link + 1] - points[link]).normalized()
 		var turn := Basis.IDENTITY
 		if wanted.length_squared() > 0.5:
 			turn = Basis(Quaternion(rest_direction, wanted))
 		var posed := to_local * Transform3D(turn * authored.basis,
-			points[link] + turn * (authored.origin - rest[link]))
+			points[link] + turn * (authored.origin - fabric[link]))
 		var local_pose := parent.affine_inverse() * posed
 		skeleton.set_bone_pose_position(bone, local_pose.origin)
 		skeleton.set_bone_pose_rotation(bone,

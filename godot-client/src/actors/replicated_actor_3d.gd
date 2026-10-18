@@ -2159,6 +2159,7 @@ func _tell_cloth_what_is_worn() -> void:
 	if _cape_cloth == null or _native_skeleton == null:
 		return
 	var torso_scene: String = _worn_torso_scene()
+	_cape_cloth.call("set_fabric_line", _cape_fabric_line(torso_scene))
 	var empty := PackedFloat32Array()
 	if torso_scene.is_empty():
 		_cape_cloth.call("set_torso_reach", empty, empty)
@@ -2169,11 +2170,31 @@ func _tell_cloth_what_is_worn() -> void:
 	if reach.is_empty():
 		var pieces: Array = _equipment_pieces(torso_scene)
 		reach = [_axis_reach(pieces, "spine_01", "neck_01"),
-			_axis_reach(pieces, "pelvis", "spine_01")]
+			_axis_reach(pieces, "pelvis", "spine_01", CapeDrape.SEAT_BELOW)]
 		_torso_reaches[key] = reach
 	_cape_cloth.call("set_torso_reach", reach[0], reach[1])
 
-func _axis_reach(pieces: Array, from: String, to: String) -> PackedFloat32Array:
+## Where the worn cape's cloth hangs behind each of its chains, for the solver
+## to hang plumb and to collide. It depends on the rig, the cape and - through
+## the drape that holds the yoke out over armour - the torso, so it is shared
+## by every actor wearing the three.
+func _cape_fabric_line(torso_scene: String) -> Array:
+	var cape: Array = []
+	for node_value: Variant in _equipment_nodes.get(CAPE_PART, []) as Array:
+		if node_value is MeshInstance3D and is_instance_valid(node_value):
+			cape.append(node_value)
+	if cape.is_empty():
+		return []
+	var visual: int = int(_equipment_visuals.get(CAPE_PART, 0))
+	var key: String = "%s|%s|%s" % [str(_model_config.get("scene", "")),
+		str(_equipment_model_config(CAPE_PART, visual).get("scene", "")),
+		torso_scene]
+	if not _fabric_lines.has(key):
+		_fabric_lines[key] = CapeDrape.fabric_line(_native_skeleton, cape)
+	return _fabric_lines[key] as Array
+
+func _axis_reach(pieces: Array, from: String, to: String,
+		below: float = 0.0) -> PackedFloat32Array:
 	var head: int = _native_skeleton.find_bone(from)
 	var tail: int = _native_skeleton.find_bone(to)
 	if head < 0 or tail < 0:
@@ -2181,7 +2202,7 @@ func _axis_reach(pieces: Array, from: String, to: String) -> PackedFloat32Array:
 	return CapeDrape.axis_reach(pieces,
 		_native_skeleton.get_bone_global_rest(head).origin,
 		_native_skeleton.get_bone_global_rest(tail).origin,
-		CapeDrape.BARE_TRUNK_RADIUS)
+		CapeDrape.BARE_TRUNK_RADIUS, below)
 
 func _apply_equipment_hides(part: int, part_config: Dictionary,
 		model_config: Dictionary) -> void:
@@ -3535,6 +3556,7 @@ static var _rebound_skins: Dictionary = {}
 static var _drape_envelopes: Dictionary = {}
 static var _draped_capes: Dictionary = {}
 static var _torso_reaches: Dictionary = {}
+static var _fabric_lines: Dictionary = {}
 
 static func _equipment_pieces(path: String) -> Array:
 	# One cached scene instance per equipment model. In production this comes

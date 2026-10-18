@@ -21,7 +21,7 @@ SELECTED = {
     ("res://src/app/main.gd", "_process"),
     ("res://src/actors/cape_cloth.gd", "_process_modification_with_delta"),
     ("res://src/actors/cape_cloth.gd", "_try_native_constraint_step"),
-    ("res://src/actors/cape_cloth.gd", "_write_native_chain_bones"),
+    ("res://src/actors/cape_cloth.gd", "_write_chain_bones"),
     ("res://src/actors/combat_presentation_3d.gd", "CombatPresentation3D.update_pose"),
     ("res://src/actors/ranger_bow_3d.gd", "RangerBow3D.pose"),
     ("res://src/world/world_effect_3d.gd", "WorldEffect3D._process"),

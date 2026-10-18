@@ -88,6 +88,25 @@ const CAPE_BONE_PREFIX := "cape_"
 const SLOPE := 1.0
 ## Relaxation sweeps; a ladder torso settles in under ten.
 const SLOPE_PASSES := 64
+## The solver's capsules are round, so a reach counted all the way round the
+## back was the girth at the flanks: the Studded Jack's sides stand 0.29 from
+## the spine where its back stands 0.15, and that capsule held the middle of
+## the cape a hand's width off the jack. The chains hang within about 40
+## degrees of straight back, so only the armour they can reach is counted.
+const REACH_BEARING := 45.0
+## How far below the pelvis the waist capsule's cap counts the worn torso: a
+## coat tail or a plate skirt hangs there, behind the cape's middle joint.
+const SEAT_BELOW := 0.20
+## The cape chains, as `cape_<side>_01..04` in the rig.
+const CHAIN_SIDES: Array[String] = ["l", "c", "r"]
+const CHAIN_LINKS := 4
+## A chain's cloth is read in a strip this far either side of its root bone,
+## and this far above and below each joint, as the middle of the sheet there:
+## its folds stand in and out by a few centimetres either way.
+const LINE_BAND := 0.05
+const LINE_SLICE := 0.05
+## The hem's trim rolls outward; the lowest joint reads the sheet above it.
+const LINE_HEM := 0.08
 
 
 static func columns() -> int:
@@ -324,9 +343,17 @@ static func _rigid_share(bones: PackedStringArray,
 ##
 ## The chest is left out. A breastplate is as proud as a back plate and no cape
 ## ever touches it, and counting it would inflate the capsule the hem swings
-## around into a barrel the cloth could not fall inside of.
+## around into a barrel the cloth could not fall inside of. So are the flanks
+## past REACH_BEARING, for the same reason. What is counted is held CLEARANCE
+## off: the solver pushes the cloth itself out to this radius.
+##
+## `below` also counts what hangs past the `from` end, up to that far along the
+## axis, into the first sample as its distance from the end: that is the round
+## cap the solver pushes the cloth out of there. The waist capsule ends at the
+## pelvis, and a coat tail or a plate skirt hangs below it, right where the
+## cape's middle joint is.
 static func axis_reach(pieces: Array, from: Vector3, to: Vector3,
-		floor_radius: float) -> PackedFloat32Array:
+		floor_radius: float, below: float = 0.0) -> PackedFloat32Array:
 	var out := PackedFloat32Array()
 	out.resize(REACH_SAMPLES)
 	out.fill(floor_radius)
@@ -350,13 +377,22 @@ static func axis_reach(pieces: Array, from: Vector3, to: Vector3,
 				# bone as if it were a metre of girth, which is how the first
 				# cut of this pushed the cape 400 mm off the back.
 				var travel: float = (point - from).dot(axis) / span
+				if travel < 0.0 and -travel * sqrt(span) <= below:
+					var hanging: Vector3 = point - from
+					if hanging.z > 0.0 or rad_to_deg(atan2(absf(hanging.x),
+							-hanging.z)) > REACH_BEARING:
+						continue
+					out[0] = maxf(out[0], hanging.length() + CLEARANCE)
+					continue
 				if travel < 0.0 or travel > 1.0:
 					continue
 				var away: Vector3 = point - (from + axis * travel)
 				if away.z > 0.0:
 					continue
+				if rad_to_deg(atan2(absf(away.x), -away.z)) > REACH_BEARING:
+					continue
 				var slot: int = int(round(travel * float(REACH_SAMPLES - 1)))
-				var radius: float = away.length()
+				var radius: float = away.length() + CLEARANCE
 				if radius > out[slot]:
 					out[slot] = radius
 	# A sample boundary is not a surface either: each one carries its
@@ -369,3 +405,109 @@ static func axis_reach(pieces: Array, from: Vector3, to: Vector3,
 		if slot + 1 < REACH_SAMPLES:
 			smeared[slot] = maxf(smeared[slot], out[slot + 1])
 	return smeared
+
+
+## Where each cape chain's cloth hangs behind the chain's material line, joint
+## by joint, in the skeleton's rest space: the line the cloth solver simulates
+## (`set_fabric_line` in cape_cloth.gd). One PackedVector3Array of offsets per
+## chain, from the root's joint to the tip's; empty when the rig carries no
+## cape chains or the cape has no cloth on them.
+##
+## The material line drops plumb from each chain's root bone, which sits on the
+## spine. The cloth is read off the cape as it is skinned to this rig, and only
+## where the chain itself carries it: the root's joint is in the yoke, which the
+## spine holds and the collar wraps round, so the line starts where the chain's
+## cloth leaves the yoke. That cloth was conformed to the bare back, so a drape
+## over armour moves only the yoke above it. Each vertex is carried at rest by
+## its heaviest bone; the line wants only a depth.
+static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
+	var cloth := PackedVector3Array()
+	var carriers := PackedInt32Array()
+	for node_value: Variant in cape:
+		var node := node_value as MeshInstance3D
+		if node == null or node.mesh == null or node.skin == null:
+			continue
+		var carry: Array[Transform3D] = []
+		var carrier := PackedInt32Array()
+		for bind: int in range(node.skin.get_bind_count()):
+			var bone: int = skeleton.find_bone(node.skin.get_bind_name(bind))
+			if bone < 0:
+				bone = node.skin.get_bind_bone(bind)
+			if bone >= skeleton.get_bone_count():
+				bone = -1
+			carrier.append(bone)
+			carry.append(Transform3D.IDENTITY if bone < 0
+				else skeleton.get_bone_global_rest(bone) * node.skin.get_bind_pose(bind))
+		for surface: int in range(node.mesh.get_surface_count()):
+			var arrays: Array = node.mesh.surface_get_arrays(surface)
+			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			if arrays[Mesh.ARRAY_BONES] == null or arrays[Mesh.ARRAY_WEIGHTS] == null:
+				continue
+			var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+			var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+			if vertices.is_empty() or bones.size() < vertices.size():
+				continue
+			var per: int = bones.size() / vertices.size()
+			for index: int in range(vertices.size()):
+				var heaviest: int = -1
+				var most := 0.0
+				for slot: int in range(per):
+					var weight: float = weights[index * per + slot]
+					if weight > most:
+						most = weight
+						heaviest = bones[index * per + slot]
+				if heaviest < 0 or heaviest >= carry.size() or carrier[heaviest] < 0:
+					continue
+				cloth.append(carry[heaviest] * vertices[index])
+				carriers.append(carrier[heaviest])
+	var out: Array = []
+	for side: String in CHAIN_SIDES:
+		var chain := PackedInt32Array()
+		for link: int in range(CHAIN_LINKS):
+			var bone: int = skeleton.find_bone("cape_%s_%02d" % [side, link + 1])
+			if bone < 0:
+				return []
+			chain.append(bone)
+		var root: Vector3 = skeleton.get_bone_global_rest(chain[0]).origin
+		# The solver's link lengths: each child's offset, the last repeated.
+		var lengths := PackedFloat32Array()
+		for link: int in range(1, CHAIN_LINKS):
+			lengths.append(skeleton.get_bone_rest(chain[link]).origin.length())
+		lengths.append(lengths[lengths.size() - 1])
+		var band := PackedVector3Array()
+		var lowest := INF
+		var highest := -INF
+		for index: int in range(cloth.size()):
+			var point: Vector3 = cloth[index]
+			if absf(point.x - root.x) < LINE_BAND and chain.has(carriers[index]):
+				band.append(point)
+				lowest = minf(lowest, point.y)
+				highest = maxf(highest, point.y)
+		if band.is_empty():
+			return []
+		var offsets := PackedVector3Array()
+		var height: float = root.y
+		for joint: int in range(CHAIN_LINKS + 1):
+			var at: float = clampf(height, lowest + LINE_HEM, highest - LINE_SLICE)
+			var depths := PackedFloat32Array()
+			for point: Vector3 in band:
+				if absf(point.y - at) < LINE_SLICE:
+					depths.append(point.z)
+			if depths.is_empty():
+				offsets.append(Vector3.ZERO if offsets.is_empty()
+					else offsets[offsets.size() - 1])
+			else:
+				# The middle half's mean: a pleat splits a thin strip into an
+				# inner and an outer crest, and a median jumps between them.
+				depths.sort()
+				var first: int = depths.size() / 4
+				var last: int = maxi(first + 1, depths.size() - depths.size() / 4)
+				var total := 0.0
+				for index: int in range(first, last):
+					total += depths[index]
+				offsets.append(Vector3(0.0, 0.0,
+					total / float(last - first) - root.z))
+			if joint < CHAIN_LINKS:
+				height -= lengths[joint]
+		out.append(offsets)
+	return out

@@ -662,7 +662,7 @@ owner's shot and the reshoot, and the female body from the same view.
 A second review (22 notes, at commit `ac868b73`, session
 `equipment-review/2026-10-17_18-18-43`) covered all five sets again. Note 3,
 the hole through the Leather Helm's crown, is the headwear section's
-(`54e7b083`). Note 2, the cape's curve, is left (see **Not yet done**). The
+(`54e7b083`). Note 2, the cape's curve, has its own section below. The
 other 20 are addressed here, on all 15 design-fit pieces and both Human bodies.
 
 **Arm holes and shoulder seams (notes 1, 4, 6, 9, 12, 14, 16, 18, 20).**
@@ -776,22 +776,99 @@ Evidence, installed before and after on each noted view, reshot with
 
 **Not yet done.**
 
-- **The cape's curve (note 2).** The cape hangs from three simulated chains
-  whose roots are pinned where the cape was authored, on the bare back.
-  `CapeDrape` pushes the cape's rigid yoke out over the worn torso, so over a
-  deep back such as the Studded Jack the cloth flares out at the shoulder
-  blades and then swings back in to hang from roots set near the legs. The
-  fix belongs in `cape_cloth.gd`: move each chain root out to the worn
-  torso's measured reach, so the cape hangs plumb from the armour. Its parity
-  tests compare the solver with frozen reference copies, armoured wearers
-  included, so a behaviour change means re-approving those baselines. Not
-  done here.
 - The Furtrim Coat still shows two small dark notches near its back hem
   (note 17), where the fur band used to cover them. Shards of the legguards'
   fur stay in the coat's back slit.
 - A small light shard shows above the Phoenix belt at the back (note 21).
 - The Studded Jack's arm hole keeps a small flap at the front in the bow
   (note 6). The Furtrim Coat's left cuff is still 2.6–2.8 cm off the wrist.
+
+### The cape's hang (second review, note 2)
+
+The owner noted that, in idle, the Vanguard cape flared out at the top of the
+back and then followed the legs near the hem. The bare chest showed the same
+curve. The cause was in the cloth solver, not in the chain roots:
+
+- Each chain simulated its *material line*, a plumb line from the chain's root
+  bone, which sits on the spine about 10 cm in front of the cloth. The trunk
+  capsule pushed that line out to its surface, and the cloth then hung 10 cm
+  further out again. The capsule is round, and its reach came from the worn
+  torso's flanks: the Studded Jack stands 0.29 m from the spine at 60–90°
+  but only 0.15 m straight back. Over the jack, the middle of the cape stood
+  12 cm off the armour.
+- Below the shoulders, the bone write kept the cape's bind shape. That shape
+  was conformed to the bare body, and below the seat the cloth sits 7–11 cm
+  further in, against the thighs and calves.
+
+Fix (`cape_cloth.gd`, `cape_drape.gd`, `replicated_actor_3d.gd`):
+
+- `CapeDrape.fabric_line` measures where each chain's cloth hangs behind its
+  material line at each joint. It is measured once per rig, cape and torso,
+  in rest space. It reads the middle half of the sheet in a 10 cm strip,
+  using only cloth that the chain itself carries, so the line starts where
+  the rigid yoke lets go.
+- The solver hangs that line plumb (`set_fabric_line`), collides it, and turns
+  each link from its own cloth's authored direction, which straightens the
+  lean onto the legs. With no line it is the old solver: with the line
+  cleared, both frozen baselines match to 1e-6 through Walk, an attack, a
+  teleport and a reset.
+- The trunk and waist reach counts only armour within 45° of straight back
+  (the chains hang within about 40°), held 2 cm off. The waist capsule's cap
+  also counts what hangs up to 20 cm below the pelvis: coat tails and plate
+  skirts, where the cape's middle joint is.
+- The native kernel is handed the measured line as its rests. The bone write
+  is shared GDScript, so the kernel itself is unchanged.
+
+Depth change of the cape's middle (cloth within 10 cm of the spine) from just
+below the yoke to the calves, Idle_Subtle at 2.03 s. A positive change means
+the cape comes in toward the legs:
+
+| Wearer | Before | After |
+| --- | ---: | ---: |
+| Bare chest | +85 mm | +10 mm |
+| Studded Jack (noted) | +90 mm | +10 mm |
+| Scout Vest, 184, 213, 197 | — | −1 to +10 mm |
+| Phoenix Cuirass | — | −9 mm |
+
+Armour through the cape's sheet, using the over-armour fixture's measure on
+the solver's own output (same pose): Scout Vest 17 → 17 mm, 184 8 → 8 mm,
+213 2 → 0 mm, 197 0 → 6 mm, Studded Jack 0 → 0 mm, Phoenix 63 → 35 mm. In the
+back three-quarter view, the Arcanist's tunic tails no longer come through
+the cape at the seat. Other races (Stoneborn, Ssarathi, Orun, Mycelari,
+Glasswarden) and the female body hang the same way. Evidence:
+[note 2 and the synthetic views](design-fit/review2-cape.jpg).
+
+Tests:
+
+- `test_cape_cloth.gd`, `test_cape_drape.gd`, `test_actor_render_quality.gd`
+  and `rendered_cape_clipping.gd` pass.
+- `test_cape_idle.gd` passes. Its new check, "hangs plumb from the back"
+  (under 40 mm), measures 0.3–10.3 mm on both bodies; the old solver gives
+  85–90 mm.
+- `test_cape_cloth_pose_cache.gd` and `test_cape_cloth_capsule_cache.gd` fail
+  on the same two checks as before: the rig has no `Sword_Attack` clip, so
+  their real-actor sequence never runs. In a scratch copy using
+  `Combat_Slash_A`, the measured line diverges from the frozen baselines, as
+  intended, and with the line cleared both match. The frozen baselines are
+  unchanged.
+- `test_cape_cloth_native_constraint.gd` and
+  `test_native_presentation_modes.gd` fail because this checkout has no built
+  native extension (`bin/`).
+- `rendered_cape_over_armour.gd` and its `_baseline` variant fail with the
+  same numbers for the new and the frozen solver. The fixture measures after
+  a frame, by which point the solver's output is gone from the pose. Its
+  collar band (74–159 mm) is the rigid yoke, which this change does not touch.
+
+Scratch views, probes and scripts are in the client
+`.local/asset-authoring/working/equipment-cape-2026-10-17/`.
+
+**Not yet done.**
+
+- The parity tests need the owner's decision. The options are to clear the
+  measured line on the live solver in the parity harness (and swap the
+  missing clip), or to re-freeze the baselines.
+- The Phoenix Cuirass's tail still shows 35 mm into the sheet at the seat.
+- The native kernel path was not run here.
 
 ## Two body shapes, preserved race identity
 

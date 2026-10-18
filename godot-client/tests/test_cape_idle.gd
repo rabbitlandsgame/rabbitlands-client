@@ -4,6 +4,11 @@ extends "res://tests/integration/rendered_cape_over_armour.gd"
 
 const STEP := 1.0 / 60.0
 const MAX_IDLE_SLOPE := 0.06
+## The whole sheet, not only its lower half. From just below the yoke to the
+## calves the cape used to come 85-90 mm in toward the legs, after the trunk
+## capsule had flared it out over the shoulder blades (owner's second review,
+## note 2); hung from the cloth's own line it moves under 15 mm.
+const MAX_PLUMB_DRIFT := 0.04
 
 func _run() -> void:
 	_main = (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
@@ -29,6 +34,8 @@ func _run() -> void:
 			player.pause()
 			var skeleton := _skeleton_of(actor)
 			var cloth := skeleton.get_node("CapeCloth")
+			_check((cloth.get("_fabric_rest") as Array).size() == 3,
+				"%s body %d hangs the cloth's own measured line" % [rig, body])
 			cloth.call("reset")
 			_step_cloth(cloth, 180)
 			_check_hang(skeleton, "%s body %d fresh idle" % [rig, body])
@@ -65,7 +72,7 @@ func _check_hang(skeleton: Skeleton3D, label: String) -> void:
 	var cape := _posed(skeleton, 2)
 	var anchor := skeleton.get_bone_global_pose(skeleton.find_bone("spine_03")).origin
 	var depths := PackedFloat32Array()
-	for fraction: float in [0.55, 0.25]:
+	for fraction: float in [0.55, 0.25, 0.85, 0.40]:
 		var total := 0.0
 		var count := 0
 		for p: Vector3 in cape:
@@ -77,6 +84,9 @@ func _check_hang(skeleton: Skeleton3D, label: String) -> void:
 	var slope := absf(depths[1] - depths[0])
 	_check(slope < MAX_IDLE_SLOPE, "%s hangs down (%.1f mm depth change)"
 		% [label, slope * 1000.0])
+	var drift := absf(depths[3] - depths[2])
+	_check(drift < MAX_PLUMB_DRIFT, "%s hangs plumb from the back (%.1f mm to the calves)"
+		% [label, drift * 1000.0])
 
 func _check(ok: bool, label: String) -> void:
 	if not ok:
