@@ -111,10 +111,10 @@ func update_pose() -> void:
 	var right := hand_position(_hand_r)
 	var drawing := action in [&"ranged_draw", &"ranged_hold"]
 	var ranging := drawing or action == &"ranged_attack"
-	if ranging:
+	if ranging and _equipped_bow:
 		_ensure_bow()
 	if bow != null:
-		bow.visible = ranging or _equipped_bow
+		bow.visible = _equipped_bow
 	if bow != null and bow.visible:
 		# Relaxed carrying follows the closed fist; active draw/release keeps
 		# the authored aiming frame and nock positions from both hands.
@@ -127,7 +127,7 @@ func update_pose() -> void:
 			drawing, time if action == &"ranged_attack" else -1.0, size, skeleton_size)
 		if not ranging:
 			bow.global_basis = grip.basis.orthonormalized().scaled(Vector3.ONE * size)
-	actor.set_hand_props_visible(not ranging)
+	actor.set_hand_props_visible(not ranging or not _equipped_bow)
 	_mesh.clear_surfaces()
 	if not effects_enabled or not actor.is_visible_in_tree():
 		return

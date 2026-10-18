@@ -25,22 +25,25 @@ const RECIPES := {
 	"Combat_Bow_Release": [["Bow_Release", 0.08, 0.0, 0.32],
 		["Bow_Release", 0.36, 0.32, 1.0]]}
 const LOOPS := ["Combat_Channel", "Combat_Bow_Hold"]
+const TechniqueClips = preload("res://src/actors/technique_animation_library.gd")
 
 static func source_clips(wanted: PackedStringArray) -> PackedStringArray:
 	var sources := wanted.duplicate()
-	for name: String in RECIPES:
+	var recipes := RECIPES.merged(TechniqueClips.RECIPES)
+	for name: String in recipes:
 		if not wanted.is_empty() and not wanted.has(name):
 			continue
-		for segment: Array in RECIPES[name]:
+		for segment: Array in recipes[name]:
 			if not sources.has(segment[0]):
 				sources.append(segment[0])
 	return sources
 
 static func install(library: AnimationLibrary, wanted: PackedStringArray) -> void:
-	for name: String in RECIPES:
+	var recipes := RECIPES.merged(TechniqueClips.RECIPES)
+	for name: String in recipes:
 		if not wanted.is_empty() and not wanted.has(name):
 			continue
-		var recipe: Array = RECIPES[name]
+		var recipe: Array = recipes[name]
 		var complete := true
 		for segment: Array in recipe:
 			complete = complete and library.has_animation(segment[0])

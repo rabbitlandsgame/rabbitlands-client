@@ -3576,6 +3576,9 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 func _clear_world_presentation() -> void:
 	character_intro.cancel()
 	_clear_map_walk_target()
+	for effect: Variant in world_effects:
+		if is_instance_valid(effect): effect.queue_free()
+	world_effects.clear()
 	for raw_node: Variant in actor_nodes.values():
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
@@ -11536,6 +11539,9 @@ func _on_client_setting_changed(section: String, key: String,
 			_apply_day_night()
 		"particles":
 			_effects_enabled = bool(value)
+			if not _effects_enabled:
+				for effect: Variant in world_effects:
+					if is_instance_valid(effect) and effect.is_in_group("technique_visual_effects"): effect.queue_free()
 			for actor_value: Variant in actor_nodes.values():
 				if is_instance_valid(actor_value):
 					(actor_value as ReplicatedActor3D).set_combat_effects_enabled(_effects_enabled)
@@ -11755,6 +11761,9 @@ func _cast_spell_by_id(spell_id: int) -> void:
 	_begin_prepared_cast(spell_id, power)
 
 func _on_magic_state(data: Dictionary) -> void:
+	if data.get("kind") == "technique_effect":
+		_on_technique_effect(data)
+		return
 	if data.get("kind") == "spell_impact":
 		_on_special_effect_requested(data)
 		return
@@ -11778,6 +11787,23 @@ func _on_magic_state(data: Dictionary) -> void:
 	effect.configure_area(float(data.get("radius", 4.0)) * adapter.metres_per_tile, str(data.get("scope", "burst")))
 	if data.has("release_delay"):
 		effect.configure_timing(float(data.release_delay), float(data.get("flight_duration", 0.0)))
+	world_effects.append(effect)
+	world_effects = world_effects.filter(func(node: Variant) -> bool: return is_instance_valid(node))
+
+func _on_technique_effect(data: Dictionary) -> void:
+	var key := str(data.get("key", ""))
+	var presentation = preload("res://src/world/technique_presentation.gd")
+	if not presentation.PROFILES.has(key): return
+	var source := actor_nodes.get(int(data.get("actor_id", -1))) as ReplicatedActor3D
+	if not is_instance_valid(source) or source.current_action == &"death": return
+	var phase := str(data.get("phase", "strike"))
+	if phase not in ["strike", "counter", "activate", "shot", "impact", "pulse"]: return
+	source.play_technique(key, phase)
+	if not _effects_enabled or get_tree().get_nodes_in_group("technique_visual_effects").size() >= 48: return
+	var target := actor_nodes.get(int(data.get("target_id", -1))) as Node3D
+	var effect = preload("res://src/world/technique_effect_3d.gd").new()
+	world_root.add_child(effect)
+	effect.configure(key, phase, source, target, bool(data.get("hit", false)))
 	world_effects.append(effect)
 	world_effects = world_effects.filter(func(node: Variant) -> bool: return is_instance_valid(node))
 

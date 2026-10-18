@@ -152,6 +152,32 @@ favorite star use the same controls on both tabs; favorites and the chosen
 filter are saved per character. Short windows prioritize requirements and keep
 the action and assignment controls visible while collapsing the preview.
 
+The Techniques inspector previews the same player rigs, equipped weapons,
+timed motions and transient effects used in combat. Shield impacts, heavy and
+precision blows, sweeps, counters, ranged hits and support abilities have their
+own cues. The preview is an isolated demonstration and never sends a use request.
+Run `godot-client/test-technique-effects.bat` for a larger offline review of all
+24 techniques, with Replay and Pause controls.
+The launcher uses the compatibility renderer and writes startup details to
+`%TEMP%\rabbitlands-technique-review.log`. Startup failures remain visible in
+the launcher window.
+
+Combat effects follow server-confirmed `technique_effects_v1` events, including
+the actual hit/miss outcome. Merely queuing or inspecting a technique produces
+no world effect. Misses retain the attack motion without a successful target
+impact. Effects stop with the particle setting and are cleared with the world.
+No damage, AP, cooldown or status-duration rules change.
+
+Twelve one-shot timing recipes reuse the shipped universal animation library;
+source models, skin, skeletons, bind poses and source animation files are
+unchanged. Recipes sample at 60 Hz, last 0.51–1.15 seconds and recover through
+the normal action transitions. Melee contact cues fall at 0.19–0.34 seconds;
+shot impacts follow the existing 28 m/s cosmetic flight timing (0.12–0.65 s).
+Transient cues fade within 2.1 seconds and the live world caps them at 48.
+Current Amberwood/Sunmane bow meshes use the live string presentation. Retired
+bow and arrow model files remain excluded; shot flight remains visible through
+the existing tracer even without an arrow model.
+
 ## Five-minute evaluation
 
 1. Select Tavin, then cast Heal Target twice. Compare Prepared and Aimed.

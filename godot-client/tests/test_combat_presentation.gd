@@ -49,9 +49,12 @@ func run() -> void:
 				"carried Ranger handle stays in the left fist in %s: %s" % [carry_action, option.model])
 			check(idle_bow.global_basis.orthonormalized().is_equal_approx(grip.basis.orthonormalized()),
 				"carried Ranger haft follows the fist bore in %s: %s" % [carry_action, option.model])
-			check(idle_visual.transform.is_equal_approx(Transform3D.IDENTITY) and
-				idle_visual.global_transform.is_equal_approx(idle_string.global_transform),
-				"carried Ranger mesh and live string share the grip frame: " + str(option.model))
+			# The imported bow curves in X; the live string curves in Z. Verify
+			# the source mesh's sampled grip and axes rather than identical roots.
+			check((idle_visual.global_transform * Vector3(0.02325, 0, 0)).distance_to(idle_string.global_position) < 0.002 and
+				idle_visual.global_basis.y.normalized().is_equal_approx(idle_string.global_basis.y.normalized()) and
+				idle_visual.global_basis.x.normalized().is_equal_approx(idle_string.global_basis.z.normalized()),
+				"carried current bow grip and live string stay aligned: " + str(option.model))
 		for effect_id: int in [2, 84, 83, 85, 0, 86, 10, 79, 19, 18, 75]:
 			actor.set_spell_variant(effect_id)
 			var action := SpellPresentation.action_for_effect(effect_id)
@@ -75,9 +78,9 @@ func run() -> void:
 		actor.animation_player.advance(0.7)
 		check(actor.current_action == &"ranged_hold", "draw transitions to hold")
 		actor.combat_presentation.update_pose()
-		check(idle_visual.transform.is_equal_approx(Transform3D.IDENTITY) and
+		check((idle_visual.transform * Vector3(0.02325, 0, 0)).length() < 0.001 and
 			idle_string.transform.is_equal_approx(Transform3D.IDENTITY),
-			"active Ranger draw clears the idle-only palm fit: " + str(option.model))
+			"active draw centers the current bow's sampled grip and clears idle cant: " + str(option.model))
 		for tick: int in 60:
 			actor.animation_player.advance(1.0 / 60.0)
 		actor._advance_facing_offset(1.0)
@@ -85,19 +88,18 @@ func run() -> void:
 		check(actor.animation_player.is_playing(), "bow hold loops beyond clip end")
 		actor.combat_presentation.update_pose()
 		var bow := actor.combat_presentation.bow
-		check(bow.visible and bow.arrow.visible, "ranging shows bow and nocked arrow")
-		check(bow.arrow.global_position.distance_to(actor.combat_presentation.hand_position(
+		check(bow.visible and bow.bow != null, "ranging shows the equipped current bow")
+		check(bow.nock_position().distance_to(actor.combat_presentation.hand_position(
 			actor.get_skeleton().find_bone("hand_r"))) < 0.09, "arrow nock follows draw fingers: " + str(option.model))
-		var arrow_point := bow.arrow.global_transform * Vector3(0, 0, -1.15)
-		check((arrow_point-bow.global_position).dot(-bow.global_basis.z.normalized()) > 0.03,
-			"broadhead extends past the bow at full draw: " + str(option.model))
+		check(bow.arrow == null and preload("res://src/actors/archived_model_policy.gd").is_retired_path(RangerBow3D.ARROW_PATH),
+			"retired arrow art stays absent while the live string retains its release point")
 		var aim_axis := -bow.global_basis.z.normalized()
 		check(aim_axis.dot(-actor.global_basis.z.normalized()) > 0.97,
 			"bow aim aligns with authoritative facing: %s aim=%s forward=%s offset=%s clip=%s time=%s" % [option.model, aim_axis, -actor.global_basis.z.normalized(), actor._facing_offset, actor.animation_player.current_animation, actor.animation_player.current_animation_position])
 		actor.play_action(&"ranged_attack", true)
 		actor.animation_player.advance(0.01)
 		actor.combat_presentation.update_pose()
-		check(not bow.arrow.visible, "arrow leaves hand on release")
+		check(bow.nock_position().is_finite(), "release origin remains finite without retired arrow art")
 		actor.play_action(&"cast_channel_enter")
 		actor.combat_presentation.set_spell_power(10)
 		actor.animation_player.advance(0.6)

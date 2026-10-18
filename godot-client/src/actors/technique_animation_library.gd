@@ -1,0 +1,27 @@
+extends RefCounted
+## In-place timing recipes over the shipped shared rig library. No source GLB,
+## bind, skin, foot path, or rest pose is edited. All clips are one-shot.
+const RECIPES := {
+	"Technique_Heavy": [["Sword_Attack_Air_Vertical", 0.34, 0.0, 0.45],
+		["Sword_Attack_Air_Vertical", 0.16, 0.45, 0.8], ["Sword_Regular_A_Rec", 0.36, 0.0, 1.0]],
+	"Technique_Precise": [["Sword_Regular_C", 0.26, 0.0, 0.45],
+		["Sword_Regular_C", 0.12, 0.45, 0.78], ["Sword_Regular_A_Rec", 0.28, 0.0, 1.0]],
+	"Technique_Shield_Bash": [["Shield_OneShot", 0.30, 0.0, 0.4],
+		["Shield_OneShot", 0.14, 0.4, 0.72], ["Shield_OneShot", 0.30, 0.72, 1.0]],
+	"Technique_Brace": [["Defend", 0.18, 0.0, 0.36],
+		["Defend", 0.50, 0.36, 0.64], ["Defend", 0.24, 0.64, 1.0]],
+	"Technique_Cleave": [["Sword_Regular_B", 0.30, 0.0, 0.40],
+		["Sword_Regular_B", 0.19, 0.40, 0.87], ["Sword_Regular_B_Rec", 0.34, 0.0, 1.0]],
+	"Technique_Flurry": [["Sword_Regular_A", 0.19, 0.0, 0.40],
+		["Sword_Regular_A", 0.10, 0.40, 0.85], ["Sword_Regular_A_Rec", 0.22, 0.0, 1.0]],
+	"Technique_Low_Cut": [["Sword_Regular_C", 0.26, 0.0, 0.45],
+		["Sword_Regular_C", 0.14, 0.45, 0.85], ["Sword_Regular_B_Rec", 0.30, 0.0, 1.0]],
+	"Technique_Thrust": [["Sword_Regular_C", 0.25, 0.0, 0.45],
+		["Sword_Regular_C", 0.16, 0.45, 0.85], ["Sword_Regular_A_Rec", 0.30, 0.0, 1.0]],
+	"Technique_Riposte": [["Sword_Block", 0.12, 0.15, 0.65],
+		["Sword_Regular_A", 0.15, 0.15, 0.45], ["Sword_Regular_A", 0.13, 0.45, 0.85],
+		["Sword_Regular_A_Rec", 0.30, 0.0, 1.0]],
+	"Technique_Challenge": [["Angry", 0.85, 0.0, 1.0]],
+	"Technique_Rally": [["Power_Up", 1.15, 0.0, 1.0]],
+	"Technique_Breath": [["Tired_Hunched", 1.15, 0.0, 1.0]],
+}

@@ -531,7 +531,7 @@ func _build() -> void:
 	preview = Preview.new()
 	preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_hero.add_child(preview)
-	preview.custom_minimum_size = Vector2(100, 72)
+	preview.custom_minimum_size = Vector2(120, 92)
 	description_label = UI.label("", 13, true)
 	description_label.max_lines_visible = 3
 	info.add_child(description_label)

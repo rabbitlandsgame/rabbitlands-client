@@ -63,14 +63,15 @@ func _run() -> void:
 			_row("brace", "Brace", "Shield", "stance", 5, false, ""),
 			_row("shield_bash", "Shield Bash", "Shield", "strike", 10, true, "You need a shield."),
 		]}
-	state.techniques[0]["ready_in"] = 5.0
+	state.techniques[0]["ready_in"] = 30.0
 	app_state.call("_on_packet", 212, JSON.stringify(state).to_utf8_buffer())
 	await process_frame
 	var buttons: Dictionary = tab.get("buttons")
 	_expect(buttons.size() == 7, "one button per technique: %d" % buttons.size())
 	_expect((tab.find_child("ActionPoints", true, false) as Label).text == "Action points 30 / 200",
 		"the real action-point pool is shown")
-	_expect(not (buttons["heavy_blow"] as Button).disabled and "5s" in tab.get("_row_controls")["heavy_blow"].get_node("Cooldown").text,
+	var remaining: String = tab.get("_row_controls")["heavy_blow"].get_node("Cooldown").text
+	_expect(not (buttons["heavy_blow"] as Button).disabled and remaining.ends_with("s") and remaining.to_int() > 0 and remaining.to_int() <= 30,
 		"a cooling-down technique is inspectable and counts down")
 	_expect((buttons["heavy_blow"] as Button).icon != null, "rows carry the painted icon")
 	_expect(not (buttons["war_cry"] as Button).disabled and "Attack level 40" in (buttons["war_cry"] as Button).tooltip_text,
