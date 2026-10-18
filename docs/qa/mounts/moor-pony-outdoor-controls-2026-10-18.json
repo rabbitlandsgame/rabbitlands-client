@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "unrestricted outdoor riding and player-anchored mount controls",
+  "changes": [
+    "No automatic dismount or summon restriction from nearby obstacles, narrow paths or neighbouring height changes",
+    "All published outdoor classes allowed; ordinary player collision retained",
+    "Compact mount controls follow the right edge of the local name/resource overlay"
+  ],
+  "checks": {
+    "serverMountAndMovementTests": 91,
+    "floatingPanelChecks": 12,
+    "existingHotkeyChecks": 18,
+    "normalLandfallRealGameSmokeFailures": 0
+  },
+  "unchanged": [
+    "Moor Pony model, rider pose, reins and cape",
+    "R and Space bindings",
+    "Interior, combat and activity dismounts"
+  ]
+}

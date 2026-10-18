@@ -116,11 +116,11 @@ func _run() -> void:
 		"the ring leaves out unlearned techniques and ones the gear or level refuses")
 	_expect("heavy_blow" in offered_keys and "brace" in offered_keys, "and offers what can be used, cooling down or not")
 	var hold := InputEventKey.new()
-	hold.physical_keycode = KEY_TAB
+	hold.physical_keycode = KEY_Z
 	hold.pressed = true
 	var ring_gate := [true]
 	ring.set("can_open", func() -> bool: return ring_gate[0])
-	_expect(bool(ring.call("handle_event", hold)) and ring.visible, "pressing Tab opens the ring")
+	_expect(bool(ring.call("handle_event", hold)) and ring.visible, "pressing Z opens the ring")
 	await process_frame
 	_expect(ring.visible, "and it stays open while it may")
 	_expect((ring.get("buttons") as Array).size() == offered.size(), "one wedge per offered technique")
@@ -134,12 +134,12 @@ func _run() -> void:
 	var release := hold.duplicate() as InputEventKey
 	release.pressed = false
 	ring.call("handle_event", hold)
-	_expect(bool(ring.call("handle_event", release)) and not ring.visible, "letting go of Tab closes it")
+	_expect(bool(ring.call("handle_event", release)) and not ring.visible, "letting go of Z closes it")
 	InputMap.action_erase_events("technique_ring")
 	var rebound := InputEventKey.new()
 	rebound.physical_keycode = KEY_G
 	InputMap.action_add_event("technique_ring", rebound)
-	_expect(not bool(ring.call("handle_event", hold)) and not ring.visible, "a rebound ring key releases Tab")
+	_expect(not bool(ring.call("handle_event", hold)) and not ring.visible, "a rebound ring key releases Z")
 	var g := InputEventKey.new()
 	g.physical_keycode = KEY_G
 	g.pressed = true
@@ -175,7 +175,7 @@ func _run() -> void:
 
 	# --- keys.ini ------------------------------------------------------------
 	var Keys := load("res://src/ui/key_bindings.gd")
-	for spec: String in ["CTRL S", "ALT 1", "LSHIFT", "TAB", "M", "1", "SHIFT F3", "-"]:
+	for spec: String in ["CTRL S", "ALT 1", "LSHIFT", "TAB", "M", "Z", "1", "SHIFT F3", "-"]:
 		var event: InputEventKey = Keys.parse(spec)
 		_expect(event != null and Keys.describe(event) == spec, "keys.ini reads and writes %s: %s" % [
 			spec, Keys.describe(event) if event != null else "null"])
@@ -191,10 +191,35 @@ func _run() -> void:
 	_expect("#K_TOGGLE_MAP = CTRL ALT K" in text and "#K_SPELL_RING = LSHIFT" in text,
 		"one #K_ line per action: " + text.get_slice("\n", 6))
 	Keys.reset_to_defaults(["toggle_map"])
-	_expect(Keys.describe(InputMap.action_get_events("toggle_map")[0]) == "M", "reset restores the shipped key")
+	_expect(Keys.describe(InputMap.action_get_events("toggle_map")[0]) == "TAB", "reset restores the shipped key")
 	_expect(Keys.load_file(["toggle_map", "spell_ring"], path) == 2
 		and Keys.describe(InputMap.action_get_events("toggle_map")[0]) == "CTRL ALT K",
 		"keys.ini wins at start-up")
+	# A file the previous build wrote lists its defaults, the map on M and
+	# the ring on Tab: those give way to the new defaults, a chosen key stays,
+	# and the file is rewritten so a later choice of M or Tab is kept.
+	var old_file := FileAccess.open(path, FileAccess.WRITE)
+	old_file.store_string("; Rabbit Lands key bindings.\n#K_TOGGLE_MAP = M\n"
+		+ "#K_TECHNIQUE_RING = TAB\n#K_SPELL_RING = RSHIFT\n")
+	old_file.close()
+	var three := ["toggle_map", "technique_ring", "spell_ring"]
+	# Start-up reads keys.ini over the shipped defaults.
+	InputMap.load_from_project_settings()
+	_expect(Keys.load_file(three, path) == 1
+		and Keys.describe(InputMap.action_get_events("toggle_map")[0]) == "TAB"
+		and Keys.describe(InputMap.action_get_events("technique_ring")[0]) == "Z"
+		and Keys.describe(InputMap.action_get_events("spell_ring")[0]) == "RSHIFT",
+		"an older keys.ini gives up its old defaults and keeps chosen keys")
+	text = FileAccess.get_file_as_string(path)
+	_expect("#KEYS_VERSION = 2" in text and "#K_TOGGLE_MAP = TAB" in text
+		and "#K_TECHNIQUE_RING = Z" in text, "and is written again at the new version")
+	InputMap.action_erase_events("toggle_map")
+	InputMap.action_add_event("toggle_map", Keys.parse("M"))
+	Keys.save(three, path)
+	Keys.reset_to_defaults(three)
+	_expect(Keys.load_file(three, path) == 3
+		and Keys.describe(InputMap.action_get_events("toggle_map")[0]) == "M",
+		"M chosen in a current keys.ini stays M")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	InputMap.load_from_project_settings()
 
@@ -218,14 +243,15 @@ func _run() -> void:
 		"a held modifier is captured as the key itself, with its side")
 	settings.call("begin_capture", "toggle_map")
 	var t_key := InputEventKey.new()
-	t_key.physical_keycode = KEY_TAB
+	t_key.physical_keycode = KEY_Z
 	t_key.pressed = true
 	settings.call("apply_capture", t_key)
 	_expect("technique ring" in (settings.get("capture_label") as Label).text,
 		"binding a key already in use names the other action")
 	InputMap.load_from_project_settings()
 	settings.call("reset_keys")
-	_expect(Keys.describe(InputMap.action_get_events("toggle_map")[0]) == "M", "Reset puts every key back")
+	_expect(Keys.describe(InputMap.action_get_events("toggle_map")[0]) == "TAB"
+		and Keys.describe(InputMap.action_get_events("technique_ring")[0]) == "Z", "Reset puts every key back")
 
 	print("techniques ui tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	settings.queue_free()
