@@ -1,10 +1,11 @@
 extends SubViewportContainer
 ## The card displays the actual approved runtime model, including horse tack.
 const Profiles := preload("res://src/mounts/mount_profiles.gd")
-var viewport := SubViewport.new()
+var viewport: SubViewport
 var actor: ReplicatedActor3D
 
 func configure(id: String) -> void:
+	viewport = SubViewport.new()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stretch = true
 	custom_minimum_size = Vector2(220, 215)
@@ -62,6 +63,8 @@ func configure(id: String) -> void:
 	set_active(true)
 
 func set_active(active: bool) -> void:
+	if viewport == null:
+		return
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if active else SubViewport.UPDATE_DISABLED
 	if actor != null and actor.animation_player != null:
 		# A still card avoids a second animation/attachment clock in the HUD.
