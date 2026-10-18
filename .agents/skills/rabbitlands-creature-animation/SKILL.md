@@ -25,4 +25,4 @@ For grounded boar/tapir pilots, head/tusk strikes and collapse-frame singulariti
 
 For rams, ibex, sheep, bison and yak, read [native hoofed motion](references/native-hoofed-motion.md). It covers anatomy-based forward frames, mirrored hoof lanes, native sole tilt, horn-supported collapse and actor-specific rig/coat repairs. The seven approved sets and portable checks are documented in `docs/caprine-motion.md`.
 
-For pony/horse rigs and tack, read [native equid motion](references/native-equid-motion.md). It covers whole-hoof ownership, saddle/bridle attachments, hanging-tail clearance, repaired-surface import witnesses and mount handoff. The approved Moor Pony behavior is documented in `docs/equid-motion.md`.
+For pony/horse rigs and tack, read [native equid motion](references/native-equid-motion.md). It covers whole-hoof ownership, saddle/bridle attachments, hanging-tail clearance, repaired-surface import witnesses and mount handoff. The approved Moor Pony and six reviewed family transfers, including Gallop, are documented in `docs/equid-motion.md`.
