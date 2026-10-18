@@ -463,7 +463,10 @@ func _ground_at(point: Vector3) -> float:
 # --------------------------------------------------------------------------
 
 ## One still per key and one halfway between keys, after the grass and the
-## animals have had frames to settle on each.
+## animals have had frames to settle on each, and with the grass bed placed in
+## full: its per-frame build budget leaves most of the bed unbuilt after those
+## frames (a Landfall bed takes about 1.5 s of 2-6 ms budgets), and the stills
+## showed bare lawns away from the focus.
 func _write_previews(directory: String) -> void:
 	if not directory.is_absolute_path():
 		directory = _repository_path(directory)
@@ -479,6 +482,11 @@ func _write_previews(directory: String) -> void:
 		_apply_pose(pose)
 		for unused: int in range(20):
 			_tend(pose)
+			await get_tree().process_frame
+		var beds := get_node_or_null(LookGrassBeds.NODE_NAME) as LookGrassBeds
+		if beds != null:
+			beds.settle()
+		for unused: int in range(3):
 			await get_tree().process_frame
 		RenderingServer.force_draw(false)
 		var image := get_viewport().get_texture().get_image()
