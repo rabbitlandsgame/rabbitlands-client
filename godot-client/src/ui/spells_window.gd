@@ -1,30 +1,10 @@
 extends Control
-## The spell book: effect rows and target columns, within the health,
-## general, attack and defense groups, with reasons a cast would fail.
-##
-## Everything on it is a rendering of what the client honestly knows. The
-## definitions are the client's own spell catalog; the tomes the player has
-## read, their magic level, their mana and their reagents are the server's
-## state as it last arrived in `AppState`. A spell the client can see no way
-## to cast is dimmed and its first blocking reason is written beside its
-## name, the way the legacy client dimmed and annotated its own - but the
-## window never decides whether a cast succeeds. Pressing Cast only asks;
-## the server answers, because the knowledge, the mana and the inventory are
-## all its to judge.
-##
-## The script declares no `class_name`: a global class is parsed before the
-## autoload singletons are registered, and this reads `AppState` directly.
-
-const PANEL_SIZE := Vector2(560.0, 600.0)
+## Compact action library. The server remains authoritative for costs and use.
+const UI := preload("res://src/ui/action_book_ui.gd")
 const TechniquesPanel := preload("res://src/ui/techniques_panel.gd")
-## Nothing may cover the fixed resource rail down the right-hand edge.
+const PANEL_SIZE := Vector2(716, 636)
 const RESERVED_RIGHT_RAIL := 96.0
-
-## The four Eternal Lands groups, in the order the legacy window draws them.
-const GROUP_ORDER: Array[String] = ["Health", "General", "Attack", "Defense"]
-## Which group each catalogued effect belongs to. Anything the table does not
-## name - Blinkstep and any other spell with no effect at all - is a General
-## spell.
+const GROUP_ORDER: Array[String] = ["Healing", "Defense", "Offense", "Support", "Utility"]
 const EFFECT_GROUPS := {
 	"heal": "Health", "regeneration": "Health", "dispel": "Health",
 	"mana_restore": "Health",
@@ -49,10 +29,10 @@ const EFFECT_GROUPS := {
 const BLOCKED_ALPHA := 0.45
 const BLOCKED_COLOR := Color(1.0, 0.36, 0.36)
 const CASTABLE_COLOR := Color(0.85, 1.0, 0.85)
-const ICON_SIZE := Vector2(28.0, 28.0)
-const TARGET_COLUMNS: Array[String] = ["self", "target", "allies", "burst", "utility"]
-const EFFECT_COLUMN_WIDTH := 164.0
-const TARGET_COLUMN_WIDTH := 56.0
+const ICON_SIZE := Vector2(36.0, 36.0)
+const TARGET_COLUMNS: Array[String] = ["self", "target", "allies", "burst"]
+const EFFECT_COLUMN_WIDTH := 148.0
+const TARGET_COLUMN_WIDTH := 44.0
 const SpellButton := preload("res://src/ui/prepared_spell_button.gd")
 const EffectPreview := preload("res://src/ui/spell_effect_preview.gd")
 const EFFECT_LABELS := {
@@ -66,129 +46,114 @@ const EFFECT_LABELS := {
 	"expose_cold": "Weaken Cold", "expose_radiation": "Weaken Radiation",
 }
 
-var catalog: SpellCatalog
-var selected_spell_id: int = -1
 
+var catalog: SpellCatalog
+var selected_spell_id := -1
 var panel: PanelContainer
 var name_label: Label
 var description_label: Label
 var numbers_label: Label
 var knowledge_label: Label
 var reagents_label: Label
+var reagents_rows: VBoxContainer
+var requirements_rows: VBoxContainer
 var cast_button: Button
+var status_label: Label
 var effect_preview
-
-var _cast: Callable = Callable()
-## Effect key to its row, and group name to its section.
-var _rows: Dictionary = {}
-var _groups: Dictionary = {}
-var _empty_label: Label
-## Spell id to its Button, for re-dimming without a rebuild.
-var _buttons: Dictionary = {}
-## Spell id to the Array[String] of everything blocking a cast, as the
-## catalog last computed it from the server's state. Empty means castable
-## as far as the client can see.
-var _reasons: Dictionary = {}
+var selected_icon: TextureRect
+var favorite_button: Button
 var search: LineEdit
 var scope_filter: OptionButton
-var requested_power := 1
-var _quote_request := ""
-var _last_quote: Dictionary = {}
-var loadout
+var browser_picker: OptionButton
 var power_picker: SpinBox
 var slot_picker: OptionButton
-var browser_picker: OptionButton
-var _family_groups: GridContainer
-var _family_buttons: Dictionary = {}
-var _variant_picker: OptionButton
-var _prepare_controls: HBoxContainer
-var _content_scroll: ScrollContainer
+var loadout
+var requested_power := 1
+var current_tab := "magic"
+var techniques_panel: VBoxContainer
+var _cast: Callable
+var _rows: Dictionary = {}
+var _groups: Dictionary = {}
+var _buttons: Dictionary = {}
+var _reasons: Dictionary = {}
+var _tab_buttons: Dictionary = {}
+var _filter_buttons: Dictionary = {}
+var _favorites: Array = []
+var _filter := "all"
+var _profile := ""
+var _empty_label: Label
+var _quote_request := ""
+var _last_quote: Dictionary = {}
 var _assign_button: Button
 var _preparation_label: Label
+var _prepare_controls: HBoxContainer
+var _content_scroll: ScrollContainer
+var _info_scroll: ScrollContainer
+var _grid_headings: MarginContainer
+var _grid_groups: VBoxContainer
+var _magic_page: VBoxContainer
+var _body: HBoxContainer
+var _browser: VBoxContainer
+var _inspector: PanelContainer
 var _dragger: WindowDrag
-var _grid_headings: Control
-var _grid_groups: Control
-
-func set_loadout(value) -> void:
-	loadout = value
-	panel.position = Vector2(30, 35)
-	(panel.find_child("SpellScroll", true, false) as ScrollContainer).custom_minimum_size.y = 160
-	_prepare_controls.show()
-	_preparation_label.show()
-	_variant_picker.show()
-	browser_picker.show()
-	browser_picker.select(1)
-	_filter_spells()
-	loadout.changed.connect(_refresh_preparation)
-	_fit_panel()
-
-func reserve_bottom_hud(control: Control) -> void:
-	_dragger.bottom_hud = control
-	control.item_rect_changed.connect(func(): _fit_panel.call_deferred())
-	_fit_panel()
-
-func edit_prepared_slot(index: int) -> void:
-	if loadout != null and not str(loadout.slots[index].get("technique", "")).is_empty():
-		open_tab("techniques")
-		return
-	set_tab("magic")
-	slot_picker.select(index)
-	var entry: Dictionary = loadout.slots[index]
-	if int(entry.id) >= 0:
-		# Editing a saved variant must not inherit a filter that hides it.
-		search.clear()
-		scope_filter.select(0)
-		_filter_spells()
-		_on_spell_pressed(int(entry.id))
-		power_picker.value = int(entry.power)
-	panel.show()
-	panel.move_to_front()
-	sync()
-
-func _quote_state(data: Dictionary) -> void:
-	if data.get("kind") != "preview" or int(data.get("id", -1)) != selected_spell_id or int(data.get("requested", 0)) != requested_power:
-		return
-	_last_quote=data.duplicate(true)
-	name_label.text = str(catalog.spell(selected_spell_id).get("name", "Spell"))
-	name_label.add_theme_color_override("font_color",CASTABLE_COLOR if data.get("ready",false) else BLOCKED_COLOR)
-	numbers_label.text = "Power %d / %d allowed · Ether %d" % [int(data.power), int(data.limit), int(data.mana)]
-	var parts: Array[String] = []
-	for reagent: Dictionary in data.get("reagents", []):
-		parts.append("%s %d (have %d)" % [str(reagent.name), int(reagent.quantity), int(reagent.have)])
-	reagents_label.text = ", ".join(parts)
-	if not str(data.get("focus", "")).is_empty():
-		reagents_label.text += "\n%s replaces the anchor with one charge." % str(data.focus)
-	if not bool(data.get("ready", false)):
-		name_label.text += " — " + str(data.get("reason", "Unavailable"))
-	cast_button.disabled = not bool(data.get("ready", false))
+var _item_atlas := ItemAtlas.new()
+var _compact := false
+var _short := false
+var _hero: HBoxContainer
+var _details_column: VBoxContainer
+var _power_row: HBoxContainer
 
 func _ready() -> void:
-	AppState.magic_state_received.connect(_quote_state)
 	name = "SpellsLayer"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_item_atlas.configure(JSON.parse_string(FileAccess.get_file_as_string("res://data/items/atlases.json")))
 	_build()
-	get_viewport().size_changed.connect(_fit_panel)
+	AppState.magic_state_received.connect(_quote_state)
 	AppState.state_changed.connect(_on_state_changed)
-	sync()
+	get_viewport().size_changed.connect(_fit_panel)
 
-func configure(spell_catalog: SpellCatalog, cast: Callable) -> void:
-	catalog = spell_catalog
+func configure(value: SpellCatalog, cast: Callable) -> void:
+	catalog = value
 	_cast = cast
 	_populate()
 	sync()
 
+func set_loadout(value) -> void:
+	loadout = value
+	techniques_panel.set_loadout(value)
+	loadout.changed.connect(_on_loadout_changed)
+	_restore_preferences()
+	_refresh_preparation()
+
+func _on_loadout_changed() -> void:
+	if _profile != loadout.profile:
+		_restore_preferences()
+		search.clear()
+		_last_quote.clear()
+		selected_spell_id = -1
+		_filter_spells()
+	_refresh_preparation()
+
+func _restore_preferences() -> void:
+	if loadout == null: return
+	_profile = loadout.profile
+	var preferences: Dictionary = loadout.book_preferences.get("magic", {})
+	_favorites = preferences.get("favorites", []).duplicate()
+	set_filter(str(preferences.get("filter", "all")), false)
+
+func _save_preferences() -> void:
+	if loadout == null: return
+	loadout.book_preferences["magic"] = {"filter": _filter, "favorites": _favorites.duplicate()}
+	loadout.save_book_preferences()
+
+func reserve_bottom_hud(control: Control) -> void:
+	_dragger.bottom_hud = control
+	control.item_rect_changed.connect(_fit_panel)
+	_fit_panel()
+
 func is_open() -> bool:
 	return panel.visible
-
-## Which tab is showing: "magic" or "techniques". Reopening the window shows
-## the tab it was closed on.
-var current_tab := "magic"
-## The Techniques tab (techniques_panel.gd): the technique ring and the quick
-## spell slots aim through it too.
-var techniques_panel: VBoxContainer
-var _magic_nodes: Array[Control] = []
-var _tab_buttons: Dictionary = {}
 
 func toggle() -> void:
 	panel.visible = not panel.visible
@@ -197,568 +162,570 @@ func toggle() -> void:
 		sync()
 		_fit_panel()
 
-## Ctrl+X: open on Techniques, or close the window when it already shows them.
-func toggle_techniques() -> void:
-	if panel.visible and current_tab == "techniques":
-		close()
-		return
-	open_tab("techniques")
-
-func open_tab(tab: String) -> void:
-	set_tab(tab)
-	if not panel.visible:
-		toggle()
-	else:
-		panel.move_to_front()
-
-func set_tab(tab: String) -> void:
-	var wanted := "techniques" if tab == "techniques" else "magic"
-	if wanted != current_tab:
-		# The magic controls show and hide themselves as spells are chosen,
-		# so what each was showing is kept and given back, not assumed.
-		for node: Control in _magic_nodes:
-			if wanted == "techniques":
-				node.set_meta("magic_visible", node.visible)
-				node.hide()
-			else:
-				node.visible = bool(node.get_meta("magic_visible", node.visible))
-	current_tab = wanted
-	if techniques_panel != null:
-		techniques_panel.visible = current_tab == "techniques"
-		if techniques_panel.visible:
-			techniques_panel.call("sync")
-	for name: String in _tab_buttons:
-		(_tab_buttons[name] as Button).set_pressed_no_signal(name == current_tab)
-
 func close() -> void:
 	panel.hide()
 
-## Which of the four groups a spell is drawn under, from its catalogued
-## effect alone.
+func toggle_techniques() -> void:
+	if panel.visible and current_tab == "techniques": close()
+	else: open_tab("techniques")
+
+func open_tab(tab: String) -> void:
+	set_tab(tab)
+	if not panel.visible: toggle()
+	else: panel.move_to_front()
+
+func set_tab(tab: String) -> void:
+	current_tab = "techniques" if tab == "techniques" else "magic"
+	_magic_page.visible = current_tab == "magic"
+	techniques_panel.visible = current_tab == "techniques"
+	for key in _tab_buttons:
+		(_tab_buttons[key] as Button).set_pressed_no_signal(key == current_tab)
+	if current_tab == "techniques": techniques_panel.sync()
+	else: sync()
+
+func edit_prepared_slot(index: int) -> void:
+	if loadout == null or index < 0 or index >= loadout.slots.size(): return
+	var entry: Dictionary = loadout.slots[index]
+	if not str(entry.get("technique", "")).is_empty():
+		open_tab("techniques")
+		techniques_panel.edit_slot(index, str(entry.technique))
+		return
+	open_tab("magic")
+	slot_picker.select(index)
+	search.clear()
+	scope_filter.select(0)
+	set_filter("all")
+	_filter_spells()
+	if int(entry.id) >= 0:
+		_on_spell_pressed(int(entry.id))
+		requested_power = int(entry.power)
+		power_picker.set_value_no_signal(requested_power)
+		_quote_request = ""
+		_last_quote.clear()
+		_refresh_details()
+
 func group_of(spell_id: int) -> String:
-	if catalog == null:
-		return "General"
-	var effect_value: Variant = catalog.spell(spell_id).get("effect", "")
-	var effect: String = effect_value if effect_value is String else ""
-	return str(EFFECT_GROUPS.get(effect, "General"))
+	if catalog == null: return "Utility"
+	var effect := catalog.effect_for(spell_id)
+	if effect in ["blink", "transmute", "recall"]: return "Utility"
+	return str({"Health": "Healing", "Defense": "Defense", "Attack": "Offense"}.get(EFFECT_GROUPS.get(effect, "General"), "Support"))
+
+## Library placement never changes the spell's real scope or targeting.
+func column_for(spell_id: int) -> String:
+	var scope := str(catalog.spell(spell_id).get("scope", "self"))
+	return scope if scope in TARGET_COLUMNS else "self"
 
 func _on_state_changed(path: StringName) -> void:
-	if path == &"spells" or path == &"stats" or path == &"inventory" or path == &"knowledge":
+	if path in [&"spells", &"stats", &"inventory", &"knowledge", &"spell_power"]:
+		_quote_request = ""
+		_last_quote.clear()
 		sync()
 
-## Re-asks the catalog what blocks every spell, dims accordingly and redraws
-## the selected details. Everything it reads is the server's last word held
-## in AppState; nothing here predicts what the server will actually allow.
 func sync() -> void:
-	_quote_request = ""
-	if not panel.visible or catalog == null:
-		return
+	if catalog == null: return
 	_reasons.clear()
-	for spell_id: int in catalog.spell_ids():
-		var reasons: Array[String] = catalog.unavailable_reasons(
-			spell_id, AppState.known_knowledge, AppState.stats, AppState.inventory)
-		_reasons[spell_id] = reasons
-		var button: Button = _buttons.get(spell_id) as Button
+	for id: int in catalog.spell_ids():
+		var reasons := catalog.unavailable_reasons(id, AppState.known_knowledge, AppState.stats, AppState.inventory)
+		_reasons[id] = reasons
+		var button: Button = _buttons.get(id)
 		if button != null:
-			button.modulate = Color(1.0, 1.0, 1.0,
-				1.0 if reasons.is_empty() else BLOCKED_ALPHA)
+			UI.icon_availability(button, reasons.is_empty())
+			button.tooltip_text = "%s\n%s" % [catalog.spell(id).name, str(catalog.spell(id).get("scope", "self")).capitalize()]
+			if not reasons.is_empty(): button.tooltip_text += "\n" + "\n".join(reasons)
+	if panel.visible and current_tab == "magic":
+		_filter_spells()
+		_refresh_details()
+
+func set_filter(value: String, save := true) -> void:
+	_filter = value if value in _filter_buttons else "all"
+	for key in _filter_buttons:
+		(_filter_buttons[key] as Button).set_pressed_no_signal(key == _filter)
+	if save: _save_preferences()
+	_filter_spells()
+
+func _toggle_favorite() -> void:
+	if selected_spell_id < 0: return
+	if selected_spell_id in _favorites: _favorites.erase(selected_spell_id)
+	else: _favorites.append(selected_spell_id)
+	_save_preferences()
+	_filter_spells()
 	_refresh_details()
 
-func _on_spell_pressed(spell_id: int) -> void:
-	var replay_selection := selected_spell_id == spell_id
-	selected_spell_id = spell_id
-	(panel.find_child("SpellInfoScroll", true, false) as ScrollContainer).scroll_vertical = 0
+func _matches(id: int) -> bool:
+	var spell := catalog.spell(id)
+	var scope := str(spell.get("scope", "self"))
+	var scopes := ["", "self", "target", "allies", "burst", "utility"]
+	var wanted: String = scopes[clampi(scope_filter.selected, 0, 5)]
+	if not wanted.is_empty():
+		if wanted == "utility" and scope in TARGET_COLUMNS: return false
+		if wanted != "utility" and scope != wanted: return false
+	var query := search.text.strip_edges().to_lower()
+	var effect := catalog.effect_for(id)
+	var haystack := "%s %s %s %s" % [spell.name, effect, spell.get("damage_type", ""), EFFECT_LABELS.get(effect, effect.capitalize())]
+	if not query.is_empty() and not query in haystack.to_lower(): return false
+	if _filter == "ready" and not (_reasons.get(id, []) as Array).is_empty(): return false
+	if _filter == "learned" and not catalog.knows(id, AppState.known_knowledge): return false
+	if _filter == "favorites" and id not in _favorites: return false
+	return true
+
+func _filter_spells() -> void:
+	if catalog == null: return
 	for id: int in _buttons:
-		(_buttons[id] as Button).set_pressed_no_signal(id == spell_id)
-	for effect: String in _family_buttons:
-		(_family_buttons[effect] as Button).set_pressed_no_signal(effect == catalog.effect_for(spell_id))
-	if loadout != null:
-		requested_power = loadout.power_for(spell_id)
-		_sync_variant_picker()
-		power_picker.set_value_no_signal(requested_power)
-	_refresh_details()
-	if replay_selection:
-		effect_preview.replay()
+		(_buttons[id] as Button).visible = _matches(id)
+	var any_matches := false
+	for row: HBoxContainer in _rows.values():
+		var row_visible := false
+		for target: String in TARGET_COLUMNS:
+			var cell := row.get_node("%sCell" % target.capitalize()) as VBoxContainer
+			var occupied := false
+			for child in cell.get_children():
+				if child is Button: occupied = occupied or child.visible
+			(cell.get_node("Empty") as Label).visible = not occupied
+			row_visible = row_visible or occupied
+		row.visible = row_visible
+		any_matches = any_matches or row_visible
+	for section: VBoxContainer in _groups.values():
+		var occupied := false
+		for child in section.get_children():
+			if child is HBoxContainer: occupied = occupied or child.visible
+		section.visible = occupied
+	_empty_label.visible = not any_matches
+	# Preserve the family when a scope/search changes its visible variant.
+	if selected_spell_id >= 0 and not (_buttons[selected_spell_id] as Button).visible:
+		var family := catalog.effect_for(selected_spell_id)
+		selected_spell_id = -1
+		for id: int in _buttons:
+			if (_buttons[id] as Button).visible and catalog.effect_for(id) == family:
+				_on_spell_pressed(id)
+				break
+	if selected_spell_id < 0:
+		for id: int in _buttons:
+			if (_buttons[id] as Button).visible:
+				_on_spell_pressed(id)
+				break
+	for id: int in _buttons:
+		(_buttons[id] as Button).set_pressed_no_signal(id == selected_spell_id)
+	if selected_spell_id < 0: _refresh_details()
 	_refresh_preparation()
 
-func _sync_variant_picker() -> void:
-	_variant_picker.clear()
-	if selected_spell_id < 0 or catalog == null: return
-	var effect := catalog.effect_for(selected_spell_id)
-	for id: int in catalog.spell_ids():
-		if catalog.effect_for(id) != effect or not (_buttons[id] as Button).visible: continue
-		var definition := catalog.spell(id)
-		_variant_picker.add_item("%s · %s" % [definition.name, str(definition.get("scope", "self")).capitalize()], id)
-		if id == selected_spell_id: _variant_picker.select(_variant_picker.item_count - 1)
+func _on_family_pressed(effect: String) -> void:
+	for id: int in _buttons:
+		if catalog.effect_for(id) == effect and (_buttons[id] as Button).visible:
+			_on_spell_pressed(selected_spell_id if selected_spell_id >= 0 and catalog.effect_for(selected_spell_id) == effect and (_buttons[selected_spell_id] as Button).visible else id)
+			return
 
-func _refresh_preparation() -> void:
-	_assign_button.disabled = selected_spell_id < 0
-	if selected_spell_id < 0 or catalog == null:
-		_preparation_label.text = "Select a spell to assign to the quick bar."
-		return
-	var definition := catalog.spell(selected_spell_id)
-	_preparation_label.text = "Slot %d: %s · %s · Power %d" % [slot_picker.selected + 1,
-		definition.name, str(definition.get("scope", "self")).capitalize(), requested_power]
-	_preparation_label.tooltip_text = _preparation_label.text
-	_assign_button.tooltip_text = "Assign %s to quick slot %d" % [definition.name, slot_picker.selected + 1]
+func _on_spell_pressed(id: int) -> void:
+	var replay := selected_spell_id == id
+	if not _buttons.has(id): return
+	selected_spell_id = id
+	_quote_request = ""
+	_last_quote.clear()
+	if loadout != null: requested_power = loadout.power_for(id)
+	power_picker.set_value_no_signal(requested_power)
+	for key in _buttons: (_buttons[key] as Button).set_pressed_no_signal(key == id)
+	_info_scroll.scroll_vertical = 0
+	_refresh_details()
+	if replay: effect_preview.replay()
+	_refresh_preparation()
 
-## The scrolling body absorbs text/list minimum sizes. The title and quick
-## slot controls stay on screen even with a long quote or a larger UI scale.
-func _fit_panel() -> void:
-	if panel == null: return
-	var bounds := get_viewport_rect().size
-	var bottom := bounds.y - WindowDrag.RESERVED_BOTTOM_BAR
-	if is_instance_valid(_dragger.bottom_hud):
-		bottom = minf(bottom, _dragger.bottom_hud.global_position.y)
-	var available := bounds - Vector2(RESERVED_RIGHT_RAIL + WindowDrag.EDGE_MARGIN * 2,
-		bounds.y - bottom + WindowDrag.EDGE_MARGIN * 2)
-	var preferred := Vector2(620, 600) if loadout != null else PANEL_SIZE
-	panel.custom_minimum_size = preferred.min(available.max(Vector2.ONE))
-	panel.size = panel.custom_minimum_size
-	_dragger.clamp_into_view()
-
-## Only asks. The server owns the knowledge, the mana and the reagents, so it
-## alone decides whether the cast happens.
-func _on_cast_pressed() -> void:
-	if selected_spell_id >= 0 and _cast.is_valid():
-		_cast.call(selected_spell_id)
-		if loadout != null: close()
+func _set_status(text: String, ready: bool) -> void:
+	status_label.text = ("✓ " if ready else "× ") + text
+	status_label.add_theme_color_override("font_color", UI.GOOD if ready else UI.BAD)
+	cast_button.disabled = not ready
 
 func _refresh_details() -> void:
-	cast_button.disabled = selected_spell_id < 0
+	UI.clear(reagents_rows)
+	UI.clear(requirements_rows)
 	if selected_spell_id < 0 or catalog == null:
 		name_label.text = "Select a spell"
-		name_label.remove_theme_color_override("font_color")
-		description_label.text = "Click a spell to read what it does and preview its effect."
+		description_label.text = "Select an icon to inspect its target, cost and requirements."
 		numbers_label.text = ""
 		knowledge_label.text = ""
 		reagents_label.text = ""
+		selected_icon.texture = null
+		favorite_button.disabled = true
+		status_label.text = ""
+		cast_button.disabled = true
 		effect_preview.set_spell({}, requested_power)
 		return
-	var definition: Dictionary = catalog.spell(selected_spell_id)
-	if loadout != null:
-		var stated: Dictionary = AppState.spell_power.get(catalog.effect_for(selected_spell_id), {})
-		power_picker.max_value = maxi(1, int(stated.get("limit", 10)))
-	var title: String = str(definition.get("name", "Spell %d" % selected_spell_id))
-	var reasons: Array = _reasons.get(selected_spell_id, []) as Array
-	if reasons.is_empty():
-		name_label.text = title
-		name_label.add_theme_color_override("font_color", CASTABLE_COLOR)
-	else:
-		name_label.text = "%s (%s)" % [title, str(reasons[0])]
-		name_label.add_theme_color_override("font_color", BLOCKED_COLOR)
+	var definition := catalog.spell(selected_spell_id)
+	name_label.text = str(definition.name)
+	name_label.add_theme_color_override("font_color", UI.TEXT)
+	selected_icon.texture = catalog.icon_for(selected_spell_id)
 	description_label.text = str(definition.get("description", ""))
+	description_label.tooltip_text = description_label.text
+	favorite_button.disabled = false
+	favorite_button.set_pressed_no_signal(selected_spell_id in _favorites)
+	favorite_button.text = "★" if selected_spell_id in _favorites else "☆"
+	favorite_button.tooltip_text = "Remove favorite" if selected_spell_id in _favorites else "Add favorite"
 	effect_preview.set_spell(definition, requested_power)
-	numbers_label.text = "Magic %d   Base ether %d" % [
-		int(definition.get("level", 0)), int(definition.get("mana", 0))]
-	knowledge_label.text = _knowledge_line(selected_spell_id)
-	reagents_label.text = _reagents_line(definition)
+	var limit: Dictionary = AppState.spell_power.get(catalog.effect_for(selected_spell_id), {})
+	power_picker.max_value = maxi(requested_power, maxi(1, int(limit.get("limit", 10))))
+	numbers_label.text = "%s · Base ether %d" % [str(definition.get("scope", "self")).capitalize(), int(definition.get("mana", 0))]
+	var magic := int(AppState.stats.get("magic", 0))
+	var level := int(definition.get("level", 0))
+	UI.requirement(requirements_rows, "Magic %d" % level, "Current %d" % magic, magic >= level)
+	var tome := catalog.knowledge_for(selected_spell_id)
+	var known := catalog.knows(selected_spell_id, AppState.known_knowledge)
+	knowledge_label.text = tome if not tome.is_empty() else "Every mage knows this"
+	knowledge_label.add_theme_color_override("font_color", UI.GOOD if known else UI.BAD)
+	knowledge_label.tooltip_text = "Known" if known else "Read this tome to learn the spell."
+	# Passed level/knowledge checks stay available in the tooltip; the chosen
+	# design prioritizes consumables over repeating satisfied prerequisites.
+	requirements_rows.visible = magic < level and not _short
+	knowledge_label.visible = not known and not _short
+	name_label.tooltip_text = "Magic %d (current %d)\n%s" % [level, magic, knowledge_label.text]
+	reagents_label.text = "Reagents required"
+	for reagent: Dictionary in definition.get("reagents", []):
+		var quantity := int(reagent.get("quantity", 0))
+		if quantity <= 0: continue # Power-dependent anchors come from the quote.
+		_add_reagent(reagent, quantity, catalog.reagent_quantity(reagent, AppState.inventory))
+	if reagents_rows.get_child_count() == 0: UI.requirement(reagents_rows, "None", "", true)
+	var reasons: Array = _reasons.get(selected_spell_id, [])
+	_set_status("Ready" if reasons.is_empty() else str(reasons[0]), reasons.is_empty())
+	cast_button.text = "Cast" if _short else "Cast " + str(definition.name)
+	cast_button.tooltip_text = "Cast " + str(definition.name)
 	if AppState.authenticated:
 		var token := "%d:%d" % [selected_spell_id, requested_power]
 		if token != _quote_request:
 			_quote_request = token
+			status_label.text = "Checking cost and requirements…"
+			status_label.add_theme_color_override("font_color", UI.MUTED)
 			cast_button.disabled = true
-			Network.magic_request({"op":"preview", "id":selected_spell_id, "power":requested_power})
+			Network.magic_request({"op": "preview", "id": selected_spell_id, "power": requested_power})
 		elif not _last_quote.is_empty():
 			_quote_state(_last_quote)
 
-## The tome the spell's family is learned from, marked with a leading "!"
-## while it is unread - or that every mage already knows it. What has been
-## read is the server's knowledge list in AppState.
-func _knowledge_line(spell_id: int) -> String:
-	var tome: String = catalog.knowledge_for(spell_id)
-	if tome.is_empty():
-		return "Knowledge: every mage knows this"
-	return "Knowledge: %s%s" % [
-		"" if catalog.knows(spell_id, AppState.known_knowledge) else "!", tome]
+func _add_reagent(reagent: Dictionary, required: int, have: int) -> void:
+	var title := str(reagent.get("name", SpellCatalog.reagent_name(reagent)))
+	var image := int(reagent.get("image_id", -1))
+	if image < 0 and selected_spell_id >= 0:
+		for candidate: Dictionary in catalog.spell(selected_spell_id).get("reagents", []):
+			if str(candidate.get("name", "")) == title:
+				image = int(candidate.get("image_id", -1))
+	var row := UI.requirement(reagents_rows, "%s ×%d" % [title, required], "Have %d" % have, have >= required, _item_atlas.icon_for(image))
+	row.set_meta("reagent", {"name": title, "required": required, "have": have})
 
-## The required reagents by the name the server gives the item, with a
-## leading "!" on any the backpack is short of - the same mark the knowledge
-## line uses, so both lines answer "what am I missing" the same way. What is
-## carried is the server's inventory in AppState.
-func _reagents_line(definition: Dictionary) -> String:
-	var parts: Array[String] = []
-	var reagents_value: Variant = definition.get("reagents", [])
-	if reagents_value is Array:
-		for raw_reagent: Variant in reagents_value as Array:
-			if raw_reagent is Dictionary:
-				var reagent: Dictionary = raw_reagent as Dictionary
-				var required: int = int(reagent.get("quantity", 0))
-				# An anchor the book lists at 0 is free until Power 4.
-				var label: String = ("%s from Power 4" % SpellCatalog.reagent_name(reagent)
-					if required == 0 else "%s x%d" % [SpellCatalog.reagent_name(reagent), required])
-				if catalog.reagent_quantity(reagent, AppState.inventory) < required:
-					label = "!" + label
-				parts.append(label)
-	return "Reagents: " + (", ".join(parts) if not parts.is_empty() else "none")
+func _quote_state(data: Dictionary) -> void:
+	if data.get("kind") != "preview" or int(data.get("id", -1)) != selected_spell_id or int(data.get("requested", 0)) != requested_power: return
+	_last_quote = data.duplicate(true)
+	effect_preview.set_spell(catalog.spell(selected_spell_id), int(data.get("power", 1)))
+	numbers_label.text = "%s · Power %d / %d · Ether %d" % [str(catalog.spell(selected_spell_id).get("scope", "self")).capitalize(), int(data.get("power", 1)), int(data.get("limit", 1)), int(data.get("mana", 0))]
+	UI.clear(reagents_rows)
+	for reagent: Dictionary in data.get("reagents", []):
+		if int(reagent.get("quantity", 0)) > 0:
+			_add_reagent(reagent, int(reagent.quantity), int(reagent.get("have", 0)))
+	if reagents_rows.get_child_count() == 0: UI.requirement(reagents_rows, "None", "", true)
+	if not str(data.get("focus", "")).is_empty():
+		UI.requirement(reagents_rows, str(data.focus), "Focus", true)
+	var ready := bool(data.get("ready", false))
+	_set_status("Ready" if ready else str(data.get("reason", "Unavailable")), ready)
 
-## Each effect owns a row. Target cells stay in place even when empty or
-## filtered, so comparing variants never changes the meaning of a column.
-func _populate() -> void:
-	for group: String in GROUP_ORDER:
-		var section: VBoxContainer = _groups[group] as VBoxContainer
-		for child: Node in section.get_children():
-			if child is Label:
-				continue
-			section.remove_child(child)
-			child.free()
-	_rows.clear()
-	_buttons.clear()
-	_family_buttons.clear()
-	for child in _family_groups.get_children():
-		_family_groups.remove_child(child)
-		child.free()
-	if catalog == null:
+func _on_cast_pressed() -> void:
+	if cast_button.disabled or selected_spell_id < 0 or not _cast.is_valid(): return
+	_cast.call(selected_spell_id)
+	if loadout != null: close()
+
+func _refresh_preparation() -> void:
+	if _assign_button == null: return
+	_assign_button.disabled = selected_spell_id < 0 or loadout == null
+	_prepare_controls.visible = loadout != null
+	if selected_spell_id < 0 or catalog == null:
+		_preparation_label.text = ""
 		return
-	var grouped: Dictionary = {}
-	for group: String in GROUP_ORDER:
-		grouped[group] = []
-	for spell_id: int in catalog.spell_ids():
-		(grouped[group_of(spell_id)] as Array).append(spell_id)
-	for group: String in GROUP_ORDER:
-		var ids: Array = grouped[group] as Array
-		ids.sort_custom(func(a: Variant, b: Variant) -> bool:
-			var level_a: int = int(catalog.spell(int(a)).get("level", 0))
-			var level_b: int = int(catalog.spell(int(b)).get("level", 0))
-			return level_a < level_b if level_a != level_b else int(a) < int(b))
-		for raw_id: Variant in ids:
-			var spell_id: int = int(raw_id)
-			var definition := catalog.spell(spell_id)
-			var effect := str(definition.get("effect", ""))
-			if effect.is_empty():
-				effect = str(definition.get("name", "Spell %d" % spell_id))
-			if not _rows.has(effect):
-				var row := _make_effect_row(effect)
-				(_groups[group] as VBoxContainer).add_child(row)
-				_rows[effect] = row
-				var family := Button.new()
-				family.text = str(EFFECT_LABELS.get(effect, effect.capitalize()))
-				family.icon = catalog.icon_for(spell_id)
-				family.expand_icon = true
-				family.add_theme_constant_override("icon_max_width", 24)
-				family.custom_minimum_size.y = 32
-				family.alignment = HORIZONTAL_ALIGNMENT_LEFT
-				family.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				family.toggle_mode = true
-				family.pressed.connect(_on_family_pressed.bind(effect))
-				_family_groups.add_child(family)
-				_family_buttons[effect] = family
-			var scope := str(definition.get("scope", "self"))
-			var target := scope if scope in TARGET_COLUMNS else "utility"
-			var cell := (_rows[effect] as HBoxContainer).get_node(
-				"%sCell" % target.capitalize()) as VBoxContainer
-			(cell.get_node("Empty") as Label).hide()
-			var button := SpellButton.new()
-			button.spell_id = spell_id
-			button.toggle_mode = true
-			button.power_provider = func() -> int: return requested_power if selected_spell_id == spell_id else (loadout.power_for(spell_id) if loadout != null else 1)
-			button.name = "SpellButton%d" % spell_id
-			button.tooltip_text = str(definition.get("name", ""))
-			if target == "utility":
-				button.tooltip_text += "\nTarget: " + scope.capitalize()
-			button.icon = catalog.icon_for(spell_id)
-			button.expand_icon = true
-			button.custom_minimum_size = ICON_SIZE
-			button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-			button.pressed.connect(_on_spell_pressed.bind(spell_id))
-			cell.add_child(button)
-			_buttons[spell_id] = button
-	_filter_spells()
-
-func _on_family_pressed(effect: String) -> void:
-	if selected_spell_id >= 0 and catalog.effect_for(selected_spell_id) == effect and (_buttons[selected_spell_id] as Button).visible:
-		_on_spell_pressed(selected_spell_id)
-		return
-	for spell_id: int in catalog.spell_ids():
-		if catalog.effect_for(spell_id) == effect and (_buttons[spell_id] as Button).visible:
-			_on_spell_pressed(spell_id)
-			return
+	_preparation_label.text = "Slot %d · %s · Power %d" % [slot_picker.selected + 1, catalog.spell(selected_spell_id).name, requested_power]
+	_preparation_label.tooltip_text = _preparation_label.text
 
 func _make_effect_row(effect: String, heading := false) -> HBoxContainer:
 	var row := HBoxContainer.new()
-	row.name = "TargetHeadings" if heading else "%sEffectRow" % effect.to_pascal_case()
-	var label := Label.new()
-	label.name = "EffectLabel"
-	label.text = "Effect" if heading else str(EFFECT_LABELS.get(effect, effect.capitalize()))
-	label.tooltip_text = label.text
-	label.custom_minimum_size.x = EFFECT_COLUMN_WIDTH
-	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	row.add_child(label)
+	row.name = "TargetHeadings" if heading else effect.to_pascal_case() + "EffectRow"
+	row.add_theme_constant_override("separation", 0)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var title := UI.label("Effect" if heading else str(EFFECT_LABELS.get(effect, effect.capitalize())), 13)
+	title.name = "EffectLabel"
+	title.custom_minimum_size.x = EFFECT_COLUMN_WIDTH
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title.tooltip_text = title.text
+	row.add_child(title)
 	for target: String in TARGET_COLUMNS:
 		var cell := VBoxContainer.new()
-		cell.name = "%sCell" % target.capitalize()
+		cell.name = target.capitalize() + "Cell"
 		cell.custom_minimum_size.x = TARGET_COLUMN_WIDTH
-		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		cell.alignment = BoxContainer.ALIGNMENT_CENTER
 		row.add_child(cell)
-		var placeholder := Label.new()
+		var placeholder := UI.label(target.capitalize() if heading else "—", 12)
 		placeholder.name = "Empty"
-		placeholder.text = target.capitalize() if heading else "—"
 		placeholder.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		if not heading:
-			placeholder.modulate.a = BLOCKED_ALPHA
+		if not heading: placeholder.modulate.a = BLOCKED_ALPHA
 		cell.add_child(placeholder)
 	return row
+
+func _populate() -> void:
+	UI.clear(_grid_groups)
+	_groups.clear()
+	_rows.clear()
+	_buttons.clear()
+	for group: String in GROUP_ORDER:
+		var section := VBoxContainer.new()
+		section.name = group + "Spells"
+		section.add_theme_constant_override("separation", 2)
+		var title := UI.label(group, 13)
+		title.add_theme_color_override("font_color", UI.GOLD)
+		section.add_child(title)
+		_grid_groups.add_child(section)
+		_groups[group] = section
+	if catalog == null: return
+	for id: int in catalog.spell_ids():
+		var definition := catalog.spell(id)
+		var effect := catalog.effect_for(id)
+		if effect.is_empty(): effect = str(definition.name)
+		if not _rows.has(effect):
+			var row := _make_effect_row(effect)
+			(_groups[group_of(id)] as VBoxContainer).add_child(row)
+			_rows[effect] = row
+		var cell := (_rows[effect] as HBoxContainer).get_node(column_for(id).capitalize() + "Cell")
+		var button := SpellButton.new()
+		button.name = "SpellButton%d" % id
+		button.spell_id = id
+		button.toggle_mode = true
+		button.icon = catalog.icon_for(id)
+		UI.icon_button(button)
+		button.power_provider = func() -> int: return requested_power if selected_spell_id == id else loadout.power_for(id) if loadout != null else 1
+		button.pressed.connect(_on_spell_pressed.bind(id))
+		cell.add_child(button)
+		_buttons[id] = button
+	_filter_spells()
 
 func _build() -> void:
 	panel = PanelContainer.new()
 	panel.name = "SpellsWindow"
-	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	# Left of centre, where the legacy client keeps its own spell window.
-	panel.position = Vector2(
-		(1280.0 - RESERVED_RIGHT_RAIL - PANEL_SIZE.x) * 0.5 - 110.0, 120.0)
-	panel.custom_minimum_size = PANEL_SIZE
-	panel.size = PANEL_SIZE
+	panel.position = Vector2(30, 30)
+	panel.add_theme_stylebox_override("panel", UI.box(UI.SURFACE, Color("987542"), 10))
 	panel.hide()
 	add_child(panel)
+	# Wrapped requirements can briefly raise the minimum during a tab switch;
+	# refit after the containers have their final width, not just on resize.
 	panel.minimum_size_changed.connect(func(): _fit_panel.call_deferred())
-
+	panel.resized.connect(func(): _fit_panel.call_deferred())
 	var column := VBoxContainer.new()
 	column.name = "SpellsBody"
+	column.add_theme_constant_override("separation", 7)
 	panel.add_child(column)
 	var header := HBoxContainer.new()
 	header.name = "SpellsHeader"
 	column.add_child(header)
-	_dragger = WindowDrag.attach(panel, header)
-	var title := Label.new()
+	var title := UI.label("Spells & Techniques", 18)
 	title.name = "SpellsTitle"
-	title.text = "Spells & Techniques"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.add_child(title)
-	var close_button := Button.new()
+	var close_button := UI.button("×")
 	close_button.name = "SpellsClose"
-	close_button.text = "X"
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
+	_dragger = WindowDrag.attach(panel, header)
 	var tabs := HBoxContainer.new()
-	tabs.name = "SpellsTabs"
 	column.add_child(tabs)
-	for tab: String in ["magic", "techniques"]:
-		var tab_button := Button.new()
-		tab_button.name = tab.capitalize() + "Tab"
-		tab_button.text = tab.capitalize()
-		tab_button.toggle_mode = true
-		tab_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tab_button.pressed.connect(set_tab.bind(tab))
-		tabs.add_child(tab_button)
-		_tab_buttons[tab] = tab_button
-	var first_magic_index := column.get_child_count()
-	_build_details(column)
-	_variant_picker = OptionButton.new()
-	_variant_picker.name = "SpellVariant"
-	_variant_picker.tooltip_text = "Choose which target variant of this spell to prepare."
-	_variant_picker.hide()
-	_variant_picker.item_selected.connect(func(index: int): _on_spell_pressed(_variant_picker.get_item_id(index)))
-	_variant_picker.clip_text = true
-	column.add_child(_variant_picker)
-	_content_scroll = ScrollContainer.new()
-	_content_scroll.name = "SpellContentScroll"
-	_content_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	column.add_child(_content_scroll)
-	var content := VBoxContainer.new()
-	content.name = "SpellContent"
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_content_scroll.add_child(content)
-
+	for key: String in ["magic", "techniques"]:
+		var button := UI.button(key.capitalize())
+		button.name = key.capitalize() + "Tab"
+		button.toggle_mode = true
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(set_tab.bind(key))
+		tabs.add_child(button)
+		_tab_buttons[key] = button
+	_magic_page = VBoxContainer.new()
+	_magic_page.name = "MagicPage"
+	_magic_page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(_magic_page)
+	var toolbar := HBoxContainer.new()
+	_magic_page.add_child(toolbar)
 	search = LineEdit.new()
 	search.name = "SpellSearch"
-	search.placeholder_text = "Search spells, effects or damage types"
-	content.add_child(search)
+	search.placeholder_text = "Search spells, effects or damage types…"
+	search.add_theme_font_size_override("font_size", 13)
+	search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	search.text_changed.connect(func(_text: String): _filter_spells())
+	toolbar.add_child(search)
+	var filters := HBoxContainer.new()
+	toolbar.add_child(filters)
+	_filter_buttons = UI.filters(filters, set_filter)
+	# Kept as a programmatic scope filter for the practice tools; the grid
+	# itself chooses variants directly and needs no extra target dropdown.
 	scope_filter = OptionButton.new()
-	for option: String in ["All targets", "Self", "Target", "Allies", "Burst", "Utility"]:
-		scope_filter.add_item(option)
-	content.add_child(scope_filter)
-	search.text_changed.connect(func(_text: String) -> void: _filter_spells())
-	scope_filter.item_selected.connect(func(_index: int) -> void: _filter_spells())
+	for text: String in ["All targets", "Self", "Target", "Allies", "Burst", "Utility"]: scope_filter.add_item(text)
+	scope_filter.hide()
+	scope_filter.item_selected.connect(func(_index: int): _filter_spells())
+	_magic_page.add_child(scope_filter)
 	browser_picker = OptionButton.new()
-	browser_picker.name = "SpellBrowserMode"
 	browser_picker.add_item("Compare grid")
-	browser_picker.add_item("Spell families")
 	browser_picker.hide()
-	browser_picker.item_selected.connect(func(_index: int): _filter_spells())
-	content.add_child(browser_picker)
-	var headings := MarginContainer.new()
-	headings.name = "SpellTargetHeadings"
-	_grid_headings = headings
-	content.add_child(headings)
-	headings.add_child(_make_effect_row("", true))
-	var scroll := ScrollContainer.new()
-	scroll.name = "SpellScroll"
-	scroll.custom_minimum_size.y = 230
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
-	content.add_child(scroll)
-	# Reserve the same scrollbar gutter in the fixed headings as in the rows.
-	headings.add_theme_constant_override("margin_right",
-		int(scroll.get_v_scroll_bar().get_combined_minimum_size().x))
-	var groups := VBoxContainer.new()
-	groups.name = "SpellGroups"
-	groups.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var browser_body := VBoxContainer.new()
-	browser_body.name = "SpellBrowser"
-	browser_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(browser_body)
-	browser_body.add_child(groups)
-	_grid_groups = groups
-	_family_groups = GridContainer.new()
-	_family_groups.columns = 2
-	_family_groups.name = "SpellFamilies"
-	_family_groups.hide()
-	browser_body.add_child(_family_groups)
-	for group: String in GROUP_ORDER:
-		var section := VBoxContainer.new()
-		section.name = "%sSpells" % group
-		groups.add_child(section)
-		var label := Label.new()
-		label.name = "%sSpellsLabel" % group
-		label.text = "%s Spells" % group
-		section.add_child(label)
-		_groups[group] = section
-	_empty_label = Label.new()
+	_magic_page.add_child(browser_picker)
+	_body = HBoxContainer.new()
+	_body.name = "MagicPanes"
+	_body.add_theme_constant_override("separation", 10)
+	_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_magic_page.add_child(_body)
+	_browser = VBoxContainer.new()
+	_browser.name = "SpellBrowser"
+	_browser.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_body.add_child(_browser)
+	_grid_headings = MarginContainer.new()
+	_grid_headings.name = "SpellTargetHeadings"
+	_grid_headings.add_child(_make_effect_row("", true))
+	_browser.add_child(_grid_headings)
+	_content_scroll = UI.scroll("SpellContentScroll")
+	_content_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	_browser.add_child(_content_scroll)
+	var rows := VBoxContainer.new()
+	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content_scroll.add_child(rows)
+	_grid_groups = VBoxContainer.new()
+	_grid_groups.name = "SpellGroups"
+	_grid_groups.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rows.add_child(_grid_groups)
+	_empty_label = UI.label("No spells match. Clear search or choose All.", 13, true)
 	_empty_label.name = "NoMatchingSpells"
-	_empty_label.text = "No spells match your search."
-	_empty_label.hide()
-	browser_body.add_child(_empty_label)
-	_preparation_label = Label.new()
-	_preparation_label.name = "PreparationSummary"
-	_preparation_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	_preparation_label.hide()
-	column.add_child(_preparation_label)
-	_prepare_controls = HBoxContainer.new()
-	_prepare_controls.name = "PrepareSpell"
-	_prepare_controls.hide()
-	column.add_child(_prepare_controls)
-	power_picker = SpinBox.new()
-	power_picker.custom_minimum_size.x = 128
-	power_picker.prefix = "Power "
-	power_picker.min_value = 1
-	power_picker.max_value = 10
-	power_picker.value_changed.connect(func(value: float):
-		requested_power = int(value)
-		if selected_spell_id >= 0:
-			loadout.remember_power(selected_spell_id, requested_power)
-			_quote_request = ""
-			_refresh_details()
-		_refresh_preparation())
-	_prepare_controls.add_child(power_picker)
-	slot_picker = OptionButton.new()
-	for index in range(12): slot_picker.add_item("Slot %d" % (index + 1))
-	slot_picker.item_selected.connect(func(_index: int): _refresh_preparation())
-	_prepare_controls.add_child(slot_picker)
-	_assign_button = Button.new()
-	_assign_button.name = "AssignSpell"
-	_assign_button.text = "Assign to slot"
-	_assign_button.disabled = true
-	_assign_button.pressed.connect(func():
-		if selected_spell_id >= 0:
-			loadout.assign_slot(slot_picker.selected, selected_spell_id, requested_power)
-			_preparation_label.text = "Assigned " + _preparation_label.text)
-	_prepare_controls.add_child(_assign_button)
-
-	cast_button = Button.new()
-	cast_button.name = "CastButton"
-	cast_button.text = "Cast"
-	cast_button.disabled = true
-	cast_button.size_flags_horizontal = Control.SIZE_SHRINK_END
-	cast_button.pressed.connect(_on_cast_pressed)
-	column.add_child(cast_button)
-	for index in range(first_magic_index, column.get_child_count()):
-		_magic_nodes.append(column.get_child(index) as Control)
+	rows.add_child(_empty_label)
+	_grid_headings.add_theme_constant_override("margin_right", int(_content_scroll.get_v_scroll_bar().get_combined_minimum_size().x))
+	_build_details()
+	var hint := UI.label("Select to inspect · Drag to a quick slot", 12, true)
+	hint.add_theme_color_override("font_color", UI.MUTED)
+	_magic_page.add_child(hint)
 	techniques_panel = TechniquesPanel.new()
-	techniques_panel.hide()
+	techniques_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(techniques_panel)
+	techniques_panel.close_requested.connect(close)
 	set_tab("magic")
 	_fit_panel()
 
-## Keep the selected spell visible while its browser scrolls independently.
-## Long requirements can scroll within the card without pushing it offscreen.
-func _build_details(column: VBoxContainer) -> void:
-	var details := HBoxContainer.new()
-	details.name = "SpellDetails"
-	details.add_theme_constant_override("separation", 12)
-	column.add_child(details)
-	var info_scroll := ScrollContainer.new()
-	info_scroll.name = "SpellInfoScroll"
-	info_scroll.custom_minimum_size.y = 180
-	info_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	details.add_child(info_scroll)
-	var info := VBoxContainer.new()
-	info.name = "SpellInfo"
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_theme_constant_override("separation", 6)
-	info_scroll.add_child(info)
-	name_label = Label.new()
+func _build_details() -> void:
+	_inspector = PanelContainer.new()
+	_inspector.name = "SpellDetails"
+	_inspector.add_theme_stylebox_override("panel", UI.box(Color("130f0a"), Color("80623b"), 8))
+	_body.add_child(_inspector)
+	var column := VBoxContainer.new()
+	_details_column = column
+	column.add_theme_constant_override("separation", 6)
+	_inspector.add_child(column)
+	var header := HBoxContainer.new()
+	column.add_child(header)
+	name_label = UI.label("Select a spell", 18, true)
 	name_label.name = "SpellName"
-	name_label.add_theme_font_size_override("font_size", 18)
-	description_label = Label.new()
-	description_label.name = "SpellDescription"
-	numbers_label = Label.new()
-	numbers_label.name = "SpellNumbers"
-	knowledge_label = Label.new()
-	knowledge_label.name = "SpellKnowledge"
-	reagents_label = Label.new()
-	reagents_label.name = "SpellReagents"
-	for label: Label in [name_label, description_label, numbers_label, knowledge_label, reagents_label]:
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		info.add_child(label)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(name_label)
+	favorite_button = UI.button("☆")
+	favorite_button.toggle_mode = true
+	favorite_button.pressed.connect(_toggle_favorite)
+	header.add_child(favorite_button)
+	_info_scroll = UI.scroll("SpellInfoScroll")
+	column.add_child(_info_scroll)
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_theme_constant_override("separation", 4)
+	_info_scroll.add_child(info)
+	_hero = HBoxContainer.new()
+	info.add_child(_hero)
+	selected_icon = TextureRect.new()
+	selected_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	selected_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	selected_icon.custom_minimum_size = Vector2(56, 56)
+	_hero.add_child(selected_icon)
 	effect_preview = EffectPreview.new()
-	details.add_child(effect_preview)
+	effect_preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_hero.add_child(effect_preview)
+	effect_preview.custom_minimum_size = Vector2(120, 72)
+	effect_preview.get("_caption").hide()
+	description_label = UI.label("", 13, true)
+	description_label.max_lines_visible = 3
+	description_label.name = "SpellDescription"
+	info.add_child(description_label)
+	numbers_label = UI.label("", 13, true)
+	numbers_label.name = "SpellNumbers"
+	info.add_child(numbers_label)
+	requirements_rows = VBoxContainer.new()
+	info.add_child(requirements_rows)
+	knowledge_label = UI.label("", 12, true)
+	knowledge_label.name = "SpellKnowledge"
+	info.add_child(knowledge_label)
+	reagents_label = UI.label("Reagents required", 13)
+	reagents_label.name = "SpellReagents"
+	info.add_child(reagents_label)
+	reagents_rows = VBoxContainer.new()
+	reagents_rows.name = "ReagentRows"
+	info.add_child(reagents_rows)
+	status_label = UI.label("", 13, true)
+	status_label.name = "SpellStatus"
+	column.add_child(status_label)
+	var power_row := HBoxContainer.new()
+	_power_row = power_row
+	column.add_child(power_row)
+	power_row.add_child(UI.label("Power", 13))
+	power_picker = SpinBox.new()
+	power_picker.min_value = 1
+	power_picker.max_value = 10
+	power_picker.custom_minimum_size.x = 100
+	power_picker.add_theme_font_size_override("font_size", 13)
+	power_picker.value_changed.connect(func(value: float):
+		requested_power = int(value)
+		if loadout != null and selected_spell_id >= 0: loadout.remember_power(selected_spell_id, requested_power)
+		_quote_request = ""
+		_last_quote.clear()
+		_refresh_details()
+		_refresh_preparation())
+	power_row.add_child(power_picker)
+	cast_button = UI.button("Cast")
+	cast_button.name = "CastButton"
+	cast_button.clip_text = true
+	cast_button.pressed.connect(_on_cast_pressed)
+	column.add_child(cast_button)
+	_prepare_controls = HBoxContainer.new()
+	_prepare_controls.name = "PrepareSpell"
+	column.add_child(_prepare_controls)
+	slot_picker = UI.slot_picker()
+	slot_picker.item_selected.connect(func(_index: int): _refresh_preparation())
+	_prepare_controls.add_child(slot_picker)
+	_assign_button = UI.button("Assign")
+	_assign_button.name = "AssignSpell"
+	_assign_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_assign_button.pressed.connect(func():
+		if selected_spell_id >= 0 and loadout != null:
+			loadout.assign_slot(slot_picker.selected, selected_spell_id, requested_power)
+			_preparation_label.text = "Assigned to slot %d" % (slot_picker.selected + 1))
+	_prepare_controls.add_child(_assign_button)
+	_preparation_label = UI.label("", 11)
+	_preparation_label.name = "PreparationSummary"
+	_preparation_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	column.add_child(_preparation_label)
 
-func _filter_spells() -> void:
-	if catalog == null: return
-	var families := loadout != null and browser_picker.selected == 1
-	_grid_headings.visible = not families
-	_grid_groups.visible = not families
-	_family_groups.visible = families
-	var selected := "" if scope_filter.selected <= 0 else TARGET_COLUMNS[scope_filter.selected - 1]
-	var query := search.text.strip_edges().to_lower()
-	for spell_id: int in catalog.spell_ids():
-		var spell := catalog.spell(spell_id)
-		var scope := str(spell.get("scope", "self"))
-		var target := scope if scope in TARGET_COLUMNS else "utility"
-		var effect := str(spell.get("effect", ""))
-		var scope_matches := selected.is_empty() or target == selected
-		var haystack := "%s %s %s %s" % [spell.name, effect, spell.get("damage_type", ""), EFFECT_LABELS.get(effect, effect.capitalize())]
-		(_buttons[spell_id] as Button).visible = scope_matches and (query.is_empty() or haystack.to_lower().contains(query))
-
-	var any_matches := false
+func _fit_panel() -> void:
+	if panel == null or _dragger == null: return
+	var bounds := get_viewport_rect().size
+	var bottom := bounds.y - WindowDrag.RESERVED_BOTTOM_BAR
+	if is_instance_valid(_dragger.bottom_hud): bottom = minf(bottom, _dragger.bottom_hud.global_position.y)
+	var available := Vector2(bounds.x - RESERVED_RIGHT_RAIL - 12, bottom - 12).max(Vector2.ONE)
+	_compact = available.x < 700
+	var short := available.y < 500
+	if short != _short:
+		_short = short
+		cast_button.reparent(_power_row if short else _details_column)
+		if not short: _details_column.move_child(cast_button, _power_row.get_index() + 1)
+		cast_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_hero.visible = not short
+	description_label.visible = not short
+	_preparation_label.visible = not short
+	if short:
+		requirements_rows.hide()
+		knowledge_label.hide()
+		cast_button.text = "Cast"
+	_inspector.custom_minimum_size.x = 244 if _compact else 288
 	for row: HBoxContainer in _rows.values():
-		var any_visible := false
-		for target: String in TARGET_COLUMNS:
-			var cell := row.get_node("%sCell" % target.capitalize()) as VBoxContainer
-			var cell_visible := false
-			for child: Node in cell.get_children():
-				if child is Button:
-					cell_visible = cell_visible or (child as Button).visible
-			(cell.get_node("Empty") as Label).visible = not cell_visible
-			any_visible = any_visible or cell_visible
-		row.visible = any_visible
-		var effect_key: String = _rows.find_key(row)
-		(_family_buttons[effect_key] as Button).visible = any_visible
-		any_matches = any_matches or any_visible
-	for group: String in GROUP_ORDER:
-		var section: VBoxContainer = _groups[group]
-		var any_visible := false
-		for child: Node in section.get_children():
-			if child is HBoxContainer:
-				any_visible = any_visible or (child as Control).visible
-		section.visible = any_visible
-	_empty_label.visible = not any_matches
-	# A Burst-only browser must never assign/cast the hidden Target variant.
-	if selected_spell_id >= 0 and not (_buttons[selected_spell_id] as Button).visible:
-		var effect := catalog.effect_for(selected_spell_id)
-		selected_spell_id = -1
-		for id: int in catalog.spell_ids():
-			if catalog.effect_for(id) == effect and (_buttons[id] as Button).visible:
-				_on_spell_pressed(id)
-				break
-		if selected_spell_id < 0:
-			for button: Button in _buttons.values(): button.set_pressed_no_signal(false)
-			for button: Button in _family_buttons.values(): button.set_pressed_no_signal(false)
-			_refresh_details()
-	if loadout != null: _sync_variant_picker()
-	_refresh_preparation()
+		(row.get_node("EffectLabel") as Label).custom_minimum_size.x = 110 if _compact else EFFECT_COLUMN_WIDTH
+	var headings := _grid_headings.get_child(0) as HBoxContainer
+	(headings.get_node("EffectLabel") as Label).custom_minimum_size.x = 110 if _compact else EFFECT_COLUMN_WIDTH
+	techniques_panel.set_compact(_compact)
+	techniques_panel.set_short(short)
+	panel.custom_minimum_size = PANEL_SIZE.min(available)
+	panel.size = panel.custom_minimum_size
+	_dragger.clamp_into_view()

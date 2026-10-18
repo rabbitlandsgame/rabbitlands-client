@@ -43,7 +43,7 @@ func _run() -> void:
 	_expect(panel.visible and str(window.get("current_tab")) == "techniques" and tab.visible,
 		"Ctrl+X opens the window on Techniques")
 	var scroll: Control = panel.find_child("SpellContentScroll", true, false) as Control
-	_expect(not scroll.visible, "the magic browser is hidden behind the Techniques tab")
+	_expect(not scroll.is_visible_in_tree(), "the magic browser is hidden behind the Techniques tab")
 	window.call("set_tab", "magic")
 	_expect(scroll.visible and not tab.visible, "the Magic tab brings the browser back")
 	window.call("set_tab", "techniques")
@@ -70,30 +70,39 @@ func _run() -> void:
 	_expect(buttons.size() == 7, "one button per technique: %d" % buttons.size())
 	_expect((tab.find_child("ActionPoints", true, false) as Label).text == "Action points 30 / 200",
 		"the real action-point pool is shown")
-	_expect((buttons["heavy_blow"] as Button).disabled and "5s" in (buttons["heavy_blow"] as Button).text,
-		"a technique cooling down cannot be pressed and counts down")
+	_expect(not (buttons["heavy_blow"] as Button).disabled and "5s" in tab.get("_row_controls")["heavy_blow"].get_node("Cooldown").text,
+		"a cooling-down technique is inspectable and counts down")
 	_expect((buttons["heavy_blow"] as Button).icon != null, "rows carry the painted icon")
-	_expect((buttons["war_cry"] as Button).disabled and "Attack level 40" in (buttons["war_cry"] as Button).tooltip_text,
+	_expect(not (buttons["war_cry"] as Button).disabled and "Attack level 40" in (buttons["war_cry"] as Button).tooltip_text,
 		"a refused technique says why")
-	_expect((buttons["cleave"] as Button).disabled and "Manual of Cleave" in (buttons["cleave"] as Button).tooltip_text,
+	_expect(not (buttons["cleave"] as Button).disabled and "Manual of Cleave" in (buttons["cleave"] as Button).tooltip_text,
 		"an unlearned technique names its manual")
 	(buttons["fighting_retreat"] as Button).pressed.emit()
+	_expect(sent.is_empty(), "inspecting a technique never activates it")
+	(tab.get("use_button") as Button).pressed.emit()
 	_expect(sent.back() == {"op": "use", "key": "fighting_retreat"}, "an instant technique is requested at once")
 	app_state.set("selected_actor_id", -1)
 	(buttons["charge"] as Button).pressed.emit()
-	_expect(str(tab.get("pending_key")) == "charge" and "click a creature" in (buttons["charge"] as Button).text,
+	(tab.get("use_button") as Button).pressed.emit()
+	_expect(str(tab.get("pending_key")) == "charge" and "click a creature" in (tab.get("status_label") as Label).text.to_lower(),
 		"a targeted technique with no creature in hand is armed and says so")
 	_expect(not bool(tab.call("fire_at", 99)), "a click on something it cannot strike does not take it")
 	_expect(bool(tab.call("fire_at", 31)) and sent.back() == {"op": "use", "key": "charge", "target_id": 31},
 		"the next creature clicked receives it")
 	var placed: Array[String] = []
 	tab.connect("place_on_bar", func(key: String) -> void: placed.append(key))
-	((tab.find_child("Row_charge", true, false) as Control).get_node("Place") as Button).pressed.emit()
-	_expect(placed == ["charge"], "+ asks for a quick slot")
+	tab.call("select_technique", "charge")
+	var requirement_row: Control = (tab.get("requirements_rows") as Control).get_child(0)
+	tab.call("_refresh_buttons")
+	_expect((tab.get("requirements_rows") as Control).get_child(0) == requirement_row, "cooldown refreshes preserve the requirement controls")
+	(tab.get("assign_button") as Button).pressed.emit()
+	_expect(placed == ["charge"], "the inspector assigns the selected technique")
 	state.stance = "brace"
 	state.techniques[5]["active"] = true
 	app_state.call("_on_packet", 212, JSON.stringify(state).to_utf8_buffer())
-	_expect(not (buttons["brace"] as Button).disabled and "held" in (buttons["brace"] as Button).text,
+	tab.call("select_technique", "brace")
+	_expect(not (tab.get("use_button") as Button).disabled and "Held" in tab.get("_row_controls")["brace"].get_node("Cooldown").text
+		and (tab.get("use_button") as Button).text == "Release Brace",
 		"a held stance can be let go and says it is held")
 
 	# --- repeat casting's state ---------------------------------------------

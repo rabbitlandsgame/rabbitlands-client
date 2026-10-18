@@ -8,6 +8,7 @@ var powers: Dictionary = {}
 var wheel_power := 1
 var ring_size := 100
 var ring_preferences := {"scopes": {}, "powers": {}, "pins": {}}
+var book_preferences: Dictionary = {}
 var mode := "wheel"
 var profile := ""
 var path := "user://magic_loadouts.cfg"
@@ -22,6 +23,7 @@ func _reset() -> void:
 	wheel_power = 1
 	ring_size = 100
 	ring_preferences = {"scopes": {}, "powers": {}, "pins": {}}
+	book_preferences = {}
 	for index in range(SLOT_COUNT):
 		var id := catalog.default_quick_slots[index] if index < catalog.default_quick_slots.size() else -1
 		slots.append({"id": id, "power": 1})
@@ -31,6 +33,13 @@ func load_profile(key: String) -> void:
 	_reset()
 	var config := ConfigFile.new()
 	if config.load(path) == OK:
+		var saved_book: Variant = config.get_value(profile, "book_preferences", {})
+		if saved_book is Dictionary:
+			for tab: String in ["magic", "techniques"]:
+				var value: Variant = saved_book.get(tab)
+				if value is Dictionary:
+					book_preferences[tab] = {"filter": str(value.get("filter", "all")),
+						"favorites": value.get("favorites", []).duplicate() if value.get("favorites") is Array else []}
 		wheel_power = clampi(int(config.get_value(profile, "wheel_power", 1)), 1, 10)
 		ring_size = clampi(int(config.get_value(profile, "ring_size", 100)), 75, 125)
 		var saved_ring: Variant = config.get_value(profile, "ring_preferences", {})
@@ -136,6 +145,10 @@ func save_ring_preferences() -> void:
 	# The ring shares this dictionary. Saving must not rebuild its hovered wedge.
 	_save()
 
+func save_book_preferences() -> void:
+	# Filtering/favoriting must not rebuild a hovered ring or change quick slots.
+	_save()
+
 func targeting_mode() -> String:
 	return "aimed" if mode == "aimed" else "prepared"
 
@@ -148,6 +161,7 @@ func _save() -> void:
 	config.set_value(profile, "wheel_power", wheel_power)
 	config.set_value(profile, "ring_size", ring_size)
 	config.set_value(profile, "ring_preferences", ring_preferences)
+	config.set_value(profile, "book_preferences", book_preferences)
 	var error := config.save(path)
 	if error != OK:
 		push_warning("Could not save spell loadout: " + error_string(error))

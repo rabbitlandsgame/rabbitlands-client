@@ -54,8 +54,7 @@ func _run() -> void:
 	_expect(bool(spells_window.call("is_open")), "the spells window opens")
 	# The detail block is the half of this window worth reviewing - the
 	# requirements it writes out - and it is blank until a spell is picked.
-	var embermend: Button = spells_window.get_node(
-		"SpellsWindow/SpellsBody/SpellContentScroll/SpellContent/SpellScroll/SpellBrowser/SpellGroups/HealthSpells/HealEffectRow/SelfCell/SpellButton0") as Button
+	var embermend := spells_window.find_child("SpellButton0", true, false) as Button
 	_expect(embermend != null, "Heal has a button to select")
 	if embermend != null:
 		embermend.pressed.emit()

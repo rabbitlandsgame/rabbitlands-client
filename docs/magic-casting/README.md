@@ -132,16 +132,33 @@ Escape or right clicking the world cancels. Selecting a recipient retains it
 for subsequent casts. Changing mode never casts by itself.
 
 All versions provide twelve editable slots with last-cast target and power,
-family browsing, the effect/target comparison grid, and feedback beside the
-cursor. The spellbook closes when a spell is launched, exposing the world.
+the effect/target comparison grid, and feedback beside the cursor. The
+spellbook closes when a spell is launched, exposing the world.
+
+The book's Magic and Techniques tabs share a compact browser with a side
+inspector. Selecting an icon inspects it; **Cast** or **Use** launches the
+action. Magic has four narrow columns (Self, Target, Allies and Burst).
+Utility icons appear under Self without changing their actual targeting.
+The inspector lists the selected power's required reagents and carried counts,
+green when sufficient and red when short. Server quotes determine effective
+power, cost, focus substitutions and readiness.
+
+Techniques show AP costs and cooldowns in combat rounds. Their inspector shows
+skill, knowledge and equipped-gear checks from the server, with a separate
+cooldown and overall availability state. Unavailable actions remain inspectable;
+learned techniques and visible spells can still be assigned to a chosen shared
+slot or dragged onto it. Search, All/Ready/Learned/Favorites filters and the
+favorite star use the same controls on both tabs; favorites and the chosen
+filter are saved per character. Short windows prioritize requirements and keep
+the action and assignment controls visible while collapsing the preview.
 
 ## Five-minute evaluation
 
 1. Select Tavin, then cast Heal Target twice. Compare Prepared and Aimed.
 2. Cast Fire Burst near the wisp; move outside range and try again.
 3. Arm Blink, switch to Heal Target, then cancel with Escape or right click.
-4. Open the spellbook. Select a family, choose its target and power, then
-   choose a slot and click **Assign to slot**. Alternatively drag a grid icon.
+4. Open the spellbook. Select a target variant in the grid, choose power and
+   a slot, then click **Assign**. Alternatively drag a grid icon.
 5. Right click a casting slot to edit its spell/power or clear it. Cast that
    family from the ring at a different power/target and check the icon corners.
 6. Close and reopen the launcher. Practice slots should be remembered.
