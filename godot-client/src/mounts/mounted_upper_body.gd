@@ -51,22 +51,32 @@ func configure(player: ReplicatedActor3D) -> void:
 		var name := actor.resolver.clip_for_action(key)
 		if not actor.animation_player.has_animation(name):
 			continue
-		var clip := actor.animation_player.get_animation(name)
-		clips[key] = clip
-		var rotations: Array = []
-		var parents := {}
-		for track: int in clip.get_track_count():
-			if clip.track_get_type(track) != Animation.TYPE_ROTATION_3D:
-				continue
-			var bone := skeleton.find_bone(str(clip.track_get_path(track).get_concatenated_subnames()))
-			if bone in bones:
-				rotations.append([bone, track])
-			elif bone in _parent_chain:
-				parents[bone] = track
-		tracks[key] = rotations
-		_parent_tracks[key] = parents
+		_cache_clip(key, actor.animation_player.get_animation(name))
+
+func _cache_clip(key: StringName, clip: Animation) -> void:
+	clips[key] = clip
+	var rotations: Array = []
+	var parents := {}
+	for track: int in clip.get_track_count():
+		if clip.track_get_type(track) != Animation.TYPE_ROTATION_3D:
+			continue
+		var bone := skeleton.find_bone(str(clip.track_get_path(track).get_concatenated_subnames()))
+		if bone in bones:
+			rotations.append([bone, track])
+		elif bone in _parent_chain:
+			parents[bone] = track
+	tracks[key] = rotations
+	_parent_tracks[key] = parents
 
 func request(next: StringName, restart := false) -> void:
+	if next in ACTIONS:
+		# Spell variants and ranged techniques select their clip immediately
+		# before play_action. Use that current mapping, not the mounting-time one.
+		var name := actor.resolver.clip_for_action(next)
+		if actor.animation_player.has_animation(name):
+			var clip := actor.animation_player.get_animation(name)
+			if clips.get(next) != clip:
+				_cache_clip(next, clip)
 	if next not in ACTIONS or not clips.has(next):
 		if next in [&"walk", &"run", &"idle", &"combat_idle"]:
 			ground_action = next

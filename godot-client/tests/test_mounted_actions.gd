@@ -21,7 +21,7 @@ func make_rider(body: String, models: Dictionary) -> ReplicatedActor3D:
 	var animations: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	var errors := actor.configure({"actor_id": 42, "x": 0, "y": 0, "rotation": 0,
-		"kind": 1, "name": "", "appearance": {"hair": 0}, "equipment_visuals": {0: 64}},
+		"kind": 1, "name": "", "appearance": {"hair": 0}, "equipment_visuals": {0: 164}},
 		CoordinateAdapter.new({"walkingHeight": 0.0}), config, animations, equipment)
 	expect(errors.is_empty(), body + " loads: " + str(errors))
 	actor.set_process(false)
@@ -48,8 +48,16 @@ func run() -> void:
 			var comparison: Variant = baseline._mount_visual
 			for requested: StringName in [&"ranged_draw", &"ranged_hold", &"ranged_attack",
 					&"cast_aggressive", &"cast_defensive", &"heal", &"cast_channel_enter", &"cast_channel", &"cast_exit"]:
+				if requested == &"cast_aggressive":
+					actor.set_spell_variant(2)
+				elif requested == &"cast_defensive":
+					actor.set_spell_variant(75)
+				elif requested == &"heal":
+					actor.set_spell_variant(3)
 				expect(visual.upper.clips.has(requested), body + " source clip exists: " + str(requested))
 				actor.play_action(requested, true)
+				expect(visual.upper.clips[requested] == actor.animation_player.get_animation(actor.resolver.clip_for_action(requested)),
+					"uses current spell/technique variant")
 				var start := rig.get_bone_pose_rotation(rig.find_bone("upperarm_r"))
 				for frame: int in 24:
 					if frame == 8:
@@ -75,6 +83,10 @@ func run() -> void:
 				if requested in [&"ranged_draw", &"ranged_hold", &"ranged_attack"]:
 					expect(actor.combat_presentation.bow != null and actor.combat_presentation.bow.visible,
 						"actual bow is visible while shooting")
+					if requested != &"ranged_attack":
+						var right := actor.combat_presentation.hand_position(rig.find_bone("hand_r"))
+						expect(actor.combat_presentation.bow.nock_position().distance_to(right) < .03,
+							"arrow nock stays at the drawing fingers")
 				actor.play_action(&"idle")
 				baseline.play_action(&"idle")
 				for frame: int in 150:
@@ -82,6 +94,15 @@ func run() -> void:
 					comparison._process(1.0 / 60.0)
 				expect(visual.upper.action.is_empty(), "action returns to the reins: " + str(requested))
 				expect(visual.upper.grip_weight == 0.0, "rein contact restores after action")
+				var recovery_error := 0.0
+				for bone: int in rig.get_bone_count():
+					var current := rig.get_bone_global_pose(bone)
+					var target := reference.get_bone_global_pose(bone)
+					recovery_error = maxf(recovery_error, current.origin.distance_to(target.origin))
+					recovery_error = maxf(recovery_error, current.basis.x.distance_to(target.basis.x))
+					recovery_error = maxf(recovery_error, current.basis.y.distance_to(target.basis.y))
+					recovery_error = maxf(recovery_error, current.basis.z.distance_to(target.basis.z))
+				expect(recovery_error < 0.00001, "all bones return to the riding pose: " + str(recovery_error))
 				expect(actor.combat_presentation.bow == null or not actor.combat_presentation.bow.visible,
 					"shooting prop hides after recovery")
 				actor.play_action(&"run")

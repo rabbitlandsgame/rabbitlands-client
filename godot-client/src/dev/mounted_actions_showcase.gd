@@ -95,7 +95,7 @@ func _ready() -> void:
 		stage.add_child(actor)
 		var errors := actor.configure({"actor_id": 900 + index, "x": 0, "y": 0,
 			"rotation": 0, "kind": 1, "name": "", "appearance": {"hair": 0},
-			"equipment_visuals": {0: 64} if index < 2 else {}},
+			"equipment_visuals": {0: 164} if index < 2 else {}},
 			CoordinateAdapter.new({"walkingHeight": 0.0}), models[panel[1]], mapping, equipment)
 		if not errors.is_empty():
 			push_error(str(errors))
@@ -117,6 +117,12 @@ func restart() -> void:
 	clock = 0.0
 	released = false
 	for index: int in actors.size():
+		if index == 2:
+			actors[index].set_spell_variant(2)
+		elif index == 3:
+			actors[index].set_spell_variant(75)
+		elif index == 4:
+			actors[index].set_spell_variant(3)
 		actors[index].play_action(&"run" if PANELS[index][4] else &"idle")
 		actors[index].play_action(StringName(PANELS[index][3]), true)
 
