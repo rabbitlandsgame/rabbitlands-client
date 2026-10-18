@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Golden Plains Horse and bronze-card mount selection for normal-server testing",
+  "clientRevisionTested": "b8d6d42e8bed306ce0d8523636ba4b47cd1b49bc",
+  "serverRevisionTested": "12664e3686227a739ee21078936f566cad052923",
+  "userApproval": "Horse prototype approved for in-game testing; mount-window option 1 (Bronze cards) selected.",
+  "behavior": {
+    "enabledMounts": [
+      "moor_pony",
+      "golden_plains_horse"
+    ],
+    "ownership": "Both granted to every authenticated character by mounts_grant_all=1",
+    "access": "Mounts banner button or right-click local character > Mounts",
+    "selection": "Browse locally; Ride requests server selection and summon. Choice persists on the server.",
+    "controls": "R calls/cancels/dismounts; Space toggles gallop.",
+    "preserved": "Outdoor access, calling while moving, melee-only combat dismount behavior, shared endurance, approved rider/cape/reins and mounted bow/spell animation.",
+    "legacyClients": "Existing mounts_v1 clients retain pony behavior; mount_selection_v1 enables the catalogue and horse replication."
+  },
+  "validation": {
+    "serverFocusedTests": 85,
+    "serverFailures": 0,
+    "mountWindowChecks": 14,
+    "mountControlsChecks": 18,
+    "mountHotkeyChecks": 18,
+    "mountProtocolChecks": 19,
+    "clientFailures": 0,
+    "liveTlsMultiplayer": {
+      "tlsVerified": true,
+      "allEnabledMountsGranted": true,
+      "horseAndPonySwitching": true,
+      "observerReplication": true,
+      "horseGallop": true,
+      "defaultSurvivesReconnect": true,
+      "reconnectOnFoot": true
+    },
+    "renderedNormalGame": {
+      "failures": 0,
+      "horse": true,
+      "mountWindow": true,
+      "pony": true,
+      "rAndSpace": true,
+      "tls": true
+    },
+    "renderedWindowRect": {
+      "x": 307,
+      "y": 6,
+      "width": 570,
+      "height": 472,
+      "viewport": [
+        1280,
+        720
+      ]
+    },
+    "renderedReview": "Actual game window and mounted horse/pony screenshots inspected; both model portraits use the real runtime assets.",
+    "cleanupNote": "The rendered harness reports two cached texture allocations at engine shutdown; no gameplay script or resource-load failures. Existing imported texture UID warnings fall back to valid text paths."
+  },
+  "authoring": {
+    "newModelsGenerated": false,
+    "sourceGlbsReplaced": false,
+    "motionChannelsModified": false,
+    "horsePrototypeReceipt": "golden-plains-horse-prototype-v1.json"
+  },
+  "designConcepts": {
+    "method": "Built-in image_gen tool",
+    "count": 5,
+    "selected": "01-bronze-cards",
+    "localFolder": ".local/qa/mount-selection-concepts-v1",
+    "promptFile": "prompts.json"
+  },
+  "sourceSha256": {
+    "godot-client/src/ui/mounts_window.gd": "8afc1e1dc67426a6c88c7623312a583593a794d7e7cd2ae16531b92971a9f542",
+    "godot-client/src/mounts/mount_portrait.gd": "1e256913c1286f9d34ab02bc417d81001a9958f8ac8f802bc77956f1004faaef",
+    "godot-client/src/mounts/mount_profiles.gd": "585a611631bef91a57aeb25de2f96273aa58005f1d8c0f561f1a04e864858be4",
+    "godot-client/src/mounts/mount_controls.gd": "aecb04101132b1ded99dcb4c4f854ce90717225206687508fb15dd3d60c8e7b5",
+    "godot-client/src/mounts/mount_preview_state.gd": "d7d61696eeebca60d1f592b9df9f2d8b7fdb2fe9df887b07c98cd7139e7e78a7",
+    "godot-client/src/network/protocol.gd": "4cf861a2d1cad2176a5512ff1ac3902bd2eb8a90264759530e9e91bcdff304e7",
+    "godot-client/src/app/main.gd": "2f25fb8ca4cbfdd1786a8af8ec5b76ec7de2e2bc8c6855b9273fe320161d9ffc",
+    "godot-client/data/mounts/golden_plains_horse.json": "ee53c385067fab922a9688cc73f5fe7ebeb08bf5c0556fbcb9c82b56798ceb76"
+  },
+  "unchangedInputSha256": {
+    "godot-client/assets/actors/native/creatures/golden_plains_horse.glb": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+    "godot-client/assets/actors/native/creatures/moor_pony.glb": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "godot-client/data/animations/equid/golden_plains_horse.json": "2678471afa67ec96c2efd75be278133db708ef236889c3a1668afe34df328b7c"
+  },
+  "localReviewSha256": {
+    "in-game-mounts.png": "de16797e995f2957fb4271fe34bb1eeafc87bfe49e1f2755887ea16921f81bdf",
+    "horse-in-game.png": "9ee97d8c00ef64bde8757dd32ec8d92a5079582fe85401436758e52050d77cae",
+    "pony-in-game.png": "1b3743056ee0046a934afaa6e10783d9a8476fc0dbdb8462e1856550c1a24637"
+  },
+  "distribution": "Client code integrated into local develop; normal test server updated directly. No public client release published by this change."
+}
