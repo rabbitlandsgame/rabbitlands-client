@@ -842,11 +842,14 @@ Tests:
 
 - `test_cape_cloth.gd`, `test_cape_drape.gd` and `test_actor_render_quality.gd`
   pass.
-- `rendered_cape_clipping.gd` passes, but none of its three attacks
-  (`Sword_Attack`, `Attack_Ground_Pound`, `Punch_Cross`) exists in the
-  animation map, so it skips them all. A scratch copy that swings
-  `Combat_Slash_A` and `_B` passes: the cape stays at least 98 mm behind the
-  spine plane (40 mm ahead is allowed), and never rises above the anchor.
+- `rendered_cape_clipping.gd` passes. None of its three attacks
+  (`Sword_Attack`, `Attack_Ground_Pound`, `Punch_Cross`) existed in the
+  animation map, and it skipped missing clips, so it used to pass without
+  swinging at all. It now swings `Combat_Slash_A` and `_B`, and a missing
+  clip fails it. Both clips read the same: the cape stays 98 mm behind the
+  spine plane (40 mm ahead is allowed), and does not rise above the anchor.
+  Offline, the rise reads about zero for any solver, as this harness's
+  gravity is delta-driven.
 - `test_cape_idle.gd` passes. Its new check, "hangs plumb from the back"
   (under 40 mm), measures 0.3–10.3 mm on both bodies; the old solver gives
   85–90 mm.
@@ -872,8 +875,6 @@ Scratch views, probes and scripts are in the client
 
 - The Phoenix Cuirass's tail still shows 35 mm into the sheet at the seat.
 - The native kernel path was not run here.
-- `rendered_cape_clipping.gd` still lists three attacks the rig does not
-  have; it should swing `Combat_Slash_A` and `_B`.
 
 ## Two body shapes, preserved race identity
 

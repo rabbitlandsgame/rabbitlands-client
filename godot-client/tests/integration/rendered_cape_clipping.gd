@@ -14,7 +14,9 @@ extends SceneTree
 ## cannot fully stage, so a clean run here means the sim keeps the cape behind
 ## under the motion it CAN stage, not that no pose anywhere spikes.
 
-const ATTACKS := ["Sword_Attack", "Attack_Ground_Pound", "Punch_Cross"]
+## The shared library's attacks. The earlier list named three clips the rig does
+## not have, and the loop skipped them, so the guard passed without a swing.
+const ATTACKS := ["Combat_Slash_A", "Combat_Slash_B"]
 const CAPE_VISUAL := 5
 const BODY_VISUAL := 184
 ## The cape may reach this far ahead of the spine plane (the plane runs down the
@@ -79,6 +81,8 @@ func _run() -> void:
 
 	for clip: String in ATTACKS:
 		if not player.has_animation(clip):
+			_failures += 1
+			print("  %-22s missing from the rig" % clip)
 			continue
 		# Walk, then swing: the cape is already moving when the lunge lands,
 		# which is what stresses both the forward wrap and the upward whip.
