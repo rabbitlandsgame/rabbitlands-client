@@ -125,6 +125,15 @@ not impose the historical suites as merge checks.
 
 ## Maps
 
+Add a personal named marker at your current position with `#mark Reed bank`.
+Use `#markpos 100 200 Ferry` to mark specific coordinates, `#marks` to list your
+markers on the current map, and `#unmark Reed bank` to remove one from that map.
+Names can contain spaces. Reusing a name on the same map moves that marker;
+other maps can have their own markers with the same name. Press **Tab** to see
+your markers on the full map, with names and coordinates in its sidebar and
+names on hover. Markers are private to your local client and saved between
+sessions.
+
 A map is a GLB scene, a `world.json` manifest and a `collision.bin` walk grid
 under `eloria-assets/maps/`. `godot-client/data/maps/registry.json` binds each
 **stable map id** — `four_gates`, `westhaven` — to its manifest and to the

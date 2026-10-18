@@ -28,3 +28,7 @@ For rams, ibex, sheep, bison, yak, deer and elk, read [native hoofed motion](ref
 For pony/horse rigs and tack, read [native equid motion](references/native-equid-motion.md). It covers whole-hoof ownership, saddle/bridle attachments, hanging-tail clearance, repaired-surface import witnesses and mount handoff. The approved Moor Pony and six reviewed family transfers, including Gallop, are documented in `docs/equid-motion.md`.
 
 For badger, otter, wolverine and stoat transfers, read [native mustelid motion](references/native-mustelid-motion.md). It covers whole-heel ownership, heavy influence consolidation, physical tail guides, clothing attachments and continuous paw-release constraints. The seven approved installed sets and portable checks are documented in `docs/mustelid-motion.md`.
+
+For Squirrel, Dormouse and Beaver, read [native rodent motion](references/native-rodent-motion.md). It covers physical shoulder/forearm fitting, complete facial ownership, local skin-strain checks, small-creature cadence and separate rump/hock/paddle fields. The three approved installed sets and portable checks are documented in `docs/rodent-motion.md`.
+
+For Hedgehog, Shrew and Giant Mole, read [native insectivore motion](references/native-insectivore-motion.md). It covers quill-heavy silhouettes, short-leg guide fitting, asymmetric digging arms, complete palm/finger and heel ownership, native contact surfaces and supported collapse. Consult private continuation memory for the selected review and acceptance state.
