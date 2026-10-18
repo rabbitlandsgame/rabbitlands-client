@@ -21,6 +21,7 @@ const CreationClassIcons = preload("res://src/ui/creation_class_icons.gd")
 const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
 const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd")
 var character_intro := NewCharacterIntroScript.new()
+var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
 
 @onready var login_panel: Control = %LoginPanel
 @onready var game_view: Control = %GameView
@@ -1078,6 +1079,7 @@ const EXPERIENCE_SKILLS: Array[String] = [
 	"ranging", "overall"]
 
 func _ready() -> void:
+	world_root.add_child(quest_trail)
 	add_child(character_intro)
 	character_intro.conversation_requested.connect(_request_arrival_conversation)
 	character_intro.conversation_ended.connect(_end_arrival_conversation)
@@ -1207,6 +1209,9 @@ func _ready() -> void:
 	add_child(magic_selection)
 	magic_selection.status_changed.connect(func(message: String) -> void: spell_status.text = message)
 	AppState.magic_state_received.connect(_on_magic_state)
+	var death_panel := preload("res://src/ui/death_panel.gd").new()
+	death_panel.actor_for_player = func() -> Variant: return actor_nodes.get(AppState.local_actor_id)
+	game_view.add_child(death_panel)
 	spell_loadout.configure(spell_catalog)
 	magic_selection.cast_submitted.connect(spell_loadout.remember_cast)
 	magic_selection.target_validator = _spell_target_candidate
@@ -1547,10 +1552,13 @@ func _process(delta: float) -> void:
 		_queue_world_sync()
 	if game_view.visible:
 		_update_carried_item()
-		_update_attached_map_markers()
 		_update_map_viewports()
 		_update_local_actor_follow()
 		_update_character_intro(delta)
+		_update_attached_map_markers()
+		var trail_actor: Variant = actor_nodes.get(AppState.local_actor_id)
+		if is_instance_valid(trail_actor):
+			quest_trail.update_trail(delta, (trail_actor as Node3D).global_position)
 		_update_map_walk_target()
 		if AppState.actors.has(AppState.local_actor_id) and not character_intro.blocks_input():
 			exterior_stream.update_position(camera_rig.focus)
@@ -3574,6 +3582,7 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	quest_trail.clear()
 	character_intro.cancel()
 	_clear_map_walk_target()
 	for effect: Variant in world_effects:
@@ -4194,6 +4203,8 @@ func _movement_locked(ctrl_pressed: bool) -> bool:
 	if character_intro.blocks_input():
 		return true
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	if bool(AppState.death.get("dead", false)) or int(local_actor.get("health", 1)) <= 0:
+		return true
 	if (_banner_option("sit_lock") and not ctrl_pressed
 			and bool(local_actor.get("sitting", false))):
 		return true
@@ -4953,6 +4964,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"adjacent_maps":
 			_queue_map_picture_warmup()
 		&"lantern_tutorial":
+			quest_trail.apply_state(AppState.lantern_tutorial, adapter, AppState.current_map)
 			if AppState.lantern_tutorial.get("active", false) and AppState.lantern_tutorial.get("ring_training", false):
 				if spell_loadout.mode != "wheel": spell_loadout.set_mode("wheel")
 			if bool(AppState.lantern_tutorial.get("active", false)) and int(AppState.popup.get("popup_id", -1)) in [4000, 4001, 4002]:
@@ -8139,6 +8151,7 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 	marks.append_array(_current_entrance_marks())
 	marks.append_array(_current_service_marks())
 	marks.append_array(_harvest_grouping_marks())
+	marks.append_array(quest_trail.map_marks())
 	return marks
 
 func _current_service_records() -> Array:
@@ -11881,9 +11894,12 @@ func _begin_prepared_cast(spell_id: int, power: int) -> void:
 
 func _spell_target_candidate(spell_id: int, actor_id: int) -> bool:
 	var actor: Dictionary = AppState.actors.get(actor_id, {})
-	if actor.is_empty() or not bool(actor.get("alive", int(actor.get("health", 0)) > 0)):
+	if actor.is_empty():
 		return false
 	var spell: Dictionary = spell_catalog.spell(spell_id)
+	if not bool(actor.get("alive", int(actor.get("health", 0)) > 0)):
+		return actor_id != AppState.local_actor_id and int(actor.get("kind", 0)) in [1, 4] \
+			and spell.get("scope") == "target" and spell.get("effect") == "heal"
 	if bool(spell.get("hostile", false)):
 		if spell.get("effect") == "mana_drain" and int(actor.get("kind", 0)) not in [1, 4]: return false
 		if spell.get("effect") == "disrupt" and not ReplicatedActor3D.is_summon(actor): return false
@@ -13794,6 +13810,7 @@ func _fit_lantern_map_marker(node: Node3D, marker_name: String) -> void:
 ## withdraws one because the player walked elsewhere, so a marker for another
 ## map is held and hidden rather than discarded and guessed at again later.
 func _sync_map_markers() -> void:
+	quest_trail.apply_state(AppState.lantern_tutorial, adapter, AppState.current_map)
 	# Both sides are reduced the same way: the marker names its map as the
 	# server's own file reference, and CHANGE_MAP names the current one the
 	# same way, so neither is compared to a path the other never uses.
@@ -13835,6 +13852,7 @@ func _update_attached_map_markers() -> void:
 		if not is_instance_valid(raw_marker):
 			continue
 		var marker := raw_marker as MapMarker3D
+		marker.visible = not character_intro.owns_guide_beacon(marker.target_actor_id)
 		if marker.target_actor_id < 0:
 			continue
 		var dto: Dictionary = AppState.actors.get(marker.target_actor_id, {})

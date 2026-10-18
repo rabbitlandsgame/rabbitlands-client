@@ -247,6 +247,7 @@ static func turn(left: bool) -> PackedByteArray:
 ## Grow this list in the same commit that lands the window which decodes the
 ## packet, never before.
 const CLIENT_CAPABILITIES: Array[String] = [
+	"death_state_v1",
 	"music_program_v1",
 	"lantern_tutorial_v1",
 	"tutorial_rewards_v1",
@@ -3203,6 +3204,17 @@ static func decode_lantern(payload: PackedByteArray, logical_coordinates := fals
 		for coordinate: Variant in value.target:
 			if typeof(coordinate) not in [TYPE_FLOAT, TYPE_INT] or not is_finite(float(coordinate)) or coordinate < (-2147483648 if logical_coordinates else 0) or coordinate > (2147483647 if logical_coordinates else 65535) or int(coordinate)!=coordinate:
 				return {"type":"invalid", "error":"lantern_target"}
+		if value.has("route"):
+			if not value.route is Array or value.route.size() > 513:
+				return {"type": "invalid", "error": "tutorial_route"}
+			for point: Variant in value.route:
+				if not point is Array or point.size() != 2:
+					return {"type": "invalid", "error": "tutorial_route"}
+				for coordinate: Variant in point:
+					if typeof(coordinate) not in [TYPE_FLOAT, TYPE_INT] or not is_finite(float(coordinate)) \
+							or int(coordinate) != coordinate or coordinate < (-2147483648 if logical_coordinates else 0) \
+							or coordinate > (2147483647 if logical_coordinates else 65535):
+						return {"type": "invalid", "error": "tutorial_route"}
 		var required_flags: Array = ["north","east","south","west"] if value.get("tutorial", "") == "followup" \
 			else ["grove","temple","gate","light"] if value.get("tutorial", "") == "signed_ashore" \
 			else ["crafted","prepared","repaired","lit"]
