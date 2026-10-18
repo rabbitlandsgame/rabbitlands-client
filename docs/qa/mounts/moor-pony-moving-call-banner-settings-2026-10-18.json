@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "moving mount calls, combat-entry dismount and configurable overhead mount banner",
+  "behavior": [
+    "The 1.5 second call can begin and finish during movement within one outdoor map",
+    "Selecting an attack target preserves riding during the approach; actual combat dismounts before combat animation, including a missed first swing",
+    "Settings > Banners offers banner visibility, mount button, gallop button, gait/calling status, endurance and key hints",
+    "Right-clicking the local character opens character and mount banner menus, with a shortcut to all banner settings",
+    "Banner choices persist locally and remain synchronized between both settings entry points"
+  ],
+  "checks": {
+    "focusedServerTests": 103,
+    "combatAndRangingRegressionTests": 37,
+    "mountControlChecks": 18,
+    "renderedBannerSettingsChecks": 20,
+    "hotkeyChecks": 18,
+    "normalLandfallGameSmokeFailures": 0
+  },
+  "unchanged": ["Moor Pony model and rider animation", "R and Space bindings", "Ordinary collision and outdoor map policy"]
+}

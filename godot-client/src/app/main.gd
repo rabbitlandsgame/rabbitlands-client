@@ -800,6 +800,11 @@ var _last_skill_experience_msec := -100000
 ## Config key -> CheckBox on the right-click banner menu, filled in _ready().
 var _banner_option_boxes: Dictionary = {}
 var _banner_background_style: StyleBoxFlat
+const MountControls := preload("res://src/mounts/mount_controls.gd")
+var _mount_banner_options: Dictionary = MountControls.default_options()
+var _actor_hud_menu: PopupMenu
+var _character_banner_menu: PopupMenu
+var _mount_banner_menu: PopupMenu
 
 const FLOATING_FEEDBACK_ROW_HEIGHT := 21.0
 const FLOATING_FEEDBACK_MAX_ROWS := 4
@@ -1080,7 +1085,7 @@ func _ready() -> void:
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
-	game_view.add_child(preload("res://src/mounts/mount_controls.gd").new())
+	game_view.add_child(MountControls.new())
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
 	actor_type_models = model_registry.get("actorTypes", {})
@@ -2527,10 +2532,18 @@ func _configure_unified_settings() -> void:
 			audio_director.category_volumes[category])
 	# The banner controls themselves retain their names and persisted keys.
 	var actor_hud_menu := get_node("%BannerControls") as Control
-	(actor_hud_menu.get_node("Options") as Control).reparent(
-		settings_window.page_body("Banners"), false)
-	# Retain the stored option for compatibility; world right-click now cycles tools.
-	(%DisableMenu as CheckBox).hide()
+	var banners_page: VBoxContainer = settings_window.page_body("Banners")
+	(%DisableMenu as CheckBox).text = "Disable character right-click menu"
+	var mount_heading := Label.new()
+	mount_heading.text = "Mount banner"
+	banners_page.add_child(mount_heading)
+	for key: String in MountControls.OPTION_LABELS:
+		settings_window._add_toggle(banners_page,
+			"mount_banner_" + key, MountControls.OPTION_LABELS[key], true)
+	var character_heading := Label.new()
+	character_heading.text = "Character banner"
+	banners_page.add_child(character_heading)
+	(actor_hud_menu.get_node("Options") as Control).reparent(banners_page, false)
 	actor_hud_menu.queue_free()
 	settings_panel = settings_window.panel
 	old_panel.queue_free()
@@ -2621,6 +2634,8 @@ func _refresh_unified_settings() -> void:
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
 	}
 	values.merge(_hud_element_options)
+	for key: String in _mount_banner_options:
+		values["mount_banner_" + key] = _mount_banner_options[key]
 	for option: String in chat_hud.options:
 		values["chat_" + option] = chat_hud.options[option]
 	if system_chat_hud != null:
@@ -3951,6 +3966,8 @@ func _on_world_gui_input(event: InputEvent) -> void:
 					magic_selection.cancel()
 				elif _has_carry():
 					_cancel_carry()
+				elif AppState.authenticated and _pick_actor(_local_viewport_position(mouse_button.position)) == AppState.local_actor_id:
+					_open_actor_hud_menu(mouse_button.position)
 				else:
 					_cycle_world_action(_local_viewport_position(mouse_button.position))
 			viewport_container.accept_event()
@@ -3969,7 +3986,9 @@ func _on_world_gui_input(event: InputEvent) -> void:
 func _open_actor_hud_menu(_position: Vector2) -> void:
 	if _banner_option("menu_disabled"):
 		return
-	settings_window.open_tab("Banners")
+	_sync_banner_context_menu()
+	_actor_hud_menu.position = DisplayServer.mouse_get_position()
+	_actor_hud_menu.popup()
 
 func _configure_banner_menu() -> void:
 	for key: String in BANNER_OPTION_NODES:
@@ -3977,6 +3996,43 @@ func _configure_banner_menu() -> void:
 		box.set_pressed_no_signal(bool(BANNER_OPTION_DEFAULTS[key]))
 		box.toggled.connect(_on_banner_option_toggled)
 		_banner_option_boxes[key] = box
+	_actor_hud_menu = PopupMenu.new()
+	_character_banner_menu = PopupMenu.new()
+	_mount_banner_menu = PopupMenu.new()
+	add_child(_actor_hud_menu)
+	_actor_hud_menu.add_child(_character_banner_menu)
+	_actor_hud_menu.add_child(_mount_banner_menu)
+	_actor_hud_menu.add_submenu_node_item("Character banner", _character_banner_menu)
+	_actor_hud_menu.add_submenu_node_item("Mount banner", _mount_banner_menu)
+	_actor_hud_menu.add_item("All banner settings…", 2)
+	_actor_hud_menu.id_pressed.connect(func(_id: int) -> void: settings_window.open_tab("Banners"))
+	_character_banner_menu.hide_on_checkable_item_selection = false
+	_mount_banner_menu.hide_on_checkable_item_selection = false
+	for key: String in BANNER_OPTION_NODES:
+		var box := _banner_option_boxes[key] as CheckBox
+		_character_banner_menu.add_check_item("Disable character right-click menu" if key == "menu_disabled" else box.text)
+	_character_banner_menu.id_pressed.connect(func(id: int) -> void:
+		var box := _banner_option_boxes[BANNER_OPTION_NODES.keys()[id]] as CheckBox
+		box.button_pressed = not box.button_pressed)
+	for key: String in MountControls.OPTION_LABELS:
+		_mount_banner_menu.add_check_item(MountControls.OPTION_LABELS[key])
+	_mount_banner_menu.id_pressed.connect(func(id: int) -> void:
+		var key: String = MountControls.OPTION_LABELS.keys()[id]
+		_set_mount_banner_option(key, not bool(_mount_banner_options[key])))
+
+func _sync_banner_context_menu() -> void:
+	for index: int in BANNER_OPTION_NODES.size():
+		_character_banner_menu.set_item_checked(index, _banner_option(BANNER_OPTION_NODES.keys()[index]))
+	for index: int in MountControls.OPTION_LABELS.size():
+		_mount_banner_menu.set_item_checked(index, bool(_mount_banner_options[MountControls.OPTION_LABELS.keys()[index]]))
+
+func _set_mount_banner_option(key: String, value: bool) -> void:
+	if not _mount_banner_options.has(key):
+		return
+	_mount_banner_options[key] = value
+	game_view.get_node("MountControls").set_options(_mount_banner_options)
+	_sync_banner_context_menu()
+	_save_hud_settings()
 
 func _banner_option(key: String) -> bool:
 	var box_value: Variant = _banner_option_boxes.get(key)
@@ -3986,6 +4042,7 @@ func _banner_option(key: String) -> bool:
 
 func _on_banner_option_toggled(_enabled: bool) -> void:
 	_apply_banner_options()
+	_sync_banner_context_menu()
 	# The R indicator letter reads the ranging-lock switch, so it follows the
 	# toggle rather than waiting for the next unrelated state change.
 	_sync_hud_indicators()
@@ -7395,6 +7452,9 @@ func _load_hud_settings() -> void:
 			var box: CheckBox = _banner_option_boxes[banner_key] as CheckBox
 			box.set_pressed_no_signal(bool(config.get_value(
 				"banner", banner_key, BANNER_OPTION_DEFAULTS[banner_key])))
+		for key: String in _mount_banner_options:
+			_mount_banner_options[key] = bool(config.get_value("mount_banner", key, true))
+	game_view.get_node("MountControls").set_options(_mount_banner_options)
 	_apply_fps_limit(config.get_value("graphics", "fps_limit", 0))
 	_load_look_settings(config)
 	reference_window.call("configure", console_commands,
@@ -7543,6 +7603,8 @@ func _save_hud_settings() -> void:
 	config.set_value("inventory", "item_lists", _item_lists)
 	for banner_key: String in BANNER_OPTION_NODES:
 		config.set_value("banner", banner_key, _banner_option(banner_key))
+	for key: String in _mount_banner_options:
+		config.set_value("mount_banner", key, _mount_banner_options[key])
 	var error: Error = config.save(SETTINGS_PATH)
 	if error != OK:
 		push_warning("HUD settings save failed: " + error_string(error))
@@ -10018,6 +10080,8 @@ func _sync_local_status_icons() -> void:
 		local_status_grid.add_child(icon)
 
 func _banner_has_content() -> bool:
+	if game_view.get_node("MountControls").wants_banner():
+		return true
 	if not _local_status_effects.is_empty():
 		return true
 	if _banner_option("show_names"):
@@ -11273,6 +11337,9 @@ func _set_name_distance(value: Variant) -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if key.begins_with("mount_banner_"):
+		_set_mount_banner_option(key.trim_prefix("mount_banner_"), bool(value))
+		return
 	if section == "Audio" and key.begins_with("audio_"):
 		audio_director.set_category_volume(key.trim_prefix("audio_"), float(value))
 		_save_hud_settings()
