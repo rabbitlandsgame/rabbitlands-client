@@ -21,10 +21,14 @@ import re
 import sys
 from pathlib import Path
 
-ROAD_NODE = re.compile(r'^\[node name="([^"]+)" type="Path3D" parent="Roads"\]$', re.M)
-REGION_NODE = re.compile(r'^\[node name="([^"]+)" type="Marker3D" parent="Ground/Regions"\]$', re.M)
-CURVE = re.compile(r'^\[sub_resource type="Curve3D" id="([^"]+)"\]$', re.M)
-RESOURCE = re.compile(r'^\[sub_resource type="Resource" id="([^"]+)"\]$', re.M)
+# Godot 4.7 writes more attributes after the ones matched here (unique_id=NNN after
+# parent=), so every header pattern allows a trailing remainder.
+ROAD_NODE = re.compile(r'^\[node name="([^"]+)" type="Path3D" parent="Roads"(?: [^\n]*)?\]$', re.M)
+REGION_NODE = re.compile(r'^\[node name="([^"]+)" type="Marker3D" parent="Ground/Regions"(?: [^\n]*)?\]$', re.M)
+CURVE = re.compile(r'^\[sub_resource type="Curve3D"[^\n]*? id="([^"]+)"[^\n]*\]$', re.M)
+RESOURCE = re.compile(r'^\[sub_resource type="Resource"[^\n]*? id="([^"]+)"[^\n]*\]$', re.M)
+# Any node header under the two parents the audit reads, whatever its type or attributes.
+CHILD_NODE = re.compile(r'^\[node [^\n]*? parent="(Roads|Ground/Regions)"[^\n]*\]$', re.M)
 
 # A road's centreline should not turn tighter than this many road widths (radius),
 # nor run out and back: over a stretch of DETOUR_WINDOW_WIDTHS widths the straight
@@ -46,7 +50,19 @@ def block_after(text: str, start: int) -> str:
 
 
 def floats(text: str) -> list[float]:
-    return [float(v) for v in re.findall(r'-?[0-9.]+(?:e-?[0-9]+)?', text)]
+    return [float(v) for v in re.findall(r'-?[0-9.]+(?:e[-+]?[0-9]+)?', text)]
+
+
+class SceneFormatError(Exception):
+    """The scene has content the header patterns did not read: an audit of it would report too little."""
+
+
+def require_read(text: str, parent: str, pattern: re.Pattern) -> None:
+    headers = [m.group(0) for m in CHILD_NODE.finditer(text) if m.group(1) == parent]
+    unread = [h for h in headers if not pattern.match(h)]
+    if unread:
+        raise SceneFormatError(f'{len(unread)} of {len(headers)} nodes under {parent} were not read '
+                               f'(the scene format changed?), first: {unread[0]}')
 
 
 def scene_path(client: Path, map_id: str) -> Path:
@@ -62,7 +78,16 @@ def served_maps(client: Path) -> list[str]:
     return sorted(k for k, v in maps.items() if isinstance(v, dict) and v.get('status') == 'continent-v2-served')
 
 
+def read(client: Path, map_id: str, reader):
+    path = scene_path(client, map_id)
+    try:
+        return reader(path.read_text(encoding='utf-8'))
+    except SceneFormatError as e:
+        raise SceneFormatError(f'{path}: {e}') from None
+
+
 def roads(text: str) -> list[dict]:
+    require_read(text, 'Roads', ROAD_NODE)
     curves = {}
     for m in CURVE.finditer(text):
         pm = re.search(r'"points": PackedVector3Array\(([^)]*)\)', block_after(text, m.end()))
@@ -75,8 +100,12 @@ def roads(text: str) -> list[dict]:
         cm = re.search(r'curve = SubResource\("([^"]+)"\)', block)
         tm = re.search(r'^transform = Transform3D\(([^)]*)\)', block, re.M)
         wm = re.search(r'^default_width = ([0-9.]+)', block, re.M)
-        origin = floats(tm.group(1))[9:12] if tm else [0.0, 0.0, 0.0]
-        points = [(x + origin[0], y + origin[1], z + origin[2]) for x, y, z in curves.get(cm.group(1) if cm else '', [])]
+        if cm and cm.group(1) not in curves:
+            raise SceneFormatError(f'road {m.group(1)} uses curve {cm.group(1)}, which was not read')
+        # Transform3D(...) lists the basis ROWS, then the origin.
+        t = floats(tm.group(1)) if tm else [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+        points = [(t[0] * x + t[1] * y + t[2] * z + t[9], t[3] * x + t[4] * y + t[5] * z + t[10],
+                   t[6] * x + t[7] * y + t[8] * z + t[11]) for x, y, z in curves.get(cm.group(1) if cm else '', [])]
         out.append({'name': m.group(1), 'width': float(wm.group(1)) if wm else 6.0, 'points': points})
     return out
 
@@ -138,6 +167,7 @@ def audit_road(road: dict) -> dict:
 
 
 def regions(text: str) -> list[dict]:
+    require_read(text, 'Ground/Regions', REGION_NODE)
     presets = {}
     for m in RESOURCE.finditer(text):
         p = re.search(r'texture_preset = "([^"]+)"', block_after(text, m.end()))
@@ -182,7 +212,7 @@ def audit_region(region: dict) -> list[str]:
 def cmd_roads(client: Path, maps: list[str], out: Path | None) -> dict:
     report = {}
     for m in maps:
-        report[m] = [audit_road(r) for r in roads(scene_path(client, m).read_text(encoding='utf-8'))]
+        report[m] = [audit_road(r) for r in read(client, m, roads)]
         issues = [i for r in report[m] for i in r['issues']]
         tight = [r['name'] for r in report[m] if not r['radius_ok']]
         print(f'{m:13s} roads={len(report[m]):2d} doubles_back={sum(i["kind"] == "doubles_back" for i in issues)} '
@@ -196,7 +226,7 @@ def cmd_roads(client: Path, maps: list[str], out: Path | None) -> dict:
 def cmd_patches(client: Path, maps: list[str], out: Path | None) -> dict:
     report = {}
     for m in maps:
-        rows = regions(scene_path(client, m).read_text(encoding='utf-8'))
+        rows = read(client, m, regions)
         for row in rows:
             row['findings'] = audit_region(row) if row['enabled'] else []
         report[m] = rows
@@ -231,14 +261,14 @@ def cmd_overlay(client: Path, maps: list[str], out: Path) -> None:
         def px(x, z):
             return ((x - lo[0]) * scale, (z - lo[1]) * scale)
 
-        for road in roads(scene_path(client, m).read_text(encoding='utf-8')):
+        for road in read(client, m, roads):
             if len(road['points']) > 1:
                 draw.line([px(p[0], p[2]) for p in road['points']], fill=(255, 0, 0), width=3)
         for road in road_report[m]:
             for issue in road['issues']:
                 x, y = px(*issue['at'])
                 draw.ellipse([x - 30, y - 30, x + 30, y + 30], outline=(255, 255, 0), width=6)
-        for row in regions(scene_path(client, m).read_text(encoding='utf-8')):
+        for row in read(client, m, regions):
             if row['enabled'] and row['at'] and audit_region(row):
                 x, y = px(*row['at'])
                 draw.rectangle([x - 14, y - 14, x + 14, y + 14], outline=(0, 255, 255), width=4)
@@ -258,16 +288,19 @@ def main() -> int:
     if not (client / 'godot-client/data/maps/registry.json').is_file():
         sys.exit(f'{client} is not a client checkout (pass --client)')
     maps = args.maps or served_maps(client)
-    if args.command == 'roads':
-        cmd_roads(client, maps, args.out)
-    elif args.command == 'patches':
-        cmd_patches(client, maps, args.out)
-    elif args.command == 'drift':
-        cmd_drift(client, maps)
-    else:
-        if not args.out:
-            sys.exit('overlay needs --out')
-        cmd_overlay(client, maps, args.out)
+    try:
+        if args.command == 'roads':
+            cmd_roads(client, maps, args.out)
+        elif args.command == 'patches':
+            cmd_patches(client, maps, args.out)
+        elif args.command == 'drift':
+            cmd_drift(client, maps)
+        else:
+            if not args.out:
+                sys.exit('overlay needs --out')
+            cmd_overlay(client, maps, args.out)
+    except SceneFormatError as e:
+        sys.exit(f'map_audit: {e}')
     return 0
 
 
