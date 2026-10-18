@@ -1004,7 +1004,12 @@ lower sheet by 69 mm, where develop shows none; it did so already at
 - The Kneecops' front belt is now hidden under the jack. Restoring it would
   mean refitting it to ride over the jack's skirt.
 - The Scout Vest comes through the cape in rendered_cape_over_armour (see
-  above); the cape's yoke push does not reach its lower back or its collar.
+  above). The cause is the refitted vest, not the cape solver: its back tail
+  flares to 25 cm behind the body at 0.82 m. The fixture reads the cape
+  before the cloth solver poses it, and gives the same 69 mm sheet and 141 mm
+  collar with the develop solver. On the solver's own output, at
+  Idle_Subtle 2.03 s, the vest clips the sheet by 17 mm with either solver
+  (the cape session's measurement, at `aa5709ca`).
 
 ## Two body shapes, preserved race identity
 
