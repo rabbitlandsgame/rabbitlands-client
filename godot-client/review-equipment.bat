@@ -1,6 +1,6 @@
 @echo off
 rem Equipment review viewer: the real client actor on a turntable.
-rem   review-equipment.bat [--race luminous] [--sex male] [--set "Vanguard"] [--clip Walk] [--review-dir <folder>]
+rem   review-equipment.bat [--race luminous] [--sex male] [--set "Vanguard"] [--clip Walk] [--travel yes] [--review-dir <folder>]
 rem Notes and screenshots (F2) go to ..\.local\asset-authoring\working\equipment-review\<session>\
 rem Close any GPU-heavy renders first: the laptop GPU handles one at a time.
 setlocal

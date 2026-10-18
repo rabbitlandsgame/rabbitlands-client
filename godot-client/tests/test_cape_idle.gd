@@ -7,7 +7,9 @@ const MAX_IDLE_SLOPE := 0.06
 ## The whole sheet, not only its lower half. From just below the yoke to the
 ## calves the cape used to come 85-90 mm in toward the legs, after the trunk
 ## capsule had flared it out over the shoulder blades (owner's second review,
-## note 2); hung from the cloth's own line it moves under 15 mm.
+## note 2); hung from the cloth's own line it moves under 15 mm. Only in: a
+## cape held out over a knee flap is draping on it, and this kit's legguards
+## stood 20-24 mm through the hem until the shins were collided.
 const MAX_PLUMB_DRIFT := 0.04
 
 func _run() -> void:
@@ -84,9 +86,10 @@ func _check_hang(skeleton: Skeleton3D, label: String) -> void:
 	var slope := absf(depths[1] - depths[0])
 	_check(slope < MAX_IDLE_SLOPE, "%s hangs down (%.1f mm depth change)"
 		% [label, slope * 1000.0])
-	var drift := absf(depths[3] - depths[2])
-	_check(drift < MAX_PLUMB_DRIFT, "%s hangs plumb from the back (%.1f mm to the calves)"
-		% [label, drift * 1000.0])
+	# The rig's back is -z, so a cape coming in toward the legs gains z.
+	var inward := depths[3] - depths[2]
+	_check(inward < MAX_PLUMB_DRIFT, "%s does not follow the legs in (%+.1f mm to the calves)"
+		% [label, inward * 1000.0])
 
 func _check(ok: bool, label: String) -> void:
 	if not ok:
