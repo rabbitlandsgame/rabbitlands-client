@@ -4,7 +4,9 @@ extends SceneTree
 ## With ELORIA_LOOK=0 nothing is grown and no node is added. With it on,
 ## tufts grow on the grass and densest along a road's verge, never on the
 ## road itself, under a wall, on a steep bank, under water, on pale paving or
-## where a second road deck covers the rim of the first; placement is the
+## where a second road deck covers the rim of the first; around paving they
+## stop where its paint does, following a turned or round court's outline
+## (not its bounds) and leaving the seam between two courts bare; placement is the
 ## same every time it is worked out, lives in the ground's frame (so moving
 ## the world moves the bed, not the tufts within it), stays inside its
 ## budget, draws in three MultiMeshes on the gameplay layer without shadows,
@@ -139,6 +141,23 @@ func _run() -> void:
 	_expect(LookGrassBeds.value_noise(3.3, -7.1, 11) == LookGrassBeds.value_noise(3.3, -7.1, 11)
 		and LookGrassBeds.value_noise(3.3, -7.1, 11) >= 0.0
 		and LookGrassBeds.value_noise(3.3, -7.1, 11) <= 1.0, "the bed noise is deterministic")
+	# Pale paving: the grass works out the paint's own wandering cut.
+	var on_stones := true
+	var under_paint := true
+	var wander := Vector2(1.0, 0.0)
+	for step: int in 400:
+		var xz := Vector2(float(step % 20) * 2.3 - 604.0, float(step / 20) * 1.9 + 822.0)
+		on_stones = on_stones and LookGrassBeds.paving_share(0.6, xz) == 0.0
+		for coverage: float in [0.0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.3]:
+			if _paint_coverage(coverage, xz) > 0.0 and LookGrassBeds.paving_share(coverage, xz) > 0.0:
+				under_paint = false
+		var share := LookGrassBeds.paving_share(0.05, xz)
+		wander = Vector2(minf(wander.x, share), maxf(wander.y, share))
+	_expect(on_stones and under_paint,
+		"paving leaves no grass where its paint draws stone, wherever the paint's cut wanders")
+	_expect(wander.x < 0.1 and wander.y > 0.75,
+		"along one coverage the grass's edge wanders with the paint's lobes (share %.2f to %.2f)"
+			% [wander.x, wander.y])
 
 	# --- Look off: nothing ---------------------------------------------------
 	# The focus sits on the terrain frame's origin, (100, 0, -50) in the world.
@@ -196,7 +215,7 @@ func _run() -> void:
 			on_bank += 1
 		if x > 8.0 and x < 12.0 and z > -24.0 and z < -20.0:
 			in_pond += 1
-		if x > -13.15 and x < -6.85 and z > 14.85 and z < 21.15:
+		if x > -13.0 and x < -7.0 and z > 15.0 and z < 21.0:
 			on_paving += 1
 		if absf(x) < 1.2 and z >= 18.5 and z < 24.0:
 			on_overlap += 1
@@ -206,7 +225,28 @@ func _run() -> void:
 	_expect(in_house == 0, "no tuft under a wall (%d)" % in_house)
 	_expect(on_bank == 0, "no tuft on a steep bank (%d)" % on_bank)
 	_expect(in_pond == 0, "no tuft under water (%d)" % in_pond)
-	_expect(on_paving == 0, "no tuft on pale paving nor within its margin (%d)" % on_paving)
+	_expect(on_paving == 0, "no tuft on pale paving (%d)" % on_paving)
+	# The turned court, the round court and the two courts that meet.
+	var on_paint := 0
+	var turned_corners := 0
+	var round_corners := 0
+	var in_seam := 0
+	for position: Vector3 in positions:
+		if _paint_at(beds, beds.global_transform * position) > 0.0:
+			on_paint += 1
+		var spot := Vector2(position.x, position.z)
+		if _inside_court(spot, TURNED_COURT) < -0.75 \
+				and _bounds(TURNED_COURT).grow(0.5).has_point(spot):
+			turned_corners += 1
+		if _inside_court(spot, ROUND_COURT) < -0.75 and _bounds(ROUND_COURT).grow(0.5).has_point(spot):
+			round_corners += 1
+		if spot.x > 34.5 and spot.x < 37.5 and spot.y > -49.0 and spot.y < -41.0:
+			in_seam += 1
+	_expect(on_paint == 0, "no tuft where the paint draws a court's stones (%d)" % on_paint)
+	_expect(turned_corners > 20 and round_corners > 10,
+		"grass grows in a turned or round court's bounding-box corners, up to its outline (%d, %d)"
+			% [turned_corners, round_corners])
+	_expect(in_seam == 0, "no tuft along the seam where two paving courts meet (%d)" % in_seam)
 	_expect(on_overlap == 0, "no tuft on a deck's rim where another deck is road (%d)" % on_overlap)
 	var census := beds.get("_census") as Dictionary
 	_expect(census.get("face_mismatch", 0) == 0, "every face index found its triangle")
@@ -322,6 +362,51 @@ func _check_streaming_fade() -> void:
 		"a map change resets the previous map's coverage and fade")
 	beds.free()
 
+## The paint's coverage of pale paving at vertex alpha `coverage`, `xz` into
+## its mesh space, as painted_ground_surface.gdshaderinc cuts it (without the
+## texture's grain): kept apart from LookGrassBeds.paving_share on purpose.
+func _paint_coverage(coverage: float, xz: Vector2) -> float:
+	var lobe_at := xz / LookProfile.RIM_LOBE_METRES
+	var lobe := 0.65 * LookGrassBeds.paint_noise(lobe_at + Vector2(41.3, 17.9)) \
+		+ 0.35 * LookGrassBeds.paint_noise(lobe_at * 2.7 + Vector2(7.1, 29.3)) - 0.5
+	var weight := coverage + (LookGrassBeds.paint_noise(xz / LookProfile.RIM_NOISE_METRES) - 0.5) \
+		* 2.0 * LookProfile.PAVING_RIM.z + lobe * 2.0 * LookProfile.PAVING_RIM_LOBE.x
+	return smoothstep(LookProfile.PAVING_RIM.x - LookProfile.PAVING_RIM.y,
+		LookProfile.PAVING_RIM.x + LookProfile.PAVING_RIM.y, weight)
+
+## The most the paint covers `point` (world) with any pale paving the bed knows.
+func _paint_at(beds: LookGrassBeds, point: Vector3) -> float:
+	var painted := 0.0
+	for patch: Dictionary in beds.get("_patches") as Array:
+		if not bool(patch.paving) or not (patch.rect as Rect2).has_point(Vector2(point.x, point.z)):
+			continue
+		var coverage: float = beds.call("_patch_coverage", patch, point)
+		if coverage < 0.0:
+			continue
+		var local := (patch.inverse as Transform3D) * point
+		painted = maxf(painted, _paint_coverage(coverage, Vector2(local.x, local.z)))
+	return painted
+
+## How far `spot` (the terrain frame) lies inside a court: negative outside.
+static func _inside_court(spot: Vector2, court: Dictionary) -> float:
+	var local := (spot - (court.centre as Vector2)).rotated(-float(court.angle))
+	var half := float(court.half)
+	if bool(court.round):
+		return half - local.length()
+	return minf(half - absf(local.x), half - absf(local.y))
+
+static func _bounds(court: Dictionary) -> Rect2:
+	var half := float(court.half)
+	if bool(court.round):
+		return Rect2(court.centre - Vector2.ONE * half, Vector2.ONE * half * 2.0)
+	var corners := PackedVector2Array()
+	for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+		corners.append(court.centre + (corner * half).rotated(float(court.angle)))
+	var bounds := Rect2(corners[0], Vector2.ZERO)
+	for corner: Vector2 in corners:
+		bounds = bounds.expand(corner)
+	return bounds
+
 func _sorted(positions: PackedVector3Array) -> PackedVector3Array:
 	var copy := positions.duplicate()
 	copy.sort()
@@ -335,7 +420,9 @@ func _finish(previous: String) -> void:
 ## A continent field, 192 m square, in a terrain frame offset from its
 ## root: flat grass with a road deck down x = 0 (coverage 1 in the middle,
 ## 0 at 2.4 m out), a second deck overlapping its far end, a walled house, a
-## steep bank, a pond, and a pale paving patch.
+## steep bank, a pond, a pale paving patch, and pale paving courts as the
+## continent exporter writes them: a turned square, a round one, and two
+## squares that meet along one side.
 func _world() -> Node3D:
 	var world := Node3D.new()
 	world.name = "ImportedWorld_test"
@@ -380,7 +467,55 @@ func _world() -> Node3D:
 	plaza.set_surface_override_material(0, paving)
 	plaza.position = frame
 	world.add_child(plaza)
+	for court: Dictionary in [TURNED_COURT, ROUND_COURT, SEAM_COURT_WEST, SEAM_COURT_EAST]:
+		var node := MeshInstance3D.new()
+		node.name = "AuthoredGround_test_" + str(court.name)
+		node.mesh = _court(court)
+		node.set_surface_override_material(0, paving)
+		node.position = frame
+		world.add_child(node)
 	return world
+
+const TURNED_COURT := {"name": "turned", "centre": Vector2(-35.0, 35.0), "half": 6.0,
+	"angle": 0.52, "round": false, "blend": 2.0}
+const ROUND_COURT := {"name": "round", "centre": Vector2(35.0, 35.0), "half": 6.0,
+	"angle": 0.0, "round": true, "blend": 2.0}
+const SEAM_COURT_WEST := {"name": "seam_west", "centre": Vector2(30.0, -45.0), "half": 6.0,
+	"angle": 0.0, "round": false, "blend": 2.0}
+const SEAM_COURT_EAST := {"name": "seam_east", "centre": Vector2(42.0, -45.0), "half": 6.0,
+	"angle": 0.0, "round": false, "blend": 2.0}
+
+## A paving court as terrain_export.py writes a ground region: the terrain's
+## 2 m lattice triangles under it, its coverage smoothstep(0, blend, the
+## distance inside its shape) in each vertex's alpha, and no triangle whose
+## every vertex has none.
+func _court(court: Dictionary) -> ArrayMesh:
+	var reach := float(court.half) * 1.5 + 2.0
+	var low := ((court.centre as Vector2) - Vector2.ONE * reach).snapped(Vector2(2.0, 2.0))
+	var cells := int(ceil(reach * 2.0 / 2.0)) + 1
+	var alphas := PackedFloat32Array()
+	for i: int in cells + 1:
+		for j: int in cells + 1:
+			var inside := _inside_court(low + Vector2(i, j) * 2.0, court)
+			alphas.append(smoothstep(0.0, float(court.blend), inside) if inside > 0.0 else 0.0)
+	var vertices := PackedVector3Array()
+	var colours := PackedColorArray()
+	var indices := PackedInt32Array()
+	var used := {}
+	for i: int in cells:
+		for j: int in cells:
+			var a := i * (cells + 1) + j
+			for triangle: Array in [[a, a + cells + 1, a + 1], [a + 1, a + cells + 1, a + cells + 2]]:
+				if alphas[triangle[0]] <= 0.0 and alphas[triangle[1]] <= 0.0 and alphas[triangle[2]] <= 0.0:
+					continue
+				for corner: int in triangle:
+					if not used.has(corner):
+						used[corner] = vertices.size()
+						var xz := low + Vector2(corner / (cells + 1), corner % (cells + 1)) * 2.0
+						vertices.append(Vector3(xz.x, 0.03, xz.y))
+						colours.append(Color(1, 1, 1, alphas[corner]))
+					indices.append(int(used[corner]))
+	return _mesh(vertices, colours, indices)
 
 func _walk(world: Node3D, node_name: String, mesh: ArrayMesh, material: Material,
 		frame: Vector3) -> MeshInstance3D:

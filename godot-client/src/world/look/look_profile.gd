@@ -996,11 +996,20 @@ const GRASS_BARE_PATCH := Vector2(0.6, 0.35)
 const GRASS_BARE_EDGE_METRES := 1.3
 const GRASS_BARE_EDGE_JITTER := 0.2
 const GRASS_BARE_EDGE_FEATHER := 0.25
-## No grass within pale paving's bounds, nor this many metres beyond them:
-## judged by its coverage, the grass came up through the one-cell seams
-## between the Four Gates plaza's patches and along the rims of the avenue
-## decks that cross it.
-const GRASS_PAVING_MARGIN := 0.5
+## Where the grass stops at pale paving (LookGrassBeds.paving_share): it
+## follows the paving's coverage and the paint's own wandering cut
+## (PAVING_RIM, PAVING_RIM_LOBE), ends GRASS_PAVING_PULL of coverage short of
+## where the paint's step begins and thins out over GRASS_PAVING_FEATHER of
+## coverage before that. It used to stop at the paving's bounds grown by half
+## a metre, which cut every turned or round court out of the lawn as an
+## axis-aligned rectangle (map audit 2026-10-17, Landfall's courts). A seam
+## between two paving patches still grows none: a spot on both, or with paint
+## on both sides of it within GRASS_PAVING_SEAM_METRES (judged by coverage
+## alone, the grass came up through the one-cell seams between the Four Gates
+## plaza's patches).
+const GRASS_PAVING_PULL := 0.04
+const GRASS_PAVING_FEATHER := 0.1
+const GRASS_PAVING_SEAM_METRES := 1.5
 ## A terrain road (the worn colour the exporter paints into the terrain's
 ## vertex colour, LookProfile.TERRAIN_ROAD_COLOUR) is road from this weight
 ## and verge from this one.

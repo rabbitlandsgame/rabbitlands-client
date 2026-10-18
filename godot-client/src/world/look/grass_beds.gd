@@ -657,7 +657,9 @@ func _place_tile(key: Vector2i) -> void:
 		(Vector2(corner_b.x, corner_b.z) - Vector2(corner_a.x, corner_a.z)).abs())
 	var patches: Array[Dictionary] = []
 	for patch: Dictionary in _patches:
-		if (patch.rect as Rect2).intersects(tile_rect):
+		# Grown: a candidate at the tile's edge spreads its tufts past it, and
+		# looks for paving on both sides of it (`_paving_share`).
+		if (patch.rect as Rect2).intersects(tile_rect.grow(step + LookProfile.GRASS_PAVING_SEAM_METRES)):
 			patches.append(patch)
 	var waters: Array[Dictionary] = []
 	for water: Dictionary in _waters:
@@ -690,7 +692,8 @@ func _place_tile(key: Vector2i) -> void:
 			var local_hit := inverse * (hit.position as Vector3)
 			var local_normal := (inverse.basis * (hit.normal as Vector3)).normalized()
 			count += _grow(data, local_hit, local_normal, kind, ground.y, int(ground.z),
-				cell, cell_hash, step, _border_blend(_classified_region, area, borders, local_hit))
+				cell, cell_hash, step, _border_blend(_classified_region, area, borders, local_hit),
+				_paving_near(hit.position as Vector3, patches, step))
 	tile["count"] = count
 
 ## What the ground is where `hit` landed: (Ground, grassiness 0..1, palette).
@@ -725,10 +728,15 @@ func _classify(hit: Dictionary, up: Vector3, patches: Array[Dictionary],
 	var point: Vector3 = hit.position
 	var palette := float(body.palette)
 	_classified_region = String(body.get("region", ""))
-	# What the authored patches drawn over the ground say here: (0 grass,
-	# 1 road or paving, 2 verge along a patch's rim; the grass share left;
-	# how much of a green meadow patch covers it).
-	var cover := _patch_cover(point, patches) if kind != Surface.VERTEX \
+	# How much grass pale paving leaves here (none on it, thinning towards
+	# it), and what the other authored patches drawn over the ground say:
+	# (0 grass, 1 road or cobble, 2 verge along a patch's rim; the grass share
+	# left; how much of a green meadow patch covers it).
+	var paving := _paving_share(point, Vector2(point.x, point.z), patches) \
+		if kind != Surface.VERTEX else 1.0
+	if paving <= 0.0:
+		return Vector3(Ground.PATH, 0.0, palette)
+	var cover := _patch_cover(point, patches, paving) if kind != Surface.VERTEX \
 		else Vector3(0.0, 1.0, 0.0)
 	if int(cover.x) == 1:
 		return Vector3(Ground.PATH, 0.0, palette)
@@ -737,7 +745,7 @@ func _classify(hit: Dictionary, up: Vector3, patches: Array[Dictionary],
 		if alpha >= LookProfile.GRASS_VERGE_ALPHA.y or _road_beneath(hit, collider, up):
 			return Vector3(Ground.PATH, 0.0, palette)
 		return Vector3(Ground.VERGE, verge_strength(alpha, cell_hash) * slope
-			* _rim_grass(point, cell_hash), palette)
+			* _rim_grass(point, cell_hash) * paving, palette)
 	if _under_water(point, waters):
 		return Vector3(Ground.NONE, 0.0, 0.0)
 	if kind == Surface.VERTEX:
@@ -764,8 +772,8 @@ func _classify(hit: Dictionary, up: Vector3, patches: Array[Dictionary],
 		open *= lerpf(1.0, open_green(_vertex_colour(body, hit), bool(body.srgb)), green_share)
 	var grass := maxf(open * cover.y, meadow) * slope
 	if verge:
-		return Vector3(Ground.VERGE, maxf(grass, 0.5 * slope * _rim_grass(point, cell_hash)),
-			palette)
+		return Vector3(Ground.VERGE, maxf(grass, 0.5 * slope * _rim_grass(point, cell_hash)
+			* paving), palette)
 	return Vector3(Ground.GRASS, grass, palette)
 
 ## How much of its verge bed a road's or a patch's rim keeps over the biome
@@ -824,26 +832,20 @@ func _road_beneath(hit: Dictionary, collider: CollisionObject3D, up: Vector3) ->
 
 ## What the authored patches over `point` make of it: (0, share) grass that
 ## keeps `share` of its tufts (a yard or leaf litter keeps GRASS_ON_PATCH),
-## (1, 0) no grass - pale paving's footprint and its seams, or worn cobble or
-## sand where it covers the ground (thinning out towards a broken edge, see
-## LookProfile.GRASS_BARE_EDGE_*) - and (2, 1) verge along a patch's rim. The
-## third value is how much a green meadow patch covers the spot, as grassy
-## as it is whatever the biome beneath (LookProfile.GRASS_PATCH_GREEN).
-## Paving is judged by its bounds rather than its coverage: its low weights
-## are the seams between two plaza patches, where the grass beneath shows
-## through as thin lines the grass must not pick out.
-func _patch_cover(point: Vector3, patches: Array[Dictionary]) -> Vector3:
+## (1, 0) no grass - worn cobble or sand where it covers the ground (thinning
+## out towards a broken edge, see LookProfile.GRASS_BARE_EDGE_*) - and (2, 1)
+## verge along a patch's rim. The third value is how much a green meadow patch
+## covers the spot, as grassy as it is whatever the biome beneath
+## (LookProfile.GRASS_PATCH_GREEN). Both start from `paving`, the share pale
+## paving leaves (`_paving_share`).
+func _patch_cover(point: Vector3, patches: Array[Dictionary], paving := 1.0) -> Vector3:
 	var spot := Vector2(point.x, point.z)
-	var share := 1.0
+	var share := paving
 	var rim := false
 	var green := 0.0
 	for patch: Dictionary in patches:
 		var rect: Rect2 = patch.rect
-		if bool(patch.paving):
-			if rect.grow(LookProfile.GRASS_PAVING_MARGIN).has_point(spot):
-				return Vector3(1.0, 0.0, 0.0)
-			continue
-		if not rect.has_point(spot):
+		if bool(patch.paving) or not rect.has_point(spot):
 			continue
 		var coverage := _patch_coverage(patch, point)
 		if bool(patch.get("grass", false)):
@@ -873,7 +875,84 @@ func _patch_cover(point: Vector3, patches: Array[Dictionary]) -> Vector3:
 			share = minf(share, LookProfile.GRASS_ON_PATCH)
 		elif coverage >= LookProfile.GRASS_PATCH_RIM_FROM:
 			rim = true
-	return Vector3(2.0 if rim else 0.0, share, green)
+	return Vector3(2.0 if rim else 0.0, share, green * paving)
+
+## How much of its grass pale paving leaves at `point`: all of it off the
+## paving, none where its paint covers the ground, and a share thinning out
+## towards the paint's edge between (`paving_share`). Judged by the paving's
+## own coverage, so the grass follows a turned court's or a round plaza's
+## outline. Judged by its bounds grown by half a metre, as it was, every
+## paving patch drew an axis-aligned bald rectangle: Landfall's turned
+## forecourts stood in square lawns cut along straight lines.
+## The seams between paving patches grow none either, or the grass picks out
+## the thin lines where their low weights let the ground beneath show through
+## (the Four Gates plaza's patches): a spot on two paving patches is one, and so
+## is a spot with painted paving on both sides of it within
+## LookProfile.GRASS_PAVING_SEAM_METRES, across x or across z (patches that
+## only touch, and a cell neither of them covers). `seams` false skips that
+## second test, for a tuft's foot once its candidate has passed it.
+func _paving_share(point: Vector3, spot: Vector2, patches: Array[Dictionary],
+		seams := true) -> float:
+	var reach := LookProfile.GRASS_PAVING_SEAM_METRES if seams else 0.0
+	var near := false
+	var under: Dictionary = {}
+	var coverage := 0.0
+	for patch: Dictionary in patches:
+		if not bool(patch.paving):
+			continue
+		var rect: Rect2 = patch.rect
+		if not rect.grow(reach).has_point(spot):
+			continue
+		near = true
+		if not rect.has_point(spot):
+			continue
+		var found := _patch_coverage(patch, point)
+		if found < 0.0:
+			continue
+		if not under.is_empty():
+			return 0.0
+		under = patch
+		coverage = found
+	if not near:
+		return 1.0
+	var share := 1.0
+	if not under.is_empty():
+		# The exporter's mesh space is the continent frame the paint's noise runs in.
+		var local := (under.inverse as Transform3D) * point
+		share = paving_share(coverage, Vector2(local.x, local.z))
+	if share <= 0.0 or not seams:
+		return share
+	for across: Vector3 in [Vector3(reach, 0.0, 0.0), Vector3(0.0, 0.0, reach)]:
+		if _paving_painted(point + across, patches) and _paving_painted(point - across, patches):
+			return 0.0
+	return share
+
+## True when pale paving among `patches` is painted at `point`: its coverage
+## reaches the paint's cut (LookProfile.PAVING_RIM.x, without the wobble).
+func _paving_painted(point: Vector3, patches: Array[Dictionary]) -> bool:
+	var spot := Vector2(point.x, point.z)
+	for patch: Dictionary in patches:
+		if bool(patch.paving) and (patch.rect as Rect2).has_point(spot) \
+				and _patch_coverage(patch, point) >= LookProfile.PAVING_RIM.x:
+			return true
+	return false
+
+## The grass share pale paving leaves at coverage `coverage`, `xz` metres into
+## the continent frame. The paint ends where the coverage, moved by its fine
+## wobble and broad lobes, crosses LookProfile.PAVING_RIM.x
+## (painted_ground_surface.gdshaderinc); the grass works the same cut out with
+## the same noise, so it follows the stones' edge as it wanders rather than a
+## line of its own, stops LookProfile.GRASS_PAVING_PULL of coverage short of it
+## (a tuft's blades reach a little way past its foot), and thins out over the
+## GRASS_PAVING_FEATHER of coverage before that.
+static func paving_share(coverage: float, xz: Vector2) -> float:
+	var lobe_at := xz / LookProfile.RIM_LOBE_METRES
+	var lobe := 0.65 * paint_noise(lobe_at + Vector2(41.3, 17.9)) \
+		+ 0.35 * paint_noise(lobe_at * 2.7 + Vector2(7.1, 29.3)) - 0.5
+	var weight := coverage + (paint_noise(xz / LookProfile.RIM_NOISE_METRES) - 0.5) * 2.0 \
+		* LookProfile.PAVING_RIM.z + lobe * 2.0 * LookProfile.PAVING_RIM_LOBE.x
+	var edge := LookProfile.PAVING_RIM.x - LookProfile.PAVING_RIM.y - LookProfile.GRASS_PAVING_PULL
+	return smoothstep(edge, edge - LookProfile.GRASS_PAVING_FEATHER, weight)
 
 ## A vertex-coloured map's ground (Lantern Reach): (Ground, grassiness). Its
 ## colour is judged as stored, which is how the island's scene draws it.
@@ -1162,12 +1241,25 @@ func _biome_grass(point: Vector3, cell_hash: int) -> float:
 	# is (`grass.open`, 1 unless it says otherwise).
 	return float(LookProfile.region_value(_classified_region, "grass", "open", 1.0))
 
+## The pale paving patches among `patches` whose bounds come within `step`
+## of `point`: a candidate's tufts spread half a cell about it, so beside
+## paving each tuft's own foot is judged again (`_grow`).
+static func _paving_near(point: Vector3, patches: Array[Dictionary], step: float) -> Array[Dictionary]:
+	var near: Array[Dictionary] = []
+	for patch: Dictionary in patches:
+		if bool(patch.paving) and (patch.rect as Rect2).grow(step).has_point(Vector2(point.x, point.z)):
+			near.append(patch)
+	return near
+
 ## The tufts a candidate carries: none to GRASS_TUFTS_PER_CELL, as dense as
 ## its ground's class and grassiness ask, each at its own hashed spot in the
-## cell, turned, scaled and tilted halfway to the ground. Returns the count.
+## cell, turned, scaled and tilted halfway to the ground. Beside pale paving
+## (`paving`, from `_paving_near`) a tuft whose foot lands where the paving
+## leaves no grass is not grown: the candidate stands off the stones, but half
+## a cell's spread put its tufts on them. Returns the count.
 func _grow(data: Array[PackedFloat32Array], hit: Vector3, normal: Vector3, kind: int,
 		grassiness: float, palette: int, cell: Vector2i, cell_hash: int, step: float,
-		blend := Vector2.ZERO) -> int:
+		blend := Vector2.ZERO, paving: Array[Dictionary] = []) -> int:
 	var bed := 0.0
 	var density := LookProfile.GRASS_VERGE_DENSITY * grassiness
 	if kind == Ground.GRASS:
@@ -1196,11 +1288,17 @@ func _grow(data: Array[PackedFloat32Array], hit: Vector3, normal: Vector3, kind:
 	var tilt := Vector3.UP.lerp(normal, LookProfile.GRASS_GROUND_TILT).normalized()
 	var lean := Basis(Quaternion(Vector3.UP, tilt))
 	var wind := LookProfile.GRASS_WIND_DIRECTION.normalized()
+	var placed := 0
 	for index: int in tufts:
 		var tuft_seed := hash(Vector3i(cell.x, cell.y, index + 1))
 		var offset := Vector2(_unit(tuft_seed, 0) - 0.5, _unit(tuft_seed, 1) - 0.5) * step
 		var y := hit.y - (normal.x * offset.x + normal.z * offset.y) / maxf(normal.y, 0.3)
 		var origin := Vector3(hit.x + offset.x, y, hit.z + offset.y)
+		if not paving.is_empty():
+			var foot := global_transform * origin
+			if _paving_share(foot, Vector2(foot.x, foot.z), paving, false) <= 0.0:
+				continue
+		placed += 1
 		var pick := _unit(tuft_seed, 2)
 		var variant := 0
 		if kind == Ground.VERGE:
@@ -1230,8 +1328,8 @@ func _grow(data: Array[PackedFloat32Array], hit: Vector3, normal: Vector3, kind:
 			turn.x.z, turn.y.z, turn.z.z, origin.z,
 			tint.r, tint.g, tint.b, 1.0,
 			float(palette), blend.x, blend.y, phase]))
-	_count("tufts_" + GROUND_NAMES[kind], tufts)
-	return tufts
+	_count("tufts_" + GROUND_NAMES[kind], placed)
+	return placed
 
 ## The ground paint's mottle at `xz` (the continent frame, as the paint's own
 ## mesh space is) as a colour multiplier: its low-frequency value and warmth
