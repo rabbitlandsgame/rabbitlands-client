@@ -42,7 +42,7 @@ const COMMANDS := {
 	"#calc": "Evaluate arithmetic: #calc 12 * (3 + 4)",
 	"#mark": "Mark your current tile: #mark <label>",
 	"#markpos": "Mark a tile: #markpos <x> <y> <label>",
-	"#unmark": "Remove one of your marks: #unmark <label>",
+	"#unmark": "Remove a mark on this map: #unmark <label>",
 	"#marks": "List your marks on this map.",
 	"#ignore": "Hide someone's local, channel and private messages: #ignore <name>",
 	"#unignore": "Show someone's messages again: #unignore <name>",
@@ -234,10 +234,11 @@ func _store_mark(tile: Vector2i, label: String) -> Result:
 
 func _unmark(label: String) -> Result:
 	for index: int in range(marks.size()):
-		if str(marks[index].get("label", "")) == label:
+		if str(marks[index].get("label", "")) == label \
+				and str(marks[index].get("map", "")) == current_map:
 			marks.remove_at(index)
 			return Result.new(true, ["Removed mark %s." % label], true)
-	return Result.new(true, ["You have no mark called %s." % label])
+	return Result.new(true, ["You have no mark called %s on this map." % label])
 
 func _list_marks() -> Array[String]:
 	var lines: Array[String] = []

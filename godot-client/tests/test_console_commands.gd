@@ -46,6 +46,21 @@ func _run() -> void:
 		"#unmark removes one")
 	_expect(not console.run("#unmark Nothing").changed,
 		"removing a mark that is not there changes nothing")
+	console.current_map = "mirrorhold"
+	console.current_tile = Vector2i(40, 50)
+	console.run("#mark Reed bank")
+	_expect(console.marks.size() == 2
+		and console.run("#marks").lines.size() == 2,
+		"different maps can each have a mark with the same label")
+	_expect(console.run("#unmark Reed bank").changed
+		and console.marks.size() == 1
+		and str(console.marks[0].get("map", "")) == "four_gates"
+		and int(console.marks[0].get("x", 0)) == 770,
+		"#unmark removes the current map's mark and preserves the other map's")
+	_expect(not console.run("#unmark Reed bank").changed
+		and console.marks.size() == 1,
+		"#unmark never removes a mark that only exists on another map")
+	console.current_map = "four_gates"
 
 	# Ignore and filter decide what the player is shown, and nothing else.
 	console.run("#ignore Griefer")
