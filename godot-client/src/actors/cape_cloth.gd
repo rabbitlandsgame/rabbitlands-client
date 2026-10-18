@@ -131,6 +131,40 @@ const BACK_OFFSET := -0.02
 ## what hangs plumb from the yoke and what the body pushes out.
 var _fabric_rest: Array[PackedVector3Array] = []
 var _anchor_rest_inverse := Basis.IDENTITY
+## The legs, hip to knee and knee to ankle (thighs then shins, left then
+## right), and how far what is worn reaches behind each, sampled along it
+## (`set_shin_reach`).
+##
+## The leg capsules run hip to knee at a bare thigh's radius. That was all the
+## hem had to clear while the material line hung a hand's width in front of
+## the cloth. The cloth's own line hangs to the hem behind the calves, and in a
+## fighting stance the back leg's shin and greave stood 25-40 mm through it,
+## and the Vanguard's kneecops 26 mm above the knee. The native kernel takes
+## four capsules and no more, so both solvers keep the measured line off the
+## legs the same way, once they have run. A rider's legs hang beside the
+## mount, and the mount surface owns the cape there.
+const SHIN_RADIUS := CapeDrape.BARE_SHIN_RADIUS
+var _shins: Array[PackedInt32Array] = []
+var _shin_world := PackedVector3Array()
+var _shin_reaches: Array[PackedFloat32Array] = []
+## Each shin's back, in its calf bone's frame, and in world space this frame:
+## the reach is kept per bearing from it (`CapeDrape.shin_reach`), and turns
+## with the leg.
+var _shin_back_local := PackedVector3Array()
+var _shin_back_world := PackedVector3Array()
+## Each shin's furthest reach per sample along it, at any bearing: a stretch of
+## cloth further than that from the shin is clear without the bearing lookup.
+var _shin_row_reach: Array[PackedFloat32Array] = []
+## The cape's cross-section (`CapeDrape.fabric_line`): the chains' rest x off
+## the middle one, the sheet's half-width at each joint, and how far its folds
+## come in past the chains' line there, CapeDrape.SECTION_BINS from -x to +x
+## for each joint. The middle chain carries nearly the whole sheet and the
+## cloth between chains is a blend of them, so the legs are kept off the sheet
+## where the chains together put it, not off each chain's own line.
+var _section_knots := PackedFloat32Array()
+var _section_halves := PackedFloat32Array()
+var _section_folds := PackedFloat32Array()
+var _section_blend := PackedFloat32Array()
 
 func set_mount_surface(surface: RefCounted) -> void:
 	_mount_surface = surface
@@ -168,6 +202,22 @@ func _cache(skeleton: Skeleton3D) -> bool:
 		pair.append(skeleton.find_bone("calf_%s" % side))
 		if pair[0] >= 0 and pair[1] >= 0:
 			_legs.append(pair)
+	for segment: Array in [["thigh", "calf"], ["calf", "foot"]]:
+		for side in ["l", "r"]:
+			var shin := PackedInt32Array()
+			shin.append(skeleton.find_bone("%s_%s" % [segment[0], side]))
+			shin.append(skeleton.find_bone("%s_%s" % [segment[1], side]))
+			_shins.append(shin)
+			# The rig's back is -z in its rest space.
+			_shin_back_local.append(Vector3.ZERO if shin[0] < 0 else
+				skeleton.get_bone_global_rest(shin[0]).basis.inverse()
+				* Vector3(0.0, 0.0, -1.0))
+	# All four or none: the reaches the wearer measures come in this order.
+	for shin: PackedInt32Array in _shins:
+		if shin[0] < 0 or shin[1] < 0:
+			_shins.clear()
+			_shin_back_local.clear()
+			break
 	# The trunk keeps the upper sheet off the back the same way the legs
 	# keep the hem off the shins; without it the simulation relaxes the
 	# top links straight into the shoulder blades.
@@ -191,6 +241,8 @@ func _cache(skeleton: Skeleton3D) -> bool:
 	for pair: PackedInt32Array in _legs:
 		_cache_collision_pair(pair, CapsuleKind.LEG)
 	_collision_world.resize(_collision_bones.size())
+	_shin_world.resize(_shins.size() * 2)
+	_shin_back_world.resize(_shins.size())
 	_collision_axes.resize(_collision_pairs.size())
 	_collision_spans.resize(_collision_pairs.size())
 	_refresh_collision_descriptors()
@@ -355,12 +407,265 @@ func _hang_from(top: Vector3, chain: int, down: Vector3) -> PackedVector3Array:
 
 ## Where the cloth hangs behind each chain's material line, joint by joint, in
 ## the skeleton's rest space (`CapeDrape.fabric_line`); empty for the material
-## line itself. The chains drop back onto the new hang.
-func set_fabric_line(offsets: Array) -> void:
-	_fabric_rest.clear()
+## line itself. `section` is the cape's cross-section, as `fabric_line` gives
+## it. The chains drop back onto a new hang.
+func set_fabric_line(offsets: Array, section: Array = []) -> void:
+	var line: Array[PackedVector3Array] = []
 	for chain: Variant in offsets:
-		_fabric_rest.append(PackedVector3Array(chain))
+		line.append(PackedVector3Array(chain))
+	var measured := section.size() == 4
+	_section_knots = PackedFloat32Array(section[0]) if measured else PackedFloat32Array()
+	_section_halves = PackedFloat32Array(section[1]) if measured else PackedFloat32Array()
+	_section_folds = PackedFloat32Array(section[2]) if measured else PackedFloat32Array()
+	_section_blend = PackedFloat32Array(section[3]) if measured else PackedFloat32Array()
+	if line == _fabric_rest:
+		return
+	_fabric_rest = line
 	_settled = false
+
+
+## How far the legs reach behind each segment - left thigh, right thigh, left
+## shin, right shin - by sample along it and bearing from the leg's back
+## (`CapeDrape.shin_reach`): the body's own leg and whatever is worn over it.
+## A missing or empty table leaves SHIN_RADIUS.
+func set_shin_reach(reaches: Array) -> void:
+	_shin_reaches.clear()
+	for reach: Variant in reaches:
+		_shin_reaches.append(PackedFloat32Array(reach))
+	_shin_row_reach.clear()
+	var columns := CapeDrape.SHIN_BEARINGS
+	for reach: PackedFloat32Array in _shin_reaches:
+		var rows := PackedFloat32Array()
+		rows.resize(CapeDrape.REACH_SAMPLES)
+		rows.fill(SHIN_RADIUS)
+		if reach.size() == CapeDrape.REACH_SAMPLES * columns:
+			for at: int in range(reach.size()):
+				rows[at / columns] = maxf(rows[at / columns], reach[at])
+		_shin_row_reach.append(rows)
+
+
+func _keeps_off_legs() -> bool:
+	if _mount_surface != null or _shins.is_empty() \
+			or _section_knots.size() != _bones.size() \
+			or _section_halves.size() != LINKS + 1 \
+			or _section_folds.size() != (LINKS + 1) * CapeDrape.SECTION_BINS \
+			or _section_blend.size() != _section_folds.size() * _bones.size():
+		return false
+	for chain: int in range(_bones.size()):
+		if not _fabric_measured(chain):
+			return false
+	return true
+
+
+## The measured line moved straight back, away from the chest, until the sheet
+## the chains carry - between them and past the outer ones - clears the legs,
+## after either solver. Back rather than out from a leg, so a chain does not
+## slide across its neighbour. The links are read at their middles too: a link
+## from beside the knee to below the calf passed straight through a shin with
+## both ends clear of it.
+func _keep_off_legs(forward: Vector3, carried: Basis) -> void:
+	if forward == Vector3.ZERO:
+		return
+	# Across the cape is the rig's rest x, carried by the spine: the axis the
+	# cross-section was measured along.
+	var side := carried * Vector3.RIGHT
+	side -= forward * side.dot(forward)
+	if side.length_squared() < 1e-6:
+		return
+	side = side.normalized()
+	var bins := CapeDrape.SECTION_BINS
+	var deepest := 0.0
+	for fold: float in _section_folds:
+		deepest = maxf(deepest, fold)
+	# What each leg segment can reach: its furthest reach anywhere, and so the
+	# heights it spans. A level out of either is not read at all.
+	var furthest := PackedFloat32Array()
+	var lowest := PackedFloat32Array()
+	var highest := PackedFloat32Array()
+	for shin: int in range(_shins.size()):
+		var reach := SHIN_RADIUS
+		if shin < _shin_row_reach.size():
+			for row: float in _shin_row_reach[shin]:
+				reach = maxf(reach, row)
+		furthest.append(reach)
+		lowest.append(minf(_shin_world[shin * 2].y, _shin_world[shin * 2 + 1].y) - reach)
+		highest.append(maxf(_shin_world[shin * 2].y, _shin_world[shin * 2 + 1].y) + reach)
+	for index in range(1, LINKS + 1):
+		for third: float in [0.0, 0.5]:
+			if third > 0.0 and index == LINKS:
+				continue
+			var half := lerpf(_section_halves[index],
+				_section_halves[mini(index + 1, LINKS)], third)
+			var between := 2.0 * half / float(bins - 1)
+			var level := PackedVector3Array()
+			for chain: int in range(_bones.size()):
+				level.append(_level_point(chain, index, third))
+			var middle := level[1]
+			for shin: int in range(_shins.size()):
+				if middle.y < lowest[shin] or middle.y > highest[shin]:
+					continue
+				var knee := _shin_world[shin * 2]
+				var axis := _shin_world[shin * 2 + 1] - knee
+				var span := axis.length_squared()
+				if span < 1e-9:
+					continue
+				var travel := clampf((middle - knee).dot(axis) / span, 0.0, 1.0)
+				var nearest := clampf((knee + axis * travel - middle).dot(side), -half, half)
+				# The cape's line there, its folds at their deepest, still clear
+				# of the leg's furthest reach: nothing to read.
+				var line := middle + side * nearest
+				var along := clampf((line - knee).dot(axis) / span, 0.0, 1.0)
+				var gap := line.distance_to(knee + axis * along) - deepest - between
+				if gap >= furthest[shin]:
+					continue
+				# Its neighbours across only when the nearest stretch had to move.
+				if _push_section(level, index, third, nearest, half, side, forward,
+						shin, knee, axis, span):
+					for offset: float in [-between, between]:
+						_push_section(level, index, third, clampf(nearest + offset,
+							-half, half), half, side, forward, shin, knee, axis, span)
+
+
+## A chain's point `third` of the way from joint `index` to the next.
+func _level_point(chain: int, index: int, third: float) -> Vector3:
+	var points := _points[chain]
+	return points[index] if third <= 0.0 else points[index].lerp(points[index + 1], third)
+
+
+## Moves the chains carrying the sheet `across` the cape at one level back until
+## that stretch of sheet, its folds in front, clears one leg segment. The sheet
+## there is the blend of the chains its skin weights name, each carrying it at
+## its own offset across; each chain moves by its share of the push, the least
+## that moves the blend as far as it must go. Whether anything had to move.
+func _push_section(level: PackedVector3Array, index: int, third: float,
+		across: float, half: float, side: Vector3, forward: Vector3, shin: int,
+		knee: Vector3, axis: Vector3, span: float) -> bool:
+	var count := level.size()
+	var bins := CapeDrape.SECTION_BINS
+	var joint := float(index) + third
+	var column := clampf((across / maxf(half, 1e-4) + 1.0) * 0.5 * float(bins - 1),
+		0.0, float(bins) - 1.0001)
+	var row := clampf(joint, 0.0, float(LINKS) - 0.0001)
+	var low_row := int(row)
+	var low_column := int(column)
+	var fx := column - float(low_column)
+	var fy := row - float(low_row)
+	var top := (low_row * bins + low_column) * count
+	var bottom := ((low_row + 1) * bins + low_column) * count
+	var weights := Vector3.ZERO
+	var base := Vector3.ZERO
+	var norm := 0.0
+	for chain: int in range(count):
+		var weight := lerpf(lerpf(_section_blend[top + chain],
+			_section_blend[top + count + chain], fx), lerpf(_section_blend[bottom + chain],
+			_section_blend[bottom + count + chain], fx), fy)
+		weights[chain] = weight
+		if weight <= 0.0:
+			continue
+		base += (level[chain] + side * (across - _section_knots[chain])) * weight
+		norm += weight * weight
+	if norm <= 1e-6:
+		return false
+	var sample := base + forward * _section_fold(joint, across, half)
+	var back := _band_clearance(shin, sample, forward, knee, axis, span)
+	if back <= 0.0:
+		return false
+	for chain: int in range(count):
+		if weights[chain] <= 0.0:
+			continue
+		var share := back * weights[chain] / norm
+		var points := _points[chain]
+		points[index] -= forward * share
+		if third > 0.0:
+			points[index + 1] -= forward * share
+		_points[chain] = points
+		level[chain] -= forward * share
+	return true
+
+
+## How far the sheet's folds come in past the chains' line at `joint`
+## (fractional, down the chains) and `across` the cape, `half` either side.
+func _section_fold(joint: float, across: float, half: float) -> float:
+	var bins := CapeDrape.SECTION_BINS
+	var column := clampf((across / maxf(half, 1e-4) + 1.0) * 0.5 * float(bins - 1),
+		0.0, float(bins) - 1.0001)
+	var row := clampf(joint, 0.0, float(LINKS) - 0.0001)
+	var low_row := int(row)
+	var low_column := int(column)
+	var fx := column - float(low_column)
+	var top := lerpf(_section_folds[low_row * bins + low_column],
+		_section_folds[low_row * bins + low_column + 1], fx)
+	var bottom := lerpf(_section_folds[(low_row + 1) * bins + low_column],
+		_section_folds[(low_row + 1) * bins + low_column + 1], fx)
+	return lerpf(top, bottom, row - float(low_row))
+
+
+func _band_clearance(shin: int, sample: Vector3, forward: Vector3,
+		knee: Vector3, axis: Vector3, span: float) -> float:
+	if shin < _shin_row_reach.size():
+		# Further than the leg reaches anywhere at this height is clear.
+		var along := clampf((sample - knee).dot(axis) / span, 0.0, 1.0)
+		var row := along * float(CapeDrape.REACH_SAMPLES - 1)
+		var rows: PackedFloat32Array = _shin_row_reach[shin]
+		var furthest := maxf(rows[int(row)], rows[mini(int(row) + 1,
+			CapeDrape.REACH_SAMPLES - 1)])
+		if sample.distance_squared_to(knee + axis * along) >= furthest * furthest:
+			return 0.0
+	return _clear_backward(sample, -forward, shin, knee, axis, span)
+
+
+func _shin_reach(shin: int) -> PackedFloat32Array:
+	return _shin_reaches[shin] if shin < _shin_reaches.size() else _empty_reach
+
+
+## How far `sample` must move along `back` to leave one shin, whose reach
+## depends on where round the shin the sample is: the exit through the radius
+## at its bearing, read again where that exit lands, a few times over.
+func _clear_backward(sample: Vector3, back: Vector3, shin: int, knee: Vector3,
+		axis: Vector3, span: float) -> float:
+	var moved := 0.0
+	for _settle: int in range(3):
+		var at := sample + back * moved
+		var travel := (at - knee).dot(axis) / span
+		var along := clampf(travel, 0.0, 1.0)
+		var away := at - (knee + axis * along)
+		var direction := Vector3.ZERO
+		if travel > 0.0 and travel < 1.0:
+			direction = axis / sqrt(span)
+			away -= direction * away.dot(direction)
+		var radius := _shin_radius(shin, along, away)
+		if away.length_squared() >= radius * radius:
+			return moved
+		var move := back - direction * back.dot(direction)
+		var a := move.length_squared()
+		if a < 1e-6:
+			return moved + radius - away.length()
+		var b := away.dot(move)
+		var c := away.length_squared() - radius * radius
+		moved += (-b + sqrt(maxf(b * b - a * c, 0.0))) / a + 0.001
+	return moved
+
+
+## The shin's reach at a point `along` it and offset `away` from it.
+func _shin_radius(shin: int, along: float, away: Vector3) -> float:
+	var reach := _shin_reach(shin)
+	var columns := CapeDrape.SHIN_BEARINGS
+	if reach.size() != CapeDrape.REACH_SAMPLES * columns or away.length_squared() < 1e-10:
+		return SHIN_RADIUS
+	var bearing := rad_to_deg(acos(clampf(away.normalized().dot(
+		_shin_back_world[shin]), -1.0, 1.0)))
+	var column := clampf(bearing / CapeDrape.SHIN_BEARING_STEP - 0.5, 0.0,
+		float(columns) - 1.0001)
+	var row := along * float(CapeDrape.REACH_SAMPLES - 1)
+	var low_row := mini(int(row), CapeDrape.REACH_SAMPLES - 2)
+	var low_column := int(column)
+	var fy := row - float(low_row)
+	var fx := column - float(low_column)
+	var top := lerpf(reach[low_row * columns + low_column],
+		reach[low_row * columns + low_column + 1], fx)
+	var bottom := lerpf(reach[(low_row + 1) * columns + low_column],
+		reach[(low_row + 1) * columns + low_column + 1], fx)
+	return maxf(SHIN_RADIUS, lerpf(top, bottom, fy))
 
 
 ## The reach the worn torso was measured to have, along each capsule. Empty
@@ -399,6 +704,12 @@ func _snapshot_collision_world(skeleton: Skeleton3D,
 		var axis := _collision_world[pair.y] - _collision_world[pair.x]
 		_collision_axes[capsule] = axis
 		_collision_spans[capsule] = axis.length_squared()
+	for shin: int in range(_shins.size()):
+		for end: int in range(2):
+			_shin_world[shin * 2 + end] = to_world * skeleton.get_bone_global_pose(
+				_shins[shin][end]).origin
+		_shin_back_world[shin] = (to_world.basis * skeleton.get_bone_global_pose(
+			_shins[shin][0]).basis * _shin_back_local[shin]).normalized()
 
 
 func _push_out_of_collision_snapshot(to_world: Transform3D,
@@ -506,9 +817,11 @@ func _process_modification_with_delta(delta: float) -> void:
 		_settled = true
 		return
 
+	var fabrics: Array[PackedVector3Array] = []
 	for chain in range(_bones.size()):
 		var rest := _rest_joints_from_pose(to_world, chain, anchor_pose, down)
 		var fabric := _fabric_joints(rest, chain, anchor_carry)
+		fabrics.append(fabric)
 		if _fabric_measured(chain):
 			rest = _hang_from(fabric[0], chain, down)
 		var points := _points[chain]
@@ -555,7 +868,10 @@ func _process_modification_with_delta(delta: float) -> void:
 					points[index] = _mount_surface.call("limit_lift", points[index], rest[0], material_length, float(index) / LINKS)
 		_points[chain] = points
 		_previous[chain] = previous
-		_write_chain_bones(skeleton, chain, fabric, anchor_pose, to_world, to_local)
+	if _keeps_off_legs():
+		_keep_off_legs(forward, anchor_carry)
+	for chain in range(_bones.size()):
+		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose, to_world, to_local)
 	_settled = true
 
 
@@ -583,6 +899,8 @@ func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
 		_native_constraint_fallbacks += 1
 		return false
 	_native_constraint_calls += 1
+	if _keeps_off_legs():
+		_keep_off_legs(forward, carried)
 	for chain: int in range(_bones.size()):
 		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose,
 			to_world, to_local)

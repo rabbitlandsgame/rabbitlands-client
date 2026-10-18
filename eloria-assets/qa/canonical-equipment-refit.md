@@ -298,9 +298,21 @@ real client actor (`tools/equipment_review/`). It is configured the way
 
 - **Drop-downs:** race (all eight), sex, armour set and animation. The sets
   are the four class starter kits from `CreationArchetypes`, plus those in
-  `tools/equipment_review/review_sets.json`. The chosen clip loops at the
-  game's playback speed.
-- **Toggles:** headwear, weapons and cape, and hair.
+  `tools/equipment_review/review_sets.json`. Since the audit (2026-10-18)
+  that file also lists the 60 other generated sets as "Audit <Theme> <index>
+  (<torso>)", each with its theme's weapon and the Red Cape. The chosen clip
+  loops at the game's playback speed. A walk or a run plays at the speed the
+  client gives it for its own pace: Walk at 2.17× for 1.67 m/s and Run_Female
+  at 1.81× for 5.0 m/s (before 2026-10-18 the viewer played them at 3.5× and
+  2.17×).
+- **Toggles:** headwear, weapons and cape, hair, and travel.
+- **Travel** (T, or `--travel yes`): a walk or a run moves the actor through
+  the scene at that pace, along the way it faces, with the camera following
+  and a metre grid on the floor. On the spot the cape cloth never sees the
+  actor move, so it hangs into the arms and legs as it never does in play.
+  Travelling, the clip, the actor and the cloth advance together in game
+  frames: a pause freezes the cloth where it was, `.` plays one frame on, and
+  slow motion shows each frame for longer instead of making it shorter.
 - **Camera:** mouse orbit, pan and zoom, keyboard turning, and preset views
   on 1–5. Space pauses, `,` and `.` step a frame, and `[` and `]` change the
   speed.
@@ -315,7 +327,9 @@ Notes go to `<checkout>/.local/asset-authoring/working/equipment-review/<session
 Each session folder holds:
 
 - `notes.jsonl`: one line per note, with the race, sex, set, each piece's key
-  and resolved scene, the clip and its time, the camera, and the commit;
+  and resolved scene, the clip and its time, the travel toggle with its pace
+  and clip speed, the camera (its target is relative to the actor's ground
+  point), and the commit;
 - `notes.md`, the same notes in readable form;
 - `shot_NNN.png`, the screenshots;
 - `session.json`.
@@ -332,6 +346,9 @@ The viewer also reshoots a review without anyone at the keyboard:
 - `--equipment <equipment.json>` reads a copy that points at candidate GLBs,
   so a fix is seen on the noted view before it is installed.
 - `--headwear yes|no` overrides the notes' headwear toggle.
+- `--travel yes|no` overrides the notes' travel toggle. Travelling, a replay
+  plays 2 s of the clip at 60 frames a second, ending on the noted time, so
+  the cloth is streaming on the noted frame.
 - `--debug-tint yes` draws generated backings magenta and body surfaces cyan.
   It tells a hole from a dark lining, or from the skin behind it.
 
@@ -1003,13 +1020,689 @@ lower sheet by 69 mm, where develop shows none; it did so already at
   border of the crotch fill.
 - The Kneecops' front belt is now hidden under the jack. Restoring it would
   mean refitting it to ride over the jack's skirt.
-- The Scout Vest comes through the cape in rendered_cape_over_armour (see
-  above). The cause is the refitted vest, not the cape solver: its back tail
-  flares to 25 cm behind the body at 0.82 m. The fixture reads the cape
-  before the cloth solver poses it, and gives the same 69 mm sheet and 141 mm
-  collar with the develop solver. On the solver's own output, at
-  Idle_Subtle 2.03 s, the vest clips the sheet by 17 mm with either solver
-  (the cape session's measurement, at `aa5709ca`).
+- The Scout Vest came through the cape in rendered_cape_over_armour. Done
+  on 2026-10-18 (see **The Scout Vest under a cape (2026-10-18)**): the vest's
+  back tail, 25 cm behind the body at 0.82 m, is now held in with `hug`. The
+  tail's 69 mm is gone from the fixture, and its part of the 17 mm on the
+  solver's own output is gone too. What remains is 18 mm at the back of the
+  shoulder, at the cape's side edge. It was there before as well, and it is
+  within the fixture's tolerance.
+
+### The cape in the owner's fourth review (2026-10-18)
+
+Four notes, taken at `619a19f8` with the viewer's weapons and cape on
+(session `equipment-review/2026-10-17_23-42-13`). The owner asked for notes
+1–3 to be judged against the cape moving as it does in play, not in a frozen
+frame.
+
+How it was measured: for each frame, the furthest any arm, leg or weapon
+vertex stands outside the cape's sheet. That is the distance past the
+nearest cape vertex that a chain carries, outward from the spine. The rigid
+yoke, which armour may stand through, is not counted, and nor is anything
+within 3 cm of the cape's border. The cloth runs over a whole clip cycle.
+"Moving" means the actor travels at the client's own speeds, with the clip
+played at the speed the client would play it:
+
+- walking: 1.67 m/s, Walk at 2.18×;
+- running: 5.0 m/s, Run_Female at 1.81×.
+
+The Warden's sleeves read up to 13 mm in idle, which is this measure's floor.
+
+| Note | In place (the viewer) | Moving, whole cycle |
+| --- | ---: | ---: |
+| 1. Warden, Run_Female 0.59 s, arm | 35 mm (worst 38) | 0 mm |
+| 2. Warden, Run_Female 0.28 s, leg | worst 40 mm | 0 mm |
+| 3. Warden, Walk 0.06 s, hand | 38 mm (worst 38) | 0 mm |
+
+**Notes 1–3 are motion-only and are left as they are.** The viewer played a
+run or a walk on the spot, so the cloth never saw the actor travel. In
+motion the cape streams back off the arms, legs and hands at both noted
+times and through every sample.
+
+The viewer now has a travel option (see **Reviewing fits in the client**).
+`--replay notes.jsonl --notes 1,2,3 --travel yes` reshoots the three views
+with the actor moving, and the cape streams clear of the arm, the leg and the
+hand: [in place and travelling](design-fit/review4-travel.jpg).
+
+**Note 4 (Phoenix set, Red Cape 2:12, Fighting_Idle 0.01 s) is fixed.**
+
+The leg capsules ran hip to knee, so nothing collided the shins. In the
+fighting stance the back leg's shin and greave stand behind the hem. With
+the solver before the second-review fix the result was the same: 25 mm at
+the noted frame and 37–40 mm over the cycle.
+
+What changed (`cape_cloth.gd`, `cape_drape.gd`, `replicated_actor_3d.gd`):
+
+- After the solve, the measured cloth line is kept off both shins, knee to
+  ankle, the same way in both solvers. The native kernel takes four capsules
+  and no more, so it is handed the same rests as before and the shins are
+  handled afterwards in GDScript.
+- Each chain point stands for the cloth 7.5 cm either side of it, and for
+  that cloth's inner folds. `CapeDrape.fabric_line` now measures the folds:
+  2–8 cm in front of the line.
+- Links are also checked at their thirds. A link from beside the knee to
+  below the calf had passed through a shin with both ends clear of it.
+- Points move straight back, away from the chest, so a chain does not slide
+  across its neighbour.
+- `CapeDrape.shin_reach` measures each shin's reach per rig and per worn
+  torso, legs and boots. It counts the body's own calf and whatever is worn
+  over it, on that leg's side only, per 15° of bearing from the leg's back.
+  A single radius was the round-capsule problem again: an Amberwood knee flap
+  stands 0.31 m straight back, and as a single radius it bowed an idle cape
+  45 mm. The other leg's back flap also had to be kept out.
+- This applies only to a measured line, and never to a mounted rider.
+- A change of legs or boots re-tells the cloth.
+
+Results:
+
+- Note 4: 0 mm at the noted frame. Over the cycle the worst is 17 mm, at
+  0.70 s, and 11 of 52 samples are over 10 mm (before: all 52).
+- The test kit's Amberwood legguards (4:171) stood 20–24 mm through the hem
+  in idle. They now read 0 mm, and the cape drapes 15–45 mm out over the
+  knee flap.
+- The note-2 view (Vanguard) is unchanged within 3 mm.
+- Cost: 110–140 µs per step with a measured line on the Phoenix kit, against
+  58–82 µs without it (debug build, headless).
+
+Tests:
+
+- `test_cape_idle.gd` passes. Its check is now one-sided: the cape must not
+  come in toward the legs. Being pushed out over leg armour is draping.
+- These pass:
+  - `test_cape_cloth.gd` (52 µs, under its 200 µs budget) and
+    `test_cape_drape.gd`;
+  - both parity suites (the shins act only on a measured line, which the
+    harness clears);
+  - `test_actor_render_quality.gd`;
+  - the mount suites `test_mounted_cape.gd` (44 checks),
+    `test_mounted_player.gd` (1,130) and `test_mount_preview_state.gd` (39),
+    with no failures.
+- The native suites fail only because the extension is not built here.
+
+Evidence: [note 4, the idle drape and notes 1–3 in motion](design-fit/review4-cape.jpg).
+Scratch harnesses: the client's
+`.local/asset-authoring/working/equipment-cape-2026-10-17/review4/`.
+
+**Not yet done.**
+
+- Note 4 still read up to 17 mm at a few frames of the Fighting_Idle cycle;
+  see the fifth review below.
+- Arms are not collided with the cape's sides. In place, a swinging elbow
+  passes through them (notes 1 and 3); in motion it does not.
+
+### Audit batch 1: Sunmane (2026-10-18)
+
+The owner asked for the same audit on the other sets. It is in
+[design-fit/audit-2026-10.md](design-fit/audit-2026-10.md): all 60 remaining
+sets, on both Human bodies, measured through five clips, shot in the review
+viewer and compared with a concept target solved from each set's raw pieces,
+then ranked by how bad and how widely worn they are. The Sunmane Steppe line
+is the starting tier (0-1 armour per piece) and four of its sets rank among
+the worst nine, so they are the first batch:
+
+| Set | Torso | Legs | Boots |
+| --- | --- | --- | --- |
+| Sunmane 02 | Fringed Kaftan 5:241 | Wrapskirt Trousers 4:236 | Steppe Wrap Boots 6:217 |
+| Sunmane 03 | Rider Vest 5:242 | Steppe Chaps 4:237 | Bronze Boots 6:218 |
+| Sunmane 05 | Sundisc Cuirass 5:244 | Bronze Tassets 4:239 | Sunplate Boots 6:220 |
+| Sunmane 06 | Red Sash Wrap 5:245 | Sashcord Trousers 4:240 | Sashed Boots 6:221 |
+
+What the audit found on them: the trousers and tassets lay over the coats'
+fronts (65-97% of the covered rays) and backs; every collar sat in the nape
+(104-215 cells, up to 10 cm deep); the Bronze Tassets belled out and stood
+8-10 cm behind the back plane; Sunmane 06's scarf end and sash tails stood
+7-15 cm behind the back and its trousers left a 9% gap above the boots; the
+Steppe Chaps' fringe was scattered over both legs as dark shards. The headwear
+is not part of this batch.
+
+**Specs.** `sunmane_02.json`, `sunmane_03.json`, `sunmane_05.json` and
+`sunmane_06.json` were drafted by the audit's rules, the kits' `make_specs`
+rules with girth scales chosen from the same chest/waist and thigh clearance
+tables (the rules reproduce the four kit scales to within 0.04), and they
+carry the kits' `collar`, `twist`, `centre_cuffs`, `conform` (female) and
+`tuck_into` (coat at the back, boots). Four readings were made by hand:
+
+- **Drop-crotch trousers** (Sunmane 02 and 06). A wrap or sash skirt hides the
+  crotch, and the trousers are drawn baggy with a low crotch. The crotch is
+  read at 0.15 source units, so the waistband lands at the body's waist and
+  the baggy seat hangs below the body's crotch as drawn.
+- **A sleeveless vest** (Sunmane 03). The sleeve finder took the Rider Vest's
+  side panels for sleeves; the spec has no arm bones.
+- **Back tuck to 8 cm** (Sunmane 05), the Phoenix precedent: at 4 cm the
+  trousers' waist still showed above the tassets at the cuirass's back.
+- **`hug`** (Sunmane 02 and 06), below.
+
+**Two opt-in tool changes.** Both leave every earlier spec as it was: the
+Vanguard and Phoenix specs re-solve byte-identically, and a sleeved torso
+takes the old lining path.
+
+- `design_fit_blender.py` gains the spec key `hug`. A concept can draw a sash
+  tail or a scarf end blown out behind the wearer; carried onto the body,
+  Sunmane 06's stood 7-15 cm behind the back and the seat, where a cape
+  hanging plumb from the shoulders meets it. For the design bones it names,
+  over a height band and an arc of bearings round each bone (here about
+  120-240°, the back), each vertex's standoff over the body surface d is mapped to
+  `start` + (`max` − `start`) tanh((d − `start`) / (`max` − `start`)) past
+  `start` (3 and 6 cm here). The map is monotonic, so layers lying behind one
+  another keep their order, and it fades in at the band's ends and the arc's.
+  It runs before any tuck. The tails then hang straight down the back.
+- `torso_remap.art_lining_weights(..., sleeveless=...)`. A design-fit lining
+  takes the weights of the art it lies under. Over the arms of a sleeveless
+  vest no art lies, so the nearest art was the vest and the arm lining stayed
+  in the rest pose with the trunk: the arms stuck out sideways. When a
+  design fit gives no vertex to an arm, the lining over the arms now keeps
+  lining_weights' own arm field.
+
+The kit session (owner of these tools) and the cape session were told before
+either change.
+
+**Results.** Silhouette IoU against the solved targets, idle, front and side
+(Blender, backings hidden):
+
+| Set | Body | Front old | Front new | Side old | Side new |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Sunmane 02 | male | 0.837 | 0.993 | 0.764 | 0.985 |
+| Sunmane 02 | female | 0.846 | 0.992 | 0.778 | 0.981 |
+| Sunmane 03 | male | 0.799 | 0.968 | 0.752 | 0.980 |
+| Sunmane 03 | female | 0.798 | 0.970 | 0.760 | 0.976 |
+| Sunmane 05 | male | 0.870 | 0.977 | 0.763 | 0.972 |
+| Sunmane 05 | female | 0.862 | 0.978 | 0.781 | 0.972 |
+| Sunmane 06 | male | 0.879 | 0.992 | 0.685 | 0.986 |
+| Sunmane 06 | female | 0.898 | 0.991 | 0.686 | 0.986 |
+
+At the 95th percentile the installed art lies within 0.1-0.3 mm of the target
+for the coats, 7-14 mm for the legs and 2-15 mm for the boots; the old fits
+were 28-79 mm, 56-150 mm and 18-28 mm.
+
+The audit's measures, old → new, worst frame through the five clips, male /
+female:
+
+| Measure | Sunmane 02 | Sunmane 03 | Sunmane 05 | Sunmane 06 |
+| --- | --- | --- | --- | --- |
+| Trousers over the coat, front (%) | 72→28 / 52→34 | 47→9 / 38→6 | 97→24 / 89→15 | 66→14 / 67→26 |
+| Trousers over the coat, back (%) | 61→48 / 61→59 | 62→5 / 75→33 | 30→23 / 43→40 | 21→39 / 35→59 |
+| Collar inside the nape (cells) | 215→26 / 181→63 | 160→12 / 159→23 | 129→5 / 104→10 | 127→12 / 112→16 |
+| Trousers behind the back plane (cm) | 2.2→−3.4 / 4.9→−2.7 | 1.2→3.8 / 2.3→4.5 | 9.7→2.3 / 8.0→2.4 | −2.6→−5.9 / −0.7→−4.3 |
+| Coat behind the back plane (cm) | 1.5→4.7 / 2.1→3.9 | −0.6→4.0 / 1.2→2.3 | −0.5→−0.8 / −2.0→−0.8 | 6.5→0.0 / 7.4→−1.2 |
+| Gap between trousers and boots (%) | 2.1→1.1 / 0.8→1.0 | 0.8→1.2 / 0.8→0.8 | 1.4→0.6 / 1.1→0.3 | 8.9→0.9 / 9.4→0.5 |
+| Torn art in the bow pull, coat (%) | 0.4→1.3 / 0.3→1.2 | 0.6→1.0 / 0.5→0.8 | 0.7→0.9 / 0.4→0.8 | 1.1→0.8 / 1.1→1.2 |
+
+The coats' torn share rises as the kits' did when their seams were sewn
+(second review), and stays within the kits' 0.4-2.3%. The trousers tuck into
+the knee boots: the tuck moves the baggy Steppe trousers by up to 25 cm below
+the knee, all of it inside the shafts.
+
+In the engine (review viewer, `--replay` of the audit's views, real actor):
+the coats' belts and sashes now lie over the trousers and tassets; the tassets
+hang on the thighs; the boots show; the Steppe Chaps' fringe stays on the
+outer seams; Sunmane 06's tails hang straight and no longer show under the
+cape's hem; and the debug tint shows less lining at the arms and down
+Sunmane 06's trousers. Evidence:
+
+- [Blender target / design fit / previous fit](design-fit/audit-batch1-blender-target-new-old.jpg)
+- [in-engine before/after, idle and cape](design-fit/audit-batch1-engine-idle-cape.jpg)
+- [in-engine before/after, walk, run, bow, fighting idle](design-fit/audit-batch1-engine-motion.jpg)
+
+**Install.** The 24 Human variants were refitted
+(`refit_human_bodies.py --tag audit2`, Sunmane 05's legs again as `audit3`
+after the tuck change), installed with `install_human_equipment.py`, then
+`share_human_equipment_textures.py`. The registry and catalogue were converted
+back to LF and are byte-identical to before: scenes and sockets are
+unchanged. The eight new fitted-cloth textures replace eight that no GLB
+references any more; the six older orphans stay. The packed GLBs change by
+−1.4% to +6.7%. Godot's import was refreshed, and the seven creature `.import`
+files it rewrites were reverted.
+
+Tests. The pytest suites were also run on this branch's base (`82ae2326`)
+before the install; the Godot suites are compared with the results recorded
+for the third review above:
+
+| Suite | After | Before |
+| --- | --- | --- |
+| Equipment, remapper and held-prop pytest | 9 failed, 70 passed | the same 9 IDs at `82ae2326` (and at `224bb9b9`) |
+| torso_body_cover, torso LOD, imported-actor LOD, registry snapshot | pass | |
+| creation_class_equipment_fit | 54,666 checks, 0 failures | |
+| armour_body_cover | 60 failures, all "restores sculpted hair visibility" (helm 3:120) | the same 60 (third review) |
+| test_cape_cloth, test_cape_drape, test_cape_idle, pose and capsule caches, rendered_cape_clipping | pass | |
+| test_mounted_cape (44 checks), test_mounted_player (1,130), test_mount_hotkeys, test_mount_preview_state, test_mount_protocol | pass | |
+| test_cape_cloth_native_constraint | 17 failures (no native extension) | 17 (third review) |
+| rendered_cape_over_armour | 4 bodies clip: 225, 184, 213, 197 | the same 4, the same figures (225: sheet 69 mm, collar 160 mm) |
+
+**Not yet done.**
+
+- Sunmane 06's sash still lies over the Red Sash Wrap's back hem (39% male,
+  59% female of the back rays), and Sunmane 05's tassets over the cuirass's
+  back skirt (40% female). Both are drawn that way; tucking them would bury
+  the sash and the tassets' tops.
+- The Steppe Chaps reach their girth cap (1.15): 20% of the calf rays meet the
+  hidden default trousers outside the art, all inside the boots.
+- A wide Fringed Kaftan cuff shows a grey disc at the female wrist in the bow
+  pull and Fighting_Idle.
+- Sunmane 03's arms are the lining, in the vest's cloth colour, as before.
+- Coats 02 and 03 stand 4 cm behind the back plane at the seat (the kaftan's
+  skirt and the vest's peplum); they were not hugged.
+- The batch's headwear is unchanged (Steppe Headcloth, Rider Helm, Sundisc
+  Helm, Sun Headband).
+
+### Audit batch 2: every remaining set (2026-10-18)
+
+The owner went through the audit sets in the viewer. Their notes: Militia 01
+"the legs are not straight", Militia 03 "the arms and sleeves are not mapped
+well from the back", and on batch 1's Sunmane 05 "tearing below arm" (bow
+pull) and "collar is clipping into the helmet". Then: most of the new sets do
+not have straight legs, "possibly due to misalignment of the boots with the
+pants", and many have the pants clipping through the torso armour. They asked
+for the whole set to be checked, not only the noted ones. So all 56 sets not
+in batch 1 were measured, and then design-fitted together. That covers
+batches 2-11 of the audit.
+
+**A straight-leg measure.** The installed trousers and boots keep their
+source's vertex order, and so does the set's solved concept target, so the
+same vertices can be compared (`legtilt.py`). On each leg, the target's
+vertices of that side are sliced by the target's height (2 cm). A line is
+fitted through the slice centroids for the shin (0.16-0.48 m), the thigh
+(0.50-0.70 m) and the boot shaft (0.14-0.40 m), once on the target's
+positions and once on the installed ones. The difference of the slopes is
+the segment's tilt off the concept, in the front view (splay) and the side
+view (lean). Drawn features ride the same vertices in both, so they cancel.
+The boot's step is how far the boot's centre sits from the trouser leg's at
+the boot top, installed minus target.
+
+On the old fits, 97 of the 98 body fits had a segment tilted more than 3° off
+the concept, and 92 more than 5°. The legendary sets are excluded: their legs
+carry the sabatons. The worst segment's median was 11.8° (p90 20.7°, max
+33.7°). The boots stood off the trouser line by a median 25 mm (p90 46, max
+155). Each old piece was fitted to the body on its own, so nothing put a set's
+trousers and boots on one line. The owner's guess was right.
+
+**The design fit.** The 56 specs were drafted by the audit's rules (the kits'
+`make_specs` rules, see batch 1). They carry the kits' `collar`, `twist`,
+`centre_cuffs`, `conform` and `tuck_into`. They also carry these defaults,
+learned on the Sunmane batch and the first pass of this one:
+
+- `hug` on the coat's lower trunk (bearings 125-235°, 0.55-1.25 m, 4 cm start,
+  7 cm cap), and on the trousers' pelvis, thighs and calves (115-245°,
+  0.45-1.15 m), so tails and skirt backs hang inside the cape.
+- The trousers go under the coat's back by up to 8 cm (`tuck_torso_max`, as
+  for Sunmane 05) and into the boots.
+- `trunk_seed_x: 0.25`. The Vanguard kit took 0.20. With the narrower strip, a
+  mail skirt's sides and a sleeve's inner wall fell to the forearm and tore in
+  the bow pull (Militia 04 11% → 6.8%, Militia 07 6.5 → 3.5%).
+- Short sleeves are not stretched to the wrist: a sleeve whose drawn length,
+  at the girth scale, is under 0.65 of the body's arm keeps its length (the
+  Splinted Vest and Mail Shirt no longer get long bell sleeves).
+- `split_islands: "bones"` (new). A welded island that no seed reaches, such
+  as a forearm bracer, joins the group its nearest design bones belong to.
+  Before, it fell to the trunk, took hip weights and stayed behind as the arm
+  rose.
+- Legendary 02-08 get Phoenix-style harness specs: the legs carry their
+  sabatons (ankle at half the foot length from the toe, 0.075 above the sole,
+  ball at 20%, foot scale 1.23 × the legs' scale). The crotch is at least 0.2
+  source units, and the legs' scale is held to 0.95-1.1. The sabatons are
+  refitted from the legs' fit.
+
+Hand readings (`overrides.json`): a crotch of 0.15 under a skirt or flap
+(Knightly 05, Amberwood 05 and 08, Arcane 01, 03 and 08, Frontier 08), and
+the bow-pull keys below for Militia 03, 04 and 07. Kit pieces inside a set
+stay as installed: Ranger 02's Scout Vest, Ranger 04's Sidelace Breeches and
+Frontier 03's Laced Fieldboots. Their spec entries are copied from
+`ranger.json`, so the set's other pieces fit against the same shells.
+
+**The bow pull.** The first install threw coat art 24-27 cm off the body in
+Bow_Pull_Back on Militia 03, 04 and 07; the old fits reached 10-13 cm. The
+split was traced vertex by vertex (`farverts.py`, `split_rules.py`). There
+were two causes:
+
+- In these concepts the hands hang beside a flared hem. The hem's side passed
+  `split_limbs`' test for the forearm's outer wall, so it became arm seeds:
+  40 of Militia 07's 52 far vertices were coat skirt owned by the forearm.
+  `limb_seed_end` (new) places no limb seeds past that share of a limb's last
+  bone. At 0.9 only the hem beside the wrists goes back to the trunk (61-62
+  vertices). On four other coats tried, no owner changes. A cuff still joins
+  its sleeve over the surface.
+- The Splinted Vest's wide trunk radius left its short sleeves below the 0.9
+  arm share that a limb seed needs, so they got no seeds. They stayed with the
+  chest and hung as a flap when the arm rose. `limb_seed_own` (new) lowers the
+  bar; at 0.5 the sleeves follow the arms.
+
+Without the keys, specs re-solve byte-identically (Militia 01 checked), and
+only the three Militia specs use them. Afterwards the bow pull's farthest coat
+art is 10 cm on Militia 07 (27 before), 12-16 cm on Militia 04 (22-24) and
+20 cm on Militia 03 (25). Walk and run are back to 10-12 cm (16-20). What is
+left on Militia 03 and 04 is about 30 armpit vertices split half and half
+between arm and trunk: the underarm seam opens as it does on the kits.
+
+On ten more coats the bow pull reaches 5+ cm further than the old fit:
+Militia 01 and 08, Knightly 06 and 07, Amberwood 03 and 07, Arcane 01,
+Ranger 05, Frontier 06 and Sunmane 07 (15-28 cm). In the engine's bow views
+these look as they did before. The far vertices are a few seam and plate
+vertices with mixed weights. Knightly 07's are its mantle, which drapes over
+the right arm. The split keys do not change them.
+
+The kit session (owner of these tools) and the cape session were told before
+each tool change.
+
+**Results.** The audit's measures over the 56 sets and both bodies (112 body
+fits), old → new, worst frame through the five clips. Median / p90 / max, and
+how many body fits got worse:
+
+| Measure | Old | New | Worse |
+| --- | --- | --- | ---: |
+| Leg tilt off the concept, worst segment (°) | 11.8 / 20.7 / 33.7 | 1.2 / 4.4 / 14.9 | 2 of 98 |
+| Boot's step from the trouser line (mm) | 25 / 46 / 155 | 3 / 10 / 13 | 0 of 96 |
+| Trousers over the coat, front (%) | 39 / 81 / 98 | 23 / 50 / 77 | 27 |
+| Trousers over the coat, back (%) | 31 / 67 / 87 | 10 / 23 / 57 | 24 |
+| Collar inside the nape (cells) | 112 / 150 / 203 | 3 / 33 / 71 | 0 |
+| Trousers behind the back plane (cm) | −2.2 / 1.9 / 9.4 | −5.5 / −3.5 / −1.8 | 9 |
+| Coat behind the back plane (cm) | −1.2 / 1.9 / 7.0 | −2.0 / −0.2 / 1.9 | 34 |
+| Gap between trousers and boots (%) | 0.8 / 3.9 / 15.6 | 0.8 / 1.7 / 5.6 | 59 |
+| Farthest coat art, idle, walk, run (cm) | 12.1 / 17.6 / 23.9 | 11.9 / 17.3 / 23.1 | 43 |
+| Farthest coat art, bow pull (cm) | 11.4 / 17.5 / 23.8 | 13.4 / 18.0 / 28.4 | 73 |
+| Torn coat art in the bow pull (%) | 0.4 / 1.0 / 2.1 | 1.5 / 3.3 / 5.8 | 104 |
+| Torn trouser art, walk and run (%) | 0.4 / 0.9 / 1.9 | 0.9 / 1.9 / 2.6 | 99 |
+| Collar over the helm's lower edge (rays) | 15 / 105 / 205 | 38 / 145 / 335 | 87 |
+
+Silhouette IoU against the solved targets (Blender, idle, backings hidden;
+the 53 sets without a kit piece, 106 body fits): front 0.853 → 0.987 (median;
+lowest 0.734 → 0.951) and side 0.798 → 0.985 (lowest 0.716 → 0.941, Ranger 05's
+chaps). Every theme's median is 0.98-0.99 after.
+
+Per theme (medians, old → new):
+
+| Theme | Sets | Leg tilt (°) | Boot step (mm) | Over coat, front (%) | Over coat, back (%) | Collar in nape | Bow pull far (cm) | Torn coat, bow (%) |
+| --- | ---: | --- | --- | --- | --- | --- | --- | --- |
+| Militia | 7 | 10.0→1.1 | 29→1 | 45→10 | 55→12 | 116→15 | 11→14 | 0.7→3.2 |
+| Knightly | 8 | 11.3→1.5 | 28→6 | 32→41 | 31→17 | 113→0 | 11→11 | 0.4→1.4 |
+| Legendary | 7 | — | — | 78→31 | 49→12 | 90→6 | 14→14 | 0.2→1.4 |
+| Amberwood | 7 | 10.7→2.5 | 25→4 | 46→31 | 34→12 | 121→0 | 11→15 | 0.2→1.3 |
+| Arcane | 7 | 17.8→1.6 | 43→3 | 21→20 | 2→4 | 136→1 | 14→15 | 0.3→0.7 |
+| Ranger | 8 | 10.4→1.1 | 19→3 | 37→29 | 14→10 | 130→12 | 11→13 | 0.4→1.1 |
+| Frontier | 8 | 14.5→1.1 | 19→4 | 31→14 | 41→5 | 74→2 | 12→11 | 0.8→2.6 |
+| Sunmane | 4 | 12.3→1.1 | 20→4 | 36→24 | 47→10 | 134→17 | 10→13 | 0.7→1.8 |
+
+Reading the table:
+
+- **Legs.** 12 body fits still tilt more than 3° somewhere, 6 more than 5°.
+  Militia 08 measures 13-15° of thigh lean, but its legs stand straight in
+  the engine. The slices there are full of hip plates, which the fit hangs
+  differently from the target. Knightly 05's left thigh splays 6-8° (the Lion
+  Cuisses' flared plate). Amberwood 02 leans 5°. The boot shafts of Sunmane 07
+  and Amberwood 04 splay 5°, but look straight in the engine.
+- **Trousers through the coat.** The back share fell from 31% to 10%. The
+  front share fell less, and rose on the Knightly line, because there the
+  trousers' own belt or tassets are drawn over the coat's hem. Knightly 01, 03,
+  04 and 07, Amberwood 04 and Ranger 01 match their concept targets
+  ([sheet](design-fit/audit-batch2-front-layers.jpg)).
+- **The trouser-to-boot gap** rose on Knightly 04 male (0.2 → 5.6% of the calf
+  rays in idle). Those rays pass between the greaves' straps. In the engine,
+  the grey default trousers that showed at the back of the calves before are
+  gone.
+- **Tearing** in the bow pull rose as the kits' did when their seams were sewn
+  (0.4-2.3%). Thirteen body fits pass 3%: Militia 03, 04, 07 and 08, and
+  Frontier 01, 02 and 06 (up to 5.8%). At the engine's distance it shows as
+  thin strips under the forearm and at the armpit.
+- **Collar over the helm** got worse on 87 body fits: median 15 → 38 rays. The
+  collars now stand out of the nape, so more of them reach a helm's lower
+  edge, and the headwear was not refitted (see "Not yet done").
+
+The owner's notes on the audit sets
+([their shot and the set now](design-fit/audit-batch2-owner-notes.jpg)):
+Militia 01's legs stand straight in the Shinplate Boots (worst segment 20.5° →
+1.0°). Militia 03's Splinted Vest keeps its short sleeves as drawn. They used
+to be stretched into wide bell sleeves that gaped at the back; now they ride
+on the upper arms, and the forearms show the lining. Sunmane 05's two notes
+are not fixed yet (below).
+
+In the engine (review viewer, `--replay` of the audit's views, real actor),
+the legs stand straight with the boots under the trousers, and the coats'
+belts and hems lie over the trousers. Evidence, before and after per theme
+(male: idle side and front, walk side, idle back):
+[militia](design-fit/audit-batch2-militia.jpg),
+[knightly](design-fit/audit-batch2-knightly.jpg),
+[legendary](design-fit/audit-batch2-legendary.jpg),
+[amberwood](design-fit/audit-batch2-amberwood.jpg),
+[arcane](design-fit/audit-batch2-arcane.jpg),
+[ranger](design-fit/audit-batch2-ranger.jpg),
+[frontier](design-fit/audit-batch2-frontier.jpg),
+[sunmane](design-fit/audit-batch2-sunmane.jpg);
+the bow pull on Militia 03, 04 and 07
+([before, first pass, final](design-fit/audit-batch2-bow.jpg)).
+
+**Install.** All 330 Human variants of the 165 pieces were refitted in three
+tags. `full1` covered every piece. `full2` covered the coats again, after
+`trunk_seed_x` and `split_islands`, together with the trousers that tuck
+under them and the legendary sabatons. `full3` covered Militia 03, 04 and 07's
+coats and trousers, after the bow-pull keys. Each was installed with
+`install_human_equipment.py`, then `share_human_equipment_textures.py`. The
+registry is byte-identical, and the catalogue changes only its 44 validation
+lines (converted back to LF). 110 new fitted-cloth textures replace the 110
+that no GLB references any more; the six older orphans stay. Godot's import
+was refreshed, and the creature `.import` files it rewrites were reverted.
+
+Tests, after the last install, against the baseline at `82ae2326` and batch
+1's results:
+
+| Suite | After | Before |
+| --- | --- | --- |
+| Equipment, remapper and held-prop pytest | 9 failed, 70 passed | the same 9 IDs |
+| torso_body_cover, torso LOD, imported-actor LOD, registry snapshot | pass | pass |
+| creation_class_equipment_fit | 54,666 checks, 0 failures | the same |
+| armour_body_cover | 60 failures, all "restores sculpted hair visibility" | the same 60 |
+| test_cape_cloth, test_cape_drape, test_cape_idle, pose and capsule caches, rendered_cape_clipping | pass | pass |
+| test_mounted_cape (44 checks), test_mounted_player (1,130), test_mount_hotkeys, test_mount_preview_state, test_mount_protocol | pass | pass |
+| test_cape_cloth_native_constraint | 17 failures (no native extension) | 17 |
+| rendered_cape_over_armour | 4 bodies clip: 225, 184, 213, 197 | the same 4, the same figures (225: sheet 69 mm, collar 160 mm) |
+
+**Not yet done.**
+
+- Headwear. The collars now stand clear of the nape, so more of them meet the
+  helms. Sunmane 05's collar top sits at 1.617 m and the Sundisc Helm's
+  aventail bottom at 1.575 m: the owner's "collar is clipping into the
+  helmet". The audit's headwear track (`frame` rows for helm size, cowls over
+  the set's own collar, refit on 16 bodies) is the fix.
+- Sunmane 05's "tearing below arm" is a strip of 13 sleeve triangles against
+  the coat's side in the bow pull. The coat was not refitted in this pass.
+- The bow-pull seam strips on the ten coats listed above, and the torn share
+  over 3% on Militia 03, 04, 07 and 08 and Frontier 01, 02 and 06.
+- Knightly 05's thigh splay.
+- Ranger 02's trousers were fitted against the Scout Vest as installed here.
+  The kits' later vest fix ("The Scout Vest under a cape", on
+  feature/equipment-set-fit) hugs the vest's back flaps. When the branches
+  meet, `ranger_02.json` takes the new `ranger.json` torso entry and its legs
+  are refitted.
+
+### The Scout Vest under a cape (2026-10-18)
+
+Since the first kit fit (`b4ee06ed`), the refitted Scout Vest (5:225) has
+come through a worn cape at the seat. The concept draws the vest's back
+flaps flared out behind. Carried onto the body, the flaps' corners at the
+centre vent stood 13 cm behind the seat at 0.83 m on the male (z −0.23 m)
+and 11 cm behind it on the female (z −0.20 m). This is the 69 mm that
+rendered_cape_over_armour reported 0.40-0.50 m below spine_03. On develop
+before the kits (`224bb9b9`) the sheet read 0 mm.
+
+**The fix.** The Ranger torso spec now carries the design fit's `hug` key:
+design bone `trunk_lower`, the back arc 125-235°, heights 0.55-1.25 m,
+`start` 6 cm, `max` 12 cm. The key comes from `98dcef4b` (equipment audit,
+Sunmane batch 1). Only its two tool files were brought over (`0d9f185f`),
+unchanged, and its batch was not. The kits' `make_specs.py` writes the key.
+`hug` caps how far art stands off the body behind a bone. A vertex's standoff
+d over the body (default clothes included), measured from the bone's posed
+axis, becomes `start` + (`max` − `start`) tanh((d − `start`) / (`max` −
+`start`)). The map is monotonic, so layers keep their order.
+
+Two pieces were refitted on both bodies and installed: the vest, and the
+Sidelace Breeches (4:230), whose back tucks under it. The Laced Fieldboots'
+design fit changed only in its recorded spec hash; their GLBs are untouched.
+`share_human_equipment_textures.py` reused the shipped textures, so the
+registry and the catalogue are unchanged.
+
+**Why 6/12 cm, not the Sunmane 3/6 cm.** The breeches' seat stands about
+5 cm off the body. At 3/6 cm the flaps went up to 71 mm inside the breeches'
+back: 85% of the tail's vertices lay behind it. At 6/12 cm, 98% lie over the
+breeches (median 16 mm out), and the offline measure still clears the
+fixture's sheet.
+
+**What it costs.** Below the pelvis joint `trunk_lower`'s axis ends, so the
+pull runs up as well as in:
+
+- The vent corners rise 36 mm on the male (lowest point 0.834 → 0.870 m) and
+  21 mm on the female (0.828 → 0.849 m).
+- The flaps now hang straight down the seat, and the back hem runs level
+  where it used to dip toward the vent.
+- The vent still shows the breeches about as much as before (owner's second
+  review, note 10).
+- At 3/6 cm the corners rose 66 mm and curled under the seat.
+
+| Male, body 225 | Before | After | Develop `224bb9b9` |
+| --- | ---: | ---: | ---: |
+| Flaps' furthest back (z, within 15 cm of the centre line) | −0.230 m | −0.186 m | — |
+| rendered_cape_over_armour, sheet | 69 mm (tail) | 18 mm (shoulder) | 0 mm |
+| The same, tail bands (−0.40 to −0.50 m) | 69 / 44 / 34 mm | 0 | 0 |
+| Solver's own output, Idle_Subtle 2.03 s | 17 mm (tail 17, shoulder 17) | 18 mm (shoulder) | — |
+| rendered_cape_over_armour, collar | 160 mm | 160 mm | 120 mm |
+
+The solver row is the cape session's `armour_measure.gd` on the full Ranger
+kit. On the solver's output the cape stands further back at the seat
+(−0.22 m at 0.80 m, against −0.16 m in the fixture's bind hang), so there the
+tail only reached 17 mm.
+
+**What remains is not the tail.**
+
+- **18 mm at +0.10 m.** This is the back of the shoulder, at the cape's side
+  edge (bearing 40-50°). It is most likely the lining at the sleeve root:
+  the design-fit art alone, scored against the same cape, does not reach the
+  cape there. It was 17 mm before, it is within the fixture's 20 mm sheet
+  tolerance, and `hug`'s band does not reach it.
+- **The collar** (+0.15 to +0.25 m). It measures 140 mm headless and 160 mm
+  windowed on the same fit, since the fixture's idle phase depends on the
+  frame rate. Scored offline against one cape, the vest's design-fit shells
+  read 125 mm up to `04109b51` and 146 mm from `8da16322` on. That commit added
+  the `collar` key, which brings the collar's back out of the nape at the
+  owner's request (the hood/collar gap). The fixture allows the collar band
+  to stand through the cape, and all four bodies exceed its 55 mm tolerance
+  on develop as well.
+
+Checks:
+
+- Stretch: share of art triangles past 1.8× and past 2.5×.
+  - Bow_Pull_Back: unchanged on the vest (male 1.03% and 0.41%, female 0.62%
+    and 0.07%).
+  - Run_Female, male: the vest goes 0.76% → 0.97% past 1.8× but 0.28% → 0.14%
+    past 2.5×; the breeches go 0.80% → 0.92% past 1.8×, with 2.5× unchanged.
+  - Female breeches in the bow: one triangle past 2.5×.
+- The Buckled Hood (3:159) was shaped against this vest. Its clip check is
+  identical with the old and the new vest in all eight clips, on both bodies
+  (hood through the vest, collar over the hood, hood through skin, stretch).
+  The design fit moved nothing above 0.99 m, so the hood keeps its installed
+  fit.
+- The owner's Ranger notes were replayed with the old and the new vest
+  (second review notes 8-12, third review notes 9-11). They are unchanged,
+  except that in second-review note 10 and in side views the flaps no longer
+  stand out behind.
+
+Tests, compared by failing ID with a clean develop worktree at this branch's
+develop base, `82ae2326`:
+
+| Suite | This branch | Develop `82ae2326` |
+| --- | --- | --- |
+| Equipment, remapper and held-prop pytest | 9 failed, 70 passed | the same 9 IDs |
+| torso_body_cover, LOD and registry snapshot tests | pass | pass |
+| creation_class_equipment_fit | 54,666 checks, 0 failures | the same |
+| armour_body_cover | 60 failures (scalp under 3:120) | the same 60 |
+| test_cape_cloth, capsule and pose caches, drape, idle; rendered_cape_clipping | pass | pass |
+| test_cape_cloth_native_constraint | 17 failures (no native extension here) | the same 17 |
+| rendered_cape_over_armour | 4 bodies flagged on the collar; 184 also on its sheet (24 mm) | the same, and 225 also on its sheet (69 mm) |
+
+Evidence: [the fixture's back and quarter views, side and back views of
+both bodies, and note 10](design-fit/vest-hug-cape.jpg). Scratch (offline
+measure `score.py`, the dump harness, trials, replays): the client's
+`.local/asset-authoring/working/equipment-fit-2026-10-17-kits/hug/`.
+
+### The cape over the legs in Fighting_Idle (fifth review, 2026-10-18)
+
+The owner's note, at `0d9f185f`: on the Vanguard kit (Studded Jack, Leather
+Kneecops, Banded Warboots, cape 2:105), Fighting_Idle at 0.33 s, "the left
+leg clips through the cape slightly". This is the residual after `c1b77a16`,
+on another kit. Session `equipment-review/2026-10-18_07-25-19`.
+
+The shin pass from `c1b77a16` treated each chain as a 15 cm strip of cloth.
+The skin weights say otherwise. The middle chain carries nearly the whole
+sheet below the yoke, its side panels included: 24 cm either side of it at
+the top link and 37 cm at the hem. The side chains carry only 7 cm strips.
+In the fighting stance the torso turns, and the side panel lies right behind
+the back leg. Nothing kept it off the leg, and nothing covered the thigh
+either: the Kneecops stand 13 cm behind the hip-to-knee line, past the solver's
+fixed 11.5 cm thigh capsule.
+
+What changed (`cape_cloth.gd`, `cape_drape.gd`, `replicated_actor_3d.gd`):
+
+- `CapeDrape.fabric_line` also measures the cape's cross-section at each
+  joint, at 9 places across its width. At each place it records each chain's
+  share of the skin weights, and how far the folds come in past the blend of
+  the chains' lines.
+- After either solver, the sheet is placed where that blend puts it. Where a
+  stretch of it meets a leg, the chains that carry it move straight back, each
+  by its share. All three chains are solved first, then pushed, then written.
+- The legs are hip to knee and knee to ankle on both sides. Each has a reach
+  measured per 15° of bearing from the leg's back, counting the body's own leg
+  and whatever is worn over it. The thigh's reach starts 40% down from the
+  hip: the seat above that is the waist capsule's.
+- The pass is skipped at heights a leg cannot reach, and where even the
+  nearest stretch of sheet is out of reach. It reads each link's middle, and
+  reads a stretch's neighbours only when that stretch had to move.
+- The leg clearance is 1 cm. With 2 cm, an idle Vanguard cape stood 2 cm off
+  legs it cleared.
+- As before, none of this applies without a measured line or to a mounted
+  rider.
+
+Leg through the cape (the fourth review's measure, now with face samples as
+well as vertices), over the whole Fighting_Idle cycle:
+
+| Kit | Noted frame, before → after | Cycle worst, before → after | Samples over 10 mm |
+| --- | ---: | ---: | ---: |
+| Vanguard (this note) | 27 → 12 mm | 37 → 16 mm | 32 → 20 of 52 |
+| Phoenix (fourth review, note 4) | 0 → 0 mm | 19 → 6 mm | 19 → 0 of 52 |
+
+With the legs drawn flat red, the replayed note shows no leg through the
+cape, held or playing. Before the fix it showed a strip through the side
+panel and a sliver above the boot. The only red left is the back leg seen
+past the cape's edge.
+
+Earlier notes are kept:
+
+- The second-review note 2 view (Vanguard, idle) hangs as fixed: from the
+  upper back to the calves within 3 mm, and the hem 9 mm further out.
+- The test kit's Amberwood legguards (4:171) stood 19–24 mm through the cape
+  in idle without the pass. They read 0 mm, and the cape drapes 5–46 mm out
+  over their knee flaps.
+- Replayed with the viewer's travel mode, the fourth review's run and walk
+  notes stream clear.
+
+Cost on the Phoenix kit is 95–157 µs per step with the pass, against
+52–72 µs without it (debug build, headless; the timings vary by ±30 µs run to
+run).
+
+Tests:
+
+- These pass:
+  - `test_cape_cloth.gd`, `test_cape_drape.gd` and `test_cape_idle.gd`;
+  - both parity suites;
+  - `test_actor_render_quality.gd`;
+  - `test_mounted_cape.gd` (44 checks), `test_mounted_player.gd` (1,130) and
+    `test_mount_preview_state.gd` (39), with no failures.
+- The native suites fail only because the extension is not built here.
+
+Evidence: [the note, before and after](design-fit/review5-cape-leg.jpg).
+
+**Not yet done.**
+
+- In Fighting_Idle the Vanguard's leg still comes up to 16 mm through the cape
+  over the cycle (20 of 52 samples over 10 mm). These are the measure's
+  readings; the replayed views show none.
+- Over the Scout Vest the cape's rigid yoke edge still clips the back of the
+  shoulder by 18 mm (see the Scout Vest section). The leg pass does not reach
+  the yoke.
 
 ## Two body shapes, preserved race identity
 

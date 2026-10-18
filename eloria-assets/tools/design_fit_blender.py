@@ -46,6 +46,15 @@ hangs tails from the belt instead of binding them to the leg behind (drape);
 ``collar`` brings a collar's back out of the neck it was fitted into (collar);
 ``twist`` lets a coat's waist turn with the chest (twist), and
 ``centre_cuffs`` puts each sleeve's end on its wrist (centre_cuffs).
+Added 2026-10-18 for the Sunmane sets of the equipment audit: ``hug`` draws
+tails and sash panels that the concept blows out behind the body in to a
+capped standoff, so a cape hanging plumb from the shoulders clears them (hug).
+``split_islands: "bones"`` gives a welded island that no limb or trunk seed
+reaches (a bracer, a strap) to the group its nearest design bones belong to,
+instead of the trunk (split_limbs). ``limb_seed_end`` keeps limb seeds off the
+last part of a limb's end bone, where a hem flares beside the hanging hand,
+and ``limb_seed_own`` lowers the arm share a limb seed needs, for short sleeves
+on a bulky coat (split_limbs).
 
 The output per source is ``<source>.npz``: rest positions in glTF axes,
 four joint names and weights per vertex, and a keep mask for triangles
@@ -228,12 +237,23 @@ def split_limbs(P, tris, q, w, ps):
         else:
             # the limb's outer wall, which no coat panel reaches
             seeds = np.zeros(len(P), bool)
+            heads = [tuple(bones[i]["design"][0]) for i in cols]
             for i in cols:
                 dh = np.array(bones[i]["design"][0], float); dt = np.array(bones[i]["design"][1], float)
                 foot, _ = seg_proj(P, dh, dt)
                 out_x = np.sign(dh[0] + dt[0]) * (P[:, 0] - foot[:, 0])
-                seeds |= (out_x > 0.3 * float(bones[i]["radius"])) & (q[:, i] < 2.0)
-            seeds &= own > 0.9
+                wall = (out_x > 0.3 * float(bones[i]["radius"])) & (q[:, i] < 2.0)
+                if "limb_seed_end" in ps and tuple(bones[i]["design"][1]) not in heads:
+                    # Where the concept's hands hang beside a flared hem, the hem's side passed for the
+                    # forearm's outer wall and stood out 24-27 cm in the bow pull (Militia 04 and 07, audit
+                    # 2026-10-18): no seeds past this share of the limb's last bone. A cuff still joins its
+                    # sleeve over the surface.
+                    ab = dt - dh
+                    wall &= ((P - dh) @ ab) / (ab @ ab) <= float(ps["limb_seed_end"])
+                seeds |= wall
+            # A bulky coat's wide trunk radius leaves a short sleeve short of 0.9 (Militia 03): the sleeve got
+            # no seeds and stayed with the chest as the arm rose. ``limb_seed_own`` lowers the bar.
+            seeds &= own > float(ps.get("limb_seed_own", 0.9))
         d = np.full(n, np.inf)
         heap = [(0.0, int(c)) for c in np.unique(canon[seeds])]
         for _, c in heap:
@@ -248,6 +268,18 @@ def split_limbs(P, tris, q, w, ps):
                     d[nb] = dc + dl; heapq.heappush(heap, (dc + dl, nb))
         dist[g] = d[canon]
     owner = np.array(names)[np.argmin(np.stack([dist[g] for g in names], 1), 1)]
+    if ps.get("split_islands") == "bones":
+        # A welded island no seed reaches (a bracer, a strap) is infinitely far from every group and fell to the
+        # first, the trunk: a forearm bracer hanging by the hip in idle then took hip weights and stayed behind
+        # as the arm rose. Each such island joins the group its vertices' nearest design bones mostly belong to
+        # (audit 2026-10-18).
+        lost = ~np.isfinite(np.stack([dist[g] for g in names], 1)).any(1)
+        if lost.any():
+            labels = components(P, tris)
+            share = np.stack([w[:, [i for i, x in enumerate(group) if x == g]].sum(1) for g in names], 1)
+            for lab in np.unique(labels[lost]):
+                own = labels == lab
+                owner[own] = names[int(np.argmax(share[own].sum(0)))]
     tau = float(ps.get("tau", 0.15))
     out = np.zeros_like(w)
     for g in names:
@@ -617,6 +649,59 @@ def tuck(body, P, tris, posed, dom, ps, outer, outer_tris):
                           "max_mm": round(1000 * float(np.linalg.norm(move, axis=1).max()), 1)}
 
 
+def hug(body, posed, dom, ps):
+    """Cap how far a piece's art stands off the body over a band, behind it.
+
+    Added 2026-10-18 (equipment audit, Sunmane 02 and 06). A concept can draw
+    a sash tail or a scarf end blown out behind the wearer; carried onto the
+    body it stood 10-16 cm behind the back and the seat, where a cape hanging
+    plumb from the shoulders met it. Each ``hug`` entry names design ``bones``;
+    every vertex they own whose bearing round the bone (0 the front, 180 the
+    back) lies in ``arc`` and whose height lies in ``z`` is measured along the
+    ray from the bone's posed axis: its standoff d over the body surface
+    (default clothes included) is mapped to ``start`` + (``max`` - ``start``)
+    tanh((d - ``start``) / (``max`` - ``start``)) past ``start``. The map is
+    monotonic, so layers lying behind one another keep their order and never
+    cross; it fades in over ``fade`` at the band's ends and 15 degrees at the
+    arc's. Returns the vertices moved and the largest move.
+    """
+    from math import tanh
+    moved, largest = 0, 0.
+    sm = lambda x, e0, e1: (lambda t: t * t * (3 - 2 * t))(np.clip((x - e0) / (e1 - e0), 0., 1.))
+    for h in ps["hug"] if isinstance(ps["hug"], list) else [ps["hug"]]:
+        a, b = float(h.get("start", .04)), float(h["max"])
+        arc = h.get("arc", [120, 240]); z0, z1 = h.get("z", [-1., 3.]); fade = float(h.get("fade", .04))
+        for i, bone in enumerate(ps["bones"]):
+            if bone["name"] not in h["bones"]:
+                continue
+            a0 = body.joint(bone["body"][0]) + np.array(bone.get("offset", (0, 0, 0)), float)
+            a1 = body.joint(bone["body"][1]) + np.array(bone.get("offset_tail", bone.get("offset", (0, 0, 0))), float)
+            own = np.flatnonzero(dom == i)
+            foot, _ = seg_proj(posed[own], a0, a1)
+            for v, p0 in zip(own, foot):
+                u = posed[v] - p0; r = float(np.linalg.norm(u))
+                if r < 1e-4:
+                    continue
+                u /= r
+                bearing = float(np.degrees(np.arctan2(u[0], -u[1]))) % 360
+                k = (sm(bearing, arc[0], arc[0] + 15) * (1 - sm(bearing, arc[1] - 15, arc[1]))
+                     * sm(posed[v, 2], z0, z0 + fade) * (1 - sm(posed[v, 2], z1 - fade, z1)))
+                if k <= 0:
+                    continue
+                reach = .5
+                skin = body.bvh.ray_cast(Vector(p0 + u * reach), Vector(-u), reach)
+                if skin[0] is None:
+                    continue
+                d = r - (reach - skin[3])
+                if d <= a:
+                    continue
+                want = a + (b - a) * tanh((d - a) / (b - a))
+                step = k * (d - want)
+                posed[v] -= u * step
+                moved += 1; largest = max(largest, step)
+    return posed, {"moved": moved, "max_mm": round(1000 * largest, 1)}
+
+
 def seat_soles(body, P, rest, sink=0.004):
     """Stand a pair of separate boots where limb_head_remap seats boots.
 
@@ -824,6 +909,8 @@ def main():
             posed, report["centre_cuffs"] = centre_cuffs(body, posed, w, ps)
         if "collar" in ps:
             posed, report["collar"] = collar(body, posed, tris, w, ps)
+        if "hug" in ps:
+            posed, report["hug"] = hug(body, posed, w.argmax(1), ps)
         if "tuck_sleeves" in ps:
             # A coat's own sleeves go under its shoulder panels (owner's second
             # review, note 9: the Scout Vest's shirt sleeves came through the

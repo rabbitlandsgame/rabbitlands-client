@@ -1,0 +1,236 @@
+{
+ "format": 2,
+ "spec": "knightly_06.json",
+ "spec_sha256": "a6c650654336f826e21e3363be5b45a6839834e46b034d802a7f4f7e1cdca77e",
+ "body": "luminous_male.glb",
+ "body_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+ "pose": "Idle_Subtle",
+ "tool_sha256": "6896841bfdd40695eb089f3c7e6dad52e76628bc7dafa8f172e99ef2fc4c81ad",
+ "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
+ "pieces": {
+  "torso": {
+   "source": "Eight_refined_knightly_torso_armor_designs__r02_c02.glb",
+   "vertices": 1606,
+   "triangles": 1348,
+   "opened": 15,
+   "rigidPlates": 49,
+   "bones": {
+    "trunk_lower": {
+     "k": 1.001,
+     "rays": 1868,
+     "shift_mm": [
+      5.7,
+      11.0,
+      2.2
+     ],
+     "girth": 1.0
+    },
+    "trunk_upper": {
+     "k": 1.0,
+     "rays": 1068,
+     "shift_mm": [
+      0.4,
+      -25.4,
+      2.8
+     ],
+     "girth": 1.075
+    },
+    "upperarm_l": {
+     "k": 1.124,
+     "rays": 185,
+     "shift_mm": [
+      1.4,
+      0.3,
+      0.4
+     ],
+     "girth": 1.0
+    },
+    "lowerarm_l": {
+     "k": 1.086,
+     "rays": 872,
+     "shift_mm": [
+      -8.5,
+      12.0,
+      -6.4
+     ],
+     "girth": 1.173
+    },
+    "upperarm_r": {
+     "k": 1.124,
+     "rays": 175,
+     "shift_mm": [
+      -7.9,
+      6.1,
+      2.1
+     ],
+     "girth": 1.0
+    },
+    "lowerarm_r": {
+     "k": 1.086,
+     "rays": 769,
+     "shift_mm": [
+      10.3,
+      4.2,
+      -4.0
+     ],
+     "girth": 1.107
+    },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      -13.3,
+      -4.5,
+      -1.6
+     ],
+     "lowerarm_r": [
+      6.8,
+      2.9,
+      -2.7
+     ]
+    },
+    "collar": {
+     "cells": 239,
+     "max_mm": 52.0
+    },
+    "hug": {
+     "moved": 99,
+     "max_mm": 88.8
+    },
+    "twist_vertices": 437
+   },
+   "out": "Eight_refined_knightly_torso_armor_designs__r02_c02.glb.npz",
+   "sha256": "be72ca10ed6361a2bc28abf18dd505eaab13cd14f7fe5eabae15f576a0041c37"
+  },
+  "legs": {
+   "source": "Eight_ceremonial_knight_leg_armor_designs__r02_c02.glb",
+   "vertices": 1737,
+   "triangles": 1377,
+   "opened": 0,
+   "rigidPlates": 21,
+   "bones": {
+    "pelvis": {
+     "k": 0.794,
+     "rays": 1255,
+     "shift_mm": [
+      3.6,
+      -9.8,
+      -1.7
+     ],
+     "girth": 1.0
+    },
+    "thigh_l": {
+     "k": 1.189,
+     "rays": 258,
+     "shift_mm": [
+      -9.0,
+      12.2,
+      0.0
+     ],
+     "girth": 1.066
+    },
+    "calf_l": {
+     "k": 1.19,
+     "rays": 963,
+     "shift_mm": [
+      0.9,
+      -13.8,
+      -0.1
+     ],
+     "girth": 1.131
+    },
+    "thigh_r": {
+     "k": 1.189,
+     "rays": 228,
+     "shift_mm": [
+      4.6,
+      16.7,
+      0.5
+     ],
+     "girth": 1.05
+    },
+    "calf_r": {
+     "k": 1.19,
+     "rays": 879,
+     "shift_mm": [
+      -7.6,
+      -11.9,
+      0.4
+     ],
+     "girth": 1.128
+    },
+    "hug": {
+     "moved": 125,
+     "max_mm": 124.5
+    },
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 143,
+      "max_mm": 38.4
+     },
+     {
+      "into": "boots",
+      "tucked": 264,
+      "max_mm": 45.6
+     }
+    ]
+   },
+   "out": "Eight_ceremonial_knight_leg_armor_designs__r02_c02.glb.npz",
+   "sha256": "c98521a64b518163be0591dbbae4d2d4d55b09dcd237716c354fc5b9cea61552"
+  },
+  "boots": {
+   "source": "Eight_Refined_Knightly_Greave_Designs__r02_c02.glb",
+   "vertices": 1328,
+   "triangles": 1257,
+   "opened": 0,
+   "rigidPlates": 20,
+   "bones": {
+    "calf_l": {
+     "k": 1.0,
+     "rays": 635,
+     "shift_mm": [
+      11.0,
+      9.6,
+      0.7
+     ],
+     "girth": 1.2
+    },
+    "foot_l": {
+     "k": 1.001,
+     "rays": 585,
+     "shift_mm": [
+      16.3,
+      -9.1,
+      16.6
+     ],
+     "girth": 1.1
+    },
+    "calf_r": {
+     "k": 1.0,
+     "rays": 605,
+     "shift_mm": [
+      -17.0,
+      12.7,
+      1.1
+     ],
+     "girth": 1.2
+    },
+    "foot_r": {
+     "k": 1.001,
+     "rays": 536,
+     "shift_mm": [
+      -16.4,
+      -9.1,
+      16.6
+     ],
+     "girth": 1.1
+    },
+    "sole_seat_mm": {
+     "l": 6.1,
+     "r": 11.1
+    }
+   },
+   "out": "Eight_Refined_Knightly_Greave_Designs__r02_c02.glb.npz",
+   "sha256": "745e697601f5da48c1f1b8e7bfb3ff0ee05dcd935bd2c436f274e6d43215a1ed"
+  }
+ }
+}

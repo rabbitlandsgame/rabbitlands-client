@@ -1,0 +1,236 @@
+{
+ "format": 2,
+ "spec": "arcane_08.json",
+ "spec_sha256": "2a1b71313344f9fbd1be87cf1306e492bac6339e003f6130228a1be31d3a5648",
+ "body": "luminous_male.glb",
+ "body_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+ "pose": "Idle_Subtle",
+ "tool_sha256": "6896841bfdd40695eb089f3c7e6dad52e76628bc7dafa8f172e99ef2fc4c81ad",
+ "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
+ "pieces": {
+  "torso": {
+   "source": "Eloria_Arcane_Armor_Design_Sheet__r02_c04.glb",
+   "vertices": 1587,
+   "triangles": 1256,
+   "opened": 2,
+   "rigidPlates": 38,
+   "bones": {
+    "trunk_lower": {
+     "k": 1.001,
+     "rays": 2520,
+     "shift_mm": [
+      6.0,
+      5.7,
+      1.2
+     ],
+     "girth": 1.0
+    },
+    "trunk_upper": {
+     "k": 1.0,
+     "rays": 1053,
+     "shift_mm": [
+      2.5,
+      -12.9,
+      1.5
+     ],
+     "girth": 1.008
+    },
+    "upperarm_l": {
+     "k": 1.253,
+     "rays": 261,
+     "shift_mm": [
+      -8.4,
+      -6.4,
+      -2.3
+     ],
+     "girth": 1.024
+    },
+    "lowerarm_l": {
+     "k": 1.171,
+     "rays": 868,
+     "shift_mm": [
+      -23.4,
+      15.2,
+      -11.1
+     ],
+     "girth": 1.25
+    },
+    "upperarm_r": {
+     "k": 1.253,
+     "rays": 270,
+     "shift_mm": [
+      6.6,
+      8.0,
+      -1.3
+     ],
+     "girth": 1.005
+    },
+    "lowerarm_r": {
+     "k": 1.171,
+     "rays": 768,
+     "shift_mm": [
+      26.7,
+      6.9,
+      -9.0
+     ],
+     "girth": 1.207
+    },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "lowerarm_r": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "collar": {
+     "cells": 117,
+     "max_mm": 36.1
+    },
+    "hug": {
+     "moved": 129,
+     "max_mm": 162.3
+    },
+    "twist_vertices": 365
+   },
+   "out": "Eloria_Arcane_Armor_Design_Sheet__r02_c04.glb.npz",
+   "sha256": "1e3ff63ca20e867e2f2a48d0bbe3ab4300f2840fa50db116a05d684e18f947c4"
+  },
+  "legs": {
+   "source": "Eight_arcane_leg_armor_designs__r02_c04.glb",
+   "vertices": 1706,
+   "triangles": 1421,
+   "opened": 0,
+   "rigidPlates": 14,
+   "bones": {
+    "pelvis": {
+     "k": 0.869,
+     "rays": 512,
+     "shift_mm": [
+      4.2,
+      3.9,
+      0.9
+     ],
+     "girth": 1.096
+    },
+    "thigh_l": {
+     "k": 1.032,
+     "rays": 250,
+     "shift_mm": [
+      -4.8,
+      21.9,
+      0.6
+     ],
+     "girth": 1.006
+    },
+    "calf_l": {
+     "k": 1.038,
+     "rays": 890,
+     "shift_mm": [
+      0.3,
+      -30.0,
+      -0.2
+     ],
+     "girth": 1.076
+    },
+    "thigh_r": {
+     "k": 1.032,
+     "rays": 225,
+     "shift_mm": [
+      0.6,
+      23.7,
+      1.0
+     ],
+     "girth": 1.0
+    },
+    "calf_r": {
+     "k": 1.038,
+     "rays": 829,
+     "shift_mm": [
+      -6.1,
+      -28.8,
+      0.2
+     ],
+     "girth": 1.051
+    },
+    "hug": {
+     "moved": 159,
+     "max_mm": 283.5
+    },
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 136,
+      "max_mm": 62.5
+     },
+     {
+      "into": "boots",
+      "tucked": 396,
+      "max_mm": 75.9
+     }
+    ]
+   },
+   "out": "Eight_arcane_leg_armor_designs__r02_c04.glb.npz",
+   "sha256": "dfaacc4729972f93b67d0e4af85afb391a538c3d72e4f3084c4b5befe02624fa"
+  },
+  "boots": {
+   "source": "Arcane_Fantasy_Boots_Concept_Sheet__r02_c04.glb",
+   "vertices": 1944,
+   "triangles": 1418,
+   "opened": 0,
+   "rigidPlates": 13,
+   "bones": {
+    "calf_l": {
+     "k": 1.0,
+     "rays": 170,
+     "shift_mm": [
+      27.9,
+      -2.9,
+      1.7
+     ],
+     "girth": 1.2
+    },
+    "foot_l": {
+     "k": 1.001,
+     "rays": 645,
+     "shift_mm": [
+      15.9,
+      -9.3,
+      16.9
+     ],
+     "girth": 1.1
+    },
+    "calf_r": {
+     "k": 1.0,
+     "rays": 125,
+     "shift_mm": [
+      -27.2,
+      0.2,
+      1.7
+     ],
+     "girth": 1.2
+    },
+    "foot_r": {
+     "k": 1.001,
+     "rays": 550,
+     "shift_mm": [
+      -13.1,
+      -10.3,
+      18.7
+     ],
+     "girth": 1.1
+    },
+    "sole_seat_mm": {
+     "l": 5.3,
+     "r": 9.2
+    }
+   },
+   "out": "Arcane_Fantasy_Boots_Concept_Sheet__r02_c04.glb.npz",
+   "sha256": "3fbbf49469eaf49b1be64842ce94c3c04ceb1efc591ee912108ca6d8f477b78f"
+  }
+ }
+}

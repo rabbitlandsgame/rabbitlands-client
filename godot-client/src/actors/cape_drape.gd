@@ -97,6 +97,24 @@ const REACH_BEARING := 45.0
 ## How far below the pelvis the waist capsule's cap counts the worn torso: a
 ## coat tail or a plate skirt hangs there, behind the cape's middle joint.
 const SEAT_BELOW := 0.20
+## The floor under a shin's measured reach. The reach itself is read off the
+## body's own calf, which stands 0.08-0.15 behind the knee-to-ankle line, and
+## off what is worn over it; the floor only covers a rig whose body was not
+## measured.
+const BARE_SHIN_RADIUS := 0.10
+## A shin's reach is kept per bearing from the leg's own back, in this many
+## columns of SHIN_BEARING_STEP degrees, the last taking everything further
+## round. Kept as one radius it was the round capsule again: a knee flap
+## standing 0.31 straight back pushed the cape out at every bearing, where the
+## legs reach 0.13-0.17, and an idle cape bowed 45 mm off the calves.
+const SHIN_BEARINGS := 7
+const SHIN_BEARING_STEP := 15.0
+## How far off what is worn the legs' measured reach holds the cloth. Two
+## centimetres held an idle Vanguard cape 2 cm out from legs it cleared.
+const LEG_CLEARANCE := 0.01
+## How far down the thigh, hip to knee, its reach starts counting: above, the
+## seat and the skirts behind it are the waist capsule's.
+const THIGH_FROM := 0.4
 ## The cape chains, as `cape_<side>_01..04` in the rig.
 const CHAIN_SIDES: Array[String] = ["l", "c", "r"]
 const CHAIN_LINKS := 4
@@ -107,6 +125,20 @@ const LINE_BAND := 0.05
 const LINE_SLICE := 0.05
 ## The hem's trim rolls outward; the lowest joint reads the sheet above it.
 const LINE_HEM := 0.08
+## How far a joint's folds come in toward the body past its line, read this
+## far through the strip: the inner crests the shins meet.
+const LINE_FOLD := 0.90
+## How far from the middle chain the sheet reaches at a joint, read this far
+## out through it: 0.24 either side at the top link and 0.37 at the hem.
+const LINE_WIDTH := 0.90
+## The cape's cross-section is read at this many places from side to side, at
+## each joint, each from cloth within FOLD_WINDOW of it. Below the yoke the
+## sheet is a U round the body: 25 cm out from the middle it stands 10-15 cm
+## further in than the chains' line. Read over a wide stretch, a crest is the
+## furthest-in cloth anywhere in it, and an idle cape was pushed 6 cm off legs
+## it cleared.
+const SECTION_BINS := 9
+const FOLD_WINDOW := 0.04
 
 
 static func columns() -> int:
@@ -420,9 +452,27 @@ static func axis_reach(pieces: Array, from: Vector3, to: Vector3,
 ## cloth leaves the yoke. That cloth was conformed to the bare back, so a drape
 ## over armour moves only the yoke above it. Each vertex is carried at rest by
 ## its heaviest bone; the line wants only a depth.
-static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
+##
+## `section`, when given, receives the cape's cross-section at each joint,
+## across the middle chain's rest x: [the chains' x offsets from the middle
+## one (PackedFloat32Array, low to high); the sheet's half-width at each
+## joint; how far its folds come in toward the body, SECTION_BINS from -x to +x
+## for each joint in turn; and each chain's share of the cloth at each of those
+## places, CHAIN_SIDES order]. The middle chain carries nearly the whole sheet,
+## its side panels too, and cloth between chains is a blend of them, so each
+## place is read against the blend of the chains' lines that carries it.
+static func fabric_line(skeleton: Skeleton3D, cape: Array,
+		section: Array = []) -> Array:
+	var chains: Array[PackedInt32Array] = []
+	for side: String in CHAIN_SIDES:
+		var chain := PackedInt32Array()
+		for link: int in range(CHAIN_LINKS):
+			chain.append(skeleton.find_bone("cape_%s_%02d" % [side, link + 1]))
+		chains.append(chain)
 	var cloth := PackedVector3Array()
 	var carriers := PackedInt32Array()
+	# Each vertex's weight on each chain, in CHAIN_SIDES order.
+	var shares := PackedFloat32Array()
 	for node_value: Variant in cape:
 		var node := node_value as MeshInstance3D
 		if node == null or node.mesh == null or node.skin == null:
@@ -460,7 +510,17 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
 					continue
 				cloth.append(carry[heaviest] * vertices[index])
 				carriers.append(carrier[heaviest])
+				for chain: PackedInt32Array in chains:
+					var share := 0.0
+					for slot: int in range(per):
+						var bone: int = bones[index * per + slot]
+						if bone >= 0 and bone < carrier.size() and chain.has(carrier[bone]):
+							share += weights[index * per + slot]
+					shares.append(share)
 	var out: Array = []
+	var roots: Array = []
+	var heights: Array = []
+	var carried_by := PackedInt32Array()
 	for side: String in CHAIN_SIDES:
 		var chain := PackedInt32Array()
 		for link: int in range(CHAIN_LINKS):
@@ -487,8 +547,10 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
 			return []
 		var offsets := PackedVector3Array()
 		var height: float = root.y
+		var levels := PackedFloat32Array()
 		for joint: int in range(CHAIN_LINKS + 1):
 			var at: float = clampf(height, lowest + LINE_HEM, highest - LINE_SLICE)
+			levels.append(at)
 			var depths := PackedFloat32Array()
 			for point: Vector3 in band:
 				if absf(point.y - at) < LINE_SLICE:
@@ -510,4 +572,151 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
 			if joint < CHAIN_LINKS:
 				height -= lengths[joint]
 		out.append(offsets)
+		roots.append(root)
+		heights.append(levels)
+		carried_by.append_array(chain)
+	section.append_array(_cross_section(cloth, carriers, shares, carried_by, roots,
+		heights, out))
 	return out
+
+
+## The cape's cross-section at each joint (see `fabric_line`), read at the
+## middle chain's joint heights: per place across, each chain's share of the
+## cloth there and how far its folds come in past the blend of the chains'
+## lines they make.
+static func _cross_section(cloth: PackedVector3Array, carriers: PackedInt32Array,
+		shares: PackedFloat32Array, carried_by: PackedInt32Array, roots: Array,
+		heights: Array, lines: Array) -> Array:
+	var count: int = roots.size()
+	var middle: Vector3 = roots[1]
+	var knots := PackedFloat32Array()
+	for root: Vector3 in roots:
+		knots.append(root.x - middle.x)
+	var halves := PackedFloat32Array()
+	var folds := PackedFloat32Array()
+	var blend := PackedFloat32Array()
+	var levels: PackedFloat32Array = heights[1]
+	for joint: int in range(CHAIN_LINKS + 1):
+		var at: float = levels[joint]
+		var depths := PackedFloat32Array()
+		for chain: int in range(count):
+			depths.append((roots[chain] as Vector3).z + (lines[chain] as PackedVector3Array)[joint].z)
+		var slice := PackedInt32Array()
+		var reach := PackedFloat32Array()
+		for index: int in range(cloth.size()):
+			if carried_by.has(carriers[index]) and absf(cloth[index].y - at) < LINE_SLICE:
+				slice.append(index)
+				reach.append(absf(cloth[index].x - middle.x))
+		reach.sort()
+		var half: float = 0.0 if reach.is_empty() else reach[mini(int(
+			LINE_WIDTH * float(reach.size())), reach.size() - 1)]
+		halves.append(half)
+		# Toward the body is toward the material line.
+		var toward: float = signf(middle.z - depths[1])
+		for bin: int in range(SECTION_BINS):
+			var across: float = (2.0 * float(bin) / float(SECTION_BINS - 1) - 1.0) * half
+			var weight := PackedFloat32Array()
+			weight.resize(count)
+			weight.fill(0.0)
+			var inner := PackedFloat32Array()
+			for index: int in slice:
+				if absf(cloth[index].x - middle.x - across) >= FOLD_WINDOW:
+					continue
+				inner.append(cloth[index].z)
+				for chain: int in range(count):
+					weight[chain] += shares[index * count + chain]
+			var total := 0.0
+			for chain: int in range(count):
+				total += weight[chain]
+			if total <= 1e-6:
+				# Nothing measured here: straight between the nearest chains.
+				weight = _knot_weights(knots, across)
+				total = 1.0
+			var line := 0.0
+			for chain: int in range(count):
+				weight[chain] /= total
+				line += weight[chain] * depths[chain]
+			blend.append_array(weight)
+			if inner.is_empty():
+				folds.append(0.0)
+				continue
+			inner.sort()
+			var crest: float = inner[mini(int(LINE_FOLD * float(inner.size())),
+				inner.size() - 1)] if toward >= 0.0 else inner[mini(int(
+				(1.0 - LINE_FOLD) * float(inner.size())), inner.size() - 1)]
+			folds.append(maxf(0.0, (crest - line) * toward))
+	return [knots, halves, folds, blend]
+
+
+## Each chain's share `across` the cape when nothing was measured there:
+## straight between neighbouring chains, all to an outer one past it.
+static func _knot_weights(knots: PackedFloat32Array, across: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	out.resize(knots.size())
+	out.fill(0.0)
+	if across <= knots[0]:
+		out[0] = 1.0
+		return out
+	for knot: int in range(1, knots.size()):
+		if across <= knots[knot]:
+			var t: float = (across - knots[knot - 1]) / maxf(knots[knot] - knots[knot - 1], 1e-5)
+			out[knot - 1] = 1.0 - t
+			out[knot] = t
+			return out
+	out[knots.size() - 1] = 1.0
+	return out
+
+
+## How far the legs reach behind a shin	return out
+
+
+## How far the legs reach behind a shin, by sample along it (REACH_SAMPLES, knee
+## to ankle) and bearing from the leg's back (SHIN_BEARINGS columns), in rest
+## space: the body's calf and whatever is worn over it, held CLEARANCE off.
+## Only that leg's half of the body counts: the other leg's back flap stood
+## within 45 degrees of the first shin's back. Each cell carries its neighbours along
+## and around the shin, as `axis_reach` does along its axis.
+static func shin_reach(pieces: Array, from: Vector3, to: Vector3,
+		floor_radius: float, below: float = 0.0) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	out.resize(REACH_SAMPLES * SHIN_BEARINGS)
+	out.fill(floor_radius)
+	var axis: Vector3 = to - from
+	var span: float = axis.length_squared()
+	if span < 1e-9:
+		return out
+	var along: Vector3 = axis / sqrt(span)
+	# The rig's back is -z in its rest space.
+	var back := Vector3(0.0, 0.0, -1.0)
+	back = (back - along * back.dot(along)).normalized()
+	for piece_value: Variant in pieces:
+		var mesh: Mesh = (piece_value as Dictionary).get("mesh") as Mesh
+		if mesh == null:
+			continue
+		for surface: int in range(mesh.get_surface_count()):
+			var vertices: PackedVector3Array = mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+			for point: Vector3 in vertices:
+				if absf(point.x) > TRUNK_HALF or point.x * from.x < 0.0:
+					continue
+				var travel: float = (point - from).dot(axis) / span
+				if travel < below or travel > 1.0:
+					continue
+				var away: Vector3 = point - (from + axis * travel)
+				var gap: float = away.length()
+				if gap < 1e-5:
+					continue
+				var bearing: float = rad_to_deg(acos(clampf(away.dot(back) / gap, -1.0, 1.0)))
+				var column: int = mini(int(bearing / SHIN_BEARING_STEP), SHIN_BEARINGS - 1)
+				var at: int = int(round(travel * float(REACH_SAMPLES - 1))) * SHIN_BEARINGS + column
+				out[at] = maxf(out[at], gap + LEG_CLEARANCE)
+	var smeared := out.duplicate()
+	for slot: int in range(REACH_SAMPLES):
+		for column: int in range(SHIN_BEARINGS):
+			var best: float = out[slot * SHIN_BEARINGS + column]
+			for near_slot: int in [slot - 1, slot, slot + 1]:
+				for near_column: int in [column - 1, column, column + 1]:
+					if near_slot < 0 or near_slot >= REACH_SAMPLES or near_column < 0 							or near_column >= SHIN_BEARINGS:
+						continue
+					best = maxf(best, out[near_slot * SHIN_BEARINGS + near_column])
+			smeared[slot * SHIN_BEARINGS + column] = best
+	return smeared

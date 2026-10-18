@@ -1,5 +1,5 @@
 {
-	"_note": "Extra armour sets for the equipment review viewer, after the four class starter kits (read from src/ui/creation_archetypes.gd). visuals maps part -> visual id, as in equipment.json model keys \"part:visual\" (0 main hand, 1 off hand, 2 cape, 3 head, 4 legs, 5 torso, 6 feet). Parts 0-2 show only with the viewer's \"Weapons and cape\" toggle.",
+	"_note": "Extra armour sets for the equipment review viewer, after the four class starter kits (read from src/ui/creation_archetypes.gd). visuals maps part -> visual id, as in equipment.json model keys \"part:visual\" (0 main hand, 1 off hand, 2 cape, 3 head, 4 legs, 5 torso, 6 feet). Parts 0-2 show only with the viewer's \"Weapons and cape\" toggle. Audit sets (2026-10-18): every generated set not yet design-fitted, one per theme and design index (torso, legs, boots, headwear of the same index), with the theme's weapon and the Red Cape.",
 	"sets": [
 		{
 			"name": "Phoenix legendary set",
@@ -15,6 +15,681 @@
 		{
 			"name": "Default clothes (no armour)",
 			"visuals": {}
+		},
+		{
+			"name": "Audit Militia 01 (Arming Gambeson)",
+			"visuals": {
+				"0": 114,
+				"1": 106,
+				"2": 12,
+				"3": 133,
+				"4": 219,
+				"5": 208,
+				"6": 248
+			}
+		},
+		{
+			"name": "Audit Militia 03 (Splinted Vest)",
+			"visuals": {
+				"0": 114,
+				"1": 106,
+				"2": 12,
+				"3": 135,
+				"4": 221,
+				"5": 210,
+				"6": 250
+			}
+		},
+		{
+			"name": "Audit Militia 04 (Mail Shirt)",
+			"visuals": {
+				"0": 114,
+				"1": 106,
+				"2": 12,
+				"3": 136,
+				"4": 222,
+				"5": 211,
+				"6": 251
+			}
+		},
+		{
+			"name": "Audit Militia 05 (Riveted Lamellar)",
+			"visuals": {
+				"0": 114,
+				"1": 106,
+				"2": 12,
+				"3": 137,
+				"4": 223,
+				"5": 212,
+				"6": 252
+			}
+		},
+		{
+			"name": "Audit Militia 06 (Plain Breastplate)",
+			"visuals": {
+				"0": 114,
+				"1": 106,
+				"2": 12,
+				"3": 138,
+				"4": 224,
+				"5": 213,
+				"6": 253
+			}
+		},
+		{
+			"name": "Audit Militia 07 (Brass Breastplate)",
+			"visuals": {
+				"0": 114,
+				"1": 106,
+				"2": 12,
+				"3": 139,
+				"4": 225,
+				"5": 214,
+				"6": 254
+			}
+		},
+		{
+			"name": "Audit Militia 08 (Crimson Guard Cuirass)",
+			"visuals": {
+				"0": 114,
+				"1": 106,
+				"2": 12,
+				"3": 140,
+				"4": 226,
+				"5": 215,
+				"6": 255
+			}
+		},
+		{
+			"name": "Audit Knightly 01 (Fluted Breastplate)",
+			"visuals": {
+				"0": 115,
+				"1": 106,
+				"2": 12,
+				"3": 141,
+				"4": 187,
+				"5": 200,
+				"6": 240
+			}
+		},
+		{
+			"name": "Audit Knightly 02 (Polished Cuirass)",
+			"visuals": {
+				"0": 115,
+				"1": 106,
+				"2": 12,
+				"3": 142,
+				"4": 188,
+				"5": 201,
+				"6": 241
+			}
+		},
+		{
+			"name": "Audit Knightly 03 (Gilded Vine Cuirass)",
+			"visuals": {
+				"0": 115,
+				"1": 106,
+				"2": 12,
+				"3": 143,
+				"4": 189,
+				"5": 202,
+				"6": 242
+			}
+		},
+		{
+			"name": "Audit Knightly 04 (Scalework Cuirass)",
+			"visuals": {
+				"0": 115,
+				"1": 106,
+				"2": 12,
+				"3": 144,
+				"4": 190,
+				"5": 203,
+				"6": 243
+			}
+		},
+		{
+			"name": "Audit Knightly 05 (Rosette Cuirass)",
+			"visuals": {
+				"0": 115,
+				"1": 106,
+				"2": 12,
+				"3": 145,
+				"4": 191,
+				"5": 204,
+				"6": 244
+			}
+		},
+		{
+			"name": "Audit Knightly 06 (Tasset Cuirass)",
+			"visuals": {
+				"0": 115,
+				"1": 106,
+				"2": 12,
+				"3": 146,
+				"4": 192,
+				"5": 205,
+				"6": 245
+			}
+		},
+		{
+			"name": "Audit Knightly 07 (Mantled Cuirass)",
+			"visuals": {
+				"0": 115,
+				"1": 106,
+				"2": 12,
+				"3": 147,
+				"4": 193,
+				"5": 206,
+				"6": 246
+			}
+		},
+		{
+			"name": "Audit Knightly 08 (Blackened Cuirass)",
+			"visuals": {
+				"0": 115,
+				"1": 106,
+				"2": 12,
+				"3": 148,
+				"4": 194,
+				"5": 207,
+				"6": 247
+			}
+		},
+		{
+			"name": "Audit Legendary 02 (Glacier Cuirass)",
+			"visuals": {
+				"0": 189,
+				"2": 12,
+				"3": 126,
+				"4": 196,
+				"5": 193,
+				"6": 108
+			}
+		},
+		{
+			"name": "Audit Legendary 03 (Nightstorm Cuirass)",
+			"visuals": {
+				"0": 189,
+				"2": 12,
+				"3": 127,
+				"4": 197,
+				"5": 194,
+				"6": 109
+			}
+		},
+		{
+			"name": "Audit Legendary 04 (Dragonbone Cuirass)",
+			"visuals": {
+				"0": 189,
+				"2": 12,
+				"3": 128,
+				"4": 198,
+				"5": 195,
+				"6": 110
+			}
+		},
+		{
+			"name": "Audit Legendary 05 (Sunburst Cuirass)",
+			"visuals": {
+				"0": 189,
+				"2": 12,
+				"3": 129,
+				"4": 199,
+				"5": 196,
+				"6": 111
+			}
+		},
+		{
+			"name": "Audit Legendary 06 (Amethyst Cuirass)",
+			"visuals": {
+				"0": 189,
+				"2": 12,
+				"3": 130,
+				"4": 200,
+				"5": 197,
+				"6": 112
+			}
+		},
+		{
+			"name": "Audit Legendary 07 (Knotwork Cuirass)",
+			"visuals": {
+				"0": 189,
+				"2": 12,
+				"3": 131,
+				"4": 201,
+				"5": 198,
+				"6": 113
+			}
+		},
+		{
+			"name": "Audit Legendary 08 (Lion Cuirass)",
+			"visuals": {
+				"0": 189,
+				"2": 12,
+				"3": 132,
+				"4": 202,
+				"5": 199,
+				"6": 114
+			}
+		},
+		{
+			"name": "Audit Amberwood 01 (Bark Jerkin)",
+			"visuals": {
+				"0": 163,
+				"2": 12,
+				"3": 117,
+				"4": 171,
+				"5": 184,
+				"6": 200
+			}
+		},
+		{
+			"name": "Audit Amberwood 02 (Mossbound Coat)",
+			"visuals": {
+				"0": 163,
+				"2": 12,
+				"3": 118,
+				"4": 172,
+				"5": 185,
+				"6": 201
+			}
+		},
+		{
+			"name": "Audit Amberwood 03 (Rootwrap Tunic)",
+			"visuals": {
+				"0": 163,
+				"2": 12,
+				"3": 119,
+				"4": 173,
+				"5": 186,
+				"6": 202
+			}
+		},
+		{
+			"name": "Audit Amberwood 04 (Leafscale Cuirass)",
+			"visuals": {
+				"0": 163,
+				"2": 12,
+				"3": 120,
+				"4": 174,
+				"5": 187,
+				"6": 203
+			}
+		},
+		{
+			"name": "Audit Amberwood 05 (Heartwood Cuirass)",
+			"visuals": {
+				"0": 163,
+				"2": 12,
+				"3": 121,
+				"4": 175,
+				"5": 188,
+				"6": 204
+			}
+		},
+		{
+			"name": "Audit Amberwood 07 (Amberglass Cuirass)",
+			"visuals": {
+				"0": 163,
+				"2": 12,
+				"3": 123,
+				"4": 177,
+				"5": 190,
+				"6": 206
+			}
+		},
+		{
+			"name": "Audit Amberwood 08 (Ivory Vine Cuirass)",
+			"visuals": {
+				"0": 163,
+				"2": 12,
+				"3": 124,
+				"4": 178,
+				"5": 191,
+				"6": 207
+			}
+		},
+		{
+			"name": "Audit Arcane 01 (Warded Tabard)",
+			"visuals": {
+				"0": 142,
+				"2": 12,
+				"3": 109,
+				"4": 179,
+				"5": 216,
+				"6": 192
+			}
+		},
+		{
+			"name": "Audit Arcane 02 (Glowline Coat)",
+			"visuals": {
+				"0": 142,
+				"2": 12,
+				"3": 110,
+				"4": 180,
+				"5": 217,
+				"6": 193
+			}
+		},
+		{
+			"name": "Audit Arcane 03 (Palesteel Cuirass)",
+			"visuals": {
+				"0": 142,
+				"2": 12,
+				"3": 111,
+				"4": 181,
+				"5": 218,
+				"6": 194
+			}
+		},
+		{
+			"name": "Audit Arcane 04 (Starglass Cuirass)",
+			"visuals": {
+				"0": 142,
+				"2": 12,
+				"3": 112,
+				"4": 182,
+				"5": 219,
+				"6": 195
+			}
+		},
+		{
+			"name": "Audit Arcane 05 (Twilight Cuirass)",
+			"visuals": {
+				"0": 142,
+				"2": 12,
+				"3": 113,
+				"4": 183,
+				"5": 220,
+				"6": 196
+			}
+		},
+		{
+			"name": "Audit Arcane 06 (Seawrap Robe)",
+			"visuals": {
+				"0": 142,
+				"2": 12,
+				"3": 114,
+				"4": 184,
+				"5": 221,
+				"6": 197
+			}
+		},
+		{
+			"name": "Audit Arcane 08 (Crystalward Plate)",
+			"visuals": {
+				"0": 142,
+				"2": 12,
+				"3": 116,
+				"4": 186,
+				"5": 223,
+				"6": 199
+			}
+		},
+		{
+			"name": "Audit Ranger 01 (Bonehook Jerkin)",
+			"visuals": {
+				"0": 164,
+				"2": 12,
+				"3": 157,
+				"4": 227,
+				"5": 224,
+				"6": 232
+			}
+		},
+		{
+			"name": "Audit Ranger 02 (Scout Vest)",
+			"visuals": {
+				"0": 164,
+				"2": 12,
+				"3": 158,
+				"4": 228,
+				"5": 225,
+				"6": 233
+			}
+		},
+		{
+			"name": "Audit Ranger 03 (Sashed Jerkin)",
+			"visuals": {
+				"0": 164,
+				"2": 12,
+				"3": 159,
+				"4": 229,
+				"5": 226,
+				"6": 234
+			}
+		},
+		{
+			"name": "Audit Ranger 04 (Brassbuckle Coat)",
+			"visuals": {
+				"0": 164,
+				"2": 12,
+				"3": 160,
+				"4": 230,
+				"5": 227,
+				"6": 235
+			}
+		},
+		{
+			"name": "Audit Ranger 05 (Mossfringe Jerkin)",
+			"visuals": {
+				"0": 164,
+				"2": 12,
+				"3": 161,
+				"4": 231,
+				"5": 228,
+				"6": 236
+			}
+		},
+		{
+			"name": "Audit Ranger 06 (Ropecoil Jerkin)",
+			"visuals": {
+				"0": 164,
+				"2": 12,
+				"3": 162,
+				"4": 232,
+				"5": 229,
+				"6": 237
+			}
+		},
+		{
+			"name": "Audit Ranger 07 (Riveted Jerkin)",
+			"visuals": {
+				"0": 164,
+				"2": 12,
+				"3": 163,
+				"4": 233,
+				"5": 230,
+				"6": 238
+			}
+		},
+		{
+			"name": "Audit Ranger 08 (Trapper Coat)",
+			"visuals": {
+				"0": 164,
+				"2": 12,
+				"3": 164,
+				"4": 234,
+				"5": 231,
+				"6": 239
+			}
+		},
+		{
+			"name": "Audit Frontier 01 (Homespun Shirt)",
+			"visuals": {
+				"0": 116,
+				"2": 12,
+				"3": 149,
+				"4": 243,
+				"5": 232,
+				"6": 224
+			}
+		},
+		{
+			"name": "Audit Frontier 02 (Redtrim Tunic)",
+			"visuals": {
+				"0": 116,
+				"2": 12,
+				"3": 150,
+				"4": 244,
+				"5": 233,
+				"6": 225
+			}
+		},
+		{
+			"name": "Audit Frontier 03 (Patched Workshirt)",
+			"visuals": {
+				"0": 116,
+				"2": 12,
+				"3": 151,
+				"4": 245,
+				"5": 234,
+				"6": 226
+			}
+		},
+		{
+			"name": "Audit Frontier 04 (Whipstitch Shirt)",
+			"visuals": {
+				"0": 116,
+				"2": 12,
+				"3": 152,
+				"4": 246,
+				"5": 235,
+				"6": 227
+			}
+		},
+		{
+			"name": "Audit Frontier 05 (Sashwrap Shirt)",
+			"visuals": {
+				"0": 116,
+				"2": 12,
+				"3": 153,
+				"4": 247,
+				"5": 236,
+				"6": 228
+			}
+		},
+		{
+			"name": "Audit Frontier 06 (Laced Field Tunic)",
+			"visuals": {
+				"0": 116,
+				"2": 12,
+				"3": 154,
+				"4": 248,
+				"5": 237,
+				"6": 229
+			}
+		},
+		{
+			"name": "Audit Frontier 07 (Tattered Blue Shirt)",
+			"visuals": {
+				"0": 116,
+				"2": 12,
+				"3": 155,
+				"4": 249,
+				"5": 238,
+				"6": 230
+			}
+		},
+		{
+			"name": "Audit Frontier 08 (Woollen Tunic)",
+			"visuals": {
+				"0": 116,
+				"2": 12,
+				"3": 156,
+				"4": 250,
+				"5": 239,
+				"6": 231
+			}
+		},
+		{
+			"name": "Audit Sunmane 01 (Tasselled Tunic)",
+			"visuals": {
+				"0": 118,
+				"2": 12,
+				"3": 165,
+				"4": 235,
+				"5": 240,
+				"6": 216
+			}
+		},
+		{
+			"name": "Audit Sunmane 02 (Fringed Kaftan)",
+			"visuals": {
+				"0": 118,
+				"2": 12,
+				"3": 166,
+				"4": 236,
+				"5": 241,
+				"6": 217
+			}
+		},
+		{
+			"name": "Audit Sunmane 03 (Rider Vest)",
+			"visuals": {
+				"0": 118,
+				"2": 12,
+				"3": 167,
+				"4": 237,
+				"5": 242,
+				"6": 218
+			}
+		},
+		{
+			"name": "Audit Sunmane 04 (Bone Clasp Coat)",
+			"visuals": {
+				"0": 118,
+				"2": 12,
+				"3": 168,
+				"4": 238,
+				"5": 243,
+				"6": 219
+			}
+		},
+		{
+			"name": "Audit Sunmane 05 (Sundisc Cuirass)",
+			"visuals": {
+				"0": 118,
+				"2": 12,
+				"3": 169,
+				"4": 239,
+				"5": 244,
+				"6": 220
+			}
+		},
+		{
+			"name": "Audit Sunmane 06 (Red Sash Wrap)",
+			"visuals": {
+				"0": 118,
+				"2": 12,
+				"3": 170,
+				"4": 240,
+				"5": 245,
+				"6": 221
+			}
+		},
+		{
+			"name": "Audit Sunmane 07 (Riding Jacket)",
+			"visuals": {
+				"0": 118,
+				"2": 12,
+				"3": 171,
+				"4": 241,
+				"5": 246,
+				"6": 222
+			}
+		},
+		{
+			"name": "Audit Sunmane 08 (Boneplate Coat)",
+			"visuals": {
+				"0": 118,
+				"2": 12,
+				"3": 172,
+				"4": 242,
+				"5": 247,
+				"6": 223
+			}
 		}
 	]
 }

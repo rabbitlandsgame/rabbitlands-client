@@ -1,0 +1,242 @@
+{
+ "format": 2,
+ "spec": "militia_08.json",
+ "spec_sha256": "c83e736f0c5fa00a962b84c44efed9a6648b44990205c4529a2fc8046df914ae",
+ "body": "luminous_female.glb",
+ "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+ "pose": "Idle_Subtle",
+ "tool_sha256": "6896841bfdd40695eb089f3c7e6dad52e76628bc7dafa8f172e99ef2fc4c81ad",
+ "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
+ "pieces": {
+  "torso": {
+   "source": "Militia_torso_armor_concept_sheet__r02_c04.glb",
+   "vertices": 1945,
+   "triangles": 1483,
+   "opened": 158,
+   "rigidPlates": 13,
+   "bones": {
+    "trunk_lower": {
+     "k": 1.001,
+     "rays": 1827,
+     "shift_mm": [
+      4.7,
+      -14.6,
+      -2.4
+     ],
+     "girth": 1.0
+    },
+    "trunk_upper": {
+     "k": 1.0,
+     "rays": 1225,
+     "shift_mm": [
+      -1.6,
+      -34.9,
+      3.9
+     ],
+     "girth": 1.0
+    },
+    "upperarm_l": {
+     "k": 1.15,
+     "rays": 426,
+     "shift_mm": [
+      -27.7,
+      -9.1,
+      -7.0
+     ],
+     "girth": 1.011
+    },
+    "lowerarm_l": {
+     "k": 1.109,
+     "rays": 75,
+     "shift_mm": [
+      16.1,
+      5.0,
+      2.1
+     ],
+     "girth": 1.25
+    },
+    "upperarm_r": {
+     "k": 1.15,
+     "rays": 421,
+     "shift_mm": [
+      29.1,
+      -1.6,
+      -7.0
+     ],
+     "girth": 1.148
+    },
+    "lowerarm_r": {
+     "k": 1.109,
+     "rays": 145,
+     "shift_mm": [
+      -13.2,
+      -6.4,
+      5.5
+     ],
+     "girth": 1.25
+    },
+    "conform": {
+     "cells": 988,
+     "standoff_mm": 29.0,
+     "out_mm": 18.3,
+     "in_mm": 19.5
+    },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      46.3,
+      26.3,
+      1.7
+     ],
+     "lowerarm_r": [
+      -24.6,
+      13.2,
+      1.1
+     ]
+    },
+    "collar": {
+     "cells": 153,
+     "max_mm": 91.4
+    },
+    "hug": {
+     "moved": 108,
+     "max_mm": 67.1
+    },
+    "twist_vertices": 616
+   },
+   "out": "Militia_torso_armor_concept_sheet__r02_c04.glb.npz",
+   "sha256": "84168b87027aa31b2990c8d6c6fdc9a736405bc024349d97203e4c7794942610"
+  },
+  "legs": {
+   "source": "Eloria_Militia_Leg_Armor_Variants__r02_c04.glb",
+   "vertices": 1842,
+   "triangles": 1403,
+   "opened": 2,
+   "rigidPlates": 27,
+   "bones": {
+    "pelvis": {
+     "k": 1.092,
+     "rays": 283,
+     "shift_mm": [
+      3.3,
+      -16.8,
+      -3.8
+     ],
+     "girth": 1.15
+    },
+    "thigh_l": {
+     "k": 1.138,
+     "rays": 313,
+     "shift_mm": [
+      -7.7,
+      -10.1,
+      -0.8
+     ],
+     "girth": 1.0
+    },
+    "calf_l": {
+     "k": 1.127,
+     "rays": 1427,
+     "shift_mm": [
+      -2.4,
+      -23.0,
+      -0.3
+     ],
+     "girth": 1.139
+    },
+    "thigh_r": {
+     "k": 1.138,
+     "rays": 325,
+     "shift_mm": [
+      5.4,
+      -7.9,
+      -0.6
+     ],
+     "girth": 1.0
+    },
+    "calf_r": {
+     "k": 1.127,
+     "rays": 1426,
+     "shift_mm": [
+      1.5,
+      -23.2,
+      -0.2
+     ],
+     "girth": 1.077
+    },
+    "hug": {
+     "moved": 217,
+     "max_mm": 118.5
+    },
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 135,
+      "max_mm": 65.3
+     },
+     {
+      "into": "boots",
+      "tucked": 300,
+      "max_mm": 58.5
+     }
+    ]
+   },
+   "out": "Eloria_Militia_Leg_Armor_Variants__r02_c04.glb.npz",
+   "sha256": "39d30daa63552d88f0a380d9670e77d518ea8104a7083ccfd2f45d6763777f05"
+  },
+  "boots": {
+   "source": "Eight_medieval_militia_greaves__r02_c04.glb",
+   "vertices": 1799,
+   "triangles": 1363,
+   "opened": 0,
+   "rigidPlates": 20,
+   "bones": {
+    "calf_l": {
+     "k": 1.0,
+     "rays": 585,
+     "shift_mm": [
+      10.3,
+      13.0,
+      0.7
+     ],
+     "girth": 1.2
+    },
+    "foot_l": {
+     "k": 1.001,
+     "rays": 602,
+     "shift_mm": [
+      9.8,
+      -7.1,
+      12.9
+     ],
+     "girth": 1.1
+    },
+    "calf_r": {
+     "k": 1.0,
+     "rays": 550,
+     "shift_mm": [
+      -11.2,
+      14.6,
+      0.8
+     ],
+     "girth": 1.2
+    },
+    "foot_r": {
+     "k": 1.001,
+     "rays": 632,
+     "shift_mm": [
+      -7.4,
+      -7.6,
+      13.9
+     ],
+     "girth": 1.1
+    },
+    "sole_seat_mm": {
+     "l": 14.5,
+     "r": 14.7
+    }
+   },
+   "out": "Eight_medieval_militia_greaves__r02_c04.glb.npz",
+   "sha256": "dca6fe704c8874696062f2d3d58515ddefde1ed14400886ca8b283b32a46754e"
+  }
+ }
+}

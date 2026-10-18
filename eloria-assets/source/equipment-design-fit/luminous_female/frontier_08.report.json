@@ -1,0 +1,242 @@
+{
+ "format": 2,
+ "spec": "frontier_08.json",
+ "spec_sha256": "7b28c122553c810ebb6e82288b558500d4225f6bc235801cc38100f9c2ef8824",
+ "body": "luminous_female.glb",
+ "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+ "pose": "Idle_Subtle",
+ "tool_sha256": "6896841bfdd40695eb089f3c7e6dad52e76628bc7dafa8f172e99ef2fc4c81ad",
+ "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
+ "pieces": {
+  "torso": {
+   "source": "Eight_Eloria_frontier_shirt_designs__r02_c04.glb",
+   "vertices": 1743,
+   "triangles": 1557,
+   "opened": 17,
+   "rigidPlates": 6,
+   "bones": {
+    "trunk_lower": {
+     "k": 1.001,
+     "rays": 1791,
+     "shift_mm": [
+      6.5,
+      -12.0,
+      -1.8
+     ],
+     "girth": 1.0
+    },
+    "trunk_upper": {
+     "k": 1.0,
+     "rays": 1237,
+     "shift_mm": [
+      -1.8,
+      -43.7,
+      4.9
+     ],
+     "girth": 1.01
+    },
+    "upperarm_l": {
+     "k": 1.239,
+     "rays": 315,
+     "shift_mm": [
+      5.6,
+      -6.5,
+      1.0
+     ],
+     "girth": 1.0
+    },
+    "lowerarm_l": {
+     "k": 1.236,
+     "rays": 319,
+     "shift_mm": [
+      -6.8,
+      9.9,
+      -5.2
+     ],
+     "girth": 1.0
+    },
+    "upperarm_r": {
+     "k": 1.239,
+     "rays": 330,
+     "shift_mm": [
+      5.4,
+      -0.8,
+      -1.3
+     ],
+     "girth": 1.0
+    },
+    "lowerarm_r": {
+     "k": 1.236,
+     "rays": 497,
+     "shift_mm": [
+      9.5,
+      13.5,
+      -7.2
+     ],
+     "girth": 1.0
+    },
+    "conform": {
+     "cells": 981,
+     "standoff_mm": 7.5,
+     "out_mm": 22.2,
+     "in_mm": 20.0
+    },
+    "centre_cuffs": {
+     "lowerarm_l": [
+      11.9,
+      -55.0,
+      22.6
+     ],
+     "lowerarm_r": [
+      -11.3,
+      -40.4,
+      17.6
+     ]
+    },
+    "collar": {
+     "cells": 175,
+     "max_mm": 107.9
+    },
+    "hug": {
+     "moved": 47,
+     "max_mm": 51.7
+    },
+    "twist_vertices": 416
+   },
+   "out": "Eight_Eloria_frontier_shirt_designs__r02_c04.glb.npz",
+   "sha256": "036091107f19e6efa110a87e8df19e5c4729903112ffdcc4495e6407cc783fe9"
+  },
+  "legs": {
+   "source": "Eight_Humble_Frontier_Pants_Designs__r02_c04.glb",
+   "vertices": 1795,
+   "triangles": 1598,
+   "opened": 0,
+   "rigidPlates": 11,
+   "bones": {
+    "pelvis": {
+     "k": 0.88,
+     "rays": 251,
+     "shift_mm": [
+      0.7,
+      -18.3,
+      -4.2
+     ],
+     "girth": 1.15
+    },
+    "thigh_l": {
+     "k": 1.174,
+     "rays": 366,
+     "shift_mm": [
+      2.3,
+      -11.0,
+      -0.3
+     ],
+     "girth": 1.0
+    },
+    "calf_l": {
+     "k": 1.173,
+     "rays": 1339,
+     "shift_mm": [
+      -0.2,
+      -8.0,
+      -0.1
+     ],
+     "girth": 1.0
+    },
+    "thigh_r": {
+     "k": 1.174,
+     "rays": 371,
+     "shift_mm": [
+      -4.1,
+      -10.0,
+      -0.2
+     ],
+     "girth": 1.0
+    },
+    "calf_r": {
+     "k": 1.173,
+     "rays": 1370,
+     "shift_mm": [
+      -1.0,
+      -11.0,
+      -0.0
+     ],
+     "girth": 1.011
+    },
+    "hug": {
+     "moved": 110,
+     "max_mm": 91.0
+    },
+    "tuck": [
+     {
+      "into": "torso",
+      "tucked": 62,
+      "max_mm": 56.6
+     },
+     {
+      "into": "boots",
+      "tucked": 510,
+      "max_mm": 56.6
+     }
+    ]
+   },
+   "out": "Eight_Humble_Frontier_Pants_Designs__r02_c04.glb.npz",
+   "sha256": "e6cfc5546ff2bf164351fe3a56ab2dd330996cb237c10016a2ad0982a5a809f2"
+  },
+  "boots": {
+   "source": "Eight_frontier_boot_designs__r02_c04.glb",
+   "vertices": 2003,
+   "triangles": 1457,
+   "opened": 0,
+   "rigidPlates": 14,
+   "bones": {
+    "calf_l": {
+     "k": 1.0,
+     "rays": 331,
+     "shift_mm": [
+      9.1,
+      2.2,
+      0.6
+     ],
+     "girth": 1.081
+    },
+    "foot_l": {
+     "k": 1.001,
+     "rays": 625,
+     "shift_mm": [
+      8.8,
+      -7.7,
+      13.9
+     ],
+     "girth": 1.1
+    },
+    "calf_r": {
+     "k": 1.0,
+     "rays": 302,
+     "shift_mm": [
+      -7.8,
+      1.8,
+      0.5
+     ],
+     "girth": 1.056
+    },
+    "foot_r": {
+     "k": 1.001,
+     "rays": 668,
+     "shift_mm": [
+      -7.6,
+      -8.5,
+      15.5
+     ],
+     "girth": 1.1
+    },
+    "sole_seat_mm": {
+     "l": 8.6,
+     "r": 11.0
+    }
+   },
+   "out": "Eight_frontier_boot_designs__r02_c04.glb.npz",
+   "sha256": "6ad4fe7c682a537bab987966c3900a90376c9cac9ca40a14a30988d5d44303fd"
+  }
+ }
+}
