@@ -1122,7 +1122,8 @@ Scratch harnesses: the client's
 
 **Not yet done.**
 
-- Note 4 still reads up to 17 mm at a few frames of the Fighting_Idle cycle.
+- Note 4 still read up to 17 mm at a few frames of the Fighting_Idle cycle;
+  see the fifth review below.
 - Arms are not collided with the cape's sides. In place, a swinging elbow
   passes through them (notes 1 and 3); in motion it does not.
 
@@ -1233,6 +1234,91 @@ Evidence: [the fixture's back and quarter views, side and back views of
 both bodies, and note 10](design-fit/vest-hug-cape.jpg). Scratch (offline
 measure `score.py`, the dump harness, trials, replays): the client's
 `.local/asset-authoring/working/equipment-fit-2026-10-17-kits/hug/`.
+
+### The cape over the legs in Fighting_Idle (fifth review, 2026-10-18)
+
+The owner's note, at `0d9f185f`: on the Vanguard kit (Studded Jack, Leather
+Kneecops, Banded Warboots, cape 2:105), Fighting_Idle at 0.33 s, "the left
+leg clips through the cape slightly". This is the residual after `c1b77a16`,
+on another kit. Session `equipment-review/2026-10-18_07-25-19`.
+
+The shin pass from `c1b77a16` treated each chain as a 15 cm strip of cloth.
+The skin weights say otherwise. The middle chain carries nearly the whole
+sheet below the yoke, its side panels included: 24 cm either side of it at
+the top link and 37 cm at the hem. The side chains carry only 7 cm strips.
+In the fighting stance the torso turns, and the side panel lies right behind
+the back leg. Nothing kept it off the leg, and nothing covered the thigh
+either: the Kneecops stand 13 cm behind the hip-to-knee line, past the solver's
+fixed 11.5 cm thigh capsule.
+
+What changed (`cape_cloth.gd`, `cape_drape.gd`, `replicated_actor_3d.gd`):
+
+- `CapeDrape.fabric_line` also measures the cape's cross-section at each
+  joint, at 9 places across its width. At each place it records each chain's
+  share of the skin weights, and how far the folds come in past the blend of
+  the chains' lines.
+- After either solver, the sheet is placed where that blend puts it. Where a
+  stretch of it meets a leg, the chains that carry it move straight back, each
+  by its share. All three chains are solved first, then pushed, then written.
+- The legs are hip to knee and knee to ankle on both sides. Each has a reach
+  measured per 15° of bearing from the leg's back, counting the body's own leg
+  and whatever is worn over it. The thigh's reach starts 40% down from the
+  hip: the seat above that is the waist capsule's.
+- The pass is skipped at heights a leg cannot reach, and where even the
+  nearest stretch of sheet is out of reach. It reads each link's middle, and
+  reads a stretch's neighbours only when that stretch had to move.
+- The leg clearance is 1 cm. With 2 cm, an idle Vanguard cape stood 2 cm off
+  legs it cleared.
+- As before, none of this applies without a measured line or to a mounted
+  rider.
+
+Leg through the cape (the fourth review's measure, now with face samples as
+well as vertices), over the whole Fighting_Idle cycle:
+
+| Kit | Noted frame, before → after | Cycle worst, before → after | Samples over 10 mm |
+| --- | ---: | ---: | ---: |
+| Vanguard (this note) | 27 → 12 mm | 37 → 16 mm | 32 → 20 of 52 |
+| Phoenix (fourth review, note 4) | 0 → 0 mm | 19 → 6 mm | 19 → 0 of 52 |
+
+With the legs drawn flat red, the replayed note shows no leg through the
+cape, held or playing. Before the fix it showed a strip through the side
+panel and a sliver above the boot. The only red left is the back leg seen
+past the cape's edge.
+
+Earlier notes are kept:
+
+- The second-review note 2 view (Vanguard, idle) hangs as fixed: from the
+  upper back to the calves within 3 mm, and the hem 9 mm further out.
+- The test kit's Amberwood legguards (4:171) stood 19–24 mm through the cape
+  in idle without the pass. They read 0 mm, and the cape drapes 5–46 mm out
+  over their knee flaps.
+- Replayed with the viewer's travel mode, the fourth review's run and walk
+  notes stream clear.
+
+Cost on the Phoenix kit is 95–157 µs per step with the pass, against
+52–72 µs without it (debug build, headless; the timings vary by ±30 µs run to
+run).
+
+Tests:
+
+- These pass:
+  - `test_cape_cloth.gd`, `test_cape_drape.gd` and `test_cape_idle.gd`;
+  - both parity suites;
+  - `test_actor_render_quality.gd`;
+  - `test_mounted_cape.gd` (44 checks), `test_mounted_player.gd` (1,130) and
+    `test_mount_preview_state.gd` (39), with no failures.
+- The native suites fail only because the extension is not built here.
+
+Evidence: [the note, before and after](design-fit/review5-cape-leg.jpg).
+
+**Not yet done.**
+
+- In Fighting_Idle the Vanguard's leg still comes up to 16 mm through the cape
+  over the cycle (20 of 52 samples over 10 mm). These are the measure's
+  readings; the replayed views show none.
+- Over the Scout Vest the cape's rigid yoke edge still clips the back of the
+  shoulder by 18 mm (see the Scout Vest section). The leg pass does not reach
+  the yoke.
 
 ## Two body shapes, preserved race identity
 
