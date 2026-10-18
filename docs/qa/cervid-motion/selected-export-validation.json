@@ -1,0 +1,260 @@
+{
+  "passed": true,
+  "actors": {
+    "lantern_stag": {
+      "passed": true,
+      "sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "samples": 7091,
+          "floor": 0.0033999170909637818,
+          "max_supported_hoof_speed": 0.0005846814314172071,
+          "length_error": 3.306456058949081e-08,
+          "max_rotation_step": 0.0024773435082076894
+        },
+        "Jog": {
+          "passed": true,
+          "samples": 4183,
+          "floor": 0.0033998310933611177,
+          "max_supported_hoof_speed": 0.0015962867250445094,
+          "length_error": 4.518804819220179e-08,
+          "max_rotation_step": 0.0027968413083777894
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "samples": 10131,
+          "floor": 0.003399559810204562,
+          "max_supported_hoof_speed": 0.0036587117797739614,
+          "length_error": 3.2873572530789374e-08,
+          "max_rotation_step": 0.0034378027562177163
+        },
+        "Death_A": {
+          "passed": true,
+          "samples": 16471,
+          "floor": 0.0033997302105826244,
+          "max_supported_hoof_speed": 0.00047613358579148824,
+          "length_error": 5.781423689787957e-08,
+          "max_rotation_step": 0.0018753564334976227
+        }
+      },
+      "import_adaptation": {
+        "source_sha256": "f209351457e7db2652ace36d210a5a77a583aec52575a686a86c73349d5d852c",
+        "sha256": "74033f3d4ce80c6ce66bcc4d62f57c76b8cec07475a675896d372f9692ed29b3",
+        "scope": "The native client importer discards non-bone wrapper tracks. Idle_A has a0.000596-unit wrapper lift. Bake that translation into the physical root and neutralize the wrapper; all physical bone/surface world motion retained. All four new actions and every unrelated sampler/static array remain exact. Quaternion subdivision hypothesis was rejected and reverted.",
+        "max_physical_bone_world_error": 2.915491514876578e-08,
+        "max_surface_error": 2.9154918035345645e-08
+      }
+    },
+    "elderwood_stag": {
+      "passed": true,
+      "sha256": "ff12aa932a9cae5686b9ae6f0df291d976d2df7da5c656c4411685bc86f35df5",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "samples": 7091,
+          "floor": 0.003398936931561617,
+          "max_supported_hoof_speed": 0.0004750456346684766,
+          "length_error": 1.2181246861198147e-06,
+          "max_rotation_step": 0.00216483503401556,
+          "loop_or_hold_error": 4.440892098500626e-16
+        },
+        "Jog": {
+          "passed": true,
+          "samples": 4183,
+          "floor": 0.0033988211857816503,
+          "max_supported_hoof_speed": 0.0014627705435759425,
+          "length_error": 1.3176124619707075e-06,
+          "max_rotation_step": 0.002359443248132205,
+          "loop_or_hold_error": 4.440892098500626e-16
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "samples": 10131,
+          "floor": 0.0033992962943075215,
+          "max_supported_hoof_speed": 0.0033658660090120987,
+          "length_error": 1.4306631145877269e-06,
+          "max_rotation_step": 0.0026889756344117568,
+          "loop_or_hold_error": 4.738866521414309e-10
+        },
+        "Death_A": {
+          "passed": true,
+          "samples": 16471,
+          "floor": 0.003371096103727955,
+          "max_supported_hoof_speed": 0.00042785185482738204,
+          "length_error": 1.2646413788952593e-06,
+          "max_rotation_step": 0.0007852092076435278,
+          "loop_or_hold_error": 0
+        }
+      }
+    },
+    "autumn_antler_stag": {
+      "passed": true,
+      "sha256": "8eb3f54fed102a5380d9788c1f3c3a523ae0edd753b55c23a0d9ce8b58c17408",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "samples": 7091,
+          "floor": 0.0033998006361006974,
+          "max_supported_hoof_speed": 0.000522315477142486,
+          "length_error": 6.619416126341093e-08,
+          "max_rotation_step": 0.0025040938103044496,
+          "loop_or_hold_error": 5.551115123125783e-16
+        },
+        "Jog": {
+          "passed": true,
+          "samples": 4183,
+          "floor": 0.0033997349612350175,
+          "max_supported_hoof_speed": 0.0018096260584547904,
+          "length_error": 6.614612257926922e-08,
+          "max_rotation_step": 0.0030577467947666536,
+          "loop_or_hold_error": 3.885780586188048e-16
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "samples": 10131,
+          "floor": 0.0033994586040881495,
+          "max_supported_hoof_speed": 0.0036832868364502494,
+          "length_error": 6.624285742162783e-08,
+          "max_rotation_step": 0.00293334903706557,
+          "loop_or_hold_error": 5.054790475078619e-10
+        },
+        "Death_A": {
+          "passed": true,
+          "samples": 16471,
+          "floor": 0.0032786614988504,
+          "max_supported_hoof_speed": 0.0005162276495708454,
+          "length_error": 7.278566899193706e-08,
+          "max_rotation_step": 0.00247267393156866,
+          "loop_or_hold_error": 0
+        }
+      }
+    },
+    "autumn_crown_stag": {
+      "passed": true,
+      "sha256": "a5a5244109627b0204bc709f9cc7408d2902628aad52991c4cb2c1a25fb270a7",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "samples": 7091,
+          "floor": 0.0033999411522464998,
+          "max_supported_hoof_speed": 0.0005242640685744983,
+          "length_error": 4.325654906489618e-08,
+          "max_rotation_step": 0.002918265676438829,
+          "loop_or_hold_error": 6.661338147750939e-16
+        },
+        "Jog": {
+          "passed": true,
+          "samples": 4183,
+          "floor": 0.003399848012685795,
+          "max_supported_hoof_speed": 0.001861517861533811,
+          "length_error": 4.329117905821356e-08,
+          "max_rotation_step": 0.00264230839507797,
+          "loop_or_hold_error": 5.551115123125783e-16
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "samples": 10131,
+          "floor": 0.00339954436022906,
+          "max_supported_hoof_speed": 0.004023329094661735,
+          "length_error": 4.333840231129926e-08,
+          "max_rotation_step": 0.003030246849957771,
+          "loop_or_hold_error": 5.151502557865228e-10
+        },
+        "Death_A": {
+          "passed": true,
+          "samples": 16471,
+          "floor": 0.0032117870116679112,
+          "max_supported_hoof_speed": 0.00048252167646310507,
+          "length_error": 4.338298087436243e-08,
+          "max_rotation_step": 0.004828745833585805,
+          "loop_or_hold_error": 0
+        }
+      }
+    },
+    "crown_antler_stag": {
+      "passed": true,
+      "sha256": "6a6fa1cfeec38fbe96d4fee06047d89ce4502623c1e9373b76f59fe369fc602c",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "samples": 7091,
+          "floor": 0.00339720936440816,
+          "max_supported_hoof_speed": 0.000654595325049841,
+          "length_error": 1.5822735601189741e-06,
+          "max_rotation_step": 0.003315191742634318,
+          "loop_or_hold_error": 5.551115123125783e-16
+        },
+        "Jog": {
+          "passed": true,
+          "samples": 4183,
+          "floor": 0.0033968191009006565,
+          "max_supported_hoof_speed": 0.002797431231437984,
+          "length_error": 1.5822955035660335e-06,
+          "max_rotation_step": 0.003883595945660227,
+          "loop_or_hold_error": 6.661338147750939e-16
+        },
+        "Death_A": {
+          "passed": true,
+          "samples": 16467,
+          "floor": 0.003398940826617039,
+          "max_supported_hoof_speed": 0.0005096068014885458,
+          "length_error": 1.5818129932010372e-06,
+          "max_rotation_step": 0.003996827028118977,
+          "loop_or_hold_error": 0
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "samples": 10133,
+          "floor": 0.003398331538942212,
+          "max_supported_hoof_speed": 0.004878502273557083,
+          "length_error": 1.5823682793514315e-06,
+          "max_rotation_step": 0.003247483920492917,
+          "loop_or_hold_error": 1.1284411183254406e-09
+        }
+      }
+    },
+    "frosthorn_elk": {
+      "passed": true,
+      "sha256": "f3965ded399467bb3c1ea6e5c5c088f3e4d6fcfd7d823563d8ceaf9123e24d9b",
+      "clips": {
+        "Walk": {
+          "passed": true,
+          "samples": 7091,
+          "floor": 0.003399641478989814,
+          "max_supported_hoof_speed": 0.0008632594493804389,
+          "length_error": 6.576326607166116e-07,
+          "max_rotation_step": 0.001772223022495543,
+          "loop_or_hold_error": 6.661338147750939e-16
+        },
+        "Jog": {
+          "passed": true,
+          "samples": 4183,
+          "floor": 0.0033995725130281855,
+          "max_supported_hoof_speed": 0.0012791936734415546,
+          "length_error": 6.82979522936833e-07,
+          "max_rotation_step": 0.0022579029360435725,
+          "loop_or_hold_error": 5.551115123125783e-16
+        },
+        "Sword_Attack": {
+          "passed": true,
+          "samples": 10131,
+          "floor": 0.0033996617654835086,
+          "max_supported_hoof_speed": 0.00301202009801536,
+          "length_error": 5.7539014780561e-07,
+          "max_rotation_step": 0.002975027298034897,
+          "loop_or_hold_error": 2.28799978962968e-10
+        },
+        "Death_A": {
+          "passed": true,
+          "samples": 16471,
+          "floor": 0.0033974642643589403,
+          "max_supported_hoof_speed": 0.0008502190478482892,
+          "length_error": 6.865453386351028e-07,
+          "max_rotation_step": 0.0025315902096122774,
+          "loop_or_hold_error": 0
+        }
+      }
+    }
+  }
+}
