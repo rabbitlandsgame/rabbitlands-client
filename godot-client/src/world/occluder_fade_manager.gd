@@ -3,19 +3,17 @@ extends RefCounted
 ## Fade state belongs to actual scenery roots, not the authoritative map ID.
 ## Reconciliation visits only the active root and the bounded resident list;
 ## each root's mesh index is built once and survives promotion and rebasing.
+## Actor models, including large bosses, stay opaque on the player's sight line.
 const FadeScript := preload("res://src/world/occluder_fade.gd")
 
 var _worlds: Dictionary = {}
 var _enabled := false
 
-func sync_worlds(manifest: WorldManifest, imported_world: Variant, residents: Dictionary,
-		dynamic_roots: Array = []) -> int:
+func sync_worlds(manifest: WorldManifest, imported_world: Variant, residents: Dictionary) -> int:
 	var wanted: Dictionary = {}
 	_include(wanted, imported_world, manifest)
 	for resident: Dictionary in residents.values():
 		_include(wanted, resident.get("root"), resident.get("manifest") as WorldManifest)
-	for dynamic_root: Variant in dynamic_roots:
-		_include(wanted, dynamic_root, manifest)
 	for identity: int in _worlds.keys():
 		if not wanted.has(identity):
 			_remove(identity)

@@ -117,6 +117,13 @@ func _source_cue(p: float, color: Color) -> void:
 				_line(chest.lerp(end, a) + Vector3.UP * sin(a * PI) * 0.35, chest.lerp(end, b) + Vector3.UP * sin(b * PI) * 0.35, 0.025, color)
 			_arc(_origin + Vector3.UP * 0.06, 0.48, 0.025, color, 0, TAU * 0.75)
 		"charge", "fighting_retreat", "step_back":
+			if key == "charge" and phase == "land":
+				_arc(_origin + Vector3.UP * 0.04, 0.25 + p * 0.7, 0.035, color)
+				_motes(_origin, p, color, 10, 0.9)
+				return
+			if key == "charge" and phase == "strike":
+				_line(chest, chest + _forward * (0.45 + sin(p * PI) * 0.65), 0.055, color)
+				return
 			var direction := _forward if key == "charge" else -_forward
 			for side: int in [-1, 1]:
 				var at := _origin + _right * side * 0.30 + Vector3.UP * 0.12

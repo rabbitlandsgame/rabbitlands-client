@@ -47,6 +47,15 @@ func run() -> void:
 				actor.animation_player.seek(clip.length * tick / 16.0, true)
 				for bone in actor.get_skeleton().get_bone_count():
 					check(actor.get_skeleton().get_bone_global_pose(bone).is_finite(), key + " has finite skeletal poses")
+				if key in ["heavy_blow", "executioners_stroke", "sunder"]:
+					var skeleton := actor.get_skeleton()
+					var head := skeleton.find_bone(str(actor._model_config.get("boneAliases", {}).get("head", "head")))
+					var pelvis := skeleton.find_bone("pelvis")
+					check(head >= 0 and pelvis >= 0, "grounded motion has physical head and pelvis probes")
+					if head >= 0 and pelvis >= 0:
+						var head_world := skeleton.global_transform * skeleton.get_bone_global_pose(head).origin
+						var hips_world := skeleton.global_transform * skeleton.get_bone_global_pose(pelvis).origin
+						check(head_world.y > hips_world.y, key + " stays upright through the complete strike")
 			# Seeking exactly to the last key does not emit animation_finished;
 			# exercise ordinary playback from the beginning separately.
 			actor.play_technique(key, phase)
@@ -113,6 +122,23 @@ func check_live_dispatch() -> void:
 	event.actor_id = 9999
 	state._on_packet(212, JSON.stringify(event).to_utf8_buffer())
 	check(main.world_effects.size() == 1, "absent source actors do not create orphan effects")
+	main._effects_enabled = false
+	source.actor_id = 991
+	event.actor_id = 991
+	event.key = "charge"
+	event.phase = "activate"
+	event.leap = {"origin": [0, 0], "offsets": [[0, 0], [1, 0], [2, 0]], "duration": 0.36}
+	state._on_packet(212, JSON.stringify(event).to_utf8_buffer())
+	check(source._charge_leap != null, "server-approved leap dispatch works with particles disabled")
+	source._physics_process(0.18)
+	check(source.global_position.y > source.server_target.y + 0.5, "dispatched charge renders a real airborne arc")
+	event.phase = "land"
+	state._on_packet(212, JSON.stringify(event).to_utf8_buffer())
+	check(source._charge_leap == null, "server landing ends the leap")
+	event.phase = "activate"
+	event.leap.offsets = [[0, 0], [999, 0]]
+	state._on_packet(212, JSON.stringify(event).to_utf8_buffer())
+	check(source._charge_leap == null, "out-of-bounds leap routes are ignored")
 	var effect: Node = main.world_effects[0]
 	main._clear_world_presentation()
 	await process_frame

@@ -168,10 +168,16 @@ no world effect. Misses retain the attack motion without a successful target
 impact. Effects stop with the particle setting and are cleared with the world.
 No damage, AP, cooldown or status-duration rules change.
 
-Twelve one-shot timing recipes reuse the shipped universal animation library;
+Charge approaches normally from a distance, then jumps along the server-approved
+route when within six tiles. Its 0.24–0.42 second leap ends beside the creature,
+with a landing and strike. Flight remains visible with particles disabled.
+Heavy Blow, Executioner's Stroke and Sunder use separate grounded cuts instead
+of the former flipping attack. The offline reviewer demonstrates these motions.
+
+Seventeen one-shot timing recipes reuse the shipped universal animation library;
 source models, skin, skeletons, bind poses and source animation files are
-unchanged. Recipes sample at 60 Hz, last 0.51–1.15 seconds and recover through
-the normal action transitions. Melee contact cues fall at 0.19–0.34 seconds;
+unchanged. Recipes sample at 60 Hz, last 0.36–1.15 seconds and recover through
+the normal action transitions. Melee contact cues fall at 0.19–0.42 seconds;
 shot impacts follow the existing 28 m/s cosmetic flight timing (0.12–0.65 s).
 Transient cues fade within 2.1 seconds and the live world caps them at 48.
 Current Amberwood/Sunmane bow meshes use the live string presentation. Retired

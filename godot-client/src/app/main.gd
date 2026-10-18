@@ -95,7 +95,6 @@ var interior_cutaway: RefCounted = InteriorCutawayScript.new()
 ## stays black.
 var secret_sections: RefCounted = SecretSectionsScript.new()
 var occluder_fade: RefCounted = OccluderFadeScript.new()
-var _dynamic_occluder_roots: Array = []
 var invasion_assistant_window
 var extension_windows: Control
 @onready var gameplay_camera: Camera3D = %Camera
@@ -6826,8 +6825,7 @@ func _configure_occluder_fade(manifest: WorldManifest) -> void:
 ## between a map change and the first actor list, so a frame without one simply
 ## lets whatever is faded blend back to solid.
 func _update_occluder_fade(delta: float) -> void:
-	occluder_fade.sync_worlds(world_loader.manifest, world_loader.world_root, exterior_stream.residents,
-		_dynamic_occluder_roots)
+	occluder_fade.sync_worlds(world_loader.manifest, world_loader.world_root, exterior_stream.residents)
 	var target_value: Variant = actor_nodes.get(AppState.local_actor_id)
 	var target: Node3D = target_value as Node3D if target_value is Node3D else null
 	occluder_fade.update(delta, gameplay_camera, target)
@@ -6851,7 +6849,6 @@ func _update_animation_gate(delta: float) -> void:
 	var local_node: Node3D = local_value as Node3D if is_instance_valid(local_value) else null
 	var here: Vector3 = local_node.global_position if local_node != null else Vector3.ZERO
 	var fighting: int = _combat_target_actor_id()
-	_dynamic_occluder_roots.clear()
 	for raw_id: Variant in actor_nodes:
 		var actor_value: Variant = actor_nodes[raw_id]
 		if not is_instance_valid(actor_value):
@@ -6859,13 +6856,6 @@ func _update_animation_gate(delta: float) -> void:
 		var actor: ReplicatedActor3D = actor_value as ReplicatedActor3D
 		if actor == null or not actor.is_inside_tree():
 			continue
-		var dto: Dictionary = AppState.actors.get(raw_id, {})
-		if int(raw_id) != AppState.local_actor_id and actor.view_radius() >= 1.5 \
-				and _minimap_actor_type(dto) in [&"creature", &"invasion"] \
-				and actor.global_position.distance_squared_to(camera_rig.focus) < 1600.0:
-			var model: Node3D = actor.get("_native_model") as Node3D
-			if is_instance_valid(model):
-				_dynamic_occluder_roots.append(model)
 		var tier: AnimationGate.Tier = AnimationGate.Tier.FULL
 		if int(raw_id) == AppState.local_actor_id:
 			actor.set_drawn(true)
@@ -11810,8 +11800,15 @@ func _on_technique_effect(data: Dictionary) -> void:
 	var source := actor_nodes.get(int(data.get("actor_id", -1))) as ReplicatedActor3D
 	if not is_instance_valid(source) or source.current_action == &"death": return
 	var phase := str(data.get("phase", "strike"))
-	if phase not in ["strike", "counter", "activate", "shot", "impact", "pulse"]: return
-	source.play_technique(key, phase)
+	if phase not in ["strike", "counter", "activate", "shot", "impact", "pulse", "land"]: return
+	if phase == "land" and key != "charge": return
+	if key == "charge" and phase == "activate" and data.has("leap"):
+		var route := _charge_leap_route(source, data.leap)
+		if route.size() < 2: return
+		source.begin_charge_leap(route, float(data.leap.get("duration", 0.36)))
+	else:
+		if key == "charge" and phase in ["land", "strike"]: source.end_charge_leap()
+		source.play_technique(key, phase)
 	if not _effects_enabled or get_tree().get_nodes_in_group("technique_visual_effects").size() >= 48: return
 	var target := actor_nodes.get(int(data.get("target_id", -1))) as Node3D
 	var effect = preload("res://src/world/technique_effect_3d.gd").new()
@@ -11819,6 +11816,31 @@ func _on_technique_effect(data: Dictionary) -> void:
 	effect.configure(key, phase, source, target, bool(data.get("hit", false)))
 	world_effects.append(effect)
 	world_effects = world_effects.filter(func(node: Variant) -> bool: return is_instance_valid(node))
+
+func _charge_leap_route(source: ReplicatedActor3D, value: Variant) -> PackedVector3Array:
+	var route := PackedVector3Array()
+	if not value is Dictionary: return route
+	var origin: Variant = value.get("origin", [])
+	var offsets: Variant = value.get("offsets", [])
+	if not origin is Array or origin.size() != 2 or not offsets is Array or offsets.size() < 2 or offsets.size() > 13: return route
+	var record: Dictionary = AppState.actors.get(source.actor_id, {}) as Dictionary
+	var actor_adapter := _adapter_for_actor(record)
+	if actor_adapter == null: return route
+	var mask: int = WorldLoader.NAVIGATION_SURFACE_LAYER
+	if source.actor_id != AppState.local_actor_id and str(record.get("map", AppState.current_map)) != AppState.current_map:
+		mask |= ExteriorRegionStream.PREVIEW_SURFACE_LAYER
+	for offset: Variant in offsets:
+		if not offset is Array or offset.size() != 2: return PackedVector3Array()
+		if absf(float(offset[0])) > 12 or absf(float(offset[1])) > 12: return PackedVector3Array()
+		var point := actor_adapter.footprint_center(int(origin[0]) + int(offset[0]), int(origin[1]) + int(offset[1]), source.footprint)
+		point.y = source.server_target.y
+		if gameplay_world != null:
+			var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 2000.0, point + Vector3.DOWN * 2000.0,
+				mask)
+			var hit := gameplay_world.direct_space_state.intersect_ray(query)
+			if hit.get("position") is Vector3: point.y = (hit.position as Vector3).y + 0.02
+		route.append(point)
+	return route
 
 ## The emote picker's seam onto the network: the same packet `#emote <name>`
 ## already sends. The server stays the judge of what the name means.
