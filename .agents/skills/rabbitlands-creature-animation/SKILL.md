@@ -32,3 +32,5 @@ For badger, otter, wolverine and stoat transfers, read [native mustelid motion](
 For Squirrel, Dormouse and Beaver, read [native rodent motion](references/native-rodent-motion.md). It covers physical shoulder/forearm fitting, complete facial ownership, local skin-strain checks, small-creature cadence and separate rump/hock/paddle fields. The three approved installed sets and portable checks are documented in `docs/rodent-motion.md`.
 
 For Hedgehog, Shrew and Giant Mole, read [native insectivore motion](references/native-insectivore-motion.md). It covers quill-heavy silhouettes, short-leg guide fitting, asymmetric digging arms, complete palm/finger and heel ownership, native contact surfaces and supported collapse. Consult private continuation memory for the selected review and acceptance state.
+
+For Axolotl and Salamander pilots, read [native amphibian motion](references/native-amphibian-motion.md). It covers outward elbow planes, gill/fin ownership and full-palm contact frames; lowest-toe contact alone cannot certify a flat planted paw.
