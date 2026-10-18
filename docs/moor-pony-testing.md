@@ -15,8 +15,8 @@ The launcher starts with a close camera; normal zoom and camera controls work.
 - Press **R** or click **Dismount** to return to foot movement. R also cancels a
   summon. Both shortcuts can be changed in **Settings → Controls → Mounts**.
 
-This test enables riding at Four Gates, Grey Moors and Sunmane Steppe. Narrow
-terrain, interiors, combat, death, sitting, gathering, crafting and interaction
+This test enables riding at Four Gates, Grey Moors and Sunmane Steppe.
+Interiors, combat, death, sitting, gathering, crafting and interaction
 actions return the rider to foot movement. Damage also blocks remounting for
 ten seconds. Normal action and terrain rules still apply.
 
@@ -40,14 +40,20 @@ review; the pony asset and accepted torso/hand pose are unchanged.
 ## Normal Landfall server
 
 The independent server profile enables the Moor Pony for every character on
-all 15 Landfall outdoor maps. Ownership is saved automatically on login,
+all published outdoor maps, including all 15 Landfall maps. Nearby objects and
+narrow paths do not restrict mounting or automatically dismount the rider;
+ordinary player collision still blocks movement through obstacles.
+Ownership is saved automatically on login,
 including for characters using an older client. Riding and mount visibility
 require a client with `mounts_v1`; use the client containing the reviewed
 Moor Pony implementation. The visuals, R/Space shortcuts and test paces above
 also apply to the normal server.
 
-Interiors, underground areas and practice instances remain on foot. Tight
-terrain, activities, combat and map changes dismount the rider. On reconnect,
+The compact mount controls follow the player, immediately to the right of the
+name and resource bars, with the same outlined-text style and similar font size.
+
+Interiors, underground areas and practice instances remain on foot.
+Activities, combat and map changes dismount the rider. On reconnect,
 the pony remains owned and the character starts on foot.
 
 Operators can disable riding without deleting ownership. Server settings and
