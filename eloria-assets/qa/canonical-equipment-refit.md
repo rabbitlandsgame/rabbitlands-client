@@ -1017,13 +1017,13 @@ lower sheet by 69 mm, where develop shows none; it did so already at
   border of the crotch fill.
 - The Kneecops' front belt is now hidden under the jack. Restoring it would
   mean refitting it to ride over the jack's skirt.
-- The Scout Vest comes through the cape in rendered_cape_over_armour (see
-  above). The cause is the refitted vest, not the cape solver: its back tail
-  flares to 25 cm behind the body at 0.82 m. The fixture reads the cape
-  before the cloth solver poses it, and gives the same 69 mm sheet and 141 mm
-  collar with the develop solver. On the solver's own output, at
-  Idle_Subtle 2.03 s, the vest clips the sheet by 17 mm with either solver
-  (the cape session's measurement, at `aa5709ca`).
+- The Scout Vest came through the cape in rendered_cape_over_armour. Done
+  on 2026-10-18 (see **The Scout Vest under a cape (2026-10-18)**): the vest's
+  back tail, 25 cm behind the body at 0.82 m, is now held in with `hug`. The
+  tail's 69 mm is gone from the fixture, and its part of the 17 mm on the
+  solver's own output is gone too. What remains is 18 mm at the back of the
+  shoulder, at the cape's side edge. It was there before as well, and it is
+  within the fixture's tolerance.
 
 ### The cape in the owner's fourth review (2026-10-18)
 
@@ -1125,6 +1125,114 @@ Scratch harnesses: the client's
 - Note 4 still reads up to 17 mm at a few frames of the Fighting_Idle cycle.
 - Arms are not collided with the cape's sides. In place, a swinging elbow
   passes through them (notes 1 and 3); in motion it does not.
+
+### The Scout Vest under a cape (2026-10-18)
+
+Since the first kit fit (`b4ee06ed`), the refitted Scout Vest (5:225) has
+come through a worn cape at the seat. The concept draws the vest's back
+flaps flared out behind. Carried onto the body, the flaps' corners at the
+centre vent stood 13 cm behind the seat at 0.83 m on the male (z −0.23 m)
+and 11 cm behind it on the female (z −0.20 m). This is the 69 mm that
+rendered_cape_over_armour reported 0.40-0.50 m below spine_03. On develop
+before the kits (`224bb9b9`) the sheet read 0 mm.
+
+**The fix.** The Ranger torso spec now carries the design fit's `hug` key:
+design bone `trunk_lower`, the back arc 125-235°, heights 0.55-1.25 m,
+`start` 6 cm, `max` 12 cm. The key comes from `98dcef4b` (equipment audit,
+Sunmane batch 1). Only its two tool files were brought over (`0d9f185f`),
+unchanged, and its batch was not. The kits' `make_specs.py` writes the key.
+`hug` caps how far art stands off the body behind a bone. A vertex's standoff
+d over the body (default clothes included), measured from the bone's posed
+axis, becomes `start` + (`max` − `start`) tanh((d − `start`) / (`max` −
+`start`)). The map is monotonic, so layers keep their order.
+
+Two pieces were refitted on both bodies and installed: the vest, and the
+Sidelace Breeches (4:230), whose back tucks under it. The Laced Fieldboots'
+design fit changed only in its recorded spec hash; their GLBs are untouched.
+`share_human_equipment_textures.py` reused the shipped textures, so the
+registry and the catalogue are unchanged.
+
+**Why 6/12 cm, not the Sunmane 3/6 cm.** The breeches' seat stands about
+5 cm off the body. At 3/6 cm the flaps went up to 71 mm inside the breeches'
+back: 85% of the tail's vertices lay behind it. At 6/12 cm, 98% lie over the
+breeches (median 16 mm out), and the offline measure still clears the
+fixture's sheet.
+
+**What it costs.** Below the pelvis joint `trunk_lower`'s axis ends, so the
+pull runs up as well as in:
+
+- The vent corners rise 36 mm on the male (lowest point 0.834 → 0.870 m) and
+  21 mm on the female (0.828 → 0.849 m).
+- The flaps now hang straight down the seat, and the back hem runs level
+  where it used to dip toward the vent.
+- The vent still shows the breeches about as much as before (owner's second
+  review, note 10).
+- At 3/6 cm the corners rose 66 mm and curled under the seat.
+
+| Male, body 225 | Before | After | Develop `224bb9b9` |
+| --- | ---: | ---: | ---: |
+| Flaps' furthest back (z, within 15 cm of the centre line) | −0.230 m | −0.186 m | — |
+| rendered_cape_over_armour, sheet | 69 mm (tail) | 18 mm (shoulder) | 0 mm |
+| The same, tail bands (−0.40 to −0.50 m) | 69 / 44 / 34 mm | 0 | 0 |
+| Solver's own output, Idle_Subtle 2.03 s | 17 mm (tail 17, shoulder 17) | 18 mm (shoulder) | — |
+| rendered_cape_over_armour, collar | 160 mm | 160 mm | 120 mm |
+
+The solver row is the cape session's `armour_measure.gd` on the full Ranger
+kit. On the solver's output the cape stands further back at the seat
+(−0.22 m at 0.80 m, against −0.16 m in the fixture's bind hang), so there the
+tail only reached 17 mm.
+
+**What remains is not the tail.**
+
+- **18 mm at +0.10 m.** This is the back of the shoulder, at the cape's side
+  edge (bearing 40-50°). It is most likely the lining at the sleeve root:
+  the design-fit art alone, scored against the same cape, does not reach the
+  cape there. It was 17 mm before, it is within the fixture's 20 mm sheet
+  tolerance, and `hug`'s band does not reach it.
+- **The collar** (+0.15 to +0.25 m). It measures 140 mm headless and 160 mm
+  windowed on the same fit, since the fixture's idle phase depends on the
+  frame rate. Scored offline against one cape, the vest's design-fit shells
+  read 125 mm up to `04109b51` and 146 mm from `8da16322` on. That commit added
+  the `collar` key, which brings the collar's back out of the nape at the
+  owner's request (the hood/collar gap). The fixture allows the collar band
+  to stand through the cape, and all four bodies exceed its 55 mm tolerance
+  on develop as well.
+
+Checks:
+
+- Stretch: share of art triangles past 1.8× and past 2.5×.
+  - Bow_Pull_Back: unchanged on the vest (male 1.03% and 0.41%, female 0.62%
+    and 0.07%).
+  - Run_Female, male: the vest goes 0.76% → 0.97% past 1.8× but 0.28% → 0.14%
+    past 2.5×; the breeches go 0.80% → 0.92% past 1.8×, with 2.5× unchanged.
+  - Female breeches in the bow: one triangle past 2.5×.
+- The Buckled Hood (3:159) was shaped against this vest. Its clip check is
+  identical with the old and the new vest in all eight clips, on both bodies
+  (hood through the vest, collar over the hood, hood through skin, stretch).
+  The design fit moved nothing above 0.99 m, so the hood keeps its installed
+  fit.
+- The owner's Ranger notes were replayed with the old and the new vest
+  (second review notes 8-12, third review notes 9-11). They are unchanged,
+  except that in second-review note 10 and in side views the flaps no longer
+  stand out behind.
+
+Tests, compared by failing ID with a clean develop worktree at this branch's
+develop base, `82ae2326`:
+
+| Suite | This branch | Develop `82ae2326` |
+| --- | --- | --- |
+| Equipment, remapper and held-prop pytest | 9 failed, 70 passed | the same 9 IDs |
+| torso_body_cover, LOD and registry snapshot tests | pass | pass |
+| creation_class_equipment_fit | 54,666 checks, 0 failures | the same |
+| armour_body_cover | 60 failures (scalp under 3:120) | the same 60 |
+| test_cape_cloth, capsule and pose caches, drape, idle; rendered_cape_clipping | pass | pass |
+| test_cape_cloth_native_constraint | 17 failures (no native extension here) | the same 17 |
+| rendered_cape_over_armour | 4 bodies flagged on the collar; 184 also on its sheet (24 mm) | the same, and 225 also on its sheet (69 mm) |
+
+Evidence: [the fixture's back and quarter views, side and back views of
+both bodies, and note 10](design-fit/vest-hug-cape.jpg). Scratch (offline
+measure `score.py`, the dump harness, trials, replays): the client's
+`.local/asset-authoring/working/equipment-fit-2026-10-17-kits/hug/`.
 
 ## Two body shapes, preserved race identity
 
