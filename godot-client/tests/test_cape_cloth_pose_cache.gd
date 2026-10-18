@@ -38,11 +38,17 @@ func _run() -> void:
 	var baseline_cloth := _replace_with_baseline(baseline_actor, baseline_skeleton)
 	optimized_cloth.active = false
 	baseline_cloth.active = false
+	# The wearer hands the live solver the cloth's measured line, which the
+	# frozen copies predate: it hangs the cape plumb on purpose (owner's second
+	# review, note 2), and tests/test_cape_idle.gd checks that hang. Cleared,
+	# the live solver runs the material line the baselines were reviewed on,
+	# which is what this parity guards.
+	optimized_cloth.call("set_fabric_line", [])
 
 	_check_rig_ownership(optimized_skeleton)
 	var optimized_player := optimized_actor.animation_player
 	var baseline_player := baseline_actor.animation_player
-	for clip: StringName in [&"Walk", &"Sword_Attack"]:
+	for clip: StringName in [&"Walk", &"Combat_Slash_A"]:
 		_check(optimized_player != null and optimized_player.has_animation(clip),
 			"optimized rig has animation %s" % clip)
 		_check(baseline_player != null and baseline_player.has_animation(clip),
@@ -167,8 +173,8 @@ func _run_real_sequence(optimized_actor: ReplicatedActor3D,
 	_check(_pose_arrays_differ(walk_start, _input_poses(optimized_skeleton)),
 		"Walk advances the real rig body pose")
 
-	optimized_player.play(&"Sword_Attack")
-	baseline_player.play(&"Sword_Attack")
+	optimized_player.play(&"Combat_Slash_A")
+	baseline_player.play(&"Combat_Slash_A")
 	var attack_start := _input_poses(optimized_skeleton)
 	for frame: int in range(42):
 		optimized_player.advance(STEP)
@@ -176,7 +182,7 @@ func _run_real_sequence(optimized_actor: ReplicatedActor3D,
 		_step_pair(optimized_skeleton, baseline_skeleton,
 			optimized_cloth, baseline_cloth, STEP, "attack frame %d" % frame)
 	_check(_pose_arrays_differ(attack_start, _input_poses(optimized_skeleton)),
-		"Sword_Attack advances the real rig body pose")
+		"Combat_Slash_A advances the real rig body pose")
 
 	optimized_actor.position += Vector3(2.1, 0.4, -1.8)
 	baseline_actor.position = optimized_actor.position

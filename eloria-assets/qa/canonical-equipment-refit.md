@@ -840,20 +840,26 @@ Glasswarden) and the female body hang the same way. Evidence:
 
 Tests:
 
-- `test_cape_cloth.gd`, `test_cape_drape.gd`, `test_actor_render_quality.gd`
-  and `rendered_cape_clipping.gd` pass.
+- `test_cape_cloth.gd`, `test_cape_drape.gd` and `test_actor_render_quality.gd`
+  pass.
+- `rendered_cape_clipping.gd` passes, but none of its three attacks
+  (`Sword_Attack`, `Attack_Ground_Pound`, `Punch_Cross`) exists in the
+  animation map, so it skips them all. A scratch copy that swings
+  `Combat_Slash_A` and `_B` passes: the cape stays at least 98 mm behind the
+  spine plane (40 mm ahead is allowed), and never rises above the anchor.
 - `test_cape_idle.gd` passes. Its new check, "hangs plumb from the back"
   (under 40 mm), measures 0.3–10.3 mm on both bodies; the old solver gives
   85–90 mm.
-- `test_cape_cloth_pose_cache.gd` and `test_cape_cloth_capsule_cache.gd` fail
-  on the same two checks as before: the rig has no `Sword_Attack` clip, so
-  their real-actor sequence never runs. In a scratch copy using
-  `Combat_Slash_A`, the measured line diverges from the frozen baselines, as
-  intended, and with the line cleared both match. The frozen baselines are
-  unchanged.
-- `test_cape_cloth_native_constraint.gd` and
-  `test_native_presentation_modes.gd` fail because this checkout has no built
-  native extension (`bin/`).
+- `test_cape_cloth_pose_cache.gd` and `test_cape_cloth_capsule_cache.gd`
+  pass, and the frozen baselines are unchanged (the owner's call). The harness
+  now clears the measured line on the live solver, so parity guards the
+  material-line arithmetic the baselines were reviewed on. With the line live,
+  the solver diverges from them, as intended. The rig never had the
+  `Sword_Attack` clip, so the harness's real-actor sequence used to be
+  skipped; it now swings `Combat_Slash_A`.
+- `test_cape_cloth_native_constraint.gd` (17 checks) and
+  `test_native_presentation_modes.gd` fail only because this checkout has no
+  built native extension (`bin/`).
 - `rendered_cape_over_armour.gd` and its `_baseline` variant fail with the
   same numbers for the new and the frozen solver. The fixture measures after
   a frame, by which point the solver's output is gone from the pose. Its
@@ -864,11 +870,10 @@ Scratch views, probes and scripts are in the client
 
 **Not yet done.**
 
-- The parity tests need the owner's decision. The options are to clear the
-  measured line on the live solver in the parity harness (and swap the
-  missing clip), or to re-freeze the baselines.
 - The Phoenix Cuirass's tail still shows 35 mm into the sheet at the seat.
 - The native kernel path was not run here.
+- `rendered_cape_clipping.gd` still lists three attacks the rig does not
+  have; it should swing `Combat_Slash_A` and `_B`.
 
 ## Two body shapes, preserved race identity
 
