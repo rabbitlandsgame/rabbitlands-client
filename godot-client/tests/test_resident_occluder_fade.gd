@@ -228,12 +228,38 @@ func _test_main_binding() -> void:
 	hud.gameplay_camera = camera
 	var state := root.get_node("AppState")
 	hud.actor_nodes[state.local_actor_id] = player
+	# A large invasion creature on the same sight line must stay solid even
+	# after the animation gate refresh, which used to register it as scenery.
+	var boss := ReplicatedActor3D.new()
+	stage.add_child(boss)
+	boss.position = SIGHT_POINT
+	boss.server_scale = 3.0
+	boss.footprint = Vector2i(3, 3)
+	var model := Node3D.new()
+	model.name = "NativeModel"
+	boss.add_child(model)
+	var body := _box(model, "BossBody", Vector3.ZERO, Vector3(4, 6, 4))
+	boss.set("_native_model", model)
+	var boss_id := 900001
+	var saved_actors: Dictionary = state.actors
+	state.actors = saved_actors.duplicate()
+	state.actors[boss_id] = {"kind": ReplicatedActor3D.CREATURE_ACTOR_KIND,
+		"name_colour": ReplicatedActor3D.INVASION_NAME_COLOUR}
+	hud.actor_nodes[boss_id] = boss
+	hud.camera_rig = IsometricCameraController.new()
+	hud.actor_resource_overlay = PanelContainer.new()
+	hud.actor_resource_overlay.hide()
+	hud._name_distance_metres = 0.0
+	hud._update_animation_gate(SETTLE)
 	hud._show_through_obstacles = true
 	hud._configure_occluder_fade(manifest)
 	hud._update_occluder_fade(SETTLE)
 	var saved_a := _material(a)
 	var saved_b := _material(b)
 	_expect(saved_a != null and saved_b != null, "main configuration and update fade actual active and resident roots")
+	_expect(_material(body) == null and body.visible
+		and body.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON,
+		"large invasion boss stays opaque and keeps its shadow on the player's sight line")
 	loader.world_root = second
 	stream.residents = {"first": {"root": first, "manifest": manifest}}
 	hud._configure_occluder_fade(manifest)
@@ -245,6 +271,9 @@ func _test_main_binding() -> void:
 		"main frame reconciliation restores retired scenery without resetting active scenery")
 	hud.occluder_fade.reset()
 	loader.world_root = null
+	state.actors = saved_actors
+	hud.camera_rig.free()
+	hud.actor_resource_overlay.free()
 	hud.free()
 	loader.free()
 	stream.free()

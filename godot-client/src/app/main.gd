@@ -95,7 +95,6 @@ var interior_cutaway: RefCounted = InteriorCutawayScript.new()
 ## stays black.
 var secret_sections: RefCounted = SecretSectionsScript.new()
 var occluder_fade: RefCounted = OccluderFadeScript.new()
-var _dynamic_occluder_roots: Array = []
 var invasion_assistant_window
 var extension_windows: Control
 @onready var gameplay_camera: Camera3D = %Camera
@@ -6826,8 +6825,7 @@ func _configure_occluder_fade(manifest: WorldManifest) -> void:
 ## between a map change and the first actor list, so a frame without one simply
 ## lets whatever is faded blend back to solid.
 func _update_occluder_fade(delta: float) -> void:
-	occluder_fade.sync_worlds(world_loader.manifest, world_loader.world_root, exterior_stream.residents,
-		_dynamic_occluder_roots)
+	occluder_fade.sync_worlds(world_loader.manifest, world_loader.world_root, exterior_stream.residents)
 	var target_value: Variant = actor_nodes.get(AppState.local_actor_id)
 	var target: Node3D = target_value as Node3D if target_value is Node3D else null
 	occluder_fade.update(delta, gameplay_camera, target)
@@ -6851,7 +6849,6 @@ func _update_animation_gate(delta: float) -> void:
 	var local_node: Node3D = local_value as Node3D if is_instance_valid(local_value) else null
 	var here: Vector3 = local_node.global_position if local_node != null else Vector3.ZERO
 	var fighting: int = _combat_target_actor_id()
-	_dynamic_occluder_roots.clear()
 	for raw_id: Variant in actor_nodes:
 		var actor_value: Variant = actor_nodes[raw_id]
 		if not is_instance_valid(actor_value):
@@ -6859,13 +6856,6 @@ func _update_animation_gate(delta: float) -> void:
 		var actor: ReplicatedActor3D = actor_value as ReplicatedActor3D
 		if actor == null or not actor.is_inside_tree():
 			continue
-		var dto: Dictionary = AppState.actors.get(raw_id, {})
-		if int(raw_id) != AppState.local_actor_id and actor.view_radius() >= 1.5 \
-				and _minimap_actor_type(dto) in [&"creature", &"invasion"] \
-				and actor.global_position.distance_squared_to(camera_rig.focus) < 1600.0:
-			var model: Node3D = actor.get("_native_model") as Node3D
-			if is_instance_valid(model):
-				_dynamic_occluder_roots.append(model)
 		var tier: AnimationGate.Tier = AnimationGate.Tier.FULL
 		if int(raw_id) == AppState.local_actor_id:
 			actor.set_drawn(true)
