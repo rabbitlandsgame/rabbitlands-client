@@ -44,9 +44,7 @@ Landfall isles); pass `--maps` for others.
 Then look in game. Write views (a target point, a compass heading, a pitch and a
 distance) to a JSON file and turn them into trailer-camera shots with
 `scripts/audit_shots.py`. Render stills before and after with the trailer camera's
-`--preview` mode (`godot-client/src/dev/trailer_camera/README.md`). The camera was on
-client branch `feature/trailer-camera` when this skill was written; until it is merged,
-copy that folder into your worktree, untracked, to render.
+`--preview` mode (`godot-client/src/dev/trailer_camera/README.md`, on develop).
 `references/audit-checklist.md` lists what to look at and in which views.
 
 ## 2. Choose the layer
