@@ -25,7 +25,11 @@
 // (LookProfile.CLASS_TEXTURES): its detail, mapped in continent metres, is
 // rescaled to the source texture's own mean colour, so the paint classes,
 // the palette and every look trim see the colour they always did and only
-// the surface's structure changes.
+// the surface's structure changes. Its alpha replaces the source's too: the
+// coastal limestone gravel pack came out of the generator with a vignette in
+// its alpha (about 0.3 in the corners, 0.58 along the edges, 0.94 inside), and
+// multiplied into coverage it opened every 4 m tile edge to the grass beneath,
+// a grid of green grout lines over the isles' scree (map audit 2026-10-17).
 //
 // A shader that also defines LOOK_GROUND_EDGE_BAND (the walk decks) darkens
 // the ground beyond that edge by look_edge_band, where the deck's geometry
@@ -102,11 +106,11 @@ void fragment() {
 	vec3 texel_mean = textureLod(albedo_texture, UV, 16.0).rgb;
 	if (look_class_metres > 0.0) {
 		vec2 class_uv = look_ground_xz / look_class_metres;
-		vec3 detail = texture(look_class_texture, class_uv).rgb;
+		vec4 detail = texture(look_class_texture, class_uv);
 		vec3 detail_mean = max(textureLod(look_class_texture, class_uv, 16.0).rgb, vec3(0.02));
-		vec3 recoloured = detail * texel_mean / detail_mean;
-		vec3 own_hue = detail * (look_luma(texel_mean) / max(look_luma(detail_mean), 0.02));
-		texel.rgb = mix(recoloured, own_hue, look_class_hue);
+		vec3 recoloured = detail.rgb * texel_mean / detail_mean;
+		vec3 own_hue = detail.rgb * (look_luma(texel_mean) / max(look_luma(detail_mean), 0.02));
+		texel = vec4(mix(recoloured, own_hue, look_class_hue), detail.a);
 	}
 	vec3 albedo = texel.rgb * albedo_color.rgb;
 	vec3 vertex_colour = COLOR.rgb;

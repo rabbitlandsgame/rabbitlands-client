@@ -205,6 +205,15 @@ func _run() -> void:
 		deck_material.duplicate() as StandardMaterial3D)
 	var isle_paving := _mesh(isle, "AuthoredGround_greenlight_quay_greenlight_9_9",
 		paving_material.duplicate() as StandardMaterial3D)
+	# The isles' authored presets as their patches arrive: coastal gravel
+	# (rock), a ploughed field (Soil) and forest floor (the moss pack's tint).
+	var isle_patches := {}
+	for preset: Array in [["scree", Color(0.8, 0.81, 0.85)], ["field", Color(0.66, 0.55, 0.42)],
+			["forest", Color(0.52, 0.5, 0.4)]]:
+		var material := patch_material.duplicate() as StandardMaterial3D
+		material.albedo_color = preset[1]
+		isle_patches[preset[0]] = _mesh(isle,
+			"AuthoredGround_greenlight_%s-01_greenlight_9_9" % preset[0], material)
 	var greenlight := WorldManifest.new()
 	greenlight.data = {"asset": {"id": "greenlight__chunk_9_9"},
 		"continentGeography": {"geometryMode": "continent-chunks-v1"}}
@@ -220,6 +229,18 @@ func _run() -> void:
 		"Greenlight's roads take packed earth and its paving flagstone, mipmapped")
 	_expect(LookGround.class_texture("packed_earth") == earth,
 		"each class texture is built once")
+	var patch_detail := func(id: String) -> Variant:
+		return ((isle_patches[id] as MeshInstance3D).get_surface_override_material(0)
+			as ShaderMaterial).get_shader_parameter(&"look_class_texture")
+	var scree_paint := (isle_patches["scree"] as MeshInstance3D).get_surface_override_material(0)
+	_expect(LookGround.is_rock((isle_patches["scree"] as MeshInstance3D).mesh.surface_get_material(0))
+		and patch_detail.call("scree") == LookGround.class_texture("coastal_gravel")
+		and float((scree_paint as ShaderMaterial).get_shader_parameter(&"look_class_metres"))
+			== float(LookProfile.CLASS_TEXTURES["coastal_gravel"]["metres"]),
+		"the isles' coastal gravel is rock and takes the seamless gravel")
+	_expect(patch_detail.call("field") == LookGround.class_texture("tilled_soil")
+		and patch_detail.call("forest") == null,
+		"a ploughed field takes tilled soil; forest floor keeps its own moss")
 	isle.queue_free()
 
 	# The trims are the region files' (src/world/look/regions/<id>.json).

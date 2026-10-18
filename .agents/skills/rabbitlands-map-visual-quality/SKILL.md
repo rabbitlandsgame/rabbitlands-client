@@ -128,7 +128,8 @@ gets hard, is in `references/edge-pipeline.md`. Read it before changing a consta
   3). 12 paving patches have blends of 1 m or less (Landfall's keep forecourt, courts
   and paved avenue; the seam-mole pavings; Tollholm's square).
 - **Textures:** roads, sand, soil and lawns were one tinted texture, and paving was
-  wall masonry. The coastal gravel showed a repeat grid.
+  wall masonry. The coastal gravel showed a repeat grid, which turned out to be its
+  pack tile's alpha vignette cutting coverage, not its colour.
 - **Roads:**
   - Hairpins: Boarsend R41 (two V switchbacks) and Hearthcroft's terrace roads.
   - Jogs and kinks: Greenlight R29's start, Ringholm's east road and Twinbrook's north
@@ -140,5 +141,10 @@ gets hard, is in `references/edge-pipeline.md`. Read it before changing a consta
     1.3 m rim strip.
   - A meadow turf texture was tried and dropped: its fine detail went flat green at
     the game camera.
+  - Second pass: the coastal gravel pack tile made seamless and opaque (slot `rock`;
+    a class texture now replaces the source's alpha too) and a generated tilled soil
+    (slot `soil`) on all 15 isles. Forest floor got no slot: its moss pack is its own
+    texture and wraps cleanly. Its patches are authored at opacity 0.4, under the
+    0.42 patch cut, so most of each is cut away; that is a look or content fix.
 - **Still need a republish:** road shapes, patch shapes, narrow blends and road edge
   ramps. They are recorded as follow-ups.

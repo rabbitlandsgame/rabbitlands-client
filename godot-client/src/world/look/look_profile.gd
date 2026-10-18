@@ -379,6 +379,16 @@ const STONE_TINT_LEAD := Vector2(0.1, 0.03)
 ## sand shares its texture with the Four Gates plaza's paving, so its tint is
 ## all that tells them apart.
 const SAND_TINT := Vector2(0.95, 0.1)
+## A glazed patch whose tint is a mid-value warm earth is bare soil
+## (LookGround.soil_tint): at most x bright (display value), at least y
+## saturated, its red ahead of its blue by at least z, and not green. The
+## isles' ploughed fields (the Soil preset at #a88c6b: value 0.66, saturation
+## 0.36, red ahead by 0.24) are soil; their forest floor (the moss pack under
+## #858066: saturation 0.23, red ahead by 0.12) and ripe wheat (#edd685, value
+## 0.93) are not. It only chooses a class texture (the `soil` slot): soil is
+## painted as the glaze it was. Four Gates' orange soil (#ffa85c, value 1.0)
+## is not caught; no Nymara region names a soil texture.
+const SOIL_TINT := Vector3(0.8, 0.3, 0.15)
 ## At most this many paving patches are handed to a root's roads, the largest
 ## first; a chunk holds two or three.
 const PAVING_RECTS_MAX := 8
@@ -532,18 +542,31 @@ const MEADOW_RIM_LOBE := Vector2(0.12, 0.12)
 ## Generated for the Landfall isles (map audit 2026-10-17), which drew their
 ## roads, sand, soil and lawns from one mottled ground texture under four
 ## tints and their paving from wall masonry laid flat; provenance in
-## textures/README.md.
+## textures/README.md. `coastal_gravel` is the isles' own coastal limestone
+## gravel pack tile made seamless and opaque: the pack's alpha is a vignette,
+## and its scree and shingle patches showed the 4 m repeat as a grid of green
+## grout lines (painted_ground_surface.gdshaderinc). `tilled_soil` replaced
+## the ground texture their ploughed fields still shared with the lawns.
 const CLASS_TEXTURES := {
 	"packed_earth": {"path": "res://src/world/look/textures/packed-earth-path.png", "metres": 3.5},
 	"flagstone": {"path": "res://src/world/look/textures/flagstone-paving.png", "metres": 3.2},
 	"beach_sand": {"path": "res://src/world/look/textures/beach-sand.png", "metres": 4.0},
+	"coastal_gravel": {"path": "res://src/world/look/textures/coastal-gravel.png", "metres": 4.0},
+	"tilled_soil": {"path": "res://src/world/look/textures/tilled-soil.png", "metres": 3.5},
 }
 ## The surfaces a class texture can cover: walk decks, pale paving, sand
-## glazes and green meadows (LookGround.class_slot). A meadow keeps its own
-## texture on the isles: a fine turf at a 4 m repeat averaged to flat green at
-## the game camera, losing the mottle the painted look leans on (audit renders,
-## 2026-10-17).
-const CLASS_TEXTURE_SLOTS := ["deck", "paving", "sand", "meadow"]
+## glazes, green meadows, bare rock and bare soil (LookGround.class_slot). A
+## meadow keeps its own texture on the isles: a fine turf at a 4 m repeat
+## averaged to flat green at the game camera, losing the mottle the painted
+## look leans on (audit renders, 2026-10-17). The isles' patches carry their
+## authored preset only as a tint and a texture, so a slot is how the runtime
+## reaches a preset: every isle patch classed rock is "Coastal limestone
+## gravel" (410 patch meshes on the 15 isles) and every one classed soil is
+## "Soil". Their "Forest floor moss" patches are plain glazes and have no slot:
+## the moss pack is their own texture already, and it wraps without a grid.
+## What they lack at the game camera is coverage, not texture: authored at
+## opacity 0.4, under PATCH_RIM's 0.42 cut, most of each is cut away.
+const CLASS_TEXTURE_SLOTS := ["deck", "paving", "sand", "meadow", "rock", "soil"]
 ## How much of a class texture's own hue survives its recolouring (0: the
 ## source's mean colour exactly; 1: only its luminance is matched).
 const CLASS_TEXTURE_HUE := 0.5

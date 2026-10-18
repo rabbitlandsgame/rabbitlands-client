@@ -74,5 +74,5 @@ merge the same keys into the region file. Update `notes.overrides.sha256`, and t
 indentation; a round trip of an unchanged file is byte-identical.
 
 The ground keys a region may set are in `LookProfile.REGION_SECTIONS["ground"]`.
-`class_textures` maps the slots `deck`, `paving`, `sand` and `meadow` to the names in
-`LookProfile.CLASS_TEXTURES`.
+`class_textures` maps the slots `deck`, `paving`, `sand`, `meadow`, `rock` and `soil` to
+the names in `LookProfile.CLASS_TEXTURES`.

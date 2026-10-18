@@ -442,6 +442,13 @@ static func is_kept_patch(material: Material, region: String) -> bool:
 static func sand_tint(tint: Color) -> bool:
 	return tint.v >= LookProfile.SAND_TINT.x and tint.s >= LookProfile.SAND_TINT.y
 
+## True when a patch's tint is a mid-value warm earth (LookProfile.SOIL_TINT):
+## the isles' ploughed fields. It only picks the `soil` class texture; the
+## patch is painted as the glaze it was.
+static func soil_tint(tint: Color) -> bool:
+	return tint.v <= LookProfile.SOIL_TINT.x and tint.s >= LookProfile.SOIL_TINT.y \
+		and tint.r - tint.b >= LookProfile.SOIL_TINT.z and not LookProfile.green_tint(tint)
+
 ## The continent-space bounds (min x, min z, max x, max z) of the pale paving
 ## among `ground`, the largest first. Mesh space is the continent frame (see
 ## painted_ground_surface.gdshaderinc), so a mesh's own AABB is enough and no
@@ -551,7 +558,7 @@ static func painted_for(source: Material, kind: Kind, mesh: Mesh, surface: int,
 		Vector2(rim_lobe.x, LookProfile.RIM_LOBE_METRES))
 	painted.set_shader_parameter(&"look_rim_grain", rim_lobe.y)
 	# A region's class texture for this surface (`ground.class_textures`).
-	var slot := class_slot(standard, kind, meadow, kept or rock)
+	var slot := class_slot(standard, kind, meadow, kept, rock)
 	var chosen: Variant = LookProfile.region_value(region, "ground", "class_textures", {})
 	if not slot.is_empty() and chosen is Dictionary and (chosen as Dictionary).has(slot):
 		var texture_name := str((chosen as Dictionary)[slot])
@@ -653,20 +660,26 @@ static func deck_path_of(region: String) -> float:
 		0.0, 1.0)
 
 ## The class texture slot a painted surface fills (LookProfile.CLASS_TEXTURE_SLOTS),
-## or "" for none: a worn walk deck, pale paving, a sand glaze or a green
-## meadow. A kept patch (a mosaic, a signature surface) and bare rock keep
-## their own texture.
-static func class_slot(material: BaseMaterial3D, kind: Kind, meadow: bool, kept: bool) -> String:
+## or "" for none: a worn walk deck, pale paving, a sand glaze, a green
+## meadow, bare rock (`is_rock`; the isles' coastal gravel) or bare soil
+## (`soil_tint`; their ploughed fields). A kept patch (a mosaic, a signature
+## surface) keeps its own texture.
+static func class_slot(material: BaseMaterial3D, kind: Kind, meadow: bool, kept: bool,
+		rock := false) -> String:
 	if kind == Kind.DECK:
 		return "deck"
 	if kind != Kind.PATCH or kept:
 		return ""
 	if meadow:
 		return "meadow"
+	if rock:
+		return "rock"
 	if is_paving(material):
 		return "paving"
 	if sand_tint(material.albedo_color) and not is_cobble(material):
 		return "sand"
+	if soil_tint(material.albedo_color) and not is_cobble(material):
+		return "soil"
 	return ""
 
 ## The class texture `texture_name` names (LookProfile.CLASS_TEXTURES), with
