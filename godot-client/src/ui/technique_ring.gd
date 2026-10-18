@@ -1,5 +1,5 @@
 extends Control
-## The technique ring: hold Tab (the `technique_ring` action) and choose a
+## The technique ring: hold Z (the `technique_ring` action) and choose a
 ## technique; let go to close it without using anything.
 ##
 ## One level deep, unlike the spell ring: techniques have no target type or

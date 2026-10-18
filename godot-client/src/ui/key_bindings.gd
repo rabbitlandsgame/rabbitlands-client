@@ -3,7 +3,7 @@ extends RefCounted
 ## Eternal Lands keeps key.ini.
 ##
 ## One line per action, `#K_<ACTION> = <key>[, <key>...]`, where a key is its
-## modifiers then its name: `#K_TOGGLE_MAP = M`, `#K_QUICK_SPELL_1 = ALT 1`,
+## modifiers then its name: `#K_TOGGLE_MAP = TAB`, `#K_QUICK_SPELL_1 = ALT 1`,
 ## `#K_QUICK_ITEM_1 = 1, CTRL 1`, `#K_SPELL_RING = LSHIFT`. Lines that are not
 ## `#K_` entries are comments and are ignored, as are actions this client does
 ## not have; an action the file leaves out keeps its default. The settings
@@ -11,6 +11,17 @@ extends RefCounted
 ## every key back to the shipped default.
 
 const PATH := "user://keys.ini"
+## The layout `render` writes, kept in the file as `#KEYS_VERSION = 2`. A file
+## without that line is version 1.
+const VERSION := 2
+## Defaults each older version shipped that a later one changed. keys.ini is
+## written on the first run, so it lists the defaults of the build that wrote
+## it as if the player had chosen them. An entry that still names its old
+## default is dropped once, the current default applies, and the file is
+## written again at this version, so a key chosen after that is kept.
+const SUPERSEDED := {
+	1: {"toggle_map": "M", "technique_ring": "TAB"},
+}
 
 ## Names for keys whose Godot name is not what the file should say.
 const NAMES := {
@@ -92,6 +103,8 @@ static func render(actions: Array) -> String:
 		"; A key is its modifiers then its name: M, CTRL S, ALT 1, LSHIFT, TAB.",
 		"; Edit with the game closed, or change keys in Settings > Controls.",
 		"; Settings > Controls > Reset all keys puts every key back to its default.",
+		"; Keep the #KEYS_VERSION line: it says which defaults the file was written with.",
+		"#KEYS_VERSION = %d" % VERSION,
 		""]
 	for action: Variant in actions:
 		var name := str(action)
@@ -133,16 +146,42 @@ static func read(text: String, allowed: Array) -> Dictionary:
 			result[action] = events
 	return result
 
-## Applies keys.ini to the input map. Returns how many actions it set.
+## The `#KEYS_VERSION` a file was written at; 1 when it has none.
+static func version_of(text: String) -> int:
+	for raw_line: String in text.split("\n"):
+		var line := raw_line.strip_edges()
+		if line.begins_with("#KEYS_VERSION") and "=" in line:
+			return maxi(1, line.get_slice("=", 1).strip_edges().to_int())
+	return 1
+
+## Applies keys.ini to the input map. Returns how many actions it set. A
+## file from an older version loses the entries that only repeat that
+## version's defaults (SUPERSEDED) and is written again at this one.
 static func load_file(allowed: Array, path := PATH) -> int:
 	if not FileAccess.file_exists(path):
 		return 0
-	var parsed := read(FileAccess.get_file_as_string(path), allowed)
+	var text := FileAccess.get_file_as_string(path)
+	var parsed := read(text, allowed)
+	var version := version_of(text)
+	for old_version in range(version, VERSION):
+		var old_defaults: Dictionary = SUPERSEDED.get(old_version, {})
+		for action: String in old_defaults:
+			if parsed.has(action) and _names(parsed[action]) == str(old_defaults[action]):
+				parsed.erase(action)
 	for action: String in parsed:
 		InputMap.action_erase_events(action)
 		for event: InputEventKey in parsed[action]:
 			InputMap.action_add_event(action, event)
+	if version < VERSION:
+		save(allowed, path)
 	return parsed.size()
+
+## Keys as one keys.ini value: `1, CTRL 1`.
+static func _names(events: Array) -> String:
+	var names: Array[String] = []
+	for event: Variant in events:
+		names.append(describe(event as InputEvent))
+	return ", ".join(names)
 
 ## Puts every listed action back to the key project.godot ships.
 static func reset_to_defaults(actions: Array) -> void:
