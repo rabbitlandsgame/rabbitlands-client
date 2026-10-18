@@ -2256,8 +2256,7 @@ func _tell_cloth_what_is_worn() -> void:
 	var torso_scene: String = _worn_torso_scene()
 	var fabric: Array = _cape_fabric_line(torso_scene)
 	_cape_cloth.call("set_fabric_line", fabric[0], fabric[1])
-	var shins: Array = _shin_reach(torso_scene)
-	_cape_cloth.call("set_shin_reach", shins[0], shins[1])
+	_cape_cloth.call("set_shin_reach", _shin_reach(torso_scene))
 	var empty := PackedFloat32Array()
 	if torso_scene.is_empty():
 		_cape_cloth.call("set_torso_reach", empty, empty)
@@ -2275,7 +2274,7 @@ func _tell_cloth_what_is_worn() -> void:
 ## Where the worn cape's cloth hangs behind each of its chains, for the solver
 ## to hang plumb and to collide. It depends on the rig, the cape and - through
 ## the drape that holds the yoke out over armour - the torso, so it is shared
-## by every actor wearing the three. The line, then how far its folds come in.
+## by every actor wearing the three. The line, then the cape's cross-section.
 func _cape_fabric_line(torso_scene: String) -> Array:
 	var cape: Array = []
 	for node_value: Variant in _equipment_nodes.get(CAPE_PART, []) as Array:
@@ -2288,14 +2287,15 @@ func _cape_fabric_line(torso_scene: String) -> Array:
 		str(_equipment_model_config(CAPE_PART, visual).get("scene", "")),
 		torso_scene]
 	if not _fabric_lines.has(key):
-		var folds: Array = []
-		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, folds)
-		_fabric_lines[key] = [line, folds]
+		var section: Array = []
+		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, section)
+		_fabric_lines[key] = [line, section]
 	return _fabric_lines[key] as Array
 
-## How far the legs reach behind each shin, left then right, knee to ankle:
-## the body's own calf, and the trousers, boots and any long coat worn over
-## it. Shared by every actor of the rig wearing the same three.
+## How far the legs reach behind each thigh and shin - left thigh, right
+## thigh, left shin, right shin, as the cloth takes them: the body's own legs,
+## and the trousers, boots and any long coat worn over them. Shared by every
+## actor of the rig wearing the same three.
 func _shin_reach(torso_scene: String) -> Array:
 	var scenes := PackedStringArray([torso_scene, _worn_skinned_scene(LEGS_PART),
 		_worn_skinned_scene(BOOTS_PART)])
@@ -2312,14 +2312,16 @@ func _shin_reach(torso_scene: String) -> Array:
 			if not scene.is_empty():
 				pieces.append_array(_equipment_pieces(scene))
 		var reaches: Array = []
-		for side: String in ["l", "r"]:
-			var knee: int = _native_skeleton.find_bone("calf_%s" % side)
-			var ankle: int = _native_skeleton.find_bone("foot_%s" % side)
-			reaches.append(PackedFloat32Array() if knee < 0 or ankle < 0
-				else CapeDrape.shin_reach(pieces,
-					_native_skeleton.get_bone_global_rest(knee).origin,
-					_native_skeleton.get_bone_global_rest(ankle).origin,
-					CapeDrape.BARE_SHIN_RADIUS))
+		for segment: Array in [["thigh", "calf"], ["calf", "foot"]]:
+			for side: String in ["l", "r"]:
+				var top: int = _native_skeleton.find_bone("%s_%s" % [segment[0], side])
+				var bottom: int = _native_skeleton.find_bone("%s_%s" % [segment[1], side])
+				reaches.append(PackedFloat32Array() if top < 0 or bottom < 0
+					else CapeDrape.shin_reach(pieces,
+						_native_skeleton.get_bone_global_rest(top).origin,
+						_native_skeleton.get_bone_global_rest(bottom).origin,
+						CapeDrape.BARE_SHIN_RADIUS,
+						CapeDrape.THIGH_FROM if segment[0] == "thigh" else 0.0))
 		_shin_reaches[key] = reaches
 	return _shin_reaches[key] as Array
 
