@@ -32,6 +32,15 @@ func run() -> void:
 	expect(state.actor_mounts[42].selected_mount_id == "moor_pony", "browsing never predicts server selection")
 	window._ride()
 	expect(sent == ["#mount ride golden_plains_horse"], "Ride asks server to select and call the chosen horse")
+	state.actor_mounts[42].mode = "summoning"
+	state.actor_mounts[42].mount_id = "golden_plains_horse"
+	state.state_changed.emit(&"mount_states")
+	for frame: int in 4:
+		await process_frame
+	expect(window.panel.get_rect().end.y <= 680, "calling status keeps the window above the bottom bar")
+	state.actor_mounts[42].mode = "on_foot"
+	state.actor_mounts[42].mount_id = ""
+	state.state_changed.emit(&"mount_states")
 	window._dismount()
 	expect(sent.size() == 1, "disabled dismount never starts an unintended call")
 	state.actor_mounts[42].mode = "mounted"

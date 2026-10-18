@@ -35,6 +35,9 @@ func _build() -> void:
 	panel.add_theme_stylebox_override("panel", _box(Color("121d24"), Color("937342"), 2, 14))
 	panel.hide()
 	add_child(panel)
+	# Wrapped status text may briefly request extra height while its new width
+	# settles. Shrink again after layout, including server call/riding updates.
+	panel.minimum_size_changed.connect(func() -> void: _fit_panel.call_deferred())
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)
 	panel.add_child(column)
