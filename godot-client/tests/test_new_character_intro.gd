@@ -105,6 +105,9 @@ func run() -> void:
 	intro.update(1.1, rig, player, true, true)
 	intro.update(0.2, rig, player, true, true)
 	expect(guide.action == &"run" and guide.global_position.distance_to(guide.post) > 0.1, "Nash runs towards the player after waving")
+	var beacon: MapMarker3D = intro._guide_beacon
+	var sparks: int = beacon.get_node("RisingSparks").get_instance_id()
+	expect(beacon.global_position.is_equal_approx(guide.global_position), "green particles follow Nash's approach")
 	intro.update(2.0, rig, player, true, true)
 	expect(requests == [100] and intro.allows_dialogue(), "approach opens the actual tutorial exactly once and enables dialogue controls")
 	var conversation := {"open":true, "name":"Nash", "text":"Ilyon needs a dressing.", "options":[]}
@@ -114,10 +117,13 @@ func run() -> void:
 	intro.update(0.1, rig, player, true, true, null, -1, {"open":false})
 	intro.update(0.2, rig, player, true, true)
 	expect(intro.greeting_phase == &"return" and intro.blocks_input(), "closing the conversation starts the run back while movement stays locked")
+	expect(beacon.global_position.is_equal_approx(guide.global_position) and beacon.get_node("RisingSparks").get_instance_id() == sparks,
+		"the same particle animation follows Nash back without restarting")
 	intro.update(2.0, rig, player, true, true)
 	expect(guide.restored and guide.global_position.is_equal_approx(guide.post) and not intro.blocks_input(),
 		"only arriving at Nash's original post restores player control")
 	expect(requests == [100], "conversation updates never restart the tutorial")
+	expect(not intro.owns_guide_beacon(100) and beacon.is_queued_for_deletion(), "arrival beacon ends after Nash returns")
 	intro.arm(main.main_viewport)
 	for frame: int in range(3):
 		intro.update(0.016, rig, player, true, true, guide, 100)

@@ -273,6 +273,10 @@ func convert(event: Dictionary) -> Dictionary:
 				var valid := logical_point(str(state.map), state.target[0], state.target[1])
 				if not valid.ok:
 					return valid
+				for point: Array in state.get("route", []):
+					var route_point := logical_point(str(state.map), point[0], point[1])
+					if not route_point.ok:
+						return route_point
 	if not rows.is_empty() and not ready():
 		return Profile.failure("coordinate_no_active_context")
 	for index: int in range(rows.size()):

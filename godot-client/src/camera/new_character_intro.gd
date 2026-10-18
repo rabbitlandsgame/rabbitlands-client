@@ -19,6 +19,7 @@ var playing := false
 var elapsed := 0.0
 var greeting_phase: StringName = &""
 var _guide: Node3D
+var _guide_beacon: MapMarker3D
 var _guide_id := -1
 var _guide_post := Transform3D.IDENTITY
 var _approach := Vector3.ZERO
@@ -160,10 +161,12 @@ func update(delta: float, rig: IsometricCameraController, actor: Node3D,
 		return
 	if greeting_phase != &"":
 		_update_greeting(delta, actor, dialogue)
+		_follow_guide_beacon()
 		return
 	if is_instance_valid(guide):
 		_guide = guide
 		_guide_id = guide_id
+		_follow_guide_beacon()
 	if pending:
 		var failed := is_instance_valid(_stream) and _stream.views_failed()
 		var timed_out := Time.get_ticks_msec() - _wait_started > LOAD_TIMEOUT_MSEC
@@ -285,10 +288,26 @@ func _end_conversation() -> void:
 		conversation_ended.emit()
 
 func _restore_guide() -> void:
+	if is_instance_valid(_guide_beacon):
+		_guide_beacon.queue_free()
+	_guide_beacon = null
 	if is_instance_valid(_guide):
 		_guide.call("end_cinematic_presentation")
 	_guide = null
 	_guide_id = -1
+
+func _follow_guide_beacon() -> void:
+	if not is_instance_valid(_guide):
+		return
+	if not is_instance_valid(_guide_beacon):
+		_guide_beacon = MapMarker3D.new()
+		_guide.get_parent().add_child(_guide_beacon)
+		_guide_beacon.configure({"label": "Nash"}, CoordinateAdapter.new(), false)
+		_guide_beacon.get_node("WorldLabel").hide()
+	_guide_beacon.follow_actor(_guide.global_position)
+
+func owns_guide_beacon(actor_id: int) -> bool:
+	return is_instance_valid(_guide_beacon) and _guide_id == actor_id
 
 func cancel() -> void:
 	_end_conversation()
