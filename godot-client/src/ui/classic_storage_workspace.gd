@@ -7,7 +7,7 @@ const BACKGROUND := Color("05090a")
 const AMBER := Color("896234")
 const GOLD := Color("e9bd83")
 const CELL := 40
-const ICON_FRAME_INSET := 8
+const INVENTORY_ICON_MARGIN := 4
 const STORAGE_SIZE := Vector2(CELL * 6 + 134, CELL * 6 + 158)
 
 var main: Node
@@ -46,7 +46,6 @@ var _category_id := -1
 var _updating := false
 var _fitting_lists := false
 var _pending_withdrawals: Dictionary = {}
-var _cropped_icons: Dictionary = {}
 ## One frame style for every cell and one for a lit cell, shared rather than
 ## six new StyleBoxFlat per cell per refresh.
 var _plain_cell: StyleBoxFlat
@@ -280,16 +279,22 @@ func _style_inventory() -> void:
 	rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	title.add_child(rail)
 	rail.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var worn_cell: StyleBoxFlat = style_box(Color("6d854e"), 0)
+	# Leave a visible gutter inside the grid even when expand_icon fills the
+	# content rectangle. Use the same inset in every state to avoid icon jumps.
+	var pack_cell: StyleBoxFlat = style_box(AMBER, INVENTORY_ICON_MARGIN)
+	var worn_cell: StyleBoxFlat = style_box(Color("6d854e"), INVENTORY_ICON_MARGIN)
+	var active_cell: StyleBoxFlat = style_box(Color("7cc6d4"), INVENTORY_ICON_MARGIN)
 	for grid: GridContainer in [main.get("inventory_grid"), main.get("equipment_grid")]:
 		grid.add_theme_constant_override("h_separation", 0)
 		grid.add_theme_constant_override("v_separation", 0)
 		for slot: Button in grid.get_children():
 			slot.custom_minimum_size = Vector2(CELL, CELL)
 			slot.add_theme_stylebox_override("normal",
-				worn_cell if grid == main.get("equipment_grid") else _plain_cell)
+				worn_cell if grid == main.get("equipment_grid") else pack_cell)
+			slot.add_theme_stylebox_override("disabled",
+				worn_cell if grid == main.get("equipment_grid") else pack_cell)
 			for state: String in ["hover", "pressed", "hover_pressed", "focus"]:
-				slot.add_theme_stylebox_override(state, _lit_cell)
+				slot.add_theme_stylebox_override(state, active_cell)
 	var equipment: Control = main.get("equipment_column") as Control
 	for quantity: Label in main.get("inventory_quantity_labels"):
 		quantity.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
@@ -429,23 +434,9 @@ func _hide_cells_from(grid: GridContainer, first: int) -> void:
 		cell.set_meta("storage_position", -1)
 
 func crop_icon(texture: Texture2D) -> Texture2D:
-	# The eight-pixel inset removes the complete decorative corners. A worn
-	# item's warning mark sits inside this region and remains visible.
-	if texture == null or texture.get_size() != Vector2(50, 50):
-		return texture
-	var key: int = texture.get_instance_id()
-	if not _cropped_icons.has(key):
-		var cropped := AtlasTexture.new()
-		if texture is AtlasTexture:
-			var source := texture as AtlasTexture
-			cropped.atlas = source.atlas
-			cropped.region = source.region.grow(-ICON_FRAME_INSET)
-		else:
-			cropped.atlas = texture
-			cropped.region = Rect2(Vector2.ZERO, texture.get_size()).grow(-ICON_FRAME_INSET)
-		cropped.filter_clip = true
-		_cropped_icons[key] = cropped
-	return _cropped_icons[key] as Texture2D
+	# The atlas now contains unframed artwork. Preserve the complete item and
+	# worn marker; button content margins provide the space inside the grid.
+	return texture
 
 func _refresh_grid() -> void:
 	var adapter: ItemList = main.get("storage_items") as ItemList
