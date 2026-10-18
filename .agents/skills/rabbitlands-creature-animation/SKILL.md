@@ -34,3 +34,5 @@ For Squirrel, Dormouse and Beaver, read [native rodent motion](references/native
 For Hedgehog, Shrew and Giant Mole, read [native insectivore motion](references/native-insectivore-motion.md). It covers quill-heavy silhouettes, short-leg guide fitting, asymmetric digging arms, complete palm/finger and heel ownership, native contact surfaces and supported collapse. Consult private continuation memory for the selected review and acceptance state.
 
 For Axolotl and Salamander pilots, read [native amphibian motion](references/native-amphibian-motion.md). It covers outward elbow planes, gill/fin ownership and full-palm contact frames; lowest-toe contact alone cannot certify a flat planted paw.
+
+For Gecko, Chameleon, Frilled Lizard and Iguana transfers, read [native lizard motion](references/native-lizard-motion.md). It covers physical palm frames without finger bones, continuous frill/crest/throat attachments and preserving an accepted category pilot through native anatomical fitting.
