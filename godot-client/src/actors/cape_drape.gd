@@ -97,6 +97,18 @@ const REACH_BEARING := 45.0
 ## How far below the pelvis the waist capsule's cap counts the worn torso: a
 ## coat tail or a plate skirt hangs there, behind the cape's middle joint.
 const SEAT_BELOW := 0.20
+## The floor under a shin's measured reach. The reach itself is read off the
+## body's own calf, which stands 0.08-0.15 behind the knee-to-ankle line, and
+## off what is worn over it; the floor only covers a rig whose body was not
+## measured.
+const BARE_SHIN_RADIUS := 0.10
+## A shin's reach is kept per bearing from the leg's own back, in this many
+## columns of SHIN_BEARING_STEP degrees, the last taking everything further
+## round. Kept as one radius it was the round capsule again: a knee flap
+## standing 0.31 straight back pushed the cape out at every bearing, where the
+## legs reach 0.13-0.17, and an idle cape bowed 45 mm off the calves.
+const SHIN_BEARINGS := 7
+const SHIN_BEARING_STEP := 15.0
 ## The cape chains, as `cape_<side>_01..04` in the rig.
 const CHAIN_SIDES: Array[String] = ["l", "c", "r"]
 const CHAIN_LINKS := 4
@@ -107,6 +119,9 @@ const LINE_BAND := 0.05
 const LINE_SLICE := 0.05
 ## The hem's trim rolls outward; the lowest joint reads the sheet above it.
 const LINE_HEM := 0.08
+## How far a joint's folds come in toward the body past its line, read this
+## far through the strip: the inner crests the shins meet.
+const LINE_FOLD := 0.90
 
 
 static func columns() -> int:
@@ -420,7 +435,11 @@ static func axis_reach(pieces: Array, from: Vector3, to: Vector3,
 ## cloth leaves the yoke. That cloth was conformed to the bare back, so a drape
 ## over armour moves only the yoke above it. Each vertex is carried at rest by
 ## its heaviest bone; the line wants only a depth.
-static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
+##
+## `folds`, when given, receives one PackedFloat32Array per chain: how far the
+## cloth's folds come in toward the body past the line at each joint.
+static func fabric_line(skeleton: Skeleton3D, cape: Array,
+		folds: Array = []) -> Array:
 	var cloth := PackedVector3Array()
 	var carriers := PackedInt32Array()
 	for node_value: Variant in cape:
@@ -486,6 +505,7 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
 		if band.is_empty():
 			return []
 		var offsets := PackedVector3Array()
+		var inward := PackedFloat32Array()
 		var height: float = root.y
 		for joint: int in range(CHAIN_LINKS + 1):
 			var at: float = clampf(height, lowest + LINE_HEM, highest - LINE_SLICE)
@@ -496,6 +516,7 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
 			if depths.is_empty():
 				offsets.append(Vector3.ZERO if offsets.is_empty()
 					else offsets[offsets.size() - 1])
+				inward.append(0.0 if inward.is_empty() else inward[inward.size() - 1])
 			else:
 				# The middle half's mean: a pleat splits a thin strip into an
 				# inner and an outer crest, and a median jumps between them.
@@ -505,9 +526,68 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array) -> Array:
 				var total := 0.0
 				for index: int in range(first, last):
 					total += depths[index]
-				offsets.append(Vector3(0.0, 0.0,
-					total / float(last - first) - root.z))
+				var middle: float = total / float(last - first)
+				offsets.append(Vector3(0.0, 0.0, middle - root.z))
+				# Toward the body is toward the material line.
+				var toward: float = signf(root.z - middle)
+				var crest: float = depths[mini(int(LINE_FOLD * float(depths.size())),
+					depths.size() - 1)] if toward >= 0.0 else depths[mini(int(
+					(1.0 - LINE_FOLD) * float(depths.size())), depths.size() - 1)]
+				inward.append(maxf(0.0, (crest - middle) * toward))
 			if joint < CHAIN_LINKS:
 				height -= lengths[joint]
 		out.append(offsets)
+		folds.append(inward)
 	return out
+
+
+## How far the legs reach behind a shin, by sample along it (REACH_SAMPLES, knee
+## to ankle) and bearing from the leg's back (SHIN_BEARINGS columns), in rest
+## space: the body's calf and whatever is worn over it, held CLEARANCE off.
+## Only that leg's half of the body counts: the other leg's back flap stood
+## within 45 degrees of the first shin's back. Each cell carries its neighbours along
+## and around the shin, as `axis_reach` does along its axis.
+static func shin_reach(pieces: Array, from: Vector3, to: Vector3,
+		floor_radius: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	out.resize(REACH_SAMPLES * SHIN_BEARINGS)
+	out.fill(floor_radius)
+	var axis: Vector3 = to - from
+	var span: float = axis.length_squared()
+	if span < 1e-9:
+		return out
+	var along: Vector3 = axis / sqrt(span)
+	# The rig's back is -z in its rest space.
+	var back := Vector3(0.0, 0.0, -1.0)
+	back = (back - along * back.dot(along)).normalized()
+	for piece_value: Variant in pieces:
+		var mesh: Mesh = (piece_value as Dictionary).get("mesh") as Mesh
+		if mesh == null:
+			continue
+		for surface: int in range(mesh.get_surface_count()):
+			var vertices: PackedVector3Array = mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+			for point: Vector3 in vertices:
+				if absf(point.x) > TRUNK_HALF or point.x * from.x < 0.0:
+					continue
+				var travel: float = (point - from).dot(axis) / span
+				if travel < 0.0 or travel > 1.0:
+					continue
+				var away: Vector3 = point - (from + axis * travel)
+				var gap: float = away.length()
+				if gap < 1e-5:
+					continue
+				var bearing: float = rad_to_deg(acos(clampf(away.dot(back) / gap, -1.0, 1.0)))
+				var column: int = mini(int(bearing / SHIN_BEARING_STEP), SHIN_BEARINGS - 1)
+				var at: int = int(round(travel * float(REACH_SAMPLES - 1))) * SHIN_BEARINGS + column
+				out[at] = maxf(out[at], gap + CLEARANCE)
+	var smeared := out.duplicate()
+	for slot: int in range(REACH_SAMPLES):
+		for column: int in range(SHIN_BEARINGS):
+			var best: float = out[slot * SHIN_BEARINGS + column]
+			for near_slot: int in [slot - 1, slot, slot + 1]:
+				for near_column: int in [column - 1, column, column + 1]:
+					if near_slot < 0 or near_slot >= REACH_SAMPLES or near_column < 0 							or near_column >= SHIN_BEARINGS:
+						continue
+					best = maxf(best, out[near_slot * SHIN_BEARINGS + near_column])
+			smeared[slot * SHIN_BEARINGS + column] = best
+	return smeared

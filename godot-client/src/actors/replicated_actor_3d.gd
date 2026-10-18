@@ -181,6 +181,10 @@ const CAPE_PART := 2
 ## Part 5: the torso. The cape is draped over whatever is worn there, so the
 ## two parts are not independent the way every other pair is.
 const BODY_PART := 5
+## Parts 4 and 6, the legs and the boots: the cape's hem is kept off the shins
+## they cover.
+const LEGS_PART := 4
+const BOOTS_PART := 6
 ## How many cut capes are kept before the cache is dropped and rebuilt.
 const DRAPE_CACHE_LIMIT := 48
 ## The shade an undershirt takes while torso armour is worn over it.
@@ -1963,6 +1967,8 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		return
 	_equipment_applied = true
 	var torso_before: int = int(_equipment_visuals.get(BODY_PART, 0))
+	var shins_before := Vector2i(int(_equipment_visuals.get(LEGS_PART, 0)),
+		int(_equipment_visuals.get(BOOTS_PART, 0)))
 	for raw_part: Variant in _equipment_visuals.keys():
 		var old_part: int = int(raw_part)
 		if not visuals.has(old_part) and not visuals.has(str(old_part)):
@@ -1999,6 +2005,12 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		_equipment_visuals[CAPE_PART] = cape_visual
 		_create_equipment_part(CAPE_PART, cape_visual,
 			fallback_parts.has(CAPE_PART))
+	# The hem is kept off whatever is worn on the shins, so new trousers or
+	# boots are news to the cloth, whenever they went on relative to the cape.
+	if _equipment_nodes.has(CAPE_PART) and shins_before != Vector2i(
+			int(_equipment_visuals.get(LEGS_PART, 0)),
+			int(_equipment_visuals.get(BOOTS_PART, 0))):
+		_tell_cloth_what_is_worn()
 	_refresh_wardrobe_cover()
 	if _weapon_carry != null:
 		_weapon_carry.call("refresh_equipment")
@@ -2152,10 +2164,14 @@ func _create_equipment_part(part: int, visual_id: int, allow_fallback: bool) -> 
 ## bare. A bare chest needs no drape: the capes were conformed against the bare
 ## back offline and already clear it.
 func _worn_torso_scene() -> String:
-	var visual: int = int(_equipment_visuals.get(BODY_PART, 0))
+	return _worn_skinned_scene(BODY_PART)
+
+## The skinned scene worn on a part, or "" when nothing is.
+func _worn_skinned_scene(part: int) -> String:
+	var visual: int = int(_equipment_visuals.get(part, 0))
 	if visual == 0:
 		return ""
-	var model: Dictionary = _equipment_model_config(BODY_PART, visual)
+	var model: Dictionary = _equipment_model_config(part, visual)
 	if bool(model.get("wardrobeOnly", false)):
 		return ""
 	if str(model.get("attach", "socket")) != "skinned":
@@ -2238,7 +2254,10 @@ func _tell_cloth_what_is_worn() -> void:
 	if _cape_cloth == null or _native_skeleton == null:
 		return
 	var torso_scene: String = _worn_torso_scene()
-	_cape_cloth.call("set_fabric_line", _cape_fabric_line(torso_scene))
+	var fabric: Array = _cape_fabric_line(torso_scene)
+	_cape_cloth.call("set_fabric_line", fabric[0], fabric[1])
+	var shins: Array = _shin_reach(torso_scene)
+	_cape_cloth.call("set_shin_reach", shins[0], shins[1])
 	var empty := PackedFloat32Array()
 	if torso_scene.is_empty():
 		_cape_cloth.call("set_torso_reach", empty, empty)
@@ -2256,21 +2275,53 @@ func _tell_cloth_what_is_worn() -> void:
 ## Where the worn cape's cloth hangs behind each of its chains, for the solver
 ## to hang plumb and to collide. It depends on the rig, the cape and - through
 ## the drape that holds the yoke out over armour - the torso, so it is shared
-## by every actor wearing the three.
+## by every actor wearing the three. The line, then how far its folds come in.
 func _cape_fabric_line(torso_scene: String) -> Array:
 	var cape: Array = []
 	for node_value: Variant in _equipment_nodes.get(CAPE_PART, []) as Array:
 		if node_value is MeshInstance3D and is_instance_valid(node_value):
 			cape.append(node_value)
 	if cape.is_empty():
-		return []
+		return [[], []]
 	var visual: int = int(_equipment_visuals.get(CAPE_PART, 0))
 	var key: String = "%s|%s|%s" % [str(_model_config.get("scene", "")),
 		str(_equipment_model_config(CAPE_PART, visual).get("scene", "")),
 		torso_scene]
 	if not _fabric_lines.has(key):
-		_fabric_lines[key] = CapeDrape.fabric_line(_native_skeleton, cape)
+		var folds: Array = []
+		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, folds)
+		_fabric_lines[key] = [line, folds]
 	return _fabric_lines[key] as Array
+
+## How far the legs reach behind each shin, left then right, knee to ankle:
+## the body's own calf, and the trousers, boots and any long coat worn over
+## it. Shared by every actor of the rig wearing the same three.
+func _shin_reach(torso_scene: String) -> Array:
+	var scenes := PackedStringArray([torso_scene, _worn_skinned_scene(LEGS_PART),
+		_worn_skinned_scene(BOOTS_PART)])
+	var key: String = "%s|%s" % [str(_model_config.get("scene", "")), "|".join(scenes)]
+	if not _shin_reaches.has(key):
+		var pieces: Array = []
+		var native_model := get_node_or_null("NativeModel")
+		var body: MeshInstance3D = null
+		if native_model != null:
+			body = native_model.find_child("body", true, false) as MeshInstance3D
+		if body != null and body.mesh != null:
+			pieces.append({"mesh": body.mesh})
+		for scene: String in scenes:
+			if not scene.is_empty():
+				pieces.append_array(_equipment_pieces(scene))
+		var reaches: Array = []
+		for side: String in ["l", "r"]:
+			var knee: int = _native_skeleton.find_bone("calf_%s" % side)
+			var ankle: int = _native_skeleton.find_bone("foot_%s" % side)
+			reaches.append(PackedFloat32Array() if knee < 0 or ankle < 0
+				else CapeDrape.shin_reach(pieces,
+					_native_skeleton.get_bone_global_rest(knee).origin,
+					_native_skeleton.get_bone_global_rest(ankle).origin,
+					CapeDrape.BARE_SHIN_RADIUS))
+		_shin_reaches[key] = reaches
+	return _shin_reaches[key] as Array
 
 func _axis_reach(pieces: Array, from: String, to: String,
 		below: float = 0.0) -> PackedFloat32Array:
@@ -3677,6 +3728,7 @@ static var _drape_envelopes: Dictionary = {}
 static var _draped_capes: Dictionary = {}
 static var _torso_reaches: Dictionary = {}
 static var _fabric_lines: Dictionary = {}
+static var _shin_reaches: Dictionary = {}
 
 static func _equipment_pieces(path: String) -> Array:
 	# One cached scene instance per equipment model. In production this comes

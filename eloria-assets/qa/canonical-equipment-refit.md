@@ -1011,6 +1011,105 @@ lower sheet by 69 mm, where develop shows none; it did so already at
   Idle_Subtle 2.03 s, the vest clips the sheet by 17 mm with either solver
   (the cape session's measurement, at `aa5709ca`).
 
+### The cape in the owner's fourth review (2026-10-18)
+
+Four notes, taken at `619a19f8` with the viewer's weapons and cape on
+(session `equipment-review/2026-10-17_23-42-13`). The owner asked for notes
+1–3 to be judged against the cape moving as it does in play, not in a frozen
+frame.
+
+How it was measured: for each frame, the furthest any arm, leg or weapon
+vertex stands outside the cape's sheet. That is the distance past the
+nearest cape vertex that a chain carries, outward from the spine. The rigid
+yoke, which armour may stand through, is not counted, and nor is anything
+within 3 cm of the cape's border. The cloth runs over a whole clip cycle.
+"Moving" means the actor travels at the client's own speeds, with the clip
+played at the speed the client would play it:
+
+- walking: 1.67 m/s, Walk at 2.18×;
+- running: 5.0 m/s, Run_Female at 1.81×.
+
+The Warden's sleeves read up to 13 mm in idle, which is this measure's floor.
+
+| Note | In place (the viewer) | Moving, whole cycle |
+| --- | ---: | ---: |
+| 1. Warden, Run_Female 0.59 s, arm | 35 mm (worst 38) | 0 mm |
+| 2. Warden, Run_Female 0.28 s, leg | worst 40 mm | 0 mm |
+| 3. Warden, Walk 0.06 s, hand | 38 mm (worst 38) | 0 mm |
+
+**Notes 1–3 are motion-only and are left as they are.** The viewer plays a
+run or a walk on the spot, so the cloth never sees the actor travel. In
+motion the cape streams back off the arms, legs and hands at both noted
+times and through every sample.
+
+**Note 4 (Phoenix set, Red Cape 2:12, Fighting_Idle 0.01 s) is fixed.**
+
+The leg capsules ran hip to knee, so nothing collided the shins. In the
+fighting stance the back leg's shin and greave stand behind the hem. With
+the solver before the second-review fix the result was the same: 25 mm at
+the noted frame and 37–40 mm over the cycle.
+
+What changed (`cape_cloth.gd`, `cape_drape.gd`, `replicated_actor_3d.gd`):
+
+- After the solve, the measured cloth line is kept off both shins, knee to
+  ankle, the same way in both solvers. The native kernel takes four capsules
+  and no more, so it is handed the same rests as before and the shins are
+  handled afterwards in GDScript.
+- Each chain point stands for the cloth 7.5 cm either side of it, and for
+  that cloth's inner folds. `CapeDrape.fabric_line` now measures the folds:
+  2–8 cm in front of the line.
+- Links are also checked at their thirds. A link from beside the knee to
+  below the calf had passed through a shin with both ends clear of it.
+- Points move straight back, away from the chest, so a chain does not slide
+  across its neighbour.
+- `CapeDrape.shin_reach` measures each shin's reach per rig and per worn
+  torso, legs and boots. It counts the body's own calf and whatever is worn
+  over it, on that leg's side only, per 15° of bearing from the leg's back.
+  A single radius was the round-capsule problem again: an Amberwood knee flap
+  stands 0.31 m straight back, and as a single radius it bowed an idle cape
+  45 mm. The other leg's back flap also had to be kept out.
+- This applies only to a measured line, and never to a mounted rider.
+- A change of legs or boots re-tells the cloth.
+
+Results:
+
+- Note 4: 0 mm at the noted frame. Over the cycle the worst is 17 mm, at
+  0.70 s, and 11 of 52 samples are over 10 mm (before: all 52).
+- The test kit's Amberwood legguards (4:171) stood 20–24 mm through the hem
+  in idle. They now read 0 mm, and the cape drapes 15–45 mm out over the
+  knee flap.
+- The note-2 view (Vanguard) is unchanged within 3 mm.
+- Cost: 110–140 µs per step with a measured line on the Phoenix kit, against
+  58–82 µs without it (debug build, headless).
+
+Tests:
+
+- `test_cape_idle.gd` passes. Its check is now one-sided: the cape must not
+  come in toward the legs. Being pushed out over leg armour is draping.
+- These pass:
+  - `test_cape_cloth.gd` (52 µs, under its 200 µs budget) and
+    `test_cape_drape.gd`;
+  - both parity suites (the shins act only on a measured line, which the
+    harness clears);
+  - `test_actor_render_quality.gd`;
+  - the mount suites `test_mounted_cape.gd` (44 checks),
+    `test_mounted_player.gd` (1,130) and `test_mount_preview_state.gd` (39),
+    with no failures.
+- The native suites fail only because the extension is not built here.
+
+Evidence: [note 4, the idle drape and notes 1–3 in motion](design-fit/review4-cape.jpg).
+Scratch harnesses: the client's
+`.local/asset-authoring/working/equipment-cape-2026-10-17/review4/`.
+
+**Not yet done.**
+
+- Note 4 still reads up to 17 mm at a few frames of the Fighting_Idle cycle.
+- Arms are not collided with the cape's sides. In place, a swinging elbow
+  passes through them (notes 1 and 3); in motion it does not.
+- The viewer plays locomotion on the spot, so its cape never streams. A
+  "travel" option in `tools/equipment_review/` would let reviews see the
+  cape as it moves in play.
+
 ## Two body shapes, preserved race identity
 
 There are **two body equipment fits**, with 200 torso/leg/boot designs each,
