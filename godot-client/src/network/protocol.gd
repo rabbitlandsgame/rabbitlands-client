@@ -124,6 +124,7 @@ enum ServerMessage {
 	# What the NPCs just shown do for a living, the line under their names.
 	# The free number between the map digest (209) and the titles (211).
 	ELORIA_ACTOR_OCCUPATIONS = 210,
+	ELORIA_MOUNT_STATES = 198,
 	ELORIA_QUEST_OFFERS = 199,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
@@ -281,6 +282,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"achievements_catalog_v1",
 	"actor_titles_v1",
 	"actor_occupations_v1",
+	"mounts_v1",
 	"quest_offers_v1",
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",
@@ -1106,6 +1108,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_actor_titles(payload)
 		ServerMessage.ELORIA_ACTOR_OCCUPATIONS:
 			return decode_actor_occupations(payload)
+		ServerMessage.ELORIA_MOUNT_STATES:
+			return preload("res://src/mounts/mount_protocol.gd").decode(payload)
 		ServerMessage.ELORIA_QUEST_OFFERS:
 			if payload.size() < 2 or payload.size() != 2 + u16(payload) * 2:
 				return {"type": "invalid", "error": "quest_offers_length"}

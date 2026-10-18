@@ -167,6 +167,7 @@ var actor_titles: Dictionary = {}
 ## actor is removed, and a seamless land crossing that keeps the actors keeps
 ## their rows too.
 var actor_occupations: Dictionary = {}
+var actor_mounts: Dictionary = {}
 ## NPCs with a new quest this player can accept, stated by the server.
 var quest_offer_actors: Dictionary = {}
 ## True lifetime experience per skill, keyed by skill name, and what it has
@@ -454,6 +455,7 @@ func _on_connection_state_changed(value: String) -> void:
 		achievements_catalog = {"worn_title": "", "entries": []}
 		actor_titles.clear()
 		actor_occupations.clear()
+		actor_mounts.clear()
 		quest_offer_actors.clear()
 		experience64.clear()
 		# Per profile rather than per character, but a different server may
@@ -591,6 +593,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"clock")
 		"change_map":
 			current_map = event.map_name
+			actor_mounts.clear()
 			# The new map's objects arrive in their own packet; anything held
 			# for the old map is stale the moment the change lands.
 			map_objects.clear()
@@ -637,6 +640,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				var removed_actor_id: int = int(removed_actor_value)
 				actors.erase(removed_actor_id)
 				actor_occupations.erase(removed_actor_id)
+				actor_mounts.erase(removed_actor_id)
 				quest_offer_actors.erase(removed_actor_id)
 				if selected_actor_id == removed_actor_id:
 					selected_actor_id = -1
@@ -646,6 +650,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			Network.coordinate_route_cancelled.emit()
 			actors.clear()
 			actor_occupations.clear()
+			actor_mounts.clear()
 			quest_offer_actors.clear()
 			state_changed.emit(&"actors")
 		"actor_commands":
@@ -1192,6 +1197,10 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				else:
 					actor_titles[actor_id] = worn
 			state_changed.emit(&"actor_titles")
+		"mount_states":
+			if str(event.map) == current_map:
+				actor_mounts = (event.states as Dictionary).duplicate(true)
+				state_changed.emit(&"mount_states")
 		"actor_occupations":
 			# An empty row is honoured the way an empty title is: it takes the
 			# line off rather than leaving the last one standing.

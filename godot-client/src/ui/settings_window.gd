@@ -39,7 +39,7 @@ const KeyBindings := preload("res://src/ui/key_bindings.gd")
 ## offered, because rebinding them would break the box they are typed in.
 const BINDABLE := {
 	"Movement": ["move_north", "move_south", "move_west", "move_east",
-		"turn_left", "turn_right", "recenter_viewport"],
+		"turn_left", "turn_right"],
 	"Windows": ["toggle_inventory", "toggle_map", "toggle_minimap",
 		"toggle_console", "toggle_encyclopedia", "chat_focus",
 		"toggle_spells", "toggle_summoning", "toggle_manufacture",
@@ -47,6 +47,7 @@ const BINDABLE := {
 		"toggle_ranging", "toggle_techniques", "toggle_help", "toggle_notepad", "toggle_options",
 		"toggle_mail", "toggle_party", "toggle_guild", "toggle_achievements"],
 	"Rings": ["spell_ring", "technique_ring"],
+	"Mounts": ["toggle_mount", "toggle_gallop"],
 	"Actions": ["attack_selected", "combat_target", "summon_behavior",
 		"toggle_sit", "toggle_show_through_obstacles", "screenshot", "cancel",
 		"connect", "disconnect", "open_last_url"],
@@ -261,6 +262,8 @@ func restore_bindings(stored: Dictionary) -> int:
 	var restored := 0
 	for action: Variant in stored:
 		var name: String = str(action)
+		if name == "recenter_viewport":
+			continue # Retired camera binding must not reclaim Space from gallop.
 		if not InputMap.has_action(name):
 			continue
 		if str(stored[action]) == str(SUPERSEDED_DEFAULTS.get(name, "")):
