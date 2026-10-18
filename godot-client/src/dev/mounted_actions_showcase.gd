@@ -2,7 +2,7 @@ extends Control
 ## Offline review using the same rider, mount, action router and props as play.
 const PANELS := [
 	["BOW · STANDING", "luminous_male", "cruise", "ranged_draw", false],
-	["BOW · TROT", "luminous_female", "cruise", "ranged_draw", true],
+	["BOW · TROT + CAPE", "luminous_female", "cruise", "ranged_draw", true],
 	["OFFENSIVE SPELL · TROT", "luminous_male", "cruise", "cast_aggressive", true],
 	["WARD · GALLOP", "luminous_female", "burst", "cast_defensive", true],
 	["HEAL · WALK", "luminous_female", "walk", "heal", true],
@@ -93,9 +93,12 @@ func _ready() -> void:
 		camera.look_at(Vector3(0, 1.15, .15))
 		var actor := ReplicatedActor3D.new()
 		stage.add_child(actor)
+		var worn := {0: 164} if index < 2 else {}
+		if index in [1, 5]:
+			worn[2] = 1
 		var errors := actor.configure({"actor_id": 900 + index, "x": 0, "y": 0,
 			"rotation": 0, "kind": 1, "name": "", "appearance": {"hair": 0},
-			"equipment_visuals": {0: 164} if index < 2 else {}},
+			"equipment_visuals": worn},
 			CoordinateAdapter.new({"walkingHeight": 0.0}), models[panel[1]], mapping, equipment)
 		if not errors.is_empty():
 			push_error(str(errors))

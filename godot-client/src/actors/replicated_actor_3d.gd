@@ -3307,6 +3307,10 @@ func play_technique(key: String, phase: String) -> void:
 	resolver.action_to_clip[action] = original
 
 func play_action(action: StringName, restart := false) -> void:
+	# Death can precede the server's dismount snapshot. Release the seated
+	# layer first so an active shot/channel cannot mask the full death clip.
+	if action == &"death" and is_instance_valid(_mount_visual):
+		set_mount_state({}, {})
 	# Death is a latched state, including after its one-shot clip finishes.
 	# Equipment/health snapshots and late combat commands must never restart it.
 	if current_action == &"death":

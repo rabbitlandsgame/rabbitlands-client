@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Moor Pony mounted bow and spell upper-body animation composition",
+  "implementation": {
+    "method": "Runtime rotation-track mask rooted at spine_01 over the existing seated rider solver",
+    "actions": [
+      "ranged_draw",
+      "ranged_hold",
+      "ranged_attack",
+      "cast",
+      "cast_aggressive",
+      "cast_defensive",
+      "heal",
+      "cast_channel_enter",
+      "cast_channel",
+      "cast_exit"
+    ],
+    "lowerBodyTracksApplied": false,
+    "sourceClipsModified": false,
+    "glbAssetsModified": false,
+    "movementPacketsPreserveOneShots": true,
+    "currentSpellAndTechniqueClipMappingsHonored": true,
+    "reins": "Park over saddle while hands are busy; blend back to the riding grip",
+    "bowVisualId": 164,
+    "death": "Unseat before full death playback, including during an active channel",
+    "drawSeconds": 0.25,
+    "drawFramesAt30fps": 7.5,
+    "sourceBowReleaseSeconds": 0.08,
+    "sourceBowReleaseFramesAt30fps": 2.4,
+    "entryBlendSeconds": 0.12,
+    "returnBlendSeconds": 0.18
+  },
+  "validation": {
+    "godot": "4.7.2-stable",
+    "mountedActionChecks": 3070,
+    "mountedActionFailures": 0,
+    "bodies": [
+      "luminous_male",
+      "luminous_female"
+    ],
+    "gaits": [
+      "walk",
+      "cruise",
+      "burst"
+    ],
+    "lowerBodyPoseTolerance": 1e-05,
+    "maxLowerBodyTransformComponentError": 0.0,
+    "allBoneRecoveryTolerance": 1e-05,
+    "arrowNockToDrawingHandToleranceMetres": 0.03,
+    "mountBaselineChecks": 1130,
+    "mountBaselineFailures": 0,
+    "onFootCombatPresentation": "PASS: 16 player rigs, action transitions, props, effects",
+    "capeRegressionChecks": 44,
+    "capeRegressionFailures": 0,
+    "capeRegressionNote": "Unmodified cape test with only report outputs redirected to test-artifacts. Existing headless dummy-renderer resource warnings occur at shutdown.",
+    "renderedPreviewFrames": 135,
+    "renderedPreviewFps": 30,
+    "renderedPreviewSeconds": 4.5,
+    "renderedPreviewScriptOrResourceErrors": 0,
+    "coverage": [
+      "held aim and release",
+      "offensive spell",
+      "defensive ward",
+      "heal",
+      "channel and exit",
+      "moving rider actions",
+      "recovery and prop hiding",
+      "dismount during cast",
+      "death during channel"
+    ],
+    "gates": {
+      "sourceAuthoring": "Existing approved models and shared motion library reused unchanged",
+      "exportFidelity": "Not applicable: no Blender export, GLB or motion payload replacement",
+      "godotIntegration": "Passed actual actor, mount, action routing, bow, spell and cape runtime checks",
+      "visualReview": "Reviewed standing, walking, trotting and galloping panels, including a rear game-camera bow view with cape and recovery frames",
+      "explicitUserApproval": "Pending review of this animation revision"
+    }
+  },
+  "sourceSha256": {
+    "godot-client/src/actors/combat_presentation_3d.gd": "a1448d04edc420a35244c741e3bbc6235df7b55a19691b40076c083147cb9beb",
+    "godot-client/src/actors/replicated_actor_3d.gd": "b88b0e0c8352bc26e6e94106310a99555a82bb856bd12784e8f9b9130ce65349",
+    "godot-client/src/actors/combat_animation_library.gd": "2c15f0e919f82bcc6aab4cefe2412c3f92a93b6f65645d941da325227f391b0d",
+    "godot-client/src/mounts/mounted_upper_body.gd": "e66f83eaad4bb036374f8038768a5cb91e1ac0202c7372f211c88a6da327ab5f",
+    "godot-client/src/mounts/mounted_player_visual.gd": "57cff8180f914637ef15925506759709adc9395f0500d99a7a62ac96fc780f4e",
+    "godot-client/src/mounts/mount_reins.gd": "2581861e3d4f6866ada65cd21ed5d5c227bd6879eabd3cb09872608199c3cf79",
+    "godot-client/src/mounts/rider_seat_pose.gd": "635eade1c6344f98ed17b8f87edbec971a0a18359a6ba9e72f93b0dcb6185f6d",
+    "godot-client/src/mounts/mount_cape_surface.gd": "4a178416a4f5335ca695d4810eac4e768b783bb8644b01264236c04c0272db35",
+    "godot-client/data/animations/luminous.json": "135d62a823c64c7ca47b9dfa304b34f909542f2e69320fa81a5785eed3b3929d",
+    "godot-client/data/mounts/moor_pony.json": "84100fc70888ebcd645d1f4f20745930f89ff56eb91075a776a11701414a4639",
+    "godot-client/src/dev/mounted_actions_showcase.gd": "53fa3d0d6fbade5127ec270f3329adda10949bfd68446420a7db1bae5914ee8d",
+    "godot-client/src/dev/mounted_actions_showcase.tscn": "99eb9537df298d19dedcce710269585c2617fb7ef3186ebb5df135f232db1573",
+    "godot-client/tests/test_mounted_actions.gd": "31fcce4535e65810280a468813b349ee6ff3d8e9eddff090895f19d132377655",
+    "godot-client/tests/integration/rendered_mounted_actions.gd": "ccb452112c4c61cfb9c46cc586264f26ce6ee02aa149e3261b13b58d38c20a92"
+  },
+  "unchangedAssetSha256": {
+    "godot-client/assets/actors/native/creatures/moor_pony.glb": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "godot-client/assets/actors/native/races/luminous_male.glb": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+    "godot-client/assets/actors/native/races/luminous_female.glb": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+    "godot-client/assets/actors/native/shared/Universal_Animation_Library.glb": "161f9b54aed6a172ac5b1a37960264f106015bbc8622cd33af2061c9c4f6d69c",
+    "godot-client/assets/actors/native/equipment/amberwood_longbow.glb": "89b3af8d1876eff7405c7fb4cc133e743dcde4e3a22105b1de42ca1210afb18b"
+  },
+  "previewSha256": {
+    "mounted-actions.png": "ebbff9594a2343bc2306e1c36f906241d4d7c0c78216af97a0655a6a446361d6",
+    "mounted-actions.mp4": "47f1d7765f0431004971896df5b130261a3bc894852eb09e6d24bb4768bedbfa"
+  },
+  "reviewScene": "res://src/dev/mounted_actions_showcase.tscn",
+  "reviewControls": "Space pauses/resumes the review scene; R restarts its action sequence",
+  "limitations": [
+    "Visual review covers two representative rider bodies, not every race, armor and cape combination."
+  ]
+}
