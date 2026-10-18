@@ -207,36 +207,31 @@ func _check_inventory_size(main: Node, state: Node) -> void:
 func _check_icon_frames(workspace: Node) -> void:
 	var image := Image.create(100, 50, false, Image.FORMAT_RGBA8)
 	image.fill(Color.BLACK)
-	# A second atlas cell ensures cropping honors the item's atlas offset.
-	for y: int in range(50):
-		for x: int in range(50):
-			if x < 8 or x >= 42 or y < 8 or y >= 42:
-				image.set_pixel(50 + x, y, Color.YELLOW)
+	# The second cell verifies the atlas offset. A detail near its edge must
+	# survive: unframed art no longer has eight disposable pixels per side.
 	image.set_pixel(75, 25, Color.BLUE)
-	var texture := ImageTexture.create_from_image(image)
+	image.set_pixel(51, 1, Color.RED)
 	var atlas := AtlasTexture.new()
-	atlas.atlas = texture
+	atlas.atlas = ImageTexture.create_from_image(image)
 	atlas.region = Rect2(50, 0, 50, 50)
-	var cropped: Texture2D = workspace.call("crop_icon", atlas) as Texture2D
-	var pixels: Image = cropped.get_image()
-	_expect(pixels.get_size() == Vector2i(34, 34)
-		and pixels.get_pixel(17, 17) == Color.BLUE, "unframed icon retains the correct item's artwork")
-	for corner: Vector2i in [Vector2i(0, 0), Vector2i(33, 0), Vector2i(0, 33), Vector2i(33, 33)]:
-		_expect(pixels.get_pixelv(corner) == Color.BLACK, "decorative yellow corners are removed")
+	var displayed: Texture2D = workspace.call("crop_icon", atlas) as Texture2D
+	var pixels: Image = displayed.get_image()
+	_expect(pixels.get_size() == Vector2i(50, 50)
+		and pixels.get_pixel(25, 25) == Color.BLUE
+		and pixels.get_pixel(1, 1) == Color.RED,
+		"unframed icons preserve the complete correct atlas cell")
 	var worn_image: Image = image.get_region(Rect2i(50, 0, 50, 50))
 	var item_atlas := ItemAtlas.new()
 	item_atlas.call("_stamp_worn_mark", worn_image)
 	var worn: Texture2D = workspace.call("crop_icon", ImageTexture.create_from_image(worn_image)) as Texture2D
 	var worn_pixels: Image = worn.get_image()
-	_expect(worn_pixels.get_pixel(0, 0) == Color.BLACK
-		and worn_pixels.get_pixel(33, 33).r < 0.1 and worn_pixels.get_pixel(33, 33).g < 0.1,
-		"worn-item icons lose their decorative frame too")
 	var mark: Dictionary = ItemAtlas.worn_mark_metrics(50, 50)
-	var mark_pixel: Color = worn_pixels.get_pixel(int(mark.left) - 8, int(mark.top) - 8)
-	_expect(absf(mark_pixel.r - ItemAtlas.WORN_MARK_COLOUR.r) < 0.004
+	var mark_pixel: Color = worn_pixels.get_pixel(int(mark.left), int(mark.top))
+	_expect(worn_pixels.get_size() == Vector2i(50, 50)
+		and absf(mark_pixel.r - ItemAtlas.WORN_MARK_COLOUR.r) < 0.004
 		and absf(mark_pixel.g - ItemAtlas.WORN_MARK_COLOUR.g) < 0.004
 		and absf(mark_pixel.b - ItemAtlas.WORN_MARK_COLOUR.b) < 0.004,
-		"worn-item warning remains visible inside the larger artwork")
+		"the complete worn-item warning remains visible")
 
 func _check_transfers(workspace: Node, state: Node) -> void:
 	var fixture: Dictionary = await _open_fixture()

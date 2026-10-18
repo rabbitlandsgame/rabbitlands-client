@@ -16,34 +16,23 @@ import sys
 from pathlib import Path
 import unittest
 
-# The generated armour set is defined once, by the importer's roster, and this
-# suite counts its icons from there so the two cannot disagree.
+# Item IDs remain frozen, while the public painting manifest now owns the art.
+# Routine atlas checks must not depend on ignored model-generation inputs.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]
                        / "eloria-assets" / "tools"))
 FIRST_GENERATED_IMAGE_ID = 118
 
 
 def generated_piece_count() -> int:
-    # All five generated sets: the armour from 118, the weapons and shields
-    # after it, the painted potion shelf after those, the sixty-four torso
-    # concept designs after those again, and the island crops from 594, handed
-    # out from one run of numbers so the painted prefix stays contiguous.
-    # Counting only some of them would leave the others' cells looking like a
-    # gap the atlas had failed to fill.
-    import crop_icons
-    import import_generated_equipment as armour
-    import import_generated_weapons as weapons
-    import potion_icons
-    import torso_items
-    return (len(armour.roster()) + len(weapons.roster())
-            + len(potion_icons.roster()) + len(torso_items.roster())
-            + len(crop_icons.roster()))
+    manifest = json.loads((ROOT / "eloria-assets/source/item-icons/"
+                           "painted-2026-10-18/manifest.json").read_text())
+    return sum(record["imageId"] >= FIRST_GENERATED_IMAGE_ID
+               for record in manifest["items"])
 
 ROOT = Path(__file__).resolve().parents[2]
 CLIENT = ROOT / "godot-client"
 
-# The frame's corner brackets sit within this many pixels of the cell edge, and
-# the plate behind them is opaque all the way out.
+# The unframed backing must remain opaque along every sampling-grid edge.
 FRAME_BAND = 6
 FIRST_NYMARA_IMAGE_ID = 85
 
@@ -70,14 +59,35 @@ class ItemIconAtlasTest(unittest.TestCase):
         return self.atlases[atlas][row * self.cell:(row + 1) * self.cell,
                                    column * self.cell:(column + 1) * self.cell]
 
+    def test_item_art_has_no_decorative_corner_frame(self) -> None:
+        import numpy as np
+        background = np.array([5, 15, 18, 255])
+        for image_id in range(self.config["imageCount"]):
+            cell = self.cell_for(image_id)
+            edges = np.concatenate((cell[:3].reshape(-1, 4),
+                                    cell[-3:].reshape(-1, 4),
+                                    cell[:, :3].reshape(-1, 4),
+                                    cell[:, -3:].reshape(-1, 4)))
+            with self.subTest(image_id=image_id):
+                self.assertTrue(np.all(edges == background),
+                                "icon decorations still reach the grid perimeter")
+
+    def test_complete_painted_equipment_no_longer_uses_legacy_substitutes(self) -> None:
+        manifest = json.loads((ROOT / "eloria-assets/source/item-icons/"
+                               "painted-2026-10-18/manifest.json").read_text())
+        records = {record["imageId"]: record for record in manifest["items"]}
+        self.assertFalse(self.config["aliases"])
+        equipment_ids = set(range(118, 474)) | set(range(506, 570)) | set(range(576, 584))
+        self.assertEqual(428, len(equipment_ids))
+        for image_id in sorted(equipment_ids):
+            with self.subTest(image_id=image_id):
+                self.assertEqual("equipment-concept-cutout",
+                                 records[image_id]["sourceKind"])
+        self.assertEqual("Knightly Boar Spear", records[397]["name"])
+        self.assertEqual("Circular Ringblade", records[460]["name"])
+
     def test_atlas_declares_its_painted_range(self) -> None:
-        # 0-117 are the painted originals and everything above them is the
-        # generated armour set, one rendered cell per piece
-        # (tools/build_item_icon_atlases.py).  Counted from the roster rather
-        # than written down: the set grew from sixty pieces to two hundred and
-        # fifty-six, and a number pinned here only says what the set used to
-        # be.  What matters is that the painted prefix stays contiguous with
-        # the generated range and that the declared count covers all of it.
+        # The public paintings cover the same contiguous IDs as the registry.
         self.assertEqual(FIRST_GENERATED_IMAGE_ID + generated_piece_count(),
                          self.config["imageCount"])
         self.assertEqual(117, self.config["fallbackImageId"])
@@ -163,15 +173,11 @@ class ItemIconAtlasTest(unittest.TestCase):
                            max(crop_icons.SERVER_ITEM_IDS.values()))
         self.assertEqual(set(crop_icons.SERVER_ITEM_IDS), set(crops))
         self.assertFalse({p.item_id for p in potions} & set(crop_icons.SERVER_ITEM_IDS.values()))
-        plate = read_png(potion_icons.TEMPLATE) if potion_icons.TEMPLATE.is_file() else None
+        background = np.array([5, 15, 18, 255])
         for name, image_id in crops.items():
             with self.subTest(crop=name):
                 self.assertLess(image_id, self.config["imageCount"])
-                if plate is None:
-                    self.skipTest("the empty-slot plate is not beside this checkout")
-                # A crop on the plate, not the bare plate: the distillate
-                # phials beside them change about a tenth of the cell.
-                changed = (np.abs(self.cell_for(image_id) - plate).max(axis=2) > 24).mean()
+                changed = (np.abs(self.cell_for(image_id) - background).max(axis=2) > 24).mean()
                 self.assertGreater(changed, .12)
 
     def test_the_potion_shelf_refuses_ids_another_item_holds(self) -> None:

@@ -1,0 +1,57 @@
+{
+  "product": "Rabbit Lands",
+  "date": "2026-10-18",
+  "auditedCells": 599,
+  "replacements": {
+    "equipmentConceptCutouts": 428,
+    "selectedPaintedPotionConcepts": 38,
+    "newDistillatePaintings": 10,
+    "newCropPaintings": 5
+  },
+  "originalPaintingsPreservedWithFramesRemoved": 118,
+  "decorativeCornersRemovedFromCells": 599,
+  "inventoryAndEquipment": {
+    "cellSize": 40,
+    "contentMarginAllStates": 4,
+    "artworkCroppedAtRuntime": false
+  },
+  "orientation": {
+    "directionalEquipment": "left",
+    "longWeapons": "action end upper-left; grip lower-right",
+    "neutralFrontalWearables": "unchanged",
+    "wornItems": "existing mirror and orange warning retained",
+    "originalDirectionalIconsReflected": [
+      5,
+      6,
+      7,
+      38,
+      39,
+      52,
+      53
+    ]
+  },
+  "removedStaleSubstitutions": {
+    "397": "Knightly Boar Spear previously showed a shield",
+    "460": "Circular Ringblade previously showed a cape"
+  },
+  "itemImageIdsChanged": false,
+  "atlasCount": 24,
+  "sourceManifest": "eloria-assets/source/item-icons/painted-2026-10-18/manifest.json",
+  "reviewImage": "docs/qa/item-thumbnails-2026-10-18/review.png",
+  "validation": {
+    "atlasTests": "9 passed",
+    "canonicalRepackCheck": "all 24 runtime atlases match the approved painting pixels",
+    "inventoryActions": "passed",
+    "wornItemIcons": "passed",
+    "nativeTextureImport": "24 item atlases imported in isolated Godot project",
+    "renderedEvidence": "normal inventory/equipment 40px cells with 4px margins; complete 50px source art; quantities visible",
+    "storageSuite": "all UI/artwork checks passed; two loopback transfer fixtures did not reach a usable connection in this test run",
+    "cleanPublicSourceCheckout": "9 atlas tests and 24-atlas repack check pass without private authoring inputs"
+  },
+  "authoring": {
+    "conceptReuse": "356 exact isolated equipment inputs; 64 original torso design cells; 8 sabaton extracts from original legwear concepts",
+    "newImageTool": "built-in image_gen",
+    "newPaintings": 15,
+    "privateInputs": "Originals, processing stages and full-resolution generated inputs remain in ignored local authoring storage"
+  }
+}
