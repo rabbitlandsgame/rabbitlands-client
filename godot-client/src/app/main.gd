@@ -1080,6 +1080,7 @@ func _ready() -> void:
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
+	game_view.add_child(preload("res://src/mounts/mount_controls.gd").new())
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
 	actor_type_models = model_registry.get("actorTypes", {})
@@ -3726,6 +3727,13 @@ func _handle_bound_action(event: InputEvent) -> bool:
 		return true
 	if not game_view.visible:
 		return false
+	# Before focused HUD buttons. Text entry and key
+	# capture were excluded above; Ctrl+R remains the guild window shortcut.
+	var mount_request := preload("res://src/mounts/mount_hotkeys.gd").request_for_event(
+		event, AppState.actor_mounts.get(AppState.local_actor_id, {}))
+	if not mount_request.is_empty():
+		Network.send_chat(mount_request)
+		return true
 	# After leaving typing, a separate Escape discards the draft before
 	# the same press can close another window.
 	if event.is_action_pressed("cancel") and not chat_input.text.is_empty():
@@ -4929,6 +4937,9 @@ func _on_state_changed(path: StringName) -> void:
 			# can land after the window has opened.
 			if bool(AppState.npc_dialogue.get("open", false)):
 				_sync_dialogue()
+		&"mount_states":
+			for mount_actor_id: Variant in actor_nodes:
+				_apply_actor_mount(mount_actor_id)
 		&"experience_state":
 			_sync_stats()
 		&"worn_slots", &"degraded_items":
@@ -5503,6 +5514,7 @@ func _present_actor(id: Variant) -> void:
 	if actor_adapter == null:
 		return
 	existing_actor.apply_server_state(dto, actor_adapter)
+	_apply_actor_mount(id)
 	# Before apply_vitals, which is what overwrites the old value.
 	_report_health_change(int(id), int(dto.get("health", 0)),
 		int(dto.get("max_health", 0)), existing_actor)
@@ -5537,16 +5549,23 @@ func _spawn_actor(id: Variant) -> void:
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
+	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	if int(id) == AppState.local_actor_id:
 		_sync_harvest_sparkle()
 
-## Push the worn titles onto the actors wearing them.
-##
-## The title arrives on its own packet rather than in the actor's display
-## name, which packs a colour byte, the name and the guild tag into one string
-## that the decoder already unpicks by hand. So it is applied here, and on
-## spawn, for whoever is on screen when it lands.
+## Bind mount presentation to the current player identity and map, including
+## state received before a visible actor's model finished loading.
+func _apply_actor_mount(id: Variant) -> void:
+	var node := actor_nodes.get(id) as ReplicatedActor3D
+	if node == null:
+		return
+	var state: Dictionary = AppState.actor_mounts.get(int(id), {})
+	var dto: Dictionary = AppState.actors.get(id, {})
+	if state.get("map", "") != dto.get("map", "") or str(state.get("owner", "")).to_lower() != str(dto.get("name", "")).to_lower():
+		state = {}
+	node.set_mount_state(state, models)
+
 func _sync_quest_offers() -> void:
 	for id: Variant in actor_nodes:
 		var node := actor_nodes[id] as ReplicatedActor3D
@@ -11388,6 +11407,9 @@ func _on_client_setting_changed(section: String, key: String,
 
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()
+	var mount_controls := game_view.get_node_or_null("MountControls")
+	if mount_controls != null:
+		mount_controls.call("_refresh")
 	_sync_quick_slots()
 	# Quick spell badges and the Techniques hint name the keys they use.
 	casting_bar.refresh()

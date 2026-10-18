@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "selection": "human-approved mounted v8",
+  "approvedDate": "2026-10-17",
+  "scope": "local in-game prototype; no release or remote deployment",
+  "asset": "godot-client/assets/actors/native/creatures/moor_pony.glb",
+  "sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+  "previousRuntimeSha256": "50589ff68ad7c9586e49681dcf8c5012d19fe32f9aecdd0340d75e13e8e8421f",
+  "baseColorAtlas": "godot-client/assets/actors/native/creatures/moor_pony_base_color.png",
+  "atlasSha256": "5b59a260326a8e8397bb9083bec14dc68d29014dccd261bf6d960d3409c39c5b",
+  "atlasRgbaSha256": "883bf2ba3a9f911941a6edb242021f462f7efe8aae6aad089afda15c2d36ede1",
+  "embeddedAtlasPixelsEqual": true,
+  "creatureRunClip": "Jog",
+  "mountedGallopClip": "Gallop",
+  "clips": [
+    "Fighting_Idle",
+    "Hit_Chest",
+    "Idle_A",
+    "Walk",
+    "Jog",
+    "Sword_Attack",
+    "Death_A",
+    "Gallop"
+  ],
+  "riderPose": "preserved accepted torso, lower hand grip and live reins",
+  "checks": {
+    "serverMountTests": 69,
+    "serverStepDeliveryTests": 13,
+    "clientMovementChecks": 37,
+    "clientMountPacketValidationChecks": 13,
+    "livePlayerContactChecks": 1118,
+    "multiplayerSocketProbe": "passed; rider, observer and legacy client",
+    "realGameSmoke": "passed headless and rendered; mount, walk, trot, gallop, dismount"
+  },
+  "limitations": [
+    "loopback test server only",
+    "riding qualified on three outdoor maps",
+    "all body/equipment combinations still need visual review",
+    "mount/dismount are immediate pose changes",
+    "final speed balance pending review"
+  ]
+}

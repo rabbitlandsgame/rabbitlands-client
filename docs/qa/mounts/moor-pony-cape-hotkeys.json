@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-17",
+  "scope": "local Moor Pony prototype",
+  "capeDirection": "human-selected drape over hindquarters",
+  "shortcuts": {
+    "mountDismountCancel": "R",
+    "gallopToggle": "Space",
+    "cameraRecenter": "retired, including saved legacy bindings",
+    "rebindable": true,
+    "shiftRunningSupported": true
+  },
+  "ponySha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+  "sourceSha256": {
+    "godot-client/src/mounts/mount_hotkeys.gd": "8575e701e26d3c07474f18c772c9c8e295b14d3fd078be0412d785fa10de0aa6",
+    "godot-client/src/mounts/mount_controls.gd": "c5dc0fdbb94823e6cf791634cd869ee3abd87918b669b9152b56e9ef84ce92eb",
+    "godot-client/src/mounts/mount_cape_surface.gd": "fd3f831d902f2b8c1da9759e37af2b2b7528bfad775a23f0c139ab9fd1fde09f",
+    "godot-client/src/mounts/mounted_player_visual.gd": "db7847ad91268abdc86e07e2c4f2aa6011df0f8d7300ccd408219b7cdf57c49f",
+    "godot-client/src/actors/cape_cloth.gd": "d9fd91e1a0dcc63f3acd4587edfc829153653fd76b3b4558f666aac698ccef46",
+    "godot-client/src/ui/settings_window.gd": "5d80605542a68791bbdb198a9630ec3e335168cf9b2ce7bfedc1df4bd3a93685",
+    "godot-client/project.godot": "8d372a365848bc555400df80c1ff7ae77a311814ca43f5969df9c68957dc2724"
+  },
+  "validation": {
+    "hotkeyAndSettingsChecks": 18,
+    "riderContactChecks": 1118,
+    "capeDeformationChecks": 24,
+    "capeDeformationFailures": 0,
+    "actualCapeSurfaceSamples": 72,
+    "gaitTimeCombinations": 24,
+    "verticesEdgesFacesChecked": true,
+    "minimumMeasuredCapePonyGapMetres": 0.04798290566300312,
+    "maximumMaterialLinkErrorMetres": 9.41753387451172e-06,
+    "maximumSampledCapeEdgeRatio": 1.46535735490769,
+    "onFootCapeRegression": "passed",
+    "realGameSmoke": "passed: R, Space, chat focus, walk, trot, gallop, dismount"
+  },
+  "limits": [
+    "cape contact geometry checked on the current Luminous male test wardrobe",
+    "male/female cape chains and edge deformation checked; additional wardrobes still need visual review",
+    "sparse cloth bones use an inflated animated contact envelope; this is a prototype drape, not a full fabric solver upgrade",
+    "historical broad settings test has a stale node path; current focused settings migration checks pass"
+  ]
+}

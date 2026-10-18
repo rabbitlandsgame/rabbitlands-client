@@ -238,6 +238,8 @@ var _native_skeleton: Skeleton3D
 ## walk does not snap the body. Poses meant to face off - a bladed combat idle, a
 ## sword lunge - declare nothing and are left as authored.
 var _native_model: Node3D
+var _mount_visual: Node3D
+var mount_state: Dictionary = {}
 ## Authored body bounds, cached before equipment or animation can move them.
 var _native_body_bounds := AABB()
 var _base_model_yaw := 0.0
@@ -537,9 +539,12 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 			_attach_cape_cloth(skeleton)
 			apply_appearance_variants(dto.get("appearance", {}) as Dictionary)
 			var animation_path := _external_path(str(model_config.get("animationLibrary", "")))
+			var wanted_clips := resolver.required_clips()
+			if model_config.has("culture") and not wanted_clips.has("Rest_Pose"):
+				wanted_clips.append("Rest_Pose")
 			var imported := NativeAnimationImporter.import_library(self,
 					animation_path, skeleton, model_config.get("boneAliases", {}),
-					resolver.required_clips(), resolver.looping_clips)
+					wanted_clips, resolver.looping_clips)
 			animation_player = imported.player
 			errors.append_array(Array(imported.errors))
 			if animation_player != null:
@@ -2218,6 +2223,7 @@ func _refresh_cape_cloth_activity(reset_when_enabled: bool = false) -> void:
 	if _cape_cloth == null:
 		return
 	var enabled := (_cape_cloth_worn
+		and not is_instance_valid(_mount_visual)
 		and _animation_tier != AnimationGate.Tier.PAUSED
 		and ACTOR_RENDER_QUALITY.cape_enabled(
 			_render_quality, _render_quality_local_actor))
@@ -2482,6 +2488,38 @@ func occlusion_silhouette_enabled() -> bool:
 
 func get_skeleton() -> Skeleton3D:
 	return _native_skeleton
+
+func set_mount_state(state: Dictionary, models: Dictionary) -> void:
+	var was_mounted := is_instance_valid(_mount_visual)
+	var riding: bool = state.get("mode") == "mounted" and state.get("mount_id") == "moor_pony"
+	mount_state = state.duplicate(true)
+	if riding and not was_mounted:
+		var visual := (load("res://src/mounts/mounted_player_visual.gd") as Script).new() as Node3D
+		add_child(visual)
+		# Configure before marking mounted: reference poses must play normally.
+		var errors: Array = visual.call("configure", self, models)
+		if not errors.is_empty():
+			visual.call("restore")
+			visual.free()
+			push_warning("Mount: " + str(errors))
+			play_action(&"idle", true)
+			return
+		_mount_visual = visual
+		_mount_visual.name = "MountedPony"
+		_pace_histories.clear()
+		_last_movement_update_msec = -1
+		current_action = &"idle"
+	elif not riding and was_mounted:
+		var previous := _mount_visual
+		_mount_visual = null
+		previous.call("restore")
+		previous.free()
+		_pace_histories.clear()
+		_last_movement_update_msec = -1
+		current_action = &"idle"
+		play_action(&"walk" if _segment_duration > 0.0 else &"idle", true)
+	if is_instance_valid(_mount_visual):
+		_mount_visual.set("state", mount_state)
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
 	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary
@@ -3076,6 +3114,9 @@ func _equipment_fallback_mesh(shape: String) -> MeshInstance3D:
 	return instance
 
 func play_action(action: StringName, restart := false) -> void:
+	if is_instance_valid(_mount_visual):
+		current_action = action
+		return
 	if animation_player == null or resolver == null:
 		return
 	if not resolver.action_to_clip.has(String(action)):
@@ -3360,6 +3401,8 @@ static func pace_gait(command: int, hastened: bool) -> int:
 ## buff changes, then let this gait's own measurements take over. Falling back
 ## to the previous step's interval carried walking pace into a new run/haste.
 func _pace_for_gait(gait: int) -> float:
+	if is_instance_valid(_mount_visual):
+		return float(mount_state.get("step_us", 200000)) / 1000000.0
 	var history: PackedFloat32Array = _pace_histories.get(gait, PackedFloat32Array())
 	if not history.is_empty():
 		return median_of(history, initial_server_interval)
@@ -3484,6 +3527,8 @@ func _settle_if_idle() -> void:
 ## the animation crossfade and writes it onto the visual root. A no-op once the
 ## two agree, so a resting actor pays nothing for it.
 func _advance_facing_offset(delta: float) -> void:
+	if is_instance_valid(_mount_visual):
+		return
 	if _native_model == null or is_equal_approx(_facing_offset, _facing_offset_to):
 		return
 	_facing_offset_elapsed += delta
@@ -3552,6 +3597,8 @@ func is_drawn() -> bool:
 ## full rate whatever the tier asks. Paused, the actor would be left caught
 ## mid-move and then seen finishing it when it came back into view.
 func set_animation_tier(tier: int, gate: AnimationGate) -> void:
+	if is_instance_valid(_mount_visual):
+		return
 	if animation_player == null:
 		return
 	if tier != AnimationGate.Tier.FULL and _playing_one_shot():
