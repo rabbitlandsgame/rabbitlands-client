@@ -108,7 +108,9 @@ gets hard, is in `references/edge-pipeline.md`. Read it before changing a consta
     `publish_client`, collision and crossings, then `publish_server --apply`, commit,
     and apply again.
   - Check served reach and walk the changed roads.
-  - `references/road-shapes.md` has the road specifics.
+  - `references/road-shapes.md` has the road specifics, reroute grading and the
+    guards a republish trips. `references/edge-pipeline.md` covers splitting a
+    patch and reading scene transforms.
 
 ## 5. Verify and record
 
@@ -140,5 +142,6 @@ gets hard, is in `references/edge-pipeline.md`. Read it before changing a consta
     1.3 m rim strip.
   - A meadow turf texture was tried and dropped: its fine detail went flat green at
     the game camera.
-- **Still need a republish:** road shapes, patch shapes, narrow blends and road edge
-  ramps. They are recorded as follow-ups.
+- **Republished in the content pass** (client 3523bffd): four hairpin reroutes, the
+  smaller road kinks, rebuilt patches, wider paving blends and road `edge_feather`
+  0.16 → 0.45. Its lessons are in the references.
