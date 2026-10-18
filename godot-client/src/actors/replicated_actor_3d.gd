@@ -125,6 +125,15 @@ var _swing_index := 0
 var _trail_weapon_mesh: MeshInstance3D
 var _trail_weapon_tip := Vector3.ZERO
 var current_action: StringName = &"idle"
+var _death_elapsed := 0.0
+var _death_finished := false
+var _death_animation_seconds := 0.0
+var _corpse_temporary := false
+var _corpse_hold_seconds := 10.0
+var _corpse_fade_seconds := 10.0
+var _death_snapshot_msec := -1
+var _corpse_transparency := -1.0
+var _corpse_geometry: Array[GeometryInstance3D] = []
 var _cinematic_active := false
 var _cinematic_position := Vector3.ZERO
 var _cinematic_yaw := 0.0
@@ -1729,6 +1738,7 @@ func rebase_world(frame: Transform3D) -> void:
 	_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	_sync_death_presentation(dto)
 	set_status_effects(dto.get("status_effects", dto.get("negative_statuses", [])))
 	# The capability handshake can correct an actor already spawned from the
 	# legacy clothing bytes. Update its dyes once, including under worn armour.
@@ -1940,6 +1950,86 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 			play_action(&"combat_idle" if _in_combat else &"idle")
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
+	if current_action == &"death":
+		_segment_duration = 0.0
+		_movement_coast_remaining = 0.0
+		_travel_yaw_active = false
+
+func _sync_death_presentation(dto: Dictionary) -> void:
+	if not dto.has("health"):
+		return
+	if int(dto.health) > 0 and bool(dto.get("alive", true)):
+		if current_action == &"death":
+			current_action = &"idle"
+			_death_finished = false
+			_death_elapsed = 0.0
+			_death_animation_seconds = 0.0
+			_death_snapshot_msec = -1
+			_corpse_temporary = false
+			_set_corpse_transparency(0.0)
+			play_action(&"idle", true)
+		return
+	var snapshot: Dictionary = dto.get("death_presentation", {})
+	_death_animation_seconds = float(snapshot.get("animation_seconds", 0.0))
+	_corpse_temporary = bool(snapshot.get("temporary", false))
+	_corpse_hold_seconds = float(snapshot.get("hold_seconds", 10.0))
+	_corpse_fade_seconds = maxf(0.01, float(snapshot.get("fade_seconds", 10.0)))
+	play_action(&"death")
+	var received := int(snapshot.get("received_msec", -1))
+	if received >= 0 and received != _death_snapshot_msec:
+		_death_snapshot_msec = received
+		_death_elapsed = maxf(_death_elapsed, float(snapshot.get("elapsed", 0.0))
+			+ float(Time.get_ticks_msec() - received) / 1000.0)
+		if animation_player != null and resolver != null:
+			var clip := resolver.clip_for_action(&"death")
+			if animation_player.has_animation(clip):
+				animation_player.speed_scale = _playback_speed_for(&"death")
+				animation_player.seek(minf(_death_elapsed * animation_player.speed_scale,
+					animation_player.get_animation(clip).length), true)
+	_update_corpse_pose()
+	set_process(true)
+
+func death_animation_finished() -> bool:
+	return current_action == &"death" and _death_finished
+
+func _death_duration() -> float:
+	return _death_animation_seconds if _death_animation_seconds > 0.0 else cinematic_action_duration(&"death")
+
+func _hold_death_pose() -> void:
+	_death_finished = true
+	if animation_player != null and resolver != null:
+		var clip := resolver.clip_for_action(&"death")
+		if animation_player.has_animation(clip):
+			animation_player.seek(animation_player.get_animation(clip).length, true)
+			animation_player.pause()
+
+func _update_corpse_pose() -> void:
+	if not _death_finished and _death_elapsed >= _death_duration():
+		_hold_death_pose()
+	if _corpse_temporary:
+		var fade := clampf((_death_elapsed - _death_duration() - _corpse_hold_seconds)
+			/ _corpse_fade_seconds, 0.0, 1.0)
+		_set_corpse_transparency(fade)
+
+func _set_corpse_transparency(amount: float) -> void:
+	if is_equal_approx(_corpse_transparency, amount):
+		return
+	_corpse_transparency = amount
+	if _corpse_geometry.is_empty():
+		for node: Node in find_children("*", "GeometryInstance3D", true, false):
+			_corpse_geometry.append(node as GeometryInstance3D)
+	for geometry: GeometryInstance3D in _corpse_geometry:
+		if is_instance_valid(geometry):
+			geometry.transparency = amount
+
+func _process(delta: float) -> void:
+	if current_action != &"death":
+		set_process(false)
+		return
+	_death_elapsed += delta
+	_update_corpse_pose()
+	if _death_finished and not _corpse_temporary:
+		set_process(false)
 
 ## Resting commands can arrive before the body finishes its buffered step,
 ## including combat ending on the way to a dropped bag. Keep the step's gait
@@ -3217,6 +3307,18 @@ func play_technique(key: String, phase: String) -> void:
 	resolver.action_to_clip[action] = original
 
 func play_action(action: StringName, restart := false) -> void:
+	# Death is a latched state, including after its one-shot clip finishes.
+	# Equipment/health snapshots and late combat commands must never restart it.
+	if current_action == &"death":
+		return
+	if action == &"death" and (animation_player == null or resolver == null \
+			or not resolver.action_to_clip.has("death") \
+			or not animation_player.has_animation(resolver.clip_for_action(&"death"))):
+		current_action = &"death"
+		_death_finished = true
+		_death_elapsed = 0.0
+		set_process(true)
+		return
 	if _cinematic_active and action != _cinematic_action:
 		return
 	if is_instance_valid(_mount_visual):
@@ -3226,8 +3328,6 @@ func play_action(action: StringName, restart := false) -> void:
 		return
 	if not resolver.action_to_clip.has(String(action)):
 		return
-	if current_action == &"death" and action != &"death":
-		return
 	var clip := resolver.clip_for_action(action)
 	if clip.is_empty() or not animation_player.has_animation(clip):
 		return
@@ -3235,6 +3335,10 @@ func play_action(action: StringName, restart := false) -> void:
 	if current_action == action and animation_player.is_playing() and not restart:
 		return
 	current_action = action
+	if action == &"death":
+		_death_finished = false
+		_death_elapsed = 0.0
+		set_process(true)
 	var blend := action_blend_seconds
 	if action in [&"ranged_attack", &"pain", &"death"]:
 		blend = 0.045
@@ -3267,6 +3371,10 @@ func play_action(action: StringName, restart := false) -> void:
 ## `Run_Female` covers 2.666 against a running 5.0 m/s (1.88x). Only Speed Hax
 ## on top of a run - 10 m/s - asks for more than the ceiling.
 func _playback_speed_for(action: StringName) -> float:
+	if action == &"death" and _death_animation_seconds > 0.0 and animation_player != null:
+		var clip := resolver.clip_for_action(action)
+		if animation_player.has_animation(clip):
+			return animation_player.get_animation(clip).length / _death_animation_seconds
 	var stride: float = resolver.stride_speed_for_action(action, _small_creature_scale * server_scale)
 	if stride <= 0.0:
 		return resolver.playback_speed_for_action(action)
@@ -3284,7 +3392,9 @@ func _travel_speed() -> float:
 func _on_animation_finished(_animation_name: StringName) -> void:
 	# The server sends transition commands, not a second command for the resting
 	# pose. Keep this explicit and data-driven through the action map.
-	if current_action == &"sit":
+	if current_action == &"death":
+		_hold_death_pose()
+	elif current_action == &"sit":
 		play_action(&"seated_idle")
 	elif current_action == &"stand":
 		play_action(&"idle")
@@ -3396,6 +3506,8 @@ func weapon_trail_tip() -> Variant:
 ## first turn actor command the server broadcasts clears it and the
 ## authoritative facing takes over. Nothing here decides an outcome.
 func predict_turn(radians: float) -> void:
+	if current_action == &"death":
+		return
 	_wake()
 	_target_yaw = wrapf(_target_yaw + radians, -PI, PI)
 	_predicted_turn_yaw = _target_yaw

@@ -247,6 +247,7 @@ static func turn(left: bool) -> PackedByteArray:
 ## Grow this list in the same commit that lands the window which decodes the
 ## packet, never before.
 const CLIENT_CAPABILITIES: Array[String] = [
+	"death_state_v1",
 	"music_program_v1",
 	"lantern_tutorial_v1",
 	"tutorial_rewards_v1",

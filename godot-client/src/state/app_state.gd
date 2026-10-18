@@ -89,6 +89,7 @@ var _inventory_text_generation := 0
 var inventory_cooldowns: Dictionary = {}
 var active_spells: Dictionary = {}
 var last_spell_result: Dictionary = {}
+var death: Dictionary = {}
 signal magic_state_received(data: Dictionary)
 var pending_spell_target := ""
 var stats: Dictionary = {}
@@ -418,6 +419,7 @@ func _on_connection_state_changed(value: String) -> void:
 		inventory_cooldowns.clear()
 		active_spells.clear()
 		last_spell_result.clear()
+		death.clear()
 		pending_spell_target = ""
 		stats.clear()
 		game_minute = 0
@@ -1337,7 +1339,18 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"special_events")
 		"magic_state":
 			var magic: Dictionary = event.data
-			if magic.get("kind") == "techniques":
+			if magic.get("kind") == "death":
+				death = magic.duplicate(true)
+				death["received_msec"] = Time.get_ticks_msec()
+				state_changed.emit(&"death")
+			elif magic.get("kind") == "actor_death":
+				var dead_id := int(magic.get("actor_id", -1))
+				if actors.has(dead_id):
+					actors[dead_id]["death_presentation"] = magic.duplicate(true)
+					actors[dead_id]["death_presentation"]["received_msec"] = Time.get_ticks_msec()
+					mark_actor_changed(dead_id)
+					state_changed.emit(&"actors")
+			elif magic.get("kind") == "techniques":
 				techniques = magic.duplicate(true)
 				techniques["received_msec"] = Time.get_ticks_msec()
 				state_changed.emit(&"techniques")
@@ -1496,6 +1509,10 @@ func _apply_actor_health_delta(actor_id: int, amount: int) -> void:
 	var actor: Dictionary = actors[actor_id]
 	var maximum: int = maxi(0, int(actor.get("max_health", 0)))
 	var health: int = clampi(int(actor.get("health", 0)) + amount, 0, maximum)
+	if int(actor.get("health", 0)) <= 0 and health > 0:
+		actor["command"] = 7
+		actor["in_combat"] = false
+		actor.erase("death_presentation")
 	actor["health"] = health
 	actor["alive"] = health > 0
 	actors[actor_id] = actor

@@ -1209,6 +1209,9 @@ func _ready() -> void:
 	add_child(magic_selection)
 	magic_selection.status_changed.connect(func(message: String) -> void: spell_status.text = message)
 	AppState.magic_state_received.connect(_on_magic_state)
+	var death_panel := preload("res://src/ui/death_panel.gd").new()
+	death_panel.actor_for_player = func() -> Variant: return actor_nodes.get(AppState.local_actor_id)
+	game_view.add_child(death_panel)
 	spell_loadout.configure(spell_catalog)
 	magic_selection.cast_submitted.connect(spell_loadout.remember_cast)
 	magic_selection.target_validator = _spell_target_candidate
@@ -4200,6 +4203,8 @@ func _movement_locked(ctrl_pressed: bool) -> bool:
 	if character_intro.blocks_input():
 		return true
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	if bool(AppState.death.get("dead", false)) or int(local_actor.get("health", 1)) <= 0:
+		return true
 	if (_banner_option("sit_lock") and not ctrl_pressed
 			and bool(local_actor.get("sitting", false))):
 		return true
@@ -11889,9 +11894,12 @@ func _begin_prepared_cast(spell_id: int, power: int) -> void:
 
 func _spell_target_candidate(spell_id: int, actor_id: int) -> bool:
 	var actor: Dictionary = AppState.actors.get(actor_id, {})
-	if actor.is_empty() or not bool(actor.get("alive", int(actor.get("health", 0)) > 0)):
+	if actor.is_empty():
 		return false
 	var spell: Dictionary = spell_catalog.spell(spell_id)
+	if not bool(actor.get("alive", int(actor.get("health", 0)) > 0)):
+		return actor_id != AppState.local_actor_id and int(actor.get("kind", 0)) in [1, 4] \
+			and spell.get("scope") == "target" and spell.get("effect") == "heal"
 	if bool(spell.get("hostile", false)):
 		if spell.get("effect") == "mana_drain" and int(actor.get("kind", 0)) not in [1, 4]: return false
 		if spell.get("effect") == "disrupt" and not ReplicatedActor3D.is_summon(actor): return false
