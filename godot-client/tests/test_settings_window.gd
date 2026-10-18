@@ -30,7 +30,7 @@ func _run() -> void:
 	(main.get_node("GameView") as Control).show()
 	(main.get_node("LoginPanel") as Control).hide()
 	var window: Control = main.get("settings_window") as Control
-	var panel: PanelContainer = window.get_node("SettingsWindow") as PanelContainer
+	var panel: PanelContainer = window.get("panel") as PanelContainer
 	var resource_rail: Control = main.get_node("GameView/ResourceHud") as Control
 	await process_frame
 
@@ -385,8 +385,12 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 	_expect(panel.visible and main.chat_hud.options_button.button_pressed,
 		"Options opens the unified window and lights its HUD button")
 	main.call("_open_actor_hud_menu", Vector2.ZERO)
+	_expect((main.get("_actor_hud_menu") as PopupMenu).visible,
+		"the character shortcut opens the banner context menu")
+	(main.get("_actor_hud_menu") as PopupMenu).hide()
+	(main.get("_actor_hud_menu") as PopupMenu).id_pressed.emit(2)
 	_expect(panel.visible and (window.get("tabs") as TabContainer).get_current_tab_control().name == "Banners",
-		"the character shortcut opens the Banners tab in the same window")
+		"the context menu can open all banner settings")
 	(main.get("casting_bar") as Control).call("_dock_menu_action", 2)
 	_expect((window.get("tabs") as TabContainer).get_current_tab_control().name == "Spells",
 		"the spell bar shortcut opens the Spells tab")

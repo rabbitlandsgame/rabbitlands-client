@@ -37,6 +37,16 @@ func run() -> void:
 	expect(controls.toggle.get_theme_font_size("font_size") == 11, "button font matches resource numbers")
 	expect(controls.status.text == "Trot · 8.0s", "compact gait and endurance")
 	expect(not controls.gallop.disabled, "gallop available while trotting")
+	controls.set_options({"mount_button": false, "key_hints": false, "status": false})
+	expect(not controls.toggle.visible and controls.gallop.visible, "mount and gallop buttons can be hidden independently")
+	expect(controls.gallop.text == "Gallop" and controls.status.text == "8.0s", "key hints and gait can be hidden while keeping endurance")
+	controls.set_options({"endurance": false})
+	expect(controls.status.text == "Trot", "gait can remain without endurance")
+	controls.set_options({"mount_button": false, "gallop_button": false, "status": false, "endurance": false})
+	expect(not controls.wants_banner(), "hiding every component leaves no empty banner")
+	controls.set_options({"show_banner": false})
+	expect(not controls.visible, "master preference hides mount banner")
+	controls.set_options({})
 	banner.position += Vector2(40, 35)
 	banner.size.x = 180
 	await process_frame
@@ -56,6 +66,9 @@ func run() -> void:
 	await process_frame
 	expect(controls.visible and controls.toggle.text.begins_with("Mount pony"), "on-foot mount button remains available")
 	expect(controls.gallop.disabled, "on-foot gallop remains unavailable")
+	state.actor_mounts[1] = {"mode": "summoning", "summon_remaining_ms": 1000}
+	state.state_changed.emit(&"mount_states")
+	expect(controls.status.text == "Calling… 1.0s" and controls.toggle.text.begins_with("Cancel"), "moving call keeps countdown and cancellation available")
 	state.authenticated = false
 	state.state_changed.emit(&"authentication")
 	await process_frame

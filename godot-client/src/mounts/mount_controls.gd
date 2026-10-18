@@ -1,5 +1,14 @@
 extends PanelContainer
 const Hotkeys := preload("res://src/mounts/mount_hotkeys.gd")
+const OPTION_LABELS := {
+	"show_banner": "Show mount banner",
+	"mount_button": "Show mount / dismount button",
+	"gallop_button": "Show gallop button",
+	"status": "Show gait and calling status",
+	"endurance": "Show gallop endurance",
+	"key_hints": "Show mount key hints",
+}
+var options: Dictionary = default_options()
 var toggle := Button.new()
 var gallop := Button.new()
 var status := Label.new()
@@ -33,7 +42,7 @@ func _ready() -> void:
 	status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	toggle.focus_mode = Control.FOCUS_NONE
 	gallop.focus_mode = Control.FOCUS_NONE
-	toggle.tooltip_text = "Call your Moor Pony, or dismount. Stand still while calling."
+	toggle.tooltip_text = "Call your Moor Pony while standing or moving, or dismount."
 	gallop.tooltip_text = "Toggle gallop while running (hold Shift for keyboard running). Eight seconds of endurance."
 	toggle.pressed.connect(func() -> void: Network.send_chat("#mount"))
 	gallop.pressed.connect(func() -> void: Network.send_chat("#gallop"))
@@ -44,7 +53,7 @@ func _process(_delta: float) -> void:
 	_follow_banner()
 
 func _follow_banner() -> void:
-	visible = _has_mount_state and AppState.authenticated and is_instance_valid(_banner) and _banner.is_visible_in_tree()
+	visible = wants_banner() and is_instance_valid(_banner) and _banner.is_visible_in_tree()
 	if not visible:
 		return
 	var view := get_parent() as Control
@@ -52,6 +61,21 @@ func _follow_banner() -> void:
 	position = Vector2(
 		clampf(desired.x, 4.0, maxf(4.0, view.size.x - size.x - 90.0)),
 		clampf(desired.y, 34.0, maxf(34.0, view.size.y - size.y - 86.0)))
+
+static func default_options() -> Dictionary:
+	var defaults := {}
+	for key: String in OPTION_LABELS:
+		defaults[key] = true
+	return defaults
+
+func set_options(values: Dictionary) -> void:
+	for key: String in OPTION_LABELS:
+		options[key] = bool(values.get(key, true))
+	_refresh()
+
+func wants_banner() -> bool:
+	return _has_mount_state and AppState.authenticated and bool(options.show_banner) \
+		and (toggle.visible or gallop.visible or status.visible)
 
 static func _style_button(button: Button) -> void:
 	button.add_theme_font_size_override("font_size", 11)
@@ -85,14 +109,27 @@ func _refresh() -> void:
 	_has_mount_state = not state.is_empty()
 	var mode: String = state.get("mode", "on_foot")
 	toggle.text = "Dismount" if mode == "mounted" else ("Cancel" if mode == "summoning" else "Mount pony")
-	toggle.text += Hotkeys.key_hint("toggle_mount")
+	toggle.visible = bool(options.mount_button)
+	gallop.visible = bool(options.gallop_button)
+	if options.key_hints:
+		toggle.text += Hotkeys.key_hint("toggle_mount")
 	gallop.disabled = mode != "mounted" or state.get("gait") == "walk"
 	gallop.text = "Stop gallop" if state.get("gait") == "burst" else "Gallop"
-	gallop.text += Hotkeys.key_hint("toggle_gallop")
+	if options.key_hints:
+		gallop.text += Hotkeys.key_hint("toggle_gallop")
+	var details: Array[String] = []
 	if mode == "summoning":
-		status.text = "Calling… %.1fs" % (float(state.get("summon_remaining_ms", 0)) / 1000.0)
+		if options.status:
+			details.append("Calling… %.1fs" % (float(state.get("summon_remaining_ms", 0)) / 1000.0))
 	elif mode == "mounted":
-		status.text = "%s · %.1fs" % [str(state.get("gait", "cruise")).capitalize().replace("Cruise", "Trot").replace("Burst", "Gallop"), float(state.get("endurance_ms", 0)) / 1000.0]
+		if options.status:
+			details.append(str(state.get("gait", "cruise")).capitalize().replace("Cruise", "Trot").replace("Burst", "Gallop"))
+		if options.endurance:
+			details.append("%.1fs" % (float(state.get("endurance_ms", 0)) / 1000.0))
 	else:
-		status.text = str(state.get("blocked_reason", "")).replace("_", " ").capitalize()
+		if options.status:
+			details.append(str(state.get("blocked_reason", "")).replace("_", " ").capitalize())
+	status.text = " · ".join(details)
+	status.visible = not status.text.is_empty()
+	reset_size()
 	_follow_banner()
