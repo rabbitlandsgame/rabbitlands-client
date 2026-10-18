@@ -1,76 +1,76 @@
 {
  "format": 2,
  "spec": "vanguard.json",
- "spec_sha256": "04cf25f119383c0ee1b953547e48cb25ac743f9d00bd1e1cbc4fffc3315eaa8d",
+ "spec_sha256": "0fd5dc4645ce1788b4e23b07cf07f72e1d3581dbf183637bb3032171739a1966",
  "body": "luminous_male.glb",
  "body_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
  "pose": "Idle_Subtle",
- "tool_sha256": "55e0adc47a41478832a1db5561fae711dcc0709b1fa8d4dea206733778077ca8",
+ "tool_sha256": "c36b8e4cd4154940fc6918d688f80726e8e66969a6a87d1b5bd9a495b4e5b943",
  "posekit_sha256": "19db84fe44d870da6cb2dbc5ff9c606e84bb82133a4e0b47c5d9bdf21ba224af",
  "pieces": {
   "torso": {
    "source": "Militia_torso_armor_concept_sheet__r01_c02.glb",
    "vertices": 1496,
    "triangles": 1539,
-   "opened": 41,
+   "opened": 51,
    "rigidPlates": 7,
    "bones": {
     "trunk_lower": {
      "k": 1.001,
-     "rays": 1749,
+     "rays": 1659,
      "shift_mm": [
-      5.6,
-      15.0,
+      5.5,
+      15.1,
       2.9
      ],
      "girth": 1.0
     },
     "trunk_upper": {
      "k": 1.0,
-     "rays": 1023,
+     "rays": 1024,
      "shift_mm": [
-      2.1,
-      -17.0,
-      1.9
+      2.6,
+      -17.8,
+      2.0
      ],
-     "girth": 1.089
+     "girth": 1.081
     },
     "upperarm_l": {
      "k": 1.141,
-     "rays": 280,
+     "rays": 250,
      "shift_mm": [
-      -3.5,
-      -0.1,
-      -0.8
+      -8.9,
+      -1.7,
+      -2.2
      ],
-     "girth": 1.21
+     "girth": 1.25
     },
     "lowerarm_l": {
      "k": 1.133,
      "rays": 838,
      "shift_mm": [
-      -21.6,
-      17.4,
+      -21.5,
+      17.6,
       -11.5
      ],
      "girth": 1.25
     },
     "upperarm_r": {
      "k": 1.141,
-     "rays": 312,
+     "rays": 261,
      "shift_mm": [
-      2.1,
-      12.5,
-      0.0
+      8.0,
+      12.7,
+      -1.4
      ],
-     "girth": 1.226
+     "girth": 1.25
     },
     "lowerarm_r": {
      "k": 1.133,
-     "rays": 740,
+     "rays": 741,
      "shift_mm": [
       25.2,
-      12.3,
+      12.4,
       -10.6
      ],
      "girth": 1.25
@@ -78,28 +78,28 @@
     "centre_cuffs": {
      "lowerarm_l": [
       24.8,
-      -15.5,
+      -15.4,
       11.5
      ],
      "lowerarm_r": [
-      -25.3,
-      -4.1,
+      -25.2,
+      -4.0,
       7.6
      ]
     },
     "collar": {
-     "cells": 238,
-     "max_mm": 66.1
+     "cells": 243,
+     "max_mm": 67.6
     },
     "tuck_sleeves": {
      "into": "self",
-     "tucked": 67,
-     "max_mm": 39.4
+     "tucked": 47,
+     "max_mm": 29.0
     },
-    "twist_vertices": 519
+    "twist_vertices": 351
    },
    "out": "Militia_torso_armor_concept_sheet__r01_c02.glb.npz",
-   "sha256": "f05bf852486c750f24ac60aa663ca3e79656537faadcd06902c6fafc2e0a776e"
+   "sha256": "957d48f75786cdbcb7ee28c26563ba649bc17acd15cfee88afa030ef48e6c765"
   },
   "legs": {
    "source": "Eloria_Militia_Leg_Armor_Variants__r01_c02.glb",
@@ -161,8 +161,8 @@
     "tuck": [
      {
       "into": "torso",
-      "tucked": 73,
-      "max_mm": 39.6
+      "tucked": 252,
+      "max_mm": 54.1
      },
      {
       "into": "boots",
@@ -172,7 +172,7 @@
     ]
    },
    "out": "Eloria_Militia_Leg_Armor_Variants__r01_c02.glb.npz",
-   "sha256": "43c1267dd55b1a1888dda3350a4141f82964bcb7f7250444ffda71fd09e78b3c"
+   "sha256": "17bb4d464405a5c07e4e35b2ac2ee510210031538e837c9f81d90aa8038259ad"
   },
   "boots": {
    "source": "Eight_medieval_militia_greaves__r01_c02.glb",
@@ -227,7 +227,7 @@
     }
    },
    "out": "Eight_medieval_militia_greaves__r01_c02.glb.npz",
-   "sha256": "c4f248ff45a33a777f0e294141c40c78d2fc4ac7f73f80b1e9588a0485bfd1d9"
+   "sha256": "416311a77121f3c81b9a98d6033d8a83c74c6d8fd680489fd61e18e4217f82b6"
   }
  }
 }

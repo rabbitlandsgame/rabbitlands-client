@@ -876,6 +876,136 @@ Scratch views, probes and scripts are in the client
 - The Phoenix Cuirass's tail still shows 35 mm into the sheet at the seat.
 - The native kernel path was not run here.
 
+### Owner's third review (2026-10-17)
+
+The third review (14 notes, at `aa5709ca`, session
+`equipment-review/2026-10-17_22-12-25`) covered the four kits and Phoenix
+again, and found that the viewer's weapons and cape did not appear.
+
+**The viewer's weapons and cape.** The toggle works: clicked through the real
+UI on every set, it adds each set's own pieces. These are the Vanguard's
+Militia Arming Sword, Wooden Round Shield and cape, the Ranger's Amberwood
+Yew Longbow, the Arcanist's Arcane Focus Wand, and the Warden's Fighting
+Quarterstaff and cape. The Phoenix set, from `review_sets.json`, had no
+weapon or cape at all, and the Default clothes have none, so the toggle
+showed nothing there. The Phoenix set now carries the Phoenix Feather Spear
+(0:189) and the Red Cape (2:12). The status line names what the toggle adds,
+or says the set carries none. The kits carry no arrows or quiver, so none
+show. Evidence: [toggle on, each set](design-fit/review3-viewer-weapons-cape.jpg).
+
+**Holes at the groin and seat (notes 1, 2, 11).** Meshy's trousers leave a gap
+between the legs, and the trousers' lining and reconstructed inseams fill it.
+Drawn in the trousers' texture (second review), each corner took its own
+nearest art vertex's UV, so the fill smeared into dark shards and read as a
+hole. A per-triangle texture map did no better: the texture round the gap is
+patchy. The lining and inseams are now one plain cloth colour, the median
+texel under the art within 12 cm of the midline between 0.70 and 1.00 m
+(`limb_head_remap.crotch_colour`), with the art's own roughness and their own
+smooth normals. The gap reads as cloth. A few light slivers of the art's own
+inner edge still show at its border on the Sidelace Breeches (note 11).
+
+**Trousers through the coat (notes 3, 6, 13, 14).** Two causes.
+
+- The back tuck skipped any vertex that would have had to move more than
+  4 cm. The Kneecops' waist stood up to 8 cm proud of the jack's back hem
+  (note 3), the Furtrim Legguards' back fur up to 7 cm out of the coat's back
+  slit (note 13), and the Phoenix Legguards' hip panels rose to the
+  cuirass's belt at the back (note 14). Those three now tuck up to 8 cm.
+  The Kneecops also tuck at the front (note 6): their belt, drawn over the
+  jack's front, came through its skirt in a walk, so it now sits under the
+  jack, which keeps its own belt.
+- The waist `twist` capped the pelvis weight down to the hem, so in a walk
+  the skirt turned toward the chest while the thighs drove through it. It now
+  starts at the belt (`free_below`, 0.98 m) and leaves the hem with the hips.
+
+Share of the chest's turn the belt and the hem follow (`twist_check.py`,
+male):
+
+| Torso | Run belt | Run hem | Bow belt | Bow hem | Walk belt | Walk hem |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Studded Jack | 0.57 | 0.10 | 0.49 | 0.05 | 0.73 | 0.06 |
+| Scout Vest | 0.52 | 0.12 | 0.43 | 0.06 | 0.78 | 0.08 |
+| Acolyte Tunic | 0.41 | 0.19 | 0.26 | 0.12 | 0.69 | 0.23 |
+| Furtrim Coat | 0.50 | 0.10 | 0.38 | 0.04 | 0.87 | 0.06 |
+| Phoenix Cuirass | 0.35 | 0.15 | 0.24 | 0.09 | 0.65 | −0.13 |
+
+**The torso's sides in a drawn bow (notes 7, 8, 9, 12).** Two causes.
+
+- Blended under the arm as well as over it, the coat's side followed the
+  raised arm and stretched into a smear across the flank (7, 8, 12). The seam
+  blend now fades with `shoulder_top`: full over the top of the shoulder,
+  none under the arm. There the sleeve follows the arm alone and the seam's
+  bridges open again, as before the second review.
+- The fitted lining kept its own arm field and the body's waist, while the art
+  over it was bound differently, so in the bow and the walk it came through
+  the coat's sides and back. Each lining vertex now takes the weights of the
+  art it lies under (`torso_remap.art_lining_weights`), except over the
+  forearm's last stretch, which holds the wrist skin.
+
+Share of art triangles stretched past 1.8× in Bow_Pull_Back:
+
+| Torso | Male, second review | Male now | Female, second review | Female now |
+| --- | ---: | ---: | ---: | ---: |
+| Studded Jack | 4.29% | 2.31% | 3.57% | 1.70% |
+| Scout Vest | 3.12% | 1.03% | 2.71% | 0.62% |
+| Acolyte Tunic | 3.47% | 1.74% | 4.17% | 2.22% |
+| Furtrim Coat | 2.63% | 1.48% | 2.40% | 1.67% |
+| Phoenix Cuirass | 1.80% | 0.41% | 2.02% | 0.41% |
+
+**The Studded Jack's shoulders (notes 4, 5).** `split_limbs` gave the jack's
+studded shoulder cap to the sleeve, so it was carried and stretched with the
+arm and its studs smeared away (note 4). In the bow the jack's side folded
+into a strap shard (note 7). Seeding the jack's trunk on a strip 20 cm wide
+instead of 12 (`trunk_seed_x`, Vanguard only) keeps the cap with the jack.
+The studs now run continuously over the shoulder, and the shoulder edge is
+clean in the walk (note 5).
+
+**Holes at the top of the Ranger's shoulder (note 10).** Four seam triangles
+over the top of the Scout Vest's shoulder were cut because the fit stretched
+them in idle, and the lining showed through from above. Seam triangles over
+the top of the shoulder (`SHOULDER_SEWN`) now stay sewn.
+
+Evidence, before (as installed at the review) and after, on each noted view:
+[trousers](design-fit/review3-trousers.jpg) and
+[shoulders and sides](design-fit/review3-shoulders.jpg).
+
+**Tests against clean develop.** The suites ran on this branch with all 15
+pieces installed, and on a clean worktree of develop at `224bb9b9`, the commit
+this branch started from:
+
+| Suite | Branch | Develop `224bb9b9` |
+| --- | --- | --- |
+| Equipment, remapper and held-prop pytest | 9 failed, 70 passed | the same 9 IDs |
+| torso_body_cover, LOD, registry tests | pass | pass |
+| creation_class_equipment_fit | 54,666 checks, 0 failures | 52,202 checks, 0 failures |
+| armour_body_cover | 60 failures (scalp under 3:120) | the same 60 |
+| test_cape_cloth, test_cape_drape, test_cape_idle, rendered_cape_clipping | pass | pass |
+| test_cape_cloth_capsule_cache, test_cape_cloth_pose_cache | pass | 2 failures each |
+| test_cape_cloth_native_constraint | 17 failures | 19 failures |
+| rendered_cape_over_armour | 4 bodies clip | the same 4 bodies |
+
+The native-constraint failures on both are the missing native extension
+(`NativeCapeConstraintKernel`). In rendered_cape_over_armour, bodies 184, 213
+and 197 clip exactly as on develop. Body 225, the Scout Vest, clips the cape's
+lower sheet by 69 mm, where develop shows none; it did so already at
+`aa5709ca`, before this round. Its collar reaches 160 mm into the cape, against
+141 mm at `aa5709ca` and 120 mm on develop.
+
+**Not yet done.**
+
+- **Note 9 (Ranger's right shoulder in the bow).** The vest's shoulder and
+  the shirt sleeve still part at the top of the raised arm. The lining shows
+  there; it is the sleeve's colour, so it reads as cloth.
+- **Note 5 (Studded Jack, walk).** The cap is clean, but at the back of the
+  upper arm the sleeve art parts in the swing and the sleeve-coloured lining
+  shows.
+- **Note 11.** Light slivers of the Sidelace Breeches' own inner edge at the
+  border of the crotch fill.
+- The Kneecops' front belt is now hidden under the jack. Restoring it would
+  mean refitting it to ride over the jack's skirt.
+- The Scout Vest comes through the cape in rendered_cape_over_armour (see
+  above); the cape's yoke push does not reach its lower back or its collar.
+
 ## Two body shapes, preserved race identity
 
 There are **two body equipment fits**, with 200 torso/leg/boot designs each,

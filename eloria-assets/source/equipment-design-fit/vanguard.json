@@ -213,6 +213,7 @@
     }
    ],
    "split_limbs": true,
+   "trunk_seed_x": 0.2,
    "tuck_sleeves": {
     "bones": [
      "upperarm_l",
@@ -254,7 +255,8 @@
     "to": {
      "spine_02": 0.4,
      "spine_03": 0.6
-    }
+    },
+    "free_below": 0.98
    }
   },
   "legs": {
@@ -469,10 +471,10 @@
      ],
      "margin": 0.01,
      "arc": [
-      110,
-      250
+      0,
+      360
      ],
-     "max": 0.04
+     "max": 0.08
     },
     {
      "piece": "boots",

@@ -1550,6 +1550,46 @@ def lining(rig, armour, triangles, binding_rig=None):
     return equipment_seams.thickened_sheets(outer, inner, normals, faces, j, w)
 
 
+def art_lining_weights(points, joints, weights, art, art_joints, art_weights, rig, neighbours=6):
+    """Lining weights from the art it lies under, for a design-fit torso.
+
+    Added 2026-10-17 (owner's third review, notes 7-9, 12-14). lining_weights
+    binds the lining with its own continuous arm field and the body's trunk
+    weights, but a design-fit coat binds its art differently (bind_sleeves'
+    seam blend, the twist on the waist), so in a drawn bow or a walk the lining
+    rose with the arm, or stayed with the hips, while the art over it did not,
+    and showed through the coat's sides and back. Each lining vertex now takes
+    the blend of its nearest art vertices (rest pose, inverse distance
+    squared). Over the forearm's last stretch, where the lining holds the
+    wrist skin (wrist_cover), it keeps lining_weights' own binding.
+    """
+    from scipy.spatial import cKDTree
+    from equipment_skinning import smoothstep
+    count = len(rig.joint_names)
+    distance, index = cKDTree(art).query(points, k=neighbours)
+    near = 1. / np.maximum(distance, 1e-4) ** 2
+    near /= near.sum(axis=1, keepdims=True)
+    dense = np.zeros((len(points), count))
+    for k in range(neighbours):
+        for slot in range(art_joints.shape[1]):
+            np.add.at(dense, (np.arange(len(points)), art_joints[index[:, k], slot].astype(int)),
+                      near[:, k] * art_weights[index[:, k], slot])
+    own = np.zeros((len(points), count))
+    for slot in range(joints.shape[1]):
+        np.add.at(own, (np.arange(len(points)), joints[:, slot].astype(int)), weights[:, slot])
+    keep = np.zeros(len(points))
+    for side in "lr":
+        root, wrist = rig.origin('upperarm_' + side), rig.origin('hand_' + side)
+        axis = wrist - root
+        travel = (points - root) @ axis / (axis @ axis)
+        keep = np.maximum(keep, smoothstep(travel, .7, .85) * ((points[:, 0] > 0) == (side == 'l')))
+    dense = (1 - keep)[:, None] * dense + keep[:, None] * own
+    j = np.argsort(-dense, axis=1)[:, :4]
+    w = np.take_along_axis(dense, j, axis=1)
+    w /= np.maximum(w.sum(axis=1, keepdims=True), 1e-12)
+    return j.astype(np.uint16), w
+
+
 def lining_weights(points, rig):
     """Use one continuous arm field around each reconstructed sleeve ring.
 
@@ -1714,6 +1754,8 @@ def build(source, out, rig, kind='cuirass', label='Remapped armour',
     # The continuous fitted lining closes the opened underarm instead.
     p, n, uv, idx, j, w = lining(
         rig, points, triangles, design_rig)
+    if fit is not None:
+        j, w = art_lining_weights(p, j, w, points, joints, weights, design_rig)
     liner_mat = len(glb.doc['materials'])
     glb.doc['materials'].append({'name': label + ' Backing', 'pbrMetallicRoughness': {
         'baseColorFactor': cloth_colour, 'metallicFactor': 0., 'roughnessFactor': 1.}})

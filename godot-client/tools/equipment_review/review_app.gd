@@ -242,22 +242,29 @@ func _apply_equipment() -> void:
 	var visuals := _current_visuals()
 	_prefer_files_on_disk(visuals)
 	actor.apply_equipment_visuals(visuals)
-	if options.get("debug-tint", "no") == "yes":
+	if options.get("debug-tint", "no") in ["yes", "parts"]:
 		_debug_tint()
 
 
 ## --debug-tint yes: generated backings magenta, reconstructed inseams green,
 ## body and wardrobe surfaces cyan, so a hole can be told from a lining or the
-## skin behind it.
+## skin behind it. --debug-tint parts also draws the trousers' art yellow and
+## the boots' orange.
 func _debug_tint() -> void:
 	var tints := {"backing": Color(1.0, 0.0, 1.0), "body": Color(0.0, 0.9, 0.9),
-		"inseam": Color(0.1, 0.9, 0.1)}
+		"inseam": Color(0.1, 0.9, 0.1), "legs": Color(1.0, 0.85, 0.0), "boots": Color(1.0, 0.45, 0.0)}
+	var by_part: bool = options.get("debug-tint", "no") == "parts"
 	for node: Node in actor.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node := node as MeshInstance3D
 		var lower := mesh_node.name.to_lower()
 		var kind := ("backing" if lower.contains("backing") else
 			"inseam" if lower.contains("reconstructedinseams") else
 			"body" if lower in ["body", "char1", "mesh_node"] or lower.begins_with("wardrobe_") else "")
+		# --debug-tint parts: the trousers' and boots' own art too, to tell
+		# which piece comes through which.
+		if kind.is_empty() and by_part:
+			kind = ("legs" if lower.begins_with("equipmentskin_4_") else
+				"boots" if lower.begins_with("equipmentskin_6_") else "")
 		if options.get("debug-meshes", "no") == "yes":
 			var first := mesh_node.get_active_material(0) if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 0 else null
 			print("MESH ", actor.get_path_to(mesh_node), " visible=", mesh_node.is_visible_in_tree(),
@@ -447,7 +454,8 @@ func _build_ui() -> void:
 	_check(box, "Weapons and cape", _show_extras, func(on: bool) -> void:
 		_show_extras = on
 		_apply_equipment()
-		_play_clip(_clip))
+		_play_clip(_clip)
+		_set_status("%s, %s" % [_race_label(), _sets[_set_index]["name"]]))
 	_check(box, "Hair", _show_hair, func(on: bool) -> void:
 		_show_hair = on
 		_rebuild_actor())
@@ -554,8 +562,27 @@ func _on_dialog_key(event: InputEvent) -> void:
 
 func _set_status(text: String) -> void:
 	if _status != null:
-		_status.text = text + ("\nLoaded from disk (newer than the import): %d file(s)" % _raw_loaded.size()
+		_status.text = text + "\n" + _extras_line() + ("\nLoaded from disk (newer than the import): %d file(s)" % _raw_loaded.size()
 			if not _raw_loaded.is_empty() else "") + "\nNotes: " + _review_dir
+
+
+## What "Weapons and cape" adds for the chosen set, named, so a set that carries
+## none (the Default clothes) says so instead of the toggle seeming to fail.
+func _extras_line() -> String:
+	if _sets.is_empty():
+		return ""
+	var models: Dictionary = _equipment.get("models", {}) as Dictionary
+	var wanted: Dictionary = _sets[_set_index]["visuals"] as Dictionary
+	var names := PackedStringArray()
+	for part: int in EXTRA_PARTS:
+		if wanted.has(part):
+			var model: Dictionary = models.get("%d:%d" % [part, int(wanted[part])], {}) as Dictionary
+			var label := str(model.get("name", ""))
+			names.append(label if not label.is_empty() else
+				("cape %d" % int(wanted[part]) if part == 2 else "%d:%d" % [part, int(wanted[part])]))
+	if names.is_empty():
+		return "Weapons and cape: this set carries none"
+	return "Weapons and cape (%s): %s" % ["shown" if _show_extras else "off", ", ".join(names)]
 
 
 func _toast_message(text: String) -> void:

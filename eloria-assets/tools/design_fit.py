@@ -98,6 +98,36 @@ def seam_distance(points, triangles, part, limit):
 #: its source size (the piece's scale) spans a gap the fit opened between
 #: sleeve and coat; it is cut, as before, and the fitted lining shows behind.
 SEAM_STRETCH = 1.6
+#: Seam triangles whose vertices sit, on average, lower round the arm than this
+#: (shoulder_top) are under the arm: their bridge opens.
+UNDERARM_TOP = .35
+#: Seam triangles over the top of the shoulder (shoulder_top above this) stay
+#: sewn however far the fit stretched them.
+SHOULDER_SEWN = .7
+
+
+def shoulder_top(points, rig):
+    """How far over the top of its arm each point sits: 1 above it, 0 under it.
+
+    Measured round the upper arm's rest axis (shoulder to wrist) on its own
+    side: the smoothstep of the cosine between the point's offset from the
+    axis and the vertical, from -.3 (just under the side) to .4.
+    """
+    from equipment_skinning import smoothstep
+    out = np.zeros(len(points))
+    for side in "lr":
+        root, wrist = rig.origin("upperarm_" + side), rig.origin("hand_" + side)
+        axis = (wrist - root) / np.linalg.norm(wrist - root)
+        up = np.array([0., 1., 0.]) - axis * axis[1]
+        up /= np.linalg.norm(up)
+        r = points - root
+        r -= np.outer(r @ axis, axis)
+        cos = (r @ up) / np.maximum(np.linalg.norm(r, axis=1), 1e-9)
+        own = (points[:, 0] > 0) == (side == "l")
+        out[own] = smoothstep(cos[own], -.3, .4)
+    return out
+
+
 #: Width (rig units) of the band across the sleeve/coat seam over which the
 #: arm field and the fit's trunk weights blend: on the sleeve, on the coat.
 SLEEVE_BAND, COAT_BAND = .05, .06
@@ -115,24 +145,26 @@ def bind_sleeves(fit, rig, triangles, passes=2, source=None):
     43% to 59% of the way to the wrist). The trunk keeps the fit's weights,
     tassets on thighs included.
 
-    Across the seam the two blend (revised after the owner's second review,
-    2026-10-17). A hard switch with the sleeve/coat bridges opened let the arm
-    slide through the coat's arm hole in idle and walk and opened gaps at the
-    armpit and the back of the shoulder in a drawn bow. Now, over a band
-    SLEEVE_BAND wide on the sleeve and COAT_BAND on the coat (surface
-    distance from the seam), each side takes a share of the other's
-    weights, half at the seam and none at the band's edge, so the arm hole
-    moves with the arm and the seam stays sewn. The weights are smoothed over
-    the whole mesh, and the rest pose is then solved again from the idle shell
+    Over the top of the shoulder the two blend across the seam (owner's
+    second review, 2026-10-17: with a hard switch the arm slid through the
+    coat's arm hole in idle and walk). There, over a band SLEEVE_BAND wide on
+    the sleeve and COAT_BAND on the coat (surface distance from the seam),
+    each side takes a share of the other's weights, half at the seam and none
+    at the band's edge, fading with shoulder_top, so the arm hole moves with
+    the arm and the seam stays sewn. Under the arm (third review: blended
+    there too, the coat's side followed the raised arm in a drawn bow and
+    smeared across the flank) the sleeve follows the arm alone and the seam's
+    bridges open, as torso_remap opens them; the fitted lining, bound like the
+    art (torso_remap.art_lining_weights), closes them. Seam triangles the fit
+    already stretched in idle past SEAM_STRETCH times their ``source`` size
+    (raw art, the piece's scale applied) open too, except over the top of the
+    shoulder (SHOULDER_SEWN). The weights are smoothed over the whole mesh,
+    and the rest pose is then solved again from the idle shell
     (``inverse_skin``), so the client still returns the fitted shell exactly
     in idle; two passes let the arm field see the sleeves' new rest positions.
 
-    Only seam triangles the fit already stretched in idle past SEAM_STRETCH
-    times their ``source`` size (raw art, the piece's scale applied) are cut:
-    sewn, they smeared the art across the gap (the Studded Jack's back beside
-    the sleeve). keep_triangles still opens any bridge the rest pose
-    overstretches. Returns rest positions, joints, weights and the triangles
-    to keep.
+    Returns rest positions, joints, weights and the triangles to keep
+    (keep_triangles still opens any bridge the rest pose overstretches).
     """
     import equipment_seams
     from equipment_skinning import smoothstep
@@ -145,8 +177,14 @@ def bind_sleeves(fit, rig, triangles, passes=2, source=None):
         np.add.at(trunk_fit, (np.arange(len(rest)), joints[:, slot].astype(int)), weights[:, slot])
     scale = rig.fit_scale
     distance = seam_distance(posed, triangles, part, max(SLEEVE_BAND, COAT_BAND) * scale)
-    on_sleeve = .5 * (1 - smoothstep(distance, 0., SLEEVE_BAND * scale))
-    on_coat = .5 * (1 - smoothstep(distance, 0., COAT_BAND * scale))
+    # Only over the top of the shoulder (owner's third review): blended under
+    # the arm too, the coat's side followed the raised arm in a drawn bow and
+    # stretched into a smear across the flank (notes 4, 7, 8, 12). Under the
+    # arm the sleeve follows the arm alone and the seam opens, as torso_remap
+    # opens it; the fitted lining, bound like the art, closes it.
+    top = shoulder_top(rest, rig)
+    on_sleeve = .5 * (1 - smoothstep(distance, 0., SLEEVE_BAND * scale)) * top
+    on_coat = .5 * (1 - smoothstep(distance, 0., COAT_BAND * scale)) * top
     for _ in range(passes):
         dense = trunk_fit.copy()
         for col, side in enumerate("lr"):
@@ -167,15 +205,17 @@ def bind_sleeves(fit, rig, triangles, passes=2, source=None):
         weights /= np.maximum(weights.sum(axis=1, keepdims=True), 1e-12)
         joints, weights = equipment_seams.smooth_skin(rest, triangles, joints, weights, count, strength=2.)
         rest = inverse_skin(posed, joints, weights, skin)
-    keep = np.ones(len(triangles), dtype=bool)
+    seam = np.ptp(part[triangles], axis=1) > 0
+    keep = ~(seam & (top[triangles].mean(axis=1) < UNDERARM_TOP))
     if source is not None:
-        seam = np.ptp(part[triangles], axis=1) > 0
         stretch = np.ones(len(triangles))
         for a, b in ((0, 1), (1, 2), (2, 0)):
             fitted = np.linalg.norm(posed[triangles[:, a]] - posed[triangles[:, b]], axis=1)
             drawn = np.linalg.norm(source[triangles[:, a]] - source[triangles[:, b]], axis=1) * fit["scale"]
             stretch = np.maximum(stretch, fitted / np.maximum(drawn, 1e-9))
-        keep = ~(seam & (stretch > SEAM_STRETCH))
+        # never over the top of the shoulder: open there, the lining showed
+        # through from above (owner's third review, note 10)
+        keep &= ~(seam & (stretch > SEAM_STRETCH) & (top[triangles].mean(axis=1) < SHOULDER_SEWN))
     return rest, joints, weights, keep
 
 

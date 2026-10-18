@@ -1,7 +1,20 @@
 {
-	"_note": "Extra armour sets for the equipment review viewer, after the four class starter kits (read from src/ui/creation_archetypes.gd). visuals maps part -> visual id, as in equipment.json model keys \"part:visual\" (0 main hand, 1 off hand, 2 cape, 3 head, 4 legs, 5 torso, 6 feet).",
+	"_note": "Extra armour sets for the equipment review viewer, after the four class starter kits (read from src/ui/creation_archetypes.gd). visuals maps part -> visual id, as in equipment.json model keys \"part:visual\" (0 main hand, 1 off hand, 2 cape, 3 head, 4 legs, 5 torso, 6 feet). Parts 0-2 show only with the viewer's \"Weapons and cape\" toggle.",
 	"sets": [
-		{"name": "Phoenix legendary set", "visuals": {"3": 125, "4": 195, "5": 192, "6": 107}},
-		{"name": "Default clothes (no armour)", "visuals": {}}
+		{
+			"name": "Phoenix legendary set",
+			"visuals": {
+				"0": 189,
+				"2": 12,
+				"3": 125,
+				"4": 195,
+				"5": 192,
+				"6": 107
+			}
+		},
+		{
+			"name": "Default clothes (no armour)",
+			"visuals": {}
+		}
 	]
 }

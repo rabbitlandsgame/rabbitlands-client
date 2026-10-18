@@ -8,7 +8,10 @@ move whole, and source UV seams always receive identical geometry and weights.
 
 from __future__ import annotations
 
+from io import BytesIO
+
 import numpy as np
+from PIL import Image
 
 import conform_equipment as io
 import equipment_authoring as ea
@@ -514,43 +517,27 @@ def clip_sheet_band(points, faces, low=None, high=None, vertex_values=None):
     return result_points, result_faces, result_values
 
 
-def wear_art(points, faces, art, art_faces, art_uvs):
-    """UVs (and normals) from the art for generated cloth, one texture island per triangle.
+def crotch_colour(points, uvs, texture, rig):
+    """The trousers' own cloth colour around the crotch, for its lining and inseams.
 
-    Added 2026-10-17 (owner's second review, notes 7, 10, 11 and 17). The
-    trousers' lining and reconstructed inseams were drawn in one flat colour
-    with their own flat normals; wherever they showed, through the crotch of
-    the Leather Kneecops and the Sidelace Breeches or between coat tails, they
-    read as a wet, dark patch or a hole. They now wear the trousers' texture.
-    A triangle can lie between the two legs, whose art is in different atlas
-    islands, so each triangle takes the island of the art vertex nearest its
-    centre and each corner the UV and normal of the nearest art vertex in that
-    island (no UV is blended across islands). Returns, per corner of the
-    de-indexed triangles, the source vertex, the UV and the art normal.
+    Added 2026-10-17 (owner's reviews: the lining and reconstructed inseams
+    that show through the gap Meshy leaves between the legs read first as a
+    wet, dark patch, in the flat colour torso_remap.backing_colour picks from
+    a sleeve region trousers do not have, then, wearing the trousers'
+    texture, as a hole with torn edges). The median texel under the art
+    vertices within 12 cm of the midline, between 0.70 and 1.00 m, matches
+    the cloth round the gap; with fewer than eight art vertices there, the
+    median over all of them.
     """
-    from scipy.spatial import cKDTree
-    art_uvs = np.asarray(art_uvs, dtype=float)
-    canon, edges, count = io._weld(np.c_[art, art_uvs * 1000.], art_faces)
-    island = io._components(edges, count)[canon]
-    art_n = normals(art, art_faces)
-    corner = np.asarray(faces).ravel()
-    _, centre_hit = cKDTree(art).query(points[faces].mean(axis=1))
-    labels = np.repeat(island[centre_hit], 3)
-    uv = np.zeros((len(corner), 2)); nn = np.zeros((len(corner), 3))
-    for label in np.unique(labels):
-        rows = np.flatnonzero(labels == label)
-        members = np.flatnonzero(island == label)
-        hit = members[cKDTree(art[members]).query(points[corner[rows]])[1]]
-        uv[rows], nn[rows] = art_uvs[hit], art_n[hit]
-    return corner, uv, nn
-
-
-def art_lining(glb, b, n, idx, j, w, art, art_faces, art_uvs, material):
-    """A leg lining primitive in the trousers' own material and texture (see wear_art)."""
-    faces = np.asarray(idx).reshape(-1, 3)
-    corner, uv, _ = wear_art(b, faces, art, art_faces, art_uvs)
-    return glb.primitive(b[corner], n[corner], uv, np.arange(len(corner)), material,
-                         joints=j[corner], weights=w[corner], weight_floats=True)
+    if texture is None:
+        return [.045, .025, .018, 1.]
+    im = np.asarray(Image.open(BytesIO(texture)).convert('RGB'))
+    s = rig.fit_scale
+    own = (np.abs(points[:, 0]) < .12 * s) & (points[:, 1] > .70 * s) & (points[:, 1] < 1.0 * s)
+    uv = np.asarray(uvs)[own] if own.sum() >= 8 else np.asarray(uvs)
+    xy = np.clip(uv, 0., 1.) * np.array([im.shape[1] - 1, im.shape[0] - 1])
+    colours = im[xy[:, 1].astype(int), xy[:, 0].astype(int)].astype(float)
+    return ea.srgb_to_linear(np.median(colours, axis=0)) + [1.]
 
 
 def backing(rig, armour, faces, region, low, high, join_default_clothing=True,
@@ -853,36 +840,31 @@ def build(source, out, rig, kind, label, span=None):
         )
         b, n, uv, idx, j, w = backing(rig, p, f, region, lower, upper)
         mat = len(glb.doc["materials"])
-        if region != "legs":
-            # Leg linings and inseams wear the trousers' art (wear_art).
-            color = torso_remap.backing_colour(surface, texture)
-            glb.doc["materials"].append(
-                {
-                    "name": label + " Backing",
-                    "pbrMetallicRoughness": {
-                        "baseColorFactor": color,
-                        "metallicFactor": 0.0,
-                        "roughnessFactor": 1.0,
-                    },
-                }
-            )
+        # Trouser linings and inseams match the cloth round the crotch, with the
+        # art's own roughness (crotch_colour); boots keep backing_colour.
+        legs = region == "legs"
+        glb.doc["materials"].append(
+            {
+                "name": label + " Backing",
+                "pbrMetallicRoughness": {
+                    "baseColorFactor": (crotch_colour(p, surface.uvs, texture, rig) if legs
+                                        else torso_remap.backing_colour(surface, texture)),
+                    "metallicFactor": 0.0,
+                    "roughnessFactor": (glb.doc["materials"][material]["pbrMetallicRoughness"]["roughnessFactor"]
+                                        if legs else 1.0),
+                },
+            }
+        )
         if region == "legs":
             import equipment_seams
             panels = equipment_seams.close_cuts(p, f, original_faces, joints, weights, rig, source_left, region="legs")
             if panels is not None:
                 pp, ff, jj, ww = panels
-                # The inseams wear the trousers' own art and shading (owner's
-                # second review, 2026-10-17: see wear_art).
-                corner, uv, art_n = wear_art(pp, ff, p, f, surface.uvs)
-                seam = glb.primitive(pp[corner], art_n, uv, np.arange(len(corner)), material,
-                                     joints=jj[corner], weights=ww[corner], weight_floats=True)
+                seam = glb.primitive(pp, normals(pp, ff), pp[:, [0,1]], ff.ravel(), mat, joints=jj, weights=ww, weight_floats=True)
                 glb.mesh("ReconstructedInseams", [seam], skin=0)
-        if region == "legs":
-            lining = art_lining(glb, b, n, idx, j, w, p, f, surface.uvs, material)
-        else:
-            lining = glb.primitive(
-                b, n, uv, idx, mat, joints=j, weights=w, weight_floats=True
-            )
+        lining = glb.primitive(
+            b, n, uv, idx, mat, joints=j, weights=w, weight_floats=True
+        )
         glb.mesh(
             "GeneratedLegBacking" if region == "legs" else "GeneratedBootBacking",
             [lining],
@@ -917,7 +899,9 @@ def build(source, out, rig, kind, label, span=None):
                 rig, p, f, region, cuff_seam, upper,
                 join_lower=False, exact_low=True
             )
-            lining = art_lining(glb, b, n, idx, j, w, p, f, surface.uvs, material)
+            lining = glb.primitive(
+                b, n, uv, idx, mat, joints=j, weights=w, weight_floats=True
+            )
             glb.mesh("GeneratedLegBackingWithBoots", [lining], skin=0)
     glb.write(out)
     return {

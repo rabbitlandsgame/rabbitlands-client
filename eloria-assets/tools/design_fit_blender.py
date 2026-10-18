@@ -708,7 +708,8 @@ def twist(body, posed, top, tw, w, ps):
     it stayed with the hips, sheared along one line.  ``twist`` caps the
     pelvis share of trunk vertices on a smooth ramp, ``pelvis`` at the hip
     joint falling to none at spine_02 (``hip`` / ``waist`` override the two
-    heights), and gives the excess to the bones in ``to`` (shares; default
+    heights; with ``free_below`` the hem below that height is left alone and
+    the cap ramps in over the next 4 cm), and gives the excess to the bones in ``to`` (shares; default
     spine_01 and spine_02 equally).  The clips turn the chest mostly at
     spine_03: in Bow_Pull_Back spine_03 turns 65 degrees while spine_01 turns
     the other way, so a belt meant to turn with the chest needs a spine_03
@@ -719,10 +720,17 @@ def twist(body, posed, top, tw, w, ps):
     hip = float(c.get("hip", body.joint("thigh_l")[2]))
     waist = float(c.get("waist", body.joint("spine_02")[2]))
     cap0 = float(c.get("pelvis", .7))
+    free = float(c.get("free_below", -1.))
     limb = np.array([bool(b.get("limb")) for b in ps["bones"]])
     trunk = (w[:, ~limb].sum(1) if (~limb).any() else np.ones(len(posed))) > .5
     sm = lambda x, e0, e1: (lambda t: t * t * (3 - 2 * t))(np.clip((x - e0) / (e1 - e0), 0., 1.))
-    cap = cap0 * (1 - sm(posed[:, 2], hip, waist))
+    if free > 0:
+        # The hem stays with the hips and legs (owner's third review: with the
+        # whole coat turned toward the chest, the thighs came through its
+        # skirt in a walk, notes 6, 13, 14); the cap starts at the belt.
+        cap = (1 - (1 - cap0) * sm(posed[:, 2], free, free + .04)) * (1 - sm(posed[:, 2], free + .04, waist))
+    else:
+        cap = cap0 * (1 - sm(posed[:, 2], hip, waist))
     pelvis = body.index["pelvis"]
     to = {body.index[n]: float(v) for n, v in c.get("to", {"spine_01": .5, "spine_02": .5}).items()}
     total = sum(to.values())
