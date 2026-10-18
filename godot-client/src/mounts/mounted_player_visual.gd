@@ -1,9 +1,11 @@
 extends Node3D
-## Pony presentation on the real player actor, retaining its body and wardrobe.
+## Profile-driven mount presentation on the real player and its wardrobe.
 const RiderPose := preload("res://src/mounts/rider_seat_pose.gd")
 const ReinVisual := preload("res://src/mounts/mount_reins.gd")
 const CapeSurface := preload("res://src/mounts/mount_cape_surface.gd")
 const UpperBody := preload("res://src/mounts/mounted_upper_body.gd")
+const Profiles := preload("res://src/mounts/mount_profiles.gd")
+const BorrowedTack := preload("res://src/mounts/borrowed_mount_tack.gd")
 var actor: ReplicatedActor3D
 var pony: ReplicatedActor3D
 var pose := RiderPose.new()
@@ -18,14 +20,20 @@ var action := ""
 var modifiers: Dictionary = {}
 var cape_surface := CapeSurface.new()
 var upper := UpperBody.new()
+var seat_rest_inverse := Transform3D.IDENTITY
+var tack: Node3D
+var bridle_paths: Array[PackedVector3Array] = []
 
-func configure(player: ReplicatedActor3D, models: Dictionary) -> Array[String]:
+func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony") -> Array[String]:
 	actor = player
-	profile = JSON.parse_string(FileAccess.get_file_as_string("res://data/mounts/moor_pony.json"))
+	profile = Profiles.read(mount_id)
+	if profile.is_empty() or not models.has(mount_id):
+		return ["Mount visual profile missing: " + mount_id]
 	pony = ReplicatedActor3D.new()
-	pony.name = "MoorPony"
+	pony.name = str(profile.get("displayName", "MoorPony")).replace(" ", "")
 	add_child(pony)
-	var config: Dictionary = models["moor_pony"]
+	var config: Dictionary = models[mount_id].duplicate(true)
+	config.import.scale = float(config.import.scale) * float(profile.get("visualScale", 1.0))
 	var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
 	var errors := pony.configure({"actor_id": actor.actor_id, "x": 0, "y": 0,
 		"rotation": 0, "kind": 5, "name": "", "scale": 1.0}, CoordinateAdapter.new(), config, mapping)
@@ -43,11 +51,23 @@ func configure(player: ReplicatedActor3D, models: Dictionary) -> Array[String]:
 	saddle = pony.get_skeleton().find_bone(str(profile.saddleBone))
 	head = pony.get_skeleton().find_bone(str(profile.reins.headBone))
 	if saddle < 0 or head < 0:
-		return ["Moor Pony saddle/bridle attachment missing"]
+		return [mount_id + " seat/bridle attachment missing"]
+	seat_rest_inverse = pony.get_skeleton().get_bone_global_rest(saddle).affine_inverse()
 	var head_rest := pony.get_skeleton().get_bone_global_rest(head)
 	for side: String in ["l", "r"]:
 		var values: Array = profile.reins.bridleAnchorsNative[side]
 		sockets[side] = head_rest.affine_inverse() * Vector3(float(values[0]), float(values[1]), float(values[2]))
+	for path: Array in profile.reins.get("bridlePathsNative", []):
+		var points := PackedVector3Array()
+		for values: Array in path:
+			points.append(head_rest.affine_inverse() * Vector3(float(values[0]), float(values[1]), float(values[2])))
+		bridle_paths.append(points)
+	if profile.has("borrowedTack"):
+		tack = BorrowedTack.new()
+		add_child(tack)
+		var tack_errors: Array[String] = tack.configure(pony.get_skeleton(), profile.borrowedTack)
+		if not tack_errors.is_empty():
+			return tack_errors
 	var player_anim := actor.animation_player
 	if player_anim == null or not player_anim.has_animation("Rest_Pose") or not player_anim.has_animation("Fighting_Idle"):
 		return ["Player riding reference poses missing"]
@@ -62,7 +82,7 @@ func configure(player: ReplicatedActor3D, models: Dictionary) -> Array[String]:
 	for modifier: Node in actor.get_skeleton().find_children("*", "SkeletonModifier3D", true, false):
 		modifiers[modifier] = (modifier as SkeletonModifier3D).active
 		(modifier as SkeletonModifier3D).active = false
-	cape_surface.configure(pony.get_skeleton())
+	cape_surface.configure(pony.get_skeleton(), profile.get("capeContact", []))
 	if actor._cape_cloth != null:
 		actor._cape_cloth.call("set_mount_surface", cape_surface)
 	actor.set_hand_props_visible(false)
@@ -95,9 +115,17 @@ func _process(delta: float) -> void:
 	pony.animation_player.pause()
 	pony.get_skeleton().force_update_all_bone_transforms()
 	actor.animation_player.pause()
-	var offset: Array = profile.seatOffsetNative
 	var bone := pony.get_skeleton().global_transform * pony.get_skeleton().get_bone_global_pose(saddle)
-	var seat := Transform3D(bone.basis.orthonormalized(), bone * Vector3(float(offset[0]), float(offset[1]), float(offset[2])))
+	var seat: Transform3D
+	if profile.has("seatPositionNative"):
+		var point: Array = profile.seatPositionNative
+		var frame := bone * seat_rest_inverse
+		seat = Transform3D(frame.basis.orthonormalized(), frame * Vector3(float(point[0]), float(point[1]), float(point[2])))
+	else:
+		var offset: Array = profile.seatOffsetNative
+		seat = Transform3D(bone.basis.orthonormalized(), bone * Vector3(float(offset[0]), float(offset[1]), float(offset[2])))
+	if tack != null:
+		tack.update_pose()
 	pose.fit(seat, action, elapsed, duration)
 	upper.apply()
 	if actor._cape_cloth != null and actor._cape_cloth_worn:
@@ -118,7 +146,13 @@ func _process(delta: float) -> void:
 		var exit := reins.grip_exit_world(actor.get_skeleton(), side)
 		var saddle_grip := seat.origin + seat.basis * Vector3(sign_value * .055, .12, .21)
 		parked[side] = [grip.lerp(saddle_grip, upper.grip_weight), exit.lerp(saddle_grip + Vector3.DOWN * .025, upper.grip_weight)]
-	reins.update_contact(bridle, actor.get_skeleton(), seat.basis, parked)
+	var straps: Array[PackedVector3Array] = []
+	for path: PackedVector3Array in bridle_paths:
+		var points := PackedVector3Array()
+		for point: Vector3 in path:
+			points.append(head_frame * point)
+		straps.append(points)
+	reins.update_contact(bridle, actor.get_skeleton(), seat.basis, parked, straps)
 	actor.set_hand_props_visible(false)
 	if actor.combat_presentation != null:
 		actor.combat_presentation.update_pose()

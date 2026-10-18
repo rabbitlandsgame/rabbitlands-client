@@ -4,6 +4,7 @@ extends SceneTree
 var failures := 0
 var checks := 0
 var max_lower_error := 0.0
+var mount_id := "moor_pony"
 
 func _init() -> void:
 	call_deferred("run")
@@ -31,6 +32,8 @@ func make_rider(body: String, models: Dictionary) -> ReplicatedActor3D:
 	return actor
 
 func run() -> void:
+	if "--horse" in OS.get_cmdline_user_args():
+		mount_id = "golden_plains_horse"
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	for body: String in ["luminous_male", "luminous_female"]:
 		var actor := make_rider(body, models)
@@ -40,7 +43,7 @@ func run() -> void:
 		var authoritative := actor.global_transform
 		for gait: String in ["walk", "cruise", "burst"]:
 			for rider: ReplicatedActor3D in [actor, baseline]:
-				rider.set_mount_state({"mode": "mounted", "mount_id": "moor_pony", "gait": gait, "step_us": 200000}, models)
+				rider.set_mount_state({"mode": "mounted", "mount_id": mount_id, "gait": gait, "step_us": 200000}, models)
 				rider._mount_visual.set_process(false)
 				rider.play_action(&"run")
 				rider._mount_visual._process(0.0)
@@ -112,7 +115,7 @@ func run() -> void:
 			actor.set_mount_state({}, models)
 			baseline.set_mount_state({}, models)
 			expect(actor.animation_player.is_playing(), "dismount during action restores normal playback")
-		actor.set_mount_state({"mode": "mounted", "mount_id": "moor_pony", "gait": "cruise"}, models)
+		actor.set_mount_state({"mode": "mounted", "mount_id": mount_id, "gait": "cruise"}, models)
 		actor._mount_visual.set_process(false)
 		actor.play_action(&"cast_channel", true)
 		actor._mount_visual._process(.3)

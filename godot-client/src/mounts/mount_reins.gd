@@ -32,7 +32,7 @@ func grip_exit_world(rig: Skeleton3D, side: String) -> Vector3:
 	var thumb := rig.get_bone_global_pose(rig.find_bone("thumb_02_" + side)).origin
 	return rig.to_global((index + thumb) * .5)
 
-func update_contact(anchors: Dictionary, rig: Skeleton3D, seat_basis: Basis, grips: Dictionary = {}) -> void:
+func update_contact(anchors: Dictionary, rig: Skeleton3D, seat_basis: Basis, grips: Dictionary = {}, bridle_paths: Array[PackedVector3Array] = []) -> void:
 	visible = true
 	last_points.clear()
 	last_lengths.clear()
@@ -77,6 +77,11 @@ func update_contact(anchors: Dictionary, rig: Skeleton3D, seat_basis: Basis, gri
 		last_points[side] = points
 		last_lengths[side] = length
 		last_grip_points[side] = grip_points
+	for path: PackedVector3Array in bridle_paths:
+		var points := PackedVector3Array()
+		for point: Vector3 in path:
+			points.append(to_local(point))
+		_strip(points)
 	surface.surface_end()
 
 func _strip(points: PackedVector3Array) -> void:

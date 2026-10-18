@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "status": "local_horse_mount_v1_awaiting_review",
+  "mount": "golden_plains_horse",
+  "saddleBone": "spine_2",
+  "footOffsetMetres": [
+    0.31,
+    -0.64,
+    0.04
+  ],
+  "kneePoleOffsetMetres": [
+    0.4,
+    -0.22,
+    0.27
+  ],
+  "handOffsetMetres": [
+    0.13,
+    0.16,
+    0.38
+  ],
+  "elbowPoleOffsetMetres": [
+    0.3,
+    0.02,
+    -0.04
+  ],
+  "pelvisLeanDegrees": 3.0,
+  "torsoStabilization": 0.55,
+  "fingerGripWeight": 0.95,
+  "fingerCurlDegrees": [
+    55.0,
+    70.0,
+    50.0
+  ],
+  "footToeOutDegrees": 8.0,
+  "armMotion": {
+    "weight": 1.0,
+    "idle": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.002,
+      "elbowGiveMetres": 0.003
+    },
+    "walk": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    },
+    "trot": {
+      "beatsPerCycle": 2,
+      "handFollowMetres": 0.009,
+      "elbowGiveMetres": 0.014
+    },
+    "gallop": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    }
+  },
+  "reins": {
+    "headBone": "head",
+    "bridleAnchorsNative": {
+      "l": [
+        0.125,
+        1.2,
+        1.07
+      ],
+      "r": [
+        -0.125,
+        1.2,
+        1.07
+      ]
+    },
+    "widthMetres": 0.02,
+    "thicknessMetres": 0.006,
+    "crossSectionRollDegrees": 35.0,
+    "sideClearanceMetres": 0.13,
+    "sagMetres": 0.015,
+    "looseEndLengthMetres": 0.1,
+    "looseEndSpreadMetres": 0.065,
+    "segments": 20,
+    "colour": "98703e",
+    "bridlePathsNative": [
+      [
+        [
+          0,
+          1.3,
+          1.035
+        ],
+        [
+          0.095,
+          1.28,
+          1.045
+        ],
+        [
+          0.14,
+          1.21,
+          1.07
+        ],
+        [
+          0.095,
+          1.13,
+          1.09
+        ],
+        [
+          0,
+          1.11,
+          1.09
+        ],
+        [
+          -0.095,
+          1.13,
+          1.09
+        ],
+        [
+          -0.14,
+          1.21,
+          1.07
+        ],
+        [
+          -0.095,
+          1.28,
+          1.045
+        ],
+        [
+          0,
+          1.3,
+          1.035
+        ]
+      ],
+      [
+        [
+          0.125,
+          1.2,
+          1.07
+        ],
+        [
+          0.14,
+          1.4,
+          0.87
+        ],
+        [
+          0.13,
+          1.58,
+          0.71
+        ],
+        [
+          0,
+          1.6,
+          0.7
+        ],
+        [
+          -0.13,
+          1.58,
+          0.71
+        ],
+        [
+          -0.14,
+          1.4,
+          0.87
+        ],
+        [
+          -0.125,
+          1.2,
+          1.07
+        ]
+      ]
+    ]
+  },
+  "walkStrideMetresPerSecond": 0.8099972660404452,
+  "trotStrideMetresPerSecond": 2.094538384912666,
+  "gallopStrideMetresPerSecond": 5.399981773602967,
+  "playbackRateMultipliers": {
+    "trot": 0.5
+  },
+  "clips": {
+    "idle": "Idle_A",
+    "walk": "Walk",
+    "trot": "Jog",
+    "gallop": "Gallop"
+  },
+  "notes": "Local first riding prototype on the existing Golden Plains Horse. Reuses its unchanged eight motion clips and an extracted copy of the imported pony saddle. No original model, shared rider animation or live-server mount choice is replaced.",
+  "displayName": "Golden Plains Horse",
+  "visualScale": 1.2,
+  "seatPositionNative": [
+    0.0035,
+    1.373,
+    0.08
+  ],
+  "borrowedTack": {
+    "source": "res://assets/actors/native/creatures/moor_pony.glb",
+    "sourceBone": "Bone_021",
+    "bone": "spine_2",
+    "positionNative": [
+      0.0035,
+      1.22,
+      0.256
+    ],
+    "scale": [
+      0.9,
+      0.85,
+      1.1
+    ],
+    "dropScale": 0.6
+  },
+  "capeContact": [
+    {
+      "bone": "hips",
+      "center": [
+        0.0035,
+        0.93,
+        -0.36
+      ],
+      "radii": [
+        0.34,
+        0.38,
+        0.68
+      ]
+    },
+    {
+      "bone": "spine_2",
+      "center": [
+        0.0035,
+        1.23,
+        0.08
+      ],
+      "radii": [
+        0.3,
+        0.18,
+        0.33
+      ]
+    }
+  ]
+}

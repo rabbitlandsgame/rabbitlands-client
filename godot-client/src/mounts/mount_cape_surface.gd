@@ -10,19 +10,26 @@ var gallop_blend := 0.0
 var moving_blend := 0.0
 var flow_time := 0.0
 
-func configure(skeleton: Skeleton3D) -> void:
+func configure(skeleton: Skeleton3D, contact: Array = []) -> void:
 	rig = skeleton
 	# Bounds fitted to v8's existing body: native rump top 1.38–1.42 m,
 	# half-width 0.34 m. The larger envelope also clears interpolated cloth.
-	for spec: Array in [
+	var specs: Array = [
 		["hips", Vector3(0.0, 1.02, -.29), Vector3(.41, .50, .90)],
-		["Bone_021", Vector3(0.0, 1.30, .12), Vector3(.31, .22, .29)]]:
+		["Bone_021", Vector3(0.0, 1.30, .12), Vector3(.31, .22, .29)]]
+	if not contact.is_empty():
+		specs = []
+		for entry: Dictionary in contact:
+			var center: Array = entry.center
+			var radii: Array = entry.radii
+			specs.append([entry.bone, Vector3(center[0], center[1], center[2]), Vector3(radii[0], radii[1], radii[2])])
+	for spec: Array in specs:
 		var bone := rig.find_bone(str(spec[0]))
 		if bone >= 0:
 			envelopes.append({"bone": bone, "rump": str(spec[0]) == "hips",
 				"rest_inverse": rig.get_bone_global_rest(bone).affine_inverse(),
 				"center": spec[1], "radii": spec[2], "frame": Transform3D.IDENTITY,
-				"inverse": Transform3D.IDENTITY})
+				"inverse": Transform3D.IDENTITY, "rest_height": (spec[2] as Vector3).y})
 	update()
 
 func update(delta := 0.0, gait := "idle") -> void:
@@ -35,7 +42,7 @@ func update(delta := 0.0, gait := "idle") -> void:
 	for envelope: Dictionary in envelopes:
 		if bool(envelope.rump):
 			var radii: Vector3 = envelope.radii
-			radii.y = lerpf(.48, .50, gallop_blend)
+			radii.y = float(envelope.rest_height) - .02 * (1.0 - gallop_blend)
 			envelope.radii = radii
 		var frame := rig.global_transform * rig.get_bone_global_pose(int(envelope.bone)) * (envelope.rest_inverse as Transform3D)
 		envelope.frame = frame

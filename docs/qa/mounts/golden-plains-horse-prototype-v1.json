@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Local Golden Plains Horse riding prototype v1",
+  "model": "golden_plains_horse",
+  "method": "Unchanged imported horse and its approved idle/walk/trot/gallop clips; profile-driven seated rider, existing upper-body action layer, borrowed imported pony saddle and live leather straps.",
+  "authoring": {
+    "newModelsGenerated": false,
+    "sourceGlbsReplaced": false,
+    "horseAnimationChannelsModified": false,
+    "nativeHorseBoundsMetres": [
+      [
+        -0.3082,
+        0.0,
+        -1.1956
+      ],
+      [
+        0.3059,
+        1.7,
+        1.1956
+      ]
+    ],
+    "existingImportScale": 1.058824,
+    "mountVisualScale": 1.2,
+    "runtimeEarHeightMetres": 2.16000096,
+    "seatBone": "spine_2",
+    "seatPointNative": [
+      0.0035,
+      1.373,
+      0.08
+    ],
+    "bridleBone": "head",
+    "saddleSourceBone": "Bone_021",
+    "saddleSourceCompleteComponents": 67,
+    "saddleCopiedTriangles": 638,
+    "saddleCopiedVertices": 751,
+    "saddleSourceSelection": "All triangle vertices have >95% ownership by the source saddle subtree. Independently checked: selected triangles equal all 67 complete saddle components; body boundary triangles excluded.",
+    "saddleAttributes": "Existing positions fitted once; original UVs/material retained, normals/tangents transformed for the static fit. No per-gait blanket stretching.",
+    "gaitTiming": "Existing source durations retained: Walk 1.12s, Jog 0.66s, Gallop 0.56s. Playback adapts to visual scale and travel speed; the reviewed half-rate mounted trot preference is retained.",
+    "sourceFps": "No motion rebake or retiming export performed; existing source clips retained."
+  },
+  "validation": {
+    "godot": "4.7.2-stable",
+    "horseFitChecks": 11741,
+    "horseFitFailures": 0,
+    "maxRiderContactErrorMetres": 4.215241279e-05,
+    "riderContactToleranceMetres": 0.06,
+    "maxCapeMaterialLinkErrorMetres": 0.00571274757385,
+    "capeMaterialLinkToleranceMetres": 0.02,
+    "horseUpperBodyChecks": 3070,
+    "horseUpperBodyFailures": 0,
+    "maxHorseLowerBodyTransformComponentError": 0.0,
+    "lowerBodyPoseAndRecoveryTolerance": 1e-05,
+    "ponyRiderRegressionChecks": 1130,
+    "ponyUpperBodyRegressionChecks": 3070,
+    "ponyCapeRegressionChecks": 44,
+    "ponyRegressionFailures": 0,
+    "bodies": [
+      "luminous_male",
+      "luminous_female"
+    ],
+    "gaits": [
+      "walk",
+      "cruise",
+      "burst"
+    ],
+    "renderedPreviewFrames": 135,
+    "renderedPreviewFps": 30,
+    "renderedPreviewSeconds": 4.5,
+    "renderedScriptOrResourceErrors": 0,
+    "headlessNote": "Existing pony baseline/cape tests emit dummy-renderer resource cleanup warnings on exit; numerical checks pass. The cape test report paths were redirected in an ignored test copy.",
+    "gates": {
+      "sourceAuthoring": "Current source assets and animation mappings unchanged; saddle source subset independently counted.",
+      "exportFidelity": "Not applicable: runtime attachment/profile prototype; no Blender export or animated GLB replacement.",
+      "godotIntegration": "Actual player actor, horse model, mount routing, saddle, reins, cape, bow/spell recovery, mount switching and death interruption passed.",
+      "visualReview": "Reviewed side, front-quarter and rear game-camera views; sampled gait cycles, aiming/release, spell and recovery frames.",
+      "explicitUserApproval": "Pending user review of horse prototype v1"
+    }
+  },
+  "sourceSha256": {
+    "godot-client/data/mounts/golden_plains_horse.json": "d1e0704d2550e3d854bddd1fb2216e16fb980bf294b157645bb2fc2f285034ee",
+    "godot-client/src/mounts/mount_profiles.gd": "1bf9e1427e455e8c6c37bff8ea9fe42960695a411243860b2b4f3eae510ae550",
+    "godot-client/src/mounts/borrowed_mount_tack.gd": "c9ddebe86222157adf7628550a0fe86ee807c903e346fafe439f5cc702f73bed",
+    "godot-client/src/mounts/mounted_player_visual.gd": "f869f981bf9698d7c8d2dd32c24cc6de59c2cea7daa41d66151deb95791c1369",
+    "godot-client/src/mounts/mount_cape_surface.gd": "ebaa86013861388fd1e823130a85643f058f980abeeebf9aa7fc732bf995f8fb",
+    "godot-client/src/mounts/mount_reins.gd": "648394925a9bee9fd0ff2cbe2a958a1f1c4a22d031ffa83df72ed24a19bed807",
+    "godot-client/src/mounts/rider_seat_pose.gd": "635eade1c6344f98ed17b8f87edbec971a0a18359a6ba9e72f93b0dcb6185f6d",
+    "godot-client/src/mounts/mounted_upper_body.gd": "e66f83eaad4bb036374f8038768a5cb91e1ac0202c7372f211c88a6da327ab5f",
+    "godot-client/src/actors/replicated_actor_3d.gd": "e62c04e29dbe0dc83ae81f695623f89afd0f9633de8771661dda94df262c8396",
+    "godot-client/src/dev/horse_mount_showcase.gd": "af511074ccde32bf328edb8bbd41e8b501feb4a6233fbf0f305485a48788d614",
+    "godot-client/src/dev/horse_mount_showcase.tscn": "024163de73340d0c71f098d0dbe249fe6f1135f198cbe66509a01dd1d60b4b49",
+    "godot-client/tests/test_horse_mount.gd": "548f328174f2b92067b55d103c8888e7ac6c6c38cf69aa8ce07830ea73608128",
+    "godot-client/tests/test_mounted_actions.gd": "a3a5e92f1f015be142ce96bf959536c8c4dcb9b3cfeb51639057d2277258157f",
+    "godot-client/tests/integration/rendered_horse_mount.gd": "db939747e47ab53cc4fef9c2124b4754a7ae134fba96cf15e471f53ff3b5d378"
+  },
+  "unchangedInputSha256": {
+    "godot-client/assets/actors/native/creatures/golden_plains_horse.glb": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+    "godot-client/assets/actors/native/creatures/moor_pony.glb": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "godot-client/assets/actors/native/races/luminous_male.glb": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+    "godot-client/assets/actors/native/races/luminous_female.glb": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+    "godot-client/assets/actors/native/shared/Universal_Animation_Library.glb": "161f9b54aed6a172ac5b1a37960264f106015bbc8622cd33af2061c9c4f6d69c",
+    "godot-client/data/mounts/moor_pony.json": "84100fc70888ebcd645d1f4f20745930f89ff56eb91075a776a11701414a4639",
+    "godot-client/data/actors/models.json": "c892158744c7391fdfedb1fb4230947ec54673b6b8e9b5d76985efce3e4dd08a",
+    "godot-client/data/animations/equid/golden_plains_horse.json": "2678471afa67ec96c2efd75be278133db708ef236889c3a1668afe34df328b7c"
+  },
+  "previewSha256": {
+    "horse-mount.png": "2a624a6a88a1ebd940d285e00ae8a3ad50230c29933ccce1fbdfb3b7b84653ba",
+    "horse-mount.mp4": "1d68ff1e87c5d49fe63ccfa1015c3214b9caaa12405d21d73cf7b83e950e32b1"
+  },
+  "reviewScene": "res://src/dev/horse_mount_showcase.tscn",
+  "reviewControls": "Space pauses/resumes; R restarts the sequence.",
+  "limitations": [
+    "Local review only. Server ownership, horse selection and live balance are not enabled.",
+    "Visual review covers two representative rider bodies; other race/equipment combinations remain to be checked.",
+    "Saddle is fitted from the existing imported pony tack for the prototype."
+  ]
+}

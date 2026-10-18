@@ -2667,13 +2667,17 @@ func get_skeleton() -> Skeleton3D:
 
 func set_mount_state(state: Dictionary, models: Dictionary) -> void:
 	var was_mounted := is_instance_valid(_mount_visual)
-	var riding: bool = state.get("mode") == "mounted" and state.get("mount_id") == "moor_pony"
+	var mount_id := str(state.get("mount_id", ""))
+	var riding: bool = state.get("mode") == "mounted" and preload("res://src/mounts/mount_profiles.gd").supports(mount_id)
+	if was_mounted and riding and mount_state.get("mount_id") != mount_id:
+		set_mount_state({}, models)
+		was_mounted = false
 	mount_state = state.duplicate(true)
 	if riding and not was_mounted:
 		var visual := (load("res://src/mounts/mounted_player_visual.gd") as Script).new() as Node3D
 		add_child(visual)
 		# Configure before marking mounted: reference poses must play normally.
-		var errors: Array = visual.call("configure", self, models)
+		var errors: Array = visual.call("configure", self, models, mount_id)
 		if not errors.is_empty():
 			visual.call("restore")
 			visual.free()
