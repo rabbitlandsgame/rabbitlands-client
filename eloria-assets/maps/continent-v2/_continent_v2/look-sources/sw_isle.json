@@ -1,0 +1,51 @@
+{
+	"id": "sw_isle",
+	"schema": 1,
+	"ground": {
+		"path_luma_forward": 0.2,
+		"path_tint_forward": [0.85, 0.72, 0.53],
+		"path_chroma_forward": 1.35,
+		"meadow_value_forward": 0.76,
+		"meadow_chroma_forward": 0.95,
+		"meadow_tint_forward": [0.72, 1.0, 0.6],
+		"verge_saturation_forward": 1.05,
+		"rock_value_forward": 0.32,
+		"verge_value_earth_forward": 0.7,
+		"paving_tint_forward": [0.6, 0.53, 0.42],
+		"verge_grain_forward": 1.0,
+		"verge_grain_steep_forward": 0.3
+	},
+	"grass": {
+		"root": [0.07, 0.15, 0.06],
+		"tip": [0.5, 0.63, 0.29],
+		"value_forward": 1.55,
+		"open": 0.8,
+		"meadow": 1.0,
+		"open_green": 1.0
+	},
+	"sky": {
+		"haze_warmth_forward": 0.1
+	},
+	"water": {
+		"sea_value_forward": 8.5,
+		"sea_chroma_forward": 1.25,
+		"sea_tint_forward": [0.55, 1.0, 1.05]
+	},
+	"foliage": {
+		"untamed_words": ["blossom", "flame", "bougainvillea", "lemon"],
+		"shrub_words": ["grass"],
+		"plain_words": ["hedge", "shrub"]
+	},
+	"props": {
+		"keep_words": ["kit-sw-palace-keep", "kit-sw-townhouse", "kit-sw-domed-temple", "kit-sw-wall-tower-round", "kit-sw-wall-bastion", "kit-sw-harbour-tower", "kit-sw-landing-beacon", "crownwater_gilt", "kit-sw-plaza-rosette"],
+		"hole_words": ["kit-sw-palace-keep", "kit-sw-gatehouse", "kit-sw-townhouse-dome", "kit-sw-wall-tower-round", "kit-sw-domed-temple"]
+	},
+	"notes": {
+		"grade": "None: a continent region (its manifest has continentGeography), so a grade section would be ignored with a warning (look_profile.gd map_trim). Its sky and fog are declared in the manifest, copied from Crownwater's lagoon since the fix:game-look stage (Westhaven's pale horizon read cream); sky.haze_warmth 0.1 keeps the far haze near that blue fog instead of warming it by SKY_HAZE_WARMTH 0.45 (causeway haze hue 39 s0.10 -> 184 s0.04; lighthouse_se 177).",
+		"ground": "Measured in the client survey (Forward+, look on, high; boxes in game_look/fix/metrics.py). Lawns and meadows are green meadow patches drawn solid in their own colour: meadow_value 0.76 and meadow_tint [0.72, 1, 0.6] turn them from pale olive to the editor's green; meadow_chroma 0.95 (1.1 in the publish stage) takes the lime edge off them against the olive base (court north lawn s0.62 -> 0.46). Roads: Crownwater's pale warm limestone at path_luma 0.2. The open base (the Meshy colours, an opaque BIOME verge): verge_saturation 1.05, verge_value_earth 0.7; verge_grain 1.0 keeps all of the new detail tile's grain (forest_road frame detail 12.3 -> 16.3, the switchback 12.9 -> 17.2), and verge_grain_steep 0.3 calms it on cliffs, where the planar tile streaks. Rock: the 27 coastal gravel patches are the rock class, drawn solid; rock_value 0.32. Paving: paving_tint [0.6, 0.53, 0.42] in place of PAVING_SURFACE_TINT: the courts and avenue read L0.72 s0.20, near-white; now L0.57-0.63 s0.22-0.24 (play_street, play_plaza, play_forecourt; Oldcraft's cobble road L0.49 s0.20). The garden walks are kit paving published as Walk_ surfaces (the look leaves them unpainted), tinted 0.55/0.50/0.42 in their kit to match. The plaza rosette is a kit inlay (source/plaza_rosette.py) whose material keeps its chroma (props.keep_words); it was a kept patch before.",
+		"grass": "Crownwater's lagoon palette: tufts measure 0.95-1.0 of the bare ground under them. No biome blend: open ground counts grass.open, 0.8, but only as far as its vertex colour is green (grass.open_green 1: the sand rule's beaches, grey cut faces and earth grow none; lawn-green ground all of it); the lawn and meadows grow full beds (meadow 1).",
+		"foliage": "Blossom (kit-sw-blossom-tree), the flame tree, bougainvillea and the lemon tree keep their colour (the default untamed word, flower, keeps the flower shrubs, meadows and mats). Every kit tree matches KIT_TREE_WORDS by 'tree', 'pine' or 'cypress' and the shrubs by 'shrub', 'hedge' or 'undergrowth' (the probe, tests/look/probe_look_classes.gd at four targets: 72 foliage surfaces painted, none left). shrub_words adds 'grass' for the 1,328 kit-dune-grass tufts on the beaches, as Ssarathi does; the flower meadows and mats stay props in their own colour, and 'topiary' and 'citrus' stay out (their pots fill the lower 20-40 % of the mesh). No crown materials (the kit uses one atlas material per model). CROWN_FLOOR (0.2 of the mesh height, a constant, not a region key) is low for N15 kit-sw-broadleaf-tree-a (bark to 0.30, 1,474 placements), the umbrella pine (0.50) and the flame tree (0.45): the band between is painted as crown. plain_words ['hedge', 'shrub'] (fix:game-look): the clipped garden hedges and the flower and bougainvillea shrubs keep their own texture; painted as crowns they read as pale grey-green cards and dark slabs (review D13).",
+		"props": "Signature chroma the grade's SATURATION_FORWARD (0.69) would grey: cobalt and gold texel shares of the castle atlases (hue 200-245 / 35-56): townhouse-blue 36 % / 13 %, townhouse-dome-arcade 10 % / 44 %, palace keep 15 % / 15 %, round tower 8 % / 18 %, bastion 8 % / 9 %, domed temple 9 % / 3 %, harbour tower 5 % / 11 %; the banners' crownwater_gilt is wholly gold. keep_chroma is the default KEEP_CHROMA_FORWARD 1.45 until measured. kit-sw-landing-beacon (N20, the arrival plaza's beacon since the seat:beacon stage) keeps its cobalt roof and gold cup, and its emissive crystal material (kit-sw-landing-beacon-crystal) keeps the chroma of its glow; the borrowed Four Gates beacon's fg_metal_gold is no longer placed (its prototype stays in the kit palette), so it left keep_words. kit-sw-plaza-rosette keeps the arrival rosette's cobalt and gilt. hole_words (fix:game-look, review D6): the palace keep, the gatehouse, the domed townhouses, the round towers and the domed temple keep a hole round the player where they would vanish, unless their box covers more than FADE_NAMED_HOLE_MAX_COVERAGE (0.95) of the view (the keep behind the low camera at hz_castle_east covers 1.0 and still vanishes; the gatehouse with the player in its passage covers 0.90 and stays).",
+		"water": "The continent sea (continent_water.gdshader) is decoded at the region's own value, chroma and tint (water.sea_value 8.5, sea_chroma 1.25, sea_tint [0.55, 1, 1.05]): the isle's sea meets no other region's in the continent-v2 frame. At the shared CONTINENT_SEA_VALUE 4 it read navy-teal (play_pier 42/73/83, s0.49); now a lagoon turquoise (15/114/136, s0.89, hue 191; the concept paints 9/152/191)."
+	}
+}

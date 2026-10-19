@@ -3,7 +3,9 @@
 The common terrain, grass, sky, water and foliage palette must agree across
 contributing sources. Prop signature words are the stable union of those
 sources; shared model identities remain intact. --check compares without writes.
-Original profiles are read from Git so retirement cannot break regeneration.
+The original profiles are pinned in look-sources/ (hash-checked against its manifest), so retirement cannot break
+regeneration. A section of a later partition without its own source counts inherits them: from its predecessor
+section (successorOf, else the same map id) or from its lookBase map.
 """
 from __future__ import annotations
 import argparse
@@ -11,8 +13,30 @@ import copy
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import frames as F
+
+SOURCES = Path(__file__).resolve().parent/'look-sources'
+
+
+def source_profile(path):
+    manifest = json.loads((SOURCES/'manifest.json').read_text(encoding='utf-8'))
+    record = manifest['files'][path]
+    raw = (SOURCES/record['file']).read_bytes()
+    if hashlib.sha256(raw).hexdigest() != record['sha256']:
+        raise ValueError(f'pinned look source changed: {path}')
+    return raw, manifest['sourceCommit']
+
+
+def look_sources(region, rows, previous):
+    row = rows[region]
+    if 'placementsBySourceScene' in row:
+        return sorted(row['placementsBySourceScene'])
+    if row.get('lookBase'):
+        return look_sources(row['lookBase'], rows, previous)
+    old = previous.get(row.get('successorOf', region))
+    if old is None:
+        raise ValueError(f'{region}: no look sources, predecessor or lookBase')
+    return sorted(old['placementsBySourceScene'])
 
 
 def _merge(base,overrides):
@@ -30,16 +54,19 @@ def outputs(checkout):
     partition_path=F._res(catalog['partitionSpecPath'],checkout)
     partition=json.loads(partition_path.read_text())
     provenance=json.loads((partition_path.parent/'input-provenance.json').read_text())
-    commit=provenance['sourceCommit']
+    previous={}
+    if 'predecessor' in provenance:
+        old=json.loads((checkout/provenance['predecessor']['path']).parent.joinpath('sections_spec.json').read_text())
+        previous={r['mapId']:r for r in old['sections']}
     rows={r['mapId']:r for r in partition['sections']}
     result={}
     for region in F.regions(checkout):
-        sources=sorted(rows[region]['placementsBySourceScene'])
+        sources=look_sources(region,rows,previous)
         profiles=[]
         hashes={}
         for source in sources:
             path=f'godot-client/src/world/look/regions/{source}.json'
-            raw=subprocess.check_output(['git','-C',str(checkout),'show',f'{commit}:{path}'])
+            raw,commit=source_profile(path)
             profiles.append(json.loads(raw))
             hashes[path]=hashlib.sha256(raw).hexdigest()
         base=copy.deepcopy(profiles[0])

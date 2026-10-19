@@ -1,0 +1,48 @@
+{
+	"id": "gull_skerries",
+	"schema": 1,
+	"ground": {
+		"path_luma_forward": 0.2,
+		"path_tint_forward": [0.85, 0.72, 0.53],
+		"path_chroma_forward": 1.35,
+		"meadow_value_forward": 0.76,
+		"meadow_chroma_forward": 0.95,
+		"meadow_tint_forward": [0.72, 1.0, 0.6],
+		"verge_saturation_forward": 1.05,
+		"rock_value_forward": 0.32,
+		"verge_value_earth_forward": 0.7,
+		"paving_tint_forward": [0.6, 0.53, 0.42],
+		"verge_grain_forward": 1.0,
+		"verge_grain_steep_forward": 0.3
+	},
+	"grass": {
+		"root": [0.07, 0.15, 0.06],
+		"tip": [0.5, 0.63, 0.29],
+		"value_forward": 1.55,
+		"open": 0.8,
+		"meadow": 1.0,
+		"open_green": 1.0
+	},
+	"sky": {
+		"haze_warmth_forward": 0.1
+	},
+	"water": {
+		"sea_value_forward": 8.5,
+		"sea_chroma_forward": 1.25,
+		"sea_tint_forward": [0.55, 1.0, 1.05]
+	},
+	"foliage": {
+		"untamed_words": ["blossom", "flame", "bougainvillea", "lemon"],
+		"shrub_words": ["grass"],
+		"plain_words": ["hedge", "shrub"]
+	},
+	"notes": {
+		"origin": "The Gull Skerries (task A3b, the island group's third map: the south tip, its two islets and the west cliff strip) share Landfall's ground, kit and sea: this file is sw_isle.json's palette, measured there in the client survey (game-look fix stage), as The Tollholms' is, so the three maps meet without a seam in colour.",
+		"grade": "None: a continent region (its manifest has continentGeography), so a grade section would be ignored (look_profile.gd map_trim). Sky and fog come from the manifest, Crownwater's lagoon as on sw_isle; sky.haze_warmth 0.1 as there.",
+		"ground": "As sw_isle: the plateau's meadow at meadow_value 0.76 and tint [0.72, 1, 0.6]; the opaque Meshy base as a BIOME verge with all of the detail tile's grain (verge_grain 1), calmer on the south tip's and the skerries' cliffs (verge_grain_steep 0.3); the coastal gravel patches over the cliffs as solid rock at rock_value 0.32. The map has no road and no paving; their keys are sw_isle's, so a path drawn here later matches the isle's.",
+		"grass": "As sw_isle: grass follows the base's green (open_green 1), so the beaches, the cliffs and the fin talus grow none.",
+		"foliage": "As sw_isle: the same kit trees and shrubs (a3b/dress.py's census is sw_isle's species mix).",
+		"props": "None of its own: the map has no landmark building, so no prop keeps its chroma or a hole round the player.",
+		"water": "The same continent-sea decode as sw_isle (sea_value 8.5, sea_chroma 1.25, sea_tint [0.55, 1, 1.05]): the two maps' seas meet along z 8259 and x 399, and any other value would draw a step in the sea's colour along the seam."
+	}
+}
