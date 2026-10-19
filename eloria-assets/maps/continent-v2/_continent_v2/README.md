@@ -77,8 +77,9 @@ and register/ferry object descriptors are `{map, id}`. The hub is `landfall`; ch
 in Warrenmead, step 9 in Reedfall and step 10 in Greenlight. Runtime isle membership comes from the served manifest.
 Retired map saves return home; fresh map IDs have no character position migration.
 
-Six maps have authored default spawn markers (the three conserved ones in Landfall, Boarsend and Coilmere, and
-A3's Suncoil, Hornmere and Whitepeak). Twelve maps use separately hash-bound generated arrival metadata, validated by `arrivals.py` against the recorded source/frame/ownership contract. Generated
+Seven maps have authored default spawn markers (the three conserved ones in Landfall, Boarsend and Coilmere; A3's
+Suncoil, Hornmere and Whitepeak; and Greenlight's quay, whose generated arrival ground v2 left under water). Ten maps
+use separately hash-bound generated arrival metadata, validated by `arrivals.py` against the recorded source/frame/ownership contract. Generated
 arrivals are outside gameplay marker arrays and do not increase the authored marker total. Marker rename history
 and shared kit identities retain pinned historical source names; active ownership uses the new catalog IDs.
 
@@ -115,6 +116,32 @@ supplies beginner Coal and Iron Ore; the deeper areas contain intermediate
 encounters and additional minerals. See `../landfall_insides/README.md` for
 locations, resources, encounter tiers, and the rebuild workflow. `build_underground.py` is retired; when a
 partition change moves a door's exterior map or frame, `retarget_underground.py` rewrites only the door ends.
+
+## Boats
+
+Owner-approved 2026-10-19 as in Eternal Lands: one boat per destination, several boats at a dock, all free, so players
+chain boats to cross Landfall quickly. `content/boat-network.json` lists the docks and the 14 routes (one boat each
+way). The hub is Lakehead Landing, a lake jetty on Reedfall's lake by the Landfall border, with boats to Stagheath,
+Ravenhead, Greenlight, Warrenmead and Boarsend. The isles are reached from their nearest ports: Coilmere from Ravenhead
+(the 2026-10-14 ferry) and Greenlight; Suncoil from Ringholm and Ravenhead; Hornmere from Stagheath; Whitepeak from
+Saltsound. Coastal shortcuts join Warrenmead-Stagheath, Boarsend-Greenlight and Stagheath-Saltsound.
+
+`godot-client/tools/author_continent_v2_boats.py --apply` writes the network into the scenes and server rows. Every
+generated node carries `boatNetwork: <dock id>`, and a rerun replaces the previous generation; `--check` refuses stale
+output. A new dock is a `bridge_control` pier deck (walkable once exported) with trestle spans and a lantern. Each berth
+has:
+- a boat prop at the water level: the ferry ship for an isle crossing, a packet (fishing) boat otherwise, small lake
+  boats at Lakehead (the lake is 1 m deep, so their keels sit in its bed);
+- a harbour banner by the gangway;
+- the boat's interactive `<map>--obj-boat-<dock>`, an object portal from object ID 30 up. Its text starts
+  "Bound for <place>.", which the client shows as the destination;
+- the landing `<map>--boat-landing-<dock>` 4 m shoreward, within `publish_server.BOAT_LANDING_REACH` of the boat that
+  sails back.
+The tool keeps each touched map's `runtimePointCount` equal to its scene's runtime points and adjusts
+`authoredMarkerCount`. The A3 build stage's `boats/make_boat_network.py` designed the docks: the shortest jetty
+meeting the shore at deck height whose berths float at draught inside the map and clear of solid props. Greenlight's
+boats use a jetty off the town quay, because the lighthouse pier B23 stands on a 1-1.8 m bank. The Coilmere knob quay
+shelves too fast for the ferry, so route B (Greenlight-Coilmere) sails packet boats.
 
 ## Publication order
 

@@ -216,6 +216,16 @@
 [ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-chalk-boulder-1.glb" id="lv_chalk_boulder_1"]
 
 
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/bridge_control.gd" id="bn_bridge_script"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb" id="bn_kit_sw_trestle_pier_span"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb" id="bn_kit_lantern_post_1"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb" id="bn_kit_fishing_boat_2"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb" id="bn_kit_harbour_banner_1"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -468,6 +478,26 @@ resource_local_to_scene = true
 script = ExtResource("s1_surface")
 texture_preset = "Coastal limestone gravel"
 source_material = SubResource("s1_ORMMaterial3D_skrgp")
+
+[sub_resource type="StandardMaterial3D" id="bn_deck_surface_material"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.67, 0.64, 0.6, 0)
+
+[sub_resource type="Resource" id="bn_deck_surface"]
+resource_local_to_scene = true
+script = ExtResource("surface")
+source_material = SubResource("bn_deck_surface_material")
+
+[sub_resource type="StandardMaterial3D" id="bn_support_surface_material"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.67, 0.64, 0.6, 0)
+
+[sub_resource type="Resource" id="bn_support_surface"]
+resource_local_to_scene = true
+script = ExtResource("surface")
+source_material = SubResource("bn_support_surface_material")
 
 [node name="warrenmead" type="Node3D" groups=["map_authoring_region"]]
 script = ExtResource("region")
@@ -38197,3 +38227,237 @@ transform = Transform3D(-0.950651, 0, 0.0328971, 0, 0.95122, 0, -0.0328971, 0, -
 [node name="Content" parent="AuthoredAssets/lv_warrenmead_Chalk Boulder 1 1" instance=ExtResource("lv_chalk_boulder_1")]
 metadata/map_asset_id = "lf_biomes:kit-chalk-boulder-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-chalk-boulder-1.glb"
+
+[node name="boatnet-warrenmead-pier" type="Node3D" parent="Bridges"]
+script = ExtResource("bn_bridge_script")
+bridge_id = "boatnet-warrenmead-pier"
+metadata = {
+"boatNetwork": "warrenmead",
+"approval": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil",
+"deck": "Warrenmead pier",
+"inside_ownership": true,
+"note": "Warrenmead's west harbour",
+"type": "pier"
+}
+width = 8
+arch = 0
+water_clearance = 0.85
+deck_surface = SubResource("bn_deck_surface")
+support_surface = SubResource("bn_support_surface")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Start" type="Marker3D" parent="Bridges/boatnet-warrenmead-pier"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -195, 2.5, 74)
+
+[node name="End" type="Marker3D" parent="Bridges/boatnet-warrenmead-pier"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -199.17, 2.5, 97.64)
+
+[node name="BN Warrenmead Pier Span 1" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-warrenmead-span-1"
+node_name = "Authored_boatnet_warrenmead_span_1"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "warrenmead",
+"note": "trestle span 1 of 3 on the Warrenmead pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.1738, 0, -0.8068, 0, 1, 0, 0.985, 0, -0.1423, -195.695, 2.5, 77.94)
+
+[node name="Content" parent="AuthoredAssets/BN Warrenmead Pier Span 1" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Warrenmead Pier Span 2" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-warrenmead-span-2"
+node_name = "Authored_boatnet_warrenmead_span_2"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "warrenmead",
+"note": "trestle span 2 of 3 on the Warrenmead pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.1738, 0, -0.8068, 0, 1, 0, 0.985, 0, -0.1423, -197.085, 2.5, 85.82)
+
+[node name="Content" parent="AuthoredAssets/BN Warrenmead Pier Span 2" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Warrenmead Pier Span 3" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-warrenmead-span-3"
+node_name = "Authored_boatnet_warrenmead_span_3"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "warrenmead",
+"note": "trestle span 3 of 3 on the Warrenmead pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.1738, 0, -0.8068, 0, 1, 0, 0.985, 0, -0.1423, -198.475, 2.5, 93.7)
+
+[node name="Content" parent="AuthoredAssets/BN Warrenmead Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Warrenmead Pier Lantern" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-warrenmead-lantern"
+node_name = "Authored_boatnet_warrenmead_lantern"
+catalog_asset_id = "tollholms:kit-lantern-post-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "warrenmead",
+"note": "a light at the head of the Warrenmead pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.1737, 0, -0.9848, 0, 1, 0, 0.9848, 0, -0.1737, -195.9087, 2.5, 96.9968)
+
+[node name="Content" parent="AuthoredAssets/BN Warrenmead Pier Lantern" instance=ExtResource("bn_kit_lantern_post_1")]
+metadata/map_asset_id = "tollholms:kit-lantern-post-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb"
+
+[node name="BN Warrenmead Boat To Lakehead Landing" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-warrenmead-boat-lakehead"
+node_name = "Authored_boatnet_warrenmead_boat_lakehead"
+catalog_asset_id = "tollholms:kit-fishing-boat-2"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "warrenmead",
+"note": "the boat bound for Lakehead Landing, moored on the pier's left side, bow seaward, waterline origin at the water level"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.1737, 0, -0.9848, 0, 1, 0, 0.9848, 0, -0.1737, -191.6827, 0, 93.8785)
+
+[node name="Content" parent="AuthoredAssets/BN Warrenmead Boat To Lakehead Landing" instance=ExtResource("bn_kit_fishing_boat_2")]
+metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
+
+[node name="BN Warrenmead Banner For Lakehead Landing" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-warrenmead-banner-lakehead"
+node_name = "Authored_boatnet_warrenmead_banner_lakehead"
+catalog_asset_id = "tollholms:kit-harbour-banner-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+collision_role = "none"
+metadata = {
+"boatNetwork": "warrenmead",
+"note": "marks the berth of the boat bound for Lakehead Landing"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.1737, 0, 0.9848, 0, 1, 0, -0.9848, 0, 0.1737, -195.2272, 2.5, 96.2996)
+
+[node name="Content" parent="AuthoredAssets/BN Warrenmead Banner For Lakehead Landing" instance=ExtResource("bn_kit_harbour_banner_1")]
+metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+
+[node name="BN Warrenmead Boat To Stagheath" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-warrenmead-boat-stagheath"
+node_name = "Authored_boatnet_warrenmead_boat_stagheath"
+catalog_asset_id = "tollholms:kit-fishing-boat-2"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "warrenmead",
+"note": "the boat bound for Stagheath, moored on the pier's right side, bow seaward, waterline origin at the water level"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.1737, 0, -0.9848, 0, 1, 0, 0.9848, 0, -0.1737, -204.9184, 0, 91.5438)
+
+[node name="Content" parent="AuthoredAssets/BN Warrenmead Boat To Stagheath" instance=ExtResource("bn_kit_fishing_boat_2")]
+metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
+
+[node name="BN Warrenmead Banner For Stagheath" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-warrenmead-banner-stagheath"
+node_name = "Authored_boatnet_warrenmead_banner_stagheath"
+catalog_asset_id = "tollholms:kit-harbour-banner-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+collision_role = "none"
+metadata = {
+"boatNetwork": "warrenmead",
+"note": "marks the berth of the boat bound for Stagheath"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.1737, 0, -0.9848, 0, 1, 0, 0.9848, 0, -0.1737, -202.4162, 2.5, 95.0315)
+
+[node name="Content" parent="AuthoredAssets/BN Warrenmead Banner For Stagheath" instance=ExtResource("bn_kit_harbour_banner_1")]
+metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+
+[node name="warrenmead--obj-boat-lakehead" type="Marker3D" parent="Gameplay/Interactives"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "warrenmead--obj-boat-lakehead"
+kind = "interactive"
+label = "Boat to Lakehead Landing"
+extras = {
+"authority": "server",
+"name": "Boat to Lakehead Landing",
+"objectId": 30,
+"type": "portal",
+"destination": "reedfall",
+"landing": "reedfall--boat-landing-warrenmead",
+"returnBy": "reedfall--obj-boat-warrenmead",
+"boatNetwork": "warrenmead"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -197.3158, 2.5, 92.8848)
+
+[node name="warrenmead--boat-landing-lakehead" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "warrenmead--boat-landing-lakehead"
+kind = "runtime_point"
+label = "Boat landing (from Lakehead Landing)"
+extras = {
+"role": "boat-landing",
+"insideOwnership": true,
+"boat": "warrenmead--obj-boat-lakehead",
+"note": "where the boat from Lakehead Landing sets passengers down, 4 m shoreward of the gangway of the boat that sails back (warrenmead--obj-boat-lakehead)",
+"boatNetwork": "warrenmead"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -196.6209, 2.5, 88.9457)
+
+[node name="warrenmead--obj-boat-stagheath" type="Marker3D" parent="Gameplay/Interactives"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "warrenmead--obj-boat-stagheath"
+kind = "interactive"
+label = "Boat to Stagheath"
+extras = {
+"authority": "server",
+"name": "Boat to Stagheath",
+"objectId": 31,
+"type": "portal",
+"destination": "stagheath",
+"landing": "stagheath--boat-landing-warrenmead",
+"returnBy": "stagheath--obj-boat-warrenmead",
+"boatNetwork": "warrenmead"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -199.2854, 2.5, 92.5374)
+
+[node name="warrenmead--boat-landing-stagheath" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "warrenmead--boat-landing-stagheath"
+kind = "runtime_point"
+label = "Boat landing (from Stagheath)"
+extras = {
+"role": "boat-landing",
+"insideOwnership": true,
+"boat": "warrenmead--obj-boat-stagheath",
+"note": "where the boat from Stagheath sets passengers down, 4 m shoreward of the gangway of the boat that sails back (warrenmead--obj-boat-stagheath)",
+"boatNetwork": "warrenmead"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -198.5905, 2.5, 88.5982)

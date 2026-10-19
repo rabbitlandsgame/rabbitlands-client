@@ -64100,3 +64100,71 @@ size = Vector2(42.0, 12.0)
 feather = 0.0
 enabled = true
 
+[node name="BN Coilmere Boat To Greenlight" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s2_18_itflr")
+asset_id = "boatnet-coilmere-knob-boat-greenlight"
+node_name = "Authored_boatnet_coilmere_knob_boat_greenlight"
+catalog_asset_id = "tollholms:kit-fishing-boat-2"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "coilmere-knob",
+"note": "the boat bound for Greenlight, moored on the pier's left side, bow seaward, waterline origin at the water level"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.9842, 0, 0.1772, 0, 1, 0, -0.1772, 0, 0.9842, -524.1145, 0, -79.7274)
+
+[node name="Content" parent="AuthoredAssets/BN Coilmere Boat To Greenlight" instance=ExtResource("s2_55_o3tud")]
+metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
+
+[node name="BN Coilmere Banner For Greenlight" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s2_18_itflr")
+asset_id = "boatnet-coilmere-knob-banner-greenlight"
+node_name = "Authored_boatnet_coilmere_knob_banner_greenlight"
+catalog_asset_id = "tollholms:kit-harbour-banner-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+collision_role = "none"
+metadata = {
+"boatNetwork": "coilmere-knob",
+"note": "marks the berth of the boat bound for Greenlight"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.9842, 0, -0.1772, 0, 1, 0, 0.1772, 0, -0.9842, -520.6181, 2.5, -77.2374)
+
+[node name="Content" parent="AuthoredAssets/BN Coilmere Banner For Greenlight" instance=ExtResource("s2_114_e1p32")]
+metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+
+[node name="coilmere--obj-boat-greenlight" type="Marker3D" parent="Gameplay/Interactives"]
+gizmo_extents = 0.8
+script = ExtResource("s2_marker")
+record_id = "coilmere--obj-boat-greenlight"
+kind = "interactive"
+label = "Boat to Greenlight"
+extras = {
+"authority": "server",
+"name": "Boat to Greenlight",
+"objectId": 30,
+"type": "portal",
+"destination": "greenlight",
+"landing": "greenlight--boat-landing-coilmere-knob",
+"returnBy": "greenlight--obj-boat-coilmere-knob",
+"boatNetwork": "coilmere-knob"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -523.1011, 2.5, -74.0978)
+
+[node name="coilmere--boat-landing-greenlight" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
+gizmo_extents = 0.8
+script = ExtResource("s2_marker")
+record_id = "coilmere--boat-landing-greenlight"
+kind = "runtime_point"
+label = "Boat landing (from Greenlight)"
+extras = {
+"role": "boat-landing",
+"insideOwnership": true,
+"boat": "coilmere--obj-boat-greenlight",
+"note": "where the boat from Greenlight sets passengers down, 4 m shoreward of the gangway of the boat that sails back (coilmere--obj-boat-greenlight)",
+"boatNetwork": "coilmere-knob"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -527.0379, 2.5, -73.3892)

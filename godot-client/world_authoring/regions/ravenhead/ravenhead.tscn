@@ -291,6 +291,10 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-bench-1.glb" id="lvx96"]
 
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb" id="bn_kit_harbour_banner_1"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb" id="bn_kit_fishing_boat_2"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -41732,3 +41736,141 @@ extras = {
 "note": "owner 2026-10-14: R5, the boat that closes the eastern loop (route audit F5); served by publish_server.py as an isle boat (server-rows.json portal.landingMarker/returnBy)"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.5, 2.5, 231.5)
+
+[node name="BN Ravenhead Boat To Suncoil" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-ravenhead-boat-suncoil"
+node_name = "Authored_boatnet_ravenhead_boat_suncoil"
+catalog_asset_id = "tollholms:kit-sw-ferry-ship"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-ferry-ship.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "ravenhead",
+"note": "the boat bound for Suncoil, moored on the pier's left side, bow seaward, waterline origin at the water level"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.9992, 0, 0.0407, 0, 1, 0, -0.0407, 0, 0.9992, 104.2761, 0, 220.5306)
+
+[node name="Content" parent="AuthoredAssets/BN Ravenhead Boat To Suncoil" instance=ExtResource("s2_23_hk4cr")]
+metadata/map_asset_id = "tollholms:kit-sw-ferry-ship"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-ferry-ship.glb"
+
+[node name="BN Ravenhead Banner For Suncoil" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-ravenhead-banner-suncoil"
+node_name = "Authored_boatnet_ravenhead_banner_suncoil"
+catalog_asset_id = "tollholms:kit-harbour-banner-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+collision_role = "none"
+metadata = {
+"boatNetwork": "ravenhead",
+"note": "marks the berth of the boat bound for Suncoil"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.9992, 0, -0.0407, 0, 1, 0, 0.0407, 0, -0.9992, 107.5674, 2.5, 227.6226)
+
+[node name="Content" parent="AuthoredAssets/BN Ravenhead Banner For Suncoil" instance=ExtResource("bn_kit_harbour_banner_1")]
+metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+
+[node name="BN Ravenhead Boat To Lakehead Landing" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-ravenhead-boat-lakehead"
+node_name = "Authored_boatnet_ravenhead_boat_lakehead"
+catalog_asset_id = "tollholms:kit-fishing-boat-2"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "ravenhead",
+"note": "the boat bound for Lakehead Landing, moored on the pier's left side, bow seaward, waterline origin at the water level"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.9992, 0, 0.0407, 0, 1, 0, -0.0407, 0, 0.9992, 86.9594, 0, 225.3893)
+
+[node name="Content" parent="AuthoredAssets/BN Ravenhead Boat To Lakehead Landing" instance=ExtResource("bn_kit_fishing_boat_2")]
+metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
+
+[node name="BN Ravenhead Banner For Lakehead Landing" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-ravenhead-banner-lakehead"
+node_name = "Authored_boatnet_ravenhead_banner_lakehead"
+catalog_asset_id = "tollholms:kit-harbour-banner-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+collision_role = "none"
+metadata = {
+"boatNetwork": "ravenhead",
+"note": "marks the berth of the boat bound for Lakehead Landing"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.9992, 0, -0.0407, 0, 1, 0, 0.0407, 0, -0.9992, 90.0819, 2.5, 228.3347)
+
+[node name="Content" parent="AuthoredAssets/BN Ravenhead Banner For Lakehead Landing" instance=ExtResource("bn_kit_harbour_banner_1")]
+metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+
+[node name="ravenhead--obj-boat-suncoil" type="Marker3D" parent="Gameplay/Interactives"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "ravenhead--obj-boat-suncoil"
+kind = "interactive"
+label = "Boat to Suncoil"
+extras = {
+"authority": "server",
+"name": "Boat to Suncoil",
+"objectId": 31,
+"type": "portal",
+"destination": "suncoil",
+"landing": "suncoil--boat-landing-ravenhead",
+"returnBy": "suncoil--obj-boat-ravenhead",
+"boatNetwork": "ravenhead"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.6777, 2.5, 230.3925)
+
+[node name="ravenhead--boat-landing-suncoil" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "ravenhead--boat-landing-suncoil"
+kind = "runtime_point"
+label = "Boat landing (from Suncoil)"
+extras = {
+"role": "boat-landing",
+"insideOwnership": true,
+"boat": "ravenhead--obj-boat-suncoil",
+"note": "where the boat from Suncoil sets passengers down, 4 m shoreward of the gangway of the boat that sails back (ravenhead--obj-boat-suncoil)",
+"boatNetwork": "ravenhead"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100.681, 2.5, 230.5552)
+
+[node name="ravenhead--obj-boat-lakehead" type="Marker3D" parent="Gameplay/Interactives"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "ravenhead--obj-boat-lakehead"
+kind = "interactive"
+label = "Boat to Lakehead Landing"
+extras = {
+"authority": "server",
+"name": "Boat to Lakehead Landing",
+"objectId": 30,
+"type": "portal",
+"destination": "reedfall",
+"landing": "reedfall--boat-landing-ravenhead",
+"returnBy": "reedfall--obj-boat-ravenhead",
+"boatNetwork": "ravenhead"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.1922, 2.5, 231.1046)
+
+[node name="ravenhead--boat-landing-lakehead" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "ravenhead--boat-landing-lakehead"
+kind = "runtime_point"
+label = "Boat landing (from Lakehead Landing)"
+extras = {
+"role": "boat-landing",
+"insideOwnership": true,
+"boat": "ravenhead--obj-boat-lakehead",
+"note": "where the boat from Lakehead Landing sets passengers down, 4 m shoreward of the gangway of the boat that sails back (ravenhead--obj-boat-lakehead)",
+"boatNetwork": "ravenhead"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 83.1955, 2.5, 231.2674)

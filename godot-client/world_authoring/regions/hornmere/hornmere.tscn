@@ -9,6 +9,18 @@
 [ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/terrain-detail-normal.png" id="normal"]
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/gameplay_marker.gd" id="marker"]
 
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="bn_asset_script"]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/bridge_control.gd" id="bn_bridge_script"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb" id="bn_kit_sw_trestle_pier_span"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb" id="bn_kit_lantern_post_1"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-ferry-ship.glb" id="bn_kit_sw_ferry_ship"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb" id="bn_kit_harbour_banner_1"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -32,6 +44,26 @@ grid_size = Vector2i(426, 595)
 cell_metres = 2.0
 indices = PackedInt32Array()
 deltas = PackedFloat32Array()
+
+[sub_resource type="StandardMaterial3D" id="bn_deck_surface_material"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.67, 0.64, 0.6, 0)
+
+[sub_resource type="Resource" id="bn_deck_surface"]
+resource_local_to_scene = true
+script = ExtResource("surface")
+source_material = SubResource("bn_deck_surface_material")
+
+[sub_resource type="StandardMaterial3D" id="bn_support_surface_material"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.67, 0.64, 0.6, 0)
+
+[sub_resource type="Resource" id="bn_support_surface"]
+resource_local_to_scene = true
+script = ExtResource("surface")
+source_material = SubResource("bn_support_surface_material")
 
 [node name="hornmere" type="Node3D" groups=["map_authoring_region"]]
 script = ExtResource("region")
@@ -107,3 +139,240 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -326.5, 101.941, -350.5)
 [node name="TutorialTargets" type="Node3D" parent="RuntimePoints"]
 
 [node name="GeneratedPreview" type="Node3D" parent="."]
+
+[node name="boatnet-hornmere-pier" type="Node3D" parent="Bridges"]
+script = ExtResource("bn_bridge_script")
+bridge_id = "boatnet-hornmere-pier"
+metadata = {
+"boatNetwork": "hornmere",
+"approval": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil",
+"deck": "Hornmere pier",
+"inside_ownership": true,
+"note": "Hornmere's south cove: the Stagheath ferry",
+"type": "pier"
+}
+width = 8
+arch = 0
+water_clearance = 0.85
+deck_surface = SubResource("bn_deck_surface")
+support_surface = SubResource("bn_support_surface")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Start" type="Marker3D" parent="Bridges/boatnet-hornmere-pier"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -367, 2.5, 82)
+
+[node name="End" type="Marker3D" parent="Bridges/boatnet-hornmere-pier"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -367, 2.5, 142)
+
+[node name="BN Hornmere Pier Span 1" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-span-1"
+node_name = "Authored_boatnet_hornmere_span_1"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "trestle span 1 of 7 on the Hornmere pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -0.8193, 0, 1, 0, 1.0714, 0, 0, -367, 2.5, 86.2857)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Pier Span 1" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Hornmere Pier Span 2" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-span-2"
+node_name = "Authored_boatnet_hornmere_span_2"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "trestle span 2 of 7 on the Hornmere pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -0.8193, 0, 1, 0, 1.0714, 0, 0, -367, 2.5, 94.8571)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Pier Span 2" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Hornmere Pier Span 3" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-span-3"
+node_name = "Authored_boatnet_hornmere_span_3"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "trestle span 3 of 7 on the Hornmere pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -0.8193, 0, 1, 0, 1.0714, 0, 0, -367, 2.5, 103.4286)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Hornmere Pier Span 4" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-span-4"
+node_name = "Authored_boatnet_hornmere_span_4"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "trestle span 4 of 7 on the Hornmere pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -0.8193, 0, 1, 0, 1.0714, 0, 0, -367, 2.5, 112)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Pier Span 4" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Hornmere Pier Span 5" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-span-5"
+node_name = "Authored_boatnet_hornmere_span_5"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "trestle span 5 of 7 on the Hornmere pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -0.8193, 0, 1, 0, 1.0714, 0, 0, -367, 2.5, 120.5714)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Pier Span 5" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Hornmere Pier Span 6" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-span-6"
+node_name = "Authored_boatnet_hornmere_span_6"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "trestle span 6 of 7 on the Hornmere pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -0.8193, 0, 1, 0, 1.0714, 0, 0, -367, 2.5, 129.1429)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Pier Span 6" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Hornmere Pier Span 7" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-span-7"
+node_name = "Authored_boatnet_hornmere_span_7"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "trestle span 7 of 7 on the Hornmere pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -0.8193, 0, 1, 0, 1.0714, 0, 0, -367, 2.5, 137.7143)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Pier Span 7" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Hornmere Pier Lantern" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-lantern"
+node_name = "Authored_boatnet_hornmere_lantern"
+catalog_asset_id = "tollholms:kit-lantern-post-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "a light at the head of the Hornmere pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -363.9, 2.5, 140.8)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Pier Lantern" instance=ExtResource("bn_kit_lantern_post_1")]
+metadata/map_asset_id = "tollholms:kit-lantern-post-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb"
+
+[node name="BN Hornmere Boat To Stagheath" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-boat-stagheath"
+node_name = "Authored_boatnet_hornmere_boat_stagheath"
+catalog_asset_id = "tollholms:kit-sw-ferry-ship"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-ferry-ship.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "the boat bound for Stagheath, moored on the pier's left side, bow seaward, waterline origin at the water level"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -356.13, 0, 130.5)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Boat To Stagheath" instance=ExtResource("bn_kit_sw_ferry_ship")]
+metadata/map_asset_id = "tollholms:kit-sw-ferry-ship"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-ferry-ship.glb"
+
+[node name="BN Hornmere Banner For Stagheath" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "boatnet-hornmere-banner-stagheath"
+node_name = "Authored_boatnet_hornmere_banner_stagheath"
+catalog_asset_id = "tollholms:kit-harbour-banner-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+collision_role = "none"
+metadata = {
+"boatNetwork": "hornmere",
+"note": "marks the berth of the boat bound for Stagheath"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -363.35, 2.5, 133.5)
+
+[node name="Content" parent="AuthoredAssets/BN Hornmere Banner For Stagheath" instance=ExtResource("bn_kit_harbour_banner_1")]
+metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+
+[node name="hornmere--obj-boat-stagheath" type="Marker3D" parent="Gameplay/Interactives"]
+gizmo_extents = 0.8
+script = ExtResource("marker")
+record_id = "hornmere--obj-boat-stagheath"
+kind = "interactive"
+label = "Boat to Stagheath"
+extras = {
+"authority": "server",
+"name": "Boat to Stagheath",
+"objectId": 30,
+"type": "portal",
+"destination": "stagheath",
+"landing": "stagheath--boat-landing-hornmere",
+"returnBy": "stagheath--obj-boat-hornmere",
+"boatNetwork": "hornmere"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -366, 2.5, 130.5)
+
+[node name="hornmere--boat-landing-stagheath" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
+gizmo_extents = 0.8
+script = ExtResource("marker")
+record_id = "hornmere--boat-landing-stagheath"
+kind = "runtime_point"
+label = "Boat landing (from Stagheath)"
+extras = {
+"role": "boat-landing",
+"insideOwnership": true,
+"boat": "hornmere--obj-boat-stagheath",
+"note": "where the boat from Stagheath sets passengers down, 4 m shoreward of the gangway of the boat that sails back (hornmere--obj-boat-stagheath)",
+"boatNetwork": "hornmere"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -366, 2.5, 126.5)

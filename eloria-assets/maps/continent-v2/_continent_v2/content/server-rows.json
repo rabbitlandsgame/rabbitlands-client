@@ -14,7 +14,34 @@
      "servedFrom": "M1 npcs.txt"
     }
    },
-   "interactives": {}
+   "interactives": {
+    "boarsend--obj-boat-lakehead": {
+     "objectId": 31,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Lakehead Landing. The packet boat at Boarsend sails for Lakehead Landing; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "reedfall",
+      "oneWay": true,
+      "landingMarker": "reedfall--boat-landing-boarsend",
+      "returnBy": "reedfall--obj-boat-boarsend"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "boarsend--obj-boat-greenlight": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Greenlight. The packet boat at Boarsend sails for Greenlight; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "greenlight",
+      "oneWay": true,
+      "landingMarker": "greenlight--boat-landing-boarsend",
+      "returnBy": "greenlight--obj-boat-boarsend"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    }
+   }
   },
   "brambleshaw": {
    "npcs": {},
@@ -43,7 +70,7 @@
      "objectId": 23,
      "role": "portal",
      "target": "maps.txt",
-     "text": "The Ravenhead ferry is berthed at the north jetty, ready to carry you back across the sound to Ravenhead pier. The crew ask no fare.",
+     "text": "Bound for Ravenhead. The ferry at Coilmere crosses to Ravenhead; the crew ask no fare.",
      "portal": {
       "destinationMap": "ravenhead",
       "oneWay": true,
@@ -51,6 +78,19 @@
       "returnBy": "ravenhead--obj-boat-coilmere"
      },
      "source": "owner 2026-10-14: R5, close the eastern loop with a boat connection (landfall-audit-2026-10-14 routes F5); free crossing"
+    },
+    "coilmere--obj-boat-greenlight": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Greenlight. The packet boat at Coilmere sails for Greenlight; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "greenlight",
+      "oneWay": true,
+      "landingMarker": "greenlight--boat-landing-coilmere-knob",
+      "returnBy": "greenlight--obj-boat-coilmere-knob"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
     }
    }
   },
@@ -93,6 +133,45 @@
      "role": "storage",
      "target": "shared",
      "text": "Greenlight quay storehouse opens your shared storage."
+    },
+    "greenlight--obj-boat-coilmere-knob": {
+     "objectId": 31,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Coilmere. The packet boat at Greenlight sails for Coilmere; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "coilmere",
+      "oneWay": true,
+      "landingMarker": "coilmere--boat-landing-greenlight",
+      "returnBy": "coilmere--obj-boat-greenlight"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "greenlight--obj-boat-lakehead": {
+     "objectId": 32,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Lakehead Landing. The packet boat at Greenlight sails for Lakehead Landing; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "reedfall",
+      "oneWay": true,
+      "landingMarker": "reedfall--boat-landing-greenlight",
+      "returnBy": "reedfall--obj-boat-greenlight"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "greenlight--obj-boat-boarsend": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Boarsend. The packet boat at Greenlight sails for Boarsend; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "boarsend",
+      "oneWay": true,
+      "landingMarker": "boarsend--boat-landing-greenlight",
+      "returnBy": "boarsend--obj-boat-greenlight"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
     }
    }
   },
@@ -119,7 +198,21 @@
   },
   "hornmere": {
    "npcs": {},
-   "interactives": {}
+   "interactives": {
+    "hornmere--obj-boat-stagheath": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Stagheath. The ferry at Hornmere crosses to Stagheath; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "stagheath",
+      "oneWay": true,
+      "landingMarker": "stagheath--boat-landing-hornmere",
+      "returnBy": "stagheath--obj-boat-hornmere"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    }
+   }
   },
   "landfall": {
    "npcs": {
@@ -215,7 +308,7 @@
      "objectId": 23,
      "role": "portal",
      "target": "maps.txt",
-     "text": "The Tollholm ferry is berthed at the end of the pier, ready to carry you across the sound to Tollholm's north jetty. The crew ask no fare.",
+     "text": "Bound for Coilmere. The ferry at Ravenhead crosses to Coilmere; the crew ask no fare.",
      "portal": {
       "destinationMap": "coilmere",
       "oneWay": true,
@@ -223,12 +316,104 @@
       "returnBy": "coilmere--obj-boat-ravenhead"
      },
      "source": "owner 2026-10-14: R5, close the eastern loop with a boat connection (landfall-audit-2026-10-14 routes F5); free crossing"
+    },
+    "ravenhead--obj-boat-suncoil": {
+     "objectId": 31,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Suncoil. The ferry at Ravenhead crosses to Suncoil; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "suncoil",
+      "oneWay": true,
+      "landingMarker": "suncoil--boat-landing-ravenhead",
+      "returnBy": "suncoil--obj-boat-ravenhead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "ravenhead--obj-boat-lakehead": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Lakehead Landing. The packet boat at Ravenhead sails for Lakehead Landing; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "reedfall",
+      "oneWay": true,
+      "landingMarker": "reedfall--boat-landing-ravenhead",
+      "returnBy": "reedfall--obj-boat-ravenhead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
     }
    }
   },
   "reedfall": {
    "npcs": {},
-   "interactives": {}
+   "interactives": {
+    "reedfall--obj-boat-stagheath": {
+     "objectId": 33,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Stagheath. The lake boat at Lakehead Landing carries you to Stagheath; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "stagheath",
+      "oneWay": true,
+      "landingMarker": "stagheath--boat-landing-lakehead",
+      "returnBy": "stagheath--obj-boat-lakehead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "reedfall--obj-boat-ravenhead": {
+     "objectId": 32,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Ravenhead. The lake boat at Lakehead Landing carries you to Ravenhead; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "ravenhead",
+      "oneWay": true,
+      "landingMarker": "ravenhead--boat-landing-lakehead",
+      "returnBy": "ravenhead--obj-boat-lakehead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "reedfall--obj-boat-greenlight": {
+     "objectId": 31,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Greenlight. The lake boat at Lakehead Landing carries you to Greenlight; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "greenlight",
+      "oneWay": true,
+      "landingMarker": "greenlight--boat-landing-lakehead",
+      "returnBy": "greenlight--obj-boat-lakehead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "reedfall--obj-boat-warrenmead": {
+     "objectId": 34,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Warrenmead. The lake boat at Lakehead Landing carries you to Warrenmead; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "warrenmead",
+      "oneWay": true,
+      "landingMarker": "warrenmead--boat-landing-lakehead",
+      "returnBy": "warrenmead--obj-boat-lakehead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "reedfall--obj-boat-boarsend": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Boarsend. The lake boat at Lakehead Landing carries you to Boarsend; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "boarsend",
+      "oneWay": true,
+      "landingMarker": "boarsend--boat-landing-lakehead",
+      "returnBy": "boarsend--obj-boat-lakehead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    }
+   }
   },
   "ringholm": {
    "npcs": {
@@ -242,7 +427,21 @@
      "servedFrom": "M1 npcs.txt"
     }
    },
-   "interactives": {}
+   "interactives": {
+    "ringholm--obj-boat-suncoil": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Suncoil. The ferry at Ringholm crosses to Suncoil; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "suncoil",
+      "oneWay": true,
+      "landingMarker": "suncoil--boat-landing-ringholm",
+      "returnBy": "suncoil--obj-boat-ringholm"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    }
+   }
   },
   "saltsound": {
    "npcs": {
@@ -256,7 +455,34 @@
      "servedFrom": "M1 npcs.txt"
     }
    },
-   "interactives": {}
+   "interactives": {
+    "saltsound--obj-boat-whitepeak": {
+     "objectId": 31,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Whitepeak. The ferry at Saltsound crosses to Whitepeak; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "whitepeak",
+      "oneWay": true,
+      "landingMarker": "whitepeak--boat-landing-saltsound",
+      "returnBy": "whitepeak--obj-boat-saltsound"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "saltsound--obj-boat-stagheath": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Stagheath. The packet boat at Saltsound sails for Stagheath; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "stagheath",
+      "oneWay": true,
+      "landingMarker": "stagheath--boat-landing-saltsound",
+      "returnBy": "stagheath--obj-boat-saltsound"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    }
+   }
   },
   "stagheath": {
    "npcs": {
@@ -285,12 +511,91 @@
      "role": "storage",
      "target": "shared",
      "text": "Red light supply chest opens your shared storage."
+    },
+    "stagheath--obj-boat-hornmere": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Hornmere. The ferry at Stagheath crosses to Hornmere; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "hornmere",
+      "oneWay": true,
+      "landingMarker": "hornmere--boat-landing-stagheath",
+      "returnBy": "hornmere--obj-boat-stagheath"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "stagheath--obj-boat-saltsound": {
+     "objectId": 32,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Saltsound. The packet boat at Stagheath sails for Saltsound; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "saltsound",
+      "oneWay": true,
+      "landingMarker": "saltsound--boat-landing-stagheath",
+      "returnBy": "saltsound--obj-boat-stagheath"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "stagheath--obj-boat-lakehead": {
+     "objectId": 31,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Lakehead Landing. The packet boat at Stagheath sails for Lakehead Landing; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "reedfall",
+      "oneWay": true,
+      "landingMarker": "reedfall--boat-landing-stagheath",
+      "returnBy": "reedfall--obj-boat-stagheath"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "stagheath--obj-boat-warrenmead": {
+     "objectId": 33,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Warrenmead. The packet boat at Stagheath sails for Warrenmead; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "warrenmead",
+      "oneWay": true,
+      "landingMarker": "warrenmead--boat-landing-stagheath",
+      "returnBy": "warrenmead--obj-boat-stagheath"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
     }
    }
   },
   "suncoil": {
    "npcs": {},
-   "interactives": {}
+   "interactives": {
+    "suncoil--obj-boat-ringholm": {
+     "objectId": 31,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Ringholm. The ferry at Suncoil crosses to Ringholm; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "ringholm",
+      "oneWay": true,
+      "landingMarker": "ringholm--boat-landing-suncoil",
+      "returnBy": "ringholm--obj-boat-suncoil"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "suncoil--obj-boat-ravenhead": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Ravenhead. The ferry at Suncoil crosses to Ravenhead; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "ravenhead",
+      "oneWay": true,
+      "landingMarker": "ravenhead--boat-landing-suncoil",
+      "returnBy": "ravenhead--obj-boat-suncoil"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    }
+   }
   },
   "twinbrook": {
    "npcs": {
@@ -308,11 +613,52 @@
   },
   "warrenmead": {
    "npcs": {},
-   "interactives": {}
+   "interactives": {
+    "warrenmead--obj-boat-lakehead": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Lakehead Landing. The packet boat at Warrenmead sails for Lakehead Landing; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "reedfall",
+      "oneWay": true,
+      "landingMarker": "reedfall--boat-landing-warrenmead",
+      "returnBy": "reedfall--obj-boat-warrenmead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    },
+    "warrenmead--obj-boat-stagheath": {
+     "objectId": 31,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Stagheath. The packet boat at Warrenmead sails for Stagheath; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "stagheath",
+      "oneWay": true,
+      "landingMarker": "stagheath--boat-landing-warrenmead",
+      "returnBy": "stagheath--obj-boat-warrenmead"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    }
+   }
   },
   "whitepeak": {
    "npcs": {},
-   "interactives": {}
+   "interactives": {
+    "whitepeak--obj-boat-saltsound": {
+     "objectId": 30,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "Bound for Saltsound. The ferry at Whitepeak crosses to Saltsound; the crew ask no fare.",
+     "portal": {
+      "destinationMap": "saltsound",
+      "oneWay": true,
+      "landingMarker": "saltsound--boat-landing-whitepeak",
+      "returnBy": "saltsound--obj-boat-whitepeak"
+     },
+     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
+    }
+   }
   }
  }
 }
