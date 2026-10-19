@@ -30,13 +30,13 @@ func configure(id: String) -> void:
 	stage.add_child(light)
 	var camera := Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 2.75 if id == "golden_plains_horse" else 2.1
+	var profile := Profiles.read(id)
+	camera.size = float(profile.get("portraitCameraSize", 2.75 if id == "golden_plains_horse" else 2.1))
 	stage.add_child(camera)
-	var center := 1.05 if id == "golden_plains_horse" else .73
+	var center := float(profile.get("portraitLookAtHeight", 1.05 if id == "golden_plains_horse" else .73))
 	camera.position = Vector3(3.5, 2.2, -4.8)
 	camera.look_at(Vector3(0, center, 0))
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
-	var profile := Profiles.read(id)
 	var config: Dictionary = models[id].duplicate(true)
 	config.import.scale = float(config.import.scale) * float(profile.get("visualScale", 1.0))
 	actor = ReplicatedActor3D.new()

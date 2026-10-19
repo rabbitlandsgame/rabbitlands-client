@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "status": "crystalback_tortoise_prototype_v1",
+  "mount": "crystalback_tortoise",
+  "saddleBone": "Bone_001",
+  "footOffsetMetres": [
+    0.6,
+    -0.66,
+    0.08
+  ],
+  "kneePoleOffsetMetres": [
+    0.76,
+    -0.3,
+    0.24
+  ],
+  "handOffsetMetres": [
+    0.12,
+    0.16,
+    0.22
+  ],
+  "elbowPoleOffsetMetres": [
+    0.33,
+    0.03,
+    -0.05
+  ],
+  "pelvisLeanDegrees": 3.0,
+  "torsoStabilization": 0.55,
+  "fingerGripWeight": 0.95,
+  "fingerCurlDegrees": [
+    55.0,
+    70.0,
+    50.0
+  ],
+  "footToeOutDegrees": 8.0,
+  "armMotion": {
+    "weight": 1.0,
+    "idle": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.002,
+      "elbowGiveMetres": 0.003
+    },
+    "walk": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    },
+    "trot": {
+      "beatsPerCycle": 2,
+      "handFollowMetres": 0.009,
+      "elbowGiveMetres": 0.014
+    },
+    "gallop": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    }
+  },
+  "reins": {
+    "headBone": "Bone_001",
+    "bridleAnchorsNative": {
+      "l": [
+        0.23,
+        1.74,
+        0.7
+      ],
+      "r": [
+        -0.23,
+        1.74,
+        0.7
+      ]
+    },
+    "widthMetres": 0.024,
+    "thicknessMetres": 0.006,
+    "crossSectionRollDegrees": 35.0,
+    "sideClearanceMetres": 0.025,
+    "sagMetres": 0.008,
+    "looseEndLengthMetres": 0.05,
+    "looseEndSpreadMetres": 0.065,
+    "segments": 20,
+    "colour": "98703e",
+    "bridlePathsNative": [
+      [
+        [
+          0.23,
+          1.74,
+          0.7
+        ],
+        [
+          0.47,
+          1.51,
+          0.47
+        ],
+        [
+          0.73,
+          1.05,
+          0.2
+        ],
+        [
+          0.76,
+          0.7,
+          0.1
+        ],
+        [
+          0.34,
+          0.36,
+          0.05
+        ],
+        [
+          0,
+          0.34,
+          0.05
+        ],
+        [
+          -0.34,
+          0.36,
+          0.05
+        ],
+        [
+          -0.76,
+          0.7,
+          0.1
+        ],
+        [
+          -0.73,
+          1.05,
+          0.2
+        ],
+        [
+          -0.47,
+          1.51,
+          0.47
+        ],
+        [
+          -0.23,
+          1.74,
+          0.7
+        ]
+      ]
+    ]
+  },
+  "walkStrideMetresPerSecond": 0.20309210526315788,
+  "trotStrideMetresPerSecond": 0.4536,
+  "gallopStrideMetresPerSecond": 0.826875,
+  "playbackRateMultipliers": {},
+  "clips": {
+    "idle": "Idle_A",
+    "walk": "Walk",
+    "trot": "Jog",
+    "gallop": "Jog"
+  },
+  "notes": "Local tortoise mount prototype. Centered shell saddle and fitted harness. Original imported model and native NPC clips are retained. Mount-only four-beat walk and scuttle use the actual rig and existing pony saddle geometry. Visual review pending.",
+  "displayName": "Crystalback Tortoise",
+  "visualScale": 1.5,
+  "seatPositionNative": [
+    0.0083,
+    1.78,
+    0.2
+  ],
+  "cycleLengths": {
+    "idle": 3.2,
+    "walk": 1.6,
+    "trot": 1.0,
+    "gallop": 0.7
+  },
+  "borrowedTack": {
+    "source": "res://assets/actors/native/creatures/moor_pony.glb",
+    "sourceBone": "Bone_021",
+    "bone": "Bone_001",
+    "positionNative": [
+      0.0083,
+      1.63,
+      0.4
+    ],
+    "scale": [
+      2.0,
+      0.6,
+      1.05
+    ],
+    "dropScale": 0.9
+  },
+  "locomotionAdapter": {
+    "kind": "tortoise",
+    "rootBone": "Bone_000",
+    "bodyCenter": [
+      0.0083,
+      0.7,
+      -0.06
+    ],
+    "legs": [
+      {
+        "name": "fore_l",
+        "chain": [
+          "Bone_020",
+          "Bone_019",
+          "Bone_018"
+        ],
+        "phase": 0.25,
+        "side": 1,
+        "trackOffsetZ": -0.16
+      },
+      {
+        "name": "fore_r",
+        "chain": [
+          "Bone_016",
+          "Bone_015",
+          "Bone_014"
+        ],
+        "phase": 0.75,
+        "side": -1,
+        "trackOffsetZ": -0.16
+      },
+      {
+        "name": "hind_l",
+        "chain": [
+          "Bone_009",
+          "Bone_008",
+          "Bone_007"
+        ],
+        "phase": 0.0,
+        "side": 1,
+        "trackOffsetZ": 0.1
+      },
+      {
+        "name": "hind_r",
+        "chain": [
+          "Bone_012",
+          "Bone_011",
+          "Bone_010"
+        ],
+        "phase": 0.5,
+        "side": -1,
+        "trackOffsetZ": -0.03
+      }
+    ],
+    "gaits": {
+      "idle": {
+        "stride": 0,
+        "stance": 1.0,
+        "lift": 0,
+        "roll": 0,
+        "bob": 0.002
+      },
+      "walk": {
+        "stride": 0.28,
+        "stance": 0.76,
+        "lift": 0.055,
+        "roll": 1.4,
+        "bob": 0.006
+      },
+      "trot": {
+        "stride": 0.36,
+        "stance": 0.7,
+        "lift": 0.07,
+        "roll": 1.9,
+        "bob": 0.009
+      },
+      "gallop": {
+        "stride": 0.42,
+        "stance": 0.64,
+        "lift": 0.09,
+        "roll": 2.2,
+        "bob": 0.012
+      }
+    },
+    "pawBlendHeight": [
+      0.14,
+      0.28
+    ]
+  },
+  "capeContact": [
+    {
+      "bone": "Bone_000",
+      "center": [
+        0.0083,
+        1.05,
+        -0.25
+      ],
+      "radii": [
+        0.84,
+        0.78,
+        1.05
+      ]
+    }
+  ],
+  "portraitCameraSize": 2.65,
+  "portraitLookAtHeight": 0.85
+}

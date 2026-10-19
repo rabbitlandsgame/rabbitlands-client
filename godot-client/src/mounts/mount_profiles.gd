@@ -2,8 +2,9 @@ extends RefCounted
 ## Explicit local visual profiles. Server ownership and unlocks stay authoritative.
 const PATHS := {
 	"moor_pony": "res://data/mounts/moor_pony.json",
-	"golden_plains_horse": "res://data/mounts/golden_plains_horse.json"}
-const NAMES := {"moor_pony": "Moor Pony", "golden_plains_horse": "Golden Plains Horse"}
+	"golden_plains_horse": "res://data/mounts/golden_plains_horse.json",
+	"crystalback_tortoise": "res://data/mounts/crystalback_tortoise.json"}
+const NAMES := {"moor_pony": "Moor Pony", "golden_plains_horse": "Golden Plains Horse", "crystalback_tortoise":"Crystalback Tortoise"}
 
 static func display_name(id: String) -> String:
 	return str(NAMES.get(id, "Mount"))

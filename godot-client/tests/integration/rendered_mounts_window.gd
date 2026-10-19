@@ -12,8 +12,8 @@ func run() -> void:
 	var state := root.get_node("AppState")
 	state.authenticated = true
 	state.local_actor_id = 42
-	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "golden_plains_horse", "mount_id": "",
-		"owned_mount_ids": ["moor_pony", "golden_plains_horse"], "blocked_reason": "", "gait": "on_foot"}
+	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "crystalback_tortoise", "mount_id": "",
+		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise"], "blocked_reason": "", "gait": "on_foot"}
 	var window: Variant = (load("res://src/ui/mounts_window.gd") as Script).new()
 	root.add_child(window)
 	window.open()

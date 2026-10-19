@@ -23,6 +23,14 @@ func _init() -> void:
 	horse.states[0].selected_mount_id = "golden_plains_horse"
 	horse.states[0].owned_mount_ids = ["moor_pony", "golden_plains_horse"]
 	check(decode(horse).type == "mount_states")
+	var tortoise: Dictionary = horse.duplicate(true)
+	tortoise.states[0].mount_id = "crystalback_tortoise"
+	tortoise.states[0].selected_mount_id = "crystalback_tortoise"
+	tortoise.states[0].owned_mount_ids.append("crystalback_tortoise")
+	check(decode(tortoise).type == "mount_states")
+	for step: int in [2000000,666667,444444]:
+		tortoise.states[0].step_us = step
+		check(decode(tortoise).type == "mount_states")
 	for bad: Variant in [["moor_pony"], ["golden_plains_horse", "golden_plains_horse"], ["unicorn"], "all", [null]]:
 		var copy: Dictionary = horse.duplicate(true)
 		copy.states[0].owned_mount_ids = bad

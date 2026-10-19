@@ -25,6 +25,7 @@ var seat_rest_inverse := Transform3D.IDENTITY
 var tack: Node3D
 var bridle_paths: Array[PackedVector3Array] = []
 var hind_legs := HindLegPose.new()
+var locomotion: RefCounted
 
 func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony") -> Array[String]:
 	actor = player
@@ -58,6 +59,10 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 	var hind_errors := hind_legs.configure(pony.get_skeleton(), profile.get("hindLegPose", {}))
 	if not hind_errors.is_empty():
 		return hind_errors
+	if profile.has("locomotionAdapter"):
+		locomotion = preload("res://src/mounts/tortoise_locomotion.gd").new()
+		var locomotion_errors: Array[String] = locomotion.configure(pony.get_skeleton(), profile.locomotionAdapter)
+		if not locomotion_errors.is_empty(): return locomotion_errors
 	var head_rest := pony.get_skeleton().get_bone_global_rest(head)
 	for side: String in ["l", "r"]:
 		var values: Array = profile.reins.bridleAnchorsNative[side]
@@ -114,10 +119,13 @@ func _process(delta: float) -> void:
 		rate *= float(playback_multipliers.get(action, 1.0))
 	elapsed += delta * rate
 	var clip: String = profile.clips[action]
-	var duration := pony.animation_player.get_animation(clip).length
-	pony.animation_player.play(clip)
-	pony.animation_player.seek(fposmod(elapsed, duration), true)
-	pony.animation_player.pause()
+	var duration := float(profile.get("cycleLengths", {}).get(action, pony.animation_player.get_animation(clip).length))
+	if locomotion != null:
+		locomotion.apply(action, elapsed, duration)
+	else:
+		pony.animation_player.play(clip)
+		pony.animation_player.seek(fposmod(elapsed, duration), true)
+		pony.animation_player.pause()
 	pony.get_skeleton().force_update_all_bone_transforms()
 	hind_legs.apply(action)
 	actor.animation_player.pause()

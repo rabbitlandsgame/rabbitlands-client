@@ -34,6 +34,8 @@ func make_rider(body: String, models: Dictionary) -> ReplicatedActor3D:
 func run() -> void:
 	if "--horse" in OS.get_cmdline_user_args():
 		mount_id = "golden_plains_horse"
+	if "--tortoise" in OS.get_cmdline_user_args():
+		mount_id = "crystalback_tortoise"
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	for body: String in ["luminous_male", "luminous_female"]:
 		var actor := make_rider(body, models)

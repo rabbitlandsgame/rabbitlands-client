@@ -22,6 +22,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build()
+	get_viewport().size_changed.connect(func() -> void: _fit_panel.call_deferred())
 	send_command = get_node("/root/Network").send_chat
 	AppState.state_changed.connect(_changed)
 	sync()
@@ -30,8 +31,9 @@ func _build() -> void:
 	panel = PanelContainer.new()
 	panel.name = "MountsWindow"
 	panel.position = Vector2(65, 65)
-	panel.custom_minimum_size = Vector2(570, 385)
-	panel.size = Vector2(570, 445)
+	panel.custom_minimum_size = Vector2(minf(Profiles.PATHS.size() * 272.0 + 16.0,
+		maxf(360.0, get_viewport_rect().size.x - 112.0)), 385)
+	panel.size = Vector2(panel.custom_minimum_size.x, 445)
 	panel.add_theme_stylebox_override("panel", _box(Color("121d24"), Color("937342"), 2, 14))
 	panel.hide()
 	add_child(panel)
@@ -55,9 +57,14 @@ func _build() -> void:
 	close_button.focus_mode = Control.FOCUS_NONE
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size.y = 300
+	column.add_child(scroll)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
-	column.add_child(row)
+	scroll.add_child(row)
 	for id: String in Profiles.PATHS:
 		var card := PanelContainer.new()
 		card.custom_minimum_size = Vector2(260, 270)
@@ -157,6 +164,8 @@ func open() -> void:
 func _fit_panel() -> void:
 	if not is_inside_tree() or not panel.visible:
 		return
+	panel.custom_minimum_size.x = minf(Profiles.PATHS.size() * 272.0 + 16.0,
+		maxf(360.0, get_viewport_rect().size.x - 112.0))
 	panel.reset_size()
 	if _first_layout:
 		var screen := get_viewport_rect().size
@@ -175,6 +184,7 @@ func choose(id: String) -> void:
 	if Profiles.supports(id):
 		candidate = id
 		sync()
+		(cards[id].get_parent().get_parent() as ScrollContainer).ensure_control_visible(cards[id])
 
 func _state() -> Dictionary:
 	return AppState.actor_mounts.get(AppState.local_actor_id, {})

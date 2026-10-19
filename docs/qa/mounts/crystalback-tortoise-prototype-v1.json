@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "model": "crystalback_tortoise",
+  "scope": "Crystalback Tortoise mount prototype, centered saddle revision",
+  "method": "Existing imported tortoise, copied pony saddle and shell harness; mount-only four-beat walk/scuttle, seated rider, existing cape and upper-body actions.",
+  "authoring": {
+    "newModelsGenerated": false,
+    "sourceGlbsReplaced": false,
+    "nativeNpcClipsChanged": false,
+    "nativeBoundsMetres": [
+      [
+        -0.9207,
+        0,
+        -1.4252
+      ],
+      [
+        0.9295,
+        1.7,
+        1.4184
+      ]
+    ],
+    "importScale": 0.588,
+    "mountVisualScale": 1.5,
+    "effectiveScale": 0.882,
+    "sourceVertexCount": 5368,
+    "sourceJointCount": 21,
+    "influencesPerVertex": 4,
+    "morphTargets": 0,
+    "seatBone": "Bone_001",
+    "seatPointNative": [
+      0.0083,
+      1.78,
+      0.2
+    ],
+    "saddleSource": "moor_pony.glb",
+    "saddleSourceBone": "Bone_021",
+    "saddleCopiedTriangles": 638,
+    "saddleCopiedVertices": 751,
+    "centeredSeatRevision": {
+      "previousSeatPointNative": [
+        0.0083,
+        1.47,
+        0.66
+      ],
+      "rearwardMovementMetres": 0.40572,
+      "reason": "User requested a saddle closer to the middle of the tortoise. Seat raised above the central crystals; harness moved with saddle."
+    },
+    "skinCorrection": "The mounted instance receives a copied ArrayMesh with 964 low-paw vertices rebound within their existing physical leg chains. This prevents imported shin-owned claws rolling through the floor. Shared NPC mesh/weights and source GLB remain unchanged.",
+    "preservedAttributes": "Positions, UVs, triangle indices, materials, skeleton, rest transforms and skin binds retained. Godot surface repacking introduces measured normal/tangent quantization below 0.0005.",
+    "animation": "In-place native rig solver, support locked to the ground, C1 support/recovery transitions. Cycle times walk 1.6s, scuttle 1.0s, rush 0.7s before stride-speed matching.",
+    "exportFidelity": "Runtime pose and copied-skin adapter; no new GLB or Blender export."
+  },
+  "integration": {
+    "controls": "Existing R mount/dismount and Space burst controls.",
+    "selection": "Third bronze card; horizontally scrolls on smaller windows.",
+    "clientCapability": "crystalback_mount_v1",
+    "compatibility": "Server filters unsupported IDs for older client catalogues and restores a usable pony default for an unsupported saved tortoise selection.",
+    "serverPaceMultiplier": 0.3,
+    "travelSpeedMetresPerSecond": {
+      "walk": 0.5,
+      "scuttle": 1.5,
+      "rush": 2.25
+    },
+    "ownership": "Existing all-player mount grant includes the tortoise when this feature is deployed. Shared endurance and outdoor rules retained.",
+    "deployment": "Local feature branches only; not merged, pushed or enabled on the remote test server."
+  },
+  "validation": {
+    "godot": "4.7.2-stable",
+    "tortoiseFit": {
+      "checks": 1352,
+      "failures": 0,
+      "max_leg_reach_error": 0.0,
+      "max_rider_contact_error": 0.00550040602684021,
+      "max_rotation_step_radians": 0.0731069445610046,
+      "max_supported_sole_height": 0.00488438224419951,
+      "max_supported_sole_speed_error": 0.000305038935039192,
+      "minimum_sole_height": -3.42401335728937e-07,
+      "normal_repack_error": 0.000128849787870422,
+      "rebound_paw_vertices": 964,
+      "tangent_repack_error": 5.83827495574951e-05
+    },
+    "upperBodyActions": {
+      "checks": 3070,
+      "failures": 0,
+      "maxLowerBodyTransformError": 0
+    },
+    "clientComponentChecks": {
+      "mountProtocol": 23,
+      "mountControls": 18,
+      "mountHotkeys": 18,
+      "mountsWindow": 17,
+      "failures": 0
+    },
+    "horseRegression": {
+      "fitChecks": 11741,
+      "hindLegChecks": 60887,
+      "failures": 0
+    },
+    "serverMountTests": {
+      "passed": 93,
+      "failed": 0
+    },
+    "bodies": [
+      "luminous_male",
+      "luminous_female"
+    ],
+    "gaits": [
+      "walk",
+      "cruise",
+      "burst"
+    ],
+    "renderedPreview": {
+      "frames": 135,
+      "fps": 30,
+      "seconds": 4.5,
+      "scriptOrResourceErrors": 0
+    },
+    "gates": {
+      "sourceAuthoring": "Existing imported asset audited; required local paw-skin correction documented and checked.",
+      "godotIntegration": "Actual native actors, rider contacts, foot-ground support, action composition/recovery, selector and protocol checked.",
+      "visualReview": "Sampled side, front-quarter and rear game-camera views with centered saddle, cape, bow and spells.",
+      "explicitUserApproval": "Pending review of this revision."
+    }
+  },
+  "sourceSha256": {
+    "godot-client/data/mounts/crystalback_tortoise.json": "72a28982c39f7a061c08646a6527b94522747915accc4d5bc4eceda5407676e6",
+    "godot-client/src/mounts/tortoise_locomotion.gd": "8d72097561d91afed2d02a0122c45226fafe3dcbeff7c2484d0a4c7669db8f5d",
+    "godot-client/src/mounts/mounted_player_visual.gd": "ee15ee4534c5c3cbe280d2c0e3b51452dd80a5d52da5ec711452ea5766f83b3b",
+    "godot-client/src/mounts/mount_profiles.gd": "3256251d920bc7875ad598cce0a4b42e6d8a255aa8ff98e0f3a3a8a963427aef",
+    "godot-client/src/mounts/mount_controls.gd": "01a89656f1ef78d8ff220546a99a94dc323e2fd81744b88af4de3d1075064720",
+    "godot-client/src/mounts/mount_portrait.gd": "c110394b2e55be961888b0d8313f0abdb9af08db46841314c2172e9ef5834742",
+    "godot-client/src/mounts/mount_preview_state.gd": "d80624d4bc1311ba1a8ee973f66e1d2494a8efb626b78d39663025766ff2c2cd",
+    "godot-client/src/network/protocol.gd": "6cbf86c2b1acab083c01cd866cafba0d814facb7a7352ab97edc1bd7dacabb3d",
+    "godot-client/src/ui/mounts_window.gd": "5dcce067c0c57e77b5dcd90106bb0121e498b160b6f824f48b78c26ff4f48e6d",
+    "godot-client/src/dev/tortoise_mount_showcase.gd": "c8d4116dd018afc7e991c6825e382727d590821275a161a4512a2f3b7c2bcb21",
+    "godot-client/src/dev/tortoise_mount_showcase.tscn": "7fa77e41089823f19fc1a4cbf3da591fdf4c10f7b91b17e77548479eb7969cac",
+    "godot-client/tests/test_tortoise_mount.gd": "2e9ad36fbfbce5a45ee780273d2aac6c6da53be74d00914e20e0a201a07d389b",
+    "godot-client/tests/test_mounted_actions.gd": "456f87290ac6d9d296489d2d36169e212625ade0b8bc25b8d48e001591fe8fa6",
+    "godot-client/tests/test_mount_protocol.gd": "e2e72c44ef40008cdb47772966a401c823aafd5f08ba5b2ffd6a43b476c38355",
+    "godot-client/tests/test_mounts_window.gd": "d11f791417a6ac630b189125b184a65a87b8e6c404ed3bfd005bdebb813b36b9",
+    "godot-client/tests/integration/rendered_tortoise_mount.gd": "63eb7625944d050c102e0ae297f216ff24c76f04f49b360c972d94bd411c3e41",
+    "godot-client/tests/integration/rendered_mounts_window.gd": "ac40c2e29c56b8db6619fe2a1cc43ac63c788dcfad7d5e04bfc22c9102c3cbec"
+  },
+  "unchangedInputSha256": {
+    "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb": "eaa9da0596d861961bb4ad2eeab991b4f3fe6c42553e8ba7678f0b29a7f44348",
+    "godot-client/assets/actors/native/creatures/moor_pony.glb": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+    "godot-client/assets/actors/native/races/luminous_male.glb": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+    "godot-client/assets/actors/native/races/luminous_female.glb": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+    "godot-client/assets/actors/native/shared/Universal_Animation_Library.glb": "161f9b54aed6a172ac5b1a37960264f106015bbc8622cd33af2061c9c4f6d69c",
+    "godot-client/data/mounts/moor_pony.json": "84100fc70888ebcd645d1f4f20745930f89ff56eb91075a776a11701414a4639",
+    "godot-client/data/mounts/golden_plains_horse.json": "4d494ba5018fb2da713302f0bcf06881cda4cf28a8333d5c88f17febaea6fb49",
+    "godot-client/data/actors/models.json": "c892158744c7391fdfedb1fb4230947ec54673b6b8e9b5d76985efce3e4dd08a"
+  },
+  "previewSha256": {
+    "crystalback-tortoise-v2.mp4": "4b965a8f7221c0c8371d71e2a71c9fe65ee04758913441a90949e2e8d962c73c",
+    "riding-preview-v2.png": "b5bdcb454635a3e878eda02844974d2607cfe3c589500eebbb1105ac0a6baeef",
+    "mount-selector-v2.png": "beced453c1969d6d4e160a50f8c9a1176150496499976e902773d11be2c56296"
+  },
+  "reviewScene": "res://src/dev/tortoise_mount_showcase.tscn",
+  "reviewControls": "Space pauses/resumes; R restarts the review sequence.",
+  "limitations": [
+    "Two representative rider bodies reviewed; other race and equipment combinations remain to be checked.",
+    "No remote server gameplay test performed for the tortoise.",
+    "Existing pony tack is reused for the prototype."
+  ]
+}
