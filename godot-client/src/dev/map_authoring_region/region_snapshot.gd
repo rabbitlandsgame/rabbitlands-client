@@ -972,8 +972,7 @@ func _generated_arrival_record(region: Node3D, storage: Dictionary, ownership: D
 		if coordinate != floor(float(coordinate)) or coordinate < 0:
 			_fail("Generated arrival source tile must contain nonnegative integers.")
 			return {}
-	var partition := OWNERSHIP.contained(ownership.checkout,
-		"eloria-assets/maps/continent-v2/_continent_v2/partition-inputs/sections_spec.json")
+	var partition := OWNERSHIP.contained(ownership.checkout, _active_partition_spec(ownership.checkout))
 	if partition.is_empty() or not FileAccess.file_exists(partition) or \
 			FileAccess.get_sha256(partition) != provenance.sectionsSpecSha256:
 		_fail("Generated arrival section partition provenance changed.")
@@ -992,6 +991,20 @@ func _generated_arrival_record(region: Node3D, storage: Dictionary, ownership: D
 		return {}
 	_validated_generated_arrival = payload.duplicate(true)
 	return {"payload": payload, "binding": reference.duplicate(true), "absolute": absolute}
+
+
+func _active_partition_spec(checkout: String) -> String:
+	## The catalog's partitionSpecPath (res://../ names the checkout), as arrivals.py reads it; the first partition's
+	## spec when the checkout has no catalog.
+	var first := "eloria-assets/maps/continent-v2/_continent_v2/partition-inputs/sections_spec.json"
+	var catalog_path := OWNERSHIP.contained(checkout, "godot-client/world_authoring/continent-v2/territories.json")
+	if catalog_path.is_empty() or not FileAccess.file_exists(catalog_path):
+		return first
+	var catalog: Variant = JSON.parse_string(FileAccess.get_file_as_string(catalog_path))
+	var resource := String(catalog.get("partitionSpecPath", "")) if catalog is Dictionary else ""
+	if not resource.begins_with("res://../"):
+		return first
+	return resource.substr("res://../".length())
 
 
 func _validate_document(region: Node3D, document: Dictionary) -> void:

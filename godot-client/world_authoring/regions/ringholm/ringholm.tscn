@@ -264,6 +264,12 @@
 [ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb" id="lv_thrift_clump_1"]
 
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb" id="a3_hearthcroft_s0_90_x1ic5"]
+
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="a3_hearthcroft_s0_19_jaile"]
+
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -903,12 +909,6 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 24
-
-[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb" id="a3_hearthcroft_s0_90_x1ic5"]
-
-
-[ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="a3_hearthcroft_s0_19_jaile"]
-
 
 [node name="ringholm" type="Node3D" groups=["map_authoring_region"]]
 script = ExtResource("region")

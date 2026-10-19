@@ -550,6 +550,15 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-causeway-support-f2r-12.glb" id="f2r_t_sw_causeway_support_f2r_12"]
 
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb" id="a3_ravenhead_s0_91_kiy41"]
+
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="a3_ravenhead_s0_19_jaile"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb" id="a3_ravenhead_s0_95_8ehyf"]
+
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -1282,15 +1291,6 @@ albedo_color = Color(0.67, 0.64, 0.6, 0)
 resource_local_to_scene = true
 script = ExtResource("s0_surface")
 source_material = SubResource("s0_StandardMaterial3D_dgf5m")
-
-[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb" id="a3_ravenhead_s0_91_kiy41"]
-
-
-[ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="a3_ravenhead_s0_19_jaile"]
-
-
-[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb" id="a3_ravenhead_s0_95_8ehyf"]
-
 
 [node name="hearthcroft" type="Node3D" groups=["map_authoring_region"]]
 script = ExtResource("region")

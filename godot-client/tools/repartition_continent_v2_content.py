@@ -273,8 +273,13 @@ def build(territories, spec, amend):
         gone = set(indices)
         s.blocks = [b for i, b in enumerate(s.blocks) if i not in gone]
         s.index()
+        # Godot lists every ext_resource before any sub_resource: each kind joins the end of its own run
         first_node = min(d.node_at.values())
-        d.blocks[first_node:first_node] = new_resources
+        subs = [b for b in new_resources if b.startswith("[sub_resource ")]
+        exts = [b for b in new_resources if b.startswith("[ext_resource ")]
+        d.blocks[first_node:first_node] = subs
+        last_ext = max((i for i, b in enumerate(d.blocks[:first_node]) if b.startswith("[ext_resource ")), default=0)
+        d.blocks[last_ext + 1:last_ext + 1] = exts
         d.blocks.extend(moved)
         d.index()
         report["moved"].setdefault(f"{src}->{dst}", 0)
