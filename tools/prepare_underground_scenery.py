@@ -30,6 +30,33 @@ SELECTION = {
     'resource_rock_3': ('amethyst_barrens','veined-boulder-3','height',.8),
 }
 
+# The underground's Quartz and Salt nodes, presented as a continent-v2 package
+# presents its nodes (harvest_presentation.py): `variant` indexes objects.json
+# harvestables.variants[label] (quartz_seam_a/b, salt_pan_a/b) and `yaw` is in
+# degrees about +Y. build_underground.py (retired) writes no presentation into
+# the package, and seams and pans do not stand alone, so without this the
+# client draws these nodes as rings. The values are the art the 2026-10-19
+# playtest reviewed: the variant and yaw each object id seeded (the scale
+# stays seeded). A node moved in underground.json needs its own values.
+HARVEST_PRESENTATION = {
+    1010: {'variant': 1, 'yaw': 226.336},
+    1201: {'variant': 0, 'yaw': 241.054},
+    1202: {'variant': 0, 'yaw': 168.147},
+    1203: {'variant': 1, 'yaw': 53.152},
+    1204: {'variant': 0, 'yaw': 317.132},
+    1301: {'variant': 1, 'yaw': 171.323},
+    1302: {'variant': 0, 'yaw': 201.639},
+}
+
+
+def harvest_presentation(plan):
+    """underground-scenery.json `harvestPresentation`: object id -> its resource and HARVEST_PRESENTATION entry."""
+    nodes = {oid: res for section in plan['sections'] for oid, res, _x, _y in section['nodes']}
+    unknown = sorted(set(HARVEST_PRESENTATION) - set(nodes))
+    if unknown:
+        raise ValueError(f'HARVEST_PRESENTATION names no underground node: {unknown}')
+    return {str(oid): {'resource': nodes[oid], **hint} for oid, hint in sorted(HARVEST_PRESENTATION.items())}
+
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -202,6 +229,7 @@ def main():
             place('mossy_rock', x+rx+1.2, y)
     config = {'schemaVersion': 1, 'map': plan['map']['id'], 'sourcePlanSha256': sha(plan_path.read_bytes()),
               'assets': {record['id']: 'res://'+record['output'].split('godot-client/', 1)[1] for record in records},
+              'harvestPresentation': harvest_presentation(plan),
               'placements': placements}
     (ROOT/'godot-client/data/world/underground-scenery.json').write_text(json.dumps(config, indent=2)+'\n')
     catalog_path = ROOT/'godot-client/data/world/objects.json'

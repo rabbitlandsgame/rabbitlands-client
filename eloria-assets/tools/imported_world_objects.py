@@ -73,6 +73,15 @@ class ImportedHarvestable:
     `graded_against` is the procedural model whose brightness this one was
     graded to: the model it replaces, or for a new label the nearest like
     node.
+
+    `stands_alone` says whether a patch variant reads right on a node its
+    package lays out no footprint or yaw for: a whole plant or stone that
+    looks the same at any yaw (a herb clump, a wet mat, a reed clump, a round
+    boulder). A crop row, a hedge segment, a seam or bank face, a kelp strand,
+    a shell drift or a salt pan is shaped for a stated footprint and yaw, and
+    is never stood at a random one. The registry writes it as `standsAlone` on
+    every model `HARVEST_VARIANTS` lists, and the client stands only those on
+    a node whose label's own model is retired (see `HARVEST_VARIANTS`).
     """
     model_id: str
     label: str
@@ -81,6 +90,7 @@ class ImportedHarvestable:
     answers_label: bool
     graded_against: str
     source: str
+    stands_alone: bool = False
 
 
 #: Append only. Each row's GLB is `assets/world/harvestables/<model_id>.glb`.
@@ -140,32 +150,40 @@ IMPORTED_HARVESTABLES = (
     # bank - so every plant or stone of it is harvestable. Meshy Smart Topology generated above the archetype's
     # triangle cap, collapse-decimated to it, graded in linear light against the label's model; 512 px;
     # work-output/lv/meshy/patches2. They answer no label; HARVEST_VARIANTS names them for packages that describe
-    # their nodes. footprints.json there gives each one's size, long axis and (seams, banks) the face side.
+    # their nodes. footprints.json there gives each one's size, long axis and (seams, banks) the face side. The
+    # rows marked stands_alone (the herb clumps and mats, the reed clumps, the flint boulder; not lavender_clump_b,
+    # a planted row on a tilled strip) also stand on an undescribed node whose label's own model is retired.
     ImportedHarvestable(
         "sage_clump_a", "Sage", "herb", "common", False, "wayside_sage",
         "Meshy patches2 (task 01a13b58-e040-76aa-b5b2-7229a9ef7b2d): a low 1.5 m dome of grey-green sage with "
-        "lilac spikes and cut stubs; 796 tris; 1.00 of isle_sage; 512 px; 2026-10-14"),
+        "lilac spikes and cut stubs; 796 tris; 1.00 of isle_sage; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "sage_clump_b", "Sage", "herb", "common", False, "wayside_sage",
         "Meshy patches2 (task 01a13b5b-47d4-723f-bd03-fb8d39141584): a 1.8 m long low drift of sage with "
-        "seven lilac spikes; 796 tris; 1.00 of isle_sage; 512 px; 2026-10-14"),
+        "seven lilac spikes; 796 tris; 1.00 of isle_sage; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "sage_clump_c", "Sage", "herb", "common", False, "wayside_sage",
         "Meshy patches2 (task 01a13b5f-a0d6-75bb-bd47-0d544b59946c): an open 1.3 m clump of sage, five stems, "
-        "lilac spikes and cut stubs; 794 tris; 1.00 of isle_sage; 512 px; 2026-10-14"),
+        "lilac spikes and cut stubs; 794 tris; 1.00 of isle_sage; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "watercress_mat_a", "Watercress", "flora", "common", False, "cenote_watercress",
         "Meshy patches2 (task 01a13b5b-4cf0-753b-9dfb-fc6f0cc250fd): a 1.5 m round watercress mat on mud; its "
         "open centre closed with a leaf dome (0-credit fix); 798 tris; 1.00 of cenote_watercress; 512 px; "
-        "2026-10-14"),
+        "2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "watercress_mat_b", "Watercress", "flora", "common", False, "cenote_watercress",
         "Meshy patches2 (task 01a13b5b-51a5-766f-9f91-e4fe7c307360): a 1.7 m kidney-shaped watercress mat on "
-        "mud; 794 tris; 1.00 of cenote_watercress; 512 px; 2026-10-14"),
+        "mud; 794 tris; 1.00 of cenote_watercress; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "lavender_clump_a", "Lavender", "herb", "common", False, "lavender",
         "Meshy patches2 (task 01a13b5f-91f0-742e-a126-fc5eff86f480): a low 1.4 m lavender cushion under a "
-        "purple crown; 795 tris; 1.00 of lavender; 512 px; 2026-10-14"),
+        "purple crown; 795 tris; 1.00 of lavender; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "lavender_clump_b", "Lavender", "herb", "common", False, "lavender",
         "Meshy patches2 (task 01a13b5b-3ab2-7181-a8c4-d06c0e686202): a 1.8 x 0.6 m lavender row of purple "
@@ -173,11 +191,13 @@ IMPORTED_HARVESTABLES = (
     ImportedHarvestable(
         "rosemary_clump_a", "Rosemary", "herb", "common", False, "rosemary",
         "Meshy patches2 (task 01a13b5f-96a7-74a2-b8a0-f6cf9e5379a5): an upright 1.4 m rosemary bush; pale "
-        "blue flowers painted on (0-credit); 796 tris; 1.00 of rosemary; 512 px; 2026-10-14"),
+        "blue flowers painted on (0-credit); 796 tris; 1.00 of rosemary; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "rosemary_clump_b", "Rosemary", "herb", "common", False, "rosemary",
         "Meshy patches2 (task 01a13b5f-9b65-72cc-9b89-1bd422529987): a low sprawling 1.7 m rosemary mound; "
-        "pale blue flowers painted on (0-credit); 796 tris; 1.00 of rosemary; 512 px; 2026-10-14"),
+        "pale blue flowers painted on (0-credit); 796 tris; 1.00 of rosemary; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "bramble_hedge_a", "Bramble", "flora", "common", False, "barrow_bramble",
         "Meshy patches2 (task 01a13b5b-e507-70d2-9928-939dad7f680a): a 3.0 m bramble hedge segment, berries "
@@ -193,15 +213,18 @@ IMPORTED_HARVESTABLES = (
     ImportedHarvestable(
         "reed_clump_a", "Reed", "fibre", "common", False, "mirror_reed",
         "Meshy patches2 (task 01a13b5c-810d-736a-ae8b-589acee07501): a 1.8 m reed clump of six sheaves under "
-        "tan plumes; 996 tris; 0.80 of mirror_reed; 512 px; 2026-10-14"),
+        "tan plumes; 996 tris; 0.80 of mirror_reed; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "reed_clump_b", "Reed", "fibre", "common", False, "mirror_reed",
         "Meshy patches2 (task 01a13b5c-8572-758b-8148-62abf47feca7): a 1.6 m reed clump of cattails and "
-        "plumes on an oval mud base; 996 tris; 0.80 of mirror_reed; 512 px; 2026-10-14"),
+        "plumes on an oval mud base; 996 tris; 0.80 of mirror_reed; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "reed_clump_c", "Reed", "fibre", "common", False, "mirror_reed",
         "Meshy patches2 (task 01a13b5c-8ac5-7730-bf3d-7a23549eb743): a 1.9 m narrow reed clump with plumes "
-        "and cut stubs; 996 tris; 0.80 of mirror_reed; 512 px; 2026-10-14"),
+        "and cut stubs; 996 tris; 0.80 of mirror_reed; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "kelp_strand_a", "Kelp", "aquatic", "common", False, "tidewrack_kelp",
         "Meshy patches2 (task 01a13b5d-0420-7380-a0a4-05a672b53364): a 2.6 m washed-up kelp strand on damp "
@@ -237,7 +260,8 @@ IMPORTED_HARVESTABLES = (
     ImportedHarvestable(
         "flint_boulder_a", "Flint", "mineral", "common", False, "sunstone_flint",
         "Meshy patches2 (task 01a13b5d-f05b-751c-a64a-718b0082a73c): a 1.4 m limestone boulder split on flint "
-        "nodules; 2496 tris; 1.00 of isle_flint; 512 px; 2026-10-14"),
+        "nodules; 2496 tris; 1.00 of isle_flint; 512 px; 2026-10-14",
+        stands_alone=True),
     ImportedHarvestable(
         "quartz_seam_a", "Quartz", "crystal", "common", False, "pale_quartz",
         "Meshy patches2 (task 01a13b5d-f4c5-71b5-85ca-98131a2ebf28): a 2.2 m granite seam with crystal "
@@ -273,12 +297,20 @@ class ImportedInteractive:
 #: harvest presentation: work-output/landfall-audit-2026-10-14/harvest/
 #: FINDINGS.md 5.6). A label listed here is written to the registry's
 #: `harvestables.variants` table, and the client stands
-#: `variants[label][variant % len]` on a node - the variant its map package
-#: states, or one its object id picks - instead of the label's one model, so a
-#: field of crop-row segments is not one segment stamped in a lattice. Every id
-#: must be a registered model (procedural or imported) of that label. Empty
-#: until the patch models (row segments, clumps, hedge segments, seams) are
-#: made; with it empty the registry carries no `variants` table at all.
+#: `variants[label][variant % len]` on a node its map package lays out (states
+#: a variant or a footprint; without a stated variant its object id picks one)
+#: instead of the label's one model, so a field of crop-row segments is not one
+#: segment stamped in a lattice. Every id must be a registered model
+#: (procedural or imported) of that label. Empty until the patch models (row
+#: segments, clumps, hedge segments, seams) are made; with it empty the
+#: registry carries no `variants` table at all.
+#:
+#: A node its package does not lay out keeps the label's own model. Where that
+#: model is retired, the client stands one of the label's variants whose row
+#: `stands_alone` (the registry's `standsAlone`), picked by the object id at
+#: its seeded yaw, and the bare ring when the label has none: a hedge, a seam
+#: or a drift at a random yaw reads wrong (2026-10-19 playtest map review,
+#: finding 6).
 HARVEST_VARIANTS: dict[str, tuple[str, ...]] = {
     "Cotton": ("cotton_row",),
     "Hearthroot": ("hearthroot_row",),
@@ -525,6 +557,7 @@ def check_rows(procedural_ids: set[str]) -> None:
     procedural GLB at that path and would overwrite the committed import.
     """
     seen: set[str] = set()
+    listed = variant_ids()
     for row in IMPORTED_HARVESTABLES:
         if row.model_id in procedural_ids:
             raise ValueError(f"imported model {row.model_id} shadows a procedural model")
@@ -533,13 +566,21 @@ def check_rows(procedural_ids: set[str]) -> None:
         if row.graded_against not in procedural_ids:
             raise ValueError(f"{row.model_id} is graded against {row.graded_against}, "
                              "which is not a procedural harvest model")
+        if row.stands_alone and row.model_id not in listed:
+            raise ValueError(f"{row.model_id} stands alone but is no label's variant in HARVEST_VARIANTS")
         seen.add(row.model_id)
+
+
+def variant_ids() -> set[str]:
+    """Every model id HARVEST_VARIANTS lists; the registry states `standsAlone` on each imported one."""
+    return {model_id for ids in HARVEST_VARIANTS.values() for model_id in ids}
 
 
 def imported_entries(client_root: Path, harvestable_dir: str) -> dict[str, dict]:
     """model id -> registry entry, for every row of the table, in table order."""
     entries: dict[str, dict] = {}
     low, high = IMPORTED_TRIANGLE_BAND
+    listed = variant_ids()
     for row in IMPORTED_HARVESTABLES:
         path = client_root / harvestable_dir / f"{row.model_id}.glb"
         if not path.is_file():
@@ -557,6 +598,8 @@ def imported_entries(client_root: Path, harvestable_dir: str) -> dict[str, dict]
             "imported": True,
             "source": row.source,
         }
+        if row.model_id in listed:
+            entries[row.model_id]["standsAlone"] = row.stands_alone
     return entries
 
 
