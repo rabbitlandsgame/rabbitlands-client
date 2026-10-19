@@ -5,6 +5,7 @@ func _init() -> void:
 
 func run() -> void:
 	var all_mounts := "--all-mounts" in OS.get_cmdline_user_args()
+	var pace_review := "--tortoise-cadence" in OS.get_cmdline_user_args()
 	root.size = Vector2i(1760 if all_mounts else 1500, 1000)
 	var view: Variant = (load("res://src/dev/rabbit_mount_showcase.tscn") as PackedScene).instantiate()
 	root.add_child(view)
@@ -30,6 +31,7 @@ func run() -> void:
 	for frame: int in 4:
 		await process_frame
 	var artifacts := ProjectSettings.globalize_path("res://test-artifacts/" + ("all-mount-paces" if all_mounts else "rabbit-mount") + ("-source" if audit else ""))
+	if pace_review: artifacts = ProjectSettings.globalize_path("res://test-artifacts/tortoise-cadence")
 	DirAccess.make_dir_recursive_absolute(artifacts.path_join("frames"))
 	var video := "--video" in OS.get_cmdline_user_args()
 	var frames := 135 if video else 18

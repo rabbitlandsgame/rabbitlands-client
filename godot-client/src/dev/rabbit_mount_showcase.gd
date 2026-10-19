@@ -14,10 +14,20 @@ var paused := false
 var manual := false
 var panels: Array = PANELS.duplicate(true)
 var all_mounts := false
+var pace_review := false
+var travelling_views: Array[Dictionary] = []
 
 func _ready() -> void:
 	all_mounts = "--all-mounts" in OS.get_cmdline_user_args()
-	if all_mounts:
+	pace_review = "--tortoise-cadence" in OS.get_cmdline_user_args()
+	if pace_review:
+		all_mounts = true
+		panels = [
+			["NORMAL / EARLIER CADENCE", "luminous_female", "cruise", "run", true, "crystalback_tortoise", true],
+			["NORMAL / FASTER CADENCE", "luminous_female", "cruise", "run", true, "crystalback_tortoise", false],
+			["FAST / EARLIER CADENCE", "luminous_female", "burst", "run", true, "crystalback_tortoise", true],
+			["FAST / FASTER CADENCE", "luminous_female", "burst", "run", true, "crystalback_tortoise", false]]
+	elif all_mounts:
 		panels.clear()
 		for gait: String in ["cruise", "burst"]:
 			for id: String in preload("res://src/mounts/mount_profiles.gd").PATHS:
@@ -38,11 +48,12 @@ func _ready() -> void:
 	margin.add_child(column)
 	var title := Label.new()
 	title.text = "RABBIT LANDS   /   " + ("ALL MOUNTS / NORMAL + FAST" if all_mounts else "GIANT MEADOW RABBIT")
+	if pace_review: title.text = "RABBIT LANDS   /   TORTOISE CADENCE / 10 AND 20 METRES PER SECOND"
 	title.add_theme_font_size_override("font_size", 23)
 	title.add_theme_color_override("font_color", Color("e6d3a7"))
 	column.add_child(title)
 	var grid := GridContainer.new()
-	grid.columns = 4 if all_mounts else 3
+	grid.columns = 2 if pace_review else (4 if all_mounts else 3)
 	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(grid)
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
@@ -105,6 +116,26 @@ func _ready() -> void:
 		elif index == 1:
 			camera.position = Vector3(0, 2.6, -6.5)
 		camera.look_at(Vector3(0, 1.55, .15))
+		if pace_review:
+			ground.hide()
+			var floor_mesh := MeshInstance3D.new()
+			var plane := PlaneMesh.new()
+			plane.size = Vector2(30, 220)
+			floor_mesh.mesh = plane
+			floor_mesh.material_override = material
+			floor_mesh.position.z = -70
+			stage.add_child(floor_mesh)
+			# Fixed five-metre road markers make server travel speed visible
+			# while the camera follows the actual rider across the review floor.
+			for marker: int in range(-25, 7):
+				var line := MeshInstance3D.new()
+				var stripe := BoxMesh.new()
+				stripe.size = Vector3(30,.008,.035)
+				line.mesh = stripe
+				line.position.z = marker * 5.0
+				stage.add_child(line)
+			camera.position = Vector3(4.8,3.8,5.7)
+			camera.look_at(Vector3(0,1.5,0))
 		var actor := ReplicatedActor3D.new()
 		stage.add_child(actor)
 		var worn := {}
@@ -126,18 +157,27 @@ func _ready() -> void:
 			var mount_errors := Draft.attach(actor, models)
 			if not mount_errors.is_empty(): push_error(str(mount_errors))
 		Draft.pace(actor, panel[2])
+		if pace_review:
+			if bool(panel[6]):
+				actor._mount_visual.profile.maximumCyclesPerSecond = {"trot":2.0,"gallop":3.0}
+			travelling_views.append({"actor":actor,"camera":camera,"camera_rest":camera.position,
+				"speed":actor._presentation_speed})
 		for child: Node in actor.get_children():
 			if child is Node3D and child.name not in ["NativeModel", "RabbitMountDraft", "MountedPony", "CombatPresentation"]:
 				(child as Node3D).hide()
 		actors.append(actor)
 	var instructions := Label.new()
 	instructions.text = "SPACE  pause / resume     R  restart     |     Giant Meadow Rabbit / normal + fast riding"
+	if pace_review: instructions.text = "LEFT: earlier cadence    RIGHT: doubled cadence    |    Ground markers are five metres apart"
 	instructions.add_theme_font_size_override("font_size", 14)
 	column.add_child(instructions)
 	restart()
 
 func restart() -> void:
 	clock = 0.0
+	for view: Dictionary in travelling_views:
+		(view.actor as Node3D).position = Vector3.ZERO
+		(view.camera as Node3D).position = view.camera_rest
 	for index: int in actors.size():
 		actors[index]._mount_visual.elapsed = 0.0
 		actors[index].play_action(&"run" if panels[index][4] else &"idle")
@@ -151,6 +191,10 @@ func advance_sequence(delta: float) -> void:
 	clock += delta
 	if clock > 4.5:
 		restart()
+	for view: Dictionary in travelling_views:
+		var offset := Vector3.FORWARD * float(view.speed) * clock
+		(view.actor as Node3D).position = offset
+		(view.camera as Node3D).position = (view.camera_rest as Vector3) + offset
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
