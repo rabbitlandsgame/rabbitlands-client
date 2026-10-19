@@ -65,7 +65,7 @@ and shared kit identities retain pinned historical source names; active ownershi
 The overlay sits beside certified legacy tables. A runtime change to a certified source such as `world.py` needs
 the owner's separate certificate-advance kit; publication does not overwrite the immutable legacy authority.
 
-Five public shared-storage chests are authored in Landfall (beside the register), Greenlight (the ferry quay),
+Five public shared-storage chests are authored in Landfall (beside Ressa on the arrival plaza), Greenlight (the ferry quay),
 Hearthcroft (the roadside hamlet), Stagheath (the red lighthouse courtyard), and Tollholm (beside the square).
 Each uses per-map object ID 22 and the existing server `storage` role. The server stamps its 3x3 solid body;
 publication requires the complete two-tile approach ring to be open and connected to an arrival. Client packages

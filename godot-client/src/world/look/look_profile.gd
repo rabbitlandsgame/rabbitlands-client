@@ -1293,10 +1293,19 @@ const HAZE_DENSITY_PER_DECLARED := 100.0
 const HAZE_DENSITY_MAX := 0.92
 ## The haze a fog bank closes it to (WeatherSky marks the weather's fog in the
 ## manifest's `fog.weather`, 0..1): from HAZE_BEGIN-HAZE_END to these at full
-## fog, and up to full density. Begun at 80 m, the haze could only ever grey
-## the far half of a frame, so a fog state read as an overcast one.
+## fog, on a curve of 1. Begun at 80 m, the haze could only ever grey the far
+## half of a frame, so a fog state read as an overcast one. From 6 m to 150 m
+## the route a player walks went opaque in production scenes; from 16 m to
+## 200 m it reads (2026-10-19 playtest).
 const WEATHER_HAZE_BEGIN := 16.0
 const WEATHER_HAZE_END := 200.0
+## The density a fog bank raises the haze to. The fog blends a map's clear-day
+## density (haze_density, 0.75-0.92) toward the larger of the two, never down:
+## blended down to 0.68, a fog bank left a third of the geometry and the
+## streamed world's edge showing beyond 200 m, more than a clear day shows
+## beyond HAZE_END. At full fog this is 4 % at 40 m, 14 % at 60 m, 41 % at
+## 100 m, 78 % at 150 m and 95 % from 200 m.
+const WEATHER_HAZE_DENSITY := 0.95
 ## How much of the haze also veils the sky itself, clouds and zenith alike.
 ## Little: the painted sky draws its own haze where it belongs, at the horizon.
 const HAZE_SKY_AFFECT := 0.1

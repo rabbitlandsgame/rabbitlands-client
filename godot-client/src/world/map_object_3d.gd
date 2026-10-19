@@ -507,6 +507,12 @@ func _add_entrance_visual(authored: Dictionary) -> void:
 		return
 	model.name = "EntranceModel"
 	model.rotation.y = deg_to_rad(float(authored.get("yaw", 0.0)))
+	# The art stands behind the portal tile, its opening on it: the served grid
+	# closes the rock (export_collision.entrance_art), and the portal needs its
+	# four neighbours open.
+	var offset: Variant = authored.get("modelOffset")
+	if offset is Array and (offset as Array).size() == 3:
+		model.position = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 	add_child(model)
 	model_id = "underground_entrance_" + str(object_id)
 

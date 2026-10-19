@@ -32,7 +32,8 @@ z = z1 - (r + .5) / 2 with (x0, z1) = collisionOriginMetres, and tile (tx, ty) h
   watertight) placement's blocked cells wall in on every side, its own walk surface excepted (enclosed: a Meshy
   house is a shell, and without this its floor was open inside a ring of wall), whichever map's scene the placement
   is in: a piece whose body reaches over a border closes the neighbour's own ground as well, judged in the
-  neighbour's frame on the neighbour's surface, so both maps' grids agree over it; and not on a harvest node's served
+  neighbour's frame on the neighbour's surface, so both maps' grids agree over it (an underground entrance's art,
+  which the client stands at run time, is such a placement: entrance_art); and not on a harvest node's served
   tile (the node is a body, harvested from the ring round it: harvest_mask);
 - walkable = this map's own ground (the stub's ownership polygon) and standable, or the collar: the neighbour's first
   tile across an open border (the plan's openSeams and moles), eight-connected and one tile deep, taken at the
@@ -118,6 +119,14 @@ TRUNK_MIN_VERTICES = 8
 TRUNK_RADIUS = (0.25, 1.0)
 TRUNK_SIDES = 8
 TRUNK_SPAN = (-1.0, 3.0)
+# Underground entrances (2026-10-19): the client stands each entrance's art from ENTRANCE_REGISTRY's authoredObjects
+# (an entrance with an exteriorTile: a cave mouth or the crystal arch) on the portal's served tile at run time, so it
+# is in no package. Its rock is a solid as a placed kit model's is, at the bake's entrance runtime point moved by the
+# registry's modelOffset and turned by its yaw, as map_object_3d stands it. Its faces that face up and lie below
+# ENTRANCE_FLOOR metres are the passage floor the model was aligned to (tools/prepare_underground_scenery.py):
+# walked through, not a wall.
+ENTRANCE_REGISTRY = "godot-client/data/world/objects.json"
+ENTRANCE_FLOOR = 0.3
 
 
 def say(*parts):
@@ -261,6 +270,42 @@ def placed(triangles, matrix):
     return triangles @ m[:3, :3].T + m[:3, 3]
 
 
+def entrance_art(doc, checkout):
+    """The bake's underground entrances as solid placements [(id, [(triangles, closed), ...], passage floor)] and
+    a record of the art each one stands (ENTRANCE_REGISTRY)."""
+    points = [p for p in doc.get("gameplay", {}).get("runtimePoints", []) if p.get("role") == "underground_entrance"]
+    if not points:
+        return [], []
+    registry = json.loads((checkout / ENTRANCE_REGISTRY).read_text(encoding="utf-8")).get("authoredObjects", {})
+    solids, records = [], []
+    for point in points:
+        art = registry.get(str(point["objectId"]), {})
+        if not (art.get("entrance") and art.get("scene")
+                and list(art.get("exteriorTile", [])) == list(point["serverTile"])):
+            raise ExportError(f"{point['id']}: {ENTRANCE_REGISTRY} stands no entrance art for object "
+                              f"{point['objectId']} on tile {point['serverTile']}")
+        path = checkout / "godot-client" / art["scene"].removeprefix("res://")
+        yaw = math.radians(float(art.get("yaw", 0.0)))
+        c, s = math.cos(yaw), math.sin(yaw)
+        x, y, z = (float(a) + float(b) for a, b in zip(point["position"], art.get("modelOffset", (0, 0, 0))))
+        matrix = [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, x, y, z, 1]
+        groups, floor = [], []
+        for triangles, closed in Prototype.load(path).solid:
+            normal = np.cross(triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0])
+            up = normal[:, 1] >= UPWARD * np.maximum(np.linalg.norm(normal, axis=1), 1e-12)
+            walked = up & (triangles[:, :, 1].max(axis=1) < ENTRANCE_FLOOR)
+            if (~walked).any():
+                groups.append((placed(triangles[~walked], matrix), bool(closed and not walked.any())))
+            if walked.any():
+                floor.append(placed(triangles[walked], matrix))
+        solids.append((f"entrance-{point['objectId']}", groups,
+                       np.concatenate(floor) if floor else np.zeros((0, 3, 3))))
+        records.append({"object": int(point["objectId"]), "tile": list(point["serverTile"]), "scene": art["scene"],
+                        "sha256": sha256_file(path), "solidFaces": int(sum(len(g) for g, _c in groups)),
+                        "floorFaces": int(sum(len(f) for f in floor))})
+    return solids, records
+
+
 def plan_document(checkout=DEFAULT_CHECKOUT):
     return json.loads((Path(checkout) / PLAN).read_text(encoding="utf-8"))
 
@@ -364,6 +409,8 @@ def load_bake(region, bake, checkout=DEFAULT_CHECKOUT, *, sea_level=0.0, log=say
                       "walkInlayPlacements": stem_walk, "solidPlacements": len(solids),
                       "solidTriangles": int(sum(len(t_) for _, groups, _deck in solids for t_, _c in groups)),
                       "prototypes": len(Prototype.cache), "seconds": round(time.time() - t, 1)}
+    entrances, sources["entranceArt"] = entrance_art(doc, checkout)
+    solids.extend(entrances)
     spawn = default_spawn(doc, region, frame=frame, checkout=checkout)["position"]
     harvest_tiles = sorted({tuple(frame.tile(float(h["position"][0]), float(h["position"][2])))
                             for h in doc.get("gameplay", {}).get("harvestables", [])})
