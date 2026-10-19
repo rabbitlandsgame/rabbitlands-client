@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "status": "approved_for_develop",
+  "scope": [
+    "Golden Plains Horse alongside Moor Pony",
+    "Bronze-card mount selection window",
+    "Both mounts granted to all characters",
+    "Revised mounted hind-leg articulation for normal riding and galloping"
+  ],
+  "approval": "The user approved the revised horse preview and requested merging the horse and mount selection changes into develop and pushing.",
+  "clientRevisionReviewed": "90b5069c2e3eb705a073c420c40905f8ebb52899",
+  "serverRevisionReviewed": "12664e3686227a739ee21078936f566cad052923",
+  "acceptedRuntimeSha256": {
+    "godot-client/data/mounts/golden_plains_horse.json": "4d494ba5018fb2da713302f0bcf06881cda4cf28a8333d5c88f17febaea6fb49",
+    "godot-client/src/mounts/mount_hind_leg_pose.gd": "f95daca417456ced3eec52792c27583aba0f653178cadd850e7dcf808860455d",
+    "godot-client/src/mounts/mounted_player_visual.gd": "5f4c2d620d47daad561f45eabc2c1ccf8fc659b269f28a30a9c99690bb801843",
+    "godot-client/tests/test_mount_hind_legs.gd": "1846b5ff632f7c45095ac23737702bbafbd154d3d6d99aa77967307e385753d0"
+  },
+  "unchangedInputSha256": {
+    "golden_plains_horse.glb": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+    "moor_pony.glb": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902"
+  },
+  "reviewVideoSha256": "6e175bb4b5fe8453d04b428c39ad3c5ef1789bab012bcf88b5d1072f1fd56877",
+  "verificationReceipts": [
+    "golden-plains-horse-prototype-v1.json",
+    "golden-plains-horse-in-game-2026-10-18.json",
+    "golden-plains-horse-hind-legs-v1.json"
+  ],
+  "approvalRecordPolicy": "This acceptance supersedes the pending user-review status in the frozen earlier receipts without changing the reviewed motion payload.",
+  "publicationBranches": [
+    "rabbitlandsgame/rabbitlands-client:develop",
+    "rabbitlandsgame/rabbitlands-server:develop"
+  ]
+}
