@@ -268,7 +268,9 @@ def build(recipe: dict) -> dict[str, bytes]:
                        "newVertices": int(grid.width * grid.height - v1h.size),
                        "edgeAllSea": True, "exclusionsUntouched": True,
                        "landKm2": round(float((out_h > 0).sum()) * CELL * CELL / 1e6, 3)},
-        "sceneSidePatches": recipe.get("sceneSidePatches", []),
+        # v1's authored scene-side patches stay authored in scenes; carried so crops of v2 can bind them
+        "sceneSidePatches": sorted({p["id"]: p for src in provenance["sources"]
+                                    for p in src.get("sceneSidePatches", [])}.values(), key=lambda p: p["id"]),
         "outputs": {name: {"sha256": sha256(blob), "bytes": len(blob)} for name, blob in outputs.items()},
         "baseCommit": recipe.get("baseCommit"),
     }

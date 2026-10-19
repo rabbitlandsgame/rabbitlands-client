@@ -39,7 +39,7 @@
  },
  "generator": {
   "path": "godot-client/tools/build_continent_v2_ground.py",
-  "sha256": "7399391aad186f26de34a981fa73d8dfebd14bb035ba98aaa8caecf5b7f4010c"
+  "sha256": "6afd7f034df73ad9f425b52fa5231ead56cecf0c94719b77e4c4524ad3e55188"
  },
  "toolchain": {
   "python": "3.13.7",
@@ -124,7 +124,62 @@
   "exclusionsUntouched": true,
   "landKm2": 4.88
  },
- "sceneSidePatches": [],
+ "sceneSidePatches": [
+  {
+   "id": "seam-mole-knob",
+   "shape": 1,
+   "operation": 1,
+   "size": [
+    42.0,
+    12.0
+   ],
+   "feather": 0.0,
+   "enabled": true,
+   "basis": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "continentOrigin": [
+    2431.0,
+    2.5,
+    7932.0
+   ]
+  },
+  {
+   "id": "seam-mole-pier",
+   "shape": 1,
+   "operation": 1,
+   "size": [
+    28.0,
+    42.0
+   ],
+   "feather": 0.0,
+   "enabled": true,
+   "basis": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "continentOrigin": [
+    2434.0,
+    2.0,
+    7335.0
+   ]
+  }
+ ],
  "outputs": {
   "base-heights.f32le": {
    "sha256": "e0fd40c935bdf78ae2c09ae948c0fffec52f43f3fa36721b16f34dca6606b6b1",
