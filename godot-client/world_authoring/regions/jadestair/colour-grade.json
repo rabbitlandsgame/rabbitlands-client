@@ -5,12 +5,12 @@
  "about": "Ground-colour grade over the frozen Meshy vertex colours. The frozen crop base-colors.rgba8 is unchanged; the scene's Terrain reads this graded copy.",
  "parentFrozenCrop": {
   "path": "base-colors.rgba8",
-  "sha256": "cb965db38924df1ed28e5a4ccbde1835b45c1ed7d40309578989f136db52eb16"
+  "sha256": "ba3f2d83648e2ab226feb3d8f4c2634cf22aea450389cd0d3d4126a1c3baf5ca"
  },
  "graded": {
   "path": "base-colors-graded.rgba8",
-  "sha256": "2f2111e989d1dba4b667e3d742a2c36f6417321a78ce8024abf282cbbd3e83ba",
-  "changedVertices": 36044
+  "sha256": "f758c3f029f14685003d74ca276887451de55548e2101bfeab5accb8551515fb",
+  "changedVertices": 72047
  },
  "gradeOnly": null,
  "targets": {
@@ -326,5 +326,13 @@
    ],
    "strength": 0.55
   }
+ },
+ "carried": {
+  "tool": "godot-client/tools/carry_continent_v2_grade.py",
+  "fromCommit": "08448a36",
+  "fromRegion": "godot-client/world_authoring/regions/spindle_hill",
+  "keptVertices": 79729,
+  "carriedVertices": 78221,
+  "method": "unchanged frozen bytes keep their graded bytes; the rest take a harmonically inpainted per-channel log ratio graded/frozen"
  }
 }
