@@ -21,6 +21,13 @@ const CreationClassIcons = preload("res://src/ui/creation_class_icons.gd")
 const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
 const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd")
 var character_intro := NewCharacterIntroScript.new()
+const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
+const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
+## The loading screen from signing in, or a far arrival, until the character
+## stands on loaded ground (_update_arrival).
+var arrival_curtain := ArrivalCurtainScript.new()
+## The respawn destination's ground on another map, loaded while dead.
+var respawn_prewarm := ArrivalPrewarmScript.new()
 var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
 
 @onready var login_panel: Control = %LoginPanel
@@ -729,6 +736,18 @@ var _local_placement_logged := false
 ## Set when `_sync_world` ran out of spawn budget with actors still to
 ## build; the next frame picks them up.
 var _spawn_backlog := false
+## The local character's arrival while its ground streams in behind the
+## curtain: {position, started, ready}. Empty when none is pending.
+var _arrival: Dictionary = {}
+## A fresh map load waiting for the curtain to be on screen, so a whole map's
+## synchronous build happens behind it instead of freezing the last view.
+var _deferred_map_load := false
+## Frames the curtain stays up after the character is grounded.
+var _arrival_settle_frames := 0
+## An arrival that has not loaded by then is grounded synchronously, and a
+## curtain still up is lowered: neither may strand a player.
+const ARRIVAL_TIMEOUT_MSEC := 30000
+const ARRIVAL_CURTAIN_LIMIT_MSEC := 60000
 ## The region's picture under the map cameras, or null on a map without one.
 var _map_picture: MeshInstance3D
 ## The ground the current region's picture lies on: what the other regions'
@@ -1082,6 +1101,7 @@ const EXPERIENCE_SKILLS: Array[String] = [
 func _ready() -> void:
 	world_root.add_child(quest_trail)
 	add_child(character_intro)
+	add_child(arrival_curtain)
 	character_intro.conversation_requested.connect(_request_arrival_conversation)
 	character_intro.conversation_ended.connect(_end_arrival_conversation)
 	Diagnostics.record("main_scene_initializing")
@@ -1551,6 +1571,7 @@ func _process(delta: float) -> void:
 			and not weather_map.has("insidesOf")
 		audio_director.set_weather(weather_layer.look() \
 			if AppState.authenticated and outdoors else {})
+	_update_arrival()
 	if _spawn_backlog:
 		_spawn_backlog = false
 		_queue_world_sync()
@@ -1564,7 +1585,7 @@ func _process(delta: float) -> void:
 		if is_instance_valid(trail_actor):
 			quest_trail.update_trail(delta, (trail_actor as Node3D).global_position)
 		_update_map_walk_target()
-		if AppState.actors.has(AppState.local_actor_id) and not character_intro.blocks_input():
+		if AppState.actors.has(AppState.local_actor_id) and not _world_input_blocked():
 			exterior_stream.update_position(camera_rig.focus)
 		# Look pass: a chunk or neighbour finished under the switch's old
 		# answer follows the new one as it arrives, before anything fades it.
@@ -1665,8 +1686,13 @@ func _text_entry_active() -> bool:
 	var focus: Control = get_viewport().gui_get_focus_owner()
 	return focus is LineEdit or focus is TextEdit
 
+## The new-character intro and the loading curtain both own the screen while
+## they are up: the world takes no input and the exterior preloads wait.
+func _world_input_blocked() -> bool:
+	return character_intro.blocks_input() or arrival_curtain.blocks_input()
+
 func _update_keyboard_movement() -> void:
-	if character_intro.blocks_input():
+	if _world_input_blocked():
 		_stop_keyboard_movement()
 		return
 	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
@@ -2227,6 +2253,11 @@ func _on_login_pressed() -> void:
 	if error != OK:
 		status_label.text = "Login send failed: " + error_string(error)
 		login_button.disabled = false
+		return
+	# Up before LOG_IN_OK: it and CHANGE_MAP arrive in one burst, and the world
+	# is built behind the curtain, never in front of the player.
+	arrival_curtain.begin("Signing in…")
+	arrival_curtain.set_progress(0.05)
 
 func _on_login_submitted(_text: String) -> void:
 	if AppState.connection_state == "disconnected":
@@ -3524,11 +3555,15 @@ func _on_login_succeeded() -> void:
 	_request_map_redraw()
 	_sync_map_viewport_activity()
 	map_label.text = "Entering world…"
+	if arrival_curtain.is_showing():
+		arrival_curtain.set_text("Entering Rabbit Lands…")
+		arrival_curtain.set_progress(0.1)
 	_load_server_map()
 	_sync_world()
 	_record_client_snapshot_after_frames()
 
 func _on_login_failed(message: String) -> void:
+	_end_arrival()
 	if character_intro.blocks_input():
 		character_intro.cancel()
 		creation_panel.hide()
@@ -3540,6 +3575,8 @@ func _on_login_failed(message: String) -> void:
 func _on_connection_state_changed(value: String) -> void:
 	if value == "disconnected":
 		character_intro.cancel()
+		_end_arrival()
+		respawn_prewarm.discard()
 		_pickpoint_draft.clear()
 		_pickpoint_submitting = false
 	status_label.text = ("Securing the connection…" if value == "securing"
@@ -3677,6 +3714,8 @@ func _clear_world_presentation() -> void:
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	if arrival_curtain.blocks_input():
+		return
 	if character_intro.blocks_input():
 		if character_intro.allows_dialogue():
 			if event is InputEventKey and event.is_pressed() \
@@ -3729,7 +3768,7 @@ func _can_open_spell_wheel() -> bool:
 	return _ring_allowed() and not (technique_ring != null and technique_ring.visible)
 
 func _ring_allowed() -> bool:
-	return game_view.visible and not character_intro.blocks_input() and not _text_entry_active() \
+	return game_view.visible and not _world_input_blocked() and not _text_entry_active() \
 		and not popup_panel.visible and not purchase_confirm.visible \
 		and not dialogue_panel.visible and not trade_panel.visible \
 		and not storage_panel.visible and not full_map.visible \
@@ -3868,7 +3907,7 @@ func _recenter_viewport_on_player() -> void:
 	_update_local_actor_follow()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if character_intro.blocks_input():
+	if _world_input_blocked():
 		return
 	if not game_view.visible:
 		return
@@ -4023,7 +4062,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 func _on_world_gui_input(event: InputEvent) -> void:
-	if character_intro.blocks_input():
+	if _world_input_blocked():
 		viewport_container.accept_event()
 		return
 	if event is InputEventMouseButton and not event.pressed \
@@ -4224,7 +4263,7 @@ func _capture_speech_bubble_from_chat() -> void:
 ## the deliberate override, and Ranging Lock while a bow is in hand
 ## (gamewin.c, CURSOR_WALK and CURSOR_ATTACK).
 func _movement_locked(ctrl_pressed: bool) -> bool:
-	if character_intro.blocks_input():
+	if _world_input_blocked():
 		return true
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	if bool(AppState.death.get("dead", false)) or int(local_actor.get("health", 1)) <= 0:
@@ -4612,7 +4651,7 @@ func _local_actor_server_tile() -> Variant:
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
 func _map_input_blocked() -> bool:
-	return (character_intro.blocks_input() or not game_view.visible or dialogue_panel.visible or trade_panel.visible
+	return (_world_input_blocked() or not game_view.visible or dialogue_panel.visible or trade_panel.visible
 		or storage_panel.visible or manufacturing_panel.visible)
 
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
@@ -5006,6 +5045,8 @@ func _on_state_changed(path: StringName) -> void:
 			_update_console_location()
 			# Markers survive a map change; which of them belong here does not.
 			_sync_map_markers()
+		&"death":
+			_prefetch_respawn()
 		&"actors":
 			# A busy map emits this once per actor packet. Rebuilding the whole
 			# actor presentation for each of them repeated the same work many
@@ -5195,6 +5236,24 @@ func _load_server_map() -> void:
 				handoff = {"resident": preloaded, "continuous": false}
 		else:
 			character_intro.cancel()
+	if handoff.is_empty() and not character_intro.blocks_input():
+		# A respawn onto another map adopts the ground loaded while dead.
+		var prewarmed: Dictionary = respawn_prewarm.take(normalized_map)
+		if not prewarmed.is_empty():
+			handoff = {"resident": prewarmed, "continuous": false}
+		else:
+			# A fresh load: the arrival is built behind the curtain. A whole map is
+			# built on the frame it loads, so it waits for the curtain to be drawn.
+			if not arrival_curtain.is_showing():
+				arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+			if not respawn_prewarm.streams(ProjectSettings.globalize_path(str(entry.get("manifest", "")))) \
+					and not arrival_curtain.has_drawn():
+				_deferred_map_load = true
+				return
+	_deferred_map_load = false
+	_arrival = {}
+	if arrival_curtain.is_showing():
+		arrival_curtain.set_text("Entering %s…" % _friendly_map_name(AppState.current_map))
 	_continuous_map_handoff = bool(handoff.get("continuous", false))
 	_retained_traveller = AppState.local_actor_id if _continuous_map_handoff else -1
 	_retained_until = Time.get_ticks_msec() + 3000
@@ -5567,12 +5626,152 @@ func _on_world_load_failed(errors: Array[String]) -> void:
 	map_label.text = "Map load failed: " + "; ".join(errors)
 	_record_client_snapshot_after_frames()
 
+## True while the local character must wait for its ground: it has no node yet
+## (signing in, a map change, a teleport or respawn) and the streamed cells
+## under its arrival are not resident. The first such call starts the
+## asynchronous arrival (ContinentChunkStream.begin_arrival) and raises the
+## curtain; _update_arrival releases it. An arrival whose ground is already
+## resident (a short hop, ground prefetched while dead) is not held at all.
+## A character already standing keeps walking: its streamed lead covers it.
+func _hold_for_arrival() -> bool:
+	var stream := world_loader.world_root as ContinentChunkStream
+	var local_id: int = AppState.local_actor_id
+	if stream == null or adapter == null or character_intro.pending \
+			or not AppState.actors.has(local_id) or actor_nodes.has(local_id):
+		return false
+	var arriving: Dictionary = AppState.actors[local_id]
+	# Across a seamless crossing the record names the map it came from.
+	if str(arriving.get("map", AppState.current_map)) != AppState.current_map:
+		return false
+	var position: Vector3 = adapter.tile_center(int(arriving.x), int(arriving.y))
+	if not _arrival.is_empty() and (_arrival.position as Vector3).is_equal_approx(position):
+		# Once the curtain is on screen the actors are built behind it while the
+		# ground loads (their models are main-thread work the worker's imports
+		# overlap); the local character stays hidden until its ground is there.
+		return not bool(_arrival.ready) and not arrival_curtain.has_drawn()
+	if stream.has_focus and stream.arrival_resident(position):
+		return false
+	stream.begin_arrival(position)
+	_arrival = {"position": position, "started": Time.get_ticks_msec(), "ready": false}
+	if not arrival_curtain.is_showing():
+		arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+	arrival_curtain.set_progress(0.15)
+	Diagnostics.record("arrival_started", {"map": AppState.current_map,
+		"position": [position.x, position.y, position.z]})
+	return true
+
+## Each frame: a deferred whole-map load once the curtain is drawn; a pending
+## arrival's progress, and its release once every cell framing it is resident;
+## then the curtain lowered once the character stands grounded for a few frames.
+func _update_arrival() -> void:
+	if _deferred_map_load:
+		if not AppState.authenticated:
+			_deferred_map_load = false
+		elif arrival_curtain.has_drawn():
+			_deferred_map_load = false
+			_load_server_map()
+			_sync_world()
+		return
+	if not _arrival.is_empty() and not bool(_arrival.ready):
+		var stream := world_loader.world_root as ContinentChunkStream
+		var position: Vector3 = _arrival.position
+		var waited := Time.get_ticks_msec() - int(_arrival.started)
+		if stream == null:
+			_arrival.ready = true
+		else:
+			var progress := stream.arrival_progress(position)
+			arrival_curtain.set_progress(0.15 + 0.75 * float(progress.x) / maxf(1.0, float(progress.y)))
+			if progress.x >= progress.y:
+				_arrival.ready = true
+			elif waited > ARRIVAL_TIMEOUT_MSEC:
+				# Never strand a player behind the curtain: ground the arrival the
+				# way the client did before it loaded in the background.
+				push_warning("arrival: %d of %d cells after %d ms; loading the rest now" % [
+					progress.x, progress.y, waited])
+				world_loader.ensure_chunk_arrival(position)
+				_arrival.ready = true
+		if bool(_arrival.ready):
+			_arrival_settle_frames = 0
+			# A full pass: changes that arrived while held were not presented.
+			var building := Time.get_ticks_usec()
+			_sync_world()
+			var arrived: Variant = actor_nodes.get(AppState.local_actor_id)
+			if is_instance_valid(arrived):
+				var local_node := arrived as ReplicatedActor3D
+				local_node.visible = true
+				_place_actor_on_surface(local_node, true, adapter.fallback_height())
+			_snap_all_actors_to_surface.call_deferred()
+			Diagnostics.record("arrival_ready", {"map": AppState.current_map, "msec": waited,
+				"spawn_ms": (Time.get_ticks_usec() - building) / 1000.0})
+		return
+	if not arrival_curtain.is_showing():
+		return
+	if not AppState.authenticated and AppState.connection_state != "connected":
+		_end_arrival()
+		return
+	var local_id: int = AppState.local_actor_id
+	var standing: bool = actor_nodes.has(local_id) and _grounded_actors.has(local_id)
+	if standing or arrival_curtain.elapsed_msec() > ARRIVAL_CURTAIN_LIMIT_MSEC:
+		arrival_curtain.set_progress(1.0)
+		_arrival_settle_frames += 1
+		if _arrival_settle_frames >= 3:
+			_arrival_settle_frames = 0
+			_arrival = {}
+			arrival_curtain.finish()
+	else:
+		_arrival_settle_frames = 0
+		if actor_nodes.has(local_id):
+			arrival_curtain.set_progress(0.95)
+
+func _arrival_pending() -> bool:
+	return not _arrival.is_empty() and not bool(_arrival.ready)
+
+func _end_arrival() -> void:
+	_arrival = {}
+	_deferred_map_load = false
+	_arrival_settle_frames = 0
+	arrival_curtain.cancel()
+
+## While dead, the ground where a respawn will land is loaded in the background
+## (the death state's `destination`): kept resident on this map, or prewarmed
+## in a hidden stream on another, so clicking respawn needs no loading.
+func _prefetch_respawn() -> void:
+	var stream := world_loader.world_root as ContinentChunkStream
+	var destination: Variant = AppState.death.get("destination")
+	if not bool(AppState.death.get("dead", false)) or not destination is Dictionary:
+		if stream != null:
+			stream.clear_prefetch()
+		if not bool(AppState.death.get("dead", false)):
+			respawn_prewarm.discard()
+		return
+	var target: Dictionary = destination
+	var server_map := str(target.get("map", ""))
+	var tile := Vector2i(int(target.get("x", -1)), int(target.get("y", -1)))
+	if server_map.is_empty() or tile.x < 0 or tile.y < 0:
+		return
+	var map_id: String = MapRegistry.normalize_server_map_id(server_map)
+	if map_id == MapRegistry.normalize_server_map_id(AppState.current_map):
+		respawn_prewarm.discard()
+		if stream != null and adapter != null:
+			stream.prefetch(PackedVector3Array([adapter.tile_center(tile.x, tile.y)]))
+		return
+	if stream != null:
+		stream.clear_prefetch()
+	var entry: Dictionary = MapRegistry.resolve(map_registry, server_map)
+	if not entry.is_empty():
+		respawn_prewarm.prewarm(entry, map_id, tile, world_root)
+
 ## Brings the actor nodes in line with AppState. Given `changed` - the ids
 ## AppState has written since the last pass - only those actors are visited;
 ## without it every actor is, which is what a map load and the fixtures need.
 ## An actor with no node yet is built either way, at most ACTOR_SPAWN_BUDGET
 ## of them per pass; the rest are picked up on the following frames.
 func _sync_world(changed: Variant = null) -> void:
+	# A whole map waiting for the curtain, or a character whose ground is still
+	# streaming in: nothing is placed on ground that is not there yet.
+	if _deferred_map_load or _hold_for_arrival():
+		_spawn_backlog = true
+		return
 	# The background worker owns arrival imports during creation. Let it finish
 	# the actual spawn instead of falling back to a synchronous login prime.
 	if character_intro.pending and world_loader.world_root is ContinentChunkStream \
@@ -5591,7 +5790,9 @@ func _sync_world(changed: Variant = null) -> void:
 		# which was then loaded on the handoff frame (the sixteenth's live proof:
 		# 1-2 s a crossing, the traveller walking on meanwhile).
 		var record_map: String = str(arrival_actor.get("map", AppState.current_map))
-		if record_map == AppState.current_map and world_loader.ensure_chunk_arrival(adapter.tile_center(int(arrival_actor.x), int(arrival_actor.y))):
+		# An arrival loading behind the curtain is the worker's: no synchronous prime.
+		if record_map == AppState.current_map and not _arrival_pending() \
+				and world_loader.ensure_chunk_arrival(adapter.tile_center(int(arrival_actor.x), int(arrival_actor.y))):
 			_actor_surface_samples.clear()
 			# The chunk just attached has no physics body until the next physics
 			# frame: the actors presented below ray past it onto their fallback
@@ -5718,6 +5919,8 @@ func _spawn_actor(id: Variant) -> void:
 	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	if int(id) == AppState.local_actor_id:
+		# Built behind the curtain, shown once its ground is resident.
+		node.visible = not _arrival_pending()
 		_sync_harvest_sparkle()
 
 ## Bind mount presentation to the current player identity and map, including
