@@ -60,8 +60,10 @@ const STORAGE_EFFECT_PRIORITY := 2
 const STORAGE_GLOW_CLEARANCE := 0.12
 const GAMEPLAY_LAYER := 2
 ## The waygate texts the continent tool writes name where the gate leads in
-## these words; the label beside the P on the full map is that name.
+## these words, and a boat's text where it sails; the label beside the P on the
+## full map is that name (the rest of its sentence).
 const PORTAL_DESTINATION_PHRASE := "Beyond it lies "
+const BOAT_DESTINATION_PHRASE := "Bound for "
 ## The ring drawn under a node while the player is harvesting it, and under any
 ## object the registry could not place a model for.
 const RING_INNER_RADIUS := 0.62
@@ -237,13 +239,15 @@ static func from_pick_collider(collider: Variant) -> MapObject3D:
 	return null
 
 ## Where this leads, as far as the server said: an exit is named for its
-## destination, and a waygate's text names it in a fixed phrase. Empty when
-## neither applies.
+## destination, and a waygate's or a boat's text names it in a fixed phrase.
+## Empty when neither applies.
 func destination() -> String:
 	if is_exit():
 		return label
-	if is_portal() and detail.contains(PORTAL_DESTINATION_PHRASE):
-		return detail.get_slice(PORTAL_DESTINATION_PHRASE, 1).trim_suffix(".").strip_edges()
+	if is_portal():
+		for phrase: String in [PORTAL_DESTINATION_PHRASE, BOAT_DESTINATION_PHRASE]:
+			if detail.contains(phrase):
+				return detail.get_slice(phrase, 1).get_slice(". ", 0).trim_suffix(".").strip_edges()
 	return ""
 
 ## The glyph the maps draw for this object, or "" for one drawn as a disc.

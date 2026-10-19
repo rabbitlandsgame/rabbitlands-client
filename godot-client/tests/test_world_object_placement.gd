@@ -85,6 +85,21 @@ func _run() -> void:
 		"an authored landscape crossing adds no second monument or ring")
 	_expect(crossing.is_portal() and crossing.map_glyph() == "P" and crossing.destination() == "Whitehorn Range",
 		"the crossing retains its interaction identity and map destination")
+	var waygate := MapObject3D.new()
+	root.add_child(waygate)
+	waygate.configure({"object_id": 59001, "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE,
+		"x": 12, "y": 10, "label": "Portal", "detail": "Beyond it lies Lantern Mine. Safe working mine."},
+		adapter, catalog, true)
+	_expect(waygate.destination() == "Lantern Mine",
+		"a waygate's destination is its name, not the sentences after it")
+	var boat := MapObject3D.new()
+	root.add_child(boat)
+	boat.configure({"object_id": 31, "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE,
+		"x": 14, "y": 10, "label": "Portal",
+		"detail": "Bound for Stagheath. The boat waits at the Lakehead jetty; the crew ask no fare."},
+		adapter, catalog, true)
+	_expect(boat.is_portal() and boat.destination() == "Stagheath",
+		"a boat's destination is the map its text says it is bound for")
 
 	print("world object placement tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)

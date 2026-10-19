@@ -1211,6 +1211,19 @@ preview_clip_inside = PackedVector2Array(1675, 7941, 1685, 8259, 2311, 8259, 231
 [node name="Spawns" type="Node3D" parent="Gameplay"]
 
 
+[node name="greenlight--arrival" type="Marker3D" parent="Gameplay/Spawns"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "greenlight--arrival"
+kind = "spawn"
+label = "Greenlight harbour quay (map start)"
+default_spawn = true
+facing = Vector3(-1, 0, 0)
+extras = {
+"note": "on the town quay beside the Crownwater ferry and the boat jetty, facing the harbour. Replaces the generated arrival, which ground v2's seabed profile left 0.86 m under water (A3, 2026-10-19)"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 2.5, 149.5)
+
 [node name="Portals" type="Node3D" parent="Gameplay"]
 
 
