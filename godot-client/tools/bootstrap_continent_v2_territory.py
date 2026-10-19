@@ -189,6 +189,11 @@ def generate():
         outputs[region/'terrain-provenance.json']=jbytes(prov)
         geo={'revision':'continent-v2-draft-1','translation':translation,'ownershipPolygon':section['ownershipPolygons'][0],'ownershipPolygons':section['ownershipPolygons'],'geometryMode':'continent-v2-editor-source'}
         stub={'schemaVersion':1,'asset':{'id':rid,'name':section['label'],'glb':'world.glb','units':'meters','seaLevel':0.0},'productionStatus':'continent-v2-editor-source','continentGeography':geo,'server':server,'environment':copy.deepcopy(environment)}
+        if (package/'world.json').exists():
+            # merge: the bootstrap owns identity, geography and frame; the map's own environment and keys survive
+            existing=read(package/'world.json')
+            for key in ('schemaVersion','asset','productionStatus','continentGeography','server'): existing[key]=stub[key]
+            existing.setdefault('environment',stub['environment']); stub=existing
         outputs[package/'world.json']=jbytes(stub)
         scene_path=region/(rid+'.tscn'); spec_path=region/'region-authoring-spec.json'
         terrain={'origin':origin,'cellMetres':cell,'vertices':[int(cw),int(ch)]}
@@ -207,6 +212,9 @@ def generate():
         if isinstance(value,dict): value['continentV2']['planSha256']=plan_sha; outputs[path]=jbytes(value)
     original=read(INPUT/'source-catalog.json')
     libraries=[{'directory':'res://world_authoring/regions/'+e['id']+'/assets/prototypes','catalogPrefix':e['id']} for e in original['entries']]
+    if CATALOG.exists():
+        # libraries added after the partition (such as the lf-biomes kit) stay registered
+        libraries+=[l for l in read(CATALOG)['sharedAssetLibraries'] if l not in libraries]
     catalog={'schema':original['schema'],'partitionSpecPath':resource(INPUT/'sections_spec.json'),'ownershipPriority':ids,'retiredMapIds':spec['retiredMapIds'],'sharedAssetLibraries':libraries,'sharedAssetCatalogPath':'res://world_authoring/continent-v2/shared-kit-catalog.json','entries':sorted(entries,key=lambda e:e['label'])}
     if CATALOG.exists():
         omitted={e['id'] for e in read(CATALOG)['entries']}-set(ids)
@@ -232,20 +240,6 @@ def generate():
         return ('\n'.join(lines)+'\n').encode()
     outputs[VIEW/'isles_view.tscn']=viewer(entries)
     for e in entries: outputs[VIEW/(e['id']+'_view.tscn')]=viewer([e])
-    outputs[META/'README.md']=('''# Continent v2 section partition
-
-Active map IDs, exact polygons and ownership priority come from `partition-inputs/sections_spec.json`; the recorded
-check report has 33 ordinary shared borders. Ravenhead retains both disjoint ownership rings. All editor bases are
-byte crops of the hash-pinned `group-terrain` frozen terrain. Its grid is a data parent outside the active catalog.
-The original plan and catalog are pinned under `partition-inputs` with their source commit and file hashes.
-
-Run `python godot-client/tools/bootstrap_continent_v2_territory.py --check` to replay immutable crop/frame/plan checks.
-The bootstrap does not reset existing authored scenes and preserves gameplay/authority spec fields. Edit those
-scenes normally, then run `python godot-client/tools/continent_v2_territories.py` to validate seams and ownership.
-Do not re-run the original Meshy conditioning. Source kit libraries are shared by catalog metadata; placements
-remain authored content. Original three source editors/packages are staged historical inputs until migration
-removes their physical directories; they have no active catalog references.
-''').encode()
     return outputs
 
 def main():

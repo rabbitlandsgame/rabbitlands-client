@@ -698,6 +698,9 @@ def check_seams(territories: list[Territory], lattice: Lattice) -> tuple[list[st
     return problems, report
 
 
+GROUP_SCHEMAS = ("eloria-continent-v2-frozen-group-terrain-v1", "eloria-continent-v2-frozen-group-terrain-v2")
+
+
 def check_crops(territories: list[Territory]) -> tuple[list[str], dict]:
     """Validate exact crops, including an external frozen parent with hash-pinned files and grid."""
     problems, report = [], {}
@@ -722,7 +725,7 @@ def check_crops(territories: list[Territory]) -> tuple[list[str], dict]:
                         files[kind] = raw
                     meta = json.loads(files["provenance"])
                     grid = crop["parentGrid"]
-                    if meta["schema"] != "eloria-continent-v2-frozen-group-terrain-v1" or meta["grid"] != grid or meta["sourceCommit"] != crop["sourceCommit"]:
+                    if meta["schema"] not in GROUP_SCHEMAS or meta["grid"] != grid or                             meta.get("sourceCommit", meta.get("baseCommit")) != crop["sourceCommit"]:
                         raise ValueError("parent provenance/grid/source differs")
                     w, h = grid["gridSize"]
                     if grid["cellMetres"] != CELL or len(files["heights"]) != w*h*4 or len(files["colors"]) != w*h*4:
@@ -745,7 +748,13 @@ def check_crops(territories: list[Territory]) -> tuple[list[str], dict]:
             if any(type(v) is not int for v in (r,c,h,w)) or r<0 or c<0 or (h,w)!=(t.height,t.width) or r+h>heights.shape[0] or c+w>heights.shape[1]:
                 raise ValueError("crop bounds/size differ")
             same_heights = heights[r:r+h,c:c+w].tobytes() == t.heights.tobytes()
-            same_colors = colors[r:r+h,c:c+w].tobytes() == t.colors_path.read_bytes()
+            # the frozen crop beside the heights; a scene may read a graded copy bound to it by colour-grade.json
+            frozen_colors = t.colors_path.parent / "base-colors.rgba8"
+            same_colors = colors[r:r+h,c:c+w].tobytes() == frozen_colors.read_bytes()
+            if t.colors_path != frozen_colors:
+                grade = _json(t.colors_path.parent / "colour-grade.json")
+                if grade["parentFrozenCrop"]["sha256"] != hashlib.sha256(frozen_colors.read_bytes()).hexdigest() or                         grade["graded"]["sha256"] != hashlib.sha256(t.colors_path.read_bytes()).hexdigest() or                         t.colors_path.name != grade["graded"]["path"]:
+                    raise ValueError("the graded colours are not bound to this crop by colour-grade.json")
             same_frame = bool(np.all(first + CELL*np.array([c,r]) == t.first_vertex))
             if not (same_heights and same_colors and same_frame):
                 raise ValueError(f"not a byte crop (heights {same_heights}, colours {same_colors}, frame {same_frame})")
