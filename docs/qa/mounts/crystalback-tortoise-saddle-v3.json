@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Crystalback Tortoise saddle position revision 3",
+  "previousClientRevision": "8980cbf1",
+  "request": "Bring the saddle back further.",
+  "changes": {
+    "previousSeatNative": [
+      0.0083,
+      1.78,
+      0.2
+    ],
+    "seatNative": [
+      0.0083,
+      1.78,
+      -0.25
+    ],
+    "previousSaddleNative": [
+      0.0083,
+      1.63,
+      0.4
+    ],
+    "saddleNative": [
+      0.0083,
+      1.63,
+      -0.05
+    ],
+    "harnessTranslationNative": [
+      0,
+      0,
+      -0.45
+    ],
+    "additionalRearwardMovementMetres": 0.3969
+  },
+  "preserved": "Model, geometry, source skins, native clips, locomotion, rider pose offsets, seat height and controls unchanged.",
+  "validation": {
+    "godot": "4.7.2-stable",
+    "contacts": {
+      "checks": 1352,
+      "failures": 0,
+      "max_leg_reach_error": 0.0,
+      "max_rider_contact_error": 0.00550040509551764,
+      "max_rotation_step_radians": 0.0731069445610046,
+      "max_supported_sole_height": 0.00488438224419951,
+      "max_supported_sole_speed_error": 0.000305038935039192,
+      "minimum_sole_height": -3.42401335728937e-07,
+      "normal_repack_error": 0.000128849787870422,
+      "rebound_paw_vertices": 964,
+      "tangent_repack_error": 5.83827495574951e-05
+    },
+    "renderedFrames": 135,
+    "renderedFps": 30,
+    "renderedSeconds": 4.5,
+    "renderedScriptOrResourceErrors": 0,
+    "visualReview": "Side, quarter and game-camera samples show saddle/rider farther back over the shell; standing, walk, scuttle, rush, cape and upper-body poses retained.",
+    "exportFidelity": "No GLB export or asset replacement. Profile-only position adjustment.",
+    "userApproval": "Pending review of this position."
+  },
+  "sourceSha256": {
+    "godot-client/data/mounts/crystalback_tortoise.json": "2aae7fdf71b57578e1425793e4761f9577eaecf469b61f633f569ffa40ab5bba"
+  },
+  "evidenceSha256": {
+    "contacts-v3.json": "01a6d1f5f9aa80f4a13a1766bdcc1e9e982582229ef8c3233652ee1556acf80c",
+    "crystalback-tortoise-v3.mp4": "425261bb3d637465df933d40b1f9450c8c4f2dcd5a0684d0d61f7ff07146f2b8",
+    "riding-preview-v3.png": "bd5f7f891a2bd902bae0d7b7822f4afdbdb015905fec9d74323f97dc3c49d7e8",
+    "mount-selector-v3.png": "834ffeaf2aa5112062247a370105bc0a636ff3e66e3bc0e1f731aab34edd968a"
+  }
+}
