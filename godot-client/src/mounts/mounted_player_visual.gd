@@ -43,7 +43,8 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 		"rotation": 0, "kind": 5, "name": "", "scale": 1.0}, CoordinateAdapter.new(), config, mapping)
 	if not errors.is_empty():
 		return errors
-	pony.position = Vector3.ZERO
+	var offset: Array = profile.get("visualOffsetMetres", [0.0, 0.0, 0.0])
+	pony.position = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 	pony.server_target = Vector3.ZERO
 	pony.collision_layer = 0
 	pony.set_physics_process(false)
@@ -146,6 +147,10 @@ func _process(delta: float) -> void:
 		seat = Transform3D(bone.basis.orthonormalized(), bone * Vector3(float(offset[0]), float(offset[1]), float(offset[2])))
 	if tack != null:
 		tack.update_pose()
+	# Gait-specific lean is optional; other mounts keep their approved pose.
+	var lean_key := "gallopPelvisLeanDegrees" if action == "gallop" else "normalPelvisLeanDegrees"
+	if profile.has(lean_key):
+		profile.pelvisLeanDegrees = float(profile[lean_key])
 	pose.fit(seat, action, elapsed, duration)
 	upper.apply()
 	if actor._cape_cloth != null and actor._cape_cloth_worn:

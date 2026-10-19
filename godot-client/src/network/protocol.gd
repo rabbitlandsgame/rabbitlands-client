@@ -287,6 +287,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"mount_selection_v1",
 	"crystalback_mount_v1",
 	"rabbit_mount_v1",
+	"raptor_mount_v1",
 	"quest_offers_v1",
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",

@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "status": "jadefeather_raptor_mount_runtime_v1",
+  "mount": "jadefeather_raptor",
+  "saddleBone": "hips",
+  "footOffsetMetres": [
+    0.42,
+    -0.61,
+    0.1
+  ],
+  "kneePoleOffsetMetres": [
+    0.56,
+    -0.16,
+    0.33
+  ],
+  "handOffsetMetres": [
+    0.12,
+    0.15,
+    0.3
+  ],
+  "elbowPoleOffsetMetres": [
+    0.3,
+    0.02,
+    -0.04
+  ],
+  "pelvisLeanDegrees": 7,
+  "torsoStabilization": 0.7,
+  "fingerGripWeight": 0.95,
+  "fingerCurlDegrees": [
+    55.0,
+    70.0,
+    50.0
+  ],
+  "footToeOutDegrees": 10,
+  "armMotion": {
+    "weight": 1.0,
+    "idle": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.002,
+      "elbowGiveMetres": 0.003
+    },
+    "walk": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    },
+    "trot": {
+      "beatsPerCycle": 2,
+      "handFollowMetres": 0.009,
+      "elbowGiveMetres": 0.014
+    },
+    "gallop": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    }
+  },
+  "reins": {
+    "headBone": "spine_6",
+    "bridleAnchorsNative": {
+      "l": [
+        -0.28,
+        1.24,
+        0.77
+      ],
+      "r": [
+        -0.53,
+        1.24,
+        0.77
+      ]
+    },
+    "widthMetres": 0.02,
+    "thicknessMetres": 0.006,
+    "crossSectionRollDegrees": 35.0,
+    "sideClearanceMetres": 0.04,
+    "sagMetres": 0.015,
+    "looseEndLengthMetres": 0.1,
+    "looseEndSpreadMetres": 0.065,
+    "segments": 20,
+    "colour": "98703e",
+    "bridlePathsNative": [
+      [
+        [
+          -0.28,
+          1.24,
+          0.77
+        ],
+        [
+          -0.24,
+          1.2,
+          0.74
+        ],
+        [
+          -0.29,
+          1.08,
+          0.72
+        ],
+        [
+          -0.41,
+          1.05,
+          0.7
+        ],
+        [
+          -0.54,
+          1.08,
+          0.72
+        ],
+        [
+          -0.59,
+          1.2,
+          0.74
+        ],
+        [
+          -0.53,
+          1.24,
+          0.77
+        ]
+      ]
+    ]
+  },
+  "walkStrideMetresPerSecond": 1.7465937048278084,
+  "trotStrideMetresPerSecond": 1.7465937048278084,
+  "gallopStrideMetresPerSecond": 2.951732358911596,
+  "playbackRateMultipliers": {},
+  "clips": {
+    "idle": "Idle_A",
+    "walk": "Walk",
+    "trot": "Walk",
+    "gallop": "Jog"
+  },
+  "notes": "Approved rider fit, idle cape drape and native normal/fast clips promoted to the normal mount catalogue. Original model and animation data are unchanged.",
+  "displayName": "Jadefeather Raptor",
+  "visualScale": 1.25,
+  "seatPositionNative": [
+    -0.27,
+    1.16,
+    0.24
+  ],
+  "borrowedTack": {
+    "source": "res://assets/actors/native/creatures/moor_pony.glb",
+    "sourceBone": "Bone_021",
+    "bone": "hips",
+    "positionNative": [
+      -0.27,
+      1.09,
+      0.28
+    ],
+    "scale": [
+      0.68,
+      0.5,
+      0.75
+    ],
+    "dropScale": 0.42
+  },
+  "capeContact": [
+    {
+      "bone": "hips",
+      "center": [
+        -0.27,
+        0.91,
+        0.14
+      ],
+      "radii": [
+        0.32,
+        0.26,
+        0.48
+      ],
+      "idleBackProfile": [
+        [
+          0.35,
+          1.22
+        ],
+        [
+          0.2,
+          1.16
+        ],
+        [
+          0.1,
+          1.16
+        ],
+        [
+          0.0,
+          1.17
+        ],
+        [
+          -0.07,
+          1.15
+        ],
+        [
+          -0.14,
+          0.9
+        ],
+        [
+          -0.2,
+          0.86
+        ],
+        [
+          -0.4,
+          0.835
+        ],
+        [
+          -0.6,
+          0.875
+        ]
+      ]
+    },
+    {
+      "bone": "tail_1",
+      "center": [
+        -0.23,
+        0.94,
+        -0.25
+      ],
+      "radii": [
+        0.24,
+        0.19,
+        0.5
+      ],
+      "idleBackProfile": [
+        [
+          0.35,
+          1.22
+        ],
+        [
+          0.2,
+          1.16
+        ],
+        [
+          0.1,
+          1.16
+        ],
+        [
+          0.0,
+          1.17
+        ],
+        [
+          -0.07,
+          1.15
+        ],
+        [
+          -0.14,
+          0.9
+        ],
+        [
+          -0.2,
+          0.86
+        ],
+        [
+          -0.4,
+          0.835
+        ],
+        [
+          -0.6,
+          0.875
+        ]
+      ]
+    }
+  ],
+  "capeMotion": {
+    "hangFraction": 0.64,
+    "gallopHangFraction": 0.56,
+    "liftMultiplier": 0.4,
+    "rippleMultiplier": 0.6,
+    "clearanceMetres": 0.04,
+    "gallopClearanceMetres": 0.06,
+    "idleHangFraction": 0.82,
+    "idleClearanceMetres": 0.012
+  },
+  "portraitCameraSize": 3.6,
+  "portraitLookAtHeight": 1.2,
+  "maximumCyclesPerSecond": {
+    "trot": 2.0,
+    "gallop": 4.0
+  },
+  "visualOffsetMetres": [
+    -0.365,
+    -0.05,
+    0.257
+  ],
+  "normalPelvisLeanDegrees": 7.0,
+  "gallopPelvisLeanDegrees": 12.0
+}

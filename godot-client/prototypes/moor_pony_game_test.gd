@@ -3,6 +3,8 @@ extends SceneTree
 var game: Node
 var smoke := false
 var failures := 0
+var mount_id := "moor_pony"
+var evidence := ""
 
 func mount_key(code: Key) -> bool:
 	var event := InputEventKey.new()
@@ -31,6 +33,13 @@ func run() -> void:
 		push_error("The Moor Pony launcher requires a local test session")
 		quit(1)
 		return
+	mount_id = str(config.get("mount_id", "moor_pony"))
+	if not preload("res://src/mounts/mount_profiles.gd").supports(mount_id):
+		push_error("Unknown mount in local test session")
+		quit(1)
+		return
+	evidence = "res://../.local/qa/" + mount_id + "-game"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(evidence))
 	game = load("res://src/app/main.tscn").instantiate()
 	root.add_child(game)
 	await process_frame
@@ -58,9 +67,13 @@ func run() -> void:
 	camera.pitch_degrees = -35.0
 	camera.yaw_degrees = -35.0
 	camera.set_focus(camera.focus)
-	print("MOOR_PONY_GAME_READY")
+	var window: Variant = game.get("mounts_window")
+	window.open()
+	window.choose(mount_id)
+	print("MOUNT_GAME_READY ", mount_id)
 	if not smoke:
 		return
+	window.close()
 	# Give terrain streaming and initial UI windows time to settle.
 	await create_timer(3.0).timeout
 	var typing := game.get("chat_input") as LineEdit
@@ -71,17 +84,22 @@ func run() -> void:
 		failures += 1
 	typing.release_focus()
 	game.call("_hide_chat_input")
-	if not mount_key(KEY_R):
-		push_error("Mount shortcut did not handle R")
+	# Ride through the actual selection window and ordinary server command.
+	window.open()
+	window.choose(mount_id)
+	if window.ride.disabled:
+		push_error("Requested mount is unavailable in the game window")
 		failures += 1
+	window._ride()
+	window.close()
 	if not await wait_for(func() -> bool: return state.actor_mounts.get(state.local_actor_id, {}).get("mode") == "mounted", 8):
 		push_error("Game summon failed: " + str(state.actor_mounts))
 		quit(1)
 		return
 	await process_frame
 	var actor: ReplicatedActor3D = game.get("actor_nodes")[state.local_actor_id]
-	if not is_instance_valid(actor._mount_visual):
-		push_error("Server mount state did not create the pony on the real player")
+	if not is_instance_valid(actor._mount_visual) or str(actor.mount_state.get("mount_id")) != mount_id:
+		push_error("Server mount state did not create the selected mount on the real player")
 		quit(1)
 		return
 	if not mount_key(KEY_SPACE):
@@ -95,7 +113,7 @@ func run() -> void:
 	await create_timer(2.0).timeout
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
-		root.get_texture().get_image().save_png("res://../.local/qa/moor-pony-game/mounted-game.png")
+		root.get_texture().get_image().save_png(evidence.path_join("mounted-game.png"))
 	for gait: String in ["walk", "cruise", "burst"]:
 		network.send_chat("#walk" if gait == "walk" else "#run")
 		network.send_chat("#gallop on" if gait == "burst" else "#gallop off")
@@ -103,6 +121,10 @@ func run() -> void:
 		var dto: Dictionary = state.actors[state.local_actor_id]
 		var destination := Vector2i(int(dto.x) + (-2 if gait == "cruise" else 2), int(dto.y))
 		network.move_to(destination, gait != "walk")
+		var expected := "gallop" if gait == "burst" else "trot"
+		if not await wait_for(func() -> bool: return is_instance_valid(actor._mount_visual) and actor._mount_visual.action == expected, 3):
+			push_error("Wrong live riding animation: " + expected)
+			failures += 1
 		if not await wait_for(func() -> bool: return int(state.actors[state.local_actor_id].x) == destination.x, 5):
 			push_error("Mounted " + gait + " did not reach its server destination")
 			failures += 1
@@ -110,12 +132,12 @@ func run() -> void:
 		if not is_instance_valid(actor._mount_visual):
 			push_error("Mounted route unexpectedly dismounted")
 			failures += 1
-		elif actor._mount_visual.get("action") != {"walk": "walk", "cruise": "trot", "burst": "gallop"}[gait]:
-			push_error("Wrong live riding gait: " + str(actor._mount_visual.get("action")))
+		elif state.actor_mounts[state.local_actor_id].gait != ("burst" if gait == "burst" else "cruise"):
+			push_error("Wrong authoritative riding pace")
 			failures += 1
 		if DisplayServer.get_name() != "headless":
 			await RenderingServer.frame_post_draw
-			root.get_texture().get_image().save_png("res://../.local/qa/moor-pony-game/" + gait + "-game.png")
+			root.get_texture().get_image().save_png(evidence.path_join(gait + "-game.png"))
 		await create_timer(.8).timeout
 	network.send_chat("#gallop on")
 	await create_timer(.5).timeout
@@ -127,7 +149,15 @@ func run() -> void:
 	await process_frame
 	if is_instance_valid(actor._mount_visual):
 		failures += 1
-	print("MOOR_PONY_REAL_GAME_SMOKE failures=", failures)
+	# R recalls the selected mount after dismounting; selection persists.
+	if not mount_key(KEY_R):
+		failures += 1
+	if not await wait_for(func() -> bool: return state.actor_mounts.get(state.local_actor_id, {}).get("mode") == "mounted", 8):
+		failures += 1
+	elif state.actor_mounts[state.local_actor_id].mount_id != mount_id:
+		failures += 1
+	mount_key(KEY_R)
+	print("MOUNT_REAL_GAME_SMOKE ", mount_id, " failures=", failures)
 	network.disconnect_from_server()
 	game.queue_free()
 	await process_frame

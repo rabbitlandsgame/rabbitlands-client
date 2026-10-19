@@ -47,6 +47,8 @@ func configure(id: String) -> void:
 	if not errors.is_empty():
 		push_warning("Mount portrait: " + str(errors))
 		return
+	var offset: Array = profile.get("visualOffsetMetres", [0.0, 0.0, 0.0])
+	actor.position += Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 	actor.set_physics_process(false)
 	actor.set_process(false)
 	for child: Node in actor.get_children():

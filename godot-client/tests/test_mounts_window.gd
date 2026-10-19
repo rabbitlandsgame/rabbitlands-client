@@ -17,7 +17,7 @@ func run() -> void:
 	state.authenticated = true
 	state.local_actor_id = 42
 	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "moor_pony", "mount_id": "",
-		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit"], "blocked_reason": "", "gait": "on_foot"}
+		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"], "blocked_reason": "", "gait": "on_foot"}
 	var window: Variant = (load("res://src/ui/mounts_window.gd") as Script).new()
 	root.add_child(window)
 	var sent: Array[String] = []
@@ -26,7 +26,7 @@ func run() -> void:
 	for frame: int in 4:
 		await process_frame
 	expect(window.panel.get_rect().end.y <= 680, "mount window fits above the fixed bottom bar")
-	expect(window.is_open() and window.cards.size() == 4, "four enabled mounts appear")
+	expect(window.is_open() and window.cards.size() == 5, "five enabled mounts appear")
 	window.choose("golden_plains_horse")
 	expect(not window.ride.disabled, "horse can be chosen by this player")
 	expect(state.actor_mounts[42].selected_mount_id == "moor_pony", "browsing never predicts server selection")
@@ -57,6 +57,9 @@ func run() -> void:
 	window.choose("rabbit")
 	window._ride()
 	expect(sent.back() == "#mount ride rabbit", "rabbit uses normal authoritative switching")
+	window.choose("jadefeather_raptor")
+	window._ride()
+	expect(sent.back() == "#mount ride jadefeather_raptor", "raptor uses normal authoritative switching")
 	window._dismount()
 	expect(sent.back() == "#mount", "Dismount uses normal server command")
 	state.actor_mounts[42].blocked_reason = "combat"
@@ -65,8 +68,14 @@ func run() -> void:
 	root.size = Vector2i(800,720)
 	root.content_scale_size = Vector2i(800,720)
 	for frame: int in 8: await process_frame
-	expect(window.panel.get_global_rect().end.x <= 704, "four cards scroll inside a smaller game window")
-	window.choose("crystalback_tortoise")
+	expect(window.panel.get_global_rect().end.x <= 704, "five cards scroll inside a smaller game window")
+	state.actor_mounts[42].selected_mount_id = "jadefeather_raptor"
+	window.close()
+	window.open()
+	for frame: int in 8: await process_frame
+	var card_rect: Rect2 = window.cards["jadefeather_raptor"].get_global_rect()
+	var scroll_rect: Rect2 = window.cards["jadefeather_raptor"].get_parent().get_parent().get_global_rect()
+	expect(card_rect.position.x >= scroll_rect.position.x and card_rect.end.x <= scroll_rect.end.x + 1, "reopening reveals the saved raptor card on small screens")
 	window.close()
 	expect(not window.is_open(), "window closes")
 	for portrait: Variant in window.portraits.values():

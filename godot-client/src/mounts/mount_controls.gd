@@ -119,7 +119,7 @@ func _refresh() -> void:
 	_has_mount_state = not state.is_empty()
 	var mode: String = state.get("mode", "on_foot")
 	var selected := str(state.get("selected_mount_id", "moor_pony"))
-	var mount_label: String = {"golden_plains_horse":"Mount horse", "crystalback_tortoise":"Mount tortoise", "rabbit":"Mount rabbit"}.get(selected, "Mount pony")
+	var mount_label: String = {"golden_plains_horse":"Mount horse", "crystalback_tortoise":"Mount tortoise", "rabbit":"Mount rabbit", "jadefeather_raptor":"Mount raptor"}.get(selected, "Mount pony")
 	toggle.text = "Dismount" if mode == "mounted" else ("Cancel" if mode == "summoning" else mount_label)
 	toggle.visible = bool(options.mount_button)
 	choose.visible = bool(options.choose_button)

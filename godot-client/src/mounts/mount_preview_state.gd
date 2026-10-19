@@ -4,7 +4,7 @@ extends RefCounted
 ## cannot infer a successful summon from sending a request.
 
 const MOUNT_ID := "moor_pony"
-const MOUNT_IDS := ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit"]
+const MOUNT_IDS := ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"]
 const REASONS := ["", "disabled", "not_owned", "dead", "combat", "restricted_area",
 	"no_clearance", "immobilized", "moving", "already_summoning"]
 var actor_id := -1

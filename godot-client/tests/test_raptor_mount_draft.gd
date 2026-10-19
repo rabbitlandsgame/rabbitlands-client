@@ -29,7 +29,7 @@ func run() -> void:
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	fixture = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/raptor_mount_soles.json"))
 	check(FileAccess.get_sha256(models.jadefeather_raptor.scene) == fixture.sourceSha256, "uses the current roster-pinned raptor source")
-	check(not Profiles.supports("jadefeather_raptor"), "draft does not enable a live catalogue entry")
+	check(Profiles.supports("jadefeather_raptor"), "raptor uses the normal mount catalogue")
 	for body: String in ["luminous_male", "luminous_female"]:
 		var actor := ReplicatedActor3D.new()
 		root.add_child(actor)
@@ -41,7 +41,7 @@ func run() -> void:
 		var authority := actor.global_transform
 		var native := actor.get_node("NativeModel") as Node3D
 		var original := native.transform
-		check(Draft.attach(actor, models).is_empty(), "raptor mount draft configures")
+		check(Draft.attach(actor, models).is_empty(), "registered raptor mount configures")
 		var visual: Variant = actor._mount_visual
 		visual.set_process(false)
 		check(visual.pony.rig_name() == "jadefeather_raptor" and visual.locomotion == null, "uses unchanged native raptor and its original clips")
@@ -100,6 +100,16 @@ func run() -> void:
 			drape_measurements.append({"body":body,"gait":gait,"cape_drop_metres":drop})
 			if gait == "idle": min_idle_drop = minf(min_idle_drop,drop)
 			else: max_moving_drop = maxf(max_moving_drop,drop)
+		# Swap the same equipped body through every live mount, then back to the
+		# raptor. Its offset and cape surface must not leak into another profile.
+		for id: String in Profiles.PATHS:
+			actor.set_mount_state({"mode":"mounted", "mount_id":id, "gait":"cruise"},models)
+			check(is_instance_valid(actor._mount_visual), "switch creates " + id)
+			actor._mount_visual.set_process(false)
+			actor._mount_visual._process(1.0 / 60.0)
+			check(actor.global_transform.is_equal_approx(authority), "switch preserves authoritative placement")
+			for error: float in actor._mount_visual.pose.last_errors.values():
+				check(error < .06, "switched rider fits " + id)
 		actor.set_mount_state({},models)
 		check(native.transform.is_equal_approx(original), "dismount restores the on-foot visual")
 		actor.free()
