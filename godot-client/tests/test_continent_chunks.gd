@@ -155,10 +155,73 @@ func _test_framed_cells_outlast_budget() -> void:
 	_expect(not stream.arrival_resident(Vector3(0, 0, 45)), "a position no cell covers is never reported as ready")
 	stream.free()
 
+## The loading-curtain arrival (main.gd _hold_for_arrival): nothing imported on
+## the calling frame, progress counted over the framed cells, and a respawn
+## prefetch kept resident away from the focus until it is cleared.
+func _test_async_arrival_and_prefetch() -> void:
+	var config := _manifest("fixture_async")
+	config.streamingChunks = {"schemaVersion":"1.0","coordinateSpace":"territory-local",
+		"preloadDistance":60,"retainDistance":100,"maximumLoadedChunks":4,"maximumResidentBytes":1000,
+		"chunks":[_write_chunk("async_west",0),_write_chunk("async_middle",600),_write_chunk("async_east",1200)]}
+	_write_json(SCRATCH.path_join("async.json"),config)
+	var loader := WorldLoader.new()
+	root.add_child(loader)
+	loader.load_world(SCRATCH.path_join("async.json"),Vector3.INF,true)
+	var stream := loader.world_root as ContinentChunkStream
+	var arrival := Vector3(600,0,0)
+	stream.begin_arrival(arrival)
+	_expect(stream.has_focus and stream.cells.is_empty(), "an asynchronous arrival imports nothing on the calling frame")
+	_expect(stream.arrival_progress(arrival) == Vector2i(0,1) and not stream.arrival_ready(arrival),
+		"arrival progress counts the cells framing the arrival")
+	for frame: int in 900:
+		await process_frame
+		if stream.arrival_ready(arrival):
+			break
+	_expect(stream.arrival_ready(arrival) and stream.cells.keys() == ["async_middle"],
+		"the worker loads the arrival's ground, and only that")
+	_expect(stream.events.filter(func(e: Dictionary) -> bool: return str(e.event) == "arrival_reprime").is_empty(),
+		"no synchronous re-prime was needed")
+	var respawn := Vector3(1200,0,0)
+	stream.prefetch(PackedVector3Array([respawn]))
+	for frame: int in 900:
+		await process_frame
+		if stream.prefetch_ready() and stream._thread == null:
+			break
+	_expect(stream.prefetch_ready() and stream.cells.has("async_east") and stream.cells.has("async_middle"),
+		"a prefetch loads a distant destination beside the focus's own ground")
+	_expect(stream.focus == arrival, "a prefetch leaves the focus where the player stands")
+	for frame: int in 30:
+		stream._next_update = 0
+		stream.update_focus(arrival)
+		await process_frame
+	_expect(stream.cells.has("async_east"), "the retain distance does not evict prefetched ground")
+	stream.clear_prefetch()
+	for frame: int in 600:
+		await process_frame
+		if not stream.cells.has("async_east") and stream._retiring.is_empty():
+			break
+	_expect(not stream.cells.has("async_east"), "cleared prefetch ground retires like any distant cell")
+	stream.begin_arrival(Vector3.ZERO)
+	_expect(not stream.cells.has("async_west"), "a far teleport starts without importing on the calling frame")
+	for frame: int in 900:
+		await process_frame
+		if stream.arrival_ready(Vector3.ZERO) and not stream.cells.has("async_middle") and stream._retiring.is_empty():
+			break
+	_expect(stream.arrival_ready(Vector3.ZERO) and stream.cells.keys() == ["async_west"],
+		"a far teleport loads its destination and retires the ground it left")
+	stream.pause_streaming()
+	for frame: int in 300:
+		if stream.can_retire():
+			break
+		await process_frame
+	loader.queue_free()
+	await process_frame
+
 func _run() -> void:
 	_test_shared_memory_accounting()
 	_test_framed_cells_outlast_budget()
 	DirAccess.make_dir_recursive_absolute(SCRATCH)
+	await _test_async_arrival_and_prefetch()
 	# A low-budget arrival half a metre from a boundary used to load only
 	# this side, then synchronously re-prime on the first movement packet.
 	var warm := _manifest("fixture_first_steps")
