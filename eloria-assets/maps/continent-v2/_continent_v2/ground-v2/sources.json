@@ -1,0 +1,37 @@
+{
+ "about": "How each pinned raster was made. The generators are copied here for the record; they read private inputs that stay outside Git: the Meshy continent GLB (sha256 42c887398a86d6f3675cf1e5396234d972b3544fb795e877d6cfa4771f155d30) and the A3 draft mask (work-output drafts.py compose(A3)), and the staged base from build_continent_v2_ground.py --base.",
+ "draftMask": {
+  "file": "a3-draft-newland.npz",
+  "sha256": "3b71ee047284282c3e58b8ff0aafe112547212d7128006821e59760101fac1a0"
+ },
+ "edits": {
+  "strait-fills-north-coast": {
+   "generator": {
+    "path": "authoring/strait_fills.py",
+    "sha256": "b163f22e8a39c06c60e327c2f5381268eee8f779080a589b91eb6d6a8ffa4817"
+   },
+   "note": "the approved A3 draft new-land mask (drafts.py compose(A3)) resampled to 2 m; harmonic join to the old coast (at most 6 m), plain bands by area, 40 m shelf, colours inpainted from inland land, old beach band repainted"
+  },
+  "strait-fills-b22-bars": {
+   "generator": {
+    "path": "authoring/strait_fills.py",
+    "sha256": "b163f22e8a39c06c60e327c2f5381268eee8f779080a589b91eb6d6a8ffa4817"
+   },
+   "note": "the approved A3 draft new-land mask (drafts.py compose(A3)) resampled to 2 m; harmonic join to the old coast (at most 6 m), plain bands by area, 40 m shelf, colours inpainted from inland land, old beach band repainted"
+  },
+  "north-isle": {
+   "generator": {
+    "path": "authoring/island_ground.py",
+    "sha256": "81e10d101b2179437c19ae97fee7b2b507ef8e2cba19829d73d6dc6746dc5e56"
+   },
+   "note": "Meshy continent GLB (sha256 42c88739…) surface at offset (3560,-1650): z-buffered at 2 m, the vertical curve applied, objects opened away, the approved A3 draft coast (fine warp), coastal taper, citadel terrace pad, pits filled"
+  },
+  "south-east-isle": {
+   "generator": {
+    "path": "authoring/island_ground.py",
+    "sha256": "81e10d101b2179437c19ae97fee7b2b507ef8e2cba19829d73d6dc6746dc5e56"
+   },
+   "note": "Meshy continent GLB (sha256 42c88739…) surface at offset (3000,-1620), heights x0.5, lagoon lowland within 260 m of Tollholm and Spindle Hill, the approved A3 draft coast (fine warp) kept 8 m clear of the berths and sea lanes, temple summit pad, pits filled"
+  }
+ }
+}

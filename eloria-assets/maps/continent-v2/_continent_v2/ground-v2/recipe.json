@@ -1,0 +1,307 @@
+{
+ "schema": "eloria-continent-v2-ground-recipe-1",
+ "about": "Landfall A3 (owner-approved 2026-10-19): strait fills (B13 islet and Saltsound bay, B14, the Ringholm-Ravenhead sound, Ringholm's north shelf and east extension, the B22 and Greenlight islet bars), the boat-only south-east Verdant + Ssarathi isle wrapping Tollholm and Spindle Hill, and the north Whitehorn + Mirrorhold isle. The unowned north-east mainland stub is sunk, as in the approved draft.",
+ "predecessor": {
+  "path": "eloria-assets/maps/continent-v2/_continent_v2/group-terrain/terrain-provenance.json",
+  "sha256": "67f190ab3f5e41d1608261b749f2cacaa2d57b71d51fb4ce577a89a64e14d8df"
+ },
+ "grid": {
+  "continentFirstVertex": [
+   299,
+   5003
+  ],
+  "gridSize": [
+   1931,
+   1889
+  ],
+  "cellMetres": 2
+ },
+ "seabed": {
+  "profile": [
+   [
+    0,
+    -2.5
+   ],
+   [
+    60,
+    -2.5
+   ],
+   [
+    360,
+    -11.2
+   ],
+   [
+    540,
+    -16
+   ],
+   [
+    100000,
+    -16
+   ]
+  ],
+  "windowBlendMetres": 200,
+  "note": "v1's own median sea depth by distance from land (2 m vertices away from the grid edge, 25 m bins), extended to -16 m"
+ },
+ "sinks": [
+  {
+   "id": "north-east-mainland-stub",
+   "components": [
+    [
+     2905,
+     6381
+    ]
+   ],
+   "note": "the only v1 land touching the grid edge: 0.276 km2 never owned plus Saltsound's 5,268 m2 polygon-cut stump at (2409, 6265)",
+   "shallowsMetres": 120
+  }
+ ],
+ "exclusionRules": {
+  "pitRepairDilateCells": 9,
+  "patchMarginMetres": 6,
+  "waterMarginMetres": 4,
+  "berths": [
+   {
+    "id": "greenlight-ferry",
+    "xz": [
+     1980,
+     7968
+    ],
+    "radiusMetres": 28,
+    "note": "greenlight--obj-ferry-n10 (2010.5, 7958.5); the berth water lies west of the quay"
+   },
+   {
+    "id": "ravenhead-pier-tower",
+    "xz": [
+     2503,
+     7332
+    ],
+    "radiusMetres": 30
+   },
+   {
+    "id": "ravenhead-boat",
+    "xz": [
+     2600.5,
+     7327.5
+    ],
+    "radiusMetres": 40,
+    "note": "ravenhead--obj-boat-tollholm"
+   },
+   {
+    "id": "tollholm-boat",
+    "xz": [
+     2737.5,
+     7719.5
+    ],
+    "radiusMetres": 40,
+    "note": "tollholm--obj-boat-ravenhead: the south-east isle's only way in"
+   },
+   {
+    "id": "tollholm-lagoon-quay",
+    "xz": [
+     2809,
+     8087
+    ],
+    "radiusMetres": 22
+   }
+  ],
+  "seaLanes": [
+   {
+    "id": "ravenhead-tollholm-boat",
+    "points": [
+     [
+      2600.5,
+      7327.5
+     ],
+     [
+      2737.5,
+      7719.5
+     ]
+    ],
+    "halfWidthMetres": 40
+   },
+   {
+    "id": "tollholm-lagoon-to-sea",
+    "points": [
+     [
+      2809,
+      8087
+     ],
+     [
+      2815,
+      8160
+     ],
+     [
+      2880,
+      8240
+     ],
+     [
+      2950,
+      8300
+     ],
+     [
+      2880,
+      8335
+     ],
+     [
+      2800,
+      8345
+     ],
+     [
+      2700,
+      8335
+     ],
+     [
+      2600,
+      8310
+     ]
+    ],
+    "halfWidthMetres": 14,
+    "note": "keeps the lagoon quay's water open to the sea through the inner bay the new ground encloses"
+   }
+  ]
+ },
+ "exclusions": {
+  "path": "exclusions.bits",
+  "sha256": "9962d37ad7df7037459e9e14243fa83fe966952dc975f36c22293f5a65804a75",
+  "bytes": 455958,
+  "derivation": "exclusions.json (build_continent_v2_ground.py --record-exclusions on the v1 scenes)"
+ },
+ "edits": [
+  {
+   "id": "strait-fills-north-coast",
+   "kind": "raster",
+   "firstVertex": [
+    1547.0,
+    6263.0
+   ],
+   "gridSize": [
+    831,
+    533
+   ],
+   "files": {
+    "heights": {
+     "path": "sources/strait-fills-north-coast.heights.f32le",
+     "sha256": "792220ea21ed8fb49bb4b369690816d87e5ba7e75924e45fc9eac656766378ec",
+     "bytes": 1771692
+    },
+    "colors": {
+     "path": "sources/strait-fills-north-coast.colors.rgba8",
+     "sha256": "9190c7207f23acc10af44f1b8685a0c91cfebc83c10f65a0faab10462aea828b",
+     "bytes": 1771692
+    },
+    "heightWeights": {
+     "path": "sources/strait-fills-north-coast.height-weights.u8",
+     "sha256": "82a668bf509296aaaea5a3515e374e05ce6f8dbbeb989bf74edc9a88b7e0aab8",
+     "bytes": 442923
+    },
+    "colorWeights": {
+     "path": "sources/strait-fills-north-coast.color-weights.u8",
+     "sha256": "6824bf84081d600fdeb4265d1d03508e897776ae42d88c4b205e4de9908d6dc3",
+     "bytes": 442923
+    }
+   }
+  },
+  {
+   "id": "strait-fills-b22-bars",
+   "kind": "raster",
+   "firstVertex": [
+    1585.0,
+    7415.0
+   ],
+   "gridSize": [
+    279,
+    296
+   ],
+   "files": {
+    "heights": {
+     "path": "sources/strait-fills-b22-bars.heights.f32le",
+     "sha256": "d644941a003d24a80f2d064f3d5053d8cd55704750910366ca23ac9c86e5f4f7",
+     "bytes": 330336
+    },
+    "colors": {
+     "path": "sources/strait-fills-b22-bars.colors.rgba8",
+     "sha256": "e5fc339457a08d7f711318c22bc81b3b39cc84ba6f355e2a27be84b5a5b98d6a",
+     "bytes": 330336
+    },
+    "heightWeights": {
+     "path": "sources/strait-fills-b22-bars.height-weights.u8",
+     "sha256": "4f43546bae4f13f80170f4358e4400a6154b12a45d2ac6fa6dee929ea1cdd20b",
+     "bytes": 82584
+    },
+    "colorWeights": {
+     "path": "sources/strait-fills-b22-bars.color-weights.u8",
+     "sha256": "5c1be185d85859efc85bdb8b70b7b5493ac917f8aff17e97d0099c4830ec1cf5",
+     "bytes": 82584
+    }
+   }
+  },
+  {
+   "id": "north-isle",
+   "kind": "raster",
+   "firstVertex": [
+    687.0,
+    5093.0
+   ],
+   "gridSize": [
+    652,
+    479
+   ],
+   "files": {
+    "heights": {
+     "path": "sources/north-isle.heights.f32le",
+     "sha256": "e2dc3678db6735c35ebda1bd08db74a837387dead7ab7e3713681d687e8ef54f",
+     "bytes": 1249232
+    },
+    "colors": {
+     "path": "sources/north-isle.colors.rgba8",
+     "sha256": "c3873416c84bb70c3839d0582bd3f13327563a3cf401ac3ad849798b1d1cc1df",
+     "bytes": 1249232
+    },
+    "heightWeights": {
+     "path": "sources/north-isle.height-weights.u8",
+     "sha256": "50f72a0cd91550e0fe8a299936751fbffd822e8f4662abe3c4fe3c2c4a6293ac",
+     "bytes": 312308
+    },
+    "colorWeights": {
+     "path": "sources/north-isle.color-weights.u8",
+     "sha256": "d9150d867cc0c128fc059a2f65d1c29a67b0a0bc42d4335bedf9e449217c7ca0",
+     "bytes": 312308
+    }
+   }
+  },
+  {
+   "id": "south-east-isle",
+   "kind": "raster",
+   "firstVertex": [
+    2555.0,
+    7455.0
+   ],
+   "gridSize": [
+    749,
+    622
+   ],
+   "files": {
+    "heights": {
+     "path": "sources/south-east-isle.heights.f32le",
+     "sha256": "081f8a040fac6f83a4326fd08abe758bac15598a3b45a806044ae5e5b42121bd",
+     "bytes": 1863512
+    },
+    "colors": {
+     "path": "sources/south-east-isle.colors.rgba8",
+     "sha256": "8cae6daa0f7f93a447e882d3311f02a55711d2c4dc4ab32ebfff2022892ea552",
+     "bytes": 1863512
+    },
+    "heightWeights": {
+     "path": "sources/south-east-isle.height-weights.u8",
+     "sha256": "26dba98552bafdd97d0d8038de199414b81892ef9ac8819a386e9c6f536875de",
+     "bytes": 465878
+    },
+    "colorWeights": {
+     "path": "sources/south-east-isle.color-weights.u8",
+     "sha256": "eab4892897b38a8e3809f34f39264b15fc51a0e7430f46656ac08d532492e391",
+     "bytes": 465878
+    }
+   }
+  }
+ ]
+}

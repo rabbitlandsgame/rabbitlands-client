@@ -1,0 +1,143 @@
+{
+ "schema": "eloria-continent-v2-frozen-group-terrain-v2",
+ "method": "v1 frozen group terrain verified and copied into an extended lattice; recorded land components sunk; pinned weighted 2 m raster edits applied; v1 vertices outside the changed mask byte-identical",
+ "predecessor": {
+  "path": "eloria-assets/maps/continent-v2/_continent_v2/group-terrain/terrain-provenance.json",
+  "sha256": "67f190ab3f5e41d1608261b749f2cacaa2d57b71d51fb4ce577a89a64e14d8df",
+  "schema": "eloria-continent-v2-frozen-group-terrain-v1",
+  "outputs": {
+   "base-heights.f32le": {
+    "sha256": "176b536762632e57bc40a1298f9a6ccf304a2c27bd420ec9e0f7191314ed69ec",
+    "bytes": 7282056
+   },
+   "base-colors.rgba8": {
+    "sha256": "35b67bacbf9c562375f5fa00a2cb57c895cebc95b0258901b00af6edad2974c4",
+    "bytes": 7282056
+   }
+  }
+ },
+ "grid": {
+  "continentFirstVertex": [
+   299.0,
+   5003.0
+  ],
+  "gridSize": [
+   1931,
+   1889
+  ],
+  "cellMetres": 2.0
+ },
+ "predecessorWindow": {
+  "row0": 580,
+  "col0": 0,
+  "rows": 1259,
+  "cols": 1446
+ },
+ "recipe": {
+  "path": "eloria-assets/maps/continent-v2/_continent_v2/ground-v2/recipe.json",
+  "sha256": "96c2e7ab8eec66f3c175bafb9e167c6db90b4c4bc7b327f314c40317fa116983"
+ },
+ "generator": {
+  "path": "godot-client/tools/build_continent_v2_ground.py",
+  "sha256": "7399391aad186f26de34a981fa73d8dfebd14bb035ba98aaa8caecf5b7f4010c"
+ },
+ "toolchain": {
+  "python": "3.13.7",
+  "numpy": "2.5.2",
+  "scipy": "1.18.1"
+ },
+ "sinks": [
+  {
+   "id": "north-east-mainland-stub",
+   "vertices": 70372,
+   "shallowsVertices": 14761
+  }
+ ],
+ "edits": [
+  {
+   "id": "strait-fills-north-coast",
+   "kind": "raster",
+   "firstVertex": [
+    1547.0,
+    6263.0
+   ],
+   "gridSize": [
+    831,
+    533
+   ],
+   "heightVertices": 173133,
+   "colourVertices": 150510
+  },
+  {
+   "id": "strait-fills-b22-bars",
+   "kind": "raster",
+   "firstVertex": [
+    1585.0,
+    7415.0
+   ],
+   "gridSize": [
+    279,
+    296
+   ],
+   "heightVertices": 26543,
+   "colourVertices": 19384
+  },
+  {
+   "id": "north-isle",
+   "kind": "raster",
+   "firstVertex": [
+    687.0,
+    5093.0
+   ],
+   "gridSize": [
+    652,
+    479
+   ],
+   "heightVertices": 232009,
+   "colourVertices": 183299
+  },
+  {
+   "id": "south-east-isle",
+   "kind": "raster",
+   "firstVertex": [
+    2555.0,
+    7455.0
+   ],
+   "gridSize": [
+    749,
+    622
+   ],
+   "heightVertices": 291321,
+   "colourVertices": 233389
+  }
+ ],
+ "changedMask": {
+  "path": "changed-mask.bits",
+  "encoding": "np.packbits row-major over the v2 grid",
+  "count": 367264
+ },
+ "invariants": {
+  "predecessorVerticesChanged": 367264,
+  "predecessorVerticesUnchangedByteExact": 1453250,
+  "newVertices": 1827145,
+  "edgeAllSea": true,
+  "exclusionsUntouched": true,
+  "landKm2": 4.88
+ },
+ "sceneSidePatches": [],
+ "outputs": {
+  "base-heights.f32le": {
+   "sha256": "e0fd40c935bdf78ae2c09ae948c0fffec52f43f3fa36721b16f34dca6606b6b1",
+   "bytes": 14590636
+  },
+  "base-colors.rgba8": {
+   "sha256": "27ec08bebc6a4f04235af5fcd18ac2d34c1dd8a62a0e36783b4eb5c98750191f",
+   "bytes": 14590636
+  },
+  "changed-mask.bits": {
+   "sha256": "63f1ae8c2796ba25f1d39e1ceea670d93c8683c893233c6456ca112113587f19",
+   "bytes": 455958
+  }
+ },
+ "baseCommit": null
+}

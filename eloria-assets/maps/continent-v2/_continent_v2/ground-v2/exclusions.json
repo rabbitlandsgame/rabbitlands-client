@@ -1,0 +1,134 @@
+{
+ "rules": {
+  "pitRepairDilateCells": 9,
+  "patchMarginMetres": 6,
+  "waterMarginMetres": 4,
+  "berths": [
+   {
+    "id": "greenlight-ferry",
+    "xz": [
+     1980,
+     7968
+    ],
+    "radiusMetres": 28,
+    "note": "greenlight--obj-ferry-n10 (2010.5, 7958.5); the berth water lies west of the quay"
+   },
+   {
+    "id": "ravenhead-pier-tower",
+    "xz": [
+     2503,
+     7332
+    ],
+    "radiusMetres": 30
+   },
+   {
+    "id": "ravenhead-boat",
+    "xz": [
+     2600.5,
+     7327.5
+    ],
+    "radiusMetres": 40,
+    "note": "ravenhead--obj-boat-tollholm"
+   },
+   {
+    "id": "tollholm-boat",
+    "xz": [
+     2737.5,
+     7719.5
+    ],
+    "radiusMetres": 40,
+    "note": "tollholm--obj-boat-ravenhead: the south-east isle's only way in"
+   },
+   {
+    "id": "tollholm-lagoon-quay",
+    "xz": [
+     2809,
+     8087
+    ],
+    "radiusMetres": 22
+   }
+  ],
+  "seaLanes": [
+   {
+    "id": "ravenhead-tollholm-boat",
+    "points": [
+     [
+      2600.5,
+      7327.5
+     ],
+     [
+      2737.5,
+      7719.5
+     ]
+    ],
+    "halfWidthMetres": 40
+   },
+   {
+    "id": "tollholm-lagoon-to-sea",
+    "points": [
+     [
+      2809,
+      8087
+     ],
+     [
+      2815,
+      8160
+     ],
+     [
+      2880,
+      8240
+     ],
+     [
+      2950,
+      8300
+     ],
+     [
+      2880,
+      8335
+     ],
+     [
+      2800,
+      8345
+     ],
+     [
+      2700,
+      8335
+     ],
+     [
+      2600,
+      8310
+     ]
+    ],
+    "halfWidthMetres": 14,
+    "note": "keeps the lagoon quay's water open to the sea through the inner bay the new ground encloses"
+   }
+  ]
+ },
+ "counts": {
+  "pitRepairs": 17199,
+  "patches": 816,
+  "water": 13122,
+  "berths": 4203,
+  "seaLanes": 14115
+ },
+ "vertices": 46726,
+ "inputs": {
+  "godot-client/tools/continent_v2_territories.py": "27d9c7ababa189ce07d5acb99d826b3d272fa3766ebf3c64acf8f27b724c6b6c",
+  "godot-client/tools/repair_continent_v2_pits.py": "3f55f322026c2e55c4952d17137a424b0283a15eddb7fe03722b5e3d76127867",
+  "godot-client/world_authoring/regions/boarsend/boarsend.tscn": "0e6693938ef4850aa75c13994ff8ffa01f38765b5ae1898f2c317b21d38f3f37",
+  "godot-client/world_authoring/regions/brambleshaw/brambleshaw.tscn": "9bad79c05212bc2c57d80d8df2782be94f92b7c604936c4192ff8b842d51eb7a",
+  "godot-client/world_authoring/regions/greenlight/greenlight.tscn": "fcaef7c95e6c17e0e469c638959b1d741c118823e59c11adcf32d5f3d265e851",
+  "godot-client/world_authoring/regions/hearthcroft/hearthcroft.tscn": "e5d88c645ddb899c153ab119539306b96d29158dbe5a60be44380ba7297357c0",
+  "godot-client/world_authoring/regions/landfall/landfall.tscn": "fcaa98eeab83b94ff1949c79ed47262f5800138ec230d57ec706dc1b58402686",
+  "godot-client/world_authoring/regions/pinebrow/pinebrow.tscn": "34baf4bd6a8296bb8eeb27e6182274c0c1f9f8cf83753a5109e16505e9cbef70",
+  "godot-client/world_authoring/regions/ravenhead/ravenhead.tscn": "424b0e41c7d750b36b1cc48fdae0028ec3c1727c98d784dd4fc1bf5fd013f9d2",
+  "godot-client/world_authoring/regions/reedfall/reedfall.tscn": "1321a67953914d7899e82b1f36e7293c13b962c5feb751d96b86205475d5763f",
+  "godot-client/world_authoring/regions/ringholm/ringholm.tscn": "ed72004265ebe985d2a773505dcc2cfb89f461b75cec76a1dcd1db8e1d6f17e3",
+  "godot-client/world_authoring/regions/saltsound/saltsound.tscn": "8286670ca0fdb28249875c7110113a9fe72b8ca3cf96a75e692f03ebe81eac8d",
+  "godot-client/world_authoring/regions/spindle_hill/spindle_hill.tscn": "179a34bc3f6fbe66094c20b8370689b8d33fb28138e84f64e9d3e5cb75b3356f",
+  "godot-client/world_authoring/regions/stagheath/stagheath.tscn": "c3caacdba4a572613ad821483abe63828fcf6399b2a56bb95a4c37dbe43bb602",
+  "godot-client/world_authoring/regions/tollholm/tollholm.tscn": "ee32f9349ab222ce364883d659f9b9ad0301eb7b1f9ad89d9af0d91f71a0b3c4",
+  "godot-client/world_authoring/regions/twinbrook/twinbrook.tscn": "3a10eec9018a1a74fabace68ef27ce858890446fcf906d2feb1e5eaa4522fb25",
+  "godot-client/world_authoring/regions/warrenmead/warrenmead.tscn": "5d1e25199411131bec2d8ca8fb8d20b3bf8946c689196ece4e02fa20fbbb4a6f"
+ }
+}
