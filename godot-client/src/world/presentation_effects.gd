@@ -33,7 +33,7 @@ const MIST_SIZE := Vector2(14.0, 24.0)
 ## The most a mist puff covers at full strength. It is many faint, wide
 ## layers over the whole view: fewer, denser puffs in a smaller box gathered
 ## into one bright cloud round the player, which read as a spotlight.
-const MIST_ALPHA := 0.1
+const MIST_ALPHA := 0.055
 ## The mist is the haze come close, a little darker so it lies on the ground
 ## rather than glowing on it.
 const MIST_SHADE := 0.88

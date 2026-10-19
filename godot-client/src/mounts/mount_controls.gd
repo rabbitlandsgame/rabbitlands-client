@@ -3,6 +3,7 @@ signal choose_mount_requested
 const Hotkeys := preload("res://src/mounts/mount_hotkeys.gd")
 const OPTION_LABELS := {
 	"show_banner": "Show mount banner",
+	"pin_banner": "Keep mount controls at the top of the screen",
 	"mount_button": "Show mount / dismount button",
 	"choose_button": "Show mount selection button",
 	"gallop_button": "Show gallop button",
@@ -61,11 +62,12 @@ func _process(_delta: float) -> void:
 	_follow_banner()
 
 func _follow_banner() -> void:
-	visible = wants_banner() and is_instance_valid(_banner) and _banner.is_visible_in_tree()
+	var pinned := bool(options.pin_banner)
+	visible = wants_banner() and (pinned or (is_instance_valid(_banner) and _banner.is_visible_in_tree()))
 	if not visible:
 		return
 	var view := get_parent() as Control
-	var desired := _banner.position + Vector2(_banner.size.x + 6.0, 0.0)
+	var desired := Vector2(view.size.x * 0.5 + 140, 34) if pinned else _banner.position + Vector2(_banner.size.x + 6.0, 0.0)
 	position = Vector2(
 		clampf(desired.x, 4.0, maxf(4.0, view.size.x - size.x - 90.0)),
 		clampf(desired.y, 34.0, maxf(34.0, view.size.y - size.y - 86.0)))
@@ -136,7 +138,8 @@ func _refresh() -> void:
 		if options.status:
 			details.append(str(state.get("gait", "cruise")).capitalize().replace("Cruise", "Trot").replace("Burst", "Gallop"))
 		if options.endurance:
-			details.append("%.1fs" % (float(state.get("endurance_ms", 0)) / 1000.0))
+			var seconds := float(state.get("endurance_ms", 0)) / 1000.0
+			details.append("Gallop ready" if seconds >= 8.0 else ("Gallop %.1fs" % seconds))
 	else:
 		if options.status:
 			details.append(str(state.get("blocked_reason", "")).replace("_", " ").capitalize())

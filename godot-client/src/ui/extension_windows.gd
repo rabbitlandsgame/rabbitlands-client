@@ -48,8 +48,8 @@ const QUEST_CARVED_FRAME_TEXTURE: Texture2D = preload(
 ## used to sit there after the target was already dead.
 const COMBAT_HOLD_MSEC := 5000
 const COMBAT_FADE_MSEC := 700
-const COMBAT_PANEL_SIZE := Vector2(208.0, 64.0)
-const COMBAT_FONT_SIZE := 11
+const COMBAT_PANEL_SIZE := Vector2(240.0, 76.0)
+const COMBAT_FONT_SIZE := 13
 const MARKET_SIZE := Vector2(840.0, 600.0)
 ## The pack, not the worn slots the inventory packet also carries.
 const MARKET_PACK_SLOTS := 36
@@ -204,6 +204,7 @@ var _merchant_mode := "buy"
 ## every 224, and a tracked quest the server stops sending simply stops being
 ## tracked.
 var _tracked_quest_title := ""
+var _field_tracking_title := ""
 var _tracked_quest_layout_revision := 0
 
 func _ready() -> void:
@@ -286,6 +287,17 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_events()
 		&"quest_journal", &"quest_archive":
 			_sync_quests()
+		&"lantern_tutorial":
+			var guide: Dictionary = AppState.lantern_tutorial
+			if str(guide.get("tutorial", "")) == "field_dispatch" or not _field_tracking_title.is_empty():
+				if bool(guide.get("active", false)) and str(guide.get("tutorial", "")) == "field_dispatch":
+					_field_tracking_title = str(guide.get("adventure", guide.get("title", "")))
+					_tracked_quest_title = _field_tracking_title
+				else:
+					if _tracked_quest_title == _field_tracking_title:
+						_tracked_quest_title = ""
+					_field_tracking_title = ""
+				_sync_quests()
 		&"mail":
 			_sync_mail()
 		&"item_detail":
@@ -304,6 +316,8 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_achievements()
 		&"connection":
 			if AppState.connection_state == "disconnected":
+				_field_tracking_title = ""
+				_tracked_quest_title = ""
 				# A dropped session is not a fight that just ended: nothing
 				# from it should linger, pinned or not.
 				combat_panel.hide()
@@ -456,6 +470,8 @@ func _sync_events() -> void:
 # --- quest journal -----------------------------------------------------------
 
 func _sync_quests() -> void:
+	if not _field_tracking_title.is_empty():
+		_tracked_quest_title = _field_tracking_title
 	quest_active_button.button_pressed = not _quest_showing_archive
 	quest_done_button.button_pressed = _quest_showing_archive
 	quest_done_button.text = "Completed (%d)" % AppState.quest_archive.size()
@@ -529,6 +545,15 @@ func _on_quest_track_pressed() -> void:
 		return
 	var title: String = str(
 		(AppState.quest_journal[index] as Dictionary).get("title", ""))
+	var entry: Dictionary = AppState.quest_journal[index]
+	if str(entry.get("location", "")) == "Main world":
+		var error := Network.send_chat("#quests untrack" if title == _tracked_quest_title else "#quests track " + title)
+		if error != OK:
+			AppState.append_local_message("Could not update quest tracking. Reconnect and try again.")
+		return
+	if not _field_tracking_title.is_empty():
+		Network.send_chat("#quests untrack")
+		_field_tracking_title = ""
 	_tracked_quest_title = "" if title == _tracked_quest_title else title
 	_sync_quests()
 
@@ -545,6 +570,10 @@ func _sync_tracked_quest() -> void:
 		_tracked_quest_layout_revision += 1
 		tracked_quest.hide()
 		quest_track_button.text = "Track"
+		return
+	if str(tracked.get("location", "")) == "Main world":
+		# The dispatch guide already shows its objective and navigation.
+		tracked_quest.hide()
 		return
 	var target: int = int(tracked.get("target", 0))
 	var lines: Array[String] = [
@@ -1852,6 +1881,8 @@ func _build() -> void:
 	combat_target.name = "CombatTarget"
 	combat_target.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	combat_target.add_theme_font_size_override("font_size", COMBAT_FONT_SIZE)
+	combat_target.add_theme_color_override("font_outline_color", Color.BLACK)
+	combat_target.add_theme_constant_override("outline_size", 3)
 	combat_target.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	combat_box.add_child(combat_target)
 	combat_target_bar = _bar("CombatTargetBar", Color(0.82, 0.32, 0.28))
@@ -1866,6 +1897,8 @@ func _build() -> void:
 	combat_event.name = "CombatEvent"
 	combat_event.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	combat_event.add_theme_font_size_override("font_size", COMBAT_FONT_SIZE)
+	combat_event.add_theme_color_override("font_outline_color", Color.BLACK)
+	combat_event.add_theme_constant_override("outline_size", 3)
 	combat_event.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	combat_box.add_child(combat_event)
 	combat_menu = PopupMenu.new()

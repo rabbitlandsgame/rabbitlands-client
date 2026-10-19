@@ -27,6 +27,8 @@ const GRAVITY := Vector3(0.0, -14.0, 0.0)
 ## the waist in motion and hold it there; this settles in about a quarter of a
 ## second and trails lower while travelling.
 const DAMPING := 0.72
+const WALK_DAMPING := 0.42
+var _last_translation := Vector3.INF
 ## Two passes is enough for a four-link chain and is the whole reason this is
 ## affordable. More iterations buy stiffness nobody can see on a cape.
 const RELAX_PASSES := 2
@@ -802,6 +804,11 @@ func _process_modification_with_delta(delta: float) -> void:
 	var still := anchor_speed < SETTLE_SPEED
 	var fall := GRAVITY * (SETTLE_GRAVITY if still and _mount_surface == null else 1.0) * step * step
 	var damping := SETTLE_DAMPING if still or _mount_surface != null else DAMPING
+	if not still and _mount_surface == null and _last_translation.is_finite() and step > 0:
+		var travel := to_world.origin - _last_translation
+		var speed := Vector2(travel.x, travel.z).length() / step
+		damping = lerpf(WALK_DAMPING, DAMPING, smoothstep(2.0, 4.0, speed))
+	_last_translation = to_world.origin
 	# The back-of-the-torso plane, held for every chain this frame: a cape
 	# swings and cannot pass to the chest, which is what an attack's lean and
 	# twist made it do.

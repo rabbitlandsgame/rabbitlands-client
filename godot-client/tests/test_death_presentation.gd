@@ -66,10 +66,29 @@ func run() -> void:
 		and is_equal_approx(body.rotation.z, PI / 2.0), "snapshots and late combat commands never restart a corpse")
 	actor._process(600.0)
 	expect(is_zero_approx(body.transparency), "normal corpses remain fully visible until respawn")
+	var fallen_yaw := actor.rotation.y
+	var stale_turn := dead.duplicate(true)
+	stale_turn["rotation"] = 20000
+	stale_turn["facing_command"] = 42
+	actor.apply_server_state(stale_turn, adapter)
+	actor._physics_process(1.0)
+	expect(is_equal_approx(actor.rotation.y, fallen_yaw), "late turn packets cannot rotate a fallen body")
 	actor.apply_server_state({"x": 0, "y": 0, "rotation": 0, "health": 17,
 		"alive": true, "command": 7}, adapter)
 	expect(actor.current_action == &"idle" and actor.animation_player.is_playing(),
 		"authoritative healing releases the death pose")
+	actor.free()
+
+	actor = actor_fixture()
+	actor.set("_is_creature", true)
+	var ordinary_dead := dead_state(false)
+	ordinary_dead.death_presentation.hold_seconds = 3.0
+	ordinary_dead.death_presentation.fade_seconds = 4.0
+	actor.apply_server_state(ordinary_dead, adapter)
+	actor._process(10.0)
+	expect(is_equal_approx(actor.get_node("Body").transparency, 1.0), "ordinary creature corpses also clear after the held pose and fade")
+	actor.apply_server_state({"x":0,"y":0,"rotation":0,"health":20,"alive":true,"command":7},adapter)
+	expect(is_zero_approx(actor.get_node("Body").transparency), "respawning restores a faded ordinary creature")
 	actor.free()
 
 	actor = actor_fixture()

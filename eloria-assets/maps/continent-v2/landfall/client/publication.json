@@ -2,23 +2,23 @@
  "region": "landfall",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "2571681b21df6949b976b4af8e3654bf98f874540b95644250e3e6972e6cda91",
-  "sceneSha256": "5b4bca47bb1ba07d4d455c360654bb34decf28f5190a3ab6c67ab7a8d911cf9e",
+  "sha256": "f361a18ff0c2ee06086ee02d0d5cf55ce874dcde9f57ea162bfe30761410217d",
+  "sceneSha256": "230bb186989d2aa79a4067933dce2ae4a6f80b66dadce2a91a1ff7db2516e18d",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/landfall/landfall.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "f533779c7009f97d6d0fd4ce738e95647c682c3b3481eac44c62a73e0ade6e84",
-  "collisionSha256": "f08c65115b8b898f2f611529f3c4b9c28482fefe446728043d734687866d546d",
-  "servedGridSha256": "d8c7fe12734903713363603416c312c3b4e2a4a4d025a191dff6324b1587edb5",
-  "walkableCells": 726111,
-  "openTiles": 176094,
-  "sourceSnapshotSha256": "2571681b21df6949b976b4af8e3654bf98f874540b95644250e3e6972e6cda91"
+  "sidecarSha256": "f8e09d68124a3b8be34cbd2c964516eda8ce6822c0ec5f11d6ef3717b08be213",
+  "collisionSha256": "1447813429580d6be19559f918b3b9c8a407db4842a17e4f965d61435a5492a0",
+  "servedGridSha256": "7517102c258867c8310b40945453f81bb5a7883889d1bc842af950bc38f64b3b",
+  "walkableCells": 726157,
+  "openTiles": 176109,
+  "sourceSnapshotSha256": "f361a18ff0c2ee06086ee02d0d5cf55ce874dcde9f57ea162bfe30761410217d"
  },
  "chunks": 32,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 1,
  "chunkGlbBytes": {
-  "total": 40905224,
+  "total": 41023112,
   "max": 3584708,
   "over100MiB": []
  },
@@ -30,7 +30,7 @@
   "07_12": 63.4,
   "08_08": 75.6,
   "08_09": 289.4,
-  "08_10": 333.7,
+  "08_10": 333.8,
   "08_11": 334.0,
   "08_12": 121.8,
   "08_13": 37.6,
@@ -57,19 +57,19 @@
   "12_10": 43.1
  },
  "timings": {
-  "snapshot_s": 1.4,
-  "terrain_s": 0.0,
+  "snapshot_s": 1.0,
+  "terrain_s": 0.1,
   "water_s": 0.0,
-  "overlays_s": 0.8,
+  "overlays_s": 0.6,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 151687428,
+  "surface_glb_bytes": 153699664,
   "walk_kit_nodes": 11,
-  "library_s": 0.4,
+  "library_s": 0.3,
   "harvest_nodes": 80,
-  "chunks_s": 2.5,
-  "space_passes_s": 3.9
+  "chunks_s": 1.7,
+  "space_passes_s": 2.8
  },
- "seconds": 20.2,
+ "seconds": 14.8,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 7,
@@ -100,7 +100,7 @@
    -1022
   ],
   "maximumPlacements": 201,
-  "maximumTriangles": 391716,
+  "maximumTriangles": 392830,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96

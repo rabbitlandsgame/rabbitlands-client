@@ -1031,6 +1031,14 @@ _data = {
 }
 point_count = 84
 
+[sub_resource type="Curve3D" id="stream_orchard_approach"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -129.5, 121.494, -7, 0, 0, 0, 0, 0, 0, -129.5, 121.494, -20, 0, 0, 0, 0, 0, 0, -143, 121.494, -27),
+"tilts": PackedFloat32Array(0, 0, 0)
+}
+point_count = 3
+
 [node name="landfall" type="Node3D" groups=["map_authoring_region"]]
 script = ExtResource("region")
 region_id = "landfall"
@@ -1698,6 +1706,20 @@ default_width = 6.0
 point_widths = PackedFloat32Array(5.83, 5.68, 5.53, 5.39, 5.26, 5.16, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.15, 5.26, 5.38, 5.52, 5.68, 5.84, 6.01, 6.18, 6.34, 6.5, 6.64, 6.77, 6.88, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.89, 6.78, 6.66, 6.51, 6.35, 6.19, 6.02, 5.85, 5.68, 5.53, 5.38, 5.25, 5.13, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.19, 5.31, 5.45, 5.6, 5.76, 5.92, 6.09, 6.25, 6.4, 6.54, 6.68, 6.79, 6.88, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.9, 6.81, 6.71, 6.58, 6.6, 6.7, 6.8, 6.9, 7, 7.1, 7.2)
 surface = SubResource("s0_Resource_we62f")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="landfall-stream-orchard-approach" type="Path3D" parent="Roads"]
+curve = SubResource("stream_orchard_approach")
+script = ExtResource("s0_15_tch1l")
+path_id = "landfall-stream-orchard-approach"
+properties = {
+"source": "October 18 streamed playtest: readable public orchard approach",
+"terrainConform": false,
+"terrainFeather": 0.5
+}
+default_width = 2.8
+point_widths = PackedFloat32Array(2.8, 2.8, 2.8)
+snapshot_mode = 1
+surface = SubResource("s0_Resource_we62f")
 
 [node name="s0_r29-gully-1-01" type="Node3D" parent="Bridges"]
 script = ExtResource("s0_18_vegt2")
@@ -13083,44 +13105,6 @@ transform = Transform3D(0.948749, 0, 0.396359, 0, 1, 0, -0.409593, 0, 0.918095, 
 metadata/map_asset_id = "sw_isle:kit-sw-curtain-revetment"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-curtain-revetment.glb"
 
-[node name="s0_Sw Curtain Revetment29" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-curtain-revetment-029"
-node_name = "Authored_sw_isle_kit_sw_curtain_revetment_029"
-catalog_asset_id = "sw_isle:kit-sw-curtain-revetment"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-curtain-revetment.glb"
-metadata = {
-"polishLayer": "revetment",
-"polishPiece": "pad-1-11-c0",
-"polishRun": "pad-1",
-"polishStep": "d1-masonry"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.999019, 0, 0.255756, 0, 1, 0, -0.264295, 0, 0.966741, -26.3528, 116.24, 91.5391)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Curtain Revetment29" instance=ExtResource("s0_122_lnicj")]
-metadata/map_asset_id = "sw_isle:kit-sw-curtain-revetment"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-curtain-revetment.glb"
-
-[node name="s0_Sw Curtain Revetment30" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-curtain-revetment-030"
-node_name = "Authored_sw_isle_kit_sw_curtain_revetment_030"
-catalog_asset_id = "sw_isle:kit-sw-curtain-revetment"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-curtain-revetment.glb"
-metadata = {
-"polishLayer": "revetment",
-"polishPiece": "pad-1-11-f1",
-"polishRun": "pad-1",
-"polishStep": "d1-masonry"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.999019, 0, 0.255756, 0, 1, 0, -0.264295, 0, 0.966741, -26.0971, 113.04, 92.5058)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Curtain Revetment30" instance=ExtResource("s0_122_lnicj")]
-metadata/map_asset_id = "sw_isle:kit-sw-curtain-revetment"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-curtain-revetment.glb"
-
 [node name="s0_Sw Curtain Revetment31" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-sw-curtain-revetment-031"
@@ -16256,7 +16240,7 @@ metadata = {
 "townStep": "5-garden-a"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.96077913, 0, 0.27731466, 0, 1, 0, -0.27731466, 0, 0.96077913, -123.746, 121.494, -18.764)
+transform = Transform3D(0.96077913, 0, 0.27731466, 0, 1, 0, -0.27731466, 0, 0.96077913,-121.746, 121.494,-19.163999999999998)
 
 [node name="Content" parent="AuthoredAssets/s0_Sw Townhouse Blue8" instance=ExtResource("s0_124_bwulv")]
 metadata/map_asset_id = "sw_isle:kit-sw-townhouse-blue"
@@ -16276,7 +16260,7 @@ metadata = {
 "townStep": "5-garden-a"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.96077913, 0, 0.27731466, 0, 1, 0, -0.27731466, 0, 0.96077913, -116.794, 121.494, -22.155)
+transform = Transform3D(0.96077913, 0, 0.27731466, 0, 1, 0, -0.27731466, 0, 0.96077913,-114.794, 121.494,-22.555)
 
 [node name="Content" parent="AuthoredAssets/s0_Sw Townhouse Dome Arcade6" instance=ExtResource("s0_125_f0g1p")]
 metadata/map_asset_id = "sw_isle:kit-sw-townhouse-dome-arcade"
@@ -39325,7 +39309,7 @@ extras = {
 "rotationDegrees": 135,
 "status": "re-homed from Four Gates (npcs.txt:44, role tutorial, actor 307)"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -147.5, 121.494, 27.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1,-148.5, 121.494, 27.5)
 
 [node name="landfall--npc-register-clerk-hemmen" type="Marker3D" parent="Gameplay/NpcMarkers"]
 gizmo_extents = 0.8

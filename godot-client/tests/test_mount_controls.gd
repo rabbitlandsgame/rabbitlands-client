@@ -33,20 +33,26 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	expect(controls.visible, "mount state shows controls beside visible banner")
+	var pinned: Vector2 = controls.position
+	banner.position.y += 20
+	await process_frame
+	expect(controls.position.is_equal_approx(pinned), "pinned controls do not bounce with the actor")
+	banner.position.y -= 20
+	controls.set_options({"pin_banner": false})
 	expect(controls.position.is_equal_approx(Vector2(656, 240)), "controls sit immediately right of name and bars")
 	expect(controls.toggle.get_theme_font_size("font_size") == 11, "button font matches resource numbers")
-	expect(controls.status.text == "Trot · 8.0s", "compact gait and endurance")
+	expect(controls.status.text == "Trot · Gallop ready", "compact gait and gallop availability")
 	expect(not controls.gallop.disabled, "gallop available while trotting")
 	controls.set_options({"mount_button": false, "key_hints": false, "status": false})
 	expect(not controls.toggle.visible and controls.gallop.visible, "mount and gallop buttons can be hidden independently")
-	expect(controls.gallop.text == "Gallop" and controls.status.text == "8.0s", "key hints and gait can be hidden while keeping endurance")
+	expect(controls.gallop.text == "Gallop" and controls.status.text == "Gallop ready", "key hints and gait can be hidden while keeping endurance")
 	controls.set_options({"endurance": false})
 	expect(controls.status.text == "Trot", "gait can remain without endurance")
 	controls.set_options({"mount_button": false, "gallop_button": false, "choose_button": false, "status": false, "endurance": false})
 	expect(not controls.wants_banner(), "hiding every component leaves no empty banner")
 	controls.set_options({"show_banner": false})
 	expect(not controls.visible, "master preference hides mount banner")
-	controls.set_options({})
+	controls.set_options({"pin_banner": false})
 	banner.position += Vector2(40, 35)
 	banner.size.x = 180
 	await process_frame

@@ -313,7 +313,7 @@ func get_ring_bounds() -> Rect2:
 func _draw() -> void:
 	# An annulus leaves the character visible in the middle of the wheel.
 	draw_set_transform(center, 0, Vector2.ONE * display_scale())
-	var fill := Color(0.035, 0.03, 0.022, 0.90)
+	var fill := Color(0.035, 0.03, 0.022, 0.32)
 	for step in range(64):
 		var a := Vector2.from_angle(TAU * step / 64)
 		var b := Vector2.from_angle(TAU * (step + 1) / 64)
