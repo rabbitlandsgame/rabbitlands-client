@@ -677,6 +677,91 @@ _data = {
 }
 point_count = 98
 
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/bridge_control.gd" id="a3_greenlight_s0_18_vegt2"]
+
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="a3_greenlight_s0_surface"]
+
+
+[sub_resource type="StandardMaterial3D" id="a3_greenlight_s0_StandardMaterial3D_2glf6"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.67, 0.64, 0.6, 0)
+
+[sub_resource type="Resource" id="a3_greenlight_s0_Resource_ql72o"]
+resource_local_to_scene = true
+script = ExtResource("a3_greenlight_s0_surface")
+source_material = SubResource("a3_greenlight_s0_StandardMaterial3D_2glf6")
+
+[sub_resource type="StandardMaterial3D" id="a3_greenlight_s0_StandardMaterial3D_idnrw"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.67, 0.64, 0.6, 0)
+
+[sub_resource type="Resource" id="a3_greenlight_s0_Resource_41irn"]
+resource_local_to_scene = true
+script = ExtResource("a3_greenlight_s0_surface")
+source_material = SubResource("a3_greenlight_s0_StandardMaterial3D_idnrw")
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb" id="a3_greenlight_s0_90_x1ic5"]
+
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="a3_greenlight_s0_19_jaile"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-2.glb" id="a3_greenlight_s0_108_rfpay"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb" id="a3_greenlight_s0_96_e14li"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb" id="a3_greenlight_s0_95_8ehyf"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-2.glb" id="a3_greenlight_s0_29_aq2a8"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-3.glb" id="a3_greenlight_s0_53_6jfpr"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-1.glb" id="a3_greenlight_s0_34_37d76"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-sea-cliff-corner.glb" id="a3_greenlight_s0_88_6lw0k"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb" id="a3_greenlight_s0_91_kiy41"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb" id="a3_greenlight_s0_93_l81vy"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb" id="a3_greenlight_s0_92_edrkc"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb" id="a3_greenlight_s0_94_rfpay"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span-long24.glb" id="a3_greenlight_s0_152_bc4hv"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb" id="a3_greenlight_s0_85_vrua1"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb" id="a3_greenlight_s0_86_tdlc1"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-landing-stage-1.glb" id="a3_greenlight_s0_77_ep8sg"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb" id="a3_greenlight_s0_26_tch1l"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-harbour-tower.glb" id="a3_greenlight_s0_66_obv44"]
+
+
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb" id="a3_greenlight_lv_thrift_clump_1"]
+
 [node name="jadestair" type="Node3D" groups=["map_authoring_region"]]
 script = ExtResource("region")
 region_id = "jadestair"
@@ -28687,3 +28772,1090 @@ extras = {
 "zone": "drift"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47.5, 86.5100, 21.5)
+[node name="s0_knob-quay-02" type="Node3D" parent="Bridges"]
+script = ExtResource("a3_greenlight_s0_18_vegt2")
+bridge_id = "knob-quay-02"
+metadata = {
+"approval": "owner 2026-10-02: content plan decision 4 (the R42 strand reroute)",
+"deck": "QK",
+"index": 2.0,
+"inside_ownership": true,
+"source": "adjacent-map design s. 5: the knob quay round the knob's north foot, from B24's new 2.5 m end to seam-mole-knob",
+"spans": 2.0,
+"type": "pier"
+}
+width = 8.0
+arch = 0.0
+water_clearance = 0.85
+deck_surface = SubResource("a3_greenlight_s0_Resource_41irn")
+support_surface = SubResource("a3_greenlight_s0_Resource_ql72o")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1165, 0, -737)
+
+[node name="Start" type="Marker3D" parent="Bridges/s0_knob-quay-02"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 941.54, 2.5, 672.443)
+
+[node name="End" type="Marker3D" parent="Bridges/s0_knob-quay-02"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 994, 2.5, 663)
+
+[node name="s0_Coastal Boulders 2" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-2-001"
+node_name = "Authored_sw_isle_kit_coastal_boulders_2_001"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+collision_role = "solid"
+metadata = {
+"coastDesign": "continent-v2 slice 2 coast design",
+"coastGroup": "rock-cliff-foot",
+"coastKind": "base",
+"coastPiece": "rock-cliff-foot-001",
+"coastStep": "3-shore"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.312456, 0, 0.010766, 0, 1.3125, 0, -0.010766, 0, 1.312456, -235.915, -5.6, -4.079)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 2" instance=ExtResource("a3_greenlight_s0_90_x1ic5")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+
+[node name="s0_Coastal Boulders 71" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-2-022"
+node_name = "Authored_sw_isle_kit_coastal_boulders_2_022"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+collision_role = "solid"
+metadata = {
+"coastDesign": "continent-v2 slice 2 coast design",
+"coastGroup": "rock-earthwork-face",
+"coastKind": "base",
+"coastPiece": "rock-earthwork-face-004",
+"coastStep": "3-shore"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.918318, 0, -0.317637, 0, 0.9717, 0, 0.317637, 0, -0.918318, -149.515, 41.243, 22.485)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 71" instance=ExtResource("a3_greenlight_s0_90_x1ic5")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+
+[node name="s0_Beach Palm Tree 408" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-beach-palm-tree-2-031"
+node_name = "Authored_sw_isle_kit_beach_palm_tree_2_031"
+catalog_asset_id = "sw_isle:kit-beach-palm-tree-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-2.glb"
+collision_role = "solid"
+metadata = {
+"natureDesign": "continent-v2 slice 2 nature design",
+"natureKey": "palm2",
+"natureLayer": "canopy",
+"naturePiece": "nature-palm2-4306",
+"natureStep": "1-forests",
+"natureZone": "forest-coast"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.925105, 0, 0.291685, 0, 0.97, 0, -0.291685, 0, 0.925105, -193.2, 49.3249, -43.65)
+
+[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 408" instance=ExtResource("a3_greenlight_s0_108_rfpay")]
+metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-2.glb"
+
+[node name="s0_Coastal Rock 17" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-3-004"
+node_name = "Authored_sw_isle_kit_coastal_rock_3_004"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+collision_role = "solid"
+metadata = {
+"natureDesign": "continent-v2 slice 2 nature design",
+"natureKey": "crock3",
+"natureLayer": "earthworks",
+"naturePiece": "nature-crock3-5264",
+"natureStep": "3-earthworks",
+"natureZone": "earthworks-cut"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.724721, -0.473971, -0.009314, -0.466147, 0.709386, 0.171567, -0.086271, 0.148591, -0.848784, -169.24, 94.4767, -17.68)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 17" instance=ExtResource("a3_greenlight_s0_96_e14li")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+
+[node name="s0_Coastal Rock 44" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-2-015"
+node_name = "Authored_sw_isle_kit_coastal_rock_2_015"
+catalog_asset_id = "sw_isle:kit-coastal-rock-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
+collision_role = "solid"
+metadata = {
+"natureDesign": "continent-v2 slice 2 nature design",
+"natureKey": "crock2",
+"natureLayer": "earthworks",
+"naturePiece": "nature-crock2-5308",
+"natureStep": "3-earthworks",
+"natureZone": "earthworks-cut"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.172876, -0.526204, -0.738344, -0.050652, 0.756077, -0.526982, 0.90525, -0.058184, -0.170489, -175.02, 81.4437, -24.55)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 44" instance=ExtResource("a3_greenlight_s0_95_8ehyf")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
+
+[node name="s0_Flower Shrub 471" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-flower-shrub-2-167"
+node_name = "Authored_sw_isle_kit_flower_shrub_2_167"
+catalog_asset_id = "sw_isle:kit-flower-shrub-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-2.glb"
+metadata = {
+"natureDesign": "continent-v2 slice 2 nature design",
+"natureKey": "fsh2",
+"natureLayer": "understorey",
+"naturePiece": "nature-fsh2-5426",
+"natureStep": "3-earthworks",
+"natureZone": "earthworks-fill"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.209938, -0.498197, 0.3816, 0.556059, 1.235298, -0.150356, -0.290889, 0.289152, 1.299825, -152.86, 39.616, 23.14)
+
+[node name="Content" parent="AuthoredAssets/s0_Flower Shrub 471" instance=ExtResource("a3_greenlight_s0_29_aq2a8")]
+metadata/map_asset_id = "sw_isle:kit-flower-shrub-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-2.glb"
+
+[node name="s0_Flower Shrub 479" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-flower-shrub-3-135"
+node_name = "Authored_sw_isle_kit_flower_shrub_3_135"
+catalog_asset_id = "sw_isle:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-3.glb"
+metadata = {
+"natureDesign": "continent-v2 slice 2 nature design",
+"natureKey": "fsh3",
+"natureLayer": "understorey",
+"naturePiece": "nature-fsh3-5454",
+"natureStep": "3-earthworks",
+"natureZone": "earthworks-fill"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.343736, -0.388362, -0.87482, 0.324706, 0.921715, -0.281596, 0.900389, -0.184134, 0.435526, -192.48, 70.4251, -9.26)
+
+[node name="Content" parent="AuthoredAssets/s0_Flower Shrub 479" instance=ExtResource("a3_greenlight_s0_53_6jfpr")]
+metadata/map_asset_id = "sw_isle:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="s0_Flower Shrub 504" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-flower-shrub-3-142"
+node_name = "Authored_sw_isle_kit_flower_shrub_3_142"
+catalog_asset_id = "sw_isle:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-3.glb"
+metadata = {
+"natureDesign": "continent-v2 slice 2 nature design",
+"natureKey": "fsh3",
+"natureLayer": "understorey",
+"naturePiece": "nature-fsh3-5545",
+"natureStep": "3-earthworks",
+"natureZone": "earthworks-fill"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.56192, -0.412445, -0.930969, 0.29618, 1.08355, -0.301272, 0.974214, -0.091525, 0.62857, -189.95, 75.0555, -5.41)
+
+[node name="Content" parent="AuthoredAssets/s0_Flower Shrub 504" instance=ExtResource("a3_greenlight_s0_53_6jfpr")]
+metadata/map_asset_id = "sw_isle:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="s0_Flower Shrub 546" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-flower-shrub-2-196"
+node_name = "Authored_sw_isle_kit_flower_shrub_2_196"
+catalog_asset_id = "sw_isle:kit-flower-shrub-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-2.glb"
+metadata = {
+"natureDesign": "continent-v2 slice 2 nature design",
+"natureKey": "fsh2",
+"natureLayer": "understorey",
+"naturePiece": "nature-fsh2-5666",
+"natureStep": "3-earthworks",
+"natureZone": "earthworks-fill"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.416031, 0.062243, -0.718263, -0.353057, 1.440123, -0.571242, 0.628591, 0.66865, 1.29719, -170.92, 79.0129, 11.18)
+
+[node name="Content" parent="AuthoredAssets/s0_Flower Shrub 546" instance=ExtResource("a3_greenlight_s0_29_aq2a8")]
+metadata/map_asset_id = "sw_isle:kit-flower-shrub-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-2.glb"
+
+[node name="s0_Flower Shrub 554" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-flower-shrub-1-201"
+node_name = "Authored_sw_isle_kit_flower_shrub_1_201"
+catalog_asset_id = "sw_isle:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-1.glb"
+metadata = {
+"natureDesign": "continent-v2 slice 2 nature design",
+"natureKey": "fsh1",
+"natureLayer": "understorey",
+"naturePiece": "nature-fsh1-5685",
+"natureStep": "3-earthworks",
+"natureZone": "earthworks-fill"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.016912, 0.198781, 1.060974, 0.190182, 1.401841, -0.444929, -1.062549, 0.441154, 0.935768, -155.12, 76.6166, 9.39)
+
+[node name="Content" parent="AuthoredAssets/s0_Flower Shrub 554" instance=ExtResource("a3_greenlight_s0_34_37d76")]
+metadata/map_asset_id = "sw_isle:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="s0_Sw Sea Cliff Corner4" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-sea-cliff-corner-004"
+node_name = "Authored_sw_isle_kit_sw_sea_cliff_corner_004"
+catalog_asset_id = "sw_isle:kit-sw-sea-cliff-corner"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-sea-cliff-corner.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "headland",
+"polishNote": "apex seaward at (935, 743); turf top 6.4 m; rear turf p90 -0.4 m over the land; 32% of its plan proud",
+"polishPiece": "n19-0",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.67082, 0, -0.33541, 0, 0.75, 0, 0.33541, 0, 0.67082, -222.8448, -4.9873, -8.3104)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Sea Cliff Corner4" instance=ExtResource("a3_greenlight_s0_88_6lw0k")]
+metadata/map_asset_id = "sw_isle:kit-sw-sea-cliff-corner"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-sea-cliff-corner.glb"
+
+[node name="s0_Coastal Boulders 126" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-1-031"
+node_name = "Authored_sw_isle_kit_coastal_boulders_1_031"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0000-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.161246, -0.007284, 1.016879, -0.584177, 0.843407, -0.086592, -0.832366, -0.590515, -0.136218, -155, -5.2349, -86)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 126" instance=ExtResource("a3_greenlight_s0_91_kiy41")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
+
+[node name="s0_Coastal Rock 63" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-3-015"
+node_name = "Authored_sw_isle_kit_coastal_rock_3_015"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0000-b",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.263025, -0.10515, 0.107263, -0.142547, 1.125417, -0.575247, -0.047352, -0.583243, -1.129327, -164.5, -1.5145, -85.5)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 63" instance=ExtResource("a3_greenlight_s0_96_e14li")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+
+[node name="s0_Coastal Boulders 127" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-3-039"
+node_name = "Authored_sw_isle_kit_coastal_boulders_3_039"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0001-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.96265, 0, 0.900265, -0.333166, 1.224441, -0.356253, -0.836347, -0.487766, -0.894304, -180.6023, -4.3962, -82.4323)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 127" instance=ExtResource("a3_greenlight_s0_93_l81vy")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
+
+[node name="s0_Coastal Rock 64" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-2-022"
+node_name = "Authored_sw_isle_kit_coastal_rock_2_022"
+catalog_asset_id = "sw_isle:kit-coastal-rock-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0001-b",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.269635, 3.2e-05, 0.46459, -0.18142, 1.244663, 0.495699, -0.427704, -0.527855, 1.168869, -185.5561, -4.1948, -81.5406)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 64" instance=ExtResource("a3_greenlight_s0_95_8ehyf")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
+
+[node name="s0_Coastal Boulders 128" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-2-038"
+node_name = "Authored_sw_isle_kit_coastal_boulders_2_038"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0002-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.575393, -0.077397, -1.335378, 0.739682, 1.192788, -0.38785, 1.114493, -0.831605, -0.432018, -203.1669, -6.3676, -78.3707)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 128" instance=ExtResource("a3_greenlight_s0_90_x1ic5")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+
+[node name="s0_Coastal Boulders 129" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-4-021"
+node_name = "Authored_sw_isle_kit_coastal_boulders_4_021"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-4"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0003-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.130039, 0.067781, 1.152876, 0.308836, 1.115868, -0.10044, -1.112807, 0.317606, 0.106847, -216.8193, -2.8963, 8.3614)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 129" instance=ExtResource("a3_greenlight_s0_92_edrkc")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-4"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
+
+[node name="s0_Coastal Rock 65" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-1-028"
+node_name = "Authored_sw_isle_kit_coastal_rock_1_028"
+catalog_asset_id = "sw_isle:kit-coastal-rock-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0003-b",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.250943, 0.019615, 0.767546, 0.144201, 1.435186, -0.271695, -0.754134, 0.306965, 1.221239, -213.3961, -1.8251, 7.1871)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 65" instance=ExtResource("a3_greenlight_s0_94_rfpay")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
+
+[node name="s0_Coastal Boulders 130" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-2-039"
+node_name = "Authored_sw_isle_kit_coastal_boulders_2_039"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0004-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.289349, -0.388905, -0.966574, -0.398122, 0.885759, -0.475569, 0.962814, 0.483135, 0.093833, -196.7881, -0.5851, 13.5761)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 130" instance=ExtResource("a3_greenlight_s0_90_x1ic5")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+
+[node name="s0_Coastal Boulders 131" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-3-040"
+node_name = "Authored_sw_isle_kit_coastal_boulders_3_040"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0005-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.873275, 0.379979, 0.207761, -0.225742, 0.798477, -0.5115, -0.36958, 0.410131, 0.803343, -174, -6.9448, 24.2176)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 131" instance=ExtResource("a3_greenlight_s0_93_l81vy")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
+
+[node name="s0_Coastal Rock 66" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-3-016"
+node_name = "Authored_sw_isle_kit_coastal_rock_3_016"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0005-b",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.075656, -0.013907, 0.430077, 0.236085, 0.949014, 0.621154, -0.359755, 0.664361, -0.878292, -168.1615, -4.712, 23.5604)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 66" instance=ExtResource("a3_greenlight_s0_96_e14li")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+
+[node name="s0_Coastal Boulders 132" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-3-041"
+node_name = "Authored_sw_isle_kit_coastal_boulders_3_041"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0006-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.662316, -0.733313, -0.848792, -0.583693, 1.067056, -0.466425, 0.957862, 0.143181, -0.871125, -158.3266, -1.5092, 38.0816)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 132" instance=ExtResource("a3_greenlight_s0_93_l81vy")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
+
+[node name="s0_Coastal Rock 67" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-2-023"
+node_name = "Authored_sw_isle_kit_coastal_rock_2_023"
+catalog_asset_id = "sw_isle:kit-coastal-rock-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "shore",
+"polishPiece": "shore-0006-b",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.074094, -0.620179, 0.886564, 0.006759, 0.888358, 0.621998, -1.08193, 0.048021, -0.056829, -158.3585, -1.4632, 43.7427)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 67" instance=ExtResource("a3_greenlight_s0_95_8ehyf")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
+
+[node name="s0_Coastal Rock 418" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-3-138"
+node_name = "Authored_sw_isle_kit_coastal_rock_3_138"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "roadcut",
+"polishPiece": "cut-0011-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.262613, 0.687222, -0.960024, 0.291704, 0.990763, 0.629431, 1.14404, -0.094871, -0.380863, -150, 106.8271, -26)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 418" instance=ExtResource("a3_greenlight_s0_96_e14li")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+
+[node name="s0_Coastal Rock 482" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-rock-3-168"
+node_name = "Authored_sw_isle_kit_coastal_rock_3_168"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+collision_role = "solid"
+metadata = {
+"polishLayer": "roadcut",
+"polishPiece": "cut-0059-a",
+"polishStep": "d1-rock"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.624453, 0.369072, -0.025482, 0.341695, 0.594552, 0.23782, 0.141803, 0.192612, -0.685272, -146, 83.6625, -12)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 482" instance=ExtResource("a3_greenlight_s0_96_e14li")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+
+[node name="s0_Sw Trestle Pier Span Long 24" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-long24-001"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_long24_001"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span-long24"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-001",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.365056, 0, 0.763795, 0, 1, 0, -0.934543, 0, 0.298357, -229.5398, 2.53, -43.1382)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span Long 24" instance=ExtResource("a3_greenlight_s0_152_bc4hv")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span-long24"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
+
+[node name="s0_Sw Trestle Pier Span13" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-013"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_013"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-002",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.365056, 0, 0.763795, 0, 1, 0, -0.934543, 0, 0.298357, -226.6193, 2.53, -50.6145)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span13" instance=ExtResource("a3_greenlight_s0_85_vrua1")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="s0_Sw Trestle Pier Span Long 25" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-long24-002"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_long24_002"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span-long24"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-003",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.365056, 0, 0.763795, 0, 1, 0, -0.934543, 0, 0.298357, -223.6989, 2.53, -58.0909)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span Long 25" instance=ExtResource("a3_greenlight_s0_152_bc4hv")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span-long24"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
+
+[node name="s0_Sw Trestle Pier Span14" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-014"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_014"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-004",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.992369, 0, 0.145265, 0, 1, 0, -0.178626, 0, 0.80703, -213.6801, 2.53, -66.3176)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span14" instance=ExtResource("a3_greenlight_s0_85_vrua1")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="s0_Sw Trestle Pier Span15" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-015"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_015"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-005",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.992369, 0, 0.145265, 0, 1, 0, -0.178626, 0, 0.80703, -205.7411, 2.53, -67.7466)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span15" instance=ExtResource("a3_greenlight_s0_85_vrua1")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="s0_Sw Trestle Pier Span16" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-016"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_016"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-006",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.992369, 0, 0.145265, 0, 1, 0, -0.178626, 0, 0.80703, -197.8022, 2.53, -69.1756)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span16" instance=ExtResource("a3_greenlight_s0_85_vrua1")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="s0_Sw Trestle Pier Span17" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-017"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_017"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-007",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.992369, 0, 0.145265, 0, 1, 0, -0.178626, 0, 0.80703, -189.8632, 2.53, -70.6046)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span17" instance=ExtResource("a3_greenlight_s0_85_vrua1")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="s0_Sw Trestle Pier Span18" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-018"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_018"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-008",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.992369, 0, 0.145265, 0, 1, 0, -0.178626, 0, 0.80703, -181.9242, 2.53, -72.0336)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span18" instance=ExtResource("a3_greenlight_s0_85_vrua1")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="s0_Sw Trestle Pier Span19" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-trestle-pier-span-019"
+node_name = "Authored_sw_isle_kit_sw_trestle_pier_span_019"
+catalog_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"a1Piece": "deck-knob-quay-009",
+"coastGroup": "deck-knob-quay",
+"coastKind": "trestle",
+"knuckle": false,
+"polishStep": "a1-r42",
+"postsReachSeabed": true
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.992369, 0, 0.145265, 0, 1, 0, -0.178626, 0, 0.80703, -173.9853, 2.53, -73.4626)
+
+[node name="Content" parent="AuthoredAssets/s0_Sw Trestle Pier Span19" instance=ExtResource("a3_greenlight_s0_85_vrua1")]
+metadata/map_asset_id = "sw_isle:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="s0_Sea Wall Segment 6" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-006"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_006"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "deck-knob-quay-wall-01",
+"coastGroup": "deck-knob-quay",
+"coastKind": "base",
+"note": "quay face on the cliff side: top flush with the 2.5 m deck",
+"polishStep": "a1-r42"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.416667, 0, -0.931457, 0, 4, 0, 1.066667, 0, -0.363851, -224.9648, -3.1, -41.9602)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 6" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 16" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-016"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_016"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "deck-knob-quay-wall-02",
+"coastGroup": "deck-knob-quay",
+"coastKind": "base",
+"note": "quay face on the cliff side: top flush with the 2.5 m deck",
+"polishStep": "a1-r42"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.416667, 0, -0.931457, 0, 4, 0, 1.066667, 0, -0.363851, -221.6315, -3.1, -50.4935)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 16" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 22" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-022"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_022"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "deck-knob-quay-wall-03",
+"coastGroup": "deck-knob-quay",
+"coastKind": "base",
+"note": "quay face on the cliff side: top flush with the 2.5 m deck",
+"polishStep": "a1-r42"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.416667, 0, -0.931457, 0, 4, 0, 1.066667, 0, -0.363851, -218.2981, -3.1, -59.0269)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 22" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 24" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-024"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_024"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "deck-knob-quay-wall-05",
+"coastGroup": "deck-knob-quay",
+"coastKind": "base",
+"note": "quay face on the cliff side: top flush with the 2.5 m deck",
+"polishStep": "a1-r42"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.041667, 0, -0.177153, 0, 4, 0, 0.1875, 0, -0.984183, -207.6692, -3.1, -62.6342)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 24" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 92" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-092"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_092"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "deck-knob-quay-wall-06",
+"coastGroup": "deck-knob-quay",
+"coastKind": "base",
+"note": "quay face on the cliff side: top flush with the 2.5 m deck",
+"polishStep": "a1-r42"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.041667, 0, -0.177153, 0, 1, 0, 0.1875, 0, -0.984183, -199.3358, 1.1, -64.1342)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 92" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 93" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-093"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_093"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "deck-knob-quay-wall-07",
+"coastGroup": "deck-knob-quay",
+"coastKind": "base",
+"note": "quay face on the cliff side: top flush with the 2.5 m deck",
+"polishStep": "a1-r42"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.041667, 0, -0.177153, 0, 1.804719, 0, 0.1875, 0, -0.984183, -191.0025, -0.0266, -65.6342)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 93" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 94" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-094"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_094"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "deck-knob-quay-wall-08",
+"coastGroup": "deck-knob-quay",
+"coastKind": "base",
+"note": "quay face on the cliff side: top flush with the 2.5 m deck",
+"polishStep": "a1-r42"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.041667, 0, -0.177153, 0, 2.174847, 0, 0.1875, 0, -0.984183, -182.6692, -0.5448, -67.1342)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 94" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 95" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-095"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_095"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "deck-knob-quay-wall-09",
+"coastGroup": "deck-knob-quay",
+"coastKind": "base",
+"note": "quay face on the cliff side: top flush with the 2.5 m deck",
+"polishStep": "a1-r42"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.041667, 0, -0.177153, 0, 2.357661, 0, 0.1875, 0, -0.984183, -174.3358, -0.8007, -68.6342)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 95" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 96" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-096"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_096"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "seam-mole-knob-wall-01",
+"coastGroup": "seam-mole-knob",
+"coastKind": "base",
+"note": "mole face on its seaward long side, top flush with the 2.5 m mole",
+"polishStep": "a1-r42b"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.083333, 0, 0, 0, 4, 0, 0, 0, -1, -168.6667, -3.1, -81.69)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 96" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 97" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-097"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_097"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "seam-mole-knob-wall-02",
+"coastGroup": "seam-mole-knob",
+"coastKind": "base",
+"note": "mole face on its seaward long side, top flush with the 2.5 m mole",
+"polishStep": "a1-r42b"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.083333, 0, 0, 0, 4, 0, 0, 0, -1, -160, -3.1, -81.69)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 97" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Sea Wall Segment 98" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sea-wall-segment-1-098"
+node_name = "Authored_sw_isle_kit_sea_wall_segment_1_098"
+catalog_asset_id = "sw_isle:kit-sea-wall-segment-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+metadata = {
+"a1Piece": "seam-mole-knob-wall-03",
+"coastGroup": "seam-mole-knob",
+"coastKind": "base",
+"note": "mole face on its seaward long side, top flush with the 2.5 m mole",
+"polishStep": "a1-r42b"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.20875, 0, 0, 0, 4, 0, 0, 0, -1, -150.835, -3.1, -81.69)
+
+[node name="Content" parent="AuthoredAssets/s0_Sea Wall Segment 98" instance=ExtResource("a3_greenlight_s0_86_tdlc1")]
+metadata/map_asset_id = "sw_isle:kit-sea-wall-segment-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-wall-segment-1.glb"
+
+[node name="s0_Stone Landing Stage 2" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-stone-landing-stage-1-002"
+node_name = "Authored_sw_isle_kit_stone_landing_stage_1_002"
+catalog_asset_id = "sw_isle:kit-stone-landing-stage-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-landing-stage-1.glb"
+collision_role = "solid"
+metadata = {
+"a3Waterline": true,
+"coastGroup": "deck-knob-quay",
+"coastKind": "pier-head",
+"polishStep": "rf-sw-b25",
+"rfPiece": "knob-quay-bend-head",
+"rfWhy": "review fix 2026-10-03: the bend's knuckle trestle crossed its neighbours' railings"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.119925, 0, 0.921015, 0, 1.5, 0, -0.921015, 0, 1.119925, -221, -1.8995, -65)
+
+[node name="Content" parent="AuthoredAssets/s0_Stone Landing Stage 2" instance=ExtResource("a3_greenlight_s0_77_ep8sg")]
+metadata/map_asset_id = "sw_isle:kit-stone-landing-stage-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-landing-stage-1.glb"
+
+[node name="lv_stop_knob-quay_kit-lantern-post-1 30" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-lantern-post-1-lvstop-030"
+node_name = "Authored_sw_isle_kit_lantern_post_1_lvstop_030"
+catalog_asset_id = "sw_isle:kit-lantern-post-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb"
+collision_role = "solid"
+metadata = {
+"stopPass": "lv-2026-10-14",
+"stopRule": "knob-quay"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, -183, 2.5000, -72)
+
+[node name="Content" parent="AuthoredAssets/lv_stop_knob-quay_kit-lantern-post-1 30" instance=ExtResource("a3_greenlight_s0_26_tch1l")]
+metadata/map_asset_id = "sw_isle:kit-lantern-post-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb"
+
+[node name="lv_stop_knob-quay_kit-lantern-post-1 29" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-lantern-post-1-lvstop-029"
+node_name = "Authored_sw_isle_kit_lantern_post_1_lvstop_029"
+catalog_asset_id = "sw_isle:kit-lantern-post-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb"
+collision_role = "solid"
+metadata = {
+"stopPass": "lv-2026-10-14",
+"stopRule": "knob-quay"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, -203, 2.5000, -68.5)
+
+[node name="Content" parent="AuthoredAssets/lv_stop_knob-quay_kit-lantern-post-1 29" instance=ExtResource("a3_greenlight_s0_26_tch1l")]
+metadata/map_asset_id = "sw_isle:kit-lantern-post-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb"
+
+[node name="lv_stop_knob-quay_kit-lantern-post-1 28" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-lantern-post-1-lvstop-028"
+node_name = "Authored_sw_isle_kit_lantern_post_1_lvstop_028"
+catalog_asset_id = "sw_isle:kit-lantern-post-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb"
+collision_role = "solid"
+metadata = {
+"stopPass": "lv-2026-10-14",
+"stopRule": "knob-quay"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, -221, 2.5000, -63)
+
+[node name="Content" parent="AuthoredAssets/lv_stop_knob-quay_kit-lantern-post-1 28" instance=ExtResource("a3_greenlight_s0_26_tch1l")]
+metadata/map_asset_id = "sw_isle:kit-lantern-post-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb"
+
+[node name="lv_stop_knob-quay_kit-lantern-post-1 27" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-lantern-post-1-lvstop-027"
+node_name = "Authored_sw_isle_kit_lantern_post_1_lvstop_027"
+catalog_asset_id = "sw_isle:kit-lantern-post-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb"
+collision_role = "solid"
+metadata = {
+"stopPass": "lv-2026-10-14",
+"stopRule": "knob-quay"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, -229.5, 2.5000, -45)
+
+[node name="Content" parent="AuthoredAssets/lv_stop_knob-quay_kit-lantern-post-1 27" instance=ExtResource("a3_greenlight_s0_26_tch1l")]
+metadata/map_asset_id = "sw_isle:kit-lantern-post-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-lantern-post-1.glb"
+
+[node name="lv_stop_knob-light_kit-sw-harbour-tower 26" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "sw_isle-kit-sw-harbour-tower-lvstop-026"
+node_name = "Authored_sw_isle_kit_sw_harbour_tower_lvstop_026"
+catalog_asset_id = "sw_isle:kit-sw-harbour-tower"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-harbour-tower.glb"
+collision_role = "solid"
+metadata = {
+"stopPass": "lv-2026-10-14",
+"stopRule": "knob-light"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, -0.939693, -203, 50.6176, -45)
+
+[node name="Content" parent="AuthoredAssets/lv_stop_knob-light_kit-sw-harbour-tower 26" instance=ExtResource("a3_greenlight_s0_66_obv44")]
+metadata/map_asset_id = "sw_isle:kit-sw-harbour-tower"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-harbour-tower.glb"
+
+[node name="lv_greenlight_Thrift Clump 1 23" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "lf_biomes-kit-thrift-clump-1-greenlight-0023"
+node_name = "Authored_lf_biomes_kit_thrift_clump_1_greenlight_0023"
+catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
+collision_role = "none"
+metadata = {
+"biomeMap": "greenlight",
+"biomePass": "lv-2026-10-14",
+"biomeRule": "thrift"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.683304, 0, 0.635545, 0, 0.933178, 0, -0.635545, 0, -0.683304, -205.595, 58.5202, -11.42)
+
+[node name="Content" parent="AuthoredAssets/lv_greenlight_Thrift Clump 1 23" instance=ExtResource("a3_greenlight_lv_thrift_clump_1")]
+metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
+
+[node name="lv_greenlight_Thrift Clump 1 48" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_greenlight_s0_19_jaile")
+asset_id = "lf_biomes-kit-thrift-clump-1-greenlight-0048"
+node_name = "Authored_lf_biomes_kit_thrift_clump_1_greenlight_0048"
+catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
+collision_role = "none"
+metadata = {
+"biomeMap": "greenlight",
+"biomePass": "lv-2026-10-14",
+"biomeRule": "thrift"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.155436, 0, -1.17423, 0, 1.18447, 0, 1.17423, 0, -0.155436, -175.554, 90.1401, -4.89)
+
+[node name="Content" parent="AuthoredAssets/lv_greenlight_Thrift Clump 1 48" instance=ExtResource("a3_greenlight_lv_thrift_clump_1")]
+metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
+

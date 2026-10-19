@@ -904,6 +904,12 @@ _data = {
 }
 point_count = 24
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb" id="a3_hearthcroft_s0_90_x1ic5"]
+
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/asset_control.gd" id="a3_hearthcroft_s0_19_jaile"]
+
+
 [node name="ringholm" type="Node3D" groups=["map_authoring_region"]]
 script = ExtResource("region")
 region_id = "ringholm"
@@ -1390,25 +1396,6 @@ transform = Transform3D(0.989949, 0, -0.989949, 0, 1.4, 0, 0.989949, 0, 0.989949
 metadata/map_asset_id = "sw_isle:kit-sw-sea-cliff-corner"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-sea-cliff-corner.glb"
 
-[node name="s0_Coastal Boulders 133" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-4-022"
-node_name = "Authored_sw_isle_kit_coastal_boulders_4_022"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-4"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0007-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.09535, -0.079346, -1.006487, 0.23574, 1.464107, 0.141131, 0.981701, -0.26305, 1.089114, -332.2812, -3.6917, -262.5625)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 133" instance=ExtResource("s0_92_edrkc")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-4"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
-
 [node name="s0_Coastal Rock 68" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-017"
@@ -1427,25 +1414,6 @@ transform = Transform3D(-0.778481, -0.09442, -1.084404, 0.156756, 1.309572, -0.2
 [node name="Content" parent="AuthoredAssets/s0_Coastal Rock 68" instance=ExtResource("s0_96_e14li")]
 metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-
-[node name="s0_Coastal Boulders 134" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-2-040"
-node_name = "Authored_sw_isle_kit_coastal_boulders_2_040"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0008-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.308769, -0.135697, -1.15258, 0.199996, 1.168611, -0.191162, 1.143178, -0.241097, -0.277866, -351.8941, -2.8096, -249.7881)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 134" instance=ExtResource("s0_90_x1ic5")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
 
 [node name="s0_Coastal Rock 69" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -1504,63 +1472,6 @@ transform = Transform3D(-0.815572, 0.066839, 0.9171, -0.182965, 1.189546, -0.249
 metadata/map_asset_id = "sw_isle:kit-coastal-rock-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
 
-[node name="s0_Coastal Boulders 136" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-4-023"
-node_name = "Authored_sw_isle_kit_coastal_boulders_4_023"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-4"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0010-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.839093, -0.559733, 1.094271, -0.250841, 1.219081, 0.815922, -1.203249, -0.644475, 0.593001, -394.1224, -3.483, -239.4966)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 136" instance=ExtResource("s0_92_edrkc")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-4"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
-
-[node name="s0_Coastal Rock 71" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-3-019"
-node_name = "Authored_sw_isle_kit_coastal_rock_3_019"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0010-b",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.867365, -0.417904, -0.386625, 0.53006, 0.849885, 0.270509, 0.207746, -0.423669, 0.924008, -396.6407, -1.2786, -237.3367)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 71" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-
-[node name="s0_Coastal Rock 72" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-2-024"
-node_name = "Authored_sw_isle_kit_coastal_rock_2_024"
-catalog_asset_id = "sw_isle:kit-coastal-rock-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0010-c",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.543363, -0.281972, -1.215222, 0.775478, 1.114623, 0.08811, 0.977193, -0.727751, 0.605795, -390.4428, -1.7098, -242.8102)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 72" instance=ExtResource("s0_95_8ehyf")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
-
 [node name="s0_Coastal Boulders 137" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-boulders-1-033"
@@ -1579,63 +1490,6 @@ transform = Transform3D(0.626787, -0.039072, 0.7517, -0.410286, 0.802368, 0.3838
 [node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 137" instance=ExtResource("s0_91_kiy41")]
 metadata/map_asset_id = "sw_isle:kit-coastal-boulders-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
-
-[node name="s0_Coastal Boulders 138" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-3-042"
-node_name = "Authored_sw_isle_kit_coastal_boulders_3_042"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0012-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.856036, -0.614365, -0.192458, 0.599403, 0.877404, -0.134761, 0.234948, 0, 1.045027, -433.7903, -2.1509, -198)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 138" instance=ExtResource("s0_93_l81vy")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
-
-[node name="s0_Coastal Rock 73" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-1-030"
-node_name = "Authored_sw_isle_kit_coastal_rock_1_030"
-catalog_asset_id = "sw_isle:kit-coastal-rock-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0012-b",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.163391, -0.589781, 0.826295, -0.114383, 0.842294, 0.578583, -1.008723, 2e-05, -0.19945, -435.0465, -2.046, -192.5262)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 73" instance=ExtResource("s0_94_rfpay")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
-
-[node name="s0_Coastal Rock 74" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-2-025"
-node_name = "Authored_sw_isle_kit_coastal_rock_2_025"
-catalog_asset_id = "sw_isle:kit-coastal-rock-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0012-c",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.681633, -0.559878, 0.417991, 0.477285, 0.799588, 0.292681, -0.510273, 0, 0.832121, -434.7855, -1.8309, -202.6482)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 74" instance=ExtResource("s0_95_8ehyf")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-2.glb"
 
 [node name="s0_Coastal Boulders 139" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -1731,25 +1585,6 @@ transform = Transform3D(1.326508, -0.797779, -0.010297, 0.759025, 1.268015, -0.4
 [node name="Content" parent="AuthoredAssets/s0_Coastal Rock 77" instance=ExtResource("s0_96_e14li")]
 metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-
-[node name="s0_Coastal Boulders 141" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-1-034"
-node_name = "Authored_sw_isle_kit_coastal_boulders_1_034"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0015-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.228101, -0.668186, 0.168629, -0.545884, 1.153563, 0.595352, -0.420617, 0.453829, -1.265014, -385.859, -5.1284, -99.141)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 141" instance=ExtResource("s0_91_kiy41")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
 
 [node name="s0_Coastal Boulders 142" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -2017,25 +1852,6 @@ transform = Transform3D(-0.283296, -0.56809, -0.853764, -0.423477, 0.8715, -0.43
 metadata/map_asset_id = "sw_isle:kit-coastal-rock-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
 
-[node name="s0_Coastal Boulders 149" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-4-025"
-node_name = "Authored_sw_isle_kit_coastal_boulders_4_025"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-4"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0023-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.067345, -0.338712, -0.455661, -0.336017, 1.158937, -0.074397, 0.457652, 0.060964, -1.117325, -299.2552, -2.8203, 136.5637)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 149" instance=ExtResource("s0_92_edrkc")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-4"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
-
 [node name="s0_Coastal Rock 85" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-023"
@@ -2073,25 +1889,6 @@ transform = Transform3D(-0.181881, -0.246156, -0.740191, -0.067553, 0.762161, -0
 [node name="Content" parent="AuthoredAssets/s0_Coastal Rock 86" instance=ExtResource("s0_94_rfpay")]
 metadata/map_asset_id = "sw_isle:kit-coastal-rock-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
-
-[node name="s0_Coastal Boulders 150" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-4-026"
-node_name = "Authored_sw_isle_kit_coastal_boulders_4_026"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-4"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0024-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.947715, -0.212009, -0.446547, -0.269696, 1.030974, 0.082901, 0.414266, 0.186173, -0.967594, -289.2345, -2.6877, 157.6759)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 150" instance=ExtResource("s0_92_edrkc")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-4"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
 
 [node name="s0_Coastal Rock 87" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -13263,46 +13060,6 @@ transform = Transform3D(0.750112, 0.161283, -0.116169, -0.168508, 0.756543, -0.0
 [node name="Content" parent="AuthoredAssets/s2_Dune Grass 488" instance=ExtResource("s2_107_3exuu")]
 metadata/map_asset_id = "tollholms:kit-dune-grass-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-dune-grass-1.glb"
-
-[node name="s2_Sea Stack 1" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-sea-stack-1-001"
-node_name = "Authored_tollholms_kit_sea_stack_1_001"
-catalog_asset_id = "tollholms:kit-sea-stack-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sea-stack-1.glb"
-collision_role = "solid"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00979",
-"a3Zone": "sea-stack",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.281802, 0, -1.239393, 0, 1.783006, 0, 1.239393, 0, -1.281802, 51, -10.6401, -158)
-
-[node name="Content" parent="AuthoredAssets/s2_Sea Stack 1" instance=ExtResource("s2_110_rdhml")]
-metadata/map_asset_id = "tollholms:kit-sea-stack-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sea-stack-1.glb"
-
-[node name="s2_Sea Stack 2" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-sea-stack-2-001"
-node_name = "Authored_tollholms_kit_sea_stack_2_001"
-catalog_asset_id = "tollholms:kit-sea-stack-2"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sea-stack-2.glb"
-collision_role = "solid"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00980",
-"a3Zone": "sea-stack",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.3737, 0, -1.444387, 0, 1.491947, 0, 1.444387, 0, -0.3737, -155, -6.6346, 246)
-
-[node name="Content" parent="AuthoredAssets/s2_Sea Stack 2" instance=ExtResource("s2_111_jjr12")]
-metadata/map_asset_id = "tollholms:kit-sea-stack-2"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sea-stack-2.glb"
 
 [node name="s2_Drystone Dyke 45" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -59335,3 +59092,24 @@ extras = {
 "zone": "drift"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -293.5, 90.4780, -97.5)
+[node name="s0_Coastal Boulders 68" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("a3_hearthcroft_s0_19_jaile")
+asset_id = "sw_isle-kit-coastal-boulders-2-021"
+node_name = "Authored_sw_isle_kit_coastal_boulders_2_021"
+catalog_asset_id = "sw_isle:kit-coastal-boulders-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+collision_role = "solid"
+metadata = {
+"coastDesign": "continent-v2 slice 2 coast design",
+"coastGroup": "rock-earthwork-face",
+"coastKind": "base",
+"coastPiece": "rock-earthwork-face-001",
+"coastStep": "3-shore"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.891402, 0, 0.552046, 0, 1.0485, 0, -0.552046, 0, 0.891402, -415.123, -1.497, -125.218)
+
+[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 68" instance=ExtResource("a3_hearthcroft_s0_90_x1ic5")]
+metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
+
