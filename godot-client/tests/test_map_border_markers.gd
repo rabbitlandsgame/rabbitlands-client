@@ -49,7 +49,7 @@ func run() -> void:
 				ferries += 1
 			else:
 				walking += 1
-			if source in ["landfall", "pinebrow", "spindle_hill", "boarsend"]:
+			if source in ["landfall", "pinebrow", "jadestair", "boarsend"]:
 				expect(marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"entrance").size() == 1,
 					"Tan entrance remains visible alongside the walking border")
 	expect(walking > 0 and ferries > 0, "Both walking borders and coastlines were checked")

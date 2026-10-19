@@ -100,7 +100,7 @@ def test_the_label_point_is_the_area_centroid():
 
 def test_five_storage_markers_match_the_published_tiles_and_preview_positions():
     import frames
-    storage_maps = {"landfall", "greenlight", "hearthcroft", "stagheath", "tollholm"}
+    storage_maps = {"landfall", "greenlight", "hearthcroft", "stagheath", "coilmere"}
     for row in read(tool.OUTPUT)["regions"]:
         mid = row["serverMap"]
         markers = row["storageMarkers"]
@@ -141,7 +141,7 @@ def test_landfall_overview_places_all_components_in_its_own_image():
     overview = data["overview"]
     assert overview["name"] == "Landfall" and overview["frame"] == "continent-v2"
     assert [r["serverMap"] for r in overview["regions"]] == [r["serverMap"] for r in data["regions"]]
-    assert len(overview["regions"]) == 15
+    assert len(overview["regions"]) == 18
     source_scale = data["lattice"]["metresPerPixel"]
     source_origin = data["lattice"]["originMetres"]
     for source, region in zip(data["regions"], overview["regions"]):
@@ -152,7 +152,7 @@ def test_landfall_overview_places_all_components_in_its_own_image():
                     assert abs((old[i] * source_scale + source_origin[i]) -
                                (new[i] * overview["metresPerPixel"] + overview["originMetres"][i])) < .002
                     assert 0 <= new[i] < overview["imageSize"][i]
-    assert len(next(r for r in overview["regions"] if r["serverMap"] == "ravenhead")["polygons"]) == 2
+    assert len(next(r for r in overview["regions"] if r["serverMap"] == "ravenhead")["polygons"]) == 1
     image_path = ROOT / tool.OVERVIEW
     assert hashlib.sha256(image_path.read_bytes()).hexdigest() == overview["sha256"]
     with Image.open(image_path) as image:

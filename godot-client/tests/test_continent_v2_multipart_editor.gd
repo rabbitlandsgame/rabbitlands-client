@@ -12,7 +12,7 @@ func _run() -> void:
 	var catalog := CATALOG.new()
 	var entries: Array[Dictionary] = catalog.entries("", CATALOG.configured_path())
 	_expect(catalog.errors.is_empty(), "real continent-v2 catalog validates: " + "; ".join(catalog.errors))
-	_expect(entries.size() == 15, "all fifteen scenes are registered")
+	_expect(entries.size() == 18, "all eighteen A3 scenes are registered")
 	for entry in entries:
 		var packed := load(String(entry.scene_path)) as PackedScene
 		_expect(packed != null and entry.editable, String(entry.id) + " saved authored scene loads")
@@ -32,11 +32,11 @@ func _run() -> void:
 		scene.add_child(host)
 		var local_rings := TOPDOWN.ownership_polygons_local(scene)
 		_expect(local_rings.size() == rings.size(), String(entry.id) + " editor tools receive all ownership components")
-		if entry.id == "ravenhead":
-			_expect(rings.size() == 2 and terrain.preview_clip_polygons == rings, "Ravenhead retains both exact viewer components")
+		if rings.size() > 1:
+			_expect(terrain.preview_clip_polygons == rings, String(entry.id) + " retains every exact viewer component")
 			var framing: Dictionary = TOPDOWN.plan(scene, 0.1, local_rings)
 			var owned: Rect2 = GEOMETRY.bounds(local_rings)
-			_expect(not framing.has("error") and framing.rect.encloses(owned), "Ravenhead capture frames both disjoint components")
+			_expect(not framing.has("error") and framing.rect.encloses(owned), String(entry.id) + " capture frames every disjoint component")
 			var mask: PackedByteArray = terrain.preview_clip_mask()
 			var all_match := true
 			var boundary_cells := 0
