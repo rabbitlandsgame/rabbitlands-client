@@ -330,8 +330,24 @@ def build(territories, spec, amend):
 
         def rename(text):
             return REF.sub(lambda m: f'{m.group(1)}("{prefix}{m.group(2)}")' if m.group(2) in needed else m.group(0), text)
+        # Godot reads a sub_resource only after those it uses: dependencies first (ext_resources have none here)
+        ordered, state = [], {}
+
+        def visit(rid):
+            if state.get(rid) == 2:
+                return
+            if state.get(rid) == 1:
+                raise ValueError(f"{src}: resource cycle at {rid}")
+            state[rid] = 1
+            for _, dep in REF.findall(resources[rid]):
+                if dep in needed:
+                    visit(dep)
+            state[rid] = 2
+            ordered.append(rid)
+        for rid in sorted(needed):
+            visit(rid)
         new_resources = []
-        for rid in sorted(needed, key=lambda r: not resources[r].startswith("[ext_resource")):
+        for rid in sorted(ordered, key=lambda r: not resources[r].startswith("[ext_resource")):
             if prefix + rid in d.resource_ids:
                 continue
             block = resources[rid].replace(f' id="{rid}"', f' id="{prefix}{rid}"', 1)

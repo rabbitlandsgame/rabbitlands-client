@@ -1,3 +1,5 @@
+
+
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/region_control.gd" id="region"]
@@ -1375,6 +1377,11 @@ transparency = 1
 cull_mode = 2
 albedo_color = Color(0.67, 0.64, 0.6, 0)
 
+[sub_resource type="StandardMaterial3D" id="a3_jadestair_a3_greenlight_s0_StandardMaterial3D_idnrw"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.67, 0.64, 0.6, 0)
+
 [sub_resource type="Resource" id="a3_jadestair_a3_greenlight_s0_Resource_41irn"]
 resource_local_to_scene = true
 script = ExtResource("a3_jadestair_a3_greenlight_s0_surface")
@@ -1385,10 +1392,18 @@ resource_local_to_scene = true
 script = ExtResource("a3_jadestair_a3_greenlight_s0_surface")
 source_material = SubResource("a3_jadestair_a3_greenlight_s0_StandardMaterial3D_2glf6")
 
-[sub_resource type="StandardMaterial3D" id="a3_jadestair_a3_greenlight_s0_StandardMaterial3D_idnrw"]
-transparency = 1
-cull_mode = 2
-albedo_color = Color(0.67, 0.64, 0.6, 0)
+[sub_resource type="ShaderMaterial" id="a3_jadestair_s2_ShaderMaterial_pthxn"]
+render_priority = 1
+shader = ExtResource("a3_jadestair_s2_13_sk0g7")
+shader_parameter/ground_albedo = ExtResource("a3_jadestair_s2_14_0fybo")
+shader_parameter/ground_normal = ExtResource("a3_jadestair_s2_15_4jwv8")
+shader_parameter/ground_orm = ExtResource("a3_jadestair_s2_16_rc10d")
+shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
+shader_parameter/texture_scale = 1.0
+shader_parameter/roughness_multiplier = 1.0
+shader_parameter/normal_strength = 0.72
+shader_parameter/edge_feather = 0.45
+shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="Resource" id="a3_jadestair_s2_Resource_k5d2k"]
 resource_local_to_scene = true
@@ -1405,7 +1420,15 @@ _data = {
 }
 point_count = 59
 
-[sub_resource type="ShaderMaterial" id="a3_jadestair_s2_ShaderMaterial_pthxn"]
+[sub_resource type="Curve3D" id="a3_jadestair_s2_road_1216021f7f00a77b_cut_1"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, -0.359213747071, 0.0161436295011, -0.317547351167, -83.950709205, 69.6816866507, 542.179609833, 0, 0, 0, 0, 0, 0, -85.3239, 69.7434, 540.9657, 0, 0, 0, 0, 0, 0, -86.8904, 69.8549, 539.7246, 0, 0, 0, 0, 0, 0, -88.539, 69.9676, 538.5953, 0, 0, 0, 0, 0, 0, -90.2694, 70.1377, 537.5959, 0, 0, 0, 0, 0, 0, -92.0757, 70.3719, 536.7415, 0, 0, 0, 0, 0, 0, -93.9522, 70.6789, 536.0553, 0, 0, 0, 0, 0, 0, -95.8881, 71.051, 535.561, 0, 0, 0, 0, 0, 0, -97.863, 71.5025, 535.2557, 0, 0, 0, 0, 0, 0, -99.8554, 72.1013, 535.0984, 0, 0, 0, 0, 0, 0, -101.8532, 72.7009, 535.0316, 0, 0, 0, 0, 0, 0, -103.852, 73.3006, 535.0083, 0, 0, 0, 0, 0, 0, -105.8509, 73.9003, 535.0018, 0, 0, 0, 0, 0, 0, -107.8499, 74.5, 535.0003, 0, 0, 0, 0, 0, 0, -109.8488, 75.0997, 535, 0, 0, 0, 0, 0, 0, -111.8478, 75.6994, 535, 0, 0, 0, 0, 0, 0, -113.8467, 76.299, 535, 0, 0, 0, 0, 0, 0, -115.8457, 76.8987, 535, 0, 0, 0, 0, 0, 0, -117.8446, 77.4984, 535, 0, 0, 0, 0, 0, 0, -119.8436, 78.0981, 535, 0, 0, 0, 0, 0, 0, -121.8425, 78.6978, 535, 0, 0, 0, 0, 0, 0, -123.8415, 79.2557, 535, 0, 0, 0, 0, 0, 0, -125.8404, 79.762, 535, 0, 0, 0, 0, 0, 0, -127.8394, 80.288, 535, 0, 0, 0, 0, 0, 0, -129.8383, 80.8304, 535, 0, 0, 0, 0, 0, 0, -131.8373, 81.3831, 535, 0, 0, 0, 0, 0, 0, -133.8362, 81.9231, 535, 0, 0, 0, 0, 0, 0, -135.8352, 82.4245, 535, 0, 0, 0, 0, 0, 0, -137.8341, 82.8846, 535, 0, 0, 0, 0, 0, 0, -139.8331, 83.3281, 535, 0, 0, 0, 0, 0, 0, -141.832, 83.7896, 535, 0, 0, 0, 0, 0, 0, -143.831, 84.2649, 535, 0, 0, 0, 0, 0, 0, -145.8299, 84.7135, 535, 0, 0, 0, 0, 0, 0, -147.8289, 85.1109, 535, 0, 0, 0, 0, 0, 0, -149.8278, 85.475, 535, 0, 0, 0, 0, 0, 0, -151.8268, 85.8297, 535, 0, 0, 0, 0, 0, 0, -153.8257, 86.1128, 535, 0, 0, 0, 0, 0, 0, -155.8247, 86.3342, 535, 0, 0, 0, 0, 0, 0, -157.8236, 86.5915, 535, 0, 0, 0, 0, 0, 0, -159.8225, 86.8521, 535, 0, 0, 0, 0, 0, 0, -161.8215, 87.1004, 535, 0, 0, 0, 0, 0, 0, -163.8204, 87.3167, 535, 0, 0, 0, 0, 0, 0, -165.8194, 87.4881, 535, 0, 0, 0, 0, 0, 0, -167.8183, 87.6091, 535, 0, 0, 0, 0, 0, 0, -169.8173, 87.6967, 535.0003, 0, 0, 0, 0, 0, 0, -171.8162, 87.7584, 535.0018, 0, 0, 0, 0, 0, 0, -173.8152, 87.8265, 535.0087, 0, 0, 0, 0, 0, 0, -175.8139, 87.9415, 535.0346, 0, 0, 0, 0, 0, 0, -177.8113, 88.102, 535.112, 0, 0, 0, 0, 0, 0, -179.8006, 88.2898, 535.3026, 0, 0, 0, 0, 0, 0, -181.7608, 88.47, 535.6876, 0, 0, 0, 0, 0, 0, -183.6539, 88.6381, 536.3235, 0, 0, 0, 0, 0, 0, -185.4527, 88.8251, 537.1922, 0, 0, 0, 0, 0, 0, -187.1705, 89.0062, 538.2135, 0, 0, 0, 0, 0, 0, -188.85, 89.2841, 539.2976, 0, 0, 0, 0, 0, 0, -190.5325, 89.4741, 540.3768, 0, 0, 0, 0, 0, 0, -192.2416, 89.6039, 541.4133, 0, 0, 0, 0, 0, 0, -193.9817, 89.7425, 542.3969, 0, 0, 0, 0, 0, 0, -195.7455, 89.9309, 543.3374, 0, 0, 0, 0, 0, 0, -197.5229, 90.091, 544.252, 0, 0, 0, 0, 0, 0, -199.3049, 90.1849, 545.1577, 0, 0, 0, 0, 0, 0, -201.0831, 90.2676, 546.0708, 0, 0, 0, 0, 0, 0, -202.8462, 90.2225, 547.0125, 0, 0, 0, 0, 0, 0, -204.5769, 90.2333, 548.0124, 0, 0, 0, 0, 0, 0, -206.2531, 90.3218, 549.1007, 0, 0, 0, 0, 0, 0, -207.8571, 90.3524, 550.2927, 0, 0, 0, 0, 0, 0, -209.3872, 90.3421, 551.5784, 0, 0, 0, 0, 0, 0, -210.8596, 90.3698, 552.9302, 0, 0, 0, 0, 0, 0, -212.2973, 90.3184, 554.3189, 0, 0, 0, 0, 0, 0, -213.7189, 90.2586, 555.7243, 0, 0, 0, 0, 0, 0, -215.1345, 90.1915, 557.1356, 0, 0, 0, 0, 0, 0, -216.5484, 90.0579, 558.5486, 0, 0, 0, 0, 0, 0, -217.962, 89.8668, 559.962, 0, 0, 0, 0, 0, 0, -219.3754, 89.658, 561.3754, 0, 0, 0, 0, 0, 0, -220.7889, 89.4751, 562.7889, 0, 0, 0, 0, 0, 0, -222.2026, 89.2728, 564.2022, 0, 0, 0, 0, 0, 0, -223.6171, 89.1067, 565.6146, 0, 0, 0, 0, 0, 0, -225.035, 88.9907, 567.0236, 0, 0, 0, 0, 0, 0, -226.4632, 88.8083, 568.4222, 0, 0, 0, 0, 0, 0, -227.9163, 88.6522, 569.7948, 0, 0, 0, 0, 0, 0, -229.4158, 88.5277, 571.1163, 0, 0, 0, 0, 0, 0, -230.9811, 88.4329, 572.3589, 0, 0, 0, 0, 0, 0, -232.6146, 88.3597, 573.5105, 0, 0, 0, 0, 0, 0, -234.2938, 88.2674, 574.5948, 0, 0, 0, 0, 0, 0, -235.9767, 88.1865, 575.6734, 0, 0, 0, 0, 0, 0, -237.6117, 88.1263, 576.8227, 0, 0, 0, 0, 0, 0, -239.1508, 88.0541, 578.097, 0, 0, 0, 0, 0, 0, -240.5711, 87.9982, 579.5026, 0, 0, 0, 0, 0, 0, -241.8878, 87.9473, 581.0063, 0, 0, 0, 0, 0, 0, -243.1374, 88.3314, 582.5664, 0, 0, 0, 0, 0, 0, -244.3532, 88.1068, 584.1531, 0, 0, 0, 0, 0, 0, -245.5533, 87.9907, 585.7516, 0, 0, 0, 0, 0, 0, -246.7428, 88.1522, 587.3582, 0, 0, 0, 0, 0, 0, -247.9208, 88.4728, 588.9731, 0, 0, 0, 0, 0, 0, -249.0935, 88.3079, 590.5919, 0, 0, 0, 0, 0, 0, -250.2837, 88.0983, 592.1979, 0, 0, 0, 0, 0, 0, -250.9473, 87.8008, 594.0019, 0, 0, 0, 0, 0, 0, -251, 87.686, 595),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 98
+
+[sub_resource type="ShaderMaterial" id="a3_jadestair_s2_ShaderMaterial_l2nk0"]
 render_priority = 1
 shader = ExtResource("a3_jadestair_s2_13_sk0g7")
 shader_parameter/ground_albedo = ExtResource("a3_jadestair_s2_14_0fybo")
@@ -1418,14 +1441,6 @@ shader_parameter/normal_strength = 0.72
 shader_parameter/edge_feather = 0.45
 shader_parameter/texture_rotation_radians = null
 
-[sub_resource type="Curve3D" id="a3_jadestair_s2_road_1216021f7f00a77b_cut_1"]
-resource_local_to_scene = true
-_data = {
-"points": PackedVector3Array(0, 0, 0, -0.359213747071, 0.0161436295011, -0.317547351167, -83.950709205, 69.6816866507, 542.179609833, 0, 0, 0, 0, 0, 0, -85.3239, 69.7434, 540.9657, 0, 0, 0, 0, 0, 0, -86.8904, 69.8549, 539.7246, 0, 0, 0, 0, 0, 0, -88.539, 69.9676, 538.5953, 0, 0, 0, 0, 0, 0, -90.2694, 70.1377, 537.5959, 0, 0, 0, 0, 0, 0, -92.0757, 70.3719, 536.7415, 0, 0, 0, 0, 0, 0, -93.9522, 70.6789, 536.0553, 0, 0, 0, 0, 0, 0, -95.8881, 71.051, 535.561, 0, 0, 0, 0, 0, 0, -97.863, 71.5025, 535.2557, 0, 0, 0, 0, 0, 0, -99.8554, 72.1013, 535.0984, 0, 0, 0, 0, 0, 0, -101.8532, 72.7009, 535.0316, 0, 0, 0, 0, 0, 0, -103.852, 73.3006, 535.0083, 0, 0, 0, 0, 0, 0, -105.8509, 73.9003, 535.0018, 0, 0, 0, 0, 0, 0, -107.8499, 74.5, 535.0003, 0, 0, 0, 0, 0, 0, -109.8488, 75.0997, 535, 0, 0, 0, 0, 0, 0, -111.8478, 75.6994, 535, 0, 0, 0, 0, 0, 0, -113.8467, 76.299, 535, 0, 0, 0, 0, 0, 0, -115.8457, 76.8987, 535, 0, 0, 0, 0, 0, 0, -117.8446, 77.4984, 535, 0, 0, 0, 0, 0, 0, -119.8436, 78.0981, 535, 0, 0, 0, 0, 0, 0, -121.8425, 78.6978, 535, 0, 0, 0, 0, 0, 0, -123.8415, 79.2557, 535, 0, 0, 0, 0, 0, 0, -125.8404, 79.762, 535, 0, 0, 0, 0, 0, 0, -127.8394, 80.288, 535, 0, 0, 0, 0, 0, 0, -129.8383, 80.8304, 535, 0, 0, 0, 0, 0, 0, -131.8373, 81.3831, 535, 0, 0, 0, 0, 0, 0, -133.8362, 81.9231, 535, 0, 0, 0, 0, 0, 0, -135.8352, 82.4245, 535, 0, 0, 0, 0, 0, 0, -137.8341, 82.8846, 535, 0, 0, 0, 0, 0, 0, -139.8331, 83.3281, 535, 0, 0, 0, 0, 0, 0, -141.832, 83.7896, 535, 0, 0, 0, 0, 0, 0, -143.831, 84.2649, 535, 0, 0, 0, 0, 0, 0, -145.8299, 84.7135, 535, 0, 0, 0, 0, 0, 0, -147.8289, 85.1109, 535, 0, 0, 0, 0, 0, 0, -149.8278, 85.475, 535, 0, 0, 0, 0, 0, 0, -151.8268, 85.8297, 535, 0, 0, 0, 0, 0, 0, -153.8257, 86.1128, 535, 0, 0, 0, 0, 0, 0, -155.8247, 86.3342, 535, 0, 0, 0, 0, 0, 0, -157.8236, 86.5915, 535, 0, 0, 0, 0, 0, 0, -159.8225, 86.8521, 535, 0, 0, 0, 0, 0, 0, -161.8215, 87.1004, 535, 0, 0, 0, 0, 0, 0, -163.8204, 87.3167, 535, 0, 0, 0, 0, 0, 0, -165.8194, 87.4881, 535, 0, 0, 0, 0, 0, 0, -167.8183, 87.6091, 535, 0, 0, 0, 0, 0, 0, -169.8173, 87.6967, 535.0003, 0, 0, 0, 0, 0, 0, -171.8162, 87.7584, 535.0018, 0, 0, 0, 0, 0, 0, -173.8152, 87.8265, 535.0087, 0, 0, 0, 0, 0, 0, -175.8139, 87.9415, 535.0346, 0, 0, 0, 0, 0, 0, -177.8113, 88.102, 535.112, 0, 0, 0, 0, 0, 0, -179.8006, 88.2898, 535.3026, 0, 0, 0, 0, 0, 0, -181.7608, 88.47, 535.6876, 0, 0, 0, 0, 0, 0, -183.6539, 88.6381, 536.3235, 0, 0, 0, 0, 0, 0, -185.4527, 88.8251, 537.1922, 0, 0, 0, 0, 0, 0, -187.1705, 89.0062, 538.2135, 0, 0, 0, 0, 0, 0, -188.85, 89.2841, 539.2976, 0, 0, 0, 0, 0, 0, -190.5325, 89.4741, 540.3768, 0, 0, 0, 0, 0, 0, -192.2416, 89.6039, 541.4133, 0, 0, 0, 0, 0, 0, -193.9817, 89.7425, 542.3969, 0, 0, 0, 0, 0, 0, -195.7455, 89.9309, 543.3374, 0, 0, 0, 0, 0, 0, -197.5229, 90.091, 544.252, 0, 0, 0, 0, 0, 0, -199.3049, 90.1849, 545.1577, 0, 0, 0, 0, 0, 0, -201.0831, 90.2676, 546.0708, 0, 0, 0, 0, 0, 0, -202.8462, 90.2225, 547.0125, 0, 0, 0, 0, 0, 0, -204.5769, 90.2333, 548.0124, 0, 0, 0, 0, 0, 0, -206.2531, 90.3218, 549.1007, 0, 0, 0, 0, 0, 0, -207.8571, 90.3524, 550.2927, 0, 0, 0, 0, 0, 0, -209.3872, 90.3421, 551.5784, 0, 0, 0, 0, 0, 0, -210.8596, 90.3698, 552.9302, 0, 0, 0, 0, 0, 0, -212.2973, 90.3184, 554.3189, 0, 0, 0, 0, 0, 0, -213.7189, 90.2586, 555.7243, 0, 0, 0, 0, 0, 0, -215.1345, 90.1915, 557.1356, 0, 0, 0, 0, 0, 0, -216.5484, 90.0579, 558.5486, 0, 0, 0, 0, 0, 0, -217.962, 89.8668, 559.962, 0, 0, 0, 0, 0, 0, -219.3754, 89.658, 561.3754, 0, 0, 0, 0, 0, 0, -220.7889, 89.4751, 562.7889, 0, 0, 0, 0, 0, 0, -222.2026, 89.2728, 564.2022, 0, 0, 0, 0, 0, 0, -223.6171, 89.1067, 565.6146, 0, 0, 0, 0, 0, 0, -225.035, 88.9907, 567.0236, 0, 0, 0, 0, 0, 0, -226.4632, 88.8083, 568.4222, 0, 0, 0, 0, 0, 0, -227.9163, 88.6522, 569.7948, 0, 0, 0, 0, 0, 0, -229.4158, 88.5277, 571.1163, 0, 0, 0, 0, 0, 0, -230.9811, 88.4329, 572.3589, 0, 0, 0, 0, 0, 0, -232.6146, 88.3597, 573.5105, 0, 0, 0, 0, 0, 0, -234.2938, 88.2674, 574.5948, 0, 0, 0, 0, 0, 0, -235.9767, 88.1865, 575.6734, 0, 0, 0, 0, 0, 0, -237.6117, 88.1263, 576.8227, 0, 0, 0, 0, 0, 0, -239.1508, 88.0541, 578.097, 0, 0, 0, 0, 0, 0, -240.5711, 87.9982, 579.5026, 0, 0, 0, 0, 0, 0, -241.8878, 87.9473, 581.0063, 0, 0, 0, 0, 0, 0, -243.1374, 88.3314, 582.5664, 0, 0, 0, 0, 0, 0, -244.3532, 88.1068, 584.1531, 0, 0, 0, 0, 0, 0, -245.5533, 87.9907, 585.7516, 0, 0, 0, 0, 0, 0, -246.7428, 88.1522, 587.3582, 0, 0, 0, 0, 0, 0, -247.9208, 88.4728, 588.9731, 0, 0, 0, 0, 0, 0, -249.0935, 88.3079, 590.5919, 0, 0, 0, 0, 0, 0, -250.2837, 88.0983, 592.1979, 0, 0, 0, 0, 0, 0, -250.9473, 87.8008, 594.0019, 0, 0, 0, 0, 0, 0, -251, 87.686, 595),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-}
-point_count = 98
-
 [sub_resource type="Resource" id="a3_jadestair_s2_Resource_x5dao"]
 resource_local_to_scene = true
 script = ExtResource("a3_jadestair_s2_surface")
@@ -1433,7 +1448,7 @@ material_mode = 1
 texture_preset = "Worn earth"
 source_material = SubResource("a3_jadestair_s2_ShaderMaterial_l2nk0")
 
-[sub_resource type="ShaderMaterial" id="a3_jadestair_s2_ShaderMaterial_l2nk0"]
+[sub_resource type="ShaderMaterial" id="a3_jadestair_s2_ShaderMaterial_7ry8s"]
 render_priority = 1
 shader = ExtResource("a3_jadestair_s2_13_sk0g7")
 shader_parameter/ground_albedo = ExtResource("a3_jadestair_s2_14_0fybo")
@@ -1460,19 +1475,6 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 172
-
-[sub_resource type="ShaderMaterial" id="a3_jadestair_s2_ShaderMaterial_7ry8s"]
-render_priority = 1
-shader = ExtResource("a3_jadestair_s2_13_sk0g7")
-shader_parameter/ground_albedo = ExtResource("a3_jadestair_s2_14_0fybo")
-shader_parameter/ground_normal = ExtResource("a3_jadestair_s2_15_4jwv8")
-shader_parameter/ground_orm = ExtResource("a3_jadestair_s2_16_rc10d")
-shader_parameter/worn_tint = Color(0.6, 0.48, 0.31, 1)
-shader_parameter/texture_scale = 1.0
-shader_parameter/roughness_multiplier = 1.0
-shader_parameter/normal_strength = 0.72
-shader_parameter/edge_feather = 0.45
-shader_parameter/texture_rotation_radians = null
 
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_fn3qb"]
 cull_mode = 2
@@ -1525,12 +1527,6 @@ script = ExtResource("a3_jadestair_s2_surface")
 texture_preset = "Soil"
 source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_3sdjo")
 
-[sub_resource type="Resource" id="a3_jadestair_s2_Resource_jb8ov"]
-resource_local_to_scene = true
-script = ExtResource("a3_jadestair_s2_surface")
-texture_preset = "Forest floor moss"
-source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_ghl8y")
-
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_ghl8y"]
 cull_mode = 2
 albedo_color = Color(0.52, 0.5, 0.4, 1)
@@ -1541,6 +1537,12 @@ normal_scale = 0.65
 normal_texture = ExtResource("a3_jadestair_s2_15_4jwv8")
 uv1_scale = Vector3(1.4705882, 1.4705882, 0.25)
 texture_filter = 5
+
+[sub_resource type="Resource" id="a3_jadestair_s2_Resource_jb8ov"]
+resource_local_to_scene = true
+script = ExtResource("a3_jadestair_s2_surface")
+texture_preset = "Forest floor moss"
+source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_ghl8y")
 
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_a7kww"]
 cull_mode = 2
@@ -1559,13 +1561,24 @@ script = ExtResource("a3_jadestair_s2_surface")
 texture_preset = "Forest floor moss"
 source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_a7kww")
 
+[sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_14qan"]
+cull_mode = 2
+albedo_color = Color(0.52, 0.5, 0.4, 1)
+albedo_texture = ExtResource("a3_jadestair_s2_15_qm0ps")
+orm_texture = ExtResource("a3_jadestair_s2_16_rc10d")
+normal_enabled = true
+normal_scale = 0.65
+normal_texture = ExtResource("a3_jadestair_s2_15_4jwv8")
+uv1_scale = Vector3(1.4705882, 1.4705882, 0.25)
+texture_filter = 5
+
 [sub_resource type="Resource" id="a3_jadestair_s2_Resource_jpe6b"]
 resource_local_to_scene = true
 script = ExtResource("a3_jadestair_s2_surface")
 texture_preset = "Forest floor moss"
 source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_14qan")
 
-[sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_14qan"]
+[sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_3owv1"]
 cull_mode = 2
 albedo_color = Color(0.52, 0.5, 0.4, 1)
 albedo_texture = ExtResource("a3_jadestair_s2_15_qm0ps")
@@ -1582,7 +1595,7 @@ script = ExtResource("a3_jadestair_s2_surface")
 texture_preset = "Forest floor moss"
 source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_3owv1")
 
-[sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_3owv1"]
+[sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_8igbc"]
 cull_mode = 2
 albedo_color = Color(0.52, 0.5, 0.4, 1)
 albedo_texture = ExtResource("a3_jadestair_s2_15_qm0ps")
@@ -1598,17 +1611,6 @@ resource_local_to_scene = true
 script = ExtResource("a3_jadestair_s2_surface")
 texture_preset = "Forest floor moss"
 source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_8igbc")
-
-[sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_8igbc"]
-cull_mode = 2
-albedo_color = Color(0.52, 0.5, 0.4, 1)
-albedo_texture = ExtResource("a3_jadestair_s2_15_qm0ps")
-orm_texture = ExtResource("a3_jadestair_s2_16_rc10d")
-normal_enabled = true
-normal_scale = 0.65
-normal_texture = ExtResource("a3_jadestair_s2_15_4jwv8")
-uv1_scale = Vector3(1.4705882, 1.4705882, 0.25)
-texture_filter = 5
 
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_0h21k"]
 cull_mode = 2
@@ -1644,12 +1646,6 @@ script = ExtResource("a3_jadestair_s2_surface")
 texture_preset = "Forest floor moss"
 source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_bfyyq")
 
-[sub_resource type="Resource" id="a3_jadestair_s2_Resource_yqgi0"]
-resource_local_to_scene = true
-script = ExtResource("a3_jadestair_s2_surface")
-texture_preset = "Forest floor moss"
-source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_03n8j")
-
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_03n8j"]
 cull_mode = 2
 albedo_color = Color(0.52, 0.5, 0.4, 1)
@@ -1660,6 +1656,12 @@ normal_scale = 0.65
 normal_texture = ExtResource("a3_jadestair_s2_15_4jwv8")
 uv1_scale = Vector3(1.4705882, 1.4705882, 0.25)
 texture_filter = 5
+
+[sub_resource type="Resource" id="a3_jadestair_s2_Resource_yqgi0"]
+resource_local_to_scene = true
+script = ExtResource("a3_jadestair_s2_surface")
+texture_preset = "Forest floor moss"
+source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_03n8j")
 
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_yd8nx"]
 cull_mode = 2
@@ -1712,12 +1714,6 @@ script = ExtResource("a3_jadestair_s2_surface")
 texture_preset = "Coastal limestone gravel"
 source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_px7yy")
 
-[sub_resource type="Resource" id="a3_jadestair_s2_Resource_hjuk0"]
-resource_local_to_scene = true
-script = ExtResource("a3_jadestair_s2_surface")
-texture_preset = "Coastal limestone gravel"
-source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_artdu")
-
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_artdu"]
 cull_mode = 2
 albedo_color = Color(0.8, 0.81, 0.85, 1)
@@ -1729,11 +1725,11 @@ normal_texture = ExtResource("a3_jadestair_s2_10_0xb6s")
 uv1_scale = Vector3(1.4705882, 1.4705882, 0.25)
 texture_filter = 5
 
-[sub_resource type="Resource" id="a3_jadestair_s2_Resource_r33nr"]
+[sub_resource type="Resource" id="a3_jadestair_s2_Resource_hjuk0"]
 resource_local_to_scene = true
 script = ExtResource("a3_jadestair_s2_surface")
-texture_preset = "Sand"
-source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_vyhna")
+texture_preset = "Coastal limestone gravel"
+source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_artdu")
 
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_vyhna"]
 cull_mode = 2
@@ -1745,6 +1741,12 @@ normal_scale = 0.48
 normal_texture = ExtResource("a3_jadestair_s2_15_4jwv8")
 uv1_scale = Vector3(1.1764706, 1.1764706, 0.2)
 texture_filter = 5
+
+[sub_resource type="Resource" id="a3_jadestair_s2_Resource_r33nr"]
+resource_local_to_scene = true
+script = ExtResource("a3_jadestair_s2_surface")
+texture_preset = "Sand"
+source_material = SubResource("a3_jadestair_s2_ORMMaterial3D_vyhna")
 
 [sub_resource type="ORMMaterial3D" id="a3_jadestair_s2_ORMMaterial3D_g5oij"]
 cull_mode = 2
@@ -35247,6 +35249,7 @@ extras = {
 "zone": "grove"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -148.723, 20.5780, -167.743)
+
 [node name="lv_greenlight_Thrift Clump 1 23" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("a3_jadestair_a3_greenlight_s0_19_jaile")
 asset_id = "lf_biomes-kit-thrift-clump-1-greenlight-0023"
