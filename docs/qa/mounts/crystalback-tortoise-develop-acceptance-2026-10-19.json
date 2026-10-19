@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "scope": "Approved Crystalback Tortoise integration into client and server develop",
+  "userApproval": "User accepted revision 5 as a starting point and explicitly requested merge into develop and push.",
+  "approvedClientSourceRevision": "9d33fee14b1cc255a6ee461be573a90b7faa8964",
+  "serverSourceRevision": "6fcf9b4218e8dae2bebd02514ca72d0313448957",
+  "approvedBehavior": "Existing imported tortoise with centered rearward saddle, broad riding pose, shell harness, four-beat walk/scuttle/rush, mounted bow/spells and a resting cape that settles onto the rear shell while retaining the reviewed moving lift.",
+  "integration": "Client third-card selector/capability and server ownership/pace/older-client filtering are included. Existing R mount/dismount and Space burst controls retained.",
+  "validation": {
+    "client": {
+      "tortoiseFitAndCape": 1354,
+      "mountedActions": 3070,
+      "mountProtocol": 23,
+      "mountControls": 18,
+      "mountHotkeys": 18,
+      "mountsWindow": 17,
+      "totalChecks": 4500,
+      "failures": 0
+    },
+    "server": {
+      "testsPassed": 93,
+      "testsFailed": 0,
+      "suites": [
+        "test_tortoise_mount",
+        "test_mount_selection",
+        "test_mounts",
+        "test_live_mounts",
+        "test_mount_rollout"
+      ]
+    },
+    "tortoiseMetrics": {
+      "checks": 1354,
+      "failures": 0,
+      "max_cape_link_error": 0.00128641724586487,
+      "max_leg_reach_error": 0.0,
+      "max_rider_contact_error": 5.10133588704775e-07,
+      "max_rotation_step_radians": 0.0731069445610046,
+      "max_supported_sole_height": 0.00488438224419951,
+      "max_supported_sole_speed_error": 0.000305038935039192,
+      "min_idle_cape_drop": 1.05202424526215,
+      "min_idle_drop_increase": 0.261900544166565,
+      "minimum_sole_height": -3.42401335728937e-07,
+      "normal_repack_error": 0.000128849787870422,
+      "rebound_paw_vertices": 964,
+      "tangent_repack_error": 5.83827495574951e-05
+    },
+    "protocolNote": "The protocol test deliberately feeds malformed JSON; its parser diagnostic is expected, and all 23 checks pass.",
+    "priorRevision5MovingComparison": {
+      "checks": 48600,
+      "maxDifferenceMetres": 0,
+      "failures": 0
+    },
+    "priorHorseRegression": {
+      "checks": 11741,
+      "failures": 0
+    }
+  },
+  "sourceSha256": {
+    "godot-client/data/mounts/crystalback_tortoise.json": "c574bb274482a45ef9d6ecf5c65de245a028737271a1697eb1abd03359676b7d",
+    "godot-client/src/mounts/tortoise_locomotion.gd": "8d72097561d91afed2d02a0122c45226fafe3dcbeff7c2484d0a4c7669db8f5d",
+    "godot-client/src/mounts/mount_cape_surface.gd": "3a0de0f83f66c71d86b4f9384fb6bf68e4af635efa62cf7d9062942ebe0d6152",
+    "godot-client/src/mounts/mounted_player_visual.gd": "2a6a6edfdafbf83890a2fef7256e880b1b2a1692fb6712cafc26becf79e8b0b5",
+    "godot-client/src/ui/mounts_window.gd": "5dcce067c0c57e77b5dcd90106bb0121e498b160b6f824f48b78c26ff4f48e6d"
+  },
+  "approvedPreviewSha256": {
+    "crystalback-tortoise-v5.mp4": "d3b8e8934889d102e02d535b12fb0d9f51aba8f596743381fff1af049b92b902"
+  },
+  "promotionScope": "Develop source integration and origin/develop push. Stable master, releases and deployment are separate."
+}
