@@ -120,11 +120,14 @@ partition change moves a door's exterior map or frame, `retarget_underground.py`
 ## Boats
 
 Owner-approved 2026-10-19 as in Eternal Lands: one boat per destination, several boats at a dock, all free, so players
-chain boats to cross Landfall quickly. `content/boat-network.json` lists the docks and the 14 routes (one boat each
-way). The hub is Lakehead Landing, a lake jetty on Reedfall's lake by the Landfall border, with boats to Stagheath,
-Ravenhead, Greenlight, Warrenmead and Boarsend. The isles are reached from their nearest ports: Coilmere from Ravenhead
-(the 2026-10-14 ferry) and Greenlight; Suncoil from Ringholm and Ravenhead; Hornmere from Stagheath; Whitepeak from
-Saltsound. Coastal shortcuts join Warrenmead-Stagheath, Boarsend-Greenlight and Stagheath-Saltsound.
+chain boats to cross Landfall quickly. `content/boat-network.json` lists the docks and 12 of the 14 approved routes
+(one boat each way). The hub is Lakehead Landing, a lake jetty on Reedfall's lake, with boats to Stagheath, Ravenhead,
+Greenlight and Boarsend. It stands on the lake's east shore by Reedfall's arrival: the west shore at the Landfall
+border is a 60 m cliff. The isles are reached from their nearest ports: Coilmere from Ravenhead (the 2026-10-14 ferry)
+and Greenlight; Suncoil from Ringholm and Ravenhead; Hornmere from Stagheath; Whitepeak from Saltsound. Coastal
+shortcuts join Boarsend-Greenlight and Stagheath-Saltsound. Warrenmead's two routes (Lakehead and Stagheath) wait on
+the owner: the whole west coast (Warrenmead, Pinebrow, Twinbrook) is cliff, its nearest reached ground 136 m up and
+78 m from deep water, so no dock is reachable without a cliff path.
 
 `godot-client/tools/author_continent_v2_boats.py --apply` writes the network into the scenes and server rows. Every
 generated node carries `boatNetwork: <dock id>`, and a rerun replaces the previous generation; `--check` refuses stale
@@ -138,8 +141,11 @@ has:
 - the landing `<map>--boat-landing-<dock>` 4 m shoreward, within `publish_server.BOAT_LANDING_REACH` of the boat that
   sails back.
 The tool keeps each touched map's `runtimePointCount` equal to its scene's runtime points and adjusts
-`authoredMarkerCount`. The A3 build stage's `boats/make_boat_network.py` designed the docks: the shortest jetty
-meeting the shore at deck height whose berths float at draught inside the map and clear of solid props. Greenlight's
+`authoredMarkerCount`. The A3 build stage's `boats/make_boat_network.py` designed the docks from the publisher's own
+walk and reach grids (`publish_server.union_reach`): a pier's root stands on reached ground, its deck one step (under
+0.9 m) from that shore (2.5 m above the sea where the shore allows, down to 1 m on low beaches), and it is the shortest
+jetty whose berths float at draught inside the map, clear of solid props and moored boats. A berth on an existing pier
+also needs its gangway and landing rings open and reached on the served grid. Greenlight's
 boats use a jetty off the town quay, because the lighthouse pier B23 stands on a 1-1.8 m bank. The Coilmere knob quay
 shelves too fast for the ferry, so route B (Greenlight-Coilmere) sails packet boats.
 

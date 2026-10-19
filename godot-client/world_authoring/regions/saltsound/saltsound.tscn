@@ -28675,10 +28675,10 @@ support_surface = SubResource("bn_support_surface")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Start" type="Marker3D" parent="Bridges/boatnet-saltsound-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 2.5, -255)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -76.5, 1, -262.5)
 
 [node name="End" type="Marker3D" parent="Bridges/boatnet-saltsound-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 2.5, -295)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68.74, 1, -291.48)
 
 [node name="BN Saltsound Pier Span 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -28689,10 +28689,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "saltsound",
-"note": "trestle span 1 of 5 on the Saltsound pier"
+"note": "trestle span 1 of 4 on the Saltsound pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 0.8193, 0, 1, 0, -1, 0, 0, -60, 2.5, -259)
+transform = Transform3D(0.2425, 0, 0.7914, 0, 1, 0, -0.9056, 0, 0.2119, -75.53, 1, -266.1225)
 
 [node name="Content" parent="AuthoredAssets/BN Saltsound Pier Span 1" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -28707,10 +28707,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "saltsound",
-"note": "trestle span 2 of 5 on the Saltsound pier"
+"note": "trestle span 2 of 4 on the Saltsound pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 0.8193, 0, 1, 0, -1, 0, 0, -60, 2.5, -267)
+transform = Transform3D(0.2425, 0, 0.7914, 0, 1, 0, -0.9056, 0, 0.2119, -73.59, 1, -273.3675)
 
 [node name="Content" parent="AuthoredAssets/BN Saltsound Pier Span 2" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -28725,10 +28725,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "saltsound",
-"note": "trestle span 3 of 5 on the Saltsound pier"
+"note": "trestle span 3 of 4 on the Saltsound pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 0.8193, 0, 1, 0, -1, 0, 0, -60, 2.5, -275)
+transform = Transform3D(0.2425, 0, 0.7914, 0, 1, 0, -0.9056, 0, 0.2119, -71.65, 1, -280.6125)
 
 [node name="Content" parent="AuthoredAssets/BN Saltsound Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -28738,35 +28738,17 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s0_19_jaile")
 asset_id = "boatnet-saltsound-span-4"
 node_name = "Authored_boatnet_saltsound_span_4"
-catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
-collision_role = "solid"
-metadata = {
-"boatNetwork": "saltsound",
-"note": "trestle span 4 of 5 on the Saltsound pier"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 0.8193, 0, 1, 0, -1, 0, 0, -60, 2.5, -283)
-
-[node name="Content" parent="AuthoredAssets/BN Saltsound Pier Span 4" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
-metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
-
-[node name="BN Saltsound Pier Span 5" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "boatnet-saltsound-span-5"
-node_name = "Authored_boatnet_saltsound_span_5"
 catalog_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
 scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
 collision_role = "solid"
 metadata = {
 "boatNetwork": "saltsound",
-"note": "trestle span 5 of 5 on the Saltsound pier"
+"note": "trestle span 4 of 4 on the Saltsound pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 0.8193, 0, 1, 0, -1, 0, 0, -60, 2.5, -291)
+transform = Transform3D(0.2425, 0, 0.7914, 0, 1, 0, -0.9056, 0, 0.2119, -69.71, 1, -287.8575)
 
-[node name="Content" parent="AuthoredAssets/BN Saltsound Pier Span 5" instance=ExtResource("bn_kit_sw_trestle_pier_span_long24")]
+[node name="Content" parent="AuthoredAssets/BN Saltsound Pier Span 4" instance=ExtResource("bn_kit_sw_trestle_pier_span_long24")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
 
@@ -28782,7 +28764,7 @@ metadata = {
 "note": "a light at the head of the Saltsound pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -63.1, 2.5, -293.8)
+transform = Transform3D(0.2587, 0, 0.966, 0, 1, 0, -0.966, 0, 0.2587, -72.0449, 1, -291.1227)
 
 [node name="Content" parent="AuthoredAssets/BN Saltsound Pier Lantern" instance=ExtResource("bn_kit_lantern_post_1")]
 metadata/map_asset_id = "tollholms:kit-lantern-post-1"
@@ -28800,7 +28782,7 @@ metadata = {
 "note": "the boat bound for Whitepeak, moored on the pier's left side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -70.87, 0, -283.5)
+transform = Transform3D(0.2587, 0, 0.966, 0, 1, 0, -0.966, 0, 0.2587, -82.2149, 0, -283.182)
 
 [node name="Content" parent="AuthoredAssets/BN Saltsound Boat To Whitepeak" instance=ExtResource("bn_kit_sw_ferry_ship")]
 metadata/map_asset_id = "tollholms:kit-sw-ferry-ship"
@@ -28818,7 +28800,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Whitepeak"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -63.65, 2.5, -286.5)
+transform = Transform3D(-0.2587, 0, -0.966, 0, 1, 0, 0.966, 0, -0.2587, -74.4646, 1, -284.2124)
 
 [node name="Content" parent="AuthoredAssets/BN Saltsound Banner For Whitepeak" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -28836,7 +28818,7 @@ metadata = {
 "note": "the boat bound for Stagheath, moored on the pier's right side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -53.28, 0, -290)
+transform = Transform3D(0.2587, 0, 0.966, 0, 1, 0, -0.966, 0, 0.2587, -63.5422, 0, -284.911)
 
 [node name="Content" parent="AuthoredAssets/BN Saltsound Boat To Stagheath" instance=ExtResource("bn_kit_fishing_boat_2")]
 metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
@@ -28854,7 +28836,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Stagheath"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -56.35, 2.5, -293)
+transform = Transform3D(0.2587, 0, 0.966, 0, 1, 0, -0.966, 0, 0.2587, -65.7318, 1, -288.603)
 
 [node name="Content" parent="AuthoredAssets/BN Saltsound Banner For Stagheath" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -28876,7 +28858,7 @@ extras = {
 "returnBy": "whitepeak--obj-boat-saltsound",
 "boatNetwork": "saltsound"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -61, 2.5, -283.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72.6808, 1, -280.6291)
 
 [node name="saltsound--boat-landing-whitepeak" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -28891,7 +28873,7 @@ extras = {
 "note": "where the boat from Whitepeak sets passengers down, 4 m shoreward of the gangway of the boat that sails back (saltsound--obj-boat-whitepeak)",
 "boatNetwork": "saltsound"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -61, 2.5, -279.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -73.7154, 1, -276.7652)
 
 [node name="saltsound--obj-boat-stagheath" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
@@ -28909,7 +28891,7 @@ extras = {
 "returnBy": "stagheath--obj-boat-saltsound",
 "boatNetwork": "saltsound"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59, 2.5, -290)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -69.0676, 1, -286.3906)
 
 [node name="saltsound--boat-landing-stagheath" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -28924,4 +28906,4 @@ extras = {
 "note": "where the boat from Stagheath sets passengers down, 4 m shoreward of the gangway of the boat that sails back (saltsound--obj-boat-stagheath)",
 "boatNetwork": "saltsound"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59, 2.5, -286)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70.1022, 1, -282.5267)

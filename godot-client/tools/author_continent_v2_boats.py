@@ -163,9 +163,10 @@ def plan(spec, docks, ground, territories):
     for dock in docks.values():
         out = per_map.setdefault(dock.map, {"assets": [], "markers": [], "bridges": [], "rows": {}})
         if dock.new:
-            # the deck meets the shore at its start and clears the ground beyond the first few metres
+            # the deck meets the shore at its start within one step (the server climbs 1 m) and clears the ground
+            # beyond the first few metres
             shore = ground(*dock.start)
-            if not dock.deck - 0.7 <= shore <= dock.deck + 0.3:
+            if not dock.deck - 0.9 <= shore <= dock.deck + 0.5:
                 problems.append(f"{dock.id}: the shore at the pier's start is {shore:.2f} m, the deck {dock.deck} m")
             for t in np.arange(4.0, dock.length + 0.01, 1.0):
                 for across in (-dock.width / 2, 0.0, dock.width / 2):
@@ -421,7 +422,10 @@ def main(argv=None) -> int:
     rows = read(ROWS)
     outputs = {}
     donor = RC.SceneText(territories[DONOR[0]].scene.path)
-    for map_id, p in sorted(per_map.items()):
+    # every catalog map: one the network no longer reaches drops its previous generation
+    empty = {"assets": [], "markers": [], "bridges": [], "rows": {}}
+    for map_id in sorted(territories):
+        p = per_map.get(map_id, empty)
         territory = territories[map_id]
         table = rows["maps"].setdefault(map_id, {"npcs": {}, "interactives": {}})["interactives"]
         # the previous generation: every boat row but the hand-authored ones the spec keeps

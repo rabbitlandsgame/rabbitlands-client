@@ -387,19 +387,6 @@
      },
      "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
     },
-    "reedfall--obj-boat-warrenmead": {
-     "objectId": 34,
-     "role": "portal",
-     "target": "maps.txt",
-     "text": "Bound for Warrenmead. The lake boat at Lakehead Landing carries you to Warrenmead; the crew ask no fare.",
-     "portal": {
-      "destinationMap": "warrenmead",
-      "oneWay": true,
-      "landingMarker": "warrenmead--boat-landing-lakehead",
-      "returnBy": "warrenmead--obj-boat-lakehead"
-     },
-     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
-    },
     "reedfall--obj-boat-boarsend": {
      "objectId": 30,
      "role": "portal",
@@ -525,19 +512,6 @@
      },
      "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
     },
-    "stagheath--obj-boat-saltsound": {
-     "objectId": 32,
-     "role": "portal",
-     "target": "maps.txt",
-     "text": "Bound for Saltsound. The packet boat at Stagheath sails for Saltsound; the crew ask no fare.",
-     "portal": {
-      "destinationMap": "saltsound",
-      "oneWay": true,
-      "landingMarker": "saltsound--boat-landing-stagheath",
-      "returnBy": "saltsound--obj-boat-stagheath"
-     },
-     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
-    },
     "stagheath--obj-boat-lakehead": {
      "objectId": 31,
      "role": "portal",
@@ -551,16 +525,16 @@
      },
      "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
     },
-    "stagheath--obj-boat-warrenmead": {
-     "objectId": 33,
+    "stagheath--obj-boat-saltsound": {
+     "objectId": 32,
      "role": "portal",
      "target": "maps.txt",
-     "text": "Bound for Warrenmead. The packet boat at Stagheath sails for Warrenmead; the crew ask no fare.",
+     "text": "Bound for Saltsound. The packet boat at Stagheath sails for Saltsound; the crew ask no fare.",
      "portal": {
-      "destinationMap": "warrenmead",
+      "destinationMap": "saltsound",
       "oneWay": true,
-      "landingMarker": "warrenmead--boat-landing-stagheath",
-      "returnBy": "warrenmead--obj-boat-stagheath"
+      "landingMarker": "saltsound--boat-landing-stagheath",
+      "returnBy": "saltsound--obj-boat-stagheath"
      },
      "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
     }
@@ -613,34 +587,7 @@
   },
   "warrenmead": {
    "npcs": {},
-   "interactives": {
-    "warrenmead--obj-boat-lakehead": {
-     "objectId": 30,
-     "role": "portal",
-     "target": "maps.txt",
-     "text": "Bound for Lakehead Landing. The packet boat at Warrenmead sails for Lakehead Landing; the crew ask no fare.",
-     "portal": {
-      "destinationMap": "reedfall",
-      "oneWay": true,
-      "landingMarker": "reedfall--boat-landing-warrenmead",
-      "returnBy": "reedfall--obj-boat-warrenmead"
-     },
-     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
-    },
-    "warrenmead--obj-boat-stagheath": {
-     "objectId": 31,
-     "role": "portal",
-     "target": "maps.txt",
-     "text": "Bound for Stagheath. The packet boat at Warrenmead sails for Stagheath; the crew ask no fare.",
-     "portal": {
-      "destinationMap": "stagheath",
-      "oneWay": true,
-      "landingMarker": "stagheath--boat-landing-warrenmead",
-      "returnBy": "stagheath--obj-boat-warrenmead"
-     },
-     "source": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil"
-    }
-   }
+   "interactives": {}
   },
   "whitepeak": {
    "npcs": {},

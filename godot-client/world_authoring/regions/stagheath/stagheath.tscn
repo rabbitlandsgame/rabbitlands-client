@@ -73549,7 +73549,7 @@ metadata = {
 "approval": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil",
 "deck": "Stagheath pier",
 "inside_ownership": true,
-"note": "Stagheath's north quay: the hub boat, the Hornmere ferry and two coastal boats",
+"note": "Stagheath's north strand: the hub boat, the Hornmere ferry and the Saltsound boat",
 "type": "pier"
 }
 width = 8
@@ -73560,10 +73560,10 @@ support_surface = SubResource("bn_support_surface")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Start" type="Marker3D" parent="Bridges/boatnet-stagheath-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 272, 2.5, -285)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 399.5, 1, -244.5)
 
 [node name="End" type="Marker3D" parent="Bridges/boatnet-stagheath-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 276.18, 2.5, -332.82)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 408.3, 1, -277.34)
 
 [node name="BN Stagheath Pier Span 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -73574,10 +73574,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "stagheath",
-"note": "trestle span 1 of 6 on the Stagheath pier"
+"note": "trestle span 1 of 4 on the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.8162, 0, 1, 0, -0.9962, 0, 0.0713, 272.3483, 2.5, -288.985)
+transform = Transform3D(0.275, 0, 0.7914, 0, 1, 0, -1.0263, 0, 0.2121, 400.6, 1, -248.605)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 1" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -73592,10 +73592,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "stagheath",
-"note": "trestle span 2 of 6 on the Stagheath pier"
+"note": "trestle span 2 of 4 on the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.8162, 0, 1, 0, -0.9962, 0, 0.0713, 273.045, 2.5, -296.955)
+transform = Transform3D(0.275, 0, 0.7914, 0, 1, 0, -1.0263, 0, 0.2121, 402.8, 1, -256.815)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 2" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -73605,71 +73605,35 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s0_19_jaile")
 asset_id = "boatnet-stagheath-span-3"
 node_name = "Authored_boatnet_stagheath_span_3"
-catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
 collision_role = "solid"
 metadata = {
 "boatNetwork": "stagheath",
-"note": "trestle span 3 of 6 on the Stagheath pier"
+"note": "trestle span 3 of 4 on the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.8162, 0, 1, 0, -0.9962, 0, 0.0713, 273.7417, 2.5, -304.925)
+transform = Transform3D(0.275, 0, 0.7914, 0, 1, 0, -1.0263, 0, 0.2121, 405, 1, -265.025)
 
-[node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
-metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+[node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span_long24")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
 
 [node name="BN Stagheath Pier Span 4" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "boatnet-stagheath-span-4"
 node_name = "Authored_boatnet_stagheath_span_4"
-catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
-collision_role = "solid"
-metadata = {
-"boatNetwork": "stagheath",
-"note": "trestle span 4 of 6 on the Stagheath pier"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.8162, 0, 1, 0, -0.9962, 0, 0.0713, 274.4383, 2.5, -312.895)
-
-[node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 4" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
-metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
-
-[node name="BN Stagheath Pier Span 5" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "boatnet-stagheath-span-5"
-node_name = "Authored_boatnet_stagheath_span_5"
 catalog_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
 scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
 collision_role = "solid"
 metadata = {
 "boatNetwork": "stagheath",
-"note": "trestle span 5 of 6 on the Stagheath pier"
+"note": "trestle span 4 of 4 on the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.8162, 0, 1, 0, -0.9962, 0, 0.0713, 275.135, 2.5, -320.865)
+transform = Transform3D(0.275, 0, 0.7914, 0, 1, 0, -1.0263, 0, 0.2121, 407.2, 1, -273.235)
 
-[node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 5" instance=ExtResource("bn_kit_sw_trestle_pier_span_long24")]
-metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
-
-[node name="BN Stagheath Pier Span 6" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "boatnet-stagheath-span-6"
-node_name = "Authored_boatnet_stagheath_span_6"
-catalog_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
-collision_role = "solid"
-metadata = {
-"boatNetwork": "stagheath",
-"note": "trestle span 6 of 6 on the Stagheath pier"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.8162, 0, 1, 0, -0.9962, 0, 0.0713, 275.8317, 2.5, -328.835)
-
-[node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 6" instance=ExtResource("bn_kit_sw_trestle_pier_span_long24")]
+[node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 4" instance=ExtResource("bn_kit_sw_trestle_pier_span_long24")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
 
@@ -73685,7 +73649,7 @@ metadata = {
 "note": "a light at the head of the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.9962, 0, 1, 0, -0.9962, 0, 0.0871, 272.9873, 2.5, -331.8945)
+transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 404.995, 1, -276.9833)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Pier Lantern" instance=ExtResource("bn_kit_lantern_post_1")]
 metadata/map_asset_id = "tollholms:kit-lantern-post-1"
@@ -73703,7 +73667,7 @@ metadata = {
 "note": "the boat bound for Hornmere, moored on the pier's left side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.9962, 0, 1, 0, -0.9962, 0, 0.0871, 264.3497, 0, -322.3079)
+transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 394.8242, 0, -269.0468)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Boat To Hornmere" instance=ExtResource("bn_kit_sw_ferry_ship")]
 metadata/map_asset_id = "tollholms:kit-sw-ferry-ship"
@@ -73721,45 +73685,9 @@ metadata = {
 "note": "marks the berth of the boat bound for Hornmere"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.0871, 0, -0.9962, 0, 1, 0, 0.9962, 0, -0.0871, 271.8035, 2.5, -324.6678)
+transform = Transform3D(-0.2588, 0, -0.9659, 0, 1, 0, 0.9659, 0, -0.2588, 402.5747, 1, -270.0758)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Hornmere" instance=ExtResource("bn_kit_harbour_banner_1")]
-metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
-
-[node name="BN Stagheath Boat To Saltsound" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "boatnet-stagheath-boat-saltsound"
-node_name = "Authored_boatnet_stagheath_boat_saltsound"
-catalog_asset_id = "tollholms:kit-fishing-boat-2"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
-collision_role = "solid"
-metadata = {
-"boatNetwork": "stagheath",
-"note": "the boat bound for Saltsound, moored on the pier's left side, bow seaward, waterline origin at the water level"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.9962, 0, 1, 0, -0.9962, 0, 0.0871, 266.96, 0, -304.513)
-
-[node name="Content" parent="AuthoredAssets/BN Stagheath Boat To Saltsound" instance=ExtResource("bn_kit_fishing_boat_2")]
-metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
-
-[node name="BN Stagheath Banner For Saltsound" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "boatnet-stagheath-banner-saltsound"
-node_name = "Authored_boatnet_stagheath_banner_saltsound"
-catalog_asset_id = "tollholms:kit-harbour-banner-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
-collision_role = "none"
-metadata = {
-"boatNetwork": "stagheath",
-"note": "marks the berth of the boat bound for Saltsound"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.0871, 0, -0.9962, 0, 1, 0, 0.9962, 0, -0.0871, 270.2796, 2.5, -307.2343)
-
-[node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Saltsound" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
 
@@ -73775,7 +73703,7 @@ metadata = {
 "note": "the boat bound for Lakehead Landing, moored on the pier's right side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.9962, 0, 1, 0, -0.9962, 0, 0.0871, 282.4389, 0, -327.2515)
+transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 413.4972, 0, -270.7724)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Boat To Lakehead Landing" instance=ExtResource("bn_kit_fishing_boat_2")]
 metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
@@ -73793,45 +73721,45 @@ metadata = {
 "note": "marks the berth of the boat bound for Lakehead Landing"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.9962, 0, 1, 0, -0.9962, 0, 0.0871, 279.6418, 2.5, -330.5074)
+transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 411.3083, 1, -274.4648)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Lakehead Landing" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
 
-[node name="BN Stagheath Boat To Warrenmead" type="Node3D" parent="AuthoredAssets"]
+[node name="BN Stagheath Boat To Saltsound" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
-asset_id = "boatnet-stagheath-boat-warrenmead"
-node_name = "Authored_boatnet_stagheath_boat_warrenmead"
+asset_id = "boatnet-stagheath-boat-saltsound"
+node_name = "Authored_boatnet_stagheath_boat_saltsound"
 catalog_asset_id = "tollholms:kit-fishing-boat-2"
 scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
 collision_role = "solid"
 metadata = {
 "boatNetwork": "stagheath",
-"note": "the boat bound for Warrenmead, moored on the pier's right side, bow seaward, waterline origin at the water level"
+"note": "the boat bound for Saltsound, moored on the pier's right side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.9962, 0, 1, 0, -0.9962, 0, 0.0871, 281.481, 0, -316.2933)
+transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 410.65, 0, -260.1472)
 
-[node name="Content" parent="AuthoredAssets/BN Stagheath Boat To Warrenmead" instance=ExtResource("bn_kit_fishing_boat_2")]
+[node name="Content" parent="AuthoredAssets/BN Stagheath Boat To Saltsound" instance=ExtResource("bn_kit_fishing_boat_2")]
 metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb"
 
-[node name="BN Stagheath Banner For Warrenmead" type="Node3D" parent="AuthoredAssets"]
+[node name="BN Stagheath Banner For Saltsound" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
-asset_id = "boatnet-stagheath-banner-warrenmead"
-node_name = "Authored_boatnet_stagheath_banner_warrenmead"
+asset_id = "boatnet-stagheath-banner-saltsound"
+node_name = "Authored_boatnet_stagheath_banner_saltsound"
 catalog_asset_id = "tollholms:kit-harbour-banner-1"
 scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
 collision_role = "none"
 metadata = {
 "boatNetwork": "stagheath",
-"note": "marks the berth of the boat bound for Warrenmead"
+"note": "marks the berth of the boat bound for Saltsound"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0871, 0, 0.9962, 0, 1, 0, -0.9962, 0, 0.0871, 278.6839, 2.5, -319.5492)
+transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 408.4611, 1, -263.8396)
 
-[node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Warrenmead" instance=ExtResource("bn_kit_harbour_banner_1")]
+[node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Saltsound" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
 
@@ -73851,7 +73779,7 @@ extras = {
 "returnBy": "hornmere--obj-boat-stagheath",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 274.1822, 2.5, -321.4484)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 404.3578, 1, -266.4921)
 
 [node name="stagheath--boat-landing-hornmere" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -73866,40 +73794,7 @@ extras = {
 "note": "where the boat from Hornmere sets passengers down, 4 m shoreward of the gangway of the boat that sails back (stagheath--obj-boat-hornmere)",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 273.8339, 2.5, -317.4636)
-
-[node name="stagheath--obj-boat-saltsound" type="Marker3D" parent="Gameplay/Interactives"]
-gizmo_extents = 0.8
-script = ExtResource("s0_marker")
-record_id = "stagheath--obj-boat-saltsound"
-kind = "interactive"
-label = "Boat to Saltsound"
-extras = {
-"authority": "server",
-"name": "Boat to Saltsound",
-"objectId": 32,
-"type": "portal",
-"destination": "saltsound",
-"landing": "saltsound--boat-landing-stagheath",
-"returnBy": "saltsound--obj-boat-stagheath",
-"boatNetwork": "stagheath"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 272.6583, 2.5, -304.0149)
-
-[node name="stagheath--boat-landing-saltsound" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
-gizmo_extents = 0.8
-script = ExtResource("s0_marker")
-record_id = "stagheath--boat-landing-saltsound"
-kind = "runtime_point"
-label = "Boat landing (from Saltsound)"
-extras = {
-"role": "boat-landing",
-"insideOwnership": true,
-"boat": "stagheath--obj-boat-saltsound",
-"note": "where the boat from Saltsound sets passengers down, 4 m shoreward of the gangway of the boat that sails back (stagheath--obj-boat-saltsound)",
-"boatNetwork": "stagheath"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 272.31, 2.5, -300.0301)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 403.3225, 1, -262.6284)
 
 [node name="stagheath--obj-boat-lakehead" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
@@ -73917,7 +73812,7 @@ extras = {
 "returnBy": "reedfall--obj-boat-stagheath",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 276.7406, 2.5, -327.7496)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 407.9721, 1, -272.2529)
 
 [node name="stagheath--boat-landing-lakehead" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -73932,37 +73827,37 @@ extras = {
 "note": "where the boat from Lakehead Landing sets passengers down, 4 m shoreward of the gangway of the boat that sails back (stagheath--obj-boat-lakehead)",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 276.3923, 2.5, -323.7648)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 406.9368, 1, -268.3892)
 
-[node name="stagheath--obj-boat-warrenmead" type="Marker3D" parent="Gameplay/Interactives"]
+[node name="stagheath--obj-boat-saltsound" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
 script = ExtResource("s0_marker")
-record_id = "stagheath--obj-boat-warrenmead"
+record_id = "stagheath--obj-boat-saltsound"
 kind = "interactive"
-label = "Boat to Warrenmead"
+label = "Boat to Saltsound"
 extras = {
 "authority": "server",
-"name": "Boat to Warrenmead",
-"objectId": 33,
+"name": "Boat to Saltsound",
+"objectId": 32,
 "type": "portal",
-"destination": "warrenmead",
-"landing": "warrenmead--boat-landing-stagheath",
-"returnBy": "warrenmead--obj-boat-stagheath",
+"destination": "saltsound",
+"landing": "saltsound--boat-landing-stagheath",
+"returnBy": "saltsound--obj-boat-stagheath",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 275.7827, 2.5, -316.7914)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 405.1249, 1, -261.6278)
 
-[node name="stagheath--boat-landing-warrenmead" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
+[node name="stagheath--boat-landing-saltsound" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
 script = ExtResource("s0_marker")
-record_id = "stagheath--boat-landing-warrenmead"
+record_id = "stagheath--boat-landing-saltsound"
 kind = "runtime_point"
-label = "Boat landing (from Warrenmead)"
+label = "Boat landing (from Saltsound)"
 extras = {
 "role": "boat-landing",
 "insideOwnership": true,
-"boat": "stagheath--obj-boat-warrenmead",
-"note": "where the boat from Warrenmead sets passengers down, 4 m shoreward of the gangway of the boat that sails back (stagheath--obj-boat-warrenmead)",
+"boat": "stagheath--obj-boat-saltsound",
+"note": "where the boat from Saltsound sets passengers down, 4 m shoreward of the gangway of the boat that sails back (stagheath--obj-boat-saltsound)",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 275.4344, 2.5, -312.8066)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 404.0896, 1, -257.7641)

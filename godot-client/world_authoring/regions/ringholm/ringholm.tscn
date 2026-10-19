@@ -59149,7 +59149,7 @@ metadata = {
 "approval": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil",
 "deck": "Ringholm pier",
 "inside_ownership": true,
-"note": "Ringholm's east strand: the Suncoil ferry",
+"note": "Ringholm's south-east strand: the Suncoil ferry",
 "type": "pier"
 }
 width = 8
@@ -59160,10 +59160,10 @@ support_surface = SubResource("bn_support_surface")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Start" type="Marker3D" parent="Bridges/boatnet-ringholm-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 444, 2.5, 38)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 401.5, 1.7, 184.5)
 
 [node name="End" type="Marker3D" parent="Bridges/boatnet-ringholm-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 477.71, 2.5, 66.28)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 424.13, 1.7, 207.13)
 
 [node name="BN Ringholm Pier Span 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -59174,10 +59174,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "ringholm",
-"note": "trestle span 1 of 5 on the Ringholm pier"
+"note": "trestle span 1 of 4 on the Ringholm pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.8428, 0, -0.5266, 0, 1, 0, 0.707, 0, 0.6277, 447.371, 2.5, 40.828)
+transform = Transform3D(0.7072, 0, -0.5793, 0, 1, 0, 0.7072, 0, 0.5793, 404.3288, 1.7, 187.3287)
 
 [node name="Content" parent="AuthoredAssets/BN Ringholm Pier Span 1" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -59192,10 +59192,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "ringholm",
-"note": "trestle span 2 of 5 on the Ringholm pier"
+"note": "trestle span 2 of 4 on the Ringholm pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.8428, 0, -0.5266, 0, 1, 0, 0.707, 0, 0.6277, 454.113, 2.5, 46.484)
+transform = Transform3D(0.7072, 0, -0.5793, 0, 1, 0, 0.7072, 0, 0.5793, 409.9862, 1.7, 192.9862)
 
 [node name="Content" parent="AuthoredAssets/BN Ringholm Pier Span 2" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -59210,10 +59210,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "ringholm",
-"note": "trestle span 3 of 5 on the Ringholm pier"
+"note": "trestle span 3 of 4 on the Ringholm pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.8428, 0, -0.5266, 0, 1, 0, 0.707, 0, 0.6277, 460.855, 2.5, 52.14)
+transform = Transform3D(0.7072, 0, -0.5793, 0, 1, 0, 0.7072, 0, 0.5793, 415.6438, 1.7, 198.6438)
 
 [node name="Content" parent="AuthoredAssets/BN Ringholm Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -59228,30 +59228,12 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "ringholm",
-"note": "trestle span 4 of 5 on the Ringholm pier"
+"note": "trestle span 4 of 4 on the Ringholm pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.8428, 0, -0.5266, 0, 1, 0, 0.707, 0, 0.6277, 467.597, 2.5, 57.796)
+transform = Transform3D(0.7072, 0, -0.5793, 0, 1, 0, 0.7072, 0, 0.5793, 421.3012, 1.7, 204.3013)
 
 [node name="Content" parent="AuthoredAssets/BN Ringholm Pier Span 4" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
-metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
-
-[node name="BN Ringholm Pier Span 5" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "boatnet-ringholm-span-5"
-node_name = "Authored_boatnet_ringholm_span_5"
-catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
-collision_role = "solid"
-metadata = {
-"boatNetwork": "ringholm",
-"note": "trestle span 5 of 5 on the Ringholm pier"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.8428, 0, -0.5266, 0, 1, 0, 0.707, 0, 0.6277, 474.339, 2.5, 63.452)
-
-[node name="Content" parent="AuthoredAssets/BN Ringholm Pier Span 5" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
 
@@ -59267,7 +59249,7 @@ metadata = {
 "note": "a light at the head of the Ringholm pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.7661, 0, -0.6427, 0, 1, 0, 0.6427, 0, 0.7661, 478.7831, 2.5, 63.1338)
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 425.4735, 1.7, 204.0894)
 
 [node name="Content" parent="AuthoredAssets/BN Ringholm Pier Lantern" instance=ExtResource("s2_45_2hsmq")]
 metadata/map_asset_id = "tollholms:kit-lantern-post-1"
@@ -59285,7 +59267,7 @@ metadata = {
 "note": "the boat bound for Suncoil, moored on the pier's left side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.7661, 0, -0.6427, 0, 1, 0, 0.6427, 0, 0.7661, 475.8849, 0, 50.5603)
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 423.6819, 0, 191.3094)
 
 [node name="Content" parent="AuthoredAssets/BN Ringholm Boat To Suncoil" instance=ExtResource("bn_kit_sw_ferry_ship")]
 metadata/map_asset_id = "tollholms:kit-sw-ferry-ship"
@@ -59303,7 +59285,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Suncoil"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.7661, 0, 0.6427, 0, 1, 0, -0.6427, 0, -0.7661, 473.5429, 2.5, 58.0198)
+transform = Transform3D(-0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, -0.7071, 420.6979, 1.7, 198.5361)
 
 [node name="Content" parent="AuthoredAssets/BN Ringholm Banner For Suncoil" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -59325,7 +59307,7 @@ extras = {
 "returnBy": "suncoil--obj-boat-ringholm",
 "boatNetwork": "ringholm"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 469.5414, 2.5, 58.1219)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 416.7028, 1.7, 198.2886)
 
 [node name="ringholm--boat-landing-suncoil" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -59340,4 +59322,4 @@ extras = {
 "note": "where the boat from Suncoil sets passengers down, 4 m shoreward of the gangway of the boat that sails back (ringholm--obj-boat-suncoil)",
 "boatNetwork": "ringholm"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 466.4769, 2.5, 55.551)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 413.8744, 1.7, 195.4602)

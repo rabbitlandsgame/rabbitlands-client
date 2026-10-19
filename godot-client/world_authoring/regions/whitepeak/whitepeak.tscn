@@ -148,7 +148,7 @@ metadata = {
 "approval": "owner 2026-10-19: accept the 13 routes (Lakehead hub, isle boats A-E, coastal shortcuts), free boats, the lake hub is fine; add Ravenhead-Suncoil",
 "deck": "Whitepeak pier",
 "inside_ownership": true,
-"note": "Whitepeak's east strand: the Saltsound ferry",
+"note": "Whitepeak's south-east beach: the Saltsound ferry",
 "type": "pier"
 }
 width = 8
@@ -159,10 +159,10 @@ support_surface = SubResource("bn_support_surface")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Start" type="Marker3D" parent="Bridges/boatnet-whitepeak-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 573, 2.5, 145)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 511.5, 1.4, 56.5)
 
 [node name="End" type="Marker3D" parent="Bridges/boatnet-whitepeak-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 632.09, 2.5, 155.42)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 520.18, 1.4, 7.26)
 
 [node name="BN Whitepeak Pier Span 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("bn_asset_script")
@@ -173,10 +173,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "whitepeak",
-"note": "trestle span 1 of 7 on the Whitepeak pier"
+"note": "trestle span 1 of 6 on the Whitepeak pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.0552, 0, -0.1423, 0, 1, 0, 0.1861, 0, 0.8069, 577.2207, 2.5, 145.7443)
+transform = Transform3D(0.1808, 0, 0.8069, 0, 1, 0, -1.0258, 0, 0.1422, 512.2233, 1.4, 52.3967)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Pier Span 1" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -191,10 +191,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "whitepeak",
-"note": "trestle span 2 of 7 on the Whitepeak pier"
+"note": "trestle span 2 of 6 on the Whitepeak pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.0552, 0, -0.1423, 0, 1, 0, 0.1861, 0, 0.8069, 585.6621, 2.5, 147.2329)
+transform = Transform3D(0.1808, 0, 0.8069, 0, 1, 0, -1.0258, 0, 0.1422, 513.67, 1.4, 44.19)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Pier Span 2" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -209,10 +209,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "whitepeak",
-"note": "trestle span 3 of 7 on the Whitepeak pier"
+"note": "trestle span 3 of 6 on the Whitepeak pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.0552, 0, -0.1423, 0, 1, 0, 0.1861, 0, 0.8069, 594.1036, 2.5, 148.7214)
+transform = Transform3D(0.1808, 0, 0.8069, 0, 1, 0, -1.0258, 0, 0.1422, 515.1167, 1.4, 35.9833)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -227,10 +227,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "whitepeak",
-"note": "trestle span 4 of 7 on the Whitepeak pier"
+"note": "trestle span 4 of 6 on the Whitepeak pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.0552, 0, -0.1423, 0, 1, 0, 0.1861, 0, 0.8069, 602.545, 2.5, 150.21)
+transform = Transform3D(0.1808, 0, 0.8069, 0, 1, 0, -1.0258, 0, 0.1422, 516.5633, 1.4, 27.7767)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Pier Span 4" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -245,10 +245,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "whitepeak",
-"note": "trestle span 5 of 7 on the Whitepeak pier"
+"note": "trestle span 5 of 6 on the Whitepeak pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.0552, 0, -0.1423, 0, 1, 0, 0.1861, 0, 0.8069, 610.9864, 2.5, 151.6986)
+transform = Transform3D(0.1808, 0, 0.8069, 0, 1, 0, -1.0258, 0, 0.1422, 518.01, 1.4, 19.57)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Pier Span 5" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -263,30 +263,12 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "whitepeak",
-"note": "trestle span 6 of 7 on the Whitepeak pier"
+"note": "trestle span 6 of 6 on the Whitepeak pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.0552, 0, -0.1423, 0, 1, 0, 0.1861, 0, 0.8069, 619.4279, 2.5, 153.1871)
+transform = Transform3D(0.1808, 0, 0.8069, 0, 1, 0, -1.0258, 0, 0.1422, 519.4567, 1.4, 11.3633)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Pier Span 6" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
-metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
-
-[node name="BN Whitepeak Pier Span 7" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("bn_asset_script")
-asset_id = "boatnet-whitepeak-span-7"
-node_name = "Authored_boatnet_whitepeak_span_7"
-catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
-collision_role = "solid"
-metadata = {
-"boatNetwork": "whitepeak",
-"note": "trestle span 7 of 7 on the Whitepeak pier"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.0552, 0, -0.1423, 0, 1, 0, 0.1861, 0, 0.8069, 627.8693, 2.5, 154.6757)
-
-[node name="Content" parent="AuthoredAssets/BN Whitepeak Pier Span 7" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
 
@@ -302,7 +284,7 @@ metadata = {
 "note": "a light at the head of the Whitepeak pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.9848, 0, -0.1737, 0, 1, 0, 0.1737, 0, 0.9848, 631.4466, 2.5, 152.1587)
+transform = Transform3D(0.1736, 0, 0.9848, 0, 1, 0, -0.9848, 0, 0.1736, 516.9187, 1.4, 7.9036)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Pier Lantern" instance=ExtResource("bn_kit_lantern_post_1")]
 metadata/map_asset_id = "tollholms:kit-lantern-post-1"
@@ -320,7 +302,7 @@ metadata = {
 "note": "the boat bound for Saltsound, moored on the pier's left side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.9848, 0, -0.1737, 0, 1, 0, 0.1737, 0, 0.9848, 622.6508, 0, 142.7178)
+transform = Transform3D(0.1736, 0, 0.9848, 0, 1, 0, -0.9848, 0, 0.1736, 507.4788, 0, 16.6975)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Boat To Saltsound" instance=ExtResource("bn_kit_sw_ferry_ship")]
 metadata/map_asset_id = "tollholms:kit-sw-ferry-ship"
@@ -338,7 +320,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Saltsound"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.9848, 0, 0.1737, 0, 1, 0, -0.1737, 0, -0.9848, 624.3513, 2.5, 150.349)
+transform = Transform3D(-0.1736, 0, -0.9848, 0, 1, 0, 0.9848, 0, -0.1736, 515.1099, 1.4, 14.9965)
 
 [node name="Content" parent="AuthoredAssets/BN Whitepeak Banner For Saltsound" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -360,7 +342,7 @@ extras = {
 "returnBy": "saltsound--obj-boat-whitepeak",
 "boatNetwork": "whitepeak"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 620.9367, 2.5, 152.4378)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 517.1989, 1.4, 18.411)
 
 [node name="whitepeak--boat-landing-saltsound" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -375,4 +357,4 @@ extras = {
 "note": "where the boat from Saltsound sets passengers down, 4 m shoreward of the gangway of the boat that sails back (whitepeak--obj-boat-saltsound)",
 "boatNetwork": "whitepeak"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 616.9975, 2.5, 151.7431)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 516.5045, 1.4, 22.3503)
