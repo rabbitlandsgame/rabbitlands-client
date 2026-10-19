@@ -26,6 +26,51 @@ bone rests so differently proportioned rigs do not share an incorrect reset.
 Actor command sequences distinguish a new strike from a health/equipment update
 that merely restates the previous command.
 
+New melee strikes and hit reactions preserve their transition blends. Repeating
+the same clip starts a new clock through a per-actor animation alias, so a fresh
+event neither resumes an old swing nor snaps to its first pose. The shared
+animation resources remain immutable. Unarmed players use the reference left
+and right jabs; equipping a main-hand weapon restores the sword cuts. Equipment
+changes are applied before choosing the strike from the same actor packet.
+
+The confirmed melee opponent or ranged aim target wears a coral ground ring and
+an overhead pointer, independently of clicked selection and banner visibility.
+Clicked tentative targets wear a yellow circle with black inner and outer
+borders. It uses the same footprint, size and thickness rules as the active
+target's red circle. Both rings follow the
+terrain and update with footprint changes; map cameras exclude both cues.
+Combat end, target changes and death clear the combat cue.
+
+The yellow circle hides while the same actor is the confirmed combat or aiming
+target. The selection remains recorded, so its yellow circle returns when the
+active cue clears. Selecting another actor during combat shows its tentative
+circle separately.
+The overhead triangle is 50% larger by default. Settings → Banners → Target
+markers offers independent size, thickness and color controls for all three
+shapes (triangle thickness adjusts its outline), plus a reset button. Changes
+apply immediately to existing and future actors and persist locally under
+`[target_markers]`. Size and thickness use percentages of the default appearance;
+only the drawing changes, while footprint, picking and gameplay stay stable.
+The tentative circle retains the former `square_*` preference keys so existing
+player size, thickness and color choices continue to load.
+
+Creature imports specify `visualBacksetMetres` in gameplay metres after import
+scaling, before runtime small-creature enlargement and server actor scale.
+The 2026-10-19 expansion applies measured setbacks to 76 pronounced projections
+and 28 smaller projections, alongside the three existing wolf adjustments.
+Their leading resting surfaces sit near the front footprint edge at the current
+species scale. For example, Red Fox uses 0.132 m: its 2× small-creature boost
+and 2× species scale produce a 0.528 m visible setback. Values must account for
+both multipliers. The offset follows facing and applies only to the visual
+root: server positions, footprint centres and picking remain stable. Native
+meshes, skin, bone animation, stride settings and hit timing are preserved.
+
+Saddle bones on Moor Pony, Golden Plains Horse and Crystalback Tortoise carry
+the rider and reins with the offset; dismount restores the original player
+visual transform. Placement does not extend an
+attack's authored reach. The short attack reach on Crystal Wing Griffin and
+Jadefeather Raptor is recorded separately for animation review.
+
 ## Assets and visual effects
 
 The original `amberwood_ranger_bow.glb`, `sunmane_ranger_bow.glb`, and
@@ -141,11 +186,18 @@ handling, power capture, utility choices, search filters and area effects.
 
 ```sh
 godot --headless --path godot-client --script res://tests/test_combat_presentation.gd
+godot --headless --path godot-client --script res://tests/test_combat_readability.gd
+godot --headless --path godot-client --script res://tests/test_target_marker_settings.gd
+godot --headless --path godot-client --script res://tests/test_mount_visual_backset.gd
+godot --headless --path godot-client --script res://tests/test_mount_visual_backset.gd -- --horse
+godot --headless --path godot-client --script res://tests/test_mount_visual_backset.gd -- --tortoise
 godot --headless --path godot-client --script res://tests/test_spell_flights.gd
 godot --headless --path godot-client --script res://tests/test_animation_looping.gd
 godot --headless --path godot-client --script res://tests/test_animation_gate.gd
 python godot-client/tests/test_held_props.py -v
 godot --path godot-client --rendering-method gl_compatibility --script res://tests/integration/rendered_combat_showcase.gd
+godot --path godot-client --rendering-method gl_compatibility --script res://tests/integration/rendered_combat_readability.gd
+godot --path godot-client --rendering-method gl_compatibility --script res://tests/integration/rendered_target_markers.gd
 godot --path godot-client --rendering-method gl_compatibility --script res://tests/integration/rendered_world_effects.gd
 godot --path godot-client --rendering-method gl_compatibility --script res://tests/integration/rendered_spell_exchanges.gd
 ```

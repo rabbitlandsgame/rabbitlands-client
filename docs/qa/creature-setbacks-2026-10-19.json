@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-19",
+  "product": "Rabbit Lands",
+  "scope": "Apply approved visual setbacks to 76 strong candidates and 28 smaller adjustments",
+  "result": "PASS",
+  "new_adjustments": 104,
+  "strong": 76,
+  "smaller": 28,
+  "existing_wolf_adjustments_preserved": 3,
+  "models_with_setback_total": 107,
+  "production_small_creature_kind": 5,
+  "enlarged_creatures_in_new_adjustments": 31,
+  "input_preservation": {
+    "active_creature_glbs_sha256_unchanged": 236,
+    "active_action_mappings_sha256_unchanged": 236,
+    "only_approved_104_import_settings_changed_since_audit": true
+  },
+  "rendered_pose_verification": {
+    "engine": "Godot 4.7.2 GL Compatibility",
+    "models": 104,
+    "checks": 28600,
+    "poses": 17368,
+    "actions": [
+      "idle",
+      "combat_idle",
+      "attack_primary",
+      "walk",
+      "run",
+      "pain",
+      "death"
+    ],
+    "method": "Seek each production clip, force bone updates, wait for rendered draw, bake the visible skin; compare the same pose with its visual root setback removed. Check clip names/durations and source hashes independently.",
+    "max_shifted_pose_error_metres": 4.76837158203125e-07,
+    "max_abs_rest_front_edge_error_metres": 0.00192523002624512,
+    "turn_facings_per_model": 8,
+    "scale_factors_relative_to_species": [
+      0.5,
+      1,
+      2
+    ],
+    "footprint_ray_picking": "PASS for all 104",
+    "authoritative_position_and_capsule_preserved": true,
+    "combat_markers_remain_on_reserved_tiles": true
+  },
+  "regressions": {
+    "readability": "PASS",
+    "player_combat": "PASS",
+    "looping": "PASS",
+    "footprints": "PASS",
+    "mounted_player": "PASS",
+    "mounted_actions": "PASS",
+    "moor_pony_setback": "PASS",
+    "horse_setback": "PASS",
+    "tortoise_setback": "PASS",
+    "rendered_crowds": "PASS"
+  },
+  "mount_setback_pose_checks": {
+    "moor_pony": 48152,
+    "golden_plains_horse": 45160,
+    "crystalback_tortoise": 38904
+  },
+  "mount_tolerance": {
+    "position_metres": 0.001,
+    "basis_component": 0.001,
+    "max_observed_rider_position_error_metres": 0.00023764265643,
+    "max_observed_rein_position_error_metres": 0.00023746590887
+  },
+  "visual_review": {
+    "rest_and_strike_images": 208,
+    "contact_sheets": 9,
+    "crowd_scenes": 6,
+    "normal_speed_preview_frames": 96,
+    "normal_speed_preview_seconds": 12,
+    "assistant_review": "Rest/strike sheets for all 104, crowded scene witnesses and representative movement/attack sequences",
+    "user_artistic_approval": "not yet requested or asserted"
+  },
+  "attack_polish_followups": [
+    "crystal_wing_griffin",
+    "jadefeather_raptor"
+  ],
+  "limits": [
+    "Rest alignment is measured at current production species sizes; larger invasion visuals retain their server footprint.",
+    "Root placement preserves existing animation and vertical foot motion, including existing authored contact limitations.",
+    "Crystal Wing Griffin and Jadefeather Raptor have short attack reach after resting placement is corrected; no animation reach or server hit rules were changed.",
+    "Long tails, wings and rear bodies can extend beyond reserved tiles; turn checks preserve the logical footprint rather than asserting continuous mesh collision.",
+    "Offline rendered verification; live multiplayer visual acceptance remains separate."
+  ],
+  "file_sha256": {
+    "godot-client/data/actors/models.json": "4de0de5c488d7650b6f45c8e39d6187bdb04b5b6e56480e56cd736977a28109b",
+    "godot-client/tests/test_combat_readability.gd": "c4a90bc3622f4eb809ea5cf28f21109b72e9ae05b9d5d36c5821ee7ad0ca1290",
+    "godot-client/tests/test_mount_visual_backset.gd": "1e67360611c4f39878d990dbeb5c9be78a342693b2352b4108caf132b1dc2b4c",
+    "godot-client/tests/integration/rendered_combat_readability.gd": "8d807c33a2f28fd615f2b5cd45c35fa6f3052bbaa9a4c7db5a938c2cdd9916cd"
+  },
+  "preview_sha256": {
+    "implemented.png": "932c3f0e997ca21d285c5da30c15020c1ce069c08a67dafbf1d2c48d1aa3d77d",
+    "motion-review.gif": "07d14054c66a8a8fc4c54d45d6a591873d39e929ae564051db0ad90a2294ab91"
+  }
+}

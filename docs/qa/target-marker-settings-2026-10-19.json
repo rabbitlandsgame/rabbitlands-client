@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-19",
+  "scope": "Player target-marker appearance and selection/combat overlap",
+  "result": "PASS",
+  "default_triangle_font_pixels": {
+    "before": 32,
+    "after": 48
+  },
+  "settings_location": "Settings > Banners > Target markers",
+  "settings": {
+    "shapes": [
+      "circle",
+      "square",
+      "triangle"
+    ],
+    "per_shape": [
+      "size",
+      "thickness",
+      "color"
+    ],
+    "thickness_for_triangle": "outline",
+    "circle_and_square_size_percent": [
+      50,
+      200
+    ],
+    "triangle_size_percent": [
+      50,
+      300
+    ],
+    "thickness_percent": [
+      25,
+      300
+    ],
+    "defaults_percent": 100,
+    "live_updates": true,
+    "persisted_config_section": "target_markers",
+    "reset_to_defaults": true
+  },
+  "selection_behavior": "Keep the clicked selection recorded; hide its square while the same actor has the confirmed combat/aiming cue. Restore the square when the cue clears. A different selected actor keeps its square.",
+  "checks": {
+    "rendered_settings": {
+      "result": "PASS",
+      "checks": 631,
+      "normal_window": [
+        1280,
+        720
+      ],
+      "large_ui_window": [
+        900,
+        600
+      ],
+      "large_ui_scale": 1.5,
+      "covers": [
+        "all nine real control signals",
+        "saving/loading",
+        "invalid input handling",
+        "existing and late markers",
+        "minimum-size maximum-thickness geometry",
+        "unchanged logical footprint and picking",
+        "reset"
+      ]
+    },
+    "combat_readability": {
+      "result": "PASS",
+      "checks": 114
+    },
+    "actor_footprints": "PASS",
+    "rendered_selection_and_custom_styles": "PASS",
+    "historical_settings_suite": {
+      "unmodified_result": "FAIL: 77 stale fixture assumptions",
+      "cause": "The current main scene reparents the settings panel outside its controller; the old fixture searches under the now-empty controller and also requires the retired recenter_viewport binding.",
+      "compatibility_probe": "PASS after adjusting only panel lookups/ancestry and excluding that retired binding in an ignored fixture copy; maintained historical test left unchanged."
+    }
+  },
+  "profile_isolation": "Writable QA profiles under ignored test-artifacts; player profile not changed.",
+  "visuals": [
+    "appearance.png",
+    "settings.png",
+    "settings-narrow.png"
+  ],
+  "source_sha256": {
+    "godot-client/src/actors/target_marker_style.gd": "026421b6c246cb7c6906a5c3c0d93e359f37b2b5bd669c9af2e35bebe30ad606",
+    "godot-client/src/actors/combat_target_marker_3d.gd": "19a3eb809765920483b70a88c543f5c56d0711a1f022ccaca8c228609959979b",
+    "godot-client/src/actors/replicated_actor_3d.gd": "8a94cb9639580304e736b0f9586a7b8b9ec86fd044337e16a4db68719fe21619",
+    "godot-client/src/app/main.gd": "edf867fa2c872e24c4e192eda701f8a9e4c036caacf9c2f4448bb0a1d0a3e699",
+    "godot-client/src/ui/settings_window.gd": "5db86414698bbeb208259333080b9679b41008a781d95c21fb453122059ffedd",
+    "godot-client/tests/test_target_marker_settings.gd": "2f81579355d4590d9b4492a644de344bf9e648fe1ace29cc0f735e8959249682",
+    "godot-client/tests/test_combat_readability.gd": "e8642c23604f5862ed1ba8319fdf734ed638b8ea3b54949907bf4e9f50d6adb8",
+    "godot-client/tests/integration/rendered_target_markers.gd": "8d0bcb01122f8948ef03e64e15db353e399c62e307bca3598c7f2cd0ca30d47a"
+  },
+  "visual_sha256": {
+    "appearance.png": "9acc6c3730e73891436ec80fe5ff5015cdef75cb761cd0004f272c3e728bacb3",
+    "settings.png": "857d656d388d876a8212571fccb584cc351d142aa27badf4ef8a63ab773e119f",
+    "settings-narrow.png": "479f48ce96a100bf48e331f230130e3f60632df2e423169ec42a5b73b9b23179"
+  }
+}

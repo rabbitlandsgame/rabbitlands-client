@@ -33,6 +33,7 @@ const MapCache := preload("res://src/world/map_scene_cache.gd")
 const LookProfileScript := preload("res://src/world/look/look_profile.gd")
 ## keys.ini, Eternal Lands-style: the file every key binding is kept in.
 const KeyBindings := preload("res://src/ui/key_bindings.gd")
+const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
 
 ## The actions a player may rebind, grouped the way they are used. Actions the
 ## client does not own - text editing inside a LineEdit, for instance - are not
@@ -366,6 +367,7 @@ func _build() -> void:
 	_build_chat()
 	_new_page("Minimap", "Minimap")
 	_new_page("Banners", "Banners")
+	_add_target_marker_controls()
 	_build_graphics()
 	_build_camera()
 	_new_page("Audio", "Audio")
@@ -642,6 +644,58 @@ func _build_camera() -> void:
 	var page := _new_page("Camera", tr("ELORIA_SETTINGS_CAMERA"))
 	_add_slider(page, "rotation_sensitivity", tr("ELORIA_SETTINGS_ROTATION"), 0.05, 1.0, 0.25)
 
+func _add_target_marker_controls() -> void:
+	var page := page_body("Banners")
+	var heading := Label.new()
+	heading.text = "Target markers"
+	heading.add_theme_font_size_override("font_size", 18)
+	page.add_child(heading)
+	var hint := Label.new()
+	hint.text = "Yellow marks your clicked, tentative target. Red and the triangle mark the confirmed active target. Changes appear immediately."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(hint)
+	var grid := GridContainer.new()
+	grid.name = "TargetMarkerControls"
+	grid.add_theme_constant_override("h_separation", 18)
+	page.add_child(grid)
+	page.resized.connect(func() -> void: grid.columns = 3 if page.size.x >= 790 else 1)
+	for shape: String in ["circle", "square", "triangle"]:
+		var group := VBoxContainer.new()
+		grid.add_child(group)
+		var caption := Label.new()
+		caption.text = {"circle": "Active target circle", "square": "Tentative target circle", "triangle": "Target triangle"}[shape]
+		group.add_child(caption)
+		for property: String in ["size", "thickness", "color"]:
+			var key := shape + "_" + property
+			var row := HBoxContainer.new()
+			group.add_child(row)
+			var label := Label.new()
+			label.text = {"size": "Size (%)", "thickness": "Outline (%)" if shape == "triangle" else "Thickness (%)", "color": "Color"}[property]
+			label.custom_minimum_size.x = 120.0
+			row.add_child(label)
+			if property == "color":
+				var picker := ColorPickerButton.new()
+				picker.name = "target_" + key
+				picker.custom_minimum_size.x = 104.0
+				picker.color = TargetMarkerStyle.DEFAULTS[key]
+				picker.edit_alpha = false
+				picker.color_changed.connect(func(value: Color) -> void:
+					setting_changed.emit("Banners", "target_" + key, value))
+				row.add_child(picker)
+			else:
+				var number := SpinBox.new()
+				number.name = "target_" + key
+				var bounds := TargetMarkerStyle.limits(key)
+				number.min_value = bounds.x
+				number.max_value = bounds.y
+				number.step = 5.0
+				number.value = TargetMarkerStyle.DEFAULTS[key]
+				number.custom_minimum_size.x = 104.0
+				number.value_changed.connect(func(value: float) -> void:
+					setting_changed.emit("Banners", "target_" + key, value))
+				row.add_child(number)
+	_add_button(page, "target_markers_reset", "Reset target marker appearance")
+
 func _build_gameplay() -> void:
 	var page := _new_page("Gameplay", tr("ELORIA_SETTINGS_GAMEPLAY"))
 	var hint := Label.new()
@@ -832,7 +886,10 @@ func add_audio_controls() -> void:
 ## changed by a HUD shortcut while the settings window was closed.
 func restore_value(key: String, value: Variant) -> void:
 	var control := panel.find_child(key, true, false)
-	if control is OptionButton:
+	if control is ColorPickerButton:
+		# Programmatic color changes do not emit color_changed.
+		(control as ColorPickerButton).color = value as Color
+	elif control is OptionButton:
 		var option := control as OptionButton
 		for index: int in option.item_count:
 			if option.get_item_metadata(index) == value:

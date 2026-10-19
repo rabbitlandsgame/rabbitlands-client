@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-19",
+  "scope": "Replace clicked selection square with a bordered tentative circle",
+  "result": "PASS",
+  "defaults": {
+    "tentative": "yellow #f4c746 circle with black inner and outer borders",
+    "active": "red/coral #ff755f circle with black borders and larger overhead triangle"
+  },
+  "shared_geometry": "Both states use the same ring builder, footprint dimensions, padding, size percentages, thickness bands, tessellation and terrain draping. Independent player appearance controls remain available.",
+  "selection_transition": "Confirmed combat or ranged aim replaces the yellow circle on the same actor. Different clicked selections retain yellow; a still-selected actor returns to yellow when the active cue clears.",
+  "settings": "Settings > Banners > Target markers: Active target circle, Tentative target circle, Target triangle",
+  "compatibility": "Existing square_* saved appearance keys now style the tentative circle; saved choices and logical footprint/collision remain unchanged.",
+  "checks": {
+    "rendered_settings": "PASS",
+    "combat_state": "PASS",
+    "footprint_and_picking": "PASS",
+    "rendered_markers": "PASS"
+  },
+  "rendered_settings_checks": 713,
+  "combat_checks": 114,
+  "matching_ring_geometry_cases": 27,
+  "geometry_cases": {
+    "footprints": [
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "size_percent": [
+      50,
+      100,
+      200
+    ],
+    "thickness_percent": [
+      25,
+      100,
+      300
+    ]
+  },
+  "visual_review": [
+    "appearance.png",
+    "settings.png",
+    "settings-narrow.png"
+  ],
+  "source_sha256": {
+    "godot-client/src/actors/target_marker_style.gd": "3cd9cbc88b1a78e777f776e98b7bfd782ad6b709371b2d3eeba21743ceb31b29",
+    "godot-client/src/actors/combat_target_marker_3d.gd": "ebe5c97af5deeb8ddb8f26946f3a30ccf1532523bcfdfd97e82acc27d2096409",
+    "godot-client/src/actors/replicated_actor_3d.gd": "dabd6e3af9c1d67cc3f0df799042e43e244d86dc5c73cacd0d45df748fcea99a",
+    "godot-client/src/ui/settings_window.gd": "908999483f6d7553584f449accfc535c867c308961285df0587ff049d4841803",
+    "godot-client/tests/test_target_marker_settings.gd": "c895a79eeb3555d5482962306a9ea33cf0717c3415ff331b2c8e968aa6a9fd9b",
+    "godot-client/tests/test_combat_readability.gd": "498eb1acceee025ac6b655e2822991d47cd65378a498f3a4c9430b8ca8401073",
+    "godot-client/tests/integration/rendered_target_markers.gd": "f846e8a1cf1623d76e4a7cb838b091196d9c70faeefc09b27b6d69be1feda35b"
+  },
+  "visual_sha256": {
+    "appearance.png": "049c741e0abcb9b949fe19115e856bb909fd4cfec2012993c38433dbc90c7b66",
+    "settings.png": "907bafdf81e907adf3a35228e51c78421ea3b2fd49fc6b06ce3a8124f36586ce",
+    "settings-narrow.png": "e5a9a8102e6408922a96ba475dfc91ebf08b32b0927b0288cb4671a96b5b9081"
+  }
+}

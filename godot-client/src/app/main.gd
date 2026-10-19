@@ -81,6 +81,7 @@ const RangingWindowScript := preload("res://src/ui/ranging_window.gd")
 const MountsWindowScript := preload("res://src/ui/mounts_window.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
+const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
 const ChatHudScript := preload("res://src/ui/chat_hud.gd")
 const ChatMessages := preload("res://src/ui/chat_messages.gd")
 const ChatLogTabsScript := preload("res://src/ui/chat_log_tabs.gd")
@@ -385,6 +386,7 @@ var reference_window: Control
 var _shadows_enabled := true
 var _effects_enabled := true
 var _nameplates_enabled := true
+var _target_marker_style := TargetMarkerStyle.defaults()
 ## Trailer capture (`_configure_trailer_capture`): off unless the client was
 ## launched with TRAILER_CAPTURE_ARGUMENT. 0 draws the HUD, 1 the world alone,
 ## 2 the world without nameplates. Never saved.
@@ -2671,6 +2673,8 @@ func _refresh_unified_settings() -> void:
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
 	}
 	values.merge(_hud_element_options)
+	for key: String in _target_marker_style:
+		values["target_" + key] = _target_marker_style[key]
 	for key: String in _mount_banner_options:
 		values["mount_banner_" + key] = _mount_banner_options[key]
 	for option: String in chat_hud.options:
@@ -4294,7 +4298,9 @@ func _sync_overhead_health() -> void:
 		if not (node_value is ReplicatedActor3D) or not is_instance_valid(
 				node_value as ReplicatedActor3D):
 			continue
-		(node_value as ReplicatedActor3D).set_health_visible(
+		var actor := node_value as ReplicatedActor3D
+		actor.set_combat_target(int(id) == target_id)
+		actor.set_health_visible(
 			_overhead_health_for(int(id),
 				AppState.actors.get(id, {}) as Dictionary, target_id))
 
@@ -5711,6 +5717,7 @@ func _spawn_actor(id: Variant) -> void:
 	node.apply_server_state(dto, actor_adapter, true)
 	_fit_lantern_map_marker(node, "MapDot")
 	node.set_combat_effects_enabled(_effects_enabled)
+	node.set_target_marker_style(_target_marker_style)
 	node.set_nameplate_visible(_nameplate_visible_for(int(id)))
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
@@ -7595,6 +7602,8 @@ func _load_hud_settings() -> void:
 		for key: String in _mount_banner_options:
 			_mount_banner_options[key] = bool(config.get_value("mount_banner", key, true))
 	game_view.get_node("MountControls").set_options(_mount_banner_options)
+	_target_marker_style = TargetMarkerStyle.read(config)
+	_apply_target_marker_style()
 	_apply_fps_limit(config.get_value("graphics", "fps_limit", 0))
 	_load_look_settings(config)
 	reference_window.call("configure", console_commands,
@@ -7692,6 +7701,7 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "nameplates", _nameplates_enabled)
 	config.set_value("graphics", "name_distance", _name_distance_metres)
 	config.set_value("graphics", "fps_limit", _fps_limit)
+	TargetMarkerStyle.write(config, _target_marker_style)
 	# The player's own choices, not what ELORIA_LOOK or ELORIA_LOOK_QUALITY
 	# made of them for this session.
 	config.set_value("graphics", "look", LookProfile.player_look())
@@ -11481,6 +11491,17 @@ func _set_name_distance(value: Variant) -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if section == "Banners" and key.begins_with("target_"):
+		if key == "target_markers_reset":
+			_target_marker_style = TargetMarkerStyle.defaults()
+		else:
+			var property := key.trim_prefix("target_")
+			if not TargetMarkerStyle.DEFAULTS.has(property): return
+			_target_marker_style[property] = value
+			_target_marker_style = TargetMarkerStyle.normalise(_target_marker_style)
+		_apply_target_marker_style()
+		_save_hud_settings()
+		return
 	if key.begins_with("mount_banner_"):
 		_set_mount_banner_option(key.trim_prefix("mount_banner_"), bool(value))
 		return
@@ -11618,6 +11639,11 @@ func _on_client_setting_changed(section: String, key: String,
 	# save immediately.
 	if key not in ["target_mode_strong", "target_mode_weak", "autogather", "magic_autocast"]:
 		_save_hud_settings()
+
+func _apply_target_marker_style() -> void:
+	for actor: Variant in actor_nodes.values():
+		if is_instance_valid(actor):
+			(actor as ReplicatedActor3D).set_target_marker_style(_target_marker_style)
 
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()

@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-19",
+  "scope": "Client combat readability and melee playback",
+  "changes": {
+    "target_cue": "Confirmed melee/ranged target receives a terrain-following coral ring and fixed-size overhead pointer; clicked gold selection stays independent.",
+    "wolf_visual_backset_metres": {
+      "dire_wolf": 0.45,
+      "crystal_dire_wolf": 0.58,
+      "moorland_dire_wolf": 0.6
+    },
+    "melee": "Reference left/right jabs when unarmed; weapon equip restores sword cuts; fresh strikes and pain reactions retain blends and repeated clips restart through a bounded per-actor alias library."
+  },
+  "checks": {
+    "test_combat_readability.gd": {
+      "result": "PASS",
+      "checks": 73,
+      "first_strike_frame_max_nonleaf_joint_delta_degrees": 19.8086465459461,
+      "prior_hard_restart_delta_degrees": 78.1792468249364
+    },
+    "test_combat_presentation.gd": {
+      "result": "PASS",
+      "player_rigs": 16,
+      "includes_unarmed_clips": true
+    },
+    "test_animation_looping.gd": "PASS",
+    "test_actor_footprints.gd": "PASS",
+    "rendered_combat_readability.gd": "PASS"
+  },
+  "preservation": {
+    "wolf_glbs_match_existing_model_roster": true,
+    "shared_player_library_matches_prechange_sha256": true,
+    "server_positions_and_collision_unchanged": true
+  },
+  "visual_review": "Reviewed production render of four adjacent wolves in combat idle and bite, independent clicked selection, and unarmed/equipped attack poses.",
+  "limits": [
+    "Offline engine checks and rendered review; live multiplayer playtesting remains useful.",
+    "Setbacks were measured at ordinary species scale and scale with actor size; they do not change the server footprint."
+  ],
+  "source_sha256": {
+    "godot-client/src/actors/combat_target_marker_3d.gd": "41921b57288d10a1a0a4c7224eabcffe8dec665103c50880bd12f6a455e1ea4a",
+    "godot-client/src/actors/replicated_actor_3d.gd": "804dfaca4c25878706ff104b5a9669b1eb4dedfec0a5d16bf0d956fc12cf596d",
+    "godot-client/src/actors/animation_resolver.gd": "e1c86f5d2ced15199e54e7d69d87cdac2c0991e3c7a7911ac31c89bba4894f53",
+    "godot-client/src/app/main.gd": "992aa95fe28b2450d1f30d8662666bc4389a32172234a8dab65c83b9105be953",
+    "godot-client/data/actors/models.json": "eefa3a51f6746eac17dfcae27fa98385d30fcd48934c77a42c9de0a76a4a015f",
+    "godot-client/data/animations/luminous.json": "cab052b8c9aaf8ca9509aa63af7b1eab12ddd3893328cb75924ded289e6faf9b",
+    "godot-client/tests/test_combat_readability.gd": "e56bd54a79bab0887685f5ba243e21af0c08e0318a5ba0a9c73d27b7e11e37a7",
+    "godot-client/tests/test_combat_presentation.gd": "adde684b319269e7f310937763cc95b2d9af13bdf84aceea54efbf0648898cc2",
+    "godot-client/tests/integration/rendered_combat_readability.gd": "c4447d2ff64f236b5e434acc86fe363c4b4ea67bfedbb973484e2c84473d94fb"
+  },
+  "render_sha256": "b8f793c02186fcf265773f41e5bd9051e2fda81273cdb496fbbda7917fe786ac"
+}

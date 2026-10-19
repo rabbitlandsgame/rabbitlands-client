@@ -4,6 +4,8 @@ extends RefCounted
 var action_to_clip: Dictionary
 var command_to_action: Dictionary
 var playback_speeds: Dictionary
+## Optional loadout-specific clips; they are imported with the default actions.
+var melee_styles: Dictionary
 ## Metres of ground each locomotion clip covers per second when it plays at
 ## speed 1.0, measured from its planted foot. The clips animate in place, so
 ## this is what tells an actor how fast to run one for its own travel speed.
@@ -36,6 +38,7 @@ func _init(config: Dictionary) -> void:
 	action_to_clip = config.get("actions", {}).duplicate(true)
 	command_to_action = config.get("serverCommands", {}).duplicate(true)
 	playback_speeds = config.get("playbackSpeeds", {}).duplicate(true)
+	melee_styles = config.get("meleeStyles", {}).duplicate(true)
 	stride_speeds = config.get("strideMetresPerSecond", {}).duplicate(true)
 	stride_scales_with_actor = bool(config.get("strideScalesWithActor", false))
 	looping_clips = PackedStringArray(config.get("loopingClips", []))
@@ -85,6 +88,11 @@ func required_clips() -> PackedStringArray:
 		var clip := str(action_to_clip[action])
 		if not clip.is_empty() and not clips.has(clip):
 			clips.append(clip)
+	for style: Dictionary in melee_styles.values():
+		for value: Variant in style.values():
+			var clip := str(value)
+			if not clip.is_empty() and not clips.has(clip):
+				clips.append(clip)
 	return clips
 
 func validate(available_clips: PackedStringArray) -> Array[String]:
@@ -93,4 +101,9 @@ func validate(available_clips: PackedStringArray) -> Array[String]:
 		var clip := str(action_to_clip[action])
 		if clip.is_empty() or not available_clips.has(clip):
 			missing.append(str(action) + " -> " + clip)
+	for style_name: Variant in melee_styles:
+		for action: Variant in melee_styles[style_name]:
+			var clip := str(melee_styles[style_name][action])
+			if clip.is_empty() or not available_clips.has(clip):
+				missing.append(str(style_name) + "/" + str(action) + " -> " + clip)
 	return missing
