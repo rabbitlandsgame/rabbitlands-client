@@ -4,16 +4,26 @@ const Draft := preload("res://src/dev/rabbit_mount_draft.gd")
 const PANELS := [
  ["REST / SIDE", "luminous_male", "cruise", "idle", false],
  ["REST / FRONT", "luminous_female", "cruise", "idle", false],
- ["GENTLE HOPS / SIDE", "luminous_male", "walk", "walk", true],
- ["GENTLE HOPS / GAME CAMERA", "luminous_female", "walk", "walk", true],
- ["BOUNDS / QUARTER", "luminous_male", "cruise", "run", true],
- ["BOUNDS / REAR + CAPE", "luminous_female", "cruise", "run", true]]
+ ["NORMAL / SIDE  |  2x RUN", "luminous_male", "cruise", "run", true],
+ ["NORMAL / GAME CAMERA  |  2x RUN", "luminous_female", "cruise", "run", true],
+ ["FAST / QUARTER  |  4x RUN", "luminous_male", "burst", "run", true],
+ ["FAST / REAR + CAPE  |  4x RUN", "luminous_female", "burst", "run", true]]
 var actors: Array[ReplicatedActor3D] = []
 var clock := 0.0
 var paused := false
 var manual := false
+var panels: Array = PANELS.duplicate(true)
+var all_mounts := false
 
 func _ready() -> void:
+	all_mounts = "--all-mounts" in OS.get_cmdline_user_args()
+	if all_mounts:
+		panels.clear()
+		for gait: String in ["cruise", "burst"]:
+			for id: String in preload("res://src/mounts/mount_profiles.gd").PATHS:
+				var label := preload("res://src/mounts/mount_profiles.gd").display_name(id)
+				panels.append([label + (" / 4x" if gait == "burst" else " / 2x"),
+					"luminous_female", gait, "run", true, id])
 	var background := ColorRect.new()
 	background.color = Color("111b23")
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -27,26 +37,26 @@ func _ready() -> void:
 	column.add_theme_constant_override("separation", 10)
 	margin.add_child(column)
 	var title := Label.new()
-	title.text = "RABBIT LANDS   /   GIANT MEADOW RABBIT"
+	title.text = "RABBIT LANDS   /   " + ("ALL MOUNTS / NORMAL + FAST" if all_mounts else "GIANT MEADOW RABBIT")
 	title.add_theme_font_size_override("font_size", 23)
 	title.add_theme_color_override("font_color", Color("e6d3a7"))
 	column.add_child(title)
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 4 if all_mounts else 3
 	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(grid)
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/animations/luminous.json"))
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
-	for index: int in PANELS.size():
-		var panel: Array = PANELS[index]
+	for index: int in panels.size():
+		var panel: Array = panels[index]
 		var box := VBoxContainer.new()
 		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		grid.add_child(box)
 		var label := Label.new()
 		label.text = panel[0]
-		label.add_theme_font_size_override("font_size", 17)
+		label.add_theme_font_size_override("font_size", 15 if all_mounts else 17)
 		box.add_child(label)
 		var container := SubViewportContainer.new()
 		container.stretch = true
@@ -98,7 +108,7 @@ func _ready() -> void:
 		var actor := ReplicatedActor3D.new()
 		stage.add_child(actor)
 		var worn := {}
-		if index in [0, 3, 5]:
+		if all_mounts or index in [0, 3, 5]:
 			worn[2] = 1
 		var errors := actor.configure({"actor_id": 900 + index, "x": 0, "y": 0,
 			"rotation": 0, "kind": 1, "name": "", "appearance": {"hair": 0},
@@ -108,16 +118,20 @@ func _ready() -> void:
 			push_error(str(errors))
 		actor.set_physics_process(false)
 		actor.set_process(false)
-		actor._presentation_speed = 1.504999183 if panel[2] == "cruise" else .674999634
-		var mount_errors := Draft.attach(actor, models)
-		if not mount_errors.is_empty(): push_error(str(mount_errors))
+		actor._presentation_speed = 20.0 if panel[2] == "burst" else 10.0
+		if all_mounts:
+			actor.set_mount_state({"mode":"mounted", "mount_id":panel[5], "gait":panel[2],
+				"step_us":50000 if panel[2] == "burst" else 100000}, models)
+		else:
+			var mount_errors := Draft.attach(actor, models)
+			if not mount_errors.is_empty(): push_error(str(mount_errors))
 		Draft.pace(actor, panel[2])
 		for child: Node in actor.get_children():
-			if child is Node3D and child.name not in ["NativeModel", "RabbitMountDraft", "CombatPresentation"]:
+			if child is Node3D and child.name not in ["NativeModel", "RabbitMountDraft", "MountedPony", "CombatPresentation"]:
 				(child as Node3D).hide()
 		actors.append(actor)
 	var instructions := Label.new()
-	instructions.text = "SPACE  pause / resume     R  restart     |     Giant Meadow Rabbit riding draft"
+	instructions.text = "SPACE  pause / resume     R  restart     |     Giant Meadow Rabbit / normal + fast riding"
 	instructions.add_theme_font_size_override("font_size", 14)
 	column.add_child(instructions)
 	restart()
@@ -126,8 +140,8 @@ func restart() -> void:
 	clock = 0.0
 	for index: int in actors.size():
 		actors[index]._mount_visual.elapsed = 0.0
-		actors[index].play_action(&"run" if PANELS[index][4] else &"idle")
-		actors[index].play_action(StringName(PANELS[index][3]), true)
+		actors[index].play_action(&"run" if panels[index][4] else &"idle")
+		actors[index].play_action(StringName(panels[index][3]), true)
 
 func _process(delta: float) -> void:
 	if not paused and not manual:

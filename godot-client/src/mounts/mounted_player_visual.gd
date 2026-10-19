@@ -118,9 +118,14 @@ func _process(delta: float) -> void:
 		rate = actor._travel_speed() / maxf(.01, float(profile[speed_key[action]]))
 		var playback_multipliers: Dictionary = profile.get("playbackRateMultipliers", {})
 		rate *= float(playback_multipliers.get(action, 1.0))
-	elapsed += delta * rate
 	var clip: String = profile.clips[action]
 	var duration := float(profile.get("cycleLengths", {}).get(action, pony.animation_player.get_animation(clip).length))
+	# High travel speeds must not turn short source strides into frantic limbs.
+	# This presentation limit changes the clip clock only; the server owns pace.
+	var cadence: Dictionary = profile.get("maximumCyclesPerSecond", {})
+	if cadence.has(action):
+		rate = minf(rate, duration * float(cadence[action]))
+	elapsed += delta * rate
 	if locomotion != null:
 		locomotion.apply(action, elapsed, duration)
 	else:

@@ -26,7 +26,7 @@ func run() -> void:
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	fixture = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/rabbit_mount_soles.json"))
 	check(FileAccess.get_sha256(models.rabbit.scene) == fixture.sourceSha256, "uses the current qualified rabbit source")
-	check(not Profiles.supports("rabbit"), "draft does not enable a live mount catalogue entry")
+	check(Profiles.supports("rabbit"), "rabbit is registered for live selection")
 	for body: String in ["luminous_male", "luminous_female"]:
 		var actor := ReplicatedActor3D.new()
 		root.add_child(actor)
@@ -66,9 +66,9 @@ func run() -> void:
 				check(not matches.is_empty(), "qualified sole patch resolves in the actual engine mesh")
 				for index: int in matches: unique[index] = true
 			sole_indices[leg] = PackedInt32Array(unique.keys())
-		for gait: String in ["walk","cruise"]:
+		for gait: String in ["walk","cruise","burst"]:
 			Draft.pace(actor, gait)
-			actor._presentation_speed = .674999634 if gait == "walk" else 1.504999183
+			actor._presentation_speed = {"walk":.674999634,"cruise":10.0,"burst":20.0}[gait]
 			actor.play_action(&"walk" if gait == "walk" else &"run", true)
 			visual._process(0.0)
 			visual.elapsed = 0.0
@@ -105,7 +105,7 @@ func run() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--report="):
 			FileAccess.open(argument.trim_prefix("--report="),FileAccess.WRITE).store_string(JSON.stringify(report,"  "))
-	print("RABBIT_MOUNT_DRAFT_CHECKS ",JSON.stringify(report))
+	print("RABBIT_MOUNT_CHECKS ",JSON.stringify(report))
 	NativeAnimationImporter.clear()
 	GlbSceneCache.clear()
 	quit(1 if failures else 0)

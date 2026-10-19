@@ -55,7 +55,7 @@ func run() -> void:
 		_bind_soles(visual.pony)
 		for gait: String in ["walk","cruise","burst"]:
 			actor.set_mount_state({"mode":"mounted","mount_id":"crystalback_tortoise","gait":gait},models)
-			actor._presentation_speed = {"walk":.5,"cruise":1.5,"burst":2.25}[gait]
+			actor._presentation_speed = {"walk":.5,"cruise":10.0,"burst":20.0}[gait]
 			actor.play_action(&"run")
 			visual._process(0.0)
 			var duration: float = visual.profile.cycleLengths[visual.action]

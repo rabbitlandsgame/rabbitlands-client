@@ -1929,9 +1929,12 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		# a stop and the early one behind it a sprint.
 		var due: float = scheduled_arrival(now, _schedule_due, cadence,
 			cadence * arrival_margin + _jitter_allowance, catch_up_factor)
+		# A server-confirmed fast mount can cross a tile faster than the
+		# ordinary segment floor. Keep its short steps on the supplied cadence.
+		var segment_floor := minf(minimum_segment_duration, cadence) if is_instance_valid(_mount_visual) else minimum_segment_duration
 		_segment_duration = clampf(maxf(due - now,
 			global_position.distance_to(server_target) / maxf(_presentation_speed, 0.001)),
-			minimum_segment_duration, maximum_segment_duration + maximum_buffer_seconds)
+			segment_floor, maximum_segment_duration + maximum_buffer_seconds)
 		_schedule_due = now + _segment_duration
 		_travel_yaw = travel_yaw(_segment_start, server_target, _target_yaw)
 		_travel_yaw_active = true

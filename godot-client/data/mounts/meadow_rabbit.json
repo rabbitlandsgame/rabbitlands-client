@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "status": "meadow_rabbit_in_game_v2",
+  "mount": "rabbit",
+  "saddleBone": "spine_01",
+  "footOffsetMetres": [
+    0.55,
+    -0.54,
+    0.13
+  ],
+  "kneePoleOffsetMetres": [
+    0.68,
+    -0.14,
+    0.27
+  ],
+  "handOffsetMetres": [
+    0.13,
+    0.16,
+    0.3
+  ],
+  "elbowPoleOffsetMetres": [
+    0.3,
+    0.02,
+    -0.04
+  ],
+  "pelvisLeanDegrees": 5.0,
+  "torsoStabilization": 0.65,
+  "fingerGripWeight": 0.95,
+  "fingerCurlDegrees": [
+    55.0,
+    70.0,
+    50.0
+  ],
+  "footToeOutDegrees": 10,
+  "armMotion": {
+    "weight": 1.0,
+    "idle": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.002,
+      "elbowGiveMetres": 0.003
+    },
+    "walk": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    },
+    "trot": {
+      "beatsPerCycle": 2,
+      "handFollowMetres": 0.009,
+      "elbowGiveMetres": 0.014
+    },
+    "gallop": {
+      "beatsPerCycle": 1,
+      "handFollowMetres": 0.012,
+      "elbowGiveMetres": 0.018
+    }
+  },
+  "reins": {
+    "headBone": "spine_02",
+    "bridleAnchorsNative": {
+      "l": [
+        0.115,
+        0.57,
+        0.29
+      ],
+      "r": [
+        -0.115,
+        0.57,
+        0.29
+      ]
+    },
+    "widthMetres": 0.017,
+    "thicknessMetres": 0.006,
+    "crossSectionRollDegrees": 35.0,
+    "sideClearanceMetres": 0.06,
+    "sagMetres": 0.015,
+    "looseEndLengthMetres": 0.1,
+    "looseEndSpreadMetres": 0.065,
+    "segments": 20,
+    "colour": "98703e",
+    "bridlePathsNative": [
+      [
+        [
+          0.115,
+          0.57,
+          0.29
+        ],
+        [
+          0.18,
+          0.51,
+          0.27
+        ],
+        [
+          0.22,
+          0.35,
+          0.24
+        ],
+        [
+          0,
+          0.3,
+          0.24
+        ],
+        [
+          -0.22,
+          0.35,
+          0.24
+        ],
+        [
+          -0.18,
+          0.51,
+          0.27
+        ],
+        [
+          -0.115,
+          0.57,
+          0.29
+        ]
+      ]
+    ]
+  },
+  "walkStrideMetresPerSecond": 0.6749996335714287,
+  "trotStrideMetresPerSecond": 1.5049991830000002,
+  "gallopStrideMetresPerSecond": 1.5049991830000002,
+  "playbackRateMultipliers": {},
+  "clips": {
+    "idle": "Idle_A",
+    "walk": "Walk",
+    "trot": "Jog",
+    "gallop": "Jog"
+  },
+  "notes": "Giant Meadow Rabbit riding profile for the normal mount catalogue. Preserves the reviewed leporid GLB, source hopping clips and approved saddle fit. Normal and fast mode use distinct capped hop cadences; the server controls travel speed. Existing pony saddle geometry is reused.",
+  "displayName": "Giant Meadow Rabbit",
+  "visualScale": 6.0,
+  "seatPositionNative": [
+    0.001,
+    0.63,
+    -0.04
+  ],
+  "borrowedTack": {
+    "source": "res://assets/actors/native/creatures/moor_pony.glb",
+    "sourceBone": "Bone_021",
+    "bone": "spine_01",
+    "positionNative": [
+      0.001,
+      0.57,
+      0.05
+    ],
+    "scale": [
+      0.55,
+      0.42,
+      0.6
+    ],
+    "dropScale": 0.38
+  },
+  "capeContact": [
+    {
+      "bone": "hips",
+      "center": [
+        0.001,
+        0.36,
+        -0.16
+      ],
+      "radii": [
+        0.29,
+        0.23,
+        0.42
+      ],
+      "idleBackProfile": [
+        [
+          0.1,
+          0.59
+        ],
+        [
+          -0.04,
+          0.64
+        ],
+        [
+          -0.14,
+          0.6
+        ],
+        [
+          -0.22,
+          0.57
+        ],
+        [
+          -0.3,
+          0.5
+        ],
+        [
+          -0.4,
+          0.44
+        ],
+        [
+          -0.52,
+          0.31
+        ]
+      ]
+    },
+    {
+      "bone": "spine_01",
+      "center": [
+        0.001,
+        0.59,
+        -0.04
+      ],
+      "radii": [
+        0.13,
+        0.08,
+        0.17
+      ]
+    }
+  ],
+  "capeMotion": {
+    "hangFraction": 0.64,
+    "gallopHangFraction": 0.66,
+    "liftMultiplier": 0.25,
+    "rippleMultiplier": 0.5,
+    "clearanceMetres": 0.025,
+    "gallopClearanceMetres": 0.04,
+    "idleHangFraction": 0.82,
+    "idleClearanceMetres": 0.02
+  },
+  "portraitCameraSize": 2.8,
+  "portraitLookAtHeight": 1.05,
+  "maximumCyclesPerSecond": {
+    "trot": 1.8,
+    "gallop": 2.6
+  }
+}
