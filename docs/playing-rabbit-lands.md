@@ -32,7 +32,7 @@ Gauntlet death keeps your carried items and returns you at full health at a safe
 
 ## Riding and the interface
 
-The Moor Pony, Golden Plains Horse, Crystalback Tortoise and Giant Meadow Rabbit all travel at twice ordinary running speed. Press Space for fast mode at four times running speed: with the normal five-metre-per-second run, those mounted paces are ten and twenty metres per second. Fast mode lasts eight seconds of movement and takes eight seconds to recover. The on-foot walk/run switch does not change mounted speed. Press R to mount or dismount, and use the Mounts window to switch mounts.
+The Moor Pony, Golden Plains Horse, Crystalback Tortoise, Giant Meadow Rabbit and Jadefeather Raptor all travel at twice ordinary running speed. Press Space for fast mode at four times running speed: with the normal five-metre-per-second run, those mounted paces are ten and twenty metres per second. Fast mode lasts eight seconds of movement and takes eight seconds to recover. The on-foot walk/run switch does not change mounted speed. Press R to mount or dismount, and use the Mounts window to switch mounts.
 
 The mount banner can stay pinned above the scene. Riding continues across supported outdoor maps and ends when entering a restricted map.
 

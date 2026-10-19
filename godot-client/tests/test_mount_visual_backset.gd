@@ -50,6 +50,7 @@ func check_rig(actual: Skeleton3D, reference: Skeleton3D, shift: Vector3) -> voi
 func run() -> void:
 	if "--horse" in OS.get_cmdline_user_args(): mount_id = "golden_plains_horse"
 	if "--tortoise" in OS.get_cmdline_user_args(): mount_id = "crystalback_tortoise"
+	if "--raptor" in OS.get_cmdline_user_args(): mount_id = "jadefeather_raptor"
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	var baseline := models.duplicate(true)
 	baseline[mount_id].import.visualBacksetMetres = 0.0
