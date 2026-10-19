@@ -35,8 +35,8 @@
     -444.0
    ],
    "max": [
-    431.0,
-    118.8054384765625,
+    305.0,
+    58.16673226928711,
     444.0
    ]
   },
@@ -47,8 +47,8 @@
     -444.0
    ],
    "max": [
-    431.0,
-    118.8054384765625,
+    305.0,
+    58.16673226928711,
     444.0
    ]
   },
@@ -70,7 +70,7 @@
    0,
    0
   ],
-  "walkingHeight": -0.3,
+  "walkingHeight": 2.5,
   "invertServerY": true,
   "serverStorageVersion": 1,
   "serverTileMin": [
@@ -127,7 +127,7 @@
   ],
   "terrainConforming": true,
   "authority": "server",
-  "defaultSpawn": "generated-arrival-greenlight"
+  "defaultSpawn": "greenlight--arrival"
  },
  "environment": {
   "sky": {
@@ -337,16 +337,20 @@
     8259.0
    ],
    [
-    2437.0,
+    2311.0,
     8259.0
    ],
    [
-    2437.0,
+    2311.0,
     7671.0
    ],
    [
-    1899.0,
+    2001.0,
     7671.0
+   ],
+   [
+    1961.0,
+    7631.0
    ],
    [
     1849.0,
@@ -380,16 +384,20 @@
      8259.0
     ],
     [
-     2437.0,
+     2311.0,
      8259.0
     ],
     [
-     2437.0,
+     2311.0,
      7671.0
     ],
     [
-     1899.0,
+     2001.0,
      7671.0
+    ],
+    [
+     1961.0,
+     7631.0
     ],
     [
      1849.0,
@@ -423,8 +431,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "b7470ebc6891ad15f40c41b2a2962847dff598cc8d8778c004f3725d0c7f6c64",
-  "sceneSha256": "fcaef7c95e6c17e0e469c638959b1d741c118823e59c11adcf32d5f3d265e851"
+  "snapshotSha256": "76835398a2921879866d5dea6be8b7b9bc783c70bdb6102e30f69a4d7d60d7c1",
+  "sceneSha256": "163680f7f6f6fdfe10da0c24a621f28e63f9ba0cf311b24ee76c194a939a10bd"
  },
  "externalResources": {
   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
@@ -463,8 +471,7 @@
   "../../../../_continent_v2/shared-assets/6230b50e6b3eca0a0413c48a4bb172c4e32f231d48c60d98f13d672ad341088b.jpg": "6230b50e6b3eca0a0413c48a4bb172c4e32f231d48c60d98f13d672ad341088b",
   "../../../../_continent_v2/shared-assets/a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e.jpg": "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e",
   "../../../../_continent_v2/shared-assets/15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03.jpg": "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03",
-  "../../../../_continent_v2/shared-assets/1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5.jpg": "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5",
-  "../../../../_continent_v2/shared-assets/fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782.jpg": "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782"
+  "../../../../_continent_v2/shared-assets/1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5.jpg": "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5"
  },
  "bounds": {
   "min": [
@@ -479,9 +486,9 @@
   ]
  },
  "performance": {
-  "glbBytes": 1654380,
-  "nodes": 154,
-  "meshes": 24,
+  "glbBytes": 1599644,
+  "nodes": 109,
+  "meshes": 11,
   "externalResources": {
    "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
    "../../../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
@@ -519,8 +526,7 @@
    "../../../../_continent_v2/shared-assets/6230b50e6b3eca0a0413c48a4bb172c4e32f231d48c60d98f13d672ad341088b.jpg": "6230b50e6b3eca0a0413c48a4bb172c4e32f231d48c60d98f13d672ad341088b",
    "../../../../_continent_v2/shared-assets/a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e.jpg": "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e",
    "../../../../_continent_v2/shared-assets/15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03.jpg": "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03",
-   "../../../../_continent_v2/shared-assets/1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5.jpg": "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5",
-   "../../../../_continent_v2/shared-assets/fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782.jpg": "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782"
+   "../../../../_continent_v2/shared-assets/1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5.jpg": "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5"
   },
   "sharedResourceResidentBytes": {
    "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
@@ -559,8 +565,7 @@
    "6230b50e6b3eca0a0413c48a4bb172c4e32f231d48c60d98f13d672ad341088b": 1398102,
    "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
    "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
-   "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102,
-   "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622
+   "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102
   }
  },
  "biomeBlend": null,
@@ -573,12 +578,10 @@
   "../../../../../_shared/meshes/60917cbd5cb9e4a8b59ff65a33afbe02201ec2c2d47c0cfeb6dc38a46471d401.glb": "1854f16a603bfc266507fbb6aae419973b3ce6804260821c659f4483792e48b0",
   "../../../../../_shared/meshes/78770cb5a2a72e0c9125b535dd3123f29e0b194fc7fad239ab4b80f3c87fbc77.glb": "2578f9a4199d91cfde247f907b3f388af06c98b4c1ccab1b597c81544c9adba7",
   "../../../../../_shared/meshes/a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204.glb": "fce9954f022affe50d31e702dbe7c244f63ab924546826363799d1f831ba7fb0",
-  "../../../../../_shared/meshes/c034acd826b529670bab47a35c9b44fe2edc1e722691e70e3393c8887c61416b.glb": "7432d51a4c9326c2585a05533e47ff034fdfe6b7528ff819e4ec5b99df62a11b",
   "../../../../../_shared/meshes/c33c18589f913d072c0e40ee0163e3b394389f3a769b1b2ebadccf41b769e76d.glb": "7a566eecc93873a8eadb83eec54cdcfc2f9b93ca2f45930eaa0487e74b3a053a",
   "../../../../../_shared/meshes/c3c3113207f4a7fd6ba57455c102f9bd8fbb723e39a932db723f0fbaca12c6d8.glb": "0062b83cc18fc2db56b4827b6267ef0ba7282cc5d7741d6be3ba90a9f44eba87",
   "../../../../../_shared/meshes/d323656f5ae2809d39dad5376b94a325baa9b1f73dcd91af901cc8caf000f090.glb": "2c20088bba01983e8289fb4e4b84ed7e0690ea7ecb95504c6ec606bf5143cb52",
   "../../../../../_shared/meshes/e697beb28dde2953398fad79d5ed01361afe49a3fd0224b1c38fe55529bce1e4.glb": "c910e3d5516f1726d105482391a13f8c426fadb96ae83736b20e2ca78c05df59",
-  "../../../../../_shared/meshes/f247af6c67932b0dbf657390cf491b934ca9d9ed37773c4d56cd4365d491477f.glb": "9f6e331b9480e1a94dc40fab9ab33f7a39a8527a14c82f2a6138d1bbdfe7e6db",
-  "../../../../../_shared/meshes/f5e0150efae5a9c8ff72ff211a43598ae67886cc2b45975dd306778310bca9fe.glb": "106d489608e18734839c9e71e3c53fd2cdf9fedde20a715619702a8048e5830b"
+  "../../../../../_shared/meshes/f247af6c67932b0dbf657390cf491b934ca9d9ed37773c4d56cd4365d491477f.glb": "9f6e331b9480e1a94dc40fab9ab33f7a39a8527a14c82f2a6138d1bbdfe7e6db"
  }
 }

@@ -1,0 +1,3493 @@
+{
+ "schemaVersion": "1.0.0",
+ "assetVersion": "1.0.0",
+ "asset": {
+  "id": "whitepeak",
+  "name": "Whitepeak",
+  "glb": "world.glb",
+  "units": "meters",
+  "coordinateSystem": {
+   "handedness": "right",
+   "upAxis": "Y",
+   "northAxis": "-Z"
+  },
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "bounds": {
+   "min": [
+    0.0,
+    -12.330740928649902,
+    -600.0
+   ],
+   "max": [
+    680.0,
+    140.34263940429688,
+    510.0
+   ]
+  },
+  "playableBounds": {
+   "min": [
+    0.0,
+    -12.330740928649902,
+    -600.0
+   ],
+   "max": [
+    680.0,
+    140.34263940429688,
+    510.0
+   ]
+  },
+  "mapBounds": {
+   "min": [
+    0.0,
+    -12.330740928649902,
+    -600.0
+   ],
+   "max": [
+    680.0,
+    140.34263940429688,
+    510.0
+   ]
+  },
+  "seaLevel": 0.0,
+  "serverCells": 1512
+ },
+ "coordinateTransform": {
+  "metresPerTile": 1.0,
+  "serverOrigin": [
+   754,
+   604
+  ],
+  "serverCells": [
+   1512,
+   1512
+  ],
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "walkingHeight": 112.76100158691406,
+  "invertServerY": true,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "addressableWorldBounds": {
+   "min": [
+    -754,
+    -908
+   ],
+   "max": [
+    758,
+    604
+   ]
+  }
+ },
+ "spawnPoints": [
+  {
+   "default": true,
+   "id": "whitepeak--arrival",
+   "position": [
+    130.5,
+    112.76100158691406,
+    50.5
+   ],
+   "facing": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "serverTile": [
+    884,
+    553
+   ]
+  }
+ ],
+ "spawns": [
+  {
+   "default": true,
+   "id": "whitepeak--arrival",
+   "position": [
+    130.5,
+    112.76100158691406,
+    50.5
+   ],
+   "facing": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "serverTile": [
+    884,
+    553
+   ]
+  }
+ ],
+ "collision": {
+  "nodeNames": [],
+  "binary": "collision.bin",
+  "format": "EWCG-v2",
+  "formatVersion": 2,
+  "version": 2,
+  "width": 3024,
+  "height": 3024,
+  "cellMetres": 0.5,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "serverCells": [
+   1512,
+   1512
+  ],
+  "originMetres": [
+   -754.0,
+   604.0
+  ],
+  "heightEncoding": {
+   "origin": -0.8834062435999218,
+   "step": 0.5559726947322193,
+   "range": [
+    1,
+    255
+   ]
+  },
+  "gridAlignment": "tile-centres-v1",
+  "authoredSurfaceExport": true,
+  "maxTerrainGrade": 0.65,
+  "maximumWadingDepth": 0.35,
+  "actorVolume": {
+   "floorClearance": 0.06,
+   "height": 2.1,
+   "halfCellWidth": 0.5
+  },
+  "walkableCells": 792665,
+  "walkableFraction": 0.086681,
+  "sha256": "327b58d7d9e62dd8c56a1b9ef8f4954b43d44c6c0c7f17cbb88d5950f619afcc",
+  "exportStatistics": {
+   "walkTriangles": 412,
+   "structuralMeshes": 8,
+   "structuralPlacements": 8,
+   "structuralTriangles": 20176,
+   "structuralTrianglesTested": 15715,
+   "ownCells": 3019200,
+   "deckCells": 1703,
+   "steepCells": 419920,
+   "waterCells": 1812221,
+   "structuralCells": 228,
+   "crossSeamSolidCells": 0,
+   "harvestNodeTiles": 0,
+   "noGroundCells": 0,
+   "seamCollarCells": 2122,
+   "ownWalkableCells": 790543
+  },
+  "seamCollar": {
+   "hornmere": {
+    "cells": 4440,
+    "openCells": 2122,
+    "closedByTheNeighbour": 2318,
+    "closedByThisMapsSolids": 0,
+    "closedByThirdMapsSolids": 0,
+    "droppedByTheHeightScale": 0,
+    "walkableCells": 2122,
+    "walkableTiles": 523
+   },
+   "saltsound": {
+    "cells": 2292,
+    "openCells": 0,
+    "closedByTheNeighbour": 2292,
+    "closedByThisMapsSolids": 0,
+    "closedByThirdMapsSolids": 0,
+    "droppedByTheHeightScale": 0,
+    "walkableCells": 0,
+    "walkableTiles": 0
+   },
+   "stagheath": {
+    "cells": 436,
+    "openCells": 0,
+    "closedByTheNeighbour": 436,
+    "closedByThisMapsSolids": 0,
+    "closedByThirdMapsSolids": 0,
+    "droppedByTheHeightScale": 0,
+    "walkableCells": 0,
+    "walkableTiles": 0
+   }
+  },
+  "sourceSnapshotSha256": "18533178070aaa2f26dfea156808d16a8dca7b0a1e1ae40c5800dda81d023c6c",
+  "sourceSceneSha256": "79f25281653039252c1182c482cd6b7ad3797e5510112fe193fa169394e8f739",
+  "groupExport": {
+   "maps": {
+    "boarsend": {
+     "snapshotSha256": "538b13771f27d603253bf94ea9a8aef35008dacf01bcfbad694c45ff18d20722",
+     "servedGridSha256": "24688a4614f365aa2bc65c0aa6aa31fcfef793be9c30ac41e8f61ff43710d47d"
+    },
+    "brambleshaw": {
+     "snapshotSha256": "807460f17eaf362281735df88020cb68ddd7a4c2801c0e6db85beb18d6276868",
+     "servedGridSha256": "acb08a5a10b1aa36beef403b058dc8b142f41076c87e621bf2558b9ec8496775"
+    },
+    "coilmere": {
+     "snapshotSha256": "5053be9ce02595b56a091c5665b43e4ce57431c48a875d212a8bceea9a815381",
+     "servedGridSha256": "fa2c3922d84217c4561de26561ffc98644682b2e2a0a30bbe3209df141cb335a"
+    },
+    "greenlight": {
+     "snapshotSha256": "76835398a2921879866d5dea6be8b7b9bc783c70bdb6102e30f69a4d7d60d7c1",
+     "servedGridSha256": "360a002fc6b23e685f49e8ad3aac33366080d381984d092a99efa0d9aeb7fec1"
+    },
+    "hearthcroft": {
+     "snapshotSha256": "0a62004d7d3bb703074279c52568002e4a7a5061c926794fcc89a28acd7620f2",
+     "servedGridSha256": "bcf5d2d3eef578f97c6d891af73ae4ab15cafb7ef9cbc7c00ca6dd1ecf03283f"
+    },
+    "hornmere": {
+     "snapshotSha256": "250272f738721b2530dfdbcdc9cf0e1bfb83080ef8d596e68a225c40d90913e3",
+     "servedGridSha256": "a75ef4aef1833fa51b925f2976853b43d0a5a19ee525ec95f4349e9c957365af"
+    },
+    "landfall": {
+     "snapshotSha256": "b805145edc7538ee41b7853e5cb995422d007ba00aca8222cba775667d32bf41",
+     "servedGridSha256": "54d03428d7c1490fdb0c9dbaf13e2858297b6936edd0b8f6042c66e6721a4e05"
+    },
+    "pinebrow": {
+     "snapshotSha256": "04f65b546cf80fb9b21df34c9fb89fffea4b02c304b3dd146153676bf9a3031d",
+     "servedGridSha256": "973e5eae3a7438e6abdafc4b5669ab7d0a426cf2cb699fd2cd31983913c2e67f"
+    },
+    "ravenhead": {
+     "snapshotSha256": "c56e6f123e06fed54af85c548a1c9925a0585d14b3269567f3a799bd03bdb7f4",
+     "servedGridSha256": "2cd98a612fc7f3d8eba226101b3afc0da668405023dd1bf5f0a20277f35277fd"
+    },
+    "reedfall": {
+     "snapshotSha256": "42d268ab4362910cf8a06e7c183285881a1dec4778ac8269c31d61fcd8803d15",
+     "servedGridSha256": "ee41e7cce43c9fe99dff25f43ff4ee7745e21599d51346a83909d8d422dfb520"
+    },
+    "ringholm": {
+     "snapshotSha256": "df2f31ba248aa2ff794c1e501166b15ef315c4e42c1c8bb60c193afd7f075e8a",
+     "servedGridSha256": "20888d14a79cd5130e67a9ac022421fe55d4d2ea38f6bd9ada5dc4b7c04ed2cc"
+    },
+    "saltsound": {
+     "snapshotSha256": "f4d31a32c8637ac00947d0fea0bd83afb0303cb5bfb65c551f0116a5d37fa2e2",
+     "servedGridSha256": "f97e4e73a63f3f8aedad3491a42c6ebb36ec0fff34278c46de94be18dfcf68ff"
+    },
+    "stagheath": {
+     "snapshotSha256": "a7026f7d8f0643198b6c91008a7d041330244f903bd8e7d4a3090a96e2d8f83e",
+     "servedGridSha256": "c8c2315df8baeb6b0178fa5e10518c6e7ade4a184bc579f995b915a73fa95a27"
+    },
+    "suncoil": {
+     "snapshotSha256": "7c985436894a489c64d20f25478c206397fed931be83616c511c9cfec3071101",
+     "servedGridSha256": "83ba3dc7d64f7075e3622516fb87ef7a30d11db3ab90c1f44e3e5b813fc93658"
+    },
+    "twinbrook": {
+     "snapshotSha256": "d834c98189d94cad427a2ab5fd5e385a95afa476f02f6a1f0f1943e2e5cf225c",
+     "servedGridSha256": "ef5816720d690cda2880b9d0a9a909c0b22f9d00d483f2bf3be1c3c9aa4926c0"
+    },
+    "warrenmead": {
+     "snapshotSha256": "e51eb854d061f7ae9cee1c4c295f34562c623d5548e6401c252c492e0d09dcdd",
+     "servedGridSha256": "a5caa315c36b5fa0223c8fd6112b8d775e4db2444a746336ccd031012af4cb04"
+    },
+    "whitepeak": {
+     "snapshotSha256": "18533178070aaa2f26dfea156808d16a8dca7b0a1e1ae40c5800dda81d023c6c",
+     "servedGridSha256": "ca662f32791dc85be0deb56f70097ae29be2e73f42ee36f78359dddc3f5f8ee7"
+    }
+   }
+  },
+  "exporter": "eloria-assets/maps/continent-v2/_continent_v2/export_collision.py",
+  "servedGrid": {
+   "binary": "served-grid.escg.gz",
+   "format": "ESCG-v2",
+   "unitMetres": 0.05,
+   "climbMetres": 1.0,
+   "originMetres": -100.0,
+   "width": 1512,
+   "height": 1512,
+   "openTiles": 192626,
+   "sha256": "ca662f32791dc85be0deb56f70097ae29be2e73f42ee36f78359dddc3f5f8ee7"
+  },
+  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
+ },
+ "navigation": {
+  "surfaceNodePrefixes": [
+   "Terrain_",
+   "Walk_"
+  ],
+  "terrainConforming": true,
+  "authority": "server",
+  "defaultSpawn": "whitepeak--arrival"
+ },
+ "landmarks": [],
+ "interactives": [],
+ "npcMarkers": [],
+ "harvestablesSchema": "eloria-harvest-presentation-v1",
+ "harvestables": [],
+ "harvestGroupings": [],
+ "portals": [],
+ "serviceMarkers": [],
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.2,
+    0.45,
+    0.76
+   ],
+   "horizon": [
+    0.8,
+    0.87,
+    0.9
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.5,
+    0.58,
+    0.6
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    1.0,
+    0.93,
+    0.8
+   ],
+   "energy": 1.1
+  },
+  "ambient": {
+   "color": [
+    0.63,
+    0.64,
+    0.67
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.16,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.76,
+    0.8,
+    0.82
+   ],
+   "density": 0.0004,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.76,
+      0.7
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.96,
+      0.76,
+      0.76
+     ]
+    },
+    "fog": {
+     "color": [
+      0.84,
+      0.76,
+      0.78
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.62,
+      0.48
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.92,
+      0.6,
+      0.58
+     ]
+    },
+    "fog": {
+     "color": [
+      0.78,
+      0.62,
+      0.64
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.15,
+      0.14,
+      0.3
+     ],
+     "horizon": [
+      0.31,
+      0.28,
+      0.44
+     ]
+    },
+    "fog": {
+     "color": [
+      0.3,
+      0.27,
+      0.4
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.6,
+      0.57,
+      0.74
+     ]
+    },
+    "moon": {
+     "color": [
+      0.6,
+      0.58,
+      0.88
+     ]
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.5
+   },
+   "gulls": {
+    "enabled": true,
+    "density": 0.3
+   }
+  }
+ },
+ "lighting": {
+  "markers": []
+ },
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   1351.0,
+   0.0,
+   5621.0
+  ],
+  "ownershipPolygon": [
+   [
+    1351.0,
+    6131.0
+   ],
+   [
+    1351.0,
+    5021.0
+   ],
+   [
+    2031.0,
+    5021.0
+   ],
+   [
+    2031.0,
+    6131.0
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     1351.0,
+     6131.0
+    ],
+    [
+     1351.0,
+     5021.0
+    ],
+    [
+     2031.0,
+     5021.0
+    ],
+    [
+     2031.0,
+     6131.0
+    ]
+   ]
+  ],
+  "geometryMode": "continent-chunks-v1"
+ },
+ "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
+ "knownLimitations": [
+  "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
+  "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
+  "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
+ ],
+ "provenance": {
+  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
+  "snapshotSha256": "18533178070aaa2f26dfea156808d16a8dca7b0a1e1ae40c5800dda81d023c6c",
+  "sceneSha256": "79f25281653039252c1182c482cd6b7ad3797e5510112fe193fa169394e8f739"
+ },
+ "externalResources": {
+  "../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+  "../../_continent_v2/shared-assets/13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb.jpg": "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb",
+  "../../_continent_v2/shared-assets/15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03.jpg": "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03",
+  "../../_continent_v2/shared-assets/1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5.jpg": "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5",
+  "../../_continent_v2/shared-assets/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+  "../../_continent_v2/shared-assets/1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f.png": "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f",
+  "../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+  "../../_continent_v2/shared-assets/71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac.png": "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac",
+  "../../_continent_v2/shared-assets/7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23.png": "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23",
+  "../../_continent_v2/shared-assets/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+  "../../_continent_v2/shared-assets/8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283.jpg": "8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283",
+  "../../_continent_v2/shared-assets/90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a.png": "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a",
+  "../../_continent_v2/shared-assets/a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e.jpg": "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e",
+  "../../_continent_v2/shared-assets/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+  "../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
+  "../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+  "../../_continent_v2/shared-assets/f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c.png": "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c"
+ },
+ "streamingChunks": {
+  "schemaVersion": "1.0",
+  "coordinateSpace": "territory-local",
+  "preloadDistance": 240,
+  "retainDistance": 320,
+  "maximumLoadedChunks": 64,
+  "maximumResidentBytes": 268435456,
+  "chunks": [
+   {
+    "id": "10_03",
+    "manifest": "chunks/10_03/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      -6.262362957000732,
+      -600.0
+     ],
+     "max": [
+      36.0,
+      0.0,
+      -558.0
+     ]
+    },
+    "estimatedResidentBytes": 11453184,
+    "glbBytes": 93608,
+    "geometryResidentBytes": 93608,
+    "placements": 0,
+    "triangles": 1400,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_04",
+    "manifest": "chunks/10_04/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      -5.219969749450684,
+      -560.0
+     ],
+     "max": [
+      36.0,
+      0.0,
+      -462.0
+     ]
+    },
+    "estimatedResidentBytes": 11571144,
+    "glbBytes": 211568,
+    "geometryResidentBytes": 211568,
+    "placements": 0,
+    "triangles": 3314,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_05",
+    "manifest": "chunks/10_05/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      -2.7810919284820557,
+      -464.0
+     ],
+     "max": [
+      36.0,
+      7.153330284118653,
+      -366.0
+     ]
+    },
+    "estimatedResidentBytes": 11571164,
+    "glbBytes": 211588,
+    "geometryResidentBytes": 211588,
+    "placements": 0,
+    "triangles": 3314,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_06",
+    "manifest": "chunks/10_06/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      0.9881182909011841,
+      -368.0
+     ],
+     "max": [
+      36.0,
+      50.11389108276367,
+      -270.0
+     ]
+    },
+    "estimatedResidentBytes": 11482266,
+    "glbBytes": 210072,
+    "geometryResidentBytes": 210072,
+    "placements": 0,
+    "triangles": 3312,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_07",
+    "manifest": "chunks/10_07/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      37.78586959838867,
+      -272.0
+     ],
+     "max": [
+      36.0,
+      122.60308404541016,
+      -174.0
+     ]
+    },
+    "estimatedResidentBytes": 11482270,
+    "glbBytes": 210076,
+    "geometryResidentBytes": 210076,
+    "placements": 0,
+    "triangles": 3312,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_08",
+    "manifest": "chunks/10_08/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      98.69025421142578,
+      -176.0
+     ],
+     "max": [
+      36.0,
+      129.57469506835938,
+      -78.0
+     ]
+    },
+    "estimatedResidentBytes": 11482274,
+    "glbBytes": 210080,
+    "geometryResidentBytes": 210080,
+    "placements": 0,
+    "triangles": 3312,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_09",
+    "manifest": "chunks/10_09/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      98.40522332763672,
+      -80.0
+     ],
+     "max": [
+      36.0,
+      113.66797967529297,
+      18.0
+     ]
+    },
+    "estimatedResidentBytes": 11482270,
+    "glbBytes": 210076,
+    "geometryResidentBytes": 210076,
+    "placements": 0,
+    "triangles": 3312,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_10",
+    "manifest": "chunks/10_10/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      60.05621286010742,
+      16.0
+     ],
+     "max": [
+      36.0,
+      101.6651382446289,
+      114.0
+     ]
+    },
+    "estimatedResidentBytes": 11482266,
+    "glbBytes": 210072,
+    "geometryResidentBytes": 210072,
+    "placements": 0,
+    "triangles": 3312,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_11",
+    "manifest": "chunks/10_11/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      9.346853691101074,
+      112.0
+     ],
+     "max": [
+      36.0,
+      69.24264093017578,
+      210.0
+     ]
+    },
+    "estimatedResidentBytes": 11482262,
+    "glbBytes": 210068,
+    "geometryResidentBytes": 210068,
+    "placements": 0,
+    "triangles": 3312,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_12",
+    "manifest": "chunks/10_12/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      2.300426483154297,
+      208.0
+     ],
+     "max": [
+      36.0,
+      31.94167657470703,
+      306.0
+     ]
+    },
+    "estimatedResidentBytes": 11482250,
+    "glbBytes": 210056,
+    "geometryResidentBytes": 210056,
+    "placements": 0,
+    "triangles": 3312,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_13",
+    "manifest": "chunks/10_13/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      -2.560635847091675,
+      304.0
+     ],
+     "max": [
+      36.0,
+      15.756027656555176,
+      402.0
+     ]
+    },
+    "estimatedResidentBytes": 11571156,
+    "glbBytes": 211580,
+    "geometryResidentBytes": 211580,
+    "placements": 0,
+    "triangles": 3314,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_14",
+    "manifest": "chunks/10_14/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      -3.869537115097046,
+      400.0
+     ],
+     "max": [
+      36.0,
+      0.0,
+      498.0
+     ]
+    },
+    "estimatedResidentBytes": 11571144,
+    "glbBytes": 211568,
+    "geometryResidentBytes": 211568,
+    "placements": 0,
+    "triangles": 3314,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "10_15",
+    "manifest": "chunks/10_15/world.json",
+    "bounds": {
+     "min": [
+      0.0,
+      -3.8342268466949463,
+      496.0
+     ],
+     "max": [
+      36.0,
+      0.0,
+      510.0
+     ]
+    },
+    "estimatedResidentBytes": 11393892,
+    "glbBytes": 34316,
+    "geometryResidentBytes": 34316,
+    "placements": 0,
+    "triangles": 467,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_03",
+    "manifest": "chunks/11_03/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      -6.091585159301758,
+      -600.0
+     ],
+     "max": [
+      132.0,
+      0.0,
+      -558.0
+     ]
+    },
+    "estimatedResidentBytes": 11606388,
+    "glbBytes": 246812,
+    "geometryResidentBytes": 246812,
+    "placements": 0,
+    "triangles": 3890,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_04",
+    "manifest": "chunks/11_04/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      -4.966899394989014,
+      -560.0
+     ],
+     "max": [
+      132.0,
+      0.0,
+      -462.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_05",
+    "manifest": "chunks/11_05/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      -2.5,
+      -464.0
+     ],
+     "max": [
+      132.0,
+      30.716737228393555,
+      -366.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_06",
+    "manifest": "chunks/11_06/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      6.708825588226318,
+      -368.0
+     ],
+     "max": [
+      132.0,
+      84.0609545288086,
+      -270.0
+     ]
+    },
+    "estimatedResidentBytes": 11841346,
+    "glbBytes": 569152,
+    "geometryResidentBytes": 569152,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_07",
+    "manifest": "chunks/11_07/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      48.571136474609375,
+      -272.0
+     ],
+     "max": [
+      132.0,
+      124.89839501953125,
+      -174.0
+     ]
+    },
+    "estimatedResidentBytes": 11841350,
+    "glbBytes": 569156,
+    "geometryResidentBytes": 569156,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_08",
+    "manifest": "chunks/11_08/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      80.44866180419922,
+      -176.0
+     ],
+     "max": [
+      132.0,
+      140.34263940429688,
+      -78.0
+     ]
+    },
+    "estimatedResidentBytes": 11841354,
+    "glbBytes": 569160,
+    "geometryResidentBytes": 569160,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_09",
+    "manifest": "chunks/11_09/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      98.57859802246094,
+      -80.0
+     ],
+     "max": [
+      132.0,
+      115.50781579589844,
+      18.0
+     ]
+    },
+    "estimatedResidentBytes": 11841338,
+    "glbBytes": 569144,
+    "geometryResidentBytes": 569144,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_10",
+    "manifest": "chunks/11_10/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      67.13636779785156,
+      16.0
+     ],
+     "max": [
+      132.0,
+      114.7690615234375,
+      114.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_11",
+    "manifest": "chunks/11_11/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      30.673091888427734,
+      112.0
+     ],
+     "max": [
+      132.0,
+      111.88885827636719,
+      210.0
+     ]
+    },
+    "estimatedResidentBytes": 11841350,
+    "glbBytes": 569156,
+    "geometryResidentBytes": 569156,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_12",
+    "manifest": "chunks/11_12/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      5.740665393829346,
+      208.0
+     ],
+     "max": [
+      132.0,
+      67.55351586914063,
+      306.0
+     ]
+    },
+    "estimatedResidentBytes": 11841338,
+    "glbBytes": 569144,
+    "geometryResidentBytes": 569144,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_13",
+    "manifest": "chunks/11_13/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      -3.076962274551392,
+      304.0
+     ],
+     "max": [
+      132.0,
+      15.750027656555176,
+      402.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_14",
+    "manifest": "chunks/11_14/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      -4.738568824768066,
+      400.0
+     ],
+     "max": [
+      132.0,
+      0.0,
+      498.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "11_15",
+    "manifest": "chunks/11_15/world.json",
+    "bounds": {
+     "min": [
+      34.0,
+      -4.736626667022705,
+      496.0
+     ],
+     "max": [
+      132.0,
+      0.0,
+      510.0
+     ]
+    },
+    "estimatedResidentBytes": 11443964,
+    "glbBytes": 84388,
+    "geometryResidentBytes": 84388,
+    "placements": 0,
+    "triangles": 1298,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_03",
+    "manifest": "chunks/12_03/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      -6.883368057250976,
+      -600.0
+     ],
+     "max": [
+      228.0,
+      0.0,
+      -558.0
+     ]
+    },
+    "estimatedResidentBytes": 11606384,
+    "glbBytes": 246808,
+    "geometryResidentBytes": 246808,
+    "placements": 0,
+    "triangles": 3890,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_04",
+    "manifest": "chunks/12_04/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      -5.877493381500244,
+      -560.0
+     ],
+     "max": [
+      228.0,
+      0.0,
+      -462.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_05",
+    "manifest": "chunks/12_05/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      -3.6600000858306885,
+      -464.0
+     ],
+     "max": [
+      228.0,
+      11.489805656433106,
+      -366.0
+     ]
+    },
+    "estimatedResidentBytes": 11930244,
+    "glbBytes": 570668,
+    "geometryResidentBytes": 570668,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_06",
+    "manifest": "chunks/12_06/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      -1.9941378059387207,
+      -368.0
+     ],
+     "max": [
+      228.0,
+      51.29171319580078,
+      -270.0
+     ]
+    },
+    "estimatedResidentBytes": 11930240,
+    "glbBytes": 570664,
+    "geometryResidentBytes": 570664,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_07",
+    "manifest": "chunks/12_07/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      4.8149919509887695,
+      -272.0
+     ],
+     "max": [
+      228.0,
+      104.69439263916016,
+      -174.0
+     ]
+    },
+    "estimatedResidentBytes": 11841350,
+    "glbBytes": 569156,
+    "geometryResidentBytes": 569156,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_08",
+    "manifest": "chunks/12_08/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      47.10265298461914,
+      -176.0
+     ],
+     "max": [
+      228.0,
+      112.87124963378906,
+      -78.0
+     ]
+    },
+    "estimatedResidentBytes": 11841350,
+    "glbBytes": 569156,
+    "geometryResidentBytes": 569156,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_09",
+    "manifest": "chunks/12_09/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      93.51710510253906,
+      -80.0
+     ],
+     "max": [
+      228.0,
+      115.49293084716797,
+      18.0
+     ]
+    },
+    "estimatedResidentBytes": 11841346,
+    "glbBytes": 569152,
+    "geometryResidentBytes": 569152,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_10",
+    "manifest": "chunks/12_10/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      101.29942651367188,
+      16.0
+     ],
+     "max": [
+      228.0,
+      114.4085650024414,
+      114.0
+     ]
+    },
+    "estimatedResidentBytes": 11841346,
+    "glbBytes": 569152,
+    "geometryResidentBytes": 569152,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_11",
+    "manifest": "chunks/12_11/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      55.39485498046875,
+      112.0
+     ],
+     "max": [
+      228.0,
+      112.08430047607422,
+      210.0
+     ]
+    },
+    "estimatedResidentBytes": 11841346,
+    "glbBytes": 569152,
+    "geometryResidentBytes": 569152,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_12",
+    "manifest": "chunks/12_12/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      2.358544069290161,
+      208.0
+     ],
+     "max": [
+      228.0,
+      64.23090692138672,
+      306.0
+     ]
+    },
+    "estimatedResidentBytes": 11841330,
+    "glbBytes": 569136,
+    "geometryResidentBytes": 569136,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_13",
+    "manifest": "chunks/12_13/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      -3.3244350376129153,
+      304.0
+     ],
+     "max": [
+      228.0,
+      12.563085990905762,
+      402.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_14",
+    "manifest": "chunks/12_14/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      -5.713394207000732,
+      400.0
+     ],
+     "max": [
+      228.0,
+      0.0,
+      498.0
+     ]
+    },
+    "estimatedResidentBytes": 11930224,
+    "glbBytes": 570648,
+    "geometryResidentBytes": 570648,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "12_15",
+    "manifest": "chunks/12_15/world.json",
+    "bounds": {
+     "min": [
+      130.0,
+      -5.758562606811523,
+      496.0
+     ],
+     "max": [
+      228.0,
+      0.0,
+      510.0
+     ]
+    },
+    "estimatedResidentBytes": 11443964,
+    "glbBytes": 84388,
+    "geometryResidentBytes": 84388,
+    "placements": 0,
+    "triangles": 1298,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_03",
+    "manifest": "chunks/13_03/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -8.514955085754394,
+      -600.0
+     ],
+     "max": [
+      324.0,
+      0.0,
+      -558.0
+     ]
+    },
+    "estimatedResidentBytes": 11606384,
+    "glbBytes": 246808,
+    "geometryResidentBytes": 246808,
+    "placements": 0,
+    "triangles": 3890,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_04",
+    "manifest": "chunks/13_04/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -7.562833786010742,
+      -560.0
+     ],
+     "max": [
+      324.0,
+      0.0,
+      -462.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_05",
+    "manifest": "chunks/13_05/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -5.491929096221924,
+      -464.0
+     ],
+     "max": [
+      324.0,
+      0.0,
+      -366.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_06",
+    "manifest": "chunks/13_06/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -3.952950996398926,
+      -368.0
+     ],
+     "max": [
+      324.0,
+      4.976357894897461,
+      -270.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_07",
+    "manifest": "chunks/13_07/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -2.095104021072388,
+      -272.0
+     ],
+     "max": [
+      324.0,
+      47.21609826660156,
+      -174.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_08",
+    "manifest": "chunks/13_08/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      4.966233253479004,
+      -176.0
+     ],
+     "max": [
+      324.0,
+      94.99082513427734,
+      -78.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_09",
+    "manifest": "chunks/13_09/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      57.471065521240234,
+      -80.0
+     ],
+     "max": [
+      324.0,
+      108.78231378173828,
+      18.0
+     ]
+    },
+    "estimatedResidentBytes": 11841350,
+    "glbBytes": 569156,
+    "geometryResidentBytes": 569156,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_10",
+    "manifest": "chunks/13_10/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      60.23551889038086,
+      16.0
+     ],
+     "max": [
+      324.0,
+      110.49695153808594,
+      114.0
+     ]
+    },
+    "estimatedResidentBytes": 11841350,
+    "glbBytes": 569156,
+    "geometryResidentBytes": 569156,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_11",
+    "manifest": "chunks/13_11/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      17.182488876342774,
+      112.0
+     ],
+     "max": [
+      324.0,
+      102.1008071899414,
+      210.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_12",
+    "manifest": "chunks/13_12/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -1.6868918361663818,
+      208.0
+     ],
+     "max": [
+      324.0,
+      57.4259147644043,
+      306.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_13",
+    "manifest": "chunks/13_13/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -4.3435712280273435,
+      304.0
+     ],
+     "max": [
+      324.0,
+      3.596628385543823,
+      402.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_14",
+    "manifest": "chunks/13_14/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -7.138518375396728,
+      400.0
+     ],
+     "max": [
+      324.0,
+      0.0,
+      498.0
+     ]
+    },
+    "estimatedResidentBytes": 11930212,
+    "glbBytes": 570636,
+    "geometryResidentBytes": 570636,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "13_15",
+    "manifest": "chunks/13_15/world.json",
+    "bounds": {
+     "min": [
+      226.0,
+      -7.238631725311279,
+      496.0
+     ],
+     "max": [
+      324.0,
+      0.0,
+      510.0
+     ]
+    },
+    "estimatedResidentBytes": 11443956,
+    "glbBytes": 84380,
+    "geometryResidentBytes": 84380,
+    "placements": 0,
+    "triangles": 1298,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_03",
+    "manifest": "chunks/14_03/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -10.272010368347168,
+      -600.0
+     ],
+     "max": [
+      420.0,
+      0.0,
+      -558.0
+     ]
+    },
+    "estimatedResidentBytes": 11606384,
+    "glbBytes": 246808,
+    "geometryResidentBytes": 246808,
+    "placements": 0,
+    "triangles": 3890,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_04",
+    "manifest": "chunks/14_04/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -9.421441078186035,
+      -560.0
+     ],
+     "max": [
+      420.0,
+      0.0,
+      -462.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_05",
+    "manifest": "chunks/14_05/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -7.751838726043701,
+      -464.0
+     ],
+     "max": [
+      420.0,
+      0.0,
+      -366.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_06",
+    "manifest": "chunks/14_06/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -5.636486053466797,
+      -368.0
+     ],
+     "max": [
+      420.0,
+      0.0,
+      -270.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_07",
+    "manifest": "chunks/14_07/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -3.1492903232574463,
+      -272.0
+     ],
+     "max": [
+      420.0,
+      6.043272453308106,
+      -174.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_08",
+    "manifest": "chunks/14_08/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      2.26595139503479,
+      -176.0
+     ],
+     "max": [
+      420.0,
+      60.19732232666016,
+      -78.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_09",
+    "manifest": "chunks/14_09/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      4.371187210083008,
+      -80.0
+     ],
+     "max": [
+      420.0,
+      75.2919878540039,
+      18.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_10",
+    "manifest": "chunks/14_10/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      4.3520769653320315,
+      16.0
+     ],
+     "max": [
+      420.0,
+      74.8189653930664,
+      114.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_11",
+    "manifest": "chunks/14_11/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      6.762513595581055,
+      112.0
+     ],
+     "max": [
+      420.0,
+      74.8129653930664,
+      210.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_12",
+    "manifest": "chunks/14_12/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -2.4939165534973147,
+      208.0
+     ],
+     "max": [
+      420.0,
+      19.174411254882813,
+      306.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_13",
+    "manifest": "chunks/14_13/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -5.020570320129394,
+      304.0
+     ],
+     "max": [
+      420.0,
+      0.0,
+      402.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_14",
+    "manifest": "chunks/14_14/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -6.858529090881348,
+      400.0
+     ],
+     "max": [
+      420.0,
+      0.0,
+      498.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "14_15",
+    "manifest": "chunks/14_15/world.json",
+    "bounds": {
+     "min": [
+      322.0,
+      -6.944273948669434,
+      496.0
+     ],
+     "max": [
+      420.0,
+      0.0,
+      510.0
+     ]
+    },
+    "estimatedResidentBytes": 11443960,
+    "glbBytes": 84384,
+    "geometryResidentBytes": 84384,
+    "placements": 0,
+    "triangles": 1298,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_03",
+    "manifest": "chunks/15_03/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -11.67251968383789,
+      -600.0
+     ],
+     "max": [
+      516.0,
+      0.0,
+      -558.0
+     ]
+    },
+    "estimatedResidentBytes": 11606388,
+    "glbBytes": 246812,
+    "geometryResidentBytes": 246812,
+    "placements": 0,
+    "triangles": 3890,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_04",
+    "manifest": "chunks/15_04/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -10.629036903381348,
+      -560.0
+     ],
+     "max": [
+      516.0,
+      0.0,
+      -462.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_05",
+    "manifest": "chunks/15_05/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -8.075361251831055,
+      -464.0
+     ],
+     "max": [
+      516.0,
+      0.0,
+      -366.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_06",
+    "manifest": "chunks/15_06/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -5.58516788482666,
+      -368.0
+     ],
+     "max": [
+      516.0,
+      0.0,
+      -270.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_07",
+    "manifest": "chunks/15_07/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -3.012620210647583,
+      -272.0
+     ],
+     "max": [
+      516.0,
+      12.54988427734375,
+      -174.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_08",
+    "manifest": "chunks/15_08/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -1.7315352382659912,
+      -176.0
+     ],
+     "max": [
+      516.0,
+      31.187127548217774,
+      -78.0
+     ]
+    },
+    "estimatedResidentBytes": 11930248,
+    "glbBytes": 570672,
+    "geometryResidentBytes": 570672,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_09",
+    "manifest": "chunks/15_09/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -2.51744822883606,
+      -80.0
+     ],
+     "max": [
+      516.0,
+      18.028545379638672,
+      28.6529014600545
+     ]
+    },
+    "estimatedResidentBytes": 34581778,
+    "glbBytes": 571420,
+    "geometryResidentBytes": 571420,
+    "placements": 1,
+    "triangles": 17079,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+     "8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283": 22369622
+    },
+    "sharedMeshResidentBytes": {
+     "87c576c9dcf08d125dec4ce299e39ed8dc8eced2feefbfb5eb57539cc006a949": 281160
+    }
+   },
+   {
+    "id": "15_10",
+    "manifest": "chunks/15_10/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -4.600000023841858,
+      16.0
+     ],
+     "max": [
+      518.6214866243827,
+      24.207715469360352,
+      114.0
+     ]
+    },
+    "estimatedResidentBytes": 34392894,
+    "glbBytes": 585920,
+    "geometryResidentBytes": 585920,
+    "placements": 2,
+    "triangles": 12676,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+     "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
+    },
+    "sharedMeshResidentBytes": {
+     "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776
+    }
+   },
+   {
+    "id": "15_11",
+    "manifest": "chunks/15_11/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -1.3399908962249756,
+      112.0
+     ],
+     "max": [
+      516.0,
+      38.466941314697266,
+      210.0
+     ]
+    },
+    "estimatedResidentBytes": 11930244,
+    "glbBytes": 570668,
+    "geometryResidentBytes": 570668,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_12",
+    "manifest": "chunks/15_12/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -3.5596657218933108,
+      208.0
+     ],
+     "max": [
+      516.0,
+      7.6021809577941895,
+      306.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_13",
+    "manifest": "chunks/15_13/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -5.605321926116943,
+      304.0
+     ],
+     "max": [
+      516.0,
+      0.0,
+      402.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_14",
+    "manifest": "chunks/15_14/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -5.635591072082519,
+      400.0
+     ],
+     "max": [
+      516.0,
+      0.0,
+      498.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "15_15",
+    "manifest": "chunks/15_15/world.json",
+    "bounds": {
+     "min": [
+      418.0,
+      -5.215626239776611,
+      496.0
+     ],
+     "max": [
+      516.0,
+      0.0,
+      510.0
+     ]
+    },
+    "estimatedResidentBytes": 11443964,
+    "glbBytes": 84388,
+    "geometryResidentBytes": 84388,
+    "placements": 0,
+    "triangles": 1298,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_03",
+    "manifest": "chunks/16_03/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -11.845104736328125,
+      -600.0
+     ],
+     "max": [
+      612.0,
+      0.0,
+      -558.0
+     ]
+    },
+    "estimatedResidentBytes": 11606388,
+    "glbBytes": 246812,
+    "geometryResidentBytes": 246812,
+    "placements": 0,
+    "triangles": 3890,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_04",
+    "manifest": "chunks/16_04/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -10.763108253479004,
+      -560.0
+     ],
+     "max": [
+      612.0,
+      0.0,
+      -462.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_05",
+    "manifest": "chunks/16_05/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -8.06569766998291,
+      -464.0
+     ],
+     "max": [
+      612.0,
+      0.0,
+      -366.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_06",
+    "manifest": "chunks/16_06/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -5.455492973327637,
+      -368.0
+     ],
+     "max": [
+      612.0,
+      0.0,
+      -270.0
+     ]
+    },
+    "estimatedResidentBytes": 11930224,
+    "glbBytes": 570648,
+    "geometryResidentBytes": 570648,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_07",
+    "manifest": "chunks/16_07/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -3.2634637775421145,
+      -272.0
+     ],
+     "max": [
+      612.0,
+      5.338988262176514,
+      -174.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_08",
+    "manifest": "chunks/16_08/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -3.790010494232178,
+      -176.0
+     ],
+     "max": [
+      612.0,
+      5.910294490814209,
+      -78.0
+     ]
+    },
+    "estimatedResidentBytes": 11930248,
+    "glbBytes": 570672,
+    "geometryResidentBytes": 570672,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_09",
+    "manifest": "chunks/16_09/world.json",
+    "bounds": {
+     "min": [
+      513.5979723734949,
+      -4.600000023841858,
+      -80.0
+     ],
+     "max": [
+      612.0,
+      9.099999785423279,
+      18.0
+     ]
+    },
+    "estimatedResidentBytes": 41488176,
+    "glbBytes": 590060,
+    "geometryResidentBytes": 590060,
+    "placements": 3,
+    "triangles": 13540,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+     "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68": 349526,
+     "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44": 349526,
+     "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b": 349526,
+     "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f": 349526,
+     "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23": 349526,
+     "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c": 349526,
+     "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a": 349526,
+     "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac": 349526,
+     "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
+     "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
+     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102,
+     "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
+    },
+    "sharedMeshResidentBytes": {
+     "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776,
+     "a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204": 100628
+    }
+   },
+   {
+    "id": "16_10",
+    "manifest": "chunks/16_10/world.json",
+    "bounds": {
+     "min": [
+      507.5607368716617,
+      -4.600000023841858,
+      6.565589683372309
+     ],
+     "max": [
+      612.0,
+      9.571661430358887,
+      114.0
+     ]
+    },
+    "estimatedResidentBytes": 34412854,
+    "glbBytes": 605880,
+    "geometryResidentBytes": 605880,
+    "placements": 3,
+    "triangles": 14681,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+     "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
+    },
+    "sharedMeshResidentBytes": {
+     "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776
+    }
+   },
+   {
+    "id": "16_11",
+    "manifest": "chunks/16_11/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -2.39486026763916,
+      112.0
+     ],
+     "max": [
+      612.0,
+      11.60248609161377,
+      210.0
+     ]
+    },
+    "estimatedResidentBytes": 11930248,
+    "glbBytes": 570672,
+    "geometryResidentBytes": 570672,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_12",
+    "manifest": "chunks/16_12/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -4.357476276397705,
+      208.0
+     ],
+     "max": [
+      612.0,
+      0.0,
+      306.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_13",
+    "manifest": "chunks/16_13/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -6.096751731872558,
+      304.0
+     ],
+     "max": [
+      612.0,
+      0.0,
+      402.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_14",
+    "manifest": "chunks/16_14/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -6.09419302368164,
+      400.0
+     ],
+     "max": [
+      612.0,
+      0.0,
+      498.0
+     ]
+    },
+    "estimatedResidentBytes": 11930224,
+    "glbBytes": 570648,
+    "geometryResidentBytes": 570648,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "16_15",
+    "manifest": "chunks/16_15/world.json",
+    "bounds": {
+     "min": [
+      514.0,
+      -3.9417169094085693,
+      496.0
+     ],
+     "max": [
+      612.0,
+      0.0,
+      510.0
+     ]
+    },
+    "estimatedResidentBytes": 11443972,
+    "glbBytes": 84396,
+    "geometryResidentBytes": 84396,
+    "placements": 0,
+    "triangles": 1298,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_03",
+    "manifest": "chunks/17_03/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -12.34914779663086,
+      -600.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      -558.0
+     ]
+    },
+    "estimatedResidentBytes": 11539108,
+    "glbBytes": 179532,
+    "geometryResidentBytes": 179532,
+    "placements": 0,
+    "triangles": 2816,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_04",
+    "manifest": "chunks/17_04/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -11.355918884277344,
+      -560.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      -462.0
+     ]
+    },
+    "estimatedResidentBytes": 11772712,
+    "glbBytes": 413136,
+    "geometryResidentBytes": 413136,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_05",
+    "manifest": "chunks/17_05/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -8.867769241333008,
+      -464.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      -366.0
+     ]
+    },
+    "estimatedResidentBytes": 11772708,
+    "glbBytes": 413132,
+    "geometryResidentBytes": 413132,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_06",
+    "manifest": "chunks/17_06/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -6.626034259796143,
+      -368.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      -270.0
+     ]
+    },
+    "estimatedResidentBytes": 11772700,
+    "glbBytes": 413124,
+    "geometryResidentBytes": 413124,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_07",
+    "manifest": "chunks/17_07/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -5.071159839630127,
+      -272.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      -174.0
+     ]
+    },
+    "estimatedResidentBytes": 11772696,
+    "glbBytes": 413120,
+    "geometryResidentBytes": 413120,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_08",
+    "manifest": "chunks/17_08/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -5.379655361175537,
+      -176.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      -78.0
+     ]
+    },
+    "estimatedResidentBytes": 11772708,
+    "glbBytes": 413132,
+    "geometryResidentBytes": 413132,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_09",
+    "manifest": "chunks/17_09/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -5.927536487579346,
+      -80.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      18.0
+     ]
+    },
+    "estimatedResidentBytes": 11772708,
+    "glbBytes": 413132,
+    "geometryResidentBytes": 413132,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_10",
+    "manifest": "chunks/17_10/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -4.830344200134277,
+      16.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      114.0
+     ]
+    },
+    "estimatedResidentBytes": 11772704,
+    "glbBytes": 413128,
+    "geometryResidentBytes": 413128,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_11",
+    "manifest": "chunks/17_11/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -4.043537616729736,
+      112.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      210.0
+     ]
+    },
+    "estimatedResidentBytes": 11772704,
+    "glbBytes": 413128,
+    "geometryResidentBytes": 413128,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_12",
+    "manifest": "chunks/17_12/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -5.6022186279296875,
+      208.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      306.0
+     ]
+    },
+    "estimatedResidentBytes": 11772696,
+    "glbBytes": 413120,
+    "geometryResidentBytes": 413120,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_13",
+    "manifest": "chunks/17_13/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -6.928296089172363,
+      304.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      402.0
+     ]
+    },
+    "estimatedResidentBytes": 11772696,
+    "glbBytes": 413120,
+    "geometryResidentBytes": 413120,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_14",
+    "manifest": "chunks/17_14/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -6.794713973999023,
+      400.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      498.0
+     ]
+    },
+    "estimatedResidentBytes": 11772700,
+    "glbBytes": 413124,
+    "geometryResidentBytes": 413124,
+    "placements": 0,
+    "triangles": 6674,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "17_15",
+    "manifest": "chunks/17_15/world.json",
+    "bounds": {
+     "min": [
+      610.0,
+      -3.636007308959961,
+      496.0
+     ],
+     "max": [
+      680.0,
+      0.0,
+      510.0
+     ]
+    },
+    "estimatedResidentBytes": 11422112,
+    "glbBytes": 62536,
+    "geometryResidentBytes": 62536,
+    "placements": 0,
+    "triangles": 941,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   }
+  ]
+ },
+ "minimap": {
+  "file": "minimap.webp",
+  "image": "minimap.webp",
+  "bounds": {
+   "min": [
+    0.0,
+    -12.330740928649902,
+    -600.0
+   ],
+   "max": [
+    680.0,
+    140.34263940429688,
+    510.0
+   ]
+  },
+  "northUp": true,
+  "worldMin": [
+   0.0,
+   -600.0
+  ],
+  "worldMax": [
+   680.0,
+   510.0
+  ],
+  "imageSize": [
+   680,
+   1110
+  ],
+  "pixelsPerMetre": 1,
+  "imageSha256": "3ca081dd58dff7de30139b73580091d86770774fb7085595107cef129deba40f",
+  "renderedFrom": "the package's chunk GLBs (the shared cartography renderer, window by window)",
+  "cartographyRender": {
+   "generator": "eloria-assets/maps/continent-v2/_continent_v2/render_minimap.py",
+   "styleVersion": 4,
+   "chunksSha256": "f0d76f1d9dcf02207ec00c4566f86509e919a1378e82bb02da4282c36612a376",
+   "neighbourChunksSha256": {
+    "hornmere": "db73377e4f40fe290d1591b1b61df764b15d9e044e300115a60af5b55bb263f2",
+    "saltsound": "2e8e10f10c3efb6c269de1f878c27135ca38190135b7435732347123ac4d76bb",
+    "stagheath": "1194c58d8491090c468ad4c80107d5473fea0bac535815acf272351601130a98"
+   },
+   "supersample": 2,
+   "windowMetres": 2048,
+   "waterRGB": [
+    79,
+    150,
+    157
+   ]
+  },
+  "detail": {
+   "worldMin": [
+    0.0,
+    -600.0
+   ],
+   "worldMax": [
+    680.0,
+    510.0
+   ],
+   "imageSize": [
+    2720,
+    4440
+   ],
+   "pixelsPerMetre": 4,
+   "imageSha256": "577bf57ef61374ee89def933b11fd1e58aacd8453762f50c848e25d82f534238",
+   "chunksSha256": "f0d76f1d9dcf02207ec00c4566f86509e919a1378e82bb02da4282c36612a376",
+   "neighbourChunksSha256": {
+    "hornmere": "db73377e4f40fe290d1591b1b61df764b15d9e044e300115a60af5b55bb263f2",
+    "saltsound": "2e8e10f10c3efb6c269de1f878c27135ca38190135b7435732347123ac4d76bb",
+    "stagheath": "1194c58d8491090c468ad4c80107d5473fea0bac535815acf272351601130a98"
+   },
+   "styleVersion": 4,
+   "supersample": 1,
+   "chunkReaderVersion": 2,
+   "retirementSha256": "7d71aa556346fd5251de83d8babc10552648975c69b5884cb05b98e3b39e8c3a",
+   "image": "map-detail.webp",
+   "generator": "eloria-assets/tools/render_region_map_details.py"
+  }
+ }
+}

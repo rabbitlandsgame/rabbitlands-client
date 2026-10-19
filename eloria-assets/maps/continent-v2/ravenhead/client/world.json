@@ -20,10 +20,10 @@
    "min": [
     -656.0,
     -16.0,
-    -575.0
+    -175.0
    ],
    "max": [
-    656.0,
+    256.0,
     149.08325663208961,
     575.0
    ]
@@ -32,10 +32,10 @@
    "min": [
     -656.0,
     -16.0,
-    -575.0
+    -175.0
    ],
    "max": [
-    656.0,
+    256.0,
     149.08325663208961,
     575.0
    ]
@@ -44,10 +44,10 @@
    "min": [
     -656.0,
     -16.0,
-    -575.0
+    -175.0
    ],
    "max": [
-    656.0,
+    256.0,
     149.08325663208961,
     575.0
    ]
@@ -169,31 +169,41 @@
    "height": 2.1,
    "halfCellWidth": 0.5
   },
-  "walkableCells": 428823,
-  "walkableFraction": 0.061528,
-  "sha256": "1f417ad1b6e7cd937b281d85bdabbc2a4065749d80b5c2609335c06cfc110651",
+  "walkableCells": 443358,
+  "walkableFraction": 0.063613,
+  "sha256": "fad289d7068428003e17d8970ce2dc1f9d05be36acea03715d3fb03bb57fb26e",
   "exportStatistics": {
    "walkTriangles": 58825,
-   "structuralMeshes": 313,
-   "structuralPlacements": 313,
-   "structuralTriangles": 718835,
-   "structuralTrianglesTested": 687011,
-   "ownCells": 3208914,
-   "deckCells": 32114,
-   "steepCells": 371398,
-   "waterCells": 2472526,
-   "structuralCells": 6761,
+   "structuralMeshes": 304,
+   "structuralPlacements": 304,
+   "structuralTriangles": 702451,
+   "structuralTrianglesTested": 652718,
+   "ownCells": 1864800,
+   "deckCells": 32127,
+   "steepCells": 337803,
+   "waterCells": 1117608,
+   "structuralCells": 6967,
    "crossSeamSolidCells": 0,
    "harvestNodeTiles": 72,
    "noGroundCells": 0,
-   "seamCollarCells": 1103,
-   "ownWalkableCells": 427720
+   "seamCollarCells": 3133,
+   "ownWalkableCells": 440225
   },
   "seamCollar": {
-   "greenlight": {
-    "cells": 3553,
+   "coilmere": {
+    "cells": 2124,
     "openCells": 0,
-    "closedByTheNeighbour": 3553,
+    "closedByTheNeighbour": 2124,
+    "closedByThisMapsSolids": 0,
+    "closedByThirdMapsSolids": 0,
+    "droppedByTheHeightScale": 0,
+    "walkableCells": 0,
+    "walkableTiles": 0
+   },
+   "greenlight": {
+    "cells": 3049,
+    "openCells": 0,
+    "closedByTheNeighbour": 3049,
     "closedByThisMapsSolids": 0,
     "closedByThirdMapsSolids": 0,
     "droppedByTheHeightScale": 0,
@@ -201,129 +211,107 @@
     "walkableTiles": 0
    },
    "hearthcroft": {
-    "cells": 5145,
-    "openCells": 983,
-    "closedByTheNeighbour": 4162,
-    "closedByThisMapsSolids": 0,
+    "cells": 3132,
+    "openCells": 2658,
+    "closedByTheNeighbour": 446,
+    "closedByThisMapsSolids": 28,
     "closedByThirdMapsSolids": 0,
     "droppedByTheHeightScale": 0,
-    "walkableCells": 983,
-    "walkableTiles": 127
+    "walkableCells": 2658,
+    "walkableTiles": 336
    },
    "reedfall": {
     "cells": 1002,
-    "openCells": 120,
-    "closedByTheNeighbour": 882,
+    "openCells": 116,
+    "closedByTheNeighbour": 886,
     "closedByThisMapsSolids": 0,
     "closedByThirdMapsSolids": 0,
     "droppedByTheHeightScale": 0,
-    "walkableCells": 120,
-    "walkableTiles": 18
+    "walkableCells": 116,
+    "walkableTiles": 17
    },
    "ringholm": {
-    "cells": 5916,
-    "openCells": 0,
-    "closedByTheNeighbour": 5916,
+    "cells": 2788,
+    "openCells": 359,
+    "closedByTheNeighbour": 2429,
     "closedByThisMapsSolids": 0,
     "closedByThirdMapsSolids": 0,
     "droppedByTheHeightScale": 0,
-    "walkableCells": 0,
-    "walkableTiles": 0
-   },
-   "saltsound": {
-    "cells": 2408,
-    "openCells": 0,
-    "closedByTheNeighbour": 2408,
-    "closedByThisMapsSolids": 0,
-    "closedByThirdMapsSolids": 0,
-    "droppedByTheHeightScale": 0,
-    "walkableCells": 0,
-    "walkableTiles": 0
-   },
-   "spindle_hill": {
-    "cells": 1128,
-    "openCells": 0,
-    "closedByTheNeighbour": 1128,
-    "closedByThisMapsSolids": 0,
-    "closedByThirdMapsSolids": 0,
-    "droppedByTheHeightScale": 0,
-    "walkableCells": 0,
-    "walkableTiles": 0
-   },
-   "tollholm": {
-    "cells": 1768,
-    "openCells": 0,
-    "closedByTheNeighbour": 1768,
-    "closedByThisMapsSolids": 0,
-    "closedByThirdMapsSolids": 0,
-    "droppedByTheHeightScale": 0,
-    "walkableCells": 0,
-    "walkableTiles": 0
+    "walkableCells": 359,
+    "walkableTiles": 45
    }
   },
-  "sourceSnapshotSha256": "543fe3ebfde3cb1e10d347c71ea93808abc444eeb3c43c238611e08dba1dfd4b",
-  "sourceSceneSha256": "424b0e41c7d750b36b1cc48fdae0028ec3c1727c98d784dd4fc1bf5fd013f9d2",
+  "sourceSnapshotSha256": "c56e6f123e06fed54af85c548a1c9925a0585d14b3269567f3a799bd03bdb7f4",
+  "sourceSceneSha256": "a292b2986489a2a40fb568c41f333b31512aa3f2f3bfee9dbc8a9f112f4a98b4",
   "groupExport": {
    "maps": {
     "boarsend": {
-     "snapshotSha256": "c035922833b93b8224e3707f5e5ed7ab26d6f46551e1176378b65194573cbcaf",
-     "servedGridSha256": "de505a4016f4a9c522eaa2605253bbcfc889db8cbeb8efd993db07f24c6a7508"
+     "snapshotSha256": "538b13771f27d603253bf94ea9a8aef35008dacf01bcfbad694c45ff18d20722",
+     "servedGridSha256": "24688a4614f365aa2bc65c0aa6aa31fcfef793be9c30ac41e8f61ff43710d47d"
     },
     "brambleshaw": {
-     "snapshotSha256": "0b139d805e65cb75eebcf628b4bf76c607982a349a47cf25fcd890768d4301e8",
-     "servedGridSha256": "21398d4aecf56c4ce04e22992a52c72e3cd8469a070d607e0126b3ad1d8e726b"
+     "snapshotSha256": "807460f17eaf362281735df88020cb68ddd7a4c2801c0e6db85beb18d6276868",
+     "servedGridSha256": "acb08a5a10b1aa36beef403b058dc8b142f41076c87e621bf2558b9ec8496775"
+    },
+    "coilmere": {
+     "snapshotSha256": "5053be9ce02595b56a091c5665b43e4ce57431c48a875d212a8bceea9a815381",
+     "servedGridSha256": "fa2c3922d84217c4561de26561ffc98644682b2e2a0a30bbe3209df141cb335a"
     },
     "greenlight": {
-     "snapshotSha256": "b7470ebc6891ad15f40c41b2a2962847dff598cc8d8778c004f3725d0c7f6c64",
-     "servedGridSha256": "a3d32acee25dc4ea4e92036992fd77d3e63ffea2b35f17b9c013aa41f3368871"
+     "snapshotSha256": "76835398a2921879866d5dea6be8b7b9bc783c70bdb6102e30f69a4d7d60d7c1",
+     "servedGridSha256": "360a002fc6b23e685f49e8ad3aac33366080d381984d092a99efa0d9aeb7fec1"
     },
     "hearthcroft": {
-     "snapshotSha256": "7be7866d34d26ce860ab7da67c8b9d0be423720c3db9c73ed4c4d581a76ad892",
-     "servedGridSha256": "58e799dc16d3a19e3646d170ceaaa9b848824d13a1fce5441ba2a5fbaf5c0af1"
+     "snapshotSha256": "0a62004d7d3bb703074279c52568002e4a7a5061c926794fcc89a28acd7620f2",
+     "servedGridSha256": "bcf5d2d3eef578f97c6d891af73ae4ab15cafb7ef9cbc7c00ca6dd1ecf03283f"
+    },
+    "hornmere": {
+     "snapshotSha256": "250272f738721b2530dfdbcdc9cf0e1bfb83080ef8d596e68a225c40d90913e3",
+     "servedGridSha256": "a75ef4aef1833fa51b925f2976853b43d0a5a19ee525ec95f4349e9c957365af"
     },
     "landfall": {
-     "snapshotSha256": "6da556f0c616d9ff9840bb4e70653cc7d58da915fe544d415d7e3d9aea4b117c",
+     "snapshotSha256": "b805145edc7538ee41b7853e5cb995422d007ba00aca8222cba775667d32bf41",
      "servedGridSha256": "54d03428d7c1490fdb0c9dbaf13e2858297b6936edd0b8f6042c66e6721a4e05"
     },
     "pinebrow": {
-     "snapshotSha256": "4df0601f3af2e21fcd75ac06e51571121e6b733aae9098c76366f6c26baf4745",
+     "snapshotSha256": "04f65b546cf80fb9b21df34c9fb89fffea4b02c304b3dd146153676bf9a3031d",
      "servedGridSha256": "973e5eae3a7438e6abdafc4b5669ab7d0a426cf2cb699fd2cd31983913c2e67f"
     },
     "ravenhead": {
-     "snapshotSha256": "543fe3ebfde3cb1e10d347c71ea93808abc444eeb3c43c238611e08dba1dfd4b",
-     "servedGridSha256": "4e1b6c5a7f2e42b95e6802315db6ee89542dfb381e1231efbbc02b5faa46c7d7"
+     "snapshotSha256": "c56e6f123e06fed54af85c548a1c9925a0585d14b3269567f3a799bd03bdb7f4",
+     "servedGridSha256": "2cd98a612fc7f3d8eba226101b3afc0da668405023dd1bf5f0a20277f35277fd"
     },
     "reedfall": {
-     "snapshotSha256": "87ada12425182383011848c88453f48714f4d09f31b1009a39f5141b0f717ccf",
-     "servedGridSha256": "76507d6ce44bbeedc631268f8f08a372b0835af98a67bc7865a89a75fedb6661"
+     "snapshotSha256": "42d268ab4362910cf8a06e7c183285881a1dec4778ac8269c31d61fcd8803d15",
+     "servedGridSha256": "ee41e7cce43c9fe99dff25f43ff4ee7745e21599d51346a83909d8d422dfb520"
     },
     "ringholm": {
-     "snapshotSha256": "7887d2c05a5d200bf149ada54455883eae6d4fe9ebcf3c636cebe3d9f692a47e",
-     "servedGridSha256": "6887cd8180d45e12e375dfbfc47e653d8ebc08acf16379060409ef87176cab9b"
+     "snapshotSha256": "df2f31ba248aa2ff794c1e501166b15ef315c4e42c1c8bb60c193afd7f075e8a",
+     "servedGridSha256": "20888d14a79cd5130e67a9ac022421fe55d4d2ea38f6bd9ada5dc4b7c04ed2cc"
     },
     "saltsound": {
-     "snapshotSha256": "40a518fde675ca3f5a137d27499532b7bee518a626e5a9e9ed8721a647c7a8a2",
-     "servedGridSha256": "7a0a730620cf75859607dac8d5b889cf5f95108669859818c45acec7c9512117"
-    },
-    "spindle_hill": {
-     "snapshotSha256": "22672680b09bd9517851625e82fb6435824d5fc8ec33637bdb7b077691fbf517",
-     "servedGridSha256": "d61dc0e3f687ccd64b6a6a28230d88fa630982ed21ea4ae4b830823275e8ca18"
+     "snapshotSha256": "f4d31a32c8637ac00947d0fea0bd83afb0303cb5bfb65c551f0116a5d37fa2e2",
+     "servedGridSha256": "f97e4e73a63f3f8aedad3491a42c6ebb36ec0fff34278c46de94be18dfcf68ff"
     },
     "stagheath": {
-     "snapshotSha256": "01fd36d6217cea98a4974675c85fc4a3c0b9b08b64ec499bdf3beae529bcb690",
-     "servedGridSha256": "03eb2cbda049deadcb6bd27fe09e2c8c88f16cb8f45a3307f0868236ba221bce"
+     "snapshotSha256": "a7026f7d8f0643198b6c91008a7d041330244f903bd8e7d4a3090a96e2d8f83e",
+     "servedGridSha256": "c8c2315df8baeb6b0178fa5e10518c6e7ade4a184bc579f995b915a73fa95a27"
     },
-    "tollholm": {
-     "snapshotSha256": "1f13323fcd0b291d0237d66d5da8d5cd08f7ca6eb4330e75b9e67a91a4c9672b",
-     "servedGridSha256": "314200041fcec74f570e7cf411274f48ca723ddc8b9871656f690342b6c6041b"
+    "suncoil": {
+     "snapshotSha256": "7c985436894a489c64d20f25478c206397fed931be83616c511c9cfec3071101",
+     "servedGridSha256": "83ba3dc7d64f7075e3622516fb87ef7a30d11db3ab90c1f44e3e5b813fc93658"
     },
     "twinbrook": {
-     "snapshotSha256": "bf2169d255bcb76901d755c8735f62fc4af305e0f400f81024ef0f71be6563f6",
+     "snapshotSha256": "d834c98189d94cad427a2ab5fd5e385a95afa476f02f6a1f0f1943e2e5cf225c",
      "servedGridSha256": "ef5816720d690cda2880b9d0a9a909c0b22f9d00d483f2bf3be1c3c9aa4926c0"
     },
     "warrenmead": {
-     "snapshotSha256": "f5af39fca39daabdeb52f894eeefde0ef825136047f8b00f727d9b429cbfb87e",
+     "snapshotSha256": "e51eb854d061f7ae9cee1c4c295f34562c623d5548e6401c252c492e0d09dcdd",
      "servedGridSha256": "a5caa315c36b5fa0223c8fd6112b8d775e4db2444a746336ccd031012af4cb04"
+    },
+    "whitepeak": {
+     "snapshotSha256": "18533178070aaa2f26dfea156808d16a8dca7b0a1e1ae40c5800dda81d023c6c",
+     "servedGridSha256": "ca662f32791dc85be0deb56f70097ae29be2e73f42ee36f78359dddc3f5f8ee7"
     }
    }
   },
@@ -336,8 +324,8 @@
    "originMetres": -100.0,
    "width": 1320,
    "height": 1320,
-   "openTiles": 105339,
-   "sha256": "4e1b6c5a7f2e42b95e6802315db6ee89542dfb381e1231efbbc02b5faa46c7d7"
+   "openTiles": 108861,
+   "sha256": "2cd98a612fc7f3d8eba226101b3afc0da668405023dd1bf5f0a20277f35277fd"
   },
   "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
  },
@@ -2013,105 +2001,207 @@
   ],
   "ownershipPolygon": [
    [
-    1939.0,
-    6849.0
+    2761.0,
+    7171.0
+   ],
+   [
+    2761.0,
+    7591.0
+   ],
+   [
+    2761.0,
+    7671.0
+   ],
+   [
+    2729.0,
+    7671.0
+   ],
+   [
+    2719.0,
+    7671.0
+   ],
+   [
+    2311.0,
+    7671.0
+   ],
+   [
+    2001.0,
+    7671.0
+   ],
+   [
+    1961.0,
+    7631.0
+   ],
+   [
+    1849.0,
+    7371.0
+   ],
+   [
+    1949.0,
+    7221.0
+   ],
+   [
+    1959.0,
+    6921.0
+   ],
+   [
+    1999.0,
+    6931.0
+   ],
+   [
+    2041.0,
+    6955.0
+   ],
+   [
+    2101.0,
+    6993.0
+   ],
+   [
+    2161.0,
+    7037.0
+   ],
+   [
+    2221.0,
+    7075.0
    ],
    [
     2259.0,
-    6717.0
+    7093.0
    ],
    [
-    2259.0,
-    6521.0
+    2283.0,
+    7139.0
    ],
    [
-    1919.0,
-    6781.0
+    2301.0,
+    7173.0
+   ],
+   [
+    2331.0,
+    7181.0
+   ],
+   [
+    2401.0,
+    7189.0
+   ],
+   [
+    2471.0,
+    7211.0
+   ],
+   [
+    2541.0,
+    7229.0
+   ],
+   [
+    2621.0,
+    7191.0
+   ],
+   [
+    2729.0,
+    7171.0
    ]
   ],
   "ownershipPolygons": [
    [
     [
-     1939.0,
-     6849.0
+     2761.0,
+     7171.0
     ],
     [
-     2259.0,
-     6717.0
+     2761.0,
+     7591.0
     ],
     [
-     2259.0,
-     6521.0
+     2761.0,
+     7671.0
     ],
     [
-     1919.0,
-     6781.0
-    ]
-   ],
-   [
+     2729.0,
+     7671.0
+    ],
     [
      2719.0,
      7671.0
     ],
     [
-     2729.0,
+     2311.0,
      7671.0
     ],
     [
-     3161.0,
+     2001.0,
      7671.0
     ],
     [
-     3161.0,
-     7171.0
-    ],
-    [
-     2729.0,
-     7171.0
-    ],
-    [
-     2479.0,
-     7171.0
-    ],
-    [
-     2409.0,
-     7101.0
-    ],
-    [
-     2289.0,
-     6981.0
-    ],
-    [
-     2259.0,
-     6921.0
-    ],
-    [
-     2259.0,
-     6789.0
-    ],
-    [
-     1959.0,
-     6919.0
-    ],
-    [
-     1959.0,
-     6921.0
-    ],
-    [
-     1949.0,
-     7221.0
+     1961.0,
+     7631.0
     ],
     [
      1849.0,
      7371.0
     ],
     [
-     1899.0,
-     7671.0
+     1949.0,
+     7221.0
     ],
     [
-     2437.0,
-     7671.0
+     1959.0,
+     6921.0
+    ],
+    [
+     1999.0,
+     6931.0
+    ],
+    [
+     2041.0,
+     6955.0
+    ],
+    [
+     2101.0,
+     6993.0
+    ],
+    [
+     2161.0,
+     7037.0
+    ],
+    [
+     2221.0,
+     7075.0
+    ],
+    [
+     2259.0,
+     7093.0
+    ],
+    [
+     2283.0,
+     7139.0
+    ],
+    [
+     2301.0,
+     7173.0
+    ],
+    [
+     2331.0,
+     7181.0
+    ],
+    [
+     2401.0,
+     7189.0
+    ],
+    [
+     2471.0,
+     7211.0
+    ],
+    [
+     2541.0,
+     7229.0
+    ],
+    [
+     2621.0,
+     7191.0
+    ],
+    [
+     2729.0,
+     7171.0
     ]
    ]
   ],
@@ -2125,8 +2215,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "543fe3ebfde3cb1e10d347c71ea93808abc444eeb3c43c238611e08dba1dfd4b",
-  "sceneSha256": "424b0e41c7d750b36b1cc48fdae0028ec3c1727c98d784dd4fc1bf5fd013f9d2"
+  "snapshotSha256": "c56e6f123e06fed54af85c548a1c9925a0585d14b3269567f3a799bd03bdb7f4",
+  "sceneSha256": "a292b2986489a2a40fb568c41f333b31512aa3f2f3bfee9dbc8a9f112f4a98b4"
  },
  "externalResources": {
   "../../_continent_v2/shared-assets/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",
@@ -2148,11 +2238,12 @@
   "../../_continent_v2/shared-assets/1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac.png": "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac",
   "../../_continent_v2/shared-assets/1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5.jpg": "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5",
   "../../_continent_v2/shared-assets/1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee.jpg": "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee",
+  "../../_continent_v2/shared-assets/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
   "../../_continent_v2/shared-assets/1ef4a3e8bf253c4617ae7bd8fb76d2bd02a6379696fd1a11497491e52fdf43c7.jpg": "1ef4a3e8bf253c4617ae7bd8fb76d2bd02a6379696fd1a11497491e52fdf43c7",
+  "../../_continent_v2/shared-assets/1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f.png": "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f",
   "../../_continent_v2/shared-assets/201584b01e2feea5e210974022ddcb077be88f5ae7a0e2bde47cc3d69248c075.jpg": "201584b01e2feea5e210974022ddcb077be88f5ae7a0e2bde47cc3d69248c075",
   "../../_continent_v2/shared-assets/20c0751fb3ba81050358b2a4889699f0ac23e2f3cf71e94b709967aad3a2caa7.jpg": "20c0751fb3ba81050358b2a4889699f0ac23e2f3cf71e94b709967aad3a2caa7",
   "../../_continent_v2/shared-assets/24117218e33395056d53066b4a944619207018462e569f4126bb447c6251505d.jpg": "24117218e33395056d53066b4a944619207018462e569f4126bb447c6251505d",
-  "../../_continent_v2/shared-assets/2604f730bf5f84ce7ff3d9126fa771a048f60b99d2805ab4110e9c09b98b3833.jpg": "2604f730bf5f84ce7ff3d9126fa771a048f60b99d2805ab4110e9c09b98b3833",
   "../../_continent_v2/shared-assets/281b2ae4b3358d2a7439f98a37bdafd55032e7a48d1f681b6a21bf1bc45f28c5.jpg": "281b2ae4b3358d2a7439f98a37bdafd55032e7a48d1f681b6a21bf1bc45f28c5",
   "../../_continent_v2/shared-assets/29e5aaef8b2f2e7b472467dbbccb197d0aa569640ac3413be717a9078d5b54ea.jpg": "29e5aaef8b2f2e7b472467dbbccb197d0aa569640ac3413be717a9078d5b54ea",
   "../../_continent_v2/shared-assets/2a21f65021cd9d87b0c2efcbfde69d9db6b35926658331a465f5f258a14c79b2.jpg": "2a21f65021cd9d87b0c2efcbfde69d9db6b35926658331a465f5f258a14c79b2",
@@ -2191,7 +2282,6 @@
   "../../_continent_v2/shared-assets/4bd6cd244d18ad3d993ad3135b684b14b5a01fe3ead55305623599bcfbf9fb76.jpg": "4bd6cd244d18ad3d993ad3135b684b14b5a01fe3ead55305623599bcfbf9fb76",
   "../../_continent_v2/shared-assets/4d4531d7bbaafcba5c53ffc16eb4c3db319ab2faa515ed59efaebd809a27d980.jpg": "4d4531d7bbaafcba5c53ffc16eb4c3db319ab2faa515ed59efaebd809a27d980",
   "../../_continent_v2/shared-assets/507d517e2e16b451d4feea03de1655e98492f8d3675c452ec64d30bfe868661a.jpg": "507d517e2e16b451d4feea03de1655e98492f8d3675c452ec64d30bfe868661a",
-  "../../_continent_v2/shared-assets/50c4b27bc27f280522a9148d0ca60ca7d39667586894272f636ea2198d525648.jpg": "50c4b27bc27f280522a9148d0ca60ca7d39667586894272f636ea2198d525648",
   "../../_continent_v2/shared-assets/545ca75d4c0e58f258d06f43e32e8e724aa5ee2bc7a83d3e83d1e419b43e563a.jpg": "545ca75d4c0e58f258d06f43e32e8e724aa5ee2bc7a83d3e83d1e419b43e563a",
   "../../_continent_v2/shared-assets/54f83cf38f1b1cdde671cc6acf8e53179b10d744ad40d2aac5e76a63010f38bd.jpg": "54f83cf38f1b1cdde671cc6acf8e53179b10d744ad40d2aac5e76a63010f38bd",
   "../../_continent_v2/shared-assets/56adad64b2806dd1b781e7d7f5eda1ed4d8f87eba14f63d4ddfba43d18eeab04.jpg": "56adad64b2806dd1b781e7d7f5eda1ed4d8f87eba14f63d4ddfba43d18eeab04",
@@ -2216,22 +2306,24 @@
   "../../_continent_v2/shared-assets/6fbdf4d8e72985959cc506a30d3bfb0712a590156aed2fc94e6e42851e43aa22.jpg": "6fbdf4d8e72985959cc506a30d3bfb0712a590156aed2fc94e6e42851e43aa22",
   "../../_continent_v2/shared-assets/706d2bad50d81e0505087fd1a6a660f26e92c942fb6d4cee7188d18e141ba22f.jpg": "706d2bad50d81e0505087fd1a6a660f26e92c942fb6d4cee7188d18e141ba22f",
   "../../_continent_v2/shared-assets/718febf885ae1d6650bd1f4fb0d7a53b98f178028e342033cdf15bd59b354928.jpg": "718febf885ae1d6650bd1f4fb0d7a53b98f178028e342033cdf15bd59b354928",
+  "../../_continent_v2/shared-assets/71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac.png": "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac",
   "../../_continent_v2/shared-assets/71d3e90449d0d0aa2f31a3305567d26311e926b1bd75eb2d519876229fca51e5.jpg": "71d3e90449d0d0aa2f31a3305567d26311e926b1bd75eb2d519876229fca51e5",
   "../../_continent_v2/shared-assets/71d7dd0b736b117da5fac3e9f4ccb78a92fa225ec9f36e4b8cb16ff0f52fe119.jpg": "71d7dd0b736b117da5fac3e9f4ccb78a92fa225ec9f36e4b8cb16ff0f52fe119",
   "../../_continent_v2/shared-assets/723fa6c6927457201caffbdbd2c3efa9b0dfa88d0c94505b60b87159a9308a7f.jpg": "723fa6c6927457201caffbdbd2c3efa9b0dfa88d0c94505b60b87159a9308a7f",
   "../../_continent_v2/shared-assets/752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66.jpg": "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66",
   "../../_continent_v2/shared-assets/759e934b5558c9de47a1a7f9bde94faa8e596d7b5c978daea41707a8d63d17b9.jpg": "759e934b5558c9de47a1a7f9bde94faa8e596d7b5c978daea41707a8d63d17b9",
   "../../_continent_v2/shared-assets/76fb1da81089dc675919a5d2b72ef3852ee766b29f4c1ef820d797ea31c3e613.jpg": "76fb1da81089dc675919a5d2b72ef3852ee766b29f4c1ef820d797ea31c3e613",
-  "../../_continent_v2/shared-assets/77343b686830d3ec20533900ab73422c9c3e502a443cd1d4bc880c2bab59b907.jpg": "77343b686830d3ec20533900ab73422c9c3e502a443cd1d4bc880c2bab59b907",
   "../../_continent_v2/shared-assets/77a876793748064eaf75e704491552a9f1724fb037cc9980679660d209bcfd7a.jpg": "77a876793748064eaf75e704491552a9f1724fb037cc9980679660d209bcfd7a",
   "../../_continent_v2/shared-assets/78d24dd9ce94bac0225f50d879e3cd4021b8cc1e039d66a6f429c13bb97283d5.jpg": "78d24dd9ce94bac0225f50d879e3cd4021b8cc1e039d66a6f429c13bb97283d5",
   "../../_continent_v2/shared-assets/7944c3205d83f66649cfef8f9887785df17e59a481c00b82d0980783f7284a57.jpg": "7944c3205d83f66649cfef8f9887785df17e59a481c00b82d0980783f7284a57",
   "../../_continent_v2/shared-assets/7a4c4a6f46ba3d09f07f5d4c88642599d2ef596b0ff6989fefaa07437d31a83d.jpg": "7a4c4a6f46ba3d09f07f5d4c88642599d2ef596b0ff6989fefaa07437d31a83d",
   "../../_continent_v2/shared-assets/7a52bf40dc177ae5372526009dfef5db8950e2d7540a5b7b5e1d2cd1d81b9432.jpg": "7a52bf40dc177ae5372526009dfef5db8950e2d7540a5b7b5e1d2cd1d81b9432",
+  "../../_continent_v2/shared-assets/7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23.png": "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23",
   "../../_continent_v2/shared-assets/7d536075548ceaa0109542c0d3f0a4d1a6a113e8398600705c26c61faf6d3934.jpg": "7d536075548ceaa0109542c0d3f0a4d1a6a113e8398600705c26c61faf6d3934",
   "../../_continent_v2/shared-assets/7f32a7d1942e43ac5cba50decff4091f326851bb504d9c1efaf7730f6be6a39b.jpg": "7f32a7d1942e43ac5cba50decff4091f326851bb504d9c1efaf7730f6be6a39b",
   "../../_continent_v2/shared-assets/80ba9efadeb8e930e800063f92f3abc91fd1a4ea3ae19f5fd9dc0e89bb152d5f.jpg": "80ba9efadeb8e930e800063f92f3abc91fd1a4ea3ae19f5fd9dc0e89bb152d5f",
   "../../_continent_v2/shared-assets/84284bf13694a7c412a2c899f1d91481105bcc8494a83447c0fa61e1b3091387.jpg": "84284bf13694a7c412a2c899f1d91481105bcc8494a83447c0fa61e1b3091387",
+  "../../_continent_v2/shared-assets/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
   "../../_continent_v2/shared-assets/854f20e314f3844adcd4044ed96c0fa158af6348c0dbd6d1131aa3abac118b84.jpg": "854f20e314f3844adcd4044ed96c0fa158af6348c0dbd6d1131aa3abac118b84",
   "../../_continent_v2/shared-assets/85f4ea4a3b267c71be2d9dc30c08406c8959784d2a45f09316fa89fb94e7eae2.jpg": "85f4ea4a3b267c71be2d9dc30c08406c8959784d2a45f09316fa89fb94e7eae2",
   "../../_continent_v2/shared-assets/85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76.jpg": "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76",
@@ -2242,6 +2334,7 @@
   "../../_continent_v2/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
   "../../_continent_v2/shared-assets/8dc320422ff3b8d0cd07834513c149b0c98d4690c6c716163ca01a042f408182.jpg": "8dc320422ff3b8d0cd07834513c149b0c98d4690c6c716163ca01a042f408182",
   "../../_continent_v2/shared-assets/8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283.jpg": "8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283",
+  "../../_continent_v2/shared-assets/90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a.png": "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a",
   "../../_continent_v2/shared-assets/91ae8352f21c5748116fe0162d12e6170a388b5241d6756c7eb5a4e94bec1d94.jpg": "91ae8352f21c5748116fe0162d12e6170a388b5241d6756c7eb5a4e94bec1d94",
   "../../_continent_v2/shared-assets/91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f.jpg": "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f",
   "../../_continent_v2/shared-assets/98b20584ae5daef8c9dbf8be688a8b170d884ed17af19269bf0cc75ae648af3a.jpg": "98b20584ae5daef8c9dbf8be688a8b170d884ed17af19269bf0cc75ae648af3a",
@@ -2262,6 +2355,7 @@
   "../../_continent_v2/shared-assets/a923be5bb829b6ead8e2a1aee78ae676954ef23ba098589daed7568b11b19e17.jpg": "a923be5bb829b6ead8e2a1aee78ae676954ef23ba098589daed7568b11b19e17",
   "../../_continent_v2/shared-assets/aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce.jpg": "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce",
   "../../_continent_v2/shared-assets/aa6ea389590adc4768b2c3ac2dcf6e5656b9a82ab84cad0e33bb91600983435b.jpg": "aa6ea389590adc4768b2c3ac2dcf6e5656b9a82ab84cad0e33bb91600983435b",
+  "../../_continent_v2/shared-assets/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
   "../../_continent_v2/shared-assets/ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832.jpg": "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832",
   "../../_continent_v2/shared-assets/ac9da0af47fef5b54acb332ae43523d93b0c8c453bd06e00c60ce74287544561.jpg": "ac9da0af47fef5b54acb332ae43523d93b0c8c453bd06e00c60ce74287544561",
   "../../_continent_v2/shared-assets/ade31f5d089f4352fe3c56d74b00dba52c7163490ed727779bdb9b0f185c45af.jpg": "ade31f5d089f4352fe3c56d74b00dba52c7163490ed727779bdb9b0f185c45af",
@@ -2301,6 +2395,7 @@
   "../../_continent_v2/shared-assets/ec931a50bfb191c230924fa3ef8d9cffc7267deb5e6742a3eb9d1b7073363401.jpg": "ec931a50bfb191c230924fa3ef8d9cffc7267deb5e6742a3eb9d1b7073363401",
   "../../_continent_v2/shared-assets/ee2032174733517f69cc5f12d4a35df0770f126ded543f651c9a6c4100bcf398.jpg": "ee2032174733517f69cc5f12d4a35df0770f126ded543f651c9a6c4100bcf398",
   "../../_continent_v2/shared-assets/f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e.jpg": "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e",
+  "../../_continent_v2/shared-assets/f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c.png": "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c",
   "../../_continent_v2/shared-assets/f2d94314b7ce53a0adbbe426bc2f58946c5c9c2fca95ced28468153b696140d8.jpg": "f2d94314b7ce53a0adbbe426bc2f58946c5c9c2fca95ced28468153b696140d8",
   "../../_continent_v2/shared-assets/f43e6539d06fa292b8449038f11ed9ca044793c2981c5711472379c112127b1f.jpg": "f43e6539d06fa292b8449038f11ed9ca044793c2981c5711472379c112127b1f",
   "../../_continent_v2/shared-assets/f97955654f8254037af02457835b6bee9da54f51fc9a667927c04e7377ffdd28.jpg": "f97955654f8254037af02457835b6bee9da54f51fc9a667927c04e7377ffdd28",
@@ -2343,93 +2438,12 @@
     }
    },
    {
-    "id": "02_13",
-    "manifest": "chunks/02_13/world.json",
-    "bounds": {
-     "min": [
-      -656.0,
-      -3.708956003189087,
-      277.0
-     ],
-     "max": [
-      -654.0,
-      0.0,
-      287.0
-     ]
-    },
-    "estimatedResidentBytes": 11365660,
-    "glbBytes": 6084,
-    "geometryResidentBytes": 6084,
-    "placements": 0,
-    "triangles": 8,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "03_06",
-    "manifest": "chunks/03_06/world.json",
-    "bounds": {
-     "min": [
-      -586.0,
-      -16.0,
-      -336.411764705882
-     ],
-     "max": [
-      -558.0,
-      0.0,
-      -299.0
-     ]
-    },
-    "estimatedResidentBytes": 11409164,
-    "glbBytes": 49588,
-    "geometryResidentBytes": 49588,
-    "placements": 0,
-    "triangles": 709,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "03_07",
-    "manifest": "chunks/03_07/world.json",
-    "bounds": {
-     "min": [
-      -582.0,
-      -13.919852256774902,
-      -299.0
-     ],
-     "max": [
-      -558.0,
-      0.0,
-      -247.0
-     ]
-    },
-    "estimatedResidentBytes": 11415056,
-    "glbBytes": 55480,
-    "geometryResidentBytes": 55480,
-    "placements": 0,
-    "triangles": 802,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
     "id": "03_11",
     "manifest": "chunks/03_11/world.json",
     "bounds": {
      "min": [
       -593.3336981189655,
-      -0.054109439667625825,
+      -0.33444755327491554,
       128.0
      ],
      "max": [
@@ -2438,9 +2452,9 @@
       181.0
      ]
     },
-    "estimatedResidentBytes": 36806246,
-    "glbBytes": 91084,
-    "geometryResidentBytes": 91084,
+    "estimatedResidentBytes": 36806242,
+    "glbBytes": 91080,
+    "geometryResidentBytes": 91080,
     "placements": 5,
     "triangles": 6992,
     "sharedResourceResidentBytes": {
@@ -2486,9 +2500,9 @@
       277.0
      ]
     },
-    "estimatedResidentBytes": 109111288,
-    "glbBytes": 449624,
-    "geometryResidentBytes": 449624,
+    "estimatedResidentBytes": 109111284,
+    "glbBytes": 449620,
+    "geometryResidentBytes": 449620,
     "placements": 12,
     "triangles": 32514,
     "sharedResourceResidentBytes": {
@@ -2545,7 +2559,7 @@
     "bounds": {
      "min": [
       -654.0,
-      -4.089743614196777,
+      -3.919154405593872,
       277.0
      ],
      "max": [
@@ -2554,11 +2568,11 @@
       373.0
      ]
     },
-    "estimatedResidentBytes": 11892032,
-    "glbBytes": 532456,
-    "geometryResidentBytes": 532456,
+    "estimatedResidentBytes": 11815232,
+    "glbBytes": 455656,
+    "geometryResidentBytes": 455656,
     "placements": 0,
-    "triangles": 8596,
+    "triangles": 7335,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2571,7 +2585,7 @@
     "manifest": "chunks/03_14/world.json",
     "bounds": {
      "min": [
-      -640.0,
+      -614.0,
       -16.0,
       373.0
      ],
@@ -2581,11 +2595,11 @@
       469.0
      ]
     },
-    "estimatedResidentBytes": 11798448,
-    "glbBytes": 438872,
-    "geometryResidentBytes": 438872,
+    "estimatedResidentBytes": 11572632,
+    "glbBytes": 213056,
+    "geometryResidentBytes": 213056,
     "placements": 0,
-    "triangles": 7066,
+    "triangles": 3367,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2598,129 +2612,21 @@
     "manifest": "chunks/03_15/world.json",
     "bounds": {
      "min": [
-      -624.0,
-      -16.0,
+      -572.4307692307693,
+      -3.4941279888153076,
       469.0
      ],
      "max": [
       -558.0,
       0.0,
-      565.0
+      502.5
      ]
     },
-    "estimatedResidentBytes": 11704516,
-    "glbBytes": 344940,
-    "geometryResidentBytes": 344940,
+    "estimatedResidentBytes": 11380472,
+    "glbBytes": 20896,
+    "geometryResidentBytes": 20896,
     "placements": 0,
-    "triangles": 5530,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "03_16",
-    "manifest": "chunks/03_16/world.json",
-    "bounds": {
-     "min": [
-      -608.0,
-      -4.370822429656982,
-      565.0
-     ],
-     "max": [
-      -558.0,
-      0.0,
-      575.0
-     ]
-    },
-    "estimatedResidentBytes": 11395832,
-    "glbBytes": 36256,
-    "geometryResidentBytes": 36256,
-    "placements": 0,
-    "triangles": 489,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "04_05",
-    "manifest": "chunks/04_05/world.json",
-    "bounds": {
-     "min": [
-      -481.3846153846155,
-      -5.106622219085693,
-      -409.82352941176487
-     ],
-     "max": [
-      -462.0,
-      0.0,
-      -395.0
-     ]
-    },
-    "estimatedResidentBytes": 11374164,
-    "glbBytes": 14588,
-    "geometryResidentBytes": 14588,
-    "placements": 0,
-    "triangles": 142,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "04_06",
-    "manifest": "chunks/04_06/world.json",
-    "bounds": {
-     "min": [
-      -558.0,
-      -16.0,
-      -395.0
-     ],
-     "max": [
-      -462.0,
-      0.0,
-      -299.0
-     ]
-    },
-    "estimatedResidentBytes": 11792556,
-    "glbBytes": 432980,
-    "geometryResidentBytes": 432980,
-    "placements": 0,
-    "triangles": 6968,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "04_07",
-    "manifest": "chunks/04_07/world.json",
-    "bounds": {
-     "min": [
-      -558.0,
-      -16.0,
-      -299.0
-     ],
-     "max": [
-      -462.0,
-      0.0,
-      -203.0
-     ]
-    },
-    "estimatedResidentBytes": 11543296,
-    "glbBytes": 183720,
-    "geometryResidentBytes": 183720,
-    "placements": 0,
-    "triangles": 2888,
+    "triangles": 242,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2733,24 +2639,23 @@
     "manifest": "chunks/04_08/world.json",
     "bounds": {
      "min": [
-      -548.2666666666667,
-      -5.241339972568696,
-      -203.0
+      -548.0,
+      -2.753906619886955,
+      -175.0
      ],
      "max": [
-      -457.2554294364498,
+      -462.0,
       79.23279901123047,
       -107.0
      ]
     },
-    "estimatedResidentBytes": 159813776,
-    "glbBytes": 470712,
-    "geometryResidentBytes": 470712,
-    "placements": 22,
-    "triangles": 45340,
+    "estimatedResidentBytes": 92001534,
+    "glbBytes": 296468,
+    "geometryResidentBytes": 296468,
+    "placements": 16,
+    "triangles": 26237,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
      "38bf7be65ffc6ad530d3aaeb1e002abbe360d2a32c2ad63827803c74534799d5": 1398102,
@@ -2780,34 +2685,18 @@
      "759e934b5558c9de47a1a7f9bde94faa8e596d7b5c978daea41707a8d63d17b9": 1398102,
      "31c20eb5b5a8ab713afa89e4afe5a76d98133313f80032cf75e9c57622a7f981": 1398102,
      "5eb070177604458b13bb1fc7baaa751022ec495bfe71546a9bfc95a6ab89759c": 1398102,
-     "c0e2086f4cda56fc52679e83a56211685fb8ee72753bb448fb2fee02a29a2292": 5592406,
-     "a12f3bdd2cc89c0da7e908fb9490c7afd1fee90d6aa2660305e67ccf1f7322f1": 5592406,
-     "47a0643ce9ae9614da54b1140c1ac1c22b6f9bc8dd6c024d2fe403da30346d0f": 5592406,
      "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383": 5592406,
      "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b": 5592406,
-     "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce": 5592406,
-     "37e0ca70e26c745f7ee2f99433403792b49196424886265ff2f2e0d20e8962ca": 5592406,
-     "4bd6cd244d18ad3d993ad3135b684b14b5a01fe3ead55305623599bcfbf9fb76": 5592406,
-     "7a4c4a6f46ba3d09f07f5d4c88642599d2ef596b0ff6989fefaa07437d31a83d": 5592406,
-     "e4586086a2fa390ea09e1b6983f1e7fea7780893fe6bfce5bafee807666c8c33": 5592406,
-     "8dc320422ff3b8d0cd07834513c149b0c98d4690c6c716163ca01a042f408182": 5592406,
-     "aeb53d3b047e52e351e7bdde418f58ac054702720abcf73b8387188700f1da28": 5592406,
-     "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79": 5592406,
-     "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832": 5592406,
-     "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f": 5592406
+     "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce": 5592406
     },
     "sharedMeshResidentBytes": {
      "18edc61842e11baf523328b61203e5985e2a5d6876582d41ab4a8ddcd3a15c82": 97752,
-     "1d5ebadc4d4ff4eb824274e7f320012d917eb29eea15cbb32041c84e1e9ae5d4": 115012,
      "26e81da871e7ed2e06f8cce503eb944fbe8837559c5714d2ad2b2df7795a48df": 42820,
-     "28915a615734b4c4d12b874819d97dc6a29008d55dd9712a43194136e240a1bb": 108572,
      "5514c701325a5e3f069fe4470add405ee02dd971f6ef1a50ba7b0feed77dc456": 40124,
      "59546ace46c87476b188e23c44f9dd6db399ebb517b51f6f512d81673fcdce29": 39144,
-     "7a4db57811508eaafb1fe0c268c0f0a85a63c26bba6205d7a2c85286f5f786ac": 121024,
      "7a933a3a844324b090da15a32d14c8533918ef3c048f502da1a14a88715db437": 34680,
      "7e1f1d28f0ca6387149060b9dc30d4e4e4366278adb8ab5618264ce39a44b106": 113804,
      "8496c0d62a5a3c840834dfd91a25937effadc7710cb40c3cbf26a2af4b84674b": 113620,
-     "898f6a3a953db7e2d1735801c3cac0999a57753aae5f0fcc99d482ec723c46eb": 97136,
      "aa262578b9f92c6964daa02e396784ca9422a71103849e5f87c2f097dc8954ac": 108604,
      "e43658c10e3499bcafd84ce4e1b2ce05d31a6223479608b4a306e2b9ce50b0df": 110260,
      "e496e5d4cf424503a864f2c2605b26049cd79fdb5bac1a40c5da905b38b9bed6": 40268
@@ -3273,11 +3162,11 @@
       469.0
      ]
     },
-    "estimatedResidentBytes": 147547890,
-    "glbBytes": 673228,
-    "geometryResidentBytes": 673228,
-    "placements": 90,
-    "triangles": 89006,
+    "estimatedResidentBytes": 130648872,
+    "glbBytes": 672452,
+    "geometryResidentBytes": 672452,
+    "placements": 89,
+    "triangles": 86280,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -3310,9 +3199,6 @@
      "67a29824fb99c960829c8d1cde3d7c7e0e8ed4a9aca065d66cfc1dcdeacd51eb": 5592406,
      "693f58ef56abe9cb17abc9cac9a542169ad753b0bc258e7cbb2da6448096219d": 5592406,
      "be6957820e8d484cea2e7bd0a722aa18f773f89601ae05a998f09a5ceb72d570": 5592406,
-     "c0e2086f4cda56fc52679e83a56211685fb8ee72753bb448fb2fee02a29a2292": 5592406,
-     "a12f3bdd2cc89c0da7e908fb9490c7afd1fee90d6aa2660305e67ccf1f7322f1": 5592406,
-     "47a0643ce9ae9614da54b1140c1ac1c22b6f9bc8dd6c024d2fe403da30346d0f": 5592406,
      "37e0ca70e26c745f7ee2f99433403792b49196424886265ff2f2e0d20e8962ca": 5592406,
      "4bd6cd244d18ad3d993ad3135b684b14b5a01fe3ead55305623599bcfbf9fb76": 5592406,
      "7a4c4a6f46ba3d09f07f5d4c88642599d2ef596b0ff6989fefaa07437d31a83d": 5592406,
@@ -3351,7 +3237,6 @@
      "71a89c050937a9347efeb79a05293663b7da9a99949c09353bbcffc1b893a68e": 27784,
      "7289dfad55575a67fa1682ca788f6c8744116d4ae520e20f4a7466afa458ed15": 29828,
      "7a42c08d3a9a0661ea86038085a04ab3bcc7273bfbed1e721fd443fb437d6642": 98428,
-     "7a4db57811508eaafb1fe0c268c0f0a85a63c26bba6205d7a2c85286f5f786ac": 121024,
      "7c5339e9eafe234e179f7af4dc6c4054155af4c11877651365b1c5a75b69595d": 32616,
      "7d20dfd345e8acb9ef56a88fd40f2874f78d05eaeef3c615587284a3474f2ee4": 27508,
      "8759e4a28dc155f58fccf29e6226b40565353accfda236e7e831b41d6337ec2f": 114032,
@@ -3377,11 +3262,11 @@
       565.0
      ]
     },
-    "estimatedResidentBytes": 11930240,
-    "glbBytes": 570664,
-    "geometryResidentBytes": 570664,
+    "estimatedResidentBytes": 11863768,
+    "glbBytes": 504192,
+    "geometryResidentBytes": 504192,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 8139,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -3394,8 +3279,8 @@
     "manifest": "chunks/04_16/world.json",
     "bounds": {
      "min": [
-      -558.0,
-      -5.037554740905762,
+      -514.0,
+      -4.939742088317871,
       565.0
      ],
      "max": [
@@ -3404,92 +3289,11 @@
       575.0
      ]
     },
-    "estimatedResidentBytes": 11425368,
-    "glbBytes": 65792,
-    "geometryResidentBytes": 65792,
+    "estimatedResidentBytes": 11394952,
+    "glbBytes": 35376,
+    "geometryResidentBytes": 35376,
     "placements": 0,
-    "triangles": 962,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "05_05",
-    "manifest": "chunks/05_05/world.json",
-    "bounds": {
-     "min": [
-      -462.0,
-      -5.918690204620361,
-      -483.23529411764684
-     ],
-     "max": [
-      -366.0,
-      0.0,
-      -395.0
-     ]
-    },
-    "estimatedResidentBytes": 11668588,
-    "glbBytes": 309012,
-    "geometryResidentBytes": 309012,
-    "placements": 0,
-    "triangles": 4940,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "05_06",
-    "manifest": "chunks/05_06/world.json",
-    "bounds": {
-     "min": [
-      -462.0,
-      -16.0,
-      -395.0
-     ],
-     "max": [
-      -366.0,
-      0.0,
-      -299.0
-     ]
-    },
-    "estimatedResidentBytes": 11860700,
-    "glbBytes": 501124,
-    "geometryResidentBytes": 501124,
-    "placements": 0,
-    "triangles": 8083,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "05_07",
-    "manifest": "chunks/05_07/world.json",
-    "bounds": {
-     "min": [
-      -462.0,
-      -16.0,
-      -299.0
-     ],
-     "max": [
-      -366.0,
-      0.0,
-      -203.0
-     ]
-    },
-    "estimatedResidentBytes": 11555220,
-    "glbBytes": 195644,
-    "geometryResidentBytes": 195644,
-    "placements": 0,
-    "triangles": 3082,
+    "triangles": 477,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -3503,20 +3307,20 @@
     "bounds": {
      "min": [
       -465.0801171419432,
-      -16.0,
-      -203.0
+      -2.3399534686397976,
+      -139.73333333333358
      ],
      "max": [
-      -366.0,
+      -410.31578947368416,
       21.970107513427735,
-      -104.84689821614468
+      -107.0
      ]
     },
-    "estimatedResidentBytes": 92176390,
-    "glbBytes": 576748,
-    "geometryResidentBytes": 576748,
-    "placements": 9,
-    "triangles": 23353,
+    "estimatedResidentBytes": 74788812,
+    "glbBytes": 63524,
+    "geometryResidentBytes": 63524,
+    "placements": 8,
+    "triangles": 12353,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -3537,9 +3341,6 @@
      "84284bf13694a7c412a2c899f1d91481105bcc8494a83447c0fa61e1b3091387": 5592406,
      "854f20e314f3844adcd4044ed96c0fa158af6348c0dbd6d1131aa3abac118b84": 5592406,
      "102444b3267f4ff14ca08adf1ded3218be575d226566d3548c713c66900f708b": 5592406,
-     "e4586086a2fa390ea09e1b6983f1e7fea7780893fe6bfce5bafee807666c8c33": 5592406,
-     "8dc320422ff3b8d0cd07834513c149b0c98d4690c6c716163ca01a042f408182": 5592406,
-     "aeb53d3b047e52e351e7bdde418f58ac054702720abcf73b8387188700f1da28": 5592406,
      "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79": 5592406,
      "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832": 5592406,
      "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f": 5592406
@@ -3550,7 +3351,6 @@
      "5514c701325a5e3f069fe4470add405ee02dd971f6ef1a50ba7b0feed77dc456": 40124,
      "7a933a3a844324b090da15a32d14c8533918ef3c048f502da1a14a88715db437": 34680,
      "8496c0d62a5a3c840834dfd91a25937effadc7710cb40c3cbf26a2af4b84674b": 113620,
-     "898f6a3a953db7e2d1735801c3cac0999a57753aae5f0fcc99d482ec723c46eb": 97136,
      "a2a28851f86be1d0468267ae99e4289f12b922c5b7c94725f5ab9645cb841c2a": 111324
     }
    },
@@ -3569,11 +3369,11 @@
       -10.385114395381267
      ]
     },
-    "estimatedResidentBytes": 190737526,
-    "glbBytes": 1823620,
-    "geometryResidentBytes": 1823620,
+    "estimatedResidentBytes": 190695234,
+    "glbBytes": 1781328,
+    "geometryResidentBytes": 1781328,
     "placements": 78,
-    "triangles": 106586,
+    "triangles": 105892,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -4173,148 +3973,13 @@
     }
    },
    {
-    "id": "06_04",
-    "manifest": "chunks/06_04/world.json",
-    "bounds": {
-     "min": [
-      -355.8461538461538,
-      -4.368923664093018,
-      -556.6470588235297
-     ],
-     "max": [
-      -270.0,
-      0.0,
-      -491.0
-     ]
-    },
-    "estimatedResidentBytes": 11538168,
-    "glbBytes": 178592,
-    "geometryResidentBytes": 178592,
-    "placements": 0,
-    "triangles": 2809,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "06_05",
-    "manifest": "chunks/06_05/world.json",
-    "bounds": {
-     "min": [
-      -366.0,
-      -4.700512886047363,
-      -491.0
-     ],
-     "max": [
-      -270.0,
-      0.0,
-      -395.0
-     ]
-    },
-    "estimatedResidentBytes": 11927932,
-    "glbBytes": 568356,
-    "geometryResidentBytes": 568356,
-    "placements": 0,
-    "triangles": 9181,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "06_06",
-    "manifest": "chunks/06_06/world.json",
-    "bounds": {
-     "min": [
-      -366.0,
-      -16.0,
-      -395.0
-     ],
-     "max": [
-      -270.0,
-      0.0,
-      -329.0
-     ]
-    },
-    "estimatedResidentBytes": 11634076,
-    "glbBytes": 274500,
-    "geometryResidentBytes": 274500,
-    "placements": 0,
-    "triangles": 4378,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "06_07",
-    "manifest": "chunks/06_07/world.json",
-    "bounds": {
-     "min": [
-      -366.0,
-      -16.0,
-      -297.0
-     ],
-     "max": [
-      -270.0,
-      0.0,
-      -203.0
-     ]
-    },
-    "estimatedResidentBytes": 11793236,
-    "glbBytes": 433660,
-    "geometryResidentBytes": 433660,
-    "placements": 0,
-    "triangles": 6981,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "06_08",
-    "manifest": "chunks/06_08/world.json",
-    "bounds": {
-     "min": [
-      -366.0,
-      -16.0,
-      -203.0
-     ],
-     "max": [
-      -270.0,
-      0.0,
-      -107.0
-     ]
-    },
-    "estimatedResidentBytes": 11930244,
-    "glbBytes": 570668,
-    "geometryResidentBytes": 570668,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
     "id": "06_09",
     "manifest": "chunks/06_09/world.json",
     "bounds": {
      "min": [
       -366.27209538667626,
-      -16.0,
-      -107.0
+      -2.009399890899658,
+      -75.13333333333321
      ],
      "max": [
       -270.0,
@@ -4322,11 +3987,11 @@
       -8.150528409851844
      ]
     },
-    "estimatedResidentBytes": 147846196,
-    "glbBytes": 1195432,
-    "geometryResidentBytes": 1195432,
-    "placements": 25,
-    "triangles": 61388,
+    "estimatedResidentBytes": 147469892,
+    "glbBytes": 819128,
+    "geometryResidentBytes": 819128,
+    "placements": 24,
+    "triangles": 52474,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -4405,7 +4070,7 @@
     "bounds": {
      "min": [
       -366.33713852899336,
-      -2.8713910579681396,
+      0.6615854501724243,
       -11.0
      ],
      "max": [
@@ -4414,14 +4079,13 @@
       86.28566137796906
      ]
     },
-    "estimatedResidentBytes": 118417856,
-    "glbBytes": 1237180,
-    "geometryResidentBytes": 1237180,
+    "estimatedResidentBytes": 118328950,
+    "glbBytes": 1235656,
+    "geometryResidentBytes": 1235656,
     "placements": 108,
-    "triangles": 134562,
+    "triangles": 134560,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
      "454fdae2b1c2ba75cbd950c262ce76e1d6c16a480284231b3b6ac8c55ed806b9": 8413526,
@@ -4876,169 +4540,27 @@
     }
    },
    {
-    "id": "07_04",
-    "manifest": "chunks/07_04/world.json",
-    "bounds": {
-     "min": [
-      -270.0,
-      -3.533738613128662,
-      -575.0
-     ],
-     "max": [
-      -242.60175099936532,
-      6.43366732350438,
-      -487.6470399022153
-     ]
-    },
-    "estimatedResidentBytes": 28366258,
-    "glbBytes": 117360,
-    "geometryResidentBytes": 117360,
-    "placements": 1,
-    "triangles": 4650,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
-     "50c4b27bc27f280522a9148d0ca60ca7d39667586894272f636ea2198d525648": 5592406,
-     "2604f730bf5f84ce7ff3d9126fa771a048f60b99d2805ab4110e9c09b98b3833": 5592406,
-     "77343b686830d3ec20533900ab73422c9c3e502a443cd1d4bc880c2bab59b907": 5592406
-    },
-    "sharedMeshResidentBytes": {
-     "9bc0b0d90835d9209e65d64fc0e660d28bac5512855bb8f10f91dd469b0c94b3": 112104
-    }
-   },
-   {
-    "id": "07_05",
-    "manifest": "chunks/07_05/world.json",
-    "bounds": {
-     "min": [
-      -270.0,
-      -12.895440101623535,
-      -491.0
-     ],
-     "max": [
-      -246.0,
-      0.0,
-      -395.0
-     ]
-    },
-    "estimatedResidentBytes": 11507600,
-    "glbBytes": 148024,
-    "geometryResidentBytes": 148024,
-    "placements": 0,
-    "triangles": 2306,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "07_06",
-    "manifest": "chunks/07_06/world.json",
-    "bounds": {
-     "min": [
-      -270.0,
-      -16.0,
-      -395.0
-     ],
-     "max": [
-      -246.0,
-      0.0,
-      -299.0
-     ]
-    },
-    "estimatedResidentBytes": 11401200,
-    "glbBytes": 41624,
-    "geometryResidentBytes": 41624,
-    "placements": 0,
-    "triangles": 575,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "07_07",
-    "manifest": "chunks/07_07/world.json",
-    "bounds": {
-     "min": [
-      -270.0,
-      -16.0,
-      -299.0
-     ],
-     "max": [
-      -246.0,
-      0.0,
-      -203.0
-     ]
-    },
-    "estimatedResidentBytes": 11507164,
-    "glbBytes": 147588,
-    "geometryResidentBytes": 147588,
-    "placements": 0,
-    "triangles": 2299,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "07_08",
-    "manifest": "chunks/07_08/world.json",
-    "bounds": {
-     "min": [
-      -270.0,
-      -4.480555057525635,
-      -203.0
-     ],
-     "max": [
-      -208.0,
-      0.0,
-      -107.0
-     ]
-    },
-    "estimatedResidentBytes": 11579252,
-    "glbBytes": 219676,
-    "geometryResidentBytes": 219676,
-    "placements": 0,
-    "triangles": 3472,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
     "id": "07_09",
     "manifest": "chunks/07_09/world.json",
     "bounds": {
      "min": [
       -270.0,
-      -16.0,
-      -107.0
+      1.5009127855300903,
+      -13.0
      ],
      "max": [
-      -174.0,
-      0.0,
+      -266.0,
+      1.6926194009780884,
       -11.0
      ]
     },
-    "estimatedResidentBytes": 11893000,
-    "glbBytes": 533424,
-    "geometryResidentBytes": 533424,
+    "estimatedResidentBytes": 11276950,
+    "glbBytes": 4756,
+    "geometryResidentBytes": 4756,
     "placements": 0,
-    "triangles": 8607,
+    "triangles": 8,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
     }
@@ -5049,7 +4571,7 @@
     "bounds": {
      "min": [
       -270.19689541201444,
-      -16.0,
+      -4.005499362945557,
       -11.0
      ],
      "max": [
@@ -5058,11 +4580,11 @@
       85.0181148680689
      ]
     },
-    "estimatedResidentBytes": 106003130,
-    "glbBytes": 1487884,
-    "geometryResidentBytes": 1487884,
-    "placements": 28,
-    "triangles": 50926,
+    "estimatedResidentBytes": 105706370,
+    "glbBytes": 1191124,
+    "geometryResidentBytes": 1191124,
+    "placements": 27,
+    "triangles": 43298,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -5137,7 +4659,7 @@
     "bounds": {
      "min": [
       -270.46223701774557,
-      -5.425003528594971,
+      -4.383853912353516,
       85.0
      ],
      "max": [
@@ -5529,65 +5051,11 @@
       575.0
      ]
     },
-    "estimatedResidentBytes": 11425372,
-    "glbBytes": 65796,
-    "geometryResidentBytes": 65796,
+    "estimatedResidentBytes": 11425452,
+    "glbBytes": 65876,
+    "geometryResidentBytes": 65876,
     "placements": 0,
-    "triangles": 962,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "08_09",
-    "manifest": "chunks/08_09/world.json",
-    "bounds": {
-     "min": [
-      -174.0,
-      -3.4424326419830322,
-      -73.0
-     ],
-     "max": [
-      -112.0,
-      0.0,
-      -11.0
-     ]
-    },
-    "estimatedResidentBytes": 11480408,
-    "glbBytes": 120832,
-    "geometryResidentBytes": 120832,
-    "placements": 0,
-    "triangles": 1861,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "08_10",
-    "manifest": "chunks/08_10/world.json",
-    "bounds": {
-     "min": [
-      -174.0,
-      -16.0,
-      -11.0
-     ],
-     "max": [
-      -78.0,
-      0.0,
-      85.0
-     ]
-    },
-    "estimatedResidentBytes": 11893072,
-    "glbBytes": 533496,
-    "geometryResidentBytes": 533496,
-    "placements": 0,
-    "triangles": 8608,
+    "triangles": 963,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -5610,11 +5078,11 @@
       181.0
      ]
     },
-    "estimatedResidentBytes": 132291732,
-    "glbBytes": 984564,
-    "geometryResidentBytes": 984564,
+    "estimatedResidentBytes": 132254988,
+    "glbBytes": 947820,
+    "geometryResidentBytes": 947820,
     "placements": 25,
-    "triangles": 61667,
+    "triangles": 61069,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -5965,40 +5433,13 @@
     }
    },
    {
-    "id": "09_10",
-    "manifest": "chunks/09_10/world.json",
-    "bounds": {
-     "min": [
-      -78.0,
-      -4.069993019104004,
-      23.0
-     ],
-     "max": [
-      18.0,
-      0.0,
-      85.0
-     ]
-    },
-    "estimatedResidentBytes": 11505460,
-    "glbBytes": 145884,
-    "geometryResidentBytes": 145884,
-    "placements": 0,
-    "triangles": 2263,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
     "id": "09_11",
     "manifest": "chunks/09_11/world.json",
     "bounds": {
      "min": [
       -78.0,
       -16.0,
-      85.0
+      101.0
      ],
      "max": [
       18.0,
@@ -6006,11 +5447,11 @@
       181.0
      ]
     },
-    "estimatedResidentBytes": 11930240,
-    "glbBytes": 570664,
-    "geometryResidentBytes": 570664,
+    "estimatedResidentBytes": 11750984,
+    "glbBytes": 391408,
+    "geometryResidentBytes": 391408,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 6286,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6166,36 +5607,9 @@
       575.0
      ]
     },
-    "estimatedResidentBytes": 11425456,
-    "glbBytes": 65880,
-    "geometryResidentBytes": 65880,
-    "placements": 0,
-    "triangles": 963,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "10_10",
-    "manifest": "chunks/10_10/world.json",
-    "bounds": {
-     "min": [
-      18.0,
-      -3.918384313583374,
-      75.0
-     ],
-     "max": [
-      114.0,
-      0.0,
-      85.0
-     ]
-    },
-    "estimatedResidentBytes": 11425360,
-    "glbBytes": 65784,
-    "geometryResidentBytes": 65784,
+    "estimatedResidentBytes": 11425376,
+    "glbBytes": 65800,
+    "geometryResidentBytes": 65800,
     "placements": 0,
     "triangles": 962,
     "sharedResourceResidentBytes": {
@@ -6212,7 +5626,7 @@
      "min": [
       18.0,
       -6.394552707672119,
-      85.0
+      95.94999999999982
      ],
      "max": [
       114.0,
@@ -6220,11 +5634,11 @@
       181.0
      ]
     },
-    "estimatedResidentBytes": 11930232,
-    "glbBytes": 570656,
-    "geometryResidentBytes": 570656,
+    "estimatedResidentBytes": 11738616,
+    "glbBytes": 379040,
+    "geometryResidentBytes": 379040,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 6085,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6247,16 +5661,28 @@
       277.0
      ]
     },
-    "estimatedResidentBytes": 74393892,
-    "glbBytes": 680344,
-    "geometryResidentBytes": 680344,
-    "placements": 24,
-    "triangles": 64881,
+    "estimatedResidentBytes": 94168606,
+    "glbBytes": 693408,
+    "geometryResidentBytes": 693408,
+    "placements": 28,
+    "triangles": 78997,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+     "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68": 349526,
+     "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44": 349526,
+     "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b": 349526,
+     "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f": 349526,
+     "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23": 349526,
+     "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c": 349526,
+     "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a": 349526,
+     "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac": 349526,
+     "3c3c70682bb8b216cdca26a17b83df9847aad9533cb0f565cb4d78ff431e79d3": 5592406,
+     "e327ff1f773147b416049c74f3b51b8ff2c8c1c0b5db66bfb43177168de6dc33": 5592406,
+     "9ccce2a30d75eb56752f8d76986ead38521d6e5d978af68cbb98cd04d858664d": 5592406,
+     "8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283": 22369622,
      "723fa6c6927457201caffbdbd2c3efa9b0dfa88d0c94505b60b87159a9308a7f": 1398102,
      "c40d1cc836ad24020f75d379027321394bbace760dfbead052ac28475916e6b4": 1398102,
      "c4de0ae6c060fd7edeb3b3cadccd041c2325d44d984980f8274da86eb0f8f434": 1398102,
@@ -6269,10 +5695,10 @@
      "615bb7d193fe5231fb6cb9569497c47193ddf12181191590604ee931c1a44386": 1398102,
      "2a21f65021cd9d87b0c2efcbfde69d9db6b35926658331a465f5f258a14c79b2": 1398102,
      "33208611e50726de60d01a8931d0a19d74dccd02baab763164901dd176dd4343": 1398102,
-     "8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283": 22369622,
      "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
     },
     "sharedMeshResidentBytes": {
+     "0708c888855cf6484eff5ddcfb7d08a946996ffbc2df649f62e849780baa1b9c": 188224,
      "2d43f4b8d0c9942109d1036e6ef0d45a1eff9fac2ca993b9a35d70664a2085be": 100724,
      "4060853adc6834fcda75ceb28b3fba79ba90c3d3cb5962088c40c917dbd63d6e": 106772,
      "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776,
@@ -6395,9 +5821,9 @@
     "manifest": "chunks/11_10/world.json",
     "bounds": {
      "min": [
-      114.0,
+      170.0,
       -4.866455078125,
-      75.0
+      77.0
      ],
      "max": [
       210.0,
@@ -6405,11 +5831,11 @@
       85.0
      ]
     },
-    "estimatedResidentBytes": 11425364,
-    "glbBytes": 65788,
-    "geometryResidentBytes": 65788,
+    "estimatedResidentBytes": 11374324,
+    "glbBytes": 14748,
+    "geometryResidentBytes": 14748,
     "placements": 0,
-    "triangles": 962,
+    "triangles": 144,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6432,11 +5858,11 @@
       181.0
      ]
     },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
+    "estimatedResidentBytes": 11912216,
+    "glbBytes": 552640,
+    "geometryResidentBytes": 552640,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 8926,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6593,20 +6019,20 @@
     "bounds": {
      "min": [
       210.0,
-      -6.686866283416748,
+      -5.646210670471191,
       75.0
      ],
      "max": [
-      306.0,
+      256.0,
       0.0,
       85.0
      ]
     },
-    "estimatedResidentBytes": 11425448,
-    "glbBytes": 65872,
-    "geometryResidentBytes": 65872,
+    "estimatedResidentBytes": 11393160,
+    "glbBytes": 33584,
+    "geometryResidentBytes": 33584,
     "placements": 0,
-    "triangles": 963,
+    "triangles": 446,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6620,20 +6046,20 @@
     "bounds": {
      "min": [
       210.0,
-      -8.852092742919922,
+      -8.060981750488281,
       85.0
      ],
      "max": [
-      306.0,
+      256.0,
       0.0,
       181.0
      ]
     },
-    "estimatedResidentBytes": 11930228,
-    "glbBytes": 570652,
-    "geometryResidentBytes": 570652,
+    "estimatedResidentBytes": 11636720,
+    "glbBytes": 277144,
+    "geometryResidentBytes": 277144,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 4418,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6647,20 +6073,20 @@
     "bounds": {
      "min": [
       210.0,
-      -11.303824424743652,
+      -10.279528617858887,
       181.0
      ],
      "max": [
-      306.0,
+      256.0,
       0.0,
       277.0
      ]
     },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
+    "estimatedResidentBytes": 11636728,
+    "glbBytes": 277152,
+    "geometryResidentBytes": 277152,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 4418,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6674,20 +6100,20 @@
     "bounds": {
      "min": [
       210.0,
-      -11.303824424743652,
+      -10.361373901367188,
       277.0
      ],
      "max": [
-      306.0,
+      256.0,
       0.0,
       373.0
      ]
     },
-    "estimatedResidentBytes": 11930232,
-    "glbBytes": 570656,
-    "geometryResidentBytes": 570656,
+    "estimatedResidentBytes": 11636720,
+    "glbBytes": 277144,
+    "geometryResidentBytes": 277144,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 4418,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6701,20 +6127,20 @@
     "bounds": {
      "min": [
       210.0,
-      -8.64014720916748,
+      -8.161989212036133,
       373.0
      ],
      "max": [
-      306.0,
+      256.0,
       0.0,
       469.0
      ]
     },
-    "estimatedResidentBytes": 11930232,
-    "glbBytes": 570656,
-    "geometryResidentBytes": 570656,
+    "estimatedResidentBytes": 11636720,
+    "glbBytes": 277144,
+    "geometryResidentBytes": 277144,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 4418,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6728,20 +6154,20 @@
     "bounds": {
      "min": [
       210.0,
-      -5.986670970916748,
+      -5.405939102172852,
       469.0
      ],
      "max": [
-      306.0,
+      256.0,
       0.0,
       565.0
      ]
     },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
+    "estimatedResidentBytes": 11636808,
+    "glbBytes": 277232,
+    "geometryResidentBytes": 277232,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 4419,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -6755,776 +6181,20 @@
     "bounds": {
      "min": [
       210.0,
-      -3.594804525375366,
+      -2.7413597106933594,
       565.0
      ],
      "max": [
-      306.0,
+      256.0,
       0.0,
       575.0
      ]
     },
-    "estimatedResidentBytes": 11425540,
-    "glbBytes": 65964,
-    "geometryResidentBytes": 65964,
+    "estimatedResidentBytes": 11394328,
+    "glbBytes": 34752,
+    "geometryResidentBytes": 34752,
     "placements": 0,
-    "triangles": 964,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "13_10",
-    "manifest": "chunks/13_10/world.json",
-    "bounds": {
-     "min": [
-      306.0,
-      -7.487057685852051,
-      75.0
-     ],
-     "max": [
-      402.0,
-      0.0,
-      85.0
-     ]
-    },
-    "estimatedResidentBytes": 11425372,
-    "glbBytes": 65796,
-    "geometryResidentBytes": 65796,
-    "placements": 0,
-    "triangles": 962,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "13_11",
-    "manifest": "chunks/13_11/world.json",
-    "bounds": {
-     "min": [
-      306.0,
-      -10.33674430847168,
-      85.0
-     ],
-     "max": [
-      402.0,
-      0.0,
-      181.0
-     ]
-    },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "13_12",
-    "manifest": "chunks/13_12/world.json",
-    "bounds": {
-     "min": [
-      306.0,
-      -12.656996726989746,
-      181.0
-     ],
-     "max": [
-      402.0,
-      0.0,
-      277.0
-     ]
-    },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "13_13",
-    "manifest": "chunks/13_13/world.json",
-    "bounds": {
-     "min": [
-      306.0,
-      -12.428742408752441,
-      277.0
-     ],
-     "max": [
-      402.0,
-      0.0,
-      373.0
-     ]
-    },
-    "estimatedResidentBytes": 11930232,
-    "glbBytes": 570656,
-    "geometryResidentBytes": 570656,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "13_14",
-    "manifest": "chunks/13_14/world.json",
-    "bounds": {
-     "min": [
-      306.0,
-      -9.936347007751465,
-      373.0
-     ],
-     "max": [
-      402.0,
-      0.0,
-      469.0
-     ]
-    },
-    "estimatedResidentBytes": 11930232,
-    "glbBytes": 570656,
-    "geometryResidentBytes": 570656,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "13_15",
-    "manifest": "chunks/13_15/world.json",
-    "bounds": {
-     "min": [
-      306.0,
-      -7.6495137214660645,
-      469.0
-     ],
-     "max": [
-      402.0,
-      0.0,
-      565.0
-     ]
-    },
-    "estimatedResidentBytes": 11930240,
-    "glbBytes": 570664,
-    "geometryResidentBytes": 570664,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "13_16",
-    "manifest": "chunks/13_16/world.json",
-    "bounds": {
-     "min": [
-      306.0,
-      -5.564825057983398,
-      565.0
-     ],
-     "max": [
-      402.0,
-      0.0,
-      575.0
-     ]
-    },
-    "estimatedResidentBytes": 11425376,
-    "glbBytes": 65800,
-    "geometryResidentBytes": 65800,
-    "placements": 0,
-    "triangles": 962,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_10",
-    "manifest": "chunks/14_10/world.json",
-    "bounds": {
-     "min": [
-      402.0,
-      -7.969005584716797,
-      75.0
-     ],
-     "max": [
-      498.0,
-      0.0,
-      85.0
-     ]
-    },
-    "estimatedResidentBytes": 11425368,
-    "glbBytes": 65792,
-    "geometryResidentBytes": 65792,
-    "placements": 0,
-    "triangles": 962,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_11",
-    "manifest": "chunks/14_11/world.json",
-    "bounds": {
-     "min": [
-      402.0,
-      -10.6309232711792,
-      85.0
-     ],
-     "max": [
-      498.0,
-      0.0,
-      181.0
-     ]
-    },
-    "estimatedResidentBytes": 11930232,
-    "glbBytes": 570656,
-    "geometryResidentBytes": 570656,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_12",
-    "manifest": "chunks/14_12/world.json",
-    "bounds": {
-     "min": [
-      402.0,
-      -12.972607612609863,
-      181.0
-     ],
-     "max": [
-      498.0,
-      0.0,
-      277.0
-     ]
-    },
-    "estimatedResidentBytes": 11930240,
-    "glbBytes": 570664,
-    "geometryResidentBytes": 570664,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_13",
-    "manifest": "chunks/14_13/world.json",
-    "bounds": {
-     "min": [
-      402.0,
-      -12.863423347473145,
-      277.0
-     ],
-     "max": [
-      498.0,
-      0.0,
-      373.0
-     ]
-    },
-    "estimatedResidentBytes": 11930232,
-    "glbBytes": 570656,
-    "geometryResidentBytes": 570656,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_14",
-    "manifest": "chunks/14_14/world.json",
-    "bounds": {
-     "min": [
-      402.0,
-      -11.717194557189941,
-      373.0
-     ],
-     "max": [
-      498.0,
-      0.0,
-      469.0
-     ]
-    },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_15",
-    "manifest": "chunks/14_15/world.json",
-    "bounds": {
-     "min": [
-      402.0,
-      -9.629344940185547,
-      469.0
-     ],
-     "max": [
-      498.0,
-      0.0,
-      565.0
-     ]
-    },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_16",
-    "manifest": "chunks/14_16/world.json",
-    "bounds": {
-     "min": [
-      402.0,
-      -7.407479763031006,
-      565.0
-     ],
-     "max": [
-      498.0,
-      0.0,
-      575.0
-     ]
-    },
-    "estimatedResidentBytes": 11425372,
-    "glbBytes": 65796,
-    "geometryResidentBytes": 65796,
-    "placements": 0,
-    "triangles": 962,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "15_10",
-    "manifest": "chunks/15_10/world.json",
-    "bounds": {
-     "min": [
-      498.0,
-      -8.637201309204102,
-      75.0
-     ],
-     "max": [
-      594.0,
-      0.0,
-      85.0
-     ]
-    },
-    "estimatedResidentBytes": 11425364,
-    "glbBytes": 65788,
-    "geometryResidentBytes": 65788,
-    "placements": 0,
-    "triangles": 962,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "15_11",
-    "manifest": "chunks/15_11/world.json",
-    "bounds": {
-     "min": [
-      498.0,
-      -10.376494407653809,
-      85.0
-     ],
-     "max": [
-      594.0,
-      0.0,
-      181.0
-     ]
-    },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "15_12",
-    "manifest": "chunks/15_12/world.json",
-    "bounds": {
-     "min": [
-      498.0,
-      -11.01217269897461,
-      181.0
-     ],
-     "max": [
-      594.0,
-      0.0,
-      277.0
-     ]
-    },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "15_13",
-    "manifest": "chunks/15_13/world.json",
-    "bounds": {
-     "min": [
-      498.0,
-      -11.959310531616211,
-      277.0
-     ],
-     "max": [
-      594.0,
-      0.0,
-      373.0
-     ]
-    },
-    "estimatedResidentBytes": 11930232,
-    "glbBytes": 570656,
-    "geometryResidentBytes": 570656,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "15_14",
-    "manifest": "chunks/15_14/world.json",
-    "bounds": {
-     "min": [
-      498.0,
-      -11.878089904785156,
-      373.0
-     ],
-     "max": [
-      594.0,
-      0.0,
-      469.0
-     ]
-    },
-    "estimatedResidentBytes": 11930228,
-    "glbBytes": 570652,
-    "geometryResidentBytes": 570652,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "15_15",
-    "manifest": "chunks/15_15/world.json",
-    "bounds": {
-     "min": [
-      498.0,
-      -11.408638954162598,
-      469.0
-     ],
-     "max": [
-      594.0,
-      0.0,
-      565.0
-     ]
-    },
-    "estimatedResidentBytes": 11930236,
-    "glbBytes": 570660,
-    "geometryResidentBytes": 570660,
-    "placements": 0,
-    "triangles": 9218,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "15_16",
-    "manifest": "chunks/15_16/world.json",
-    "bounds": {
-     "min": [
-      498.0,
-      -9.21599292755127,
-      565.0
-     ],
-     "max": [
-      594.0,
-      0.0,
-      575.0
-     ]
-    },
-    "estimatedResidentBytes": 11425368,
-    "glbBytes": 65792,
-    "geometryResidentBytes": 65792,
-    "placements": 0,
-    "triangles": 962,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "16_10",
-    "manifest": "chunks/16_10/world.json",
-    "bounds": {
-     "min": [
-      594.0,
-      -7.305221080780029,
-      75.0
-     ],
-     "max": [
-      656.0,
-      0.0,
-      85.0
-     ]
-    },
-    "estimatedResidentBytes": 11404132,
-    "glbBytes": 44556,
-    "geometryResidentBytes": 44556,
-    "placements": 0,
-    "triangles": 622,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "16_11",
-    "manifest": "chunks/16_11/world.json",
-    "bounds": {
-     "min": [
-      594.0,
-      -7.549243927001953,
-      85.0
-     ],
-     "max": [
-      656.0,
-      0.0,
-      181.0
-     ]
-    },
-    "estimatedResidentBytes": 11730640,
-    "glbBytes": 371064,
-    "geometryResidentBytes": 371064,
-    "placements": 0,
-    "triangles": 5954,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "16_12",
-    "manifest": "chunks/16_12/world.json",
-    "bounds": {
-     "min": [
-      594.0,
-      -8.286261558532715,
-      181.0
-     ],
-     "max": [
-      656.0,
-      0.0,
-      277.0
-     ]
-    },
-    "estimatedResidentBytes": 11730644,
-    "glbBytes": 371068,
-    "geometryResidentBytes": 371068,
-    "placements": 0,
-    "triangles": 5954,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "16_13",
-    "manifest": "chunks/16_13/world.json",
-    "bounds": {
-     "min": [
-      594.0,
-      -9.655082702636719,
-      277.0
-     ],
-     "max": [
-      656.0,
-      0.0,
-      373.0
-     ]
-    },
-    "estimatedResidentBytes": 11730644,
-    "glbBytes": 371068,
-    "geometryResidentBytes": 371068,
-    "placements": 0,
-    "triangles": 5954,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "16_14",
-    "manifest": "chunks/16_14/world.json",
-    "bounds": {
-     "min": [
-      594.0,
-      -11.371719360351562,
-      373.0
-     ],
-     "max": [
-      656.0,
-      0.0,
-      469.0
-     ]
-    },
-    "estimatedResidentBytes": 11730636,
-    "glbBytes": 371060,
-    "geometryResidentBytes": 371060,
-    "placements": 0,
-    "triangles": 5954,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "16_15",
-    "manifest": "chunks/16_15/world.json",
-    "bounds": {
-     "min": [
-      594.0,
-      -11.405195236206055,
-      469.0
-     ],
-     "max": [
-      656.0,
-      0.0,
-      565.0
-     ]
-    },
-    "estimatedResidentBytes": 11730644,
-    "glbBytes": 371068,
-    "geometryResidentBytes": 371068,
-    "placements": 0,
-    "triangles": 5954,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "16_16",
-    "manifest": "chunks/16_16/world.json",
-    "bounds": {
-     "min": [
-      594.0,
-      -10.524928092956543,
-      565.0
-     ],
-     "max": [
-      656.0,
-      0.0,
-      575.0
-     ]
-    },
-    "estimatedResidentBytes": 11404140,
-    "glbBytes": 44564,
-    "geometryResidentBytes": 44564,
-    "placements": 0,
-    "triangles": 622,
+    "triangles": 464,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -7541,10 +6211,10 @@
    "min": [
     -656.0,
     -16.0,
-    -575.0
+    -175.0
    ],
    "max": [
-    656.0,
+    256.0,
     149.08325663208961,
     575.0
    ]
@@ -7552,31 +6222,29 @@
   "northUp": true,
   "worldMin": [
    -656.0,
-   -575.0
+   -175.0
   ],
   "worldMax": [
-   656.0,
+   256.0,
    575.0
   ],
   "imageSize": [
-   1312,
-   1150
+   912,
+   750
   ],
   "pixelsPerMetre": 1,
-  "imageSha256": "4e8a75015c086854e643395762104e55e670ab6d7b9cb6d86d123b1718db2db6",
+  "imageSha256": "ca494115973b34c2f2b9910a03bb9bc46471b6d4ee800b2f34aacf463c8b9d4d",
   "renderedFrom": "the package's chunk GLBs (the shared cartography renderer, window by window)",
   "cartographyRender": {
    "generator": "eloria-assets/maps/continent-v2/_continent_v2/render_minimap.py",
    "styleVersion": 4,
-   "chunksSha256": "71dea5a2581b478bf0b4bef3dfca74b11517a7af0285423f9e10a16dc15608f1",
+   "chunksSha256": "2d71267cbbfe92fb774c7f43a02a9aa81d13f16a193007649d1f2de5800d8bb5",
    "neighbourChunksSha256": {
-    "greenlight": "762c8de46ae3f345400f79f68ab6f0a3dff54e29c3818de378b7948663e3df3c",
-    "hearthcroft": "4b0cf522c66a41ecae4ef97ecbc0906b1c6595307eef24e33214cbb573a5e981",
-    "reedfall": "0fa442c67119453f5b9faab54d2590623383a890c2ce135579be1eedfb9288bd",
-    "ringholm": "d523049b15932d264e41d9a261136295ec8d1c9d21f8f1a81392aa555b4e0281",
-    "saltsound": "e0278542f96e1dc63de65d1c9e26e3237e8cccf9a04b42a89f8d1200dbeb584f",
-    "spindle_hill": "6319cab56c4a57327d3edcd6acd7f0876fcce6e9553f936f08c75b98a5a82059",
-    "tollholm": "6b72ebb3bce3d14560d05a2b230ef325fa5a5767d259f22818e643c162867e2e"
+    "coilmere": "db4f80bf3c6bc117d062e4aa33c5bf121933313f63a1c33865edbea1ed4f6491",
+    "greenlight": "0836726e2cbc0f95ce60a3739538238d3a90a2cf3b695d891379a4c1ea5a61e1",
+    "hearthcroft": "52287c3e08e91ea1145f2e777922485168d8705a9d4292f79a61ec8ed5f814fd",
+    "reedfall": "3b81b29441899a655d361aeed63417933a4394cb1c8642638e32b0408b551e63",
+    "ringholm": "0173e84dbd9b11c6489f2216c1203dbb17053a8ac548d8fa4309afb5501be5d5"
    },
    "supersample": 2,
    "windowMetres": 2048,
@@ -7589,27 +6257,25 @@
   "detail": {
    "worldMin": [
     -656.0,
-    -575.0
+    -175.0
    ],
    "worldMax": [
-    656.0,
+    256.0,
     575.0
    ],
    "imageSize": [
-    5248,
-    4600
+    3648,
+    3000
    ],
    "pixelsPerMetre": 4,
-   "imageSha256": "805bae013fc31dc070026372cddcd48f307ec4c811895b4c10ef7bf0a9297b29",
-   "chunksSha256": "71dea5a2581b478bf0b4bef3dfca74b11517a7af0285423f9e10a16dc15608f1",
+   "imageSha256": "e561b74b0e403fb54ec03ac63d2f2e4f68f7161cd47971db9b5c69fa6062eb2c",
+   "chunksSha256": "2d71267cbbfe92fb774c7f43a02a9aa81d13f16a193007649d1f2de5800d8bb5",
    "neighbourChunksSha256": {
-    "greenlight": "762c8de46ae3f345400f79f68ab6f0a3dff54e29c3818de378b7948663e3df3c",
-    "hearthcroft": "4b0cf522c66a41ecae4ef97ecbc0906b1c6595307eef24e33214cbb573a5e981",
-    "reedfall": "0fa442c67119453f5b9faab54d2590623383a890c2ce135579be1eedfb9288bd",
-    "ringholm": "d523049b15932d264e41d9a261136295ec8d1c9d21f8f1a81392aa555b4e0281",
-    "saltsound": "e0278542f96e1dc63de65d1c9e26e3237e8cccf9a04b42a89f8d1200dbeb584f",
-    "spindle_hill": "6319cab56c4a57327d3edcd6acd7f0876fcce6e9553f936f08c75b98a5a82059",
-    "tollholm": "6b72ebb3bce3d14560d05a2b230ef325fa5a5767d259f22818e643c162867e2e"
+    "coilmere": "db4f80bf3c6bc117d062e4aa33c5bf121933313f63a1c33865edbea1ed4f6491",
+    "greenlight": "0836726e2cbc0f95ce60a3739538238d3a90a2cf3b695d891379a4c1ea5a61e1",
+    "hearthcroft": "52287c3e08e91ea1145f2e777922485168d8705a9d4292f79a61ec8ed5f814fd",
+    "reedfall": "3b81b29441899a655d361aeed63417933a4394cb1c8642638e32b0408b551e63",
+    "ringholm": "0173e84dbd9b11c6489f2216c1203dbb17053a8ac548d8fa4309afb5501be5d5"
    },
    "styleVersion": 4,
    "supersample": 1,

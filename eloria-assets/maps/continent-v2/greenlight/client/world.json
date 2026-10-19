@@ -23,8 +23,8 @@
     -444.0
    ],
    "max": [
-    431.0,
-    118.8054384765625,
+    305.0,
+    58.16673226928711,
     444.0
    ]
   },
@@ -35,8 +35,8 @@
     -444.0
    ],
    "max": [
-    431.0,
-    118.8054384765625,
+    305.0,
+    58.16673226928711,
     444.0
    ]
   },
@@ -47,8 +47,8 @@
     -444.0
    ],
    "max": [
-    431.0,
-    118.8054384765625,
+    305.0,
+    58.16673226928711,
     444.0
    ]
   },
@@ -70,7 +70,7 @@
    0,
    0
   ],
-  "walkingHeight": -0.3,
+  "walkingHeight": 2.5,
   "invertServerY": true,
   "serverStorageVersion": 1,
   "serverTileMin": [
@@ -91,43 +91,41 @@
  "spawnPoints": [
   {
    "default": true,
-   "id": "generated-arrival-greenlight",
+   "id": "greenlight--arrival",
    "position": [
-    38.5,
-    -0.3,
-    87.5
+    16.5,
+    2.5,
+    149.5
    ],
    "facing": [
+    -1.0,
     0.0,
-    0.0,
-    -1.0
+    0.0
    ],
    "serverTile": [
-    473,
-    360
-   ],
-   "generated": true
+    451,
+    298
+   ]
   }
  ],
  "spawns": [
   {
    "default": true,
-   "id": "generated-arrival-greenlight",
+   "id": "greenlight--arrival",
    "position": [
-    38.5,
-    -0.3,
-    87.5
+    16.5,
+    2.5,
+    149.5
    ],
    "facing": [
+    -1.0,
     0.0,
-    0.0,
-    -1.0
+    0.0
    ],
    "serverTile": [
-    473,
-    360
-   ],
-   "generated": true
+    451,
+    298
+   ]
   }
  ],
  "collision": {
@@ -153,8 +151,8 @@
    448.0
   ],
   "heightEncoding": {
-   "origin": -0.8202656055156421,
-   "step": 0.47040702349583624,
+   "origin": -0.5805634825891657,
+   "step": 0.2307568795448942,
    "range": [
     1,
     255
@@ -169,25 +167,25 @@
    "height": 2.1,
    "halfCellWidth": 0.5
   },
-  "walkableCells": 237877,
-  "walkableFraction": 0.073419,
-  "sha256": "2a774f28f8b29d6075ff89c13829b0831ec3fd2c1fa58262ca2ef776b8b5aa74",
+  "walkableCells": 427228,
+  "walkableFraction": 0.13186,
+  "sha256": "ecce6576638b5a9d8133573f6e88fc1b8b9f0594f3cba092ceb05ccbed197338",
   "exportStatistics": {
-   "walkTriangles": 59148,
-   "structuralMeshes": 265,
-   "structuralPlacements": 258,
-   "structuralTriangles": 462670,
-   "structuralTrianglesTested": 423694,
-   "ownCells": 2001694,
-   "deckCells": 56156,
-   "steepCells": 94285,
-   "waterCells": 1712064,
-   "structuralCells": 9536,
-   "crossSeamSolidCells": 36,
+   "walkTriangles": 49458,
+   "structuralMeshes": 176,
+   "structuralPlacements": 169,
+   "structuralTriangles": 274637,
+   "structuralTrianglesTested": 241010,
+   "ownCells": 1754662,
+   "deckCells": 20662,
+   "steepCells": 50354,
+   "waterCells": 1305679,
+   "structuralCells": 4240,
+   "crossSeamSolidCells": 727,
    "harvestNodeTiles": 37,
    "noGroundCells": 0,
-   "seamCollarCells": 1192,
-   "ownWalkableCells": 236685
+   "seamCollarCells": 1448,
+   "ownWalkableCells": 425780
   },
   "seamCollar": {
    "boarsend": {
@@ -206,14 +204,24 @@
     "closedByTheNeighbour": 964,
     "closedByThisMapsSolids": 0,
     "closedByThirdMapsSolids": 0,
+    "droppedByTheHeightScale": 1,
+    "walkableCells": 579,
+    "walkableTiles": 70
+   },
+   "coilmere": {
+    "cells": 2356,
+    "openCells": 0,
+    "closedByTheNeighbour": 2356,
+    "closedByThisMapsSolids": 0,
+    "closedByThirdMapsSolids": 0,
     "droppedByTheHeightScale": 0,
-    "walkableCells": 580,
-    "walkableTiles": 71
+    "walkableCells": 0,
+    "walkableTiles": 0
    },
    "ravenhead": {
-    "cells": 3554,
+    "cells": 3050,
     "openCells": 0,
-    "closedByTheNeighbour": 3554,
+    "closedByTheNeighbour": 3050,
     "closedByThisMapsSolids": 0,
     "closedByThirdMapsSolids": 0,
     "droppedByTheHeightScale": 0,
@@ -222,88 +230,86 @@
    },
    "reedfall": {
     "cells": 2234,
-    "openCells": 543,
-    "closedByTheNeighbour": 1691,
+    "openCells": 878,
+    "closedByTheNeighbour": 1356,
     "closedByThisMapsSolids": 0,
     "closedByThirdMapsSolids": 0,
-    "droppedByTheHeightScale": 0,
-    "walkableCells": 543,
-    "walkableTiles": 94
-   },
-   "spindle_hill": {
-    "cells": 2356,
-    "openCells": 69,
-    "closedByTheNeighbour": 2287,
-    "closedByThisMapsSolids": 0,
-    "closedByThirdMapsSolids": 0,
-    "droppedByTheHeightScale": 0,
-    "walkableCells": 69,
-    "walkableTiles": 16
+    "droppedByTheHeightScale": 9,
+    "walkableCells": 869,
+    "walkableTiles": 131
    }
   },
-  "sourceSnapshotSha256": "b7470ebc6891ad15f40c41b2a2962847dff598cc8d8778c004f3725d0c7f6c64",
-  "sourceSceneSha256": "fcaef7c95e6c17e0e469c638959b1d741c118823e59c11adcf32d5f3d265e851",
+  "sourceSnapshotSha256": "76835398a2921879866d5dea6be8b7b9bc783c70bdb6102e30f69a4d7d60d7c1",
+  "sourceSceneSha256": "163680f7f6f6fdfe10da0c24a621f28e63f9ba0cf311b24ee76c194a939a10bd",
   "groupExport": {
    "maps": {
     "boarsend": {
-     "snapshotSha256": "c035922833b93b8224e3707f5e5ed7ab26d6f46551e1176378b65194573cbcaf",
-     "servedGridSha256": "de505a4016f4a9c522eaa2605253bbcfc889db8cbeb8efd993db07f24c6a7508"
+     "snapshotSha256": "538b13771f27d603253bf94ea9a8aef35008dacf01bcfbad694c45ff18d20722",
+     "servedGridSha256": "24688a4614f365aa2bc65c0aa6aa31fcfef793be9c30ac41e8f61ff43710d47d"
     },
     "brambleshaw": {
-     "snapshotSha256": "0b139d805e65cb75eebcf628b4bf76c607982a349a47cf25fcd890768d4301e8",
-     "servedGridSha256": "21398d4aecf56c4ce04e22992a52c72e3cd8469a070d607e0126b3ad1d8e726b"
+     "snapshotSha256": "807460f17eaf362281735df88020cb68ddd7a4c2801c0e6db85beb18d6276868",
+     "servedGridSha256": "acb08a5a10b1aa36beef403b058dc8b142f41076c87e621bf2558b9ec8496775"
+    },
+    "coilmere": {
+     "snapshotSha256": "5053be9ce02595b56a091c5665b43e4ce57431c48a875d212a8bceea9a815381",
+     "servedGridSha256": "fa2c3922d84217c4561de26561ffc98644682b2e2a0a30bbe3209df141cb335a"
     },
     "greenlight": {
-     "snapshotSha256": "b7470ebc6891ad15f40c41b2a2962847dff598cc8d8778c004f3725d0c7f6c64",
-     "servedGridSha256": "a3d32acee25dc4ea4e92036992fd77d3e63ffea2b35f17b9c013aa41f3368871"
+     "snapshotSha256": "76835398a2921879866d5dea6be8b7b9bc783c70bdb6102e30f69a4d7d60d7c1",
+     "servedGridSha256": "360a002fc6b23e685f49e8ad3aac33366080d381984d092a99efa0d9aeb7fec1"
     },
     "hearthcroft": {
-     "snapshotSha256": "7be7866d34d26ce860ab7da67c8b9d0be423720c3db9c73ed4c4d581a76ad892",
-     "servedGridSha256": "58e799dc16d3a19e3646d170ceaaa9b848824d13a1fce5441ba2a5fbaf5c0af1"
+     "snapshotSha256": "0a62004d7d3bb703074279c52568002e4a7a5061c926794fcc89a28acd7620f2",
+     "servedGridSha256": "bcf5d2d3eef578f97c6d891af73ae4ab15cafb7ef9cbc7c00ca6dd1ecf03283f"
+    },
+    "hornmere": {
+     "snapshotSha256": "250272f738721b2530dfdbcdc9cf0e1bfb83080ef8d596e68a225c40d90913e3",
+     "servedGridSha256": "a75ef4aef1833fa51b925f2976853b43d0a5a19ee525ec95f4349e9c957365af"
     },
     "landfall": {
-     "snapshotSha256": "6da556f0c616d9ff9840bb4e70653cc7d58da915fe544d415d7e3d9aea4b117c",
+     "snapshotSha256": "b805145edc7538ee41b7853e5cb995422d007ba00aca8222cba775667d32bf41",
      "servedGridSha256": "54d03428d7c1490fdb0c9dbaf13e2858297b6936edd0b8f6042c66e6721a4e05"
     },
     "pinebrow": {
-     "snapshotSha256": "4df0601f3af2e21fcd75ac06e51571121e6b733aae9098c76366f6c26baf4745",
+     "snapshotSha256": "04f65b546cf80fb9b21df34c9fb89fffea4b02c304b3dd146153676bf9a3031d",
      "servedGridSha256": "973e5eae3a7438e6abdafc4b5669ab7d0a426cf2cb699fd2cd31983913c2e67f"
     },
     "ravenhead": {
-     "snapshotSha256": "543fe3ebfde3cb1e10d347c71ea93808abc444eeb3c43c238611e08dba1dfd4b",
-     "servedGridSha256": "4e1b6c5a7f2e42b95e6802315db6ee89542dfb381e1231efbbc02b5faa46c7d7"
+     "snapshotSha256": "c56e6f123e06fed54af85c548a1c9925a0585d14b3269567f3a799bd03bdb7f4",
+     "servedGridSha256": "2cd98a612fc7f3d8eba226101b3afc0da668405023dd1bf5f0a20277f35277fd"
     },
     "reedfall": {
-     "snapshotSha256": "87ada12425182383011848c88453f48714f4d09f31b1009a39f5141b0f717ccf",
-     "servedGridSha256": "76507d6ce44bbeedc631268f8f08a372b0835af98a67bc7865a89a75fedb6661"
+     "snapshotSha256": "42d268ab4362910cf8a06e7c183285881a1dec4778ac8269c31d61fcd8803d15",
+     "servedGridSha256": "ee41e7cce43c9fe99dff25f43ff4ee7745e21599d51346a83909d8d422dfb520"
     },
     "ringholm": {
-     "snapshotSha256": "7887d2c05a5d200bf149ada54455883eae6d4fe9ebcf3c636cebe3d9f692a47e",
-     "servedGridSha256": "6887cd8180d45e12e375dfbfc47e653d8ebc08acf16379060409ef87176cab9b"
+     "snapshotSha256": "df2f31ba248aa2ff794c1e501166b15ef315c4e42c1c8bb60c193afd7f075e8a",
+     "servedGridSha256": "20888d14a79cd5130e67a9ac022421fe55d4d2ea38f6bd9ada5dc4b7c04ed2cc"
     },
     "saltsound": {
-     "snapshotSha256": "40a518fde675ca3f5a137d27499532b7bee518a626e5a9e9ed8721a647c7a8a2",
-     "servedGridSha256": "7a0a730620cf75859607dac8d5b889cf5f95108669859818c45acec7c9512117"
-    },
-    "spindle_hill": {
-     "snapshotSha256": "22672680b09bd9517851625e82fb6435824d5fc8ec33637bdb7b077691fbf517",
-     "servedGridSha256": "d61dc0e3f687ccd64b6a6a28230d88fa630982ed21ea4ae4b830823275e8ca18"
+     "snapshotSha256": "f4d31a32c8637ac00947d0fea0bd83afb0303cb5bfb65c551f0116a5d37fa2e2",
+     "servedGridSha256": "f97e4e73a63f3f8aedad3491a42c6ebb36ec0fff34278c46de94be18dfcf68ff"
     },
     "stagheath": {
-     "snapshotSha256": "01fd36d6217cea98a4974675c85fc4a3c0b9b08b64ec499bdf3beae529bcb690",
-     "servedGridSha256": "03eb2cbda049deadcb6bd27fe09e2c8c88f16cb8f45a3307f0868236ba221bce"
+     "snapshotSha256": "a7026f7d8f0643198b6c91008a7d041330244f903bd8e7d4a3090a96e2d8f83e",
+     "servedGridSha256": "c8c2315df8baeb6b0178fa5e10518c6e7ade4a184bc579f995b915a73fa95a27"
     },
-    "tollholm": {
-     "snapshotSha256": "1f13323fcd0b291d0237d66d5da8d5cd08f7ca6eb4330e75b9e67a91a4c9672b",
-     "servedGridSha256": "314200041fcec74f570e7cf411274f48ca723ddc8b9871656f690342b6c6041b"
+    "suncoil": {
+     "snapshotSha256": "7c985436894a489c64d20f25478c206397fed931be83616c511c9cfec3071101",
+     "servedGridSha256": "83ba3dc7d64f7075e3622516fb87ef7a30d11db3ab90c1f44e3e5b813fc93658"
     },
     "twinbrook": {
-     "snapshotSha256": "bf2169d255bcb76901d755c8735f62fc4af305e0f400f81024ef0f71be6563f6",
+     "snapshotSha256": "d834c98189d94cad427a2ab5fd5e385a95afa476f02f6a1f0f1943e2e5cf225c",
      "servedGridSha256": "ef5816720d690cda2880b9d0a9a909c0b22f9d00d483f2bf3be1c3c9aa4926c0"
     },
     "warrenmead": {
-     "snapshotSha256": "f5af39fca39daabdeb52f894eeefde0ef825136047f8b00f727d9b429cbfb87e",
+     "snapshotSha256": "e51eb854d061f7ae9cee1c4c295f34562c623d5548e6401c252c492e0d09dcdd",
      "servedGridSha256": "a5caa315c36b5fa0223c8fd6112b8d775e4db2444a746336ccd031012af4cb04"
+    },
+    "whitepeak": {
+     "snapshotSha256": "18533178070aaa2f26dfea156808d16a8dca7b0a1e1ae40c5800dda81d023c6c",
+     "servedGridSha256": "ca662f32791dc85be0deb56f70097ae29be2e73f42ee36f78359dddc3f5f8ee7"
     }
    }
   },
@@ -316,8 +322,8 @@
    "originMetres": -100.0,
    "width": 900,
    "height": 900,
-   "openTiles": 57393,
-   "sha256": "a3d32acee25dc4ea4e92036992fd77d3e63ffea2b35f17b9c013aa41f3368871"
+   "openTiles": 105299,
+   "sha256": "360a002fc6b23e685f49e8ad3aac33366080d381984d092a99efa0d9aeb7fec1"
   },
   "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
  },
@@ -328,7 +334,7 @@
   ],
   "terrainConforming": true,
   "authority": "server",
-  "defaultSpawn": "generated-arrival-greenlight"
+  "defaultSpawn": "greenlight--arrival"
  },
  "landmarks": [
   {
@@ -1310,16 +1316,20 @@
     8259.0
    ],
    [
-    2437.0,
+    2311.0,
     8259.0
    ],
    [
-    2437.0,
+    2311.0,
     7671.0
    ],
    [
-    1899.0,
+    2001.0,
     7671.0
+   ],
+   [
+    1961.0,
+    7631.0
    ],
    [
     1849.0,
@@ -1353,16 +1363,20 @@
      8259.0
     ],
     [
-     2437.0,
+     2311.0,
      8259.0
     ],
     [
-     2437.0,
+     2311.0,
      7671.0
     ],
     [
-     1899.0,
+     2001.0,
      7671.0
+    ],
+    [
+     1961.0,
+     7631.0
     ],
     [
      1849.0,
@@ -1396,8 +1410,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "b7470ebc6891ad15f40c41b2a2962847dff598cc8d8778c004f3725d0c7f6c64",
-  "sceneSha256": "fcaef7c95e6c17e0e469c638959b1d741c118823e59c11adcf32d5f3d265e851"
+  "snapshotSha256": "76835398a2921879866d5dea6be8b7b9bc783c70bdb6102e30f69a4d7d60d7c1",
+  "sceneSha256": "163680f7f6f6fdfe10da0c24a621f28e63f9ba0cf311b24ee76c194a939a10bd"
  },
  "externalResources": {
   "../../_continent_v2/shared-assets/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",
@@ -1414,7 +1428,6 @@
   "../../_continent_v2/shared-assets/0d8a52c30fc96c584b2790f06c2f356b2e73d7dafe764125db7a421c58ac2c71.jpg": "0d8a52c30fc96c584b2790f06c2f356b2e73d7dafe764125db7a421c58ac2c71",
   "../../_continent_v2/shared-assets/0d9d2634a5109144825be5c219ec149f46cf0e2e7b23c5cb12323fa630eb5050.jpg": "0d9d2634a5109144825be5c219ec149f46cf0e2e7b23c5cb12323fa630eb5050",
   "../../_continent_v2/shared-assets/0dcfd9fbfcdd99bc8d7c72582bc6a135e50ef75758c3daa0edbda89ce14b7bda.jpg": "0dcfd9fbfcdd99bc8d7c72582bc6a135e50ef75758c3daa0edbda89ce14b7bda",
-  "../../_continent_v2/shared-assets/102444b3267f4ff14ca08adf1ded3218be575d226566d3548c713c66900f708b.jpg": "102444b3267f4ff14ca08adf1ded3218be575d226566d3548c713c66900f708b",
   "../../_continent_v2/shared-assets/10b24c1c2c5c760c9dde64992c2fe3789e63ffc8477a72572ccb70fe2485c568.jpg": "10b24c1c2c5c760c9dde64992c2fe3789e63ffc8477a72572ccb70fe2485c568",
   "../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
   "../../_continent_v2/shared-assets/131fcb17bdcb1bb6f243b5874e1e81f2f1bfcfc41b8ff92ac2b3b13589f0e07f.jpg": "131fcb17bdcb1bb6f243b5874e1e81f2f1bfcfc41b8ff92ac2b3b13589f0e07f",
@@ -1448,6 +1461,7 @@
   "../../_continent_v2/shared-assets/3a1ccf5d4200647c3223fc52d8b6ecf82fddb65440ee0e004d10667f12136912.jpg": "3a1ccf5d4200647c3223fc52d8b6ecf82fddb65440ee0e004d10667f12136912",
   "../../_continent_v2/shared-assets/3af449a12ffa6c1b7c1aea03e8cbf7f0d8e36a1266a5be3586e39342d54465c8.jpg": "3af449a12ffa6c1b7c1aea03e8cbf7f0d8e36a1266a5be3586e39342d54465c8",
   "../../_continent_v2/shared-assets/3bc40dac25ea7c6cd6a8b8419747545ff276986a467398da22c074b5a3177f5f.jpg": "3bc40dac25ea7c6cd6a8b8419747545ff276986a467398da22c074b5a3177f5f",
+  "../../_continent_v2/shared-assets/3c3c70682bb8b216cdca26a17b83df9847aad9533cb0f565cb4d78ff431e79d3.jpg": "3c3c70682bb8b216cdca26a17b83df9847aad9533cb0f565cb4d78ff431e79d3",
   "../../_continent_v2/shared-assets/3c43eb8ac52f16230e43621b9a95eb709fa23b4c5f0f784c7270e609b142b37e.jpg": "3c43eb8ac52f16230e43621b9a95eb709fa23b4c5f0f784c7270e609b142b37e",
   "../../_continent_v2/shared-assets/3c622920c6d7fc2326bd512a17746ebe859cfa77a7d7c1884e56848b6c7277e2.jpg": "3c622920c6d7fc2326bd512a17746ebe859cfa77a7d7c1884e56848b6c7277e2",
   "../../_continent_v2/shared-assets/3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383.jpg": "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383",
@@ -1508,10 +1522,8 @@
   "../../_continent_v2/shared-assets/7b613de292eef62b3c936ae04e8c11f2045332e3647d3d96c36d1c027d2645a0.jpg": "7b613de292eef62b3c936ae04e8c11f2045332e3647d3d96c36d1c027d2645a0",
   "../../_continent_v2/shared-assets/7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23.png": "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23",
   "../../_continent_v2/shared-assets/7dba71aef40544f654896b121966aea00322c50216ca84235cac9d2a5cedf983.jpg": "7dba71aef40544f654896b121966aea00322c50216ca84235cac9d2a5cedf983",
-  "../../_continent_v2/shared-assets/84284bf13694a7c412a2c899f1d91481105bcc8494a83447c0fa61e1b3091387.jpg": "84284bf13694a7c412a2c899f1d91481105bcc8494a83447c0fa61e1b3091387",
   "../../_continent_v2/shared-assets/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
   "../../_continent_v2/shared-assets/852e3935d9777073a0e794957f56876bdfbaa493c429ab2761b47c5c6c9b70b6.png": "852e3935d9777073a0e794957f56876bdfbaa493c429ab2761b47c5c6c9b70b6",
-  "../../_continent_v2/shared-assets/854f20e314f3844adcd4044ed96c0fa158af6348c0dbd6d1131aa3abac118b84.jpg": "854f20e314f3844adcd4044ed96c0fa158af6348c0dbd6d1131aa3abac118b84",
   "../../_continent_v2/shared-assets/85f4ea4a3b267c71be2d9dc30c08406c8959784d2a45f09316fa89fb94e7eae2.jpg": "85f4ea4a3b267c71be2d9dc30c08406c8959784d2a45f09316fa89fb94e7eae2",
   "../../_continent_v2/shared-assets/85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76.jpg": "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76",
   "../../_continent_v2/shared-assets/86dce5564c898fd97752333e823a5db5159dade033c9acf4bd328fba67e6fedf.jpg": "86dce5564c898fd97752333e823a5db5159dade033c9acf4bd328fba67e6fedf",
@@ -1530,6 +1542,7 @@
   "../../_continent_v2/shared-assets/96df8262bfe841e68d628584c8260a67da67742df05c990578e86e4caf529b13.jpg": "96df8262bfe841e68d628584c8260a67da67742df05c990578e86e4caf529b13",
   "../../_continent_v2/shared-assets/98b20584ae5daef8c9dbf8be688a8b170d884ed17af19269bf0cc75ae648af3a.jpg": "98b20584ae5daef8c9dbf8be688a8b170d884ed17af19269bf0cc75ae648af3a",
   "../../_continent_v2/shared-assets/99823fecf7a7b2f85cafafd909dadd21b78797e545f6f2ec8daa5c5f11bebf4e.png": "99823fecf7a7b2f85cafafd909dadd21b78797e545f6f2ec8daa5c5f11bebf4e",
+  "../../_continent_v2/shared-assets/9ccce2a30d75eb56752f8d76986ead38521d6e5d978af68cbb98cd04d858664d.jpg": "9ccce2a30d75eb56752f8d76986ead38521d6e5d978af68cbb98cd04d858664d",
   "../../_continent_v2/shared-assets/9ce6bfe2dc883989e194dc9245efa8c4b7918ec6ed522f56f4d4cbc7a411a1bd.jpg": "9ce6bfe2dc883989e194dc9245efa8c4b7918ec6ed522f56f4d4cbc7a411a1bd",
   "../../_continent_v2/shared-assets/9f5dc1435a23526f1961bf9e1f1ea9a5bee4a8987d705a0b7f60f66f282d5d12.jpg": "9f5dc1435a23526f1961bf9e1f1ea9a5bee4a8987d705a0b7f60f66f282d5d12",
   "../../_continent_v2/shared-assets/a083e955b68f9aecf8c73fe43240e2122acb08cb7bf70726741af53273e66adf.jpg": "a083e955b68f9aecf8c73fe43240e2122acb08cb7bf70726741af53273e66adf",
@@ -1546,7 +1559,6 @@
   "../../_continent_v2/shared-assets/ade31f5d089f4352fe3c56d74b00dba52c7163490ed727779bdb9b0f185c45af.jpg": "ade31f5d089f4352fe3c56d74b00dba52c7163490ed727779bdb9b0f185c45af",
   "../../_continent_v2/shared-assets/aeb53d3b047e52e351e7bdde418f58ac054702720abcf73b8387188700f1da28.jpg": "aeb53d3b047e52e351e7bdde418f58ac054702720abcf73b8387188700f1da28",
   "../../_continent_v2/shared-assets/af1a524af07595a62b17df4238c487af977059014de4c9c735755c7e48463174.jpg": "af1a524af07595a62b17df4238c487af977059014de4c9c735755c7e48463174",
-  "../../_continent_v2/shared-assets/b26cdb8f7f8b258efc6c9dc97d3f969d7efbdc8a88478b1e89a5ed15de7f3032.jpg": "b26cdb8f7f8b258efc6c9dc97d3f969d7efbdc8a88478b1e89a5ed15de7f3032",
   "../../_continent_v2/shared-assets/b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4.jpg": "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4",
   "../../_continent_v2/shared-assets/b484a672d527182a64ff7de765a8821db0d1b77eb1e1cbb9ea3b6a1408937afc.jpg": "b484a672d527182a64ff7de765a8821db0d1b77eb1e1cbb9ea3b6a1408937afc",
   "../../_continent_v2/shared-assets/b5a465b03d189435a8bb85e355150be38c607ac99976ea0da2135e61f13802dc.jpg": "b5a465b03d189435a8bb85e355150be38c607ac99976ea0da2135e61f13802dc",
@@ -1571,6 +1583,7 @@
   "../../_continent_v2/shared-assets/d6337c94bc95e07d4ca29e1bde7e6cabe183bbe46c32663a50251a0e110a79f8.jpg": "d6337c94bc95e07d4ca29e1bde7e6cabe183bbe46c32663a50251a0e110a79f8",
   "../../_continent_v2/shared-assets/d8c2578d76c1c26df32c7d7827db41910434f86c66d0c111cb8a596efff00b78.png": "d8c2578d76c1c26df32c7d7827db41910434f86c66d0c111cb8a596efff00b78",
   "../../_continent_v2/shared-assets/dddf3915a382004fc8ba9527f24e469cd6f0e2731e9c35610bc86e83969e160e.jpg": "dddf3915a382004fc8ba9527f24e469cd6f0e2731e9c35610bc86e83969e160e",
+  "../../_continent_v2/shared-assets/e327ff1f773147b416049c74f3b51b8ff2c8c1c0b5db66bfb43177168de6dc33.jpg": "e327ff1f773147b416049c74f3b51b8ff2c8c1c0b5db66bfb43177168de6dc33",
   "../../_continent_v2/shared-assets/e4586086a2fa390ea09e1b6983f1e7fea7780893fe6bfce5bafee807666c8c33.jpg": "e4586086a2fa390ea09e1b6983f1e7fea7780893fe6bfce5bafee807666c8c33",
   "../../_continent_v2/shared-assets/e7508123c3a9f078ecd81d2bbd3c1299789a7c3c6f4b1551c41bf8dc36109c45.jpg": "e7508123c3a9f078ecd81d2bbd3c1299789a7c3c6f4b1551c41bf8dc36109c45",
   "../../_continent_v2/shared-assets/e756622340edb55cfaed2dcb9a246798ea95d930adad68b0958d3cdc81558ec1.jpg": "e756622340edb55cfaed2dcb9a246798ea95d930adad68b0958d3cdc81558ec1",
@@ -1591,7 +1604,6 @@
   "../../_continent_v2/shared-assets/f7f1c4a381b70577c73c11e8e5f7ebb85763c59b2b8132afeb6fb5da6e3070c6.jpg": "f7f1c4a381b70577c73c11e8e5f7ebb85763c59b2b8132afeb6fb5da6e3070c6",
   "../../_continent_v2/shared-assets/f939ab15d5a53bf71f59250439785cdca72f2446455d2088e2d5b62d8918df07.png": "f939ab15d5a53bf71f59250439785cdca72f2446455d2088e2d5b62d8918df07",
   "../../_continent_v2/shared-assets/f957d793d6fd3dd7c288f0084ff108fd21196572b46fa0e6ed7213741f1d455f.jpg": "f957d793d6fd3dd7c288f0084ff108fd21196572b46fa0e6ed7213741f1d455f",
-  "../../_continent_v2/shared-assets/fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782.jpg": "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782",
   "../../_continent_v2/shared-assets/faa458b17899aefd58b5e7a19fe4e75651fe4c29d0e6564878f91db98d542540.jpg": "faa458b17899aefd58b5e7a19fe4e75651fe4c29d0e6564878f91db98d542540"
  },
  "streamingChunks": {
@@ -1646,19 +1658,18 @@
       -120.0
      ]
     },
-    "estimatedResidentBytes": 42882454,
-    "glbBytes": 852028,
-    "geometryResidentBytes": 852028,
-    "placements": 3,
-    "triangles": 13265,
+    "estimatedResidentBytes": 20240456,
+    "glbBytes": 579652,
+    "geometryResidentBytes": 579652,
+    "placements": 0,
+    "triangles": 6743,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
      "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805": 5592406,
      "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5": 1398102,
-     "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622
+     "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7": 1398102
     }
    },
    {
@@ -1667,35 +1678,30 @@
     "bounds": {
      "min": [
       -383.0,
-      -3.527336835861206,
-      -262.0
+      -2.484269009999643,
+      -260.0
      ],
      "max": [
       -287.0,
       42.479575592041016,
-      -197.81870740287124
+      -200.0
      ]
     },
-    "estimatedResidentBytes": 45340196,
-    "glbBytes": 196556,
-    "geometryResidentBytes": 196556,
-    "placements": 2,
-    "triangles": 8579,
+    "estimatedResidentBytes": 28364668,
+    "glbBytes": 194232,
+    "geometryResidentBytes": 194232,
+    "placements": 1,
+    "triangles": 5799,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
      "c0e2086f4cda56fc52679e83a56211685fb8ee72753bb448fb2fee02a29a2292": 5592406,
      "a12f3bdd2cc89c0da7e908fb9490c7afd1fee90d6aa2660305e67ccf1f7322f1": 5592406,
-     "47a0643ce9ae9614da54b1140c1ac1c22b6f9bc8dd6c024d2fe403da30346d0f": 5592406,
-     "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383": 5592406,
-     "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b": 5592406,
-     "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce": 5592406
+     "47a0643ce9ae9614da54b1140c1ac1c22b6f9bc8dd6c024d2fe403da30346d0f": 5592406
     },
     "sharedMeshResidentBytes": {
-     "7a4db57811508eaafb1fe0c268c0f0a85a63c26bba6205d7a2c85286f5f786ac": 121024,
-     "aa262578b9f92c6964daa02e396784ca9422a71103849e5f87c2f097dc8954ac": 108604
+     "7a4db57811508eaafb1fe0c268c0f0a85a63c26bba6205d7a2c85286f5f786ac": 121024
     }
    },
    {
@@ -1703,21 +1709,21 @@
     "manifest": "chunks/06_08/world.json",
     "bounds": {
      "min": [
-      -389.7277822494507,
+      -383.0,
       -3.78515387079198,
       -200.0
      ],
      "max": [
       -286.14100111391014,
-      36.46376609802246,
+      34.61325021362305,
       -99.97072114502066
      ]
     },
-    "estimatedResidentBytes": 204620762,
-    "glbBytes": 1596636,
-    "geometryResidentBytes": 1596636,
-    "placements": 58,
-    "triangles": 106886,
+    "estimatedResidentBytes": 181245704,
+    "glbBytes": 591200,
+    "geometryResidentBytes": 591200,
+    "placements": 43,
+    "triangles": 82756,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -1770,8 +1776,7 @@
      "b98686741c33af360672376041809f4cfbd6aaa9fec8fa730227ce9e9b6a44f1": 1398102,
      "10b24c1c2c5c760c9dde64992c2fe3789e63ffc8477a72572ccb70fe2485c568": 1398102,
      "59bc3e705faf7eddec0216fd762ba1fb09c2c363230cbca5c9ea83cdceffd500": 1398102,
-     "2c98c009b191d4eb9d6de6d27c577c19fdd393b0d6f8d4bb82fd668143164cd9": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622
+     "2c98c009b191d4eb9d6de6d27c577c19fdd393b0d6f8d4bb82fd668143164cd9": 1398102
     },
     "sharedMeshResidentBytes": {
      "22eb8d5195744cd789d754e300fccb037a6f12885596d8360b2ac29f4d0d5f04": 103988,
@@ -2044,7 +2049,7 @@
     "bounds": {
      "min": [
       -263.0,
-      -3.4761955738067627,
+      -3.4684152603149414,
       -392.0
      ],
      "max": [
@@ -2071,7 +2076,7 @@
     "bounds": {
      "min": [
       -287.0,
-      -3.492238759994507,
+      -3.4916040301322937,
       -296.0
      ],
      "max": [
@@ -2080,19 +2085,16 @@
       -200.0
      ]
     },
-    "estimatedResidentBytes": 62575882,
-    "glbBytes": 548240,
-    "geometryResidentBytes": 548240,
-    "placements": 4,
-    "triangles": 19964,
+    "estimatedResidentBytes": 45676288,
+    "glbBytes": 546888,
+    "geometryResidentBytes": 546888,
+    "placements": 2,
+    "triangles": 14400,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
-     "c0e2086f4cda56fc52679e83a56211685fb8ee72753bb448fb2fee02a29a2292": 5592406,
-     "a12f3bdd2cc89c0da7e908fb9490c7afd1fee90d6aa2660305e67ccf1f7322f1": 5592406,
-     "47a0643ce9ae9614da54b1140c1ac1c22b6f9bc8dd6c024d2fe403da30346d0f": 5592406,
      "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d": 5592406,
      "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92": 5592406,
      "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee": 5592406,
@@ -2102,8 +2104,7 @@
     },
     "sharedMeshResidentBytes": {
      "227af73fdff40bf0984a71fd5ab6e52a37fd51663d85e0cc3a7b91ab79416640": 106816,
-     "28915a615734b4c4d12b874819d97dc6a29008d55dd9712a43194136e240a1bb": 108572,
-     "7a4db57811508eaafb1fe0c268c0f0a85a63c26bba6205d7a2c85286f5f786ac": 121024
+     "28915a615734b4c4d12b874819d97dc6a29008d55dd9712a43194136e240a1bb": 108572
     }
    },
    {
@@ -2111,21 +2112,21 @@
     "manifest": "chunks/07_08/world.json",
     "bounds": {
      "min": [
-      -295.83902645111084,
-      -6.688269138336182,
+      -287.0,
+      -1.6269999742507935,
       -200.0
      ],
      "max": [
       -191.0,
       13.571599960327148,
-      -98.96598434448242
+      -102.9368517721978
      ]
     },
-    "estimatedResidentBytes": 135857246,
-    "glbBytes": 679272,
-    "geometryResidentBytes": 679272,
-    "placements": 32,
-    "triangles": 39572,
+    "estimatedResidentBytes": 113396732,
+    "glbBytes": 588380,
+    "geometryResidentBytes": 588380,
+    "placements": 31,
+    "triangles": 37398,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2166,8 +2167,7 @@
      "583f3b8722898b5bda04598fd13dd342bac11cb42fd0d9b24cd3d321e14c8feb": 1398102,
      "d60ec1cde1705a44c1ae392e4c7f5c80a3e40f1fe41af7f332fe89e5e179a09b": 1398102,
      "85fd322f578538a421032124e03cead4f021d78b3a61ad8d6ba17066bc2f5f76": 1398102,
-     "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622
+     "01300e168e2edc0d77115560a01872fd2c6844d0bbce53894344b1ce828703ac": 1398102
     },
     "sharedMeshResidentBytes": {
      "172cfaaa0772b8bb77ac4f2d380a6825b7de6897fe070d816bdde9b2ac72fc20": 28556,
@@ -2191,19 +2191,19 @@
      "min": [
       -287.0,
       -16.0,
-      -111.78988933563232
+      -107.79250181056081
      ],
      "max": [
-      -188.6567211151123,
+      -190.75057986398082,
       15.168100595474243,
       -8.0
      ]
     },
-    "estimatedResidentBytes": 124281830,
-    "glbBytes": 1590992,
-    "geometryResidentBytes": 1590992,
-    "placements": 37,
-    "triangles": 62625,
+    "estimatedResidentBytes": 100982972,
+    "glbBytes": 661756,
+    "geometryResidentBytes": 661756,
+    "placements": 27,
+    "triangles": 40247,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2248,7 +2248,6 @@
      "71d3e90449d0d0aa2f31a3305567d26311e926b1bd75eb2d519876229fca51e5": 1398102,
      "0d8a52c30fc96c584b2790f06c2f356b2e73d7dafe764125db7a421c58ac2c71": 1398102,
      "3c622920c6d7fc2326bd512a17746ebe859cfa77a7d7c1884e56848b6c7277e2": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622,
      "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
      "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
      "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102
@@ -2280,13 +2279,13 @@
      ],
      "max": [
       -191.0,
-      0.0,
+      0.6060000238418579,
       88.0
      ]
     },
-    "estimatedResidentBytes": 11930256,
-    "glbBytes": 570680,
-    "geometryResidentBytes": 570680,
+    "estimatedResidentBytes": 11930260,
+    "glbBytes": 570684,
+    "geometryResidentBytes": 570684,
     "placements": 0,
     "triangles": 9218,
     "sharedResourceResidentBytes": {
@@ -2414,16 +2413,16 @@
       -444.0
      ],
      "max": [
-      -148.33333333333326,
+      -134.5999999999999,
       0.0,
       -392.0
      ]
     },
-    "estimatedResidentBytes": 11438108,
-    "glbBytes": 78532,
-    "geometryResidentBytes": 78532,
+    "estimatedResidentBytes": 11460512,
+    "glbBytes": 100936,
+    "geometryResidentBytes": 100936,
     "placements": 0,
-    "triangles": 1180,
+    "triangles": 1544,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2441,16 +2440,16 @@
       -392.0
      ],
      "max": [
-      -132.33333333333326,
+      -95.0,
       0.0,
       -296.0
      ]
     },
-    "estimatedResidentBytes": 11663432,
-    "glbBytes": 303856,
-    "geometryResidentBytes": 303856,
+    "estimatedResidentBytes": 11818768,
+    "glbBytes": 459192,
+    "geometryResidentBytes": 459192,
     "placements": 0,
-    "triangles": 4858,
+    "triangles": 7392,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2468,16 +2467,16 @@
       -296.0
      ],
      "max": [
-      -116.33333333333326,
-      0.0,
+      -95.0,
+      0.6679216799736023,
       -200.0
      ]
     },
-    "estimatedResidentBytes": 11757344,
-    "glbBytes": 397768,
-    "geometryResidentBytes": 397768,
+    "estimatedResidentBytes": 11930240,
+    "glbBytes": 570664,
+    "geometryResidentBytes": 570664,
     "placements": 0,
-    "triangles": 6394,
+    "triangles": 9218,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2491,20 +2490,20 @@
     "bounds": {
      "min": [
       -191.0,
-      -16.0,
+      -4.708529472351074,
       -200.0
      ],
      "max": [
       -95.0,
-      0.0,
+      0.748012619972229,
       -104.0
      ]
     },
-    "estimatedResidentBytes": 11873048,
-    "glbBytes": 513472,
-    "geometryResidentBytes": 513472,
+    "estimatedResidentBytes": 11930248,
+    "glbBytes": 570672,
+    "geometryResidentBytes": 570672,
     "placements": 0,
-    "triangles": 8283,
+    "triangles": 9218,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2517,21 +2516,21 @@
     "manifest": "chunks/08_09/world.json",
     "bounds": {
      "min": [
-      -198.85844230651855,
-      -16.0,
+      -191.33331029916326,
+      0.0,
       -104.0
      ],
      "max": [
       -95.0,
       11.429099678993225,
-      -2.7709693908691406
+      -8.0
      ]
     },
-    "estimatedResidentBytes": 123783726,
-    "glbBytes": 1169528,
-    "geometryResidentBytes": 1169528,
-    "placements": 38,
-    "triangles": 60317,
+    "estimatedResidentBytes": 100883708,
+    "glbBytes": 639132,
+    "geometryResidentBytes": 639132,
+    "placements": 30,
+    "triangles": 47541,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2576,7 +2575,6 @@
      "71d3e90449d0d0aa2f31a3305567d26311e926b1bd75eb2d519876229fca51e5": 1398102,
      "0d8a52c30fc96c584b2790f06c2f356b2e73d7dafe764125db7a421c58ac2c71": 1398102,
      "3c622920c6d7fc2326bd512a17746ebe859cfa77a7d7c1884e56848b6c7277e2": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622,
      "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
      "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
      "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102
@@ -2603,20 +2601,20 @@
     "bounds": {
      "min": [
       -191.0,
-      -16.0,
-      -16.153683185577393
+      -3.9899344444274902,
+      -8.0
      ],
      "max": [
-      -89.01804733276367,
-      6.083739995956421,
+      -95.0,
+      3.213999927043915,
       88.0
      ]
     },
-    "estimatedResidentBytes": 39260468,
-    "glbBytes": 1123564,
-    "geometryResidentBytes": 1123564,
-    "placements": 11,
-    "triangles": 27909,
+    "estimatedResidentBytes": 16225890,
+    "glbBytes": 571380,
+    "geometryResidentBytes": 571380,
+    "placements": 1,
+    "triangles": 11615,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2624,12 +2622,9 @@
      "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
      "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
      "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
-     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622
+     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102
     },
     "sharedMeshResidentBytes": {
-     "004c8533266f829d7428166989479e824d734feddc7b1c9e55a81ef539b6e10e": 22848,
-     "07fb68229512cbf0c243951dad1b51a70b8740703bb87fb8c443f8aefd04f46d": 89924,
      "a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204": 100628
     }
    },
@@ -2644,13 +2639,13 @@
      ],
      "max": [
       -95.0,
-      0.0,
+      0.47016598558425904,
       184.0
      ]
     },
-    "estimatedResidentBytes": 11930256,
-    "glbBytes": 570680,
-    "geometryResidentBytes": 570680,
+    "estimatedResidentBytes": 11930264,
+    "glbBytes": 570688,
+    "geometryResidentBytes": 570688,
     "placements": 0,
     "triangles": 9218,
     "sharedResourceResidentBytes": {
@@ -2742,25 +2737,79 @@
     }
    },
    {
+    "id": "09_06",
+    "manifest": "chunks/09_06/world.json",
+    "bounds": {
+     "min": [
+      -95.0,
+      -2.936579704284668,
+      -300.07142857142844
+     ],
+     "max": [
+      -93.0,
+      0.0,
+      -296.0
+     ]
+    },
+    "estimatedResidentBytes": 11365492,
+    "glbBytes": 5916,
+    "geometryResidentBytes": 5916,
+    "placements": 0,
+    "triangles": 5,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "09_07",
+    "manifest": "chunks/09_07/world.json",
+    "bounds": {
+     "min": [
+      -95.0,
+      -16.0,
+      -296.0
+     ],
+     "max": [
+      -51.89230769230767,
+      0.0,
+      -200.0
+     ]
+    },
+    "estimatedResidentBytes": 11498052,
+    "glbBytes": 138476,
+    "geometryResidentBytes": 138476,
+    "placements": 0,
+    "triangles": 2149,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
     "id": "09_08",
     "manifest": "chunks/09_08/world.json",
     "bounds": {
      "min": [
       -95.0,
-      -5.63074254989624,
-      -144.0
+      -5.177818775177002,
+      -200.0
      ],
      "max": [
       1.0,
-      0.0,
+      0.9171461639404297,
       -104.0
      ]
     },
-    "estimatedResidentBytes": 11601524,
-    "glbBytes": 241948,
-    "geometryResidentBytes": 241948,
+    "estimatedResidentBytes": 11816300,
+    "glbBytes": 456724,
+    "geometryResidentBytes": 456724,
     "placements": 0,
-    "triangles": 3842,
+    "triangles": 7349,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2774,12 +2823,12 @@
     "bounds": {
      "min": [
       -95.0,
-      -16.0,
+      -5.435241222381592,
       -104.0
      ],
      "max": [
       1.0,
-      0.0,
+      0.94779767370224,
       -8.0
      ]
     },
@@ -2800,21 +2849,21 @@
     "manifest": "chunks/09_10/world.json",
     "bounds": {
      "min": [
-      -102.44404315948486,
-      -17.299999713897705,
+      -95.0,
+      -7.144000053405762,
       -8.0
      ],
      "max": [
       1.0,
-      15.490370035171509,
-      92.83220863342285
+      12.574999988079071,
+      88.0
      ]
     },
-    "estimatedResidentBytes": 78730416,
-    "glbBytes": 1915208,
-    "geometryResidentBytes": 1915208,
-    "placements": 31,
-    "triangles": 76861,
+    "estimatedResidentBytes": 50634404,
+    "glbBytes": 586788,
+    "geometryResidentBytes": 586788,
+    "placements": 9,
+    "triangles": 33420,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2840,9 +2889,6 @@
      "b5ce3df290d91d5ea774786bca5360913b9012c44fb32a560ee1bbcc934eb31e": 1398102,
      "32c657353cc78570e17516ed1e27c3cff5df911034f487fc8f135ac23d936af3": 1398102,
      "0dcfd9fbfcdd99bc8d7c72582bc6a135e50ef75758c3daa0edbda89ce14b7bda": 1398102,
-     "ec52c34aea4fad7b5c108f44f5b5b1dca2cefa2e244a41fd8bffe51bd04673d7": 1398102,
-     "98b20584ae5daef8c9dbf8be688a8b170d884ed17af19269bf0cc75ae648af3a": 1398102,
-     "3c43eb8ac52f16230e43621b9a95eb709fa23b4c5f0f784c7270e609b142b37e": 1398102,
      "234b5f4efa23f3426404663cebcd7cebb9752d858b5fdab4933d83808dfaba4e": 1398102,
      "684773c1b96676d4111e6572f4c01493e903a9fef31d2f43ec10d42d973dbae1": 1398102,
      "4647baff771d048dad023bde7625a61f478f66edda1bdb8b4596bbb894484f08": 1398102,
@@ -2852,14 +2898,10 @@
      "10b24c1c2c5c760c9dde64992c2fe3789e63ffc8477a72572ccb70fe2485c568": 1398102,
      "59bc3e705faf7eddec0216fd762ba1fb09c2c363230cbca5c9ea83cdceffd500": 1398102,
      "2c98c009b191d4eb9d6de6d27c577c19fdd393b0d6f8d4bb82fd668143164cd9": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622,
      "3af449a12ffa6c1b7c1aea03e8cbf7f0d8e36a1266a5be3586e39342d54465c8": 5592406
     },
     "sharedMeshResidentBytes": {
-     "004c8533266f829d7428166989479e824d734feddc7b1c9e55a81ef539b6e10e": 22848,
-     "07fb68229512cbf0c243951dad1b51a70b8740703bb87fb8c443f8aefd04f46d": 89924,
      "22eb8d5195744cd789d754e300fccb037a6f12885596d8360b2ac29f4d0d5f04": 103988,
-     "23e5ae8194e944f40026aade073e78199aa9d53eb4400c44a1dcd6f65913bc6d": 90892,
      "2d43f4b8d0c9942109d1036e6ef0d45a1eff9fac2ca993b9a35d70664a2085be": 100724,
      "7fc7e4e0dbe3b8db41f2991936d8bc82cc2ab3644d79f44e8a59cb05513034c7": 124932,
      "89f9c006020e3f0dd4d827361f7481814ee91125b9677215591c18d1fca64e00": 144156,
@@ -2875,20 +2917,20 @@
     "bounds": {
      "min": [
       -95.0,
-      -16.577608108520508,
-      80.46144580841064
+      -21.5,
+      88.0
      ],
      "max": [
-      6.745174407958984,
+      1.4683989249733713,
       11.819634437561035,
       184.0
      ]
     },
-    "estimatedResidentBytes": 121503826,
-    "glbBytes": 808120,
-    "geometryResidentBytes": 808120,
-    "placements": 19,
-    "triangles": 58534,
+    "estimatedResidentBytes": 145581322,
+    "glbBytes": 673476,
+    "geometryResidentBytes": 673476,
+    "placements": 27,
+    "triangles": 81608,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -2897,6 +2939,21 @@
      "e9adde18e1b92def62b1a8a83748d3ce0a32ff8c3d53753bbd363e6a9bcff951": 8386752,
      "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630": 349526,
      "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac": 349526,
+     "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68": 349526,
+     "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44": 349526,
+     "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b": 349526,
+     "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f": 349526,
+     "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23": 349526,
+     "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c": 349526,
+     "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a": 349526,
+     "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac": 349526,
+     "3c3c70682bb8b216cdca26a17b83df9847aad9533cb0f565cb4d78ff431e79d3": 5592406,
+     "e327ff1f773147b416049c74f3b51b8ff2c8c1c0b5db66bfb43177168de6dc33": 5592406,
+     "9ccce2a30d75eb56752f8d76986ead38521d6e5d978af68cbb98cd04d858664d": 5592406,
+     "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
+     "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
+     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102,
+     "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622,
      "3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb": 1398102,
      "715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f": 1398102,
      "f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f": 1398102,
@@ -2918,15 +2975,18 @@
      "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66": 1398102,
      "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e": 1398102,
      "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622,
      "8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283": 22369622
     },
     "sharedMeshResidentBytes": {
+     "0708c888855cf6484eff5ddcfb7d08a946996ffbc2df649f62e849780baa1b9c": 188224,
      "23e5ae8194e944f40026aade073e78199aa9d53eb4400c44a1dcd6f65913bc6d": 90892,
      "27853618e40ef1e926f3bc6e4bcb0a3c5ddf0a896367fc214c765e7040255057": 152668,
      "2edacdc44373407b82ae2749630cd4480e8c6005ba1c29b22774e24fcec903aa": 50504,
      "4060853adc6834fcda75ceb28b3fba79ba90c3d3cb5962088c40c917dbd63d6e": 106772,
+     "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776,
      "87c576c9dcf08d125dec4ce299e39ed8dc8eced2feefbfb5eb57539cc006a949": 281160,
+     "a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204": 100628,
+     "b3e159a636e5f63632c5eae88f612b5b9558f893ace0a2308739e654c242f5e4": 77780,
      "e8111b48daa2994a416e01bf59db2ead8fe0d3a18591c95f1263b1a194e540d0": 92652,
      "eab6772d2811eaca16707c2129ed36c9dfc8e4dc7ee254d9a9375c60ab596e8a": 186072,
      "f247af6c67932b0dbf657390cf491b934ca9d9ed37773c4d56cd4365d491477f": 24396
@@ -3041,9 +3101,9 @@
       -104.0
      ]
     },
-    "estimatedResidentBytes": 11601524,
-    "glbBytes": 241948,
-    "geometryResidentBytes": 241948,
+    "estimatedResidentBytes": 11601528,
+    "glbBytes": 241952,
+    "geometryResidentBytes": 241952,
     "placements": 0,
     "triangles": 3842,
     "sharedResourceResidentBytes": {
@@ -3068,9 +3128,9 @@
       -8.0
      ]
     },
-    "estimatedResidentBytes": 11930248,
-    "glbBytes": 570672,
-    "geometryResidentBytes": 570672,
+    "estimatedResidentBytes": 11930252,
+    "glbBytes": 570676,
+    "geometryResidentBytes": 570676,
     "placements": 0,
     "triangles": 9218,
     "sharedResourceResidentBytes": {
@@ -3091,13 +3151,13 @@
      ],
      "max": [
       97.0,
-      0.0,
+      0.5017737922668457,
       88.0
      ]
     },
-    "estimatedResidentBytes": 11930260,
-    "glbBytes": 570684,
-    "geometryResidentBytes": 570684,
+    "estimatedResidentBytes": 11930256,
+    "glbBytes": 570680,
+    "geometryResidentBytes": 570680,
     "placements": 0,
     "triangles": 9218,
     "sharedResourceResidentBytes": {
@@ -3112,7 +3172,7 @@
     "manifest": "chunks/10_11/world.json",
     "bounds": {
      "min": [
-      -3.4947328567504883,
+      -0.20000004768371582,
       -16.577608108520508,
       88.0
      ],
@@ -3122,11 +3182,11 @@
       187.19580499657891
      ]
     },
-    "estimatedResidentBytes": 231045988,
-    "glbBytes": 3581948,
-    "geometryResidentBytes": 3581948,
-    "placements": 74,
-    "triangles": 160977,
+    "estimatedResidentBytes": 208585442,
+    "glbBytes": 3491024,
+    "geometryResidentBytes": 3491024,
+    "placements": 73,
+    "triangles": 158803,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -3225,7 +3285,6 @@
      "610c64f5a20dbdaf6e0d28c0dfc22372b2365660da34cf97fc8ff43b9c0ac530": 1398102,
      "3e440c4bbe192c2a3e5e6f9eccf4480738373b7f0d256a040947a83e9286f375": 1398102,
      "0d9d2634a5109144825be5c219ec149f46cf0e2e7b23c5cb12323fa630eb5050": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622,
      "142b2e3936f453ecc0132db9ad91b5f27258da0ec0346fd38e59dd3c3818c4be": 22369622
     },
     "sharedMeshResidentBytes": {
@@ -3451,9 +3510,9 @@
       88.0
      ]
     },
-    "estimatedResidentBytes": 11930260,
-    "glbBytes": 570684,
-    "geometryResidentBytes": 570684,
+    "estimatedResidentBytes": 11930256,
+    "glbBytes": 570680,
+    "geometryResidentBytes": 570680,
     "placements": 0,
     "triangles": 9218,
     "sharedResourceResidentBytes": {
@@ -3478,11 +3537,11 @@
       184.83010691310713
      ]
     },
-    "estimatedResidentBytes": 129084470,
-    "glbBytes": 1654380,
-    "geometryResidentBytes": 1654380,
-    "placements": 36,
-    "triangles": 60116,
+    "estimatedResidentBytes": 106551132,
+    "glbBytes": 1599644,
+    "geometryResidentBytes": 1599644,
+    "placements": 29,
+    "triangles": 50768,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -3520,21 +3579,18 @@
      "6230b50e6b3eca0a0413c48a4bb172c4e32f231d48c60d98f13d672ad341088b": 1398102,
      "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
      "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
-     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622
+     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102
     },
     "sharedMeshResidentBytes": {
      "2edacdc44373407b82ae2749630cd4480e8c6005ba1c29b22774e24fcec903aa": 50504,
      "60917cbd5cb9e4a8b59ff65a33afbe02201ec2c2d47c0cfeb6dc38a46471d401": 68292,
      "78770cb5a2a72e0c9125b535dd3123f29e0b194fc7fad239ab4b80f3c87fbc77": 89548,
      "a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204": 100628,
-     "c034acd826b529670bab47a35c9b44fe2edc1e722691e70e3393c8887c61416b": 6588,
      "c33c18589f913d072c0e40ee0163e3b394389f3a769b1b2ebadccf41b769e76d": 80912,
      "c3c3113207f4a7fd6ba57455c102f9bd8fbb723e39a932db723f0fbaca12c6d8": 89820,
      "d323656f5ae2809d39dad5376b94a325baa9b1f73dcd91af901cc8caf000f090": 45888,
      "e697beb28dde2953398fad79d5ed01361afe49a3fd0224b1c38fe55529bce1e4": 70020,
-     "f247af6c67932b0dbf657390cf491b934ca9d9ed37773c4d56cd4365d491477f": 24396,
-     "f5e0150efae5a9c8ff72ff211a43598ae67886cc2b45975dd306778310bca9fe": 102392
+     "f247af6c67932b0dbf657390cf491b934ca9d9ed37773c4d56cd4365d491477f": 24396
     }
    },
    {
@@ -3819,21 +3875,21 @@
     "manifest": "chunks/12_11/world.json",
     "bounds": {
      "min": [
-      180.70001220703125,
+      193.0,
       -16.0,
       88.0
      ],
      "max": [
-      346.0,
+      289.0,
       5.099999904632568,
       184.0
      ]
     },
-    "estimatedResidentBytes": 116899900,
-    "glbBytes": 973256,
-    "geometryResidentBytes": 973256,
-    "placements": 27,
-    "triangles": 60357,
+    "estimatedResidentBytes": 93918018,
+    "glbBytes": 583772,
+    "geometryResidentBytes": 583772,
+    "placements": 14,
+    "triangles": 36409,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -3863,7 +3919,6 @@
      "10b24c1c2c5c760c9dde64992c2fe3789e63ffc8477a72572ccb70fe2485c568": 1398102,
      "59bc3e705faf7eddec0216fd762ba1fb09c2c363230cbca5c9ea83cdceffd500": 1398102,
      "2c98c009b191d4eb9d6de6d27c577c19fdd393b0d6f8d4bb82fd668143164cd9": 1398102,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622,
      "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
     },
     "sharedMeshResidentBytes": {
@@ -3872,14 +3927,10 @@
      "2d43f4b8d0c9942109d1036e6ef0d45a1eff9fac2ca993b9a35d70664a2085be": 100724,
      "2edacdc44373407b82ae2749630cd4480e8c6005ba1c29b22774e24fcec903aa": 50504,
      "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776,
-     "5b2d4d1b4ed5fe79401c568835b6be28404211dcac9b55c7eac95c97751acad1": 23852,
      "a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204": 100628,
-     "c034acd826b529670bab47a35c9b44fe2edc1e722691e70e3393c8887c61416b": 6588,
      "d3ce102f43048a57fcab933036dfd7cc389060f9bf547d84a55b1f8dca398d93": 88020,
-     "e238900b498fc1ec0ed4f54f636b039aee912c3e63d47994148cf67ac33315b4": 89944,
      "eab6772d2811eaca16707c2129ed36c9dfc8e4dc7ee254d9a9375c60ab596e8a": 186072,
-     "f247af6c67932b0dbf657390cf491b934ca9d9ed37773c4d56cd4365d491477f": 24396,
-     "f5e0150efae5a9c8ff72ff211a43598ae67886cc2b45975dd306778310bca9fe": 102392
+     "f247af6c67932b0dbf657390cf491b934ca9d9ed37773c4d56cd4365d491477f": 24396
     }
    },
    {
@@ -4159,20 +4210,20 @@
     "bounds": {
      "min": [
       289.0,
-      -7.179535865783691,
+      -7.012577533721924,
       -144.0
      ],
      "max": [
-      385.0,
+      305.0,
       0.0,
       -104.0
      ]
     },
-    "estimatedResidentBytes": 11601524,
-    "glbBytes": 241948,
-    "geometryResidentBytes": 241948,
+    "estimatedResidentBytes": 11405164,
+    "glbBytes": 45588,
+    "geometryResidentBytes": 45588,
     "placements": 0,
-    "triangles": 3842,
+    "triangles": 642,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -4190,16 +4241,16 @@
       -104.0
      ],
      "max": [
-      385.0,
+      305.0,
       0.0,
       -8.0
      ]
     },
-    "estimatedResidentBytes": 11930248,
-    "glbBytes": 570672,
-    "geometryResidentBytes": 570672,
+    "estimatedResidentBytes": 11460612,
+    "glbBytes": 101036,
+    "geometryResidentBytes": 101036,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 1538,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -4217,16 +4268,16 @@
       -8.0
      ],
      "max": [
-      385.0,
+      305.0,
       0.0,
       88.0
      ]
     },
-    "estimatedResidentBytes": 11930248,
-    "glbBytes": 570672,
-    "geometryResidentBytes": 570672,
+    "estimatedResidentBytes": 11460620,
+    "glbBytes": 101044,
+    "geometryResidentBytes": 101044,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 1538,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -4239,66 +4290,26 @@
     "manifest": "chunks/13_11/world.json",
     "bounds": {
      "min": [
-      286.9643154144287,
-      -21.47000002861023,
+      289.0,
+      -16.0,
       88.0
      ],
      "max": [
-      406.70862574636976,
-      72.37696805747917,
-      204.71005168848205
+      305.0,
+      0.0,
+      184.0
      ]
     },
-    "estimatedResidentBytes": 153425578,
-    "glbBytes": 1020224,
-    "geometryResidentBytes": 1020224,
-    "placements": 31,
-    "triangles": 75146,
+    "estimatedResidentBytes": 11460620,
+    "glbBytes": 101044,
+    "geometryResidentBytes": 101044,
+    "placements": 0,
+    "triangles": 1538,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
-     "3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb": 1398102,
-     "715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f": 1398102,
-     "f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f": 1398102,
-     "558420ef7714dd94353a45d4169d4766bdac11471828278b59429624965a65fd": 5592406,
-     "9214634b049046f27f023ebd8dc08117447c9747f0697cf787a908b3a9149b8c": 5592406,
-     "2eefbb31e0d1b9d52f0b216003f361ae1810b0fa3cc970ad3e74ad0c42d35686": 5592406,
-     "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383": 5592406,
-     "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b": 5592406,
-     "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce": 5592406,
-     "d6337c94bc95e07d4ca29e1bde7e6cabe183bbe46c32663a50251a0e110a79f8": 1398102,
-     "7dba71aef40544f654896b121966aea00322c50216ca84235cac9d2a5cedf983": 1398102,
-     "36e6b0689babf0967df5307ba8801bb984e8a7a5d9fbcfd1a82765c638b73281": 1398102,
-     "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
-     "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
-     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102,
-     "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66": 1398102,
-     "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e": 1398102,
-     "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4": 1398102,
-     "273e2f0989fe0efba2314615bc66f5bef5ed7f63b0298027165fe1b55ceaf897": 5592406,
-     "62a7b717a4948a1795ebbaeeba00e3064a3ad65bf96dcefe906b5123ff923338": 5592406,
-     "89827b87733743b56bb2893534027ba4691c94f55beb7b38edfa8c292a42f148": 5592406,
-     "fa8eec09f845e10cdf65f3221efc92cad832a3852e057d0cb449f228c3e97782": 22369622,
-     "3af449a12ffa6c1b7c1aea03e8cbf7f0d8e36a1266a5be3586e39342d54465c8": 5592406,
-     "b26cdb8f7f8b258efc6c9dc97d3f969d7efbdc8a88478b1e89a5ed15de7f3032": 22369622,
-     "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
-    },
-    "sharedMeshResidentBytes": {
-     "2edacdc44373407b82ae2749630cd4480e8c6005ba1c29b22774e24fcec903aa": 50504,
-     "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776,
-     "5fe039192e1210508285ea14119cfce81aafbe8202f5b768ed272e7901898984": 49124,
-     "8e7190b7c25479f5936084ee19649e5138a773fc9110aa63b4da602f4153c9bd": 72840,
-     "a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204": 100628,
-     "aa262578b9f92c6964daa02e396784ca9422a71103849e5f87c2f097dc8954ac": 108604,
-     "ac775dc00191e57dd4ac052b0fdf06735ee03a4f339a160105f4b853100b8686": 85724,
-     "b3e159a636e5f63632c5eae88f612b5b9558f893ace0a2308739e654c242f5e4": 77780,
-     "b63fb2ed206b658621c450edb40d6cfece4fa5d11fe81f5fedea4d74f5e98b8f": 229104,
-     "c034acd826b529670bab47a35c9b44fe2edc1e722691e70e3393c8887c61416b": 6588,
-     "e8111b48daa2994a416e01bf59db2ead8fe0d3a18591c95f1263b1a194e540d0": 92652,
-     "ea436483a920bb71ffcca2e81f990faec2bd794564929243e0d8e1f25af3f083": 181912,
-     "f5e0150efae5a9c8ff72ff211a43598ae67886cc2b45975dd306778310bca9fe": 102392
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
     }
    },
    {
@@ -4311,35 +4322,21 @@
       184.0
      ],
      "max": [
-      385.0,
-      74.63911004638672,
+      305.0,
+      0.0,
       280.0
      ]
     },
-    "estimatedResidentBytes": 62599666,
-    "glbBytes": 573496,
-    "geometryResidentBytes": 573496,
-    "placements": 4,
-    "triangles": 20184,
+    "estimatedResidentBytes": 11460624,
+    "glbBytes": 101048,
+    "geometryResidentBytes": 101048,
+    "placements": 0,
+    "triangles": 1538,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
      "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
-     "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383": 5592406,
-     "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b": 5592406,
-     "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce": 5592406,
-     "84284bf13694a7c412a2c899f1d91481105bcc8494a83447c0fa61e1b3091387": 5592406,
-     "854f20e314f3844adcd4044ed96c0fa158af6348c0dbd6d1131aa3abac118b84": 5592406,
-     "102444b3267f4ff14ca08adf1ded3218be575d226566d3548c713c66900f708b": 5592406,
-     "37e0ca70e26c745f7ee2f99433403792b49196424886265ff2f2e0d20e8962ca": 5592406,
-     "4bd6cd244d18ad3d993ad3135b684b14b5a01fe3ead55305623599bcfbf9fb76": 5592406,
-     "7a4c4a6f46ba3d09f07f5d4c88642599d2ef596b0ff6989fefaa07437d31a83d": 5592406
-    },
-    "sharedMeshResidentBytes": {
-     "1d5ebadc4d4ff4eb824274e7f320012d917eb29eea15cbb32041c84e1e9ae5d4": 115012,
-     "a2a28851f86be1d0468267ae99e4289f12b922c5b7c94725f5ab9645cb841c2a": 111324,
-     "aa262578b9f92c6964daa02e396784ca9422a71103849e5f87c2f097dc8954ac": 108604
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
     }
    },
    {
@@ -4348,20 +4345,20 @@
     "bounds": {
      "min": [
       289.0,
-      -3.9168388843536377,
+      -3.09621524810791,
       280.0
      ],
      "max": [
-      385.0,
+      305.0,
       0.0,
       376.0
      ]
     },
-    "estimatedResidentBytes": 11930252,
-    "glbBytes": 570676,
-    "geometryResidentBytes": 570676,
+    "estimatedResidentBytes": 11460616,
+    "glbBytes": 101040,
+    "geometryResidentBytes": 101040,
     "placements": 0,
-    "triangles": 9218,
+    "triangles": 1538,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -4375,20 +4372,20 @@
     "bounds": {
      "min": [
       289.0,
-      -4.3389458656311035,
+      -2.31793212890625,
       376.0
      ],
      "max": [
-      385.0,
+      305.0,
       1.2000000476837158,
       444.0
      ]
     },
-    "estimatedResidentBytes": 20390508,
-    "glbBytes": 407272,
-    "geometryResidentBytes": 407272,
+    "estimatedResidentBytes": 20057520,
+    "glbBytes": 74284,
+    "geometryResidentBytes": 74284,
     "placements": 2,
-    "triangles": 14367,
+    "triangles": 8927,
     "sharedResourceResidentBytes": {
      "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
      "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
@@ -4405,260 +4402,6 @@
      "23e5ae8194e944f40026aade073e78199aa9d53eb4400c44a1dcd6f65913bc6d": 90892,
      "89f9c006020e3f0dd4d827361f7481814ee91125b9677215591c18d1fca64e00": 144156
     }
-   },
-   {
-    "id": "14_08",
-    "manifest": "chunks/14_08/world.json",
-    "bounds": {
-     "min": [
-      385.0,
-      -5.985484600067139,
-      -144.0
-     ],
-     "max": [
-      431.0,
-      0.0,
-      -104.0
-     ]
-    },
-    "estimatedResidentBytes": 11478808,
-    "glbBytes": 119232,
-    "geometryResidentBytes": 119232,
-    "placements": 0,
-    "triangles": 1842,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_09",
-    "manifest": "chunks/14_09/world.json",
-    "bounds": {
-     "min": [
-      385.0,
-      -5.367542266845703,
-      -104.0
-     ],
-     "max": [
-      431.0,
-      0.0,
-      -8.0
-     ]
-    },
-    "estimatedResidentBytes": 11636740,
-    "glbBytes": 277164,
-    "geometryResidentBytes": 277164,
-    "placements": 0,
-    "triangles": 4418,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_10",
-    "manifest": "chunks/14_10/world.json",
-    "bounds": {
-     "min": [
-      385.0,
-      -4.136585235595703,
-      -8.0
-     ],
-     "max": [
-      431.0,
-      0.0,
-      88.0
-     ]
-    },
-    "estimatedResidentBytes": 11636736,
-    "glbBytes": 277160,
-    "geometryResidentBytes": 277160,
-    "placements": 0,
-    "triangles": 4418,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_11",
-    "manifest": "chunks/14_11/world.json",
-    "bounds": {
-     "min": [
-      381.7084338960016,
-      -7.010199546813965,
-      88.0
-     ],
-     "max": [
-      433.73696470920356,
-      118.8054384765625,
-      184.0
-     ]
-    },
-    "estimatedResidentBytes": 119342334,
-    "glbBytes": 325244,
-    "geometryResidentBytes": 325244,
-    "placements": 18,
-    "triangles": 50607,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
-     "e9adde18e1b92def62b1a8a83748d3ce0a32ff8c3d53753bbd363e6a9bcff951": 8386752,
-     "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630": 349526,
-     "1bd5132efaa99527f1873c902c7416430c7a97b31fd90c1dd3c42ea6677226ac": 349526,
-     "c0e2086f4cda56fc52679e83a56211685fb8ee72753bb448fb2fee02a29a2292": 5592406,
-     "a12f3bdd2cc89c0da7e908fb9490c7afd1fee90d6aa2660305e67ccf1f7322f1": 5592406,
-     "47a0643ce9ae9614da54b1140c1ac1c22b6f9bc8dd6c024d2fe403da30346d0f": 5592406,
-     "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d": 5592406,
-     "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92": 5592406,
-     "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee": 5592406,
-     "e4586086a2fa390ea09e1b6983f1e7fea7780893fe6bfce5bafee807666c8c33": 5592406,
-     "8dc320422ff3b8d0cd07834513c149b0c98d4690c6c716163ca01a042f408182": 5592406,
-     "aeb53d3b047e52e351e7bdde418f58ac054702720abcf73b8387188700f1da28": 5592406,
-     "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79": 5592406,
-     "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832": 5592406,
-     "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f": 5592406,
-     "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
-     "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
-     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102,
-     "752e921fac49199f3383059436ab14f537ff1360ae7dd8375ca5b9ef2721af66": 1398102,
-     "f0b46130becc0eee2ac1b080fcdf4325ae78268bda557ae8761dbf609d661f6e": 1398102,
-     "b470e4970f5d4ee9a5d2a48270438ecbec32ca6c20a5170ee8c01c38f24abbb4": 1398102,
-     "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
-    },
-    "sharedMeshResidentBytes": {
-     "227af73fdff40bf0984a71fd5ab6e52a37fd51663d85e0cc3a7b91ab79416640": 106816,
-     "28915a615734b4c4d12b874819d97dc6a29008d55dd9712a43194136e240a1bb": 108572,
-     "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776,
-     "7a4db57811508eaafb1fe0c268c0f0a85a63c26bba6205d7a2c85286f5f786ac": 121024,
-     "898f6a3a953db7e2d1735801c3cac0999a57753aae5f0fcc99d482ec723c46eb": 97136,
-     "a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204": 100628,
-     "e8111b48daa2994a416e01bf59db2ead8fe0d3a18591c95f1263b1a194e540d0": 92652
-    }
-   },
-   {
-    "id": "14_12",
-    "manifest": "chunks/14_12/world.json",
-    "bounds": {
-     "min": [
-      385.0,
-      -11.790680885314941,
-      184.0
-     ],
-     "max": [
-      431.0,
-      107.44111962890625,
-      280.0
-     ]
-    },
-    "estimatedResidentBytes": 96139372,
-    "glbBytes": 284348,
-    "geometryResidentBytes": 284348,
-    "placements": 10,
-    "triangles": 21401,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
-     "3e507baa270bb6e76e91e7dd0a3ddeba6e7bf8b64ba58a8ab92481668947f1cb": 1398102,
-     "715bf93bba2fce0270b28ce2e935817448335fb54c203ff7b6f47ebeaaad169f": 1398102,
-     "f2cbdeb744bb6ec016a79e29aeac6cf16bfc23fc60a47ec06f13b9e6653d292f": 1398102,
-     "3caef983cee269d0b7b74dfbe0812fc3756bc07916ee40dff50c75fc5f612383": 5592406,
-     "43a249593f903767aec9ca1011d925c7dfbd92abd4b497999509d3ddc20d6a9b": 5592406,
-     "aa291da4bba343d502c66dc47e3cb8bd996a1ee196eec21604108694c505a9ce": 5592406,
-     "335197b7c3143957b13f75f694583fe78a177d98b6985c72323777ab5e18d11d": 5592406,
-     "2a9f97c3189df8ebfc749bea5442894448612842a098466fa24ac4682804ac92": 5592406,
-     "1c5cd4b20051f674a314e48da9a6c7c087d63efb3688484d66d4953de2d7d1ee": 5592406,
-     "e4586086a2fa390ea09e1b6983f1e7fea7780893fe6bfce5bafee807666c8c33": 5592406,
-     "8dc320422ff3b8d0cd07834513c149b0c98d4690c6c716163ca01a042f408182": 5592406,
-     "aeb53d3b047e52e351e7bdde418f58ac054702720abcf73b8387188700f1da28": 5592406,
-     "68f442f3801210245087e73797002e43a1210baef71f1f61fa2401eff0ba3a79": 5592406,
-     "ac2d99b51b095a27e7fcb53184448a494a684fc4598b92083fc77b8065640832": 5592406,
-     "91eed6a90c01e31ce28591ed2317962602130bec70ad8085569e28eda732f66f": 5592406,
-     "ad7efd3377afdeceee3bebcbd3a1b1a7e754e48faedde73d4c50038454afb055": 1398102,
-     "0d52859a01f8d9894296ed4175e513f46bf956964879718a0656082ac112342a": 1398102,
-     "25a954b33b41048fa16e7b04d8057774779a3a475627500643b3a8cfc93fdba5": 1398102,
-     "7b613de292eef62b3c936ae04e8c11f2045332e3647d3d96c36d1c027d2645a0": 1398102,
-     "4e1013aebeb59b6fbcdc7fb67ca37f06056b17d5fdda536f3c371602f99e5639": 1398102,
-     "6230b50e6b3eca0a0413c48a4bb172c4e32f231d48c60d98f13d672ad341088b": 1398102,
-     "d6337c94bc95e07d4ca29e1bde7e6cabe183bbe46c32663a50251a0e110a79f8": 1398102,
-     "7dba71aef40544f654896b121966aea00322c50216ca84235cac9d2a5cedf983": 1398102,
-     "36e6b0689babf0967df5307ba8801bb984e8a7a5d9fbcfd1a82765c638b73281": 1398102
-    },
-    "sharedMeshResidentBytes": {
-     "227af73fdff40bf0984a71fd5ab6e52a37fd51663d85e0cc3a7b91ab79416640": 106816,
-     "28915a615734b4c4d12b874819d97dc6a29008d55dd9712a43194136e240a1bb": 108572,
-     "2be2fa7997faa7537fc407bf8729d164c2712cdcc516551672d755ec3017c153": 42708,
-     "2edacdc44373407b82ae2749630cd4480e8c6005ba1c29b22774e24fcec903aa": 50504,
-     "5fe039192e1210508285ea14119cfce81aafbe8202f5b768ed272e7901898984": 49124,
-     "898f6a3a953db7e2d1735801c3cac0999a57753aae5f0fcc99d482ec723c46eb": 97136,
-     "aa262578b9f92c6964daa02e396784ca9422a71103849e5f87c2f097dc8954ac": 108604,
-     "d323656f5ae2809d39dad5376b94a325baa9b1f73dcd91af901cc8caf000f090": 45888
-    }
-   },
-   {
-    "id": "14_13",
-    "manifest": "chunks/14_13/world.json",
-    "bounds": {
-     "min": [
-      385.0,
-      -3.7971737384796143,
-      280.0
-     ],
-     "max": [
-      431.0,
-      0.0,
-      376.0
-     ]
-    },
-    "estimatedResidentBytes": 11636744,
-    "glbBytes": 277168,
-    "geometryResidentBytes": 277168,
-    "placements": 0,
-    "triangles": 4418,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
-   },
-   {
-    "id": "14_14",
-    "manifest": "chunks/14_14/world.json",
-    "bounds": {
-     "min": [
-      385.0,
-      -4.953192234039307,
-      376.0
-     ],
-     "max": [
-      431.0,
-      0.0,
-      444.0
-     ]
-    },
-    "estimatedResidentBytes": 11557760,
-    "glbBytes": 198184,
-    "geometryResidentBytes": 198184,
-    "placements": 0,
-    "triangles": 3130,
-    "sharedResourceResidentBytes": {
-     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
-     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
-     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
-     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
-    }
    }
   ]
  },
@@ -4672,8 +4415,8 @@
     -444.0
    ],
    "max": [
-    431.0,
-    118.8054384765625,
+    305.0,
+    58.16673226928711,
     444.0
    ]
   },
@@ -4683,26 +4426,26 @@
    -444.0
   ],
   "worldMax": [
-   431.0,
+   305.0,
    444.0
   ],
   "imageSize": [
-   862,
+   736,
    888
   ],
   "pixelsPerMetre": 1,
-  "imageSha256": "a8102cd6bd8018c9f5c659584f135a9f2c881d039b37baadbdb8b87a6ac9affd",
+  "imageSha256": "224a5955803c61cab1e3db6b6da4e648c7550817bbbf8675065366730f273ce1",
   "renderedFrom": "the package's chunk GLBs (the shared cartography renderer, window by window)",
   "cartographyRender": {
    "generator": "eloria-assets/maps/continent-v2/_continent_v2/render_minimap.py",
    "styleVersion": 4,
-   "chunksSha256": "762c8de46ae3f345400f79f68ab6f0a3dff54e29c3818de378b7948663e3df3c",
+   "chunksSha256": "0836726e2cbc0f95ce60a3739538238d3a90a2cf3b695d891379a4c1ea5a61e1",
    "neighbourChunksSha256": {
-    "boarsend": "14e0cf6edf5b658083684f25d12dc2e15cdb45ed701dc4448a57e6d570e9b6cb",
-    "brambleshaw": "a4cff750ad808be8d0adf105e0e635b70a7f18f9d433042ea80ef47ee2b55373",
-    "ravenhead": "71dea5a2581b478bf0b4bef3dfca74b11517a7af0285423f9e10a16dc15608f1",
-    "reedfall": "0fa442c67119453f5b9faab54d2590623383a890c2ce135579be1eedfb9288bd",
-    "spindle_hill": "6319cab56c4a57327d3edcd6acd7f0876fcce6e9553f936f08c75b98a5a82059"
+    "boarsend": "33a076624808535d1f2d118bc0ff197d6ed3c4dbbc5b33b629f2500008ca046d",
+    "brambleshaw": "79bb7c5c61113f21be9803721108740daa5f394148f495935e7b8b8fbb84cc33",
+    "coilmere": "db4f80bf3c6bc117d062e4aa33c5bf121933313f63a1c33865edbea1ed4f6491",
+    "ravenhead": "2d71267cbbfe92fb774c7f43a02a9aa81d13f16a193007649d1f2de5800d8bb5",
+    "reedfall": "3b81b29441899a655d361aeed63417933a4394cb1c8642638e32b0408b551e63"
    },
    "supersample": 2,
    "windowMetres": 2048,
@@ -4718,22 +4461,22 @@
     -444.0
    ],
    "worldMax": [
-    431.0,
+    305.0,
     444.0
    ],
    "imageSize": [
-    3448,
+    2944,
     3552
    ],
    "pixelsPerMetre": 4,
-   "imageSha256": "5717c2081f9873b568843d46896da76fd95ccf2c1e4aef577e6fd9dca4b56b6a",
-   "chunksSha256": "762c8de46ae3f345400f79f68ab6f0a3dff54e29c3818de378b7948663e3df3c",
+   "imageSha256": "9c898782ffb23f849f87abae8a20b902d10948d84f53f6b0aba52703b5c3ca71",
+   "chunksSha256": "0836726e2cbc0f95ce60a3739538238d3a90a2cf3b695d891379a4c1ea5a61e1",
    "neighbourChunksSha256": {
-    "boarsend": "14e0cf6edf5b658083684f25d12dc2e15cdb45ed701dc4448a57e6d570e9b6cb",
-    "brambleshaw": "a4cff750ad808be8d0adf105e0e635b70a7f18f9d433042ea80ef47ee2b55373",
-    "ravenhead": "71dea5a2581b478bf0b4bef3dfca74b11517a7af0285423f9e10a16dc15608f1",
-    "reedfall": "0fa442c67119453f5b9faab54d2590623383a890c2ce135579be1eedfb9288bd",
-    "spindle_hill": "6319cab56c4a57327d3edcd6acd7f0876fcce6e9553f936f08c75b98a5a82059"
+    "boarsend": "33a076624808535d1f2d118bc0ff197d6ed3c4dbbc5b33b629f2500008ca046d",
+    "brambleshaw": "79bb7c5c61113f21be9803721108740daa5f394148f495935e7b8b8fbb84cc33",
+    "coilmere": "db4f80bf3c6bc117d062e4aa33c5bf121933313f63a1c33865edbea1ed4f6491",
+    "ravenhead": "2d71267cbbfe92fb774c7f43a02a9aa81d13f16a193007649d1f2de5800d8bb5",
+    "reedfall": "3b81b29441899a655d361aeed63417933a4394cb1c8642638e32b0408b551e63"
    },
    "styleVersion": 4,
    "supersample": 1,

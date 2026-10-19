@@ -1,0 +1,421 @@
+{
+ "schemaVersion": "1.0.0",
+ "assetVersion": "1.0.0",
+ "asset": {
+  "id": "hornmere__chunk_03_03",
+  "name": "Hornmere",
+  "glb": "world.glb",
+  "units": "meters",
+  "coordinateSystem": {
+   "handedness": "right",
+   "upAxis": "Y",
+   "northAxis": "-Z"
+  },
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "bounds": {
+   "min": [
+    -741.0,
+    -7.505228042602539,
+    -655.0
+   ],
+   "max": [
+    -645.0,
+    0.0,
+    -559.0
+   ]
+  },
+  "playableBounds": {
+   "min": [
+    -955.0,
+    -14.204055786132812,
+    -795.0
+   ],
+   "max": [
+    -225.0,
+    126.21971459960938,
+    315.0
+   ]
+  },
+  "mapBounds": {
+   "min": [
+    -955.0,
+    -14.204055786132812,
+    -795.0
+   ],
+   "max": [
+    -225.0,
+    126.21971459960938,
+    315.0
+   ]
+  },
+  "seaLevel": 0.0,
+  "serverCells": 1212
+ },
+ "coordinateTransform": {
+  "metresPerTile": 1.0,
+  "serverOrigin": [
+   959,
+   409
+  ],
+  "serverCells": [
+   1212,
+   1212
+  ],
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "walkingHeight": 101.94100189208984,
+  "invertServerY": true,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "addressableWorldBounds": {
+   "min": [
+    -959,
+    -803
+   ],
+   "max": [
+    253,
+    409
+   ]
+  }
+ },
+ "collision": {
+  "nodeNames": [],
+  "format": "EWCG-v2",
+  "formatVersion": 2,
+  "version": 2,
+  "width": 2424,
+  "height": 2424,
+  "cellMetres": 0.5,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "serverCells": [
+   1212,
+   1212
+  ],
+  "originMetres": [
+   -959.0,
+   409.0
+  ],
+  "gridAlignment": "tile-centres-v1",
+  "authoredSurfaceExport": true,
+  "maxTerrainGrade": 0.65,
+  "maximumWadingDepth": 0.35,
+  "actorVolume": {
+   "floorClearance": 0.06,
+   "height": 2.1,
+   "halfCellWidth": 0.5
+  },
+  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
+ },
+ "navigation": {
+  "surfaceNodePrefixes": [
+   "Terrain_",
+   "Walk_"
+  ],
+  "terrainConforming": true,
+  "authority": "server",
+  "defaultSpawn": "hornmere--arrival"
+ },
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.2,
+    0.45,
+    0.76
+   ],
+   "horizon": [
+    0.8,
+    0.87,
+    0.9
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.5,
+    0.58,
+    0.6
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    1.0,
+    0.93,
+    0.8
+   ],
+   "energy": 1.1
+  },
+  "ambient": {
+   "color": [
+    0.63,
+    0.64,
+    0.67
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.16,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.76,
+    0.8,
+    0.82
+   ],
+   "density": 0.0004,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.76,
+      0.7
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.96,
+      0.76,
+      0.76
+     ]
+    },
+    "fog": {
+     "color": [
+      0.84,
+      0.76,
+      0.78
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.62,
+      0.48
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.92,
+      0.6,
+      0.58
+     ]
+    },
+    "fog": {
+     "color": [
+      0.78,
+      0.62,
+      0.64
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.15,
+      0.14,
+      0.3
+     ],
+     "horizon": [
+      0.31,
+      0.28,
+      0.44
+     ]
+    },
+    "fog": {
+     "color": [
+      0.3,
+      0.27,
+      0.4
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.6,
+      0.57,
+      0.74
+     ]
+    },
+    "moon": {
+     "color": [
+      0.6,
+      0.58,
+      0.88
+     ]
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.5
+   },
+   "gulls": {
+    "enabled": true,
+    "density": 0.3
+   }
+  }
+ },
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   1576.0,
+   0.0,
+   5816.0
+  ],
+  "ownershipPolygon": [
+   [
+    621.0,
+    6131.0
+   ],
+   [
+    621.0,
+    5021.0
+   ],
+   [
+    1351.0,
+    5021.0
+   ],
+   [
+    1351.0,
+    6131.0
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     621.0,
+     6131.0
+    ],
+    [
+     621.0,
+     5021.0
+    ],
+    [
+     1351.0,
+     5021.0
+    ],
+    [
+     1351.0,
+     6131.0
+    ]
+   ]
+  ],
+  "geometryMode": "continent-chunks-v1"
+ },
+ "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
+ "knownLimitations": [
+  "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
+  "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
+  "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
+ ],
+ "provenance": {
+  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
+  "snapshotSha256": "250272f738721b2530dfdbcdc9cf0e1bfb83080ef8d596e68a225c40d90913e3",
+  "sceneSha256": "36c23dd7186a3c55234ba5ab76a5337090c73d4981417c0dacafe117622e6d49"
+ },
+ "externalResources": {
+  "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+  "../../../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+  "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+  "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0"
+ },
+ "bounds": {
+  "min": [
+   -741.0,
+   -7.505228042602539,
+   -655.0
+  ],
+  "max": [
+   -645.0,
+   0.0,
+   -559.0
+  ]
+ },
+ "performance": {
+  "glbBytes": 570644,
+  "nodes": 6,
+  "meshes": 3,
+  "externalResources": {
+   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+   "../../../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+   "../../../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+   "../../../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0"
+  },
+  "sharedResourceResidentBytes": {
+   "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+   "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+   "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+   "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+  }
+ },
+ "biomeBlend": null,
+ "objectMaterialOverrides": {
+  "schema": "eloria-object-material-overrides-v1",
+  "entries": []
+ }
+}

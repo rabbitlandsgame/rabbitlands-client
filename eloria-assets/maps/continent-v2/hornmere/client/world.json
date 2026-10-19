@@ -1,0 +1,3828 @@
+{
+ "schemaVersion": "1.0.0",
+ "assetVersion": "1.0.0",
+ "asset": {
+  "id": "hornmere",
+  "name": "Hornmere",
+  "glb": "world.glb",
+  "units": "meters",
+  "coordinateSystem": {
+   "handedness": "right",
+   "upAxis": "Y",
+   "northAxis": "-Z"
+  },
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "bounds": {
+   "min": [
+    -955.0,
+    -14.204055786132812,
+    -795.0
+   ],
+   "max": [
+    -225.0,
+    126.21971459960938,
+    315.0
+   ]
+  },
+  "playableBounds": {
+   "min": [
+    -955.0,
+    -14.204055786132812,
+    -795.0
+   ],
+   "max": [
+    -225.0,
+    126.21971459960938,
+    315.0
+   ]
+  },
+  "mapBounds": {
+   "min": [
+    -955.0,
+    -14.204055786132812,
+    -795.0
+   ],
+   "max": [
+    -225.0,
+    126.21971459960938,
+    315.0
+   ]
+  },
+  "seaLevel": 0.0,
+  "serverCells": 1212
+ },
+ "coordinateTransform": {
+  "metresPerTile": 1.0,
+  "serverOrigin": [
+   959,
+   409
+  ],
+  "serverCells": [
+   1212,
+   1212
+  ],
+  "origin": [
+   0,
+   0,
+   0
+  ],
+  "walkingHeight": 101.94100189208984,
+  "invertServerY": true,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "addressableWorldBounds": {
+   "min": [
+    -959,
+    -803
+   ],
+   "max": [
+    253,
+    409
+   ]
+  }
+ },
+ "spawnPoints": [
+  {
+   "default": true,
+   "id": "hornmere--arrival",
+   "position": [
+    -326.5,
+    101.94100189208984,
+    -350.5
+   ],
+   "facing": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "serverTile": [
+    632,
+    759
+   ]
+  }
+ ],
+ "spawns": [
+  {
+   "default": true,
+   "id": "hornmere--arrival",
+   "position": [
+    -326.5,
+    101.94100189208984,
+    -350.5
+   ],
+   "facing": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "serverTile": [
+    632,
+    759
+   ]
+  }
+ ],
+ "collision": {
+  "nodeNames": [],
+  "binary": "collision.bin",
+  "format": "EWCG-v2",
+  "formatVersion": 2,
+  "version": 2,
+  "width": 2424,
+  "height": 2424,
+  "cellMetres": 0.5,
+  "serverStorageVersion": 1,
+  "serverTileMin": [
+   0,
+   0
+  ],
+  "serverCells": [
+   1212,
+   1212
+  ],
+  "originMetres": [
+   -959.0,
+   409.0
+  ],
+  "heightEncoding": {
+   "origin": -0.8273665248287525,
+   "step": 0.49968847770818137,
+   "range": [
+    1,
+    255
+   ]
+  },
+  "gridAlignment": "tile-centres-v1",
+  "authoredSurfaceExport": true,
+  "maxTerrainGrade": 0.65,
+  "maximumWadingDepth": 0.35,
+  "actorVolume": {
+   "floorClearance": 0.06,
+   "height": 2.1,
+   "halfCellWidth": 0.5
+  },
+  "walkableCells": 854533,
+  "walkableFraction": 0.145433,
+  "sha256": "5ab04a7b2432074c7441468d85bfbb1780ffe2d0c4afb19cdb9a0cf05a9977f0",
+  "exportStatistics": {
+   "walkTriangles": 484,
+   "structuralMeshes": 9,
+   "structuralPlacements": 9,
+   "structuralTriangles": 21829,
+   "structuralTrianglesTested": 18240,
+   "ownCells": 3241200,
+   "deckCells": 2160,
+   "steepCells": 411542,
+   "waterCells": 1980773,
+   "structuralCells": 329,
+   "crossSeamSolidCells": 0,
+   "harvestNodeTiles": 0,
+   "noGroundCells": 0,
+   "seamCollarCells": 2122,
+   "ownWalkableCells": 852411
+  },
+  "seamCollar": {
+   "stagheath": {
+    "cells": 2928,
+    "openCells": 0,
+    "closedByTheNeighbour": 2928,
+    "closedByThisMapsSolids": 0,
+    "closedByThirdMapsSolids": 0,
+    "droppedByTheHeightScale": 0,
+    "walkableCells": 0,
+    "walkableTiles": 0
+   },
+   "whitepeak": {
+    "cells": 4440,
+    "openCells": 2122,
+    "closedByTheNeighbour": 2318,
+    "closedByThisMapsSolids": 0,
+    "closedByThirdMapsSolids": 0,
+    "droppedByTheHeightScale": 0,
+    "walkableCells": 2122,
+    "walkableTiles": 523
+   }
+  },
+  "sourceSnapshotSha256": "250272f738721b2530dfdbcdc9cf0e1bfb83080ef8d596e68a225c40d90913e3",
+  "sourceSceneSha256": "36c23dd7186a3c55234ba5ab76a5337090c73d4981417c0dacafe117622e6d49",
+  "groupExport": {
+   "maps": {
+    "boarsend": {
+     "snapshotSha256": "538b13771f27d603253bf94ea9a8aef35008dacf01bcfbad694c45ff18d20722",
+     "servedGridSha256": "24688a4614f365aa2bc65c0aa6aa31fcfef793be9c30ac41e8f61ff43710d47d"
+    },
+    "brambleshaw": {
+     "snapshotSha256": "807460f17eaf362281735df88020cb68ddd7a4c2801c0e6db85beb18d6276868",
+     "servedGridSha256": "acb08a5a10b1aa36beef403b058dc8b142f41076c87e621bf2558b9ec8496775"
+    },
+    "coilmere": {
+     "snapshotSha256": "5053be9ce02595b56a091c5665b43e4ce57431c48a875d212a8bceea9a815381",
+     "servedGridSha256": "fa2c3922d84217c4561de26561ffc98644682b2e2a0a30bbe3209df141cb335a"
+    },
+    "greenlight": {
+     "snapshotSha256": "76835398a2921879866d5dea6be8b7b9bc783c70bdb6102e30f69a4d7d60d7c1",
+     "servedGridSha256": "360a002fc6b23e685f49e8ad3aac33366080d381984d092a99efa0d9aeb7fec1"
+    },
+    "hearthcroft": {
+     "snapshotSha256": "0a62004d7d3bb703074279c52568002e4a7a5061c926794fcc89a28acd7620f2",
+     "servedGridSha256": "bcf5d2d3eef578f97c6d891af73ae4ab15cafb7ef9cbc7c00ca6dd1ecf03283f"
+    },
+    "hornmere": {
+     "snapshotSha256": "250272f738721b2530dfdbcdc9cf0e1bfb83080ef8d596e68a225c40d90913e3",
+     "servedGridSha256": "a75ef4aef1833fa51b925f2976853b43d0a5a19ee525ec95f4349e9c957365af"
+    },
+    "landfall": {
+     "snapshotSha256": "b805145edc7538ee41b7853e5cb995422d007ba00aca8222cba775667d32bf41",
+     "servedGridSha256": "54d03428d7c1490fdb0c9dbaf13e2858297b6936edd0b8f6042c66e6721a4e05"
+    },
+    "pinebrow": {
+     "snapshotSha256": "04f65b546cf80fb9b21df34c9fb89fffea4b02c304b3dd146153676bf9a3031d",
+     "servedGridSha256": "973e5eae3a7438e6abdafc4b5669ab7d0a426cf2cb699fd2cd31983913c2e67f"
+    },
+    "ravenhead": {
+     "snapshotSha256": "c56e6f123e06fed54af85c548a1c9925a0585d14b3269567f3a799bd03bdb7f4",
+     "servedGridSha256": "2cd98a612fc7f3d8eba226101b3afc0da668405023dd1bf5f0a20277f35277fd"
+    },
+    "reedfall": {
+     "snapshotSha256": "42d268ab4362910cf8a06e7c183285881a1dec4778ac8269c31d61fcd8803d15",
+     "servedGridSha256": "ee41e7cce43c9fe99dff25f43ff4ee7745e21599d51346a83909d8d422dfb520"
+    },
+    "ringholm": {
+     "snapshotSha256": "df2f31ba248aa2ff794c1e501166b15ef315c4e42c1c8bb60c193afd7f075e8a",
+     "servedGridSha256": "20888d14a79cd5130e67a9ac022421fe55d4d2ea38f6bd9ada5dc4b7c04ed2cc"
+    },
+    "saltsound": {
+     "snapshotSha256": "f4d31a32c8637ac00947d0fea0bd83afb0303cb5bfb65c551f0116a5d37fa2e2",
+     "servedGridSha256": "f97e4e73a63f3f8aedad3491a42c6ebb36ec0fff34278c46de94be18dfcf68ff"
+    },
+    "stagheath": {
+     "snapshotSha256": "a7026f7d8f0643198b6c91008a7d041330244f903bd8e7d4a3090a96e2d8f83e",
+     "servedGridSha256": "c8c2315df8baeb6b0178fa5e10518c6e7ade4a184bc579f995b915a73fa95a27"
+    },
+    "suncoil": {
+     "snapshotSha256": "7c985436894a489c64d20f25478c206397fed931be83616c511c9cfec3071101",
+     "servedGridSha256": "83ba3dc7d64f7075e3622516fb87ef7a30d11db3ab90c1f44e3e5b813fc93658"
+    },
+    "twinbrook": {
+     "snapshotSha256": "d834c98189d94cad427a2ab5fd5e385a95afa476f02f6a1f0f1943e2e5cf225c",
+     "servedGridSha256": "ef5816720d690cda2880b9d0a9a909c0b22f9d00d483f2bf3be1c3c9aa4926c0"
+    },
+    "warrenmead": {
+     "snapshotSha256": "e51eb854d061f7ae9cee1c4c295f34562c623d5548e6401c252c492e0d09dcdd",
+     "servedGridSha256": "a5caa315c36b5fa0223c8fd6112b8d775e4db2444a746336ccd031012af4cb04"
+    },
+    "whitepeak": {
+     "snapshotSha256": "18533178070aaa2f26dfea156808d16a8dca7b0a1e1ae40c5800dda81d023c6c",
+     "servedGridSha256": "ca662f32791dc85be0deb56f70097ae29be2e73f42ee36f78359dddc3f5f8ee7"
+    }
+   }
+  },
+  "exporter": "eloria-assets/maps/continent-v2/_continent_v2/export_collision.py",
+  "servedGrid": {
+   "binary": "served-grid.escg.gz",
+   "format": "ESCG-v2",
+   "unitMetres": 0.05,
+   "climbMetres": 1.0,
+   "originMetres": -100.0,
+   "width": 1212,
+   "height": 1212,
+   "openTiles": 207649,
+   "sha256": "a75ef4aef1833fa51b925f2976853b43d0a5a19ee525ec95f4349e9c957365af"
+  },
+  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
+ },
+ "navigation": {
+  "surfaceNodePrefixes": [
+   "Terrain_",
+   "Walk_"
+  ],
+  "terrainConforming": true,
+  "authority": "server",
+  "defaultSpawn": "hornmere--arrival"
+ },
+ "landmarks": [],
+ "interactives": [],
+ "npcMarkers": [],
+ "harvestablesSchema": "eloria-harvest-presentation-v1",
+ "harvestables": [],
+ "harvestGroupings": [],
+ "portals": [],
+ "serviceMarkers": [],
+ "environment": {
+  "sky": {
+   "type": "gradient",
+   "zenith": [
+    0.2,
+    0.45,
+    0.76
+   ],
+   "horizon": [
+    0.8,
+    0.87,
+    0.9
+   ],
+   "curve": 0.14,
+   "groundHorizon": [
+    0.5,
+    0.58,
+    0.6
+   ],
+   "groundBottom": [
+    0.16,
+    0.3,
+    0.38
+   ],
+   "sunAngleMax": 14.0,
+   "energy": 1.16
+  },
+  "sun": {
+   "direction": [
+    -0.45,
+    -0.78,
+    -0.43
+   ],
+   "color": [
+    1.0,
+    0.93,
+    0.8
+   ],
+   "energy": 1.1
+  },
+  "ambient": {
+   "color": [
+    0.63,
+    0.64,
+    0.67
+   ],
+   "energy": 0.6
+  },
+  "saturation": 1.16,
+  "fog": {
+   "enabled": true,
+   "color": [
+    0.76,
+    0.8,
+    0.82
+   ],
+   "density": 0.0004,
+   "heightFalloff": 0.0022
+  },
+  "variants": {
+   "golden-hour": {
+    "sun": {
+     "direction": [
+      -0.8,
+      -0.26,
+      0.54
+     ],
+     "color": [
+      1.52,
+      1.02,
+      0.62
+     ],
+     "energy": 1.25
+    },
+    "fog": {
+     "enabled": true,
+     "color": [
+      0.78,
+      0.66,
+      0.52
+     ],
+     "density": 0.0016
+    }
+   },
+   "dawn": {
+    "sun": {
+     "color": [
+      1.0,
+      0.76,
+      0.7
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.96,
+      0.76,
+      0.76
+     ]
+    },
+    "fog": {
+     "color": [
+      0.84,
+      0.76,
+      0.78
+     ]
+    }
+   },
+   "dusk": {
+    "sun": {
+     "color": [
+      1.0,
+      0.62,
+      0.48
+     ]
+    },
+    "sky": {
+     "horizon": [
+      0.92,
+      0.6,
+      0.58
+     ]
+    },
+    "fog": {
+     "color": [
+      0.78,
+      0.62,
+      0.64
+     ]
+    }
+   },
+   "night": {
+    "sky": {
+     "zenith": [
+      0.15,
+      0.14,
+      0.3
+     ],
+     "horizon": [
+      0.31,
+      0.28,
+      0.44
+     ]
+    },
+    "fog": {
+     "color": [
+      0.3,
+      0.27,
+      0.4
+     ]
+    },
+    "ambient": {
+     "color": [
+      0.6,
+      0.57,
+      0.74
+     ]
+    },
+    "moon": {
+     "color": [
+      0.6,
+      0.58,
+      0.88
+     ]
+    }
+   }
+  },
+  "water": {
+   "shallowColor": [
+    0.24,
+    0.74,
+    0.74
+   ],
+   "deepColor": [
+    0.04,
+    0.24,
+    0.44
+   ],
+   "causticsEnabled": true,
+   "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
+  },
+  "presentation": {
+   "mist": {
+    "enabled": true,
+    "density": 0.5
+   },
+   "gulls": {
+    "enabled": true,
+    "density": 0.3
+   }
+  }
+ },
+ "lighting": {
+  "markers": []
+ },
+ "continentGeography": {
+  "revision": "continent-v2-draft-1",
+  "translation": [
+   1576.0,
+   0.0,
+   5816.0
+  ],
+  "ownershipPolygon": [
+   [
+    621.0,
+    6131.0
+   ],
+   [
+    621.0,
+    5021.0
+   ],
+   [
+    1351.0,
+    5021.0
+   ],
+   [
+    1351.0,
+    6131.0
+   ]
+  ],
+  "ownershipPolygons": [
+   [
+    [
+     621.0,
+     6131.0
+    ],
+    [
+     621.0,
+     5021.0
+    ],
+    [
+     1351.0,
+     5021.0
+    ],
+    [
+     1351.0,
+     6131.0
+    ]
+   ]
+  ],
+  "geometryMode": "continent-chunks-v1"
+ },
+ "productionStatus": "chunk-streamed for the game client, with the served walk grid export_collision.py wrote (collision.bin, served-grid.escg.gz); the server rows are publish_server.py's",
+ "knownLimitations": [
+  "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
+  "no map digest: the master world.glb is not committed, so the server's client content manifest names no packageSha256 for this map",
+  "outside the ownership polygons nothing is exported (the neighbouring territory publishes it)"
+ ],
+ "provenance": {
+  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
+  "snapshotSha256": "250272f738721b2530dfdbcdc9cf0e1bfb83080ef8d596e68a225c40d90913e3",
+  "sceneSha256": "36c23dd7186a3c55234ba5ab76a5337090c73d4981417c0dacafe117622e6d49"
+ },
+ "externalResources": {
+  "../../_continent_v2/shared-assets/1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5.png": "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5",
+  "../../_continent_v2/shared-assets/13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb.jpg": "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb",
+  "../../_continent_v2/shared-assets/15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03.jpg": "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03",
+  "../../_continent_v2/shared-assets/1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5.jpg": "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5",
+  "../../_continent_v2/shared-assets/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
+  "../../_continent_v2/shared-assets/1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f.png": "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f",
+  "../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
+  "../../_continent_v2/shared-assets/71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac.png": "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac",
+  "../../_continent_v2/shared-assets/7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23.png": "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23",
+  "../../_continent_v2/shared-assets/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
+  "../../_continent_v2/shared-assets/8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283.jpg": "8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283",
+  "../../_continent_v2/shared-assets/90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a.png": "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a",
+  "../../_continent_v2/shared-assets/a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e.jpg": "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e",
+  "../../_continent_v2/shared-assets/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
+  "../../_continent_v2/shared-assets/c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0.png": "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0",
+  "../../_continent_v2/shared-assets/d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac.png": "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac",
+  "../../_continent_v2/shared-assets/f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c.png": "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c"
+ },
+ "streamingChunks": {
+  "schemaVersion": "1.0",
+  "coordinateSpace": "territory-local",
+  "preloadDistance": 240,
+  "retainDistance": 320,
+  "maximumLoadedChunks": 64,
+  "maximumResidentBytes": 268435456,
+  "chunks": [
+   {
+    "id": "00_01",
+    "manifest": "chunks/00_01/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -14.204055786132812,
+      -795.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11425296,
+    "glbBytes": 65720,
+    "geometryResidentBytes": 65720,
+    "placements": 0,
+    "triangles": 970,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_02",
+    "manifest": "chunks/00_02/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -13.36843204498291,
+      -751.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11495820,
+    "glbBytes": 136244,
+    "geometryResidentBytes": 136244,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_03",
+    "manifest": "chunks/00_03/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -11.65343952178955,
+      -655.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11495820,
+    "glbBytes": 136244,
+    "geometryResidentBytes": 136244,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_04",
+    "manifest": "chunks/00_04/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -10.203319549560547,
+      -559.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11495816,
+    "glbBytes": 136240,
+    "geometryResidentBytes": 136240,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_05",
+    "manifest": "chunks/00_05/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -8.822834014892578,
+      -463.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11495816,
+    "glbBytes": 136240,
+    "geometryResidentBytes": 136240,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_06",
+    "manifest": "chunks/00_06/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -6.849999904632568,
+      -367.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11495820,
+    "glbBytes": 136244,
+    "geometryResidentBytes": 136244,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_07",
+    "manifest": "chunks/00_07/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -5.599091053009033,
+      -271.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11495804,
+    "glbBytes": 136228,
+    "geometryResidentBytes": 136228,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_08",
+    "manifest": "chunks/00_08/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -5.177529335021973,
+      -175.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11495804,
+    "glbBytes": 136228,
+    "geometryResidentBytes": 136228,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_09",
+    "manifest": "chunks/00_09/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -6.134006023406982,
+      -79.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11495816,
+    "glbBytes": 136240,
+    "geometryResidentBytes": 136240,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_10",
+    "manifest": "chunks/00_10/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -7.860915184020996,
+      17.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      113.0
+     ]
+    },
+    "estimatedResidentBytes": 11495816,
+    "glbBytes": 136240,
+    "geometryResidentBytes": 136240,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_11",
+    "manifest": "chunks/00_11/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -10.451665878295898,
+      113.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 11495800,
+    "glbBytes": 136224,
+    "geometryResidentBytes": 136224,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_12",
+    "manifest": "chunks/00_12/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -12.216780662536621,
+      209.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11495796,
+    "glbBytes": 136220,
+    "geometryResidentBytes": 136220,
+    "placements": 0,
+    "triangles": 2114,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "00_13",
+    "manifest": "chunks/00_13/world.json",
+    "bounds": {
+     "min": [
+      -955.0,
+      -12.286460876464844,
+      305.0
+     ],
+     "max": [
+      -933.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11379164,
+    "glbBytes": 19588,
+    "geometryResidentBytes": 19588,
+    "placements": 0,
+    "triangles": 222,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_01",
+    "manifest": "chunks/01_01/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -13.811935424804688,
+      -795.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11624976,
+    "glbBytes": 265400,
+    "geometryResidentBytes": 265400,
+    "placements": 0,
+    "triangles": 4226,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_02",
+    "manifest": "chunks/01_02/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -12.951483726501465,
+      -751.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11930224,
+    "glbBytes": 570648,
+    "geometryResidentBytes": 570648,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_03",
+    "manifest": "chunks/01_03/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -11.202962875366211,
+      -655.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_04",
+    "manifest": "chunks/01_04/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -9.631535530090332,
+      -559.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_05",
+    "manifest": "chunks/01_05/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -8.449321746826172,
+      -463.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_06",
+    "manifest": "chunks/01_06/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -6.352715969085693,
+      -367.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11930200,
+    "glbBytes": 570624,
+    "geometryResidentBytes": 570624,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_07",
+    "manifest": "chunks/01_07/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -4.982463836669922,
+      -271.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11930204,
+    "glbBytes": 570628,
+    "geometryResidentBytes": 570628,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_08",
+    "manifest": "chunks/01_08/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -4.541137218475342,
+      -175.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11930204,
+    "glbBytes": 570628,
+    "geometryResidentBytes": 570628,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_09",
+    "manifest": "chunks/01_09/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -5.624398708343506,
+      -79.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_10",
+    "manifest": "chunks/01_10/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -7.406000137329102,
+      17.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      113.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_11",
+    "manifest": "chunks/01_11/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -9.894909858703613,
+      113.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 11930200,
+    "glbBytes": 570624,
+    "geometryResidentBytes": 570624,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_12",
+    "manifest": "chunks/01_12/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -11.769782066345215,
+      209.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11930200,
+    "glbBytes": 570624,
+    "geometryResidentBytes": 570624,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "01_13",
+    "manifest": "chunks/01_13/world.json",
+    "bounds": {
+     "min": [
+      -933.0,
+      -11.845210075378418,
+      305.0
+     ],
+     "max": [
+      -837.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11425364,
+    "glbBytes": 65788,
+    "geometryResidentBytes": 65788,
+    "placements": 0,
+    "triangles": 962,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_01",
+    "manifest": "chunks/02_01/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -12.111538887023926,
+      -795.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11624972,
+    "glbBytes": 265396,
+    "geometryResidentBytes": 265396,
+    "placements": 0,
+    "triangles": 4226,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_02",
+    "manifest": "chunks/02_02/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -11.318527221679688,
+      -751.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_03",
+    "manifest": "chunks/02_03/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -9.16759967803955,
+      -655.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_04",
+    "manifest": "chunks/02_04/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -7.281841278076172,
+      -559.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_05",
+    "manifest": "chunks/02_05/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -6.021082878112793,
+      -463.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_06",
+    "manifest": "chunks/02_06/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -4.611217498779297,
+      -367.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11930224,
+    "glbBytes": 570648,
+    "geometryResidentBytes": 570648,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_07",
+    "manifest": "chunks/02_07/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -2.5,
+      -271.0
+     ],
+     "max": [
+      -741.0,
+      18.782147842407227,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11930200,
+    "glbBytes": 570624,
+    "geometryResidentBytes": 570624,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_08",
+    "manifest": "chunks/02_08/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -2.2841243743896484,
+      -175.0
+     ],
+     "max": [
+      -741.0,
+      22.675710159301758,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_09",
+    "manifest": "chunks/02_09/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -3.471771478652954,
+      -79.0
+     ],
+     "max": [
+      -741.0,
+      10.52346940612793,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_10",
+    "manifest": "chunks/02_10/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -5.684196472167969,
+      17.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      113.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_11",
+    "manifest": "chunks/02_11/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -7.398898124694824,
+      113.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 11930200,
+    "glbBytes": 570624,
+    "geometryResidentBytes": 570624,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_12",
+    "manifest": "chunks/02_12/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -9.47169303894043,
+      209.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11930192,
+    "glbBytes": 570616,
+    "geometryResidentBytes": 570616,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "02_13",
+    "manifest": "chunks/02_13/world.json",
+    "bounds": {
+     "min": [
+      -837.0,
+      -9.54662799835205,
+      305.0
+     ],
+     "max": [
+      -741.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11425360,
+    "glbBytes": 65784,
+    "geometryResidentBytes": 65784,
+    "placements": 0,
+    "triangles": 962,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_01",
+    "manifest": "chunks/03_01/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -10.177635192871094,
+      -795.0
+     ],
+     "max": [
+      -645.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11624972,
+    "glbBytes": 265396,
+    "geometryResidentBytes": 265396,
+    "placements": 0,
+    "triangles": 4226,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_02",
+    "manifest": "chunks/03_02/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -9.251999855041504,
+      -751.0
+     ],
+     "max": [
+      -645.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_03",
+    "manifest": "chunks/03_03/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -7.505228042602539,
+      -655.0
+     ],
+     "max": [
+      -645.0,
+      0.0,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_04",
+    "manifest": "chunks/03_04/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -5.230517387390137,
+      -559.0
+     ],
+     "max": [
+      -645.0,
+      0.0,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_05",
+    "manifest": "chunks/03_05/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -3.4077491760253906,
+      -463.0
+     ],
+     "max": [
+      -645.0,
+      6.850573497772217,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_06",
+    "manifest": "chunks/03_06/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -3.012620210647583,
+      -367.0
+     ],
+     "max": [
+      -645.0,
+      21.576220947265625,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_07",
+    "manifest": "chunks/03_07/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -0.6626530289649963,
+      -271.0
+     ],
+     "max": [
+      -645.0,
+      70.80698724365234,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11930220,
+    "glbBytes": 570644,
+    "geometryResidentBytes": 570644,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_08",
+    "manifest": "chunks/03_08/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      10.51746940612793,
+      -175.0
+     ],
+     "max": [
+      -645.0,
+      78.38315148925781,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11841326,
+    "glbBytes": 569132,
+    "geometryResidentBytes": 569132,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_09",
+    "manifest": "chunks/03_09/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -2.0118978023529053,
+      -79.0
+     ],
+     "max": [
+      -645.0,
+      33.57858605957031,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_10",
+    "manifest": "chunks/03_10/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -3.1259450912475586,
+      17.0
+     ],
+     "max": [
+      -645.0,
+      5.039887386322022,
+      113.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_11",
+    "manifest": "chunks/03_11/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -4.97062873840332,
+      113.0
+     ],
+     "max": [
+      -645.0,
+      1.6936859664916992,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 11930204,
+    "glbBytes": 570628,
+    "geometryResidentBytes": 570628,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_12",
+    "manifest": "chunks/03_12/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -7.033123970031738,
+      209.0
+     ],
+     "max": [
+      -645.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11930196,
+    "glbBytes": 570620,
+    "geometryResidentBytes": 570620,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "03_13",
+    "manifest": "chunks/03_13/world.json",
+    "bounds": {
+     "min": [
+      -741.0,
+      -7.07665491104126,
+      305.0
+     ],
+     "max": [
+      -645.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11425360,
+    "glbBytes": 65784,
+    "geometryResidentBytes": 65784,
+    "placements": 0,
+    "triangles": 962,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_01",
+    "manifest": "chunks/04_01/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      -8.647359848022461,
+      -795.0
+     ],
+     "max": [
+      -549.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11624972,
+    "glbBytes": 265396,
+    "geometryResidentBytes": 265396,
+    "placements": 0,
+    "triangles": 4226,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_02",
+    "manifest": "chunks/04_02/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      -7.515194892883301,
+      -751.0
+     ],
+     "max": [
+      -549.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11930224,
+    "glbBytes": 570648,
+    "geometryResidentBytes": 570648,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_03",
+    "manifest": "chunks/04_03/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      -5.316969394683838,
+      -655.0
+     ],
+     "max": [
+      -549.0,
+      0.0,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11930224,
+    "glbBytes": 570648,
+    "geometryResidentBytes": 570648,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_04",
+    "manifest": "chunks/04_04/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      -3.7174313068389893,
+      -559.0
+     ],
+     "max": [
+      -549.0,
+      2.150808292388916,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_05",
+    "manifest": "chunks/04_05/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      -1.8090935945510864,
+      -463.0
+     ],
+     "max": [
+      -549.0,
+      44.81672998046875,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_06",
+    "manifest": "chunks/04_06/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      3.7233922481536865,
+      -367.0
+     ],
+     "max": [
+      -549.0,
+      68.93284936523438,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11841338,
+    "glbBytes": 569144,
+    "geometryResidentBytes": 569144,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_07",
+    "manifest": "chunks/04_07/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      21.570220947265625,
+      -271.0
+     ],
+     "max": [
+      -549.0,
+      103.01038690185547,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11841330,
+    "glbBytes": 569136,
+    "geometryResidentBytes": 569136,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_08",
+    "manifest": "chunks/04_08/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      29.818801879882812,
+      -175.0
+     ],
+     "max": [
+      -549.0,
+      107.50486322021484,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11841326,
+    "glbBytes": 569132,
+    "geometryResidentBytes": 569132,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_09",
+    "manifest": "chunks/04_09/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      5.0338873863220215,
+      -79.0
+     ],
+     "max": [
+      -549.0,
+      72.42238946533203,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11841330,
+    "glbBytes": 569136,
+    "geometryResidentBytes": 569136,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_10",
+    "manifest": "chunks/04_10/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      1.4224753379821777,
+      17.0
+     ],
+     "max": [
+      -549.0,
+      33.09423394775391,
+      113.0
+     ]
+    },
+    "estimatedResidentBytes": 11841334,
+    "glbBytes": 569140,
+    "geometryResidentBytes": 569140,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_11",
+    "manifest": "chunks/04_11/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      -3.291728973388672,
+      113.0
+     ],
+     "max": [
+      -549.0,
+      7.912711578369141,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_12",
+    "manifest": "chunks/04_12/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      -4.916196346282959,
+      209.0
+     ],
+     "max": [
+      -549.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11930204,
+    "glbBytes": 570628,
+    "geometryResidentBytes": 570628,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "04_13",
+    "manifest": "chunks/04_13/world.json",
+    "bounds": {
+     "min": [
+      -645.0,
+      -4.913601398468018,
+      305.0
+     ],
+     "max": [
+      -549.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11425368,
+    "glbBytes": 65792,
+    "geometryResidentBytes": 65792,
+    "placements": 0,
+    "triangles": 962,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_01",
+    "manifest": "chunks/05_01/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      -7.818387985229492,
+      -795.0
+     ],
+     "max": [
+      -453.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11624976,
+    "glbBytes": 265400,
+    "geometryResidentBytes": 265400,
+    "placements": 0,
+    "triangles": 4226,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_02",
+    "manifest": "chunks/05_02/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      -6.646642684936523,
+      -751.0
+     ],
+     "max": [
+      -453.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11930228,
+    "glbBytes": 570652,
+    "geometryResidentBytes": 570652,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_03",
+    "manifest": "chunks/05_03/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      -3.8882384300231934,
+      -655.0
+     ],
+     "max": [
+      -453.0,
+      1.3331898031234741,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11930236,
+    "glbBytes": 570660,
+    "geometryResidentBytes": 570660,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_04",
+    "manifest": "chunks/05_04/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      -1.5602192878723145,
+      -559.0
+     ],
+     "max": [
+      -453.0,
+      31.211080032348633,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11930240,
+    "glbBytes": 570664,
+    "geometryResidentBytes": 570664,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_05",
+    "manifest": "chunks/05_05/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      1.3329108953475952,
+      -463.0
+     ],
+     "max": [
+      -453.0,
+      87.06758447265625,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11841338,
+    "glbBytes": 569144,
+    "geometryResidentBytes": 569144,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_06",
+    "manifest": "chunks/05_06/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      43.994815826416016,
+      -367.0
+     ],
+     "max": [
+      -453.0,
+      97.91082330322266,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11841346,
+    "glbBytes": 569152,
+    "geometryResidentBytes": 569152,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_07",
+    "manifest": "chunks/05_07/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      59.173057556152344,
+      -271.0
+     ],
+     "max": [
+      -453.0,
+      99.73605676269531,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11841318,
+    "glbBytes": 569124,
+    "geometryResidentBytes": 569124,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_08",
+    "manifest": "chunks/05_08/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      51.820457458496094,
+      -175.0
+     ],
+     "max": [
+      -453.0,
+      98.42242761230469,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11841322,
+    "glbBytes": 569128,
+    "geometryResidentBytes": 569128,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_09",
+    "manifest": "chunks/05_09/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      5.220556259155273,
+      -79.0
+     ],
+     "max": [
+      -453.0,
+      63.87568231201172,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11841334,
+    "glbBytes": 569140,
+    "geometryResidentBytes": 569140,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_10",
+    "manifest": "chunks/05_10/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      -1.9048941135406494,
+      17.0
+     ],
+     "max": [
+      -453.0,
+      17.858869033813477,
+      113.0
+     ]
+    },
+    "estimatedResidentBytes": 11930240,
+    "glbBytes": 570664,
+    "geometryResidentBytes": 570664,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_11",
+    "manifest": "chunks/05_11/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      -3.3676459789276123,
+      113.0
+     ],
+     "max": [
+      -453.0,
+      5.8935198364257815,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 11930216,
+    "glbBytes": 570640,
+    "geometryResidentBytes": 570640,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_12",
+    "manifest": "chunks/05_12/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      -3.553934335708618,
+      209.0
+     ],
+     "max": [
+      -453.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11930208,
+    "glbBytes": 570632,
+    "geometryResidentBytes": 570632,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "05_13",
+    "manifest": "chunks/05_13/world.json",
+    "bounds": {
+     "min": [
+      -549.0,
+      -3.2239303588867188,
+      305.0
+     ],
+     "max": [
+      -453.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11425372,
+    "glbBytes": 65796,
+    "geometryResidentBytes": 65796,
+    "placements": 0,
+    "triangles": 962,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_01",
+    "manifest": "chunks/06_01/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      -6.02268123626709,
+      -795.0
+     ],
+     "max": [
+      -357.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11624976,
+    "glbBytes": 265400,
+    "geometryResidentBytes": 265400,
+    "placements": 0,
+    "triangles": 4226,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_02",
+    "manifest": "chunks/06_02/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      -4.982463836669922,
+      -751.0
+     ],
+     "max": [
+      -357.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_03",
+    "manifest": "chunks/06_03/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      -3.1612279415130615,
+      -655.0
+     ],
+     "max": [
+      -357.0,
+      14.815247970581055,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11930244,
+    "glbBytes": 570668,
+    "geometryResidentBytes": 570668,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_04",
+    "manifest": "chunks/06_04/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      0.9298052787780762,
+      -559.0
+     ],
+     "max": [
+      -357.0,
+      72.12874932861328,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_05",
+    "manifest": "chunks/06_05/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      31.205080032348633,
+      -463.0
+     ],
+     "max": [
+      -357.0,
+      122.87044854736328,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_06",
+    "manifest": "chunks/06_06/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      64.59735870361328,
+      -367.0
+     ],
+     "max": [
+      -357.0,
+      124.14187188720703,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11841346,
+    "glbBytes": 569152,
+    "geometryResidentBytes": 569152,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_07",
+    "manifest": "chunks/06_07/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      96.40682220458984,
+      -271.0
+     ],
+     "max": [
+      -357.0,
+      106.85714288330078,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11841322,
+    "glbBytes": 569128,
+    "geometryResidentBytes": 569128,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_08",
+    "manifest": "chunks/06_08/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      59.48215103149414,
+      -175.0
+     ],
+     "max": [
+      -357.0,
+      106.85045190429688,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11841330,
+    "glbBytes": 569136,
+    "geometryResidentBytes": 569136,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_09",
+    "manifest": "chunks/06_09/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      10.389317512512207,
+      -79.0
+     ],
+     "max": [
+      -357.0,
+      74.1127123413086,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11841338,
+    "glbBytes": 569144,
+    "geometryResidentBytes": 569144,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_10",
+    "manifest": "chunks/06_10/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      -3.5,
+      17.0
+     ],
+     "max": [
+      -357.0,
+      28.695924240112305,
+      142.0
+     ]
+    },
+    "estimatedResidentBytes": 34420910,
+    "glbBytes": 613936,
+    "geometryResidentBytes": 613936,
+    "placements": 4,
+    "triangles": 16470,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+     "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
+    },
+    "sharedMeshResidentBytes": {
+     "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776
+    }
+   },
+   {
+    "id": "06_11",
+    "manifest": "chunks/06_11/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      -3.87784481048584,
+      113.0
+     ],
+     "max": [
+      -357.0,
+      10.199999809265137,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 41498504,
+    "glbBytes": 600388,
+    "geometryResidentBytes": 600388,
+    "placements": 5,
+    "triangles": 16998,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+     "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68": 349526,
+     "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44": 349526,
+     "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b": 349526,
+     "1f71369ab4d1400d95e217d3fa020aac9776564e34c1bee1526e0b1bcb4bc32f": 349526,
+     "7d0fffdd91c4ab64ad09eb5e38a1ebf88949c4effa3ac81bf8894341560dbb23": 349526,
+     "f2c8d6293c8b860473c61280ac141937bf74f246d00301047cab09fe5e2aae3c": 349526,
+     "90fff08e827d09605d090a05360d05036ec5b8b3a0674816be9c9c5381fdfb6a": 349526,
+     "71c16d61028d81e7fe8676f7410f7cfffc9ce0c41baec41d38ff7ad9d1ae43ac": 349526,
+     "a277779f4b7799551068f208e6b12d0f843ecb24aab4b213ad709d70cf37dc9e": 1398102,
+     "15f4ca44d174981510cd96c90d9bbbdf61c791039256e4ee7cb5230d5d862a03": 1398102,
+     "1c0a6a3d5402a6050cbf8a199df51d4330196ff8838b1bdbbb4884b2b903ffc5": 1398102,
+     "13c0a40b1f7811a1ab5ed8c039f2020ec284c3f802797ab30b645c1395d042cb": 22369622
+    },
+    "sharedMeshResidentBytes": {
+     "564199892b61e97458075b8746d3835e4226027bc10352b74d5667cabf69f917": 77776,
+     "a1505519966baae16c6a5efe8667117d622b0f2458252c7845a2f66e767c5204": 100628
+    }
+   },
+   {
+    "id": "06_12",
+    "manifest": "chunks/06_12/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      -3.9926037788391113,
+      209.0
+     ],
+     "max": [
+      -357.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11930208,
+    "glbBytes": 570632,
+    "geometryResidentBytes": 570632,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "06_13",
+    "manifest": "chunks/06_13/world.json",
+    "bounds": {
+     "min": [
+      -453.0,
+      -2.713710308074951,
+      305.0
+     ],
+     "max": [
+      -357.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11425372,
+    "glbBytes": 65796,
+    "geometryResidentBytes": 65796,
+    "placements": 0,
+    "triangles": 962,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_01",
+    "manifest": "chunks/07_01/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      -5.628201007843018,
+      -795.0
+     ],
+     "max": [
+      -261.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11624976,
+    "glbBytes": 265400,
+    "geometryResidentBytes": 265400,
+    "placements": 0,
+    "triangles": 4226,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_02",
+    "manifest": "chunks/07_02/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      -4.4724531173706055,
+      -751.0
+     ],
+     "max": [
+      -261.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11930232,
+    "glbBytes": 570656,
+    "geometryResidentBytes": 570656,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_03",
+    "manifest": "chunks/07_03/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      -2.4261739253997803,
+      -655.0
+     ],
+     "max": [
+      -261.0,
+      27.17485757446289,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11930240,
+    "glbBytes": 570664,
+    "geometryResidentBytes": 570664,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_04",
+    "manifest": "chunks/07_04/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      1.087096929550171,
+      -559.0
+     ],
+     "max": [
+      -261.0,
+      73.72404809570313,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_05",
+    "manifest": "chunks/07_05/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      48.37449264526367,
+      -463.0
+     ],
+     "max": [
+      -261.0,
+      121.01695581054688,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11841338,
+    "glbBytes": 569144,
+    "geometryResidentBytes": 569144,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_06",
+    "manifest": "chunks/07_06/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      91.30984497070312,
+      -367.0
+     ],
+     "max": [
+      -261.0,
+      121.58071466064453,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_07",
+    "manifest": "chunks/07_07/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      94.66104888916016,
+      -271.0
+     ],
+     "max": [
+      -261.0,
+      102.59247918701172,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11841330,
+    "glbBytes": 569136,
+    "geometryResidentBytes": 569136,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_08",
+    "manifest": "chunks/07_08/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      48.31727600097656,
+      -175.0
+     ],
+     "max": [
+      -261.0,
+      98.92413659667969,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11841326,
+    "glbBytes": 569132,
+    "geometryResidentBytes": 569132,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_09",
+    "manifest": "chunks/07_09/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      2.9875173568725586,
+      -79.0
+     ],
+     "max": [
+      -261.0,
+      62.85356088256836,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11841342,
+    "glbBytes": 569148,
+    "geometryResidentBytes": 569148,
+    "placements": 0,
+    "triangles": 9216,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_10",
+    "manifest": "chunks/07_10/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      -2.4646153450012207,
+      17.0
+     ],
+     "max": [
+      -261.0,
+      10.395317512512207,
+      113.0
+     ]
+    },
+    "estimatedResidentBytes": 11930240,
+    "glbBytes": 570664,
+    "geometryResidentBytes": 570664,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_11",
+    "manifest": "chunks/07_11/world.json",
+    "bounds": {
+     "min": [
+      -362.59660291671753,
+      -3.930051803588867,
+      113.0
+     ],
+     "max": [
+      -261.0,
+      11.819634437561035,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 34581666,
+    "glbBytes": 571308,
+    "geometryResidentBytes": 571308,
+    "placements": 1,
+    "triangles": 17079,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406,
+     "8df08fbaac945d5869c4b50e8d1c81016b4fdfd0dc4d64d42b64180e0a98e283": 22369622
+    },
+    "sharedMeshResidentBytes": {
+     "87c576c9dcf08d125dec4ce299e39ed8dc8eced2feefbfb5eb57539cc006a949": 281160
+    }
+   },
+   {
+    "id": "07_12",
+    "manifest": "chunks/07_12/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      -4.016311168670654,
+      209.0
+     ],
+     "max": [
+      -261.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11930212,
+    "glbBytes": 570636,
+    "geometryResidentBytes": 570636,
+    "placements": 0,
+    "triangles": 9218,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "07_13",
+    "manifest": "chunks/07_13/world.json",
+    "bounds": {
+     "min": [
+      -357.0,
+      -3.305093765258789,
+      305.0
+     ],
+     "max": [
+      -261.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11425372,
+    "glbBytes": 65796,
+    "geometryResidentBytes": 65796,
+    "placements": 0,
+    "triangles": 962,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_01",
+    "manifest": "chunks/08_01/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      -6.1026153564453125,
+      -795.0
+     ],
+     "max": [
+      -225.0,
+      0.0,
+      -751.0
+     ]
+    },
+    "estimatedResidentBytes": 11463060,
+    "glbBytes": 103484,
+    "geometryResidentBytes": 103484,
+    "placements": 0,
+    "triangles": 1586,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_02",
+    "manifest": "chunks/08_02/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      -5.075839042663574,
+      -751.0
+     ],
+     "max": [
+      -225.0,
+      0.0,
+      -655.0
+     ]
+    },
+    "estimatedResidentBytes": 11577996,
+    "glbBytes": 218420,
+    "geometryResidentBytes": 218420,
+    "placements": 0,
+    "triangles": 3458,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_03",
+    "manifest": "chunks/08_03/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      -2.927678346633911,
+      -655.0
+     ],
+     "max": [
+      -225.0,
+      1.9715554294586182,
+      -559.0
+     ]
+    },
+    "estimatedResidentBytes": 11578000,
+    "glbBytes": 218424,
+    "geometryResidentBytes": 218424,
+    "placements": 0,
+    "triangles": 3458,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_04",
+    "manifest": "chunks/08_04/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      -1.1457844972610474,
+      -559.0
+     ],
+     "max": [
+      -225.0,
+      48.46958871459961,
+      -463.0
+     ]
+    },
+    "estimatedResidentBytes": 11578000,
+    "glbBytes": 218424,
+    "geometryResidentBytes": 218424,
+    "placements": 0,
+    "triangles": 3458,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_05",
+    "manifest": "chunks/08_05/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      39.179656982421875,
+      -463.0
+     ],
+     "max": [
+      -225.0,
+      120.11008782958984,
+      -367.0
+     ]
+    },
+    "estimatedResidentBytes": 11489106,
+    "glbBytes": 216912,
+    "geometryResidentBytes": 216912,
+    "placements": 0,
+    "triangles": 3456,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_06",
+    "manifest": "chunks/08_06/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      84.6859130859375,
+      -367.0
+     ],
+     "max": [
+      -225.0,
+      126.21971459960938,
+      -271.0
+     ]
+    },
+    "estimatedResidentBytes": 11489114,
+    "glbBytes": 216920,
+    "geometryResidentBytes": 216920,
+    "placements": 0,
+    "triangles": 3456,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_07",
+    "manifest": "chunks/08_07/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      97.09050750732422,
+      -271.0
+     ],
+     "max": [
+      -225.0,
+      102.5062212524414,
+      -175.0
+     ]
+    },
+    "estimatedResidentBytes": 11489098,
+    "glbBytes": 216904,
+    "geometryResidentBytes": 216904,
+    "placements": 0,
+    "triangles": 3456,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_08",
+    "manifest": "chunks/08_08/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      48.54795455932617,
+      -175.0
+     ],
+     "max": [
+      -225.0,
+      100.87503381347656,
+      -79.0
+     ]
+    },
+    "estimatedResidentBytes": 11489090,
+    "glbBytes": 216896,
+    "geometryResidentBytes": 216896,
+    "placements": 0,
+    "triangles": 3456,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_09",
+    "manifest": "chunks/08_09/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      4.525418281555176,
+      -79.0
+     ],
+     "max": [
+      -225.0,
+      58.88543267822266,
+      17.0
+     ]
+    },
+    "estimatedResidentBytes": 11489106,
+    "glbBytes": 216912,
+    "geometryResidentBytes": 216912,
+    "placements": 0,
+    "triangles": 3456,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_10",
+    "manifest": "chunks/08_10/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      -1.594360589981079,
+      17.0
+     ],
+     "max": [
+      -225.0,
+      8.649470764160156,
+      113.0
+     ]
+    },
+    "estimatedResidentBytes": 11578004,
+    "glbBytes": 218428,
+    "geometryResidentBytes": 218428,
+    "placements": 0,
+    "triangles": 3458,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_11",
+    "manifest": "chunks/08_11/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      -2.8448898792266846,
+      113.0
+     ],
+     "max": [
+      -225.0,
+      2.8953940448760984,
+      209.0
+     ]
+    },
+    "estimatedResidentBytes": 11577984,
+    "glbBytes": 218408,
+    "geometryResidentBytes": 218408,
+    "placements": 0,
+    "triangles": 3458,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_12",
+    "manifest": "chunks/08_12/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      -3.869537115097046,
+      209.0
+     ],
+     "max": [
+      -225.0,
+      0.0,
+      305.0
+     ]
+    },
+    "estimatedResidentBytes": 11577972,
+    "glbBytes": 218396,
+    "geometryResidentBytes": 218396,
+    "placements": 0,
+    "triangles": 3458,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   },
+   {
+    "id": "08_13",
+    "manifest": "chunks/08_13/world.json",
+    "bounds": {
+     "min": [
+      -261.0,
+      -3.793727397918701,
+      305.0
+     ],
+     "max": [
+      -225.0,
+      0.0,
+      315.0
+     ]
+    },
+    "estimatedResidentBytes": 11387900,
+    "glbBytes": 28324,
+    "geometryResidentBytes": 28324,
+    "placements": 0,
+    "triangles": 362,
+    "sharedResourceResidentBytes": {
+     "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04": 87382,
+     "d512e75e38a49aeff6270cb3475898e45a8b6dd95ca2e858fc89741bbd897bac": 87382,
+     "1299b4e247c3ed8a7c7ccb1a0269ac7d8e7383333243ed7769df4fecba418ef5": 5592406,
+     "c0cab32e0a988ba833cb4e6ab98f89d5f9c3d7f55ec462e7f6eb52aae7f3b8c0": 5592406
+    }
+   }
+  ]
+ },
+ "minimap": {
+  "file": "minimap.webp",
+  "image": "minimap.webp",
+  "bounds": {
+   "min": [
+    -955.0,
+    -14.204055786132812,
+    -795.0
+   ],
+   "max": [
+    -225.0,
+    126.21971459960938,
+    315.0
+   ]
+  },
+  "northUp": true,
+  "worldMin": [
+   -955.0,
+   -795.0
+  ],
+  "worldMax": [
+   -225.0,
+   315.0
+  ],
+  "imageSize": [
+   730,
+   1110
+  ],
+  "pixelsPerMetre": 1,
+  "imageSha256": "d506e7a5160ba8898169a462cd9fceb88cc0e0ddbb0fc199e78e0db0ddbb7c6d",
+  "renderedFrom": "the package's chunk GLBs (the shared cartography renderer, window by window)",
+  "cartographyRender": {
+   "generator": "eloria-assets/maps/continent-v2/_continent_v2/render_minimap.py",
+   "styleVersion": 4,
+   "chunksSha256": "db73377e4f40fe290d1591b1b61df764b15d9e044e300115a60af5b55bb263f2",
+   "neighbourChunksSha256": {
+    "stagheath": "1194c58d8491090c468ad4c80107d5473fea0bac535815acf272351601130a98",
+    "whitepeak": "f0d76f1d9dcf02207ec00c4566f86509e919a1378e82bb02da4282c36612a376"
+   },
+   "supersample": 2,
+   "windowMetres": 2048,
+   "waterRGB": [
+    79,
+    150,
+    157
+   ]
+  },
+  "detail": {
+   "worldMin": [
+    -955.0,
+    -795.0
+   ],
+   "worldMax": [
+    -225.0,
+    315.0
+   ],
+   "imageSize": [
+    2920,
+    4440
+   ],
+   "pixelsPerMetre": 4,
+   "imageSha256": "e50f7d527258fdfb2e007b85b12b74539609940e8e1aedb5726b07c899fbab84",
+   "chunksSha256": "db73377e4f40fe290d1591b1b61df764b15d9e044e300115a60af5b55bb263f2",
+   "neighbourChunksSha256": {
+    "stagheath": "1194c58d8491090c468ad4c80107d5473fea0bac535815acf272351601130a98",
+    "whitepeak": "f0d76f1d9dcf02207ec00c4566f86509e919a1378e82bb02da4282c36612a376"
+   },
+   "styleVersion": 4,
+   "supersample": 1,
+   "chunkReaderVersion": 2,
+   "retirementSha256": "7d71aa556346fd5251de83d8babc10552648975c69b5884cb05b98e3b39e8c3a",
+   "image": "map-detail.webp",
+   "generator": "eloria-assets/tools/render_region_map_details.py"
+  }
+ }
+}
