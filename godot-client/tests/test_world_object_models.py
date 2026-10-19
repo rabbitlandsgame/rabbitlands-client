@@ -123,14 +123,16 @@ class WorldObjectModelTest(unittest.TestCase):
         held to the refined kit's budget, not to the placeholder budget the
         bootstrap scenery was built at. A modelled node imported from the
         reviewed kits has the wider band the owner set for them, and only a
-        model the imported table lists may use it.
+        model the imported table lists may use it - or reused underground
+        scenery, which its own test holds to its recorded file.
         """
         listed = ({row.model_id for row in imported.IMPORTED_HARVESTABLES},
                   {row.model_id for row in imported.IMPORTED_INTERACTIVES})
         for section in (self.harvestables, self.interactives):
             for model_id, entry in section["models"].items():
                 with self.subTest(model=model_id):
-                    wide = model_id in listed[0 if section is self.harvestables else 1]
+                    wide = (model_id in listed[0 if section is self.harvestables else 1]
+                            or (section is self.harvestables and entry.get("reusedScenery")))
                     low, high = (imported.IMPORTED_TRIANGLE_BAND if wide
                                  else imported.PROCEDURAL_TRIANGLE_BAND)
                     self.assertGreaterEqual(entry["triangles"], low)
@@ -168,6 +170,40 @@ class WorldObjectModelTest(unittest.TestCase):
                 else:
                     self.assertNotEqual(answered, model_id,
                                         f"{row.label} is not swapped to {model_id} yet")
+
+    def test_reused_scenery_models_match_their_record(self) -> None:
+        """Underground minerals draw packaged scenery, not a row of the table.
+
+        tools/prepare_underground_scenery.py writes these entries: several
+        labels share one reused GLB under assets/world/underground and draw it
+        in their own resource palette (mineral_appearance.gd), so they are not
+        `imported` and are held instead to the file its reuse record names,
+        measured as an imported model is, inside the imported band.
+        """
+        record = json.loads((CLIENT.parent / "eloria-assets/source/world_objects/underground/"
+                             "reused-scenery.json").read_text(encoding="utf-8"))
+        packaged = {asset["output"]: asset["sha256"] for asset in record["assets"]}
+        models = self.harvestables["models"]
+        reused = {model_id: entry for model_id, entry in models.items()
+                  if entry.get("reusedScenery")}
+        self.assertTrue(reused, "the underground minerals are registered")
+        low, high = imported.IMPORTED_TRIANGLE_BAND
+        for model_id, entry in reused.items():
+            with self.subTest(model=model_id):
+                self.assertNotIn("imported", entry)
+                output = "godot-client/" + entry["scene"].removeprefix("res://")
+                self.assertIn(output, packaged)
+                path = CLIENT.parent / output
+                measured = imported.measure_glb(path)
+                self.assertEqual(measured["sha256"], packaged[output])
+                for key, value in measured.items():
+                    self.assertEqual(entry[key], value, key)
+                self.assertTrue(low <= entry["triangles"] <= high)
+                self.assertIn(entry["tier"], {"common", "uncommon", "rare"})
+                self.assertEqual(set(entry["resourcePalette"]), {"stone", "mineral"})
+                self.assertEqual(self.harvestables["resources"].get(entry["label"]), model_id)
+                self.assertTrue(models[entry["replaces"]].get("retired"))
+                self.assertEqual(models[entry["replaces"]]["tier"], entry["tier"])
 
     def test_imported_interactives_match_the_reviewed_files(self) -> None:
         models = self.interactives["models"]

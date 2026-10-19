@@ -244,10 +244,36 @@ func _run() -> void:
 	LookSky._haze(haze_test, WeatherSky.weathered_look(lit, {"fog": 0.85}), Color.GRAY)
 	var clear_haze := Environment.new()
 	LookSky._haze(clear_haze, lit, Color.GRAY)
-	_expect(haze_test.fog_depth_begin < 20.0 and haze_test.fog_depth_end < 200.0
+	_expect(haze_test.fog_depth_begin < clear_haze.fog_depth_begin * 0.5
+		and haze_test.fog_depth_end < clear_haze.fog_depth_end * 0.6
 		and haze_test.fog_density > clear_haze.fog_density
 		and is_equal_approx(clear_haze.fog_depth_begin, LookProfile.HAZE_BEGIN),
 		"a fog bank closes the painted haze in; a clear day keeps it far off")
+	# Fog never thins the far haze, on the densest map either: past
+	# WEATHER_HAZE_END a fog bank shows no more than a clear day past HAZE_END.
+	_expect(LookProfile.WEATHER_HAZE_DENSITY >= LookProfile.HAZE_DENSITY_MAX,
+		"a full fog bank is at least as dense as the densest clear-day haze")
+	var dense := WorldManifest.new()
+	dense.data = lit.data.duplicate(true)
+	((dense.data["environment"] as Dictionary)["fog"] as Dictionary)["density"] = 0.01
+	for manifest: WorldManifest in [lit, dense]:
+		var clear := Environment.new()
+		LookSky._haze(clear, manifest, Color.GRAY)
+		for amount: float in [0.3, 0.85, 1.0]:
+			var veiled := Environment.new()
+			LookSky._haze(veiled, WeatherSky.weathered_look(manifest, {"fog": amount}), Color.GRAY)
+			_expect(veiled.fog_density >= clear.fog_density
+				and veiled.fog_depth_begin <= clear.fog_depth_begin
+				and veiled.fog_depth_end <= clear.fog_depth_end
+				and veiled.fog_depth_curve <= clear.fog_depth_curve,
+				"fog %.2f thickens the haze at every depth: density %.3f -> %.3f"
+					% [amount, clear.fog_density, veiled.fog_density])
+			if amount == 1.0:
+				_expect(is_equal_approx(veiled.fog_depth_begin, LookProfile.WEATHER_HAZE_BEGIN)
+					and is_equal_approx(veiled.fog_depth_end, LookProfile.WEATHER_HAZE_END)
+					and veiled.fog_density >= LookProfile.WEATHER_HAZE_DENSITY - 0.0001,
+					"a full fog bank closes to the weather haze: %.1f-%.1f m at %.3f"
+						% [veiled.fog_depth_begin, veiled.fog_depth_end, veiled.fog_density])
 	var dusty: Dictionary = WeatherSky.weathered_look(lit, {"fall": 4, "precipitation": 0.8,
 		"fog": 0.7}).data.environment
 	var dust := DayNightBinder._colour(dusty.fog.color, Color.BLACK)

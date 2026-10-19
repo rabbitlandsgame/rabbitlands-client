@@ -14,18 +14,19 @@ static func apply(manifest: WorldManifest, world: Node3D) -> int:
 	for placement: Dictionary in data.placements:
 		var source := str(data.assets[placement.asset])
 		if not paths.has(source): paths.append(source)
-	var prepared := GlbSceneCache.prepare(paths)
+	# Parsed once a session and shared with the harvest nodes that stand the
+	# same files (crystal_cluster): only paths the cache lacks are built.
+	GlbSceneCache.install_prepared(GlbSceneCache.prepare(GlbSceneCache.missing(paths)))
 	var scenery := Node3D.new()
 	scenery.name = "UndergroundScenery"
 	world.add_child(scenery)
 	var count := 0
 	for placement: Dictionary in data.placements:
-		var path := ProjectSettings.globalize_path(str(data.assets[placement.asset]))
-		var packed := prepared.get(path) as PackedScene
-		if packed == null:
+		var path := str(data.assets[placement.asset])
+		var model := GlbSceneCache.instantiate(path)
+		if model == null:
 			push_warning("Underground scenery failed to import: " + path)
 			continue
-		var model := packed.instantiate() as Node3D
 		model.name = str(placement.asset) + "_" + str(count)
 		var p: Array = placement.position
 		model.position = Vector3(p[0], p[1], p[2])
@@ -46,11 +47,12 @@ static func _style_surfaces(world: Node3D) -> void:
 			mesh.visible = false
 		if not id.begins_with("Walk_"):
 			continue
-		var texture := "packed-earth-path.png"
-		if id.contains("boarsend_barrow"): texture = "flagstone-paving.png"
-		elif id.contains("spindle_cavern"): texture = "coastal-gravel.png"
+		var texture := "packed_earth"
+		if id.contains("boarsend_barrow"): texture = "flagstone"
+		elif id.contains("spindle_cavern"): texture = "coastal_gravel"
 		var material := StandardMaterial3D.new()
-		material.albedo_texture = load("res://src/world/look/textures/" + texture)
+		# With mipmaps even where a fresh checkout imported the PNG without.
+		material.albedo_texture = LookGround.class_texture(texture)
 		material.albedo_color = Color(.65,.65,.65)
 		material.roughness = 1
 		material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC

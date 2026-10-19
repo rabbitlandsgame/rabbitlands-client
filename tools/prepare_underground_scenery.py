@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'eloria-assets/tools'))
 from video_motion.asset import accessor, read_glb, write_glb  # noqa: E402
 from video_motion.packing import append_array  # noqa: E402
+from imported_world_objects import measure_glb  # noqa: E402
 
 SELECTION = {
     'crystal_arch': ('amethyst_barrens', 'crystal-rock-arch-1', 'height', 5.2),
@@ -33,6 +34,12 @@ SELECTION = {
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def write_json(path, document):
+    # LF on every platform: a Windows text-mode write turns a one-entry change
+    # into a whole-file diff of the shared registry.
+    path.write_text(json.dumps(document, indent=2)+'\n', encoding='utf-8', newline='\n')
 
 
 def matrix(node):
@@ -175,9 +182,9 @@ def main():
     records = [package(name, spec, output) for name, spec in SELECTION.items()]
     report = ROOT / 'eloria-assets/source/world_objects/underground/reused-scenery.json'
     report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text(json.dumps({'schema': 'rabbitlands-reused-underground-scenery-v1', 'assets': records}, indent=2)+'\n')
+    write_json(report, {'schema': 'rabbitlands-reused-underground-scenery-v1', 'assets': records})
     plan_path = ROOT / 'eloria-assets/maps/continent-v2/_continent_v2/content/underground.json'
-    plan = json.loads(plan_path.read_text())
+    plan = json.loads(plan_path.read_text(encoding='utf-8'))
     placements = []
     def place(asset, x, y, yaw=0, height=0):
         placements.append({'asset': asset, 'position': [x, height, 240-y], 'yaw': yaw})
@@ -198,14 +205,18 @@ def main():
                     # Match the existing blocked mineral patches exactly.
                     place('crystal_cluster', x+rx*.82*np.cos(angle), y+ry*.82*np.sin(angle), index*73)
         elif section['style'] == 'barrow':
+            # Room 1 is the barrow's hub: a passage leaves each of its four
+            # sides, and the east one is room 3's only way in. Wedge the rock
+            # diagonally into the north-east corner, where the wall margin of
+            # the served collision is already blocked under all of it.
             x, y, rx, ry = section['rooms'][1]
-            place('mossy_rock', x+rx+1.2, y)
+            place('mossy_rock', x+rx+.3, y-ry-.7, 45)
     config = {'schemaVersion': 1, 'map': plan['map']['id'], 'sourcePlanSha256': sha(plan_path.read_bytes()),
               'assets': {record['id']: 'res://'+record['output'].split('godot-client/', 1)[1] for record in records},
               'placements': placements}
-    (ROOT/'godot-client/data/world/underground-scenery.json').write_text(json.dumps(config, indent=2)+'\n')
+    write_json(ROOT/'godot-client/data/world/underground-scenery.json', config)
     catalog_path = ROOT/'godot-client/data/world/objects.json'
-    catalog = json.loads(catalog_path.read_text())
+    catalog = json.loads(catalog_path.read_text(encoding='utf-8'))
     harvest = catalog['harvestables']
     minerals = {
         'Coal':('1','25282b','171a1d'), 'Iron Ore':('2','777979','8d5d3c'),
@@ -216,11 +227,18 @@ def main():
     for label,(shape,stone,vein) in minerals.items():
         identity = 'rl_'+label.lower().replace(' ','_')+'_v1'
         asset = 'crystal_cluster' if shape == 'cluster' else 'resource_rock_'+shape
-        harvest['models'][identity] = {'label':label,'kind':'mineral','height':1.7 if shape=='cluster' else .8,
-            'imported':True,'scene':config['assets'][asset],'resourcePalette':{'stone':'#'+stone,'mineral':'#'+vein},
-            'source':'eloria-assets/source/world_objects/underground/reused-scenery.json'}
+        # Reused scenery, not a row of imported_world_objects: several labels
+        # share one packaged GLB and draw it in their own resource palette.
+        # The retired procedural model it replaces keeps the label's tier.
+        replaced = next(model for model, entry in harvest['models'].items()
+                        if entry['label'] == label and entry.get('retired'))
+        harvest['models'][identity] = {'label':label,'kind':'mineral','tier':harvest['models'][replaced]['tier'],
+            'reusedScenery':True,'scene':config['assets'][asset],
+            **measure_glb(ROOT/'godot-client'/config['assets'][asset].removeprefix('res://')),
+            'resourcePalette':{'stone':'#'+stone,'mineral':'#'+vein},
+            'source':'eloria-assets/source/world_objects/underground/reused-scenery.json','replaces':replaced}
         harvest['resources'][label] = identity
-    catalog_path.write_text(json.dumps(catalog,indent=2)+'\n')
+    write_json(catalog_path, catalog)
     for record in records:
         print(record['id'], record['bounds'])
 

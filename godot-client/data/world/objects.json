@@ -836,86 +836,128 @@
       "rl_coal_v1": {
         "label": "Coal",
         "kind": "mineral",
-        "height": 0.8,
-        "imported": true,
+        "tier": "common",
+        "reusedScenery": true,
         "scene": "res://assets/world/underground/resource_rock_1.glb",
+        "vertices": 2279,
+        "triangles": 2500,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "afbd69da231be2ea98f490ff3eb503753d9163a5dfe220f21c0cb86630bdc0bb",
         "resourcePalette": {
           "stone": "#25282b",
           "mineral": "#171a1d"
         },
-        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json"
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "replaces": "emberseam_coal"
       },
       "rl_iron_ore_v1": {
         "label": "Iron Ore",
         "kind": "mineral",
-        "height": 0.8,
-        "imported": true,
+        "tier": "common",
+        "reusedScenery": true,
         "scene": "res://assets/world/underground/resource_rock_2.glb",
+        "vertices": 2969,
+        "triangles": 2211,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "5d31b934752a9e1241110ec4715462b6976aa2d7bbe67fdef2eacbfcec0637ff",
         "resourcePalette": {
           "stone": "#777979",
           "mineral": "#8d5d3c"
         },
-        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json"
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "replaces": "iron_ore"
       },
       "rl_copper_v1": {
         "label": "Copper",
         "kind": "mineral",
-        "height": 0.8,
-        "imported": true,
+        "tier": "common",
+        "reusedScenery": true,
         "scene": "res://assets/world/underground/resource_rock_3.glb",
+        "vertices": 2817,
+        "triangles": 2499,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "c970b7d39ee42c6aad30149065a3381c6e499fb6d031e8f65dff0e920a9fb92d",
         "resourcePalette": {
           "stone": "#777471",
           "mineral": "#b87333"
         },
-        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json"
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "replaces": "copper_ore"
       },
       "rl_sulfur_v1": {
         "label": "Sulfur",
         "kind": "mineral",
-        "height": 0.8,
-        "imported": true,
+        "tier": "common",
+        "reusedScenery": true,
         "scene": "res://assets/world/underground/resource_rock_1.glb",
+        "vertices": 2279,
+        "triangles": 2500,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "afbd69da231be2ea98f490ff3eb503753d9163a5dfe220f21c0cb86630bdc0bb",
         "resourcePalette": {
           "stone": "#777468",
           "mineral": "#d8b94c"
         },
-        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json"
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "replaces": "sulfur"
       },
       "rl_slate_v1": {
         "label": "Slate",
         "kind": "mineral",
-        "height": 0.8,
-        "imported": true,
+        "tier": "common",
+        "reusedScenery": true,
         "scene": "res://assets/world/underground/resource_rock_2.glb",
+        "vertices": 2969,
+        "triangles": 2211,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "5d31b934752a9e1241110ec4715462b6976aa2d7bbe67fdef2eacbfcec0637ff",
         "resourcePalette": {
           "stone": "#5d656d",
           "mineral": "#77818a"
         },
-        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json"
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "replaces": "slate_outcrop"
       },
       "rl_geode_v1": {
         "label": "Geode",
         "kind": "mineral",
-        "height": 0.8,
-        "imported": true,
+        "tier": "rare",
+        "reusedScenery": true,
         "scene": "res://assets/world/underground/resource_rock_3.glb",
+        "vertices": 2817,
+        "triangles": 2499,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "c970b7d39ee42c6aad30149065a3381c6e499fb6d031e8f65dff0e920a9fb92d",
         "resourcePalette": {
           "stone": "#666572",
           "mineral": "#b093d0"
         },
-        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json"
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "replaces": "voltaic_geode"
       },
       "rl_crystal_v1": {
         "label": "Crystal",
         "kind": "mineral",
-        "height": 1.7,
-        "imported": true,
+        "tier": "rare",
+        "reusedScenery": true,
         "scene": "res://assets/world/underground/crystal_cluster.glb",
+        "vertices": 900,
+        "triangles": 470,
+        "alphaTested": false,
+        "height": 1.7,
+        "sha256": "b2d344872fb9d5109a93305fac74e5875747360b7ad7eb28b5bf8bb38db57fd4",
         "resourcePalette": {
           "stone": "#77748a",
           "mineral": "#9b74d5"
         },
-        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json"
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "replaces": "resonant_crystal"
       }
     },
     "resources": {
@@ -1120,6 +1162,11 @@
         86
       ],
       "scene": "res://assets/world/underground/cave_mouth.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -6.0
+      ],
       "visualHeight": 5.2,
       "height": 3.6,
       "radius": 1.6,
@@ -1132,6 +1179,11 @@
         490
       ],
       "scene": "res://assets/world/underground/cave_mouth.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -6.0
+      ],
       "visualHeight": 5.2,
       "height": 3.6,
       "radius": 1.6,
@@ -1144,6 +1196,11 @@
         346
       ],
       "scene": "res://assets/world/underground/crystal_arch.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -3.0
+      ],
       "visualHeight": 5.2,
       "height": 3.6,
       "radius": 1.6,
@@ -1156,6 +1213,11 @@
         489
       ],
       "scene": "res://assets/world/underground/cave_mouth.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -6.0
+      ],
       "visualHeight": 5.2,
       "height": 3.6,
       "radius": 1.6,

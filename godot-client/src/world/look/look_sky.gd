@@ -235,8 +235,11 @@ static func _haze(environment: Environment, lighting: WorldManifest, haze: Color
 	environment.fog_depth_end = lerpf(LookProfile.HAZE_END, LookProfile.WEATHER_HAZE_END,
 		weather_fog)
 	environment.fog_depth_curve = lerpf(LookProfile.HAZE_CURVE, 1.0, weather_fog)
-	# Weather can veil the horizon without turning the nearby route opaque.
-	environment.fog_density = lerpf(LookProfile.haze_density(declared_density), 0.68, weather_fog)
+	# A fog bank only ever thickens the haze: its nearer begin and end close it
+	# in, and its density never drops below the map's clear-day density.
+	var clear_density := LookProfile.haze_density(declared_density)
+	environment.fog_density = lerpf(clear_density,
+		maxf(clear_density, LookProfile.WEATHER_HAZE_DENSITY), weather_fog)
 	environment.fog_light_color = haze
 	environment.fog_light_energy = 1.0
 	environment.fog_aerial_perspective = 0.0
