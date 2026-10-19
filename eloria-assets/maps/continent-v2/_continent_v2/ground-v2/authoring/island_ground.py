@@ -34,7 +34,8 @@ ISLANDS = {
         'offset': [3560, -1650],
         'polygon': [(820, 5560), (980, 5330), (1300, 5250), (1640, 5300), (1830, 5470), (1800, 5720), (1600, 5890),
                     (1260, 5930), (950, 5860), (800, 5720)],
-        'warp': 18, 'seed': 31, 'taper': 230, 'vscale': 1.0, 'join': None, 'mask': 'draft',
+        # heights x0.5: at full Meshy height 68% of the isle was steeper than 0.65; now ~32%, like Twinbrook/Reedfall
+        'warp': 18, 'seed': 31, 'taper': 230, 'vscale': 0.5, 'smooth': 1.2, 'join': None, 'mask': 'draft',
         # citadel terrace: centre of the model's Mirrorhold citadel (4767,3967) in destination coords
         'pads': [{'name': 'citadel terrace', 'centre': [1250, 5465], 'radius': 30, 'blend': 18, 'level': 'median', 'repaint': True}],
     },
@@ -157,7 +158,7 @@ def build(name):
     obj = (top - ground) > 1.0
     obj = ndimage.binary_dilation(obj, iterations=1)
     h = np.where(obj, ground, top)
-    h = ndimage.gaussian_filter(h, 0.8)
+    h = ndimage.gaussian_filter(h, I.get('smooth', 0.8))
     h = h * I['vscale']
     # the coast: the approved A3 draft's own new-land outline (fine warp added); the polygon only bounds it
     sd = draft_sd(xs, zs, I['polygon'], I['seed']) if I.get('mask') == 'draft' else polygon_mask(xs, zs, I['polygon'], I['warp'], I['seed'])
