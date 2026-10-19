@@ -3,8 +3,9 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/hearthcroft/hearthcroft.tscn" id="hearthcroft"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/ringholm/ringholm.tscn" id="ringholm"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/greenlight/greenlight.tscn" id="greenlight"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/spindle_hill/spindle_hill.tscn" id="spindle_hill"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholm/tollholm.tscn" id="tollholm"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/jadestair/jadestair.tscn" id="jadestair"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/coilmere/coilmere.tscn" id="coilmere"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/suncoil/suncoil.tscn" id="suncoil"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/landfall/landfall.tscn" id="landfall"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/warrenmead/warrenmead.tscn" id="warrenmead"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/stagheath/stagheath.tscn" id="stagheath"]
@@ -15,6 +16,8 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/ravenhead/ravenhead.tscn" id="ravenhead"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/pinebrow/pinebrow.tscn" id="pinebrow"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/boarsend/boarsend.tscn" id="boarsend"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/hornmere/hornmere.tscn" id="hornmere"]
+[ext_resource type="PackedScene" path="res://world_authoring/regions/whitepeak/whitepeak.tscn" id="whitepeak"]
 
 [ext_resource type="Texture2D" path="res://world_authoring/continent-v2/viewer/sea-tint.png" id="sea_tint"]
 
@@ -103,7 +106,7 @@ mesh = SubResource("PlaneMesh_seabed")
 position = Vector3(1900.0, 0.0, 6956.0)
 
 [node name="Terrain" parent="hearthcroft"]
-preview_clip_inside = PackedVector2Array(1939, 6849, 1919, 6781, 1639, 6821, 1479, 6821, 1489, 6911, 1519, 6961, 1599, 7041, 1609, 7151, 1689, 7151, 1729, 7201, 1949, 7221, 1959, 6921, 1959, 6919, 2259, 6789, 2321, 6761, 2321, 6691, 2259, 6717)
+preview_clip_inside = PackedVector2Array(1939, 6849, 1919, 6781, 1639, 6821, 1479, 6821, 1489, 6911, 1519, 6961, 1599, 7041, 1609, 7151, 1689, 7151, 1729, 7201, 1949, 7221, 1959, 6921, 1999, 6931, 2041, 6955, 2101, 6993, 2161, 7037, 2221, 7075, 2259, 7093, 2259, 6717)
 
 [editable path="hearthcroft"]
 
@@ -111,7 +114,7 @@ preview_clip_inside = PackedVector2Array(1939, 6849, 1919, 6781, 1639, 6821, 147
 position = Vector3(2710.0, 0.0, 6841.0)
 
 [node name="Terrain" parent="ringholm"]
-preview_clip_inside = PackedVector2Array(2479, 7171, 2729, 7171, 3161, 7171, 3161, 6959, 3037, 6863, 2957, 6797, 2877, 6713, 2797, 6627, 2717, 6547, 2637, 6511, 2659, 6521, 2259, 6521, 2259, 6717, 2321, 6691, 2321, 6761, 2259, 6789, 2259, 6921, 2289, 6981, 2409, 7101)
+preview_clip_inside = PackedVector2Array(2259, 6717, 2259, 7093, 2283, 7139, 2301, 7173, 2331, 7181, 2401, 7189, 2471, 7211, 2541, 7229, 2621, 7191, 2729, 7171, 3161, 7171, 3301, 7171, 3301, 6221, 3061, 6221, 3061, 6621, 3011, 6621, 2861, 6651, 2751, 6703, 2691, 6661, 2631, 6629, 2571, 6605, 2511, 6595, 2451, 6577, 2391, 6567, 2331, 6581, 2301, 6599, 2259, 6611)
 
 [editable path="ringholm"]
 
@@ -119,25 +122,33 @@ preview_clip_inside = PackedVector2Array(2479, 7171, 2729, 7171, 3161, 7171, 316
 position = Vector3(2006.0, 0.0, 7815.0)
 
 [node name="Terrain" parent="greenlight"]
-preview_clip_inside = PackedVector2Array(1675, 7941, 1685, 8259, 2437, 8259, 2437, 7671, 1899, 7671, 1849, 7371, 1699, 7581, 1575, 7601, 1575, 7655, 1629, 7701)
+preview_clip_inside = PackedVector2Array(1675, 7941, 1685, 8259, 2311, 8259, 2311, 7671, 2001, 7671, 1961, 7631, 1849, 7371, 1699, 7581, 1575, 7601, 1575, 7655, 1629, 7701)
 
 [editable path="greenlight"]
 
-[node name="spindle_hill" parent="." instance=ExtResource("spindle_hill")]
+[node name="jadestair" parent="." instance=ExtResource("jadestair")]
 position = Vector3(2583.0, 0.0, 8007.0)
 
-[node name="Terrain" parent="spindle_hill"]
-preview_clip_inside = PackedVector2Array(2699, 8051, 2719, 7921, 2719, 7671, 2437, 7671, 2437, 8259, 2437, 8343, 2723, 8343, 2729, 8181)
+[node name="Terrain" parent="jadestair"]
+preview_clip_inside = PackedVector2Array(2311, 7671, 2719, 7671, 2719, 7921, 2699, 8051, 2729, 8181, 2723, 8343, 2591, 8343, 2591, 8751, 2311, 8751, 2311, 8259)
 
-[editable path="spindle_hill"]
+[editable path="jadestair"]
 
-[node name="tollholm" parent="." instance=ExtResource("tollholm")]
+[node name="coilmere" parent="." instance=ExtResource("coilmere")]
 position = Vector3(2930.0, 0.0, 8007.0)
 
-[node name="Terrain" parent="tollholm"]
-preview_clip_inside = PackedVector2Array(2729, 8181, 2723, 8343, 3161, 8343, 3161, 7671, 2729, 7671, 2719, 7671, 2719, 7921, 2699, 8051)
+[node name="Terrain" parent="coilmere"]
+preview_clip_inside = PackedVector2Array(2729, 7671, 3001, 7671, 3061, 7591, 3161, 7591, 3201, 7591, 3201, 8343, 3301, 8381, 3421, 8421, 3561, 8451, 3701, 8441, 3801, 8401, 3801, 8751, 2591, 8751, 2591, 8343, 2723, 8343, 2729, 8181, 2699, 8051, 2719, 7921, 2719, 7671)
 
-[editable path="tollholm"]
+[editable path="coilmere"]
+
+[node name="suncoil" parent="." instance=ExtResource("suncoil")]
+position = Vector3(3631.0, 0.0, 7961.0)
+
+[node name="Terrain" parent="suncoil"]
+preview_clip_inside = PackedVector2Array(3161, 7171, 4101, 7171, 4101, 8751, 3801, 8751, 3801, 8401, 3701, 8441, 3561, 8451, 3421, 8421, 3301, 8381, 3201, 8343, 3201, 7591, 3161, 7591)
+
+[editable path="suncoil"]
 
 [node name="landfall" parent="." instance=ExtResource("landfall")]
 position = Vector3(1127.0, 0.0, 7357.0)
@@ -191,7 +202,7 @@ preview_clip_inside = PackedVector2Array(1129, 7911, 1299, 7921, 1675, 7941, 162
 position = Vector3(2059.0, 0.0, 6521.0)
 
 [node name="Terrain" parent="saltsound"]
-preview_clip_inside = PackedVector2Array(1919, 6781, 2259, 6521, 2659, 6521, 2637, 6511, 2517, 6499, 2437, 6453, 2437, 6221, 1459, 6221, 1459, 6761, 1459, 6811, 1479, 6821, 1639, 6821)
+preview_clip_inside = PackedVector2Array(1919, 6781, 1939, 6849, 2259, 6717, 2259, 6611, 2301, 6599, 2331, 6581, 2391, 6567, 2451, 6577, 2511, 6595, 2571, 6605, 2631, 6629, 2691, 6661, 2751, 6703, 2861, 6651, 3011, 6621, 3061, 6621, 3061, 6221, 1459, 6221, 1459, 6761, 1459, 6811, 1479, 6821, 1639, 6821)
 
 [editable path="saltsound"]
 
@@ -199,7 +210,7 @@ preview_clip_inside = PackedVector2Array(1919, 6781, 2259, 6521, 2659, 6521, 263
 position = Vector3(2505.0, 0.0, 7096.0)
 
 [node name="Terrain" parent="ravenhead"]
-preview_clip_polygons = Array[PackedVector2Array]([PackedVector2Array(1939, 6849, 2259, 6717, 2259, 6521, 1919, 6781), PackedVector2Array(2719, 7671, 2729, 7671, 3161, 7671, 3161, 7171, 2729, 7171, 2479, 7171, 2409, 7101, 2289, 6981, 2259, 6921, 2259, 6789, 1959, 6919, 1959, 6921, 1949, 7221, 1849, 7371, 1899, 7671, 2437, 7671)])
+preview_clip_inside = PackedVector2Array(3161, 7171, 3161, 7591, 3061, 7591, 3001, 7671, 2729, 7671, 2719, 7671, 2311, 7671, 2001, 7671, 1961, 7631, 1849, 7371, 1949, 7221, 1959, 6921, 1999, 6931, 2041, 6955, 2101, 6993, 2161, 7037, 2221, 7075, 2259, 7093, 2283, 7139, 2301, 7173, 2331, 7181, 2401, 7189, 2471, 7211, 2541, 7229, 2621, 7191, 2729, 7171)
 
 [editable path="ravenhead"]
 
@@ -218,6 +229,22 @@ position = Vector3(1007.0, 0.0, 8226.0)
 preview_clip_inside = PackedVector2Array(899, 8271, 329, 8321, 329, 8651, 1461, 8651, 1461, 8259, 1685, 8259, 1675, 7941, 1299, 7921, 1129, 7911, 1039, 7801, 899, 7821)
 
 [editable path="boarsend"]
+
+[node name="hornmere" parent="." instance=ExtResource("hornmere")]
+position = Vector3(1576.0, 0.0, 5816.0)
+
+[node name="Terrain" parent="hornmere"]
+preview_clip_inside = PackedVector2Array(1051, 6221, 1051, 5801, 1101, 5601, 1151, 5431, 1351, 5411, 1551, 5491, 1751, 5541, 2101, 5561, 2101, 6221)
+
+[editable path="hornmere"]
+
+[node name="whitepeak" parent="." instance=ExtResource("whitepeak")]
+position = Vector3(1351.0, 0.0, 5621.0)
+
+[node name="Terrain" parent="whitepeak"]
+preview_clip_inside = PackedVector2Array(601, 6221, 601, 5021, 2101, 5021, 2101, 5561, 1751, 5541, 1551, 5491, 1351, 5411, 1151, 5431, 1101, 5601, 1051, 5801, 1051, 6221)
+
+[editable path="whitepeak"]
 
 [node name="Overview" type="Camera3D" parent="."]
 position = Vector3(1743, 2600, 9700)

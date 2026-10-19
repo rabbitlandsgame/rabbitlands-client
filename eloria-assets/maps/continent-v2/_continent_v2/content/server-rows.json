@@ -173,16 +173,16 @@
   "ravenhead": {
    "npcs": {},
    "interactives": {
-    "ravenhead--obj-boat-tollholm": {
+    "ravenhead--obj-boat-coilmere": {
      "objectId": 23,
      "role": "portal",
      "target": "maps.txt",
      "text": "The Tollholm ferry is berthed at the end of the pier, ready to carry you across the sound to Tollholm's north jetty. The crew ask no fare.",
      "portal": {
-      "destinationMap": "tollholm",
+      "destinationMap": "coilmere",
       "oneWay": true,
-      "landingMarker": "tollholm--runtime-boat-landing",
-      "returnBy": "tollholm--obj-boat-ravenhead"
+      "landingMarker": "coilmere--runtime-boat-landing",
+      "returnBy": "coilmere--obj-boat-ravenhead"
      },
      "source": "owner 2026-10-14: R5, close the eastern loop with a boat connection (landfall-audit-2026-10-14 routes F5); free crossing"
     }
@@ -220,7 +220,7 @@
    },
    "interactives": {}
   },
-  "spindle_hill": {
+  "jadestair": {
    "npcs": {},
    "interactives": {}
   },
@@ -254,9 +254,9 @@
     }
    }
   },
-  "tollholm": {
+  "coilmere": {
    "npcs": {
-    "tollholm--npc-toll-keeper-tobin-ware": {
+    "coilmere--npc-toll-keeper-tobin-ware": {
      "name": "Tobin Ware",
      "group": "new",
      "role": "dialogue",
@@ -267,13 +267,13 @@
     }
    },
    "interactives": {
-    "tollholm--obj-shared-storage": {
+    "coilmere--obj-shared-storage": {
      "objectId": 22,
      "role": "storage",
      "target": "shared",
      "text": "Tollholm civic storehouse opens your shared storage."
     },
-    "tollholm--obj-boat-ravenhead": {
+    "coilmere--obj-boat-ravenhead": {
      "objectId": 23,
      "role": "portal",
      "target": "maps.txt",
@@ -282,7 +282,7 @@
       "destinationMap": "ravenhead",
       "oneWay": true,
       "landingMarker": "ravenhead--runtime-boat-landing",
-      "returnBy": "ravenhead--obj-boat-tollholm"
+      "returnBy": "ravenhead--obj-boat-coilmere"
      },
      "source": "owner 2026-10-14: R5, close the eastern loop with a boat connection (landfall-audit-2026-10-14 routes F5); free crossing"
     }

@@ -1,0 +1,31 @@
+{
+ "schema": "eloria-continent-v2-plan-amendments-v1",
+ "decisions": [
+  "Owner Landfall A3, 2026-10-19: land replaces the B13, B14 and B22 crossings; the Verdant + Ssarathi isle (jadestair, coilmere, suncoil) replaces Spindle Hill and Tollholm and is boat-only, so the B24 causeway and R42's crossing to it are retired and the knob mole becomes a Jadestair jetty; a Whitehorn + Mirrorhold isle (hornmere, whitepeak) is added north."
+ ],
+ "retireDecks": {
+  "B13": "land replaces it: the filled Saltsound bay joins the islet (A3 strait fills)",
+  "B14": "land replaces it: the filled B14 strait (A3 strait fills)",
+  "B22": "land replaces it: the B22 sand bars (A3 strait fills)",
+  "B24": "the south-east isle is boat-only (owner 2026-10-19)"
+ },
+ "cutRoutes": [
+  {
+   "id": "R42",
+   "keepPoints": [
+    6,
+    21
+   ],
+   "reason": "B24 is retired: R42 keeps its strand from the knob onto Jadestair's hill"
+  }
+ ],
+ "moles": [],
+ "patchOwners": {
+  "seam-mole-knob": [
+   "jadestair"
+  ],
+  "seam-mole-pier": [
+   "ravenhead"
+  ]
+ }
+}

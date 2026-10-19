@@ -281,9 +281,9 @@ source_material = SubResource("material")
 [sub_resource type="Resource" id="sculpt"]
 resource_local_to_scene = true
 script = ExtResource("sculpt")
-base_sha256 = "214e45abee08b845b941df2db16eb1e9b8e52ce9db77a529d4d2a526ff4b51df"
-origin = Vector2(-511.0, -390.0)
-grid_size = Vector2i(496, 391)
+base_sha256 = "0f01fe4fe3bb926bb194adc2b341367955ca946fdac1c5da71b61a4d5e319746"
+origin = Vector2(-511.0, -680.0)
+grid_size = Vector2i(582, 565)
 cell_metres = 2.0
 indices = PackedInt32Array()
 deltas = PackedFloat32Array()
@@ -908,23 +908,23 @@ point_count = 24
 script = ExtResource("region")
 region_id = "ringholm"
 continent_translation = Vector3(2710.0, 0, 6841.0)
-server_origin = Vector2i(455, 334)
-server_cells = Vector2i(912, 912)
-collision_origin_metres = Vector2(-455.0, 334.0)
-ownership_polygon_sha256 = "f820e61c9fab41e3136d0d1af19f730669d6e0384d25344809a21870adf70da6"
+server_origin = Vector2i(455, 392)
+server_cells = Vector2i(1050, 1050)
+collision_origin_metres = Vector2(-455.0, 392.0)
+ownership_polygon_sha256 = "a1f1be0531475e69837a4f522108e19a2a9c16a36e721f2a90b6f4c075aaae63"
 export_directory = "res://../eloria-assets/maps/continent-v2/ringholm/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("terrain")
-origin = Vector2(-511.0, -390.0)
-grid_size = Vector2i(496, 391)
+origin = Vector2(-511.0, -680.0)
+grid_size = Vector2i(582, 565)
 cell_metres = 2.0
 base_heights_path = "res://world_authoring/regions/ringholm/base-heights.f32le"
 base_colors_path = "res://world_authoring/regions/ringholm/base-colors-graded.rgba8"
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_inside = PackedVector2Array(2479, 7171, 2729, 7171, 3161, 7171, 3161, 6959, 3037, 6863, 2957, 6797, 2877, 6713, 2797, 6627, 2717, 6547, 2637, 6511, 2659, 6521, 2259, 6521, 2259, 6717, 2321, 6691, 2321, 6761, 2259, 6789, 2259, 6921, 2289, 6981, 2409, 7101)
+preview_clip_inside = PackedVector2Array(2259, 6717, 2259, 7093, 2283, 7139, 2301, 7173, 2331, 7181, 2401, 7189, 2471, 7211, 2541, 7229, 2621, 7191, 2729, 7171, 3161, 7171, 3301, 7171, 3301, 6221, 3061, 6221, 3061, 6621, 3011, 6621, 2861, 6651, 2751, 6703, 2691, 6661, 2631, 6629, 2571, 6605, 2511, 6595, 2451, 6577, 2391, 6567, 2331, 6581, 2301, 6599, 2259, 6611)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 

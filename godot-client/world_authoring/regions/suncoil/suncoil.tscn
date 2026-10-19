@@ -1,0 +1,95 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/region_control.gd" id="region"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/terrain_control.gd" id="terrain"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/terrain_sculpt_layer.gd" id="sculpt"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_pilot/style/map_authoring_surface.gd" id="surface"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/terrain_patch.gd" id="patch"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/terrain-detail-luma.png" id="detail"]
+[ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/terrain-detail-normal.png" id="normal"]
+
+[sub_resource type="StandardMaterial3D" id="material"]
+cull_mode = 2
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("detail")
+normal_enabled = true
+normal_scale = 0.8
+normal_texture = ExtResource("normal")
+texture_filter = 5
+
+[sub_resource type="Resource" id="surface"]
+resource_local_to_scene = true
+script = ExtResource("surface")
+source_material = SubResource("material")
+
+[sub_resource type="Resource" id="sculpt"]
+resource_local_to_scene = true
+script = ExtResource("sculpt")
+base_sha256 = "ed70748c12f829e30daca24e649279ed966c19ce9ff3ee904ca3e32359f467e1"
+origin = Vector2(-530.0, -850.0)
+grid_size = Vector2i(530, 835)
+cell_metres = 2.0
+indices = PackedInt32Array()
+deltas = PackedFloat32Array()
+
+[node name="suncoil" type="Node3D" groups=["map_authoring_region"]]
+script = ExtResource("region")
+region_id = "suncoil"
+continent_translation = Vector3(3631.0, 0, 7961.0)
+server_origin = Vector2i(474, 794)
+server_cells = Vector2i(1590, 1590)
+collision_origin_metres = Vector2(-474.0, 794.0)
+ownership_polygon_sha256 = "45aa77acb0a666b7b6d7b9d5f23bdc0dab90ef0f5bfbf986fe4c8f79f89f80ba"
+export_directory = "res://../eloria-assets/maps/continent-v2/suncoil/authoring"
+
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("terrain")
+origin = Vector2(-530.0, -850.0)
+grid_size = Vector2i(530, 835)
+cell_metres = 2.0
+base_heights_path = "res://world_authoring/regions/suncoil/base-heights.f32le"
+base_colors_path = "res://world_authoring/regions/suncoil/base-colors.rgba8"
+base_surface = SubResource("surface")
+sculpt_layer = SubResource("sculpt")
+preview_uv_metres_inverse = 0.17
+preview_clip_inside = PackedVector2Array(3161, 7171, 4101, 7171, 4101, 8751, 3801, 8751, 3801, 8401, 3701, 8441, 3561, 8451, 3421, 8421, 3301, 8381, 3201, 8343, 3201, 7591, 3161, 7591)
+
+[node name="Patches" type="Node3D" parent="Terrain"]
+
+[node name="Ground" type="Node3D" parent="."]
+
+[node name="Regions" type="Node3D" parent="Ground"]
+
+[node name="Roads" type="Node3D" parent="."]
+
+[node name="Rivers" type="Node3D" parent="."]
+
+[node name="WaterRegions" type="Node3D" parent="."]
+
+[node name="Bridges" type="Node3D" parent="."]
+
+[node name="AuthoredAssets" type="Node3D" parent="."]
+
+[node name="Gameplay" type="Node3D" parent="."]
+
+[node name="Spawns" type="Node3D" parent="Gameplay"]
+
+[node name="Portals" type="Node3D" parent="Gameplay"]
+
+[node name="Interactives" type="Node3D" parent="Gameplay"]
+
+[node name="Landmarks" type="Node3D" parent="Gameplay"]
+
+[node name="Harvestables" type="Node3D" parent="Gameplay"]
+
+[node name="NpcMarkers" type="Node3D" parent="Gameplay"]
+
+[node name="AmbientPopulation" type="Node3D" parent="Gameplay"]
+
+[node name="RuntimePoints" type="Node3D" parent="."]
+
+[node name="TerritoryPoints" type="Node3D" parent="RuntimePoints"]
+
+[node name="TutorialTargets" type="Node3D" parent="RuntimePoints"]
+
+[node name="GeneratedPreview" type="Node3D" parent="."]

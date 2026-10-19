@@ -56,35 +56,46 @@ def frame(section):
     return [float(tx),0.0,float(tz)], {'origin':[ox,oz],'cells':[cells,cells],'collisionOriginMetres':[-float(ox),float(oz)]}
 
 def grown_frame(section, stub):
-    """Keep a surviving map's translation; grow its server frame (never shrink) to cover the new bounds +-4 m."""
+    """Keep a surviving map's translation; its square server frame grows (never shrinks) to cover the new bounds
+    +-4 m, and its origin moves only as far as that and the chunk lattice (+-LOCAL_LIMIT m) need."""
     translation=stub['continentGeography']['translation']; server=copy.deepcopy(stub['server'])
     tx,tz=translation[0],translation[2]; x0,z0,x1,z1=section['bounds']
-    ox,oz=server['origin']; cells=server['cells'][0]
-    ox=max(ox,int(math.ceil(tx-x0+4))); oz=max(oz,int(math.ceil(z1-tz+4)))
-    need=max(cells,ox+x1-tx+4,oz+tz-z0+4)
-    cells=int(math.ceil(need/6)*6)
-    if cells>2046 or max(ox,cells-ox,oz,cells-oz)>LOCAL_LIMIT: raise ValueError(section['mapId']+': grown frame exceeds the chunk lattice')
-    if [ox,oz]==list(stub['server']['origin']) and cells==stub['server']['cells'][0]: return translation,server
+    old_ox,old_oz=server['origin']; old_cells=server['cells'][0]
+    west=int(math.ceil(tx-x0+4)); east=int(math.ceil(x1-tx+4)); south=int(math.ceil(z1-tz+4)); north=int(math.ceil(tz-z0+4))
+    if old_ox>=west and old_cells-old_ox>=east and old_oz>=south and old_cells-old_oz>=north: return translation,server
+    cells=int(math.ceil(max(old_cells,west+east,south+north)/6)*6)
+    def place(old,low,high):
+        lo=max(low,cells-LOCAL_LIMIT); hi=min(cells-high,LOCAL_LIMIT)
+        if cells>2046 or lo>hi: raise ValueError(section['mapId']+': grown frame exceeds the chunk lattice')
+        return min(max(old,lo),hi)
+    ox=place(old_ox,west,east); oz=place(old_oz,south,north)
     return translation,{'origin':[ox,oz],'cells':[cells,cells],'collisionOriginMetres':[-float(ox),float(oz)]}
 
-def crop_window(section, region, first, w, h, cell):
-    """Window (col, row, cols, rows) on the group grid: the existing crop while it still covers the bounds +-60 m
-    (clipped to its own parent grid), else the bounds +-60 m clipped to this grid."""
-    x0,z0,x1,z1=section['bounds']
+def bounds_window(bounds, first, w, h, cell):
+    """The bootstrap's crop rule: bounds +-60 m on the lattice, clipped to the grid (col, row, cols, rows)."""
+    x0,z0,x1,z1=bounds
     lo=np.floor((np.array([x0,z0])-60-first)/cell).astype(int); hi=np.ceil((np.array([x1,z1])+60-first)/cell).astype(int)
     lo=np.maximum(lo,0); hi=np.minimum(hi,[w-1,h-1])
-    new=(int(lo[0]),int(lo[1]),int(hi[0]-lo[0]+1),int(hi[1]-lo[1]+1))
-    provenance=region/'terrain-provenance.json'
-    if not provenance.exists(): return new
-    crop=read(provenance)['crop']; grid=crop['parentGrid']; pfirst=np.array(grid['continentFirstVertex'],float)
-    plast=pfirst+(np.array(grid['gridSize'])-1)*cell
-    wlo=pfirst+np.array([crop['col0'],crop['row0']])*cell; whi=wlo+(np.array([crop['cols'],crop['rows']])-1)*cell
+    return (int(lo[0]),int(lo[1]),int(hi[0]-lo[0]+1),int(hi[1]-lo[1]+1))
+
+def crop_window(section, previous, first, w, h, cell):
+    """Window (col, row, cols, rows) on the group grid. `previous` is (predecessor bounds, predecessor grid first
+    vertex, size) or None. A surviving map keeps the predecessor's window while that still covers its bounds +-60 m
+    (clipped to the predecessor grid) and its bounds lie inside that grid; otherwise bounds +-60 m on this grid.
+    Derived from recorded inputs only, so a replay after writing gives the same answer."""
+    new=bounds_window(section['bounds'],first,w,h,cell)
+    if previous is None: return new
+    old_bounds,pfirst,(pw,ph)=previous
+    pfirst=np.asarray(pfirst,float); plast=pfirst+(np.array([pw,ph])-1)*cell
+    x0,z0,x1,z1=section['bounds']
+    if not (np.all(np.array([x0,z0])>=pfirst) and np.all(np.array([x1,z1])<=plast)): return new
+    pc,pr,pcols,prows=bounds_window(old_bounds,pfirst,pw,ph,cell)
+    wlo=pfirst+np.array([pc,pr])*cell; whi=wlo+(np.array([pcols,prows])-1)*cell
     need_lo=np.maximum(np.array([x0,z0])-60,pfirst); need_hi=np.minimum(np.array([x1,z1])+60,plast)
-    inside=np.all(np.array([x0,z0])>=pfirst) and np.all(np.array([x1,z1])<=plast)
-    if not (inside and np.all(wlo<=need_lo) and np.all(whi>=need_hi)): return new
+    if not (np.all(wlo<=need_lo) and np.all(whi>=need_hi)): return new
     c,r=((wlo-first)/cell).astype(int)
-    if np.any((wlo-first)%cell) or c<0 or r<0 or c+crop['cols']>w or r+crop['rows']>h: return new
-    return (int(c),int(r),int(crop['cols']),int(crop['rows']))
+    if np.any((wlo-first)%cell) or c<0 or r<0 or c+pcols>w or r+prows>h: return new
+    return (int(c),int(r),int(pcols),int(prows))
 
 def line_parts(geometry):
     if geometry.is_empty: return []
@@ -246,13 +257,26 @@ def generate(partition=None):
     parent_files={kind:{'path':(GROUP/name).relative_to(CHECKOUT).as_posix(),'sha256':sha((GROUP/name).read_bytes())} for kind,name in [('heights','base-heights.f32le'),('colors','base-colors.rgba8'),('provenance','terrain-provenance.json')]}
     default_environment=next(iter(read(located('source-stubs.json')).values()))['environment']
     crop_schema='eloria-continent-v2-terrain-crop-v1' if frozen['schema'].endswith('-v1') else 'eloria-continent-v2-terrain-crop-v2'
+    previous_by={}
+    if 'predecessor' in provenance:
+        # the predecessor partition's windows (its bounds on its own ground) pin the windows of surviving maps
+        ppath=CHECKOUT/provenance['predecessor']['path']
+        if sha(ppath.read_bytes())!=provenance['predecessor']['sha256']: raise ValueError('predecessor partition changed')
+        pprov=read(ppath)
+        pspec_raw=(ppath.parent/'sections_spec.json').read_bytes()
+        if sha(pspec_raw)!=pprov['files']['sections_spec.json']['sha256']: raise ValueError('predecessor spec changed')
+        pground=CHECKOUT/pprov['groundProvenancePath'] if 'groundProvenancePath' in pprov else META/'group-terrain'/'terrain-provenance.json'
+        if sha(pground.read_bytes())!=pprov['frozenTerrainProvenanceSha256']: raise ValueError('predecessor ground changed')
+        pgrid=read(pground)['grid']
+        for s in json.loads(pspec_raw)['sections']:
+            previous_by[s['mapId']]=(s['bounds'],pgrid['continentFirstVertex'],pgrid['gridSize'])
     for section in sections:
         rid=section['mapId']; region=CLIENT/'world_authoring/regions'/rid; package=CHECKOUT/'eloria-assets/maps/continent-v2'/rid
         existing_stub=read(package/'world.json') if (package/'world.json').exists() else None
         if section.get('frame'): translation,server=section['frame']['translation'],section['frame']['server']
         elif existing_stub: translation,server=grown_frame(section,existing_stub)
         else: translation,server=frame(section)
-        c,r,cw,ch=crop_window(section,region,first,w,h,cell); origin=(first+np.array([c,r])*cell-np.array(translation)[[0,2]]).tolist()
+        c,r,cw,ch=crop_window(section,previous_by.get(section.get('successorOf',rid)),first,w,h,cell); origin=(first+np.array([c,r])*cell-np.array(translation)[[0,2]]).tolist()
         crop={name:array[r:r+ch,c:c+cw].tobytes() for name,array in arrays.items()}
         for name,raw in crop.items(): outputs[region/name]=raw
         prov={'schema':crop_schema,'sourceCommit':commit,'crop':{'parent':'isles-group-terrain','parentFiles':parent_files,'parentGrid':grid,'sourceCommit':commit,'row0':int(r),'col0':int(c),'rows':int(ch),'cols':int(cw)},'outputs':{name:{'sha256':sha(raw),'bytes':len(raw)} for name,raw in crop.items()}}

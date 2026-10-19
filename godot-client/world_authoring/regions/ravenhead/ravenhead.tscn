@@ -308,7 +308,7 @@ source_material = SubResource("material")
 [sub_resource type="Resource" id="sculpt"]
 resource_local_to_scene = true
 script = ExtResource("sculpt")
-base_sha256 = "4a7706454507ff764876a361c2421d63e76fc0703711c946cfd6523a74e561a4"
+base_sha256 = "106894e9ca324423cc66f53c105bd27a267260c3a8f42f1dc9b7c46617605224"
 origin = Vector2(-716.0, -635.0)
 grid_size = Vector2i(701, 636)
 cell_metres = 2.0
@@ -941,7 +941,7 @@ continent_translation = Vector3(2505.0, 0, 7096.0)
 server_origin = Vector2i(660, 579)
 server_cells = Vector2i(1320, 1320)
 collision_origin_metres = Vector2(-660.0, 579.0)
-ownership_polygon_sha256 = "54e7aa4e7cf8fa1a01821d0d0c3afa62634a778a5c48c6f5367b03a44321d0ce"
+ownership_polygon_sha256 = "7b81fa6ce7b06e05ebe1b72fcbae2c78a7ad837ec6f6f71a69a893fc2ffba5ae"
 export_directory = "res://../eloria-assets/maps/continent-v2/ravenhead/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
@@ -954,7 +954,7 @@ base_colors_path = "res://world_authoring/regions/ravenhead/base-colors-graded.r
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_polygons = Array[PackedVector2Array]([PackedVector2Array(1939, 6849, 2259, 6717, 2259, 6521, 1919, 6781), PackedVector2Array(2719, 7671, 2729, 7671, 3161, 7671, 3161, 7171, 2729, 7171, 2479, 7171, 2409, 7101, 2289, 6981, 2259, 6921, 2259, 6789, 1959, 6919, 1959, 6921, 1949, 7221, 1849, 7371, 1899, 7671, 2437, 7671)])
+preview_clip_inside = PackedVector2Array(3161, 7171, 3161, 7591, 3061, 7591, 3001, 7671, 2729, 7671, 2719, 7671, 2311, 7671, 2001, 7671, 1961, 7631, 1849, 7371, 1949, 7221, 1959, 6921, 1999, 6931, 2041, 6955, 2101, 6993, 2161, 7037, 2221, 7075, 2259, 7093, 2283, 7139, 2301, 7173, 2331, 7181, 2401, 7189, 2471, 7211, 2541, 7229, 2621, 7191, 2729, 7171)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 
@@ -41923,15 +41923,15 @@ label = "Boat landing (from Tollholm, B15 pier)"
 extras = {
 "role": "boat-landing",
 "insideOwnership": true,
-"boat": "tollholm--obj-boat-ravenhead",
-"note": "where the Ravenhead ferry from Tollholm sets a passenger down: B15's deck, 4 m shoreward of the Tollholm ferry's gangway (ravenhead--obj-boat-tollholm)"
+"boat": "coilmere--obj-boat-ravenhead",
+"note": "where the Ravenhead ferry from Tollholm sets a passenger down: B15's deck, 4 m shoreward of the Tollholm ferry's gangway (ravenhead--obj-boat-coilmere)"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.5, 2.5, 232.5)
 
-[node name="ravenhead--obj-boat-tollholm" type="Marker3D" parent="Gameplay/Interactives"]
+[node name="ravenhead--obj-boat-coilmere" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
 script = ExtResource("s0_marker")
-record_id = "ravenhead--obj-boat-tollholm"
+record_id = "ravenhead--obj-boat-coilmere"
 kind = "interactive"
 label = "Tollholm ferry (N14 berth)"
 extras = {
@@ -41939,9 +41939,9 @@ extras = {
 "name": "Tollholm ferry",
 "objectId": 23,
 "type": "portal",
-"destination": "tollholm",
-"landing": "tollholm--runtime-boat-landing",
-"returnBy": "tollholm--obj-boat-ravenhead",
+"destination": "coilmere",
+"landing": "coilmere--runtime-boat-landing",
+"returnBy": "coilmere--obj-boat-ravenhead",
 "berth": "ravenhead--ferry-berth-east",
 "ship": "the N14 moored on B15's south side (th-ferry-n14)",
 "note": "owner 2026-10-14: R5, the boat that closes the eastern loop (route audit F5); served by publish_server.py as an isle boat (server-rows.json portal.landingMarker/returnBy)"
