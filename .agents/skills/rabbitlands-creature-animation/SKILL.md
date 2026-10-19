@@ -38,3 +38,5 @@ For Axolotl and Salamander pilots, read [native amphibian motion](references/nat
 For Gecko, Chameleon, Frilled Lizard and Iguana transfers, read [native lizard motion](references/native-lizard-motion.md). It covers physical palm frames without finger bones, continuous frill/crest/throat attachments and preserving an accepted category pilot through native anatomical fitting.
 
 For native humanoid and goblinoid fitting, read [native humanoid motion](references/native-humanoid-motion.md). The four approved goblinoid sets and portable checks are documented in `docs/goblinoid-motion.md`.
+
+The six approved Ogre/Troll/Giant sets, including target-specific clothing and released-wrist repairs, are documented in `docs/brute-humanoid-motion.md`. Their fitting guidance is in [native humanoid motion](references/native-humanoid-motion.md).
