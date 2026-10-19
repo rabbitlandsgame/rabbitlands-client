@@ -36,3 +36,5 @@ For Hedgehog, Shrew and Giant Mole, read [native insectivore motion](references/
 For Axolotl and Salamander pilots, read [native amphibian motion](references/native-amphibian-motion.md). It covers outward elbow planes, gill/fin ownership and full-palm contact frames; lowest-toe contact alone cannot certify a flat planted paw.
 
 For Gecko, Chameleon, Frilled Lizard and Iguana transfers, read [native lizard motion](references/native-lizard-motion.md). It covers physical palm frames without finger bones, continuous frill/crest/throat attachments and preserving an accepted category pilot through native anatomical fitting.
+
+For native humanoid and goblinoid fitting, read [native humanoid motion](references/native-humanoid-motion.md). The four approved goblinoid sets and portable checks are documented in `docs/goblinoid-motion.md`.

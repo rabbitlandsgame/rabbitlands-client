@@ -1,0 +1,11 @@
+# Goblinoid motion
+
+The approved Hobgoblin, Mire Goblin, Gremlin and Moss Bugbear sets contain Walk, Jog/run, Sword_Attack and Death_A, with retained idle, fighting idle and hit reactions. Goblin and Gremlin use a fast alternating right-left claw combo. Bugbear uses a broad right-hand descending swipe with torso and shoulder follow-through, a relaxed left arm and an outward recovery that clears its head. Its approved forward hand finish and toe repair are preserved.
+
+These fits retain native proportions, textures, rest surfaces, original node identity prefixes, registry scale, facing and attachments. Reviewed skin preparation covers muscle cores, joint transitions, head, palms, soles and clothing. Hobgoblin includes physical knee-pivot repair and a conforming local subdivision of broad bend faces; retained physical joint deformation matrices and corrective morph curves are preserved. The other rigs use actor-specific native chains, including Bugbear's knee/hock/ankle arrangement and Gremlin's long tail.
+
+Dedicated maps under `data/animations/goblinoid/` retain gameplay action names and measured stride speeds at actual registry scale. Matching import policies preserve declared cadence with optimizer/compression disabled: 3072 FPS for Hobgoblin, Goblin and Bugbear; 6144 FPS for Gremlin, whose run required additional between-key contact precision. The runtime fidelity helper honors declarations up to 6144 FPS. Review media and high-resolution authoring sources remain ignored.
+
+The selected exports passed 159,982 native samples, fresh Blender bone and skinned-surface checks, and 28 current-client slots. The revised Bugbear strike was checked at 481 poses against actual head and complete right-arm surfaces, including mixed elbow helper weights and fingers, with no triangle intersections. This is sampled evidence; it does not prove continuous collision absence or qualify unrelated actors.
+
+Run `python eloria-assets/tools/test_goblinoid_motion.py` with NumPy and SciPy. After import, run `tests/test_goblinoid_motion.gd`. These verify file hashes, independent off-grid bone and skin witnesses, corrective morphs, native serial lengths, whole-sole support, floor clearance, loop/hold behavior, action switching, RESET and idle restoration. The checks cover component playback rather than a full client/server session or crowd performance.

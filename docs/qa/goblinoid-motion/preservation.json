@@ -1,0 +1,1112 @@
+{
+  "passed": true,
+  "actors": {
+    "hobgoblin": {
+      "passed": true,
+      "runtime_installed": false,
+      "runtime_sources_unchanged": true,
+      "actors": {
+        "hobgoblin": {
+          "source_sha256": "3651eaa6b175d57ee9e18552d063201c561d047ddec664d13d0355f1394d0333",
+          "sha256": "85a9fff675419447c7364f3a7f7d71c96ef93103baeec6ddc821f5fbe425f074",
+          "node_ids_hierarchy_and_rest_bases_preserved": true,
+          "explicit_leg_and_arm_pivot_repair_nodes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "appended_blend_helpers": [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26
+          ],
+          "original_vertex_normal_uv_prefix_and_images_exact": true,
+          "rest_surface_preserving_local_joint_refinement": true,
+          "rest_surface_bind_product_preserved": true,
+          "inherited_deformation_matrix_error": 1.594790821624059e-08
+        }
+      }
+    },
+    "mire_goblin": {
+      "passed": true,
+      "sha256": "73643000563c24f7881c5528478effa32a47ae813f13ac33b489629816d25704",
+      "rest_surface_error": 3.0937155259813665e-07,
+      "original_node_identity_prefix": true,
+      "geometry_uv_normals_morphs_images_exact": true,
+      "retained_deformation_matrix_error": {
+        "Idle_A": 2.8347131642014745e-08,
+        "Fighting_Idle": 1.8626459263870743e-09,
+        "Hit_Chest": 1.8626459263870743e-09
+      },
+      "retained_scope": "Original physical skin joints and skinned surfaces; outer-wrapper motion is explicitly baked to the skin root.",
+      "wrapper_bake": {
+        "passed": true,
+        "actor": "mire_goblin",
+        "source_sha256": "3df82ff98d4057278e88d82a53037dc63a5fcd8e338e2078a7b904bb2836c6ed",
+        "sha256": "73643000563c24f7881c5528478effa32a47ae813f13ac33b489629816d25704",
+        "wrapper": 79,
+        "skin_root": 77,
+        "method": "Fold translation-only outer-wrapper tracks into the direct skeleton-root translation. Constant wrapper rotation/scale and union of both linear translation knot sets make the world-space curve algebraically unchanged between knots, up to float32 rounding.",
+        "clips": {
+          "Fighting_Idle": {
+            "union_keys": 2,
+            "max_folded_translation": 0.0
+          },
+          "Hit_Chest": {
+            "union_keys": 2,
+            "max_folded_translation": 0.0
+          },
+          "Idle_A": {
+            "union_keys": 2,
+            "max_folded_translation": 0.0
+          },
+          "Walk": {
+            "union_keys": 3441,
+            "max_folded_translation": 0.0
+          },
+          "Jog": {
+            "union_keys": 2213,
+            "max_folded_translation": 0.0
+          },
+          "Death_A": {
+            "union_keys": 8293,
+            "max_folded_translation": 0.0
+          },
+          "Sword_Attack": {
+            "union_keys": 2,
+            "max_folded_translation": 0.0
+          }
+        },
+        "independent_offgrid_world_and_surface": {
+          "Fighting_Idle": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Hit_Chest": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Idle_A": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Walk": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Jog": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Death_A": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Sword_Attack": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          }
+        },
+        "geometry_skin_binds_morphs_unchanged": true,
+        "packing": {
+          "constant_samplers_collapsed": 0,
+          "original_buffer_bytes": 26785376,
+          "packed_buffer_bytes": 26561984
+        }
+      },
+      "cores": {
+        "Walk": {
+          "legs_left_upper": {
+            "vertices": 28,
+            "max_segment_error": 4.440892098500626e-16
+          },
+          "legs_left_lower": {
+            "vertices": 73,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "legs_right_upper": {
+            "vertices": 34,
+            "max_segment_error": 1.1599277871532365e-08
+          },
+          "legs_right_lower": {
+            "vertices": 79,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "arms_left_upper": {
+            "vertices": 72,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_left_lower": {
+            "vertices": 38,
+            "max_segment_error": 7.216449660063518e-16
+          },
+          "arms_right_upper": {
+            "vertices": 65,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_lower": {
+            "vertices": 60,
+            "max_segment_error": 7.216449660063518e-16
+          }
+        },
+        "Jog": {
+          "legs_left_upper": {
+            "vertices": 28,
+            "max_segment_error": 4.440892098500626e-16
+          },
+          "legs_left_lower": {
+            "vertices": 73,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "legs_right_upper": {
+            "vertices": 34,
+            "max_segment_error": 1.368140845059429e-08
+          },
+          "legs_right_lower": {
+            "vertices": 79,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "arms_left_upper": {
+            "vertices": 72,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_left_lower": {
+            "vertices": 38,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_upper": {
+            "vertices": 65,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_lower": {
+            "vertices": 60,
+            "max_segment_error": 7.216449660063518e-16
+          }
+        },
+        "Sword_Attack": {
+          "legs_left_upper": {
+            "vertices": 28,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "legs_left_lower": {
+            "vertices": 73,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "legs_right_upper": {
+            "vertices": 34,
+            "max_segment_error": 6.0086955272486975e-09
+          },
+          "legs_right_lower": {
+            "vertices": 79,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "arms_left_upper": {
+            "vertices": 72,
+            "max_segment_error": 8.881784197001252e-16
+          },
+          "arms_left_lower": {
+            "vertices": 38,
+            "max_segment_error": 5.551115123125783e-16
+          },
+          "arms_right_upper": {
+            "vertices": 65,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_lower": {
+            "vertices": 60,
+            "max_segment_error": 8.881784197001252e-16
+          }
+        },
+        "Death_A": {
+          "legs_left_upper": {
+            "vertices": 28,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "legs_left_lower": {
+            "vertices": 73,
+            "max_segment_error": 4.440892098500626e-16
+          },
+          "legs_right_upper": {
+            "vertices": 34,
+            "max_segment_error": 2.267278037537679e-08
+          },
+          "legs_right_lower": {
+            "vertices": 79,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "arms_left_upper": {
+            "vertices": 72,
+            "max_segment_error": 7.771561172376096e-16
+          },
+          "arms_left_lower": {
+            "vertices": 38,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_upper": {
+            "vertices": 65,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_lower": {
+            "vertices": 60,
+            "max_segment_error": 6.661338147750939e-16
+          }
+        }
+      },
+      "surfaces": {
+        "Walk": {
+          "max_welded_gap": 2.220446049250313e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.45425796477447816,
+            0.7344326389992523,
+            1.0000000000000004,
+            1.5927834863561805,
+            2.225224534382012
+          ]
+        },
+        "Jog": {
+          "max_welded_gap": 2.220446049250313e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.3292570895129542,
+            0.6328630923114469,
+            0.9999999999999989,
+            1.5830028381133623,
+            2.7015034872025083
+          ]
+        },
+        "Sword_Attack": {
+          "max_welded_gap": 2.220446049250313e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.37630695555126503,
+            0.6772676104959479,
+            1.0,
+            1.6457021355388288,
+            2.4104252098403465
+          ]
+        },
+        "Death_A": {
+          "max_welded_gap": 4.440892098500626e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.353589838647602,
+            0.642019384380804,
+            1.0000000004487113,
+            2.136110135021121,
+            4.765898590643864
+          ]
+        }
+      },
+      "contacts": {
+        "Walk": {
+          "left": {
+            "tilt": 1.2835032264144346e-05,
+            "spread": 0.0026135164338912664,
+            "gap": 0.0026135566799794637,
+            "floor": 0.0017756266836500278,
+            "slide": 2.647008559292583e-05,
+            "supported_samples": 139,
+            "native_underside_spread_limit": 0.010654375563097429,
+            "passed": true
+          },
+          "right": {
+            "tilt": 1.344524082641768e-05,
+            "spread": 0.008887492533995095,
+            "gap": 0.008887525095895174,
+            "floor": 0.0017756547562930158,
+            "slide": 3.179423073653506e-05,
+            "supported_samples": 139,
+            "native_underside_spread_limit": 0.010654375563097429,
+            "passed": true
+          }
+        },
+        "Jog": {
+          "left": {
+            "tilt": 1.4080795695456232e-05,
+            "spread": 0.002613512484859609,
+            "gap": 0.0026135036167178735,
+            "floor": 0.0017755671425351838,
+            "slide": 2.7374594674367575e-05,
+            "supported_samples": 62,
+            "native_underside_spread_limit": 0.010654375563097429,
+            "passed": true
+          },
+          "right": {
+            "tilt": 1.4738418260860163e-05,
+            "spread": 0.00888749471756603,
+            "gap": 0.008887520033735483,
+            "floor": 0.0017755752076180908,
+            "slide": 2.9769337568786084e-05,
+            "supported_samples": 61,
+            "native_underside_spread_limit": 0.010654375563097429,
+            "passed": true
+          }
+        },
+        "Sword_Attack": {
+          "left": {
+            "tilt": 6.445849674396954e-06,
+            "spread": 0.002613495640274466,
+            "gap": 0.0026134753181541867,
+            "floor": 0.001775708938395959,
+            "slide": 0.0,
+            "supported_samples": 307,
+            "native_underside_spread_limit": 0.010654375563097429,
+            "passed": true
+          },
+          "right": {
+            "tilt": 5.663293681020318e-06,
+            "spread": 0.00888746673673066,
+            "gap": 0.008887442845442614,
+            "floor": 0.0017757053692281921,
+            "slide": 0.0,
+            "supported_samples": 307,
+            "native_underside_spread_limit": 0.010654375563097429,
+            "passed": true
+          }
+        },
+        "Death_A": {
+          "left": {
+            "tilt": 1.2489631698061449e-05,
+            "spread": 0.0026135125055687936,
+            "gap": 0.0026135193166184475,
+            "floor": 0.0017756404025362493,
+            "slide": 2.599201405586424e-05,
+            "supported_samples": 119,
+            "native_underside_spread_limit": 0.010654375563097429,
+            "passed": true
+          },
+          "right": {
+            "tilt": 1.2134403433412636e-05,
+            "spread": 0.008887494122113926,
+            "gap": 0.008887510124275536,
+            "floor": 0.0017756584043530366,
+            "slide": 3.2853499981358275e-05,
+            "supported_samples": 119,
+            "native_underside_spread_limit": 0.010654375563097429,
+            "passed": true
+          }
+        }
+      },
+      "samples": 1182,
+      "contact_basis": "Whole rigid soles and native toe/heel underside patches. Native underside thickness and arch are retained; the fitted palm frame is level and support translation is fixed."
+    },
+    "gremlin": {
+      "passed": true,
+      "sha256": "bbaaae26dcef1603016b66c53129d35d26581ec08c37ff15fa1a93ddc10bf3e1",
+      "rest_surface_error": 1.5633906133571962e-07,
+      "original_node_identity_prefix": true,
+      "geometry_uv_normals_morphs_images_exact": true,
+      "retained_deformation_matrix_error": {
+        "Idle_A": 5.388440679765516e-09,
+        "Fighting_Idle": 8.750988447769892e-09,
+        "Hit_Chest": 4.065901792332793e-09
+      },
+      "retained_scope": "Original physical skin joints and skinned surfaces; outer-wrapper motion is explicitly baked to the skin root.",
+      "wrapper_bake": {
+        "passed": true,
+        "actor": "gremlin",
+        "source_sha256": "53db50fd108f5e955732f56e027dd9368cb41768a8bb1af0e4c66e2ea08fe43f",
+        "sha256": "bbaaae26dcef1603016b66c53129d35d26581ec08c37ff15fa1a93ddc10bf3e1",
+        "wrapper": 20,
+        "skin_root": 18,
+        "method": "Fold translation-only outer-wrapper tracks into the direct skeleton-root translation. Constant wrapper rotation/scale and union of both linear translation knot sets make the world-space curve algebraically unchanged between knots, up to float32 rounding.",
+        "clips": {
+          "Walk": {
+            "union_keys": 3441,
+            "max_folded_translation": 0.0
+          },
+          "Jog": {
+            "union_keys": 4423,
+            "max_folded_translation": 0.0
+          },
+          "Death_A": {
+            "union_keys": 8293,
+            "max_folded_translation": 0.0
+          },
+          "Sword_Attack": {
+            "union_keys": 2,
+            "max_folded_translation": 0.0
+          }
+        },
+        "independent_offgrid_world_and_surface": {
+          "Fighting_Idle": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Hit_Chest": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Idle_A": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Walk": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Jog": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Death_A": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Sword_Attack": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          }
+        },
+        "geometry_skin_binds_morphs_unchanged": true,
+        "packing": {
+          "constant_samplers_collapsed": 0,
+          "original_buffer_bytes": 24352384,
+          "packed_buffer_bytes": 24093776
+        }
+      },
+      "cores": {
+        "Walk": {
+          "legs_left_upper": {
+            "vertices": 40,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "legs_left_lower": {
+            "vertices": 42,
+            "max_segment_error": 1.6653345369377348e-16
+          },
+          "legs_right_upper": {
+            "vertices": 41,
+            "max_segment_error": 1.6653345369377348e-16
+          },
+          "legs_right_lower": {
+            "vertices": 44,
+            "max_segment_error": 1.6653345369377348e-16
+          },
+          "arms_left_upper": {
+            "vertices": 25,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "arms_left_lower": {
+            "vertices": 30,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "arms_right_upper": {
+            "vertices": 32,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "arms_right_lower": {
+            "vertices": 32,
+            "max_segment_error": 2.220446049250313e-16
+          }
+        },
+        "Jog": {
+          "legs_left_upper": {
+            "vertices": 40,
+            "max_segment_error": 2.498001805406602e-16
+          },
+          "legs_left_lower": {
+            "vertices": 42,
+            "max_segment_error": 1.3877787807814457e-16
+          },
+          "legs_right_upper": {
+            "vertices": 41,
+            "max_segment_error": 1.6653345369377348e-16
+          },
+          "legs_right_lower": {
+            "vertices": 44,
+            "max_segment_error": 1.3877787807814457e-16
+          },
+          "arms_left_upper": {
+            "vertices": 25,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "arms_left_lower": {
+            "vertices": 30,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "arms_right_upper": {
+            "vertices": 32,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "arms_right_lower": {
+            "vertices": 32,
+            "max_segment_error": 2.498001805406602e-16
+          }
+        },
+        "Sword_Attack": {
+          "legs_left_upper": {
+            "vertices": 40,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "legs_left_lower": {
+            "vertices": 42,
+            "max_segment_error": 1.6653345369377348e-16
+          },
+          "legs_right_upper": {
+            "vertices": 41,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "legs_right_lower": {
+            "vertices": 44,
+            "max_segment_error": 1.6653345369377348e-16
+          },
+          "arms_left_upper": {
+            "vertices": 25,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "arms_left_lower": {
+            "vertices": 30,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "arms_right_upper": {
+            "vertices": 32,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "arms_right_lower": {
+            "vertices": 32,
+            "max_segment_error": 2.7755575615628914e-16
+          }
+        },
+        "Death_A": {
+          "legs_left_upper": {
+            "vertices": 40,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "legs_left_lower": {
+            "vertices": 42,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "legs_right_upper": {
+            "vertices": 41,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "legs_right_lower": {
+            "vertices": 44,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "arms_left_upper": {
+            "vertices": 25,
+            "max_segment_error": 4.440892098500626e-16
+          },
+          "arms_left_lower": {
+            "vertices": 30,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "arms_right_upper": {
+            "vertices": 32,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "arms_right_lower": {
+            "vertices": 32,
+            "max_segment_error": 3.3306690738754696e-16
+          }
+        }
+      },
+      "surfaces": {
+        "Walk": {
+          "max_welded_gap": 1.1102230246251565e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.47459909360448777,
+            0.7444941497792603,
+            0.9999999992599533,
+            1.534373736581329,
+            2.9340160095722174
+          ]
+        },
+        "Jog": {
+          "max_welded_gap": 1.1102230246251565e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.35921382812147157,
+            0.6743334632756283,
+            0.9999999918213944,
+            1.9130317076634673,
+            4.15160566716657
+          ]
+        },
+        "Sword_Attack": {
+          "max_welded_gap": 1.1102230246251565e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.40525796859893104,
+            0.7116210127717707,
+            0.9999999926620995,
+            2.6112418732753233,
+            4.276662613661766
+          ]
+        },
+        "Death_A": {
+          "max_welded_gap": 2.220446049250313e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.41968353488636784,
+            0.704988232311588,
+            0.9999999943222566,
+            1.9867243563292551,
+            3.887786907084015
+          ]
+        }
+      },
+      "contacts": {
+        "Walk": {
+          "left": {
+            "tilt": 2.642563911420757e-05,
+            "spread": 0.002361911176899621,
+            "gap": 0.0023618940113551666,
+            "floor": 0.0007655513687957628,
+            "slide": 8.749519328637264e-06,
+            "supported_samples": 139,
+            "native_underside_spread_limit": 0.004593751481735311,
+            "passed": true
+          },
+          "right": {
+            "tilt": 2.0276000680978352e-05,
+            "spread": 0.004912409544514884,
+            "gap": 0.004912393208322242,
+            "floor": 0.0007655471434866272,
+            "slide": 7.730339150192551e-06,
+            "supported_samples": 139,
+            "native_underside_spread_limit": 0.004950668793623634,
+            "passed": true
+          }
+        },
+        "Jog": {
+          "left": {
+            "tilt": 2.4950064948509156e-05,
+            "spread": 0.002361911182374745,
+            "gap": 0.002361900369318933,
+            "floor": 0.0007655067289448116,
+            "slide": 1.3436794569057415e-05,
+            "supported_samples": 62,
+            "native_underside_spread_limit": 0.004593751481735311,
+            "passed": true
+          },
+          "right": {
+            "tilt": 1.8271553931657168e-05,
+            "spread": 0.004912401334366739,
+            "gap": 0.0049123908666001415,
+            "floor": 0.0007655300778692808,
+            "slide": 1.6287365467864978e-05,
+            "supported_samples": 61,
+            "native_underside_spread_limit": 0.004950668793623634,
+            "passed": true
+          }
+        },
+        "Sword_Attack": {
+          "left": {
+            "tilt": 2.8750756231172085e-05,
+            "spread": 0.0023619262526561532,
+            "gap": 0.002361877832520804,
+            "floor": 0.0007655081597637368,
+            "slide": 1.532833806344815e-05,
+            "supported_samples": 307,
+            "native_underside_spread_limit": 0.004593751481735311,
+            "passed": true
+          },
+          "right": {
+            "tilt": 2.1800504449438904e-05,
+            "spread": 0.004912428215711414,
+            "gap": 0.004912372068055785,
+            "floor": 0.0007655062711544418,
+            "slide": 1.4004107155532518e-05,
+            "supported_samples": 307,
+            "native_underside_spread_limit": 0.004950668793623634,
+            "passed": true
+          }
+        },
+        "Death_A": {
+          "left": {
+            "tilt": 2.7559834460191767e-05,
+            "spread": 0.002361913539986618,
+            "gap": 0.002361883141272312,
+            "floor": 0.0007655585628522452,
+            "slide": 1.0172148750388423e-05,
+            "supported_samples": 119,
+            "native_underside_spread_limit": 0.004593751481735311,
+            "passed": true
+          },
+          "right": {
+            "tilt": 1.8860476299618448e-05,
+            "spread": 0.004912408835008434,
+            "gap": 0.004912384966973254,
+            "floor": 0.0007655700224700399,
+            "slide": 7.487245529484135e-06,
+            "supported_samples": 119,
+            "native_underside_spread_limit": 0.004950668793623634,
+            "passed": true
+          }
+        }
+      },
+      "samples": 1182,
+      "contact_basis": "Whole rigid soles and native toe/heel underside patches. Native underside thickness and arch are retained; the fitted palm frame is level and support translation is fixed."
+    },
+    "moss_bugbear": {
+      "passed": true,
+      "sha256": "7724d868c29240a4e3a1705850a2b7f23c5c6573157d016d7173518c37e05a3c",
+      "rest_surface_error": 4.443085123151391e-07,
+      "original_node_identity_prefix": true,
+      "geometry_uv_normals_morphs_images_exact": true,
+      "retained_deformation_matrix_error": {
+        "Idle_A": 2.69397635310753e-08,
+        "Fighting_Idle": 2.9802322498717615e-08,
+        "Hit_Chest": 2.9802322387695312e-08
+      },
+      "retained_scope": "Original physical skin joints and skinned surfaces; outer-wrapper motion is explicitly baked to the skin root.",
+      "wrapper_bake": {
+        "passed": true,
+        "actor": "moss_bugbear",
+        "source_sha256": "c99c26475988c79e779ad6ff240cf19f72da44cd18611b46dce9a52aa9e1a2ae",
+        "sha256": "7724d868c29240a4e3a1705850a2b7f23c5c6573157d016d7173518c37e05a3c",
+        "wrapper": 48,
+        "skin_root": 46,
+        "method": "Fold translation-only outer-wrapper tracks into the direct skeleton-root translation. Constant wrapper rotation/scale and union of both linear translation knot sets make the world-space curve algebraically unchanged between knots, up to float32 rounding.",
+        "clips": {
+          "Fighting_Idle": {
+            "union_keys": 4,
+            "max_folded_translation": 0.0
+          },
+          "Hit_Chest": {
+            "union_keys": 14,
+            "max_folded_translation": 0.0
+          },
+          "Idle_A": {
+            "union_keys": 16,
+            "max_folded_translation": 0.0
+          },
+          "Walk": {
+            "union_keys": 3441,
+            "max_folded_translation": 0.0
+          },
+          "Jog": {
+            "union_keys": 2213,
+            "max_folded_translation": 0.0
+          },
+          "Death_A": {
+            "union_keys": 8293,
+            "max_folded_translation": 0.0
+          },
+          "Sword_Attack": {
+            "union_keys": 2,
+            "max_folded_translation": 0.0
+          }
+        },
+        "independent_offgrid_world_and_surface": {
+          "Fighting_Idle": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Hit_Chest": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Idle_A": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Walk": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Jog": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Death_A": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          },
+          "Sword_Attack": {
+            "skeleton_world_error": 0.0,
+            "surface_error": 0.0
+          }
+        },
+        "geometry_skin_binds_morphs_unchanged": true,
+        "packing": {
+          "constant_samplers_collapsed": 0,
+          "original_buffer_bytes": 20832200,
+          "packed_buffer_bytes": 20608360
+        }
+      },
+      "cores": {
+        "Walk": {
+          "legs_left_upper": {
+            "vertices": 77,
+            "max_segment_error": 4.8848655120892204e-08
+          },
+          "legs_left_lower": {
+            "vertices": 22,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "legs_right_upper": {
+            "vertices": 94,
+            "max_segment_error": 5.551115123125783e-16
+          },
+          "legs_right_lower": {
+            "vertices": 22,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "arms_left_upper": {
+            "vertices": 101,
+            "max_segment_error": 8.881784197001252e-16
+          },
+          "arms_left_lower": {
+            "vertices": 100,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_upper": {
+            "vertices": 100,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_lower": {
+            "vertices": 85,
+            "max_segment_error": 7.771561172376096e-16
+          }
+        },
+        "Jog": {
+          "legs_left_upper": {
+            "vertices": 77,
+            "max_segment_error": 4.498308436851062e-08
+          },
+          "legs_left_lower": {
+            "vertices": 22,
+            "max_segment_error": 2.220446049250313e-16
+          },
+          "legs_right_upper": {
+            "vertices": 94,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "legs_right_lower": {
+            "vertices": 22,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "arms_left_upper": {
+            "vertices": 101,
+            "max_segment_error": 8.881784197001252e-16
+          },
+          "arms_left_lower": {
+            "vertices": 100,
+            "max_segment_error": 5.551115123125783e-16
+          },
+          "arms_right_upper": {
+            "vertices": 100,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_lower": {
+            "vertices": 85,
+            "max_segment_error": 6.661338147750939e-16
+          }
+        },
+        "Sword_Attack": {
+          "legs_left_upper": {
+            "vertices": 77,
+            "max_segment_error": 4.5861476838382487e-08
+          },
+          "legs_left_lower": {
+            "vertices": 22,
+            "max_segment_error": 1.6653345369377348e-16
+          },
+          "legs_right_upper": {
+            "vertices": 94,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "legs_right_lower": {
+            "vertices": 22,
+            "max_segment_error": 1.1102230246251565e-16
+          },
+          "arms_left_upper": {
+            "vertices": 101,
+            "max_segment_error": 8.881784197001252e-16
+          },
+          "arms_left_lower": {
+            "vertices": 100,
+            "max_segment_error": 5.551115123125783e-16
+          },
+          "arms_right_upper": {
+            "vertices": 100,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_lower": {
+            "vertices": 85,
+            "max_segment_error": 8.881784197001252e-16
+          }
+        },
+        "Death_A": {
+          "legs_left_upper": {
+            "vertices": 77,
+            "max_segment_error": 1.284267669987571e-07
+          },
+          "legs_left_lower": {
+            "vertices": 22,
+            "max_segment_error": 2.7755575615628914e-16
+          },
+          "legs_right_upper": {
+            "vertices": 94,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "legs_right_lower": {
+            "vertices": 22,
+            "max_segment_error": 3.3306690738754696e-16
+          },
+          "arms_left_upper": {
+            "vertices": 101,
+            "max_segment_error": 8.881784197001252e-16
+          },
+          "arms_left_lower": {
+            "vertices": 100,
+            "max_segment_error": 7.216449660063518e-16
+          },
+          "arms_right_upper": {
+            "vertices": 100,
+            "max_segment_error": 6.661338147750939e-16
+          },
+          "arms_right_lower": {
+            "vertices": 85,
+            "max_segment_error": 7.771561172376096e-16
+          }
+        }
+      },
+      "surfaces": {
+        "Walk": {
+          "max_welded_gap": 2.220446049250313e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.29327656112851475,
+            0.6450507656090559,
+            1.000000006022351,
+            1.6679361726203816,
+            2.8426771289095702
+          ]
+        },
+        "Jog": {
+          "max_welded_gap": 4.440892098500626e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.2793594742229166,
+            0.5895281065367566,
+            0.9999999963206276,
+            2.2121741037882674,
+            3.6573468762654158
+          ]
+        },
+        "Sword_Attack": {
+          "max_welded_gap": 4.440892098500626e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.285824811664158,
+            0.6000859087253103,
+            1.000000013264635,
+            2.164524259990294,
+            3.773674433955514
+          ]
+        },
+        "Death_A": {
+          "max_welded_gap": 4.440892098500626e-16,
+          "edge_ratio_p001_p01_p50_p99_p999": [
+            0.32533601766146997,
+            0.5820012686906028,
+            1.000000003481529,
+            2.506888560643307,
+            4.697028720629017
+          ]
+        }
+      },
+      "contacts": {
+        "Walk": {
+          "left": {
+            "tilt": 9.391510108767544e-06,
+            "spread": 0.012457341991978968,
+            "gap": 0.01245736157823473,
+            "floor": 0.0017358447639668484,
+            "slide": 1.9221193673105766e-05,
+            "supported_samples": 139,
+            "native_underside_spread_limit": 0.0125441007448326,
+            "passed": true
+          },
+          "right": {
+            "tilt": 1.0866764427531615e-05,
+            "spread": 0.018741372917240373,
+            "gap": 0.018741390166351932,
+            "floor": 0.0017358371793221028,
+            "slide": 2.7124488577274954e-05,
+            "supported_samples": 139,
+            "native_underside_spread_limit": 0.018828154851455656,
+            "passed": true
+          }
+        },
+        "Jog": {
+          "left": {
+            "tilt": 1.0966921055636708e-05,
+            "spread": 0.012457334708323803,
+            "gap": 0.012457310959209896,
+            "floor": 0.0017357735027287158,
+            "slide": 2.5369907220228087e-05,
+            "supported_samples": 62,
+            "native_underside_spread_limit": 0.0125441007448326,
+            "passed": true
+          },
+          "right": {
+            "tilt": 1.2431131930566656e-05,
+            "spread": 0.0187413670181468,
+            "gap": 0.018741340479280697,
+            "floor": 0.0017357344773074879,
+            "slide": 2.8081554643522568e-05,
+            "supported_samples": 61,
+            "native_underside_spread_limit": 0.018828154851455656,
+            "passed": true
+          }
+        },
+        "Sword_Attack": {
+          "left": {
+            "tilt": 1.7075472925031877e-06,
+            "spread": 0.012457322616183417,
+            "gap": 0.012457260453931076,
+            "floor": 0.001735845637237332,
+            "slide": 0.0,
+            "supported_samples": 307,
+            "native_underside_spread_limit": 0.0125441007448326,
+            "passed": true
+          },
+          "right": {
+            "tilt": 4.00455336570039e-06,
+            "spread": 0.018741354277380495,
+            "gap": 0.018741324970870502,
+            "floor": 0.0017358784929796811,
+            "slide": 0.0,
+            "supported_samples": 307,
+            "native_underside_spread_limit": 0.018828154851455656,
+            "passed": true
+          }
+        },
+        "Death_A": {
+          "left": {
+            "tilt": 9.659346157805877e-06,
+            "spread": 0.012457328381706531,
+            "gap": 0.012457362945652894,
+            "floor": 0.001735866705753819,
+            "slide": 2.0172688956730634e-05,
+            "supported_samples": 119,
+            "native_underside_spread_limit": 0.0125441007448326,
+            "passed": true
+          },
+          "right": {
+            "tilt": 1.1262047877356564e-05,
+            "spread": 0.01874135930788752,
+            "gap": 0.018741389255286376,
+            "floor": 0.001735844160046407,
+            "slide": 1.7726096024995385e-05,
+            "supported_samples": 119,
+            "native_underside_spread_limit": 0.018828154851455656,
+            "passed": true
+          }
+        }
+      },
+      "samples": 1182,
+      "contact_basis": "Whole rigid soles and native toe/heel underside patches. Native underside thickness and arch are retained; the fitted palm frame is level and support translation is fixed."
+    }
+  },
+  "scope": "Original node identity prefixes and rest surfaces retained. Reviewed skin and joint repairs explicit; Hobgoblin uses reviewed conforming topology refinement. Inherited joint deformation matrices and corrective morph curves preserved."
+}

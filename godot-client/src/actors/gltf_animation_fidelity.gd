@@ -9,4 +9,4 @@ static func bake_fps(state: GLTFState) -> float:
 	var declared: Variant = extras.get("rabbitlands_animation_bake_fps", 30.0)
 	if typeof(declared) not in [TYPE_INT, TYPE_FLOAT]: return 30.0
 	var value := float(declared)
-	return clampf(value, 30.0, 3072.0) if is_finite(value) else 30.0
+	return clampf(value, 30.0, 6144.0) if is_finite(value) else 30.0
