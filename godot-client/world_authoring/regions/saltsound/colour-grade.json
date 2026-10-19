@@ -5,12 +5,12 @@
  "about": "Ground-colour grade over the frozen Meshy vertex colours. The frozen crop base-colors.rgba8 is unchanged; the scene's Terrain reads this graded copy.",
  "parentFrozenCrop": {
   "path": "base-colors.rgba8",
-  "sha256": "804c1371994348705fdf9cd65ab1714f518fe17333abee49e686fdfbc1546ecc"
+  "sha256": "3e9972603cf32db063d4b70b007c5529c3e4d3fd0897d78f022e4f1a299da777"
  },
  "graded": {
   "path": "base-colors-graded.rgba8",
-  "sha256": "0be96f6adaf96e58bf7ff466c631f3ee53d928ffa0eebf25aa502cbdca318ed4",
-  "changedVertices": 213919
+  "sha256": "b3fb9cf95758e0d3f7a9011c54f596d7ab5fc777961b3a1f0de8707dc9f4286f",
+  "changedVertices": 219392
  },
  "gradeOnly": null,
  "targets": {
@@ -329,10 +329,12 @@
  },
  "carried": {
   "tool": "godot-client/tools/carry_continent_v2_grade.py",
-  "fromCommit": "08448a36",
-  "fromRegion": "godot-client/world_authoring/regions/saltsound",
-  "keptVertices": 128126,
-  "carriedVertices": 195124,
+  "fromCommit": "cd363de5",
+  "fromRegions": [
+   "godot-client/world_authoring/regions/saltsound"
+  ],
+  "keptVertices": 323250,
+  "carriedVertices": 38790,
   "method": "unchanged frozen bytes keep their graded bytes; the rest take a harmonically inpainted per-channel log ratio graded/frozen"
  }
 }

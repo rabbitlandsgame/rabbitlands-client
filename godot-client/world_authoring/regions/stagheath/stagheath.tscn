@@ -188,9 +188,9 @@ source_material = SubResource("material")
 [sub_resource type="Resource" id="sculpt"]
 resource_local_to_scene = true
 script = ExtResource("sculpt")
-base_sha256 = "2f222df6c5eb8a02e0b60368370b7baf0ef6977b08c3a2c9441c78297f90bb2b"
-origin = Vector2(-590.0, -354.0)
-grid_size = Vector2i(591, 356)
+base_sha256 = "5ff8410d53c2d3744d59e92663de38e2ca3cefda401829b914237215f4db9b8b"
+origin = Vector2(-590.0, -446.0)
+grid_size = Vector2i(591, 402)
 cell_metres = 2.0
 indices = PackedInt32Array()
 deltas = PackedFloat32Array()
@@ -625,20 +625,20 @@ continent_translation = Vector3(929.0, 0, 6517.0)
 server_origin = Vector2i(534, 300)
 server_cells = Vector2i(1068, 1068)
 collision_origin_metres = Vector2(-534.0, 300.0)
-ownership_polygon_sha256 = "90556a013c9fb0c8217be34642798dc3e36d2413102ce825aa41cd8c6be5c83f"
+ownership_polygon_sha256 = "d5eb32c15ab5053fdb4c0e9eff540d6a5cd01537f6b7d946474566bd1cbe796e"
 export_directory = "res://../eloria-assets/maps/continent-v2/stagheath/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("terrain")
-origin = Vector2(-590.0, -354.0)
-grid_size = Vector2i(591, 356)
+origin = Vector2(-590.0, -446.0)
+grid_size = Vector2i(591, 402)
 cell_metres = 2.0
 base_heights_path = "res://world_authoring/regions/stagheath/base-heights.f32le"
 base_colors_path = "res://world_authoring/regions/stagheath/base-colors-graded.rgba8"
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_inside = PackedVector2Array(959, 6741, 1159, 6761, 1459, 6761, 1459, 6221, 399, 6221, 399, 6813, 699, 6781)
+preview_clip_inside = PackedVector2Array(959, 6741, 1159, 6761, 1459, 6761, 1459, 6131, 399, 6131, 399, 6813, 699, 6781)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 

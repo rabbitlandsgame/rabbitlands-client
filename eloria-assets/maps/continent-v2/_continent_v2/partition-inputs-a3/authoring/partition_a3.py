@@ -49,8 +49,10 @@ C8 = [(2311, 7671), (2719, 7671), (2729, 7671), (2761, 7671), (2761, 7591)]
 # inner bay is Coilmere's coves), then down to the sea
 C9 = [(3201, 7591), (3201, 8651)]
 # hornmere | whitepeak: Whitepeak takes the Whitehorn ridge and the west lobe; the Mirrorhold citadel terrace
-# (1250, 5465) and both mirror lakes stay in Hornmere; both reach z 6221 so both preload from Stagheath
-C11 = [(1351, 5021), (1351, 6221)]
+# (1250, 5465) and both mirror lakes stay in Hornmere; both reach the mainland's sea at z 6131 so both preload from
+# Stagheath (revision 4: the border moved north from z 6221, so Stagheath and Saltsound own water for their quays)
+NORTH = 6131
+C11 = [(1351, 5021), (1351, NORTH)]
 
 
 def rev(chain):
@@ -74,8 +76,10 @@ def sections_a3(a2):
     new = {}
     for keep in ('landfall', 'warrenmead', 'stagheath', 'twinbrook', 'reedfall', 'brambleshaw', 'pinebrow', 'boarsend'):
         new[keep] = R[keep]
+    # Stagheath's north edge follows the north isle border north (it was A2's z 6221)
+    new['stagheath'] = [[(x, NORTH if z == 6221 else z) for x, z in r] for r in R['stagheath']]
     new['saltsound'] = [ring([(1919, 6781), (1939, 6849), (2259, 6717)], C5[1:],
-                             [(3061, 6371), (2201, 6371), (2201, 6221), (1459, 6221), (1459, 6761), (1459, 6811),
+                             [(3061, 6371), (2201, 6371), (2201, NORTH), (1459, NORTH), (1459, 6761), (1459, 6811),
                               (1479, 6821), (1639, 6821)])]
     new['hearthcroft'] = [ring([(1939, 6849), (1919, 6781), (1639, 6821), (1479, 6821), (1489, 6911), (1519, 6961),
                                 (1599, 7041), (1609, 7151), (1689, 7151), (1729, 7201), (1949, 7221)], C3, rev(C2))]
@@ -86,8 +90,8 @@ def sections_a3(a2):
     # the south edge steps up west of x 2723: the sea south of the knob belongs to no map
     new['coilmere'] = [ring(C8, [(3201, 7591)], C9, [(2723, 8651), (2723, 8461), (2311, 8461), (2311, 8259)])]
     new['suncoil'] = [ring([(3201, 7471), (4101, 7471), (4101, 8701), (3201, 8701)], rev(C9))]
-    new['hornmere'] = [ring([(621, 6221), (621, 5021)], C11)]
-    new['whitepeak'] = [ring(rev(C11), [(2031, 5021), (2031, 6221)])]
+    new['hornmere'] = [ring([(621, NORTH), (621, 5021)], C11)]
+    new['whitepeak'] = [ring(rev(C11), [(2031, 5021), (2031, NORTH)])]
     return new
 
 
@@ -222,7 +226,7 @@ def write(a2, secs, shapes, stats, borders):
                        'brief': 'Landfall A3, approved by the owner 2026-10-19: strait fills, a boat-only Verdant + Ssarathi '
                                 'isle replacing Spindle Hill and Tollholm (fresh ids), a north Whitehorn + Mirrorhold isle; '
                                 'revised the same day: near-rectangular borders, open sea unassigned, Jadestair merged '
-                                'into Coilmere'},
+                                'into Coilmere, the north isle border at z 6131 for the boat quays'},
             # jadestair: Spindle Hill's A3 successor, merged into Coilmere before release (owner 2026-10-19)
             'retiredMapIds': a2['retiredMapIds'] + ['spindle_hill', 'tollholm', 'jadestair'],
             'priorityNote': 'Sections are in priority order: a point exactly on a border belongs to the section listed first. '

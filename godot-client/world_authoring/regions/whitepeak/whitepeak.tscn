@@ -26,9 +26,9 @@ source_material = SubResource("material")
 [sub_resource type="Resource" id="sculpt"]
 resource_local_to_scene = true
 script = ExtResource("sculpt")
-base_sha256 = "9faccc382ccb5449e47208913b916a3d6edffbd6b2cd9575b42dd293f9eb42fe"
+base_sha256 = "e83b95adbe7978e4e05fd4b07476f138fbaf5956d433c0519fa53938cfb1a4c0"
 origin = Vector2(-60.0, -618.0)
-grid_size = Vector2i(401, 640)
+grid_size = Vector2i(401, 595)
 cell_metres = 2.0
 indices = PackedInt32Array()
 deltas = PackedFloat32Array()
@@ -40,20 +40,20 @@ continent_translation = Vector3(1351.0, 0, 5621.0)
 server_origin = Vector2i(754, 604)
 server_cells = Vector2i(1512, 1512)
 collision_origin_metres = Vector2(-754.0, 604.0)
-ownership_polygon_sha256 = "0b556d90a66c180ea89dd69b2574bcce6251a38f88fa87dc2a646f5bdf62944c"
+ownership_polygon_sha256 = "c5711efb3d9180a7cbb4f3c90a17b4906394dac753d90fb7231dbe895f511dae"
 export_directory = "res://../eloria-assets/maps/continent-v2/whitepeak/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("terrain")
 origin = Vector2(-60.0, -618.0)
-grid_size = Vector2i(401, 640)
+grid_size = Vector2i(401, 595)
 cell_metres = 2.0
 base_heights_path = "res://world_authoring/regions/whitepeak/base-heights.f32le"
 base_colors_path = "res://world_authoring/regions/whitepeak/base-colors.rgba8"
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_inside = PackedVector2Array(1351, 6221, 1351, 5021, 2031, 5021, 2031, 6221)
+preview_clip_inside = PackedVector2Array(1351, 6131, 1351, 5021, 2031, 5021, 2031, 6131)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 
