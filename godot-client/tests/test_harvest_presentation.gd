@@ -4,7 +4,10 @@ extends SceneTree
 ## exact yaw, a pick shaped to its footprint, its grouping, and promoted
 ## scenery bound to a kit placement already standing in its chunk - and its
 ## harvestGroupings are marked once each on the maps. A package from before
-## (no harvestablesSchema) presents every node as it always did. Runtime nodes
+## (no harvestablesSchema) presents every node as it always did, except that a
+## node whose label's own model is retired stands a variant marked
+## `standsAlone`, or the ring when the label has none; the underground's seams
+## and pans take the client's own table instead. Runtime nodes
 ## are painted by the look pass as the identical kit plant beside them is, and
 ## a region file's foliage.crown_tint tints its tree crowns, faded across the
 ## old continent's borders.
@@ -28,6 +31,8 @@ func _run() -> void:
 	var catalog: Dictionary = _json(REGISTRY)
 	var adapter := CoordinateAdapter.new({"metresPerTile": 1.0, "serverOrigin": [0.0, 0.0]})
 	_check_node_presentation(adapter, catalog)
+	_check_retired_label_fallback(adapter, catalog)
+	_check_underground_presentation(catalog)
 	_check_promoted_scenery(adapter, catalog)
 	_check_look_parity(adapter)
 	_check_crown_tint()
@@ -88,11 +93,12 @@ func _check_node_presentation(adapter: CoordinateAdapter, catalog: Dictionary) -
 		"a grouping the package does not list is not marked in place of the node")
 
 	# Variants: the registry's list for the label, chosen by the package or by
-	# the object id, the same on every client.
+	# the object id, the same on every client. Live models only: a retired one
+	# stands nothing of its own.
 	var models: Dictionary = (catalog.harvestables as Dictionary).models
 	var choices: Array = []
-	for model_id: String in ["isle_sage", "wayside_sage", "isle_olive"]:
-		if models.has(model_id):
+	for model_id: String in ["isle_sage", "sage_clump_b", "isle_olive"]:
+		if models.has(model_id) and not bool((models[model_id] as Dictionary).get("retired", false)):
 			choices.append(model_id)
 	var varied: Dictionary = catalog.duplicate(true)
 	(varied.harvestables as Dictionary)["variants"] = {label: choices}
@@ -103,19 +109,125 @@ func _check_node_presentation(adapter: CoordinateAdapter, catalog: Dictionary) -
 	_expect(wrapped.model_id == choices[1], "a JSON variant past the list wraps round it")
 	var seen := {}
 	for identity: int in range(100, 130):
-		var picked := _object(adapter, varied, label, identity)
+		var picked := _object(adapter, varied, label, identity, {"footprint": [1.5, 1.5]})
 		_expect(picked.model_id == choices[MapObject3D.variant_index(identity, choices.size())],
-			"without one the object id picks the variant (%d)" % identity)
+			"a laid-out node without a stated variant has its object id pick one (%d)" % identity)
 		seen[picked.model_id] = true
 		picked.free()
 	_expect(seen.size() == choices.size(), "and thirty nodes stand every variant")
+	var unlaid := _object(adapter, varied, label, 48)
+	_expect(unlaid.model_id == str(resources[label]),
+		"a node its package does not lay out keeps the label's own model: " + unlaid.model_id)
 	_expect(MapObject3D.variant_index(77, 1) == 0 and MapObject3D.variant_index(77, 3, 5) == 2,
 		"one model is always variant 0, and a stated variant is taken modulo the list")
 	var ghost: Dictionary = catalog.duplicate(true)
 	(ghost.harvestables as Dictionary)["variants"] = {label: ["not_a_model"]}
-	var fallback := _object(adapter, ghost, label, 47)
+	var fallback := _object(adapter, ghost, label, 47, {"variant": 0})
 	_expect(fallback.model_id == str(resources[label]),
 		"a listed variant the registry does not describe falls back to the label's model")
+
+# --- a retired label's node that no package lays out ------------------------------
+# The 2026-10-19 playtest map review, finding 6: such a node stands only a variant
+# that stands alone (a clump or a mat reads right at its seeded yaw). A row, hedge,
+# seam, bank, strand, drift or pan needs the footprint and yaw a package states, so
+# a node of a label with none keeps the retired model's ring and name.
+
+func _check_retired_label_fallback(adapter: CoordinateAdapter, catalog: Dictionary) -> void:
+	var harvest: Dictionary = catalog.harvestables
+	var models: Dictionary = harvest.models
+	var variants: Dictionary = harvest.get("variants", {})
+	var alone := {}
+	for listed_label: String in variants:
+		for model_id: Variant in variants[listed_label]:
+			var entry: Dictionary = models.get(str(model_id), {})
+			_expect(entry.get("standsAlone") is bool,
+				"every listed variant says whether it stands alone: " + str(model_id))
+			if bool(entry.get("standsAlone", false)):
+				alone[str(model_id)] = true
+	for model_id: String in ["reed_clump_a", "reed_clump_b", "reed_clump_c", "watercress_mat_a",
+			"watercress_mat_b", "lavender_clump_a", "rosemary_clump_a", "rosemary_clump_b"]:
+		_expect(alone.has(model_id), "a clump or mat stands alone: " + model_id)
+	for shaped: String in ["Bramble", "Hearthroot", "Cotton", "Clay", "Quartz", "Salt", "Kelp", "Shell"]:
+		for model_id: Variant in variants.get(shaped, []):
+			_expect(not alone.has(str(model_id)),
+				"a row, hedge, face, strand, drift or pan does not: " + str(model_id))
+	_expect(not alone.has("lavender_clump_b"), "nor the lavender row on its tilled strip")
+
+	# Reed's own model is retired and its clumps all stand alone: the clump the
+	# object id picks, at the yaw and scale the object id seeds.
+	_expect(bool((models.get(str(harvest.resources.get("Reed", "")), {}) as Dictionary).get("retired", false)),
+		"Reed's own model is retired")
+	var reeds: Array = (variants.get("Reed", []) as Array).filter(
+		func(model_id: Variant) -> bool: return alone.has(str(model_id)))
+	var reed := _object(adapter, catalog, "Reed", 4101)
+	var reed_model := reed.get_node_or_null("Model") as Node3D
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4101
+	var yaw := rng.randf() * TAU
+	var scale := rng.randf_range(0.92, 1.08)
+	_expect(not reeds.is_empty() and reed.model_id == reeds[MapObject3D.variant_index(4101, reeds.size())],
+		"an undescribed Reed node stands the reed clump its object id picks: " + reed.model_id)
+	_expect(reed_model != null and is_equal_approx(reed_model.rotation.y, yaw)
+		and is_equal_approx(reed_model.scale.x, scale) and not reed.get_node("Ring").visible,
+		"at its seeded yaw and scale, with no idle ring")
+	reed.free()
+	# Lavender has a clump and a planted row: only the clump stands in.
+	for identity: int in range(4110, 4116):
+		var lavender := _object(adapter, catalog, "Lavender", identity)
+		_expect(lavender.model_id == "lavender_clump_a",
+			"an undescribed Lavender node always stands the clump (%d): %s" % [identity, lavender.model_id])
+		lavender.free()
+
+	# Bramble's variants are all hedge segments: no hedge at a random yaw.
+	_expect(bool((models.get(str(harvest.resources.get("Bramble", "")), {}) as Dictionary).get("retired", false)),
+		"Bramble's own model is retired")
+	var bramble := _object(adapter, catalog, "Bramble", 4102)
+	_expect(bramble.model_id.is_empty() and bramble.get_node_or_null("Model") == null,
+		"an undescribed Bramble node stands no hedge: " + bramble.model_id)
+	_expect((bramble.get_node("Ring") as MeshInstance3D).visible
+		and (bramble.get_node("ResourceLabel") as Label3D).text == "Bramble",
+		"it keeps the bare ring and its resource name")
+	bramble.free()
+	# Laid out by its package, the same label stands its hedge where it is told.
+	var hedges: Array = variants.get("Bramble", [])
+	var hedge := _object(adapter, catalog, "Bramble", 4103,
+		{"variant": 1, "yaw": 30.0, "footprint": [2.8, 0.8]})
+	var hedge_model := hedge.get_node_or_null("Model") as Node3D
+	_expect(hedges.size() > 1 and hedge.model_id == str(hedges[1]) and hedge_model != null
+		and is_equal_approx(hedge_model.rotation.y, deg_to_rad(30.0)),
+		"a laid-out Bramble node stands its stated hedge at its stated yaw")
+	hedge.free()
+
+# --- the underground's seams and pans ----------------------------------------------
+# The underground package (landfall_insides) states no harvest presentation, and its
+# Quartz and Salt labels have retired models and no variant that stands alone. The
+# client's own table (underground-scenery.json harvestPresentation) lays them out.
+
+func _check_underground_presentation(catalog: Dictionary) -> void:
+	var scenery := preload("res://src/world/underground_scenery.gd")
+	var table: Dictionary = scenery.harvest_presentation("landfall_insides")
+	_expect(scenery.harvest_presentation("landfall").is_empty(), "no other map takes the underground's table")
+	var package := _json("res://../eloria-assets/maps/continent-v2/landfall_insides/client/world.json")
+	var harvest: Dictionary = catalog.harvestables
+	var variants: Dictionary = harvest.get("variants", {})
+	var presented := 0
+	for value: Variant in package.get("harvestables", []):
+		var node := value as Dictionary
+		var resource := str(node.resource)
+		var own: Dictionary = (harvest.models as Dictionary).get(str(harvest.resources.get(resource, "")), {})
+		var listed: Array = variants.get(resource, [])
+		var alone := listed.any(func(model_id: Variant) -> bool:
+			return bool((harvest.models as Dictionary).get(str(model_id), {}).get("standsAlone", false)))
+		if not bool(own.get("retired", false)) or listed.is_empty() or alone:
+			continue
+		var hint: Dictionary = table.get(str(int(node.objectId)), {})
+		_expect(str(hint.get("resource", "")) == resource and hint.get("variant") is float
+			and int(hint.variant) >= 0 and int(hint.variant) < listed.size() and hint.get("yaw") is float,
+			"underground %s node %d states its variant and yaw" % [resource, int(node.objectId)])
+		presented += 1
+	_expect(presented == 7 and table.size() == presented,
+		"the table presents exactly the underground's seven Quartz and Salt nodes (%d of %d)"
+		% [presented, table.size()])
 
 # --- promoted scenery ---------------------------------------------------------
 
@@ -274,6 +386,18 @@ func _check_map_presentation_of() -> void:
 	var before: Dictionary = script.call("map_presentation_of", "landfall", old, {})
 	_expect((before.nodes as Dictionary).is_empty() and (before.groupings as Array).is_empty(),
 		"a package without the schema presents nothing (the older packages' harvestables are other records)")
+	# The client's own table (the underground's) presents the nodes a package
+	# leaves bare; a node the package presents keeps the package's.
+	var authored := {"1201": {"resource": "Quartz", "variant": 0.0, "yaw": 241.054},
+		"100": {"variant": 0.0, "yaw": 5.0}, "not an id": {"variant": 1.0}, "1302": "malformed"}
+	var bare: Dictionary = script.call("map_presentation_of", "landfall_insides", {}, {}, authored)
+	var quartz: Dictionary = (bare.nodes as Dictionary).get(1201, {})
+	_expect(quartz.get("variant") == 0.0 and quartz.get("yaw") == 241.054 and not quartz.has("resource"),
+		"a client-authored entry presents a node the package leaves bare")
+	_expect((bare.nodes as Dictionary).size() == 2, "and nothing malformed is read")
+	var mixed: Dictionary = script.call("map_presentation_of", "landfall", manifest.data, {}, authored)
+	_expect(mixed.nodes[100].get("yaw") == 90.0 and mixed.nodes[100].get("variant") == 1.0,
+		"a node its package presents keeps the package's presentation")
 
 func _manifest() -> WorldManifest:
 	var manifest := WorldManifest.new()

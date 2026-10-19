@@ -54,13 +54,31 @@ func run() -> void:
 		check(ground(space, p).is_empty(), "Blackspace is unfloored: " + str(p))
 	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/world/objects.json"))
 	var adapter := loader.manifest.coordinate_adapter()
+	# The client's presentation path for this map: the package states none, so
+	# the underground's own table lays out its Quartz seams and Salt pans.
+	var main_script: Script = load("res://src/app/main.gd")
+	var presented: Dictionary = main_script.call("map_presentation_of", "landfall_insides",
+		loader.manifest.data, {}, reapply.harvest_presentation("landfall_insides"))
+	var variants: Dictionary = catalog.harvestables.variants
+	var laid_out := 0
 	for node: Dictionary in loader.manifest.data.harvestables:
+		var hint: Dictionary = (presented.nodes as Dictionary).get(int(node.objectId), {})
 		var object := MapObject3D.new()
 		stage.add_child(object)
 		object.configure({"object_id":node.objectId, "kind":EloriaProtocol.MAP_OBJECT_HARVEST,
-			"x":node.serverTile[0], "y":node.serverTile[1], "label":node.resource}, adapter, catalog)
+			"x":node.serverTile[0], "y":node.serverTile[1], "label":node.resource}, adapter, catalog,
+			false, hint)
 		check(not object.model_id.is_empty(), "Every underground resource uses imported art: " + str(node.resource))
 		check(not object.get_node("Ring").visible, "Modelled resources keep the ring for active harvesting only")
+		if str(node.resource) in ["Quartz", "Salt"]:
+			var model := object.get_node_or_null("Model") as Node3D
+			check(hint.has("variant") and hint.has("yaw") and model != null
+				and object.model_id == str(variants[node.resource][int(hint.variant)])
+				and absf(angle_difference(model.rotation.y, deg_to_rad(float(hint.yaw)))) < 1e-4,
+				"Underground %s %d stands its stated variant at its stated yaw: %s"
+				% [node.resource, int(node.objectId), object.model_id])
+			laid_out += 1
+	check(laid_out == 7, "All seven underground Quartz and Salt nodes are laid out: " + str(laid_out))
 	for doorway: Dictionary in loader.manifest.data.portals:
 		var object := MapObject3D.new()
 		stage.add_child(object)

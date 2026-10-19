@@ -64,6 +64,7 @@ var _dev_plain_tcp := false
 const InteriorCutawayScript := preload("res://src/world/interior_cutaway.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
+const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
 const InvasionAssistantScript := preload("res://src/ui/invasion_assistant.gd")
 const ExtensionWindowsScript := preload("res://src/ui/extension_windows.gd")
 const MapViewScript := preload("res://src/world/map_view.gd")
@@ -13666,7 +13667,8 @@ const HARVEST_GROUPING_RADIUS := 6.0
 func _bind_map_presentation(manifest: WorldManifest) -> void:
 	var here := EloriaProtocol.map_id_from_reference(AppState.current_map)
 	_map_presentation = map_presentation_of(here,
-		manifest.data if manifest != null else {}, _lantern_pick_shapes(here))
+		manifest.data if manifest != null else {}, _lantern_pick_shapes(here),
+		UndergroundSceneryScript.harvest_presentation(here))
 	if (_map_presentation.nodes as Dictionary).is_empty() \
 			and (_map_presentation.groupings as Array).is_empty():
 		return
@@ -13695,8 +13697,12 @@ static func _lantern_pick_shapes(map_id: String) -> Dictionary:
 ## the package names its grouping (the maps then mark the grouping once);
 ## `picks` are authored pick shapes by object id. A package published before
 ## the harvest presentation (no `harvestablesSchema`) presents nothing.
+## `authored` is the client's own presentation of nodes such a package leaves
+## bare, by object id - the underground's seams and pans
+## (underground_scenery.gd `harvest_presentation`): their `variant`, `yaw`
+## and `footprint`. A node the package presents keeps the package's.
 static func map_presentation_of(map_id: String, manifest: Dictionary,
-		picks: Dictionary = {}) -> Dictionary:
+		picks: Dictionary = {}, authored: Dictionary = {}) -> Dictionary:
 	var nodes := {}
 	var groupings: Array[Dictionary] = []
 	# Read only under the schema it was written with: the older packages'
@@ -13730,6 +13736,16 @@ static func map_presentation_of(map_id: String, manifest: Dictionary,
 				hint["grouped"] = true
 			if not hint.is_empty():
 				nodes[int(identity)] = hint
+	for key: Variant in authored:
+		if authored[key] is not Dictionary or not str(key).is_valid_int() \
+				or nodes.has(int(str(key))):
+			continue
+		var hint := {}
+		for field: String in ["variant", "yaw", "footprint"]:
+			if (authored[key] as Dictionary).has(field):
+				hint[field] = authored[key][field]
+		if not hint.is_empty():
+			nodes[int(str(key))] = hint
 	for key: Variant in picks:
 		if picks[key] is Dictionary and str(key).is_valid_int():
 			var hint: Dictionary = nodes.get(int(str(key)), {})
