@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Crystalback Tortoise wider rider and cape revision 4",
+  "previousClientRevision": "35bfc979c76d15ae01e4ef3627ddac13790de8a7",
+  "request": "Widen rider legs and adjust cape positioning after the saddle move.",
+  "changes": {
+    "previousFootOffsetMetres": [
+      0.6,
+      -0.66,
+      0.08
+    ],
+    "footOffsetMetres": [
+      0.74,
+      -0.48,
+      0.1
+    ],
+    "kneePoleOffsetMetres": [
+      1.02,
+      -0.16,
+      0.26
+    ],
+    "toeOutDegrees": 14,
+    "capeContact": [
+      {
+        "bone": "Bone_000",
+        "center": [
+          0.0083,
+          0.98,
+          -0.44
+        ],
+        "radii": [
+          0.84,
+          0.8,
+          0.98
+        ]
+      }
+    ],
+    "capeMotion": {
+      "hangFraction": 0.82,
+      "gallopHangFraction": 0.72,
+      "liftMultiplier": 0.25,
+      "rippleMultiplier": 0.55,
+      "clearanceMetres": 0.04,
+      "gallopClearanceMetres": 0.055
+    },
+    "description": "Spread feet and knees around the broad shell without stretching the rider. Fit the cape contact farther back over the rear crystals; lower the hang, reduce lift and retain a gentler ripple. A front preview and capes on walk/scuttle make both changes visible."
+  },
+  "preserved": "Accepted saddle position, torso pose, source GLBs, native model/skin/rest/animation, gait solver and controls. Existing pony and horse cape settings remain the defaults.",
+  "validation": {
+    "godot": "4.7.2-stable",
+    "riderAndMount": {
+      "checks": 1353,
+      "failures": 0,
+      "max_cape_link_error": 1.22189521789551e-06,
+      "max_leg_reach_error": 0.0,
+      "max_rider_contact_error": 5.10133588704775e-07,
+      "max_rotation_step_radians": 0.0731069445610046,
+      "max_supported_sole_height": 0.00488438224419951,
+      "max_supported_sole_speed_error": 0.000305038935039192,
+      "minimum_sole_height": -3.42401335728937e-07,
+      "normal_repack_error": 0.000128849787870422,
+      "rebound_paw_vertices": 964,
+      "tangent_repack_error": 5.83827495574951e-05
+    },
+    "capeSimulation": "120 advancing frames per gait, for both rider bodies, including walk/scuttle/rush transitions. Material link error remains below 0.02m.",
+    "mountedUpperBody": {
+      "checks": 3070,
+      "failures": 0,
+      "maxLowerBodyTransformError": 0
+    },
+    "horseRegression": {
+      "checks": 11741,
+      "failures": 0,
+      "maxRiderContactErrorMetres": 4.215241279e-05,
+      "maxCapeMaterialLinkErrorMetres": 0.00571274757385
+    },
+    "renderedFrames": 135,
+    "renderedFps": 30,
+    "renderedSeconds": 4.5,
+    "renderedScriptOrResourceErrors": 0,
+    "visualReview": "Front leg spread plus side/quarter/game-camera cape drape inspected in standing and moving samples, including bow/spell recovery.",
+    "exportFidelity": "Runtime pose/contact profile change; no GLB export or replacement.",
+    "userApproval": "Pending review of this revision."
+  },
+  "sourceSha256": {
+    "godot-client/data/mounts/crystalback_tortoise.json": "47841dce8def2644aa23783b776983923d0dc3b9d6a4c881119382228d2ffdbe",
+    "godot-client/src/mounts/mount_cape_surface.gd": "cfe4b64316b066c18a3889bb691080fda9cdc41c18a17fb548e4100eb40cc2b3",
+    "godot-client/src/mounts/mounted_player_visual.gd": "2a6a6edfdafbf83890a2fef7256e880b1b2a1692fb6712cafc26becf79e8b0b5",
+    "godot-client/src/dev/tortoise_mount_showcase.gd": "e986d9d7fc13f62a7de8047542918c142e859b592f631d571453aec0fef79b29",
+    "godot-client/tests/test_tortoise_mount.gd": "47bfc1f524abb29016bbc380504e4990548c34fee25c0ad1ec778e61febdc7ba"
+  },
+  "unchangedInputSha256": {
+    "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb": "eaa9da0596d861961bb4ad2eeab991b4f3fe6c42553e8ba7678f0b29a7f44348"
+  },
+  "evidenceSha256": {
+    "contacts-v4.json": "a3e01d23dde51b5c7271d7cacb32199216ef734fcd8698235b86ee0d31625cce",
+    "crystalback-tortoise-v4.mp4": "27c391e75bf0cadeb720f52698f026aff69b693ea068d53cbbc1f35491e79403",
+    "riding-preview-v4.png": "fa6c6785b06a869c64900d39dd3905c625d94e8beda45ff64e400224e8a9fef1"
+  }
+}

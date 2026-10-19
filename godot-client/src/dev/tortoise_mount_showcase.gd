@@ -1,7 +1,7 @@
 extends Control
 ## Offline review using the same rider, mount, action router and props as play.
 const PANELS := [
- ["STANDING / SIDE", "luminous_male", "cruise", "idle", false],
+ ["STANDING / FRONT", "luminous_male", "cruise", "idle", false],
  ["WALK", "luminous_female", "walk", "walk", true],
  ["SCUTTLE", "luminous_male", "cruise", "run", true],
  ["RUSH / GAME CAMERA + CAPE", "luminous_female", "burst", "run", true],
@@ -90,13 +90,15 @@ func _ready() -> void:
 		camera.cull_mask = 3
 		stage.add_child(camera)
 		camera.position = Vector3(4.8, 3.1, -3.8) if index != 3 else Vector3(3.8, 3.8, 5.7)
-		if index in [0, 2]:
+		if index == 0:
+			camera.position = Vector3(0, 2.6, -6.5)
+		elif index == 2:
 			camera.position = Vector3(6.5, 2.6, -.3)
 		camera.look_at(Vector3(0, 1.55, .15))
 		var actor := ReplicatedActor3D.new()
 		stage.add_child(actor)
 		var worn := {0: 164} if index == 4 else {}
-		if index in [3, 5]:
+		if index in [1, 2, 3, 5]:
 			worn[2] = 1
 		var errors := actor.configure({"actor_id": 900 + index, "x": 0, "y": 0,
 			"rotation": 0, "kind": 1, "name": "", "appearance": {"hair": 0},

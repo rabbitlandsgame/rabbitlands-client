@@ -92,7 +92,7 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 	for modifier: Node in actor.get_skeleton().find_children("*", "SkeletonModifier3D", true, false):
 		modifiers[modifier] = (modifier as SkeletonModifier3D).active
 		(modifier as SkeletonModifier3D).active = false
-	cape_surface.configure(pony.get_skeleton(), profile.get("capeContact", []))
+	cape_surface.configure(pony.get_skeleton(), profile.get("capeContact", []), profile.get("capeMotion", {}))
 	if actor._cape_cloth != null:
 		actor._cape_cloth.call("set_mount_surface", cape_surface)
 	actor.set_hand_props_visible(false)

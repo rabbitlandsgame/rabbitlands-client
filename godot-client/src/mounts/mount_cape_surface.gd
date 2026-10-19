@@ -1,5 +1,5 @@
 extends RefCounted
-## Cloth contact above the approved pony's animated back and rear saddle.
+## Cloth contact above the mount's animated back and rear saddle.
 ## Native-space envelopes follow their owning bones; no mesh is rewritten.
 var rig: Skeleton3D
 var envelopes: Array[Dictionary] = []
@@ -9,9 +9,11 @@ var clearance := .04
 var gallop_blend := 0.0
 var moving_blend := 0.0
 var flow_time := 0.0
+var motion: Dictionary = {}
 
-func configure(skeleton: Skeleton3D, contact: Array = []) -> void:
+func configure(skeleton: Skeleton3D, contact: Array = [], settings: Dictionary = {}) -> void:
 	rig = skeleton
+	motion = settings
 	# Bounds fitted to v8's existing body: native rump top 1.38–1.42 m,
 	# half-width 0.34 m. The larger envelope also clears interpolated cloth.
 	var specs: Array = [
@@ -37,7 +39,8 @@ func update(delta := 0.0, gait := "idle") -> void:
 	# pace changes. The higher, trailing silhouette is reserved for gallop.
 	gallop_blend = move_toward(gallop_blend, 1.0 if gait == "gallop" else 0.0, maxf(delta, 0.0) / .4)
 	moving_blend = move_toward(moving_blend, 1.0 if gait in ["trot", "gallop"] else 0.0, maxf(delta, 0.0) / .4)
-	clearance = lerpf(.04, .08, gallop_blend)
+	clearance = lerpf(float(motion.get("clearanceMetres", .04)),
+		float(motion.get("gallopClearanceMetres", .08)), gallop_blend)
 	flow_time += maxf(delta, 0.0)
 	for envelope: Dictionary in envelopes:
 		if bool(envelope.rump):
@@ -93,9 +96,9 @@ func flow_acceleration(chain: int, fraction: float) -> Vector3:
 	# trot contact, with twice the displacement at gallop.
 	var ripple := Vector3.UP * (24.0 * sin(phase) + 8.0 * sin(phase * 1.47)) \
 		+ back * (12.0 * sin(phase - .6))
-	var lift := gallop_blend * (Vector3.UP * 28.0 + back * 45.0)
+	var lift := gallop_blend * float(motion.get("liftMultiplier", 1.0)) * (Vector3.UP * 28.0 + back * 45.0)
 	var settle := Vector3.DOWN * (28.0 * (1.0 - moving_blend))
-	return weight * (lift + settle + ripple * moving_blend)
+	return weight * (lift + settle + ripple * moving_blend * float(motion.get("rippleMultiplier", 1.0)))
 
 func limit_lift(point: Vector3, root: Vector3, material_length: float, fraction: float) -> Vector3:
 	# Keep the lower sheet draped while travelling rather than letting all
@@ -107,8 +110,10 @@ func limit_lift(point: Vector3, root: Vector3, material_length: float, fraction:
 	# shoulder spacing. Feeding this through length/contact relaxation keeps
 	# the sheet from stretching; the wave fades to zero at its attachment.
 	var wave := .0166 * moving_blend * (1.0 + gallop_blend) * fraction * fraction \
-		* sin(TAU * 2.2 * flow_time - fraction * 4.2)
+		* sin(TAU * 2.2 * flow_time - fraction * 4.2) * float(motion.get("rippleMultiplier", 1.0))
 	var sideways := (point - root).dot(side)
 	point += side * (wave - sideways)
-	point.y = minf(point.y, root.y - material_length * lerpf(.68, .45, gallop_blend))
+	var hang := lerpf(float(motion.get("hangFraction", .68)),
+		float(motion.get("gallopHangFraction", .45)), gallop_blend)
+	point.y = minf(point.y, root.y - material_length * hang)
 	return project(point)

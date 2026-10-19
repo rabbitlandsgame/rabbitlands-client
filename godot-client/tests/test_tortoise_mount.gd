@@ -11,6 +11,7 @@ var paw_vertex_count := 0
 var normal_error := 0.0
 var tangent_error := 0.0
 var rotation_step := 0.0
+var max_cape_link_error := 0.0
 
 func _init() -> void: call_deferred("run")
 func check(ok: bool, message: String) -> void:
@@ -95,6 +96,16 @@ func run() -> void:
 								var expected: Vector3 = group.rig.global_basis * Vector3(0,0,-stride / (duration * stance))
 								max_slide = maxf(max_slide,speed.distance_to(expected))
 						previous[leg] = {"point":centroid,"support":step.support,"phase":step.phase}
+			# Advance real time as well as scrubbing the gait: the cape has its
+			# own state and must retain its material length during pace changes.
+			for frame: int in 120:
+				visual._process(1.0 / 60.0)
+				for chain: int in 3:
+					var points: PackedVector3Array = actor._cape_cloth.get("_points")[chain]
+					var lengths: PackedFloat32Array = actor._cape_cloth.get("_lengths")[chain]
+					for link: int in range(1, points.size()):
+						max_cape_link_error = maxf(max_cape_link_error,
+							absf(points[link].distance_to(points[link - 1]) - lengths[link - 1]))
 			actor.play_action(&"idle")
 			visual._process(0.0)
 			check(visual.action == "idle", "stopping restores a grounded idle")
@@ -107,8 +118,9 @@ func run() -> void:
 	check(max_slide < .003,"supported soles follow the authored backward travel without sliding")
 	check(normal_error < .0005 and tangent_error < .0005,"normal/tangent repacking retains importer precision")
 	check(rotation_step < .2,"full-cycle articulation has no pole flips or sudden joint jumps")
+	check(max_cape_link_error < .02,"draped cape retains its authored length through gait changes")
 	var report := {"checks":checks,"failures":failures,"max_rider_contact_error":max_contact,
-		"max_leg_reach_error":max_reach,"minimum_sole_height":minimum_sole,"max_supported_sole_height":max_support_height,"max_supported_sole_speed_error":max_slide,"rebound_paw_vertices":paw_vertex_count,"normal_repack_error":normal_error,"tangent_repack_error":tangent_error,"max_rotation_step_radians":rotation_step}
+		"max_leg_reach_error":max_reach,"minimum_sole_height":minimum_sole,"max_supported_sole_height":max_support_height,"max_supported_sole_speed_error":max_slide,"rebound_paw_vertices":paw_vertex_count,"normal_repack_error":normal_error,"tangent_repack_error":tangent_error,"max_rotation_step_radians":rotation_step,"max_cape_link_error":max_cape_link_error}
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--report="): FileAccess.open(argument.trim_prefix("--report="),FileAccess.WRITE).store_string(JSON.stringify(report,"  "))
 	print("TORTOISE_MOUNT_CHECKS ",JSON.stringify(report))
