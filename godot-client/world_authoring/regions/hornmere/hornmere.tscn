@@ -26,9 +26,9 @@ source_material = SubResource("material")
 [sub_resource type="Resource" id="sculpt"]
 resource_local_to_scene = true
 script = ExtResource("sculpt")
-base_sha256 = "46e953231d3926cfd5f21c2743694844d7e21c8d600d6853553ca3eca69c2ddc"
-origin = Vector2(-585.0, -465.0)
-grid_size = Vector2i(586, 466)
+base_sha256 = "1fa1f1801fed2d3e470ca0489f20a5b85254da5a6c12758253dcd707bef89d8d"
+origin = Vector2(-1015.0, -813.0)
+grid_size = Vector2i(426, 640)
 cell_metres = 2.0
 indices = PackedInt32Array()
 deltas = PackedFloat32Array()
@@ -37,23 +37,23 @@ deltas = PackedFloat32Array()
 script = ExtResource("region")
 region_id = "hornmere"
 continent_translation = Vector3(1576.0, 0, 5816.0)
-server_origin = Vector2i(529, 409)
-server_cells = Vector2i(1062, 1062)
-collision_origin_metres = Vector2(-529.0, 409.0)
-ownership_polygon_sha256 = "a81220106789503909d1204857a4d9e45b7b868a04307d12afe6bb56d1a6977e"
+server_origin = Vector2i(959, 409)
+server_cells = Vector2i(1212, 1212)
+collision_origin_metres = Vector2(-959.0, 409.0)
+ownership_polygon_sha256 = "b8985d812217727c0563779833fd28a40466ef15371a87f80fc83d3de50bcc0c"
 export_directory = "res://../eloria-assets/maps/continent-v2/hornmere/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("terrain")
-origin = Vector2(-585.0, -465.0)
-grid_size = Vector2i(586, 466)
+origin = Vector2(-1015.0, -813.0)
+grid_size = Vector2i(426, 640)
 cell_metres = 2.0
 base_heights_path = "res://world_authoring/regions/hornmere/base-heights.f32le"
 base_colors_path = "res://world_authoring/regions/hornmere/base-colors.rgba8"
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_inside = PackedVector2Array(1051, 6221, 1051, 5801, 1101, 5601, 1151, 5431, 1351, 5411, 1551, 5491, 1751, 5541, 2101, 5561, 2101, 6221)
+preview_clip_inside = PackedVector2Array(621, 6221, 621, 5021, 1351, 5021, 1351, 6221)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 

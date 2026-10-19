@@ -7,7 +7,7 @@ is not in the repository, so this carries them instead:
   * a vertex whose frozen crop colour is unchanged (same continent position, same bytes) keeps its graded bytes;
   * every other vertex gets the map's grade as a per-channel log ratio graded/frozen, harmonically inpainted from the
     carried vertices, so feathers, accents and canopy smoothing continue smoothly across new or re-cut ground.
-Previous crops are read from Git (--from COMMIT); a successor map reads its predecessor's files (marker-renames-a3).
+Previous crops are read from Git (--from COMMIT); a map absent there reads its predecessor's files (marker-renames-a3).
 colour-grade.json keeps its targets and gains a "carried" record; parentFrozenCrop and graded are rebound.
 
   python godot-client/tools/carry_continent_v2_grade.py --from COMMIT [--check]
@@ -37,6 +37,11 @@ def sha(blob: bytes) -> str:
 def git_show(ref: str, path: Path) -> bytes:
     return subprocess.run(["git", "show", f"{ref}:{path.relative_to(CHECKOUT).as_posix()}"], cwd=CHECKOUT,
                           capture_output=True, check=True).stdout
+
+
+def exists_at(ref: str, path: Path) -> bool:
+    return subprocess.run(["git", "cat-file", "-e", f"{ref}:{path.relative_to(CHECKOUT).as_posix()}"], cwd=CHECKOUT,
+                          capture_output=True).returncode == 0
 
 
 def window(provenance: dict):
@@ -115,6 +120,9 @@ def main(argv=None) -> int:
     parser.add_argument("--from", dest="ref", required=True, help="commit holding the previous crops and grades")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
+    # record the commit, not a moving name such as HEAD
+    args.ref = subprocess.run(["git", "rev-parse", "--short=8", args.ref], cwd=CHECKOUT, capture_output=True,
+                              check=True, text=True).stdout.strip()
     renamed = json.loads(RENAMES.read_text(encoding="utf-8"))["maps"] if RENAMES.exists() else {}
     successor_of = {new: old for old, new in renamed.items()}
     report, stale = {}, []
@@ -122,7 +130,11 @@ def main(argv=None) -> int:
         region = REGIONS / t.id
         if not (region / "colour-grade.json").exists():
             continue
-        previous = REGIONS / successor_of.get(t.id, t.id)
+        # the map's own files at the ref when it already existed there (a later partition change), else its
+        # predecessor's (the first carry after a rename)
+        previous = REGIONS / t.id
+        if not exists_at(args.ref, previous / "colour-grade.json"):
+            previous = REGIONS / successor_of.get(t.id, t.id)
         result = carry(region, previous, args.ref)
         if result is None:
             continue

@@ -321,9 +321,9 @@ source_material = SubResource("material")
 [sub_resource type="Resource" id="sculpt"]
 resource_local_to_scene = true
 script = ExtResource("sculpt")
-base_sha256 = "ad4cd669feb9244c9e8b2bf752369a0cf64307e0260eef2d794a13b85b4fe54e"
+base_sha256 = "6b28382e101a249265808fec1952a2c1041d0e328d65c9004cdfd8a45cb0291e"
 origin = Vector2(-332.0, -396.0)
-grid_size = Vector2i(270, 585)
+grid_size = Vector2i(270, 456)
 cell_metres = 2.0
 indices = PackedInt32Array()
 deltas = PackedFloat32Array()
@@ -769,20 +769,20 @@ continent_translation = Vector3(2583.0, 0, 8007.0)
 server_origin = Vector2i(276, 748)
 server_cells = Vector2i(1092, 1092)
 collision_origin_metres = Vector2(-276.0, 748.0)
-ownership_polygon_sha256 = "080383a857bfaefda7e2966202f7b15d78b4c9f4a8f9ec73677500b8d7222dc8"
+ownership_polygon_sha256 = "335dbe630d47449e8e099cea69b408f3fffc49400c99fc1db0ec8de9e9c54051"
 export_directory = "res://../eloria-assets/maps/continent-v2/jadestair/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("terrain")
 origin = Vector2(-332.0, -396.0)
-grid_size = Vector2i(270, 585)
+grid_size = Vector2i(270, 456)
 cell_metres = 2.0
 base_heights_path = "res://world_authoring/regions/jadestair/base-heights.f32le"
 base_colors_path = "res://world_authoring/regions/jadestair/base-colors-graded.rgba8"
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_inside = PackedVector2Array(2311, 7671, 2719, 7671, 2719, 7921, 2699, 8051, 2729, 8181, 2723, 8343, 2591, 8343, 2591, 8751, 2311, 8751, 2311, 8259)
+preview_clip_inside = PackedVector2Array(2311, 7671, 2719, 7671, 2719, 7921, 2699, 8051, 2729, 8181, 2723, 8343, 2723, 8461, 2311, 8461, 2311, 8259)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 

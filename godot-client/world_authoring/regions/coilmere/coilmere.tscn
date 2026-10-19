@@ -347,9 +347,9 @@ source_material = SubResource("material")
 [sub_resource type="Resource" id="sculpt"]
 resource_local_to_scene = true
 script = ExtResource("sculpt")
-base_sha256 = "4bda5e8a1ab0c74d2f0b29a3e5ae5940299cd10af5d7a5c35f26dfc9790e2e09"
-origin = Vector2(-399.0, -476.0)
-grid_size = Vector2i(666, 625)
+base_sha256 = "8d479a22ce858443d9239f1a1bd526ce79e99d2e1dd586cae9639022c1d43d59"
+origin = Vector2(-291.0, -476.0)
+grid_size = Vector2i(312, 591)
 cell_metres = 2.0
 indices = PackedInt32Array()
 deltas = PackedFloat32Array()
@@ -1092,20 +1092,20 @@ continent_translation = Vector3(2930.0, 0, 8007.0)
 server_origin = Vector2i(343, 748)
 server_cells = Vector2i(1218, 1218)
 collision_origin_metres = Vector2(-343.0, 748.0)
-ownership_polygon_sha256 = "634520bf22332fbb6c7133909a1c684f02559ec3598e04e161a5550b28287773"
+ownership_polygon_sha256 = "30fdd533c44f25245dc9c18f910236adc471b16fe81e76045579413eb025369f"
 export_directory = "res://../eloria-assets/maps/continent-v2/coilmere/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("terrain")
-origin = Vector2(-399.0, -476.0)
-grid_size = Vector2i(666, 625)
+origin = Vector2(-291.0, -476.0)
+grid_size = Vector2i(312, 591)
 cell_metres = 2.0
 base_heights_path = "res://world_authoring/regions/coilmere/base-heights.f32le"
 base_colors_path = "res://world_authoring/regions/coilmere/base-colors-graded.rgba8"
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_inside = PackedVector2Array(2729, 7671, 3001, 7671, 3061, 7591, 3161, 7591, 3201, 7591, 3201, 8343, 3301, 8381, 3421, 8421, 3561, 8451, 3701, 8441, 3801, 8401, 3801, 8751, 2591, 8751, 2591, 8343, 2723, 8343, 2729, 8181, 2699, 8051, 2719, 7921, 2719, 7671)
+preview_clip_inside = PackedVector2Array(2719, 7671, 2729, 7671, 2761, 7671, 2761, 7591, 3201, 7591, 3201, 8651, 2723, 8651, 2723, 8461, 2723, 8343, 2729, 8181, 2699, 8051, 2719, 7921)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 

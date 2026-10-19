@@ -845,7 +845,7 @@ continent_translation = Vector3(2059.0, 0, 6521.0)
 server_origin = Vector2i(604, 591)
 server_cells = Vector2i(1614, 1614)
 collision_origin_metres = Vector2(-604.0, 591.0)
-ownership_polygon_sha256 = "260606fda6bc75898549b68ac03ba2f4433c1662aba24d824360503d7cfb2fae"
+ownership_polygon_sha256 = "190cbc5543d637b02afee5fc3bcf1dd3ec73b6d5ccec97fd538274edbe62bebd"
 export_directory = "res://../eloria-assets/maps/continent-v2/saltsound/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
@@ -858,7 +858,7 @@ base_colors_path = "res://world_authoring/regions/saltsound/base-colors-graded.r
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_inside = PackedVector2Array(1919, 6781, 1939, 6849, 2259, 6717, 2259, 6611, 2301, 6599, 2331, 6581, 2391, 6567, 2451, 6577, 2511, 6595, 2571, 6605, 2631, 6629, 2691, 6661, 2751, 6703, 2861, 6651, 3011, 6621, 3061, 6621, 3061, 6221, 1459, 6221, 1459, 6761, 1459, 6811, 1479, 6821, 1639, 6821)
+preview_clip_inside = PackedVector2Array(1919, 6781, 1939, 6849, 2259, 6717, 2259, 6611, 2301, 6599, 2331, 6581, 2391, 6567, 2451, 6577, 2511, 6595, 2571, 6605, 2631, 6629, 2691, 6661, 2751, 6703, 2861, 6651, 3011, 6621, 3061, 6621, 3061, 6561, 3061, 6371, 2201, 6371, 2201, 6221, 1459, 6221, 1459, 6761, 1459, 6811, 1479, 6821, 1639, 6821)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 
@@ -1337,69 +1337,6 @@ transform = Transform3D(1.14161, 0, 0.51306, 0, 1.2516, 0, -0.51306, 0, 1.14161,
 metadata/map_asset_id = "sw_isle:kit-coastal-boulders-4"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
 
-[node name="s0_Coastal Boulders 65" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-2-019"
-node_name = "Authored_sw_isle_kit_coastal_boulders_2_019"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
-collision_role = "solid"
-metadata = {
-"coastDesign": "continent-v2 slice 2 coast design",
-"coastGroup": "rock-cliff-foot",
-"coastKind": "base",
-"coastPiece": "rock-cliff-foot-071",
-"coastStep": "3-shore"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.711614, 0, 1.273805, 0, 1.4591, 0, -1.273805, 0, -0.711614, 320.503, -3.9426, -243.607)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 65" instance=ExtResource("s0_90_x1ic5")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
-
-[node name="s0_Coastal Boulders 66" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-2-020"
-node_name = "Authored_sw_isle_kit_coastal_boulders_2_020"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
-collision_role = "solid"
-metadata = {
-"coastDesign": "continent-v2 slice 2 coast design",
-"coastGroup": "rock-cliff-foot",
-"coastKind": "base",
-"coastPiece": "rock-cliff-foot-072",
-"coastStep": "3-shore"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.996122, 0, -0.734941, 0, 1.2379, 0, 0.734941, 0, 0.996122, 359.044, -4.943, -203.307)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 66" instance=ExtResource("s0_90_x1ic5")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
-
-[node name="s0_Coastal Boulders 67" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-3-013"
-node_name = "Authored_sw_isle_kit_coastal_boulders_3_013"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
-collision_role = "solid"
-metadata = {
-"coastDesign": "continent-v2 slice 2 coast design",
-"coastGroup": "rock-cliff-foot",
-"coastKind": "base",
-"coastPiece": "rock-cliff-foot-073",
-"coastStep": "3-shore"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.704684, 0, 0.704438, 0, 0.9964, 0, -0.704438, 0, -0.704684, 372.899, -3.155, -198.483)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 67" instance=ExtResource("s0_93_l81vy")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
-
 [node name="s0_Beach Rocks 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-beach-rocks-1-001"
@@ -1541,27 +1478,6 @@ transform = Transform3D(-1.073199, 0, -0.72743, 0, 1.2965, 0, 0.72743, 0, -1.073
 [node name="Content" parent="AuthoredAssets/s0_Beach Rocks 6" instance=ExtResource("s0_97_epmbh")]
 metadata/map_asset_id = "sw_isle:kit-beach-rocks-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-rocks-1.glb"
-
-[node name="s0_Sea Stack 4" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sea-stack-1-003"
-node_name = "Authored_sw_isle_kit_sea_stack_1_003"
-catalog_asset_id = "sw_isle:kit-sea-stack-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-stack-1.glb"
-collision_role = "solid"
-metadata = {
-"coastDesign": "continent-v2 slice 2 coast design",
-"coastGroup": "rock-sea-stack",
-"coastKind": "base",
-"coastPiece": "rock-sea-stack-004",
-"coastStep": "3-shore"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.141215, 0, 1.105417, 0, 1.1144, 0, -1.105417, 0, 0.141215, 277.461, -3.858, -235.95)
-
-[node name="Content" parent="AuthoredAssets/s0_Sea Stack 4" instance=ExtResource("s0_98_0s4p6")]
-metadata/map_asset_id = "sw_isle:kit-sea-stack-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sea-stack-1.glb"
 
 [node name="s0_Kelp Wrack 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -11690,26 +11606,6 @@ transform = Transform3D(0.983964, 0.107906, 0.723359, -0.150124, 1.216562, 0.022
 metadata/map_asset_id = "sw_isle:kit-flower-meadow-3"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-3.glb"
 
-[node name="s0_Sw Sea Cliff Corner10" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-sea-cliff-corner-010"
-node_name = "Authored_sw_isle_kit_sw_sea_cliff_corner_010"
-catalog_asset_id = "sw_isle:kit-sw-sea-cliff-corner"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-sea-cliff-corner.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "headland",
-"polishNote": "apex seaward at (955, -999); turf top 11.7 m; rear turf p90 0.1 m over the land; 25% of its plan proud",
-"polishPiece": "n19-3",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.33541, 0, -0.67082, 0, 0.75, 0, 0.67082, 0, 0.33541, 331.888, 0.3099, -258.944)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Sea Cliff Corner10" instance=ExtResource("s0_88_6lw0k")]
-metadata/map_asset_id = "sw_isle:kit-sw-sea-cliff-corner"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-sea-cliff-corner.glb"
-
 [node name="s0_Coastal Rock 89" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-024"
@@ -12315,120 +12211,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.826649, 0.023562, 0.258774, -0.032526, 0.846786, -0.181004, -0.257801, -0.182388, -0.806933, -594.1316, -0.6316, -221.1249)
 
 [node name="Content" parent="AuthoredAssets/s0_Coastal Rock 331" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-
-[node name="s0_Coastal Boulders 350" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-3-097"
-node_name = "Authored_sw_isle_kit_coastal_boulders_3_097"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0236-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.94621, -0.207755, -0.5644, -0.178361, 1.101753, -0.106533, 0.574366, -0.000122, -0.962874, 313.1865, -1.499, -260)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 350" instance=ExtResource("s0_93_l81vy")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-3.glb"
-
-[node name="s0_Coastal Rock 337" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-3-106"
-node_name = "Authored_sw_isle_kit_coastal_rock_3_106"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0236-b",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.293356, -0.21377, -0.923826, -0.065145, 0.969284, -0.203602, 0.945995, 0.000458, -0.300502, 312.1524, -0.9839, -255.8455)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 337" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-
-[node name="s0_Coastal Boulders 351" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-1-092"
-node_name = "Authored_sw_isle_kit_coastal_boulders_1_092"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0237-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.827665, -0.308219, 0.358957, -0.129446, 0.843219, 0.425563, -0.455075, 0.320719, -0.773902, 329.6578, -2.47, -238.2433)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 351" instance=ExtResource("s0_91_kiy41")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
-
-[node name="s0_Coastal Rock 338" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-1-114"
-node_name = "Authored_sw_isle_kit_coastal_rock_1_114"
-catalog_asset_id = "sw_isle:kit-coastal-rock-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0237-c",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.162675, -0.70628, 1.324699, 0.642723, 1.236926, 0.580555, -1.356675, 0.501304, 0.433878, 328.261, -0.4408, -241.7641)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 338" instance=ExtResource("s0_94_rfpay")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-1.glb"
-
-[node name="s0_Coastal Boulders 352" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-boulders-1-093"
-node_name = "Authored_sw_isle_kit_coastal_boulders_1_093"
-catalog_asset_id = "sw_isle:kit-coastal-boulders-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0238-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.052606, -0.330277, -0.602429, -0.57329, 1.029652, 0.437192, 0.378606, 0.640871, -1.01288, 338.1406, -2.144, -217.0703)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 352" instance=ExtResource("s0_91_kiy41")]
-metadata/map_asset_id = "sw_isle:kit-coastal-boulders-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-1.glb"
-
-[node name="s0_Coastal Rock 339" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-3-107"
-node_name = "Authored_sw_isle_kit_coastal_rock_3_107"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0238-b",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.712087, -0.164523, 0.858182, 0.003607, 1.106491, 0.21512, -0.873802, 0.138642, -0.698469, 339.2446, -1.6119, -211.5765)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 339" instance=ExtResource("s0_96_e14li")]
 metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
 
@@ -14341,25 +14123,6 @@ transform = Transform3D(0.47088, 0, 0.734885, 0, 0.872803, 0, -0.734885, 0, 0.47
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 25" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0025"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0025"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0973269, 0, -1.15293, 0, 1.15703, 0, 1.15293, 0, 0.0973269, 316.558, 0.3376, -268.775)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 25" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 26" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0026"
@@ -15291,25 +15054,6 @@ transform = Transform3D(-0.155452, 0, 1.08194, 0, 1.09305, 0, -1.08194, 0, -0.15
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 75" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0075"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0075"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.525041, 0, 0.821818, 0, 0.975219, 0, -0.821818, 0, 0.525041, 360.312, 58.7713, -247.658)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 75" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 76" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0076"
@@ -16222,25 +15966,6 @@ transform = Transform3D(0.834475, 0, -0.232633, 0, 0.866294, 0, 0.232633, 0, 0.8
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 124" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0124"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0124"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.771877, 0, 0.492933, 0, 0.915848, 0, -0.492933, 0, -0.771877, 320.413, 0.2678, -288.211)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 124" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 125" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0125"
@@ -16925,25 +16650,6 @@ transform = Transform3D(0.736944, 0, 0.703461, 0, 1.01879, 0, -0.703461, 0, 0.73
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 161" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0161"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0161"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0490397, 0, 1.05608, 0, 1.05722, 0, -1.05608, 0, 0.0490397, 316.572, 0.7459, -258.043)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 161" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 162" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0162"
@@ -17343,25 +17049,6 @@ transform = Transform3D(-0.413604, 0, -0.767392, 0, 0.871756, 0, 0.767392, 0, -0
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 183" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0183"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0183"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.486639, 0, -1.00803, 0, 1.11935, 0, 1.00803, 0, -0.486639, 355.366, 56.9876, -254.022)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 183" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 184" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0184"
@@ -17685,25 +17372,6 @@ transform = Transform3D(0.921944, 0, -0.678101, 0, 1.14447, 0, 0.678101, 0, 0.92
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 201" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0201"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0201"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.855287, 0, -0.612695, 0, 1.0521, 0, 0.612695, 0, -0.855287, 364.705, 0.2981, -200.226)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 201" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 202" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0202"
@@ -17815,25 +17483,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(0.204976, 0, 1.12163, 0, 1.14021, 0, -1.12163, 0, 0.204976, -534.568, 1.9975, -150.126)
 
 [node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 207" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
-[node name="lv_saltsound_Samphire Clump 1 208" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0208"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0208"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.906445, 0, 0.0327082, 0, 0.907035, 0, -0.0327082, 0, -0.906445, 323.034, 0.3861, -292.005)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 208" instance=ExtResource("lv_samphire_clump_1")]
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
@@ -19794,25 +19443,6 @@ transform = Transform3D(-0.454961, 0, 0.784933, 0, 0.907254, 0, -0.784933, 0, -0
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 312" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0312"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0312"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.914938, 0, -0.0890592, 0, 0.919262, 0, 0.0890592, 0, -0.914938, 359.217, 58.5033, -245.099)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 312" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 313" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0313"
@@ -20342,25 +19972,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.910776, 0, 0.300164, 0, 0.958963, 0, -0.300164, 0, -0.910776, -521.532, 2.4626, -103.927)
 
 [node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 340" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
-[node name="lv_saltsound_Samphire Clump 1 341" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0341"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0341"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.86892, 0, -0.47926, 0, 0.992327, 0, 0.47926, 0, 0.86892, 357.937, 57.7043, -251.778)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 341" instance=ExtResource("lv_samphire_clump_1")]
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
@@ -21504,25 +21115,6 @@ transform = Transform3D(-0.530906, 0, -0.903819, 0, 1.04821, 0, 0.903819, 0, -0.
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 402" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0402"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0402"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.908583, 0, 0.408577, 0, 0.996222, 0, -0.408577, 0, -0.908583, 350.418, 0.3138, -206.269)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 402" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 403" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0403"
@@ -22492,25 +22084,6 @@ transform = Transform3D(0.451234, 0, 1.04318, 0, 1.13659, 0, -1.04318, 0, 0.4512
 metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
 
-[node name="lv_saltsound_Samphire Clump 1 454" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0454"
-node_name = "Authored_lf_biomes_kit_samphire_clump_1_saltsound_0454"
-catalog_asset_id = "lf_biomes:kit-samphire-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "samphire"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.986248, 0, -0.283612, 0, 1.02622, 0, 0.283612, 0, -0.986248, 351.436, 56.7000, -254.435)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Samphire Clump 1 454" instance=ExtResource("lv_samphire_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-samphire-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-samphire-clump-1.glb"
-
 [node name="lv_saltsound_Samphire Clump 1 455" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-samphire-clump-1-saltsound-0455"
@@ -22891,25 +22464,6 @@ transform = Transform3D(0.917733, 0, -0.549359, 0, 1.06959, 0, 0.549359, 0, 0.91
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
-[node name="lv_saltsound_Thrift Clump 1 11" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0011"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0011"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.870057, 0, 0.199755, 0, 0.892693, 0, -0.199755, 0, -0.870057, 318.253, 0.8653, -266.607)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 11" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
 [node name="lv_saltsound_Thrift Clump 1 12" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0012"
@@ -23135,44 +22689,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(0.929092, 0, 0.0911289, 0, 0.933551, 0, -0.0911289, 0, 0.929092, -63.456, 1.0014, -258.989)
 
 [node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 23" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
-[node name="lv_saltsound_Thrift Clump 1 24" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0024"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0024"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.09573, 0, 0.369803, 0, 1.15645, 0, -0.369803, 0, -1.09573, 348.669, 56.1590, -255.588)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 24" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
-[node name="lv_saltsound_Thrift Clump 1 25" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0025"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0025"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.867033, 0, -0.498687, 0, 1.00022, 0, 0.498687, 0, -0.867033, 315.825, 0.5280, -255.018)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 25" instance=ExtResource("lv_thrift_clump_1")]
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
@@ -23594,25 +23110,6 @@ transform = Transform3D(-1.0515, 0, -0.00859819, 0, 1.05154, 0, 0.00859819, 0, -
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
-[node name="lv_saltsound_Thrift Clump 1 48" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0048"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0048"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.05458, 0, -0.427453, 0, 1.13791, 0, 0.427453, 0, 1.05458, 319.778, 0.9281, -247.765)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 48" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
 [node name="lv_saltsound_Thrift Clump 1 49" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0049"
@@ -23936,25 +23433,6 @@ transform = Transform3D(0.62532, 0, -0.807307, 0, 1.02116, 0, 0.807307, 0, 0.625
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
-[node name="lv_saltsound_Thrift Clump 1 66" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0066"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0066"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.328172, 0, -1.15039, 0, 1.19628, 0, 1.15039, 0, 0.328172, 316.069, 0.2692, -248.157)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 66" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
 [node name="lv_saltsound_Thrift Clump 1 67" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0067"
@@ -24047,44 +23525,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.313867, 0, -0.937833, 0, 0.988961, 0, 0.937833, 0, -0.313867, 14.783, 0.0285, -237.901)
 
 [node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 71" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
-[node name="lv_saltsound_Thrift Clump 1 72" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0072"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0072"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.727781, 0, 0.441431, 0, 0.851192, 0, -0.441431, 0, 0.727781, 366.775, 17.1696, -220.604)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 72" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
-[node name="lv_saltsound_Thrift Clump 1 73" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0073"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0073"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.0670385, 0, 0.952041, 0, 0.954398, 0, -0.952041, 0, 0.0670385, 317.113, 0.1702, -271.014)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 73" instance=ExtResource("lv_thrift_clump_1")]
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
@@ -24525,25 +23965,6 @@ transform = Transform3D(-0.676272, 0, -0.525524, 0, 0.856457, 0, 0.525524, 0, -0
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
-[node name="lv_saltsound_Thrift Clump 1 97" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0097"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0097"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.771234, 0, 0.434942, 0, 0.885424, 0, -0.434942, 0, -0.771234, 347.647, 22.6416, -296.239)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 97" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
 [node name="lv_saltsound_Thrift Clump 1 98" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0098"
@@ -24601,25 +24022,6 @@ transform = Transform3D(0.394729, 0, 1.07179, 0, 1.14217, 0, -1.07179, 0, 0.3947
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
-[node name="lv_saltsound_Thrift Clump 1 101" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0101"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0101"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.833545, 0, 0.327621, 0, 0.895619, 0, -0.327621, 0, 0.833545, 376.616, 68.5106, -236.232)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 101" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
 [node name="lv_saltsound_Thrift Clump 1 102" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0102"
@@ -24636,25 +24038,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.886851, 0, 0.657156, 0, 1.10379, 0, -0.657156, 0, -0.886851, -39.175, 0.1519, -258.282)
 
 [node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 102" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
-[node name="lv_saltsound_Thrift Clump 1 103" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0103"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0103"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.929666, 0, -0.371585, 0, 1.00118, 0, 0.371585, 0, -0.929666, 349.024, 55.8949, -257.002)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 103" instance=ExtResource("lv_thrift_clump_1")]
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
@@ -25266,25 +24649,6 @@ transform = Transform3D(0.845434, 0, -0.250492, 0, 0.881762, 0, 0.250492, 0, 0.8
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
-[node name="lv_saltsound_Thrift Clump 1 136" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0136"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0136"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.830832, 0, -0.284222, 0, 0.878102, 0, 0.284222, 0, 0.830832, 355.281, 57.5597, -247.330)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 136" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
 [node name="lv_saltsound_Thrift Clump 1 137" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0137"
@@ -25760,25 +25124,6 @@ transform = Transform3D(0.493367, 0, 0.726637, 0, 0.878301, 0, -0.726637, 0, 0.4
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
-[node name="lv_saltsound_Thrift Clump 1 162" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0162"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0162"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.761417, 0, -0.512079, 0, 0.917595, 0, 0.512079, 0, 0.761417, 326.263, 1.1369, -296.709)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 162" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
 [node name="lv_saltsound_Thrift Clump 1 163" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0163"
@@ -25890,25 +25235,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(0.851062, 0, 0.583499, 0, 1.03188, 0, -0.583499, 0, 0.851062, -39.108, 3.879758694, -30.066)
 
 [node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 168" instance=ExtResource("lv_thrift_clump_1")]
-metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-
-[node name="lv_saltsound_Thrift Clump 1 169" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-thrift-clump-1-saltsound-0169"
-node_name = "Authored_lf_biomes_kit_thrift_clump_1_saltsound_0169"
-catalog_asset_id = "lf_biomes:kit-thrift-clump-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "thrift"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.773244, 0, -0.853089, 0, 1.15138, 0, 0.853089, 0, 0.773244, 317.428, 0.9932, -259.000)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Thrift Clump 1 169" instance=ExtResource("lv_thrift_clump_1")]
 metadata/map_asset_id = "lf_biomes:kit-thrift-clump-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-thrift-clump-1.glb"
 
@@ -28306,25 +27632,6 @@ transform = Transform3D(1.15935, 0, 0.272422, 0, 1.19093, 0, -0.272422, 0, 1.159
 metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
 
-[node name="lv_saltsound_Tussock Grass 1 112" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-tussock-grass-1-saltsound-0112"
-node_name = "Authored_lf_biomes_kit_tussock_grass_1_saltsound_0112"
-catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "tussock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.581908, 0, -0.684133, 0, 0.89814, 0, 0.684133, 0, 0.581908, 363.593, 60.3268, -244.481)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Tussock Grass 1 112" instance=ExtResource("lv_tussock_grass_1")]
-metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
-
 [node name="lv_saltsound_Tussock Grass 1 113" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-tussock-grass-1-saltsound-0113"
@@ -29082,25 +28389,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.56905, 0, 0.693954, 0, 0.897435, 0, -0.693954, 0, -0.56905, -87.155, 25.3458, -114.203)
 
 [node name="Content" parent="AuthoredAssets/lv_saltsound_Tussock Grass 1 152" instance=ExtResource("lv_tussock_grass_1")]
-metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
-
-[node name="lv_saltsound_Tussock Grass 1 153" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-tussock-grass-1-saltsound-0153"
-node_name = "Authored_lf_biomes_kit_tussock_grass_1_saltsound_0153"
-catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "saltsound",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "tussock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.10653, 0, 0.344136, 0, 1.15881, 0, -0.344136, 0, 1.10653, 364.045, 58.4634, -255.552)
-
-[node name="Content" parent="AuthoredAssets/lv_saltsound_Tussock Grass 1 153" instance=ExtResource("lv_tussock_grass_1")]
 metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
 

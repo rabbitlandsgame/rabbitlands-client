@@ -26,9 +26,9 @@ source_material = SubResource("material")
 [sub_resource type="Resource" id="sculpt"]
 resource_local_to_scene = true
 script = ExtResource("sculpt")
-base_sha256 = "542c3b1cad36b0b6c452e4a2c598a0da8eb0de6ba58f79db67e53cb42091e8af"
-origin = Vector2(-810.0, -618.0)
-grid_size = Vector2i(811, 640)
+base_sha256 = "9faccc382ccb5449e47208913b916a3d6edffbd6b2cd9575b42dd293f9eb42fe"
+origin = Vector2(-60.0, -618.0)
+grid_size = Vector2i(401, 640)
 cell_metres = 2.0
 indices = PackedInt32Array()
 deltas = PackedFloat32Array()
@@ -40,20 +40,20 @@ continent_translation = Vector3(1351.0, 0, 5621.0)
 server_origin = Vector2i(754, 604)
 server_cells = Vector2i(1512, 1512)
 collision_origin_metres = Vector2(-754.0, 604.0)
-ownership_polygon_sha256 = "145a6b47517d41c32944eb466bc497395534c112ebc1a74b278e2fcf4897117b"
+ownership_polygon_sha256 = "0b556d90a66c180ea89dd69b2574bcce6251a38f88fa87dc2a646f5bdf62944c"
 export_directory = "res://../eloria-assets/maps/continent-v2/whitepeak/authoring"
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("terrain")
-origin = Vector2(-810.0, -618.0)
-grid_size = Vector2i(811, 640)
+origin = Vector2(-60.0, -618.0)
+grid_size = Vector2i(401, 640)
 cell_metres = 2.0
 base_heights_path = "res://world_authoring/regions/whitepeak/base-heights.f32le"
 base_colors_path = "res://world_authoring/regions/whitepeak/base-colors.rgba8"
 base_surface = SubResource("surface")
 sculpt_layer = SubResource("sculpt")
 preview_uv_metres_inverse = 0.17
-preview_clip_inside = PackedVector2Array(601, 6221, 601, 5021, 2101, 5021, 2101, 5561, 1751, 5541, 1551, 5491, 1351, 5411, 1151, 5431, 1101, 5601, 1051, 5801, 1051, 6221)
+preview_clip_inside = PackedVector2Array(1351, 6221, 1351, 5021, 2031, 5021, 2031, 6221)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 
@@ -80,13 +80,13 @@ gizmo_extents = 0.8
 script = ExtResource("marker")
 record_id = "whitepeak--arrival"
 kind = "spawn"
-label = "Whitepeak west strand (map start)"
+label = "Whitepeak ring-lake terrace (map start)"
 default_spawn = true
 facing = Vector3(0, 0, 1)
 extras = {
-"note": "the flattest dry ground on the steep Whitehorn ridge map, a west-coast terrace; default start until the isle gets its boat landing (A3, 2026-10-19)"
+"note": "level paving beside the ring lake on the Whitehorn side of the north isle; default start until the isle gets its boat landing (A3, 2026-10-19)"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -543.5, 4.694, -23.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130.5, 112.761, 50.5)
 
 [node name="Portals" type="Node3D" parent="Gameplay"]
 

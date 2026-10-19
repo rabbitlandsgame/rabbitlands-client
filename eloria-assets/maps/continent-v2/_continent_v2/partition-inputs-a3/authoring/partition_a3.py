@@ -32,27 +32,26 @@ PREVIEW = Path(__file__).resolve().parents[1] / 'partition-a3-preview.png'
 # island's north coast, then east across the filled stub and north at x=3061 (Saltsound's translation x 2059
 # allows at most 1023 m east); the shelf's east tip and the sea beyond are Ringholm's.
 C5 = [(2259, 6717), (2259, 6611), (2301, 6599), (2331, 6581), (2391, 6567), (2451, 6577), (2511, 6595), (2571, 6605),
-      (2631, 6629), (2691, 6661), (2751, 6703), (2861, 6651), (3011, 6621), (3061, 6621), (3061, 6221)]
+      (2631, 6629), (2691, 6661), (2751, 6703), (2861, 6651), (3011, 6621), (3061, 6621), (3061, 6561)]
 # Hearthcroft | Ravenhead: ~10-15 m off Ravenhead headland's north coast (B14 fill = Hearthcroft's crofts)
 C3 = [(1959, 6921), (1999, 6931), (2041, 6955), (2101, 6993), (2161, 7037), (2221, 7075), (2259, 7093)]
 # Hearthcroft | Ringholm: x=2259 down to the headland (the B14 bridge's landing notch returns to Ringholm)
 C2 = [(2259, 6717), (2259, 7093)]
 # Ringholm | Ravenhead: past the headland's north-east tip, then through the sea gap south of the sound fill
 C4 = [(2259, 7093), (2283, 7139), (2301, 7173), (2331, 7181), (2401, 7189), (2471, 7211), (2541, 7229), (2621, 7191),
-      (2729, 7171), (3161, 7171)]
+      (2729, 7171), (2761, 7171)]
 # Greenlight | Ravenhead: west of the B22 bar's north-east coast (the bars = Greenlight)
 C7 = [(1849, 7371), (1961, 7631), (2001, 7671), (2311, 7671)]
 # Ravenhead | jadestair / coilmere / suncoil: z=7671 kept, the corner over the new ground's north coast ceded
-C8 = [(2311, 7671), (2719, 7671), (2729, 7671), (3001, 7671), (3061, 7591), (3161, 7591), (3161, 7171)]
+C8 = [(2311, 7671), (2719, 7671), (2729, 7671), (2761, 7671), (2761, 7591)]
 # jadestair | coilmere: the A2 spindle/tollholm chain, then west of the south arm's tip to the sea
-C6 = [(2719, 7671), (2719, 7921), (2699, 8051), (2729, 8181), (2723, 8343), (2591, 8343), (2591, 8751)]
+C6 = [(2719, 7671), (2719, 7921), (2699, 8051), (2729, 8181), (2723, 8343), (2723, 8461)]
 # coilmere | suncoil: 55 m west of the temple ring path, then ~50 m south of it (the south arm round the lagoon's
 # inner bay is Coilmere's coves), then down to the sea
-C9 = [(3161, 7591), (3201, 7591), (3201, 8343), (3301, 8381), (3421, 8421), (3561, 8451), (3701, 8441), (3801, 8401),
-      (3801, 8751)]
+C9 = [(3201, 7591), (3201, 8651)]
 # hornmere | whitepeak: Whitepeak takes the Whitehorn ridge and the west lobe; the Mirrorhold citadel terrace
 # (1250, 5465) and both mirror lakes stay in Hornmere; both reach z 6221 so both preload from Stagheath
-C11 = [(1051, 6221), (1051, 5801), (1101, 5601), (1151, 5431), (1351, 5411), (1551, 5491), (1751, 5541), (2101, 5561)]
+C11 = [(1351, 5021), (1351, 6221)]
 
 
 def rev(chain):
@@ -77,18 +76,19 @@ def sections_a3(a2):
     for keep in ('landfall', 'warrenmead', 'stagheath', 'twinbrook', 'reedfall', 'brambleshaw', 'pinebrow', 'boarsend'):
         new[keep] = R[keep]
     new['saltsound'] = [ring([(1919, 6781), (1939, 6849), (2259, 6717)], C5[1:],
-                             [(1459, 6221), (1459, 6761), (1459, 6811), (1479, 6821), (1639, 6821)])]
+                             [(3061, 6371), (2201, 6371), (2201, 6221), (1459, 6221), (1459, 6761), (1459, 6811),
+                              (1479, 6821), (1639, 6821)])]
     new['hearthcroft'] = [ring([(1939, 6849), (1919, 6781), (1639, 6821), (1479, 6821), (1489, 6911), (1519, 6961),
                                 (1599, 7041), (1609, 7151), (1689, 7151), (1729, 7201), (1949, 7221)], C3, rev(C2))]
-    new['ringholm'] = [ring(C2, C4, [(3301, 7171), (3301, 6221)], rev(C5))]
-    new['ravenhead'] = [ring(rev(C8), rev(C7), [(1949, 7221)], C3, C4)]
+    new['ringholm'] = [ring(C2, C4, [(3231, 7171), (3231, 6561)], rev(C5))]
+    new['ravenhead'] = [ring([(2761, 7171)], rev(C8), rev(C7), [(1949, 7221)], C3, C4)]
     new['greenlight'] = [ring([(1675, 7941), (1685, 8259), (2311, 8259)], rev(C7), [(1699, 7581), (1575, 7601),
                                                                                     (1575, 7655), (1629, 7701)])]
-    new['jadestair'] = [ring([(2311, 7671)], C6, [(2311, 8751), (2311, 8259)])]
-    new['coilmere'] = [ring(C8[2:6], C9, rev(C6))]
-    new['suncoil'] = [ring([(3161, 7171), (4101, 7171), (4101, 8751)], rev(C9))]
-    new['hornmere'] = [ring(C11, [(2101, 6221)])]
-    new['whitepeak'] = [ring([(601, 6221), (601, 5021), (2101, 5021)], rev(C11))]
+    new['jadestair'] = [ring([(2311, 7671)], C6, [(2311, 8461), (2311, 8259)])]
+    new['coilmere'] = [ring(C8[1:], [(3201, 7591)], C9, [(2723, 8651)], rev(C6))]
+    new['suncoil'] = [ring([(3201, 7471), (4101, 7471), (4101, 8701), (3201, 8701)], rev(C9))]
+    new['hornmere'] = [ring([(621, 6221), (621, 5021)], C11)]
+    new['whitepeak'] = [ring(rev(C11), [(2031, 5021), (2031, 6221)])]
     return new
 
 

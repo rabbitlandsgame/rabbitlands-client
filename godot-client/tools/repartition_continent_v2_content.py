@@ -149,6 +149,9 @@ def survey(territories, partition, amend):
                 retire[f"{t.id}:{path}"] = f"seabed rock buried {g2 - y:.1f} m by new ground"
             elif new_land and y > g2 + 0.5:
                 reground[f"{t.id}:{path}"] = round(g2, 3)
+            elif g2 is not None and g1 is not None and g2 < g1 - 1.0 and y > g2 + 1.0:
+                # ground v2 sank this ground (the north-east stub): its props would hang over the sea
+                retire[f"{t.id}:{path}"] = f"prop on ground sunk {g1 - g2:.1f} m by ground v2"
     return {"retire": dict(sorted(retire.items())), "reground": dict(sorted(reground.items()))}
 
 
@@ -356,10 +359,15 @@ def main(argv=None) -> int:
     amend = read(amend_path)
     territories = T.load_territories()
     if args.plan:
-        amend["sceneContent"] = survey(territories, partition, amend)
+        proposal = survey(territories, partition, amend)
+        recorded = amend.get("sceneContent") or {}
+        # applied decisions leave the scenes, so a later survey finds only new ones: add those to the record,
+        # never drop or change a recorded decision
+        added = {k: sorted(set(proposal[k]) - set(recorded.get(k, {}))) for k in proposal}
+        amend["sceneContent"] = {k: dict(sorted({**proposal[k], **recorded.get(k, {})}.items())) for k in proposal}
+        print(json.dumps({"added": {k: len(v) for k, v in added.items()}}, indent=1))
         amend_path.write_text(json.dumps(amend, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
-        print(json.dumps({"retire": len(amend["sceneContent"]["retire"]),
-                          "reground": len(amend["sceneContent"]["reground"])}, indent=1))
+        print(json.dumps({k: len(v) for k, v in amend["sceneContent"].items()}, indent=1))
         return 0
     texts, report = build(territories, spec, amend)
     changed = [t for t in texts.values() if t.text() != t.original]
