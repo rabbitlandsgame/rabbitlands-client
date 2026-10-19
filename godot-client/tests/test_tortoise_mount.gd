@@ -12,6 +12,8 @@ var normal_error := 0.0
 var tangent_error := 0.0
 var rotation_step := 0.0
 var max_cape_link_error := 0.0
+var min_idle_cape_drop := INF
+var min_idle_drop_increase := INF
 
 func _init() -> void: call_deferred("run")
 func check(ok: bool, message: String) -> void:
@@ -100,14 +102,14 @@ func run() -> void:
 			# own state and must retain its material length during pace changes.
 			for frame: int in 120:
 				visual._process(1.0 / 60.0)
-				for chain: int in 3:
-					var points: PackedVector3Array = actor._cape_cloth.get("_points")[chain]
-					var lengths: PackedFloat32Array = actor._cape_cloth.get("_lengths")[chain]
-					for link: int in range(1, points.size()):
-						max_cape_link_error = maxf(max_cape_link_error,
-							absf(points[link].distance_to(points[link - 1]) - lengths[link - 1]))
+				_measure_cape(actor)
+			var moving_drop := _cape_drop(actor)
 			actor.play_action(&"idle")
-			visual._process(0.0)
+			for frame: int in 120:
+				visual._process(1.0 / 60.0)
+				_measure_cape(actor)
+			min_idle_cape_drop = minf(min_idle_cape_drop, _cape_drop(actor))
+			min_idle_drop_increase = minf(min_idle_drop_increase, _cape_drop(actor) - moving_drop)
 			check(visual.action == "idle", "stopping restores a grounded idle")
 		actor.set_mount_state({},models)
 		actor.free()
@@ -119,8 +121,9 @@ func run() -> void:
 	check(normal_error < .0005 and tangent_error < .0005,"normal/tangent repacking retains importer precision")
 	check(rotation_step < .2,"full-cycle articulation has no pole flips or sudden joint jumps")
 	check(max_cape_link_error < .02,"draped cape retains its authored length through gait changes")
+	check(min_idle_drop_increase > .025,"stopping lets the cape fall lower than its travelling drape")
 	var report := {"checks":checks,"failures":failures,"max_rider_contact_error":max_contact,
-		"max_leg_reach_error":max_reach,"minimum_sole_height":minimum_sole,"max_supported_sole_height":max_support_height,"max_supported_sole_speed_error":max_slide,"rebound_paw_vertices":paw_vertex_count,"normal_repack_error":normal_error,"tangent_repack_error":tangent_error,"max_rotation_step_radians":rotation_step,"max_cape_link_error":max_cape_link_error}
+		"max_leg_reach_error":max_reach,"minimum_sole_height":minimum_sole,"max_supported_sole_height":max_support_height,"max_supported_sole_speed_error":max_slide,"rebound_paw_vertices":paw_vertex_count,"normal_repack_error":normal_error,"tangent_repack_error":tangent_error,"max_rotation_step_radians":rotation_step,"max_cape_link_error":max_cape_link_error,"min_idle_cape_drop":min_idle_cape_drop,"min_idle_drop_increase":min_idle_drop_increase}
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--report="): FileAccess.open(argument.trim_prefix("--report="),FileAccess.WRITE).store_string(JSON.stringify(report,"  "))
 	print("TORTOISE_MOUNT_CHECKS ",JSON.stringify(report))
@@ -128,6 +131,18 @@ func run() -> void:
 	NativeAnimationImporter.clear()
 	GlbSceneCache.clear()
 	quit(1 if failures else 0)
+
+func _measure_cape(actor: ReplicatedActor3D) -> void:
+	for chain: int in 3:
+		var points: PackedVector3Array = actor._cape_cloth.get("_points")[chain]
+		var lengths: PackedFloat32Array = actor._cape_cloth.get("_lengths")[chain]
+		for link: int in range(1, points.size()):
+			max_cape_link_error = maxf(max_cape_link_error,
+				absf(points[link].distance_to(points[link - 1]) - lengths[link - 1]))
+
+func _cape_drop(actor: ReplicatedActor3D) -> float:
+	var points: PackedVector3Array = actor._cape_cloth.get("_points")[1]
+	return points[0].y - points[-1].y
 
 func _bind_soles(actor: ReplicatedActor3D) -> void:
 	var sk := actor.get_skeleton()

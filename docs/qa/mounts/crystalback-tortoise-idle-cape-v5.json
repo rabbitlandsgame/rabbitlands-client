@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "scope": "Crystalback Tortoise resting cape revision 5",
+  "previousClientRevision": "2fdea4ff",
+  "request": "Cape should follow the saddle and curve down the tortoise back more naturally while stopped; keep the moving elevation.",
+  "changes": {
+    "idleBackProfileNative": [
+      [
+        0.1,
+        1.83
+      ],
+      [
+        -0.25,
+        1.83
+      ],
+      [
+        -0.4,
+        1.77
+      ],
+      [
+        -0.55,
+        1.53
+      ],
+      [
+        -0.7,
+        1.3
+      ],
+      [
+        -0.85,
+        1.18
+      ],
+      [
+        -1.0,
+        0.84
+      ],
+      [
+        -1.2,
+        0.7
+      ]
+    ],
+    "idleHangFraction": 0.94,
+    "idleClearanceMetres": 0.02,
+    "transitionSeconds": 0.4,
+    "method": "A sampled native rear-shell height profile replaces the broad moving collision roof while idle. The cape settles lower over the saddle and rear crystals; the existing moving contact, lift and ripple are restored during movement.",
+    "preview": "Top-left panel now shows a stationary rider from the side with a cape."
+  },
+  "preserved": "Reviewed saddle/rider pose and controls, source GLBs and native clips, existing walk/scuttle/rush contact, lift and ripple settings.",
+  "validation": {
+    "godot": "4.7.2-stable",
+    "riderAndCape": {
+      "checks": 1354,
+      "failures": 0,
+      "max_cape_link_error": 0.00128641724586487,
+      "max_leg_reach_error": 0.0,
+      "max_rider_contact_error": 5.10133588704775e-07,
+      "max_rotation_step_radians": 0.0731069445610046,
+      "max_supported_sole_height": 0.00488438224419951,
+      "max_supported_sole_speed_error": 0.000305038935039192,
+      "min_idle_cape_drop": 1.05202424526215,
+      "min_idle_drop_increase": 0.261900544166565,
+      "minimum_sole_height": -3.42401335728937e-07,
+      "normal_repack_error": 0.000128849787870422,
+      "rebound_paw_vertices": 964,
+      "tangent_repack_error": 5.83827495574951e-05
+    },
+    "movingBehaviorComparedToPreviousSource": {
+      "baseline_commit": "2fdea4ff",
+      "checks": 48600,
+      "failures": 0,
+      "max_moving_difference_metres": 0.0
+    },
+    "comparisonScope": "Previous committed cape adapter vs current adapter: settled walk, scuttle and rush projection, flow and lift constraints sampled across the shell and cloth fractions. The idle-to-moving transition intentionally blends for 0.4s.",
+    "horseRegression": {
+      "checks": 11741,
+      "failures": 0,
+      "maxRiderContactErrorMetres": 4.215241279e-05,
+      "maxCapeMaterialLinkErrorMetres": 0.00571274757385
+    },
+    "restSimulation": "Both rider bodies stop after each of three gaits and advance 120 frames. Cape length and increased resting hem drop measured.",
+    "renderedFrames": 135,
+    "renderedFps": 30,
+    "renderedSeconds": 4.5,
+    "renderedScriptOrResourceErrors": 0,
+    "visualReview": "Resting side view, moving side/quarter/game-camera views and bow/spell samples inspected.",
+    "exportFidelity": "Runtime cloth/contact revision only; no GLB export or replacement.",
+    "userApproval": "Moving elevation accepted by user. Resting cape revision pending review."
+  },
+  "sourceSha256": {
+    "godot-client/data/mounts/crystalback_tortoise.json": "c574bb274482a45ef9d6ecf5c65de245a028737271a1697eb1abd03359676b7d",
+    "godot-client/src/mounts/mount_cape_surface.gd": "3a0de0f83f66c71d86b4f9384fb6bf68e4af635efa62cf7d9062942ebe0d6152",
+    "godot-client/src/dev/tortoise_mount_showcase.gd": "a1f115f7929df9c2931f8871e2a6cf0e41c12c968586774032514f56ef33186e",
+    "godot-client/tests/test_tortoise_mount.gd": "62d6297a39946e71ac6058977e957bc0511675c0ead4faa4e72d8f8472c71349"
+  },
+  "unchangedInputSha256": {
+    "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb": "eaa9da0596d861961bb4ad2eeab991b4f3fe6c42553e8ba7678f0b29a7f44348"
+  },
+  "evidenceSha256": {
+    "contacts-v5.json": "3a8ef1e18ba259361cf66ca2a4e194150349854039937f0aa1dc8cd3c1b33228",
+    "moving-cape-v5.json": "0d80b90be1aebf2a2f81ca2cb290b8c53afb11d4f3ffde817d62ed009ce17e08",
+    "crystalback-tortoise-v5.mp4": "d3b8e8934889d102e02d535b12fb0d9f51aba8f596743381fff1af049b92b902",
+    "riding-preview-v5.png": "184017b71aaadf492429cdf6526dc3a0b0afb7cc3cc699e68fb83d833c2aec2c"
+  }
+}

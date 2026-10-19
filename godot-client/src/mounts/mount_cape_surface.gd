@@ -8,6 +8,7 @@ var side := Vector3.RIGHT
 var clearance := .04
 var gallop_blend := 0.0
 var moving_blend := 0.0
+var idle_blend := 1.0
 var flow_time := 0.0
 var motion: Dictionary = {}
 
@@ -24,14 +25,16 @@ func configure(skeleton: Skeleton3D, contact: Array = [], settings: Dictionary =
 		for entry: Dictionary in contact:
 			var center: Array = entry.center
 			var radii: Array = entry.radii
-			specs.append([entry.bone, Vector3(center[0], center[1], center[2]), Vector3(radii[0], radii[1], radii[2])])
+			specs.append([entry.bone, Vector3(center[0], center[1], center[2]),
+				Vector3(radii[0], radii[1], radii[2]), entry.get("idleBackProfile", [])])
 	for spec: Array in specs:
 		var bone := rig.find_bone(str(spec[0]))
 		if bone >= 0:
 			envelopes.append({"bone": bone, "rump": str(spec[0]) == "hips",
 				"rest_inverse": rig.get_bone_global_rest(bone).affine_inverse(),
 				"center": spec[1], "radii": spec[2], "frame": Transform3D.IDENTITY,
-				"inverse": Transform3D.IDENTITY, "rest_height": (spec[2] as Vector3).y})
+				"inverse": Transform3D.IDENTITY, "rest_height": (spec[2] as Vector3).y,
+				"idle_back_profile": spec[3] if spec.size() > 3 else []})
 	update()
 
 func update(delta := 0.0, gait := "idle") -> void:
@@ -39,8 +42,10 @@ func update(delta := 0.0, gait := "idle") -> void:
 	# pace changes. The higher, trailing silhouette is reserved for gallop.
 	gallop_blend = move_toward(gallop_blend, 1.0 if gait == "gallop" else 0.0, maxf(delta, 0.0) / .4)
 	moving_blend = move_toward(moving_blend, 1.0 if gait in ["trot", "gallop"] else 0.0, maxf(delta, 0.0) / .4)
+	idle_blend = move_toward(idle_blend, 1.0 if gait == "idle" else 0.0, maxf(delta, 0.0) / .4)
 	clearance = lerpf(float(motion.get("clearanceMetres", .04)),
 		float(motion.get("gallopClearanceMetres", .08)), gallop_blend)
+	clearance = lerpf(clearance, float(motion.get("idleClearanceMetres", clearance)), idle_blend)
 	flow_time += maxf(delta, 0.0)
 	for envelope: Dictionary in envelopes:
 		if bool(envelope.rump):
@@ -77,11 +82,26 @@ func project(point: Vector3) -> Vector3:
 		if radial >= 1.0:
 			continue
 		var top := center.y + radii.y * sqrt(1.0 - radial)
+		var profile: Array = envelope.get("idle_back_profile", [])
+		if not profile.is_empty() and idle_blend > 0.0:
+			# The resting cloth follows the saddle and the actual rear crystal
+			# silhouette instead of the broader moving collision envelope.
+			top = lerpf(top, _back_height(profile, native.z), idle_blend)
 		var margin := clearance / maxf(.01, frame.basis.y.length())
 		if native.y < top + margin and native.y > center.y - radii.y:
 			native.y = top + margin
 			point = frame * native
 	return point
+
+func _back_height(profile: Array, z: float) -> float:
+	# Pairs are [native Z, top Y], ordered from the saddle toward the tail.
+	for index: int in range(1, profile.size()):
+		var ahead: Array = profile[index - 1]
+		var behind: Array = profile[index]
+		if z >= float(behind[0]):
+			return lerpf(float(ahead[1]), float(behind[1]),
+				clampf((float(ahead[0]) - z) / (float(ahead[0]) - float(behind[0])), 0.0, 1.0))
+	return float(profile[-1][1])
 
 func flow_acceleration(chain: int, fraction: float) -> Vector3:
 	# A travelling wave reaches the hem after the upper sheet. Phase the
@@ -115,5 +135,6 @@ func limit_lift(point: Vector3, root: Vector3, material_length: float, fraction:
 	point += side * (wave - sideways)
 	var hang := lerpf(float(motion.get("hangFraction", .68)),
 		float(motion.get("gallopHangFraction", .45)), gallop_blend)
+	hang = lerpf(hang, float(motion.get("idleHangFraction", hang)), idle_blend)
 	point.y = minf(point.y, root.y - material_length * hang)
 	return project(point)
