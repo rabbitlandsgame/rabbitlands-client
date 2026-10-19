@@ -28,6 +28,22 @@ func _init() -> void:
 	tortoise.states[0].selected_mount_id = "crystalback_tortoise"
 	tortoise.states[0].owned_mount_ids.append("crystalback_tortoise")
 	check(decode(tortoise).type == "mount_states")
+	var rabbit: Dictionary = tortoise.duplicate(true)
+	rabbit.states[0].mount_id = "rabbit"
+	rabbit.states[0].selected_mount_id = "rabbit"
+	rabbit.states[0].owned_mount_ids.append("rabbit")
+	for gait: String in ["cruise", "burst"]:
+		rabbit.states[0].gait = gait
+		rabbit.states[0].step_us = 50000 if gait == "burst" else 100000
+		check(decode(rabbit).type == "mount_states")
+	var raptor: Dictionary = rabbit.duplicate(true)
+	raptor.states[0].mount_id = "jadefeather_raptor"
+	raptor.states[0].selected_mount_id = "jadefeather_raptor"
+	raptor.states[0].owned_mount_ids.append("jadefeather_raptor")
+	for gait: String in ["cruise", "burst"]:
+		raptor.states[0].gait = gait
+		raptor.states[0].step_us = 50000 if gait == "burst" else 100000
+		check(decode(raptor).type == "mount_states")
 	for step: int in [2000000,666667,444444]:
 		tortoise.states[0].step_us = step
 		check(decode(tortoise).type == "mount_states")

@@ -36,6 +36,10 @@ func run() -> void:
 		mount_id = "golden_plains_horse"
 	if "--tortoise" in OS.get_cmdline_user_args():
 		mount_id = "crystalback_tortoise"
+	if "--rabbit" in OS.get_cmdline_user_args():
+		mount_id = "rabbit"
+	if "--raptor" in OS.get_cmdline_user_args():
+		mount_id = "jadefeather_raptor"
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
 	for body: String in ["luminous_male", "luminous_female"]:
 		var actor := make_rider(body, models)
@@ -46,6 +50,7 @@ func run() -> void:
 		for gait: String in ["walk", "cruise", "burst"]:
 			for rider: ReplicatedActor3D in [actor, baseline]:
 				rider.set_mount_state({"mode": "mounted", "mount_id": mount_id, "gait": gait, "step_us": 200000}, models)
+				rider._presentation_speed = 20.0 if gait == "burst" else 10.0
 				rider._mount_visual.set_process(false)
 				rider.play_action(&"run")
 				rider._mount_visual._process(0.0)

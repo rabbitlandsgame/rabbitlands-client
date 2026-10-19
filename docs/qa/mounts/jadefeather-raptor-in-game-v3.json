@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "mount": "jadefeather_raptor",
+  "status": "implemented_for_local_game_testing",
+  "approval": "User approved the raptor draft and idle cape drape, then requested normal game and selection-window integration.",
+  "source": {
+    "path": "godot-client/assets/actors/native/creatures/jadefeather_raptor.glb",
+    "sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e",
+    "modified": false,
+    "nativeClipsPreserved": true
+  },
+  "profile": {
+    "path": "godot-client/data/mounts/jadefeather_raptor.json",
+    "sha256": "efe7fea81e006f4bd737466cda6e4c060beca931ddaba5bfd49586826fc9a800",
+    "approvedSettingsUnchanged": true,
+    "previewOnlyOverridesRemoved": true
+  },
+  "gameplay": {
+    "catalogueSize": 5,
+    "capability": "raptor_mount_v1",
+    "normalRunMultiplier": 2,
+    "fastRunMultiplier": 4,
+    "defaultNormalMetresPerSecond": 10,
+    "defaultFastMetresPerSecond": 20,
+    "toggleKey": "R",
+    "fastKey": "Space",
+    "normalClip": "Walk",
+    "fastClip": "Jog",
+    "maximumNormalCyclesPerSecond": 2,
+    "maximumFastCyclesPerSecond": 4,
+    "allCharacterGrants": "existing mounts_grant_all policy",
+    "terrain": "normal Landfall settings with current authored terrain"
+  },
+  "checks": {
+    "serverMountTestsPassed": 145,
+    "clientProtocolChecks": 27,
+    "clientSelectionChecks": 22,
+    "clientBannerChecks": 20,
+    "clientMovementChecks": 1245,
+    "existingPonyPoseChecks": 1130,
+    "raptorRiderCapeAndSwitching": {
+      "checks": 4821,
+      "drape_measurements": [
+        {
+          "body": "luminous_male",
+          "cape_drop_metres": 0.933431506156921,
+          "gait": "idle"
+        },
+        {
+          "body": "luminous_male",
+          "cape_drop_metres": 0.550402402877808,
+          "gait": "cruise"
+        },
+        {
+          "body": "luminous_male",
+          "cape_drop_metres": 0.539443254470825,
+          "gait": "burst"
+        },
+        {
+          "body": "luminous_male",
+          "cape_drop_metres": 0.933523058891296,
+          "gait": "idle"
+        },
+        {
+          "body": "luminous_female",
+          "cape_drop_metres": 0.933431506156921,
+          "gait": "idle"
+        },
+        {
+          "body": "luminous_female",
+          "cape_drop_metres": 0.550402402877808,
+          "gait": "cruise"
+        },
+        {
+          "body": "luminous_female",
+          "cape_drop_metres": 0.539443254470825,
+          "gait": "burst"
+        },
+        {
+          "body": "luminous_female",
+          "cape_drop_metres": 0.933523058891296,
+          "gait": "idle"
+        }
+      ],
+      "failures": 0,
+      "max_all_paw_ground_clearance_metres": 0.0276484806090593,
+      "max_cape_link_error_metres": 8.19563865661621e-06,
+      "max_moving_cape_drop_metres": 0.550402402877808,
+      "max_rider_contact_error_metres": 0.00019284053996671,
+      "min_idle_cape_drop_metres": 0.933431506156921,
+      "min_paw_sole_height_metres": -0.00144846760667861
+    },
+    "mountedBowAndSpellChecks": 3070,
+    "maxMountedActionLowerBodyError": 0.0,
+    "nativeRenderedRaptor": {
+      "cape_peak": {
+        "action": "idle",
+        "actor": 900,
+        "chain": 1,
+        "frame": 0,
+        "link": 4
+      },
+      "fps": 30,
+      "frames": 18,
+      "max_cape_link_error_metres": 3.79085540771484e-05,
+      "max_contact_error_metres": 0.000162046577315778
+    },
+    "realGameSmoke": {
+      "failures": 0,
+      "selectedFromActualMountWindow": true,
+      "normalAndFastMovement": true,
+      "spaceFastToggle": true,
+      "rDismountAndRecall": true,
+      "authoredLandfallTerrain": true,
+      "disposableDatabase": true
+    },
+    "threeSocketProbe": "passed login, summon, capable observer, legacy observer, fast mode, forced dismount and state restatement",
+    "selectionLayout": "all five cards at 1600x900; scrolling and saved raptor visibility at 800x720"
+  },
+  "evidence": {
+    "mountSelection": {
+      "sha256": "66f03620cd3a1bb95e2736ebd63803842a630d7f290da2cc3b1f3cd02c7ff23e",
+      "storage": "ignored local QA evidence"
+    },
+    "raptorViews": {
+      "sha256": "8618ad8eeb05794b206257663230a1f8e67ed560ce339efe602a541bf2de37bd",
+      "storage": "ignored local QA evidence"
+    },
+    "realGame": {
+      "sha256": "d4a45a6bf86601be10a25c3a2ba90127d27b0112b4515d3861fdcd418652082d",
+      "storage": "ignored local QA evidence"
+    }
+  },
+  "limitations": [
+    "Local client/server integration; not merged, pushed or deployed to the remote test server.",
+    "Existing import UID fallbacks and Godot shutdown cleanup warnings occur in local engine checks.",
+    "Source model, skeleton, skin and clips were not exported or rewritten in this integration."
+  ]
+}

@@ -52,7 +52,7 @@ func _ready() -> void:
 	choose.text = "Mounts"
 	choose.tooltip_text = "Choose between your mounts."
 	choose.pressed.connect(func() -> void: choose_mount_requested.emit())
-	gallop.tooltip_text = "Toggle gallop while running (hold Shift for keyboard running). Eight seconds of endurance."
+	gallop.tooltip_text = "Toggle fast mode on any mount. Normal travel is twice running speed; fast mode is four times. Eight seconds of endurance."
 	toggle.pressed.connect(func() -> void: Network.send_chat("#mount"))
 	gallop.pressed.connect(func() -> void: Network.send_chat("#gallop"))
 	AppState.state_changed.connect(_changed)
@@ -119,14 +119,14 @@ func _refresh() -> void:
 	_has_mount_state = not state.is_empty()
 	var mode: String = state.get("mode", "on_foot")
 	var selected := str(state.get("selected_mount_id", "moor_pony"))
-	var mount_label: String = {"golden_plains_horse":"Mount horse", "crystalback_tortoise":"Mount tortoise"}.get(selected, "Mount pony")
+	var mount_label: String = {"golden_plains_horse":"Mount horse", "crystalback_tortoise":"Mount tortoise", "rabbit":"Mount rabbit", "jadefeather_raptor":"Mount raptor"}.get(selected, "Mount pony")
 	toggle.text = "Dismount" if mode == "mounted" else ("Cancel" if mode == "summoning" else mount_label)
 	toggle.visible = bool(options.mount_button)
 	choose.visible = bool(options.choose_button)
 	gallop.visible = bool(options.gallop_button)
 	if options.key_hints:
 		toggle.text += Hotkeys.key_hint("toggle_mount")
-	gallop.disabled = mode != "mounted" or state.get("gait") == "walk"
+	gallop.disabled = mode != "mounted"
 	gallop.text = "Stop gallop" if state.get("gait") == "burst" else "Gallop"
 	if options.key_hints:
 		gallop.text += Hotkeys.key_hint("toggle_gallop")

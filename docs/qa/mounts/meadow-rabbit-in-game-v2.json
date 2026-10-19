@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "revision": "meadow-rabbit-in-game-v2",
+  "scope": "Rabbit integration and uniform mount speeds; local development, not deployed",
+  "source_assets": [
+    {
+      "mount": "moor_pony",
+      "path": "godot-client/assets/actors/native/creatures/moor_pony.glb",
+      "sha256": "bdd63c1e7593f763cbfaca344999cdd006513231bf3a74954532323dfbea8902",
+      "unchanged_from_development_source": true
+    },
+    {
+      "mount": "golden_plains_horse",
+      "path": "godot-client/assets/actors/native/creatures/golden_plains_horse.glb",
+      "sha256": "90d0af6f4bfd639b5edbeaecca7be7114a0ad91281a3128cc04ba88cac05b336",
+      "unchanged_from_development_source": true
+    },
+    {
+      "mount": "crystalback_tortoise",
+      "path": "godot-client/assets/actors/native/creatures/crystalback_tortoise.glb",
+      "sha256": "eaa9da0596d861961bb4ad2eeab991b4f3fe6c42553e8ba7678f0b29a7f44348",
+      "unchanged_from_development_source": true
+    },
+    {
+      "mount": "rabbit",
+      "path": "godot-client/assets/actors/native/creatures/basic_expansion/rabbit.glb",
+      "sha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
+      "unchanged_from_development_source": true
+    }
+  ],
+  "source_mesh_skin_rest_clips": "unchanged",
+  "catalogue": [
+    "moor_pony",
+    "golden_plains_horse",
+    "crystalback_tortoise",
+    "rabbit"
+  ],
+  "speed_contract": {
+    "normal_running_multiplier": 2,
+    "fast_running_multiplier": 4,
+    "normal_metres_per_second_at_standard_run": 10,
+    "fast_metres_per_second_at_standard_run": 20,
+    "independent_of_on_foot_walk_run": true,
+    "diagonals_distance_corrected": true,
+    "fast_endurance_seconds": 8,
+    "refill_seconds": 8
+  },
+  "compatibility": "rabbit_mount_v1 advertised independently of crystalback_mount_v1; unsupported clients receive only known mount IDs",
+  "rider": {
+    "checks": 3650,
+    "failures": 0,
+    "max_all_paw_ground_clearance_metres": 0.417505890130997,
+    "max_cape_link_error_metres": 0.019645482301712,
+    "max_rider_contact_error_metres": 3.88117314287229e-06,
+    "min_paw_sole_height_metres": 0.00419898796826601
+  },
+  "validation": {
+    "server_mount_tests": 136,
+    "server_failures": 0,
+    "rabbit_mounted_action_checks": 3070,
+    "rabbit_mounted_action_failures": 0,
+    "ground_speed_interpolation_checks": 996,
+    "ground_speed_interpolation_failures": 0,
+    "ordinary_movement_regressions": 37,
+    "ordinary_movement_failures": 0,
+    "tortoise_pose_and_cloth_checks": 1354,
+    "tortoise_failures": 0,
+    "other_client_results": {
+      "test_horse_mount": "HORSE_MOUNT_CHECKS 11741 failures=0 max_contact_error=0.00000687807642 max_cape_link_error=0.00682753324509",
+      "test_mounted_player": "MOUNTED_PLAYER_CHECKS 1130 failures=0",
+      "test_mounts_window": "MOUNTS_WINDOW_CHECKS 19 failures=0",
+      "test_mount_controls": "MOUNT_CONTROLS_CHECKS 19 failures=0",
+      "test_mount_hotkeys": "MOUNT_HOTKEY_CHECKS 18 failures=0",
+      "test_mount_preview_state": "MOUNT_PREVIEW_STATE_CHECKS 39 failures=0",
+      "test_mount_protocol": "MOUNT_PROTOCOL_CHECKS 25 failures=0"
+    }
+  },
+  "presentation": {
+    "normal_fast_frames_each": 135,
+    "fps": 30,
+    "views": "rabbit side, front, game camera, rear cape; all four mounts normal versus fast; four-card selection window",
+    "maximum_cycles_per_second": {
+      "moor_pony": {
+        "trot": 2.2,
+        "gallop": 3.0
+      },
+      "golden_plains_horse": {
+        "trot": 2.2,
+        "gallop": 3.0
+      },
+      "crystalback_tortoise": {
+        "trot": 2.0,
+        "gallop": 3.0
+      },
+      "rabbit": {
+        "trot": 1.8,
+        "gallop": 2.6
+      }
+    },
+    "limitation": "Cadence is capped for readable fantasy travel. Source strides are not lengthened to cover the full 10/20 m/s gameplay displacement; this is an in-place pose review, not a zero-foot-slide certification."
+  },
+  "approval": {
+    "rabbit_base_draft": "User approved and requested continued development",
+    "new_normal_and_fast_presentation": "Awaiting visual review",
+    "merge_push_deployment": "Not performed for this revision"
+  }
+}

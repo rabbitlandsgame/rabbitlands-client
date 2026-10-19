@@ -173,6 +173,8 @@ func _fit_panel() -> void:
 			maxf(6, (screen.y - 40 - panel.size.y) * .5))
 		_first_layout = false
 	(panel.get_node("WindowDrag") as WindowDrag).clamp_into_view()
+	if cards.has(candidate):
+		(cards[candidate].get_parent().get_parent() as ScrollContainer).ensure_control_visible(cards[candidate])
 
 func close() -> void:
 	panel.hide()

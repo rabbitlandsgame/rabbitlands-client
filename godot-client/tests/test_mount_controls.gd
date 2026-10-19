@@ -72,6 +72,9 @@ func run() -> void:
 	await process_frame
 	expect(controls.visible and controls.toggle.text.begins_with("Mount pony"), "on-foot mount button remains available")
 	expect(controls.gallop.disabled, "on-foot gallop remains unavailable")
+	state.actor_mounts[1].selected_mount_id = "jadefeather_raptor"
+	state.state_changed.emit(&"mount_states")
+	expect(controls.toggle.text.begins_with("Mount raptor"), "raptor has the correct on-foot banner label")
 	state.actor_mounts[1] = {"mode": "summoning", "summon_remaining_ms": 1000}
 	state.state_changed.emit(&"mount_states")
 	expect(controls.status.text == "Calling… 1.0s" and controls.toggle.text.begins_with("Cancel"), "moving call keeps countdown and cancellation available")

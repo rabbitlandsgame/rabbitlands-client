@@ -27,9 +27,10 @@ var bridle_paths: Array[PackedVector3Array] = []
 var hind_legs := HindLegPose.new()
 var locomotion: RefCounted
 
-func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony") -> Array[String]:
+func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony",
+		visual_profile: Dictionary = {}) -> Array[String]:
 	actor = player
-	profile = Profiles.read(mount_id)
+	profile = Profiles.read(mount_id) if visual_profile.is_empty() else visual_profile.duplicate(true)
 	if profile.is_empty() or not models.has(mount_id):
 		return ["Mount visual profile missing: " + mount_id]
 	pony = ReplicatedActor3D.new()
@@ -42,7 +43,8 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 		"rotation": 0, "kind": 5, "name": "", "scale": 1.0}, CoordinateAdapter.new(), config, mapping)
 	if not errors.is_empty():
 		return errors
-	pony.position = Vector3.ZERO
+	var offset: Array = profile.get("visualOffsetMetres", [0.0, 0.0, 0.0])
+	pony.position = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 	pony.server_target = Vector3.ZERO
 	pony.collision_layer = 0
 	pony.set_physics_process(false)
@@ -117,9 +119,14 @@ func _process(delta: float) -> void:
 		rate = actor._travel_speed() / maxf(.01, float(profile[speed_key[action]]))
 		var playback_multipliers: Dictionary = profile.get("playbackRateMultipliers", {})
 		rate *= float(playback_multipliers.get(action, 1.0))
-	elapsed += delta * rate
 	var clip: String = profile.clips[action]
 	var duration := float(profile.get("cycleLengths", {}).get(action, pony.animation_player.get_animation(clip).length))
+	# High travel speeds must not turn short source strides into frantic limbs.
+	# This presentation limit changes the clip clock only; the server owns pace.
+	var cadence: Dictionary = profile.get("maximumCyclesPerSecond", {})
+	if cadence.has(action):
+		rate = minf(rate, duration * float(cadence[action]))
+	elapsed += delta * rate
 	if locomotion != null:
 		locomotion.apply(action, elapsed, duration)
 	else:
@@ -140,6 +147,10 @@ func _process(delta: float) -> void:
 		seat = Transform3D(bone.basis.orthonormalized(), bone * Vector3(float(offset[0]), float(offset[1]), float(offset[2])))
 	if tack != null:
 		tack.update_pose()
+	# Gait-specific lean is optional; other mounts keep their approved pose.
+	var lean_key := "gallopPelvisLeanDegrees" if action == "gallop" else "normalPelvisLeanDegrees"
+	if profile.has(lean_key):
+		profile.pelvisLeanDegrees = float(profile[lean_key])
 	pose.fit(seat, action, elapsed, duration)
 	upper.apply()
 	if actor._cape_cloth != null and actor._cape_cloth_worn:

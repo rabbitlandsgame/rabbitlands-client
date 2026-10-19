@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "revision": "jadefeather-raptor-idle-cape-v2",
+  "base_commit": "256ba2cf",
+  "scope": "Resting cape contour; fitted back and rear saddle contact only",
+  "source_asset_sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e",
+  "model_mesh_skin_skeleton_and_all_clips": "unchanged",
+  "rider_fit_gaits_and_moving_cape_parameters": "unchanged",
+  "idle_contact": "Back and tail-base profiles measured against the actual skinned idle surface and the borrowed saddle rear rim",
+  "idle_clearance_metres": 0.012,
+  "validation": {
+    "checks": 4751,
+    "drape_measurements": [
+      {
+        "body": "luminous_male",
+        "cape_drop_metres": 0.933431506156921,
+        "gait": "idle"
+      },
+      {
+        "body": "luminous_male",
+        "cape_drop_metres": 0.550402402877808,
+        "gait": "cruise"
+      },
+      {
+        "body": "luminous_male",
+        "cape_drop_metres": 0.539443254470825,
+        "gait": "burst"
+      },
+      {
+        "body": "luminous_male",
+        "cape_drop_metres": 0.933523058891296,
+        "gait": "idle"
+      },
+      {
+        "body": "luminous_female",
+        "cape_drop_metres": 0.933431506156921,
+        "gait": "idle"
+      },
+      {
+        "body": "luminous_female",
+        "cape_drop_metres": 0.550402402877808,
+        "gait": "cruise"
+      },
+      {
+        "body": "luminous_female",
+        "cape_drop_metres": 0.539443254470825,
+        "gait": "burst"
+      },
+      {
+        "body": "luminous_female",
+        "cape_drop_metres": 0.933523058891296,
+        "gait": "idle"
+      }
+    ],
+    "failures": 0,
+    "max_all_paw_ground_clearance_metres": 0.0276484806090593,
+    "max_cape_link_error_metres": 8.19563865661621e-06,
+    "max_moving_cape_drop_metres": 0.550402402877808,
+    "max_rider_contact_error_metres": 0.00019284053996671,
+    "min_idle_cape_drop_metres": 0.933431506156921,
+    "min_paw_sole_height_metres": -0.00144846760667861
+  },
+  "rendered_validation": {
+    "pose": {
+      "cape_peak": {
+        "action": "idle",
+        "actor": 900,
+        "chain": 1,
+        "frame": 0,
+        "link": 4
+      },
+      "fps": 30,
+      "frames": 135,
+      "max_cape_link_error_metres": 3.79085540771484e-05,
+      "max_contact_error_metres": 0.000212698607356288
+    },
+    "travel": {
+      "cape_peak": {
+        "action": "idle",
+        "actor": 900,
+        "chain": 1,
+        "frame": 0,
+        "link": 4
+      },
+      "fps": 30,
+      "frames": 135,
+      "max_cape_link_error_metres": 3.79085540771484e-05,
+      "max_contact_error_metres": 0.000212698607356288
+    }
+  },
+  "review": {
+    "idle_views": [
+      "side",
+      "rear with cape"
+    ],
+    "movement_views": [
+      "normal side",
+      "normal game camera",
+      "fast side",
+      "fast game camera"
+    ],
+    "transition_test": "idle to normal to fast and back to idle, both rider bodies",
+    "visual_approval": "pending"
+  }
+}
