@@ -101,7 +101,13 @@ server names the respawn destination (`ELORIA_MAGIC_STATE` death `destination`);
 `prefetch` keeps that ground loading and resident on this map without moving
 the focus, and `src/world/arrival_prewarm.gd` loads it in a hidden,
 collision-free stream on another map, adopted by the map change. A held arrival
-that has not loaded after 30 s is primed synchronously as before. Priming imports
+that has not loaded after 30 s is primed synchronously as before. The server
+keeps the arriving character out of every fight meanwhile (capability
+`arrival_ready_v1`, server `eloria/arrival_grace.py`): creatures do not pick
+it, players cannot attack or curse it and nothing damages it, until
+`_report_arrival` sends `#arrived <map>` once the character is visible,
+grounded and the curtain no longer blocks input, until the player acts, or
+for at most 60 s (the curtain's own limit). Priming imports
 synchronously only the chunks the byte budget admits plus every chunk under
 the arrival; framed chunks beyond the budget follow on the worker. A script
 that quits the SceneTree itself (the rendered tests) therefore usually has a

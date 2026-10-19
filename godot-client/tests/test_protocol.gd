@@ -91,7 +91,10 @@ func _init() -> void:
 		"storage_window_v1": EloriaProtocol.ServerMessage.ELORIA_STORAGE_STATE,
 		# No packet of its own: the stock change-map message naming a
 		# continent-v2 map, which this client can draw (checked below).
-		"continent_v2_maps_v1": EloriaProtocol.ServerMessage.CHANGE_MAP}
+		"continent_v2_maps_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
+		# No packet of its own either: what the client does after a change of
+		# map is answer it with `#arrived` once its character stands loaded.
+		"arrival_ready_v1": EloriaProtocol.ServerMessage.CHANGE_MAP}
 	var capability_probes: Dictionary = {
 		EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE: "01" + "00000000000a00" + "01555a28374000" + "c800" + "0a" + "heavy_rain".to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.SEND_MAP_MARKER: "ea010c03e1012e2f6d6170732f666f75725f67617465732e656c6d00526565642062616e6b0060ea",

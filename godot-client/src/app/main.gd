@@ -744,6 +744,9 @@ var _arrival: Dictionary = {}
 var _deferred_map_load := false
 ## Frames the curtain stays up after the character is grounded.
 var _arrival_settle_frames := 0
+## The local character was spawned and the server has not yet been told it
+## stands on loaded ground (`_report_arrival`).
+var _arrival_unreported := false
 ## An arrival that has not loaded by then is grounded synchronously, and a
 ## curtain still up is lowered: neither may strand a player.
 const ARRIVAL_TIMEOUT_MSEC := 30000
@@ -1572,6 +1575,7 @@ func _process(delta: float) -> void:
 		audio_director.set_weather(weather_layer.look() \
 			if AppState.authenticated and outdoors else {})
 	_update_arrival()
+	_report_arrival()
 	if _spawn_backlog:
 		_spawn_backlog = false
 		_queue_world_sync()
@@ -5730,7 +5734,26 @@ func _end_arrival() -> void:
 	_arrival = {}
 	_deferred_map_load = false
 	_arrival_settle_frames = 0
+	_arrival_unreported = false
 	arrival_curtain.cancel()
+
+## The server keeps a character it has just put somewhere out of every fight
+## until the client says it is drawn on loaded ground (`arrival_ready_v1`,
+## server eloria/arrival_grace.py). Said once per spawn of the local
+## character: visible, grounded, and no loading screen in front of the player.
+## The map lets the server ignore a report about an arrival it has replaced.
+func _report_arrival() -> void:
+	if not _arrival_unreported or _arrival_pending() or arrival_curtain.blocks_input():
+		return
+	var local_id: int = AppState.local_actor_id
+	var node: Variant = actor_nodes.get(local_id)
+	if not is_instance_valid(node) or not (node as Node3D).visible \
+			or not _grounded_actors.has(local_id):
+		return
+	_arrival_unreported = false
+	if AppState.authenticated and Network._link_ready():
+		Network.send_chat("#arrived " + AppState.current_map)
+	Diagnostics.record("arrival_reported", {"map": AppState.current_map})
 
 ## While dead, the ground where a respawn will land is loaded in the background
 ## (the death state's `destination`): kept resident on this map, or prewarmed
@@ -5921,6 +5944,7 @@ func _spawn_actor(id: Variant) -> void:
 	if int(id) == AppState.local_actor_id:
 		# Built behind the curtain, shown once its ground is resident.
 		node.visible = not _arrival_pending()
+		_arrival_unreported = true
 		_sync_harvest_sparkle()
 
 ## Bind mount presentation to the current player identity and map, including

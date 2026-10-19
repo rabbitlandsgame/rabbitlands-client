@@ -60,6 +60,9 @@ func wait_for_arrival(label: String, deadline_msec := 90000) -> int:
 		if is_instance_valid(shown) and (shown as Node3D).visible and not bool(main._arrival.get("ready", true)):
 			expect(false, label + ": the character is never shown before its ground is resident")
 			break
+		if curtain.blocks_input() and is_instance_valid(shown) and not main._arrival_unreported:
+			expect(false, label + ": the server is not told of the arrival behind the curtain")
+			break
 	var monotonic := true
 	for index: int in range(1, progress_seen.size()):
 		if progress_seen[index] < progress_seen[index - 1]:
@@ -68,7 +71,16 @@ func wait_for_arrival(label: String, deadline_msec := 90000) -> int:
 		label, Time.get_ticks_msec() - began])
 	expect(monotonic, label + ": the loading bar only moves forward")
 	print("%s: longest frame while loading %d ms" % [label, longest])
+	await expect_reported(label)
 	return longest
+
+## The server keeps a loading character out of every fight until the client
+## says `#arrived` (main.gd `_report_arrival`); there is no link here, so the
+## report is read off the flag it clears.
+func expect_reported(label: String) -> void:
+	for frame: int in 5:
+		await process_frame
+	expect(not main._arrival_unreported, label + ": the arrival is reported once the character stands")
 
 func run() -> void:
 	var requested := OS.get_environment("ELORIA_ARTIFACT_DIR")
@@ -160,6 +172,7 @@ func run() -> void:
 	main.call("_sync_world")
 	expect(main.actor_nodes.has(LOCAL) and not curtain.visible,
 		"respawn: the character stands at once, with no loading screen")
+	await expect_reported("respawn")
 	state.death = {"kind": "death", "dead": false, "ready": false, "remaining": 0.0}
 	main.call("_prefetch_respawn")
 	for frame: int in 10:

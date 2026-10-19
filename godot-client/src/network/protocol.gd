@@ -317,6 +317,10 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# Repeat casting: whether it is on and running, ELORIA_MAGIC_STATE kind
 	# "autocast"; switched with magic_request {"op": "autocast"}.
 	"magic_autocast_v1",
+	# The character is held off the screen until its ground is loaded and then
+	# reported with `#arrived <map>`; the server keeps it out of every fight
+	# until then (main.gd `_report_arrival`).
+	"arrival_ready_v1",
 ]
 
 ## `#clientcaps` is an ordinary chat command; the server parses it out of
