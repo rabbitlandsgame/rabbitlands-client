@@ -16457,6 +16457,7 @@ record_id = "greenlight--tgt-causeway-foot"
 kind = "runtime_point"
 label = "Signed Ashore: causeway foot"
 extras = {
+"moved": "A3 2026-10-19: the B22 causeway is retired and its foot tile blocked; moved 1.4 m onto the nearest reached open ground",
 "chapterTarget": false,
 "insideOwnership": true,
 "note": "Signed Ashore geometry (review/tutorial_draft.md; geo.json v2, D2b): served from the v2 publish path, which writes landing.json targets and the S1-S3 quest rows' x/y from these markers through _continent_v2/frames.py",
@@ -16466,7 +16467,7 @@ extras = {
 "target": "causeway_foot",
 "uses": "step 9 \"The Lake Road\" (a route waypoint; landing.py does not read it)"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -417.5, 49.2064, -185.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -418.5, 48.75, -184.5)
 
 [node name="greenlight--tgt-causeway-mid" type="Marker3D" parent="RuntimePoints/TutorialTargets"]
 gizmo_extents = 0.8
