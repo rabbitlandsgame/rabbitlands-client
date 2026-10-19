@@ -1,9 +1,26 @@
 # Continent v2 section partition
 
-Active map IDs, exact polygons and ownership priority come from `partition-inputs/sections_spec.json`; the recorded
-check report has 33 ordinary shared borders. Ravenhead retains both disjoint ownership rings. All editor bases are
-byte crops of the hash-pinned `group-terrain` frozen terrain. Its grid is a data parent outside the active catalog.
-The original plan and catalog are pinned under `partition-inputs` with their source commit and file hashes.
+Active map IDs, exact polygons and ownership priority come from the catalog's partition: since Landfall A3
+(owner-approved 2026-10-19) that is `partition-inputs-a3/sections_spec.json`, eighteen maps with 39 shared borders,
+every section one ring. Its `input-provenance.json` names its predecessor (`partition-inputs/`, the fifteen-map
+partition of 2026-10-10, kept unchanged as history), the frozen ground it crops and the files it shares with the
+predecessor; `plan-amendments.json` retires the B13, B14, B22 and B24 decks, cuts R42 to its Jadestair strand, makes
+the knob a Jadestair jetty, and records the scene content decisions (`sceneContent`). `authoring/` keeps the scripts
+that drew the polygons.
+
+All editor bases are byte crops of the hash-pinned frozen ground, now `group-terrain-v2`, built from the untouched v1
+`group-terrain` by `godot-client/tools/build_continent_v2_ground.py` and its recipe in `ground-v2/` (the strait
+fills, the boat-only Verdant + Ssarathi isle round Tollholm and Spindle Hill, the Whitehorn + Mirrorhold isle; the
+old north-east stub sunk). Its grid is a data parent outside the active catalog. A3 also renamed `spindle_hill` to
+`jadestair` and `tollholm` to `coilmere` (`godot-client/tools/migrate_continent_v2_map_ids.py`, markers in
+`marker-renames-a3.json`) and added `suncoil`, `hornmere` and `whitepeak`.
+
+The tools that replay a partition change, in order: the ground builder; `migrate_continent_v2_map_ids.py`; the
+bootstrap with `--partition` and `--rebase-scenes` (surviving maps keep their translations; their frames only grow
+and their crop windows stay the predecessor's while those still cover them); `carry_continent_v2_grade.py` (the
+ground-colour grades follow the re-cut crops); `repartition_continent_v2_content.py` (retire, re-ground and move
+scene content and spawn rows); `generate_continent_v2_arrivals.py --rebind`; `publish_look.py` (its source palettes
+are pinned in `look-sources/`); `retarget_underground.py`; then the publication below.
 
 Run `python godot-client/tools/bootstrap_continent_v2_territory.py --check` to replay immutable crop/frame/plan checks.
 The bootstrap does not reset existing authored scenes and preserves gameplay/authority spec fields. Edit those
@@ -19,7 +36,8 @@ linearly across each border, `featherMetres` (130 m) on each side, about 260 m i
 warped by smooth noise (`borderWarpMetres` 60 m, `borderWarpScaleMetres` 80 m), so maps interfinger, and border zones
 lean toward a neutral meadow `ecotone` colour, so two strong palettes meet through grassland rather than a muddy mix.
 Each `godot-client/world_authoring/regions/<map>/colour-grade.json` records these values beside its graded copy
-`base-colors-graded.rgba8`; all fifteen maps use the same ones. Flora and ground-region bands that cross a border
+`base-colors-graded.rgba8`; all the maps graded on 2026-10-14 use the same ones (A3's re-cut crops carry them,
+`carried` in the record; the three new maps read their frozen crop colours until their own pass). Flora and ground-region bands that cross a border
 follow the same rule at roughly 150-250 m.
 
 ## Light and weather
@@ -57,8 +75,8 @@ and register/ferry object descriptors are `{map, id}`. The hub is `landfall`; ch
 in Warrenmead, step 9 in Reedfall and step 10 in Greenlight. Runtime isle membership comes from the served manifest.
 Retired map saves return home; fresh map IDs have no character position migration.
 
-Three authored default spawn markers are conserved. Twelve additional maps use separately hash-bound generated
-arrival metadata, validated by `arrivals.py` against the recorded source/frame/ownership contract. Generated
+Six maps have authored default spawn markers (the three conserved ones in Landfall, Boarsend and Coilmere, and
+A3's Suncoil, Hornmere and Whitepeak). Twelve maps use separately hash-bound generated arrival metadata, validated by `arrivals.py` against the recorded source/frame/ownership contract. Generated
 arrivals are outside gameplay marker arrays and do not increase the authored marker total. Marker rename history
 and shared kit identities retain pinned historical source names; active ownership uses the new catalog IDs.
 
@@ -66,7 +84,7 @@ The overlay sits beside certified legacy tables. A runtime change to a certified
 the owner's separate certificate-advance kit; publication does not overwrite the immutable legacy authority.
 
 Five public shared-storage chests are authored in Landfall (beside Ressa on the arrival plaza), Greenlight (the ferry quay),
-Hearthcroft (the roadside hamlet), Stagheath (the red lighthouse courtyard), and Tollholm (beside the square).
+Hearthcroft (the roadside hamlet), Stagheath (the red lighthouse courtyard), and Coilmere (beside Tollholm's square).
 Each uses per-map object ID 22 and the existing server `storage` role. The server stamps its 3x3 solid body;
 publication requires the complete two-tile approach ring to be open and connected to an arrival. Client packages
 retain the storage positions for generated cartography. Brown dots matching the Storage legend identify chests
@@ -93,7 +111,8 @@ Spindle Mineral Cavern, and Boarsend Old Barrow. Their rooms share one interior
 map with unfloored blackspace between sections. The peaceful Lantern Mine
 supplies beginner Coal and Iron Ore; the deeper areas contain intermediate
 encounters and additional minerals. See `../landfall_insides/README.md` for
-locations, resources, encounter tiers, and the rebuild workflow.
+locations, resources, encounter tiers, and the rebuild workflow. `build_underground.py` is retired; when a
+partition change moves a door's exterior map or frame, `retarget_underground.py` rewrites only the door ends.
 
 ## Publication order
 
