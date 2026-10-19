@@ -7,6 +7,9 @@ var max_rider_error := 0.0
 var max_cape_error := 0.0
 var min_sole := INF
 var max_all_paw_clearance := 0.0
+var min_idle_drop := INF
+var max_moving_drop := 0.0
+var drape_measurements: Array[Dictionary] = []
 var mesh: MeshInstance3D
 var bind_bones := PackedInt32Array()
 var arrays: Array
@@ -66,7 +69,7 @@ func run() -> void:
 				check(not matches.is_empty(), "qualified sole patch resolves in the actual engine mesh")
 				for index: int in matches: unique[index] = true
 			sole_indices[leg] = PackedInt32Array(unique.keys())
-		for gait: String in ["idle","cruise","burst"]:
+		for gait: String in ["idle","cruise","burst","idle"]:
 			Draft.pace(actor, gait)
 			actor._presentation_speed = {"idle":0.0,"cruise":10.0,"burst":20.0}[gait]
 			actor.play_action(&"idle" if gait == "idle" else &"run", true)
@@ -92,16 +95,23 @@ func run() -> void:
 					var points: PackedVector3Array = visual.reins.last_points[side]
 					check(visual.reins.to_global(points[-1]).distance_to(visual.reins.grip_world(actor.get_skeleton(),side)) < .00001,
 						"harness reins stay in the riding hands")
+			var line: PackedVector3Array = actor._cape_cloth.get("_points")[1]
+			var drop := line[0].y - line[-1].y
+			drape_measurements.append({"body":body,"gait":gait,"cape_drop_metres":drop})
+			if gait == "idle": min_idle_drop = minf(min_idle_drop,drop)
+			else: max_moving_drop = maxf(max_moving_drop,drop)
 		actor.set_mount_state({},models)
 		check(native.transform.is_equal_approx(original), "dismount restores the on-foot visual")
 		actor.free()
 	check(max_rider_error < .06, "rider seat, hands and feet reach their targets")
 	check(max_cape_error < .02, "cape keeps its authored material length")
+	check(min_idle_drop > max_moving_drop + .12, "idle hem settles lower along the back than the raised moving cape")
 	check(min_sole > -.006, "actual skinned paw soles stay above the floor at mount scale")
 	check(max_all_paw_clearance > .01, "the native gait has a visible recovery phase")
 	var report := {"checks":checks,"failures":failures,"max_rider_contact_error_metres":max_rider_error,
 		"max_cape_link_error_metres":max_cape_error,"min_paw_sole_height_metres":min_sole,
-		"max_all_paw_ground_clearance_metres":max_all_paw_clearance}
+		"max_all_paw_ground_clearance_metres":max_all_paw_clearance,
+		"min_idle_cape_drop_metres":min_idle_drop,"max_moving_cape_drop_metres":max_moving_drop,"drape_measurements":drape_measurements}
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--report="):
 			FileAccess.open(argument.trim_prefix("--report="),FileAccess.WRITE).store_string(JSON.stringify(report,"  "))

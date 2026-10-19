@@ -35,6 +35,7 @@ func run() -> void:
 	var frames := 135 if video else 18
 	var max_contact := 0.0
 	var max_cloth_link := 0.0
+	var cloth_peak := {}
 	for frame: int in frames:
 		view.advance_sequence(1.0 / 30.0)
 		for actor: ReplicatedActor3D in view.actors:
@@ -47,7 +48,10 @@ func run() -> void:
 						var points: PackedVector3Array = actor._cape_cloth.get("_points")[chain]
 						var lengths: PackedFloat32Array = actor._cape_cloth.get("_lengths")[chain]
 						for link: int in range(1,points.size()):
-							max_cloth_link = maxf(max_cloth_link,absf(points[link].distance_to(points[link-1])-lengths[link-1]))
+							var error := absf(points[link].distance_to(points[link-1])-lengths[link-1])
+							if error > max_cloth_link:
+								max_cloth_link = error
+								cloth_peak = {"frame":frame,"actor":actor.actor_id,"action":actor._mount_visual.action,"chain":chain,"link":link}
 		if audit:
 			for index: int in view.actors.size():
 				var pony: ReplicatedActor3D = view.actors[index]._mount_visual.pony
@@ -61,7 +65,7 @@ func run() -> void:
 			root.get_texture().get_image().save_png(artifacts.path_join("frames/%04d.png" % frame))
 	root.get_texture().get_image().save_png(artifacts.path_join("raptor-mount.png"))
 	print("RAPTOR_MOUNT_CAPTURE ", artifacts, " frames=", frames)
-	var report := {"frames":frames,"fps":30,"max_contact_error_metres":max_contact,"max_cape_link_error_metres":max_cloth_link}
+	var report := {"frames":frames,"fps":30,"max_contact_error_metres":max_contact,"max_cape_link_error_metres":max_cloth_link,"cape_peak":cloth_peak}
 	FileAccess.open(artifacts.path_join("render-checks.json"),FileAccess.WRITE).store_string(JSON.stringify(report,"  "))
 	var failed := max_contact >= .06 or max_cloth_link >= .02
 	view.queue_free()

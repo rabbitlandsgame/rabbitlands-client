@@ -3,7 +3,7 @@ extends Control
 const Draft := preload("res://src/dev/raptor_mount_draft.gd")
 const PANELS := [
  ["REST / SIDE", "luminous_male", "cruise", "idle", false],
- ["REST / FRONT", "luminous_female", "cruise", "idle", false],
+ ["REST / REAR + CAPE", "luminous_female", "cruise", "idle", false],
  ["NORMAL / SIDE  |  2x RUN", "luminous_male", "cruise", "run", true],
  ["NORMAL / GAME CAMERA  |  2x RUN", "luminous_female", "cruise", "run", true],
  ["FAST / SIDE  |  4x RUN", "luminous_male", "burst", "run", true],
@@ -96,8 +96,9 @@ func _ready() -> void:
 		if index in [0, 2, 4]:
 			camera.position = Vector3(6.5, 2.6, -.3)
 		elif index == 1:
-			camera.position = Vector3(0, 2.6, -6.5)
+			camera.position = Vector3(.5, 3.5, 6.5)
 		camera.look_at(Vector3(0, 1.55, .15))
+		if index == 1: camera.look_at(Vector3(.5,1.55,.15))
 		if travelling and index >= 2:
 			ground.hide()
 			var floor_mesh := MeshInstance3D.new()
@@ -117,7 +118,7 @@ func _ready() -> void:
 		var actor := ReplicatedActor3D.new()
 		stage.add_child(actor)
 		var worn := {}
-		if index in [0, 2, 3, 4, 5]:
+		if index in [0, 1, 2, 3, 4, 5]:
 			worn[2] = 1
 		var errors := actor.configure({"actor_id": 900 + index, "x": 0, "y": 0,
 			"rotation": 0, "kind": 1, "name": "", "appearance": {"hair": 0},
