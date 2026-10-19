@@ -20,6 +20,9 @@ The decisions are recorded in the partition's plan-amendments.json ("sceneConten
            (marker, road and landmark ids: retired--x becomes successor--x), harvestable object ids that collide
            with the successor's are shifted past its highest, and its spawn rows and server rows fold into the
            successor's. Renamed marker ids are reported (--apply writes them to the merge record).
+           A ground region split at the old border (the same region id, transform and settings on both sides,
+           complementary clips) is rejoined: the successor's half keeps its node and takes the union of the clips,
+           the moved half and the resources only it used go (region ids must be unique in a published map).
 Scenes are edited as text, block by block; nothing else in a scene changes. --check rebuilds every edit in memory
 and refuses unless the scenes already hold them.
 """
@@ -73,6 +76,80 @@ def merge_moves(src, dst):
             raise ValueError(f"{src.path.name}:{path} has no place in {dst.path.name}")
         moves.append(path)
     return moves
+
+
+def canonical(text, rid: str, seen=()) -> str:
+    """A resource's content with ExtResource ids replaced by their paths and SubResources expanded (ids dropped)."""
+    at = next(i for i, b in enumerate(text.blocks) if b.startswith(("[ext_resource ", "[sub_resource "))
+              and f' id="{rid}"' in b.split("\n", 1)[0])
+    block = text.blocks[at]
+    header, body = block.split("\n", 1) if "\n" in block else (block, "")
+    if header.startswith("[ext_resource "):
+        return re.search(r' path="([^"]+)"', header).group(1)
+    if rid in seen:
+        raise ValueError(f"resource cycle at {rid}")
+    kind = re.search(r' type="([^"]+)"', header).group(1)
+    return kind + "{" + REF.sub(lambda m: canonical(text, m.group(2), seen + (rid,)), body.strip()) + "}"
+
+
+def rejoin_ground_regions(text) -> list[str]:
+    """Rejoin ground regions a merge split in two (see the module notes); returns the rejoined region ids."""
+    groups = {}
+    for path, i in text.node_at.items():
+        if path.startswith("Ground/Regions/") and path.count("/") == 2:
+            rid = re.search(r'(?m)^region_id = "([^"]+)"', text.blocks[i])
+            if rid:
+                groups.setdefault(rid.group(1), []).append(path)
+    rejoined, dropped = [], []
+
+    def settings(block):
+        # every property but the clip, with resource references compared by content, not id
+        return [REF.sub(lambda m: canonical(text, m.group(2)), line) for line in block.split("\n")[1:]
+                if line and not line.startswith("clip_polygon = ")]
+
+    for rid, paths in sorted(groups.items()):
+        if len(paths) < 2:
+            continue
+        paths.sort(key=lambda path: text.node_at[path])
+        blocks = [text.blocks[text.node_at[path]] for path in paths]
+        if any(text.subtree(path) != [text.node_at[path]] for path in paths):
+            raise ValueError(f"ground region {rid}: a split half has children")
+        if any(settings(b) != settings(blocks[0]) for b in blocks[1:]):
+            raise ValueError(f"ground region {rid} appears twice with different settings")
+        clips = []
+        for b in blocks:
+            match = re.search(r'(?m)^clip_polygon = PackedVector2Array\(([^)]*)\)$', b)
+            if not match:
+                raise ValueError(f"ground region {rid} appears twice and a half is unclipped")
+            values = [float(v) for v in match.group(1).split(",")]
+            clips.append(Polygon(list(zip(values[0::2], values[1::2]))))
+        union = unary_union(clips)
+        if union.geom_type != "Polygon" or any(a.intersection(b).area > 1e-6 for k, a in enumerate(clips)
+                                                for b in clips[k + 1:]):
+            raise ValueError(f"ground region {rid}: its halves' clips are not complementary")
+        ring = list(union.exterior.coords)[:-1]
+        listed = ", ".join(f"{format(x, '.10g')}, {format(z, '.10g')}" for x, z in ring)
+        keep = text.node_at[paths[0]]
+        text.blocks[keep] = re.sub(r'(?m)^clip_polygon = PackedVector2Array\([^)]*\)$',
+                                   lambda m: f"clip_polygon = PackedVector2Array({listed})", text.blocks[keep], count=1)
+        dropped += [text.node_at[path] for path in paths[1:]]
+        rejoined.append(rid)
+    if not dropped:
+        return rejoined
+    # the dropped halves go, then every sub_resource that only they used (transitively)
+    candidates = {rid for i in dropped for _, rid in REF.findall(text.blocks[i])}
+    text.blocks = [b for i, b in enumerate(text.blocks) if i not in set(dropped)]
+    while candidates:
+        used = {rid for b in text.blocks for _, rid in REF.findall(b)}
+        orphans = {i for i, b in enumerate(text.blocks) if b.startswith("[sub_resource ")
+                   and (rid := re.search(r' id="([^"]+)"', b.split("\n", 1)[0]).group(1)) in candidates
+                   and rid not in used}
+        if not orphans:
+            break
+        candidates = {rid for i in orphans for _, rid in REF.findall(text.blocks[i])}
+        text.blocks = [b for i, b in enumerate(text.blocks) if i not in orphans]
+    text.index()
+    return rejoined
 
 
 def harvest_ids(text) -> list[int]:
@@ -397,6 +474,9 @@ def build(territories, spec, amend):
         d.index()
         report["moved"].setdefault(f"{src}->{dst}", 0)
         report["moved"][f"{src}->{dst}"] += 1
+    rejoined = {dst_id: rejoin_ground_regions(texts[dst_id]) for dst_id in sorted(set(merged.values()))
+                if dst_id in texts}
+    report["rejoinedGroundRegions"] = {k: v for k, v in rejoined.items() if v}
     report["retired"] = len(content["retire"])
     return texts, report
 
