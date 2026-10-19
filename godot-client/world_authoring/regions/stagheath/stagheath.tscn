@@ -73560,10 +73560,10 @@ support_surface = SubResource("bn_support_surface")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Start" type="Marker3D" parent="Bridges/boatnet-stagheath-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 399.5, 1, -244.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 398.98, 1.55, -240.57)
 
 [node name="End" type="Marker3D" parent="Bridges/boatnet-stagheath-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 408.3, 1, -277.34)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 408.3, 1.55, -275.34)
 
 [node name="BN Stagheath Pier Span 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -73577,7 +73577,7 @@ metadata = {
 "note": "trestle span 1 of 4 on the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.275, 0, 0.7914, 0, 1, 0, -1.0263, 0, 0.2121, 400.6, 1, -248.605)
+transform = Transform3D(0.2912, 0, 0.7914, 0, 1, 0, -1.0866, 0, 0.2121, 400.145, 1.55, -244.9163)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 1" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -73595,7 +73595,7 @@ metadata = {
 "note": "trestle span 2 of 4 on the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.275, 0, 0.7914, 0, 1, 0, -1.0263, 0, 0.2121, 402.8, 1, -256.815)
+transform = Transform3D(0.2912, 0, 0.7914, 0, 1, 0, -1.0866, 0, 0.2121, 402.475, 1.55, -253.6087)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 2" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -73605,19 +73605,19 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s0_19_jaile")
 asset_id = "boatnet-stagheath-span-3"
 node_name = "Authored_boatnet_stagheath_span_3"
-catalog_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
 collision_role = "solid"
 metadata = {
 "boatNetwork": "stagheath",
 "note": "trestle span 3 of 4 on the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.275, 0, 0.7914, 0, 1, 0, -1.0263, 0, 0.2121, 405, 1, -265.025)
+transform = Transform3D(0.2912, 0, 0.7914, 0, 1, 0, -1.0866, 0, 0.2121, 404.805, 1.55, -262.3013)
 
-[node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span_long24")]
-metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span-long24.glb"
+[node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
 
 [node name="BN Stagheath Pier Span 4" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -73631,7 +73631,7 @@ metadata = {
 "note": "trestle span 4 of 4 on the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.275, 0, 0.7914, 0, 1, 0, -1.0263, 0, 0.2121, 407.2, 1, -273.235)
+transform = Transform3D(0.2912, 0, 0.7914, 0, 1, 0, -1.0866, 0, 0.2121, 407.135, 1.55, -270.9937)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Pier Span 4" instance=ExtResource("bn_kit_sw_trestle_pier_span_long24")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span-long24"
@@ -73649,7 +73649,7 @@ metadata = {
 "note": "a light at the head of the Stagheath pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 404.995, 1, -276.9833)
+transform = Transform3D(0.2589, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2589, 404.995, 1.55, -274.9835)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Pier Lantern" instance=ExtResource("bn_kit_lantern_post_1")]
 metadata/map_asset_id = "tollholms:kit-lantern-post-1"
@@ -73667,7 +73667,7 @@ metadata = {
 "note": "the boat bound for Hornmere, moored on the pier's left side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 394.8242, 0, -269.0468)
+transform = Transform3D(0.2589, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2589, 394.8239, 0, -267.0489)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Boat To Hornmere" instance=ExtResource("bn_kit_sw_ferry_ship")]
 metadata/map_asset_id = "tollholms:kit-sw-ferry-ship"
@@ -73685,7 +73685,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Hornmere"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.2588, 0, -0.9659, 0, 1, 0, 0.9659, 0, -0.2588, 402.5747, 1, -270.0758)
+transform = Transform3D(-0.2589, 0, -0.9659, 0, 1, 0, 0.9659, 0, -0.2589, 402.5744, 1.55, -268.0773)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Hornmere" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -73703,7 +73703,7 @@ metadata = {
 "note": "the boat bound for Lakehead Landing, moored on the pier's right side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 413.4972, 0, -270.7724)
+transform = Transform3D(0.2589, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2589, 413.497, 0, -268.7731)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Boat To Lakehead Landing" instance=ExtResource("bn_kit_fishing_boat_2")]
 metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
@@ -73721,7 +73721,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Lakehead Landing"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 411.3083, 1, -274.4648)
+transform = Transform3D(0.2589, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2589, 411.3084, 1.55, -272.4657)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Lakehead Landing" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -73739,7 +73739,7 @@ metadata = {
 "note": "the boat bound for Saltsound, moored on the pier's right side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 410.65, 0, -260.1472)
+transform = Transform3D(0.2589, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2589, 410.649, 0, -258.1482)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Boat To Saltsound" instance=ExtResource("bn_kit_fishing_boat_2")]
 metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
@@ -73757,7 +73757,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Saltsound"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 408.4611, 1, -263.8396)
+transform = Transform3D(0.2589, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2589, 408.4604, 1.55, -261.8407)
 
 [node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Saltsound" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -73779,7 +73779,7 @@ extras = {
 "returnBy": "hornmere--obj-boat-stagheath",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 404.3578, 1, -266.4921)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 404.3573, 1.55, -264.4935)
 
 [node name="stagheath--boat-landing-hornmere" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -73794,7 +73794,7 @@ extras = {
 "note": "where the boat from Hornmere sets passengers down, 4 m shoreward of the gangway of the boat that sails back (stagheath--obj-boat-hornmere)",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 403.3225, 1, -262.6284)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 403.3217, 1.55, -260.6299)
 
 [node name="stagheath--obj-boat-lakehead" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
@@ -73812,7 +73812,7 @@ extras = {
 "returnBy": "reedfall--obj-boat-stagheath",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 407.9721, 1, -272.2529)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 407.972, 1.55, -270.2541)
 
 [node name="stagheath--boat-landing-lakehead" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -73827,7 +73827,7 @@ extras = {
 "note": "where the boat from Lakehead Landing sets passengers down, 4 m shoreward of the gangway of the boat that sails back (stagheath--obj-boat-lakehead)",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 406.9368, 1, -268.3892)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 406.9364, 1.55, -266.3905)
 
 [node name="stagheath--obj-boat-saltsound" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
@@ -73845,7 +73845,7 @@ extras = {
 "returnBy": "saltsound--obj-boat-stagheath",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 405.1249, 1, -261.6278)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 405.124, 1.55, -259.6291)
 
 [node name="stagheath--boat-landing-saltsound" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -73860,4 +73860,4 @@ extras = {
 "note": "where the boat from Saltsound sets passengers down, 4 m shoreward of the gangway of the boat that sails back (stagheath--obj-boat-saltsound)",
 "boatNetwork": "stagheath"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 404.0896, 1, -257.7641)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 404.0884, 1.55, -255.7655)

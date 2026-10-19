@@ -54730,10 +54730,10 @@ support_surface = SubResource("bn_support_surface")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Start" type="Marker3D" parent="Bridges/boatnet-boarsend-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 490.5, 1, -26.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 497.21, 1.1, -36.03)
 
 [node name="End" type="Marker3D" parent="Bridges/boatnet-boarsend-pier"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 505.82, 1, -13.64)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 511.36, 1.1, -19.18)
 
 [node name="BN Boarsend Pier Span 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -54744,10 +54744,10 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "boarsend",
-"note": "trestle span 1 of 2 on the Boarsend pier"
+"note": "trestle span 1 of 3 on the Boarsend pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.9575, 0, -0.5268, 0, 1, 0, 0.8038, 0, 0.6275, 494.33, 1, -23.285)
+transform = Transform3D(0.5896, 0, -0.6274, 0, 1, 0, 0.7021, 0, 0.5269, 499.5683, 1.1, -33.2217)
 
 [node name="Content" parent="AuthoredAssets/BN Boarsend Pier Span 1" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
@@ -54762,12 +54762,30 @@ scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-t
 collision_role = "solid"
 metadata = {
 "boatNetwork": "boarsend",
-"note": "trestle span 2 of 2 on the Boarsend pier"
+"note": "trestle span 2 of 3 on the Boarsend pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.9575, 0, -0.5268, 0, 1, 0, 0.8038, 0, 0.6275, 501.99, 1, -16.855)
+transform = Transform3D(0.5896, 0, -0.6274, 0, 1, 0, 0.7021, 0, 0.5269, 504.285, 1.1, -27.605)
 
 [node name="Content" parent="AuthoredAssets/BN Boarsend Pier Span 2" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
+metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+
+[node name="BN Boarsend Pier Span 3" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "boatnet-boarsend-span-3"
+node_name = "Authored_boatnet_boarsend_span_3"
+catalog_asset_id = "tollholms:kit-sw-trestle-pier-span"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
+collision_role = "solid"
+metadata = {
+"boatNetwork": "boarsend",
+"note": "trestle span 3 of 3 on the Boarsend pier"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.5896, 0, -0.6274, 0, 1, 0, 0.7021, 0, 0.5269, 509.0017, 1.1, -21.9883)
+
+[node name="Content" parent="AuthoredAssets/BN Boarsend Pier Span 3" instance=ExtResource("bn_kit_sw_trestle_pier_span")]
 metadata/map_asset_id = "tollholms:kit-sw-trestle-pier-span"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-trestle-pier-span.glb"
 
@@ -54783,7 +54801,7 @@ metadata = {
 "note": "a light at the head of the Boarsend pier"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.7659, 0, -0.6429, 0, 1, 0, 0.6429, 0, 0.7659, 506.894, 1, -16.7859)
+transform = Transform3D(0.6431, 0, -0.7658, 0, 1, 0, 0.7658, 0, 0.6431, 512.9623, 1.1, -22.0925)
 
 [node name="Content" parent="AuthoredAssets/BN Boarsend Pier Lantern" instance=ExtResource("bn_kit_lantern_post_1")]
 metadata/map_asset_id = "tollholms:kit-lantern-post-1"
@@ -54801,7 +54819,7 @@ metadata = {
 "note": "the boat bound for Lakehead Landing, moored on the pier's left side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.7659, 0, -0.6429, 0, 1, 0, 0.6429, 0, 0.7659, 506.3093, 0, -22.003)
+transform = Transform3D(0.6431, 0, -0.7658, 0, 1, 0, 0.7658, 0, 0.6431, 513.2886, 0, -27.333)
 
 [node name="Content" parent="AuthoredAssets/BN Boarsend Boat To Lakehead Landing" instance=ExtResource("bn_kit_fishing_boat_2")]
 metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
@@ -54819,7 +54837,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Lakehead Landing"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.7659, 0, 0.6429, 0, 1, 0, -0.6429, 0, -0.7659, 506.6333, 1, -17.7228)
+transform = Transform3D(-0.6431, 0, 0.7658, 0, 1, 0, -0.7658, 0, -0.6431, 512.8669, 1.1, -23.0614)
 
 [node name="Content" parent="AuthoredAssets/BN Boarsend Banner For Lakehead Landing" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -54837,7 +54855,7 @@ metadata = {
 "note": "the boat bound for Greenlight, moored on the pier's right side, bow seaward, waterline origin at the water level"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.7659, 0, -0.6429, 0, 1, 0, 0.6429, 0, 0.7659, 497.6683, 0, -11.709)
+transform = Transform3D(0.6431, 0, -0.7658, 0, 1, 0, 0.7658, 0, 0.6431, 502.9963, 0, -18.69)
 
 [node name="Content" parent="AuthoredAssets/BN Boarsend Boat To Greenlight" instance=ExtResource("bn_kit_fishing_boat_2")]
 metadata/map_asset_id = "tollholms:kit-fishing-boat-2"
@@ -54855,7 +54873,7 @@ metadata = {
 "note": "marks the berth of the boat bound for Greenlight"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.7659, 0, -0.6429, 0, 1, 0, 0.6429, 0, 0.7659, 501.9399, 1, -12.1316)
+transform = Transform3D(0.6431, 0, -0.7658, 0, 1, 0, 0.7658, 0, 0.6431, 507.2766, 1.1, -18.3669)
 
 [node name="Content" parent="AuthoredAssets/BN Boarsend Banner For Greenlight" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -54877,7 +54895,7 @@ extras = {
 "returnBy": "reedfall--obj-boat-boarsend",
 "boatNetwork": "boarsend"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 502.6318, 1, -17.6219)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 508.9082, 1.1, -23.6546)
 
 [node name="boarsend--boat-landing-lakehead" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -54892,7 +54910,7 @@ extras = {
 "note": "where the boat from Lakehead Landing sets passengers down, 4 m shoreward of the gangway of the boat that sails back (boarsend--obj-boat-lakehead)",
 "boatNetwork": "boarsend"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 499.5681, 1, -20.1936)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 506.3359, 1.1, -26.7178)
 
 [node name="boarsend--obj-boat-greenlight" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
@@ -54910,7 +54928,7 @@ extras = {
 "returnBy": "greenlight--obj-boat-boarsend",
 "boatNetwork": "boarsend"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 501.3459, 1, -16.0901)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 507.3767, 1.1, -22.3684)
 
 [node name="boarsend--boat-landing-greenlight" type="Marker3D" parent="RuntimePoints/TerritoryPoints"]
 gizmo_extents = 0.8
@@ -54925,4 +54943,4 @@ extras = {
 "note": "where the boat from Greenlight sets passengers down, 4 m shoreward of the gangway of the boat that sails back (boarsend--obj-boat-greenlight)",
 "boatNetwork": "boarsend"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 498.2822, 1, -18.6618)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 504.8043, 1.1, -25.4316)
