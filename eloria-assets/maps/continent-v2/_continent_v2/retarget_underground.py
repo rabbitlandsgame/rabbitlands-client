@@ -73,7 +73,15 @@ def retarget(checkout: Path):
     package["provenance"]["sourceSha256"] = sha(source)
     indent = 1 if raw.startswith(b'{\n "') else (2 if raw.startswith(b'{\n  "') else None)
     out = (json.dumps(package, indent=indent, ensure_ascii=False) + ("\n" if raw.endswith(b"\n") else "")).encode("utf-8")
-    return {SOURCE: source, package_path: out}, changed
+    # the client's entrance art stands on each door's exterior tile (export_collision.py reads it there)
+    objects_path = checkout / "godot-client/data/world/objects.json"
+    objects = json.loads(objects_path.read_bytes())
+    for object_id, door in doors.items():
+        record = objects["authoredObjects"].get(str(object_id))
+        if record is not None and record.get("entrance"):
+            record["exteriorTile"] = list(door["tile"])
+    objects_raw = (json.dumps(objects, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    return {SOURCE: source, package_path: out, objects_path: objects_raw}, changed
 
 
 def main() -> int:
