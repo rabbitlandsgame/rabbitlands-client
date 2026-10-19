@@ -523,6 +523,19 @@ def content_tables(territories, spec, merged=None):
     for rid, table in tables.items():
         if json.dumps(table, sort_keys=True) != original[rid] or not (root / rid / "content/spawns.json").exists():
             out[root / rid / "content/spawns.json"] = (json.dumps(table, indent=1, ensure_ascii=False) + "\n").encode()
+    # a merge successor's contract counts its own dedicated runtime points, now including the merged map's
+    regions = CHECKOUT / "godot-client/world_authoring/regions"
+    for into in sorted(set((merged or {}).values())):
+        spec_path = regions / into / "region-authoring-spec.json"
+        scene = next((t.scene for t in territories if t.id == into), None)
+        if scene is None or not spec_path.exists():
+            continue
+        spec_raw = spec_path.read_bytes()
+        authoring = json.loads(spec_raw)
+        points = sum(1 for n in scene.nodes.values() if json.loads(n.properties.get("kind", '""')) == "runtime_point")
+        if authoring["gameplay"].get("runtimePointCount") != points:
+            authoring["gameplay"]["runtimePointCount"] = points
+            out[spec_path] = (json.dumps(authoring, indent=1, ensure_ascii=False) + "\n").encode()
     rows_path = root / "_continent_v2/content/server-rows.json"
     rows = read(rows_path)
     folded = [rid for rid in (merged or {}) if rid in rows["maps"]]
