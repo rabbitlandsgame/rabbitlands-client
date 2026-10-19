@@ -49,6 +49,38 @@ SHAPE = (1259, 1446)
 BUFFER_CELLS = 6
 
 
+def _overlap(lattice):
+    """(v1 slices, lattice slices) of the reviewed v1 grid inside the territories' current lattice."""
+    dc, dr = ((FIRST - lattice.first) / T.CELL).astype(int)
+    r0, c0 = max(0, -dr), max(0, -dc)
+    r1, c1 = min(SHAPE[0], lattice.height - dr), min(SHAPE[1], lattice.width - dc)
+    return (slice(r0, r1), slice(c0, c1)), (slice(r0 + dr, r1 + dr), slice(c0 + dc, c1 + dc))
+
+
+def to_lattice(values: np.ndarray, lattice, fill) -> np.ndarray:
+    """A v1-grid array placed on the current lattice (a later ground extends the grid; v1 stays the reference)."""
+    out = np.full((lattice.height, lattice.width), fill, values.dtype)
+    v1, here = _overlap(lattice)
+    out[here] = values[v1]
+    return out
+
+
+def from_lattice(values: np.ndarray, lattice, fill) -> np.ndarray:
+    out = np.full(SHAPE, fill, values.dtype)
+    v1, here = _overlap(lattice)
+    out[v1] = values[here]
+    return out
+
+
+def lattice_base(territories, lattice) -> np.ndarray:
+    """The group base the current crops agree on, on their lattice (NaN where no crop reaches)."""
+    out = np.full((lattice.height, lattice.width), np.nan, np.float32)
+    for t in territories:
+        window = lattice.window(t)
+        out[window] = np.where(np.isnan(out[window]), t.heights, out[window])
+    return out
+
+
 def fill_sinks(heights: np.ndarray) -> np.ndarray:
     """Eight-neighbour priority flood to the lowest escaping rim, not a blur.
 
@@ -147,16 +179,14 @@ def repair_field():
                           "depthBeforeMetres": float((flooded - base)[basin].max())})
     territories = T.load_territories()
     lattice = T.Lattice.of(territories)
-    if not np.array_equal(lattice.first, FIRST) or (lattice.height, lattice.width) != SHAPE:
-        raise ValueError("reviewed group lattice changed")
-    shared = sum(T.authority(t, lattice).astype(np.uint8) for t in territories) > 1
+    shared = from_lattice(sum(T.authority(t, lattice).astype(np.uint8) for t in territories) > 1, lattice, False)
     if np.any(mask & shared):
         raise ValueError("a reviewed basin reaches shared terrain authority")
     # The outer smoothing buffer may approach a map seam. Keep that seam as
     # part of the fixed interpolation perimeter, just like the untouched hills.
     mask = ndimage.binary_dilation(mask, iterations=BUFFER_CELLS) & ~shared
     fixed = interpolate(base, mask)
-    x, z = lattice.xz()
+    x = FIRST[0] + T.CELL * np.arange(SHAPE[1]); z = FIRST[1] + T.CELL * np.arange(SHAPE[0])
     hill = HILL_REPAIR
     radius = np.sqrt(((x[None, :] - hill["center"][0]) / hill["radii"][0]) ** 2 +
                      ((z[:, None] - hill["center"][1]) / hill["radii"][1]) ** 2)
@@ -169,6 +199,11 @@ def repair_field():
     smooth = ndimage.gaussian_filter(base, sigma=hill["sigmaCells"])
     fixed[hill_mask] = (base + (smooth - base) * weight)[hill_mask]
     mask |= hill_mask
+    # a later ground (group-terrain v2) must equal v1 wherever a repair or its smoothing reads (its exclusions)
+    current = from_lattice(lattice_base(territories, lattice), lattice, np.float32(np.nan))
+    footprint = ndimage.binary_dilation(mask, iterations=9)
+    if not np.array_equal(current[footprint].view(np.uint32), base[footprint].view(np.uint32)):
+        raise ValueError("the current ground differs from the reviewed v1 base under a repair")
     return base, fixed, mask, sites
 
 
@@ -243,10 +278,8 @@ def main():
     base, fixed, mask, sites = repair_field()
     ts = T.load_territories()
     lattice = T.Lattice.of(ts)
-    if not np.array_equal(lattice.first, FIRST) or (lattice.height, lattice.width) != SHAPE:
-        raise ValueError("reviewed group lattice changed")
     authorities = [T.authority(t, lattice) for t in ts]
-    if np.any(mask & (sum(a.astype(np.uint8) for a in authorities) > 1)):
+    if np.any(mask & from_lattice(sum(a.astype(np.uint8) for a in authorities) > 1, lattice, False)):
         raise ValueError("repair reaches shared terrain authority")
     rr, cc = np.where(mask)
     for t in ts:
@@ -259,7 +292,7 @@ def main():
         if t.id not in REPAIRED_REGIONS:
             continue
         window = lattice.window(t)
-        expected = (fixed - base)[window].copy()
+        expected = to_lattice(fixed - base, lattice, np.float32(0))[window].copy()
         expected[~authorities[[v.id for v in ts].index(t.id)][window]] = 0
         path, content, installed, shifted = prepare_scene(t, expected, base, fixed)
         edits.append((path, content))

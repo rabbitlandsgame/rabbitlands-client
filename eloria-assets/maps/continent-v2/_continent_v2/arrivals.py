@@ -52,9 +52,15 @@ def _vector(value, size, field):
 
 
 def partition_spec(checkout):
-    """The active owner partition's sections spec: the catalog's partitionSpecPath (res://../ is the checkout)."""
-    catalog = json.loads((Path(checkout)/"godot-client/world_authoring/continent-v2/territories.json").read_text(encoding="utf-8"))
-    resource = catalog["partitionSpecPath"]
+    """The active owner partition's sections spec: the catalog's partitionSpecPath (res://../ is the checkout);
+    the first partition's spec when there is no catalog (a fixture checkout)."""
+    first = Path(checkout)/"eloria-assets/maps/continent-v2/_continent_v2/partition-inputs/sections_spec.json"
+    path = Path(checkout)/"godot-client/world_authoring/continent-v2/territories.json"
+    if not path.is_file():
+        return first
+    resource = json.loads(path.read_text(encoding="utf-8")).get("partitionSpecPath")
+    if not resource:
+        return first
     if not resource.startswith("res://../"):
         raise ArrivalError("partitionSpecPath must name a file outside godot-client")
     return Path(checkout)/resource[len("res://../"):]

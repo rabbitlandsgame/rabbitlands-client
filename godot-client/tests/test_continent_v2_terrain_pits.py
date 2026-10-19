@@ -43,12 +43,14 @@ def test_saved_sculpts_repair_all_nine_sites_without_changing_frozen_bases(repai
     base, fixed, mask, sites, territories, lattice = repaired
     assert len(sites) == 9
     assert base[~mask].tobytes() == fixed[~mask].tobytes()
+    current = R.lattice_base(territories, lattice)
+    delta = R.to_lattice(fixed - base, lattice, np.float32(0))
     for t in territories:
         window = lattice.window(t)
-        np.testing.assert_array_equal(t.heights, base[window])
+        np.testing.assert_array_equal(t.heights, current[window])
         sculpt, errors = T.sculpt_deltas(t)
         assert not errors
-        expected = (fixed - base)[window]
+        expected = delta[window]
         own = T.authority(t, lattice)[window]
         expected = np.where(own, expected, 0)
         touched = expected != 0
@@ -84,7 +86,8 @@ def test_replaying_the_repair_does_not_move_scenery_twice(repaired):
         if t.id not in R.REPAIRED_REGIONS:
             continue
         window = lattice.window(t)
-        expected = np.where(T.authority(t, lattice)[window], (fixed - base)[window], 0)
+        delta = R.to_lattice(fixed - base, lattice, np.float32(0))
+        expected = np.where(T.authority(t, lattice)[window], delta[window], 0)
         path, content, installed, moved = R.prepare_scene(t, expected, base, fixed)
         assert installed and not moved
         assert content == path.read_text(encoding="utf-8")

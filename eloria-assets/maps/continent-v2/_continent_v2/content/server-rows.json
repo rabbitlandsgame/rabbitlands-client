@@ -20,6 +20,40 @@
    "npcs": {},
    "interactives": {}
   },
+  "coilmere": {
+   "npcs": {
+    "coilmere--npc-toll-keeper-tobin-ware": {
+     "name": "Tobin Ware",
+     "group": "new",
+     "role": "dialogue",
+     "actorType": 348,
+     "greeting": "One cask in twenty of everything that leaves the holm. Not you; you are not a cask. Welcome to Tollholm.",
+     "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
+     "servedFrom": "M1 npcs.txt"
+    }
+   },
+   "interactives": {
+    "coilmere--obj-shared-storage": {
+     "objectId": 22,
+     "role": "storage",
+     "target": "shared",
+     "text": "Tollholm civic storehouse opens your shared storage."
+    },
+    "coilmere--obj-boat-ravenhead": {
+     "objectId": 23,
+     "role": "portal",
+     "target": "maps.txt",
+     "text": "The Ravenhead ferry is berthed at the north jetty, ready to carry you back across the sound to Ravenhead pier. The crew ask no fare.",
+     "portal": {
+      "destinationMap": "ravenhead",
+      "oneWay": true,
+      "landingMarker": "ravenhead--runtime-boat-landing",
+      "returnBy": "ravenhead--obj-boat-coilmere"
+     },
+     "source": "owner 2026-10-14: R5, close the eastern loop with a boat connection (landfall-audit-2026-10-14 routes F5); free crossing"
+    }
+   }
+  },
   "greenlight": {
    "npcs": {
     "greenlight--npc-ferryman-caldus": {
@@ -82,6 +116,14 @@
      "text": "Hearthcroft supply chest opens your shared storage."
     }
    }
+  },
+  "hornmere": {
+   "npcs": {},
+   "interactives": {}
+  },
+  "jadestair": {
+   "npcs": {},
+   "interactives": {}
   },
   "landfall": {
    "npcs": {
@@ -220,10 +262,6 @@
    },
    "interactives": {}
   },
-  "jadestair": {
-   "npcs": {},
-   "interactives": {}
-  },
   "stagheath": {
    "npcs": {
     "stagheath--npc-light-keeper-marta-quell": {
@@ -254,39 +292,9 @@
     }
    }
   },
-  "coilmere": {
-   "npcs": {
-    "coilmere--npc-toll-keeper-tobin-ware": {
-     "name": "Tobin Ware",
-     "group": "new",
-     "role": "dialogue",
-     "actorType": 348,
-     "greeting": "One cask in twenty of everything that leaves the holm. Not you; you are not a cask. Welcome to Tollholm.",
-     "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
-     "servedFrom": "M1 npcs.txt"
-    }
-   },
-   "interactives": {
-    "coilmere--obj-shared-storage": {
-     "objectId": 22,
-     "role": "storage",
-     "target": "shared",
-     "text": "Tollholm civic storehouse opens your shared storage."
-    },
-    "coilmere--obj-boat-ravenhead": {
-     "objectId": 23,
-     "role": "portal",
-     "target": "maps.txt",
-     "text": "The Ravenhead ferry is berthed at the north jetty, ready to carry you back across the sound to Ravenhead pier. The crew ask no fare.",
-     "portal": {
-      "destinationMap": "ravenhead",
-      "oneWay": true,
-      "landingMarker": "ravenhead--runtime-boat-landing",
-      "returnBy": "ravenhead--obj-boat-coilmere"
-     },
-     "source": "owner 2026-10-14: R5, close the eastern loop with a boat connection (landfall-audit-2026-10-14 routes F5); free crossing"
-    }
-   }
+  "suncoil": {
+   "npcs": {},
+   "interactives": {}
   },
   "twinbrook": {
    "npcs": {
@@ -303,6 +311,10 @@
    "interactives": {}
   },
   "warrenmead": {
+   "npcs": {},
+   "interactives": {}
+  },
+  "whitepeak": {
    "npcs": {},
    "interactives": {}
   }

@@ -29,6 +29,17 @@ def lattice(territories):
     return T.Lattice.of(territories)
 
 
+def active_partition():
+    """The catalog's partition folder (A3: partition-inputs-a3) and a resolver for its recorded input files."""
+    import bootstrap_continent_v2_territory as B
+    folder = B.partition_folder()
+    provenance = T._json(folder / "input-provenance.json")
+    def located(name):
+        record = provenance["files"][name]
+        return ROOT / record["path"] if "path" in record else folder / name
+    return folder, located
+
+
 def by_id(territories, identity):
     return next(t for t in territories if t.id == identity)
 
@@ -44,10 +55,11 @@ def vertex_index(territory, x, z):
 
 
 def test_the_catalog_lists_recorded_partition(territories):
-    recorded = T._json(ROOT / "eloria-assets/maps/continent-v2/_continent_v2/partition-inputs/sections_spec.json")
+    _, located = active_partition()
+    recorded = T._json(located("sections_spec.json"))
     sections = recorded["sections"]
     assert [t.id for t in territories] == [s["mapId"] for s in sorted(sections,key=lambda s:s["label"])]
-    assert len(territories) == 15
+    assert len(territories) == 18
     assert not set(recorded["retiredMapIds"]) & {t.id for t in territories}
     for t in territories:
         section=next(s for s in sections if s["mapId"]==t.id)
@@ -60,7 +72,8 @@ def test_scene_frames_agree_with_manifests_and_specs(territories):
     for t in territories:
         assert all(type(v) is int and v%6==0 and v<=2048 for v in t.spec["server"]["cells"])
         assert all(float(v).is_integer() for v in t.translation)
-    assert len(by_id(territories,"ravenhead").polygons)==2
+    # A3 dissolved Ravenhead's pure-sea ring: every section is one ring now
+    assert all(len(t.polygons)==1 for t in territories)
 
 
 def test_all_new_bases_are_byte_crops_of_frozen_external_group(territories):
@@ -88,8 +101,11 @@ def test_ownership_polygons_do_not_overlap_and_own_every_island(territories,latt
     assert problems==[]
     assert not any(report["overlappingCells"].values())
     assert report["unownedIslandLandM2"]==0 and report["islandLandM2"]>2_000_000
-    recorded=T._json(ROOT/"eloria-assets/maps/continent-v2/_continent_v2/partition-inputs/check_report.json")
+    _, located = active_partition()
+    recorded=T._json(located("check_report.json"))
     assert report["mainlandM2"]["owned"]==4*recorded["mainlandVerticesOwned"]
+    # ground v2 sank the old north-east mainland stub: every land component is an owned island
+    assert report["mainlandComponents"]==0
 
 
 def test_shared_border_vertices_are_byte_equal(territories,lattice):
@@ -99,13 +115,15 @@ def test_shared_border_vertices_are_byte_equal(territories,lattice):
         if entry["sharedVertices"]:
             assert entry["baseDifferences"]==0 and entry["waterNearShared"]==[]
             assert all(value==0 for key,value in entry.items() if key.startswith("sculptedShared_"))
-    assert report["greenlight|spindle_hill"]["mirroredPatches"]==["seam-mole-knob"]
-    assert T.patches(by_id(territories,"ravenhead"))[0]["id"]=="seam-mole-pier"
-    assert sum(len(T.patches(t)) for t in territories)==3
+    # A3: the knob is Jadestair's jetty and the pier Ravenhead's; no patch spans a border
+    assert all(entry.get("mirroredPatches",[])==[] for entry in report.values())
+    assert [p["id"] for p in T.patches(by_id(territories,"ravenhead"))]==["seam-mole-pier"]
+    assert [p["id"] for p in T.patches(by_id(territories,"jadestair"))]==["seam-mole-knob"]
+    assert sum(len(T.patches(t)) for t in territories)==2
 
 
 def shared_pair(territories,lattice):
-    a=by_id(territories,"greenlight"); b=by_id(territories,"spindle_hill")
+    a=by_id(territories,"hearthcroft"); b=by_id(territories,"ringholm")
     mask=T.authority(a,lattice)&T.authority(b,lattice)&T._covered(a,lattice)&T._covered(b,lattice)
     row,col=np.argwhere(mask)[0]; x,z=lattice.xz()
     return a,b,float(x[col]),float(z[row])
@@ -129,14 +147,20 @@ def test_a_sculpted_shared_vertex_is_caught(territories,lattice,monkeypatch):
     assert any("sculpts 1 shared vertices" in p for p in T.check_seams([a,b],lattice)[0])
 
 
-def test_unmirrored_and_moved_knob_are_caught(territories,lattice):
-    a,b,_,_=shared_pair(territories,lattice)
-    key=next(k for k,v in b.scene.nodes.items() if v.properties.get("patch_id")=='"seam-mole-knob"')
-    missing=dataclasses.replace(b.scene,nodes={k:v for k,v in b.scene.nodes.items() if k!=key})
-    assert any("only greenlight declares" in p for p in T.check_seams([a,dataclasses.replace(b,scene=missing)],lattice)[0])
-    patch=b.scene.nodes[key]; moved=dataclasses.replace(patch,properties=dict(patch.properties,size="Vector2(40, 12)"))
-    changed=dataclasses.replace(b.scene,nodes=dict(b.scene.nodes,**{key:moved}))
-    assert any("declared differently" in p for p in T.check_seams([a,dataclasses.replace(b,scene=changed)],lattice)[0])
+def test_unmirrored_and_moved_seam_patch_are_caught(territories,lattice,monkeypatch):
+    # A3 has no patch on a border; put a mole on the Hearthcroft|Ringholm seam to show the check still bites
+    a,b,x,z=shared_pair(territories,lattice); original=T.patches
+    mole=dict(original(by_id(territories,"ravenhead"))[0],id="test-mole",continentOrigin=[x,2.0,z])
+    def declared(holders,size=None):
+        return lambda t: original(t)+([dict(mole,size=size or mole["size"]) if t.id==b.id and size else mole]
+                                      if t.id in holders else [])
+    monkeypatch.setattr(T,"patches",declared({a.id,b.id}))
+    problems,report=T.check_seams([a,b],lattice)
+    assert problems==[] and report[f"{a.id}|{b.id}"]["mirroredPatches"]==["test-mole"]
+    monkeypatch.setattr(T,"patches",declared({a.id}))
+    assert any(f"only {a.id} declares" in p for p in T.check_seams([a,b],lattice)[0])
+    monkeypatch.setattr(T,"patches",declared({a.id,b.id},size=[40.0,12.0]))
+    assert any("declared differently" in p for p in T.check_seams([a,b],lattice)[0])
 
 
 def test_water_near_shared_vertices_is_caught(territories,lattice,monkeypatch):
@@ -145,10 +169,9 @@ def test_water_near_shared_vertices_is_caught(territories,lattice,monkeypatch):
     assert any("river Rivers/test comes within" in p for p in T.check_seams([a,b],lattice)[0])
 
 
-def test_missing_multipart_ring_and_overlapping_ownership_are_caught(territories,lattice):
+def test_a_changed_ownership_ring_and_overlapping_ownership_are_caught(territories,lattice):
     raven=by_id(territories,"ravenhead")
-    problems,report=T.check_ownership(replaced(territories,raven.id,polygons=[raven.polygons[1]]),lattice)
-    changed=replaced(territories,raven.id,polygons=[raven.polygons[1]])
+    changed=replaced(territories,raven.id,polygons=[raven.polygons[0][:-1]])
     assert any("ownership sha" in p for p in T.check_frames(changed)[0])
     a,b,_,_=shared_pair(territories,lattice)
     changed=dataclasses.replace(b,polygons=a.polygons,polygon=a.polygon)
@@ -296,10 +319,11 @@ def test_active_plan_owners_use_positions_and_reject_unknown_schemas():
     import bootstrap_continent_v2_territory as B
     from shapely.geometry import Polygon,Point
     from shapely.ops import unary_union
-    recorded=T._json(B.INPUT/"sections_spec.json")
+    _, located = active_partition()
+    recorded=T._json(located("sections_spec.json"))
     shapes=[(s["mapId"],unary_union([Polygon(r) for r in s["ownershipPolygons"]])) for s in recorded["sections"]]
     retired=set(recorded["retiredMapIds"])
-    plan=T._json(B.PLAN); source=T._json(B.INPUT/"source-plan.json")
+    plan=T._json(B.PLAN); source=T._json(located("source-plan.json"))
     for landmark,original in zip(plan["landmarks"],source["landmarks"]):
         expected=next(rid for rid,shape in shapes if shape.covers(Point(original["x"],original["z"])))
         assert landmark["territory"]==expected

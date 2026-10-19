@@ -23,8 +23,18 @@ class MemoryInputs:
         return self.files[path]
 
 
+def _history_present(*refs):
+    """The replay tests read pinned commits; a repository without them (the Rabbit Lands import began after
+    they were made) cannot replay, so those tests skip rather than error."""
+    import subprocess
+    return all(subprocess.run(["git", "cat-file", "-e", ref + "^{commit}"], cwd=F.CHECKOUT,
+                              capture_output=True).returncode == 0 for ref in refs)
+
+
 @pytest.fixture(scope="module")
 def pinned():
+    if not _history_present(F.SOURCE_REF):
+        pytest.skip(f"pinned source commit {F.SOURCE_REF[:8]} is not in this repository")
     reader = F.GitInputs(F.CHECKOUT)
     expected = F.build_snapshot(reader)
     return reader.files, expected

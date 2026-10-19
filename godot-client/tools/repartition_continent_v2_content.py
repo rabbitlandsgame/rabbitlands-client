@@ -283,6 +283,59 @@ def build(territories, spec, amend):
     return texts, report
 
 
+def content_tables(territories, spec):
+    """The per-map content files follow the same rule: spawn rows move to the map owning their continent position
+    (local re-framed by the translation difference, their source record carried); a new map gets an empty spawns
+    table and empty server rows. Returns {path: bytes} for the files that change."""
+    shapes = [(s["mapId"], unary_union([Polygon(r) for r in s["ownershipPolygons"]])) for s in spec["sections"]]
+
+    def owner(x, z):
+        point = Point(x, z)
+        return next((rid for rid, shape in shapes if shape.covers(point)), None)
+    root = CHECKOUT / "eloria-assets/maps/continent-v2"
+    by_id = {t.id: t for t in territories}
+    tables = {}
+    for t in territories:
+        path = root / t.id / "content/spawns.json"
+        tables[t.id] = read(path) if path.exists() else {
+            "schema": "eloria-continent-v2-spawns-v1", "map": t.id,
+            "about": "Pinned original spawn rows, partitioned by exact continent position. local remains the source "
+                     "of truth.", "source": {"originalSources": {}}, "spawns": []}
+    original = {rid: json.dumps(table, sort_keys=True) for rid, table in tables.items()}
+    for rid, table in tables.items():
+        keep = []
+        for row in table["spawns"]:
+            tx, tz = by_id[rid].translation[[0, 2]]
+            x, z = row["local"][0] + tx, row["local"][1] + tz
+            target = owner(x, z)
+            if target is None:
+                raise ValueError(f"{rid}: spawn row {row['id']} lies outside every section")
+            if target == rid:
+                keep.append(row)
+                continue
+            moved = dict(row)
+            dx, dz = by_id[target].translation[[0, 2]]
+            moved["local"] = [x - dx, z - dz]
+            tables[target]["spawns"].append(moved)
+            sources = table.get("source", {}).get("originalSources", {})
+            tables[target].setdefault("source", {}).setdefault("originalSources", {}).update(
+                {k: v for k, v in sources.items() if k not in tables[target]["source"]["originalSources"]})
+        table["spawns"] = keep
+    out = {}
+    for rid, table in tables.items():
+        if json.dumps(table, sort_keys=True) != original[rid] or not (root / rid / "content/spawns.json").exists():
+            out[root / rid / "content/spawns.json"] = (json.dumps(table, indent=1, ensure_ascii=False) + "\n").encode()
+    rows_path = root / "_continent_v2/content/server-rows.json"
+    rows = read(rows_path)
+    missing = [t.id for t in territories if t.id not in rows["maps"]]
+    if missing:
+        for rid in missing:
+            rows["maps"][rid] = {"npcs": {}, "interactives": {}}
+        rows["maps"] = dict(sorted(rows["maps"].items()))
+        out[rows_path] = (json.dumps(rows, indent=1, ensure_ascii=False) + "\n").encode()
+    return out
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -305,12 +358,18 @@ def main(argv=None) -> int:
         return 0
     texts, report = build(territories, spec, amend)
     changed = [t for t in texts.values() if t.text() != t.original]
+    files = content_tables(territories, spec)
     if args.check:
-        print(json.dumps({"pending": [t.path.name for t in changed], **report}, indent=1))
-        return 1 if changed else 0
+        print(json.dumps({"pending": [t.path.name for t in changed] + [str(p.relative_to(CHECKOUT)) for p in files],
+                          **report}, indent=1))
+        return 1 if changed or files else 0
     for t in changed:
         t.path.write_bytes(t.text().encode("utf-8"))
-    print(json.dumps({"written": [t.path.name for t in changed], **report}, indent=1))
+    for path, raw in files.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+    print(json.dumps({"written": [t.path.name for t in changed] + [str(p.relative_to(CHECKOUT)) for p in files],
+                      **report}, indent=1))
     return 0
 
 

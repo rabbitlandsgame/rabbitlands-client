@@ -72,8 +72,19 @@ def test_nonfinite_transform_fails_authority_assignment():
     source=S.Source('old','s0',scene,[],np.zeros(3),None,{}, {})
     with pytest.raises(S.SplitError,match='nonfinite'):source.continent_matrix('x')
 
+def _history_present(*refs):
+    """The replay tests read pinned commits; a repository without them (the Rabbit Lands import began after
+    they were made) cannot replay, so those tests skip rather than error."""
+    import subprocess
+    return all(subprocess.run(["git", "cat-file", "-e", ref + "^{commit}"], cwd=F.CHECKOUT,
+                              capture_output=True).returncode == 0 for ref in refs)
+
+
 @pytest.fixture(scope='module')
-def built():return S.build()
+def built():
+    if not _history_present(S.SOURCE_REF,S.SKELETON_REF):
+        pytest.skip('the split replays pinned commits that are not in this repository')
+    return S.build()
 
 def test_all_pinned_source_nodes_and_payload_counts_are_conserved(built):
     outputs,proof=built
@@ -126,6 +137,8 @@ def test_payload_spawn_rows_preserve_source_fields_and_continent_position(built)
 
 
 def test_unknown_light_or_group_node_cannot_silently_disappear(monkeypatch):
+    if not _history_present(S.SOURCE_REF,S.SKELETON_REF):
+        pytest.skip('the split replays pinned commits that are not in this repository')
     original=S.Source.load.__func__
     def inject(cls,*args):
         source=original(cls,*args)
