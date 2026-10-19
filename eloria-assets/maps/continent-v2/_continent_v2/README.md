@@ -1,11 +1,12 @@
 # Continent v2 section partition
 
 Active map IDs, exact polygons and ownership priority come from the catalog's partition: since Landfall A3
-(owner-approved 2026-10-19) that is `partition-inputs-a3/sections_spec.json`, eighteen maps with 39 shared borders,
-every section one ring. Its `input-provenance.json` names its predecessor (`partition-inputs/`, the fifteen-map
+(owner-approved 2026-10-19, revised the same day) that is `partition-inputs-a3/sections_spec.json`, seventeen maps
+with 35 shared borders, every section one ring. Borders are near-rectangular and open sea belongs to no map; shared sea
+edges are kept only across narrow straits, so the isles still preload from the coasts. Its `input-provenance.json` names its predecessor (`partition-inputs/`, the fifteen-map
 partition of 2026-10-10, kept unchanged as history), the frozen ground it crops and the files it shares with the
-predecessor; `plan-amendments.json` retires the B13, B14, B22 and B24 decks, cuts R42 to its Jadestair strand, makes
-the knob a Jadestair jetty, and records the scene content decisions (`sceneContent`). `authoring/` keeps the scripts
+predecessor; `plan-amendments.json` retires the B13, B14, B22 and B24 decks, cuts R42 to its Spindle Hill strand, makes
+the knob a jetty, records the scene content decisions (`sceneContent`) and the merged maps (`mergedMaps`). `authoring/` keeps the scripts
 that drew the polygons.
 
 All editor bases are byte crops of the hash-pinned frozen ground, now `group-terrain-v2`, built from the untouched v1
@@ -13,13 +14,14 @@ All editor bases are byte crops of the hash-pinned frozen ground, now `group-ter
 fills, the boat-only Verdant + Ssarathi isle round Tollholm and Spindle Hill, the Whitehorn + Mirrorhold isle; the
 old north-east stub sunk). Its grid is a data parent outside the active catalog. A3 also renamed `spindle_hill` to
 `jadestair` and `tollholm` to `coilmere` (`godot-client/tools/migrate_continent_v2_map_ids.py`, markers in
-`marker-renames-a3.json`) and added `suncoil`, `hornmere` and `whitepeak`.
+`marker-renames-a3.json`), then merged `jadestair` into `coilmere` before release (`mergedMaps`; its markers map
+straight to Coilmere's, its harvestables renumbered past Coilmere's), and added `suncoil`, `hornmere` and `whitepeak`.
 
 The tools that replay a partition change, in order: the ground builder; `migrate_continent_v2_map_ids.py`; the
 bootstrap with `--partition` and `--rebase-scenes` (surviving maps keep their translations; their frames only grow
 and their crop windows stay the predecessor's while those still cover them); `carry_continent_v2_grade.py` (the
 ground-colour grades follow the re-cut crops); `repartition_continent_v2_content.py` (retire, re-ground and move
-scene content and spawn rows); `generate_continent_v2_arrivals.py --rebind`; `publish_look.py` (its source palettes
+scene content and spawn rows; a merge runs it before the bootstrap, while the merged map is still in the catalog); `generate_continent_v2_arrivals.py --rebind`; `publish_look.py` (its source palettes
 are pinned in `look-sources/`); `retarget_underground.py`; then the publication below.
 
 Run `python godot-client/tools/bootstrap_continent_v2_territory.py --check` to replay immutable crop/frame/plan checks.

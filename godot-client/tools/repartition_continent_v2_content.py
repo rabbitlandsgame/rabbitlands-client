@@ -13,6 +13,13 @@ The decisions are recorded in the partition's plan-amendments.json ("sceneConten
   moves    are not recorded: every remaining positioned node (asset wrappers, markers, water regions, bridges,
            ground regions whose clip lies wholly in another map) belongs to the map that owns its continent position,
            and moves there with its children and the resources it uses, re-framed by the translation difference.
+  merges   plan-amendments "mergedMaps" {retired: successor}: run while the retired map is still in the catalog.
+           Every subtree of the retired scene under a structural node both scenes share (AuthoredAssets, Roads,
+           Bridges, Ground/Regions, Gameplay/*, RuntimePoints/*, Terrain/Patches) moves into the successor. Road
+           curves are re-framed point by point. The retired id is rewritten as a whole word in the moved blocks
+           (marker, road and landmark ids: retired--x becomes successor--x), harvestable object ids that collide
+           with the successor's are shifted past its highest, and its spawn rows and server rows fold into the
+           successor's. Renamed marker ids are reported (--apply writes them to the merge record).
 Scenes are edited as text, block by block; nothing else in a scene changes. --check rebuilds every edit in memory
 and refuses unless the scenes already hold them.
 """
@@ -38,6 +45,50 @@ WATER_PROP = re.compile(r"(buoy|rowing-boat|Kelp)", re.I)
 SEABED_ROCK = re.compile(r"(Coastal Boulders|Coastal Rock|Beach Rocks|Sea Stack)")
 # road pieces that ran along a retired deck (B13's islet road, R32's piece on B14)
 DECK_ROADS = {"saltsound--b13-ne-islet--0", "hearthcroft--r32-1--1"}
+
+
+HARVEST_KIND = re.compile(r'(?m)^kind = "harvestable"')
+IDENTITY = re.compile(r'(?m)^(record_id|asset_id|path_id|region_id|patch_id|bridge_id|transform) = ')
+
+
+def word(old: str) -> re.Pattern:
+    return re.compile(rf"(?<![A-Za-z0-9_]){re.escape(old)}(?![A-Za-z0-9_])")
+
+
+def structural(block: str) -> bool:
+    """A grouping node: no instance, no identity and no transform of its own."""
+    return " instance=" not in block.split("\n", 1)[0] and not IDENTITY.search(block)
+
+
+def merge_moves(src, dst):
+    """The subtrees of a merged scene to move: those whose parent is a structural node the successor also has."""
+    shared = {p for p, i in src.node_at.items()
+              if p in dst.node_at and (p == "." or (structural(src.blocks[i]) and structural(dst.blocks[dst.node_at[p]])))}
+    moves = []
+    for path in sorted(src.node_at, key=lambda p: (p.count("/"), p)):
+        if path in shared or any(path.startswith(m + "/") for m in moves):
+            continue
+        parent = path.rsplit("/", 1)[0] if "/" in path else "."
+        if parent not in shared:
+            raise ValueError(f"{src.path.name}:{path} has no place in {dst.path.name}")
+        moves.append(path)
+    return moves
+
+
+def harvest_ids(text) -> list[int]:
+    return [int(v) for b in text.blocks if HARVEST_KIND.search(b) for v in re.findall(r'"objectId": (\d+)', b)]
+
+
+def shift_curve(block: str, dx: float, dz: float) -> str:
+    """Re-frame a Curve3D: its points are (in, out, position) triples; only positions move."""
+    match = re.search(r'"points": PackedVector3Array\(([^)]*)\)', block)
+    values = [v.strip() for v in match.group(1).split(",")]
+    if len(values) % 9:
+        raise ValueError("a Curve3D point list is not (in, out, position) triples")
+    for k in range(0, len(values), 9):
+        values[k + 6] = format(round(float(values[k + 6]) + dx, 4), ".10g")
+        values[k + 8] = format(round(float(values[k + 8]) + dz, 4), ".10g")
+    return block[:match.start(1)] + ", ".join(values) + block[match.end(1):]
 
 
 def read(path):
@@ -168,8 +219,11 @@ def build(territories, spec, amend):
     report = {"retired": 0, "regrounded": 0, "moved": {}}
     # 1. retire (removed at once, per scene, so later edits index the remaining blocks)
     retired_paths = {}
+    merged = amend.get("mergedMaps", {})
     for key in content["retire"]:
         rid, path = key.split(":", 1)
+        if rid not in texts and rid in merged:
+            continue
         retired_paths.setdefault(rid, set()).add(path)
     for rid, paths in retired_paths.items():
         text = texts[rid]
@@ -179,12 +233,28 @@ def build(territories, spec, amend):
     # 2. reground (transform y of a top-level asset wrapper)
     for key, y in content["reground"].items():
         rid, path = key.split(":", 1)
+        if rid not in texts and rid in merged:
+            continue
         text = texts[rid]; i = text.node_at[path]
         text.blocks[i] = transform_origin_set(text.blocks[i], y=y)
         report["regrounded"] += 1
-    # 3. moves: positioned top-level nodes owned elsewhere
+    # 3. moves: positioned top-level nodes owned elsewhere; a merged map's whole content
     moves = []
+    offsets = {}
+    report["renamedMarkers"] = {}
+    for src_id, dst_id in merged.items():
+        if src_id not in texts:
+            continue
+        have, mine = harvest_ids(texts[dst_id]), harvest_ids(texts[src_id])
+        every = {int(v) for v in re.findall(r'"objectId": (\d+)', texts[dst_id].text())}
+        offset = max(have) + 1 - min(mine) if have and mine and set(have) & set(mine) else 0
+        if every & {v + offset for v in mine}:
+            raise ValueError(f"{src_id}: its harvestable object ids would collide in {dst_id}")
+        offsets[src_id] = offset
+        moves += [(src_id, path, dst_id) for path in merge_moves(texts[src_id], texts[dst_id])]
     for t in territories:
+        if t.id in merged:
+            continue
         text = texts[t.id]
         for path, n in t.scene.nodes.items():
             if path.count("/") != 1 and not path.startswith(("Gameplay/", "RuntimePoints/", "Ground/Regions/")):
@@ -223,6 +293,26 @@ def build(territories, spec, amend):
         indices = sorted(s.subtree(path))
         blocks = [s.blocks[i] for i in indices]
         delta = by_id[src].translation - by_id[dst].translation
+        if src in merged:
+            # the successor's ids: retired--x becomes successor--x; colliding harvestables shift past its highest
+            offset = offsets[src]
+            retag = word(src)
+            harvest = bool(HARVEST_KIND.search(blocks[0]))
+
+            def renumber(text):
+                if not (offset and harvest):
+                    return text
+                text = re.sub(r'(--harvest-)(\d+)(?=-)', lambda m: f"{m.group(1)}{int(m.group(2)) + offset}", text)
+                return re.sub(r'("objectId": )(\d+)', lambda m: f"{m.group(1)}{int(m.group(2)) + offset}", text)
+            renamed = [renumber(retag.sub(dst, b)) for b in blocks]
+            for before, after in zip(blocks, renamed):
+                old = re.search(r'(?m)^record_id = "([^"]+)"', before)
+                new = re.search(r'(?m)^record_id = "([^"]+)"', after)
+                if old and old.group(1) != new.group(1):
+                    report["renamedMarkers"][old.group(1)] = new.group(1)
+            blocks = renamed
+            path = (path.rsplit("/", 1)[0] + "/" if "/" in path else "") + \
+                re.search(r'name="((?:[^"\\]|\\.)*)"', blocks[0].split("\n", 1)[0]).group(1)
         prefix = f"a3_{src}_"
         # resources the moved blocks use, recursively
         needed, pending = set(), [rid for b in blocks for _, rid in REF.findall(b)]
@@ -247,7 +337,7 @@ def build(territories, spec, amend):
             block = resources[rid].replace(f' id="{rid}"', f' id="{prefix}{rid}"', 1)
             new_resources.append(rename(block))
             d.resource_ids.add(prefix + rid)
-        top = s.node_at[path]
+        top = indices[0]
         name = path.rsplit("/", 1)[-1]
         parent = path.rsplit("/", 1)[0] if "/" in path else "."
         taken = set(d.node_at)
@@ -265,6 +355,10 @@ def build(territories, spec, amend):
                     block = block.replace(aid.group(0), f'asset_id = "{aid.group(1)}-a3"', 1)
                 if re.search(r"(?m)^transform = Transform3D\(", block):
                     block = transform_origin_set(block, add=(float(delta[0]), 0.0, float(delta[2])))
+                elif re.search(r'(?m)^curve = SubResource\("([^"]+)"\)', block):
+                    curve = re.search(r'(?m)^curve = SubResource\("([^"]+)"\)', block).group(1)
+                    at = next(k for k, b in enumerate(new_resources) if f' id="{curve}"' in b.split("\n", 1)[0])
+                    new_resources[at] = shift_curve(new_resources[at], float(delta[0]), float(delta[2]))
                 else:
                     raise ValueError(f"{src}:{path}: a moved node needs an explicit transform")
             elif new_name != name:
@@ -291,7 +385,7 @@ def build(territories, spec, amend):
     return texts, report
 
 
-def content_tables(territories, spec):
+def content_tables(territories, spec, merged=None):
     """The per-map content files follow the same rule: spawn rows move to the map owning their continent position
     (local re-framed by the translation difference, their source record carried); a new map gets an empty spawns
     table and empty server rows. Returns {path: bytes} for the files that change."""
@@ -335,8 +429,16 @@ def content_tables(territories, spec):
             out[root / rid / "content/spawns.json"] = (json.dumps(table, indent=1, ensure_ascii=False) + "\n").encode()
     rows_path = root / "_continent_v2/content/server-rows.json"
     rows = read(rows_path)
-    missing = [t.id for t in territories if t.id not in rows["maps"]]
-    if missing:
+    folded = [rid for rid in (merged or {}) if rid in rows["maps"]]
+    for rid in folded:
+        # a merged map's server rows join its successor's (none may collide)
+        for kind, items in rows["maps"].pop(rid).items():
+            target = rows["maps"].setdefault(merged[rid], {}).setdefault(kind, {})
+            if set(items) & set(target):
+                raise ValueError(f"{rid}: server {kind} rows collide in {merged[rid]}")
+            target.update(items)
+    missing = [t.id for t in territories if t.id not in rows["maps"] and t.id not in (merged or {})]
+    if missing or folded:
         for rid in missing:
             rows["maps"][rid] = {"npcs": {}, "interactives": {}}
         rows["maps"] = dict(sorted(rows["maps"].items()))
@@ -371,7 +473,7 @@ def main(argv=None) -> int:
         return 0
     texts, report = build(territories, spec, amend)
     changed = [t for t in texts.values() if t.text() != t.original]
-    files = content_tables(territories, spec)
+    files = content_tables(territories, spec, amend.get("mergedMaps"))
     if args.check:
         print(json.dumps({"pending": [t.path.name for t in changed] + [str(p.relative_to(CHECKOUT)) for p in files],
                           **report}, indent=1))

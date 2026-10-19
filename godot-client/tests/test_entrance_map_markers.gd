@@ -4,7 +4,7 @@ extends SceneTree
 const EXPECTED := {
 	"landfall": ["Lantern Mine", 332, 86],
 	"pinebrow": ["Pinebrow Deep Workings", 537, 490],
-	"jadestair": ["Spindle Mineral Cavern", 230, 754],
+	"coilmere": ["Spindle Mineral Cavern", 230, 754],
 	"boarsend": ["Boarsend Old Barrow", 825, 489],
 }
 var failures := 0

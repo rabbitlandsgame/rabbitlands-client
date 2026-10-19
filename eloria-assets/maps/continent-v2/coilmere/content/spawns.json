@@ -12,6 +12,16 @@
     "note": "SUPERSEDED 2026-10-03 (review fix): every row now has its 1 m tile and its 8 neighbours reached on the built maps' served-rule union checks (reports/rf_th2, reports/rf_gs1); the old rule was 8-neighbour BFS over dry (>= 0.6 m) 2 m cells, step grade <= 0.65, inside the map polygon, seeded at the map's land crossings",
     "savedCopy": "work-output/continent-v2/review/serve_inputs/spawns/adjacent_d2_rf.json",
     "originally": "session scratchpad continent_v2/content/spawns/adjacent_d2_rf.json"
+   },
+   "sw_isle": {
+    "file": "spawn_plan_rf.json",
+    "sha256": "13dd506f5c254b91fd1fbeb7faeb707c8690d21b1d76d4e649aa63358219dc4f",
+    "schema": "eloria-continent-v2-spawn-plan-draft-1",
+    "date": "2026-10-02",
+    "note": "review fix 2026-10-03: sw-spawn-0883 re-seated onto a fully reached 3x3 tile ring (rf_sw1 asset-aware check)",
+    "diffCheck": "differs from spawn_plan.json (2026-10-02 21:57) only in sw-spawn-0883, (1718, 218) -> (1718, 219) in the pre-D2b frame, (1718, 188) -> (1718, 189) in D2b",
+    "savedCopy": "work-output/continent-v2/review/serve_inputs/spawns/spawn_plan_rf.json",
+    "originally": "session scratchpad continent_v2/content/spawns/spawn_plan_rf.json"
    }
   }
  },
@@ -461,6 +471,549 @@
    "level": 10,
    "habitat": "shore",
    "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0058",
+   "creature": "coralcrest_heron",
+   "local": [
+    -215.0,
+    -270.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0059",
+   "creature": "pelican",
+   "local": [
+    -335.0,
+    -252.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0061",
+   "creature": "magpie",
+   "local": [
+    -263.5,
+    -236.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 5,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0062",
+   "creature": "goose",
+   "local": [
+    -239.0,
+    -218.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0063",
+   "creature": "bronze_tide_crab",
+   "local": [
+    -373.0,
+    -202.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "shore"
+  },
+  {
+   "id": "th-spawn-0064",
+   "creature": "mossback_badger",
+   "local": [
+    -265.0,
+    -202.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0065",
+   "creature": "mossback_badger",
+   "local": [
+    -219.0,
+    -196.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0066",
+   "creature": "raven",
+   "local": [
+    -347.5,
+    -202.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0069",
+   "creature": "goose",
+   "local": [
+    -287.0,
+    -164.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0070",
+   "creature": "raven",
+   "local": [
+    -333.0,
+    -154.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0072",
+   "creature": "russet_faun",
+   "local": [
+    -249.0,
+    -148.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0076",
+   "creature": "mossback_boar",
+   "local": [
+    -247.0,
+    -122.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "forest"
+  },
+  {
+   "id": "th-spawn-0077",
+   "creature": "frilled_lizard",
+   "local": [
+    -276.5,
+    -114.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0078",
+   "creature": "bronze_tide_crab",
+   "local": [
+    -433.5,
+    -137.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "shore",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0080",
+   "creature": "frilled_lizard",
+   "local": [
+    -226.5,
+    -93.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0086",
+   "creature": "crown_antler_stag",
+   "local": [
+    -373.0,
+    -38.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0087",
+   "creature": "frilled_lizard",
+   "local": [
+    -409.0,
+    -26.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0090",
+   "creature": "brambleback_boar",
+   "local": [
+    -340.5,
+    -43.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 12,
+   "habitat": "forest",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0091",
+   "creature": "raven",
+   "local": [
+    -399.0,
+    10.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0092",
+   "creature": "raven",
+   "local": [
+    -439.0,
+    12.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0093",
+   "creature": "crown_antler_stag",
+   "local": [
+    -377.0,
+    30.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0100",
+   "creature": "goose",
+   "local": [
+    -253.0,
+    98.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0102",
+   "creature": "crown_antler_stag",
+   "local": [
+    -283.0,
+    102.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0103",
+   "creature": "jackalope",
+   "local": [
+    -315.0,
+    110.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0106",
+   "creature": "frilled_lizard",
+   "local": [
+    -299.0,
+    152.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0109",
+   "creature": "mossback_badger",
+   "local": [
+    -311.0,
+    186.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:se_islet",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0126",
+   "creature": "coralcrest_heron",
+   "local": [
+    -322.5,
+    -257.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 10,
+   "habitat": "shore",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0127",
+   "creature": "pelican",
+   "local": [
+    -380.5,
+    -158.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 9,
+   "habitat": "shore",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0128",
+   "creature": "raven",
+   "local": [
+    -309.0,
+    -134.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0130",
+   "creature": "frilled_lizard",
+   "local": [
+    -333.5,
+    -129.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0131",
+   "creature": "frilled_lizard",
+   "local": [
+    -269.5,
+    -45.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0134",
+   "creature": "chameleon",
+   "local": [
+    -459.0,
+    34.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 4,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0135",
+   "creature": "raven",
+   "local": [
+    -257.5,
+    79.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0136",
+   "creature": "jackalope",
+   "local": [
+    -373.0,
+    64.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0138",
+   "creature": "raven",
+   "local": [
+    -426.5,
+    72.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "rock",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "th-spawn-0139",
+   "creature": "crown_antler_stag",
+   "local": [
+    -391.0,
+    86.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 6,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0141",
+   "creature": "raven",
+   "local": [
+    -343.0,
+    96.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 7,
+   "habitat": "meadow"
+  },
+  {
+   "id": "th-spawn-0142",
+   "creature": "frilled_lizard",
+   "local": [
+    -255.0,
+    126.0
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 8,
+   "habitat": "rock"
+  },
+  {
+   "id": "th-spawn-0143",
+   "creature": "riverglass_otter",
+   "local": [
+    -337.5,
+    166.5
+   ],
+   "leash": 40,
+   "zone": "adjacent:tollholms-fill",
+   "band": "4-12",
+   "level": 4,
+   "habitat": "shore",
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+  },
+  {
+   "id": "lv-greenlight-stop-04",
+   "creature": "delta_mud_crab",
+   "local": [
+    -575.5,
+    -40.5
+   ],
+   "leash": 12,
+   "zone": "lv-causeway-stops",
+   "band": "D",
+   "level": 12,
+   "habitat": "shore"
+  },
+  {
+   "id": "lv-greenlight-road-04",
+   "creature": "delta_mud_crab",
+   "local": [
+    -493.5,
+    -78.5
+   ],
+   "leash": 25,
+   "zone": "lv-roadside-life",
+   "band": "D",
+   "level": 12,
+   "habitat": "shore"
   }
  ]
 }

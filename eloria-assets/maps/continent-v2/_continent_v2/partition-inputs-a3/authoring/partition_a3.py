@@ -42,10 +42,9 @@ C4 = [(2259, 7093), (2283, 7139), (2301, 7173), (2331, 7181), (2401, 7189), (247
       (2729, 7171), (2761, 7171)]
 # Greenlight | Ravenhead: west of the B22 bar's north-east coast (the bars = Greenlight)
 C7 = [(1849, 7371), (1961, 7631), (2001, 7671), (2311, 7671)]
-# Ravenhead | jadestair / coilmere / suncoil: z=7671 kept, the corner over the new ground's north coast ceded
+# Ravenhead | coilmere: z=7671 kept, the corner over the new ground's north coast ceded
 C8 = [(2311, 7671), (2719, 7671), (2729, 7671), (2761, 7671), (2761, 7591)]
-# jadestair | coilmere: the A2 spindle/tollholm chain, then west of the south arm's tip to the sea
-C6 = [(2719, 7671), (2719, 7921), (2699, 8051), (2729, 8181), (2723, 8343), (2723, 8461)]
+# (revision 3: Jadestair merged into Coilmere; their A2 spindle/tollholm border C6 is gone)
 # coilmere | suncoil: 55 m west of the temple ring path, then ~50 m south of it (the south arm round the lagoon's
 # inner bay is Coilmere's coves), then down to the sea
 C9 = [(3201, 7591), (3201, 8651)]
@@ -84,22 +83,22 @@ def sections_a3(a2):
     new['ravenhead'] = [ring([(2761, 7171)], rev(C8), rev(C7), [(1949, 7221)], C3, C4)]
     new['greenlight'] = [ring([(1675, 7941), (1685, 8259), (2311, 8259)], rev(C7), [(1699, 7581), (1575, 7601),
                                                                                     (1575, 7655), (1629, 7701)])]
-    new['jadestair'] = [ring([(2311, 7671)], C6, [(2311, 8461), (2311, 8259)])]
-    new['coilmere'] = [ring(C8[1:], [(3201, 7591)], C9, [(2723, 8651)], rev(C6))]
+    # the south edge steps up west of x 2723: the sea south of the knob belongs to no map
+    new['coilmere'] = [ring(C8, [(3201, 7591)], C9, [(2723, 8651), (2723, 8461), (2311, 8461), (2311, 8259)])]
     new['suncoil'] = [ring([(3201, 7471), (4101, 7471), (4101, 8701), (3201, 8701)], rev(C9))]
     new['hornmere'] = [ring([(621, 6221), (621, 5021)], C11)]
     new['whitepeak'] = [ring(rev(C11), [(2031, 5021), (2031, 6221)])]
     return new
 
 
-ORDER = ['hearthcroft', 'ringholm', 'greenlight', 'jadestair', 'coilmere', 'suncoil', 'landfall', 'warrenmead',
+ORDER = ['hearthcroft', 'ringholm', 'greenlight', 'coilmere', 'suncoil', 'landfall', 'warrenmead',
          'stagheath', 'twinbrook', 'reedfall', 'brambleshaw', 'saltsound', 'ravenhead', 'pinebrow', 'boarsend',
          'hornmere', 'whitepeak']
-LABELS = {'jadestair': 'Jadestair', 'coilmere': 'Coilmere', 'suncoil': 'Suncoil', 'hornmere': 'Hornmere',
+LABELS = {'coilmere': 'Coilmere', 'suncoil': 'Suncoil', 'hornmere': 'Hornmere',
           'whitepeak': 'Whitepeak'}
-SUCCESSORS = {'jadestair': 'spindle_hill', 'coilmere': 'tollholm'}
-COLOURS = {'jadestair': '#2f9e5b', 'coilmere': '#3fb8a8', 'suncoil': '#d9b13b', 'hornmere': '#9fc4e8', 'whitepeak': '#f2f4f8'}
-SE_ISLE = {'jadestair', 'coilmere', 'suncoil'}
+SUCCESSORS = {'coilmere': 'tollholm'}  # Coilmere also absorbs Spindle Hill (via Jadestair, plan-amendments mergedMaps)
+COLOURS = {'coilmere': '#3fb8a8', 'suncoil': '#d9b13b', 'hornmere': '#9fc4e8', 'whitepeak': '#f2f4f8'}
+SE_ISLE = {'coilmere', 'suncoil'}
 NORTH_ISLE = {'hornmere', 'whitepeak'}
 
 
@@ -221,11 +220,14 @@ def write(a2, secs, shapes, stats, borders):
                                        'sha256': hashlib.sha256((A2 / 'sections_spec.json').read_bytes()).hexdigest()},
                        'ground': 'eloria-assets/maps/continent-v2/_continent_v2/group-terrain-v2/terrain-provenance.json',
                        'brief': 'Landfall A3, approved by the owner 2026-10-19: strait fills, a boat-only Verdant + Ssarathi '
-                                'isle replacing Spindle Hill and Tollholm (fresh ids), a north Whitehorn + Mirrorhold isle'},
-            'retiredMapIds': a2['retiredMapIds'] + ['spindle_hill', 'tollholm'],
+                                'isle replacing Spindle Hill and Tollholm (fresh ids), a north Whitehorn + Mirrorhold isle; '
+                                'revised the same day: near-rectangular borders, open sea unassigned, Jadestair merged '
+                                'into Coilmere'},
+            # jadestair: Spindle Hill's A3 successor, merged into Coilmere before release (owner 2026-10-19)
+            'retiredMapIds': a2['retiredMapIds'] + ['spindle_hill', 'tollholm', 'jadestair'],
             'priorityNote': 'Sections are in priority order: a point exactly on a border belongs to the section listed first. '
                             'Unchanged A2 borders keep their exact vertex chains; new borders are shared vertex chains on '
-                            'the odd-metre lattice. The south-east isle (jadestair, coilmere, suncoil) shares no land '
+                            'the odd-metre lattice. The south-east isle (coilmere, suncoil) shares no land '
                             'with any other map (boat-only); every isle shares sea borders with its neighbours so it preloads.',
             'sections': sections}
     OUT.mkdir(exist_ok=True)

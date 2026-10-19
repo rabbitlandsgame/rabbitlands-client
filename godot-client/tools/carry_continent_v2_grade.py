@@ -8,6 +8,8 @@ is not in the repository, so this carries them instead:
   * every other vertex gets the map's grade as a per-channel log ratio graded/frozen, harmonically inpainted from the
     carried vertices, so feathers, accents and canopy smoothing continue smoothly across new or re-cut ground.
 Previous crops are read from Git (--from COMMIT); a map absent there reads its predecessor's files (marker-renames-a3).
+A map that absorbed another (plan-amendments mergedMaps) also reads the absorbed map's files: a vertex takes the
+graded bytes of the first previous crop (its own first) that holds it with the same frozen bytes.
 colour-grade.json keeps its targets and gains a "carried" record; parentFrozenCrop and graded are rebound.
 
   python godot-client/tools/carry_continent_v2_grade.py --from COMMIT [--check]
@@ -71,32 +73,35 @@ def harmonic(values: np.ndarray, known: np.ndarray) -> np.ndarray:
     return np.where(known, values, push_pull(np.where(known, values, 0.0), known.astype(np.float64)))
 
 
-def carry(region: Path, previous: Path, ref: str):
+def carry(region: Path, previous: list[Path], ref: str):
     grade = json.loads((region / "colour-grade.json").read_text(encoding="utf-8"))
     frozen_new = (region / "base-colors.rgba8").read_bytes()
     if grade["parentFrozenCrop"]["sha256"] == sha(frozen_new):
         return None
     prov_new = json.loads((region / "terrain-provenance.json").read_text(encoding="utf-8"))
-    prov_old = json.loads(git_show(ref, previous / "terrain-provenance.json"))
-    frozen_old = git_show(ref, previous / "base-colors.rgba8")
-    graded_old = git_show(ref, previous / grade["graded"]["path"])
-    old_grade = json.loads(git_show(ref, previous / "colour-grade.json"))
-    if sha(frozen_old) != old_grade["parentFrozenCrop"]["sha256"] or sha(graded_old) != old_grade["graded"]["sha256"]:
-        raise ValueError(f"{region.name}: the previous grade is not bound to its previous crop")
-    f0, w0, h0 = window(prov_old)
     f1, w1, h1 = window(prov_new)
-    old_c = np.frombuffer(frozen_old, np.uint8).reshape(h0, w0, 4)
-    old_g = np.frombuffer(graded_old, np.uint8).reshape(h0, w0, 4)
     new_c = np.frombuffer(frozen_new, np.uint8).reshape(h1, w1, 4)
-    # new vertex (r, c) -> old (r - dr, c - dc)
-    dc, dr = ((f1 - f0) / T.CELL).astype(int)
-    rr, cc = np.mgrid[0:h1, 0:w1]
-    orr, occ = rr + dr, cc + dc
-    inside = (orr >= 0) & (orr < h0) & (occ >= 0) & (occ < w0)
-    same = np.zeros((h1, w1), bool)
-    same[inside] = (old_c[orr[inside], occ[inside]] == new_c[inside]).all(-1)
     graded = new_c.copy()
-    graded[same] = old_g[orr[same], occ[same]]
+    same = np.zeros((h1, w1), bool)
+    for source in previous:
+        prov_old = json.loads(git_show(ref, source / "terrain-provenance.json"))
+        old_grade = json.loads(git_show(ref, source / "colour-grade.json"))
+        frozen_old = git_show(ref, source / "base-colors.rgba8")
+        graded_old = git_show(ref, source / old_grade["graded"]["path"])
+        if sha(frozen_old) != old_grade["parentFrozenCrop"]["sha256"] or sha(graded_old) != old_grade["graded"]["sha256"]:
+            raise ValueError(f"{source.name}: the previous grade is not bound to its previous crop")
+        f0, w0, h0 = window(prov_old)
+        old_c = np.frombuffer(frozen_old, np.uint8).reshape(h0, w0, 4)
+        old_g = np.frombuffer(graded_old, np.uint8).reshape(h0, w0, 4)
+        # new vertex (r, c) -> old (r - dr, c - dc)
+        dc, dr = ((f1 - f0) / T.CELL).astype(int)
+        rr, cc = np.mgrid[0:h1, 0:w1]
+        orr, occ = rr + dr, cc + dc
+        take = (orr >= 0) & (orr < h0) & (occ >= 0) & (occ < w0) & ~same
+        match = np.zeros((h1, w1), bool)
+        match[take] = (old_c[orr[take], occ[take]] == new_c[take]).all(-1)
+        graded[match] = old_g[orr[match], occ[match]]
+        same |= match
     if (~same).any():
         ratio = np.log((graded[..., :3].astype(np.float64) + 1.0) / (new_c[..., :3].astype(np.float64) + 1.0))
         for k in range(3):
@@ -108,7 +113,7 @@ def carry(region: Path, previous: Path, ref: str):
     grade["graded"]["sha256"] = sha(blob)
     grade["graded"]["changedVertices"] = int((graded != new_c).any(-1).sum())
     grade["carried"] = {"tool": "godot-client/tools/carry_continent_v2_grade.py", "fromCommit": ref,
-                        "fromRegion": previous.relative_to(CHECKOUT).as_posix(),
+                        "fromRegions": [source.relative_to(CHECKOUT).as_posix() for source in previous],
                         "keptVertices": int(same.sum()), "carriedVertices": int((~same).sum()),
                         "method": "unchanged frozen bytes keep their graded bytes; the rest take a harmonically "
                                   "inpainted per-channel log ratio graded/frozen"}
@@ -125,6 +130,9 @@ def main(argv=None) -> int:
                               check=True, text=True).stdout.strip()
     renamed = json.loads(RENAMES.read_text(encoding="utf-8"))["maps"] if RENAMES.exists() else {}
     successor_of = {new: old for old, new in renamed.items()}
+    catalog = json.loads(T.CATALOG.read_text(encoding="utf-8"))
+    amendments = T.res_to_path(catalog["partitionSpecPath"]).parent / "plan-amendments.json"
+    merged = json.loads(amendments.read_text(encoding="utf-8")).get("mergedMaps", {}) if amendments.exists() else {}
     report, stale = {}, []
     for t in T.load_territories():
         region = REGIONS / t.id
@@ -135,7 +143,9 @@ def main(argv=None) -> int:
         previous = REGIONS / t.id
         if not exists_at(args.ref, previous / "colour-grade.json"):
             previous = REGIONS / successor_of.get(t.id, t.id)
-        result = carry(region, previous, args.ref)
+        absorbed = [REGIONS / rid for rid, into in merged.items() if into == t.id
+                    and exists_at(args.ref, REGIONS / rid / "colour-grade.json")]
+        result = carry(region, [previous] + absorbed, args.ref)
         if result is None:
             continue
         blob, grade, record = result

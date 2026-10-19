@@ -3,7 +3,6 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/hearthcroft/hearthcroft.tscn" id="hearthcroft"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/ringholm/ringholm.tscn" id="ringholm"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/greenlight/greenlight.tscn" id="greenlight"]
-[ext_resource type="PackedScene" path="res://world_authoring/regions/jadestair/jadestair.tscn" id="jadestair"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/coilmere/coilmere.tscn" id="coilmere"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/suncoil/suncoil.tscn" id="suncoil"]
 [ext_resource type="PackedScene" path="res://world_authoring/regions/landfall/landfall.tscn" id="landfall"]
@@ -126,19 +125,11 @@ preview_clip_inside = PackedVector2Array(1675, 7941, 1685, 8259, 2311, 8259, 231
 
 [editable path="greenlight"]
 
-[node name="jadestair" parent="." instance=ExtResource("jadestair")]
-position = Vector3(2583.0, 0.0, 8007.0)
-
-[node name="Terrain" parent="jadestair"]
-preview_clip_inside = PackedVector2Array(2311, 7671, 2719, 7671, 2719, 7921, 2699, 8051, 2729, 8181, 2723, 8343, 2723, 8461, 2311, 8461, 2311, 8259)
-
-[editable path="jadestair"]
-
 [node name="coilmere" parent="." instance=ExtResource("coilmere")]
 position = Vector3(2930.0, 0.0, 8007.0)
 
 [node name="Terrain" parent="coilmere"]
-preview_clip_inside = PackedVector2Array(2719, 7671, 2729, 7671, 2761, 7671, 2761, 7591, 3201, 7591, 3201, 8651, 2723, 8651, 2723, 8461, 2723, 8343, 2729, 8181, 2699, 8051, 2719, 7921)
+preview_clip_inside = PackedVector2Array(2311, 7671, 2719, 7671, 2729, 7671, 2761, 7671, 2761, 7591, 3201, 7591, 3201, 8651, 2723, 8651, 2723, 8461, 2311, 8461, 2311, 8259)
 
 [editable path="coilmere"]
 

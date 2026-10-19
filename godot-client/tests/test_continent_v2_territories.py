@@ -59,7 +59,7 @@ def test_the_catalog_lists_recorded_partition(territories):
     recorded = T._json(located("sections_spec.json"))
     sections = recorded["sections"]
     assert [t.id for t in territories] == [s["mapId"] for s in sorted(sections,key=lambda s:s["label"])]
-    assert len(territories) == 18
+    assert len(territories) == 17
     assert not set(recorded["retiredMapIds"]) & {t.id for t in territories}
     for t in territories:
         section=next(s for s in sections if s["mapId"]==t.id)
@@ -115,10 +115,10 @@ def test_shared_border_vertices_are_byte_equal(territories,lattice):
         if entry["sharedVertices"]:
             assert entry["baseDifferences"]==0 and entry["waterNearShared"]==[]
             assert all(value==0 for key,value in entry.items() if key.startswith("sculptedShared_"))
-    # A3: the knob is Jadestair's jetty and the pier Ravenhead's; no patch spans a border
+    # A3: the knob is Coilmere's jetty (Jadestair merged into it) and the pier Ravenhead's; no patch spans a border
     assert all(entry.get("mirroredPatches",[])==[] for entry in report.values())
     assert [p["id"] for p in T.patches(by_id(territories,"ravenhead"))]==["seam-mole-pier"]
-    assert [p["id"] for p in T.patches(by_id(territories,"jadestair"))]==["seam-mole-knob"]
+    assert [p["id"] for p in T.patches(by_id(territories,"coilmere"))]==["seam-mole-knob"]
     assert sum(len(T.patches(t)) for t in territories)==2
 
 

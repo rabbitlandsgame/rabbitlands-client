@@ -7,16 +7,17 @@
    "sha256": "174bdae572292403a75664b0fdd10ea16e59bfd8b2de19aa2708c878139b12ec"
   },
   "ground": "eloria-assets/maps/continent-v2/_continent_v2/group-terrain-v2/terrain-provenance.json",
-  "brief": "Landfall A3, approved by the owner 2026-10-19: strait fills, a boat-only Verdant + Ssarathi isle replacing Spindle Hill and Tollholm (fresh ids), a north Whitehorn + Mirrorhold isle"
+  "brief": "Landfall A3, approved by the owner 2026-10-19: strait fills, a boat-only Verdant + Ssarathi isle replacing Spindle Hill and Tollholm (fresh ids), a north Whitehorn + Mirrorhold isle; revised the same day: near-rectangular borders, open sea unassigned, Jadestair merged into Coilmere"
  },
  "retiredMapIds": [
   "sw_isle",
   "tollholms",
   "gull_skerries",
   "spindle_hill",
-  "tollholm"
+  "tollholm",
+  "jadestair"
  ],
- "priorityNote": "Sections are in priority order: a point exactly on a border belongs to the section listed first. Unchanged A2 borders keep their exact vertex chains; new borders are shared vertex chains on the odd-metre lattice. The south-east isle (jadestair, coilmere, suncoil) shares no land with any other map (boat-only); every isle shares sea borders with its neighbours so it preloads.",
+ "priorityNote": "Sections are in priority order: a point exactly on a border belongs to the section listed first. Unchanged A2 borders keep their exact vertex chains; new borders are shared vertex chains on the odd-metre lattice. The south-east isle (coilmere, suncoil) shares no land with any other map (boat-only); every isle shares sea borders with its neighbours so it preloads.",
  "sections": [
   {
    "id": "hearthcroft",
@@ -298,10 +299,10 @@
    "landM2": 109064
   },
   {
-   "id": "jadestair",
-   "mapId": "jadestair",
-   "label": "Jadestair",
-   "colour": "#2f9e5b",
+   "id": "coilmere",
+   "mapId": "coilmere",
+   "label": "Coilmere",
+   "colour": "#3fb8a8",
    "ownershipPolygons": [
     [
      [
@@ -313,20 +314,28 @@
       7671
      ],
      [
-      2719,
-      7921
-     ],
-     [
-      2699,
-      8051
-     ],
-     [
       2729,
-      8181
+      7671
+     ],
+     [
+      2761,
+      7671
+     ],
+     [
+      2761,
+      7591
+     ],
+     [
+      3201,
+      7591
+     ],
+     [
+      3201,
+      8651
      ],
      [
       2723,
-      8343
+      8651
      ],
      [
       2723,
@@ -344,77 +353,11 @@
    ],
    "bounds": [
     2311,
-    7671,
-    2729,
-    8461
-   ],
-   "landM2": 124484,
-   "successorOf": "spindle_hill"
-  },
-  {
-   "id": "coilmere",
-   "mapId": "coilmere",
-   "label": "Coilmere",
-   "colour": "#3fb8a8",
-   "ownershipPolygons": [
-    [
-     [
-      2719,
-      7671
-     ],
-     [
-      2729,
-      7671
-     ],
-     [
-      2761,
-      7671
-     ],
-     [
-      2761,
-      7591
-     ],
-     [
-      3201,
-      7591
-     ],
-     [
-      3201,
-      8651
-     ],
-     [
-      2723,
-      8651
-     ],
-     [
-      2723,
-      8461
-     ],
-     [
-      2723,
-      8343
-     ],
-     [
-      2729,
-      8181
-     ],
-     [
-      2699,
-      8051
-     ],
-     [
-      2719,
-      7921
-     ]
-    ]
-   ],
-   "bounds": [
-    2699,
     7591,
     3201,
     8651
    ],
-   "landM2": 288088,
+   "landM2": 412572,
    "successorOf": "tollholm"
   },
   {
