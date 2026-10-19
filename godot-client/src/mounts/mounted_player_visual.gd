@@ -27,9 +27,10 @@ var bridle_paths: Array[PackedVector3Array] = []
 var hind_legs := HindLegPose.new()
 var locomotion: RefCounted
 
-func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony") -> Array[String]:
+func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony",
+		visual_profile: Dictionary = {}) -> Array[String]:
 	actor = player
-	profile = Profiles.read(mount_id)
+	profile = Profiles.read(mount_id) if visual_profile.is_empty() else visual_profile.duplicate(true)
 	if profile.is_empty() or not models.has(mount_id):
 		return ["Mount visual profile missing: " + mount_id]
 	pony = ReplicatedActor3D.new()
