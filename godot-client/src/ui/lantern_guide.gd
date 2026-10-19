@@ -91,7 +91,8 @@ func _refresh() -> void:
 	skip.text = "Leave tutorial…" if second_bell or sky or road else "Skip tutorial…"
 	if field:
 		help.text = "Quest help"
-		skip.text = "Hide guide"
+		skip.text = "Stop tracking"
+		skip.tooltip_text = "Keep your progress. Open Quests and choose Track to resume this dispatch."
 	chapter.text = ("HELP FOR THE WATCHPOST" if watchpost else str(state.get("adventure", "PRACTICE")).to_upper() if road else "THE BORROWED SKY" if sky else "THE SECOND BELL" if second_bell else str(state.get("chapter", "SIGNED ASHORE")) if signed_ashore else "THE LAST LANTERN") + "  ·  %d / %d" % [int(state.get("stage", 1)), int(state.get("total", 28))]
 	heading.text = str(state.get("title", ""))
 	if field:

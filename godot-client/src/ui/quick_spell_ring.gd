@@ -63,7 +63,7 @@ class SectorButton extends Button:
 		for step in range(17): polygon.append(origin + Vector2.from_angle(angle - spread / 2 + 0.02 + (spread - 0.04) * step / 16) * outer)
 		for step in range(16, -1, -1): polygon.append(origin + Vector2.from_angle(angle - spread / 2 + 0.02 + (spread - 0.04) * step / 16) * inner)
 		var active := is_hovered() or selected
-		draw_colored_polygon(polygon, Color(0.24, 0.18, 0.085, 0.97) if active else Color(0.055, 0.046, 0.034, 0.94))
+		draw_colored_polygon(polygon, Color(0.24, 0.18, 0.085, 0.64) if active else Color(0.055, 0.046, 0.034, 0.44))
 		polygon.append(polygon[0])
 		draw_polyline(polygon, Color(0.95, 0.76, 0.39) if active else Color(0.50, 0.38, 0.22), 1.2, true)
 
@@ -403,5 +403,5 @@ func _draw() -> void:
 	for step in range(64):
 		var a := Vector2.from_angle(TAU * step / 64)
 		var b := Vector2.from_angle(TAU * (step + 1) / 64)
-		draw_colored_polygon(PackedVector2Array([a * 29, a * outer, b * outer, b * 29]), Color(0.04, 0.035, 0.024, 0.96))
+		draw_colored_polygon(PackedVector2Array([a * 29, a * outer, b * outer, b * 29]), Color(0.04, 0.035, 0.024, 0.32))
 	draw_arc(Vector2.ZERO, 29, 0, TAU, 48, Color(0.83, 0.65, 0.32), 1, true)

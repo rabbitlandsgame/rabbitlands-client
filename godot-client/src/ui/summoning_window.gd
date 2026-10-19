@@ -158,12 +158,8 @@ func sync() -> void:
 		note.add_theme_color_override("font_color",
 			READY_COLOR if reasons.is_empty() else BLOCKED_COLOR)
 	if behavior_button != null:
-		# The behaviour popup is the server's, and it refuses below summoning
-		# thirty. Saying so here is cheaper than sending a request to be told.
-		var trained: bool = int(AppState.stats.get("summoning", 0)) >= 30
-		behavior_button.disabled = not trained
-		behavior_button.tooltip_text = ("Choose how your summons pick targets"
-			if trained else "Summoning level 30 sets summon behaviour")
+		behavior_button.disabled = false
+		behavior_button.tooltip_text = "Direct your summons at any level: assist, passive or choose target filters"
 
 ## The first blocking reason, or the ingredients when nothing blocks. A player
 ## who can summon wants to know what it will cost them; a player who cannot
@@ -353,5 +349,7 @@ func _build() -> void:
 	status_label = Label.new()
 	status_label.name = "SummoningStatus"
 	status_label.text = "Click a summon to call it. The server decides."
+	status_label.custom_minimum_size.x = PANEL_SIZE.x - 32.0
+	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(status_label)

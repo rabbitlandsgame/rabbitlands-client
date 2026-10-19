@@ -35,6 +35,7 @@ extends RefCounted
 ## Actors are left as they were: their load time is why this cache exists.
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
+const WorldObjectImages := preload("res://src/world/world_object_images.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
 
@@ -120,10 +121,11 @@ static func _build_raw(path: String) -> PackedScene:
 	GltfQuantization.ensure_registered()
 	var document: GLTFDocument = GLTFDocument.new()
 	var state: GLTFState = GLTFState.new()
+	var world_asset := is_world_asset(path)
+	if world_asset: state.set_additional_data(WorldObjectImages.ENABLED, true)
 	if document.append_from_file(path, state) != OK:
 		return null
-	var world_asset := is_world_asset(path)
-	if world_asset:
+	if world_asset and int(state.get_additional_data(WorldObjectImages.PREPARED)) < state.get_images().size():
 		build_texture_mipmaps(state)
 	var generated: Node = document.generate_scene(state, GltfAnimationFidelity.bake_fps(state))
 	if generated == null:

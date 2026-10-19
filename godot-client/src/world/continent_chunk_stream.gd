@@ -5,6 +5,9 @@ extends Node3D
 ## renderer/physics memory. Coordinates in every cell remain territory-local.
 ## This root itself transfers during exterior adoption, retaining loaded cells.
 const DEFAULT_PRELOAD_DISTANCE := 240.0
+## Give the first footsteps time to reach the background loader. Landing
+## beside a chunk boundary otherwise forces another synchronous prime.
+const ARRIVAL_CLEARANCE_METRES := 8.0
 const DEFAULT_RETAIN_DISTANCE := 320.0
 const DEFAULT_MAXIMUM_CHUNKS := 64
 const DEFAULT_RESIDENT_BYTES := 268435456
@@ -352,9 +355,8 @@ func release_views() -> void:
 
 ## Called before the first actor grounding, with the server's actual arrival.
 ## No default-spawn cells are read when the client is waiting for that packet.
-## Loads synchronously only what the byte budget admits plus every cell under
-## the arrival; framed cells beyond the budget stream in on the worker, so an
-## arrival costs no more blocking import than it did before FRAMED_RADIUS.
+## Loads synchronously what the byte budget admits plus the arrival's first
+## eight metres. Remaining framed cells stream in on the worker.
 ## The synchronous part is judged on the published figures (`blocking`), not
 ## on the VRAM-corrected ones: the correction admits more cells to residency,
 ## and every one of those would otherwise lengthen the arrival freeze (the
@@ -371,7 +373,7 @@ func prime(position: Vector3) -> void:
 		if cells.has(str(entry.id)):
 			continue
 		var blocking := not bool(entry.get("beyond_budget", false)) and bool(entry.get("blocking", true))
-		if not blocking and float(entry.distance) > .01:
+		if not blocking and float(entry.distance) > ARRIVAL_CLEARANCE_METRES:
 			continue
 		var builder := WorldLoader.prepare_detached(str(entry.path), _cache_enabled)
 		_install(entry, builder)
@@ -473,6 +475,7 @@ func poll_pending() -> void:
 		_install(entry, builder)
 
 func _install(entry: Dictionary, builder: WorldLoader) -> void:
+	var install_began := Time.get_ticks_usec()
 	if builder == null:
 		_failed(entry, "builder_missing")
 		return
@@ -491,9 +494,15 @@ func _install(entry: Dictionary, builder: WorldLoader) -> void:
 	add_child(imported)
 	resident.entry = entry
 	cells[str(entry.id)] = resident
+	# Start the next queued import as soon as this worker finishes. Waiting
+	# for the focus throttle between every cell leaves visible gaps on a
+	# first traversal even while the import worker is idle.
+	_next_update = 0
 	_update_resident_bytes()
 	_changed()
-	_record("ready", str(entry.id))
+	_record("ready", str(entry.id), {
+		"prepare_ms": float(resident.phases.get("total", 0)) / 1000.0,
+		"activate_ms": float(Time.get_ticks_usec() - install_began) / 1000.0})
 	cell_ready.emit(str(entry.id), imported)
 
 func set_physics_mode(enabled: bool, preview: bool) -> void:

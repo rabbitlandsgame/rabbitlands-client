@@ -10,7 +10,6 @@ class NativeShapeAsset:
   self.names=[n.get('name',str(i)) for i,n in enumerate(nodes)];self.ids={n:i for i,n in enumerate(self.names)}
   self.parent=np.full(self.n,-1,int)
   for i,n in enumerate(nodes):
-   if 'matrix' in n:raise ValueError('Matrix adapter required')
    for c in n.get('children',[]):self.parent[c]=i
   self.order=[]
   def visit(n):
@@ -19,6 +18,14 @@ class NativeShapeAsset:
    self.order.append(n)
   for n in range(self.n):visit(n)
   self.t=np.array([n.get('translation',[0,0,0]) for n in nodes],float);self.q=np.array([n.get('rotation',[0,0,0,1]) for n in nodes],float);self.s=np.array([n.get('scale',[1,1,1]) for n in nodes],float)
+  for i,node in enumerate(nodes):
+   if 'matrix' not in node:continue
+   matrix=np.asarray(node['matrix'],float).reshape(4,4).T;scale=np.linalg.norm(matrix[:3,:3],axis=0)
+   if np.any(scale<1e-12):raise ValueError('Singular rest matrix')
+   if np.linalg.det(matrix[:3,:3])<0:scale[np.argmax(scale)]*=-1
+   rotation=matrix[:3,:3]/scale[None,:]
+   if not np.allclose(rotation.T@rotation,np.eye(3),atol=1e-7):raise ValueError('Sheared rest matrix')
+   self.t[i]=matrix[:3,3];self.s[i]=scale;self.q[i]=Rotation.from_matrix(rotation).as_quat()
   self.joints=sorted({j for sk in self.d.get('skins',[]) for j in sk['joints']});self.parts=[];self.default_weights={}
   for ni,node in enumerate(nodes):
    if 'mesh' not in node:continue
@@ -69,4 +76,4 @@ class NativeShapeAsset:
    else:raise ValueError(kind)
   return t,q,s,mw
  def duration(self,clip):return float(max(accessor(self.d,self.b,sm['input'])[-1,0] for sm in self.animations[clip]['samplers']))
- def own(self,nodes):return np.concatenate([(p['weights']*np.isin(p['nodes'][p['joints']],nodes)).sum(1) for p in self.parts])
+ def own(self,nodes):return np.concatenate([(p['weights']*np.isin(p['nodes'][p['joints']],nodes)).sum(1) if 'joints' in p else np.zeros(len(p['position'])) for p in self.parts])

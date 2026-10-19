@@ -159,6 +159,23 @@ func _run() -> void:
 	_test_shared_memory_accounting()
 	_test_framed_cells_outlast_budget()
 	DirAccess.make_dir_recursive_absolute(SCRATCH)
+	# A low-budget arrival half a metre from a boundary used to load only
+	# this side, then synchronously re-prime on the first movement packet.
+	var warm := _manifest("fixture_first_steps")
+	warm.streamingChunks = {"schemaVersion":"1.0","coordinateSpace":"territory-local",
+		"maximumLoadedChunks":3,"maximumResidentBytes":1,
+		"chunks":[_write_chunk("first_west",0),_write_chunk("first_east",64),_write_chunk("later",600)]}
+	_write_json(SCRATCH.path_join("first-steps.json"),warm)
+	var first_loader := WorldLoader.new()
+	root.add_child(first_loader)
+	first_loader.load_world(SCRATCH.path_join("first-steps.json"),Vector3(31.5,0,0))
+	var first_stream := first_loader.world_root as ContinentChunkStream
+	_expect(first_stream.cells.has("first_west") and first_stream.cells.has("first_east"),
+		"arrival prepares ground for the first steps across a nearby chunk boundary")
+	_expect(not first_loader.ensure_chunk_arrival(Vector3(33,0,0)),
+		"first movement across the boundary needs no synchronous map reload")
+	_expect(not first_stream.cells.has("later"),"arrival clearance keeps distant chunks deferred")
+	first_loader.free()
 	var config := _manifest("fixture_territory")
 	config.streamingChunks = {"schemaVersion":"1.0","coordinateSpace":"territory-local",
 		"preloadDistance":60,"retainDistance":100,"maximumLoadedChunks":2,"maximumResidentBytes":100,

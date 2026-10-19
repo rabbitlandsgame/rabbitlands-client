@@ -64,7 +64,7 @@ func _run() -> void:
 	var names: Array[String] = []
 	for index: int in listed:
 		names.append(str(catalog.recipe(index).get("output", "")))
-	_expect(names == ["Mirrorfin Otter", "Reedhorn Stag", "Four Gates Turtle"],
+	_expect(names == ["Otter", "Crown Stag", "Crystalback Tortoise"],
 		"the three profile summons are listed, cheapest first: %s" % str(names))
 	for index: int in range(catalog.count()):
 		if str(catalog.recipe(index).get("skill", "")) != "summoning":
@@ -83,7 +83,7 @@ func _run() -> void:
 	_expect(icon.texture is Texture2D,
 		"a summon leaves no item behind, so the row falls back to the atlas glyph")
 	_expect(str((otter.get_node("Row/Name") as Label).text)
-		== "Mirrorfin Otter", "the name sits beside the icon")
+		== "Otter", "the name sits beside the icon")
 	var otter_cost: Label = otter.get_node("Row/Asks/Cost") as Label
 	_expect(otter_cost.text.contains("Mana 5")
 		and otter_cost.text.contains("Summoning 0"),
@@ -179,11 +179,11 @@ func _run() -> void:
 	_stock(inventory, slot_names, catalog, listed)
 	window.call("sync")
 
-	# The behaviour popup is the server's, and it refuses below summoning 30.
+	# Directing companions is a core feature, available from the first summon.
 	var behavior: Button = window.get_node(
 		"SummoningWindow/SummoningBody/SummoningHeader/SummoningBehavior") as Button
-	_expect(behavior.disabled,
-		"the behaviour button is off below summoning 30")
+	_expect(not behavior.disabled,
+		"the behaviour button is available below summoning 30")
 	stats["summoning"] = 30
 	window.call("sync")
 	_expect(not behavior.disabled, "and on at 30")

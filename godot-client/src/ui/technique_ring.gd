@@ -201,7 +201,7 @@ func _draw() -> void:
 		return
 	var factor := maxf(0.1, minf(ring_scale, minf((size.x - 16) / 560.0, (size.y - 16) / 560.0)))
 	draw_set_transform(center, 0, Vector2.ONE * factor)
-	var fill := Color(0.035, 0.03, 0.022, 0.90)
+	var fill := Color(0.035, 0.03, 0.022, 0.32)
 	for step in range(64):
 		var a := Vector2.from_angle(TAU * step / 64)
 		var b := Vector2.from_angle(TAU * (step + 1) / 64)

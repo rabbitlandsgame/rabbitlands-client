@@ -12,7 +12,7 @@ Wagons return visibly to the central hitching ring. There is no first-run countd
 
 ## Access and four-gate map
 
-Offer after Last Lantern or when the Summoning window is first explored. Magic is useful context, not a prerequisite. Borrow an explicitly labeled keeper profile with adequate ether, supplies, Animal Nexus 2 and Summoning at least 30; calibrate above individual recipe requirements for reliable introductory attempts. Level 30 is required by the current server for behavior selection. On departure inspect the player's actual access again.
+Offer after Last Lantern or when the Summoning window is first explored. Magic is useful context, not a prerequisite. Borrow an explicitly labeled keeper profile with adequate ether, supplies and the skill and Animal Nexus required by the recipes demonstrated. Summon directions are available at every level, including zero. On departure inspect the player's actual recipe requirements again.
 
 Propose **128 × 128 tiles** with a central hitching ring around (64,64). Court centers are North (64,101), East (103,64), South (64,27) and West (25,64). Coordinates await collision and multi-actor path testing.
 
@@ -33,9 +33,9 @@ Unlock North → East → South → West. Keep the hitching ring reachable. Do n
 
 **Voice:** “Read the cost before you call. A name in the book is only a possibility.”
 
-**Play:** Open the actual Summoning window, inspect Mirrorfin Otter and the blocked Gate Turtle, then accept the keeper profile through dialogue. Find ingredients, ether, skill and Animal Nexus requirements. Check the real character's behavior-control restriction before borrowing if below 30.
+**Play:** Open the actual Summoning window, inspect Mirrorfin Otter and the blocked Gate Turtle, then accept the keeper profile through dialogue. Find ingredients, ether, skill and Animal Nexus requirements. Inspect the real character's direction controls before borrowing; all six choices are already available.
 
-**Learn:** Summoning uses recipe and resource rules; behavior access has its own level gate.
+**Learn:** Summoning uses recipe and resource rules. All companion directions are available from Summoning level zero.
 
 **Evidence:** Record inspection and the profile transition separately. No summon credit yet. The displayed blockers must match server validation.
 
@@ -161,7 +161,7 @@ Unlock North → East → South → West. Keep the hitching ring reachable. Do n
 
 **Play:** Return the practice profile, inspect the real Summoning window and identify one currently usable recipe or the first missing requirement. Choose to revisit a pen or leave for Four Gates. No real summon or permanent nexus purchase is demanded.
 
-**Learn:** Borrowed behavior access, resources and companion strength do not become permanent unlocks.
+**Learn:** Directions remain available after practice. Borrowed resources, recipe qualifications and companion strength do not become permanent unlocks.
 
 **Evidence:** Exact profile restoration, no surviving private-owned creatures, journal completion once and correct real requirement display.
 
@@ -174,7 +174,7 @@ Optional pens last 4–6 minutes each and save separately. They are not required
 | Feature | Core / experiment | Required action or boundary |
 | --- | --- | --- |
 | Native recipes, ingredients, ether, positive food, success/failure | 01–02, 05 | Resolve real mix and inspect cost; failure is recoverable, never required |
-| Summoning level, Animal Nexus, level-30 behavior control | 01, 10 | Identify one genuine blocker before/after borrowing |
+| Summoning level and Animal Nexus for recipes; directions at every level | 01, 10 | Identify recipe requirements and direct a novice companion without borrowing a level |
 | Ownership, ordinary movement, blocked approaches | 02–03 | Owned actor reaches roomy region through normal movement |
 | Do not attack; Attack my opponent | 03–04 | Hold fire, then join the chosen fight |
 | Attack only summoned creatures; Do not attack summoned creatures | 07 | Different eligible targets under each filter |
@@ -202,7 +202,7 @@ For the later transfer, change creature appearance and ownership. For two-client
 
 > Server source links require access to the private [rabbitlands-server repository](https://github.com/rabbitlandsgame/rabbitlands-server). Local commands assume sibling `rabbitlands-client` and `rabbitlands-server` checkouts.
 
-- [Summoning rules and six behavior labels](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/summoning.py), [world runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py): ownership, behavior level, decay, mixing restrictions and spawn lifecycle.
+- [Summoning rules and six behavior labels](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/summoning.py), [world runtime](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/world.py): ownership, directions at every level, decay, mixing restrictions and spawn lifecycle.
 - [Current profile recipes](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/config/eloria/recipes.txt): Mirrorfin Otter, Stag and Gate Turtle costs and mappings.
 - [Native Summoning window](../../../godot-client/src/ui/summoning_window.gd): cost/blocker presentation and real request path.
 - [Perks](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/perks.py) and [parties](https://github.com/rabbitlandsgame/rabbitlands-server/blob/master/eloria/parties.py): borrowed perk effects and actual ally membership.

@@ -7,7 +7,7 @@ This is a compact index of the concrete implementation requirements discovered w
 | System | Observed current behavior | Storyboard consequence |
 | --- | --- | --- |
 | Character attributes | The active model has twelve directly purchased attributes; the old six are retained for save migration. Carry directly controls capacity at 20 per point. | Teach Carry and the current twelve-attribute catalog; do not repeat the retired Physique/Coordination model. |
-| Summon behavior | Native behavior selection requires Summoning 30, independent of individual summon recipe requirements. | Borrow a labeled qualified profile, then inspect the real character's restriction after departure. |
+| Summon behavior | All six native direction choices are available at every Summoning level. Recipes retain their own skill and nexus requirements. | Practice directions on the real novice character; label any qualifications borrowed for harder recipes. |
 | Summon decay | Baseline is 10 HP per 20 seconds; the current Summoner perk path uses 5. | Show an actual tick and use the offered perk name, not the internal advanced-summoner helper name. |
 | Stone content | The active catalog contains no removal items or summoning stones, despite recognized runtime handlers. | Register handler-compatible items and native representations before the removal scene or optional stone pen can run. |
 | Research | Default books require 600 pages; Book of Steel Smelting is registered. Rationality is directly purchased and the current purchase ceiling is 100. | Lend a disclosed Rationality profile and let six ordinary research ticks run alongside production; validate actual pacing. |

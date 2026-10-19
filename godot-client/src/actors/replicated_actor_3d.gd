@@ -129,8 +129,8 @@ var _death_elapsed := 0.0
 var _death_finished := false
 var _death_animation_seconds := 0.0
 var _corpse_temporary := false
-var _corpse_hold_seconds := 10.0
-var _corpse_fade_seconds := 10.0
+var _corpse_hold_seconds := 3.0
+var _corpse_fade_seconds := 4.0
 var _death_snapshot_msec := -1
 var _corpse_transparency := -1.0
 var _corpse_geometry: Array[GeometryInstance3D] = []
@@ -1279,6 +1279,9 @@ func _overhead_material(colour: Color, priority: int) -> StandardMaterial3D:
 ## no maximum for - most scenery NPCs - has nothing to draw, so it keeps the
 ## bare name rather than an empty bar that would read as "about to die".
 func apply_vitals(current: int, maximum: int) -> void:
+	# Bodies remain visible while fading, but must not intercept a living target.
+	# Fallen players keep their pick layer for targeted healing and revival.
+	collision_layer = 0 if _is_creature and current <= 0 else 2
 	if current == _health_current and maximum == _health_maximum:
 		return
 	_health_current = current
@@ -1288,7 +1291,7 @@ func apply_vitals(current: int, maximum: int) -> void:
 		return
 	if maximum <= 0:
 		_layout_overhead()
-		_refresh_overhead_health()
+		_refresh_overhead()
 		return
 	var clamped: int = clampi(current, 0, maximum)
 	var ratio: float = float(clamped) / float(maximum)
@@ -1310,7 +1313,7 @@ func apply_vitals(current: int, maximum: int) -> void:
 		var material: StandardMaterial3D = fill_quad.material as StandardMaterial3D
 		material.albedo_color = _health_colour(ratio)
 	_layout_overhead()
-	_refresh_overhead_health()
+	_refresh_overhead()
 
 ## Whether this actor's condition is worth the space over its head - which is
 ## main.gd's question, not this node's. See `_add_health_bar`.
@@ -1349,7 +1352,8 @@ func _refresh_overhead_health() -> void:
 ## The last matters because `set_drawn` hides these nodes itself, and a label
 ## switched back on while the actor is out of range would float over nothing.
 func _overhead_shown() -> bool:
-	return _overhead_visible and not _overhead_crowded and _overhead_fade > 0.0 and _drawn
+	return _overhead_visible and not _overhead_crowded and _overhead_fade > 0.0 and _drawn \
+		and not (_is_creature and _health_current == 0)
 
 func set_overhead_crowded(crowded: bool) -> void:
 	if _overhead_crowded == crowded:
@@ -1805,7 +1809,9 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 	_presentation_speed = walk_presentation_speed
 	if _hastened or (actor_command >= 30 and actor_command <= 37):
 		_presentation_speed = run_presentation_speed
-	if teleport or global_position.distance_to(server_target) > 8.0:
+	# A delayed creature burst can cover several tiles. Present its recovery
+	# continuously; only an explicit relocation or an out-of-view correction snaps.
+	if teleport or global_position.distance_to(server_target) > (64.0 if _is_creature else 8.0):
 		global_position = server_target
 		rotation.y = _target_yaw
 		_segment_start = server_target
@@ -1961,6 +1967,7 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 func _sync_death_presentation(dto: Dictionary) -> void:
 	if not dto.has("health"):
 		return
+	collision_layer = 0 if _is_creature and (int(dto.health) <= 0 or not bool(dto.get("alive", true))) else 2
 	if int(dto.health) > 0 and bool(dto.get("alive", true)):
 		if current_action == &"death":
 			current_action = &"idle"
@@ -1975,8 +1982,8 @@ func _sync_death_presentation(dto: Dictionary) -> void:
 	var snapshot: Dictionary = dto.get("death_presentation", {})
 	_death_animation_seconds = float(snapshot.get("animation_seconds", 0.0))
 	_corpse_temporary = bool(snapshot.get("temporary", false))
-	_corpse_hold_seconds = float(snapshot.get("hold_seconds", 10.0))
-	_corpse_fade_seconds = maxf(0.01, float(snapshot.get("fade_seconds", 10.0)))
+	_corpse_hold_seconds = float(snapshot.get("hold_seconds", 3.0))
+	_corpse_fade_seconds = maxf(0.01, float(snapshot.get("fade_seconds", 4.0)))
 	play_action(&"death")
 	var received := int(snapshot.get("received_msec", -1))
 	if received >= 0 and received != _death_snapshot_msec:
@@ -2009,10 +2016,11 @@ func _hold_death_pose() -> void:
 func _update_corpse_pose() -> void:
 	if not _death_finished and _death_elapsed >= _death_duration():
 		_hold_death_pose()
-	if _corpse_temporary:
+	if _corpse_temporary or _is_creature:
 		var fade := clampf((_death_elapsed - _death_duration() - _corpse_hold_seconds)
 			/ _corpse_fade_seconds, 0.0, 1.0)
 		_set_corpse_transparency(fade)
+		if fade >= 1.0: set_process(false)
 
 func _set_corpse_transparency(amount: float) -> void:
 	if is_equal_approx(_corpse_transparency, amount):
@@ -2031,7 +2039,7 @@ func _process(delta: float) -> void:
 		return
 	_death_elapsed += delta
 	_update_corpse_pose()
-	if _death_finished and not _corpse_temporary:
+	if _death_finished and not _corpse_temporary and not _is_creature:
 		set_process(false)
 
 ## Resting commands can arrive before the body finishes its buffered step,
@@ -2055,6 +2063,12 @@ func _movement_aware_action(action: StringName,
 func _paced_travel_action(action: StringName) -> StringName:
 	if _hastened and action == &"walk":
 		return &"run"
+	if _is_creature and action == &"walk" and resolver != null:
+		var scale := _small_creature_scale * server_scale
+		var walk := resolver.stride_speed_for_action(&"walk", scale)
+		var run := resolver.stride_speed_for_action(&"run", scale)
+		if walk > 0 and run > walk and _travel_speed() > walk * 1.8:
+			return &"run"
 	return action
 
 func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) -> void:
@@ -3750,6 +3764,11 @@ func _physics_process(delta: float) -> void:
 	if (_speech_bubble_expiry_msec > 0
 			and Time.get_ticks_msec() >= _speech_bubble_expiry_msec):
 		clear_speech_bubble()
+	if current_action == &"death":
+		global_position = server_target
+		_level_selection_ring()
+		set_physics_process(false)
+		return
 	if _cinematic_active:
 		global_position = _cinematic_position
 		rotation.y = rotate_toward(rotation.y, _cinematic_yaw, turn_speed_radians * delta)

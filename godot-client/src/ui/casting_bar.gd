@@ -20,6 +20,8 @@ var mode_picker: OptionButton
 var wheel_button: Button
 var ring_size_picker: OptionButton
 var slot_count_picker: OptionButton
+var orientation_picker: OptionButton
+var horizontal := false
 var visible_slot_count := DEFAULT_VISIBLE_SLOTS
 var start_expanded := true
 var launcher: Button
@@ -39,7 +41,7 @@ var grip: Label
 var dock_menu: MenuButton
 var settings_body: VBoxContainer
 var _scroll: ScrollContainer
-var _column: VBoxContainer
+var _column: GridContainer
 var _menu_slot := -1
 var _floating_position := Vector2(680, 80)
 var _dragging := false
@@ -90,8 +92,9 @@ func _ready() -> void:
 	_scroll = ScrollContainer.new()
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	body.add_child(_scroll)
-	_column = VBoxContainer.new()
-	_column.add_theme_constant_override("separation", 2)
+	_column = GridContainer.new()
+	_column.add_theme_constant_override("v_separation", 2)
+	_column.add_theme_constant_override("h_separation", 2)
 	_scroll.add_child(_column)
 	for index in range(loadout.slots.size()):
 		var cell := HBoxContainer.new()
@@ -217,6 +220,12 @@ func _build_settings() -> void:
 		slot_count_picker.add_item("Quick spell icons: %d" % count, count)
 	slot_count_picker.item_selected.connect(func(index: int): set_visible_slot_count(slot_count_picker.get_item_id(index)))
 	body.add_child(slot_count_picker)
+	orientation_picker = OptionButton.new()
+	orientation_picker.name = "QuickBarOrientation"
+	orientation_picker.add_item("Vertical spell bar")
+	orientation_picker.add_item("Horizontal spell bar")
+	orientation_picker.item_selected.connect(func(index: int): set_horizontal(index == 1))
+	body.add_child(orientation_picker)
 	ring_size_picker = OptionButton.new()
 	ring_size_picker.name = "RingSize"
 	ring_size_picker.tooltip_text = "Magic ring size, saved per character."
@@ -238,6 +247,7 @@ func set_expanded(expanded: bool) -> void:
 	if changed: layout_changed.emit()
 
 func set_docked(value: bool) -> void:
+	if value and horizontal: set_horizontal(false)
 	if docked == value: return
 	_finish_drag()
 	if not docked: _floating_position = panel.position
@@ -249,7 +259,17 @@ func set_docked(value: bool) -> void:
 	layout_changed.emit()
 
 func hud_layout() -> Dictionary:
-	return {"docked": docked, "position": _floating_position, "expanded": panel.visible, "slot_count": visible_slot_count}
+	return {"docked": docked, "position": _floating_position, "expanded": panel.visible, "slot_count": visible_slot_count, "horizontal": horizontal}
+
+func set_horizontal(value: bool) -> void:
+	if horizontal == value: return
+	horizontal = value
+	_last_layout_size = Vector3(-1, -1, -1)
+	if horizontal:
+		docked = false
+		_floating_position = Vector2(maxf(EDGE, (size.x - visible_slot_count * 60) / 2), maxf(EDGE, _bottom_edge() - 110))
+	_layout()
+	layout_changed.emit()
 
 func set_visible_slot_count(count: int) -> void:
 	count = clampi(count, 1, buttons.size())
@@ -261,6 +281,9 @@ func set_visible_slot_count(count: int) -> void:
 
 func restore_hud_layout(value: Dictionary) -> void:
 	docked = bool(value.get("docked", true))
+	horizontal = bool(value.get("horizontal", false))
+	if horizontal: docked = false
+	_last_layout_size = Vector3(-1, -1, -1)
 	visible_slot_count = clampi(int(value.get("slot_count", DEFAULT_VISIBLE_SLOTS)), 1, buttons.size())
 	var where: Variant = value.get("position", _floating_position)
 	if where is Vector2 and (where as Vector2).is_finite():
@@ -315,18 +338,21 @@ func _layout() -> void:
 	var compact := docked and _has_hud_dock()
 	var top := _dock_origin().y if docked else EDGE
 	var available := maxf(80, _dock_bounds().size.y if compact else _bottom_edge() - top)
-	var layout_size := Vector3(_dock_bounds().size.x if compact else 0, available, visible_slot_count)
+	var layout_size := Vector3(_dock_bounds().size.x if compact else size.x, available, visible_slot_count)
 	if layout_size != _last_layout_size or compact != _last_compact:
 		_last_layout_size = layout_size
 		_last_compact = compact
 		panel.add_theme_stylebox_override("panel", _style(Color(0.16, 0.12, 0.075), 1 if compact else 4))
 		var body: VBoxContainer = _scroll.get_parent()
 		body.add_theme_constant_override("separation", 1 if compact else 2)
-		_column.add_theme_constant_override("separation", 1 if compact else 2)
+		_column.add_theme_constant_override("v_separation", 1 if compact else 2)
+		_column.columns = visible_slot_count if horizontal else 1
+		orientation_picker.select(1 if horizontal else 0)
 		grip.add_theme_font_size_override("font_size", 10 if compact else 13)
 		dock_menu.add_theme_font_size_override("font_size", 9 if compact else 11)
 		wheel_button.visible = not compact and loadout.mode == "wheel"
 		_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER if compact else ScrollContainer.SCROLL_MODE_AUTO
+		_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if horizontal else ScrollContainer.SCROLL_MODE_DISABLED
 		slot_count_picker.select(slot_count_picker.get_item_index(visible_slot_count))
 		# Give the artwork its own square below the badges. Keep it readable
 		# when more slots are shown by scrolling, rather than shrinking it.
@@ -361,6 +387,8 @@ func _layout() -> void:
 				badge.offset_bottom = 12 if compact else 17
 		var content_height := visible_slot_count * slot_height + (visible_slot_count - 1) * (1 if compact else 2)
 		_scroll.custom_minimum_size = Vector2(width + (0 if compact else 14), minf(content_height, available - (18 if compact else 50)))
+		if horizontal:
+			_scroll.custom_minimum_size = Vector2(minf(visible_slot_count * (width + 16), maxf(100, size.x - reserved_right_width - EDGE * 2 - 8)), slot_height + 14)
 		if compact:
 			_sync_item_slot_layout(width, slot_height, icon_size)
 		launcher.add_theme_font_size_override("font_size", 9 if compact else 16)
@@ -386,7 +414,7 @@ func _sync_item_slot_layout(width: float, height: float, icon_size: float) -> vo
 	_item_header_height = panel.get_theme_stylebox("panel").get_content_margin(SIDE_TOP) \
 		+ header.get_combined_minimum_size().y + body.get_theme_constant("separation")
 	_item_view_height = _scroll.custom_minimum_size.y
-	item_slots.add_theme_constant_override("v_separation", _column.get_theme_constant("separation"))
+	item_slots.add_theme_constant_override("v_separation", _column.get_theme_constant("v_separation"))
 	# Both columns reserve the same header space and artwork square. Item
 	# shortcuts use that header so their numbers never reduce the icon size.
 	for child in item_slots.get_children():

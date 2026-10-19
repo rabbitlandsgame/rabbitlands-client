@@ -1,6 +1,11 @@
 {
   "schemaVersion": 1,
   "fallbackAction": "idle",
+  "strideMetresPerSecond": {
+    "walk": 0.6428570465756459,
+    "run": 1.6249997566217715
+  },
+  "strideScalesWithActor": true,
   "playbackSpeeds": {
     "walk": 1.15,
     "run": 1.25
@@ -73,12 +78,7 @@
     "interpretation": "Game choreography inferred from anatomy or fantasy archetype; timing and amplitude are authored for readability.",
     "revision_4_motion": "broader wind-up, cross-body sweep and extended follow-through"
   },
-  "locomotion_retiming": {
-    "walk": 1.35,
-    "jog": 1.5,
-    "baked_into_clip_timestamps": true
-  },
-  "revision": 11,
+  "revision": 12,
   "corrective_clips": [
     "Hit_Chest",
     "Sword_Attack"
@@ -98,5 +98,11 @@
     "Fighting_Idle",
     "Walk",
     "Jog"
-  ]
+  ],
+  "locomotionContacts": {
+    "revision": 1,
+    "report": "docs/qa/undead-gaits/manifest.json",
+    "bakedFPS": 192,
+    "sourceSha256": "f88e621f25f54256af942c4210200763ebf48b84b8e5970d2193f893e0812d83"
+  }
 }

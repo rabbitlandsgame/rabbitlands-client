@@ -1,6 +1,11 @@
 {
   "schemaVersion": 1,
   "fallbackAction": "idle",
+  "strideMetresPerSecond": {
+    "walk": 0.33373425688258956,
+    "run": 0.8131843822489021
+  },
+  "strideScalesWithActor": true,
   "playbackSpeeds": {
     "walk": 1.15,
     "run": 1.25
@@ -76,12 +81,7 @@
     "interpretation": "Game choreography inferred from anatomy or fantasy archetype; timing and amplitude are authored for readability.",
     "revision_4_motion": "planted-foot crouch, rear-leg drive, reaching forefeet and landing recovery"
   },
-  "locomotion_retiming": {
-    "walk": 1.35,
-    "jog": 1.5,
-    "baked_into_clip_timestamps": true
-  },
-  "revision": 11,
+  "revision": 12,
   "corrective_clips": [
     "Sword_Attack"
   ],
@@ -99,5 +99,11 @@
     "Fighting_Idle",
     "Walk",
     "Jog"
-  ]
+  ],
+  "locomotionContacts": {
+    "revision": 1,
+    "report": "docs/qa/undead-gaits/manifest.json",
+    "bakedFPS": 192,
+    "sourceSha256": "c06512bd05f4c225f5d873e3c9d95814f58e5b2b9251ddbbd95a4ef2bd2fdcd5"
+  }
 }

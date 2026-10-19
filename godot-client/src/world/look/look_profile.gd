@@ -1295,8 +1295,8 @@ const HAZE_DENSITY_MAX := 0.92
 ## manifest's `fog.weather`, 0..1): from HAZE_BEGIN-HAZE_END to these at full
 ## fog, and up to full density. Begun at 80 m, the haze could only ever grey
 ## the far half of a frame, so a fog state read as an overcast one.
-const WEATHER_HAZE_BEGIN := 6.0
-const WEATHER_HAZE_END := 150.0
+const WEATHER_HAZE_BEGIN := 16.0
+const WEATHER_HAZE_END := 200.0
 ## How much of the haze also veils the sky itself, clouds and zenith alike.
 ## Little: the painted sky draws its own haze where it belongs, at the horizon.
 const HAZE_SKY_AFFECT := 0.1

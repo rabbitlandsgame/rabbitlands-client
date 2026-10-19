@@ -20,6 +20,7 @@ extends GLTFDocumentExtension
 ## native_animation_importer.gd.
 
 static var _registered: GLTFDocumentExtension = null
+static var _world_images: GLTFDocumentExtension = null
 
 
 static func ensure_registered() -> void:
@@ -27,6 +28,8 @@ static func ensure_registered() -> void:
 		return
 	_registered = new()
 	GLTFDocument.register_gltf_document_extension(_registered)
+	_world_images = preload("res://src/world/world_object_images.gd").new()
+	GLTFDocument.register_gltf_document_extension(_world_images)
 
 
 func _get_supported_extensions() -> PackedStringArray:

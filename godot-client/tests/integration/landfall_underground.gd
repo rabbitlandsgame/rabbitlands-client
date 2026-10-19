@@ -32,6 +32,12 @@ func run() -> void:
 		quit(1)
 		return
 	check(loader.manifest.errors.is_empty(), "Underground manifest validates")
+	var scenery := loader.world_root.get_node_or_null("UndergroundScenery")
+	check(scenery != null and scenery.get_child_count() == 45,
+		"All reviewed imported scenery placements load")
+	var reapply := preload("res://src/world/underground_scenery.gd")
+	check(reapply.apply(loader.manifest, loader.world_root) == 0,
+		"Applying presentation twice does not duplicate scenery")
 	var cutaway := InteriorCutaway.new()
 	check(cutaway.configure(loader.manifest, loader.world_root) > 4, "Roof and wall cutaways resolve")
 	cutaway.update(0, true)
@@ -53,7 +59,8 @@ func run() -> void:
 		stage.add_child(object)
 		object.configure({"object_id":node.objectId, "kind":EloriaProtocol.MAP_OBJECT_HARVEST,
 			"x":node.serverTile[0], "y":node.serverTile[1], "label":node.resource}, adapter, catalog)
-		check(not object.model_id.is_empty(), "Harvestable has a runtime model: " + str(node.resource))
+		check(not object.model_id.is_empty(), "Every underground resource uses imported art: " + str(node.resource))
+		check(not object.get_node("Ring").visible, "Modelled resources keep the ring for active harvesting only")
 	for doorway: Dictionary in loader.manifest.data.portals:
 		var object := MapObject3D.new()
 		stage.add_child(object)
@@ -91,6 +98,13 @@ func run() -> void:
 				await process_frame
 			await RenderingServer.frame_post_draw
 			check(root.get_texture().get_image().save_png(captures.path_join(str(section.id)+".png")) == OK, "Capture saves")
+			camera.size = 23
+			var room_focus := centre + Vector3(0,0,8)
+			camera.look_at_from_position(room_focus+Vector3(0,18,19),room_focus,Vector3.UP)
+			for unused in range(8): await process_frame
+			await RenderingServer.frame_post_draw
+			check(root.get_texture().get_image().save_png(captures.path_join(str(section.id)+"-room.png")) == OK, "Room capture saves")
+			camera.size = 62
 		stage.queue_free()
 		await process_frame
 		var plan: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
@@ -118,6 +132,16 @@ func run() -> void:
 			if not floor_hit.is_empty():
 				print("Entrance ground ", e.map, ": authored=", centre.y, " rendered=", floor_hit.position.y)
 				check(absf(floor_hit.position.y-centre.y)<2.0, "Exterior entrance matches ground height: "+str(e.map))
+			var doorway := MapObject3D.new()
+			exterior.add_child(doorway)
+			doorway.configure({"object_id":e.object,"kind":EloriaProtocol.MAP_OBJECT_INTERACTIVE,
+				"x":e.tile[0],"y":e.tile[1],"label":"Portal"},
+				exterior_loader.manifest.coordinate_adapter(),catalog)
+			if not floor_hit.is_empty(): doorway.set_surface_height(floor_hit.position.y)
+			check(doorway.get_node_or_null("EntranceLabel") != null,
+				"The real Portal label still shows the exterior entrance: "+str(e.map))
+			check(doorway.get_node_or_null("EntranceModel") != null,
+				"The exterior uses reviewed imported entrance art: "+str(e.map))
 			var exterior_env := WorldEnvironment.new()
 			exterior_env.environment = Environment.new()
 			exterior.add_child(exterior_env)
@@ -125,7 +149,7 @@ func run() -> void:
 			exterior.add_child(exterior_sun)
 			WorldEnvironmentBinder.apply(exterior_loader.manifest, exterior_env, exterior_sun)
 			var exterior_camera := Camera3D.new()
-			exterior_camera.cull_mask = 1
+			exterior_camera.cull_mask = 3
 			exterior_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 			exterior_camera.size = 20
 			exterior_camera.current = true
@@ -135,8 +159,14 @@ func run() -> void:
 				await process_frame
 			await RenderingServer.frame_post_draw
 			check(root.get_texture().get_image().save_png(captures.path_join(str(section.id)+"-entrance.png")) == OK, "Entrance capture saves")
+			await ContinentChunkStream.drain_workers(self)
 			exterior.queue_free()
 			await process_frame
+	await ContinentChunkStream.drain_workers(self)
+	if is_instance_valid(stage): stage.queue_free()
+	for unused in range(8): await process_frame
+	GlbSceneCache.clear()
+	for unused in range(4): await process_frame
 	print("Landfall underground: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)
 

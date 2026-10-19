@@ -1,0 +1,142 @@
+{
+  "schema": "rabbitlands-undead-contact-gaits-v1",
+  "actors": {
+    "skeleton": {
+      "runtime": "godot-client/assets/actors/native/creatures/basic_expansion/skeleton.glb",
+      "sha256": "86fd10e517d0de83d986a5c31451964a922ee159a4512ea22eb08cb1a7237056",
+      "sourceSha256": "7625809e4e256943c677080f203bdb628e7fa74023243b2e56dbaa06b906902a",
+      "animationMap": "godot-client/data/animations/basic_expansion/skeleton.json",
+      "preserved": [
+        "mesh",
+        "rest",
+        "skin",
+        "materials",
+        "embedded textures",
+        "corrective shapes",
+        "five non-locomotion clips"
+      ],
+      "gaits": {
+        "Walk": {
+          "duration": 1.12,
+          "frames": 216,
+          "strideNative": 0.4000004853280954,
+          "speedNative": 0.3571432904715137,
+          "maxReachClamp": 0.0
+        },
+        "Jog": {
+          "duration": 0.72,
+          "frames": 139,
+          "strideNative": 0.650000788658155,
+          "speedNative": 0.9027788731363264,
+          "maxReachClamp": 0.0
+        }
+      },
+      "review": "Front, rear, side and gameplay views; 24 fps translating Godot sequences",
+      "limitation": "Skeleton joint spacing remains visible in close views; original skin and disconnected bone geometry are retained."
+    },
+    "zombie": {
+      "runtime": "godot-client/assets/actors/native/creatures/basic_expansion/zombie.glb",
+      "sha256": "5026849a3abd8868e0f369078458877a4102fda35db842ad11b44534d6e4c860",
+      "sourceSha256": "f88e621f25f54256af942c4210200763ebf48b84b8e5970d2193f893e0812d83",
+      "animationMap": "godot-client/data/animations/basic_expansion/zombie.json",
+      "preserved": [
+        "mesh",
+        "rest",
+        "skin",
+        "materials",
+        "embedded textures",
+        "corrective shapes",
+        "five non-locomotion clips"
+      ],
+      "gaits": {
+        "Walk": {
+          "duration": 1.12,
+          "frames": 216,
+          "strideNative": 0.40000025120281957,
+          "speedNative": 0.35714308143108886,
+          "maxReachClamp": 0.0
+        },
+        "Jog": {
+          "duration": 0.72,
+          "frames": 139,
+          "strideNative": 0.6500004082045817,
+          "speedNative": 0.9027783447285858,
+          "maxReachClamp": 0.0
+        }
+      },
+      "review": "Front, rear, side and gameplay views; 24 fps translating Godot sequences",
+      "limitation": "Existing ragged clothing and upper-body sway retained."
+    },
+    "cerberus": {
+      "runtime": "godot-client/assets/actors/native/creatures/basic_expansion/cerberus.glb",
+      "sha256": "fd47bbed351db8671b30b94ccee269fc53f4008db1f492bcbc3547fa5dc634a7",
+      "sourceSha256": "c06512bd05f4c225f5d873e3c9d95814f58e5b2b9251ddbbd95a4ef2bd2fdcd5",
+      "animationMap": "godot-client/data/animations/basic_expansion/cerberus.json",
+      "gaits": {
+        "Walk": {
+          "duration": 0.7716296315193176,
+          "frames": 149,
+          "strideNative": 0.17167970961435994,
+          "speedNative": 0.22248978344225492,
+          "phaseOffsets": {
+            "fore_left": 0.0,
+            "hind_right": 0.25,
+            "fore_right": 0.5,
+            "hind_left": 0.75
+          },
+          "stanceFraction": 0.64,
+          "maxReachClamp": 0.0
+        },
+        "Jog": {
+          "duration": 0.5278000235557556,
+          "frames": 102,
+          "strideNative": 0.28613284935726657,
+          "speedNative": 0.5421236009608479,
+          "phaseOffsets": {
+            "fore_left": 0.0,
+            "hind_right": 0.0,
+            "fore_right": 0.5,
+            "hind_left": 0.5
+          },
+          "stanceFraction": 0.44,
+          "maxReachClamp": 0.0
+        }
+      },
+      "chains": {
+        "fore_left": [
+          14,
+          13,
+          12
+        ],
+        "fore_right": [
+          17,
+          16,
+          15
+        ],
+        "hind_left": [
+          2,
+          1,
+          0
+        ],
+        "hind_right": [
+          5,
+          4,
+          3
+        ]
+      },
+      "bodyPlan": "quadruped",
+      "edgeExcessLimit": 0.055,
+      "preserved": [
+        "mesh",
+        "rest",
+        "skin",
+        "materials",
+        "embedded textures",
+        "corrective shapes",
+        "five non-locomotion clips"
+      ],
+      "review": "Front, rear, side and gameplay fresh-import views; translating Godot comparison at server scale 1.6",
+      "limitation": "Original thick leg skin retained; maximum edge-length excess is 0.050 native units in Jog (0.024 in the original). This does not certify rigid limb surfaces."
+    }
+  }
+}

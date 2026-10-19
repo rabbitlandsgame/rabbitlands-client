@@ -522,7 +522,7 @@ const MANUFACTURING_MAX_QUANTITY := 1000
 ## scene, because none of them has a fixed shape: there are as many skill tabs
 ## as the served recipes mention skills, as many tool rows as the selected
 ## recipe needs tools, and a queue has no rows at all until somebody fills it.
-var manufacturing_tabs: HBoxContainer
+var manufacturing_tabs: HFlowContainer
 var manufacturing_side: VBoxContainer
 var _inventory_metadata_at := 0
 var manufacturing_tool_rows: VBoxContainer
@@ -2909,6 +2909,9 @@ func _on_mix_state_changed() -> void:
 	_sync_manufacturing()
 
 func _settle_mix_run(run: Dictionary, made: int, interrupted := false) -> void:
+	if not interrupted:
+		manufacturing_server_status = ("Crafting failed: no %s made. Check the recipe requirements and supplies." % str(run.get("output", "items"))
+			if made == 0 else "Made %d %s." % [made, str(run.get("output", "items"))])
 	var position: int = int(run.get("entry", -1))
 	if position >= 0 and position < manufacturing_queue.size():
 		var entry: Dictionary = manufacturing_queue[position]
@@ -2966,6 +2969,16 @@ func _on_inventory_inspect_pressed() -> void:
 	_choose_inventory_tool("inspect")
 
 func _configure_inventory_menus() -> void:
+	inventory_store_all.text = "Store All"
+	inventory_store_all.tooltip_text = "Store all backpack stacks. Protect equipment or supplies using the Protection button."
+	var protection := Button.new()
+	protection.name = "StorageProtection"
+	protection.text = "Protection…"
+	protection.tooltip_text = "Choose backpack rows or columns to keep when using Store All."
+	inventory_store_all.get_parent().add_child(protection)
+	protection.pressed.connect(func():
+		_store_options_menu.position = Vector2i(protection.global_position + Vector2(0, protection.size.y))
+		_store_options_menu.popup())
 	_store_options_menu = PopupMenu.new()
 	_drop_options_menu = PopupMenu.new()
 	for menu: PopupMenu in [_store_options_menu, _drop_options_menu]:
@@ -6343,10 +6356,15 @@ func _sync_knowledge() -> void:
 ## and a queue.
 func _build_manufacturing_window() -> void:
 	var content: Node = manufacturing_filter.get_parent()
+	manufacturing_status.custom_minimum_size.x = 620
+	manufacturing_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	manufacturing_list.custom_minimum_size = Vector2(260, 210)
+	manufacturing_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	(manufacturing_list.get_parent() as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL
 	manufacturing_filter.placeholder_text = "Search by name, ingredient or tool"
 	manufacturing_ready_only = CheckButton.new()
 	manufacturing_ready_only.name = "ManufacturingReadyOnly"
-	manufacturing_ready_only.text = "Ready to mix only"
+	manufacturing_ready_only.text = "Has ingredients only"
 	manufacturing_ready_only.button_pressed = manufacturing_ready_preference
 	manufacturing_ready_only.toggled.connect(func(pressed: bool) -> void:
 		manufacturing_ready_preference = pressed
@@ -6354,9 +6372,9 @@ func _build_manufacturing_window() -> void:
 	content.add_child(manufacturing_ready_only)
 	content.move_child(manufacturing_ready_only, manufacturing_filter.get_index() + 1)
 
-	manufacturing_tabs = HBoxContainer.new()
+	manufacturing_tabs = HFlowContainer.new()
 	manufacturing_tabs.name = "ManufacturingTabs"
-	manufacturing_tabs.alignment = BoxContainer.ALIGNMENT_CENTER
+	manufacturing_tabs.alignment = FlowContainer.ALIGNMENT_CENTER
 	content.add_child(manufacturing_tabs)
 	content.move_child(manufacturing_tabs, manufacturing_filter.get_index())
 
@@ -6374,7 +6392,7 @@ func _build_manufacturing_window() -> void:
 	side_scroll.name = "ManufacturingDetailScroll"
 	side_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	side_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	side_scroll.custom_minimum_size = Vector2(350, 120)
+	side_scroll.custom_minimum_size = Vector2(300, 120)
 	side_column.add_child(side_scroll)
 	side_scroll.add_child(manufacturing_side)
 	manufacturing_detail.get_parent().remove_child(manufacturing_detail)
@@ -6382,6 +6400,7 @@ func _build_manufacturing_window() -> void:
 	manufacturing_detail.owner = self
 	manufacturing_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	manufacturing_detail.custom_minimum_size.y = 120
+	manufacturing_detail.custom_minimum_size.x = 300
 
 	manufacturing_tool_rows = VBoxContainer.new()
 	manufacturing_tool_rows.name = "ManufacturingTools"
@@ -6500,7 +6519,13 @@ func _manufacturing_queue_section() -> Control:
 	box.add_child(head)
 	manufacturing_queue_rows = VBoxContainer.new()
 	manufacturing_queue_rows.name = "Rows"
-	box.add_child(manufacturing_queue_rows)
+	var scroll := ScrollContainer.new()
+	scroll.name = "QueueScroll"
+	scroll.custom_minimum_size.y = 72
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	manufacturing_queue_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_child(scroll)
+	scroll.add_child(manufacturing_queue_rows)
 	return box
 
 ## Whether a batch would be drawn from the storage box. The toggle alone is
@@ -6567,7 +6592,7 @@ func _sync_manufacturing() -> void:
 			continue
 		var availability := _manufacturing_availability(recipe_index)
 		var reasons: Array = availability.get("reasons", []) as Array
-		if manufacturing_ready_only.button_pressed and not reasons.is_empty():
+		if manufacturing_ready_only.button_pressed and not bool(availability.get("ingredients_available", false)):
 			continue
 		var reason_lines: Array[String] = []
 		for reason_value: Variant in reasons:
@@ -6621,11 +6646,13 @@ func _manufacturing_searchable(definition: Dictionary) -> String:
 	return text.to_lower()
 
 func _sync_manufacturing_detail() -> void:
+	var failed := manufacturing_server_status.to_lower().contains("fail") or manufacturing_server_status.to_lower().contains("interrupted")
+	manufacturing_status.add_theme_color_override("font_color", Color(1.0, 0.38, 0.32) if failed else Color(0.88, 0.9, 0.82))
 	_sync_manufacturing_source()
 	var definition: Dictionary = manufacturing_catalog.recipe(
 		selected_manufacturing_recipe)
 	if definition.is_empty():
-		manufacturing_detail.text = ("No recipes match these filters. Check your supplies, tools, food and learned books, or turn off Ready to mix only."
+		manufacturing_detail.text = ("No recipes match these filters. Check your ingredients or turn off Has ingredients only."
 			if manufacturing_list.item_count == 0 else "Select a recipe to see what it takes.")
 		manufacturing_status.text = manufacturing_server_status
 		_sync_manufacturing_tools([])
@@ -6717,8 +6744,8 @@ func _sync_manufacturing_source() -> void:
 		manufacturing_ready_only.set_pressed_no_signal(
 			manufacturing_ready_preference and not from_storage)
 		manufacturing_ready_only.tooltip_text = (
-			"Storage contents aren't shown here. Switch to your inventory to filter ready recipes."
-			if from_storage else "Show recipes you can mix with your carried supplies, tools and learned books")
+			"Storage contents aren't shown here. Switch to your inventory to filter by ingredients."
+			if from_storage else "Show recipes with ingredients in your pack. Select a recipe to check food, mana, tools and books.")
 
 ## One row per tool, and a way to fix a missing one without leaving.
 ##
@@ -8115,6 +8142,9 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 		if actor == null or not actor.is_visible_in_tree():
 			continue
 		var dto: Dictionary = AppState.actors.get(actor_id, {}) as Dictionary
+		if int(dto.get("kind", 0)) == ReplicatedActor3D.CREATURE_ACTOR_KIND \
+				and (int(dto.get("health", 1)) <= 0 or not bool(dto.get("alive", true))):
+			continue
 		if int(dto.get("kind", 0)) == 2 and service_names.has(str(dto.get("name", "")).to_lower()):
 			continue
 		marks.append({"position": actor.global_position,

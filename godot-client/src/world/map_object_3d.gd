@@ -353,6 +353,22 @@ func _catalog_entry(catalog: Dictionary) -> Dictionary:
 	if id.is_empty():
 		return {}
 	var entry: Dictionary = models.get(id, {}) as Dictionary
+	# The approved ironbound storage chest also represents a reward strongbox.
+	# Its geometry is grounded at the origin; the old cache prop is retired.
+	if label == "Cache" and bool(entry.get("retired", false)):
+		var strongbox: Dictionary = models.get("storage", {})
+		if bool(strongbox.get("imported", false)) and not bool(strongbox.get("retired", false)):
+			entry = strongbox
+	# Older nodes kept the retired base plant instead of a current patch.
+	if is_harvestable() and bool(entry.get("retired", false)):
+		var choices: Array = []
+		for candidate: Variant in (section.get("variants", {}) as Dictionary).get(label, []):
+			var variant: Dictionary = models.get(str(candidate), {})
+			if bool(variant.get("imported", false)) and not bool(variant.get("retired", false)):
+				choices.append(str(candidate))
+		if not choices.is_empty():
+			id = choices[variant_index(object_id, choices.size())]
+			entry = models[id]
 	if entry.is_empty():
 		return {}
 	var described: Dictionary = entry.duplicate(true)
@@ -406,6 +422,17 @@ func _build_visual(catalog: Dictionary) -> void:
 		model_id = "map_authored_" + str(object_id)
 		# Harvest seams retain their active ring and resource map marker.
 		_map_authored = _map_authored or not is_harvestable()
+	# The server calls both ends "Portal". Scope the exterior replacement by
+	# its authored tile so the same object id does not add a second doorway
+	# inside the underground map.
+	var exterior_tile: Array = authored.get("exteriorTile", [])
+	var entrance := bool(authored.get("entrance", false)) and (
+		(exterior_tile.size() == 2 and server_tile == Vector2i(exterior_tile[0], exterior_tile[1]))
+		or (exterior_tile.is_empty() and not is_portal()))
+	if entrance:
+		_map_authored = false
+		model_id = ""
+		_add_entrance_visual(authored)
 	# A role the region package authors is already standing in the world art:
 	# a secret's door is a `Secret_*` node in the region mesh, on the tile the
 	# server states. A ring under one duplicates the door and advertises it.
@@ -420,9 +447,61 @@ func _build_visual(catalog: Dictionary) -> void:
 		($PickShape.shape as CylinderShape3D).radius = float(authored.get("radius", .9))
 	if is_storage():
 		_add_storage_visual(height)
+	elif entrance:
+		var title := Label3D.new()
+		title.name = "EntranceLabel"
+		title.text = str(authored.get("label", "Underground entrance")) + "\nClick to enter"
+		title.position.y = maxf(1.8, float(authored.get("visualHeight", 0.0)) + .35)
+		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		title.fixed_size = true
+		WORLD_LABEL_STYLE.apply(title, 15, .0012953, 5)
+		title.modulate = PORTAL_COLOUR
+		title.no_depth_test = true
+		title.layers = GAMEPLAY_LAYER
+		title.visibility_range_end = 80
+		add_child(title)
+	elif label == "Cache":
+		var title := Label3D.new()
+		title.name = "CacheLabel"
+		title.text = "Reward cache"
+		title.position.y = maxf(height, .8) + .5
+		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		title.fixed_size = true
+		WORLD_LABEL_STYLE.apply(title, 16, .0012953, 5)
+		title.modulate = STORAGE_COLOUR.lightened(.3)
+		title.no_depth_test = true
+		title.layers = GAMEPLAY_LAYER
+		title.visibility_range_end = 80
+		add_child(title)
+	elif is_harvestable() and (model_id.is_empty() or entry.has("resourcePalette")):
+		# Name both unmodelled resources and reused mineral forms explicitly;
+		# the resource material and the server label must agree.
+		var title := Label3D.new()
+		title.name = "ResourceLabel"
+		title.text = label
+		title.position.y = maxf(.9,height+.15)
+		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		title.fixed_size = true
+		WORLD_LABEL_STYLE.apply(title,14,.0012953,5)
+		title.modulate = HARVEST_COLOUR
+		title.layers = GAMEPLAY_LAYER
+		title.visibility_range_end = 35
+		add_child(title)
 
 ## Keep the service readable above the lid, with a soft animated ground halo.
 ## Layer 2 belongs to the gameplay camera; the maps keep their storage dot.
+func _add_entrance_visual(authored: Dictionary) -> void:
+	var scene := str(authored.get("scene", ""))
+	if scene.is_empty():
+		return
+	var model := GlbSceneCache.instantiate(_external_path(scene))
+	if model == null:
+		return
+	model.name = "EntranceModel"
+	model.rotation.y = deg_to_rad(float(authored.get("yaw", 0.0)))
+	add_child(model)
+	model_id = "underground_entrance_" + str(object_id)
+
 func _add_storage_visual(height: float) -> void:
 	var title := Label3D.new()
 	title.name = "StorageLabel"
@@ -510,8 +589,9 @@ func _add_model(entry: Dictionary) -> float:
 	if entry.is_empty():
 		return 0.0
 	if bool(entry.get("retired", false)):
-		model_id = str(entry.get("id", ""))
-		return float(entry.get("height", 0.0))
+		# Keep the service's existing interaction ring visible when its former
+		# prop was retired. A nonempty model id would hide that ring as well.
+		return 0.0
 	var model: Node3D = GlbSceneCache.instantiate(
 		_external_path(str(entry.get("scene", ""))))
 	if model == null:
@@ -520,6 +600,8 @@ func _add_model(entry: Dictionary) -> float:
 		return 0.0
 	model.name = "Model"
 	add_child(model)
+	if entry.has("resourcePalette"):
+		preload("res://src/world/mineral_appearance.gd").apply(model,entry.resourcePalette)
 	model_id = str(entry.get("id", ""))
 	# The same node id stands on every map that declares it, so an unvaried
 	# model reads as a stamped copy wherever two are in view of each other.

@@ -38,7 +38,7 @@ func availability(index: int, inventory: Dictionary, known_knowledge: Array[int]
 		stats: Dictionary, names: Dictionary = {}) -> Dictionary:
 	var definition: Dictionary = recipe(index)
 	if definition.is_empty():
-		return {"selection": [], "reasons": ["Unknown recipe"]}
+		return {"selection": [], "reasons": ["Unknown recipe"], "ingredients_available": false}
 	var selection: Array[Dictionary] = []
 	var reasons: Array[String] = []
 	var ingredients_value: Variant = definition.get("ingredients", [])
@@ -59,6 +59,7 @@ func availability(index: int, inventory: Dictionary, known_knowledge: Array[int]
 				reasons.append("Missing %s ×%d" % [name, required])
 			else:
 				selection.append({"slot": slot, "quantity": required})
+	var ingredients_available: bool = reasons.is_empty()
 	var tools_value: Variant = definition.get("tools", [])
 	if tools_value is Array:
 		for tool_value: Variant in tools_value as Array:
@@ -84,7 +85,8 @@ func availability(index: int, inventory: Dictionary, known_knowledge: Array[int]
 		var mana: int = int(definition.get("mana", 0))
 		if int(stats.get("ether", 0)) < mana:
 			reasons.append("Need %d ethereal points" % mana)
-	return {"selection": selection, "reasons": reasons}
+	return {"selection": selection, "reasons": reasons,
+		"ingredients_available": ingredients_available}
 
 ## Each tool a recipe calls for, and whether it is to hand.
 ##
