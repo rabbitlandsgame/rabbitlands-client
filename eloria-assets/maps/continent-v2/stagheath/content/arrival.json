@@ -36,7 +36,7 @@
  "provenance": {
   "algorithm": "nearest-owned-safe-baseline-tile-v1",
   "clientBaseCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
-  "sectionsSpecSha256": "174bdae572292403a75664b0fdd10ea16e59bfd8b2de19aa2708c878139b12ec",
+  "sectionsSpecSha256": "bfcb99ed8c8e51e3da15d924fee5f8c86618f1de876bfec01a4c83ba74f93a2c",
   "frameSha256": "e954c8657e7a5b3e46d0c1b92c4ba31fabb20d84b83af8eb4a3e950dd624097b",
   "sourceMap": "sw_isle",
   "sourceTile": [
@@ -51,6 +51,29 @@
    6481.0
   ],
   "tieRule": "squared-distance, continent-x, continent-z, pinned-source-catalog-order",
-  "safeOwnedReachedCandidates": 191330
+  "safeOwnedReachedCandidates": 191330,
+  "rebound": {
+   "fromSectionsSpecSha256": "174bdae572292403a75664b0fdd10ea16e59bfd8b2de19aa2708c878139b12ec",
+   "fromFrame": {
+    "origin": [
+     534,
+     300
+    ],
+    "cells": [
+     1068,
+     1068
+    ],
+    "translation": [
+     929.0,
+     0.0,
+     6517.0
+    ]
+   },
+   "fromServerTile": [
+    535,
+    314
+   ],
+   "rule": "same local position; tile, frame and hashes recomputed"
+  }
  }
 }

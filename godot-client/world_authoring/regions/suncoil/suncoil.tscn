@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/terrain_patch.gd" id="patch"]
 [ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/terrain-detail-luma.png" id="detail"]
 [ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/terrain-detail-normal.png" id="normal"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/gameplay_marker.gd" id="marker"]
 
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
@@ -73,6 +74,19 @@ preview_clip_inside = PackedVector2Array(3161, 7171, 4101, 7171, 4101, 8751, 380
 [node name="Gameplay" type="Node3D" parent="."]
 
 [node name="Spawns" type="Node3D" parent="Gameplay"]
+
+[node name="suncoil--arrival" type="Marker3D" parent="Gameplay/Spawns"]
+gizmo_extents = 0.8
+script = ExtResource("marker")
+record_id = "suncoil--arrival"
+kind = "spawn"
+label = "Suncoil ring road (map start)"
+default_spawn = true
+facing = Vector3(0, 0, 1)
+extras = {
+"note": "level ground inside the temple ring road; default start until the isle content pass (A3, 2026-10-19)"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -243.5, 54.896, 82.5)
 
 [node name="Portals" type="Node3D" parent="Gameplay"]
 

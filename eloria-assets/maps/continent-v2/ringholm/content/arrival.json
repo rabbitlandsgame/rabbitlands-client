@@ -11,7 +11,7 @@
  ],
  "serverTile": [
   372,
-  345
+  403
  ],
  "facing": [
   0.0,
@@ -21,11 +21,11 @@
  "frame": {
   "origin": [
    455,
-   334
+   392
   ],
   "cells": [
-   912,
-   912
+   1050,
+   1050
   ],
   "translation": [
    2710.0,
@@ -36,8 +36,8 @@
  "provenance": {
   "algorithm": "nearest-owned-safe-baseline-tile-v1",
   "clientBaseCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
-  "sectionsSpecSha256": "174bdae572292403a75664b0fdd10ea16e59bfd8b2de19aa2708c878139b12ec",
-  "frameSha256": "48bb34b5eaaf580861ae52355924a27bfbe93d1120e9742de8e10464d12d415b",
+  "sectionsSpecSha256": "bfcb99ed8c8e51e3da15d924fee5f8c86618f1de876bfec01a4c83ba74f93a2c",
+  "frameSha256": "89e75beececf0bf4c53f715c6a9cc390b22fbc137f49bd707606400c9ccbaaac",
   "sourceMap": "tollholms",
   "sourceTile": [
    194,
@@ -51,6 +51,29 @@
    6830.0
   ],
   "tieRule": "squared-distance, continent-x, continent-z, pinned-source-catalog-order",
-  "safeOwnedReachedCandidates": 115088
+  "safeOwnedReachedCandidates": 115088,
+  "rebound": {
+   "fromSectionsSpecSha256": "174bdae572292403a75664b0fdd10ea16e59bfd8b2de19aa2708c878139b12ec",
+   "fromFrame": {
+    "origin": [
+     455,
+     334
+    ],
+    "cells": [
+     912,
+     912
+    ],
+    "translation": [
+     2710.0,
+     0.0,
+     6841.0
+    ]
+   },
+   "fromServerTile": [
+    372,
+    345
+   ],
+   "rule": "same local position; tile, frame and hashes recomputed"
+  }
  }
 }

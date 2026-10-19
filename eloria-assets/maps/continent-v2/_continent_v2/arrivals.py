@@ -51,6 +51,15 @@ def _vector(value, size, field):
     return value
 
 
+def partition_spec(checkout):
+    """The active owner partition's sections spec: the catalog's partitionSpecPath (res://../ is the checkout)."""
+    catalog = json.loads((Path(checkout)/"godot-client/world_authoring/continent-v2/territories.json").read_text(encoding="utf-8"))
+    resource = catalog["partitionSpecPath"]
+    if not resource.startswith("res://../"):
+        raise ArrivalError("partitionSpecPath must name a file outside godot-client")
+    return Path(checkout)/resource[len("res://../"):]
+
+
 def contained(checkout, relative):
     if not isinstance(relative, str) or not relative or ":" in relative or "\\" in relative:
         raise ArrivalError("arrival path must be a checkout-relative path")
@@ -97,7 +106,7 @@ def resolve(document, frame, checkout):
         if result.get("frame") != frame_record(frame):
             raise ArrivalError(f"{region}: generated arrival frame changed")
         provenance = result.get("provenance", {})
-        partition = Path(checkout)/"eloria-assets/maps/continent-v2/_continent_v2/partition-inputs/sections_spec.json"
+        partition = partition_spec(checkout)
         if provenance.get("algorithm") != ALGORITHM or provenance.get("frameSha256") != frame_sha256(frame) or provenance.get("sectionsSpecSha256") != hashlib.sha256(partition.read_bytes()).hexdigest():
             raise ArrivalError(f"{region}: generated arrival selection/frame provenance changed")
         for field in ("clientBaseCommit","sourceWorldSha256","sourceCollisionSha256","sourceServedGridSha256"):

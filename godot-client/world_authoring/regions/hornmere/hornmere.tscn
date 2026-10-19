@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://src/dev/map_authoring_region/terrain_patch.gd" id="patch"]
 [ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/terrain-detail-luma.png" id="detail"]
 [ext_resource type="Texture2D" path="res://src/dev/map_authoring_pilot/style/textures/terrain-detail-normal.png" id="normal"]
+[ext_resource type="Script" path="res://src/dev/map_authoring_region/gameplay_marker.gd" id="marker"]
 
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
@@ -73,6 +74,19 @@ preview_clip_inside = PackedVector2Array(1051, 6221, 1051, 5801, 1101, 5601, 115
 [node name="Gameplay" type="Node3D" parent="."]
 
 [node name="Spawns" type="Node3D" parent="Gameplay"]
+
+[node name="hornmere--arrival" type="Marker3D" parent="Gameplay/Spawns"]
+gizmo_extents = 0.8
+script = ExtResource("marker")
+record_id = "hornmere--arrival"
+kind = "spawn"
+label = "Hornmere citadel terrace (map start)"
+default_spawn = true
+facing = Vector3(0, 0, 1)
+extras = {
+"note": "the flattened Mirrorhold citadel terrace; default start until the isle gets its boat landing (A3, 2026-10-19)"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -326.5, 101.941, -350.5)
 
 [node name="Portals" type="Node3D" parent="Gameplay"]
 

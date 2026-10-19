@@ -209,12 +209,66 @@ def generate(server, checkout=F.CHECKOUT):
     return output,summary,sorted(authored)
 
 
+def rebind(checkout=F.CHECKOUT):
+    """A later partition: keep every generated arrival's position while its map still owns it (a surviving map
+    keeps its translation, so the local position is the continent position); recompute its tile, frame and
+    hashes for the current frame and spec, and rebind the authoring spec. Maps with an authored default spawn keep
+    none; a map that has neither is refused (author its spawn marker)."""
+    checkout = Path(checkout)
+    spec_raw = A.partition_spec(checkout).read_bytes()
+    catalog = json.loads((checkout/F.CATALOG_PATH).read_text(encoding="utf-8"))
+    output, summary, authored = {}, {}, []
+    for entry in catalog["entries"]:
+        rid = entry["id"]
+        scene = F.parse_scene((checkout/F.git_path(entry["scenePath"])).read_bytes())
+        if any(json.loads(n.properties.get("kind",'""')) == "spawn" and n.properties.get("default_spawn") == "true"
+               for n in scene.nodes.values()):
+            authored.append(rid)
+            continue
+        path = checkout/f"eloria-assets/maps/continent-v2/{rid}/content/arrival.json"
+        if not path.is_file():
+            raise ValueError(f"{rid}: neither an authored default spawn nor a generated arrival")
+        old = json.loads(path.read_text(encoding="utf-8"))
+        frame = frames.load_source(rid,checkout)
+        if [float(v) for v in old["frame"]["translation"]] != [float(v) for v in frame.translation]:
+            raise ValueError(f"{rid}: its translation moved; select a new arrival instead")
+        position = old["position"]
+        stub = json.loads((checkout/f"eloria-assets/maps/continent-v2/{rid}/world.json").read_text(encoding="utf-8"))
+        if not O.contains(*frame.to_continent(position[0],position[2]),stub["continentGeography"],boundary=True):
+            raise ValueError(f"{rid}: its arrival is no longer inside the map; select a new arrival instead")
+        result = dict(old)
+        result["serverTile"] = list(frame.tile(position[0],position[2]))
+        result["frame"] = A.frame_record(frame)
+        provenance = dict(old["provenance"])
+        rebound = provenance.pop("rebound", None)
+        provenance["sectionsSpecSha256"] = sha(spec_raw)
+        provenance["frameSha256"] = A.frame_sha256(frame)
+        provenance["rebound"] = rebound or {"fromSectionsSpecSha256": old["provenance"]["sectionsSpecSha256"],
+                                            "fromFrame": old["frame"], "fromServerTile": old["serverTile"],
+                                            "rule": "same local position; tile, frame and hashes recomputed"}
+        result["provenance"] = provenance
+        raw = F.json_bytes(result)
+        output[path] = raw
+        spec_file = checkout/f"godot-client/world_authoring/regions/{rid}/region-authoring-spec.json"
+        authoring = json.loads(spec_file.read_text(encoding="utf-8"))
+        authoring.setdefault("gameplay",{})["generatedArrival"] = {"path":path.relative_to(checkout).as_posix(),"sha256":sha(raw)}
+        output[spec_file] = F.json_bytes(authoring)
+        summary[rid] = {"path":path.relative_to(checkout).as_posix(),"sha256":sha(raw)}
+    return output, summary, authored
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--server",required=True,type=Path)
+    parser.add_argument("--server",type=Path)
     parser.add_argument("--check",action="store_true")
+    parser.add_argument("--rebind",action="store_true",help="rebind existing arrivals to the current partition")
     args = parser.parse_args()
-    output,summary,authored = generate(args.server)
+    if args.rebind:
+        output,summary,authored = rebind()
+    elif args.server is None:
+        parser.error("--server is required unless --rebind")
+    else:
+        output,summary,authored = generate(args.server)
     problems = []
     for path,raw in output.items():
         if args.check:
