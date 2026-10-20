@@ -89,6 +89,7 @@ const SummoningWindowScript := preload("res://src/ui/summoning_window.gd")
 const EmotesWindowScript := preload("res://src/ui/emotes_window.gd")
 const RangingWindowScript := preload("res://src/ui/ranging_window.gd")
 const MountsWindowScript := preload("res://src/ui/mounts_window.gd")
+const BannerDisplayMenuScript := preload("res://src/ui/banner_display_menu.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
 const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
@@ -828,14 +829,13 @@ var _pending_floating_feedback: Array[Dictionary] = []
 var _floating_feedback_flush_queued := false
 var _active_floating_labels: Array[Label] = []
 var _last_skill_experience_msec := -100000
-## Config key -> CheckBox on the right-click banner menu, filled in _ready().
+## Persisted banner key -> the checkbox shared with the main settings window.
 var _banner_option_boxes: Dictionary = {}
 var _banner_background_style: StyleBoxFlat
 const MountControls := preload("res://src/mounts/mount_controls.gd")
+var mount_status := MountControls.new()
 var _mount_banner_options: Dictionary = MountControls.default_options()
-var _actor_hud_menu: PopupMenu
-var _character_banner_menu: PopupMenu
-var _mount_banner_menu: PopupMenu
+var _actor_hud_menu: Variant
 
 const FLOATING_FEEDBACK_ROW_HEIGHT := 21.0
 const FLOATING_FEEDBACK_MAX_ROWS := 4
@@ -1121,7 +1121,8 @@ func _ready() -> void:
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
-	game_view.add_child(MountControls.new())
+	actor_resource_overlay.get_node("Rows").add_child(mount_status)
+	mount_status.display_changed.connect(_layout_actor_resource_overlay)
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
 	actor_type_models = model_registry.get("actorTypes", {})
@@ -1191,7 +1192,8 @@ func _ready() -> void:
 	game_view.add_child(ranging_window)
 	mounts_window = MountsWindowScript.new()
 	game_view.add_child(mounts_window)
-	game_view.get_node("MountControls").choose_mount_requested.connect(func() -> void: mounts_window.call("toggle"))
+	%MountsButton.pressed.connect(func() -> void: mounts_window.call("toggle"))
+	(mounts_window.get("panel") as Control).visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
 	guild_window = GuildWindowScript.new()
 	game_view.add_child(guild_window)
 	guild_window.call("configure", Network.send_chat)
@@ -1712,6 +1714,7 @@ func _update_keyboard_movement() -> void:
 			or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
 			or storage_panel.visible or full_map.visible \
 			or console_panel.visible or settings_panel.visible or item_lists_panel.visible \
+			or (_actor_hud_menu != null and _actor_hud_menu.visible) \
 			or Input.is_key_pressed(KEY_ALT) or Input.is_key_pressed(KEY_CTRL):
 		_stop_keyboard_movement()
 		return
@@ -2616,7 +2619,7 @@ func _configure_unified_settings() -> void:
 	var banners_page: VBoxContainer = settings_window.page_body("Banners")
 	(%DisableMenu as CheckBox).text = "Disable character right-click menu"
 	var mount_heading := Label.new()
-	mount_heading.text = "Mount banner"
+	mount_heading.text = "Mount status below character bars"
 	banners_page.add_child(mount_heading)
 	for key: String in MountControls.OPTION_LABELS:
 		settings_window._add_toggle(banners_page,
@@ -3732,6 +3735,11 @@ func _clear_world_presentation() -> void:
 func _input(event: InputEvent) -> void:
 	if arrival_curtain.blocks_input():
 		return
+	if _actor_hud_menu != null and _actor_hud_menu.visible:
+		if _actor_hud_menu.handle_event(event):
+			get_viewport().set_input_as_handled()
+		# Checkbox/tab keys belong to the popover; gameplay hotkeys wait.
+		return
 	if character_intro.blocks_input():
 		if character_intro.allows_dialogue():
 			if event is InputEventKey and event.is_pressed() \
@@ -3923,6 +3931,8 @@ func _recenter_viewport_on_player() -> void:
 	_update_local_actor_follow()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _actor_hud_menu != null and _actor_hud_menu.visible:
+		return
 	if _world_input_blocked():
 		return
 	if not game_view.visible:
@@ -4122,12 +4132,12 @@ func _on_world_gui_input(event: InputEvent) -> void:
 		if camera_rig.handle_mouse_motion(mouse_motion):
 			viewport_container.accept_event()
 
-func _open_actor_hud_menu(_position: Vector2) -> void:
+func _open_actor_hud_menu(local_position: Vector2) -> void:
 	if _banner_option("menu_disabled"):
 		return
 	_sync_banner_context_menu()
-	_actor_hud_menu.position = DisplayServer.mouse_get_position()
-	_actor_hud_menu.popup()
+	_stop_keyboard_movement()
+	_actor_hud_menu.open_at(viewport_container.get_global_transform() * local_position)
 
 func _configure_banner_menu() -> void:
 	for key: String in BANNER_OPTION_NODES:
@@ -4135,46 +4145,46 @@ func _configure_banner_menu() -> void:
 		box.set_pressed_no_signal(bool(BANNER_OPTION_DEFAULTS[key]))
 		box.toggled.connect(_on_banner_option_toggled)
 		_banner_option_boxes[key] = box
-	_actor_hud_menu = PopupMenu.new()
-	_character_banner_menu = PopupMenu.new()
-	_mount_banner_menu = PopupMenu.new()
-	add_child(_actor_hud_menu)
-	_actor_hud_menu.add_child(_character_banner_menu)
-	_actor_hud_menu.add_child(_mount_banner_menu)
-	_actor_hud_menu.add_submenu_node_item("Character banner", _character_banner_menu)
-	_actor_hud_menu.add_submenu_node_item("Mount banner", _mount_banner_menu)
-	_actor_hud_menu.add_item("Mounts…", 3)
-	_actor_hud_menu.add_item("All banner settings…", 2)
-	_actor_hud_menu.id_pressed.connect(func(id: int) -> void:
-		if id == 3:
-			mounts_window.call("open")
-		else:
-			settings_window.open_tab("Banners"))
-	_character_banner_menu.hide_on_checkable_item_selection = false
-	_mount_banner_menu.hide_on_checkable_item_selection = false
-	for key: String in BANNER_OPTION_NODES:
-		var box := _banner_option_boxes[key] as CheckBox
-		_character_banner_menu.add_check_item("Disable character right-click menu" if key == "menu_disabled" else box.text)
-	_character_banner_menu.id_pressed.connect(func(id: int) -> void:
-		var box := _banner_option_boxes[BANNER_OPTION_NODES.keys()[id]] as CheckBox
-		box.button_pressed = not box.button_pressed)
-	for key: String in MountControls.OPTION_LABELS:
-		_mount_banner_menu.add_check_item(MountControls.OPTION_LABELS[key])
-	_mount_banner_menu.id_pressed.connect(func(id: int) -> void:
-		var key: String = MountControls.OPTION_LABELS.keys()[id]
-		_set_mount_banner_option(key, not bool(_mount_banner_options[key])))
+	_actor_hud_menu = BannerDisplayMenuScript.new()
+	game_view.add_child(_actor_hud_menu)
+	_actor_hud_menu.option_changed.connect(func(group: String, key: String, value: bool) -> void:
+		if group == "mount":
+			_set_mount_banner_option(key, value)
+		elif _banner_option_boxes.has(key):
+			(_banner_option_boxes[key] as CheckBox).button_pressed = value)
+	_actor_hud_menu.mounts_requested.connect(func() -> void: mounts_window.call("open"))
+	_actor_hud_menu.settings_requested.connect(func() -> void: settings_window.open_tab("Banners"))
+	_connect_banner_context_inputs(actor_resource_overlay, "Character")
+
+func _connect_banner_context_inputs(control: Control, section: String) -> void:
+	if control == mount_status:
+		section = "Mount"
+	if not control is BaseButton:
+		control.mouse_filter = Control.MOUSE_FILTER_PASS
+	control.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT \
+				and AppState.authenticated and (section == "Mount" or not _banner_option("menu_disabled")):
+			_sync_banner_context_menu()
+			_stop_keyboard_movement()
+			_actor_hud_menu.open_at(control.get_global_transform() * event.position, section)
+			control.accept_event())
+	for child: Node in control.get_children():
+		if child is Control:
+			_connect_banner_context_inputs(child, section)
 
 func _sync_banner_context_menu() -> void:
-	for index: int in BANNER_OPTION_NODES.size():
-		_character_banner_menu.set_item_checked(index, _banner_option(BANNER_OPTION_NODES.keys()[index]))
-	for index: int in MountControls.OPTION_LABELS.size():
-		_mount_banner_menu.set_item_checked(index, bool(_mount_banner_options[MountControls.OPTION_LABELS.keys()[index]]))
+	if _actor_hud_menu == null:
+		return
+	var character := {}
+	for key: String in BANNER_OPTION_NODES:
+		character[key] = _banner_option(key)
+	_actor_hud_menu.sync_options(character, _mount_banner_options)
 
 func _set_mount_banner_option(key: String, value: bool) -> void:
 	if not _mount_banner_options.has(key):
 		return
 	_mount_banner_options[key] = value
-	game_view.get_node("MountControls").set_options(_mount_banner_options)
+	mount_status.set_options(_mount_banner_options)
 	_sync_banner_context_menu()
 	_save_hud_settings()
 
@@ -4192,8 +4202,7 @@ func _on_banner_option_toggled(_enabled: bool) -> void:
 	_sync_hud_indicators()
 	_save_hud_settings()
 
-## Kept so the HUD settings window can undo the menu's own "Disable This Menu"
-## entry, which would otherwise lock the menu away for good.
+## Settings keeps the character's right-click entry point recoverable.
 func _on_banner_menu_enabled_toggled(pressed: bool) -> void:
 	var box: CheckBox = _banner_option_boxes["menu_disabled"] as CheckBox
 	box.set_pressed_no_signal(not pressed)
@@ -5035,6 +5044,9 @@ func _show_walk_highlight(tile: Vector2i, ground_height: float) -> void:
 	walk_highlight_markers[tile] = marker
 
 func _on_state_changed(path: StringName) -> void:
+	if _actor_hud_menu != null and (not AppState.authenticated \
+			or path in [&"map", &"npc_dialogue", &"trade", &"storage", &"popup", &"death"]):
+		_actor_hud_menu.close()
 	# Protocol diagnostics are the one path that must work before login: a
 	# decode failure during the handshake is exactly what the panel exists to
 	# show, and the session is not authenticated when it happens.
@@ -7846,7 +7858,7 @@ func _load_hud_settings() -> void:
 				"banner", banner_key, BANNER_OPTION_DEFAULTS[banner_key])))
 		for key: String in _mount_banner_options:
 			_mount_banner_options[key] = bool(config.get_value("mount_banner", key, true))
-	game_view.get_node("MountControls").set_options(_mount_banner_options)
+	mount_status.set_options(_mount_banner_options)
 	_target_marker_style = TargetMarkerStyle.read(config)
 	_apply_target_marker_style()
 	_apply_fps_limit(config.get_value("graphics", "fps_limit", 0))
@@ -10484,7 +10496,7 @@ func _sync_local_status_icons() -> void:
 		local_status_grid.add_child(icon)
 
 func _banner_has_content() -> bool:
-	if game_view.get_node("MountControls").wants_banner():
+	if mount_status.wants_banner():
 		return true
 	if not _local_status_effects.is_empty():
 		return true
@@ -10833,6 +10845,7 @@ func _floating_feedback_row(preferred_y: float, lowest_y: float) -> float:
 	return candidates[candidates.size() - 1]
 
 func _on_window_size_changed() -> void:
+	_fit_hud_action_buttons.call_deferred()
 	_layout_full_map()
 	# Match the render viewport to the actual drawable area so resizing changes
 	# camera aspect instead of stretching a fixed 16:9 render target. The
@@ -10847,6 +10860,44 @@ func _on_window_size_changed() -> void:
 	if main_viewport.size != target_size:
 		main_viewport.size = target_size
 	OldcraftDialogueStyleScript.layout(self)
+
+## Keep all action icons reachable as the bar gains windows or the UI scales.
+func _fit_hud_action_buttons() -> void:
+	var available_width := maxf(200, game_view.size.x - right_rail.size.x)
+	var meter_bars: Array[ProgressBar] = []
+	var meter_fixed := 0.0
+	var visible_meters := 0
+	for meter: Node in bottom_meters.get_children():
+		if not (meter as Control).visible: continue
+		visible_meters += 1
+		var parts := 0
+		for child: Node in meter.get_children():
+			if not child is Control or not (child as Control).visible: continue
+			parts += 1
+			if child is ProgressBar: meter_bars.append(child)
+			else: meter_fixed += (child as Control).get_combined_minimum_size().x
+		meter_fixed += (meter as Container).get_theme_constant("separation") * maxi(0, parts - 1)
+	meter_fixed += bottom_meters.get_theme_constant("separation") * maxi(0, visible_meters - 1)
+	var bar_width := floorf(clampf((available_width - 12 - meter_fixed) / maxf(1, meter_bars.size()), 16, 84))
+	for bar: ProgressBar in meter_bars:
+		bar.custom_minimum_size.x = bar_width
+	var row := $GameView/Quickbar/QuickRows/Buttons as HBoxContainer
+	var buttons: Array[Button] = []
+	var fixed_width := 0.0
+	for child: Node in row.get_children():
+		if child is Button:
+			buttons.append(child)
+		elif child is Control:
+			fixed_width += (child as Control).get_combined_minimum_size().x
+	var width := available_width - fixed_width - 12.0 \
+		- row.get_theme_constant("separation") * (row.get_child_count() - 1)
+	var cell := floorf(clampf(width / maxf(1, buttons.size()), 20, 44))
+	for button: Button in buttons:
+		button.custom_minimum_size = Vector2(cell, cell)
+		button.add_theme_constant_override("icon_max_width", int(cell - HUD_ICON_PADDING * 2))
+	# A prior minimum-width overflow can leave an anchored panel expanded left.
+	(%Quickbar as Control).offset_left = 0
+	(%Quickbar as Control).offset_right = -right_rail.size.x
 
 func _layout_full_map() -> void:
 	var area := viewport_container.get_rect()
@@ -10869,7 +10920,7 @@ func _sync_hud_button_states(force := false) -> void:
 			%KnowledgeButton, %ManufacturingButton, %ChatButton, %DisconnectButton,
 			%EncyclopediaButton, %SpellsButton, %EmotesButton, %QuestButton,
 			%InfoButton, %BuddyButton, %ConsoleButton, %HelpButton,
-			%RangingButton, %MinimapButton, %OptionsButton]
+			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton]
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var sitting: bool = bool(local_actor.get("sitting", false))
 	var stats_open: bool = stats_panel.visible
@@ -10898,7 +10949,8 @@ func _sync_hud_button_states(force := false) -> void:
 		_reference_tab_open(0),
 		ranging_window != null and bool(ranging_window.call("is_open")),
 		minimap_frame.visible,
-		settings_panel.visible]
+		settings_panel.visible,
+		mounts_window != null and bool(mounts_window.call("is_open"))]
 	# Only while the player has not chosen attack mode from the HUD: a mode
 	# they picked stays picked, and Alt must not appear to be what put it there.
 	var attack_preview: bool = _alt_attack_preview and _interaction_mode != "attack"
@@ -11101,6 +11153,7 @@ func _apply_hud_meter_layout() -> void:
 			continue
 		bottom_meters.move_child(meter, index)
 		meter.visible = bool(_hud_meter_visible.get(meter_key, true))
+	_fit_hud_action_buttons.call_deferred()
 
 func _load_hud_layout() -> void:
 	var config := ConfigFile.new()
@@ -11901,9 +11954,6 @@ func _apply_target_marker_style() -> void:
 
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()
-	var mount_controls := game_view.get_node_or_null("MountControls")
-	if mount_controls != null:
-		mount_controls.call("_refresh")
 	_sync_quick_slots()
 	# Quick spell badges and the Techniques hint name the keys they use.
 	casting_bar.refresh()
@@ -14587,6 +14637,7 @@ func _apply_eloria_art() -> void:
 	_apply_rabbitlands_branding()
 	_hud_active_atlas = _external_texture("res://assets/ui/eloria_gamebuttons.png")
 	_hud_inactive_atlas = _external_texture("res://assets/ui/eloria_gamebuttons_inactive.png")
+	%MountsButton.icon = _external_texture("res://assets/ui/mounts.svg")
 	if _hud_active_atlas != null:
 		# The Godot HUD atlas uses one canonical row-major icon order.  Keeping
 		# these regions contiguous makes the art easy to audit and prevents the

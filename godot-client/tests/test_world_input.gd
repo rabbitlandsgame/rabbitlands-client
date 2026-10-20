@@ -602,7 +602,7 @@ func _run() -> void:
 		"GameView/Quickbar/QuickRows/BottomMeters/ExperienceMeter/ExperienceBottom"]:
 		_expect(main.get_node_or_null(meter_path) is ProgressBar,
 			"bottom HUD exposes %s" % meter_path.get_file())
-	var actor_menu: Control = main.get("settings_panel") as Control
+	var actor_menu: Control = main.get("_actor_hud_menu") as Control
 	main.call("_open_actor_hud_menu", Vector2(640.0, 360.0))
 	var banner_menu_entries: Array[String] = ["ShowNames",
 		"ShowHealthBar", "ShowHealthNumbers", "ShowEtherBar", "ShowEtherNumbers",

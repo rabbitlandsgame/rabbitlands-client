@@ -1,5 +1,5 @@
 extends SceneTree
-## Exercise the actual floating control against a moving/resizing nameplate.
+## The mount status belongs to the character bar stack and collapses on foot.
 var failures := 0
 var checks := 0
 
@@ -14,75 +14,66 @@ func expect(value: bool, label: String) -> void:
 
 func run() -> void:
 	var state := root.get_node("AppState")
-	var view := Control.new()
-	view.size = Vector2(1280, 720)
-	root.add_child(view)
-	var banner := Control.new()
-	banner.name = "ActorResourceOverlay"
+	var banner := PanelContainer.new()
 	banner.position = Vector2(500, 240)
-	banner.size = Vector2(150, 86)
-	view.add_child(banner)
+	root.add_child(banner)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 0)
+	banner.add_child(rows)
+	var resource_bar := ProgressBar.new()
+	resource_bar.custom_minimum_size = Vector2(100, 10)
+	resource_bar.show_percentage = false
+	rows.add_child(resource_bar)
 	var controls: Variant = (load("res://src/mounts/mount_controls.gd") as Script).new()
-	view.add_child(controls)
+	rows.add_child(controls)
 	await process_frame
-	expect(not controls.visible, "no controls before authenticated mount state")
+	expect(not controls.visible, "no status before authenticated mount state")
 	state.authenticated = true
 	state.local_actor_id = 1
 	state.actor_mounts = {1: {"mode": "mounted", "gait": "cruise", "endurance_ms": 8000}}
 	state.state_changed.emit(&"mount_states")
-	await process_frame
-	await process_frame
-	expect(controls.visible, "mount state shows controls beside visible banner")
-	var pinned: Vector2 = controls.position
-	banner.position.y += 20
-	await process_frame
-	expect(controls.position.is_equal_approx(pinned), "pinned controls do not bounce with the actor")
-	banner.position.y -= 20
-	controls.set_options({"pin_banner": false})
-	expect(controls.position.is_equal_approx(Vector2(656, 240)), "controls sit immediately right of name and bars")
-	expect(controls.toggle.get_theme_font_size("font_size") == 11, "button font matches resource numbers")
+	for frame: int in 3: await process_frame
+	expect(controls.visible and controls.get_parent() == rows, "mount status shares the character bar stack")
+	expect(controls.position.y >= resource_bar.position.y + resource_bar.size.y, "mount status sits below resource bars")
+	expect(controls.find_children("*", "BaseButton", true, false).is_empty(), "no separate mount buttons remain")
+	expect(controls.status.get_theme_font_size("font_size") == 11, "status font matches resource numbers")
 	expect(controls.status.text == "Trot · Gallop ready", "compact gait and gallop availability")
-	expect(not controls.gallop.disabled, "gallop available while trotting")
-	controls.set_options({"mount_button": false, "key_hints": false, "status": false})
-	expect(not controls.toggle.visible and controls.gallop.visible, "mount and gallop buttons can be hidden independently")
-	expect(controls.gallop.text == "Gallop" and controls.status.text == "Gallop ready", "key hints and gait can be hidden while keeping endurance")
+	var before: Vector2 = controls.global_position
+	banner.position += Vector2(40, 35)
+	await process_frame
+	expect(controls.global_position.is_equal_approx(before + Vector2(40, 35)), "status moves with the character bars")
+	state.actor_mounts[1].gait = "burst"
+	state.actor_mounts[1].endurance_ms = 3750
+	state.state_changed.emit(&"mount_states")
+	expect(controls.status.text == "Gallop · 3.8s left", "gallop displays remaining endurance")
+	state.actor_mounts[1].gait = "cruise"
+	state.state_changed.emit(&"mount_states")
+	expect(controls.status.text == "Trot · Gallop 3.8s", "trot displays available gallop time while recovering")
+	controls.set_options({"status": false})
+	expect(controls.status.text == "Gallop 3.8s", "gait can be hidden while keeping available time")
 	controls.set_options({"endurance": false})
 	expect(controls.status.text == "Trot", "gait can remain without endurance")
-	controls.set_options({"mount_button": false, "gallop_button": false, "choose_button": false, "status": false, "endurance": false})
-	expect(not controls.wants_banner(), "hiding every component leaves no empty banner")
+	controls.set_options({"status": false, "endurance": false})
+	expect(not controls.wants_banner(), "hiding every component leaves no empty row")
 	controls.set_options({"show_banner": false})
-	expect(not controls.visible, "master preference hides mount banner")
-	controls.set_options({"pin_banner": false})
-	banner.position += Vector2(40, 35)
-	banner.size.x = 180
-	await process_frame
-	await process_frame
-	expect(controls.position.is_equal_approx(Vector2(726, 275)), "controls follow moving and resized banner")
-	view.size = Vector2(900, 600)
-	await process_frame
-	await process_frame
-	expect(controls.position.x + controls.size.x <= 810.1, "controls stay clear of right HUD rail")
+	expect(not controls.visible, "saved master preference hides inline status")
+	controls.set_options({"pin_banner": true, "mount_button": true, "choose_button": true})
+	expect(controls.options.size() == 3 and controls.visible, "legacy pin and button preferences cannot restore a separate banner")
 	banner.hide()
-	await process_frame
-	await process_frame
-	expect(not controls.visible, "hidden or offscreen banner hides floating controls")
+	expect(not controls.is_visible_in_tree(), "status inherits character banner visibility")
 	banner.show()
-	state.actor_mounts[1] = {"mode": "on_foot", "blocked_reason": ""}
+	state.actor_mounts[1] = {"mode": "on_foot", "blocked_reason": "combat"}
 	state.state_changed.emit(&"mount_states")
-	await process_frame
-	expect(controls.visible and controls.toggle.text.begins_with("Mount pony"), "on-foot mount button remains available")
-	expect(controls.gallop.disabled, "on-foot gallop remains unavailable")
-	state.actor_mounts[1].selected_mount_id = "jadefeather_raptor"
-	state.state_changed.emit(&"mount_states")
-	expect(controls.toggle.text.begins_with("Mount raptor"), "raptor has the correct on-foot banner label")
+	for frame: int in 3: await process_frame
+	expect(not controls.visible and rows.get_combined_minimum_size().y == resource_bar.get_combined_minimum_size().y,
+		"dismount removes the row without leaving a gap")
 	state.actor_mounts[1] = {"mode": "summoning", "summon_remaining_ms": 1000}
 	state.state_changed.emit(&"mount_states")
-	expect(controls.status.text == "Calling… 1.0s" and controls.toggle.text.begins_with("Cancel"), "moving call keeps countdown and cancellation available")
+	expect(controls.visible and controls.status.text == "Calling… 1.0s", "call countdown uses the same inline row")
 	state.authenticated = false
 	state.state_changed.emit(&"authentication")
-	await process_frame
-	expect(not controls.visible, "logout hides mount controls")
-	view.queue_free()
+	expect(not controls.visible, "logout hides mount status")
+	banner.queue_free()
 	await process_frame
 	print("MOUNT_CONTROLS_CHECKS ", checks, " failures=", failures)
 	quit(1 if failures else 0)
