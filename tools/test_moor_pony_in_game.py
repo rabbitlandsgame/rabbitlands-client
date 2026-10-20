@@ -96,7 +96,7 @@ async def probe(live):
         assert all(command != 198 for command, _ in await frames(legacy)), "legacy client received mount extension"
         await chat(writer, "#gallop on")
         burst = await state(reader, actor_id, "mounted")
-        assert burst["gait"] == "burst" and burst["step_us"] == 50000, burst
+        assert burst["gait"] == "burst" and burst["step_us"] == 100000, burst
         # Sitting runs through ordinary dispatch and removes the mount first.
         writer.write(packet(7, bytes([1])))
         await writer.drain()

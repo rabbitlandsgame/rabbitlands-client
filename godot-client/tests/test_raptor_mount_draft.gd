@@ -71,7 +71,7 @@ func run() -> void:
 			sole_indices[leg] = PackedInt32Array(unique.keys())
 		for gait: String in ["idle","cruise","burst","idle"]:
 			Draft.pace(actor, gait)
-			actor._presentation_speed = {"idle":0.0,"cruise":10.0,"burst":20.0}[gait]
+			actor._presentation_speed = {"idle":0.0,"cruise":7.5,"burst":10.0}[gait]
 			actor.play_action(&"idle" if gait == "idle" else &"run", true)
 			visual._process(0.0)
 			visual.elapsed = 0.0

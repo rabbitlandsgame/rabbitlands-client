@@ -5982,11 +5982,7 @@ func _apply_actor_mount(id: Variant) -> void:
 	var node := actor_nodes.get(id) as ReplicatedActor3D
 	if node == null:
 		return
-	var state: Dictionary = AppState.actor_mounts.get(int(id), {})
-	var dto: Dictionary = AppState.actors.get(id, {})
-	if state.get("map", "") != dto.get("map", "") or str(state.get("owner", "")).to_lower() != str(dto.get("name", "")).to_lower():
-		state = {}
-	node.set_mount_state(state, models)
+	node.set_mount_state(AppState.mount_state_for_actor(int(id)), models)
 
 func _sync_quest_offers() -> void:
 	for id: Variant in actor_nodes:
