@@ -105,6 +105,7 @@ func run() -> void:
 		"the body disappears after the fade")
 	actor.free()
 	await process_frame
+	_test_creature_dissolve()
 
 	var state := root.get_node("AppState")
 	state.actors[9] = {"health": 0, "max_health": 100, "alive": false, "command": 3,
@@ -180,3 +181,61 @@ func run() -> void:
 	await process_frame
 	print("DEATH PRESENTATION: ", failures, " failures")
 	quit(failures)
+
+func _test_creature_dissolve() -> void:
+	var actor := actor_fixture()
+	actor.set("_is_creature", true)
+	var body := actor.get_node("Body") as MeshInstance3D
+	var original := StandardMaterial3D.new()
+	original.albedo_color = Color("6c553c")
+	body.material_override = original
+	# Another creature shares the mesh and material, as the runtime cache does.
+	var neighbor := MeshInstance3D.new()
+	neighbor.mesh = body.mesh
+	neighbor.material_override = original
+	root.add_child(neighbor)
+	var dead := dead_state(true, 0.0)
+	dead.death_presentation.hold_seconds = 3.0
+	dead.death_presentation.fade_seconds = 4.0
+	actor.apply_server_state(dead, adapter)
+	actor._process(5.9)
+	expect(actor.get("_corpse_dissolve") == null, "temporary creature holds its full body before dissolving")
+	actor._process(1.3)
+	var effect: RefCounted = actor.get("_corpse_dissolve")
+	var material := body.get_active_material(0) as ShaderMaterial
+	expect(effect != null and material != null and is_zero_approx(body.transparency),
+		"temporary creatures break into opaque patches instead of fading the whole body")
+	expect(material != null and absf(float(material.get_shader_parameter("dissolve_progress")) - 0.3) < 0.01,
+		"dissolve follows the server corpse clock")
+	var ash := actor.get_node_or_null("DissolveAsh") as MultiMeshInstance3D
+	expect(ash != null and ash.multimesh.instance_count > 0 and ash.multimesh.instance_count <= 512 and ash.layers == 2,
+		"surface dust uses one bounded batch excluded from map cameras")
+	expect(neighbor.get_active_material(0) == original and body.mesh.surface_get_material(0) == null,
+		"dissolving never changes another creature's shared mesh or material")
+	actor.apply_server_state(dead, adapter)
+	expect(actor.get("_corpse_dissolve") == effect, "restated death snapshots keep the existing dissolve")
+	actor._process(3.0)
+	expect(is_equal_approx(body.transparency, 1.0) and not ash.visible,
+		"body and drifting fragments finish before server cleanup")
+	actor.apply_server_state({"x": 0, "y": 0, "rotation": 0, "health": 20, "alive": true, "command": 7}, adapter)
+	expect(body.material_override == original and is_zero_approx(body.transparency)
+		and actor.get_node_or_null("DissolveAsh") == null, "revival restores original materials and removes all dust")
+	actor.free()
+	neighbor.free()
+	actor = actor_fixture()
+	actor.set("_is_creature", true)
+	dead.death_presentation.elapsed = 8.0
+	dead.death_presentation.received_msec = Time.get_ticks_msec()
+	actor.apply_server_state(dead, adapter)
+	material = (actor.get_node("Body") as MeshInstance3D).get_active_material(0) as ShaderMaterial
+	expect(material != null and absf(float(material.get_shader_parameter("dissolve_progress")) - 0.5) < 0.02,
+		"a late viewer joins the dissolve halfway through without replaying it")
+	actor.free()
+	actor = actor_fixture()
+	actor.set("_is_creature", true)
+	dead.death_presentation.elapsed = 20.0
+	dead.death_presentation.received_msec = Time.get_ticks_msec()
+	actor.apply_server_state(dead, adapter)
+	expect(actor.get("_corpse_dissolve") == null and actor.get_node_or_null("DissolveAsh") == null,
+		"already expired corpses allocate no dissolve or particle resources")
+	actor.free()

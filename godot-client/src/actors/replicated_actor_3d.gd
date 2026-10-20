@@ -10,6 +10,7 @@ const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
 const STATUS_ICONS := preload("res://src/ui/status_effect_icons.gd")
 const COMBAT_TARGET_MARKER := preload("res://src/actors/combat_target_marker_3d.gd")
+const CREATURE_DISSOLVE := preload("res://src/actors/creature_dissolve.gd")
 const TARGET_MARKER_STYLE := preload("res://src/actors/target_marker_style.gd")
 var _target_marker_style := TARGET_MARKER_STYLE.defaults()
 
@@ -140,6 +141,7 @@ var _corpse_fade_seconds := 4.0
 var _death_snapshot_msec := -1
 var _corpse_transparency := -1.0
 var _corpse_geometry: Array[GeometryInstance3D] = []
+var _corpse_dissolve: RefCounted
 var _cinematic_active := false
 var _charge_leap: RefCounted
 var _cinematic_position := Vector3.ZERO
@@ -1986,6 +1988,10 @@ func _sync_death_presentation(dto: Dictionary) -> void:
 			_death_animation_seconds = 0.0
 			_death_snapshot_msec = -1
 			_corpse_temporary = false
+			if _corpse_dissolve != null:
+				_corpse_dissolve.reset()
+				_corpse_dissolve = null
+				_corpse_geometry.clear()
 			_set_corpse_transparency(0.0)
 			play_action(&"idle", true)
 		return
@@ -2029,7 +2035,16 @@ func _update_corpse_pose() -> void:
 	if _corpse_temporary or _is_creature:
 		var fade := clampf((_death_elapsed - _death_duration() - _corpse_hold_seconds)
 			/ _corpse_fade_seconds, 0.0, 1.0)
-		_set_corpse_transparency(fade)
+		if _is_creature and _corpse_temporary and fade > 0.0:
+			if _corpse_dissolve == null and fade < 1.0:
+				_corpse_dissolve = CREATURE_DISSOLVE.new()
+				_corpse_dissolve.begin(self, _corpse_fade_seconds, actor_id)
+			if _corpse_dissolve != null:
+				_corpse_dissolve.update(fade)
+			# The body is cut into opaque patches instead of fading as a whole.
+			_set_corpse_transparency(1.0 if fade >= 1.0 else 0.0)
+		else:
+			_set_corpse_transparency(fade)
 		if fade >= 1.0: set_process(false)
 
 func _set_corpse_transparency(amount: float) -> void:
