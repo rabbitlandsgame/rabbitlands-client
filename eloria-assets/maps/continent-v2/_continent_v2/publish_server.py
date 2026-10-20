@@ -88,7 +88,8 @@ Checks, all fail closed (nothing is relocated; a row is moved in its source, nev
   eight-neighbour rule): at least three of its ring tiles open and reached, or a reached tile within Chebyshev 2, and
   the tile the server's World.free_player_tile walks a harvester to is reached and within Chebyshev 2; and no node's
   tile centre lies within a road's half-width (D11, harvest_presentation.road_offenders: the bake's road paths);
-- a spawn's creature exists, is passive, and its footprint fits (eloria.collision.erode_for_footprint);
+- a spawn's creature exists, is passive unless its map is one of AGGRESSIVE_MAPS (the boat-only isles), and its
+  footprint fits (eloria.collision.erode_for_footprint);
 - every row lies inside its own map's ownership polygon;
 - object ids are unique per map across nodes and interactives, positive and below the exits' 60000;
 - NPC posts are unique and stand on no trigger, arrival, home point, spawn row or interactive;
@@ -163,6 +164,9 @@ BOAT_LANDING_ROLE = "boat-landing"
 BOAT_LANDING_REACH = 8
 EXIT_OBJECTS = 60000
 MAX_LEASH = 200
+# The boat-only isles field aggressive species (owner 2026-10-20); every other map, the mainland the landing chapter
+# walks, stays passive.
+AGGRESSIVE_MAPS = frozenset({"coilmere", "suncoil", "hornmere", "whitepeak"})
 INTERACTIVE_ROLES = {"storage", "crafting_station", "training", "information", "water_source", "scenery_effect",
                      "portal", "secret", "gate", "cache", "waystone"}
 FORBIDDEN = ("|", "#", "\n", "\r")
@@ -764,9 +768,9 @@ def compose(ctx, *, log=say):
             creature = ctx.server.creatures.get(record["creature"])
             if creature is None:
                 raise PublishError(f"{record['id']}: no creature {record['creature']!r} in the server's creatures.txt")
-            if creature.raw.get("aggressive", "0").strip() not in ("", "0"):
-                raise PublishError(f"{record['id']}: {record['creature']} is aggressive; the isles field only "
-                                   "passive species")
+            if creature.raw.get("aggressive", "0").strip() not in ("", "0") and region not in AGGRESSIVE_MAPS:
+                raise PublishError(f"{record['id']}: {record['creature']} is aggressive; only the boat-only isles "
+                                   f"({', '.join(sorted(AGGRESSIVE_MAPS))}) field aggressive species")
             spawn_rows.append({"map": region, "id": record["id"], "creature": plain_field(record["creature"],
                                                                                         record["id"]),
                                "tile": tile, "leash": leash, "footprint": creature.footprint})

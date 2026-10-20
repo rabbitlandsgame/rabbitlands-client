@@ -1,5 +1,5 @@
 {
- "about": "Ssarathi temple precinct (Landfall A3 isle, owner-approved 2026-10-19): jungle green from the Nymara Ssarathi look. Merged over the derived palette by publish_look.py.",
+ "about": "Ssarathi look (audit 2026-10-20): the grove crowns painted, warm sandstone causeways. Ssarathi temple precinct (Landfall A3 isle, owner-approved 2026-10-19): jungle green from the Nymara Ssarathi look. Merged over the derived palette by publish_look.py.",
  "grass": {
   "root": [
    0.05,
@@ -10,13 +10,28 @@
    0.42,
    0.6,
    0.27
-  ]
+  ],
+  "value_forward": 1.1
  },
  "ground": {
   "meadow_tint_forward": [
    0.72,
    1.0,
    0.62
+  ],
+  "path_luma_forward": 0.12,
+  "path_tint_forward": [
+   0.86,
+   0.64,
+   0.44
+  ],
+  "path_chroma_forward": 1.15
+ },
+ "foliage": {
+  "crown_materials": [
+   "foliage_green",
+   "ssarathi_palm",
+   "verdant_frond"
   ]
  }
 }

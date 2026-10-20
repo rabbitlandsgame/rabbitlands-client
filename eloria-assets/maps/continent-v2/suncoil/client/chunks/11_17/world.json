@@ -18,14 +18,14 @@
   ],
   "bounds": {
    "min": [
-    126.0,
-    -9.660496711730957,
-    658.0
+    114.0,
+    -9.168399810791016,
+    632.0
    ],
    "max": [
-    222.0,
+    210.0,
     0.0,
-    740.0
+    730.0
    ]
   },
   "playableBounds": {
@@ -36,7 +36,7 @@
    ],
    "max": [
     470.0,
-    141.28709411621094,
+    155.90562886899397,
     740.0
    ]
   },
@@ -48,7 +48,7 @@
    ],
    "max": [
     470.0,
-    141.28709411621094,
+    155.90562886899397,
     740.0
    ]
   },
@@ -133,28 +133,28 @@
   "sky": {
    "type": "gradient",
    "zenith": [
-    0.14,
-    0.4,
-    0.74
+    0.24,
+    0.48,
+    0.7
    ],
    "horizon": [
-    0.92,
+    0.8,
     0.86,
-    0.72
+    0.8
    ],
-   "curve": 0.14,
+   "curve": 0.2,
    "groundHorizon": [
-    0.42,
-    0.62,
-    0.66
-   ],
-   "groundBottom": [
-    0.16,
-    0.3,
+    0.4,
+    0.5,
     0.38
    ],
-   "sunAngleMax": 14.0,
-   "energy": 1.16
+   "groundBottom": [
+    0.14,
+    0.2,
+    0.14
+   ],
+   "sunAngleMax": 18.0,
+   "energy": 0.8
   },
   "sun": {
    "direction": [
@@ -177,16 +177,18 @@
    ],
    "energy": 0.6
   },
-  "saturation": 1.25,
+  "saturation": 1.3,
   "fog": {
    "enabled": true,
    "color": [
-    0.9,
-    0.8,
-    0.64
+    0.66,
+    0.78,
+    0.7
    ],
-   "density": 0.00045,
-   "heightFalloff": 0.0022
+   "density": 0.00011,
+   "heightFalloff": 0.004,
+   "skyAffect": 0.04,
+   "aerialPerspective": 0.1
   },
   "variants": {
    "golden-hour": {
@@ -206,8 +208,8 @@
     "fog": {
      "enabled": true,
      "color": [
-      0.78,
-      0.66,
+      0.8,
+      0.7,
       0.52
      ],
      "density": 0.0016
@@ -297,14 +299,14 @@
   },
   "water": {
    "shallowColor": [
-    0.24,
-    0.74,
-    0.74
+    0.3,
+    0.72,
+    0.66
    ],
    "deepColor": [
-    0.04,
-    0.24,
-    0.44
+    0.06,
+    0.26,
+    0.3
    ],
    "causticsEnabled": true,
    "note": "Shallow/deep tint and caustics are presentation settings for whoever writes the water shader; the GLB ships a flat lit plane."
@@ -387,8 +389,8 @@
  ],
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
-  "snapshotSha256": "bafd2ac8a04e43988c6694f417c0856ee94860b9002580476f02aa9e666e013d",
-  "sceneSha256": "1cc48fb469153c18c3784239a4976563c3115432a3a3518c09a4cff4f8d29742"
+  "snapshotSha256": "2df1d3b43c2c5c6ee5a0b14e9d6f7897b67a8f27efd0d6d1f7e69e9b07cc056b",
+  "sceneSha256": "b6e9df3b9113e602c4bb47a17ed7cafe6d784c3d24f9546e0fc8cccbf806ac40"
  },
  "externalResources": {
   "../../../../_continent_v2/shared-assets/4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04.png": "4573d835bf96740648677912295983b8056582fe495d78b0ee87267843d05f04",
@@ -398,18 +400,18 @@
  },
  "bounds": {
   "min": [
-   126.0,
-   -9.660496711730957,
-   658.0
+   114.0,
+   -9.168399810791016,
+   632.0
   ],
   "max": [
-   222.0,
+   210.0,
    0.0,
-   740.0
+   730.0
   ]
  },
  "performance": {
-  "glbBytes": 483544,
+  "glbBytes": 570616,
   "nodes": 6,
   "meshes": 3,
   "externalResources": {
