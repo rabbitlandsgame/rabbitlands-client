@@ -12884,11 +12884,12 @@ func _describe_slot(slot: int, with_window: bool) -> void:
 
 ## Right-clicking an item takes the next tool and describes what is under the
 ## cursor without opening anything, so the player can see what the new tool
-## would act on before using it. Skip Use unless this slot can use its item now.
+## would act on before using it. Usable items keep Use in the cycle during a
+## cooldown; the use action itself waits until the item is ready.
 func _cycle_inventory_tool(slot: int) -> void:
 	var index: int = INVENTORY_TOOLS.find(_inventory_tool)
 	var next_tool: String = INVENTORY_TOOLS[(index + 1) % INVENTORY_TOOLS.size()]
-	if next_tool == "use" and not _slot_click_uses_item(slot):
+	if next_tool == "use" and not _slot_has_usable_item(slot):
 		next_tool = "inspect"
 	_set_inventory_tool(next_tool)
 	if AppState.inventory.has(slot):
@@ -14484,24 +14485,22 @@ func _slot_cursor_target(button: Button) -> String:
 		"unequip":
 			return "item_grab" if slot >= 36 else ""
 		"use":
-			# A stack the server will not let you use is only looked at, and
-			# the pointer should not promise more than the click delivers.
-			return "item_use" if _slot_click_uses_item(slot) else "item_inspect"
+			# Keep the Use cursor while a usable item cools down, matching
+			# the selected tool. The use action still checks its cooldown.
+			return "item_use" if _slot_has_usable_item(slot) else "item_inspect"
 		"inspect":
 			return "item_inspect"
 	return ""
 
-## True when the use tool would really spend the item in this slot: worn gear
-## is not used, and neither is anything the server did not mark usable or that
-## is still cooling down.
-func _slot_click_uses_item(slot: int) -> bool:
+## Whether this slot offers the Use tool, regardless of its current cooldown.
+## Worn gear and items the server did not mark usable only offer inspection.
+func _slot_has_usable_item(slot: int) -> bool:
 	if slot < 0 or slot >= 36:
 		return false
 	var item_value: Variant = AppState.inventory.get(slot)
 	if not item_value is Dictionary:
 		return false
-	return (bool((item_value as Dictionary).get("inventory_usable", false))
-		and _inventory_cooldown_remaining(slot) <= 0)
+	return bool((item_value as Dictionary).get("inventory_usable", false))
 
 ## The world half of the pointer question, split from the hover gate so a test
 ## can ask it about any spot without owning the operating system's mouse.

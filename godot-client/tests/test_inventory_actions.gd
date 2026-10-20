@@ -80,6 +80,11 @@ func _check_pointer(main: Node) -> void:
 		"a stack the use tool cannot spend is only looked at")
 	_promise(main, equipped, "item_inspect", MouseCursors.EYE,
 		"worn gear is never used, so the use tool only looks at it")
+	var cooldowns: Dictionary = app_state.get("inventory_cooldowns") as Dictionary
+	cooldowns[0] = {"end_msec": Time.get_ticks_msec() + 60000}
+	_promise(main, usable, "item_use", MouseCursors.USE,
+		"the use tool keeps its finger over a usable item on cooldown")
+	cooldowns.clear()
 
 	main.set("_inventory_tool", "inspect")
 	_promise(main, usable, "item_inspect", MouseCursors.EYE,
@@ -117,7 +122,7 @@ func _check_cycle(main: Node) -> void:
 	_check_cycle_case(main, 3, ["inspect", "grab"], "item without a usable flag")
 	var cooldowns: Dictionary = app_state.get("inventory_cooldowns") as Dictionary
 	cooldowns[0] = {"end_msec": Time.get_ticks_msec() + 60000}
-	_check_cycle_case(main, 0, ["inspect", "grab"], "item on cooldown")
+	_check_cycle_case(main, 0, ["use", "inspect", "grab"], "item on cooldown")
 	cooldowns[0] = {"end_msec": Time.get_ticks_msec() - 1}
 	_check_cycle_case(main, 0, ["use", "inspect", "grab"], "expired cooldown")
 	main.set("_inventory_tool", "use")
