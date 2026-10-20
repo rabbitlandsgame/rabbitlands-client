@@ -54,9 +54,9 @@ func _run() -> void:
 	# player's disk, so it carries three controls rather than one: the switch,
 	# what the cache is using, and a way to be rid of it. All three are checked
 	# because a row that silently lost its button would look fine.
-	var cache_toggle: CheckBox = window.find_child("map_cache", true, false) as CheckBox
-	var cache_size: Label = window.find_child("MapCacheSize", true, false) as Label
-	var cache_clear: Button = window.find_child("map_cache_clear", true, false) as Button
+	var cache_toggle: CheckBox = (window.get("panel") as Node).find_child("map_cache", true, false) as CheckBox
+	var cache_size: Label = (window.get("panel") as Node).find_child("MapCacheSize", true, false) as Label
+	var cache_clear: Button = (window.get("panel") as Node).find_child("map_cache_clear", true, false) as Button
 	_expect(cache_toggle != null and cache_size != null and cache_clear != null,
 		"the graphics tab carries a map cache switch, a size and a clear button")
 	if cache_toggle != null and cache_size != null and cache_clear != null:
@@ -221,8 +221,8 @@ func _run() -> void:
 ## environment variable decides for the session.
 func _test_look_and_quality(main: Control, window: Control, panel: PanelContainer,
 		resource_rail: Control) -> void:
-	var look: CheckBox = window.find_child("look", true, false) as CheckBox
-	var quality: OptionButton = window.find_child("quality", true, false) as OptionButton
+	var look: OptionButton = (window.get("panel") as Node).find_child("look", true, false) as OptionButton
+	var quality: OptionButton = (window.get("panel") as Node).find_child("quality", true, false) as OptionButton
 	if not _expect(look != null and quality != null,
 			"the graphics tab offers the painted look and the graphics quality"):
 		return
@@ -238,25 +238,26 @@ func _test_look_and_quality(main: Control, window: Control, panel: PanelContaine
 		and quality.get_item_id(0) == LookProfile.Quality.LOW
 		and quality.get_item_id(2) == LookProfile.Quality.HIGH,
 		"the quality reads Low, Medium, High, each its LookProfile.Quality")
-	_expect(look.button_pressed == LookProfile.player_look()
+	_expect(look.get_selected_id() == LookProfile.player_mode()
 		and quality.get_selected_id() == LookProfile.player_quality()
 		and not look.disabled and not quality.disabled,
 		"both open showing what the client has")
-	var original_look := LookProfile.player_look()
+	var original_look := LookProfile.player_mode()
 	var original_quality := LookProfile.player_quality()
 	var path: String = str(main.get("SETTINGS_PATH"))
 
-	look.button_pressed = false
-	await process_frame
 	var stored := ConfigFile.new()
-	_expect(not LookProfile.enabled() and stored.load(path) == OK
-		and stored.get_value("graphics", "look", true) == false,
-		"turning the look off turns it off at once and saves it")
-	look.button_pressed = true
-	await process_frame
-	stored.load(path)
-	_expect(LookProfile.enabled() and stored.get_value("graphics", "look", false) == true,
-		"and back on")
+	_expect(look.item_count == 3 and look.get_item_text(0) == "Original"
+		and look.get_item_text(1) == "Painted ground" and look.get_item_text(2) == "Full painted",
+		"appearance offers Original, Painted ground and Full painted")
+	for mode: int in [LookProfile.Mode.ORIGINAL, LookProfile.Mode.FULL_PAINTED,
+			LookProfile.Mode.PAINTED_GROUND]:
+		look.select(look.get_item_index(mode))
+		look.item_selected.emit(look.selected)
+		await process_frame
+		_expect(LookProfile.mode() == mode and stored.load(path) == OK
+			and stored.get_value("graphics", "appearance", "") == LookProfile.mode_name(mode),
+			"appearance applies and saves " + LookProfile.mode_name(mode))
 	for level: int in [LookProfile.Quality.LOW, LookProfile.Quality.MEDIUM, LookProfile.Quality.HIGH]:
 		quality.select(quality.get_item_index(level))
 		quality.item_selected.emit(quality.selected)
@@ -272,7 +273,7 @@ func _test_look_and_quality(main: Control, window: Control, panel: PanelContaine
 	OS.set_environment(LookProfile.ENABLE_VARIABLE, "1")
 	OS.set_environment(LookProfile.QUALITY_VARIABLE, "low")
 	main.call("_load_hud_settings")
-	_expect(look.disabled and not look.button_pressed and LookProfile.enabled()
+	_expect(look.disabled and look.get_selected_id() == LookProfile.Mode.ORIGINAL and LookProfile.full_painted()
 		and look.tooltip_text.contains(LookProfile.ENABLE_VARIABLE),
 		"with ELORIA_LOOK set the switch is greyed out, says why, and shows the player's Off")
 	_expect(quality.disabled and quality.get_selected_id() == LookProfile.Quality.HIGH
@@ -285,13 +286,13 @@ func _test_look_and_quality(main: Control, window: Control, panel: PanelContaine
 	_expect(not look.disabled and not quality.disabled and not LookProfile.enabled(),
 		"unset, the player's choice decides again and both can be changed")
 
-	main.call("_on_client_setting_changed", "Graphics", "look", original_look)
+	main.call("_on_client_setting_changed", "Graphics", "appearance", original_look)
 	main.call("_on_client_setting_changed", "Graphics", "quality", original_quality)
 	main.call("_load_hud_settings")
 	tabs.current_tab = 0
 
 func _test_fps_limit(main: Control, window: Control) -> void:
-	var option: OptionButton = window.find_child("fps_limit", true, false) as OptionButton
+	var option: OptionButton = (window.get("panel") as Node).find_child("fps_limit", true, false) as OptionButton
 	if not _expect(option != null, "the graphics tab offers an FPS limit"):
 		return
 	var original: int = int(main.get("_fps_limit"))
@@ -352,8 +353,8 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 		"spell_bar_docked", "CastingMode", "QuickSlotCount", "RingSize", "start_backdrop",
 		"start_animated", "invasion_assistant_scale", "rotation_sensitivity",
 		"shadows", "particles", "nameplates"]
-	_expect(window.find_child("pan_sensitivity", true, false) == null
-		and window.find_child("follow_player", true, false) == null,
+	_expect((window.get("panel") as Node).find_child("pan_sensitivity", true, false) == null
+		and (window.get("panel") as Node).find_child("follow_player", true, false) == null,
 		"camera settings cannot detach the view from the player")
 	for key: String in (main.get("BANNER_OPTION_NODES") as Dictionary).values():
 		keys.append(key)
@@ -365,19 +366,20 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 		for index: int in 4:
 			keys.append("protect_%s_%d" % [kind, index])
 	for key: String in keys:
-		var control := window.find_child(key, true, false) as Control
+		var control := (window.get("panel") as Node).find_child(key, true, false) as Control
 		_expect(control != null and int(window.call("tab_index_for", control)) >= 0,
 			"the unified window includes " + key)
-	_expect(main.get("_hud_layout_list") is ItemList and window.is_ancestor_of(
+	_expect(main.get("_hud_layout_list") is ItemList and (window.get("panel") as Node).is_ancestor_of(
 		main.get("_hud_layout_list")), "HUD bar order and visibility live on the HUD tab")
-	_expect(window.is_ancestor_of(main.get("_hud_skill_selector")),
+	_expect((window.get("panel") as Node).is_ancestor_of(main.get("_hud_skill_selector")),
 		"the watched experience skill is included")
 	var bindable: Array[String] = []
 	for group: Array in (window.get("BINDABLE") as Dictionary).values():
 		for action: String in group:
 			bindable.append(action)
+	# The retired camera action must not reclaim Space from gallop.
 	for action: StringName in InputMap.get_actions():
-		if not str(action).begins_with("ui_"):
+		if not str(action).begins_with("ui_") and str(action) != "recenter_viewport":
 			_expect(str(action) in bindable, "every client key can be rebound: " + str(action))
 
 	window.call("close")
@@ -398,17 +400,17 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 	_expect(not main.chat_hud.options_button.button_pressed,
 		"closing the window clears the HUD button")
 	window.call("open_tab", "Minimap")
-	var orientation := window.find_child("minimap_orientation", true, false) as OptionButton
+	var orientation := (window.get("panel") as Node).find_child("minimap_orientation", true, false) as OptionButton
 	orientation.item_selected.emit(orientation.get_item_index(1))
-	var marker := window.find_child("minimap_marker_npc", true, false) as CheckBox
+	var marker := (window.get("panel") as Node).find_child("minimap_marker_npc", true, false) as CheckBox
 	marker.button_pressed = false
-	var timer := window.find_child("timer_start_seconds", true, false) as SpinBox
+	var timer := (window.get("panel") as Node).find_child("timer_start_seconds", true, false) as SpinBox
 	timer.value = 123
-	var protect := window.find_child("protect_drop_2", true, false) as CheckBox
+	var protect := (window.get("panel") as Node).find_child("protect_drop_2", true, false) as CheckBox
 	protect.button_pressed = true
-	var quantity := window.find_child("quantity_4", true, false) as SpinBox
+	var quantity := (window.get("panel") as Node).find_child("quantity_4", true, false) as SpinBox
 	quantity.value = 321
-	_expect(window.find_child("secure", true, false) == null,
+	_expect((window.get("panel") as Node).find_child("secure", true, false) == null,
 		"settings cannot disable TLS")
 	await process_frame
 	var config := ConfigFile.new()
@@ -429,7 +431,7 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 	main.call("_on_minimap_orientation_selected", 0)
 	_expect(orientation.get_item_metadata(orientation.selected) == "north_up",
 		"HUD context changes immediately refresh the open settings window")
-	var sensitivity := window.find_child("rotation_sensitivity", true, false) as HSlider
+	var sensitivity := (window.get("panel") as Node).find_child("rotation_sensitivity", true, false) as HSlider
 	main.call("_on_client_setting_changed", "Camera", "rotation_sensitivity", 0.4)
 	window.call("open_tab", "Camera")
 	_expect(is_equal_approx(sensitivity.value, 0.4),

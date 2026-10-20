@@ -72,7 +72,7 @@ var capture_label: Label
 ## What the map cache is costing on disk, refreshed when the window opens.
 var map_cache_size: Label
 var fps_limit_option: OptionButton
-var look_toggle: CheckBox
+var look_option: OptionButton
 var quality_option: OptionButton
 var name_distance_slider: HSlider
 var name_distance_value: Label
@@ -526,20 +526,34 @@ func _add_quality_row(page: VBoxContainer) -> void:
 		setting_changed.emit(page.name, "quality", quality_option.get_item_id(index)))
 	row.add_child(quality_option)
 
-## The painted look's switch: a checkbox like the window's other switches,
-## with a hint that says what Off draws and that it takes effect at once.
+## Appearance is separate from graphics quality and takes effect immediately.
 func _add_look_row(page: VBoxContainer) -> void:
-	_add_toggle(page, "look", tr("ELORIA_SETTINGS_LOOK"), LookProfileScript.LOOK_DEFAULT)
-	look_toggle = page.find_child("look", true, false) as CheckBox
-	look_toggle.tooltip_text = tr("ELORIA_SETTINGS_LOOK_HINT")
+	var row := HBoxContainer.new()
+	page.add_child(row)
+	var caption := Label.new()
+	caption.text = tr("ELORIA_SETTINGS_LOOK")
+	caption.custom_minimum_size = Vector2(200.0, 0.0)
+	row.add_child(caption)
+	look_option = OptionButton.new()
+	look_option.name = "look"
+	look_option.custom_minimum_size = Vector2(220.0, 0.0)
+	var labels: Array[String] = [tr("ELORIA_SETTINGS_LOOK_ORIGINAL"),
+		tr("ELORIA_SETTINGS_LOOK_GROUND"), tr("ELORIA_SETTINGS_LOOK_FULL")]
+	for mode: int in labels.size():
+		look_option.add_item(labels[mode], mode)
+	look_option.select(LookProfileScript.MODE_DEFAULT)
+	look_option.tooltip_text = tr("ELORIA_SETTINGS_LOOK_HINT")
+	look_option.item_selected.connect(func(index: int) -> void:
+		setting_changed.emit(page.name, "appearance", look_option.get_item_id(index)))
+	row.add_child(look_option)
 
 ## Shows the player's switch without re-emitting it. While ELORIA_LOOK
-## decides for this session (`forced`), the box is greyed out and says so,
+## decides for this session (`forced`), the choice is greyed out and says so,
 ## still showing the player's own choice, which is what the file keeps.
-func restore_look(value: bool, forced := false) -> void:
-	look_toggle.set_pressed_no_signal(value)
-	look_toggle.disabled = forced
-	look_toggle.tooltip_text = tr("ELORIA_SETTINGS_FORCED_HINT").format(
+func restore_look(value: int, forced := false) -> void:
+	look_option.select(look_option.get_item_index(value))
+	look_option.disabled = forced
+	look_option.tooltip_text = tr("ELORIA_SETTINGS_FORCED_HINT").format(
 		{"variable": LookProfileScript.ENABLE_VARIABLE}) if forced \
 		else tr("ELORIA_SETTINGS_LOOK_HINT")
 

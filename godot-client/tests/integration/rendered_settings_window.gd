@@ -60,10 +60,10 @@ func _run() -> void:
 
 	main.call("_on_more_settings_pressed")
 	var window: Control = main.get("settings_window") as Control
-	var panel := window.get_node("SettingsWindow") as PanelContainer
+	var panel := window.get("panel") as PanelContainer
 	var tabs := window.get("tabs") as TabContainer
-	var look := window.find_child("look", true, false) as CheckBox
-	var quality := window.find_child("quality", true, false) as OptionButton
+	var look := (window.get("panel") as Node).find_child("look", true, false) as OptionButton
+	var quality := (window.get("panel") as Node).find_child("quality", true, false) as OptionButton
 	tabs.current_tab = window.call("tab_index_for", look)
 	for frame: int in 10:
 		await process_frame

@@ -112,7 +112,7 @@ class Occluder extends RefCounted:
 		# Look pass (not with the look off): the faded mesh stops casting, a wall
 		# or roof handing its shadow to a solid twin, taken before the faded
 		# copies go in.
-		if LookProfile.enabled():
+		if LookProfile.full_painted():
 			_shadow = LookFade.hold_shadow(node)
 		if node.material_override is BaseMaterial3D:
 			var original: BaseMaterial3D = node.material_override as BaseMaterial3D
@@ -155,7 +155,7 @@ class Occluder extends RefCounted:
 	## with, kept for write_alpha. Null with the pass off, and for a material
 	## LookFade has no dithered copy of (it then fades as on develop).
 	func _look_dithered(material: Material) -> ShaderMaterial:
-		if not LookProfile.enabled():
+		if not LookProfile.full_painted():
 			return null
 		var dithered := LookFade.dither_copy(material, node)
 		if dithered != null:
@@ -335,7 +335,7 @@ func update(delta: float, camera: Camera3D, player: Node3D) -> void:
 		return
 	# Look pass (not with the look off): the faded look materials cut their hole
 	# round the player's chest, where the probe aims.
-	if LookProfile.enabled() and is_instance_valid(player):
+	if LookProfile.full_painted() and is_instance_valid(player):
 		LookFade.focus = player.global_position + Vector3(0.0, PROBE_HEIGHT, 0.0)
 	_probe_countdown -= delta
 	if _probe_countdown <= 0.0:

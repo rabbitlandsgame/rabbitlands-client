@@ -129,8 +129,9 @@ func _test_main() -> void:
 	var window: Control = main.get("settings_window") as Control
 	if not _expect(window != null, "main builds its settings window"):
 		return
-	var slider: HSlider = window.find_child("name_distance", true, false) as HSlider
-	var reading: Label = window.find_child("NameDistanceValue", true, false) as Label
+	var panel := window.get("panel") as Control
+	var slider: HSlider = panel.find_child("name_distance", true, false) as HSlider
+	var reading: Label = panel.find_child("NameDistanceValue", true, false) as Label
 	_expect(slider != null and reading != null,
 		"the graphics tab carries a name distance slider and its reading")
 	if slider != null and reading != null:

@@ -465,7 +465,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		WORLD_LABEL_STYLE.apply(title, 15, .0012953, 5)
 		title.modulate = PORTAL_COLOUR
 		title.no_depth_test = true
-		title.layers = GAMEPLAY_LAYER
+		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 80
 		add_child(title)
 	elif label == "Cache":
@@ -478,7 +478,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		WORLD_LABEL_STYLE.apply(title, 16, .0012953, 5)
 		title.modulate = STORAGE_COLOUR.lightened(.3)
 		title.no_depth_test = true
-		title.layers = GAMEPLAY_LAYER
+		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 80
 		add_child(title)
 	elif is_harvestable() and (model_id.is_empty() or entry.has("resourcePalette")):
@@ -492,7 +492,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		title.fixed_size = true
 		WORLD_LABEL_STYLE.apply(title,14,.0012953,5)
 		title.modulate = HARVEST_COLOUR
-		title.layers = GAMEPLAY_LAYER
+		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 35
 		add_child(title)
 
@@ -526,7 +526,7 @@ func _add_storage_visual(height: float) -> void:
 	WORLD_LABEL_STYLE.apply(title, 16, 0.0012953, 5)
 	title.modulate = STORAGE_COLOUR.lightened(0.3)
 	title.no_depth_test = true
-	title.layers = GAMEPLAY_LAYER
+	title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	title.visibility_range_end = STORAGE_WORLD_RANGE
 	add_child(title)
 

@@ -148,7 +148,7 @@ static func paint_loaded(root: Node, manifest: WorldManifest) -> int:
 ## sw_isle's lagoon sea read navy-teal where its concept paints turquoise.
 ## Returns the surfaces changed.
 static func decode_continent_sea(root: Node, region := "") -> int:
-	if not LookProfile.enabled() or root == null or not LookProfile.forward_plus():
+	if not LookProfile.full_painted() or root == null or not LookProfile.forward_plus():
 		return 0
 	var value := float(LookProfile.region_value(region, "water", "sea_value",
 		LookProfile.CONTINENT_SEA_VALUE))
@@ -187,7 +187,7 @@ static func decode_continent_sea(root: Node, region := "") -> int:
 ## painted roads beside them, and Stillglass's pool went slate. Returns the
 ## surfaces changed.
 static func decode_inland_water(root: Node, region := "") -> int:
-	if not LookProfile.enabled() or root == null or not LookProfile.forward_plus():
+	if not LookProfile.full_painted() or root == null or not LookProfile.forward_plus():
 		return 0
 	var tint: Color = LookProfile.region_value(region, "water", "inland_tint",
 		LookProfile.INLAND_WATER_TINT)
@@ -261,7 +261,7 @@ static func paint_bound(root: Node, manifest: WorldManifest) -> int:
 ## at that entry's value. Its scene script puts the shader on as a material
 ## override, which `paint` leaves alone. Returns the meshes changed.
 static func decode_water(root: Node, region := "") -> int:
-	if not LookProfile.enabled() or root == null or not LookProfile.forward_plus():
+	if not LookProfile.full_painted() or root == null or not LookProfile.forward_plus():
 		return 0
 	var changed := 0
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
@@ -803,7 +803,7 @@ static func painted_for(source: Material, kind: Kind, mesh: Mesh, surface: int,
 		painted.set_shader_parameter(&"look_keep_tint", Vector3.ONE)
 		painted.set_shader_parameter(&"look_keep_chroma", float(LookProfile.region_value(region,
 			"props", "keep_chroma", LookProfile.KEEP_CHROMA_FORWARD if LookProfile.forward_plus()
-				else LookProfile.KEEP_CHROMA)))
+				else LookProfile.KEEP_CHROMA)) if LookProfile.full_painted() else 1.0)
 	elif rock:
 		# Rock keeps its own texture and colour at its region's rock value.
 		painted.set_shader_parameter(&"look_yard", 0.0)
@@ -943,6 +943,8 @@ static func _biome_painted_shader() -> Shader:
 static func _set_paint(painted: ShaderMaterial, kind: Kind, road_detect: bool,
 		region: String, paving: PackedVector4Array, area := Rect2()) -> void:
 	painted.set_meta(PAINTED_META, true)
+	painted.set_shader_parameter(&"look_local_saturation",
+		1.0 if LookProfile.full_painted() else LookProfile.GROUND_LOCAL_SATURATION)
 	painted.set_shader_parameter(&"look_class", int(kind))
 	painted.set_shader_parameter(&"look_debug",
 		clampi(OS.get_environment(LookProfile.GROUND_DEBUG_VARIABLE).to_int(), 0, 4))
@@ -1011,8 +1013,12 @@ static func _set_paint(painted: ShaderMaterial, kind: Kind, road_detect: bool,
 	painted.set_shader_parameter(&"look_gold_hue", LookProfile.GOLD_HUE)
 	painted.set_shader_parameter(&"look_gold_saturation", LookProfile.GOLD_SATURATION)
 	painted.set_shader_parameter(&"look_gold_value", LookProfile.GOLD_VALUE)
-	painted.set_shader_parameter(&"look_gold_chroma", LookProfile.GOLD_CHROMA)
-	painted.set_shader_parameter(&"look_gold_chroma_compat", LookProfile.GOLD_CHROMA_COMPAT)
+	# These boosts compensated for Full painted's global desaturation. Without
+	# that grade they turn the gold trails orange; keep their authored chroma.
+	painted.set_shader_parameter(&"look_gold_chroma",
+		LookProfile.GOLD_CHROMA if LookProfile.full_painted() else 1.0)
+	painted.set_shader_parameter(&"look_gold_chroma_compat",
+		LookProfile.GOLD_CHROMA_COMPAT if LookProfile.full_painted() else 1.0)
 	painted.set_shader_parameter(&"look_gold_value_compat", LookProfile.GOLD_VALUE_COMPAT)
 	painted.set_shader_parameter(&"look_verge_value_green",
 		_trim(region, "verge_value_green", LookProfile.VERGE_VALUE_GREEN))

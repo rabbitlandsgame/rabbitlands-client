@@ -52,7 +52,7 @@ The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scr
 | Chat | Separate or combined feeds; independent visibility, movement/resize lock, text size, soft-fade opacity, line spacing, idle dimming and layout reset for the conversation and system windows. |
 | Minimap | Visibility, size, orientation, shape, border, map range, marker size, and all eleven marker categories. |
 | Banners | Names; health, ether, food and action bars and numbers; instance mode; speech bubbles; background; sit and ranging locks. |
-| Graphics | Frame limit, painted look, quality, shadows, particles, nameplates and distance, character visibility through obstacles, map cache usage and clearing. |
+| Graphics | Frame limit, appearance (Original / Painted ground / Full painted), quality, shadows, particles, nameplates and distance, character visibility through obstacles, map cache usage and clearing. |
 | Camera | Rotation sensitivity. The camera stays focused on the player. |
 | Audio | Sound enablement and volume, with offline attribution credits. |
 | Inventory | Equipment side, inventory and ground bag scales, storage docking, six editable quantity shortcuts and active quantity, plus all eight Store All/Drop All protection switches. |
@@ -98,7 +98,8 @@ A PASS label is evidence of source/runtime loading only. Record screenshots and 
 
 Look and lighting checks:
 
-- `ELORIA_LOOK=0` or `1` forces the painted look off or on, and `ELORIA_LOOK_QUALITY=low`, `medium` or `high` forces the graphics quality, over the saved Settings → Graphics choices; the overridden control is greyed out (`src/world/look/look_profile.gd`, presets in `QUALITY_PRESETS`). Per-map look data lives in `src/world/look/regions/`, whose README covers the schema.
+- Settings → Graphics → Appearance defaults to **Painted ground**: painted terrain with the original lighting, creatures, props, foliage and water. **Original** restores the original terrain too; **Full painted** includes the painted sky, foliage, water, global grade and extra grass. Overhead text and banners render in a separate transparent pass at native resolution, with original colors and no world fog or glow. Old On preferences migrate to Painted ground; old Off preferences remain Original.
+- `ELORIA_LOOK=original`, `painted_ground` or `full_painted` forces an appearance; legacy `0` and `1` still force Original and Full painted, and `ELORIA_LOOK_QUALITY=low`, `medium` or `high` forces the graphics quality, over the saved Settings → Graphics choices; the overridden control is greyed out (`src/world/look/look_profile.gd`, presets in `QUALITY_PRESETS`). Per-map look data lives in `src/world/look/regions/`, whose README covers the schema.
 - Check shadow and sun-elevation changes on vertical casters, such as Four Gates' walls in `src/dev/world_validation.tscn`: at grazing sun angles flat ground already faces away from the light (N·L ≤ 0) and shows no difference. Shadow strength is a package's `environment.sun.shadowOpacity`, or else `WorldEnvironmentBinder.sun_shadow_opacity` lets `SUN_SHADOW_LEAK_ENERGY` through. `ambient_light_energy` does not change sky-sourced ambient (see the comments in `src/world/world_environment_binder.gd`).
 
 ## Branding and local settings

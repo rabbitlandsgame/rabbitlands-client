@@ -22,6 +22,9 @@ func _run() -> void:
 	camera.current = true
 	camera.cull_mask = 3
 	stage.add_child(camera)
+	var text_overlay := preload("res://src/ui/world_text_overlay.gd").new()
+	root.add_child(text_overlay)
+	text_overlay.configure(root)
 	var marker := MapMarker3D.new()
 	stage.add_child(marker)
 	marker.configure({"marker_id": 1, "x": 0, "y": 0,

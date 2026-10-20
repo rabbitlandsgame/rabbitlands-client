@@ -1351,6 +1351,10 @@ func _ready() -> void:
 	region_preview.mouse_exited.connect(_on_region_preview_mouse_exited)
 	_bind_shared_world()
 	viewport_container.texture = main_viewport.get_texture()
+	var text_overlay := preload("res://src/ui/world_text_overlay.gd").new()
+	game_view.add_child(text_overlay)
+	game_view.move_child(text_overlay, viewport_container.get_index() + 1)
+	text_overlay.configure(main_viewport)
 	minimap.texture = map_viewport.get_texture()
 	map_image.texture = full_map_viewport.get_texture()
 	full_map.hide()
@@ -1526,7 +1530,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"local_actor_presented": is_instance_valid(local_actor),
 		"camera_present": active_camera != null,
 		"fallback_ground_visible": fallback_ground.is_visible_in_tree(),
-		"painted_look": LookProfile.enabled(), "quality": LookProfile.quality_name(LookProfile.quality()),
+		"appearance": LookProfile.mode_name(LookProfile.mode()), "painted_look": LookProfile.enabled(), "quality": LookProfile.quality_name(LookProfile.quality()),
 		"vram_mode": VramTextures.mode_name(), "vram_formats": VramTextures.format_names(VramTextures.usable_formats()),
 		"fps": Engine.get_frames_per_second(), "frames_drawn": Engine.get_frames_drawn(),
 		"visible_objects": main_viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE, Viewport.RENDER_INFO_OBJECTS_IN_FRAME),
@@ -2740,7 +2744,7 @@ func _refresh_unified_settings() -> void:
 	equipment_side.select(1 if _equipment_side == "right" else 0)
 	settings_window.restore_fps_limit(_fps_limit)
 	settings_window.restore_name_distance(_name_distance_metres)
-	settings_window.restore_look(LookProfile.player_look(), LookProfile.look_forced())
+	settings_window.restore_look(LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.restore_quality(LookProfile.player_quality(), LookProfile.quality_forced())
 	casting_bar.refresh()
 	_refresh_hud_layout_menu()
@@ -7932,7 +7936,9 @@ func _save_hud_settings() -> void:
 	TargetMarkerStyle.write(config, _target_marker_style)
 	# The player's own choices, not what ELORIA_LOOK or ELORIA_LOOK_QUALITY
 	# made of them for this session.
-	config.set_value("graphics", "look", LookProfile.player_look())
+	config.set_value("graphics", "appearance", LookProfile.mode_name(LookProfile.player_mode()))
+	if config.has_section_key("graphics", "look"):
+		config.erase_section_key("graphics", "look")
 	config.set_value("graphics", "quality", LookProfile.quality_name(LookProfile.player_quality()))
 	config.set_value("hud", "combat_hud",
 		bool(extension_windows.get("combat_hud_enabled")))
@@ -11541,21 +11547,19 @@ func _apply_fps_limit(value: Variant) -> void:
 
 ## The painted look and the graphics quality from the settings file. A file
 ## from before they existed, or one holding a value this build cannot read,
-## leaves the defaults (the look on, HIGH). Main keeps no copy of either:
+## leaves the defaults (Painted ground, HIGH). Main keeps no copy of either:
 ## LookProfile holds the player's choice and resolves it against ELORIA_LOOK
 ## and ELORIA_LOOK_QUALITY, so every layer and this file ask one place. A
 ## settings file read again while a map is up (a test does) applies at once.
 func _load_look_settings(config: ConfigFile) -> void:
-	var look_value: Variant = config.get_value("graphics", "look", LookProfile.LOOK_DEFAULT)
-	var look_changed := LookProfile.set_player_look(
-		bool(look_value) if look_value is bool else LookProfile.LOOK_DEFAULT)
+	var look_changed := LookProfile.set_player_mode(LookProfile.mode_from_settings(config))
 	var quality_value: Variant = config.get_value("graphics", "quality",
 		LookProfile.quality_name(LookProfile.QUALITY_DEFAULT))
 	var level: int = LookProfile.quality_named(str(quality_value)) \
 		if quality_value is String else -1
 	LookProfile.set_player_quality(
 		level if level >= 0 else LookProfile.QUALITY_DEFAULT)
-	settings_window.call("restore_look", LookProfile.player_look(), LookProfile.look_forced())
+	settings_window.call("restore_look", LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.call("restore_quality", LookProfile.player_quality(),
 		LookProfile.quality_forced())
 	# The shadows are the renderer's: set once here, before any map, whatever
@@ -11591,7 +11595,7 @@ func _apply_look_switch() -> void:
 	for raw_object: Variant in map_object_nodes.values():
 		if is_instance_valid(raw_object):
 			surfaces += _paint_map_object_look(raw_object as MapObject3D)
-	if not LookProfile.enabled():
+	if not LookProfile.full_painted():
 		LookGrade.revert_key(world_sun)
 	_rebind_look_environment()
 	_request_map_redraw()
@@ -11819,7 +11823,11 @@ func _on_client_setting_changed(section: String, key: String,
 			invasion_assistant_window.resize_to_scale(float(value))
 		"fps_limit":
 			_apply_fps_limit(value)
+		"appearance":
+			if LookProfile.set_player_mode(int(value)):
+				_apply_look_switch()
 		"look":
+			# Compatibility for older authoring and capture tools.
 			if LookProfile.set_player_look(bool(value)):
 				_apply_look_switch()
 		"quality":
@@ -14024,7 +14032,7 @@ func _paint_map_object_look(map_object: MapObject3D) -> int:
 	if manifest == null or not manifest.data.has("continentGeography") \
 			or not is_instance_valid(map_object):
 		return 0
-	if LookProfile.enabled():
+	if LookProfile.full_painted():
 		var translation: Array = (manifest.data.continentGeography as Dictionary).get(
 			"translation", [0.0, 0.0, 0.0]) as Array
 		return LookFoliage.paint_object(map_object, LookGround.region_of(manifest),

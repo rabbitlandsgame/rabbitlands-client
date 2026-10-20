@@ -132,7 +132,7 @@ func target_checks(main: Node, player: ReplicatedActor3D, wolf: ReplicatedActor3
 	wolf.set_nameplate_visible(false)
 	wolf.set_overhead_crowded(true)
 	expect(marker.visible and pointer.visible and pointer.no_depth_test, "target pointer survives hidden or crowded banners")
-	expect(ring.layers == 2 and pointer.layers == 2, "combat cues are absent from map cameras")
+	expect(ring.layers == 2 and pointer.layers == preload("res://src/ui/world_label_style.gd").RENDER_LAYER, "combat cues are absent from map cameras")
 	await physics_frame
 	marker.call("_physics_process", 0.0)
 	var surface := ring.mesh

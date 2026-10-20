@@ -1,7 +1,7 @@
 class_name LookSky
 extends RefCounted
 ## Look pass layer L5: a painted sky, and a haze that joins the far ground to
-## it. Does nothing unless LookProfile.enabled().
+## it. Does nothing unless LookProfile.full_painted().
 ##
 ## Develop draws the engine's procedural sky: a hard two-tone gradient that is
 ## deep blue almost down to the horizon, over a flat brown "ground" wherever
@@ -36,7 +36,7 @@ const PAINTED_META := &"look_painted_sky"
 ## straight after WorldEnvironmentBinder.apply, before the map cameras take
 ## their copy of the environment. Safe to call again.
 static func install(manifest: WorldManifest, world_environment: WorldEnvironment) -> bool:
-	if not LookProfile.enabled() or not _outdoor(manifest) or world_environment == null \
+	if not LookProfile.full_painted() or not _outdoor(manifest) or world_environment == null \
 			or not LookProfile.sky_painted(manifest.asset_id()):
 		return false
 	return _painted(world_environment.environment) != null
@@ -46,7 +46,7 @@ static func install(manifest: WorldManifest, world_environment: WorldEnvironment
 ## applied and `minute` the game minute they applied it for.
 static func apply(lighting: WorldManifest, world_environment: WorldEnvironment,
 		minute: float) -> bool:
-	if not LookProfile.enabled() or not _outdoor(lighting) or world_environment == null \
+	if not LookProfile.full_painted() or not _outdoor(lighting) or world_environment == null \
 			or not LookProfile.sky_painted(lighting.asset_id()):
 		return false
 	var environment: Environment = world_environment.environment

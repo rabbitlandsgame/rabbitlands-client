@@ -1078,7 +1078,7 @@ func _add_nameplate(dto: Dictionary) -> void:
 		if int(dto.get("kind", 0)) == CREATURE_ACTOR_KIND and name_colour == 0
 		else EloriaProtocol.el_text_colour(name_colour))
 	label.outline_modulate = Color.BLACK
-	label.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(label)
 	_nameplate = label
 	_add_health_bar()
@@ -1105,7 +1105,7 @@ func set_status_effects(effects: Array) -> void:
 	for index: int in range(next.size()):
 		var icon := MeshInstance3D.new()
 		icon.name = next[index]
-		icon.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		icon.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		icon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var quad := QuadMesh.new()
 		quad.size = Vector2.ONE * NEGATIVE_STATUS_SIZE * OVERHEAD_PIXEL
@@ -1168,7 +1168,7 @@ func _add_health_bar() -> void:
 	background_quad.material = _overhead_material(HEALTH_BAR_BACKING, 1)
 	background.mesh = background_quad
 	background.position.y = NAMEPLATE_HEIGHT
-	background.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	background.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(background)
 	_health_bar_background = background
 	var fill: MeshInstance3D = MeshInstance3D.new()
@@ -1181,7 +1181,7 @@ func _add_health_bar() -> void:
 	(fill_quad.material as StandardMaterial3D).albedo_texture = _health_bar_texture()
 	fill.mesh = fill_quad
 	fill.position.y = NAMEPLATE_HEIGHT
-	fill.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	fill.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(fill)
 	_health_bar_fill = fill
 	var numbers: Label3D = Label3D.new()
@@ -1197,7 +1197,7 @@ func _add_health_bar() -> void:
 	WORLD_LABEL_STYLE.apply(numbers, HEALTH_NUMBER_FONT_SIZE, OVERHEAD_PIXEL,
 		0)
 	numbers.outline_modulate = Color.BLACK
-	numbers.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	numbers.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(numbers)
 	_health_label = numbers
 
@@ -1208,7 +1208,7 @@ func _add_overhead_background() -> void:
 	backing.mesh = QuadMesh.new()
 	(backing.mesh as QuadMesh).material = _overhead_material(OVERHEAD_BACKING, 0)
 	backing.position.y = NAMEPLATE_HEIGHT
-	backing.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	backing.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	backing.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(backing)
 	_overhead_background = backing
@@ -1449,7 +1449,7 @@ func set_title(title: String) -> void:
 		WORLD_LABEL_STYLE.apply(label, TITLE_FONT_SIZE, OVERHEAD_PIXEL,
 			OVERHEAD_OUTLINE_SIZE)
 		label.modulate = Color(0.85, 0.78, 0.45, 1.0)
-		label.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		add_child(label)
 		_title_line = label
 	_title_line.text = title
@@ -1483,7 +1483,7 @@ func set_quest_available(available: bool) -> void:
 		_quest_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		_quest_marker.no_depth_test = true
 		_quest_marker.fixed_size = true
-		_quest_marker.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		_quest_marker.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		WORLD_LABEL_STYLE.apply(_quest_marker, 30, OVERHEAD_PIXEL, 2)
 		_quest_marker.outline_modulate = Color(0.28, 0.13, 0.01)
 		add_child(_quest_marker)
@@ -1520,7 +1520,7 @@ func set_occupation(occupation: String) -> void:
 			WORLD_LABEL_STYLE.apply(label, OCCUPATION_FONT_SIZE, OVERHEAD_PIXEL, 0)
 			label.modulate = OCCUPATION_COLOUR
 			label.outline_modulate = Color.BLACK
-			label.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+			label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 			add_child(label)
 			_occupation_line = label
 		_occupation_line.text = "<%s>" % text
@@ -1563,7 +1563,7 @@ func show_speech_bubble(speech: String, duration_msec: int) -> void:
 		WORLD_LABEL_STYLE.apply(label, SPEECH_BUBBLE_FONT_SIZE, OVERHEAD_PIXEL, 6)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.modulate = SPEECH_BUBBLE_TEXT
-		label.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		add_child(label)
 		_speech_bubble = label
 	_speech_bubble.text = speech

@@ -37,7 +37,7 @@ func _init() -> void:
 	pointer.modulate = COLOUR
 	pointer.outline_modulate = BORDER
 	pointer.outline_size = 6
-	pointer.layers = LAYER
+	pointer.layers = preload("res://src/ui/world_label_style.gd").RENDER_LAYER
 	add_child(pointer)
 	hide()
 	set_physics_process(false)

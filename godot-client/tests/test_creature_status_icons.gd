@@ -72,7 +72,7 @@ func _run() -> void:
 		_expect(str(icon.name) == all_effects[index], "stable icon order")
 		_expect(material.albedo_texture != null and material.fixed_size and material.no_depth_test,
 			"icon stays legible through zoom and terrain")
-		_expect(quad.center_offset.y > 0 and icon.layers == ReplicatedActor3D.GAMEPLAY_ONLY_VISUAL_LAYER,
+		_expect(quad.center_offset.y > 0 and icon.layers == preload("res://src/ui/world_label_style.gd").RENDER_LAYER,
 			"icon stays above the name and off maps")
 	fox.set_server_scale(2.0)
 	_expect(icons.position.y == fox.get_node("Nameplate").position.y, "scaling lifts icons with the banner")
