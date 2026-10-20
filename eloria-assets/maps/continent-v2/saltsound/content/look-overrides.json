@@ -1,16 +1,17 @@
 {
- "about": "Amethyst Barrens (Landfall A3 retheme, owner-approved 2026-10-19): lilac-grey grass from the Nymara barrens look. Earlier: Saltsound identity (salt marsh and sound; owner-approved biome map, 2026-10-14). Merged over the derived palette by publish_look.py.. Merged over the derived palette by publish_look.py.",
+ "about": "Amethyst Barrens look (audit 2026-10-20): dusky plum-lilac grass at value 1.15, ochre dust roads at luma 0.15, crystals keep their chroma. Amethyst Barrens (Landfall A3 retheme, owner-approved 2026-10-19): lilac-grey grass from the Nymara barrens look. Earlier: Saltsound identity (salt marsh and sound; owner-approved biome map, 2026-10-14). Merged over the derived palette by publish_look.py.. Merged over the derived palette by publish_look.py.",
  "grass": {
   "root": [
-   0.24,
-   0.2,
-   0.24
+   0.3,
+   0.22,
+   0.3
   ],
   "tip": [
-   0.6,
-   0.54,
+   0.62,
+   0.55,
    0.6
-  ]
+  ],
+  "value_forward": 1.15
  },
  "ground": {
   "meadow_tint_forward": [
@@ -24,6 +25,27 @@
    "sand": "beach_sand",
    "rock": "coastal_gravel",
    "soil": "tilled_soil"
-  }
+  },
+  "path_luma_forward": 0.15,
+  "path_tint_forward": [
+   0.8,
+   0.62,
+   0.46
+  ],
+  "path_chroma_forward": 1.2
+ },
+ "props": {
+  "keep_words": [
+   "crownwater_gilt",
+   "crystal",
+   "kit-sw-domed-temple",
+   "kit-sw-harbour-tower",
+   "kit-sw-landing-beacon",
+   "kit-sw-palace-keep",
+   "kit-sw-plaza-rosette",
+   "kit-sw-townhouse",
+   "kit-sw-wall-bastion",
+   "kit-sw-wall-tower-round"
+  ]
  }
 }

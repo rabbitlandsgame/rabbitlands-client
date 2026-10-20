@@ -73,14 +73,14 @@
   "sky": {
    "type": "gradient",
    "zenith": [
-    0.2,
-    0.45,
-    0.76
+    0.24,
+    0.38,
+    0.62
    ],
    "horizon": [
-    0.8,
-    0.87,
-    0.9
+    0.72,
+    0.78,
+    0.86
    ],
    "curve": 0.14,
    "groundHorizon": [
@@ -117,16 +117,17 @@
    ],
    "energy": 0.6
   },
-  "saturation": 1.16,
+  "saturation": 0.92,
   "fog": {
    "enabled": true,
    "color": [
-    0.76,
-    0.8,
-    0.82
+    0.62,
+    0.68,
+    0.76
    ],
-   "density": 0.0004,
-   "heightFalloff": 0.0022
+   "density": 0.00048,
+   "heightFalloff": 0.0026,
+   "skyAffect": 0.35
   },
   "variants": {
    "golden-hour": {
@@ -146,9 +147,9 @@
     "fog": {
      "enabled": true,
      "color": [
-      0.78,
-      0.66,
-      0.52
+      0.68,
+      0.62,
+      0.62
      ],
      "density": 0.0016
     }

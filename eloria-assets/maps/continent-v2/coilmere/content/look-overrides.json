@@ -1,5 +1,5 @@
 {
- "about": "Verdant Stair and the drowned quarter (Landfall A3 isle, owner-approved 2026-10-19): jungle green from the Nymara Verdant and Ssarathi looks. Earlier: Tollholm identity (vineyard toll village; owner-approved biome map, 2026-10-14). Merged over the derived palette by publish_look.py.. Merged over the derived palette by publish_look.py.",
+ "about": "Verdant Stair look (audit 2026-10-20): the grove crowns painted, Verdant's lanes. Verdant Stair and the drowned quarter (Landfall A3 isle, owner-approved 2026-10-19): jungle green from the Nymara Verdant and Ssarathi looks. Earlier: Tollholm identity (vineyard toll village; owner-approved biome map, 2026-10-14). Merged over the derived palette by publish_look.py.. Merged over the derived palette by publish_look.py.",
  "grass": {
   "root": [
    0.06,
@@ -10,13 +10,14 @@
    0.38,
    0.56,
    0.22
-  ]
+  ],
+  "value_forward": 1.6
  },
  "ground": {
   "path_tint_forward": [
-   0.92,
-   0.7,
-   0.52
+   0.72,
+   0.56,
+   0.38
   ],
   "class_textures": {
    "deck": "packed_earth",
@@ -29,6 +30,15 @@
    0.7,
    1.0,
    0.6
+  ],
+  "path_luma_forward": 0.16,
+  "path_chroma_forward": 1.25
+ },
+ "foliage": {
+  "crown_materials": [
+   "foliage_green",
+   "ssarathi_palm",
+   "verdant_frond"
   ]
  }
 }

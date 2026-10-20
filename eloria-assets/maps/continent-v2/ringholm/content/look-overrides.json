@@ -1,5 +1,5 @@
 {
- "about": "Sunmane Steppe (Landfall A3 retheme, owner-approved 2026-10-19): golden steppe grass from the Nymara Sunmane look. Earlier: Ringholm identity (machair and stone ring; owner-approved biome map, 2026-10-14). Merged over the derived palette by publish_look.py.. Merged over the derived palette by publish_look.py.",
+ "about": "Sunmane Steppe look (audit 2026-10-20): dry olive-gold grass in thin beds (open 0.3, meadow 0.5), gold sand roads, steppe-tree crowns painted. Sunmane Steppe (Landfall A3 retheme, owner-approved 2026-10-19): golden steppe grass from the Nymara Sunmane look. Earlier: Ringholm identity (machair and stone ring; owner-approved biome map, 2026-10-14). Merged over the derived palette by publish_look.py.. Merged over the derived palette by publish_look.py.",
  "grass": {
   "root": [
    0.17,
@@ -7,11 +7,13 @@
    0.06
   ],
   "tip": [
-   0.74,
-   0.64,
-   0.3
+   0.68,
+   0.62,
+   0.27
   ],
-  "meadow": 1.1
+  "meadow": 0.5,
+  "value_forward": 1.5,
+  "open": 0.3
  },
  "ground": {
   "meadow_tint_forward": [
@@ -25,6 +27,19 @@
    "sand": "beach_sand",
    "rock": "coastal_gravel",
    "soil": "tilled_soil"
-  }
+  },
+  "path_tint_forward": [
+   0.86,
+   0.74,
+   0.44
+  ],
+  "path_chroma_forward": 1.7,
+  "path_luma_forward": 0.295,
+  "verge_saturation_forward": 1.12
+ },
+ "foliage": {
+  "crown_materials": [
+   "sun_foliage"
+  ]
  }
 }
