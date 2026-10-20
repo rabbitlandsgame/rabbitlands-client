@@ -1717,7 +1717,7 @@ func _update_keyboard_movement() -> void:
 		_stop_keyboard_movement()
 		return
 	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
-			or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
+			or _text_entry_active() or trade_panel.visible \
 			or storage_panel.visible or full_map.visible \
 			or console_panel.visible or settings_panel.visible or item_lists_panel.visible \
 			or (_actor_hud_menu != null and _actor_hud_menu.visible) \
@@ -3588,7 +3588,7 @@ func _on_login_succeeded() -> void:
 
 func _on_login_failed(message: String) -> void:
 	_end_arrival()
-	if character_intro.blocks_input():
+	if character_intro.is_active():
 		character_intro.cancel()
 		creation_panel.hide()
 		_set_login_screen_visible(true)
@@ -4102,7 +4102,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed \
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
 		camera_rig.handle_mouse_button(event as InputEventMouseButton)
-	if (not game_view.visible or full_map.visible or dialogue_panel.visible
+	if (not game_view.visible or full_map.visible
 			or trade_panel.visible or storage_panel.visible
 			or manufacturing_panel.visible):
 		# The world takes no clicks behind these windows, but a right click
@@ -4686,7 +4686,7 @@ func _local_actor_server_tile() -> Variant:
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
 func _map_input_blocked() -> bool:
-	return (_world_input_blocked() or not game_view.visible or dialogue_panel.visible or trade_panel.visible
+	return (_world_input_blocked() or not game_view.visible or trade_panel.visible
 		or storage_panel.visible or manufacturing_panel.visible)
 
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
@@ -5269,7 +5269,7 @@ func _load_server_map() -> void:
 			AppState.current_map, normalized_map, map_registry.keys()])
 		return
 	var handoff := exterior_stream.take_ready(normalized_map, world_loader, camera_rig.focus)
-	if character_intro.blocks_input():
+	if character_intro.is_active():
 		if normalized_map == NewCharacterIntroScript.MAP and character_intro.pending:
 			var preloaded: Dictionary = character_intro.take_preload(normalized_map)
 			if not preloaded.is_empty():
@@ -6077,7 +6077,7 @@ func _update_local_actor_follow() -> void:
 	player_map_marker.visible = true
 
 func _update_character_intro(delta: float) -> void:
-	if not character_intro.blocks_input():
+	if not character_intro.is_active():
 		return
 	var guide_ready := false
 	var guide: Node3D

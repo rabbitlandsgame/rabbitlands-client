@@ -113,15 +113,15 @@ func run() -> void:
 	var conversation := {"open":true, "name":"Nash", "text":"Ilyon needs a dressing.", "options":[]}
 	intro.update(0.1, rig, player, true, true, null, -1, conversation)
 	intro.update(600.0, rig, player, true, true, null, -1, conversation)
-	expect(intro.greeting_phase == &"conversation" and intro.blocks_input(), "player can read and answer without a conversation time limit")
+	expect(intro.greeting_phase == &"conversation" and not intro.blocks_input() and intro.is_active(), "player can read and answer without a time limit while movement is free")
 	intro.update(0.1, rig, player, true, true, null, -1, {"open":false})
 	intro.update(0.2, rig, player, true, true)
-	expect(intro.greeting_phase == &"return" and intro.blocks_input(), "closing the conversation starts the run back while movement stays locked")
+	expect(intro.greeting_phase == &"return" and not intro.blocks_input(), "closing the conversation starts the run back without locking movement")
 	expect(beacon.global_position.is_equal_approx(guide.global_position) and beacon.get_node("RisingSparks").get_instance_id() == sparks,
 		"the same particle animation follows Nash back without restarting")
 	intro.update(2.0, rig, player, true, true)
 	expect(guide.restored and guide.global_position.is_equal_approx(guide.post) and not intro.blocks_input(),
-		"only arriving at Nash's original post restores player control")
+		"Nash returns to his original post while player control remains available")
 	expect(requests == [100], "conversation updates never restart the tutorial")
 	expect(not intro.owns_guide_beacon(100) and beacon.is_queued_for_deletion(), "arrival beacon ends after Nash returns")
 	intro.arm(main.main_viewport)
