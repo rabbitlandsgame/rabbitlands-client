@@ -4,10 +4,10 @@ const Draft := preload("res://src/dev/raptor_mount_draft.gd")
 const PANELS := [
  ["REST / SIDE", "luminous_male", "cruise", "idle", false],
  ["REST / REAR + CAPE", "luminous_female", "cruise", "idle", false],
- ["NORMAL / SIDE  |  2x RUN", "luminous_male", "cruise", "run", true],
- ["NORMAL / GAME CAMERA  |  2x RUN", "luminous_female", "cruise", "run", true],
- ["FAST / SIDE  |  4x RUN", "luminous_male", "burst", "run", true],
- ["FAST / GAME CAMERA  |  4x RUN", "luminous_female", "burst", "run", true]]
+ ["NORMAL / SIDE  |  1.5x RUN", "luminous_male", "cruise", "run", true],
+ ["NORMAL / GAME CAMERA  |  1.5x RUN", "luminous_female", "cruise", "run", true],
+ ["FAST / SIDE  |  2x RUN", "luminous_male", "burst", "run", true],
+ ["FAST / GAME CAMERA  |  2x RUN", "luminous_female", "burst", "run", true]]
 var actors: Array[ReplicatedActor3D] = []
 var clock := 0.0
 var paused := false
@@ -128,7 +128,7 @@ func _ready() -> void:
 			push_error(str(errors))
 		actor.set_physics_process(false)
 		actor.set_process(false)
-		actor._presentation_speed = 20.0 if panel[2] == "burst" else 10.0
+		actor._presentation_speed = 10.0 if panel[2] == "burst" else 7.5
 		var mount_errors := Draft.attach(actor, models)
 		if not mount_errors.is_empty(): push_error(str(mount_errors))
 		Draft.pace(actor, panel[2])

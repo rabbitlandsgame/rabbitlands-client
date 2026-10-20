@@ -52,7 +52,7 @@ func _ready() -> void:
 	choose.text = "Mounts"
 	choose.tooltip_text = "Choose between your mounts."
 	choose.pressed.connect(func() -> void: choose_mount_requested.emit())
-	gallop.tooltip_text = "Toggle fast mode on any mount. Normal travel is twice running speed; fast mode is four times. Eight seconds of endurance."
+	gallop.tooltip_text = "Toggle fast mode on any mount. Normal travel is 1.5 times running speed; gallop is twice running speed. Eight seconds of endurance."
 	toggle.pressed.connect(func() -> void: Network.send_chat("#mount"))
 	gallop.pressed.connect(func() -> void: Network.send_chat("#gallop"))
 	AppState.state_changed.connect(_changed)
