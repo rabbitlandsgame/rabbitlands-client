@@ -94,6 +94,10 @@ The output is `../dist/releases/client-<full-client-commit>/`:
   helpers, then downloads the matching signed game payload during installation.
   Download progress and SHA-256 checks use Inno Setup 6; the helper also verifies
   the RSA signature, complete archive and extracted files before installing.
+  Setup shows verification, preparation and unpacking progress, including the
+  unpacked file count. Keep setup open until these steps finish. A second setup
+  is blocked, and a helper still working in the background keeps the installation
+  locked until it finishes. Locks left by a crashed helper can be recovered on retry.
   Setup can repair the same build. Players need an internet connection, and
   do not manually download the update parts. Shortcuts start the restart updater.
 - **Linux:** a `.tar.gz` containing the native executable, updater and launch

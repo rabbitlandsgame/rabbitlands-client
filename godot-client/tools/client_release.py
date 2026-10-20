@@ -197,6 +197,7 @@ def export_installer_helper(stage: Path, godot: Path, tools_source: Path,
     (project / "project.godot").write_text(
         'config_version=5\n[application]\nconfig/name="Rabbit Lands Setup"\n'
         'config/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\n'
+        'run/flush_stdout_on_print=true\n'
         'run/main_scene="res://main.tscn"\n[rendering]\nrenderer/rendering_method="gl_compatibility"\n', encoding="utf-8")
     (project / "main.tscn").write_text(
         '[gd_scene load_steps=2 format=3]\n[ext_resource type="Script" path="res://install.gd" id="1"]\n'
