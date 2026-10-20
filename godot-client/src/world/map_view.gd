@@ -9,7 +9,7 @@ const NEIGHBOUR_BUFFER_METRES := 96.0
 
 static func bounds_for(manifest: WorldManifest, section_id: String = "") -> AABB:
 	var asset: Dictionary = manifest.data.get("asset", {})
-	if bool(manifest.data.get("secret", false)) and not section_id.is_empty():
+	if SecretSections.applies(manifest) and not section_id.is_empty():
 		for section: Dictionary in manifest.data.get("sections", []):
 			if str(section.get("id", "")) != section_id:
 				continue

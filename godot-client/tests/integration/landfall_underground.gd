@@ -35,18 +35,31 @@ func run() -> void:
 	var scenery := loader.world_root.get_node_or_null("UndergroundScenery")
 	var placements: Array = JSON.parse_string(FileAccess.get_file_as_string(
 		"res://data/world/underground-scenery.json")).placements
-	var models := 0
-	if scenery != null:
-		# The Cenote Deeps' wall rocks stand in Rocks_* groups that cut away with their wall.
-		for child: Node in scenery.get_children():
-			models += child.get_child_count() if str(child.name).begins_with("Rocks_") else 1
-	check(models == placements.size() and placements.size() > 45,
+	check(scenery != null and scenery.get_child_count() == placements.size() and placements.size() > 45,
 		"All reviewed imported scenery placements load")
 	var reapply := preload("res://src/world/underground_scenery.gd")
 	check(reapply.apply(loader.manifest, loader.world_root) == 0,
 		"Applying presentation twice does not duplicate scenery")
 	var cutaway := InteriorCutaway.new()
 	check(cutaway.configure(loader.manifest, loader.world_root) > 4, "Roof and wall cutaways resolve")
+	cutaway.update(0, true)
+	# Only the cave the player stands in is drawn (the manifest is `sectioned`).
+	var sections := SecretSections.new()
+	check(sections.configure(loader.manifest, loader.world_root) > 0, "The underground's caves sort into sections")
+	var cenote: Array = (loader.manifest.data.spawnPoints as Array).filter(
+		func(s: Dictionary) -> bool: return s.id == "spindle_cavern")
+	var at: Array = cenote[0].position
+	sections.update(Vector3(at[0], 0, at[2]), true)
+	cutaway.update(0, false, sections.current_section())
+	var mine_floor := loader.world_root.find_child("Walk_lantern_mine*", true, false) as Node3D
+	var cenote_floor := loader.world_root.find_child("Walk_spindle_cavern*", true, false) as Node3D
+	check(sections.current_section() == "spindle_cavern" and cenote_floor.visible and not mine_floor.visible,
+		"Only the cave the player is in is drawn")
+	var mine_wall := loader.world_root.find_child("Build_lantern_mine_south*", true, false) as Node3D
+	check(mine_wall != null and not mine_wall.visible, "Another cave's walls stay hidden as the camera turns")
+	var roof := loader.world_root.find_child("Roof_spindle_cavern*", true, false) as Node3D
+	check(roof != null and not roof.visible, "Entering a cave keeps its roof cut away")
+	sections.reset()
 	cutaway.update(0, true)
 	for unused in range(8):
 		await process_frame

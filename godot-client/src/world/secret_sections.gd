@@ -9,6 +9,10 @@ extends RefCounted
 ## mesh and light under the world root to the section whose bounds hold its
 ## centre, then keeps only the current section visible. The minimap and the
 ## full map are live renders of the same world, so they black out with it.
+##
+## Any interior made of disjoint sections can ask for the same treatment with
+## `sectioned: true` instead: Landfall's shared underground, whose four caves
+## stand apart in one void, shows only the cave the player is in.
 
 var _sections: Array[Dictionary] = []
 var _members: Dictionary = {}          # section id -> Array[Node3D]
@@ -20,6 +24,13 @@ const MARGIN := 3.0
 
 func is_active() -> bool:
 	return not _sections.is_empty()
+
+
+## Whether a manifest shows its sections one at a time (a secrets map, or an
+## interior that declares `sectioned`).
+static func applies(manifest: WorldManifest) -> bool:
+	return manifest != null and (bool(manifest.data.get("secret", false))
+		or bool(manifest.data.get("sectioned", false)))
 
 
 func current_section() -> String:
@@ -48,7 +59,7 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 	reset()
 	if manifest == null or world_root == null:
 		return 0
-	if not bool(manifest.data.get("secret", false)):
+	if not applies(manifest):
 		return 0
 	var listed: Variant = manifest.data.get("sections", [])
 	if not listed is Array:

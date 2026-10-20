@@ -18,6 +18,7 @@ var _always_hidden: Array[Node3D] = []
 var _walls: Array[Dictionary] = []
 var _threshold := 0.2
 var _last_yaw := INF
+var _last_section := ""
 
 func is_active() -> bool:
 	return not _always_hidden.is_empty() or not _walls.is_empty()
@@ -60,8 +61,10 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 				outward = Vector3(float(parts[0]), 0.0, float(parts[2]))
 			if outward.length_squared() < 0.0001:
 				continue
-			_walls.append({"node": node, "outward": outward.normalized()})
+			_walls.append({"node": node, "outward": outward.normalized(),
+				"section": str(entry.get("section", ""))})
 	_last_yaw = INF
+	_last_section = ""
 	return _always_hidden.size() + _walls.size()
 
 ## Restores everything this instance hid. Safe to call on a freed scene: a
@@ -78,15 +81,28 @@ func reset() -> void:
 	_always_hidden.clear()
 	_walls.clear()
 	_last_yaw = INF
+	_last_section = ""
 
 ## Hides the walls the camera is looking through. Cheap enough to call every
-## frame, but it only touches the scene when the rig has actually turned.
-func update(camera_yaw_degrees: float, force: bool = false) -> void:
-	if _walls.is_empty():
+## frame, but it only touches the scene when the rig has actually turned or
+## the player has walked into another section.
+##
+## `section` is SecretSections' current section on a map shown one section at
+## a time. A wall the manifest gives a `section` is shown only in its own one,
+## and entering a section re-hides the roofs, which SecretSections shows with
+## the rest of the section it reveals.
+func update(camera_yaw_degrees: float, force: bool = false, section: String = "") -> void:
+	if _walls.is_empty() and _always_hidden.is_empty():
 		return
-	if not force and is_equal_approx(camera_yaw_degrees, _last_yaw):
+	var entered := section != _last_section
+	if not force and not entered and is_equal_approx(camera_yaw_degrees, _last_yaw):
 		return
 	_last_yaw = camera_yaw_degrees
+	_last_section = section
+	if entered or force:
+		for value: Variant in _always_hidden:
+			if is_instance_valid(value):
+				(value as Node3D).visible = false
 	# The rig places the camera at +Z rotated by yaw, so this is the horizontal
 	# direction from the player out to the camera.
 	var yaw := deg_to_rad(camera_yaw_degrees)
@@ -96,6 +112,10 @@ func update(camera_yaw_degrees: float, force: bool = false) -> void:
 		if not is_instance_valid(value):
 			continue
 		var node := value as Node3D
+		var own: String = wall.get("section", "")
+		if not own.is_empty() and not section.is_empty() and own != section:
+			node.visible = false
+			continue
 		var outward: Vector3 = wall.get("outward") as Vector3
 		# A wall whose outside faces the camera is between the camera and the
 		# room, so it is the one to drop.

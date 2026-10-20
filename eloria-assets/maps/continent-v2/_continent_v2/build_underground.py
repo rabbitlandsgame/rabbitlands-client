@@ -105,15 +105,16 @@ KIT_LIGHTS={'jade_lantern_pole':([1,.74,.42],1.6,13,2.3),'jade_lantern_shrine':(
 def dressing(section):
     """The cenote's reused scenery, as placements in tile units: the source's props, then rocks along every wall.
 
-    Each is {asset, x, y, height, yaw, scale, block, group}: `block` is the radius (tiles) it takes from the walk
-    grid, `group` the cutaway container a wall rock hides with (Rocks_<section>_<facing>, the wall's own facing).
+    Each is {asset, x, y, height, yaw, scale, block, wall}: `block` is the radius (tiles) it takes from the walk
+    grid; `wall` marks a rock set into the rock face. Wall rocks never cut away with the face: the client fades the
+    one that comes between the camera and the player (OccluderFade).
     """
     if section['style']!='cenote': return []
     items=[]
     for prop in section.get('props',[]):
         x,y=prop['at']
         items.append({'asset':prop['asset'],'x':x,'y':y,'height':prop.get('height',0),'yaw':prop.get('yaw',0),
-                      'scale':prop.get('scale',1),'block':prop.get('block',0),'group':None,
+                      'scale':prop.get('scale',1),'block':prop.get('block',0),'wall':False,
                       **({'palette':prop['palette']} if 'palette' in prop else {}),
                       **({'light':True} if prop.get('light') else {})})
     keep_out=[(p['at'][0],p['at'][1],p['clearWall']) for p in section.get('props',[]) if p.get('clearWall')]
@@ -130,10 +131,16 @@ def dressing(section):
         # Set the rock into the face so about a third of it stands proud of the wall.
         x,y=p.x+nx*proud*scale*.45,p.y+ny*proud*scale*.45
         if any(math.hypot(x-cx,y-cy)<r for cx,cy,r in keep_out): continue
-        facing=('east' if nx>0 else 'west') if abs(nx)>abs(ny) else ('south' if ny>0 else 'north')
         items.append({'asset':asset,'x':round(x,2),'y':round(y,2),'height':-.3,'yaw':k*137%360,
-                      'scale':round(scale,2),'block':0,'group':f'Rocks_{section["id"]}_{facing}'})
+                      'scale':round(scale,2),'block':0,'wall':True})
     return items
+
+
+def section_bounds(section):
+    """A section's id, name and world-space X/Z bounds (metres, 2 m clear of its walls) for the client."""
+    x0,y0,x1,y1=outline(section).buffer(2).bounds
+    return {'id':section['id'],'name':section['name'],
+            'bounds':{'min':[round(x0,2),round(240-y1,2)],'max':[round(x1,2),round(240-y0,2)]}}
 
 
 def flat_triangles(polygon,height):
@@ -336,11 +343,9 @@ def build_geometry(design, textures):
         all_meshes.append(piece)
         if bucket.startswith('Roof'): hidden.append(name)
         if bucket.startswith('Build'):
-            collision_nodes.append(name);walls.append({'node':name,'outward':wall_faces[bucket]})
-    # The cenote's wall rocks are scenery groups (underground_scenery.gd): they cut away with their wall.
-    for section in design['sections']:
-        for group in sorted({item['group'] for item in dressing(section) if item['group']}):
-            walls.append({'node':group,'outward':FACE_OUT[group.rsplit('_',1)[1]]})
+            # Each wall names its cave, so the client keeps another cave's walls hidden (`sectioned`).
+            section=next(s['id'] for s in design['sections'] if bucket.startswith(f"Build_{s['id']}_"))
+            collision_nodes.append(name);walls.append({'node':name,'outward':wall_faces[bucket],'section':section})
     builder.add_node(root)
     bounds=M.merge(all_meshes).bounds()
     return builder,lights,chambers,hidden,collision_nodes,bounds,walls
@@ -501,7 +506,13 @@ def build(server):
                              'ambient':{'color':'#acb3bf','energy':.55,'skyContribution':0},
                              'sun':{'energy':.25,'color':'#ffe4c0','shadows':False},
                              'fog':{'enabled':False},'tonemap':{'mode':'filmic','exposure':1.1}},
-              'lighting':{'markers':lights},'cutaway':{'hideNodes':hidden,'walls':walls,'reason':'The shared interior roof and camera-facing wall cutaway convention'},
+              'lighting':{'markers':lights},
+              # A wall cuts away only while the camera looks nearly straight through it (owner 2026-10-20: the
+              # convention's 0.2 took too much of a cave away); wall rocks fade instead of hiding.
+              'cutaway':{'hideNodes':hidden,'walls':walls,'facingThreshold':.6,
+                         'reason':'The shared interior roof and camera-facing wall cutaway convention'},
+              # One cave at a time: the client draws only the section the player stands in (SecretSections).
+              'sectioned':True,'sections':[section_bounds(s) for s in design['sections']],
               'minimap':{'file':'minimap.webp','image':'minimap.webp','northUp':True,'worldMin':[0,0],'worldMax':[cells,cells],'imageSize':[720,720]},
               'provenance':{'source':'_continent_v2/content/underground.json','sourceSha256':sha(SOURCE),
                             'builder':'_continent_v2/build_underground.py','builderSha256':sha(__file__)}}

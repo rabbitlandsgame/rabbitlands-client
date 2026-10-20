@@ -39,21 +39,11 @@ static func apply(manifest: WorldManifest, world: Node3D) -> int:
 			model.scale.y = .1 # Thin floor dressing, clear of character feet.
 		if placement.has("palette"):
 			MineralAppearance.apply(model, placement.palette)
-		# A wall rock stands in a group the manifest's cutaway hides with the
-		# rock face behind it, so the near wall's rocks drop out with the wall.
-		_group(scenery, str(placement.get("group", ""))).add_child(model)
+		# The Cenote Deeps' wall rocks stay up when the camera turns: each one
+		# that comes between the camera and the player fades (OccluderFade).
+		scenery.add_child(model)
 		count += 1
 	return count
-
-static func _group(scenery: Node3D, group: String) -> Node3D:
-	if group.is_empty():
-		return scenery
-	var node := scenery.get_node_or_null(group) as Node3D
-	if node == null:
-		node = Node3D.new()
-		node.name = group
-		scenery.add_child(node)
-	return node
 
 static func _style_surfaces(world: Node3D) -> void:
 	for mesh: MeshInstance3D in world.find_children("*", "MeshInstance3D", true, false):

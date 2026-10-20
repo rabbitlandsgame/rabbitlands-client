@@ -1506,7 +1506,8 @@
           1,
           0,
           0
-        ]
+        ],
+        "section": "boarsend_barrow"
       },
       {
         "node": "Build_boarsend_barrow_north_rubble_stone",
@@ -1514,7 +1515,8 @@
           0,
           0,
           1
-        ]
+        ],
+        "section": "boarsend_barrow"
       },
       {
         "node": "Build_boarsend_barrow_south_rubble_stone",
@@ -1522,7 +1524,8 @@
           0,
           0,
           -1
-        ]
+        ],
+        "section": "boarsend_barrow"
       },
       {
         "node": "Build_boarsend_barrow_west_rubble_stone",
@@ -1530,7 +1533,8 @@
           -1,
           0,
           0
-        ]
+        ],
+        "section": "boarsend_barrow"
       },
       {
         "node": "Build_lantern_mine_east_cliff_rock",
@@ -1538,7 +1542,8 @@
           1,
           0,
           0
-        ]
+        ],
+        "section": "lantern_mine"
       },
       {
         "node": "Build_lantern_mine_north_cliff_rock",
@@ -1546,7 +1551,8 @@
           0,
           0,
           1
-        ]
+        ],
+        "section": "lantern_mine"
       },
       {
         "node": "Build_lantern_mine_south_cliff_rock",
@@ -1554,7 +1560,8 @@
           0,
           0,
           -1
-        ]
+        ],
+        "section": "lantern_mine"
       },
       {
         "node": "Build_lantern_mine_west_cliff_rock",
@@ -1562,7 +1569,8 @@
           -1,
           0,
           0
-        ]
+        ],
+        "section": "lantern_mine"
       },
       {
         "node": "Build_pinebrow_workings_east_cliff_rock",
@@ -1570,7 +1578,8 @@
           1,
           0,
           0
-        ]
+        ],
+        "section": "pinebrow_workings"
       },
       {
         "node": "Build_pinebrow_workings_north_cliff_rock",
@@ -1578,7 +1587,8 @@
           0,
           0,
           1
-        ]
+        ],
+        "section": "pinebrow_workings"
       },
       {
         "node": "Build_pinebrow_workings_south_cliff_rock",
@@ -1586,7 +1596,8 @@
           0,
           0,
           -1
-        ]
+        ],
+        "section": "pinebrow_workings"
       },
       {
         "node": "Build_pinebrow_workings_west_cliff_rock",
@@ -1594,7 +1605,8 @@
           -1,
           0,
           0
-        ]
+        ],
+        "section": "pinebrow_workings"
       },
       {
         "node": "Build_spindle_cavern_east_verdant_limestone_cliff",
@@ -1602,7 +1614,8 @@
           1,
           0,
           0
-        ]
+        ],
+        "section": "spindle_cavern"
       },
       {
         "node": "Build_spindle_cavern_north_verdant_limestone_cliff",
@@ -1610,7 +1623,8 @@
           0,
           0,
           1
-        ]
+        ],
+        "section": "spindle_cavern"
       },
       {
         "node": "Build_spindle_cavern_south_verdant_limestone_cliff",
@@ -1618,7 +1632,8 @@
           0,
           0,
           -1
-        ]
+        ],
+        "section": "spindle_cavern"
       },
       {
         "node": "Build_spindle_cavern_west_verdant_limestone_cliff",
@@ -1626,43 +1641,72 @@
           -1,
           0,
           0
-        ]
-      },
-      {
-        "node": "Rocks_spindle_cavern_east",
-        "outward": [
-          1,
-          0,
-          0
-        ]
-      },
-      {
-        "node": "Rocks_spindle_cavern_north",
-        "outward": [
-          0,
-          0,
-          1
-        ]
-      },
-      {
-        "node": "Rocks_spindle_cavern_south",
-        "outward": [
-          0,
-          0,
-          -1
-        ]
-      },
-      {
-        "node": "Rocks_spindle_cavern_west",
-        "outward": [
-          -1,
-          0,
-          0
-        ]
+        ],
+        "section": "spindle_cavern"
       }
     ],
+    "facingThreshold": 0.6,
     "reason": "The shared interior roof and camera-facing wall cutaway convention"
   },
+  "sectioned": true,
+  "sections": [
+    {
+      "id": "lantern_mine",
+      "name": "Lantern Mine",
+      "bounds": {
+        "min": [
+          21.18,
+          145.15
+        ],
+        "max": [
+          92.32,
+          217.84
+        ]
+      }
+    },
+    {
+      "id": "pinebrow_workings",
+      "name": "Pinebrow Deep Workings",
+      "bounds": {
+        "min": [
+          141.2,
+          142.19
+        ],
+        "max": [
+          211.33,
+          217.82
+        ]
+      }
+    },
+    {
+      "id": "spindle_cavern",
+      "name": "Cenote Deeps",
+      "bounds": {
+        "min": [
+          11.06,
+          14.04
+        ],
+        "max": [
+          109.47,
+          97.02
+        ]
+      }
+    },
+    {
+      "id": "boarsend_barrow",
+      "name": "Boarsend Old Barrow",
+      "bounds": {
+        "min": [
+          142.0,
+          19.0
+        ],
+        "max": [
+          213.0,
+          97.0
+        ]
+      }
+    }
+  ],
   "minimap": {
     "file": "minimap.webp",
     "image": "minimap.webp",
@@ -1684,7 +1728,7 @@
     "source": "_continent_v2/content/underground.json",
     "sourceSha256": "a73c5692e28d16a175c437803025ebfadac9284ec3ace7915384d546f22b699b",
     "builder": "_continent_v2/build_underground.py",
-    "builderSha256": "18575dc5f4c8f5fe20df6e16ee608f1d6b770b5572ac0c714b8d34470664cb35"
+    "builderSha256": "e8d99ea1b7a3024203e34163fd410689eefd77d20e227b526db8d576c89e70da"
   },
   "externalResources": {
     "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
