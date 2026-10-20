@@ -128,6 +128,7 @@ import time
 import zipfile
 import client_release
 import release_storage
+import runner_source
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -1018,10 +1019,7 @@ def prepare_build_tree(build_dir: Path, sha: str) -> Path:
         build_dir.parent.mkdir(parents=True, exist_ok=True)
         if STORAGE:
             git("worktree", "add", "--detach", "--no-checkout", str(build_dir), sha)
-            git("sparse-checkout", "init", "--cone", cwd=build_dir)
-            git("sparse-checkout", "set", "godot-client", "eloria-assets/maps",
-                "eloria-assets/concepts", "eloria-assets/fonts", "eloria-assets/tools", cwd=build_dir)
-            git("checkout", "--detach", "--force", sha, cwd=build_dir)
+            runner_source.materialize(build_dir, sha, git, STORAGE)
         else:
             git("worktree", "add", "--detach", str(build_dir), sha)
     else:
