@@ -28,9 +28,19 @@ No row has a continentRect: the isles are not on the twelve-territory continent'
 The separate overview object places all regions, including every ownership component, on a Landfall picture
 composed from their existing minimaps. Its image-local polygons and row identities drive the clickable overview.
 
+The boatNetwork object is the Landfall boat network (content/boat-network.json) as the overview draws it, in
+continent metres (the overview's originMetres frame):
+  docks           one per dock: its id, label and serverMap, its position (the middle of its boats), and its boats:
+                  per berth the dock it sails to, the destination its "Bound for X." text names (the phrase
+                  MapObject3D.destination() reads), its objectId and its position
+  routes          one per route: its two docks and the points of its line (the two docks' positions)
+A boat's position is its interactive marker in the map's scene (<map>--obj-boat-<other dock>, or the hand-authored
+marker a route's "existing" names) plus the territory's translation; its row in content/server-rows.json must say
+"Bound for <the other dock's label>.", so the map names what the boat says.
+
 --check exits 1 when the file differs from what this tool writes (godot-client/tests/test_continent_v2_cartography.py
-runs it): a picture was redrawn, a frame or polygon moved, cartography.json's lattice changed, or the file was edited
-by hand.
+runs it): a picture was redrawn, a frame or polygon moved, a boat moved or a route changed, cartography.json's lattice
+changed, or the file was edited by hand.
 """
 from __future__ import annotations
 
@@ -56,6 +66,11 @@ REGISTRY = "godot-client/data/maps/registry.json"
 CARTOGRAPHY = "godot-client/data/maps/cartography.json"
 OUTPUT = "godot-client/data/maps/cartography-continent-v2.json"
 OVERVIEW = "eloria-assets/maps/continent-v2/_continent_v2/cartography/landfall-map.webp"
+BOAT_NETWORK = "eloria-assets/maps/continent-v2/_continent_v2/content/boat-network.json"
+SERVER_ROWS = "eloria-assets/maps/continent-v2/_continent_v2/content/server-rows.json"
+CATALOG = "godot-client/world_authoring/continent-v2/territories.json"
+# MapObject3D.BOAT_DESTINATION_PHRASE: the client names a boat's destination by the words after it.
+BOAT_PHRASE = "Bound for "
 FRAME = "continent-v2"
 SERVED_STATUSES = {"continent-v2-served"}
 SCHEMA = "eloria-cartography-continent-v2-v1"
@@ -75,6 +90,16 @@ def legacy_tool(checkout: Path):
     source = Path(checkout) / "eloria-assets" / "tools" / "build_continent_map.py"
     spec = importlib.util.spec_from_file_location("build_continent_map_for_v2", source)
     module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def territories_tool(checkout: Path):
+    """godot-client/tools/continent_v2_territories.py of the checkout, imported for its .tscn reader."""
+    source = Path(checkout) / "godot-client" / "tools" / "continent_v2_territories.py"
+    spec = importlib.util.spec_from_file_location("continent_v2_territories_for_cartography", source)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module  # its dataclasses look their module up
     spec.loader.exec_module(module)
     return module
 
@@ -160,10 +185,81 @@ def compose(checkout: Path = DEFAULT_CHECKOUT) -> dict:
             "note": ("The continent-v2 territories' tab maps, appended by the client after cartography.json's regions. "
                      "Generated: run the generator after a map picture, a frame or a polygon changes."),
             "frame": FRAME, "lattice": lattice, "sources": sources, "regions": regions}
+    network = boat_network(checkout, dict(served(registry)))
+    if network is not None:
+        data["boatNetwork"] = network
     data["overview"] = overview_layout(data)
     data["overview"]["waterRGB"] = water_rgb
     data["overview"]["sha256"] = hashlib.sha256(overview_bytes(checkout, data)).hexdigest()
     return data
+
+
+def boat_network(checkout: Path, served_maps: dict, network: dict | None = None,
+                 rows: dict | None = None) -> dict | None:
+    """The boat network's docks and routes in continent metres; None where the checkout has no network.
+
+    served_maps is {map id: registry row} of the served territories; network and rows default to the checkout's
+    content/boat-network.json and content/server-rows.json."""
+    checkout = Path(checkout)
+    if network is None:
+        if not (checkout / BOAT_NETWORK).is_file():
+            return None
+        network = read_json(checkout / BOAT_NETWORK)
+    if rows is None:
+        rows = read_json(checkout / SERVER_ROWS)
+    docks = network.get("docks", {})
+    routes = network.get("routes", [])
+    labels = {key: str(dock["label"]) for key, dock in docks.items()}
+    sailed, existing = set(), {}
+    for route in routes:
+        a, b = route["docks"]
+        for here, there in ((a, b), (b, a)):
+            if here not in docks:
+                raise CartographyError(f"the route {a}-{b} names no dock {here!r}")
+            if there not in docks[here].get("berths", {}):
+                raise CartographyError(f"{here}: no berth for its route to {there}")
+            sailed.add((here, there))
+        for here, marker in (route.get("existing") or {}).items():
+            existing[(here, b if here == a else a)] = marker
+    tool = territories_tool(checkout)
+    scenes = {entry["id"]: entry["scenePath"] for entry in read_json(checkout / CATALOG)["entries"]}
+    rows_by_map = rows.get("maps", {})
+    placed, positions = [], {}
+    for key, dock in docks.items():
+        map_id = dock["map"]
+        if map_id not in served_maps or map_id not in scenes:
+            raise CartographyError(f"{key}: its map {map_id} is not served on the {FRAME} frame")
+        translation = [float(v) for v in served_maps[map_id]["continentGeography"]["translation"]]
+        scene = tool.load_scene(tool.res_to_path(scenes[map_id], checkout))
+        boats = []
+        for other in dock.get("berths", {}):
+            if (key, other) not in sailed:
+                raise CartographyError(f"{key}: its berth for {other} is on no route")
+            marker = existing.get((key, other), f"{map_id}--obj-boat-{other}")
+            path = "Gameplay/Interactives/" + marker
+            if scene.node(path) is None:
+                raise CartographyError(f"{key}: {scenes[map_id]} has no boat {marker}; run "
+                                       "godot-client/tools/author_continent_v2_boats.py --apply")
+            row = rows_by_map.get(map_id, {}).get("interactives", {}).get(marker)
+            if row is None:
+                raise CartographyError(f"{key}: content/server-rows.json serves no {marker}")
+            wanted = f"{BOAT_PHRASE}{labels[other]}."
+            if not str(row.get("text", "")).startswith(wanted):
+                raise CartographyError(f"{marker}: its text does not begin {wanted!r}, so the map would name "
+                                       "another destination than the boat")
+            local = scene.world(path)[:3, 3]
+            boats.append({"to": other, "destination": labels[other], "objectId": int(row["objectId"]),
+                          "position": [round(float(local[0]) + translation[0], 2),
+                                       round(float(local[2]) + translation[2], 2)]})
+        if not boats:
+            raise CartographyError(f"{key}: a dock without boats")
+        boats.sort(key=lambda boat: (boat["destination"], boat["to"]))
+        positions[key] = [round(sum(boat["position"][i] for boat in boats) / len(boats), 2) for i in (0, 1)]
+        placed.append({"id": key, "label": labels[key], "serverMap": map_id, "position": positions[key],
+                       "boats": boats})
+    return {"source": BOAT_NETWORK, "docks": placed,
+            "routes": [{"docks": list(route["docks"]), "points": [positions[key] for key in route["docks"]]}
+                       for route in routes]}
 
 
 def overview_layout(data: dict) -> dict:
