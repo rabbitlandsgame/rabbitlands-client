@@ -1,7 +1,7 @@
 """_continent_v2/publish_server.py end to end, on a fixture client checkout and a fixture server tree.
 
-The client fixture is two isles, "landfall" and "tollholm", on test_export_collision's shared terrain (flat ground at
-10 m, a blocked lake on landfall, and a plateau at 104.8 m on tollholm that no walker reaches), meeting along
+The client fixture is two isles, "landfall" and "coilmere" (A3's successor of Tollholm, so the real server-tables row exists), on test_export_collision's shared terrain (flat ground at
+10 m, a blocked lake on landfall, and a plateau at 104.8 m on coilmere that no walker reaches), meeting along
 continent x 100, which a road crosses. It has everything frames.py and the publisher read: the catalog, the stubs,
 the authoring specs, the registry rows, the bakes (with their markers: the arrival, two home points, the desk and
 the ferry, two harvest nodes, the five re-homed people and one new one, Signed Ashore's twelve targets and a quest
@@ -43,10 +43,10 @@ pytestmark = pytest.mark.skipif(not SERVER, reason="set ELORIA_SERVER_ROOT to a 
                                                    "eloria/served_grid.py and eloria/content_overlay.py")
 CELLS = 72
 SW = F.Frame("landfall", "Landfall", (34, 34), (CELLS, CELLS), (70.0, 0.0, 30.0))
-TH = F.Frame("tollholm", "The Tollholms", (34, 34), (CELLS, CELLS), (130.0, 0.0, 30.0))
+TH = F.Frame("coilmere", "The Tollholms", (34, 34), (CELLS, CELLS), (130.0, 0.0, 30.0))
 POLYGONS = {"landfall": [[40.0, 0.0], [100.0, 0.0], [100.0, 60.0], [40.0, 60.0]],
-            "tollholm": [[100.0, 0.0], [160.0, 0.0], [160.0, 60.0], [100.0, 60.0]]}
-FRAMES = {"landfall": SW, "tollholm": TH}
+            "coilmere": [[100.0, 0.0], [160.0, 0.0], [160.0, 60.0], [100.0, 60.0]]}
+FRAMES = {"landfall": SW, "coilmere": TH}
 V2 = "eloria-assets/maps/continent-v2"
 REHOMED = {"Gate Warden Ilyon": ("guide", 308), "Wayfinder Nesh": ("tutorial", 307),
            "Ferryman Caldus": ("dialogue", 310), "Hemmen": ("dialogue", 312),
@@ -88,8 +88,8 @@ PROFILE_FILES = ("maps.txt", "npcs.txt", "harvesting.txt", "interactives.txt", "
 REGISTER = """
 
 # test_publish_server.py: the fixture isles, as the server workflow registers the real ones before --apply
-REGIONS = REGIONS + ("landfall", "tollholm")
-MAP_TILES_WIDE_BY_NAME.update({"landfall": 12, "tollholm": 12})
+REGIONS = REGIONS + ("landfall", "coilmere")
+MAP_TILES_WIDE_BY_NAME.update({"landfall": 12, "coilmere": 12})
 ARRIVAL_TILES.update(%s)
 """
 # The code a later stage brings (publish_server.STAGE_CODE): the fixture server is copied without it.
@@ -188,7 +188,7 @@ def bake_doc(frame, gameplay, scene):
 
 SPAWNS = {"landfall": [("sw-1", "rabbit", 63.5, 45.5, 15), ("sw-2", "hedgehog", 66.5, 45.5, 25),
                       ("sw-3", "squirrel", 57.5, 48.5, 15)],
-          "tollholm": [("th-1", "rabbit", 130.5, 40.5, 40), ("th-pocket", "rabbit", *PLATEAU, 40)]}
+          "coilmere": [("th-1", "rabbit", 130.5, 40.5, 40), ("th-pocket", "rabbit", *PLATEAU, 40)]}
 QUESTLINES = """# fixture template
 
 [quest]
@@ -248,13 +248,13 @@ def make_client(root, codec, bakes_root, spawns=SPAWNS):
                  "continentGeography": {"translation": list(frame.translation), "serverCells": list(frame.cells)}}
         for region, frame in FRAMES.items()}})
     write_json(root / X.PLAN, {"frame": {"seaLevel": 0.0}, "water": {"seaLevel": 0.0},
-                              "seams": {"openSeams": [{"between": ["landfall", "tollholm"]}], "moles": []},
+                              "seams": {"openSeams": [{"between": ["landfall", "coilmere"]}], "moles": []},
                               "approvedRoutes": [{"id": "R1", "type": "road",
                                                   "approvedPolyline": [[90.0, 27.5], [110.0, 27.5]],
                                                   "byTerritory": [{"territory": "landfall"},
-                                                                  {"territory": "tollholm"}]}]})
+                                                                  {"territory": "coilmere"}]}]})
     gameplay = {"landfall": sw_points(),
-                "tollholm": {"spawnPoints": [record(TH, "th-arrival", 130.5, 21.5, default=True)]}}
+                "coilmere": {"spawnPoints": [record(TH, "th-arrival", 130.5, 21.5, default=True)]}}
     shas, spawn_local = {}, {}
     for region, frame in FRAMES.items():
         scene = f"godot-client/world_authoring/regions/{region}/{region}.tscn"
@@ -276,7 +276,7 @@ def make_client(root, codec, bakes_root, spawns=SPAWNS):
                                        terrain_origin=origin, spawn=spawn_local[region],
                                        sources={"snapshotSha256": shas[region], "sceneSha256": "0" * 64}, **extra))
     work = root.parent / (root.name + "-export")
-    _report, sidecars = X.run(territories, [("landfall", "tollholm")], codec, work, root / V2, log=lambda *_: None)
+    _report, sidecars = X.run(territories, [("landfall", "coilmere")], codec, work, root / V2, log=lambda *_: None)
     for region, frame in FRAMES.items():
         spawn = gameplay[region]["spawnPoints"][0]
         write_json(root / V2 / region / "client" / "world.json", {
@@ -292,7 +292,7 @@ def make_client(root, codec, bakes_root, spawns=SPAWNS):
                          "text": "The fixture register lies open."},
             "obj-ferry": {"objectId": 21, "role": "portal", "target": "maps.txt", "text": "The fixture ferry.",
                           "portal": {"destinationMap": "crownwater", "oneWay": True}}}},
-        "tollholm": {"npcs": {}, "interactives": {}}}}
+        "coilmere": {"npcs": {}, "interactives": {}}}}
     for npc in gameplay["landfall"]["npcMarkers"]:
         name = npc["name"]
         role, body = REHOMED.get(name, ("dialogue", 376))
@@ -302,7 +302,7 @@ def make_client(root, codec, bakes_root, spawns=SPAWNS):
     write_json(content / "server-rows.json", rows)
     tables = json.loads((Path(HERE) / "content" / "server-tables.json").read_text(encoding="utf-8"))
     tables["maps"] = [m for m in tables["maps"] if m["id"] in FRAMES]
-    tables["holdBack"] = {"why": "fixture pocket", "map": "tollholm", "spawns": ["th-pocket"], "nodes": []}
+    tables["holdBack"] = {"why": "fixture pocket", "map": "coilmere", "spawns": ["th-pocket"], "nodes": []}
     tables["homes"] = {"landfall": {"arrival": "sw-isle-arrival", "beam": "runtime-home-beam",
                                    "respawn": "runtime-home-respawn", "underworld": "runtime-home-respawn"}}
     tables["landing"].update(map="landfall", arrival="runtime-home-beam", register="obj-desk", ferry="obj-ferry", ferryPoint="runtime-ferry-n10")
@@ -469,7 +469,7 @@ def test_retirement_metadata_refuses_unsafe_or_active_ids(tmp_path, values):
 @pytest.mark.parametrize("failure", [None, "blocked", "unreached", "height_mismatch", "missing_grid", "in_owner_unreached"])
 def test_harvest_ring_uses_only_identical_reached_canonical_off_owner_cells(failure):
     source = F.Frame("landfall", "Landfall", (0, 4), (5, 5), (0, 0, 0))
-    neighbour = F.Frame("tollholm", "Tollholm", (1, 4), (5, 5), (0, 0, 0))
+    neighbour = F.Frame("coilmere", "Tollholm", (1, 4), (5, 5), (0, 0, 0))
     codes = {region: np.full((5, 5), 222, dtype=np.uint16) for region in (source.region, neighbour.region)}
     reached = {region: np.ones((5, 5), bool) for region in codes}
     # Harvest body is closed; a seam-strip alias is not reachable on the
@@ -528,7 +528,7 @@ def test_the_rows_say_what_the_markers_and_tables_say(tree):
     quest = SW.tile(*local(SW, 60.5, 45.5)[::2])
     assert f"x: {quest[0]}\r\ny: {quest[1]}\r\n" in text["questlines.txt"]
     links = json.loads(text["exterior_connections.json"])
-    assert [c["id"] for c in links["connections"]] == ["landfall--tollholm"]
+    assert [c["id"] for c in links["connections"]] == ["landfall--coilmere"]
 
 
 def edit_json(path, change):
@@ -591,7 +591,7 @@ def test_a_node_on_a_road_is_refused(tree):
 
 
 def test_an_unreachable_row_is_refused_unless_it_is_held_back(tree):
-    edit_json(tree / "client" / V2 / "tollholm" / "content" / "spawns.json",
+    edit_json(tree / "client" / V2 / "coilmere" / "content" / "spawns.json",
               lambda doc: doc["spawns"][0].update(local=local(TH, *PLATEAU)[::2]))
     result = publish(tree, "--check")
     refused(result, "rows fail the checks")
@@ -654,8 +654,8 @@ def test_a_hand_edit_shows_in_check(tree):
 
 def test_a_stale_crossings_document_is_refused(tree):
     path = tree / "client" / P.V2 / "_continent_v2" / "crossings.json"
-    edit_json(path, lambda doc: doc["inputs"]["maps"]["tollholm"].update(servedGridSha256="1" * 64))
-    refused(publish(tree, "--check"), "crossings.json is stale for tollholm")
+    edit_json(path, lambda doc: doc["inputs"]["maps"]["coilmere"].update(servedGridSha256="1" * 64))
+    refused(publish(tree, "--check"), "crossings.json is stale for coilmere")
 
 
 def test_a_bake_from_another_scene_is_refused(tree):
@@ -756,7 +756,7 @@ def codec_():
 
 
 def test_packages_from_two_export_runs_are_refused(tree):
-    path = tree / "client" / V2 / "tollholm" / "client" / "world.json"
+    path = tree / "client" / V2 / "coilmere" / "client" / "world.json"
     edit_json(path, lambda doc: doc["collision"]["groupExport"]["maps"]["landfall"].update(
         servedGridSha256="1" * 64))
     refused(publish(tree, "--check"), "exported in another run")
@@ -765,7 +765,7 @@ def test_packages_from_two_export_runs_are_refused(tree):
 # --- the isle boats (owner 2026-10-14: R5, the Ravenhead-Tollholm boat) -----------------------------------------------
 
 BOATS = {"landfall": {"boat": ("obj-boat", 72.5, 33.5), "landing": ("runtime-boat-landing", 72.5, 36.5)},
-         "tollholm": {"boat": ("th-obj-boat", 136.5, 30.5), "landing": ("th-runtime-boat-landing", 136.5, 33.5)}}
+         "coilmere": {"boat": ("th-obj-boat", 136.5, 30.5), "landing": ("th-runtime-boat-landing", 136.5, 33.5)}}
 
 
 def add_boats(tree, *, change_rows=None):
@@ -783,7 +783,7 @@ def add_boats(tree, *, change_rows=None):
         restamp(tree, region)
 
     def rows(doc):
-        for region, other in (("landfall", "tollholm"), ("tollholm", "landfall")):
+        for region, other in (("landfall", "coilmere"), ("coilmere", "landfall")):
             doc["maps"][region]["interactives"][BOATS[region]["boat"][0]] = {
                 "objectId": 23, "role": "portal", "target": "maps.txt", "text": f"The fixture boat to {other}.",
                 "portal": {"destinationMap": other, "oneWay": True, "landingMarker": BOATS[other]["landing"][0],
@@ -804,7 +804,7 @@ def test_isle_boats_sail_both_ways_and_land_beside_the_boat_back(tree):
     assert result.returncode == 0, result.stderr + result.stdout
     maps = overlay(tree, "maps.txt").decode("utf-8")
     objects = overlay(tree, "interactives.txt").decode("utf-8")
-    for region, other in (("landfall", "tollholm"), ("tollholm", "landfall")):
+    for region, other in (("landfall", "coilmere"), ("coilmere", "landfall")):
         trigger, landing = tile_of(region, "boat"), tile_of(other, "landing")
         assert (f"portal | {region} | 23 | {trigger[0]} | {trigger[1]} | {other} | {landing[0]} | {landing[1]}\r\n"
                 in maps)
@@ -815,16 +815,16 @@ def test_isle_boats_sail_both_ways_and_land_beside_the_boat_back(tree):
     # the exit ferry stays the only ferry; the boats are listed apart, one entry each way
     assert [f["destination"] for f in block["ferries"]] == ["crownwater"]
     assert {(b["map"], b["object"], b["destination"], b["returnBy"]) for b in block["boats"]} == {
-        ("landfall", 23, "tollholm", "th-obj-boat"), ("tollholm", 23, "landfall", "obj-boat")}
+        ("landfall", 23, "coilmere", "th-obj-boat"), ("coilmere", 23, "landfall", "obj-boat")}
     for b in block["boats"]:
         assert b["trigger"] == tile_of(b["map"], "boat") and b["landing"] == tile_of(b["destination"], "landing")
     entries = {m["id"]: m for m in manifest["maps"]}
-    assert {"server_tile": tile_of("tollholm", "boat"), "destination": "landfall"} in entries["tollholm"]["portals"]
+    assert {"server_tile": tile_of("coilmere", "boat"), "destination": "landfall"} in entries["coilmere"]["portals"]
     record_doc = json.loads((tree / "client" / P.DEFAULT_RECORD).read_text(encoding="utf-8"))
     assert record_doc["boats"] == block["boats"]
     # a boat is an object portal: no land link, so the land pairs are what crossings.json says
     links = json.loads(overlay(tree, "exterior_connections.json").decode("utf-8"))
-    assert [c["id"] for c in links["connections"]] == ["landfall--tollholm"]
+    assert [c["id"] for c in links["connections"]] == ["landfall--coilmere"]
     summary = json.loads(result.stdout)
     assert len(summary["boats"]) == 2 and summary["serverLoaders"]["interactives"] >= 2
     assert json.loads(publish(tree, "--check").stdout)["check"] == "clean"
@@ -832,10 +832,10 @@ def test_isle_boats_sail_both_ways_and_land_beside_the_boat_back(tree):
 
 def test_a_boat_without_its_way_back_is_refused(tree):
     def change(doc):
-        doc["maps"]["tollholm"]["interactives"]["th-obj-boat"]["portal"]["returnBy"] = "obj-desk"
+        doc["maps"]["coilmere"]["interactives"]["th-obj-boat"]["portal"]["returnBy"] = "obj-desk"
     add_boats(tree, change_rows=change)
     # landfall's boat names th-obj-boat, which names the desk back: the pair is broken, whichever end is read first
-    refused(publish(tree, "--check"), "portal.returnBy 'th-obj-boat' is not a boat on tollholm that sails back to "
+    refused(publish(tree, "--check"), "portal.returnBy 'th-obj-boat' is not a boat on coilmere that sails back to "
                                       "landfall and names obj-boat as its way back")
 
 
@@ -843,7 +843,7 @@ def test_a_boat_needs_its_landing_point(tree):
     def change(doc):
         doc["maps"]["landfall"]["interactives"]["obj-boat"]["portal"]["landingMarker"] = "th-arrival"
     add_boats(tree, change_rows=change)
-    refused(publish(tree, "--check"), "tollholm has no boat-landing runtime point 'th-arrival'")
+    refused(publish(tree, "--check"), "coilmere has no boat-landing runtime point 'th-arrival'")
     edit_json(tree / "client" / V2 / "_continent_v2" / "content" / "server-rows.json",
               lambda doc: doc["maps"]["landfall"]["interactives"]["obj-boat"]["portal"].pop("landingMarker"))
     refused(publish(tree, "--check"), "an isle boat needs portal.landingMarker")

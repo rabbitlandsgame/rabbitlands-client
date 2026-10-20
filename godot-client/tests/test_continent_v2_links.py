@@ -49,7 +49,8 @@ def test_every_isle_link_joins_two_served_isles_in_their_registry_frames():
     assert graph["connections"] == expected
     assert len({link["id"] for link in graph["connections"]}) == len(expected)
     walk_ids = {link["id"] for link in crossings["connections"]}
-    assert len(walk_ids) == len(crossings["connections"]) == 24
+    # A3 (17 maps): 26 land crossings, Hornmere-Whitepeak and Coilmere-Suncoil among them; the boats add none
+    assert len(walk_ids) == len(crossings["connections"]) == 26
     walk_links = [link for link in graph["connections"] if not link.get("visualOnly", False)]
     view_links = [link for link in graph["connections"] if link.get("visualOnly", False)]
     assert {link["id"] for link in walk_links} == walk_ids

@@ -141,7 +141,7 @@ def test_landfall_overview_places_all_components_in_its_own_image():
     overview = data["overview"]
     assert overview["name"] == "Landfall" and overview["frame"] == "continent-v2"
     assert [r["serverMap"] for r in overview["regions"]] == [r["serverMap"] for r in data["regions"]]
-    assert len(overview["regions"]) == 18
+    assert len(overview["regions"]) == 17
     source_scale = data["lattice"]["metresPerPixel"]
     source_origin = data["lattice"]["originMetres"]
     for source, region in zip(data["regions"], overview["regions"]):
