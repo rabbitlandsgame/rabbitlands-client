@@ -73,8 +73,8 @@ func run() -> void:
 	if "--capture" in OS.get_cmdline_user_args():
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUTPUT))
 		var previous := 0.0
-		for phase: Dictionary in [{"name": "held", "time": 5.8}, {"name": "breaking", "time": 7.0},
-			{"name": "drifting", "time": 7.8}, {"name": "dust", "time": 8.5}, {"name": "clear", "time": 10.1}]:
+		for phase: Dictionary in [{"name": "held", "time": 4.8}, {"name": "breaking", "time": 6.0},
+			{"name": "drifting", "time": 6.8}, {"name": "dust", "time": 7.5}, {"name": "clear", "time": 9.1}]:
 			for actor: ReplicatedActor3D in actors:
 				actor._process(float(phase.time) - previous)
 				actor.set_process(false)
@@ -94,7 +94,7 @@ func run() -> void:
 	elif "--frames" in OS.get_cmdline_user_args():
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUTPUT.path_join("frames")))
 		for actor: ReplicatedActor3D in actors:
-			actor._process(5.5)
+			actor._process(4.5)
 			actor.set_process(false)
 		caption.text = "Rabbit Lands  /  Creature dissolve"
 		for index in 100:
@@ -121,7 +121,7 @@ func _restart() -> void:
 		actor.apply_server_state(dto, CoordinateAdapter.new({"metresPerTile": 1.0}))
 		dto.merge({"health": 0, "alive": false, "command": 3,
 			"death_presentation": {"temporary": true, "elapsed": 0.0, "animation_seconds": 3.0,
-				"hold_seconds": 3.0, "fade_seconds": 4.0, "received_msec": Time.get_ticks_msec()}}, true)
+				"hold_seconds": 2.0, "fade_seconds": 4.0, "received_msec": Time.get_ticks_msec()}}, true)
 		actor.apply_server_state(dto, CoordinateAdapter.new({"metresPerTile": 1.0}))
 		actor.set_physics_process(false)
 
@@ -129,7 +129,7 @@ func _process(delta: float) -> bool:
 	if running:
 		elapsed += delta
 		caption.text = "Rabbit Lands  /  Creature dissolve  /  " + (
-			"Death" if elapsed < 3.0 else "Held pose" if elapsed < 6.0 else "Dissolving" if elapsed < 8.5 else "Drifting ash")
-		if elapsed >= 11.5:
+			"Death" if elapsed < 3.0 else "Held pose" if elapsed < 5.0 else "Dissolving" if elapsed < 7.5 else "Drifting ash")
+		if elapsed >= 10.5:
 			_restart()
 	return false

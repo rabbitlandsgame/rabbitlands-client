@@ -11,6 +11,7 @@ const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.g
 const STATUS_ICONS := preload("res://src/ui/status_effect_icons.gd")
 const COMBAT_TARGET_MARKER := preload("res://src/actors/combat_target_marker_3d.gd")
 const CREATURE_DISSOLVE := preload("res://src/actors/creature_dissolve.gd")
+const CREATURE_DISSOLVE_DELAY_SECONDS := 2.0
 const TARGET_MARKER_STYLE := preload("res://src/actors/target_marker_style.gd")
 var _target_marker_style := TARGET_MARKER_STYLE.defaults()
 
@@ -2033,7 +2034,10 @@ func _update_corpse_pose() -> void:
 	if not _death_finished and _death_elapsed >= _death_duration():
 		_hold_death_pose()
 	if _corpse_temporary or _is_creature:
-		var fade := clampf((_death_elapsed - _death_duration() - _corpse_hold_seconds)
+		# Temporary bodies dissolve two seconds after their clip ends. The
+		# server can retain the hidden corpse until its existing cleanup time.
+		var hold_seconds := CREATURE_DISSOLVE_DELAY_SECONDS if _is_creature and _corpse_temporary else _corpse_hold_seconds
+		var fade := clampf((_death_elapsed - _death_duration() - hold_seconds)
 			/ _corpse_fade_seconds, 0.0, 1.0)
 		if _is_creature and _corpse_temporary and fade > 0.0:
 			if _corpse_dissolve == null and fade < 1.0:

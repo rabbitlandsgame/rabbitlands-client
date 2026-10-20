@@ -198,15 +198,22 @@ func _test_creature_dissolve() -> void:
 	dead.death_presentation.hold_seconds = 3.0
 	dead.death_presentation.fade_seconds = 4.0
 	actor.apply_server_state(dead, adapter)
-	actor._process(5.9)
-	expect(actor.get("_corpse_dissolve") == null, "temporary creature holds its full body before dissolving")
-	actor._process(1.3)
-	var effect: RefCounted = actor.get("_corpse_dissolve")
+	actor._process(3.0)
+	expect(actor.death_animation_finished() and actor.get("_corpse_dissolve") == null,
+		"temporary creature finishes its death clip before the dissolve delay begins")
+	actor._process(1.99)
+	expect(actor.get("_corpse_dissolve") == null, "temporary creature holds its full body for two seconds after the death clip")
+	actor._process(0.02)
 	var material := body.get_active_material(0) as ShaderMaterial
+	expect(material != null and float(material.get_shader_parameter("dissolve_progress")) > 0.0
+		and float(material.get_shader_parameter("dissolve_progress")) < 0.01,
+		"dissolve starts immediately after the two-second hold despite the longer server cleanup hold")
+	actor._process(1.19)
+	var effect: RefCounted = actor.get("_corpse_dissolve")
 	expect(effect != null and material != null and is_zero_approx(body.transparency),
 		"temporary creatures break into opaque patches instead of fading the whole body")
 	expect(material != null and absf(float(material.get_shader_parameter("dissolve_progress")) - 0.3) < 0.01,
-		"dissolve follows the server corpse clock")
+		"dissolve keeps its four-second duration after the two-second hold")
 	var ash := actor.get_node_or_null("DissolveAsh") as MultiMeshInstance3D
 	expect(ash != null and ash.multimesh.instance_count > 0 and ash.multimesh.instance_count <= 512 and ash.layers == 2,
 		"surface dust uses one bounded batch excluded from map cameras")
@@ -224,7 +231,7 @@ func _test_creature_dissolve() -> void:
 	neighbor.free()
 	actor = actor_fixture()
 	actor.set("_is_creature", true)
-	dead.death_presentation.elapsed = 8.0
+	dead.death_presentation.elapsed = 7.0
 	dead.death_presentation.received_msec = Time.get_ticks_msec()
 	actor.apply_server_state(dead, adapter)
 	material = (actor.get_node("Body") as MeshInstance3D).get_active_material(0) as ShaderMaterial
