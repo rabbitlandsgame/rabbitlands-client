@@ -29,7 +29,32 @@ SELECTION = {
     'resource_rock_1': ('amethyst_barrens','veined-boulder-1','height',.8),
     'resource_rock_2': ('amethyst_barrens','veined-boulder-2','height',.8),
     'resource_rock_3': ('amethyst_barrens','veined-boulder-3','height',.8),
+    # The Cenote Deeps (owner 2026-10-20): Landfall A3's own jungle kit, lf-biomes.
+    'mossy_crag_1': ('lf-biomes','mossy-crag-1','height',6.0),
+    'mossy_crag_2': ('lf-biomes','mossy-crag-2','height',7.0),
+    'mossy_boulder_1': ('lf-biomes','mossy-boulder-1','height',2.4),
+    'mossy_boulder_2': ('lf-biomes','mossy-boulder-2','height',3.2),
+    'mossy_boulder_3': ('lf-biomes','mossy-boulder-3','length',3.0),
+    'waterfall_rocks': ('lf-biomes','waterfall-rocks-1','length',11.0),
+    'jade_lantern_shrine': ('lf-biomes','jade-shrine-1','height',2.0),
+    'jade_cairn': ('lf-biomes','jade-shrine-2','height',2.2),
+    'jade_lantern_pole': ('lf-biomes','jade-lantern-pole-1','height',2.8),
+    'incense_brazier': ('lf-biomes','serpent-incense-brazier-1','height',1.6),
+    'serpent_arch': ('lf-biomes','serpent-ruin-8','length',6.6),
+    'serpent_altar': ('lf-biomes','serpent-ruin-7','length',2.6),
+    'serpent_pillar': ('lf-biomes','serpent-ruin-3','height',3.2),
+    'serpent_obelisk': ('lf-biomes','serpent-ruin-6','height',3.0),
+    'serpent_frieze': ('lf-biomes','serpent-ruin-4','length',3.5),
+    'lotus_pads': ('lf-biomes','lotus-flower-pads-1','length',3.0),
+    'lagoon_reed': ('lf-biomes','lagoon-reed-1','height',1.4),
+    'tree_fern': ('lf-biomes','tree-fern-1','height',4.5),
+    'jungle_undergrowth': ('lf-biomes','jungle-undergrowth-1','height',2.2),
+    'jungle_undergrowth_2': ('lf-biomes','jungle-undergrowth-2','height',1.8),
+    'split_geode': ('lf-biomes','split-geode-1','height',2.0),
+    'toadstool_ring': ('lf-biomes','toadstool-ring-1','length',2.5),
+    'mossy_log': ('lf-biomes','mossy-log-1','length',5.0),
 }
+KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes'}
 
 
 def sha(data):
@@ -76,7 +101,7 @@ def bounds(document, blob):
 
 def package(name, spec, output):
     region, slug, measure, size = spec
-    source = ROOT / f'godot-client/world_authoring/regions/{region}/assets/prototypes/kit-{slug}.glb'
+    source = ROOT / KITS.get(region, f'godot-client/world_authoring/regions/{region}/assets/prototypes') / f'kit-{slug}.glb'
     if name == 'cave_mouth':
         source = ROOT / f'eloria-assets/maps/nymara-regions/{region}/assets/{slug}/model-reference.glb'
     source_bytes = source.read_bytes()
@@ -188,7 +213,20 @@ def main():
     placements = []
     def place(asset, x, y, yaw=0, height=0):
         placements.append({'asset': asset, 'position': [x, height, 240-y], 'yaw': yaw})
+    # The cenote's dressing is the builder's: the same list decides what the walk grid blocks.
+    sys.path.insert(0, str(plan_path.parents[1]))
+    from build_underground import dressing
     for section in plan['sections']:
+        if section['style'] == 'cenote':
+            for item in dressing(section):
+                place(item['asset'], item['x'], item['y'], item['yaw'], item['height'])
+                extra = {'scale': item['scale']} if item['scale'] != 1 else {}
+                if item['group']:
+                    extra['group'] = item['group']
+                if 'palette' in item:
+                    extra['palette'] = item['palette']
+                placements[-1].update(extra)
+            continue
         for x, y, rx, ry in section['rooms']:
             place('wall_lantern', x-rx+.2, y, height=2.2)
         if section['style'] == 'mine':

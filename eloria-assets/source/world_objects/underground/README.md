@@ -1,6 +1,6 @@
 # Reused underground scenery
 
-Run `python tools/prepare_underground_scenery.py` from the client checkout to package the nine selected imported models and the 45 interior placements. `reused-scenery.json` binds the current sources, textures, output files and bounds to SHA-256 hashes. No retired procedural model is restored.
+Run `python tools/prepare_underground_scenery.py` from the client checkout to package the 32 selected imported models and the 218 interior placements. The Cenote Deeps (owner, 2026-10-20) adds 23 pieces of Landfall A3's `lf-biomes` jungle kit: limestone crags and boulders for its walls, the waterfall, jade shrines and lanterns, a serpent brazier, serpent ruins (the arch over its way out and over Coilmere's door, an altar, a pillar, an obelisk, a frieze), lotus pads, reeds, ferns, undergrowth, a geode, toadstools and a log. Its placements come from `build_underground.dressing()`, the list the walk grid is cut from; its crystals reuse the cluster in a jade palette. `reused-scenery.json` binds the current sources, textures, output files and bounds to SHA-256 hashes. No retired procedural model is restored.
 
 The cave mouth is the preserved Meshy asset from `whitehorn-ice-cave-mouth-v001`, task `01a0b927-06cb-725a-9639-ac8a2091b1aa`. Its current normalized, external-texture GLB is pinned by hash in the processor. The historical adapter describes the original source and has a different frozen hash; its receipt is not rewritten. This runtime object packaging does not activate the old regional adapter.
 

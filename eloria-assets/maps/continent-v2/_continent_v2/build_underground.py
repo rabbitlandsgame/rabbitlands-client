@@ -4,6 +4,14 @@
 One authored plan drives the rock shell, tile collision, markers and minimap.
 The four sections are separated by unfloored, blocked blackspace. Resources
 and creatures are server-owned and use the reviewed runtime models.
+
+Retired with the procedural generators on 2026-10-16; the owner re-enabled it
+on 2026-10-20 for the Cenote Deeps, and it runs only with --owner-approved.
+The owner asked for section spindle_cavern to become a jungle cenote: style
+"cenote" draws only the rock shell, the pools and a light shaft. Its rocks, ruins, plants and lamps are
+reviewed Meshy kit pieces placed by tools/prepare_underground_scenery.py from
+dressing(), which also decides what they block here. The mine, workings and
+barrow sections build exactly as before.
 """
 from __future__ import annotations
 import argparse
@@ -18,7 +26,7 @@ import sys
 
 import numpy as np
 from PIL import Image, ImageDraw
-from shapely import affinity
+from shapely import affinity, constrained_delaunay_triangles
 from shapely.geometry import Point, LineString, Polygon, box
 from shapely.ops import unary_union, triangulate
 
@@ -42,9 +50,19 @@ def write_json(path, data):
 
 def outline(section):
     rooms=[]
+    cenote=section['style']=='cenote'
     for index,(x,y,rx,ry) in enumerate(section['rooms']):
         if section['style']=='barrow':
             rooms.append(box(x-rx,y-ry,x+rx,y+ry).buffer(-1).buffer(1))
+        elif cenote:
+            # Water-worn limestone: lower, broader lobes than the mine's chisel marks.
+            points=[]
+            for i in range(96):
+                angle=i*math.tau/96
+                waviness=(1+.07*math.sin(angle*4+index*1.7)+.045*math.cos(angle*7+index*.6)
+                          +.02*math.sin(angle*13+index*2.3))
+                points.append((x+rx*waviness*math.cos(angle),y+ry*waviness*math.sin(angle)))
+            rooms.append(Polygon(points))
         else:
             points=[]
             for i in range(64):
@@ -52,9 +70,162 @@ def outline(section):
                 waviness=1+.045*math.sin(angle*5+index*.8)+.025*math.cos(angle*9+index)
                 points.append((x+rx*waviness*math.cos(angle),y+ry*waviness*math.sin(angle)))
             rooms.append(Polygon(points))
-    passages = [LineString([section['rooms'][a][:2],section['rooms'][b][:2]]).buffer(w/2)
-                for a,b,w in section['links']]
-    return unary_union(rooms+passages)
+    # A link may wind through waypoints: [a, b, width, [[x, y], ...]].
+    passages = [LineString([section['rooms'][link[0]][:2],*(link[3] if len(link)>3 else []),
+                            section['rooms'][link[1]][:2]]).buffer(link[2]/2)
+                for link in section['links']]
+    shape=unary_union(rooms+passages)
+    if cenote:
+        shape=shape.buffer(1.2).buffer(-1.2)  # round the joints where tunnels meet chambers
+    return shape
+
+
+def wavy_ellipse(x,y,rx,ry,phase=0.):
+    return Polygon([(x+rx*(1+.06*math.sin(a*3+phase)+.03*math.cos(a*7+phase))*math.cos(a),
+                     y+ry*(1+.06*math.sin(a*3+phase)+.03*math.cos(a*7+phase))*math.sin(a))
+                    for a in (i*math.tau/72 for i in range(72))])
+
+
+def pools(section):
+    """The section's standing water: wavy ellipses [x, y, rx, ry], reaching under the walls they touch."""
+    shapes=[wavy_ellipse(*pool[:4],phase=index*1.3) for index,pool in enumerate(section.get('pools',[]))]
+    if not shapes: return None
+    return unary_union(shapes).intersection(outline(section).buffer(2.0))
+
+
+# Reused Meshy kit pieces (tools/prepare_underground_scenery.py packages them at these sizes):
+# the wall rocks with the half depth that stands proud of the rock face.
+WALL_ROCKS=(('mossy_crag_1',2.0),('mossy_boulder_2',1.3),('mossy_crag_2',2.2),('mossy_boulder_1',1.0),
+            ('mossy_boulder_3',1.2),('mossy_boulder_2',1.3))
+# Lamps among the kit pieces: colour, energy, range, height of the flame.
+KIT_LIGHTS={'jade_lantern_pole':([1,.74,.42],1.6,13,2.3),'jade_lantern_shrine':([.55,1,.72],1.3,10,1.6),
+            'incense_brazier':([1,.58,.28],2.0,11,1.4)}
+
+
+def dressing(section):
+    """The cenote's reused scenery, as placements in tile units: the source's props, then rocks along every wall.
+
+    Each is {asset, x, y, height, yaw, scale, block, group}: `block` is the radius (tiles) it takes from the walk
+    grid, `group` the cutaway container a wall rock hides with (Rocks_<section>_<facing>, the wall's own facing).
+    """
+    if section['style']!='cenote': return []
+    items=[]
+    for prop in section.get('props',[]):
+        x,y=prop['at']
+        items.append({'asset':prop['asset'],'x':x,'y':y,'height':prop.get('height',0),'yaw':prop.get('yaw',0),
+                      'scale':prop.get('scale',1),'block':prop.get('block',0),'group':None,
+                      **({'palette':prop['palette']} if 'palette' in prop else {}),
+                      **({'light':True} if prop.get('light') else {})})
+    keep_out=[(p['at'][0],p['at'][1],p['clearWall']) for p in section.get('props',[]) if p.get('clearWall')]
+    ring=outline(section).exterior
+    ccw=ring.is_ccw
+    step=section.get('wallRockSpacing',4.0)
+    for k in range(int(ring.length//step)):
+        d=k*step+(k*7919%10)*.08
+        p=ring.interpolate(d); q=ring.interpolate(d+.5)
+        dx,dy=q.x-p.x,q.y-p.y; length=max(.01,math.hypot(dx,dy))
+        nx,ny=(dy/length,-dx/length) if ccw else (-dy/length,dx/length)
+        asset,proud=WALL_ROCKS[(k*5+k//3)%len(WALL_ROCKS)]
+        scale=.85+(k*37%30)/100
+        # Set the rock into the face so about a third of it stands proud of the wall.
+        x,y=p.x+nx*proud*scale*.45,p.y+ny*proud*scale*.45
+        if any(math.hypot(x-cx,y-cy)<r for cx,cy,r in keep_out): continue
+        facing=('east' if nx>0 else 'west') if abs(nx)>abs(ny) else ('south' if ny>0 else 'north')
+        items.append({'asset':asset,'x':round(x,2),'y':round(y,2),'height':-.3,'yaw':k*137%360,
+                      'scale':round(scale,2),'block':0,'group':f'Rocks_{section["id"]}_{facing}'})
+    return items
+
+
+def flat_triangles(polygon,height):
+    """Upward-facing triangles covering `polygon` (holes respected) at `height`, as world-space vertex triples."""
+    result=[]
+    for tri in constrained_delaunay_triangles(polygon).geoms:
+        p=list(tri.exterior.coords)[:3]
+        a,b,c=[world(x,y,height) for x,y in p]
+        if np.cross(np.subtract(b,a),np.subtract(c,a))[1]<0:
+            a,b,c=c,b,a
+        result.append((a,b,c))
+    return result
+
+
+FACE_OUT=dict(east=[1,0,0],west=[-1,0,0],south=[0,0,-1],north=[0,0,1])
+CENOTE_WATER=-.45  # the pools' surface, below the walk floor at 0
+CENOTE_BED=-1.9
+
+
+def facing_quad(corners,toward,material):
+    """A quad wound so its normal points along the world-space vector `toward`."""
+    normal=np.cross(np.subtract(corners[1],corners[0]),np.subtract(corners[2],corners[0]))
+    return M.quad(corners if np.dot(normal,toward)>=0 else corners[::-1],material=material)
+
+
+def cenote_geometry(section,add,lights,chambers,wall_faces):
+    """The cenote's shell: limestone floor and walls, sunk pools with banks, and the shaft of daylight."""
+    ident=section['id']; poly=outline(section); water=pools(section)
+    floor=poly.difference(water) if water is not None else poly
+    for a,b,c in flat_triangles(floor,0):
+        add(M.quad([a,b,c,c],material='verdant_wet_limestone').drop_degenerate(),f'Walk_{ident}')
+    for a,b,c in flat_triangles(poly,8.5):
+        add(M.quad([c,b,a,a],material='verdant_limestone_cliff').drop_degenerate(),f'Roof_{ident}')
+    # A low, ragged rock face: the limestone crags set into it (dressing()) are the walls' skyline.
+    boundary=list(poly.exterior.coords); count=len(boundary)-1
+    ccw=poly.exterior.is_ccw; perimeter=0.
+    def top(i): return 4.2+.5*math.sin(i%count*.11)+.25*math.sin(i%count*.37)
+    for i,(a,b) in enumerate(zip(boundary,boundary[1:])):
+        dx,dy=b[0]-a[0],b[1]-a[1]; length=max(.01,math.hypot(dx,dy))
+        nx,ny=(dy/length,-dx/length) if ccw else (-dy/length,dx/length)
+        ring=[world(*a,-.15),world(*b,-.15),world(*b,top(i+1)),world(*a,top(i))]
+        facing=('east' if nx>0 else 'west') if abs(nx)>abs(ny) else ('south' if ny>0 else 'north')
+        bucket=f'Build_{ident}_{facing}'
+        wall_faces[bucket]=FACE_OUT[facing]
+        face=M.quad(ring,material='verdant_limestone_cliff')
+        face.uvs=np.array([[perimeter*.3,0],[(perimeter+length)*.3,0],
+                           [(perimeter+length)*.3,top(i+1)*.3],[perimeter*.3,top(i)*.3]])
+        add(face,bucket)
+        perimeter+=length
+    if water is not None:
+        for part in getattr(water,'geoms',[water]):
+            for a,b,c in flat_triangles(part,CENOTE_WATER):
+                add(M.quad([a,b,c,c],material='water_cenote').drop_degenerate(),f'Water_{ident}')
+            for a,b,c in flat_triangles(part,CENOTE_BED):
+                add(M.quad([a,b,c,c],material='verdant_mossy_stone').drop_degenerate(),f'Pool_{ident}')
+            # The bank drops from the floor's edge to the bed, facing the water.
+            edge=list(part.exterior.coords); inner_ccw=part.exterior.is_ccw; run=0.
+            for a,b in zip(edge,edge[1:]):
+                dx,dy=b[0]-a[0],b[1]-a[1]; length=max(.01,math.hypot(dx,dy))
+                ix,iy=(-dy/length,dx/length) if inner_ccw else (dy/length,-dx/length)
+                bank=facing_quad([world(*a,.02),world(*b,.02),world(*b,CENOTE_BED),world(*a,CENOTE_BED)],
+                                 (ix,0,-iy),'verdant_wet_limestone')
+                bank.uvs=np.array([[run*.3,0],[(run+length)*.3,0],[(run+length)*.3,.6],[run*.3,.6]])
+                add(bank,f'Bank_{ident}')
+                run+=length
+    if 'shaft' in section:
+        # Daylight through the sinkhole's mouth: an open, faintly lit column over the pool.
+        sx,sy,radius=section['shaft']
+        def rim(angle,r,h): return world(sx+r*math.cos(angle),sy+r*math.sin(angle),h)
+        for i in range(28):
+            a0,a1=i*math.tau/28,(i+1)*math.tau/28
+            add(M.quad([rim(a0,radius,.1),rim(a1,radius,.1),rim(a1,radius*.72,15),rim(a0,radius*.72,15)],
+                       material='light_shaft'),f'Shaft_{ident}')
+        lights.append({'id':f'{ident}-daylight','position':list(world(sx,sy,9)),'color':[.92,.96,.84],
+                       'energyHint':4.0,'rangeHint':26})
+    for index,(x,y,rx,ry) in enumerate(section['rooms']):
+        chambers.append({'id':f'{ident}-{index}','section':ident,'position':list(world(x,y)),
+                         'radius':min(rx,ry),'name':section['name']})
+    lamp=0
+    for item in dressing(section):
+        light=KIT_LIGHTS.get(item['asset'])
+        if light is None and item.get('light'):
+            light=([.42,1,.72],1.0,8,1.0)  # a glowing jade growth
+        if light is None: continue
+        colour,energy,reach,height=light
+        lights.append({'id':f'{ident}-lamp-{lamp}','position':list(world(item['x'],item['y'],height*item['scale'])),
+                       'color':colour,'energyHint':energy,'rangeHint':reach})
+        lamp+=1
+    # The way out: a dark passage mouth; the serpent arch over it is kit scenery.
+    x,y=section['exit']
+    add(M.quad([world(x-1.7,y-1.2,.01),world(x+1.7,y-1.2,.01),world(x+1.7,y-1.2,3.3),world(x-1.7,y-1.2,3.3)],
+               material='exit_dark'),f'Props_{ident}')
 
 
 def world(x,y,height=0):
@@ -68,6 +239,9 @@ def build_geometry(design, textures):
     lights=[]; chambers=[]; hidden=[]; wall_faces={}
     def add(piece,bucket): parts[(bucket,piece.material)].append(piece)
     for section in design['sections']:
+        if section['style']=='cenote':
+            cenote_geometry(section,add,lights,chambers,wall_faces)
+            continue
         ident=section['id']; poly=outline(section)
         floor={'barrow':'ashlar','crystal':'cliff_rock'}.get(section['style'],'packed_earth')
         rock='rubble_stone' if section['style']=='barrow' else 'cliff_rock'
@@ -145,14 +319,17 @@ def build_geometry(design, textures):
         add(M.box((4.6,.55,.8),world(x,y,3.55),material='timber_warm' if section['style']=='mine' else 'ashlar'),f'Props_{ident}')
         add(M.quad([world(x-1.7,y-1.2,.01),world(x+1.7,y-1.2,.01),world(x+1.7,y-1.2,3.3),world(x-1.7,y-1.2,3.3)],material='exit_dark'),f'Props_{ident}')
     used={m for _,m in parts}
-    MAT.register_gltf_materials(builder,textures,only=used-{'lamp_glow','cave_crystal','exit_dark'})
+    MAT.register_gltf_materials(builder,textures,only=used-{'lamp_glow','cave_crystal','exit_dark','light_shaft'})
     builder.add_material(G.Material('lamp_glow',base_color=(1,.5,.1,1),emissive=(1,.4,.05)))
     builder.add_material(G.Material('cave_crystal',base_color=(.3,.54,.62,1),roughness=.32,emissive=(.03,.10,.13)))
     builder.add_material(G.Material('exit_dark',base_color=(.008,.009,.011,1),double_sided=True))
+    if 'light_shaft' in used:
+        builder.add_material(G.Material('light_shaft',base_color=(.95,.97,.82,.10),emissive=(.45,.48,.38),
+                                        alpha_mode='BLEND',double_sided=True))
     all_meshes=[]; collision_nodes=[];walls=[]
     for (bucket,material),pieces in sorted(parts.items()):
         piece=M.merge(pieces,material=material).drop_degenerate().sanitise_normals()
-        if bucket.startswith(('Walk_','Roof_')):
+        if bucket.startswith(('Walk_','Roof_','Water_','Pool_')):
             piece.uvs=piece.positions[:,[0,2]]*.22
         name=f'{bucket}_{material}'
         builder.add_mesh(name,piece,with_tangents=True); root.add(G.Node(name,mesh=name))
@@ -160,6 +337,10 @@ def build_geometry(design, textures):
         if bucket.startswith('Roof'): hidden.append(name)
         if bucket.startswith('Build'):
             collision_nodes.append(name);walls.append({'node':name,'outward':wall_faces[bucket]})
+    # The cenote's wall rocks are scenery groups (underground_scenery.gd): they cut away with their wall.
+    for section in design['sections']:
+        for group in sorted({item['group'] for item in dressing(section) if item['group']}):
+            walls.append({'node':group,'outward':FACE_OUT[group.rsplit('_',1)[1]]})
     builder.add_node(root)
     bounds=M.merge(all_meshes).bounds()
     return builder,lights,chambers,hidden,collision_nodes,bounds,walls
@@ -193,8 +374,33 @@ def masks(design):
             for px,py,rx,ry in section['rooms'][1:]:
                 for sign in (-1,1):
                     half &= ~((abs(x-(px+sign*(rx-2.2)))<1.1)&(abs(y-(py+ry-3.2))<1.9))
+        elif section['style']=='cenote':
+            # The wall rocks stand proud of the face: keep a wider margin than the mine's.
+            half &= ~(contains_xy(outline(section),x,y) & ~contains_xy(outline(section).buffer(-1.0),x,y))
+            water=pools(section)
+            if water is not None:
+                half &= ~contains_xy(water.buffer(.4),x,y)
+            for item in dressing(section):
+                if item['block']>0:
+                    half &= ~((x-item['x'])**2+(y-item['y'])**2<item['block']**2)
         for _,_,nx,ny in section['nodes']:
             half[ny*2:ny*2+2,nx*2:nx*2+2]=False
+    coarse=half.reshape(cells,2,cells,2).all(axis=(1,3))
+    # A cenote's props and pools can pinch off a scrap of floor, and publication refuses a stranded pocket:
+    # close whatever the arrival cannot reach (the server's four-way steps on the coarse grid).
+    from scipy import ndimage
+    for section in design['sections']:
+        if section['style']!='cenote': continue
+        x0,y0,x1,y1=(int(v) for v in outline(section).buffer(1).bounds)
+        window=coarse[y0:y1+1,x0:x1+1]
+        labels,_=ndimage.label(window)
+        ax,ay=section['arrival']
+        stranded=window&(labels!=labels[ay-y0,ax-x0])
+        if stranded.sum()>12:
+            ys,xs=np.nonzero(stranded)
+            raise SystemExit(f'{section["id"]}: {int(stranded.sum())} floor tiles are cut off from the arrival, '
+                             f'e.g. ({xs[0]+x0},{ys[0]+y0}): a prop or pool closes a passage')
+        half[y0*2:(y1+1)*2,x0*2:(x1+1)*2]&=~np.repeat(np.repeat(stranded,2,0),2,1)
     coarse=half.reshape(cells,2,cells,2).all(axis=(1,3))
     return half,coarse
 
@@ -253,6 +459,12 @@ def build(server):
               'rubble_stone':T.rubble_stone(512,seed=61),'cliff_rock':T.cliff_rock(512,seed=67),
               'timber_warm':T.timber(512,seed=23,tone='warm'),'timber_dark':T.timber(512,seed=173,tone='dark'),
               'dark_iron':T.dark_iron(256,seed=101)}
+    if any(s['style']=='cenote' for s in design['sections']):
+        # The Verdant Stair's own limestone and cenote water (materials.py seeds).
+        textures.update({'verdant_mossy_stone':T.verdant_mossy_stone(512,seed=617),
+                         'verdant_wet_limestone':T.verdant_wet_limestone(512,seed=619),
+                         'verdant_limestone_cliff':T.verdant_limestone_cliff(512,seed=631),
+                         'water_cenote':T.water_surface(512,seed=683,tone='cenote')})
     builder,lights,chambers,hidden,collision_nodes,bounds,walls=build_geometry(design,textures)
     builder.write_glb(str(out/'world.glb'))
     half,coarse=masks(design)
@@ -294,28 +506,41 @@ def build(server):
               'provenance':{'source':'_continent_v2/content/underground.json','sourceSha256':sha(SOURCE),
                             'builder':'_continent_v2/build_underground.py','builderSha256':sha(__file__)}}
     write_json(out/'world.json',manifest)
+    # Images go to the content-addressed pool, as every published map's do (eloria-assets/tools/shared_images.py).
+    sys.path.insert(0,str(CHECKOUT/'eloria-assets/tools'))
+    import shared_images
+    moved=shared_images.externalise(out/'world.glb',dry_run=False)
+    shared_images.record_manifest(out/'world.glb',moved['uris'],dry_run=False)
     image=Image.new('RGB',(720,720),'black');draw=ImageDraw.Draw(image)
     for section in design['sections']:
         poly=outline(section); points=[(x*3,y*3) for x,y in poly.exterior.coords]
-        draw.polygon(points,fill=(73,70,63) if section['style']!='crystal' else (56,71,78),outline=(116,107,91),width=2)
+        if section['style']=='cenote':
+            draw.polygon(points,fill=(66,80,62),outline=(118,128,98),width=2)
+            water=pools(section)
+            for part in getattr(water,'geoms',[water]) if water is not None else []:
+                draw.polygon([(x*3,y*3) for x,y in part.intersection(poly).exterior.coords],fill=(44,122,112))
+        else:
+            draw.polygon(points,fill=(73,70,63) if section['style']!='crystal' else (56,71,78),outline=(116,107,91),width=2)
         for _,res,x,y in section['nodes']: draw.ellipse((x*3-2,y*3-2,x*3+2,y*3+2),fill=(158,179,162))
         x,y=section['exit'];draw.rectangle((x*3-4,y*3-4,x*3+4,y*3+4),fill=(232,185,94))
     image.save(out/'minimap.webp',lossless=True)
-    assets=CHECKOUT/'godot-client/world_authoring/continent-v2/underground-assets'
-    for style in ('mine','crystal','barrow'): entrance_asset(style,textures,assets/f'{style}-mouth.glb')
-    registry=CHECKOUT/'godot-client/data/maps/registry.json'; data=json.loads(registry.read_text())
-    data['maps'][ident]={'manifest':f'res://../eloria-assets/maps/continent-v2/{ident}/client/world.json',
-                         'coordinateTransform':coordinate,'status':'continent-v2-interior-served','label':design['map']['name'],'landscapeTransitions':False}
-    write_json(registry,data)
-    objects=CHECKOUT/'godot-client/data/world/objects.json';data=json.loads(objects.read_text())
-    for s in design['sections']:
-        data.setdefault('authoredObjects',{})[str(s['entrance']['object'])]={'height':3.6,'radius':1.6,'label':s['name']}
-    write_json(objects,data)
+    # The procedural entrance models stay retired: each door's art is reused Meshy scenery (objects.json),
+    # which this builder no longer writes; retarget_underground.py keeps those records' tiles and labels.
+    registry=json.loads((CHECKOUT/'godot-client/data/maps/registry.json').read_text(encoding='utf-8'))
+    if registry['maps'].get(ident,{}).get('coordinateTransform')!=coordinate:
+        raise SystemExit(f'registry.json has no {ident} row with this frame; publish it first')
     print(json.dumps({'map':ident,'sections':len(design['sections']),'nodes':len(nodes),'monsters':sum(len(s['spawns']) for s in design['sections']),
-                      'walkableTiles':int(coarse.sum()),'glbBytes':(out/'world.glb').stat().st_size}))
+                      'walkableTiles':int(coarse.sum()),'glbBytes':(out/'world.glb').stat().st_size,'imagesShared':moved['moved']}))
 
 
 if __name__=='__main__':
-    raise RuntimeError('build_underground.py is retired: procedural models and generators were archived on 2026-10-16. See docs/procedural-model-archive.md. No outputs were written.')
-    ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--server',type=Path,required=True)
-    build(ap.parse_args().server.resolve())
+    ap=argparse.ArgumentParser(description=__doc__,formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--server',type=Path,required=True)
+    ap.add_argument('--owner-approved',metavar='NOTE',
+                    help="the owner's approval for this rebuild (the generator was retired on 2026-10-16)")
+    args=ap.parse_args()
+    if not args.owner_approved:
+        raise RuntimeError('build_underground.py is retired: procedural models and generators were archived on 2026-10-16. '
+                           'See docs/procedural-model-archive.md. It rebuilds only with --owner-approved "<who, when, what>" '
+                           '(the owner re-enabled it on 2026-10-20 for the Cenote Deeps). No outputs were written.')
+    build(args.server.resolve())

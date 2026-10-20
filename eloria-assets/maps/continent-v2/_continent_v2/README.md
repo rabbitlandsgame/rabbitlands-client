@@ -114,10 +114,11 @@ Cenote Deeps (Coilmere), and Boarsend Old Barrow. Their rooms share one interior
 map with unfloored blackspace between sections. The peaceful Lantern Mine
 supplies beginner Coal and Iron Ore; the deeper areas contain intermediate
 encounters and additional minerals. See `../landfall_insides/README.md` for
-locations, resources, encounter tiers, and the rebuild workflow. `build_underground.py` is retired; when a
+locations, resources, encounter tiers, and the rebuild workflow. `build_underground.py` was retired on 2026-10-16 and runs only with
+`--owner-approved` (re-enabled 2026-10-20 to rebuild the Cenote Deeps as a jungle cenote); when a
 partition change moves a door's exterior map or frame, `retarget_underground.py` rewrites only the door ends, and a section renamed in
 the source only its labels (the Spindle Mineral Cavern became Coilmere's Cenote Deeps for Landfall A3; its
-id `spindle_cavern`, entrance marker id and crystal-style rooms are the built section's).
+id `spindle_cavern` and entrance marker id stay; its rooms are the cenote's).
 
 ## Boats
 

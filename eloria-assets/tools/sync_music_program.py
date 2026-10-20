@@ -50,7 +50,8 @@ def interior_zones(map_id: str, metadata: dict) -> tuple[list, str]:
         if program and all(k in space for k in ('x0','x1','z0','z1')):
             add(name, (space['x0']-.6,space['z0']-.6,space['x1']+.6,space['z1']+.6), program)
     for chamber in world.get('chambers', []):
-        program = room_program(chamber.get('section', ''))
+        # The chamber's name first: the Cenote Deeps keeps its section id, spindle_cavern, from its cavern days.
+        program = room_program(chamber.get('name', '')) or room_program(chamber.get('section', ''))
         if program:
             x, _, z = chamber['position']
             radius = chamber['radius']+1

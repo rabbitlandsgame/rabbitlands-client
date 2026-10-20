@@ -32,6 +32,12 @@ again. See `docs/qa/procedural-model-archive/ground-inlay-restoration.json` for
 verification. The original retirement and audit receipts remain historical
 records; the rosette and paving generators remain disabled.
 
+One generator has run again since: the owner re-enabled
+`eloria-assets/maps/continent-v2/_continent_v2/build_underground.py` on
+2026-10-20 to rebuild the Cenote Deeps as a jungle cenote. It still refuses to
+run without `--owner-approved`, and it draws only the interior's rock shell,
+pools and light; the cave's art is reviewed Meshy kit scenery.
+
 Procedural actor and equipment definitions are removed, including 158 actor
 model entries, 163 actor-type mappings, four equipment visuals and 710 obsolete
 authoring-catalog records. Historical identifiers remain reserved in the

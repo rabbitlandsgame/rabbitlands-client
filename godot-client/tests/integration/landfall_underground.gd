@@ -33,7 +33,14 @@ func run() -> void:
 		return
 	check(loader.manifest.errors.is_empty(), "Underground manifest validates")
 	var scenery := loader.world_root.get_node_or_null("UndergroundScenery")
-	check(scenery != null and scenery.get_child_count() == 45,
+	var placements: Array = JSON.parse_string(FileAccess.get_file_as_string(
+		"res://data/world/underground-scenery.json")).placements
+	var models := 0
+	if scenery != null:
+		# The Cenote Deeps' wall rocks stand in Rocks_* groups that cut away with their wall.
+		for child: Node in scenery.get_children():
+			models += child.get_child_count() if str(child.name).begins_with("Rocks_") else 1
+	check(models == placements.size() and placements.size() > 45,
 		"All reviewed imported scenery placements load")
 	var reapply := preload("res://src/world/underground_scenery.gd")
 	check(reapply.apply(loader.manifest, loader.world_root) == 0,
@@ -52,6 +59,10 @@ func run() -> void:
 		check(not ground(space, Vector3(p[0], 0, p[2])).is_empty(), "Chamber has a rendered floor: " + str(room.id))
 	for p: Vector3 in [Vector3(120, 0, 120), Vector3(120, 0, 185), Vector3(55, 0, 120), Vector3(5, 0, 5)]:
 		check(ground(space, p).is_empty(), "Blackspace is unfloored: " + str(p))
+	# The Cenote Deeps' sinkhole pool (server tile 63,205) is water over a sunk bed, not floor.
+	check(ground(space, Vector3(63, 0, 240 - 205)).is_empty(), "The cenote pool has no walk floor")
+	var water := loader.world_root.find_child("Water_spindle_cavern*", true, false) as MeshInstance3D
+	check(water != null and water.material_override is ShaderMaterial, "The cenote pool draws its water")
 	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/world/objects.json"))
 	var adapter := loader.manifest.coordinate_adapter()
 	for node: Dictionary in loader.manifest.data.harvestables:
