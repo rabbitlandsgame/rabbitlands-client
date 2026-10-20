@@ -1175,6 +1175,15 @@ custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 tooltip_text = "Sit down / stand up [Alt+S]"
 
+[node name="MountsButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+tooltip_text = "Mounts — choose and call a mount"
+toggle_mode = true
+expand_icon = true
+icon_alignment = 1
+
 [node name="LookButton" type="Button" parent="GameView/Quickbar/QuickRows/Buttons" unique_id=714975903]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)

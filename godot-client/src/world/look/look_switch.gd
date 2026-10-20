@@ -63,7 +63,11 @@ static func _include(found: Array[Dictionary], root: Variant, manifest: WorldMan
 ## is on, takes the look off it (`revert`) while it is off, and marks it as
 ## following the switch's current answer. Returns the surfaces changed.
 static func sync(root: Node, manifest: WorldManifest, bound := false) -> int:
-	var changed := apply(root, manifest, bound) if LookProfile.enabled() else revert(root)
+	# Always restore first: Full painted -> Painted ground must also remove
+	# foliage, signature-prop and water overrides while keeping painted terrain.
+	var changed := revert(root)
+	if LookProfile.enabled():
+		changed += apply(root, manifest, bound)
 	LookProfile.stamp(root)
 	return changed
 

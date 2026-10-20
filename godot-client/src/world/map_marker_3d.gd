@@ -166,7 +166,7 @@ func _build_world_visual() -> void:
 	# Match the actor labels' pixel calibration for the 50-degree game camera.
 	WORLD_LABEL_STYLE.apply(_world_label, 16, 0.0012953, 5)
 	_world_label.no_depth_test = true
-	_world_label.layers = GAMEPLAY_LAYER
+	_world_label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	_world_label.visibility_range_end = WORLD_RANGE
 	add_child(_world_label)
 

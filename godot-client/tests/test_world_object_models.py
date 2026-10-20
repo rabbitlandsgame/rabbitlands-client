@@ -367,6 +367,23 @@ class WorldObjectModelTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     imported.harvest_variants(self.harvestables, table)
 
+    def test_variants_say_whether_they_stand_alone(self) -> None:
+        """Every listed variant carries its row's `stands_alone` as `standsAlone`.
+
+        The client stands only those on a node no package lays out whose
+        label's own model is retired; a row, hedge or seam at a random yaw
+        reads wrong (playtest map review 2026-10-19, finding 6). No other
+        model carries the key.
+        """
+        listed = imported.variant_ids()
+        rows = {row.model_id: row for row in imported.IMPORTED_HARVESTABLES}
+        for model_id, entry in self.harvestables["models"].items():
+            with self.subTest(model=model_id):
+                if model_id in listed and model_id in rows:
+                    self.assertIs(entry.get("standsAlone"), rows[model_id].stands_alone)
+                else:
+                    self.assertNotIn("standsAlone", entry)
+
     def test_every_server_resource_has_a_model(self) -> None:
         root = server_root()
         if root is None:

@@ -9,6 +9,11 @@ const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const ARCHIVED_MODEL_POLICY := preload("res://src/actors/archived_model_policy.gd")
 const STATUS_ICONS := preload("res://src/ui/status_effect_icons.gd")
+const COMBAT_TARGET_MARKER := preload("res://src/actors/combat_target_marker_3d.gd")
+const CREATURE_DISSOLVE := preload("res://src/actors/creature_dissolve.gd")
+const CREATURE_DISSOLVE_DELAY_SECONDS := 2.0
+const TARGET_MARKER_STYLE := preload("res://src/actors/target_marker_style.gd")
+var _target_marker_style := TARGET_MARKER_STYLE.defaults()
 
 @export var walk_presentation_speed := 6.0
 @export var run_presentation_speed := 9.0
@@ -72,9 +77,8 @@ const PACE_CONFIRM_SPREAD := 1.15
 @export var action_blend_seconds := 0.15
 ## How long, in seconds of real time, the crossfade into the current action
 ## takes: what play_action actually gave it, scaled by the playback speed the
-## clip runs at, and zero when a restart dropped the old clip outright - as
-## every fresh swing and every hit does. Anything that has to change with the
-## pose, like the grip WeaponCarryPose eases a held weapon into, follows this
+## clip runs at, and zero for an explicit cold restart or no preceding pose.
+## Anything that changes with the pose, like the held weapon's grip, follows this
 ## rather than action_blend_seconds, or it arrives after the pose it belongs to.
 var action_crossfade_seconds := 0.15
 
@@ -105,6 +109,10 @@ const SMALL_CREATURE_MIN_SIZE := 0.7
 ## every physics frame and a node path lookup per frame per actor is
 ## not what that should cost.
 var _selection_ring: MeshInstance3D = null
+var _selected := false
+var _combat_target := false
+var _combat_target_marker: Node3D
+var _default_melee_clips: Dictionary = {}
 ## The marker as built, before the ground was laid under it. Draping reads
 ## this every time, so a marker walked over a hill and back is shaped by the
 ## ground it is on rather than by the ground it has crossed.
@@ -134,6 +142,7 @@ var _corpse_fade_seconds := 4.0
 var _death_snapshot_msec := -1
 var _corpse_transparency := -1.0
 var _corpse_geometry: Array[GeometryInstance3D] = []
+var _corpse_dissolve: RefCounted
 var _cinematic_active := false
 var _charge_leap: RefCounted
 var _cinematic_position := Vector3.ZERO
@@ -495,14 +504,15 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 	var selection_ring: MeshInstance3D = MeshInstance3D.new()
 	selection_ring.name = "SelectionRing"
 	var ring_material: StandardMaterial3D = StandardMaterial3D.new()
-	ring_material.albedo_color = Color(0.95, 0.76, 0.18, 0.9)
+	ring_material.vertex_color_use_as_albedo = true
 	ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	# Both faces: this is a flat decal on the ground and the winding
 	# it is built with should not decide whether it can be seen.
 	ring_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	selection_ring.material_override = ring_material
-	selection_ring.position.y = 0.05
+	selection_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	selection_ring.position.y = GroundDrape.CLEARANCE
 	selection_ring.visible = false
 	# Gameplay-only visual layer. The minimap and full-map cameras cull it, so
 	# neither top-down viewport pays for selection rings or nameplates it never
@@ -514,6 +524,9 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 	_add_nameplate(dto)
 	_add_map_dot(dto)
 	resolver = AnimationResolver.new(animation_config)
+	for action: String in ["attack_primary", "attack_secondary"]:
+		if resolver.action_to_clip.has(action):
+			_default_melee_clips[action] = resolver.action_to_clip[action]
 	_model_config = model_config.duplicate(true)
 	_face_material = null
 	_face_group_materials.clear()
@@ -1068,7 +1081,7 @@ func _add_nameplate(dto: Dictionary) -> void:
 		if int(dto.get("kind", 0)) == CREATURE_ACTOR_KIND and name_colour == 0
 		else EloriaProtocol.el_text_colour(name_colour))
 	label.outline_modulate = Color.BLACK
-	label.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(label)
 	_nameplate = label
 	_add_health_bar()
@@ -1095,7 +1108,7 @@ func set_status_effects(effects: Array) -> void:
 	for index: int in range(next.size()):
 		var icon := MeshInstance3D.new()
 		icon.name = next[index]
-		icon.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		icon.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		icon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var quad := QuadMesh.new()
 		quad.size = Vector2.ONE * NEGATIVE_STATUS_SIZE * OVERHEAD_PIXEL
@@ -1158,7 +1171,7 @@ func _add_health_bar() -> void:
 	background_quad.material = _overhead_material(HEALTH_BAR_BACKING, 1)
 	background.mesh = background_quad
 	background.position.y = NAMEPLATE_HEIGHT
-	background.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	background.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(background)
 	_health_bar_background = background
 	var fill: MeshInstance3D = MeshInstance3D.new()
@@ -1171,7 +1184,7 @@ func _add_health_bar() -> void:
 	(fill_quad.material as StandardMaterial3D).albedo_texture = _health_bar_texture()
 	fill.mesh = fill_quad
 	fill.position.y = NAMEPLATE_HEIGHT
-	fill.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	fill.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(fill)
 	_health_bar_fill = fill
 	var numbers: Label3D = Label3D.new()
@@ -1187,7 +1200,7 @@ func _add_health_bar() -> void:
 	WORLD_LABEL_STYLE.apply(numbers, HEALTH_NUMBER_FONT_SIZE, OVERHEAD_PIXEL,
 		0)
 	numbers.outline_modulate = Color.BLACK
-	numbers.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	numbers.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	add_child(numbers)
 	_health_label = numbers
 
@@ -1198,7 +1211,7 @@ func _add_overhead_background() -> void:
 	backing.mesh = QuadMesh.new()
 	(backing.mesh as QuadMesh).material = _overhead_material(OVERHEAD_BACKING, 0)
 	backing.position.y = NAMEPLATE_HEIGHT
-	backing.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	backing.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	backing.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(backing)
 	_overhead_background = backing
@@ -1439,7 +1452,7 @@ func set_title(title: String) -> void:
 		WORLD_LABEL_STYLE.apply(label, TITLE_FONT_SIZE, OVERHEAD_PIXEL,
 			OVERHEAD_OUTLINE_SIZE)
 		label.modulate = Color(0.85, 0.78, 0.45, 1.0)
-		label.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		add_child(label)
 		_title_line = label
 	_title_line.text = title
@@ -1473,7 +1486,7 @@ func set_quest_available(available: bool) -> void:
 		_quest_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		_quest_marker.no_depth_test = true
 		_quest_marker.fixed_size = true
-		_quest_marker.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		_quest_marker.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		WORLD_LABEL_STYLE.apply(_quest_marker, 30, OVERHEAD_PIXEL, 2)
 		_quest_marker.outline_modulate = Color(0.28, 0.13, 0.01)
 		add_child(_quest_marker)
@@ -1510,7 +1523,7 @@ func set_occupation(occupation: String) -> void:
 			WORLD_LABEL_STYLE.apply(label, OCCUPATION_FONT_SIZE, OVERHEAD_PIXEL, 0)
 			label.modulate = OCCUPATION_COLOUR
 			label.outline_modulate = Color.BLACK
-			label.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+			label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 			add_child(label)
 			_occupation_line = label
 		_occupation_line.text = "<%s>" % text
@@ -1553,7 +1566,7 @@ func show_speech_bubble(speech: String, duration_msec: int) -> void:
 		WORLD_LABEL_STYLE.apply(label, SPEECH_BUBBLE_FONT_SIZE, OVERHEAD_PIXEL, 6)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.modulate = SPEECH_BUBBLE_TEXT
-		label.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+		label.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		add_child(label)
 		_speech_bubble = label
 	_speech_bubble.text = speech
@@ -1588,6 +1601,10 @@ func _apply_model_scale() -> void:
 		var model := get_node_or_null(node_name) as Node3D
 		if model != null:
 			model.scale = Vector3.ONE * total
+			# Measured in gameplay metres after import scale. The logical tile,
+			# picking capsule and ground markers retain their server positions.
+			model.position.z = maxf(0.0, float((_model_config.get("import", {}) as Dictionary).get(
+				"visualBacksetMetres", 0.0))) * _small_creature_scale * server_scale
 	_lift_overhead(server_scale)
 
 ## The top of the body as drawn, above this actor's foot point: the authored
@@ -1612,6 +1629,7 @@ func _lift_overhead(factor: float) -> void:
 		var node := get_node_or_null(node_name) as Node3D
 		if node != null:
 			node.position.y = height
+	_sync_combat_target_marker()
 
 ## Restate how much ground this actor stands on, resizing what depends on
 ## it. Separate from `configure` because the footprint table is a login
@@ -1633,31 +1651,19 @@ func _resize_selection() -> void:
 	if shape != null and shape.shape is CapsuleShape3D:
 		(shape.shape as CapsuleShape3D).radius = SELECTION_RADIUS * span
 	if _selection_ring != null:
-		_selection_ring_flat = footprint_outline(
-			float(footprint.x) * _metres_per_tile,
-			float(footprint.y) * _metres_per_tile)
+		_selection_ring_flat = COMBAT_TARGET_MARKER.outline(
+			Vector2(footprint) * _metres_per_tile,
+			_target_marker_style.square_size / 100.0,
+			_target_marker_style.square_thickness / 100.0,
+			_target_marker_style.square_color)
 		_selection_ring.mesh = _selection_ring_flat
 		_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
+	_sync_combat_target_marker()
 
-## The ground an actor is standing on, drawn as the box the server
-## actually reserved rather than as a circle around its middle.
-##
-## A circle could only ever suggest one tile: it says nothing about which
-## way a rectangle lies, and for anything larger than a single tile it
-## either overhangs the ground the creature holds or sits inside it. The
-## outline is the box, so what is drawn under a creature is the same set
-## of tiles the server will not let you walk through.
-##
-## Static so a test can build the same mesh and measure it without
-## standing up an actor.
-## Hold the marker square to the world while the actor turns inside it.
-##
-## A footprint is axis-aligned in world space and does not rotate - that
-## is deliberate, because combat turns a creature on the spot and a box
-## that swept round with it would have to be able to fail to turn. The
-## marker is a child of the actor, so it inherits a yaw the ground it
-## describes never has, and has to give it back. A circle never showed
-## this; a rectangle shows it immediately.
+## Tentative and confirmed target circles share footprint sizing, borders
+## and terrain sampling. Hold the footprint axes level with the world when
+## the actor turns, including rectangular footprints whose rings are oval.
+## These visual preferences never resize the logical footprint or click shape.
 func _level_selection_ring() -> void:
 	if _selection_ring != null and _selection_ring.visible:
 		_selection_ring.rotation.y = -rotation.y
@@ -1690,10 +1696,11 @@ func _drape_selection_ring() -> void:
 	_selection_ring.mesh = draped
 	_selection_ring_draped_at = here
 
-static func footprint_outline(width_m: float, depth_m: float) -> ArrayMesh:
-	var half_x: float = maxf(0.1, width_m * 0.5 - RING_INSET)
-	var half_z: float = maxf(0.1, depth_m * 0.5 - RING_INSET)
-	var thickness: float = minf(RING_THICKNESS,
+static func footprint_outline(width_m: float, depth_m: float,
+		size_scale := 1.0, thickness_scale := 1.0) -> ArrayMesh:
+	var half_x: float = maxf(0.1, (width_m * 0.5 - RING_INSET) * size_scale)
+	var half_z: float = maxf(0.1, (depth_m * 0.5 - RING_INSET) * size_scale)
+	var thickness: float = minf(RING_THICKNESS * thickness_scale,
 		minf(half_x, half_z) * 0.9)
 	var outer: Array[Vector3] = [
 		Vector3(-half_x, 0.0, -half_z), Vector3(half_x, 0.0, -half_z),
@@ -1742,6 +1749,8 @@ func rebase_world(frame: Transform3D) -> void:
 	_target_yaw += yaw
 	_travel_yaw += yaw
 	_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
+	if _combat_target_marker != null:
+		_combat_target_marker.call("invalidate_ground")
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
 	if teleport and _charge_leap != null: end_charge_leap()
@@ -1929,13 +1938,19 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		# a stop and the early one behind it a sprint.
 		var due: float = scheduled_arrival(now, _schedule_due, cadence,
 			cadence * arrival_margin + _jitter_allowance, catch_up_factor)
+		# A server-confirmed fast mount can cross a tile faster than the
+		# ordinary segment floor. Keep its short steps on the supplied cadence.
+		var segment_floor := minf(minimum_segment_duration, cadence) if is_instance_valid(_mount_visual) else minimum_segment_duration
 		_segment_duration = clampf(maxf(due - now,
 			global_position.distance_to(server_target) / maxf(_presentation_speed, 0.001)),
-			minimum_segment_duration, maximum_segment_duration + maximum_buffer_seconds)
+			segment_floor, maximum_segment_duration + maximum_buffer_seconds)
 		_schedule_due = now + _segment_duration
 		_travel_yaw = travel_yaw(_segment_start, server_target, _target_yaw)
 		_travel_yaw_active = true
 	_wake()
+	# Loadout changes in this packet must choose the right strike immediately.
+	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
+		dto.get("equipment_fallback_parts", []) as Array)
 	if dto.has("command") and resolver != null:
 		var action := _movement_aware_action(
 			_paced_travel_action(resolver.action_for_command(actor_command, _in_combat)), target_changed)
@@ -1957,8 +1972,6 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 			play_action(&"ranged_draw")
 		elif current_action in [&"ranged_draw", &"ranged_hold"]:
 			play_action(&"combat_idle" if _in_combat else &"idle")
-	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
-		dto.get("equipment_fallback_parts", []) as Array)
 	if current_action == &"death":
 		_segment_duration = 0.0
 		_movement_coast_remaining = 0.0
@@ -1976,6 +1989,10 @@ func _sync_death_presentation(dto: Dictionary) -> void:
 			_death_animation_seconds = 0.0
 			_death_snapshot_msec = -1
 			_corpse_temporary = false
+			if _corpse_dissolve != null:
+				_corpse_dissolve.reset()
+				_corpse_dissolve = null
+				_corpse_geometry.clear()
 			_set_corpse_transparency(0.0)
 			play_action(&"idle", true)
 		return
@@ -2017,9 +2034,21 @@ func _update_corpse_pose() -> void:
 	if not _death_finished and _death_elapsed >= _death_duration():
 		_hold_death_pose()
 	if _corpse_temporary or _is_creature:
-		var fade := clampf((_death_elapsed - _death_duration() - _corpse_hold_seconds)
+		# Temporary bodies dissolve two seconds after their clip ends. The
+		# server can retain the hidden corpse until its existing cleanup time.
+		var hold_seconds := CREATURE_DISSOLVE_DELAY_SECONDS if _is_creature and _corpse_temporary else _corpse_hold_seconds
+		var fade := clampf((_death_elapsed - _death_duration() - hold_seconds)
 			/ _corpse_fade_seconds, 0.0, 1.0)
-		_set_corpse_transparency(fade)
+		if _is_creature and _corpse_temporary and fade > 0.0:
+			if _corpse_dissolve == null and fade < 1.0:
+				_corpse_dissolve = CREATURE_DISSOLVE.new()
+				_corpse_dissolve.begin(self, _corpse_fade_seconds, actor_id)
+			if _corpse_dissolve != null:
+				_corpse_dissolve.update(fade)
+			# The body is cut into opaque patches instead of fading as a whole.
+			_set_corpse_transparency(1.0 if fade >= 1.0 else 0.0)
+		else:
+			_set_corpse_transparency(fade)
 		if fade >= 1.0: set_process(false)
 
 func _set_corpse_transparency(amount: float) -> void:
@@ -2128,6 +2157,7 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 			int(_equipment_visuals.get(BOOTS_PART, 0))):
 		_tell_cloth_what_is_worn()
 	_refresh_wardrobe_cover()
+	_refresh_melee_animation_mapping()
 	if _weapon_carry != null:
 		_weapon_carry.call("refresh_equipment")
 	if combat_presentation != null:
@@ -2141,6 +2171,14 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 	_apply_render_quality_to_visuals()
 	if is_instance_valid(_native_model):
 		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
+
+func _refresh_melee_animation_mapping() -> void:
+	if resolver == null or not resolver.melee_styles.has("unarmed"):
+		return
+	var style: Dictionary = (resolver.melee_styles["unarmed"]
+		if int(_equipment_visuals.get(0, 0)) <= 0 else _default_melee_clips)
+	for action: Variant in _default_melee_clips:
+		resolver.action_to_clip[action] = style.get(action, _default_melee_clips[action])
 
 ## Whether `visuals` asks for exactly what is already worn. The part loop's own
 ## skip condition, taken over the whole request: the same visual id for every
@@ -3354,6 +3392,8 @@ func end_charge_leap() -> void:
 	_wake()
 
 func play_action(action: StringName, restart := false) -> void:
+	if action == &"death":
+		set_combat_target(false)
 	if _charge_leap != null:
 		if action in [&"walk", &"run", &"idle", &"combat_idle", &"turn"]: return
 		if action in [&"death", &"pain"]: end_charge_leap()
@@ -3398,13 +3438,26 @@ func play_action(action: StringName, restart := false) -> void:
 		blend = 0.045
 	elif action in [&"attack_primary", &"attack_secondary", &"cast_aggressive"]:
 		blend = 0.09
-	if restart:
+	# Preview/cinematic cold starts retain their explicit reset semantics.
+	# New strikes and hit reactions instead keep the pose they blend from.
+	var cold_restart := restart and action not in [&"attack_primary", &"attack_secondary", &"pain"]
+	if cold_restart:
 		animation_player.stop(true)
+	var had_pose := not cold_restart and not animation_player.assigned_animation.is_empty()
+	# Playing the same name resumes its clock. An alias lets a new occurrence
+	# start at zero while blending from the previous occurrence's current pose.
+	# Only this actor owns the alias library; the animation itself stays shared.
+	if restart and not cold_restart and animation_player.assigned_animation == clip:
+		if not animation_player.has_animation_library(&"action_restarts"):
+			animation_player.add_animation_library(&"action_restarts", AnimationLibrary.new())
+		var replays := animation_player.get_animation_library(&"action_restarts")
+		var key := StringName("clip_" + str(animation_player.get_animation(clip).get_instance_id()))
+		if not replays.has_animation(key):
+			replays.add_animation(key, animation_player.get_animation(clip))
+		clip = StringName("action_restarts/" + str(key))
 	animation_player.play(clip, blend)
-	# Stopped, the player has nothing left to fade from, so a restarted clip
-	# snaps in at its first frame; otherwise the fade runs at playback speed.
-	action_crossfade_seconds = 0.0 if restart else blend / maxf(
-		absf(animation_player.speed_scale), 0.01)
+	action_crossfade_seconds = blend / maxf(
+		absf(animation_player.speed_scale), 0.01) if had_pose else 0.0
 	# Retarget the facing correction to this action and ease to it over the same
 	# crossfade the clips blend across, so the body's turn tracks the pose change
 	# rather than snapping ahead of or behind it.
@@ -3582,6 +3635,17 @@ func predict_turn(radians: float) -> void:
 func desired_facing_yaw() -> float:
 	return _target_yaw
 
+## The server has reached casting range and supplied the facing before the
+## channel starts. Finish the turn now so the channel never begins sideways.
+func face_for_spell(yaw: float) -> void:
+	if current_action == &"death": return
+	_predicted_turn_pending = false
+	_travel_yaw_active = false
+	_movement_coast_remaining = 0.0
+	_target_yaw = yaw
+	rotation.y = yaw
+	_wake()
+
 ## Abandons a predicted turn the server has not answered. A route ordered
 ## before the answer arrives supersedes it: the step commands that route
 ## broadcasts state the facing, and holding the prediction over them would keep
@@ -3635,9 +3699,34 @@ func _finish_movement_presentation() -> void:
 			_smoothed_server_interval * 0.75)
 
 func set_selected(value: bool) -> void:
+	_selected = value
+	_sync_selection_marker()
+
+func _sync_selection_marker() -> void:
 	if _selection_ring != null:
-		_selection_ring.visible = value
+		_selection_ring.visible = _selected and not _combat_target and _drawn
 		_level_selection_ring()
+
+func set_target_marker_style(appearance: Dictionary) -> void:
+	var next := TARGET_MARKER_STYLE.normalise(appearance)
+	if next == _target_marker_style:
+		return
+	_target_marker_style = next
+	_resize_selection()
+	_level_selection_ring()
+
+func set_combat_target(value: bool) -> void:
+	_combat_target = value and current_action != &"death"
+	if _combat_target and _combat_target_marker == null:
+		_combat_target_marker = COMBAT_TARGET_MARKER.new()
+		add_child(_combat_target_marker)
+	_sync_combat_target_marker()
+
+func _sync_combat_target_marker() -> void:
+	_sync_selection_marker()
+	if _combat_target_marker != null:
+		_combat_target_marker.call("configure", _combat_target and _drawn,
+			Vector2(footprint) * _metres_per_tile, head_height(), _target_marker_style)
 
 ## The height the ground was sampled at under the tile this actor is heading
 ## for. Main takes the sample after `apply_server_state` has already opened the
@@ -3920,6 +4009,7 @@ func set_drawn(enabled: bool) -> void:
 		# What was showing when it went out of range need not be now: the name
 		# may have faded, or the banner options changed, in the meantime.
 		_refresh_overhead()
+		_sync_combat_target_marker()
 		return
 	# Swept on every call rather than only on the way out. An actor out of range
 	# still takes packets: it can change what it is wearing, or lose the model it

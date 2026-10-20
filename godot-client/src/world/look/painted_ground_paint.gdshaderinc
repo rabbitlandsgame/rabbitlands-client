@@ -38,6 +38,8 @@ uniform float look_yard = 0.0;
 uniform float look_keep = 0.0;
 uniform vec3 look_keep_tint = vec3(1.0);
 uniform float look_keep_chroma = 1.0;
+// Painted ground keeps its chroma trim on the surface, away from actors/UI.
+uniform float look_local_saturation = 1.0;
 // And its texture's grain about the texture's mean, scaled by this.
 uniform float look_keep_grain = 1.0;
 // How much pale ground is spared the verge treatment (0 for the biome blend).
@@ -391,7 +393,7 @@ vec3 look_paint(vec3 albedo, vec3 reference, vec3 vertex_colour, vec2 xz, vec3 w
 	float sunward = clamp(dot(world_normal.xz, look_sun_heading)
 		/ max(length(world_normal.xz), 0.0001), 0.0, 1.0);
 	colour *= mix(look_slope_shade, 1.0, max(level, sunward));
-	return look_from_linear(colour * look_surface_tint);
+	return look_from_linear(look_saturate(colour * look_surface_tint, look_local_saturation));
 }
 
 // What the debug views draw as emission (ALBEDO is black): 1, the class as

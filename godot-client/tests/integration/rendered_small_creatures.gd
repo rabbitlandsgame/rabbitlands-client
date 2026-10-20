@@ -31,6 +31,9 @@ func _run() -> void:
 	camera.cull_mask = 3
 	camera.position = Vector3(0, 6, 12)
 	stage.add_child(camera)
+	var text_overlay := preload("res://src/ui/world_text_overlay.gd").new()
+	root.add_child(text_overlay)
+	text_overlay.configure(root)
 	camera.look_at(Vector3(0, 0.8, 0))
 	camera.current = true
 	var index := 0

@@ -83,7 +83,31 @@ primes its new destination before grounding unless every chunk whose bounds
 cover it is resident. Bounds include overhanging props, so neighbours overlap;
 one resident neighbour covering the tile does not mean its ground is loaded.
 Normal movement remains asynchronous; the synchronous path handles arrival or
-a missed preload before the actor can sample missing terrain. Priming imports
+a missed preload before the actor can sample missing terrain.
+
+The game client no longer takes that synchronous path for an arrival (signing
+in, a map change, a teleport or a respawn: the local character has no node
+yet). `main.gd` `_hold_for_arrival` calls `begin_arrival`, which moves the focus
+and lets the worker import the nearest cells while the client keeps drawing,
+behind the loading curtain (`src/ui/arrival_curtain.gd`: black, the logo, a
+progress bar). The curtain reports `arrival_progress`, the cells within
+`ARRIVAL_FRAME_METRES` (36 m, the default framing) of the arrival. Actors are
+built behind the drawn curtain while the ground loads; the local character
+stays hidden until `arrival_ready`, is then placed, and the curtain lifts once
+it stands grounded. An arrival whose covering cells are already resident is not
+held. A whole (unstreamed) map is built on the frame it loads, so a fresh load
+of one waits until the curtain has been drawn. While the player is dead the
+server names the respawn destination (`ELORIA_MAGIC_STATE` death `destination`);
+`prefetch` keeps that ground loading and resident on this map without moving
+the focus, and `src/world/arrival_prewarm.gd` loads it in a hidden,
+collision-free stream on another map, adopted by the map change. A held arrival
+that has not loaded after 30 s is primed synchronously as before. The server
+keeps the arriving character out of every fight meanwhile (capability
+`arrival_ready_v1`, server `eloria/arrival_grace.py`): creatures do not pick
+it, players cannot attack or curse it and nothing damages it, until
+`_report_arrival` sends `#arrived <map>` once the character is visible,
+grounded and the curtain no longer blocks input, until the player acts, or
+for at most 60 s (the curtain's own limit). Priming imports
 synchronously only the chunks the byte budget admits plus every chunk under
 the arrival; framed chunks beyond the budget follow on the worker. A script
 that quits the SceneTree itself (the rendered tests) therefore usually has a

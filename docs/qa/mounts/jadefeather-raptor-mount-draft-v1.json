@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "revision": "jadefeather-raptor-mount-draft-v1",
+  "base_commit": "1609a9f6",
+  "scope": "Offline draft of rider positioning and both travel gaits; no live mount catalogue or server change",
+  "source": {
+    "path": "godot-client/assets/actors/native/creatures/jadefeather_raptor.glb",
+    "sha256": "4f7f93223afe19c9b24030646e4622f742568390d821f935bbd4dd7f2fef4a1e",
+    "bytes": 1808728,
+    "vertices": 4755,
+    "skin_joints": 78,
+    "meshes": 1,
+    "materials": 1,
+    "morph_targets": 0,
+    "mesh_skin_bind_rest_all_seven_clips": "byte-identical to current source"
+  },
+  "fit": {
+    "effective_scale": 1.3519925,
+    "seat_position_native": [
+      -0.27,
+      1.16,
+      0.24
+    ],
+    "root_presentation_offset_metres": [
+      -0.365,
+      -0.05,
+      0.257
+    ],
+    "normal_rider_lean_degrees": 7,
+    "fast_rider_lean_degrees": 12,
+    "borrowed_pony_saddle_triangles": 638,
+    "rider_bodies": [
+      "luminous_male",
+      "luminous_female"
+    ]
+  },
+  "motion": {
+    "normal_clip": "Walk",
+    "fast_clip": "Jog",
+    "normal_travel_metres_per_second": 10,
+    "fast_travel_metres_per_second": 20,
+    "normal_running_multiplier": 2,
+    "fast_running_multiplier": 4,
+    "maximum_cycles_per_second": {
+      "trot": 2.0,
+      "gallop": 4.0
+    },
+    "measured_stride_metres_per_second": {
+      "Walk": 1.7465937048278084,
+      "Jog": 2.951732358911596
+    },
+    "stride_measurement": "Median positive world-Z velocity of fixed anatomical claw surfaces at mount scale; source sampled at 64 phases per cycle, planted patch minimum <.071 metres before the mounted floor correction.",
+    "ground_offset": "Mounted-only -0.05m correction of the existing native visual floor offset; no NPC source changes"
+  },
+  "validation": {
+    "checks": 3670,
+    "failures": 0,
+    "max_all_paw_ground_clearance_metres": 0.0276484806090593,
+    "max_cape_link_error_metres": 0.000445306301116943,
+    "max_rider_contact_error_metres": 0.00019284053996671,
+    "min_paw_sole_height_metres": -0.00144846760667861
+  },
+  "rendered_validation": {
+    "pose": {
+      "fps": 30,
+      "frames": 135,
+      "max_cape_link_error_metres": 0.000584453344345093,
+      "max_contact_error_metres": 0.000212698607356288
+    },
+    "travel": {
+      "fps": 30,
+      "frames": 135,
+      "max_cape_link_error_metres": 0.000584453344345093,
+      "max_contact_error_metres": 0.000212698607356288
+    }
+  },
+  "review": {
+    "frames": 135,
+    "fps": 30,
+    "duration_seconds": 4.5,
+    "views": [
+      "rest side",
+      "rest front",
+      "normal side",
+      "normal game camera",
+      "fast side",
+      "fast game camera"
+    ],
+    "travel_preview": "Actual rider and following camera translate at 10/20 m/s past five-metre road markers",
+    "native_model_audit": "front/side/rear/top and Walk/Jog",
+    "visual_approval": "pending"
+  },
+  "limitations": [
+    "Draft is offline and not yet selectable on the normal server.",
+    "Native source walk/run are reused; cadence is capped for readable movement, rather than certifying zero sliding at the full fantasy travel speeds."
+  ]
+}

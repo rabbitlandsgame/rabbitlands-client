@@ -24,6 +24,17 @@ func run() -> void:
 		check(errors.is_empty(), "%s: %s" % [option.model, errors])
 		check(actor.combat_presentation != null, "player rig has combat presentation")
 		actor.set_physics_process(false)
+		actor.apply_equipment_visuals({})
+		for action: StringName in [&"attack_primary", &"attack_secondary"]:
+			actor.play_action(action, true)
+			var clip := actor.resolver.clip_for_action(action)
+			check(clip in [&"Fighting_Left_Jab", &"Fighting_Right_Jab"],
+				"unarmed rig selects a reference punch: " + str(option.model))
+			actor.animation_player.advance(0.2)
+			check(actor.spell_release_origin().is_finite(),
+				"reference punch has a finite hand pose: " + str(option.model))
+			actor.animation_player.advance(actor.animation_player.get_animation(clip).length + 0.1)
+			check(actor.current_action == &"idle", "reference punch recovers: " + str(option.model))
 		actor.apply_equipment_visuals({0: 164})
 		actor.combat_presentation.update_pose()
 		var idle_bow := actor.combat_presentation.bow

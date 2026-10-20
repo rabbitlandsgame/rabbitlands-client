@@ -1,4 +1,4 @@
-"""Run the real game and server with disposable local Moor Pony characters.
+"""Run the real game and server with a disposable local mount-test character.
 
 The test server is loopback-only, uses current authored terrain, and shuts down
 when the game exits. No installed account, production database or remote server
@@ -82,20 +82,21 @@ async def probe(live):
     peers = [await login(port, *user) for user in users]
     (reader, writer, actor_id), (watch, watch_writer, _), (legacy, _, _) = peers
     try:
-        capabilities = "mounts_v1,continent_v2_maps_v1"
+        capabilities = ("mounts_v1,mount_selection_v1,crystalback_mount_v1,"
+                        "rabbit_mount_v1,raptor_mount_v1,continent_v2_maps_v1")
         await chat(writer, "#clientcaps " + capabilities)
         await chat(watch_writer, "#clientcaps " + capabilities)
         ready = await state(reader, actor_id, "on_foot")
         assert ready["can_summon"], ready
-        await chat(writer, "#mount")
+        await chat(writer, "#mount ride " + live.mount_id)
         await state(reader, actor_id, "summoning")
         mounted = await state(reader, actor_id, "mounted")
-        assert mounted["mount_id"] == "moor_pony"
+        assert mounted["mount_id"] == live.mount_id
         await state(watch, actor_id, "mounted")
         assert all(command != 198 for command, _ in await frames(legacy)), "legacy client received mount extension"
         await chat(writer, "#gallop on")
         burst = await state(reader, actor_id, "mounted")
-        assert burst["gait"] == "burst" and burst["step_us"] == 133333, burst
+        assert burst["gait"] == "burst" and burst["step_us"] == 100000, burst
         # Sitting runs through ordinary dispatch and removes the mount first.
         writer.write(packet(7, bytes([1])))
         await writer.drain()
@@ -121,12 +122,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server-root", type=Path, default=ROOT.parent / "rabbitlands-server")
     parser.add_argument("--godot", type=Path)
+    parser.add_argument("--mount-id", default="moor_pony", choices=["moor_pony",
+        "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"],
+        help="Start with this mount selected; non-pony mounts use normal Landfall settings")
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--landfall", action="store_true",
                         help="Test normal Landfall settings without --mount-prototype")
     args = parser.parse_args()
+    if args.mount_id != "moor_pony":
+        args.landfall = True
     server = args.server_root.resolve()
     work = ROOT / ".local/qa/moor-pony-game"
     work.mkdir(parents=True, exist_ok=True)
@@ -144,6 +150,7 @@ def main():
         settings = re.sub(r"(?m)^home_map\s*=.*$", "home_map = four_gates", settings)
     with LocalServer(server, prefix="moor-pony-game-", overrides={"--settings": settings},
                      extra_arguments=[] if args.landfall else ["--mount-prototype"]) as live:
+        live.mount_id = args.mount_id
         live.mount_map = "landfall" if args.landfall else "four_gates"
         live.mount_spawn = test_spawn(server, terrain, live.mount_map)
         if args.probe:
@@ -154,7 +161,7 @@ def main():
         user, password = asyncio.run(prepare_player(live))
         session = Path(live._workdir.name) / "session.json"
         session.write_text(json.dumps({"host": "127.0.0.1", "port": live.port,
-            "username": user, "password": password}))
+            "username": user, "password": password, "mount_id": args.mount_id}))
         try:
             game_log = work / (Path(live._workdir.name).name + "-game.log")
             print(f"Local Moor Pony test game log: {game_log}", flush=True)

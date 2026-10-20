@@ -18,6 +18,7 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	LookProfile.set_player_mode(LookProfile.Mode.FULL_PAINTED)
 	var previous := OS.get_environment(LookProfile.ENABLE_VARIABLE)
 	var manifest := WorldManifest.new()
 	manifest.data = {"continentGeography": {"geometryMode": "continent-chunks-v1"},

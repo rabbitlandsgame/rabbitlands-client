@@ -5,6 +5,8 @@ signal selection_changed
 signal cast_submitted(spell_id: int, power: int)
 var catalog: SpellCatalog
 var pending: Dictionary = {}
+var active_target_cast: Dictionary = {}
+var _target_cast_phase := "approach"
 var _coordinate_token: Dictionary = {}
 var popup: AcceptDialog
 var choices: OptionButton
@@ -74,14 +76,19 @@ func _ready() -> void:
 	Network.connection_state_changed.connect(func(state: String) -> void:
 		if state == "disconnected": cancel(false))
 	Network.coordinate_intents_invalidated.connect(func() -> void: cancel(false))
+	Network.movement_requested.connect(func(_tile: Vector2i) -> void: active_target_cast.clear())
 
 func _process(_delta: float) -> void:
 	var aiming := not pending.is_empty() and not AppState.pending_spell_target.is_empty()
-	_hint.visible = aiming or Time.get_ticks_msec() < _feedback_until
+	_hint.visible = aiming or not active_target_cast.is_empty() or Time.get_ticks_msec() < _feedback_until
 	if not _hint.visible: return
 	_hint.text = ("%s · P%d\n%s · Esc / right click cancels" % [
 		catalog.spell(int(pending.id)).get("name", "Spell"), int(pending.power),
 		"Click a recipient" if AppState.pending_spell_target == "actor" else "Click a location"]) if aiming else _feedback
+	if not aiming and not active_target_cast.is_empty():
+		_hint.text = "%s · P%d\n%s · Esc / right click cancels" % [
+			catalog.spell(int(active_target_cast.id)).get("name", "Spell"), int(active_target_cast.power),
+			"Channeling" if _target_cast_phase == "channel" else "Moving into spell range"]
 	var pointer := get_global_mouse_position() + Vector2(18, 22)
 	_hint.global_position = pointer.min(get_viewport_rect().size - _hint.size - Vector2(8, 8)).max(Vector2(8, 8))
 
@@ -102,8 +109,9 @@ func begin(spell_id: int, power: int, selected_target_id := -1) -> void:
 		# kept for callers, not used).
 		status_changed.emit("Select %s for %s. Escape cancels." % [
 			"an actor" if scope == "target" else "a location", spell.name])
-		AppState.actor_animation_requested.emit({"actor_id": AppState.local_actor_id,
-			"action": &"cast_channel_enter", "power": power})
+		if scope != "target":
+			AppState.actor_animation_requested.emit({"actor_id": AppState.local_actor_id,
+				"action": &"cast_channel_enter", "power": power})
 	else:
 		_send(pending)
 		pending.clear()
@@ -127,13 +135,18 @@ func _finish(selection: Dictionary) -> void:
 	AppState.pending_spell_target = ""
 	_feedback_until = 0
 	selection_changed.emit()
-	_send(request)
+	if request.has("target_id") and not request_sender.is_valid():
+		active_target_cast = request.duplicate()
+		_target_cast_phase = "approach"
+	if _send(request) != OK:
+		active_target_cast.clear()
 
 func cancel(notify_server := true) -> void:
-	if notify_server and (not pending.is_empty() or not Network.magic_pending.is_empty()):
+	if notify_server and (not pending.is_empty() or not Network.magic_pending.is_empty() or not active_target_cast.is_empty()):
 		_send({"op":"cancel"})
 		AppState.actor_animation_requested.emit({"actor_id": AppState.local_actor_id, "action": &"cast_exit"})
 	pending.clear()
+	active_target_cast.clear()
 	Network.magic_pending.clear()
 	Network.magic_scope = ""
 	AppState.pending_spell_target = ""
@@ -142,12 +155,24 @@ func cancel(notify_server := true) -> void:
 	selection_changed.emit()
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel") and (not pending.is_empty() or not Network.magic_pending.is_empty()):
+	if event.is_action_pressed("ui_cancel") and (not pending.is_empty() or not Network.magic_pending.is_empty() or not active_target_cast.is_empty()):
 		cancel()
 		get_viewport().set_input_as_handled()
 
 func _receive(data: Dictionary) -> void:
+	if data.get("kind") == "target_cast":
+		if int(data.get("actor_id", -1)) != AppState.local_actor_id or active_target_cast.is_empty(): return
+		if int(data.get("id", -1)) != int(active_target_cast.id): return
+		_target_cast_phase = str(data.get("phase", ""))
+		match str(data.get("phase", "")):
+			"approach": status_changed.emit("Moving into spell range. Escape cancels.")
+			"channel": status_changed.emit("Channeling %s. Escape cancels." % catalog.spell(int(data.id)).name)
+			"finished", "cancelled":
+				active_target_cast.clear()
+				_feedback_until = 0
+		return
 	if data.get("kind") == "error":
+		active_target_cast.clear()
 		status_changed.emit(str(data.get("message", "Spell rejected")))
 		return
 	if pending.is_empty() or int(data.get("id", -1)) != int(pending.id): return

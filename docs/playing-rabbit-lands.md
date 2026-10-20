@@ -1,5 +1,22 @@
 # Playing Rabbit Lands
 
+## Seasons and the clock
+
+Each season lasts one real calendar month. Winter, spring, summer and autumn repeat every four months, giving three full seasonal years in one real year. Seasons change at midnight UTC on the first of the month, shared by everyone.
+
+| Season | Real months |
+| --- | --- |
+| Winter | January, May, September |
+| Spring | February, June, October |
+| Summer | March, July, November |
+| Autumn | April, August, December |
+
+Spring favours showers, summer favours clearer skies and warmer sunlight, autumn brings more fog and rain with amber light, and winter brings cooler light and more snow in temperate and mountain climates. Local climates still matter: deserts, tropical regions and volcanic lands keep their characteristic weather.
+
+Winter coats exposed ground and tree crowns with snow. Spring brings fresh greens, summer deeper greens, and autumn turns deciduous foliage gold, orange and rust red. Evergreens retain their green foliage. Tropical, desert and volcanic regions keep their local character. Snow cover follows the season and clears when winter ends.
+
+Use **#day** or click the clock to see the current season and when the next one begins, alongside the existing day or date information. The six-hour day/night cycle continues independently. Seasonal scenery works in all three appearance modes.
+
 ## Companions
 
 Open Summoning and choose **Behaviour** to direct your summons at any level, including level zero. The six choices control which targets a companion may attack. New companions assist against your opponent; a saved passive choice stays passive. Directions do not bypass a recipe's skill, Animal Nexus, ingredients, ether or food requirements.
@@ -32,6 +49,12 @@ Gauntlet death keeps your carried items and returns you at full health at a safe
 
 ## Riding and the interface
 
-A mounted trot travels at 6.25 metres per second, compared with the ordinary five-metre-per-second run. Gallop travels at ten metres per second for eight seconds, then takes eight seconds to recover. The mount banner can stay pinned above the scene. Riding continues across supported outdoor maps and ends when entering a restricted map.
+The Moor Pony, Golden Plains Horse, Crystalback Tortoise, Giant Meadow Rabbit and Jadefeather Raptor all travel at 1.5 times ordinary running speed. Press Space to gallop at twice running speed: with the normal five-metre-per-second run, those mounted paces are 7.5 and 10 metres per second. Fast mode lasts eight seconds of movement and takes eight seconds to recover. The on-foot walk/run switch does not change mounted speed. Press R to mount or dismount, and use the Mounts window to switch mounts.
+
+The horse-head icon beside Sit on the bottom HUD opens the Mounts window. Its compact grid shows the current collection together, and the search field filters mounts by name. Select a card, then Ride to call or switch mounts.
+
+Right-click your character or your name and status bars to open Banner display. Character and Mount tabs keep the options together, and changes apply immediately and are saved. Right-clicking the mount status line opens the Mount tab directly. Escape or a click outside closes the panel. The full Banners page in Settings remains available.
+
+Trot / gallop status and available gallop time appear directly below your character's resource bars while mounted. Right-click that status line to adjust its display. You can ride in outdoor areas and gauntlets, including gated and trail routes. Riding continues across supported maps and ends when entering a restricted map. Gauntlet gates and encounter requirements still apply while mounted.
 
 The quick spell bar supports a horizontal layout and twelve visible slots. Its orientation and position are saved with your interface layout. Spell and technique wheels leave the character visible in the centre and use translucent backgrounds.

@@ -22,6 +22,10 @@ const RETIRE_BUDGET_USEC := 2000
 ## so a nearest-first prefix kept one cell and left its framed neighbours -
 ## sometimes a second cell under the focus itself - as bare flat planes.
 const FRAMED_RADIUS := 64.0
+## An arrival behind the loading curtain waits for every cell this close to the
+## arrival: the ground the default rig frames (about 35 m, see FRAMED_RADIUS),
+## so the first view after the curtain lifts has no missing terrain.
+const ARRIVAL_FRAME_METRES := 36.0
 const VramTextures := preload("res://src/world/vram_textures.gd")
 ## Where configure() keeps a chunk's shared image figures as published.
 const PUBLISHED_SHARED_KEY := "publishedSharedResourceResidentBytes"
@@ -80,6 +84,11 @@ var _image_directories: Dictionary = {}
 ## A short cinematic holds the union of its views until the camera hands back.
 ## The same worker imports them during character creation; no blocking prime.
 var _preload_views: Array[Dictionary] = []
+## Cells kept resident and imported for a place the player may go next (where a
+## respawn will land) without moving the focus: the worker loads them after the
+## ground around the focus, and neither the retain distance nor the selection
+## retires them until clear_prefetch().
+var _prefetch: Array[Dictionary] = []
 ## Import workers whose owner left the tree or re-primed before they finished.
 ## A worker may be waiting on rendering-server commands that only the main
 ## thread services, so joining it synchronously deadlocks the client; the
@@ -391,6 +400,73 @@ func arrival_resident(position: Vector3) -> bool:
 				return false
 	return covering > 0
 
+## The asynchronous arrival: the focus moves to `position` and the worker
+## imports the nearest cells first, one at a time, while the client keeps
+## drawing (a loading curtain covers the wait; see arrival_progress). Unlike
+## prime() and ensure_position() nothing is imported on the calling frame. A
+## worker still importing for the old focus is orphaned unless its cell frames
+## the new arrival, so the arrival's first cell starts at once.
+func begin_arrival(position: Vector3) -> void:
+	if _thread != null and bounds_distance(position, _pending.bounds) > FRAMED_RADIUS:
+		_release_worker(position, true)
+	focus = position
+	has_focus = true
+	if not initial_focus.is_finite():
+		initial_focus = position
+	_next_update = 0
+	_record("arrival_async", "")
+
+## (resident, total) of the cells within `radius` of an arrival: the arrival's
+## loading progress. A cell that failed to import counts as done, so a missing
+## package cannot hold the curtain down; the client grounds on what loaded.
+func arrival_progress(position: Vector3, radius := ARRIVAL_FRAME_METRES) -> Vector2i:
+	var done := 0
+	var total := 0
+	for entry: Dictionary in entries:
+		if bounds_distance(position, entry.bounds) > radius:
+			continue
+		total += 1
+		var identity := str(entry.id)
+		if cells.has(identity) or _retry_after.has(identity):
+			done += 1
+	return Vector2i(done, total)
+
+func arrival_ready(position: Vector3, radius := ARRIVAL_FRAME_METRES) -> bool:
+	var progress := arrival_progress(position, radius)
+	return progress.x >= progress.y
+
+## Keeps the cells within `radius` of `points` resident, importing them after
+## the focus's own ground, without moving the focus (preload_views moves it).
+func prefetch(points: PackedVector3Array, radius := ARRIVAL_FRAME_METRES) -> void:
+	_prefetch.clear()
+	for entry: Dictionary in entries:
+		for point: Vector3 in points:
+			var distance := bounds_distance(point, entry.bounds)
+			if distance <= radius:
+				var candidate := entry.duplicate()
+				candidate.distance = distance
+				_prefetch.append(candidate)
+				break
+	_prefetch.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.id) < str(b.id) if is_equal_approx(a.distance, b.distance) else a.distance < b.distance)
+	_next_update = 0
+
+func clear_prefetch() -> void:
+	_prefetch.clear()
+	_next_update = 0
+
+func prefetch_ready() -> bool:
+	for entry: Dictionary in _prefetch:
+		if not cells.has(str(entry.id)) and not _retry_after.has(str(entry.id)):
+			return false
+	return true
+
+func _prefetched(identity: String) -> bool:
+	for entry: Dictionary in _prefetch:
+		if str(entry.id) == identity:
+			return true
+	return false
+
 func ensure_position(position: Vector3) -> bool:
 	if not has_focus:
 		prime(position)
@@ -427,13 +503,19 @@ func update_focus(position: Vector3) -> void:
 	var wanted: Dictionary = {}
 	for entry: Dictionary in selected:
 		wanted[str(entry.id)] = true
+	for entry: Dictionary in _prefetch:
+		wanted[str(entry.id)] = true
 	for identity: String in cells.keys():
 		if not wanted.has(identity):
 			_retire_cell(identity)
 	if _thread != null or not _retiring.is_empty():
 		return
-	for entry: Dictionary in selected:
-		if cells.has(str(entry.id)) or (_preload_views.is_empty() and float(entry.distance) > preload_distance):
+	# The focus's own ground first, then whatever a prefetch is holding ready.
+	var queue: Array[Dictionary] = selected.duplicate()
+	queue.append_array(_prefetch)
+	for entry: Dictionary in queue:
+		if cells.has(str(entry.id)) or (_preload_views.is_empty() and not _prefetched(str(entry.id))
+				and float(entry.distance) > preload_distance):
 			continue
 		if Time.get_ticks_msec() < int(_retry_after.get(str(entry.id), 0)):
 			continue
@@ -469,7 +551,7 @@ func poll_pending() -> void:
 	_thread = null
 	var entry := _pending
 	_pending = {}
-	if _paused or bounds_distance(focus, entry.bounds) > retain_distance:
+	if _paused or (bounds_distance(focus, entry.bounds) > retain_distance and not _prefetched(str(entry.id))):
 		_discard_builder(entry, builder)
 	else:
 		_install(entry, builder)

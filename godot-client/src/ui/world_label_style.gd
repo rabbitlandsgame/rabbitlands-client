@@ -3,6 +3,8 @@ extends RefCounted
 ## Small Label3D glyphs otherwise get enlarged by the viewport stretch and look
 ## heavier than the player's canvas labels, despite using the same typeface.
 const RASTER_SCALE := 4
+## Layer 20 is drawn only by WorldTextOverlay, after the world effects.
+const RENDER_LAYER := 1 << 19
 
 static func apply(label: Label3D, font_size: int, pixel_size: float,
 		outline_size: int) -> void:
@@ -14,6 +16,7 @@ static func apply(label: Label3D, font_size: int, pixel_size: float,
 	label.width *= RASTER_SCALE
 	label.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 	label.shaded = false
+	label.layers = RENDER_LAYER
 	# The default outline priority (-1) puts it behind alpha-blended scenery,
 	# even with depth testing disabled. Draw both passes after world effects,
 	# keeping the outline behind the letters.

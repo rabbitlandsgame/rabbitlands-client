@@ -2,6 +2,8 @@ extends Control
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
+const SeasonSky = preload("res://src/world/season_sky.gd")
+const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
 const LanternGuideScript = preload("res://src/ui/lantern_guide.gd")
 const WindowStackScript = preload("res://src/ui/window_stack.gd")
 const LanternSceneScript = preload("res://src/world/lantern_scene.gd")
@@ -21,6 +23,13 @@ const CreationClassIcons = preload("res://src/ui/creation_class_icons.gd")
 const WardrobeShirtFitScript = preload("res://src/actors/wardrobe_shirt_fit.gd")
 const NewCharacterIntroScript = preload("res://src/camera/new_character_intro.gd")
 var character_intro := NewCharacterIntroScript.new()
+const ArrivalCurtainScript = preload("res://src/ui/arrival_curtain.gd")
+const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
+## The loading screen from signing in, or a far arrival, until the character
+## stands on loaded ground (_update_arrival).
+var arrival_curtain := ArrivalCurtainScript.new()
+## The respawn destination's ground on another map, loaded while dead.
+var respawn_prewarm := ArrivalPrewarmScript.new()
 var quest_trail := preload("res://src/world/quest_trail_3d.gd").new()
 
 @onready var login_panel: Control = %LoginPanel
@@ -64,6 +73,7 @@ var _dev_plain_tcp := false
 const InteriorCutawayScript := preload("res://src/world/interior_cutaway.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
+const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
 const InvasionAssistantScript := preload("res://src/ui/invasion_assistant.gd")
 const ExtensionWindowsScript := preload("res://src/ui/extension_windows.gd")
 const MapViewScript := preload("res://src/world/map_view.gd")
@@ -79,8 +89,10 @@ const SummoningWindowScript := preload("res://src/ui/summoning_window.gd")
 const EmotesWindowScript := preload("res://src/ui/emotes_window.gd")
 const RangingWindowScript := preload("res://src/ui/ranging_window.gd")
 const MountsWindowScript := preload("res://src/ui/mounts_window.gd")
+const BannerDisplayMenuScript := preload("res://src/ui/banner_display_menu.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
+const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
 const ChatHudScript := preload("res://src/ui/chat_hud.gd")
 const ChatMessages := preload("res://src/ui/chat_messages.gd")
 const ChatLogTabsScript := preload("res://src/ui/chat_log_tabs.gd")
@@ -385,6 +397,7 @@ var reference_window: Control
 var _shadows_enabled := true
 var _effects_enabled := true
 var _nameplates_enabled := true
+var _target_marker_style := TargetMarkerStyle.defaults()
 ## Trailer capture (`_configure_trailer_capture`): off unless the client was
 ## launched with TRAILER_CAPTURE_ARGUMENT. 0 draws the HUD, 1 the world alone,
 ## 2 the world without nameplates. Never saved.
@@ -729,6 +742,21 @@ var _local_placement_logged := false
 ## Set when `_sync_world` ran out of spawn budget with actors still to
 ## build; the next frame picks them up.
 var _spawn_backlog := false
+## The local character's arrival while its ground streams in behind the
+## curtain: {position, started, ready}. Empty when none is pending.
+var _arrival: Dictionary = {}
+## A fresh map load waiting for the curtain to be on screen, so a whole map's
+## synchronous build happens behind it instead of freezing the last view.
+var _deferred_map_load := false
+## Frames the curtain stays up after the character is grounded.
+var _arrival_settle_frames := 0
+## The local character was spawned and the server has not yet been told it
+## stands on loaded ground (`_report_arrival`).
+var _arrival_unreported := false
+## An arrival that has not loaded by then is grounded synchronously, and a
+## curtain still up is lowered: neither may strand a player.
+const ARRIVAL_TIMEOUT_MSEC := 30000
+const ARRIVAL_CURTAIN_LIMIT_MSEC := 60000
 ## The region's picture under the map cameras, or null on a map without one.
 var _map_picture: MeshInstance3D
 ## The ground the current region's picture lies on: what the other regions'
@@ -801,14 +829,13 @@ var _pending_floating_feedback: Array[Dictionary] = []
 var _floating_feedback_flush_queued := false
 var _active_floating_labels: Array[Label] = []
 var _last_skill_experience_msec := -100000
-## Config key -> CheckBox on the right-click banner menu, filled in _ready().
+## Persisted banner key -> the checkbox shared with the main settings window.
 var _banner_option_boxes: Dictionary = {}
 var _banner_background_style: StyleBoxFlat
 const MountControls := preload("res://src/mounts/mount_controls.gd")
+var mount_status := MountControls.new()
 var _mount_banner_options: Dictionary = MountControls.default_options()
-var _actor_hud_menu: PopupMenu
-var _character_banner_menu: PopupMenu
-var _mount_banner_menu: PopupMenu
+var _actor_hud_menu: Variant
 
 const FLOATING_FEEDBACK_ROW_HEIGHT := 21.0
 const FLOATING_FEEDBACK_MAX_ROWS := 4
@@ -1082,6 +1109,7 @@ const EXPERIENCE_SKILLS: Array[String] = [
 func _ready() -> void:
 	world_root.add_child(quest_trail)
 	add_child(character_intro)
+	add_child(arrival_curtain)
 	character_intro.conversation_requested.connect(_request_arrival_conversation)
 	character_intro.conversation_ended.connect(_end_arrival_conversation)
 	Diagnostics.record("main_scene_initializing")
@@ -1093,7 +1121,8 @@ func _ready() -> void:
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
-	game_view.add_child(MountControls.new())
+	actor_resource_overlay.get_node("Rows").add_child(mount_status)
+	mount_status.display_changed.connect(_layout_actor_resource_overlay)
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
 	actor_type_models = model_registry.get("actorTypes", {})
@@ -1163,7 +1192,8 @@ func _ready() -> void:
 	game_view.add_child(ranging_window)
 	mounts_window = MountsWindowScript.new()
 	game_view.add_child(mounts_window)
-	game_view.get_node("MountControls").choose_mount_requested.connect(func() -> void: mounts_window.call("toggle"))
+	%MountsButton.pressed.connect(func() -> void: mounts_window.call("toggle"))
+	(mounts_window.get("panel") as Control).visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
 	guild_window = GuildWindowScript.new()
 	game_view.add_child(guild_window)
 	guild_window.call("configure", Network.send_chat)
@@ -1325,6 +1355,10 @@ func _ready() -> void:
 	region_preview.mouse_exited.connect(_on_region_preview_mouse_exited)
 	_bind_shared_world()
 	viewport_container.texture = main_viewport.get_texture()
+	var text_overlay := preload("res://src/ui/world_text_overlay.gd").new()
+	game_view.add_child(text_overlay)
+	game_view.move_child(text_overlay, viewport_container.get_index() + 1)
+	text_overlay.configure(main_viewport)
 	minimap.texture = map_viewport.get_texture()
 	map_image.texture = full_map_viewport.get_texture()
 	full_map.hide()
@@ -1500,7 +1534,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"local_actor_presented": is_instance_valid(local_actor),
 		"camera_present": active_camera != null,
 		"fallback_ground_visible": fallback_ground.is_visible_in_tree(),
-		"painted_look": LookProfile.enabled(), "quality": LookProfile.quality_name(LookProfile.quality()),
+		"appearance": LookProfile.mode_name(LookProfile.mode()), "painted_look": LookProfile.enabled(), "quality": LookProfile.quality_name(LookProfile.quality()),
 		"vram_mode": VramTextures.mode_name(), "vram_formats": VramTextures.format_names(VramTextures.usable_formats()),
 		"fps": Engine.get_frames_per_second(), "frames_drawn": Engine.get_frames_drawn(),
 		"visible_objects": main_viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE, Viewport.RENDER_INFO_OBJECTS_IN_FRAME),
@@ -1551,6 +1585,8 @@ func _process(delta: float) -> void:
 			and not weather_map.has("insidesOf")
 		audio_director.set_weather(weather_layer.look() \
 			if AppState.authenticated and outdoors else {})
+	_update_arrival()
+	_report_arrival()
 	if _spawn_backlog:
 		_spawn_backlog = false
 		_queue_world_sync()
@@ -1564,7 +1600,7 @@ func _process(delta: float) -> void:
 		if is_instance_valid(trail_actor):
 			quest_trail.update_trail(delta, (trail_actor as Node3D).global_position)
 		_update_map_walk_target()
-		if AppState.actors.has(AppState.local_actor_id) and not character_intro.blocks_input():
+		if AppState.actors.has(AppState.local_actor_id) and not _world_input_blocked():
 			exterior_stream.update_position(camera_rig.focus)
 		# Look pass: a chunk or neighbour finished under the switch's old
 		# answer follows the new one as it arrives, before anything fades it.
@@ -1668,14 +1704,20 @@ func _text_entry_active() -> bool:
 	var focus: Control = get_viewport().gui_get_focus_owner()
 	return focus is LineEdit or focus is TextEdit
 
+## The new-character intro and the loading curtain both own the screen while
+## they are up: the world takes no input and the exterior preloads wait.
+func _world_input_blocked() -> bool:
+	return character_intro.blocks_input() or arrival_curtain.blocks_input()
+
 func _update_keyboard_movement() -> void:
-	if character_intro.blocks_input():
+	if _world_input_blocked():
 		_stop_keyboard_movement()
 		return
 	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
 			or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
 			or storage_panel.visible or full_map.visible \
 			or console_panel.visible or settings_panel.visible or item_lists_panel.visible \
+			or (_actor_hud_menu != null and _actor_hud_menu.visible) \
 			or Input.is_key_pressed(KEY_ALT) or Input.is_key_pressed(KEY_CTRL):
 		_stop_keyboard_movement()
 		return
@@ -2230,6 +2272,11 @@ func _on_login_pressed() -> void:
 	if error != OK:
 		status_label.text = "Login send failed: " + error_string(error)
 		login_button.disabled = false
+		return
+	# Up before LOG_IN_OK: it and CHANGE_MAP arrive in one burst, and the world
+	# is built behind the curtain, never in front of the player.
+	arrival_curtain.begin("Signing in…")
+	arrival_curtain.set_progress(0.05)
 
 func _on_login_submitted(_text: String) -> void:
 	if AppState.connection_state == "disconnected":
@@ -2575,7 +2622,7 @@ func _configure_unified_settings() -> void:
 	var banners_page: VBoxContainer = settings_window.page_body("Banners")
 	(%DisableMenu as CheckBox).text = "Disable character right-click menu"
 	var mount_heading := Label.new()
-	mount_heading.text = "Mount banner"
+	mount_heading.text = "Mount status below character bars"
 	banners_page.add_child(mount_heading)
 	for key: String in MountControls.OPTION_LABELS:
 		settings_window._add_toggle(banners_page,
@@ -2674,6 +2721,8 @@ func _refresh_unified_settings() -> void:
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
 	}
 	values.merge(_hud_element_options)
+	for key: String in _target_marker_style:
+		values["target_" + key] = _target_marker_style[key]
 	for key: String in _mount_banner_options:
 		values["mount_banner_" + key] = _mount_banner_options[key]
 	for option: String in chat_hud.options:
@@ -2703,7 +2752,7 @@ func _refresh_unified_settings() -> void:
 	equipment_side.select(1 if _equipment_side == "right" else 0)
 	settings_window.restore_fps_limit(_fps_limit)
 	settings_window.restore_name_distance(_name_distance_metres)
-	settings_window.restore_look(LookProfile.player_look(), LookProfile.look_forced())
+	settings_window.restore_look(LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.restore_quality(LookProfile.player_quality(), LookProfile.quality_forced())
 	casting_bar.refresh()
 	_refresh_hud_layout_menu()
@@ -3527,11 +3576,15 @@ func _on_login_succeeded() -> void:
 	_request_map_redraw()
 	_sync_map_viewport_activity()
 	map_label.text = "Entering world…"
+	if arrival_curtain.is_showing():
+		arrival_curtain.set_text("Entering Rabbit Lands…")
+		arrival_curtain.set_progress(0.1)
 	_load_server_map()
 	_sync_world()
 	_record_client_snapshot_after_frames()
 
 func _on_login_failed(message: String) -> void:
+	_end_arrival()
 	if character_intro.blocks_input():
 		character_intro.cancel()
 		creation_panel.hide()
@@ -3543,6 +3596,8 @@ func _on_login_failed(message: String) -> void:
 func _on_connection_state_changed(value: String) -> void:
 	if value == "disconnected":
 		character_intro.cancel()
+		_end_arrival()
+		respawn_prewarm.discard()
 		_pickpoint_draft.clear()
 		_pickpoint_submitting = false
 	status_label.text = ("Securing the connection…" if value == "securing"
@@ -3602,6 +3657,7 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	SeasonSurfaces.set_season({})
 	quest_trail.clear()
 	character_intro.cancel()
 	_clear_map_walk_target()
@@ -3680,6 +3736,13 @@ func _clear_world_presentation() -> void:
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	if arrival_curtain.blocks_input():
+		return
+	if _actor_hud_menu != null and _actor_hud_menu.visible:
+		if _actor_hud_menu.handle_event(event):
+			get_viewport().set_input_as_handled()
+		# Checkbox/tab keys belong to the popover; gameplay hotkeys wait.
+		return
 	if character_intro.blocks_input():
 		if character_intro.allows_dialogue():
 			if event is InputEventKey and event.is_pressed() \
@@ -3732,7 +3795,7 @@ func _can_open_spell_wheel() -> bool:
 	return _ring_allowed() and not (technique_ring != null and technique_ring.visible)
 
 func _ring_allowed() -> bool:
-	return game_view.visible and not character_intro.blocks_input() and not _text_entry_active() \
+	return game_view.visible and not _world_input_blocked() and not _text_entry_active() \
 		and not popup_panel.visible and not purchase_confirm.visible \
 		and not dialogue_panel.visible and not trade_panel.visible \
 		and not storage_panel.visible and not full_map.visible \
@@ -3871,7 +3934,9 @@ func _recenter_viewport_on_player() -> void:
 	_update_local_actor_follow()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if character_intro.blocks_input():
+	if _actor_hud_menu != null and _actor_hud_menu.visible:
+		return
+	if _world_input_blocked():
 		return
 	if not game_view.visible:
 		return
@@ -3961,6 +4026,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if popup_panel.visible:
 			# The popup is modal: it takes the cancel before anything under it.
 			_on_popup_dismiss_pressed()
+		elif not magic_selection.pending.is_empty() or not magic_selection.active_target_cast.is_empty():
+			magic_selection.cancel()
 		elif bool(AppState.autocast.get("active", false)):
 			# Escape stops repeat casting before it closes anything else.
 			Network.magic_request({"op": "cancel"})
@@ -4026,7 +4093,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 func _on_world_gui_input(event: InputEvent) -> void:
-	if character_intro.blocks_input():
+	if _world_input_blocked():
 		viewport_container.accept_event()
 		return
 	if event is InputEventMouseButton and not event.pressed \
@@ -4047,7 +4114,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 		var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 		if mouse_button.button_index == MOUSE_BUTTON_RIGHT:
 			if mouse_button.pressed:
-				if not magic_selection.pending.is_empty():
+				if not magic_selection.pending.is_empty() or not magic_selection.active_target_cast.is_empty():
 					magic_selection.cancel()
 				elif _has_carry():
 					_cancel_carry()
@@ -4068,12 +4135,12 @@ func _on_world_gui_input(event: InputEvent) -> void:
 		if camera_rig.handle_mouse_motion(mouse_motion):
 			viewport_container.accept_event()
 
-func _open_actor_hud_menu(_position: Vector2) -> void:
+func _open_actor_hud_menu(local_position: Vector2) -> void:
 	if _banner_option("menu_disabled"):
 		return
 	_sync_banner_context_menu()
-	_actor_hud_menu.position = DisplayServer.mouse_get_position()
-	_actor_hud_menu.popup()
+	_stop_keyboard_movement()
+	_actor_hud_menu.open_at(viewport_container.get_global_transform() * local_position)
 
 func _configure_banner_menu() -> void:
 	for key: String in BANNER_OPTION_NODES:
@@ -4081,46 +4148,46 @@ func _configure_banner_menu() -> void:
 		box.set_pressed_no_signal(bool(BANNER_OPTION_DEFAULTS[key]))
 		box.toggled.connect(_on_banner_option_toggled)
 		_banner_option_boxes[key] = box
-	_actor_hud_menu = PopupMenu.new()
-	_character_banner_menu = PopupMenu.new()
-	_mount_banner_menu = PopupMenu.new()
-	add_child(_actor_hud_menu)
-	_actor_hud_menu.add_child(_character_banner_menu)
-	_actor_hud_menu.add_child(_mount_banner_menu)
-	_actor_hud_menu.add_submenu_node_item("Character banner", _character_banner_menu)
-	_actor_hud_menu.add_submenu_node_item("Mount banner", _mount_banner_menu)
-	_actor_hud_menu.add_item("Mounts…", 3)
-	_actor_hud_menu.add_item("All banner settings…", 2)
-	_actor_hud_menu.id_pressed.connect(func(id: int) -> void:
-		if id == 3:
-			mounts_window.call("open")
-		else:
-			settings_window.open_tab("Banners"))
-	_character_banner_menu.hide_on_checkable_item_selection = false
-	_mount_banner_menu.hide_on_checkable_item_selection = false
-	for key: String in BANNER_OPTION_NODES:
-		var box := _banner_option_boxes[key] as CheckBox
-		_character_banner_menu.add_check_item("Disable character right-click menu" if key == "menu_disabled" else box.text)
-	_character_banner_menu.id_pressed.connect(func(id: int) -> void:
-		var box := _banner_option_boxes[BANNER_OPTION_NODES.keys()[id]] as CheckBox
-		box.button_pressed = not box.button_pressed)
-	for key: String in MountControls.OPTION_LABELS:
-		_mount_banner_menu.add_check_item(MountControls.OPTION_LABELS[key])
-	_mount_banner_menu.id_pressed.connect(func(id: int) -> void:
-		var key: String = MountControls.OPTION_LABELS.keys()[id]
-		_set_mount_banner_option(key, not bool(_mount_banner_options[key])))
+	_actor_hud_menu = BannerDisplayMenuScript.new()
+	game_view.add_child(_actor_hud_menu)
+	_actor_hud_menu.option_changed.connect(func(group: String, key: String, value: bool) -> void:
+		if group == "mount":
+			_set_mount_banner_option(key, value)
+		elif _banner_option_boxes.has(key):
+			(_banner_option_boxes[key] as CheckBox).button_pressed = value)
+	_actor_hud_menu.mounts_requested.connect(func() -> void: mounts_window.call("open"))
+	_actor_hud_menu.settings_requested.connect(func() -> void: settings_window.open_tab("Banners"))
+	_connect_banner_context_inputs(actor_resource_overlay, "Character")
+
+func _connect_banner_context_inputs(control: Control, section: String) -> void:
+	if control == mount_status:
+		section = "Mount"
+	if not control is BaseButton:
+		control.mouse_filter = Control.MOUSE_FILTER_PASS
+	control.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT \
+				and AppState.authenticated and (section == "Mount" or not _banner_option("menu_disabled")):
+			_sync_banner_context_menu()
+			_stop_keyboard_movement()
+			_actor_hud_menu.open_at(control.get_global_transform() * event.position, section)
+			control.accept_event())
+	for child: Node in control.get_children():
+		if child is Control:
+			_connect_banner_context_inputs(child, section)
 
 func _sync_banner_context_menu() -> void:
-	for index: int in BANNER_OPTION_NODES.size():
-		_character_banner_menu.set_item_checked(index, _banner_option(BANNER_OPTION_NODES.keys()[index]))
-	for index: int in MountControls.OPTION_LABELS.size():
-		_mount_banner_menu.set_item_checked(index, bool(_mount_banner_options[MountControls.OPTION_LABELS.keys()[index]]))
+	if _actor_hud_menu == null:
+		return
+	var character := {}
+	for key: String in BANNER_OPTION_NODES:
+		character[key] = _banner_option(key)
+	_actor_hud_menu.sync_options(character, _mount_banner_options)
 
 func _set_mount_banner_option(key: String, value: bool) -> void:
 	if not _mount_banner_options.has(key):
 		return
 	_mount_banner_options[key] = value
-	game_view.get_node("MountControls").set_options(_mount_banner_options)
+	mount_status.set_options(_mount_banner_options)
 	_sync_banner_context_menu()
 	_save_hud_settings()
 
@@ -4138,8 +4205,7 @@ func _on_banner_option_toggled(_enabled: bool) -> void:
 	_sync_hud_indicators()
 	_save_hud_settings()
 
-## Kept so the HUD settings window can undo the menu's own "Disable This Menu"
-## entry, which would otherwise lock the menu away for good.
+## Settings keeps the character's right-click entry point recoverable.
 func _on_banner_menu_enabled_toggled(pressed: bool) -> void:
 	var box: CheckBox = _banner_option_boxes["menu_disabled"] as CheckBox
 	box.set_pressed_no_signal(not pressed)
@@ -4227,7 +4293,7 @@ func _capture_speech_bubble_from_chat() -> void:
 ## the deliberate override, and Ranging Lock while a bow is in hand
 ## (gamewin.c, CURSOR_WALK and CURSOR_ATTACK).
 func _movement_locked(ctrl_pressed: bool) -> bool:
-	if character_intro.blocks_input():
+	if _world_input_blocked():
 		return true
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	if bool(AppState.death.get("dead", false)) or int(local_actor.get("health", 1)) <= 0:
@@ -4297,7 +4363,9 @@ func _sync_overhead_health() -> void:
 		if not (node_value is ReplicatedActor3D) or not is_instance_valid(
 				node_value as ReplicatedActor3D):
 			continue
-		(node_value as ReplicatedActor3D).set_health_visible(
+		var actor := node_value as ReplicatedActor3D
+		actor.set_combat_target(int(id) == target_id)
+		actor.set_health_visible(
 			_overhead_health_for(int(id),
 				AppState.actors.get(id, {}) as Dictionary, target_id))
 
@@ -4615,7 +4683,7 @@ func _local_actor_server_tile() -> Variant:
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
 func _map_input_blocked() -> bool:
-	return (character_intro.blocks_input() or not game_view.visible or dialogue_panel.visible or trade_panel.visible
+	return (_world_input_blocked() or not game_view.visible or dialogue_panel.visible or trade_panel.visible
 		or storage_panel.visible or manufacturing_panel.visible)
 
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
@@ -4979,6 +5047,9 @@ func _show_walk_highlight(tile: Vector2i, ground_height: float) -> void:
 	walk_highlight_markers[tile] = marker
 
 func _on_state_changed(path: StringName) -> void:
+	if _actor_hud_menu != null and (not AppState.authenticated \
+			or path in [&"map", &"npc_dialogue", &"trade", &"storage", &"popup", &"death"]):
+		_actor_hud_menu.close()
 	# Protocol diagnostics are the one path that must work before login: a
 	# decode failure during the handshake is exactly what the panel exists to
 	# show, and the session is not authenticated when it happens.
@@ -5009,6 +5080,8 @@ func _on_state_changed(path: StringName) -> void:
 			_update_console_location()
 			# Markers survive a map change; which of them belong here does not.
 			_sync_map_markers()
+		&"death":
+			_prefetch_respawn()
 		&"actors":
 			# A busy map emits this once per actor packet. Rebuilding the whole
 			# actor presentation for each of them repeated the same work many
@@ -5038,6 +5111,8 @@ func _on_state_changed(path: StringName) -> void:
 				_reveal_chat_messages()
 		&"almanac":
 			_sync_hud_indicators()
+			_sync_season_surfaces()
+			_apply_day_night()
 		&"channels":
 			_sync_channel_tabs()
 		&"invasion_assistant":
@@ -5198,6 +5273,24 @@ func _load_server_map() -> void:
 				handoff = {"resident": preloaded, "continuous": false}
 		else:
 			character_intro.cancel()
+	if handoff.is_empty() and not character_intro.blocks_input():
+		# A respawn onto another map adopts the ground loaded while dead.
+		var prewarmed: Dictionary = respawn_prewarm.take(normalized_map)
+		if not prewarmed.is_empty():
+			handoff = {"resident": prewarmed, "continuous": false}
+		else:
+			# A fresh load: the arrival is built behind the curtain. A whole map is
+			# built on the frame it loads, so it waits for the curtain to be drawn.
+			if not arrival_curtain.is_showing():
+				arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+			if not respawn_prewarm.streams(ProjectSettings.globalize_path(str(entry.get("manifest", "")))) \
+					and not arrival_curtain.has_drawn():
+				_deferred_map_load = true
+				return
+	_deferred_map_load = false
+	_arrival = {}
+	if arrival_curtain.is_showing():
+		arrival_curtain.set_text("Entering %s…" % _friendly_map_name(AppState.current_map))
 	_continuous_map_handoff = bool(handoff.get("continuous", false))
 	_retained_traveller = AppState.local_actor_id if _continuous_map_handoff else -1
 	_retained_until = Time.get_ticks_msec() + 3000
@@ -5306,6 +5399,7 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 	# map outside the continent now that its scene has set its materials up.
 	# Continent regions and chunks are painted by the loader.
 	LookGround.paint_bound(world_loader.world_root, manifest)
+	_sync_season_surfaces()
 	# Look pass: on an interior every occluder fades as develop fades it.
 	LookFade.bind(manifest)
 	fallback_ground.hide()
@@ -5452,8 +5546,17 @@ func _hold_shadow_switch() -> void:
 ## camera's focus, under the weather the server says is falling (WeatherSky).
 func _lighting_manifest() -> WorldManifest:
 	var lighting := exterior_stream.lighting_manifest(camera_rig.focus)
+	lighting = SeasonSky.seasonal(lighting, AppState.almanac.get("season", {}) as Dictionary)
 	return WeatherSky.weathered_look(lighting, weather_layer.look()) \
 		if weather_layer != null else lighting
+
+## Bind seasonal scenery after map/appearance changes; month changes only
+## update shared material uniforms, so existing and newly streamed trees agree.
+func _sync_season_surfaces() -> void:
+	SeasonSurfaces.set_season(AppState.almanac.get("season", {}) as Dictionary)
+	for world: Dictionary in LookSwitch.worlds(world_loader.world_root,
+			world_loader.manifest, exterior_stream.residents):
+		SeasonSurfaces.apply(world.root as Node, world.manifest as WorldManifest)
 
 func _update_border_lighting() -> void:
 	var lighting := _lighting_manifest()
@@ -5570,12 +5673,171 @@ func _on_world_load_failed(errors: Array[String]) -> void:
 	map_label.text = "Map load failed: " + "; ".join(errors)
 	_record_client_snapshot_after_frames()
 
+## True while the local character must wait for its ground: it has no node yet
+## (signing in, a map change, a teleport or respawn) and the streamed cells
+## under its arrival are not resident. The first such call starts the
+## asynchronous arrival (ContinentChunkStream.begin_arrival) and raises the
+## curtain; _update_arrival releases it. An arrival whose ground is already
+## resident (a short hop, ground prefetched while dead) is not held at all.
+## A character already standing keeps walking: its streamed lead covers it.
+func _hold_for_arrival() -> bool:
+	var stream := world_loader.world_root as ContinentChunkStream
+	var local_id: int = AppState.local_actor_id
+	if stream == null or adapter == null or character_intro.pending \
+			or not AppState.actors.has(local_id) or actor_nodes.has(local_id):
+		return false
+	var arriving: Dictionary = AppState.actors[local_id]
+	# Across a seamless crossing the record names the map it came from.
+	if str(arriving.get("map", AppState.current_map)) != AppState.current_map:
+		return false
+	var position: Vector3 = adapter.tile_center(int(arriving.x), int(arriving.y))
+	if not _arrival.is_empty() and (_arrival.position as Vector3).is_equal_approx(position):
+		# Once the curtain is on screen the actors are built behind it while the
+		# ground loads (their models are main-thread work the worker's imports
+		# overlap); the local character stays hidden until its ground is there.
+		return not bool(_arrival.ready) and not arrival_curtain.has_drawn()
+	if stream.has_focus and stream.arrival_resident(position):
+		return false
+	stream.begin_arrival(position)
+	_arrival = {"position": position, "started": Time.get_ticks_msec(), "ready": false}
+	if not arrival_curtain.is_showing():
+		arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+	arrival_curtain.set_progress(0.15)
+	Diagnostics.record("arrival_started", {"map": AppState.current_map,
+		"position": [position.x, position.y, position.z]})
+	return true
+
+## Each frame: a deferred whole-map load once the curtain is drawn; a pending
+## arrival's progress, and its release once every cell framing it is resident;
+## then the curtain lowered once the character stands grounded for a few frames.
+func _update_arrival() -> void:
+	if _deferred_map_load:
+		if not AppState.authenticated:
+			_deferred_map_load = false
+		elif arrival_curtain.has_drawn():
+			_deferred_map_load = false
+			_load_server_map()
+			_sync_world()
+		return
+	if not _arrival.is_empty() and not bool(_arrival.ready):
+		var stream := world_loader.world_root as ContinentChunkStream
+		var position: Vector3 = _arrival.position
+		var waited := Time.get_ticks_msec() - int(_arrival.started)
+		if stream == null:
+			_arrival.ready = true
+		else:
+			var progress := stream.arrival_progress(position)
+			arrival_curtain.set_progress(0.15 + 0.75 * float(progress.x) / maxf(1.0, float(progress.y)))
+			if progress.x >= progress.y:
+				_arrival.ready = true
+			elif waited > ARRIVAL_TIMEOUT_MSEC:
+				# Never strand a player behind the curtain: ground the arrival the
+				# way the client did before it loaded in the background.
+				push_warning("arrival: %d of %d cells after %d ms; loading the rest now" % [
+					progress.x, progress.y, waited])
+				world_loader.ensure_chunk_arrival(position)
+				_arrival.ready = true
+		if bool(_arrival.ready):
+			_arrival_settle_frames = 0
+			# A full pass: changes that arrived while held were not presented.
+			var building := Time.get_ticks_usec()
+			_sync_world()
+			var arrived: Variant = actor_nodes.get(AppState.local_actor_id)
+			if is_instance_valid(arrived):
+				var local_node := arrived as ReplicatedActor3D
+				local_node.visible = true
+				_place_actor_on_surface(local_node, true, adapter.fallback_height())
+			_snap_all_actors_to_surface.call_deferred()
+			Diagnostics.record("arrival_ready", {"map": AppState.current_map, "msec": waited,
+				"spawn_ms": (Time.get_ticks_usec() - building) / 1000.0})
+		return
+	if not arrival_curtain.is_showing():
+		return
+	if not AppState.authenticated and AppState.connection_state != "connected":
+		_end_arrival()
+		return
+	var local_id: int = AppState.local_actor_id
+	var standing: bool = actor_nodes.has(local_id) and _grounded_actors.has(local_id)
+	if standing or arrival_curtain.elapsed_msec() > ARRIVAL_CURTAIN_LIMIT_MSEC:
+		arrival_curtain.set_progress(1.0)
+		_arrival_settle_frames += 1
+		if _arrival_settle_frames >= 3:
+			_arrival_settle_frames = 0
+			_arrival = {}
+			arrival_curtain.finish()
+	else:
+		_arrival_settle_frames = 0
+		if actor_nodes.has(local_id):
+			arrival_curtain.set_progress(0.95)
+
+func _arrival_pending() -> bool:
+	return not _arrival.is_empty() and not bool(_arrival.ready)
+
+func _end_arrival() -> void:
+	_arrival = {}
+	_deferred_map_load = false
+	_arrival_settle_frames = 0
+	_arrival_unreported = false
+	arrival_curtain.cancel()
+
+## The server keeps a character it has just put somewhere out of every fight
+## until the client says it is drawn on loaded ground (`arrival_ready_v1`,
+## server eloria/arrival_grace.py). Said once per spawn of the local
+## character: visible, grounded, and no loading screen in front of the player.
+## The map lets the server ignore a report about an arrival it has replaced.
+func _report_arrival() -> void:
+	if not _arrival_unreported or _arrival_pending() or arrival_curtain.blocks_input():
+		return
+	var local_id: int = AppState.local_actor_id
+	var node: Variant = actor_nodes.get(local_id)
+	if not is_instance_valid(node) or not (node as Node3D).visible \
+			or not _grounded_actors.has(local_id):
+		return
+	_arrival_unreported = false
+	if AppState.authenticated and Network._link_ready():
+		Network.send_chat("#arrived " + AppState.current_map)
+	Diagnostics.record("arrival_reported", {"map": AppState.current_map})
+
+## While dead, the ground where a respawn will land is loaded in the background
+## (the death state's `destination`): kept resident on this map, or prewarmed
+## in a hidden stream on another, so clicking respawn needs no loading.
+func _prefetch_respawn() -> void:
+	var stream := world_loader.world_root as ContinentChunkStream
+	var destination: Variant = AppState.death.get("destination")
+	if not bool(AppState.death.get("dead", false)) or not destination is Dictionary:
+		if stream != null:
+			stream.clear_prefetch()
+		if not bool(AppState.death.get("dead", false)):
+			respawn_prewarm.discard()
+		return
+	var target: Dictionary = destination
+	var server_map := str(target.get("map", ""))
+	var tile := Vector2i(int(target.get("x", -1)), int(target.get("y", -1)))
+	if server_map.is_empty() or tile.x < 0 or tile.y < 0:
+		return
+	var map_id: String = MapRegistry.normalize_server_map_id(server_map)
+	if map_id == MapRegistry.normalize_server_map_id(AppState.current_map):
+		respawn_prewarm.discard()
+		if stream != null and adapter != null:
+			stream.prefetch(PackedVector3Array([adapter.tile_center(tile.x, tile.y)]))
+		return
+	if stream != null:
+		stream.clear_prefetch()
+	var entry: Dictionary = MapRegistry.resolve(map_registry, server_map)
+	if not entry.is_empty():
+		respawn_prewarm.prewarm(entry, map_id, tile, world_root)
+
 ## Brings the actor nodes in line with AppState. Given `changed` - the ids
 ## AppState has written since the last pass - only those actors are visited;
 ## without it every actor is, which is what a map load and the fixtures need.
 ## An actor with no node yet is built either way, at most ACTOR_SPAWN_BUDGET
 ## of them per pass; the rest are picked up on the following frames.
 func _sync_world(changed: Variant = null) -> void:
+	# A whole map waiting for the curtain, or a character whose ground is still
+	# streaming in: nothing is placed on ground that is not there yet.
+	if _deferred_map_load or _hold_for_arrival():
+		_spawn_backlog = true
+		return
 	# The background worker owns arrival imports during creation. Let it finish
 	# the actual spawn instead of falling back to a synchronous login prime.
 	if character_intro.pending and world_loader.world_root is ContinentChunkStream \
@@ -5594,7 +5856,9 @@ func _sync_world(changed: Variant = null) -> void:
 		# which was then loaded on the handoff frame (the sixteenth's live proof:
 		# 1-2 s a crossing, the traveller walking on meanwhile).
 		var record_map: String = str(arrival_actor.get("map", AppState.current_map))
-		if record_map == AppState.current_map and world_loader.ensure_chunk_arrival(adapter.tile_center(int(arrival_actor.x), int(arrival_actor.y))):
+		# An arrival loading behind the curtain is the worker's: no synchronous prime.
+		if record_map == AppState.current_map and not _arrival_pending() \
+				and world_loader.ensure_chunk_arrival(adapter.tile_center(int(arrival_actor.x), int(arrival_actor.y))):
 			_actor_surface_samples.clear()
 			# The chunk just attached has no physics body until the next physics
 			# frame: the actors presented below ray past it onto their fallback
@@ -5714,6 +5978,7 @@ func _spawn_actor(id: Variant) -> void:
 	node.apply_server_state(dto, actor_adapter, true)
 	_fit_lantern_map_marker(node, "MapDot")
 	node.set_combat_effects_enabled(_effects_enabled)
+	node.set_target_marker_style(_target_marker_style)
 	node.set_nameplate_visible(_nameplate_visible_for(int(id)))
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
@@ -5721,6 +5986,9 @@ func _spawn_actor(id: Variant) -> void:
 	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	if int(id) == AppState.local_actor_id:
+		# Built behind the curtain, shown once its ground is resident.
+		node.visible = not _arrival_pending()
+		_arrival_unreported = true
 		_sync_harvest_sparkle()
 
 ## Bind mount presentation to the current player identity and map, including
@@ -5729,11 +5997,7 @@ func _apply_actor_mount(id: Variant) -> void:
 	var node := actor_nodes.get(id) as ReplicatedActor3D
 	if node == null:
 		return
-	var state: Dictionary = AppState.actor_mounts.get(int(id), {})
-	var dto: Dictionary = AppState.actors.get(id, {})
-	if state.get("map", "") != dto.get("map", "") or str(state.get("owner", "")).to_lower() != str(dto.get("name", "")).to_lower():
-		state = {}
-	node.set_mount_state(state, models)
+	node.set_mount_state(AppState.mount_state_for_actor(int(id)), models)
 
 func _sync_quest_offers() -> void:
 	for id: Variant in actor_nodes:
@@ -7597,7 +7861,9 @@ func _load_hud_settings() -> void:
 				"banner", banner_key, BANNER_OPTION_DEFAULTS[banner_key])))
 		for key: String in _mount_banner_options:
 			_mount_banner_options[key] = bool(config.get_value("mount_banner", key, true))
-	game_view.get_node("MountControls").set_options(_mount_banner_options)
+	mount_status.set_options(_mount_banner_options)
+	_target_marker_style = TargetMarkerStyle.read(config)
+	_apply_target_marker_style()
 	_apply_fps_limit(config.get_value("graphics", "fps_limit", 0))
 	_load_look_settings(config)
 	reference_window.call("configure", console_commands,
@@ -7695,9 +7961,12 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "nameplates", _nameplates_enabled)
 	config.set_value("graphics", "name_distance", _name_distance_metres)
 	config.set_value("graphics", "fps_limit", _fps_limit)
+	TargetMarkerStyle.write(config, _target_marker_style)
 	# The player's own choices, not what ELORIA_LOOK or ELORIA_LOOK_QUALITY
 	# made of them for this session.
-	config.set_value("graphics", "look", LookProfile.player_look())
+	config.set_value("graphics", "appearance", LookProfile.mode_name(LookProfile.player_mode()))
+	if config.has_section_key("graphics", "look"):
+		config.erase_section_key("graphics", "look")
 	config.set_value("graphics", "quality", LookProfile.quality_name(LookProfile.player_quality()))
 	config.set_value("hud", "combat_hud",
 		bool(extension_windows.get("combat_hud_enabled")))
@@ -9934,6 +10203,9 @@ func _on_indicator_gui_input(event: InputEvent, letter_key: String) -> void:
 				AppState.append_local_message("Today: %s - %s" % [
 					str(AppState.almanac.get("name", "an ordinary day")),
 					str(AppState.almanac.get("description", ""))])
+				var season := SeasonSky.summary(AppState.almanac.get("season", {}) as Dictionary)
+				if not season.is_empty():
+					AppState.append_local_message(season)
 		"M":
 			_unseen_pm_count = 0
 			_sync_hud_indicators()
@@ -10227,7 +10499,7 @@ func _sync_local_status_icons() -> void:
 		local_status_grid.add_child(icon)
 
 func _banner_has_content() -> bool:
-	if game_view.get_node("MountControls").wants_banner():
+	if mount_status.wants_banner():
 		return true
 	if not _local_status_effects.is_empty():
 		return true
@@ -10576,6 +10848,7 @@ func _floating_feedback_row(preferred_y: float, lowest_y: float) -> float:
 	return candidates[candidates.size() - 1]
 
 func _on_window_size_changed() -> void:
+	_fit_hud_action_buttons.call_deferred()
 	_layout_full_map()
 	# Match the render viewport to the actual drawable area so resizing changes
 	# camera aspect instead of stretching a fixed 16:9 render target. The
@@ -10590,6 +10863,44 @@ func _on_window_size_changed() -> void:
 	if main_viewport.size != target_size:
 		main_viewport.size = target_size
 	OldcraftDialogueStyleScript.layout(self)
+
+## Keep all action icons reachable as the bar gains windows or the UI scales.
+func _fit_hud_action_buttons() -> void:
+	var available_width := maxf(200, game_view.size.x - right_rail.size.x)
+	var meter_bars: Array[ProgressBar] = []
+	var meter_fixed := 0.0
+	var visible_meters := 0
+	for meter: Node in bottom_meters.get_children():
+		if not (meter as Control).visible: continue
+		visible_meters += 1
+		var parts := 0
+		for child: Node in meter.get_children():
+			if not child is Control or not (child as Control).visible: continue
+			parts += 1
+			if child is ProgressBar: meter_bars.append(child)
+			else: meter_fixed += (child as Control).get_combined_minimum_size().x
+		meter_fixed += (meter as Container).get_theme_constant("separation") * maxi(0, parts - 1)
+	meter_fixed += bottom_meters.get_theme_constant("separation") * maxi(0, visible_meters - 1)
+	var bar_width := floorf(clampf((available_width - 12 - meter_fixed) / maxf(1, meter_bars.size()), 16, 84))
+	for bar: ProgressBar in meter_bars:
+		bar.custom_minimum_size.x = bar_width
+	var row := $GameView/Quickbar/QuickRows/Buttons as HBoxContainer
+	var buttons: Array[Button] = []
+	var fixed_width := 0.0
+	for child: Node in row.get_children():
+		if child is Button:
+			buttons.append(child)
+		elif child is Control:
+			fixed_width += (child as Control).get_combined_minimum_size().x
+	var width := available_width - fixed_width - 12.0 \
+		- row.get_theme_constant("separation") * (row.get_child_count() - 1)
+	var cell := floorf(clampf(width / maxf(1, buttons.size()), 20, 44))
+	for button: Button in buttons:
+		button.custom_minimum_size = Vector2(cell, cell)
+		button.add_theme_constant_override("icon_max_width", int(cell - HUD_ICON_PADDING * 2))
+	# A prior minimum-width overflow can leave an anchored panel expanded left.
+	(%Quickbar as Control).offset_left = 0
+	(%Quickbar as Control).offset_right = -right_rail.size.x
 
 func _layout_full_map() -> void:
 	var area := viewport_container.get_rect()
@@ -10612,7 +10923,7 @@ func _sync_hud_button_states(force := false) -> void:
 			%KnowledgeButton, %ManufacturingButton, %ChatButton, %DisconnectButton,
 			%EncyclopediaButton, %SpellsButton, %EmotesButton, %QuestButton,
 			%InfoButton, %BuddyButton, %ConsoleButton, %HelpButton,
-			%RangingButton, %MinimapButton, %OptionsButton]
+			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton]
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var sitting: bool = bool(local_actor.get("sitting", false))
 	var stats_open: bool = stats_panel.visible
@@ -10641,7 +10952,8 @@ func _sync_hud_button_states(force := false) -> void:
 		_reference_tab_open(0),
 		ranging_window != null and bool(ranging_window.call("is_open")),
 		minimap_frame.visible,
-		settings_panel.visible]
+		settings_panel.visible,
+		mounts_window != null and bool(mounts_window.call("is_open"))]
 	# Only while the player has not chosen attack mode from the HUD: a mode
 	# they picked stays picked, and Alt must not appear to be what put it there.
 	var attack_preview: bool = _alt_attack_preview and _interaction_mode != "attack"
@@ -10844,6 +11156,7 @@ func _apply_hud_meter_layout() -> void:
 			continue
 		bottom_meters.move_child(meter, index)
 		meter.visible = bool(_hud_meter_visible.get(meter_key, true))
+	_fit_hud_action_buttons.call_deferred()
 
 func _load_hud_layout() -> void:
 	var config := ConfigFile.new()
@@ -11306,21 +11619,19 @@ func _apply_fps_limit(value: Variant) -> void:
 
 ## The painted look and the graphics quality from the settings file. A file
 ## from before they existed, or one holding a value this build cannot read,
-## leaves the defaults (the look on, HIGH). Main keeps no copy of either:
+## leaves the defaults (Painted ground, HIGH). Main keeps no copy of either:
 ## LookProfile holds the player's choice and resolves it against ELORIA_LOOK
 ## and ELORIA_LOOK_QUALITY, so every layer and this file ask one place. A
 ## settings file read again while a map is up (a test does) applies at once.
 func _load_look_settings(config: ConfigFile) -> void:
-	var look_value: Variant = config.get_value("graphics", "look", LookProfile.LOOK_DEFAULT)
-	var look_changed := LookProfile.set_player_look(
-		bool(look_value) if look_value is bool else LookProfile.LOOK_DEFAULT)
+	var look_changed := LookProfile.set_player_mode(LookProfile.mode_from_settings(config))
 	var quality_value: Variant = config.get_value("graphics", "quality",
 		LookProfile.quality_name(LookProfile.QUALITY_DEFAULT))
 	var level: int = LookProfile.quality_named(str(quality_value)) \
 		if quality_value is String else -1
 	LookProfile.set_player_quality(
 		level if level >= 0 else LookProfile.QUALITY_DEFAULT)
-	settings_window.call("restore_look", LookProfile.player_look(), LookProfile.look_forced())
+	settings_window.call("restore_look", LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.call("restore_quality", LookProfile.player_quality(),
 		LookProfile.quality_forced())
 	# The shadows are the renderer's: set once here, before any map, whatever
@@ -11351,12 +11662,13 @@ func _apply_look_switch() -> void:
 			world_loader.manifest, exterior_stream.residents):
 		surfaces += LookSwitch.sync(world.root as Node, world.manifest as WorldManifest,
 			bool(world.bound))
+		surfaces += SeasonSurfaces.apply(world.root as Node, world.manifest as WorldManifest, true)
 		roots += 1
 	# The runtime world objects are painted with their map, not as a root.
 	for raw_object: Variant in map_object_nodes.values():
 		if is_instance_valid(raw_object):
 			surfaces += _paint_map_object_look(raw_object as MapObject3D)
-	if not LookProfile.enabled():
+	if not LookProfile.full_painted():
 		LookGrade.revert_key(world_sun)
 	_rebind_look_environment()
 	_request_map_redraw()
@@ -11467,6 +11779,7 @@ func _reconcile_look() -> void:
 	for world: Dictionary in stale:
 		var surfaces := LookSwitch.sync(world.root as Node, world.manifest as WorldManifest,
 			bool(world.bound))
+		SeasonSurfaces.apply(world.root as Node, world.manifest as WorldManifest, true)
 		print("look_switch stage=reconciled root=%s look=%s surfaces=%d"
 			% [(world.root as Node).name, LookProfile.enabled(), surfaces])
 
@@ -11484,6 +11797,17 @@ func _set_name_distance(value: Variant) -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if section == "Banners" and key.begins_with("target_"):
+		if key == "target_markers_reset":
+			_target_marker_style = TargetMarkerStyle.defaults()
+		else:
+			var property := key.trim_prefix("target_")
+			if not TargetMarkerStyle.DEFAULTS.has(property): return
+			_target_marker_style[property] = value
+			_target_marker_style = TargetMarkerStyle.normalise(_target_marker_style)
+		_apply_target_marker_style()
+		_save_hud_settings()
+		return
 	if key.begins_with("mount_banner_"):
 		_set_mount_banner_option(key.trim_prefix("mount_banner_"), bool(value))
 		return
@@ -11573,7 +11897,11 @@ func _on_client_setting_changed(section: String, key: String,
 			invasion_assistant_window.resize_to_scale(float(value))
 		"fps_limit":
 			_apply_fps_limit(value)
+		"appearance":
+			if LookProfile.set_player_mode(int(value)):
+				_apply_look_switch()
 		"look":
+			# Compatibility for older authoring and capture tools.
 			if LookProfile.set_player_look(bool(value)):
 				_apply_look_switch()
 		"quality":
@@ -11622,11 +11950,13 @@ func _on_client_setting_changed(section: String, key: String,
 	if key not in ["target_mode_strong", "target_mode_weak", "autogather", "magic_autocast"]:
 		_save_hud_settings()
 
+func _apply_target_marker_style() -> void:
+	for actor: Variant in actor_nodes.values():
+		if is_instance_valid(actor):
+			(actor as ReplicatedActor3D).set_target_marker_style(_target_marker_style)
+
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()
-	var mount_controls := game_view.get_node_or_null("MountControls")
-	if mount_controls != null:
-		mount_controls.call("_refresh")
 	_sync_quick_slots()
 	# Quick spell badges and the Techniques hint name the keys they use.
 	casting_bar.refresh()
@@ -11809,6 +12139,11 @@ func _cast_spell_by_id(spell_id: int) -> void:
 	_begin_prepared_cast(spell_id, power)
 
 func _on_magic_state(data: Dictionary) -> void:
+	if data.get("kind") == "target_cast":
+		# Apply the preceding movement/turn actor snapshots first. A deferred
+		# turn must not replace the channel we are about to start.
+		_present_target_cast.call_deferred(data)
+		return
 	if data.get("kind") == "technique_effect":
 		_on_technique_effect(data)
 		return
@@ -11837,6 +12172,20 @@ func _on_magic_state(data: Dictionary) -> void:
 		effect.configure_timing(float(data.release_delay), float(data.get("flight_duration", 0.0)))
 	world_effects.append(effect)
 	world_effects = world_effects.filter(func(node: Variant) -> bool: return is_instance_valid(node))
+
+func _present_target_cast(data: Dictionary) -> void:
+	var caster := actor_nodes.get(int(data.get("actor_id", -1))) as ReplicatedActor3D
+	if not is_instance_valid(caster): return
+	if data.get("phase") == "channel":
+		var caster_adapter := _adapter_for_actor(AppState.actors.get(caster.actor_id, {}))
+		if caster_adapter == null: return
+		caster.face_for_spell(caster_adapter.rotation_to_godot(int(data.rotation)))
+		caster.set_combat_effects_enabled(_effects_enabled)
+		caster.play_action(&"cast_channel_enter")
+		if caster.combat_presentation != null:
+			caster.combat_presentation.set_spell_power(int(data.get("power", 1)))
+	elif data.get("phase") in ["approach", "cancelled"] and caster.current_action in [&"cast_channel_enter", &"cast_channel"]:
+		caster.play_action(&"cast_exit")
 
 func _on_technique_effect(data: Dictionary) -> void:
 	var key := str(data.get("key", ""))
@@ -12605,11 +12954,12 @@ func _describe_slot(slot: int, with_window: bool) -> void:
 
 ## Right-clicking an item takes the next tool and describes what is under the
 ## cursor without opening anything, so the player can see what the new tool
-## would act on before using it. Skip Use unless this slot can use its item now.
+## would act on before using it. Usable items keep Use in the cycle during a
+## cooldown; the use action itself waits until the item is ready.
 func _cycle_inventory_tool(slot: int) -> void:
 	var index: int = INVENTORY_TOOLS.find(_inventory_tool)
 	var next_tool: String = INVENTORY_TOOLS[(index + 1) % INVENTORY_TOOLS.size()]
-	if next_tool == "use" and not _slot_click_uses_item(slot):
+	if next_tool == "use" and not _slot_has_usable_item(slot):
 		next_tool = "inspect"
 	_set_inventory_tool(next_tool)
 	if AppState.inventory.has(slot):
@@ -13669,7 +14019,8 @@ const HARVEST_GROUPING_RADIUS := 6.0
 func _bind_map_presentation(manifest: WorldManifest) -> void:
 	var here := EloriaProtocol.map_id_from_reference(AppState.current_map)
 	_map_presentation = map_presentation_of(here,
-		manifest.data if manifest != null else {}, _lantern_pick_shapes(here))
+		manifest.data if manifest != null else {}, _lantern_pick_shapes(here),
+		UndergroundSceneryScript.harvest_presentation(here))
 	if (_map_presentation.nodes as Dictionary).is_empty() \
 			and (_map_presentation.groupings as Array).is_empty():
 		return
@@ -13698,8 +14049,12 @@ static func _lantern_pick_shapes(map_id: String) -> Dictionary:
 ## the package names its grouping (the maps then mark the grouping once);
 ## `picks` are authored pick shapes by object id. A package published before
 ## the harvest presentation (no `harvestablesSchema`) presents nothing.
+## `authored` is the client's own presentation of nodes such a package leaves
+## bare, by object id - the underground's seams and pans
+## (underground_scenery.gd `harvest_presentation`): their `variant`, `yaw`
+## and `footprint`. A node the package presents keeps the package's.
 static func map_presentation_of(map_id: String, manifest: Dictionary,
-		picks: Dictionary = {}) -> Dictionary:
+		picks: Dictionary = {}, authored: Dictionary = {}) -> Dictionary:
 	var nodes := {}
 	var groupings: Array[Dictionary] = []
 	# Read only under the schema it was written with: the older packages'
@@ -13733,6 +14088,16 @@ static func map_presentation_of(map_id: String, manifest: Dictionary,
 				hint["grouped"] = true
 			if not hint.is_empty():
 				nodes[int(identity)] = hint
+	for key: Variant in authored:
+		if authored[key] is not Dictionary or not str(key).is_valid_int() \
+				or nodes.has(int(str(key))):
+			continue
+		var hint := {}
+		for field: String in ["variant", "yaw", "footprint"]:
+			if (authored[key] as Dictionary).has(field):
+				hint[field] = authored[key][field]
+		if not hint.is_empty():
+			nodes[int(str(key))] = hint
 	for key: Variant in picks:
 		if picks[key] is Dictionary and str(key).is_valid_int():
 			var hint: Dictionary = nodes.get(int(str(key)), {})
@@ -13758,13 +14123,15 @@ func _paint_map_object_look(map_object: MapObject3D) -> int:
 	if manifest == null or not manifest.data.has("continentGeography") \
 			or not is_instance_valid(map_object):
 		return 0
-	if LookProfile.enabled():
+	# Seasonal stand-ins may be on an object even in Original mode.
+	var changed := LookSwitch.revert(map_object)
+	if LookProfile.full_painted():
 		var translation: Array = (manifest.data.continentGeography as Dictionary).get(
 			"translation", [0.0, 0.0, 0.0]) as Array
-		return LookFoliage.paint_object(map_object, LookGround.region_of(manifest),
+		changed += LookFoliage.paint_object(map_object, LookGround.region_of(manifest),
 			map_object.transform, Vector2(float(translation[0]), float(translation[2]))
 			if translation.size() == 3 else Vector2.ZERO)
-	return LookSwitch.revert(map_object)
+	return changed + SeasonSurfaces.apply(map_object, manifest, true)
 
 ## Promoted scenery: each harvest node whose package names a placed kit node
 ## (`MapObject3D.bound_node_name`) is bound to that node's mesh in the map's
@@ -14064,9 +14431,11 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()
+	_sync_season_surfaces.call_deferred()
 	_snap_all_actors_to_surface.call_deferred()
 
 func _on_chunk_surface_ready(_identity: String, _imported: Node3D) -> void:
+	_sync_season_surfaces.call_deferred()
 	_snap_all_actors_to_surface.call_deferred()
 	_snap_all_map_objects_to_surface.call_deferred()
 	_bind_promoted_scenery.call_deferred()
@@ -14186,24 +14555,22 @@ func _slot_cursor_target(button: Button) -> String:
 		"unequip":
 			return "item_grab" if slot >= 36 else ""
 		"use":
-			# A stack the server will not let you use is only looked at, and
-			# the pointer should not promise more than the click delivers.
-			return "item_use" if _slot_click_uses_item(slot) else "item_inspect"
+			# Keep the Use cursor while a usable item cools down, matching
+			# the selected tool. The use action still checks its cooldown.
+			return "item_use" if _slot_has_usable_item(slot) else "item_inspect"
 		"inspect":
 			return "item_inspect"
 	return ""
 
-## True when the use tool would really spend the item in this slot: worn gear
-## is not used, and neither is anything the server did not mark usable or that
-## is still cooling down.
-func _slot_click_uses_item(slot: int) -> bool:
+## Whether this slot offers the Use tool, regardless of its current cooldown.
+## Worn gear and items the server did not mark usable only offer inspection.
+func _slot_has_usable_item(slot: int) -> bool:
 	if slot < 0 or slot >= 36:
 		return false
 	var item_value: Variant = AppState.inventory.get(slot)
 	if not item_value is Dictionary:
 		return false
-	return (bool((item_value as Dictionary).get("inventory_usable", false))
-		and _inventory_cooldown_remaining(slot) <= 0)
+	return bool((item_value as Dictionary).get("inventory_usable", false))
 
 ## The world half of the pointer question, split from the hover gate so a test
 ## can ask it about any spot without owning the operating system's mouse.
@@ -14273,6 +14640,7 @@ func _apply_eloria_art() -> void:
 	_apply_rabbitlands_branding()
 	_hud_active_atlas = _external_texture("res://assets/ui/eloria_gamebuttons.png")
 	_hud_inactive_atlas = _external_texture("res://assets/ui/eloria_gamebuttons_inactive.png")
+	%MountsButton.icon = _external_texture("res://assets/ui/mounts.svg")
 	if _hud_active_atlas != null:
 		# The Godot HUD atlas uses one canonical row-major icon order.  Keeping
 		# these regions contiguous makes the art easy to audit and prevents the

@@ -117,6 +117,7 @@ func _run() -> void:
 
 func _check_map(map_id: String) -> void:
 	var reference := _snapshot()
+	await _capture_appearance(map_id, "original")
 	_expect(reference.look_surfaces == 0 and reference.beds == 0,
 		"%s: loaded with the look off, nothing of the look's is drawn" % map_id)
 
@@ -141,6 +142,33 @@ func _check_map(map_id: String) -> void:
 			"%s: an interior without a sun is neither painted nor graded" % map_id)
 	# The bed node is made on any map the look is on; it grows only outdoors.
 	_expect(painted.beds == 1, "%s: one grass bed (%d)" % [map_id, painted.beds])
+	await _capture_appearance(map_id, "full-painted")
+
+	# Full painted -> Painted ground must restore the original environment,
+	# water and props while retaining the ground paint on already-loaded maps.
+	_setting("appearance", LookProfile.Mode.PAINTED_GROUND)
+	await _frames(20)
+	var ground := _snapshot()
+	_expect(ground.environment == reference.environment and ground.sun == reference.sun
+		and ground.sky == reference.sky and ground.beds == 0,
+		"%s: Painted ground keeps the Original lighting, sky and no extra grass" % map_id)
+	_expect(not outdoor or ground.look_surfaces > 0,
+		"%s: Painted ground retains painted terrain" % map_id)
+	var subjects_original := true
+	for world: Dictionary in LookSwitch.worlds((main.get("world_loader") as WorldLoader).world_root,
+			manifest, (main.get("exterior_stream") as ExteriorRegionStream).residents):
+		for mesh: Node in (world.root as Node).find_children("*", "MeshInstance3D", true, false):
+			if LookGround.kind_of(str(mesh.name)) != LookGround.Kind.NONE:
+				continue
+			var instance := mesh as MeshInstance3D
+			if instance.mesh == null:
+				continue
+			for surface: int in instance.mesh.get_surface_count():
+				var active := instance.get_active_material(surface)
+				subjects_original = subjects_original and (active == null
+					or not active.has_meta(LookProfile.SOURCE_META))
+	_expect(subjects_original, "%s: all non-ground subjects retain original materials" % map_id)
+	await _capture_appearance(map_id, "painted-ground")
 
 	_setting("look", false)
 	await _frames(20)
@@ -192,8 +220,22 @@ func _check_map(map_id: String) -> void:
 	_setting("look", false)
 	await _frames(20)
 	_compare(map_id + ": off at last", _snapshot(), reference)
+	_setting("appearance", LookProfile.Mode.PAINTED_GROUND)
+	await _frames(20)
+	_compare_loads(map_id + ": Painted ground is stable across repeated switches", _snapshot(), ground)
 	if OS.get_environment(RELOAD_VARIABLE) != "0":
+		if await _reload(map_id):
+			_compare_loads(map_id + ": Painted ground loaded directly matches the live switch",
+				_snapshot(), ground)
 		await _check_loads(map_id, painted)
+
+func _capture_appearance(map_id: String, mode_name: String) -> void:
+	var destination := OS.get_environment("ELORIA_ARTIFACT_DIR")
+	if destination.is_empty() or DisplayServer.get_name() == "headless":
+		return
+	DirAccess.make_dir_recursive_absolute(destination)
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png(destination.path_join(map_id + "-" + mode_name + ".png"))
 
 ## The player's default path and its reverse, on the same map loaded again:
 ## loaded with the look on it must draw what the live switch drew on the look

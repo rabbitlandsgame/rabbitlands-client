@@ -1,20 +1,12 @@
 class_name LookProfile
 extends RefCounted
-## The frame-level look pass: its switch, the graphics quality, and every
-## constant it tunes.
-##
-## The pass is the client's look: it is on unless the player turns "Painted
-## look" off in the settings window, or the client was started with
-## ELORIA_LOOK=0, and that one switch (`enabled`) is the whole of its off path.
-## Every layer asks `enabled()` first and does nothing when it is false, which
-## gives back the frames the client drew before the pass (the look-off renders
-## match them within run-to-run noise), for a player who prefers them, an A/B
-## capture, or to rule the pass out when a frame looks wrong. The switch works
-## live: LookSwitch takes the pass off, or puts it back on, everything already
-## loaded. The graphics quality (`quality`, QUALITY_PRESETS) sets what the
-## shadows and the pass's costlier layers draw. Forward+ is the renderer the
-## pass is tuned for; the compatibility renderer (the OpenGL fallback, and
-## CI's rendered tests) keeps its own trims wherever the two light differently.
+## Appearance modes and graphics quality. Painted ground is the default: it
+## paints terrain under the original lighting. Full painted adds the global
+## grade, sky, foliage, water and grass. Original restores the original world.
+## Overhead text is composited separately in every mode (WorldTextOverlay).
+## LookSwitch updates loaded roots live; generations also distinguish the two
+## painted modes so chunks completed on loader workers are reconciled safely.
+## Forward+ and the compatibility renderer keep their own material trims.
 ##
 ## The constants live here, not beside the code that uses them, so the whole
 ## look can be read, compared and retuned in one place. They are every map's
@@ -28,11 +20,18 @@ extends RefCounted
 ## the low views (pitch -30 and -20) reach the horizon.
 
 ## The environment variable that overrides the player's switch for a
-## developer or a test: "0" forces the pass off and "1" on, whatever the
-## settings file says; unset, or any other value, leaves the player's choice.
+## developer or a test: original, painted_ground, full_painted. Legacy 0/1
+## force Original/Full painted. Unrecognized values leave the player's choice.
 const ENABLE_VARIABLE := "ELORIA_LOOK"
-## The switch before the player has touched it: on.
+## Legacy boolean default used by older full-look authoring/capture tests.
 const LOOK_DEFAULT := true
+## Appearance is independent of graphics quality. The legacy boolean API and
+## ELORIA_LOOK=0/1 remain available to old captures and authoring tools.
+enum Mode { ORIGINAL, PAINTED_GROUND, FULL_PAINTED }
+const MODE_NAMES: Array[String] = ["original", "painted_ground", "full_painted"]
+const MODE_DEFAULT := Mode.PAINTED_GROUND
+## Ground-local chroma trim, replacing the shared grade in Painted ground.
+const GROUND_LOCAL_SATURATION := 0.86
 ## On every material the pass puts in place of another (a painted ground or
 ## crown, a decoded sea or river, a kept signature colour): the material it
 ## stands in for, which LookSwitch puts back when the look is switched off.
@@ -1315,35 +1314,65 @@ const HAZE_SKY_AFFECT := 0.1
 ## flat, for reading what AgX and the grade make of them.
 const SKY_DEBUG_VARIABLE := "ELORIA_LOOK_SKY_DEBUG"
 
-## True while the look is on. ELORIA_LOOK decides when it is "0" (off) or "1"
-## (on), for a developer or a test; otherwise the player's own choice does
-## (`set_player_look`, the settings file's [graphics] look), and a player who
-## never chose has it on (LOOK_DEFAULT). A stray value of the variable is
-## ignored rather than read as off. Read on every call, from the loader's
-## worker threads too; LookSwitch applies a change to what is already loaded.
+## True for either painted mode. Loader workers read this too; mode changes
+## are applied to already-loaded roots by LookSwitch.
 static func enabled() -> bool:
-	match OS.get_environment(ENABLE_VARIABLE):
-		"0":
-			return false
-		"1":
-			return true
-	return _player_look
+	return mode() != Mode.ORIGINAL
+
+static func mode() -> Mode:
+	var forced := _forced_mode()
+	return (forced if forced >= 0 else _player_mode) as Mode
+
+static func full_painted() -> bool:
+	return mode() == Mode.FULL_PAINTED
+
+static func _forced_mode() -> int:
+	var value := OS.get_environment(ENABLE_VARIABLE)
+	if value == "0":
+		return Mode.ORIGINAL
+	if value == "1":
+		return Mode.FULL_PAINTED
+	return mode_named(value)
+
+static func mode_named(value: String) -> int:
+	return MODE_NAMES.find(value.strip_edges().to_lower())
+
+static func mode_name(value: int) -> String:
+	return MODE_NAMES[value if value >= 0 and value < MODE_NAMES.size() else MODE_DEFAULT]
+
+static func player_mode() -> Mode:
+	return _player_mode as Mode
+
+static func set_player_mode(value: int) -> bool:
+	var before := mode()
+	_player_mode = value if value >= 0 and value < MODE_NAMES.size() else MODE_DEFAULT
+	_note_switch()
+	return mode() != before
+
+## Old preferences enabled the whole bundle by default. Move those players
+## to Painted ground; an explicit old Off still means Original.
+static func mode_from_settings(config: ConfigFile) -> int:
+	var value: Variant = config.get_value("graphics", "appearance", "")
+	if value is String:
+		var named := mode_named(value)
+		if named >= 0:
+			return named
+	var legacy: Variant = config.get_value("graphics", "look", true)
+	return Mode.ORIGINAL if legacy is bool and not legacy else MODE_DEFAULT
 
 ## True when ELORIA_LOOK decides the switch, so the player's choice is kept
 ## but has no effect (the settings window greys it out and says why).
 static func look_forced() -> bool:
-	return OS.get_environment(ENABLE_VARIABLE) in ["0", "1"]
+	return _forced_mode() >= 0
 
 ## The player's own choice, whether or not ELORIA_LOOK overrides it.
 static func player_look() -> bool:
-	return _player_look
+	return _player_mode != Mode.ORIGINAL
 
-## Records the player's choice. Returns true when `enabled()`'s answer changed,
-## which is when the loaded world has to follow (LookSwitch).
+## Compatibility setter: true selects Full painted, false selects Original.
+## Returns whether the effective mode changed.
 static func set_player_look(on: bool) -> bool:
-	var before := enabled()
-	_player_look = on
-	return _note_switch() != before
+	return set_player_mode(Mode.FULL_PAINTED if on else Mode.ORIGINAL)
 
 ## The graphics quality in use (Quality): ELORIA_LOOK_QUALITY's when it names
 ## one, otherwise the player's (`set_player_quality`, the settings file's
@@ -1395,15 +1424,15 @@ static func quality_value(key: String) -> Variant:
 
 ## The player's switch and quality as main read them from the settings file or
 ## the settings window last set them. Read through `enabled` and `quality`.
-static var _player_look := LOOK_DEFAULT
+static var _player_mode: int = MODE_DEFAULT
 static var _player_quality: int = QUALITY_DEFAULT
 
-# The switch's generation: it counts every change of `enabled()`'s answer, so a
+# The switch's generation counts every change of mode, including ground/full, so a
 # root painted (or left alone) under an older answer can be told apart from
 # one that already follows the current one. Loader workers read it too.
 static var _switch_mutex := Mutex.new()
 static var _generation := 0
-static var _generation_state := LOOK_DEFAULT
+static var _generation_state: int = MODE_DEFAULT
 static var _stamps: Dictionary = {}
 
 ## The switch's generation now (see `stale`).
@@ -1466,16 +1495,16 @@ static func any_stale() -> bool:
 	_switch_mutex.unlock()
 	return found
 
-## Counts a change of `enabled()`'s answer (the player's switch, or the
-## variable in a test) into the generation; returns the answer.
+## Counts an effective mode change into the generation. Returns the legacy
+## enabled answer; the generation itself distinguishes all three modes.
 static func _note_switch() -> bool:
-	var now := enabled()
+	var now := mode()
 	_switch_mutex.lock()
 	if now != _generation_state:
 		_generation_state = now
 		_generation += 1
 	_switch_mutex.unlock()
-	return now
+	return now != Mode.ORIGINAL
 
 ## True when the renderer has SSAO and SSIL. Only Forward+ does; the others
 ## ignore the settings but warn about them, so they are not set there at all.

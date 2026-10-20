@@ -96,3 +96,27 @@ For a metric endpoint request, convert through the declared model/game scale and
 A rigid-ownership-only clearance probe can omit the offending elbow surface. In the Bugbear swipe, the last intersections were mixed forearm/helper vertices even after the pure forearm and hand subset cleared a facial hull. Audit complete anatomical arm and head regions with the actual deformed surfaces, including palm, fingers and blend helpers. Keep the same vertex/triangle regions in before-and-after comparisons; use enclosure tests to locate close phases and triangle intersections to verify contact. Report the sampled temporal scope rather than claiming continuous collision proof.
 
 For a head-crossing swipe, coordinate torso turn, clavicle sweep and anatomical upper-arm/forearm roll; the elbow bulge can still hit the head when the hand center clears. Keep the crossing route below the face and recover outward. If preserving an approved lateral and forward hand finish on a fixed reach sphere, solve the remaining downward component and recheck the whole arm. Preserving only the old projected direction can lift the elbow back into the head. Retain the off-hand in the walking torso frame and compare planted-leg worlds and unrelated clips exactly.
+
+
+## Heavy humanoids, clothing and released hands
+
+The six approved Ogre/Troll/Giant sets and portable checks are documented in `docs/brute-humanoid-motion.md`. Qualify the actual pelvis-to-chest column as well as the shoulders: forward torso rotation can leave a short-legged native actor squatting with its pelvis far behind the feet. Fit the pelvis inside the fixed-foot reach envelope, preserve native lengths and evaluate complete sole surfaces between keys. Tiny source nonuniform scales can change frame matrix components after upstream rotations; retain those scale channels and measure actual ankle/sole displacement separately.
+
+A rigid cloth island can have edge stretch1.0 and zero welded-seam gap while visibly separating from the moving waist or thighs. Track fixed cloth-to-body surface anchors through every action. Barycentric transfer of nearby anatomical body influence fields can attach a waistband to the lower torso and lateral hems to their own thighs; preserve a hanging center in the pelvis frame. Smooth on cloth topology, keep other skin rows exact and recheck all actions. Broad coordinate-based thigh repairs can accidentally deform a separate loincloth.
+
+Measure wrist rotation relative to the native forearm. Independent donor wrist calibration introduced near-half-turn motion on the Two-Headed Giant. For a relaxed released hand, preserve its native forearm relationship and solve the elbow/wrist route against the complete hand and forearm surfaces. Neutralizing the wrist alone can drive fingers through the ground if the old elbow remains high. Lower the release elbow plane as needed, keeping body and leg support unchanged.
+
+Applying an ease-to-zero curve to every intermediate strike pose creates a pause at impact and follow-through. Keep progress moving through those joins and round the transitions on an already clearance-safe route. Replacing the entire position/orientation path with a broad new spline can reintroduce upper-arm/head collisions even when the club tip clears. Keep the spare arm in a stable torso/clavicle frame and audit complete arm, helper, weapon and head surfaces.
+
+Before binary compaction, remove animation samplers unreferenced by channels and remap the channel indices. Historical fitting revisions can otherwise retain many obsolete samplers despite removing unreachable buffer views. Prove active curves, static arrays and clip duration are lossless, then bind native and fresh-import witnesses to the packed runtime hash.
+
+
+## Orc/Kobold framing and native grip
+
+The approved two-actor selection is documented in `docs/orc-kobold-motion.md`. A pitched or yawed chest frame can turn a nominal forward punch toward the groin. Author striking reach against the declared actor-forward/up frame, preserve native serial lengths and measure the exported deformed hand's height above the hips. Keep the full forearm clear through recovery as well as impact.
+
+Do not assume every digit or accessory influence describes the visible anatomy. The Orc needs calibrated native phalange closure for its fist. The Kobold has a true tail, a separate loincloth chain, compound lower legs and a detached rump spike that originally followed a thumb. Validate the complete connected hand/wrist surface and each attachment island. A single thigh point with finger leakage can stretch adjacent faces even when welded seams remain closed. Correct that physical point across its UV duplicates; broad spatial cutoffs can capture legitimate nearby claws.
+
+Exclude actual arm and thigh surfaces from abdominal smoothing. A connected torso mask can otherwise erase limb ownership. Preserve complete claws/paws in their support frames, keep the tail attached coherently at the rump and include tail/cloth behavior in terminal support fitting.
+
+For a relaxed non-striking arm, a torso-heading target with gentle counter-motion and a fixed native wrist-to-forearm relation can follow the body more naturally than carrying the entire walking pose through a pitched attack frame. Check side and opposite views: a front view may hide an elbow pulled behind the back. An arm-only revision can preserve the other arm's channels, torso, legs, feet and all six unrelated clips exactly; bind the new witnesses and review to that final file.

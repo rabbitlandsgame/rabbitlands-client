@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "status": "approved_for_develop_publication",
+  "approval": "That looks good. Go ahead and merge your updates into develop and push.",
+  "scope": [
+    "Giant Meadow Rabbit game integration",
+    "Jadefeather Raptor game integration and approved idle cape",
+    "Five-mount selection window",
+    "Uniform normal 2x and fast 4x running speeds",
+    "Approved faster Crystalback Tortoise cadence"
+  ],
+  "clientDevelopBase": "3f72fedf794f44dc9af2c56bf8d0280aa6ef6c1c",
+  "clientMergeSnapshot": "44bd45b915b54baaaa4415fedcb57c96711b77b8",
+  "serverDevelopBase": "84a69589d66cab54e59c3e514dd60af74e2fdfc6",
+  "serverMergeSnapshot": "64ecd95",
+  "validation": {
+    "serverMountTestsPassed": 145,
+    "clientProtocolChecksPassed": 27,
+    "selectionChecksPassed": 22,
+    "bannerChecksPassed": 20,
+    "mountedMovementChecksPassed": 1245,
+    "rabbitFitChecksPassed": 3650,
+    "raptorFitAndSwitching": {
+      "checks": 4821,
+      "drape_measurements": [
+        {
+          "body": "luminous_male",
+          "cape_drop_metres": 0.933429002761841,
+          "gait": "idle"
+        },
+        {
+          "body": "luminous_male",
+          "cape_drop_metres": 0.550402998924255,
+          "gait": "cruise"
+        },
+        {
+          "body": "luminous_male",
+          "cape_drop_metres": 0.539442896842957,
+          "gait": "burst"
+        },
+        {
+          "body": "luminous_male",
+          "cape_drop_metres": 0.933523058891296,
+          "gait": "idle"
+        },
+        {
+          "body": "luminous_female",
+          "cape_drop_metres": 0.933429002761841,
+          "gait": "idle"
+        },
+        {
+          "body": "luminous_female",
+          "cape_drop_metres": 0.550402998924255,
+          "gait": "cruise"
+        },
+        {
+          "body": "luminous_female",
+          "cape_drop_metres": 0.539442896842957,
+          "gait": "burst"
+        },
+        {
+          "body": "luminous_female",
+          "cape_drop_metres": 0.933523058891296,
+          "gait": "idle"
+        }
+      ],
+      "failures": 0,
+      "max_all_paw_ground_clearance_metres": 0.0276484806090593,
+      "max_cape_link_error_metres": 7.39097595214844e-06,
+      "max_moving_cape_drop_metres": 0.550402998924255,
+      "max_rider_contact_error_metres": 0.000274835532763973,
+      "min_idle_cape_drop_metres": 0.933429002761841,
+      "min_paw_sole_height_metres": -0.00144846760667861
+    },
+    "mountedBowAndMagicChecksPassed": 3070,
+    "lowerBodyActionError": 0.0,
+    "ponyPositioningChecksPassed": 48152,
+    "raptorPositioningChecksPassed": 54408,
+    "raptorPositioningMaxOriginErrorMetres": 0.00021517850109,
+    "realLandfallGameSmokeFailures": 0,
+    "realGameScope": [
+      "Actual Mounts window Ride command",
+      "Normal and fast movement",
+      "Space fast toggle",
+      "R dismount and remount"
+    ],
+    "testDatabase": "fresh disposable local database"
+  },
+  "modelAssetsRewritten": false,
+  "profilesAndControlsPreserved": true,
+  "notes": [
+    "Latest develop combat presentation, creature positioning and server movement work was retained.",
+    "New raptor positioning option extends the existing develop regression check.",
+    "Existing Godot renderer cleanup warnings occur at test shutdown.",
+    "This receipt records merge validation and publication approval, not a remote game-server deployment."
+  ]
+}

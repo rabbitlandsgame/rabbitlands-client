@@ -1,7 +1,7 @@
 class_name LookGrade
 extends RefCounted
 ## Look pass layer L1: a base grade and light over whatever the manifest
-## binders built. Does nothing unless LookProfile.enabled().
+## binders built. Does nothing unless LookProfile.full_painted().
 ##
 ## WorldEnvironmentBinder builds the environment at bind; DayNightBinder then
 ## rewrites the sun, the ambient, the sky and the fog colour on every clock
@@ -23,7 +23,7 @@ extends RefCounted
 
 static func apply(lighting: WorldManifest, world_environment: WorldEnvironment,
 		sun: DirectionalLight3D) -> bool:
-	if not LookProfile.enabled() or lighting == null or world_environment == null:
+	if not LookProfile.full_painted() or lighting == null or world_environment == null:
 		return false
 	var environment: Environment = world_environment.environment
 	var raw: Variant = lighting.data.get("environment")

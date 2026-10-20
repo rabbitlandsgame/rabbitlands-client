@@ -344,7 +344,9 @@ func _catalog_entry(catalog: Dictionary) -> Dictionary:
 		# are patch models shaped for a stated footprint (a crop-row segment
 		# needs its row's yaw, a seam its face), so a node that states neither a
 		# footprint nor a variant - an older lattice node, or any node of an
-		# older package - keeps the label's own model.
+		# older package - keeps the label's own model. Where that model is
+		# retired, only a variant marked `standsAlone` may stand in for it
+		# (below); the rest are never stood at a random yaw.
 		if listed is Array and not (listed as Array).is_empty() \
 				and (presentation.has("footprint") or presentation.has("variant")):
 			var choices: Array = listed as Array
@@ -363,12 +365,18 @@ func _catalog_entry(catalog: Dictionary) -> Dictionary:
 		var strongbox: Dictionary = models.get("storage", {})
 		if bool(strongbox.get("imported", false)) and not bool(strongbox.get("retired", false)):
 			entry = strongbox
-	# Older nodes kept the retired base plant instead of a current patch.
+	# A node no package lays out, of a label whose own model is retired,
+	# stands one of the label's variants that reads right at its seeded yaw
+	# and scale: `standsAlone`, a whole clump or mat (imported_world_objects.py
+	# ImportedHarvestable.stands_alone). A row, hedge, seam, bank, drift or pan
+	# needs the footprint and yaw its package states, so a label with none of
+	# those keeps the retired model's bare ring and name until it is laid out.
 	if is_harvestable() and bool(entry.get("retired", false)):
 		var choices: Array = []
 		for candidate: Variant in (section.get("variants", {}) as Dictionary).get(label, []):
 			var variant: Dictionary = models.get(str(candidate), {})
-			if bool(variant.get("imported", false)) and not bool(variant.get("retired", false)):
+			if bool(variant.get("imported", false)) and not bool(variant.get("retired", false)) \
+					and bool(variant.get("standsAlone", false)):
 				choices.append(str(candidate))
 		if not choices.is_empty():
 			id = choices[variant_index(object_id, choices.size())]
@@ -461,7 +469,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		WORLD_LABEL_STYLE.apply(title, 15, .0012953, 5)
 		title.modulate = PORTAL_COLOUR
 		title.no_depth_test = true
-		title.layers = GAMEPLAY_LAYER
+		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 80
 		add_child(title)
 	elif label == "Cache":
@@ -474,7 +482,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		WORLD_LABEL_STYLE.apply(title, 16, .0012953, 5)
 		title.modulate = STORAGE_COLOUR.lightened(.3)
 		title.no_depth_test = true
-		title.layers = GAMEPLAY_LAYER
+		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 80
 		add_child(title)
 	elif is_harvestable() and (model_id.is_empty() or entry.has("resourcePalette")):
@@ -488,7 +496,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		title.fixed_size = true
 		WORLD_LABEL_STYLE.apply(title,14,.0012953,5)
 		title.modulate = HARVEST_COLOUR
-		title.layers = GAMEPLAY_LAYER
+		title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 		title.visibility_range_end = 35
 		add_child(title)
 
@@ -522,7 +530,7 @@ func _add_storage_visual(height: float) -> void:
 	WORLD_LABEL_STYLE.apply(title, 16, 0.0012953, 5)
 	title.modulate = STORAGE_COLOUR.lightened(0.3)
 	title.no_depth_test = true
-	title.layers = GAMEPLAY_LAYER
+	title.layers = WORLD_LABEL_STYLE.RENDER_LAYER
 	title.visibility_range_end = STORAGE_WORLD_RANGE
 	add_child(title)
 

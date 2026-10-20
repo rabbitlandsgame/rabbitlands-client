@@ -4,7 +4,7 @@ extends RefCounted
 ## underneath, each a little different from its neighbours, the autumn reds
 ## and oranges tamed into a painted range, swaying a little in the wind - by
 ## giving each crown a painted material as its region, chunk or neighbour is
-## finished. Does nothing unless LookProfile.enabled().
+## finished. Does nothing unless LookProfile.full_painted().
 ##
 ## Two families of crown come out of the exporters (see the look inventory,
 ## tests/look/probe_materials.gd):
@@ -92,7 +92,7 @@ static func paint_loaded(root: Node, manifest: WorldManifest) -> int:
 	if root == null or manifest == null or not manifest.data.has("continentGeography"):
 		return 0
 	# Against the root, as LookGround.paint_loaded asks (LookProfile.enabled_for).
-	if not LookProfile.enabled_for(root):
+	if not LookProfile.enabled_for(root) or not LookProfile.full_painted():
 		return 0
 	root.set_meta(CONTINENT_META, translation_of(manifest))
 	var painted := paint(root, LookGround.region_of(manifest))
@@ -109,7 +109,7 @@ static func paint_loaded(root: Node, manifest: WorldManifest) -> int:
 ## painted.
 static func paint_object(root: Node, region := "", place := Transform3D.IDENTITY,
 		translation := Vector2.ZERO) -> int:
-	if root == null or not LookProfile.enabled():
+	if root == null or not LookProfile.full_painted():
 		return 0
 	root.set_meta(PLACE_META, place)
 	root.set_meta(CONTINENT_META, translation)
@@ -138,7 +138,7 @@ static func translation_of(manifest: WorldManifest) -> Vector2:
 ## variant, so it fades as any stand-in does and keeps its colour while it
 ## does. Returns the surfaces changed.
 static func keep_chroma(root: Node, region := "") -> int:
-	if not LookProfile.enabled() or root == null:
+	if not LookProfile.full_painted() or root == null:
 		return 0
 	var words := LookProfile.keep_words(region)
 	if words.is_empty():
@@ -222,7 +222,7 @@ static func _named_with(material_name: String, words: Array) -> bool:
 ## name more crown materials and kit words, LookProfile.foliage_words). Safe to
 ## call again on a root it has already painted.
 static func paint(root: Node, region := "") -> int:
-	if not LookProfile.enabled() or root == null:
+	if not LookProfile.full_painted() or root == null:
 		return 0
 	var words := words_for(region)
 	var tinting := crown_tints_near(region)

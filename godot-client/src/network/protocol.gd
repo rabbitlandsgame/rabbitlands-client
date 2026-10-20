@@ -260,6 +260,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"actor16_v1",
 	"adjacent_actors_v1",
 	"almanac_v1",
+	"seasons_v1",
 	"combat_hud_v1",
 	"inventory_names_v1",
 	"inventory_window_v1",
@@ -286,6 +287,8 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"mounts_v1",
 	"mount_selection_v1",
 	"crystalback_mount_v1",
+	"rabbit_mount_v1",
+	"raptor_mount_v1",
 	"quest_offers_v1",
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",
@@ -317,6 +320,10 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# Repeat casting: whether it is on and running, ELORIA_MAGIC_STATE kind
 	# "autocast"; switched with magic_request {"op": "autocast"}.
 	"magic_autocast_v1",
+	# The character is held off the screen until its ground is loaded and then
+	# reported with `#arrived <map>`; the server keeps it out of every fight
+	# until then (main.gd `_report_arrival`).
+	"arrival_ready_v1",
 ]
 
 ## `#clientcaps` is an ordinary chat command; the server parses it out of
@@ -2380,14 +2387,19 @@ static func decode_almanac(payload: PackedByteArray) -> Dictionary:
 		var entry_values: Array = entry.values as Array
 		catalogue.append({"kind": ALMANAC_KINDS[entry_kind],
 			"name": str(entry_values[0]), "description": str(entry_values[1])})
-	if offset != payload.size():
-		return {"type": "invalid", "error": "almanac_trailing"}
+	var season: Dictionary = {}
+	if offset < payload.size():
+		# Only seasons_v1 clients are sent this optional five-byte trailer.
+		if payload.size() - offset != 5 or int(payload[offset]) >= 4:
+			return {"type": "invalid", "error": "almanac_season"}
+		season = {"index": int(payload[offset]), "next_change": u32(payload, offset + 1)}
 	return {"type": "almanac",
 		"day": int(payload[0]), "month": int(payload[1]), "year": u16(payload, 2),
 		"kind": ALMANAC_KINDS[kind_index],
 		"experience_bonus": float(u16(payload, 5)) / 100.0,
 		"name": str(texts[0]), "description": str(texts[1]),
-		"effects": effects, "multipliers": multipliers, "catalogue": catalogue}
+		"effects": effects, "multipliers": multipliers, "catalogue": catalogue,
+		"season": season}
 
 ## Command 228. Who the player just looked at, and what they have earned.
 ##

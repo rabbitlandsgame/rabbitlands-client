@@ -17,7 +17,7 @@ func run() -> void:
 	state.authenticated = true
 	state.local_actor_id = 42
 	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "moor_pony", "mount_id": "",
-		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise"], "blocked_reason": "", "gait": "on_foot"}
+		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"], "blocked_reason": "", "gait": "on_foot"}
 	var window: Variant = (load("res://src/ui/mounts_window.gd") as Script).new()
 	root.add_child(window)
 	var sent: Array[String] = []
@@ -26,7 +26,20 @@ func run() -> void:
 	for frame: int in 4:
 		await process_frame
 	expect(window.panel.get_rect().end.y <= 680, "mount window fits above the fixed bottom bar")
-	expect(window.is_open() and window.cards.size() == 3, "three enabled mounts appear")
+	expect(window.is_open() and window.cards.size() == 5, "five enabled mounts appear")
+	expect(window.grid.columns == 3, "mount collection uses a compact three-column grid")
+	for card: Variant in window.cards.values():
+		expect(window.scroll.get_global_rect().encloses(card.get_global_rect()), "every current mount fits without scrolling")
+	window.search.text = "raptor"
+	window.search.text_changed.emit(window.search.text)
+	expect(window.cards.jadefeather_raptor.visible and not window.cards.moor_pony.visible, "search filters mounts by name")
+	expect(sent.is_empty(), "search never sends a mount command")
+	window.search.text = "missing mount"
+	window.search.text_changed.emit(window.search.text)
+	expect(window.empty_label.visible and window.ride.disabled, "empty search cannot ride a hidden selection")
+	window.search.clear()
+	window.search.text_changed.emit("")
+	for frame: int in 4: await process_frame
 	window.choose("golden_plains_horse")
 	expect(not window.ride.disabled, "horse can be chosen by this player")
 	expect(state.actor_mounts[42].selected_mount_id == "moor_pony", "browsing never predicts server selection")
@@ -54,6 +67,12 @@ func run() -> void:
 	window.choose("crystalback_tortoise")
 	window._ride()
 	expect(sent.back() == "#mount ride crystalback_tortoise", "third mount uses the same authoritative selection command")
+	window.choose("rabbit")
+	window._ride()
+	expect(sent.back() == "#mount ride rabbit", "rabbit uses normal authoritative switching")
+	window.choose("jadefeather_raptor")
+	window._ride()
+	expect(sent.back() == "#mount ride jadefeather_raptor", "raptor uses normal authoritative switching")
 	window._dismount()
 	expect(sent.back() == "#mount", "Dismount uses normal server command")
 	state.actor_mounts[42].blocked_reason = "combat"
@@ -62,8 +81,21 @@ func run() -> void:
 	root.size = Vector2i(800,720)
 	root.content_scale_size = Vector2i(800,720)
 	for frame: int in 8: await process_frame
-	expect(window.panel.get_global_rect().end.x <= 704, "three cards scroll inside a smaller game window")
-	window.choose("crystalback_tortoise")
+	expect(window.panel.get_global_rect().end.x <= 704, "compact mount grid fits a smaller game window")
+	for card: Variant in window.cards.values():
+		expect(window.scroll.get_global_rect().encloses(card.get_global_rect()), "all current mounts also fit the smaller window")
+	state.actor_mounts[42].selected_mount_id = "jadefeather_raptor"
+	window.close()
+	window.open()
+	for frame: int in 8: await process_frame
+	var card_rect: Rect2 = window.cards["jadefeather_raptor"].get_global_rect()
+	var scroll_rect: Rect2 = window.cards["jadefeather_raptor"].get_parent().get_parent().get_global_rect()
+	expect(card_rect.position.x >= scroll_rect.position.x and card_rect.end.x <= scroll_rect.end.x + 1, "reopening reveals the saved raptor card on small screens")
+	root.size = Vector2i(1024,610)
+	root.content_scale_size = Vector2i(1024,610)
+	for frame: int in 8: await process_frame
+	for card: Variant in window.cards.values():
+		expect(window.scroll.get_global_rect().encloses(card.get_global_rect()), "shorter game windows retain both mount rows when there is room")
 	window.close()
 	expect(not window.is_open(), "window closes")
 	for portrait: Variant in window.portraits.values():

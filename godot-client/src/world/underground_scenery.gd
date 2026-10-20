@@ -6,6 +6,18 @@ const MineralAppearance := preload("res://src/world/mineral_appearance.gd")
 const CENOTE_WATER := preload("res://src/world/cenote_water.gdshader")
 const DAYLIGHT_SHAFT := preload("res://src/world/daylight_shaft.gdshader")
 
+## How the underground presents its seam and pan nodes, by object id (as a
+## string): {resource, variant, yaw}, the config's `harvestPresentation`
+## (tools/prepare_underground_scenery.py). The underground package states no
+## harvest presentation, so `Main.map_presentation_of` takes these in its
+## place. Empty for any other map.
+static func harvest_presentation(map_id: String) -> Dictionary:
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(CONFIG))
+	if data is not Dictionary or str((data as Dictionary).get("map", "")) != map_id:
+		return {}
+	var listed: Variant = (data as Dictionary).get("harvestPresentation", {})
+	return listed if listed is Dictionary else {}
+
 static func apply(manifest: WorldManifest, world: Node3D) -> int:
 	if manifest.asset_id() != "landfall_insides":
 		return 0

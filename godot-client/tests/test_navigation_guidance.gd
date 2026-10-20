@@ -40,7 +40,7 @@ func _run() -> void:
 	_expect(nodes.size() == 1, "only current-map markers have world visuals")
 	var marker: MapMarker3D = nodes[520]
 	var label: Label3D = marker.get_node("WorldLabel")
-	_expect(label.text == "The central plaza" and label.layers == 2,
+	_expect(label.text == "The central plaza" and label.layers == preload("res://src/ui/world_label_style.gd").RENDER_LAYER,
 		"the gameplay label uses the server's text")
 	_expect((marker.get_node("Pin") as MeshInstance3D).layers == 4,
 		"the large map pin remains separate from the gameplay effect")

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "scope": "All five mounts",
+  "normalRunMultiplier": 1.5,
+  "gallopRunMultiplier": 2.0,
+  "standardRunMetresPerSecond": 5.0,
+  "normalMetresPerSecond": 7.5,
+  "gallopMetresPerSecond": 10.0,
+  "normalStepMicroseconds": 133333,
+  "gallopStepMicroseconds": 100000,
+  "serverTestsPassed": 146,
+  "clientChecks": {
+    "protocol": 27,
+    "movement": 1245,
+    "rabbitRiderAndCape": 3650,
+    "raptorRiderCapeAndSwitching": 4821
+  },
+  "sourceAssetsChanged": false,
+  "controlsAndOwnershipChanged": false,
+  "notes": "Client interpolation includes fractional-millisecond timing. Historical approval receipts preserve their original balance values.",
+  "normalTestServerVerification": {
+    "verifiedTLS": true,
+    "mountsVerified": 5,
+    "normalStepMicroseconds": 133333,
+    "gallopStepMicroseconds": 100000,
+    "allFiveOwned": true,
+    "testSelectionRestored": true,
+    "serverSpeedCodeCommit": "3190a6085bd360d93d5f6b8941a59bdcb9985acf"
+  }
+}

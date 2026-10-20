@@ -44,7 +44,7 @@ func run() -> void:
 			for normal: Vector3 in normals:
 				expect(absf(normal.length() - 1.0) < .0001, "fitted saddle normals stay normalized")
 			var bounds := fitted.get_aabb()
-			actor._presentation_speed = {"walk": 1.67, "cruise": 5.0, "burst": 7.5}[gait]
+			actor._presentation_speed = {"walk": 1.67, "cruise": 10.0, "burst": 20.0}[gait]
 			actor.play_action(&"run")
 			for frame: int in 120:
 				visual._process(1.0 / 60.0)

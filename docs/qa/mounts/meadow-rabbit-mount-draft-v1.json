@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "scope": "Offline Giant Meadow Rabbit mount draft v1",
+  "status": "Pending user review",
+  "sourceProvenance": {
+    "rabbit": "Current reviewed leporid source identified by docs/qa/leporid-motion/promotion.json; original imported creature retained. No retired procedural model is selected.",
+    "rabbitSha256": "2c23a31766f672eb3d78d2f74e7016546451dd5acbdc8631268be5b3883e1d99",
+    "meshVertices": 3849,
+    "joints": 25,
+    "morphTargets": 0,
+    "requiredClipsRetained": [
+      "Idle_A",
+      "Fighting_Idle",
+      "Walk",
+      "Jog",
+      "Sword_Attack",
+      "Hit_Chest",
+      "Death_A"
+    ]
+  },
+  "authoring": {
+    "newModelsGenerated": false,
+    "sourceGlbsReplaced": false,
+    "meshSkinRestBindOrClipChanges": false,
+    "importScale": 0.34999981,
+    "draftScale": 6.0,
+    "effectiveScale": 2.09999886,
+    "nativeBounds": [
+      [
+        -0.277344048,
+        -3.79e-07,
+        -0.500000358
+      ],
+      [
+        0.279296935,
+        0.998047233,
+        0.500000179
+      ]
+    ],
+    "saddleBone": "spine_01",
+    "seatNative": [
+      0.001,
+      0.63,
+      -0.04
+    ],
+    "saddle": "638 triangles / 751 vertices from the existing Moor Pony saddle, with original UVs/material and a fixed fit.",
+    "harness": "Chest harness with rein contact, clear of the ears.",
+    "motion": "Existing Walk 0.84s and Jog 0.60s retained; matched draft travel speeds approximately 0.675 and 1.505 m/s. No new sprint clip authored.",
+    "camera": "Only player visual follows the hopping saddle; authoritative player/camera transform remains unchanged.",
+    "offlineScope": "Explicit profile supplied by a development-only attachment helper. No catalogue/protocol ID, server grants or live selection entry added."
+  },
+  "validation": {
+    "godot": "4.7.2-stable",
+    "draft": {
+      "checks": 2570,
+      "failures": 0,
+      "max_all_paw_ground_clearance_metres": 0.417270421981812,
+      "max_cape_link_error_metres": 0.0194141864776611,
+      "max_rider_contact_error_metres": 3.83142423743266e-06,
+      "min_paw_sole_height_metres": 0.00419871881604195
+    },
+    "riderContactToleranceMetres": 0.06,
+    "capeLengthToleranceMetres": 0.02,
+    "pawPenetrationToleranceMetres": 0.006,
+    "soleRegion": "Fixed qualified anatomical sole witnesses resolved by exact rest positions after editor vertex reordering; all coincident imported seam copies included.",
+    "bodies": [
+      "luminous_male",
+      "luminous_female"
+    ],
+    "gaits": [
+      "walk",
+      "cruise"
+    ],
+    "sampleRateHz": 60,
+    "sampledSecondsPerGait": 3,
+    "renderedFrames": 135,
+    "renderedFps": 30,
+    "renderedSeconds": 4.5,
+    "renderedScriptOrResourceErrors": 0,
+    "horseRegression": {
+      "checks": 11741,
+      "failures": 0
+    },
+    "tortoiseRegression": {
+      "checks": 1354,
+      "failures": 0
+    },
+    "exportFidelity": "Not applicable: no GLB export or replacement. Original asset hashes and animation/import policy preserved.",
+    "visualReview": "Source front/side/rear/top plus mounted resting, hopping and bounds views inspected.",
+    "userVisualApproval": "Pending review of rabbit mount draft v1"
+  },
+  "sourceSha256": {
+    "godot-client/data/mounts/drafts/meadow_rabbit.json": "925f685ed1b0e09b475971698a0a6146d796730809ed017016fb36d87582a77c",
+    "godot-client/src/dev/rabbit_mount_draft.gd": "5aaf4944c6f2d3ba10f0351bd8a4af4ccebd28adbd5c5c4277f081abbd4f939f",
+    "godot-client/src/dev/rabbit_mount_showcase.gd": "9058ab54d0fe91e35f437b4815c2c4fff30e9e18abfb096c1466ec126364119d",
+    "godot-client/src/dev/rabbit_mount_showcase.tscn": "80f852e9168fe878aac8eb2922e7a76287baa54b7c7d54846057c694970d53f7",
+    "godot-client/src/mounts/mounted_player_visual.gd": "28cf65997760d89128eb61df777e02c4d4f37550a44f50e1c24ca16318a678ea",
+    "godot-client/tests/test_rabbit_mount_draft.gd": "0ec3551f5eb354d903bd1b01c0e6d45232001ab8be0a2733eb63ea92502b6606",
+    "godot-client/tests/fixtures/rabbit_mount_soles.json": "6b81a37892ca64adbfdd4d6d34f218e3800d19c64f4edd9d2aedc041bf08bd87",
+    "godot-client/tests/integration/rendered_rabbit_mount.gd": "4aa8e9b8acfba61079769918dd193d4d092534d008d2b043930d080cc56f050f"
+  },
+  "evidenceSha256": {
+    "checks.json": "fac2a429aa219eb7cbeaad20ab70e4306d203a68b8b3288f02a894eca6b0fa45",
+    "rabbit-mount-v1.mp4": "232f8b72b32710fa71e58193d72441207d6b722d80e640a27db178d88113e69f",
+    "riding-preview.png": "768d5bc843d2ca489ba1445f5cc62bc80d209236932d359c5ad8ba85e6d9ee89",
+    "source-audit.png": "0d1457631905d5fcd5a628da5d1d9be10dc6fb3735f447dc1e88277d9ba98e4a"
+  },
+  "reviewScene": "res://src/dev/rabbit_mount_showcase.tscn",
+  "limitations": [
+    "Offline visual draft; no server or normal game mount enablement.",
+    "Two representative rider bodies and the existing cape reviewed; other equipment combinations remain for later fitting.",
+    "Dedicated sprint, mount balance and any new ear motion are later development work."
+  ]
+}

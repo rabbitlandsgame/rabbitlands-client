@@ -43,10 +43,10 @@ MISSILE_FIRE_A_TO_XYZ = 87
 FIRE_MISSILE_AT_OBJECT = 51
 MISSILE_FIRE_A_TO_B = 86
 
-BOW = "Hunting Bow"
-AMMUNITION = "Arrow"
-# The server refuses to range a target closer than this.
-MIN_RANGING_DISTANCE = 4
+BOW = "Amberwood Yew Longbow"
+AMMUNITION = "Basic Quiver"
+# Player ranging has no minimum distance.
+MIN_RANGING_DISTANCE = 0
 
 results: list[tuple[str, bool, str]] = []
 
@@ -147,15 +147,12 @@ async def probe(port: int) -> None:
                       for line in texts(equipped).split(" | ")),
               texts(equipped)[:120] or "no refusal")
 
-        # Stand far enough away for the server to allow a shot. The creature
-        # wanders and may close the distance between the teleport and the
-        # attack, so this backs off further and asks again rather than
-        # assuming where it is.
+        # Start outside melee reach and observe the authoritative shot.
         target_id, target_x, target_y = targets[0]
         aims: list[bytes] = []
         shots: list[bytes] = []
         for attempt in range(4):
-            gap = MIN_RANGING_DISTANCE + 3 + attempt * 3
+            gap = 3 + attempt  # Stay within a novice's six-tile maximum.
             await ask(writer, reader, f"#tp {target_x + gap} {target_y}", 2.0)
             await drain(reader, 0.5)
             writer.write(packet(ATTACK_SOMEONE, struct.pack("<I", target_id)))
@@ -193,12 +190,11 @@ async def probe(port: int) -> None:
                   and fire_source == actor_id and fire_target == target_id,
                   "aim %d->%d, fire %d->%d" % (aim_source, aim_target,
                                                fire_source, fire_target))
-        # Shooting at a place rather than at somebody: the arrow is spent
-        # and lands where it was aimed, and nothing is earned.
+        # Ground shots use the selected reusable shot type and earn no XP.
         await ask(writer, reader, "#tp 160 168", 2.0)
         await drain(reader, 0.5)
         writer.write(packet(FIRE_MISSILE_AT_OBJECT,
-                            struct.pack("<HH", 160, 168 + 8)))
+                            struct.pack("<HH", 160, 168 + 6)))
         await writer.drain()
         frames = await drain(reader, 3.0)
         ground_aims = [payload for command, payload in frames
@@ -212,16 +208,16 @@ async def probe(port: int) -> None:
             aimed = struct.unpack_from("<HHH", ground_aims[0])
             loosed = struct.unpack_from("<HHH", ground_shots[0])
             check("both name the shooter and the tile that was aimed at",
-                  aimed == (actor_id, 160, 176) and loosed == aimed,
+                  aimed == (actor_id, 160, 174) and loosed == aimed,
                   "aim %s, shot %s" % (str(aimed), str(loosed)))
 
         writer.write(packet(FIRE_MISSILE_AT_OBJECT, struct.pack("<HH", 160, 169)))
         await writer.drain()
         frames = await drain(reader, 2.0)
-        check("a place too close is refused the way a target is",
-              not any(command == MISSILE_FIRE_A_TO_XYZ
-                      for command, _payload in frames)
-              and "too close" in texts(frames),
+        check("a nearby place accepts a shot without a minimum distance",
+              any(command == MISSILE_FIRE_A_TO_XYZ
+                  for command, _payload in frames)
+              and "too close" not in texts(frames),
               texts(frames)[:90])
     finally:
         await close_client(writer)

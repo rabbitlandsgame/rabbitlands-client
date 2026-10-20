@@ -4,7 +4,7 @@ extends Node3D
 ## the grassy ground around the camera's focus - along every road's verge and
 ## in slow beds across open grass, with bare ground between them - and never
 ## on a road, paving, a yard, water, under a wall or up a cliff. Grows nothing
-## unless LookProfile.enabled() and the graphics quality has grass (`tend`).
+## unless LookProfile.full_painted() and the graphics quality has grass (`tend`).
 ##
 ## Where grass may grow is read off the ground itself, not guessed from names
 ## alone. Every candidate spot casts one ray down the walk collision (the
@@ -49,6 +49,7 @@ extends Node3D
 ## main camera's gameplay layer only (the map cameras never see it).
 
 const SHADER := preload("res://src/world/look/grass_beds.gdshader")
+const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
 const NODE_NAME := "LookGrassBeds"
 
 ## WorldLoader.WORLD_COLLISION_LAYER, NAVIGATION_SURFACE_LAYER and
@@ -134,7 +135,7 @@ var _classified_region := ""
 ## Grows, extends and trims the grass beds around `focus` (global) on the map
 ## `active` was loaded from. Called every frame by main while the game view
 ## is up; `residents` is ExteriorRegionStream.residents, the neighbours
-## streamed beside the map. Grows nothing unless LookProfile.enabled() and
+## streamed beside the map. Grows nothing unless LookProfile.full_painted() and
 ## the graphics quality has grass, and takes away a bed already grown the
 ## frame either stops being true, so the settings window's switch and quality
 ## reach the grass with nothing else to call.
@@ -143,7 +144,8 @@ static func tend(parent: Node3D, active: Node3D, manifest: WorldManifest,
 	if parent == null:
 		return
 	var beds := parent.get_node_or_null(NODE_NAME) as LookGrassBeds
-	if not LookProfile.enabled() or not bool(LookProfile.quality_value("grass")) \
+	if not LookProfile.full_painted() or not bool(LookProfile.quality_value("grass")) \
+			or (SeasonSurfaces.current_season() == 0 and SeasonSurfaces.snow_cover(manifest) > 0.1) \
 			or OS.get_environment(LookProfile.GRASS_DEBUG_VARIABLE) == "none":
 		if beds != null:
 			clear(parent)
@@ -315,6 +317,7 @@ func update(active: Node3D, manifest: WorldManifest, residents: Dictionary,
 			> LookProfile.GRASS_REFOCUS_METRES:
 		_plan(local_focus)
 	_material.set_shader_parameter(&"look_focus", focus)
+	_material.set_shader_parameter(&"rl_grass_season", float(SeasonSurfaces.current_season()))
 	_place(now)
 	if _dirty and (_queue.is_empty() or now >= _assembled_msec + ASSEMBLE_MSEC):
 		_assemble(now)
@@ -1049,6 +1052,8 @@ func _surface_of(collider: CollisionObject3D) -> Dictionary:
 ## deck with coverage) or is opaque, whether its vertex colour is its colour.
 static func _material_facts(node: MeshInstance3D) -> Dictionary:
 	var material := node.get_active_material(0)
+	while material != null and material.has_meta(SeasonSurfaces.SOURCE_META):
+		material = material.get_meta(SeasonSurfaces.SOURCE_META) as Material
 	var coloured: bool = (int(node.mesh.surface_get_format(0)) & Mesh.ARRAY_FORMAT_COLOR) != 0
 	if material is ShaderMaterial and material.has_meta(LookGround.PAINTED_META):
 		var painted := material as ShaderMaterial

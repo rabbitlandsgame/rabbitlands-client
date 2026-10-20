@@ -169,6 +169,9 @@ var actor_titles: Dictionary = {}
 ## their rows too.
 var actor_occupations: Dictionary = {}
 var actor_mounts: Dictionary = {}
+## Retained actors cross land seams before their destination actor and mount
+## packets arrive. Keep the same rider mounted while those two records catch up.
+var _mount_handoffs: Dictionary = {}
 ## NPCs with a new quest this player can accept, stated by the server.
 var quest_offer_actors: Dictionary = {}
 ## True lifetime experience per skill, keyed by skill name, and what it has
@@ -199,6 +202,39 @@ func take_changed_actors() -> Dictionary:
 	var taken: Dictionary = changed_actors
 	changed_actors = {}
 	return taken
+
+func mount_state_for_actor(actor_id: int) -> Dictionary:
+	var row: Dictionary = actor_mounts.get(actor_id, {})
+	var actor: Dictionary = actors.get(actor_id, {})
+	var owner: String = str(row.get("owner", "")).to_lower()
+	if owner.is_empty() or owner != str(actor.get("name", "")).to_lower():
+		return {}
+	if row.get("map", "") == actor.get("map", ""):
+		return row
+	if str(_mount_handoffs.get(actor_id, {}).get("owner", "")) == owner:
+		return row
+	return {}
+
+func _begin_mount_handoff() -> void:
+	var retained: Dictionary = {}
+	for actor_id: int in actor_mounts.keys():
+		var row: Dictionary = mount_state_for_actor(actor_id)
+		if not row.is_empty():
+			retained[actor_id] = {"owner": str(row.owner).to_lower(), "confirmed": false}
+		else:
+			actor_mounts.erase(actor_id)
+	_mount_handoffs = retained
+
+func _settle_mount_handoff(actor_id: int) -> void:
+	if not _mount_handoffs.has(actor_id):
+		return
+	var handoff: Dictionary = _mount_handoffs[actor_id]
+	var row: Dictionary = actor_mounts.get(actor_id, {})
+	var actor: Dictionary = actors.get(actor_id, {})
+	if (str(row.get("owner", "")).to_lower() != handoff.owner
+			or str(actor.get("name", "")).to_lower() != handoff.owner
+			or (handoff.confirmed and row.get("map", "") == actor.get("map", ""))):
+		_mount_handoffs.erase(actor_id)
 
 func footprint_for_actor_type(actor_type: int) -> Vector2i:
 	var size: Variant = actor_footprints.get(actor_type)
@@ -458,6 +494,7 @@ func _on_connection_state_changed(value: String) -> void:
 		actor_titles.clear()
 		actor_occupations.clear()
 		actor_mounts.clear()
+		_mount_handoffs.clear()
 		quest_offer_actors.clear()
 		experience64.clear()
 		# Per profile rather than per character, but a different server may
@@ -595,7 +632,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"clock")
 		"change_map":
 			current_map = event.map_name
-			actor_mounts.clear()
+			_begin_mount_handoff()
 			# The new map's objects arrive in their own packet; anything held
 			# for the old map is stale the moment the change lands.
 			map_objects.clear()
@@ -635,6 +672,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			if not Network.coordinates.selected:
 				event["map"] = str(adjacent_maps.get(map_handle, current_map)) if map_handle > 0 else current_map
 			actors[event.actor_id] = event
+			_settle_mount_handoff(int(event.actor_id))
 			mark_actor_changed(int(event.actor_id))
 			state_changed.emit(&"actors")
 		"remove_actor":
@@ -643,6 +681,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				actors.erase(removed_actor_id)
 				actor_occupations.erase(removed_actor_id)
 				actor_mounts.erase(removed_actor_id)
+				_mount_handoffs.erase(removed_actor_id)
 				quest_offer_actors.erase(removed_actor_id)
 				if selected_actor_id == removed_actor_id:
 					selected_actor_id = -1
@@ -653,6 +692,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			actors.clear()
 			actor_occupations.clear()
 			actor_mounts.clear()
+			_mount_handoffs.clear()
 			quest_offer_actors.clear()
 			state_changed.emit(&"actors")
 		"actor_commands":
@@ -938,11 +978,19 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"inventory_cooldowns")
 		"spell_result":
 			last_spell_result = {"status": int(event.status), "spell_id": int(event.spell_id)}
+			# Local aiming has not submitted its cast yet, so this reply belongs
+			# to an earlier request (including cancel when replacing a spell).
+			# Keep its target and channel pose; otherwise the next click attacks.
+			if not Network.magic_pending.is_empty():
+				pending_spell_target = "actor" if Network.magic_scope == "target" else "location"
+				state_changed.emit(&"spells")
+				return
 			var spell_action: StringName = &""
 			match int(event.status):
 				4:
 					pending_spell_target = "actor"
-					spell_action = &"cast_channel_enter"
+					# A target prompt has no recipient/facing yet. The server
+					# starts its channel after the click and approach.
 				5:
 					pending_spell_target = "location"
 					spell_action = &"cast_channel_enter"
@@ -958,7 +1006,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				last_spell_result["power"] = int(event.power)
 				presentation["power"] = int(event.power)
 			if event.has("visual_effect"): presentation["visual_effect"] = int(event.visual_effect)
-			actor_animation_requested.emit(presentation)
+			if not spell_action.is_empty(): actor_animation_requested.emit(presentation)
 			state_changed.emit(&"spells")
 		"missile":
 			# Aiming is state - the shooter is still drawing - and it lives on
@@ -1202,6 +1250,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"mount_states":
 			if str(event.map) == current_map:
 				actor_mounts = (event.states as Dictionary).duplicate(true)
+				for actor_id: int in _mount_handoffs.keys():
+					_mount_handoffs[actor_id]["confirmed"] = true
+					_settle_mount_handoff(actor_id)
 				state_changed.emit(&"mount_states")
 		"actor_occupations":
 			# An empty row is honoured the way an empty title is: it takes the

@@ -4,7 +4,8 @@ func _init() -> void:
 	call_deferred("run")
 
 func run() -> void:
-	root.size = Vector2i(1280, 720)
+	root.size = Vector2i(1600, 900)
+	root.content_scale_size = Vector2i(1600, 900)
 	var background := ColorRect.new()
 	background.color = Color("23332d")
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -12,8 +13,8 @@ func run() -> void:
 	var state := root.get_node("AppState")
 	state.authenticated = true
 	state.local_actor_id = 42
-	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "crystalback_tortoise", "mount_id": "",
-		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise"], "blocked_reason": "", "gait": "on_foot"}
+	state.actor_mounts[42] = {"mode": "on_foot", "selected_mount_id": "jadefeather_raptor", "mount_id": "",
+		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"], "blocked_reason": "", "gait": "on_foot"}
 	var window: Variant = (load("res://src/ui/mounts_window.gd") as Script).new()
 	root.add_child(window)
 	window.open()

@@ -81,6 +81,9 @@ func _run() -> void:
 	camera.near = 1.0
 	camera.far = 1800.0
 	stage.add_child(camera)
+	var text_overlay := preload("res://src/ui/world_text_overlay.gd").new()
+	root.add_child(text_overlay)
+	text_overlay.configure(root)
 
 	var models: Dictionary = main.get("models") as Dictionary
 	var equipment_config: Dictionary = main.get("equipment_config") as Dictionary

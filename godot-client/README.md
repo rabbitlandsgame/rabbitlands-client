@@ -27,6 +27,7 @@ The initial screen defaults to `game.rabbitlandsgame.com:2000`, connects over re
 - `Q`/`E`: turn the local character. `Space`: recenter the viewport on your character.
 - Hold the mouse wheel button and drag to rotate the view; scroll to zoom. The camera always stays focused on your player.
 - Right-click the world to cycle Move → Trade → Fight → Use → Pick up → Harvest → Talk → Look. Left-click applies the selected action. Move retains contextual interactions on hover; other tools ignore incompatible targets. Use also selects the inventory's use-item tool. Right-click first cancels a carried item or pending spell; `Esc` returns to Move.
+- Targeted spells: choose the spell, then click its recipient. Your character moves within 15 tiles, faces the target, then channels and casts. Walking elsewhere, `Esc`, or right-click cancels the approach or channel.
 - `Ctrl+I`: toggle inventory. Drag its title bar to move it and its lower-right grip to scale the whole window proportionally. Right-click Sto All or Drop All to protect individual edge rows/columns; Get All opens and empties the ground bag on your tile subject to server slot/load validation.
 - `Tab`: toggle the full map. Scroll over it to zoom; above 100% (up to 400%), the map zooms around the cursor and keeps the location under it in place. While zoomed in, left-click and drag to pan; the view stays where you leave it as your character moves. Choose **Current map** to recenter on your player. A click without dragging still walks there; hold Shift to run. At 100% or below it frames the region, with continent exteriors able to zoom out over their neighbors. `Alt+M`: toggle the minimap; drag its thick compass border and right-click it for north-up, player-up, or viewport-up orientation.
 - The Tab map fills the play area up to the right and bottom HUD. Its left sidebar has a fixed width and scrolls when needed. Hover or scroll over the map to read the cursor's X/Y coordinates beside the pointer. A red X marks your selected movement destination until arrival, cancellation, or a replacement movement order.
@@ -52,7 +53,7 @@ The Options icon, Options button and `Ctrl+O` open one settings window. Tabs scr
 | Chat | Separate or combined feeds; independent visibility, movement/resize lock, text size, soft-fade opacity, line spacing, idle dimming and layout reset for the conversation and system windows. |
 | Minimap | Visibility, size, orientation, shape, border, map range, marker size, and all eleven marker categories. |
 | Banners | Names; health, ether, food and action bars and numbers; instance mode; speech bubbles; background; sit and ranging locks. |
-| Graphics | Frame limit, painted look, quality, shadows, particles, nameplates and distance, character visibility through obstacles, map cache usage and clearing. |
+| Graphics | Frame limit, appearance (Original / Painted ground / Full painted), quality, shadows, particles, nameplates and distance, character visibility through obstacles, map cache usage and clearing. |
 | Camera | Rotation sensitivity. The camera stays focused on the player. |
 | Audio | Sound enablement and volume, with offline attribution credits. |
 | Inventory | Equipment side, inventory and ground bag scales, storage docking, six editable quantity shortcuts and active quantity, plus all eight Store All/Drop All protection switches. |
@@ -98,7 +99,8 @@ A PASS label is evidence of source/runtime loading only. Record screenshots and 
 
 Look and lighting checks:
 
-- `ELORIA_LOOK=0` or `1` forces the painted look off or on, and `ELORIA_LOOK_QUALITY=low`, `medium` or `high` forces the graphics quality, over the saved Settings → Graphics choices; the overridden control is greyed out (`src/world/look/look_profile.gd`, presets in `QUALITY_PRESETS`). Per-map look data lives in `src/world/look/regions/`, whose README covers the schema.
+- Settings → Graphics → Appearance defaults to **Painted ground**: painted terrain with the original lighting, creatures, props, foliage and water. **Original** restores the original terrain too; **Full painted** includes the painted sky, foliage, water, global grade and extra grass. Overhead text and banners render in a separate transparent pass at native resolution, with original colors and no world fog or glow. Old On preferences migrate to Painted ground; old Off preferences remain Original.
+- `ELORIA_LOOK=original`, `painted_ground` or `full_painted` forces an appearance; legacy `0` and `1` still force Original and Full painted, and `ELORIA_LOOK_QUALITY=low`, `medium` or `high` forces the graphics quality, over the saved Settings → Graphics choices; the overridden control is greyed out (`src/world/look/look_profile.gd`, presets in `QUALITY_PRESETS`). Per-map look data lives in `src/world/look/regions/`, whose README covers the schema.
 - Check shadow and sun-elevation changes on vertical casters, such as Four Gates' walls in `src/dev/world_validation.tscn`: at grazing sun angles flat ground already faces away from the light (N·L ≤ 0) and shows no difference. Shadow strength is a package's `environment.sun.shadowOpacity`, or else `WorldEnvironmentBinder.sun_shadow_opacity` lets `SUN_SHADOW_LEAK_ENERGY` through. `ambient_light_energy` does not change sky-sourced ambient (see the comments in `src/world/world_environment_binder.gd`).
 
 ## Branding and local settings
