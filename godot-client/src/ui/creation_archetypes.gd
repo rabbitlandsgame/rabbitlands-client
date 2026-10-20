@@ -23,8 +23,8 @@ const CLASSES: Array[Dictionary] = [
 		"label": "Ranger",
 		"tagline": "Choose the distant path",
 		"description": "A mobile hunter who reads the land and strikes before danger closes in.",
-		"starting_items": "Amberwood longbow and 20 arrows, Buckled Hood, Scout Vest, Sidelace Breeches and Laced Fieldboots",
-		"equipment_visuals": {0: 164, 3: 159, 4: 230, 5: 225, 6: 226},
+		"starting_items": "Amberwood longbow and reusable Basic Quiver, Buckled Hood, Scout Vest, Sidelace Breeches and Laced Fieldboots",
+		"equipment_visuals": {0: 164, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
 	},
 	{
 		"id": 2,

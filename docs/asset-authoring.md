@@ -84,3 +84,17 @@ python eloria-assets/tools/video_motion_cli.py --help
 ```
 
 Use explicit input/output options for historical helpers and keep new intermediate work under `.local/asset-authoring/working/`. Runtime promotion remains a deliberate step with preservation, deformation, contact and engine checks. A paid Meshy job still needs scoped authorization; copying the existing ledger does not submit or authorize another job. The source `meshy.key` is not transferred; use the configured environment when a future authorized job needs credentials.
+
+### Imported quivers (2026-10-20)
+
+The eight selected Meshy quivers have current-body variants for all sixteen
+player rigs. Their portable source meshes and measured fitting frames are in
+`eloria-assets/source/quivers/`; rebuild instructions and the part-8 visual
+contract are in that directory's README. `fit_quivers.py` reshapes only imported
+geometry, preserving the current rig rest contract. Runtime textures are shared
+across the body variants. The engine probe is
+`tests/integration/quiver_equipment_fit.gd`.
+
+Item icon IDs 599-606 extend the approved paintings through the public
+`item-icons/quivers-2026-10-20` supplement. The atlas builder checks the original
+painting hashes and preserves IDs 0-598. No retired model builder is involved.

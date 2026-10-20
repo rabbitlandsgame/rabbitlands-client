@@ -56,7 +56,7 @@ func run() -> void:
 	expect(CreationArchetypes.count() == 4, "four creation classes are fitted")
 	expect(CreationArchetypes.loadout_at(0) == {0: 114, 1: 106, 2: 105, 3: 134, 4: 220, 5: 209, 6: 249},
 		"Vanguard previews the whole militia set")
-	expect(CreationArchetypes.loadout_at(1) == {0: 164, 3: 159, 4: 230, 5: 225, 6: 226},
+	expect(CreationArchetypes.loadout_at(1) == {0: 164, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
 		"Ranger previews hood, vest, breeches and fieldboots")
 	expect(CreationArchetypes.loadout_at(2) == {0: 142, 3: 115, 4: 185, 5: 222, 6: 198},
 		"Arcanist previews the whole Acolyte set")

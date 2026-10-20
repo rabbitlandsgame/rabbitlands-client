@@ -60,6 +60,12 @@
       "name": "neck",
       "attachment": "neck",
       "fallback": "head"
+    },
+    "8": {
+      "name": "quiver",
+      "attachment": "back",
+      "fallback": "body",
+      "bareWhenEmpty": true
     }
   },
   "sockets": {
@@ -30005,6 +30011,734 @@
           "fitProfile": "canonical"
         }
       }
+    },
+    "8:1": {
+      "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-basic.glb",
+      "authoredFor": "luminous_male",
+      "fitProfile": "quivers",
+      "name": "Basic Quiver",
+      "attach": "skinned",
+      "kind": "quiver",
+      "skinRegion": "quiver",
+      "variants": {
+        "canonical_glasswarden_female": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/rl-quiver-basic.glb",
+          "authoredFor": "glasswarden_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_glasswarden_male": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/rl-quiver-basic.glb",
+          "authoredFor": "glasswarden_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_female": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/rl-quiver-basic.glb",
+          "authoredFor": "greyhaven_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_male": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/rl-quiver-basic.glb",
+          "authoredFor": "greyhaven_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_female": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_female/rl-quiver-basic.glb",
+          "authoredFor": "luminous_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_male": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-basic.glb",
+          "authoredFor": "luminous_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_female": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_female/rl-quiver-basic.glb",
+          "authoredFor": "mycelari_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_male": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_male/rl-quiver-basic.glb",
+          "authoredFor": "mycelari_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_female": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_female/rl-quiver-basic.glb",
+          "authoredFor": "orun_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_male": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_male/rl-quiver-basic.glb",
+          "authoredFor": "orun_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_female": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/rl-quiver-basic.glb",
+          "authoredFor": "ssarathi_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_male": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/rl-quiver-basic.glb",
+          "authoredFor": "ssarathi_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_female": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/rl-quiver-basic.glb",
+          "authoredFor": "stoneborn_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_male": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/rl-quiver-basic.glb",
+          "authoredFor": "stoneborn_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_female": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_female/rl-quiver-basic.glb",
+          "authoredFor": "votary_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_male": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_male/rl-quiver-basic.glb",
+          "authoredFor": "votary_male",
+          "fitProfile": "quivers"
+        }
+      }
+    },
+    "8:2": {
+      "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-hunter.glb",
+      "authoredFor": "luminous_male",
+      "fitProfile": "quivers",
+      "name": "Hunter's Quiver",
+      "attach": "skinned",
+      "kind": "quiver",
+      "skinRegion": "quiver",
+      "variants": {
+        "canonical_glasswarden_female": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/rl-quiver-hunter.glb",
+          "authoredFor": "glasswarden_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_glasswarden_male": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/rl-quiver-hunter.glb",
+          "authoredFor": "glasswarden_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_female": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/rl-quiver-hunter.glb",
+          "authoredFor": "greyhaven_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_male": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/rl-quiver-hunter.glb",
+          "authoredFor": "greyhaven_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_female": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_female/rl-quiver-hunter.glb",
+          "authoredFor": "luminous_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_male": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-hunter.glb",
+          "authoredFor": "luminous_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_female": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_female/rl-quiver-hunter.glb",
+          "authoredFor": "mycelari_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_male": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_male/rl-quiver-hunter.glb",
+          "authoredFor": "mycelari_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_female": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_female/rl-quiver-hunter.glb",
+          "authoredFor": "orun_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_male": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_male/rl-quiver-hunter.glb",
+          "authoredFor": "orun_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_female": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/rl-quiver-hunter.glb",
+          "authoredFor": "ssarathi_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_male": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/rl-quiver-hunter.glb",
+          "authoredFor": "ssarathi_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_female": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/rl-quiver-hunter.glb",
+          "authoredFor": "stoneborn_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_male": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/rl-quiver-hunter.glb",
+          "authoredFor": "stoneborn_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_female": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_female/rl-quiver-hunter.glb",
+          "authoredFor": "votary_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_male": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_male/rl-quiver-hunter.glb",
+          "authoredFor": "votary_male",
+          "fitProfile": "quivers"
+        }
+      }
+    },
+    "8:3": {
+      "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-bodkin.glb",
+      "authoredFor": "luminous_male",
+      "fitProfile": "quivers",
+      "name": "Bodkin Quiver",
+      "attach": "skinned",
+      "kind": "quiver",
+      "skinRegion": "quiver",
+      "variants": {
+        "canonical_glasswarden_female": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/rl-quiver-bodkin.glb",
+          "authoredFor": "glasswarden_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_glasswarden_male": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/rl-quiver-bodkin.glb",
+          "authoredFor": "glasswarden_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_female": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/rl-quiver-bodkin.glb",
+          "authoredFor": "greyhaven_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_male": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/rl-quiver-bodkin.glb",
+          "authoredFor": "greyhaven_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_female": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_female/rl-quiver-bodkin.glb",
+          "authoredFor": "luminous_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_male": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-bodkin.glb",
+          "authoredFor": "luminous_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_female": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_female/rl-quiver-bodkin.glb",
+          "authoredFor": "mycelari_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_male": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_male/rl-quiver-bodkin.glb",
+          "authoredFor": "mycelari_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_female": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_female/rl-quiver-bodkin.glb",
+          "authoredFor": "orun_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_male": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_male/rl-quiver-bodkin.glb",
+          "authoredFor": "orun_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_female": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/rl-quiver-bodkin.glb",
+          "authoredFor": "ssarathi_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_male": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/rl-quiver-bodkin.glb",
+          "authoredFor": "ssarathi_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_female": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/rl-quiver-bodkin.glb",
+          "authoredFor": "stoneborn_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_male": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/rl-quiver-bodkin.glb",
+          "authoredFor": "stoneborn_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_female": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_female/rl-quiver-bodkin.glb",
+          "authoredFor": "votary_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_male": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_male/rl-quiver-bodkin.glb",
+          "authoredFor": "votary_male",
+          "fitProfile": "quivers"
+        }
+      }
+    },
+    "8:4": {
+      "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-farshot.glb",
+      "authoredFor": "luminous_male",
+      "fitProfile": "quivers",
+      "name": "Farshot Quiver",
+      "attach": "skinned",
+      "kind": "quiver",
+      "skinRegion": "quiver",
+      "variants": {
+        "canonical_glasswarden_female": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/rl-quiver-farshot.glb",
+          "authoredFor": "glasswarden_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_glasswarden_male": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/rl-quiver-farshot.glb",
+          "authoredFor": "glasswarden_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_female": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/rl-quiver-farshot.glb",
+          "authoredFor": "greyhaven_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_male": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/rl-quiver-farshot.glb",
+          "authoredFor": "greyhaven_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_female": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_female/rl-quiver-farshot.glb",
+          "authoredFor": "luminous_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_male": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-farshot.glb",
+          "authoredFor": "luminous_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_female": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_female/rl-quiver-farshot.glb",
+          "authoredFor": "mycelari_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_male": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_male/rl-quiver-farshot.glb",
+          "authoredFor": "mycelari_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_female": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_female/rl-quiver-farshot.glb",
+          "authoredFor": "orun_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_male": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_male/rl-quiver-farshot.glb",
+          "authoredFor": "orun_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_female": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/rl-quiver-farshot.glb",
+          "authoredFor": "ssarathi_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_male": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/rl-quiver-farshot.glb",
+          "authoredFor": "ssarathi_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_female": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/rl-quiver-farshot.glb",
+          "authoredFor": "stoneborn_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_male": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/rl-quiver-farshot.glb",
+          "authoredFor": "stoneborn_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_female": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_female/rl-quiver-farshot.glb",
+          "authoredFor": "votary_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_male": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_male/rl-quiver-farshot.glb",
+          "authoredFor": "votary_male",
+          "fitProfile": "quivers"
+        }
+      }
+    },
+    "8:5": {
+      "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-skirmisher.glb",
+      "authoredFor": "luminous_male",
+      "fitProfile": "quivers",
+      "name": "Skirmisher's Quiver",
+      "attach": "skinned",
+      "kind": "quiver",
+      "skinRegion": "quiver",
+      "variants": {
+        "canonical_glasswarden_female": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/rl-quiver-skirmisher.glb",
+          "authoredFor": "glasswarden_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_glasswarden_male": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/rl-quiver-skirmisher.glb",
+          "authoredFor": "glasswarden_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_female": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/rl-quiver-skirmisher.glb",
+          "authoredFor": "greyhaven_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_male": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/rl-quiver-skirmisher.glb",
+          "authoredFor": "greyhaven_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_female": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_female/rl-quiver-skirmisher.glb",
+          "authoredFor": "luminous_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_male": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-skirmisher.glb",
+          "authoredFor": "luminous_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_female": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_female/rl-quiver-skirmisher.glb",
+          "authoredFor": "mycelari_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_male": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_male/rl-quiver-skirmisher.glb",
+          "authoredFor": "mycelari_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_female": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_female/rl-quiver-skirmisher.glb",
+          "authoredFor": "orun_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_male": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_male/rl-quiver-skirmisher.glb",
+          "authoredFor": "orun_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_female": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/rl-quiver-skirmisher.glb",
+          "authoredFor": "ssarathi_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_male": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/rl-quiver-skirmisher.glb",
+          "authoredFor": "ssarathi_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_female": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/rl-quiver-skirmisher.glb",
+          "authoredFor": "stoneborn_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_male": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/rl-quiver-skirmisher.glb",
+          "authoredFor": "stoneborn_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_female": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_female/rl-quiver-skirmisher.glb",
+          "authoredFor": "votary_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_male": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_male/rl-quiver-skirmisher.glb",
+          "authoredFor": "votary_male",
+          "fitProfile": "quivers"
+        }
+      }
+    },
+    "8:6": {
+      "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-ember.glb",
+      "authoredFor": "luminous_male",
+      "fitProfile": "quivers",
+      "name": "Ember Quiver",
+      "attach": "skinned",
+      "kind": "quiver",
+      "skinRegion": "quiver",
+      "variants": {
+        "canonical_glasswarden_female": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/rl-quiver-ember.glb",
+          "authoredFor": "glasswarden_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_glasswarden_male": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/rl-quiver-ember.glb",
+          "authoredFor": "glasswarden_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_female": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/rl-quiver-ember.glb",
+          "authoredFor": "greyhaven_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_male": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/rl-quiver-ember.glb",
+          "authoredFor": "greyhaven_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_female": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_female/rl-quiver-ember.glb",
+          "authoredFor": "luminous_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_male": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-ember.glb",
+          "authoredFor": "luminous_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_female": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_female/rl-quiver-ember.glb",
+          "authoredFor": "mycelari_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_male": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_male/rl-quiver-ember.glb",
+          "authoredFor": "mycelari_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_female": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_female/rl-quiver-ember.glb",
+          "authoredFor": "orun_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_male": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_male/rl-quiver-ember.glb",
+          "authoredFor": "orun_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_female": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/rl-quiver-ember.glb",
+          "authoredFor": "ssarathi_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_male": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/rl-quiver-ember.glb",
+          "authoredFor": "ssarathi_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_female": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/rl-quiver-ember.glb",
+          "authoredFor": "stoneborn_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_male": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/rl-quiver-ember.glb",
+          "authoredFor": "stoneborn_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_female": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_female/rl-quiver-ember.glb",
+          "authoredFor": "votary_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_male": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_male/rl-quiver-ember.glb",
+          "authoredFor": "votary_male",
+          "fitProfile": "quivers"
+        }
+      }
+    },
+    "8:7": {
+      "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-frost.glb",
+      "authoredFor": "luminous_male",
+      "fitProfile": "quivers",
+      "name": "Frost Quiver",
+      "attach": "skinned",
+      "kind": "quiver",
+      "skinRegion": "quiver",
+      "variants": {
+        "canonical_glasswarden_female": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/rl-quiver-frost.glb",
+          "authoredFor": "glasswarden_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_glasswarden_male": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/rl-quiver-frost.glb",
+          "authoredFor": "glasswarden_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_female": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/rl-quiver-frost.glb",
+          "authoredFor": "greyhaven_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_male": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/rl-quiver-frost.glb",
+          "authoredFor": "greyhaven_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_female": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_female/rl-quiver-frost.glb",
+          "authoredFor": "luminous_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_male": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-frost.glb",
+          "authoredFor": "luminous_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_female": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_female/rl-quiver-frost.glb",
+          "authoredFor": "mycelari_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_male": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_male/rl-quiver-frost.glb",
+          "authoredFor": "mycelari_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_female": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_female/rl-quiver-frost.glb",
+          "authoredFor": "orun_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_male": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_male/rl-quiver-frost.glb",
+          "authoredFor": "orun_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_female": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/rl-quiver-frost.glb",
+          "authoredFor": "ssarathi_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_male": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/rl-quiver-frost.glb",
+          "authoredFor": "ssarathi_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_female": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/rl-quiver-frost.glb",
+          "authoredFor": "stoneborn_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_male": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/rl-quiver-frost.glb",
+          "authoredFor": "stoneborn_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_female": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_female/rl-quiver-frost.glb",
+          "authoredFor": "votary_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_male": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_male/rl-quiver-frost.glb",
+          "authoredFor": "votary_male",
+          "fitProfile": "quivers"
+        }
+      }
+    },
+    "8:8": {
+      "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-arcane.glb",
+      "authoredFor": "luminous_male",
+      "fitProfile": "quivers",
+      "name": "Arcane Quiver",
+      "attach": "skinned",
+      "kind": "quiver",
+      "skinRegion": "quiver",
+      "variants": {
+        "canonical_glasswarden_female": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_female/rl-quiver-arcane.glb",
+          "authoredFor": "glasswarden_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_glasswarden_male": {
+          "scene": "res://assets/actors/native/equipment/variants/glasswarden_male/rl-quiver-arcane.glb",
+          "authoredFor": "glasswarden_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_female": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_female/rl-quiver-arcane.glb",
+          "authoredFor": "greyhaven_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_greyhaven_male": {
+          "scene": "res://assets/actors/native/equipment/variants/greyhaven_male/rl-quiver-arcane.glb",
+          "authoredFor": "greyhaven_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_female": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_female/rl-quiver-arcane.glb",
+          "authoredFor": "luminous_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_human_male": {
+          "scene": "res://assets/actors/native/equipment/variants/luminous_male/rl-quiver-arcane.glb",
+          "authoredFor": "luminous_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_female": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_female/rl-quiver-arcane.glb",
+          "authoredFor": "mycelari_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_mycelari_male": {
+          "scene": "res://assets/actors/native/equipment/variants/mycelari_male/rl-quiver-arcane.glb",
+          "authoredFor": "mycelari_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_female": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_female/rl-quiver-arcane.glb",
+          "authoredFor": "orun_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_orun_male": {
+          "scene": "res://assets/actors/native/equipment/variants/orun_male/rl-quiver-arcane.glb",
+          "authoredFor": "orun_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_female": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_female/rl-quiver-arcane.glb",
+          "authoredFor": "ssarathi_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_ssarathi_male": {
+          "scene": "res://assets/actors/native/equipment/variants/ssarathi_male/rl-quiver-arcane.glb",
+          "authoredFor": "ssarathi_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_female": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_female/rl-quiver-arcane.glb",
+          "authoredFor": "stoneborn_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_stoneborn_male": {
+          "scene": "res://assets/actors/native/equipment/variants/stoneborn_male/rl-quiver-arcane.glb",
+          "authoredFor": "stoneborn_male",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_female": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_female/rl-quiver-arcane.glb",
+          "authoredFor": "votary_female",
+          "fitProfile": "quivers"
+        },
+        "canonical_votary_male": {
+          "scene": "res://assets/actors/native/equipment/variants/votary_male/rl-quiver-arcane.glb",
+          "authoredFor": "votary_male",
+          "fitProfile": "quivers"
+        }
+      }
     }
   },
   "aliases": {},
@@ -31625,6 +32359,10 @@
           ]
         }
       }
+    },
+    "quivers": {
+      "canonicalHeadRestY": 0.0,
+      "bodyGirth": {}
     }
   },
   "bodyTemplates": {
