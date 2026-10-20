@@ -81,7 +81,7 @@ func run() -> void:
 				if not is_instance_valid(visual): continue
 				visual.set_process(false)
 				var visual_id := visual.get_instance_id()
-				# Back-to-back crossings must not cancel a still-pending handoff.
+				# Repeated crossings must keep the original mount instance.
 				for destination: String in ["warrenmead", "landfall", "warrenmead"]:
 					await deliver(Op.CHANGE_MAP, destination.to_ascii_buffer() + PackedByteArray([0]))
 					same_mount(visual_id, "map notification keeps the same visual")
@@ -122,6 +122,15 @@ func run() -> void:
 	await deliver(Op.ELORIA_MOUNT_STATES, snapshot("landfall"))
 	await deliver(Op.ADD_NEW_ACTOR, spawn_payload())
 	check(is_instance_valid(actor._mount_visual), "teleport arrival binds already-received mount state")
+	var retained_id := actor._mount_visual.get_instance_id()
+	await deliver(Op.CHANGE_MAP, "warrenmead".to_ascii_buffer() + PackedByteArray([0]))
+	await deliver(Op.CHANGE_MAP, "grey_moors".to_ascii_buffer() + PackedByteArray([0]))
+	same_mount(retained_id, "another crossing preserves a still-pending handoff")
+	await deliver(Op.ELORIA_MOUNT_STATES, snapshot("warrenmead", "on_foot"))
+	same_mount(retained_id, "old-map snapshots are ignored during the next crossing")
+	await deliver(Op.ADD_NEW_ACTOR, spawn_payload())
+	await deliver(Op.ELORIA_MOUNT_STATES, snapshot("grey_moors"))
+	same_mount(retained_id, "latest destination completes consecutive pending crossings")
 	await deliver(Op.CHANGE_MAP, "warrenmead".to_ascii_buffer() + PackedByteArray([0]))
 	await deliver(Op.ELORIA_MOUNT_STATES, JSON.stringify({"schema_version": 1,
 		"map": "warrenmead", "states": []}).to_utf8_buffer())
