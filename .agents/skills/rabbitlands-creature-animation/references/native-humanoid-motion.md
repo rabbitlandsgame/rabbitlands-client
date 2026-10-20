@@ -109,3 +109,14 @@ Measure wrist rotation relative to the native forearm. Independent donor wrist c
 Applying an ease-to-zero curve to every intermediate strike pose creates a pause at impact and follow-through. Keep progress moving through those joins and round the transitions on an already clearance-safe route. Replacing the entire position/orientation path with a broad new spline can reintroduce upper-arm/head collisions even when the club tip clears. Keep the spare arm in a stable torso/clavicle frame and audit complete arm, helper, weapon and head surfaces.
 
 Before binary compaction, remove animation samplers unreferenced by channels and remap the channel indices. Historical fitting revisions can otherwise retain many obsolete samplers despite removing unreachable buffer views. Prove active curves, static arrays and clip duration are lossless, then bind native and fresh-import witnesses to the packed runtime hash.
+
+
+## Orc/Kobold framing and native grip
+
+The approved two-actor selection is documented in `docs/orc-kobold-motion.md`. A pitched or yawed chest frame can turn a nominal forward punch toward the groin. Author striking reach against the declared actor-forward/up frame, preserve native serial lengths and measure the exported deformed hand's height above the hips. Keep the full forearm clear through recovery as well as impact.
+
+Do not assume every digit or accessory influence describes the visible anatomy. The Orc needs calibrated native phalange closure for its fist. The Kobold has a true tail, a separate loincloth chain, compound lower legs and a detached rump spike that originally followed a thumb. Validate the complete connected hand/wrist surface and each attachment island. A single thigh point with finger leakage can stretch adjacent faces even when welded seams remain closed. Correct that physical point across its UV duplicates; broad spatial cutoffs can capture legitimate nearby claws.
+
+Exclude actual arm and thigh surfaces from abdominal smoothing. A connected torso mask can otherwise erase limb ownership. Preserve complete claws/paws in their support frames, keep the tail attached coherently at the rump and include tail/cloth behavior in terminal support fitting.
+
+For a relaxed non-striking arm, a torso-heading target with gentle counter-motion and a fixed native wrist-to-forearm relation can follow the body more naturally than carrying the entire walking pose through a pitched attack frame. Check side and opposite views: a front view may hide an elbow pulled behind the back. An arm-only revision can preserve the other arm's channels, torso, legs, feet and all six unrelated clips exactly; bind the new witnesses and review to that final file.
