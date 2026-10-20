@@ -21,13 +21,17 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]
                        / "eloria-assets" / "tools"))
 FIRST_GENERATED_IMAGE_ID = 118
+from build_item_icon_atlases import SUPPLEMENTS
 
 
 def generated_piece_count() -> int:
     manifest = json.loads((ROOT / "eloria-assets/source/item-icons/"
                            "painted-2026-10-18/manifest.json").read_text())
+    records = list(manifest["items"])
+    for folder in SUPPLEMENTS:
+        records.extend(json.loads((folder / "manifest.json").read_text())["items"])
     return sum(record["imageId"] >= FIRST_GENERATED_IMAGE_ID
-               for record in manifest["items"])
+               for record in records)
 
 ROOT = Path(__file__).resolve().parents[2]
 CLIENT = ROOT / "godot-client"
