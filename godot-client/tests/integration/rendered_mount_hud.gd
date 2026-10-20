@@ -16,12 +16,12 @@ func capture(filename: String) -> void:
 	var result := root.get_texture().get_image().save_png(folder.path_join(filename))
 	if result != OK: failures += 1
 
-func click(control: Control) -> void:
+func click(control: Control, button := MOUSE_BUTTON_LEFT) -> void:
 	var at := control.get_global_rect().get_center()
 	var mouse := InputEventMouseButton.new()
 	mouse.position = at
 	mouse.global_position = at
-	mouse.button_index = MOUSE_BUTTON_LEFT
+	mouse.button_index = button
 	mouse.pressed = true
 	Input.parse_input_event(mouse)
 	await process_frame
@@ -67,6 +67,36 @@ func run() -> void:
 	main.actor_resource_overlay.show()
 	state.state_changed.emit(&"mount_states")
 	await settle()
+	state.actor_mounts[42].mode = "mounted"
+	state.actor_mounts[42].mount_id = "moor_pony"
+	state.actor_mounts[42].gait = "cruise"
+	state.actor_mounts[42].endurance_ms = 8000
+	state.state_changed.emit(&"mount_states")
+	for entry: Array in [["HealthRow", 84, 100], ["EtherRow", 60, 80], ["FoodRow", 38, 50], ["ActionRow", 90, 100]]:
+		var row: HBoxContainer = main._banner_row(entry[0])
+		(row.get_node("Number") as Label).text = "%d / %d" % [entry[1], entry[2]]
+		(row.get_node("Bar") as ProgressBar).value = float(entry[1]) / float(entry[2]) * 100.0
+	main._layout_actor_resource_overlay()
+	await capture("mount-status-trot.png")
+	state.actor_mounts[42].gait = "burst"
+	state.actor_mounts[42].endurance_ms = 4750
+	state.state_changed.emit(&"mount_states")
+	await capture("mount-status-gallop.png")
+	var action: Control = main._banner_row("ActionRow")
+	if main.mount_status.global_position.y < action.global_position.y + action.size.y \
+			or main.mount_status.status.text != "Gallop · 4.8s left":
+		push_error("Gallop time must appear beneath the existing character bars")
+		failures += 1
+	await click(main.mount_status.status, MOUSE_BUTTON_RIGHT)
+	if not main._actor_hud_menu.visible or main._actor_hud_menu.tabs.current_tab != 1:
+		push_error("Right-clicking the inline mount status must open Mount settings")
+		failures += 1
+	await capture("mount-status-settings.png")
+	main._actor_hud_menu.close()
+	state.actor_mounts[42].gait = "cruise"
+	state.actor_mounts[42].endurance_ms = 3200
+	state.state_changed.emit(&"mount_states")
+	await capture("mount-status-recovery.png")
 	await click(main.get_node("%MountsButton"))
 	if not main.mounts_window.is_open():
 		push_error("Actual HUD click did not open mount selection")

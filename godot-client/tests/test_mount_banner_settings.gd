@@ -1,5 +1,5 @@
 extends SceneTree
-## Settings, the character shortcut and the floating banner share one preference.
+## Settings and the character shortcut share the inline mount status preferences.
 var failures := 0
 var checks := 0
 
@@ -33,7 +33,10 @@ func run() -> void:
 		"mount_id": "moor_pony", "selected_mount_id": "moor_pony", "blocked_reason": "",
 		"owned_mount_ids": ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"]}}
 	state.state_changed.emit(&"mount_states")
-	var controls: Variant = main.game_view.get_node("MountControls")
+	var controls: Variant = main.mount_status
+	expect(controls.get_parent() == main.actor_resource_overlay.get_node("Rows") \
+		and controls.get_index() > main._banner_row("ActionRow").get_index(), "mount time is below the character resource bars")
+	expect(main.game_view.get_node_or_null("MountControls") == null, "no separate mount banner in the game view")
 	var window: Variant = main.settings_window
 	var artifacts := ProjectSettings.globalize_path("res://").path_join("../.local/qa/mount-banner-settings").simplify_path()
 	for key: String in controls.OPTION_LABELS:
@@ -69,15 +72,18 @@ func run() -> void:
 		await process_frame
 		await RenderingServer.frame_post_draw
 		expect(root.get_texture().get_image().save_png(artifacts.path_join("settings.png")) == OK, "Settings screenshot saved")
-	var gallop_box := window.panel.find_child("mount_banner_gallop_button", true, false) as CheckBox
-	gallop_box.button_pressed = false
-	expect(not controls.gallop.visible and not menu.mount_boxes.gallop_button.button_pressed, "Settings change updates popover checkmark and control")
+	var status_box := window.panel.find_child("mount_banner_status", true, false) as CheckBox
+	status_box.button_pressed = false
+	expect(not controls.visible and not menu.mount_boxes.status.button_pressed, "Settings change updates popover checkmark and inline status")
+	expect(window.panel.find_child("mount_banner_pin_banner", true, false) == null \
+		and not menu.mount_boxes.has("mount_button"), "obsolete pinning and button options are removed")
 	var config := ConfigFile.new()
 	expect(config.load(path) == OK and config.get_value("mount_banner", "endurance", true) == false \
-		and config.get_value("mount_banner", "gallop_button", true) == false, "mount choices persist to player settings")
+		and config.get_value("mount_banner", "status", true) == false, "mount choices persist to player settings")
 	controls.set_options({})
 	main._load_hud_settings()
-	expect(not controls.gallop.visible and controls.status.text == "Trot", "saved choices restore on settings load")
+	expect(not controls.visible and controls.status.text.is_empty(), "saved choices restore on settings load")
+	status_box.button_pressed = true
 	var name_box: CheckBox = main._banner_option_boxes.show_names
 	name_box.button_pressed = true
 	(menu.character_boxes.show_names as CheckBox).button_pressed = false
@@ -85,15 +91,16 @@ func run() -> void:
 	for row: Array in main.BANNER_ROWS:
 		(main._banner_option_boxes[row[1]] as CheckBox).button_pressed = false
 		(main._banner_option_boxes[row[2]] as CheckBox).button_pressed = false
-	expect(main._banner_has_content(), "mount controls keep their anchor when character names and bars are hidden")
+	expect(main._banner_has_content(), "mount status can remain when character names and bars are hidden")
 	var master := window.panel.find_child("mount_banner_show_banner", true, false) as CheckBox
 	master.button_pressed = false
-	expect(not controls.wants_banner(), "master setting hides banner without changing mount state")
+	expect(not controls.wants_banner(), "master setting hides the row without changing mount state")
 	expect(state.actor_mounts[1].mode == "mounted", "banner preferences leave riding unchanged")
 	window.close()
-	# The same panel is reachable directly from the mount controls and own name.
-	controls.choose.gui_input.emit(click)
-	expect(menu.visible and menu.tabs.current_tab == 1, "right-clicking mount controls opens the Mount tab directly")
+	master.button_pressed = true
+	# The same panel is reachable directly from the mount status and own name.
+	controls.status.gui_input.emit(click)
+	expect(menu.visible and menu.tabs.current_tab == 1, "right-clicking mount time opens the Mount tab directly")
 	(menu.mount_boxes.status as CheckBox).button_pressed = false
 	expect(menu.visible, "changing an option keeps the popover open")
 	var escape := InputEventKey.new()

@@ -8,27 +8,31 @@
     "Horse-head icon beside Sit opens mount selection and highlights while the window is open",
     "Single in-game banner popover with Character and Mount tabs, persistent immediate changes, and direct banner access",
     "Escape and outside-click dismissal; server dialogue and other modal state take precedence",
-    "Responsive lower HUD meters and icons keep first and last buttons accessible on smaller screens"
+    "Responsive lower HUD meters and icons keep first and last buttons accessible on smaller screens",
+    "Standalone mount banner and its buttons removed; gait and available gallop time share a row below the character resource bars",
+    "Inline status collapses on foot; obsolete button/pinning preferences are ignored, and status preferences remain shared with Settings"
   ],
   "validation": {
     "test_mounts_window.gd": {"checks": 41, "failures": 0},
-    "test_mount_banner_settings.gd": {"checks": 33, "failures": 0},
+    "test_mount_controls.gd": {"checks": 18, "failures": 0},
+    "test_mount_banner_settings.gd": {"checks": 31, "failures": 0},
     "rendered_mount_hud.gd": {
       "failures": 0,
       "renderer": "Godot 4.7.2 Forward+",
-      "captures": ["mount-library.png", "character-banner.png", "mount-banner.png", "mount-library-small.png"],
+      "captures": ["mount-library.png", "character-banner.png", "mount-banner.png", "mount-library-small.png", "mount-status-trot.png", "mount-status-gallop.png", "mount-status-recovery.png", "mount-status-settings.png"],
       "nativeInput": [
         "HUD icon opens the collection",
         "Typing raptor filters mounts without consuming the R hotkey",
         "Card clicks browse without predicting server selection",
-        "Checkbox clicks apply preferences while keeping the banner popover open"
+        "Checkbox clicks apply preferences while keeping the banner popover open",
+        "Right-clicking inline gallop time opens the Mount settings tab"
       ]
     },
     "optionalSettingsSuite": {
       "failures": 1,
       "detail": "An existing hard-coded graphics appearance-label expectation fails; the appearance implementation and its localization were not changed. The banner/settings shortcut checks pass."
     },
-    "diagnostics": "No interaction script errors. Godot reported cached texture/resource teardown warnings after the review process exited."
+    "diagnostics": "No interaction script errors. Existing imported-model texture UID warnings use path fallbacks. Godot reported cached texture/resource teardown warnings after the review process exited."
   },
   "state": "Committed locally for review; no server runtime, mount behavior, model, or release-policy changes are required."
 }

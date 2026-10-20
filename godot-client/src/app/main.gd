@@ -833,6 +833,7 @@ var _last_skill_experience_msec := -100000
 var _banner_option_boxes: Dictionary = {}
 var _banner_background_style: StyleBoxFlat
 const MountControls := preload("res://src/mounts/mount_controls.gd")
+var mount_status := MountControls.new()
 var _mount_banner_options: Dictionary = MountControls.default_options()
 var _actor_hud_menu: Variant
 
@@ -1120,7 +1121,8 @@ func _ready() -> void:
 	lantern_guide = LanternGuideScript.new()
 	game_view.add_child(lantern_guide)
 	lantern_guide.configure(self)
-	game_view.add_child(MountControls.new())
+	actor_resource_overlay.get_node("Rows").add_child(mount_status)
+	mount_status.display_changed.connect(_layout_actor_resource_overlay)
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
 	actor_type_models = model_registry.get("actorTypes", {})
@@ -1190,7 +1192,6 @@ func _ready() -> void:
 	game_view.add_child(ranging_window)
 	mounts_window = MountsWindowScript.new()
 	game_view.add_child(mounts_window)
-	game_view.get_node("MountControls").choose_mount_requested.connect(func() -> void: mounts_window.call("toggle"))
 	%MountsButton.pressed.connect(func() -> void: mounts_window.call("toggle"))
 	(mounts_window.get("panel") as Control).visibility_changed.connect(func() -> void: _sync_hud_button_states(true))
 	guild_window = GuildWindowScript.new()
@@ -2618,7 +2619,7 @@ func _configure_unified_settings() -> void:
 	var banners_page: VBoxContainer = settings_window.page_body("Banners")
 	(%DisableMenu as CheckBox).text = "Disable character right-click menu"
 	var mount_heading := Label.new()
-	mount_heading.text = "Mount banner"
+	mount_heading.text = "Mount status below character bars"
 	banners_page.add_child(mount_heading)
 	for key: String in MountControls.OPTION_LABELS:
 		settings_window._add_toggle(banners_page,
@@ -4154,9 +4155,10 @@ func _configure_banner_menu() -> void:
 	_actor_hud_menu.mounts_requested.connect(func() -> void: mounts_window.call("open"))
 	_actor_hud_menu.settings_requested.connect(func() -> void: settings_window.open_tab("Banners"))
 	_connect_banner_context_inputs(actor_resource_overlay, "Character")
-	_connect_banner_context_inputs(game_view.get_node("MountControls"), "Mount")
 
 func _connect_banner_context_inputs(control: Control, section: String) -> void:
+	if control == mount_status:
+		section = "Mount"
 	if not control is BaseButton:
 		control.mouse_filter = Control.MOUSE_FILTER_PASS
 	control.gui_input.connect(func(event: InputEvent) -> void:
@@ -4182,7 +4184,7 @@ func _set_mount_banner_option(key: String, value: bool) -> void:
 	if not _mount_banner_options.has(key):
 		return
 	_mount_banner_options[key] = value
-	game_view.get_node("MountControls").set_options(_mount_banner_options)
+	mount_status.set_options(_mount_banner_options)
 	_sync_banner_context_menu()
 	_save_hud_settings()
 
@@ -7856,7 +7858,7 @@ func _load_hud_settings() -> void:
 				"banner", banner_key, BANNER_OPTION_DEFAULTS[banner_key])))
 		for key: String in _mount_banner_options:
 			_mount_banner_options[key] = bool(config.get_value("mount_banner", key, true))
-	game_view.get_node("MountControls").set_options(_mount_banner_options)
+	mount_status.set_options(_mount_banner_options)
 	_target_marker_style = TargetMarkerStyle.read(config)
 	_apply_target_marker_style()
 	_apply_fps_limit(config.get_value("graphics", "fps_limit", 0))
@@ -10494,7 +10496,7 @@ func _sync_local_status_icons() -> void:
 		local_status_grid.add_child(icon)
 
 func _banner_has_content() -> bool:
-	if game_view.get_node("MountControls").wants_banner():
+	if mount_status.wants_banner():
 		return true
 	if not _local_status_effects.is_empty():
 		return true
@@ -11952,9 +11954,6 @@ func _apply_target_marker_style() -> void:
 
 func _on_binding_changed(_action: String) -> void:
 	_save_hud_settings()
-	var mount_controls := game_view.get_node_or_null("MountControls")
-	if mount_controls != null:
-		mount_controls.call("_refresh")
 	_sync_quick_slots()
 	# Quick spell badges and the Techniques hint name the keys they use.
 	casting_bar.refresh()
