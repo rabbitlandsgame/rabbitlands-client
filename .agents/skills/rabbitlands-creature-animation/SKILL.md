@@ -40,3 +40,5 @@ For Gecko, Chameleon, Frilled Lizard and Iguana transfers, read [native lizard m
 For native humanoid and goblinoid fitting, read [native humanoid motion](references/native-humanoid-motion.md). The four approved goblinoid sets and portable checks are documented in `docs/goblinoid-motion.md`.
 
 The six approved Ogre/Troll/Giant sets, including target-specific clothing and released-wrist repairs, are documented in `docs/brute-humanoid-motion.md`. Their fitting guidance is in [native humanoid motion](references/native-humanoid-motion.md).
+
+For the approved Highland Orc and Coal Kobold motions, including native grip, descending scratch and relaxed spare-arm framing, see `docs/orc-kobold-motion.md` and [native humanoid motion](references/native-humanoid-motion.md).
