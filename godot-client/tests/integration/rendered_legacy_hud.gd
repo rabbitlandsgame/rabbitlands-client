@@ -85,6 +85,7 @@ func _run() -> void:
 	await _capture("legacy-hud.png")
 	main.call("_open_actor_hud_menu", Vector2(510.0, 300.0))
 	await _capture("legacy-hud-context-menu.png")
+	main.get("_actor_hud_menu").close()
 	main.call("_close_settings")
 	main.call("_toggle_minimap")
 	await _capture("legacy-hud-minimap.png")

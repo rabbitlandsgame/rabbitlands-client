@@ -8,7 +8,8 @@ func configure(id: String) -> void:
 	viewport = SubViewport.new()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stretch = true
-	custom_minimum_size = Vector2(220, 215)
+	if custom_minimum_size == Vector2.ZERO:
+		custom_minimum_size = Vector2(220, 215)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	viewport.own_world_3d = true
 	viewport.size = Vector2i(2, 2)

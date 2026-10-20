@@ -387,10 +387,10 @@ func _test_unified_settings(main: Control, window: Control, panel: PanelContaine
 	_expect(panel.visible and main.chat_hud.options_button.button_pressed,
 		"Options opens the unified window and lights its HUD button")
 	main.call("_open_actor_hud_menu", Vector2.ZERO)
-	_expect((main.get("_actor_hud_menu") as PopupMenu).visible,
+	_expect((main.get("_actor_hud_menu") as Control).visible,
 		"the character shortcut opens the banner context menu")
-	(main.get("_actor_hud_menu") as PopupMenu).hide()
-	(main.get("_actor_hud_menu") as PopupMenu).id_pressed.emit(2)
+	(main.get("_actor_hud_menu") as Control).hide()
+	main.get("_actor_hud_menu").settings_requested.emit()
 	_expect(panel.visible and (window.get("tabs") as TabContainer).get_current_tab_control().name == "Banners",
 		"the context menu can open all banner settings")
 	(main.get("casting_bar") as Control).call("_dock_menu_action", 2)
