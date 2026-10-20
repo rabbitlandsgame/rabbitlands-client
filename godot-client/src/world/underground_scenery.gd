@@ -39,8 +39,13 @@ static func apply(manifest: WorldManifest, world: Node3D) -> int:
 			model.scale.y = .1 # Thin floor dressing, clear of character feet.
 		if placement.has("palette"):
 			MineralAppearance.apply(model, placement.palette)
-		# The Cenote Deeps' wall rocks stay up when the camera turns: each one
-		# that comes between the camera and the player fades (OccluderFade).
+		# A rock set into a wall carries the wall's outward direction: the
+		# manifest's cutaway drops it near the player while that wall faces the
+		# camera (InteriorCutaway props), and OccluderFade fades any other that
+		# comes between the camera and the player.
+		var outward: Variant = placement.get("outward")
+		if outward is Array and (outward as Array).size() >= 3:
+			model.set_meta("cutaway_outward", Vector3(outward[0], outward[1], outward[2]))
 		scenery.add_child(model)
 		count += 1
 	return count

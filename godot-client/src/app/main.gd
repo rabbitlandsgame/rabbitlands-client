@@ -1602,7 +1602,8 @@ func _process(delta: float) -> void:
 		# Sections first: entering one shows its whole shell, and the cutaway
 		# then takes the camera-facing walls and the roof back out of it.
 		_update_secret_sections()
-		interior_cutaway.update(camera_rig.yaw_degrees, false, secret_sections.current_section())
+		interior_cutaway.update(camera_rig.yaw_degrees, false, secret_sections.current_section(),
+			camera_rig.focus)
 		_update_occluder_fade(delta)
 		_update_keyboard_movement()
 		_update_session_distance()

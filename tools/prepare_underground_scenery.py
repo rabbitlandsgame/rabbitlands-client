@@ -221,6 +221,8 @@ def main():
             for item in dressing(section):
                 place(item['asset'], item['x'], item['y'], item['yaw'], item['height'])
                 extra = {'scale': item['scale']} if item['scale'] != 1 else {}
+                if 'outward' in item:
+                    extra['outward'] = item['outward']
                 if 'palette' in item:
                     extra['palette'] = item['palette']
                 placements[-1].update(extra)

@@ -59,6 +59,25 @@ func run() -> void:
 	check(mine_wall != null and not mine_wall.visible, "Another cave's walls stay hidden as the camera turns")
 	var roof := loader.world_root.find_child("Roof_spindle_cavern*", true, false) as Node3D
 	check(roof != null and not roof.visible, "Entering a cave keeps its roof cut away")
+	# Rocks set into the walls drop out near the player while their wall faces
+	# the camera (yaw 0: the camera is to +Z); farther along they stay up.
+	var near_wall := Vector3(60, 0, 240 - 180)
+	cutaway.update(0, true, "spindle_cavern", near_wall)
+	var near_hidden := 0
+	var far_shown := 0
+	for rock: Node in scenery.get_children():
+		if not rock.has_meta("cutaway_outward"):
+			continue
+		var outward: Vector3 = rock.get_meta("cutaway_outward")
+		var at_rock := (rock as Node3D).position
+		var offset := Vector2(at_rock.x - near_wall.x, at_rock.z - near_wall.z)
+		if outward.z > 0.8 and offset.y > 0.0:
+			if offset.length() < 9.0 and not (rock as Node3D).visible:
+				near_hidden += 1
+			if offset.length() > 20.0 and (rock as Node3D).visible:
+				far_shown += 1
+	check(near_hidden > 0 and far_shown > 0, "Wall rocks drop out near the player and stay up farther along")
+	cutaway.update(0, true, "", Vector3(-1000, 0, -1000))
 	sections.reset()
 	cutaway.update(0, true)
 	for unused in range(8):

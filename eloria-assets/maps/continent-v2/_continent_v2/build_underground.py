@@ -106,8 +106,8 @@ def dressing(section):
     """The cenote's reused scenery, as placements in tile units: the source's props, then rocks along every wall.
 
     Each is {asset, x, y, height, yaw, scale, block, wall}: `block` is the radius (tiles) it takes from the walk
-    grid; `wall` marks a rock set into the rock face. Wall rocks never cut away with the face: the client fades the
-    one that comes between the camera and the player (OccluderFade).
+    grid; `wall` marks a rock set into the rock face, whose `outward` (world X/Y/Z) the client's cutaway judges it by:
+    near the player on a wall facing the camera it drops out (the manifest's cutaway `props`).
     """
     if section['style']!='cenote': return []
     items=[]
@@ -132,7 +132,7 @@ def dressing(section):
         x,y=p.x+nx*proud*scale*.45,p.y+ny*proud*scale*.45
         if any(math.hypot(x-cx,y-cy)<r for cx,cy,r in keep_out): continue
         items.append({'asset':asset,'x':round(x,2),'y':round(y,2),'height':-.3,'yaw':k*137%360,
-                      'scale':round(scale,2),'block':0,'wall':True})
+                      'scale':round(scale,2),'block':0,'wall':True,'outward':[round(nx,3),0,round(-ny,3)]})
     return items
 
 
@@ -510,6 +510,10 @@ def build(server):
               # A wall cuts away only while the camera looks nearly straight through it (owner 2026-10-20: the
               # convention's 0.2 took too much of a cave away); wall rocks fade instead of hiding.
               'cutaway':{'hideNodes':hidden,'walls':walls,'facingThreshold':.6,
+                         # Rocks set into a wall drop out within 12 m of the player while their wall faces the
+                         # camera within 60 degrees (owner 2026-10-20: between hiding whole sides and fading only
+                         # the one in front).
+                         'props':{'facingThreshold':.5,'radiusMetres':12},
                          'reason':'The shared interior roof and camera-facing wall cutaway convention'},
               # One cave at a time: the client draws only the section the player stands in (SecretSections).
               'sectioned':True,'sections':[section_bounds(s) for s in design['sections']],
