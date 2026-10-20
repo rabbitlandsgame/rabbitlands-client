@@ -129,14 +129,18 @@ def test_every_row_has_a_leash_and_its_band_sets_it(spawns):
 
 def test_species_come_only_from_the_plan_roster(spawns):
     for source, prefix in ID_PREFIX.items():
-        counts = Counter(r["creature"] for m in MAPS for r in spawns[m]["spawns"] if r["id"].startswith(prefix))
+        # A row the A3 rethemes re-typed keeps its source species in "retyped.from".
+        counts = Counter(r.get("retyped", {}).get("from", r["creature"]) for m in MAPS for r in spawns[m]["spawns"]
+                         if r["id"].startswith(prefix))
         assert dict(counts) == ROSTER[source], source
 
 
 def test_every_row_is_a_finite_local_position_in_a_named_zone(spawns):
     for map_id in MAPS:
         for r in spawns[map_id]["spawns"]:
-            assert set(r) <= {"id", "creature", "local", "leash", "zone", "band", "level", "habitat", "note"}, r["id"]
+            # moved/retyped/pass: the Landfall A3 theme pass (a row moved off a set piece, re-typed, or added)
+            assert set(r) <= {"id", "creature", "local", "leash", "zone", "band", "level", "habitat", "note",
+                              "moved", "retyped", "pass"}, r["id"]
             assert len(r["local"]) == 2 and all(isinstance(v, (int, float)) and math.isfinite(v)
                                                  for v in r["local"]), r["id"]
             assert isinstance(r["zone"], str) and r["zone"], r["id"]

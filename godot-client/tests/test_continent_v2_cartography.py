@@ -100,7 +100,7 @@ def test_the_label_point_is_the_area_centroid():
 
 def test_five_storage_markers_match_the_published_tiles_and_preview_positions():
     import frames
-    storage_maps = {"landfall", "greenlight", "hearthcroft", "stagheath", "coilmere"}
+    storage_maps = {"landfall", "greenlight", "hearthcroft", "stagheath", "brambleshaw"}
     for row in read(tool.OUTPUT)["regions"]:
         mid = row["serverMap"]
         markers = row["storageMarkers"]
