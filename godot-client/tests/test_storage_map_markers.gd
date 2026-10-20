@@ -68,7 +68,7 @@ func run() -> void:
 	expect(storage.size() == 1, "live storage dot retains one hover label")
 	if storage.size() == 1:
 		expect(str(storage[0].get("glyph", "")).is_empty(), "storage hover entry has no letter glyph")
-	var storage_maps := ["landfall", "greenlight", "hearthcroft", "stagheath", "coilmere"]
+	var storage_maps := ["landfall", "greenlight", "hearthcroft", "stagheath", "brambleshaw"]
 	main._ensure_cartography_textures()
 	for mid: String in storage_maps:
 		# A different current area makes this the static region-preview path.

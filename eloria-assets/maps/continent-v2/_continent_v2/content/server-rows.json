@@ -44,28 +44,31 @@
    }
   },
   "brambleshaw": {
-   "npcs": {},
-   "interactives": {}
-  },
-  "coilmere": {
    "npcs": {
-    "coilmere--npc-toll-keeper-tobin-ware": {
+    "brambleshaw--npc-toll-keeper-tobin-ware": {
      "name": "Tobin Ware",
      "group": "new",
      "role": "dialogue",
      "actorType": 348,
-     "greeting": "One cask in twenty of everything that leaves the holm. Not you; you are not a cask. Welcome to Tollholm.",
+     "greeting": "One cask in twenty of everything that leaves the vineyards. Not you; you are not a cask. Welcome to Brambleshaw.",
      "greetingSource": "dev-server config/eloria/npc_dialogue.txt, branch feature/landfall-people (Landfall liveliness pass, owner-approved 2026-10-14)",
-     "servedFrom": "M1 npcs.txt"
+     "servedFrom": "M1 npcs.txt",
+     "transplant": "from coilmere (a3-2026-10-20): owner 2026-10-19: Tollholm's vineyard village, its Wheat, Landfall's only Grapes, Tobin Ware and the storage move to Brambleshaw's field country (Landfall A3)"
     }
    },
    "interactives": {
-    "coilmere--obj-shared-storage": {
+    "brambleshaw--obj-shared-storage": {
      "objectId": 22,
      "role": "storage",
      "target": "shared",
-     "text": "Tollholm civic storehouse opens your shared storage."
-    },
+     "text": "Brambleshaw vineyard storehouse opens your shared storage.",
+     "transplant": "from coilmere (a3-2026-10-20): owner 2026-10-19: Tollholm's vineyard village, its Wheat, Landfall's only Grapes, Tobin Ware and the storage move to Brambleshaw's field country (Landfall A3)"
+    }
+   }
+  },
+  "coilmere": {
+   "npcs": {},
+   "interactives": {
     "coilmere--obj-boat-ravenhead": {
      "objectId": 23,
      "role": "portal",

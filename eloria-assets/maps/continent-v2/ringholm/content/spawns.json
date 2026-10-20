@@ -1,7 +1,7 @@
 {
  "schema": "eloria-continent-v2-spawns-v1",
  "map": "ringholm",
- "about": "Pinned original spawn rows, partitioned by exact continent position. local remains the source of truth.",
+ "about": "Pinned original spawn rows, partitioned by exact continent position. local remains the source of truth. Landfall A3 (2026-10-20): rows re-typed and added by work-output/landfall-a3-build/dress-tools/author_spawns_a3.py for the map's new theme.",
  "source": {
   "sourceCommit": "72fbd49e11f39fc9c1a00f5cadd9e447ae34e46e",
   "originalSources": {
@@ -28,29 +28,37 @@
  "spawns": [
   {
    "id": "sw-spawn-0544",
-   "creature": "crown_antler_stag",
+   "creature": "cobalt_ibex",
    "local": [
     -324.5,
     -160.5
    ],
    "leash": 45,
    "zone": "east_point:D",
-   "band": "D",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 16,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "crown_antler_stag",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "sw-spawn-0546",
-   "creature": "jackalope",
+   "creature": "skystripe_antelope",
    "local": [
     -345.5,
     -67.5
    ],
    "leash": 45,
    "zone": "east_point:D",
-   "band": "D",
-   "level": 7,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "jackalope",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "sw-spawn-0560",
@@ -80,81 +88,107 @@
   },
   {
    "id": "th-spawn-0013",
-   "creature": "raven",
+   "creature": "amethyst_moth",
    "local": [
     -255.0,
     -158.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 9,
+   "habitat": "rock",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0014",
-   "creature": "frilled_lizard",
+   "creature": "golden_plains_horse",
    "local": [
     -75.0,
     -120.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 8,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "rock",
+   "retyped": {
+    "from": "frilled_lizard",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0015",
-   "creature": "goose",
+   "creature": "glowhorn_sheep",
    "local": [
     -147.0,
     -102.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
+   "band": "6-22",
    "level": 6,
-   "habitat": "meadow"
+   "habitat": "meadow",
+   "retyped": {
+    "from": "goose",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0016",
-   "creature": "mossback_boar",
+   "creature": "skystripe_antelope",
    "local": [
     -257.0,
     -98.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 8,
-   "habitat": "forest"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "forest",
+   "retyped": {
+    "from": "mossback_boar",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0017",
-   "creature": "raven",
+   "creature": "suncrest_heron",
    "local": [
     -106.5,
     -98.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 10,
+   "habitat": "rock",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0018",
-   "creature": "frilled_lizard",
+   "creature": "glowhorn_sheep",
    "local": [
     -9.0,
     -88.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 8,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 6,
+   "habitat": "rock",
+   "retyped": {
+    "from": "frilled_lizard",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0019",
@@ -171,81 +205,130 @@
   },
   {
    "id": "th-spawn-0020",
-   "creature": "brambleback_boar",
+   "creature": "golden_plains_horse",
    "local": [
     -139.0,
     -68.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
+   "band": "6-22",
    "level": 12,
-   "habitat": "forest"
+   "habitat": "forest",
+   "retyped": {
+    "from": "brambleback_boar",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0021",
-   "creature": "frilled_lizard",
+   "creature": "glowhorn_sheep",
    "local": [
-    -111.0,
-    -64.0
+    -158.5,
+    -113.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 8,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 6,
+   "habitat": "rock",
+   "moved": {
+    "from": [
+     -111.0,
+     -64.0
+    ],
+    "why": "Sunmane camp (A3 Ringholm retheme)",
+    "pass": "a3-2026-10-20"
+   },
+   "retyped": {
+    "from": "frilled_lizard",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0022",
-   "creature": "crown_antler_stag",
+   "creature": "skystripe_antelope",
    "local": [
-    -67.0,
-    -58.0
+    -41.5,
+    -142.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "meadow",
+   "moved": {
+    "from": [
+     -67.0,
+     -58.0
+    ],
+    "why": "Sunmane camp (A3 Ringholm retheme)",
+    "pass": "a3-2026-10-20"
+   },
+   "retyped": {
+    "from": "crown_antler_stag",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0023",
    "creature": "goose",
    "local": [
-    -11.0,
-    -56.0
+    50.5,
+    -108.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
    "band": "4-12",
    "level": 6,
-   "habitat": "meadow"
+   "habitat": "meadow",
+   "moved": {
+    "from": [
+     -11.0,
+     -56.0
+    ],
+    "why": "Sunmane camp (A3 Ringholm retheme)",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0024",
    "creature": "crown_antler_stag",
    "local": [
-    -41.5,
-    -50.5
+    7.5,
+    -142.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
    "band": "4-12",
    "level": 6,
-   "habitat": "meadow"
+   "habitat": "meadow",
+   "moved": {
+    "from": [
+     -41.5,
+     -50.5
+    ],
+    "why": "Sunmane camp (A3 Ringholm retheme)",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0025",
-   "creature": "magpie",
+   "creature": "golden_plains_horse",
    "local": [
     103.0,
     -28.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 5,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "magpie",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0026",
@@ -262,94 +345,150 @@
   },
   {
    "id": "th-spawn-0027",
-   "creature": "mossback_boar",
+   "creature": "glowhorn_sheep",
    "local": [
     -153.0,
     -24.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 8,
-   "habitat": "forest"
+   "band": "6-22",
+   "level": 6,
+   "habitat": "forest",
+   "retyped": {
+    "from": "mossback_boar",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0028",
-   "creature": "crown_antler_stag",
+   "creature": "skystripe_antelope",
    "local": [
     29.0,
     -24.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "crown_antler_stag",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0029",
-   "creature": "magpie",
+   "creature": "glowhorn_sheep",
    "local": [
-    -49.0,
-    -18.0
+    28.5,
+    -53.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 5,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 6,
+   "habitat": "meadow",
+   "moved": {
+    "from": [
+     -49.0,
+     -18.0
+    ],
+    "why": "Sunmane camp (A3 Ringholm retheme)",
+    "pass": "a3-2026-10-20"
+   },
+   "retyped": {
+    "from": "magpie",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0030",
-   "creature": "raven",
+   "creature": "golden_plains_horse",
    "local": [
     65.0,
     -16.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0031",
-   "creature": "raven",
+   "creature": "golden_plains_horse",
    "local": [
-    -91.0,
-    -6.0
+    -159.5,
+    8.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "forest"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "forest",
+   "moved": {
+    "from": [
+     -91.0,
+     -6.0
+    ],
+    "why": "Sunmane camp (A3 Ringholm retheme)",
+    "pass": "a3-2026-10-20"
+   },
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0032",
-   "creature": "jackalope",
+   "creature": "golden_plains_horse",
    "local": [
-    1.0,
-    4.0
+    34.5,
+    12.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "moved": {
+    "from": [
+     1.0,
+     4.0
+    ],
+    "why": "Sunmane camp (A3 Ringholm retheme)",
+    "pass": "a3-2026-10-20"
+   },
+   "retyped": {
+    "from": "jackalope",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0033",
    "creature": "goose",
    "local": [
-    -59.0,
-    6.0
+    -22.5,
+    68.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
    "band": "4-12",
    "level": 6,
-   "habitat": "meadow"
+   "habitat": "meadow",
+   "moved": {
+    "from": [
+     -59.0,
+     6.0
+    ],
+    "why": "re-seated on a fully reached 3x3 ring (A3 server check)",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0034",
@@ -366,42 +505,55 @@
   },
   {
    "id": "th-spawn-0035",
-   "creature": "goose",
+   "creature": "skystripe_antelope",
    "local": [
     -203.0,
     26.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "goose",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0036",
-   "creature": "brambleback_boar",
+   "creature": "skystripe_antelope",
    "local": [
     -133.0,
     26.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 12,
-   "habitat": "forest"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "forest",
+   "retyped": {
+    "from": "brambleback_boar",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0037",
-   "creature": "crown_antler_stag",
+   "creature": "golden_plains_horse",
    "local": [
     41.0,
     26.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "crown_antler_stag",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0038",
@@ -418,68 +570,89 @@
   },
   {
    "id": "th-spawn-0039",
-   "creature": "jackalope",
+   "creature": "glowhorn_sheep",
    "local": [
     95.5,
     32.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 6,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "jackalope",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0040",
-   "creature": "raven",
+   "creature": "suncrest_heron",
    "local": [
     -157.0,
     46.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "forest"
+   "band": "6-22",
+   "level": 10,
+   "habitat": "forest",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0041",
-   "creature": "raven",
+   "creature": "skystripe_antelope",
    "local": [
     -111.0,
     48.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0042",
-   "creature": "jackalope",
+   "creature": "golden_plains_horse",
    "local": [
     121.0,
     48.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "jackalope",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0043",
-   "creature": "goose",
+   "creature": "golden_plains_horse",
    "local": [
     157.5,
     53.5
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "goose",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0044",
@@ -496,42 +669,54 @@
   },
   {
    "id": "th-spawn-0045",
-   "creature": "goose",
+   "creature": "golden_plains_horse",
    "local": [
     -227.0,
     60.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "goose",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0046",
-   "creature": "crown_antler_stag",
+   "creature": "golden_plains_horse",
    "local": [
     201.0,
     60.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "crown_antler_stag",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0047",
-   "creature": "frilled_lizard",
+   "creature": "glowhorn_sheep",
    "local": [
     -73.0,
     66.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 8,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 6,
+   "habitat": "rock",
+   "retyped": {
+    "from": "frilled_lizard",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0048",
@@ -561,29 +746,37 @@
   },
   {
    "id": "th-spawn-0050",
-   "creature": "goose",
+   "creature": "skystripe_antelope",
    "local": [
     -201.0,
     94.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "goose",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0051",
-   "creature": "brambleback_boar",
+   "creature": "golden_plains_horse",
    "local": [
     -173.0,
     94.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
+   "band": "6-22",
    "level": 12,
-   "habitat": "forest"
+   "habitat": "forest",
+   "retyped": {
+    "from": "brambleback_boar",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0052",
@@ -600,96 +793,126 @@
   },
   {
    "id": "th-spawn-0053",
-   "creature": "chameleon",
+   "creature": "golden_plains_horse",
    "local": [
     -237.0,
     96.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 4,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "rock",
+   "retyped": {
+    "from": "chameleon",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0054",
-   "creature": "raven",
+   "creature": "skystripe_antelope",
    "local": [
     -163.0,
     118.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "rock",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0055",
-   "creature": "magpie",
+   "creature": "glowhorn_sheep",
    "local": [
     -219.0,
     144.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 5,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 6,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "magpie",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0056",
-   "creature": "raven",
+   "creature": "golden_plains_horse",
    "local": [
     -175.0,
     146.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0057",
-   "creature": "raven",
+   "creature": "glowhorn_sheep",
    "local": [
     -129.0,
     152.0
    ],
    "leash": 40,
    "zone": "adjacent:east_islet",
-   "band": "4-12",
-   "level": 7,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 6,
+   "habitat": "rock",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0111",
-   "creature": "raven",
+   "creature": "cobalt_ibex",
    "local": [
     -115.5,
     -179.5
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
-   "level": 7,
+   "band": "6-22",
+   "level": 16,
    "habitat": "rock",
-   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0112",
-   "creature": "raven",
+   "creature": "cobalt_ibex",
    "local": [
     -109.5,
     -171.5
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
-   "level": 7,
+   "band": "6-22",
+   "level": 16,
    "habitat": "rock",
-   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat",
+   "retyped": {
+    "from": "raven",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0113",
@@ -706,17 +929,21 @@
   },
   {
    "id": "th-spawn-0114",
-   "creature": "frilled_lizard",
+   "creature": "golden_plains_horse",
    "local": [
     -148.5,
     -125.5
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
-   "level": 8,
+   "band": "6-22",
+   "level": 12,
    "habitat": "rock",
-   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat",
+   "retyped": {
+    "from": "frilled_lizard",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0115",
@@ -734,56 +961,73 @@
   },
   {
    "id": "th-spawn-0116",
-   "creature": "brambleback_boar",
+   "creature": "skystripe_antelope",
    "local": [
     -205.0,
     -82.0
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
-   "level": 12,
-   "habitat": "forest"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "forest",
+   "retyped": {
+    "from": "brambleback_boar",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0117",
-   "creature": "mossback_badger",
+   "creature": "suncrest_heron",
    "local": [
     21.0,
     -68.0
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
+   "band": "6-22",
    "level": 10,
-   "habitat": "meadow"
+   "habitat": "meadow",
+   "retyped": {
+    "from": "mossback_badger",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0118",
-   "creature": "mossback_boar",
+   "creature": "skystripe_antelope",
    "local": [
     -225.0,
     -66.0
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
-   "level": 8,
-   "habitat": "forest"
+   "band": "6-22",
+   "level": 18,
+   "habitat": "forest",
+   "retyped": {
+    "from": "mossback_boar",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0119",
-   "creature": "chameleon",
+   "creature": "skystripe_antelope",
    "local": [
     -183.5,
     -48.5
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
-   "level": 4,
+   "band": "6-22",
+   "level": 18,
    "habitat": "rock",
-   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat"
+   "note": "review fix 2026-10-03: off reached ground on the built map's served-rule union check; moved to the nearest reached 3x3 tile of its habitat",
+   "retyped": {
+    "from": "chameleon",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0120",
@@ -816,40 +1060,57 @@
    "id": "th-spawn-0122",
    "creature": "crown_antler_stag",
    "local": [
-    -41.0,
-    32.0
+    1.5,
+    64.5
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
    "band": "4-12",
    "level": 6,
-   "habitat": "meadow"
+   "habitat": "meadow",
+   "moved": {
+    "from": [
+     -41.0,
+     32.0
+    ],
+    "why": "re-seated on a fully reached 3x3 ring (A3 server check)",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0123",
-   "creature": "crown_antler_stag",
+   "creature": "golden_plains_horse",
    "local": [
     -37.0,
     60.0
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "crown_antler_stag",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "th-spawn-0124",
-   "creature": "chameleon",
+   "creature": "golden_plains_horse",
    "local": [
     -115.0,
     126.0
    ],
    "leash": 40,
    "zone": "adjacent:tollholms-fill",
-   "band": "4-12",
-   "level": 4,
-   "habitat": "rock"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "rock",
+   "retyped": {
+    "from": "chameleon",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
   },
   {
    "id": "th-spawn-0125",
@@ -867,16 +1128,20 @@
   },
   {
    "id": "lv-ringholm-road-01",
-   "creature": "goose",
+   "creature": "golden_plains_horse",
    "local": [
     -314.5,
     -54.5
    ],
    "leash": 25,
    "zone": "lv-roadside-life",
-   "band": "4-12",
-   "level": 6,
-   "habitat": "meadow"
+   "band": "6-22",
+   "level": 12,
+   "habitat": "meadow",
+   "retyped": {
+    "from": "goose",
+    "pass": "a3-2026-10-20"
+   }
   },
   {
    "id": "lv-hearthcroft-road-03",
@@ -890,6 +1155,329 @@
    "band": "4-12",
    "level": 9,
    "habitat": "shore"
+  },
+  {
+   "id": "a3-ringholm-0001",
+   "creature": "golden_plains_horse",
+   "local": [
+    -334.5,
+    -134.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0002",
+   "creature": "golden_plains_horse",
+   "local": [
+    -162.5,
+    67.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0003",
+   "creature": "golden_plains_horse",
+   "local": [
+    -18.5,
+    25.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0004",
+   "creature": "skystripe_antelope",
+   "local": [
+    -249.5,
+    -140.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 18,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0005",
+   "creature": "golden_plains_horse",
+   "local": [
+    -187.5,
+    25.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0006",
+   "creature": "golden_plains_horse",
+   "local": [
+    -246.5,
+    -111.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0007",
+   "creature": "golden_plains_horse",
+   "local": [
+    -174.5,
+    -137.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0008",
+   "creature": "glowhorn_sheep",
+   "local": [
+    -268.5,
+    -126.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 6,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0009",
+   "creature": "golden_plains_horse",
+   "local": [
+    -143.5,
+    -39.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0010",
+   "creature": "skystripe_antelope",
+   "local": [
+    -309.5,
+    -144.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 18,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0011",
+   "creature": "glowhorn_sheep",
+   "local": [
+    -272.5,
+    92.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 6,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0012",
+   "creature": "golden_plains_horse",
+   "local": [
+    -270.5,
+    104.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-plateau",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0013",
+   "creature": "glowhorn_sheep",
+   "local": [
+    294.5,
+    -92.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 6,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20",
+   "retyped": {
+    "from": "azure_hyena",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
+  },
+  {
+   "id": "a3-ringholm-0014",
+   "creature": "skystripe_antelope",
+   "local": [
+    304.5,
+    -24.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 18,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0015",
+   "creature": "golden_plains_horse",
+   "local": [
+    312.5,
+    19.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20",
+   "retyped": {
+    "from": "azure_hyena",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
+  },
+  {
+   "id": "a3-ringholm-0016",
+   "creature": "golden_plains_horse",
+   "local": [
+    268.5,
+    86.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0017",
+   "creature": "golden_plains_horse",
+   "local": [
+    389.5,
+    108.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0018",
+   "creature": "golden_plains_horse",
+   "local": [
+    349.5,
+    -93.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0019",
+   "creature": "skystripe_antelope",
+   "local": [
+    348.5,
+    174.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 18,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0020",
+   "creature": "skystripe_antelope",
+   "local": [
+    222.5,
+    -76.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 18,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20",
+   "retyped": {
+    "from": "azure_hyena",
+    "pass": "a3-2026-10-20",
+    "passiveOnly": "the continent-v2 publisher fields only passive species"
+   }
+  },
+  {
+   "id": "a3-ringholm-0021",
+   "creature": "skystripe_antelope",
+   "local": [
+    362.5,
+    -52.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 18,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
+  },
+  {
+   "id": "a3-ringholm-0022",
+   "creature": "golden_plains_horse",
+   "local": [
+    327.5,
+    -112.5
+   ],
+   "leash": 40,
+   "zone": "a3:ringholm-east",
+   "band": "6-22",
+   "level": 12,
+   "habitat": "steppe",
+   "pass": "a3-2026-10-20"
   }
  ]
 }
