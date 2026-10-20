@@ -81,8 +81,12 @@ Space is saved by:
 
 - Checking out only the build scripts initially, with complete commit ancestry
   and blob filtering. Historical binary versions are not required.
-- Creating one sparse, disposable runtime worktree. Original art, QA and other
-  authoring trees outside the runtime inputs are not materialized.
+- Streaming the immutable GitHub source archive into one disposable runtime
+  worktree. Each selected file must match its committed Git blob before use;
+  Git retains the index and complete history without caching a second copy of
+  the runtime blobs. The compressed source archive is never saved. Original art,
+  QA and other trees outside the runtime inputs are not materialized. Archive
+  writes are checked in bounded batches against the same disk reserve.
 - Checking world-authoring references once, freezing that asset-inclusion proof,
   then retiring the editor-only tree before import. Editor plugins are disabled
   in the temporary project. Runtime sources and asset checks remain enabled.
