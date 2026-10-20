@@ -15,7 +15,7 @@ from the authored underground plan into `cartography-continent-v2.json`.
 |---|---|---|---|
 | Lantern Mine | Landfall `(332, 86)` | 6 Coal, 3 Iron Ore, 1 Quartz | Peaceful working mine |
 | Pinebrow Deep Workings | Pinebrow `(537, 490)` | Coal, Iron Ore, Copper, Sulfur, Slate | 2 Coal Kobolds, 1 Nightweave Spider |
-| Spindle Mineral Cavern | Spindle Hill `(104, 346)` | Quartz, Salt, Slate, Sulfur, Crystal, Geode | 2 Cave Spiders, 1 Moss Golem |
+| Cenote Deeps | Coilmere `(230, 754)` | Quartz, Salt, Slate, Sulfur, Crystal, Geode | 2 Cave Spiders, 1 Moss Golem |
 | Boarsend Old Barrow | Boarsend `(825, 489)` | Quartz, Salt | 2 Skeletons, 1 Moss Golem |
 
 The first mine supplies the missing starter fuel and metal without combat.

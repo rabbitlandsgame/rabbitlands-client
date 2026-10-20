@@ -10,6 +10,8 @@ door ends, so this tool rewrites only those:
     return tile keeps its offset from the entrance;
   * the interior package's exit portals and interactives with that door's object id name the entrance's map and the
     new return tile;
+  * a section renamed in the source renames only labels: its spawn point and chambers, its exit's "Leave <name>"
+    and its entrance art's label in objects.json (ids, geometry and collision keep the built section's);
   * the package's provenance.sourceSha256 becomes the new source's hash. Nothing else in the package changes, and the
     builder hash must still be the retired builder's.
 --check writes nothing and exits 1 when either file would change.
@@ -70,6 +72,17 @@ def retarget(checkout: Path):
             if item["destinationMap"] != door["map"] or item["destinationTile"] != door["returnTile"]:
                 item["destinationMap"], item["destinationTile"] = door["map"], list(door["returnTile"])
                 changed += 1
+    # names are labels only: the builder wrote each section's name on these records (build_underground.build)
+    names = {s["id"]: s["name"] for s in design["sections"]}
+    exits = {s["entrance"]["object"]: f'Leave {s["name"]}' for s in design["sections"]}
+    for key in ("spawnPoints", "chambers"):
+        for item in package.get(key, []):
+            if item.get("section") in names:
+                item["name"] = names[item["section"]]
+    for key in ("portals", "interactives"):
+        for item in package.get(key, []):
+            if item.get("objectId") in exits and "label" in item:
+                item["label"] = exits[item["objectId"]]
     package["provenance"]["sourceSha256"] = sha(source)
     indent = 1 if raw.startswith(b'{\n "') else (2 if raw.startswith(b'{\n  "') else None)
     out = (json.dumps(package, indent=indent, ensure_ascii=False) + ("\n" if raw.endswith(b"\n") else "")).encode("utf-8")
@@ -80,6 +93,7 @@ def retarget(checkout: Path):
         record = objects["authoredObjects"].get(str(object_id))
         if record is not None and record.get("entrance"):
             record["exteriorTile"] = list(door["tile"])
+            record["label"] = next(s["name"] for s in design["sections"] if s["entrance"]["object"] == object_id)
     objects_raw = (json.dumps(objects, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
     return {SOURCE: source, package_path: out, objects_path: objects_raw}, changed
 

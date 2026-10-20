@@ -110,12 +110,14 @@ that every plant's approach ring is walkable with NPC posts and storage blocking
 their occupied ground. Cotton uses the existing plant model and needs no tool.
 
 Four cave mouths lead to `landfall_insides`: Lantern Mine, Pinebrow Deep Workings,
-Spindle Mineral Cavern, and Boarsend Old Barrow. Their rooms share one interior
+Cenote Deeps (Coilmere), and Boarsend Old Barrow. Their rooms share one interior
 map with unfloored blackspace between sections. The peaceful Lantern Mine
 supplies beginner Coal and Iron Ore; the deeper areas contain intermediate
 encounters and additional minerals. See `../landfall_insides/README.md` for
 locations, resources, encounter tiers, and the rebuild workflow. `build_underground.py` is retired; when a
-partition change moves a door's exterior map or frame, `retarget_underground.py` rewrites only the door ends.
+partition change moves a door's exterior map or frame, `retarget_underground.py` rewrites only the door ends, and a section renamed in
+the source only its labels (the Spindle Mineral Cavern became Coilmere's Cenote Deeps for Landfall A3; its
+id `spindle_cavern`, entrance marker id and crystal-style rooms are the built section's).
 
 ## Boats
 
