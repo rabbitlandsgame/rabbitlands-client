@@ -6,7 +6,8 @@ A chunk-streamed isle holds only the chunks round the player, so its Tab map and
 (minimap.webp, drawn from the package's chunks by _continent_v2/render_minimap.py) and a cartography row framing it
 (godot-client/data/maps/cartography-continent-v2.json, written by _continent_v2/publish_cartography.py; main.gd
 appends its rows after cartography.json's). This fails when a package was republished without its picture being
-drawn again, a picture or a frame moved, cartography.json's pixel lattice changed, or the file was edited by hand.
+drawn again, a picture or a frame moved, a boat moved or a boat route changed, cartography.json's pixel lattice
+changed, or the file was edited by hand.
 """
 from __future__ import annotations
 
@@ -172,3 +173,72 @@ def test_overview_check_refuses_corrupt_picture(tmp_path, monkeypatch):
     assert tool.check(tmp_path) == []
     image.write_bytes(image.read_bytes()[:-10] + b"corrupt")
     assert any(tool.OVERVIEW in problem for problem in tool.check(tmp_path))
+
+
+def test_the_boat_network_draws_every_route_between_the_boats_it_names():
+    import math
+    from shapely.geometry import Point, Polygon
+    from shapely.ops import unary_union
+    data = read(tool.OUTPUT)
+    network = read(tool.BOAT_NETWORK)
+    rows = read(tool.SERVER_ROWS)["maps"]
+    drawn = data["boatNetwork"]
+    assert drawn["source"] == tool.BOAT_NETWORK
+    docks = {dock["id"]: dock for dock in drawn["docks"]}
+    assert list(docks) == list(network["docks"])
+    assert len(drawn["routes"]) == len(network["routes"]) == 12
+    assert sum(len(dock["boats"]) for dock in docks.values()) == 24
+    overview = data["overview"]
+    for key, dock in docks.items():
+        spec = network["docks"][key]
+        assert dock["label"] == spec["label"] and dock["serverMap"] == spec["map"]
+        assert sorted(boat["to"] for boat in dock["boats"]) == sorted(spec["berths"])
+        boats_here = {row["objectId"]: row for row in rows[dock["serverMap"]]["interactives"].values()
+                      if row.get("role") == "portal"}
+        for boat in dock["boats"]:
+            assert boat["destination"] == network["docks"][boat["to"]]["label"]
+            # The destination the map names is the one the client reads off the boat (MapObject3D.destination).
+            row = boats_here[boat["objectId"]]
+            said = row["text"].split(tool.BOAT_PHRASE, 1)[1].split(". ", 1)[0].removesuffix(".")
+            assert said == boat["destination"]
+            assert row["portal"]["destinationMap"] == docks[boat["to"]]["serverMap"]
+            assert math.dist(boat["position"], dock["position"]) < 25.0
+        manifest = read(f"eloria-assets/maps/continent-v2/{dock['serverMap']}/client/world.json")
+        geography = manifest["continentGeography"]
+        land = unary_union([Polygon(ring) for ring in geography.get("ownershipPolygons",
+                                                                    [geography["ownershipPolygon"]])])
+        assert land.contains(Point(dock["position"])), f"{key} stands outside {dock['serverMap']}"
+        pixel = [(dock["position"][i] - overview["originMetres"][i]) / overview["metresPerPixel"] for i in (0, 1)]
+        assert all(0 <= pixel[i] < overview["imageSize"][i] for i in (0, 1))
+    for route, spec in zip(drawn["routes"], network["routes"]):
+        assert route["docks"] == spec["docks"]
+        assert route["points"] == [docks[key]["position"] for key in spec["docks"]]
+    # Both boat-only isles have routes drawn to the rest of the network.
+    for isle in ({"coilmere", "suncoil"}, {"hornmere", "whitepeak"}):
+        assert any((docks[a]["serverMap"] in isle) != (docks[b]["serverMap"] in isle)
+                   for a, b in (route["docks"] for route in drawn["routes"]))
+
+
+def test_the_boat_network_refuses_what_the_boats_do_not_say():
+    import copy
+    import pytest
+    served = dict(tool.served(read(tool.REGISTRY)))
+    network = read(tool.BOAT_NETWORK)
+    rows = read(tool.SERVER_ROWS)
+    assert tool.boat_network(ROOT, served, network, rows) == read(tool.OUTPUT)["boatNetwork"]
+    unrouted = copy.deepcopy(network)
+    unrouted["routes"] = unrouted["routes"][1:]
+    with pytest.raises(tool.CartographyError, match="on no route"):
+        tool.boat_network(ROOT, served, unrouted, rows)
+    misnamed = copy.deepcopy(rows)
+    row = misnamed["maps"]["reedfall"]["interactives"]["reedfall--obj-boat-stagheath"]
+    row["text"] = row["text"].replace("Bound for Stagheath.", "Bound for Saltsound.")
+    with pytest.raises(tool.CartographyError, match="does not begin"):
+        tool.boat_network(ROOT, served, network, misnamed)
+    unmoored = copy.deepcopy(network)
+    route = next(route for route in unmoored["routes"] if route["docks"] == ["stagheath", "hornmere"])
+    route["existing"] = {"hornmere": "hornmere--obj-boat-nowhere"}
+    with pytest.raises(tool.CartographyError, match="has no boat"):
+        tool.boat_network(ROOT, served, unmoored, rows)
+    with pytest.raises(tool.CartographyError, match="not served"):
+        tool.boat_network(ROOT, {key: row for key, row in served.items() if key != "hornmere"}, network, rows)

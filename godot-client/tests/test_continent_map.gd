@@ -5,6 +5,8 @@ extends SceneTree
 ## region of the continent opens that region's own top-down map, and the cursor
 ## names server tiles over a preview as it does over the live map.
 
+const BoatRouteOverlayScript := preload("res://src/ui/boat_route_overlay.gd")
+
 var failures: int = 0
 var checks: int = 0
 var _landfall_checks_done := false
@@ -301,13 +303,71 @@ func _test_landfall_group(main: Control, app_state: Node) -> void:
 	_expect(int(main.get("_preview_region_index")) == _index_of(rows, "ravenhead")
 		and (main.get("region_preview") as Control).visible and str(app_state.get("current_map")) == "landfall",
 		"overview click maps to Ravenhead's own preview without changing server map")
+	_test_landfall_boats(main)
 
 	app_state.set("current_map", "four_gates")
 	main.call("_show_current_map_view")
 	main.call("_on_continent_button_pressed")
 	_expect(int(overlay.call("region_count")) == 12 and (main.get("map_title") as Label).text == "NYMARA CONTINENT",
 		"returning to Nymara restores its original 12-region overview")
+	var boats: Control = main.get("_boat_continent_overlay") as Control
+	_expect(int(boats.call("dock_count")) == 0 and int(boats.call("route_count")) == 0,
+		"Nymara's continent draws no Landfall boats")
+	var nymara_legend: Rect2 = overlay.call("legend_rect")
+	_expect(nymara_legend.position == (overlay.call("display_rect") as Rect2).position + Vector2(18, 14),
+		"Nymara's legend keeps its top-left corner, got " + str(nymara_legend))
 	_landfall_checks_done = true
+
+## The Landfall boat network on the overview: every published route is drawn
+## between its docks, and the cursor on a dock names where its boats sail.
+func _test_landfall_boats(main: Control) -> void:
+	main.call("_show_continent_view")
+	var overlay: Control = main.get("continent_map") as Control
+	var boats: Control = main.get("_boat_continent_overlay") as Control
+	var sidebar: Label = main.get("map_coordinates") as Label
+	var network: Dictionary = (main.get("_v2_cartography") as Dictionary).get("boatNetwork", {}) as Dictionary
+	var docks: Array = network.get("docks", []) as Array
+	_expect(docks.size() == 12 and int(boats.call("dock_count")) == docks.size(),
+		"Landfall's overview marks all 12 boat docks")
+	_expect((network.get("routes", []) as Array).size() == 12 and int(boats.call("route_count")) == 12,
+		"Landfall's overview draws all 12 boat routes")
+	var picture: Rect2 = overlay.call("display_rect")
+	var lakehead := -1
+	for index: int in range(docks.size()):
+		var dock: Dictionary = docks[index] as Dictionary
+		var point: Variant = boats.call("dock_point", index)
+		_expect(point is Vector2 and picture.has_point(point as Vector2), str(dock.label) + "'s dock is on the picture")
+		if str(dock.id) == "lakehead":
+			lakehead = index
+	for value: Variant in network.get("routes", []):
+		var ends: Array = (value as Dictionary).get("points", []) as Array
+		_expect(ends.size() == 2, "a route is drawn between its two docks")
+	_expect(lakehead >= 0, "the Lakehead hub has a dock")
+	if lakehead < 0:
+		return
+	# The overlay map takes the cursor; the boat marks share its picture.
+	var at: Vector2 = overlay.get_global_transform().affine_inverse() * (
+		boats.get_global_transform() * (boats.call("dock_point", lakehead) as Vector2))
+	var on_dock := InputEventMouseMotion.new()
+	on_dock.position = at
+	overlay.gui_input.emit(on_dock)
+	overlay.call("_gui_input", on_dock)
+	_expect(int(boats.call("hovered_dock")) == lakehead, "the cursor on Lakehead Landing's dock lifts it")
+	_expect(sidebar.text == "Lakehead Landing — boats to Boarsend, Greenlight, Ravenhead and Stagheath",
+		"Lakehead Landing names its four destinations, got " + sidebar.text)
+	_expect(boats.has_node("DockLabel"), "the hovered dock's names are drawn beside it")
+	var off_dock := InputEventMouseMotion.new()
+	off_dock.position = picture.position + Vector2(2, 2)
+	overlay.gui_input.emit(off_dock)
+	overlay.call("_gui_input", off_dock)
+	_expect(int(boats.call("hovered_dock")) == -1 and sidebar.text.begins_with("Click a region"),
+		"off the docks the sidebar gives the continent hint again, got " + sidebar.text)
+	_expect(BoatRouteOverlayScript.destinations_text({"boats": [{"destination": "Hornmere"}]}) == "Boat to Hornmere",
+		"one boat is named in the singular")
+	# The north isle fills the picture's top left, so the legend takes a clear corner.
+	var legend: Rect2 = overlay.call("legend_rect")
+	_expect(legend.size.x > 0.0 and picture.encloses(legend) and not bool(overlay.call("_covers_a_region", legend)),
+		"the legend covers no Landfall region")
 
 ## The pixels a region's published cartography frames, one a metre: the crop
 ## the tab map declares, or the whole picture where it declares none.

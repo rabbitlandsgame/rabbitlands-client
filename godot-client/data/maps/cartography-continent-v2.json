@@ -2757,6 +2757,553 @@
       "entranceMarkers": []
     }
   ],
+  "boatNetwork": {
+    "source": "eloria-assets/maps/continent-v2/_continent_v2/content/boat-network.json",
+    "docks": [
+      {
+        "id": "lakehead",
+        "label": "Lakehead Landing",
+        "serverMap": "reedfall",
+        "position": [
+          1575.49,
+          7463.82
+        ],
+        "boats": [
+          {
+            "to": "boarsend",
+            "destination": "Boarsend",
+            "objectId": 30,
+            "position": [
+              1573.73,
+              7459.57
+            ]
+          },
+          {
+            "to": "greenlight",
+            "destination": "Greenlight",
+            "objectId": 31,
+            "position": [
+              1575.29,
+              7468.43
+            ]
+          },
+          {
+            "to": "ravenhead",
+            "destination": "Ravenhead",
+            "objectId": 32,
+            "position": [
+              1575.7,
+              7459.22
+            ]
+          },
+          {
+            "to": "stagheath",
+            "destination": "Stagheath",
+            "objectId": 33,
+            "position": [
+              1577.26,
+              7468.08
+            ]
+          }
+        ]
+      },
+      {
+        "id": "stagheath",
+        "label": "Stagheath",
+        "serverMap": "stagheath",
+        "position": [
+          1334.82,
+          6252.21
+        ],
+        "boats": [
+          {
+            "to": "hornmere",
+            "destination": "Hornmere",
+            "objectId": 30,
+            "position": [
+              1333.36,
+              6252.51
+            ]
+          },
+          {
+            "to": "lakehead",
+            "destination": "Lakehead Landing",
+            "objectId": 31,
+            "position": [
+              1336.97,
+              6246.75
+            ]
+          },
+          {
+            "to": "saltsound",
+            "destination": "Saltsound",
+            "objectId": 32,
+            "position": [
+              1334.12,
+              6257.37
+            ]
+          }
+        ]
+      },
+      {
+        "id": "boarsend",
+        "label": "Boarsend",
+        "serverMap": "boarsend",
+        "position": [
+          1515.14,
+          8202.99
+        ],
+        "boats": [
+          {
+            "to": "greenlight",
+            "destination": "Greenlight",
+            "objectId": 30,
+            "position": [
+              1514.38,
+              8203.63
+            ]
+          },
+          {
+            "to": "lakehead",
+            "destination": "Lakehead Landing",
+            "objectId": 31,
+            "position": [
+              1515.91,
+              8202.35
+            ]
+          }
+        ]
+      },
+      {
+        "id": "saltsound",
+        "label": "Saltsound",
+        "serverMap": "saltsound",
+        "position": [
+          1982.53,
+          6238.98
+        ],
+        "boats": [
+          {
+            "to": "stagheath",
+            "destination": "Stagheath",
+            "objectId": 30,
+            "position": [
+              1984.81,
+              6236.45
+            ]
+          },
+          {
+            "to": "whitepeak",
+            "destination": "Whitepeak",
+            "objectId": 31,
+            "position": [
+              1980.25,
+              6241.5
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ringholm",
+        "label": "Ringholm",
+        "serverMap": "ringholm",
+        "position": [
+          3126.7,
+          7039.29
+        ],
+        "boats": [
+          {
+            "to": "suncoil",
+            "destination": "Suncoil",
+            "objectId": 30,
+            "position": [
+              3126.7,
+              7039.29
+            ]
+          }
+        ]
+      },
+      {
+        "id": "suncoil",
+        "label": "Suncoil",
+        "serverMap": "suncoil",
+        "position": [
+          3280.75,
+          7619.72
+        ],
+        "boats": [
+          {
+            "to": "ravenhead",
+            "destination": "Ravenhead",
+            "objectId": 30,
+            "position": [
+              3281.69,
+              7619.38
+            ]
+          },
+          {
+            "to": "ringholm",
+            "destination": "Ringholm",
+            "objectId": 31,
+            "position": [
+              3279.81,
+              7620.06
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hornmere",
+        "label": "Hornmere",
+        "serverMap": "hornmere",
+        "position": [
+          1210.0,
+          5946.5
+        ],
+        "boats": [
+          {
+            "to": "stagheath",
+            "destination": "Stagheath",
+            "objectId": 30,
+            "position": [
+              1210.0,
+              5946.5
+            ]
+          }
+        ]
+      },
+      {
+        "id": "whitepeak",
+        "label": "Whitepeak",
+        "serverMap": "whitepeak",
+        "position": [
+          1868.2,
+          5639.41
+        ],
+        "boats": [
+          {
+            "to": "saltsound",
+            "destination": "Saltsound",
+            "objectId": 30,
+            "position": [
+              1868.2,
+              5639.41
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ravenhead",
+        "label": "Ravenhead",
+        "serverMap": "ravenhead",
+        "position": [
+          2600.62,
+          7327.0
+        ],
+        "boats": [
+          {
+            "to": "coilmere-north",
+            "destination": "Coilmere",
+            "objectId": 23,
+            "position": [
+              2600.5,
+              7327.5
+            ]
+          },
+          {
+            "to": "lakehead",
+            "destination": "Lakehead Landing",
+            "objectId": 30,
+            "position": [
+              2591.69,
+              7327.12
+            ]
+          },
+          {
+            "to": "suncoil",
+            "destination": "Suncoil",
+            "objectId": 31,
+            "position": [
+              2609.68,
+              7326.39
+            ]
+          }
+        ]
+      },
+      {
+        "id": "greenlight",
+        "label": "Greenlight",
+        "serverMap": "greenlight",
+        "position": [
+          1980.43,
+          7951.66
+        ],
+        "boats": [
+          {
+            "to": "boarsend",
+            "destination": "Boarsend",
+            "objectId": 30,
+            "position": [
+              1976.53,
+              7951.66
+            ]
+          },
+          {
+            "to": "coilmere-knob",
+            "destination": "Coilmere",
+            "objectId": 31,
+            "position": [
+              1977.21,
+              7953.54
+            ]
+          },
+          {
+            "to": "lakehead",
+            "destination": "Lakehead Landing",
+            "objectId": 32,
+            "position": [
+              1987.55,
+              7949.78
+            ]
+          }
+        ]
+      },
+      {
+        "id": "coilmere-knob",
+        "label": "Coilmere",
+        "serverMap": "coilmere",
+        "position": [
+          2406.9,
+          7932.9
+        ],
+        "boats": [
+          {
+            "to": "greenlight",
+            "destination": "Greenlight",
+            "objectId": 30,
+            "position": [
+              2406.9,
+              7932.9
+            ]
+          }
+        ]
+      },
+      {
+        "id": "coilmere-north",
+        "label": "Coilmere",
+        "serverMap": "coilmere",
+        "position": [
+          2737.5,
+          7719.5
+        ],
+        "boats": [
+          {
+            "to": "ravenhead",
+            "destination": "Ravenhead",
+            "objectId": 23,
+            "position": [
+              2737.5,
+              7719.5
+            ]
+          }
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "docks": [
+          "lakehead",
+          "stagheath"
+        ],
+        "points": [
+          [
+            1575.49,
+            7463.82
+          ],
+          [
+            1334.82,
+            6252.21
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "lakehead",
+          "ravenhead"
+        ],
+        "points": [
+          [
+            1575.49,
+            7463.82
+          ],
+          [
+            2600.62,
+            7327.0
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "lakehead",
+          "greenlight"
+        ],
+        "points": [
+          [
+            1575.49,
+            7463.82
+          ],
+          [
+            1980.43,
+            7951.66
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "lakehead",
+          "boarsend"
+        ],
+        "points": [
+          [
+            1575.49,
+            7463.82
+          ],
+          [
+            1515.14,
+            8202.99
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "ravenhead",
+          "coilmere-north"
+        ],
+        "points": [
+          [
+            2600.62,
+            7327.0
+          ],
+          [
+            2737.5,
+            7719.5
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "greenlight",
+          "coilmere-knob"
+        ],
+        "points": [
+          [
+            1980.43,
+            7951.66
+          ],
+          [
+            2406.9,
+            7932.9
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "stagheath",
+          "hornmere"
+        ],
+        "points": [
+          [
+            1334.82,
+            6252.21
+          ],
+          [
+            1210.0,
+            5946.5
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "ringholm",
+          "suncoil"
+        ],
+        "points": [
+          [
+            3126.7,
+            7039.29
+          ],
+          [
+            3280.75,
+            7619.72
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "saltsound",
+          "whitepeak"
+        ],
+        "points": [
+          [
+            1982.53,
+            6238.98
+          ],
+          [
+            1868.2,
+            5639.41
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "ravenhead",
+          "suncoil"
+        ],
+        "points": [
+          [
+            2600.62,
+            7327.0
+          ],
+          [
+            3280.75,
+            7619.72
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "boarsend",
+          "greenlight"
+        ],
+        "points": [
+          [
+            1515.14,
+            8202.99
+          ],
+          [
+            1980.43,
+            7951.66
+          ]
+        ]
+      },
+      {
+        "docks": [
+          "stagheath",
+          "saltsound"
+        ],
+        "points": [
+          [
+            1334.82,
+            6252.21
+          ],
+          [
+            1982.53,
+            6238.98
+          ]
+        ]
+      }
+    ]
+  },
   "overview": {
     "name": "Landfall",
     "frame": "continent-v2",

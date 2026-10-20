@@ -17,12 +17,16 @@ const HOVER_WIDTH := 3.0
 ## Legacy rectangular atlases enlarge very small targets for the mouse.
 ## Geographic atlases use their actual polygons to avoid selecting a neighbor.
 const MIN_HIT_SIZE := 44.0
+const LEGEND_SIZE := 14
+const LEGEND_LINE := 23.0
+const BoatRouteOverlayScript := preload("res://src/ui/boat_route_overlay.gd")
 
 var _image_size := Vector2.ZERO
 var _regions: Array[Dictionary] = []
 var _current_index := -1
 var _hovered_index := -1
 var _marker_positions: Array[Vector2] = []
+var _dock_legend := false
 
 ## Region names, bounds and polygons use the picture's own pixels.
 func configure(image_size: Vector2, regions: Array[Dictionary]) -> void:
@@ -35,6 +39,46 @@ func configure(image_size: Vector2, regions: Array[Dictionary]) -> void:
 func set_marker_positions(points: Array[Vector2]) -> void:
 	_marker_positions = points
 	queue_redraw()
+
+## The legend explains the boat docks only on a picture that has some.
+func set_dock_legend(shown: bool) -> void:
+	_dock_legend = shown
+	queue_redraw()
+
+func _legend_lines() -> PackedStringArray:
+	var lines := PackedStringArray(["Road / causeway", "Boat route"])
+	if _dock_legend:
+		lines.append("Boat dock (hover for destinations)")
+	return lines
+
+## The legend's box: the first corner of the picture (top left, top right,
+## bottom left, bottom right) where it covers no region, or the top left when
+## every corner does.
+func legend_rect() -> Rect2:
+	var display := display_rect()
+	var font: Font = get_theme_default_font()
+	if display.size.x <= 0.0 or font == null:
+		return Rect2()
+	var lines := _legend_lines()
+	var width := 0.0
+	for line: String in lines:
+		width = maxf(width, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE).x)
+	var box := Vector2(40.0 + width, LEGEND_LINE * (lines.size() - 1) + 24.0)
+	var near := display.position + Vector2(18, 14)
+	var far := display.end - Vector2(18, 10) - box
+	for corner: Vector2 in [near, Vector2(far.x, near.y), Vector2(near.x, far.y), far]:
+		if not _covers_a_region(Rect2(corner, box)):
+			return Rect2(corner, box)
+	return Rect2(near, box)
+
+func _covers_a_region(rect: Rect2) -> bool:
+	var corners := PackedVector2Array([rect.position, Vector2(rect.end.x, rect.position.y), rect.end,
+		Vector2(rect.position.x, rect.end.y)])
+	for index: int in range(_regions.size()):
+		for polygon: PackedVector2Array in region_polygons(index):
+			if not Geometry2D.intersect_polygons(corners, polygon).is_empty():
+				return true
+	return false
 
 func region_count() -> int:
 	return _regions.size()
@@ -168,13 +212,19 @@ func _draw() -> void:
 	var font: Font = get_theme_default_font()
 	if font == null:
 		return
-	var legend := display_rect().position + Vector2(18, 28)
+	var lines := _legend_lines()
+	var legend := legend_rect().position + Vector2(0, 14)
 	draw_line(legend, legend + Vector2(30, 0), Color(0.85, 0.76, 0.54), 3.0)
-	draw_string(font, legend + Vector2(40, 5), "Road / causeway", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, LABEL_COLOUR)
-	legend.y += 23.0
+	draw_string(font, legend + Vector2(40, 5), lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, LABEL_COLOUR)
+	legend.y += LEGEND_LINE
 	for part: int in range(4):
-		draw_line(legend + Vector2(part * 8, 0), legend + Vector2(part * 8 + 4, 0), Color(0.51, 0.80, 0.87), 2.0)
-	draw_string(font, legend + Vector2(40, 5), "Ferry", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, LABEL_COLOUR)
+		draw_line(legend + Vector2(part * 8, 0), legend + Vector2(part * 8 + 4, 0),
+			BoatRouteOverlayScript.ROUTE_COLOUR, 2.0)
+	draw_string(font, legend + Vector2(40, 5), lines[1], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, LABEL_COLOUR)
+	if _dock_legend:
+		legend.y += LEGEND_LINE
+		BoatRouteOverlayScript.draw_dock(self, legend + Vector2(15, 0))
+		draw_string(font, legend + Vector2(40, 5), lines[2], HORIZONTAL_ALIGNMENT_LEFT, -1, LEGEND_SIZE, LABEL_COLOUR)
 	for index: int in range(_regions.size()):
 		var rect: Rect2 = region_rect(index)
 		if rect.size.x <= 0.0:

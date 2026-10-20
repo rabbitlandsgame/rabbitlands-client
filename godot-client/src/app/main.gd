@@ -485,6 +485,9 @@ var _entrance_continent_overlay: Control
 const ServiceOverlayScript := preload("res://src/ui/service_map_overlay.gd")
 var _service_preview_overlay: Control
 var _service_continent_overlay: Control
+## The Landfall boat network's routes and docks on the continent picture.
+const BoatRouteOverlayScript := preload("res://src/ui/boat_route_overlay.gd")
+var _boat_continent_overlay: Control
 var equipment_config: Dictionary = {}
 var item_atlas := ItemAtlas.new()
 var spell_catalog := SpellCatalog.new()
@@ -7325,6 +7328,12 @@ func _configure_cartography() -> void:
 	_service_preview_overlay = ServiceOverlayScript.new()
 	region_preview.add_child(_service_preview_overlay)
 	_service_preview_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# First of the continent's marks, so the routes run under the other dots.
+	_boat_continent_overlay = BoatRouteOverlayScript.new()
+	_boat_continent_overlay.name = "BoatRoutes"
+	_boat_continent_overlay.z_index = 1
+	continent_image.add_child(_boat_continent_overlay)
+	_boat_continent_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_service_continent_overlay = ServiceOverlayScript.new()
 	_service_continent_overlay.z_index = 1
 	continent_image.add_child(_service_continent_overlay)
@@ -7349,6 +7358,8 @@ func _configure_cartography() -> void:
 	continent_map.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	continent_map.region_selected.connect(_preview_continent_region)
 	continent_map.region_hovered.connect(_hover_continent_region)
+	continent_map.gui_input.connect(_on_continent_map_gui_input)
+	continent_map.mouse_exited.connect(_set_hovered_dock.bind(-1))
 	_configure_continent_overlay(_active_continent_data())
 
 func _active_continent_data() -> Dictionary:
@@ -7418,7 +7429,20 @@ func _configure_continent_overlay(continent: Dictionary) -> void:
 				entrances.append(mark)
 				marker_pixels.append((Vector2(float(mark.position[0]), float(mark.position[1])) - minimum)
 					/ float(continent.get("metresPerPixel", 1.0)))
+		# The boat network is written in the picture's own metres.
+		var boats: Dictionary = {}
+		if not frame.is_empty() and frame == str(_v2_cartography.get("frame", "")):
+			boats = _v2_cartography.get("boatNetwork", {}) as Dictionary
+		var docks: Array = boats.get("docks", []) as Array
+		for value: Variant in docks:
+			var at: Array = (value as Dictionary).get("position", [0, 0]) as Array
+			marker_pixels.append((Vector2(float(at[0]), float(at[1])) - minimum)
+				/ float(continent.get("metresPerPixel", 1.0)))
 		continent_map.set_marker_positions(marker_pixels)
+		continent_map.set_dock_legend(not docks.is_empty())
+		_boat_continent_overlay.configure(minimum,
+			minimum + pixels * float(continent.get("metresPerPixel", 1.0)), pixels, docks)
+		_boat_continent_overlay.set_routes(boats.get("routes", []) as Array)
 		_service_continent_overlay.configure(minimum,
 			minimum + pixels * float(continent.get("metresPerPixel", 1.0)), pixels, services)
 		_storage_continent_overlay.configure(minimum,
@@ -7442,6 +7466,21 @@ func _preview_continent_region(local_index: int) -> void:
 func _hover_continent_region(local_index: int) -> void:
 	_on_continent_region_hovered(_continent_region_indices[local_index]
 		if local_index >= 0 and local_index < _continent_region_indices.size() else -1)
+
+## The cursor over a boat dock lifts its routes and names its destinations.
+## The overlay map takes the input; the boat marks share its picture.
+func _on_continent_map_gui_input(event: InputEvent) -> void:
+	if not event is InputEventMouseMotion:
+		return
+	var at: Vector2 = _boat_continent_overlay.get_global_transform().affine_inverse() * (
+		continent_map.get_global_transform() * (event as InputEventMouseMotion).position)
+	_set_hovered_dock(_boat_continent_overlay.dock_at(at))
+
+func _set_hovered_dock(index: int) -> void:
+	if index == _boat_continent_overlay.hovered_dock():
+		return
+	_boat_continent_overlay.set_hovered_dock(index)
+	_hover_continent_region(continent_map.hovered_region())
 
 ## Decode only the active group's picture, once per group, when Tab opens.
 func _ensure_cartography_textures() -> void:
@@ -7600,6 +7639,7 @@ func _show_continent_view() -> void:
 	_preview_region_index = -1
 	_sync_map_viewport_activity()
 	continent_view.show()
+	_boat_continent_overlay.set_hovered_dock(-1)
 	continent_map.set_current_region(_continent_region_indices.find(_region_index_for_map(AppState.current_map)))
 	# The live render keeps its last frame while its viewport idles.
 	continent_button.texture_normal = full_map_viewport.get_texture()
@@ -7609,6 +7649,11 @@ func _show_continent_view() -> void:
 
 func _on_continent_region_hovered(region_index: int) -> void:
 	if not continent_view.visible:
+		return
+	# A dock names its boats over the region it stands in.
+	var dock_text: String = _boat_continent_overlay.hover_text()
+	if not dock_text.is_empty():
+		map_coordinates.text = dock_text
 		return
 	if region_index < 0 or region_index >= cartography_regions.size():
 		map_coordinates.text = CONTINENT_HINT
