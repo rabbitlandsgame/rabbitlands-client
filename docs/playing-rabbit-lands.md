@@ -51,6 +51,6 @@ Gauntlet death keeps your carried items and returns you at full health at a safe
 
 The Moor Pony, Golden Plains Horse, Crystalback Tortoise, Giant Meadow Rabbit and Jadefeather Raptor all travel at 1.5 times ordinary running speed. Press Space to gallop at twice running speed: with the normal five-metre-per-second run, those mounted paces are 7.5 and 10 metres per second. Fast mode lasts eight seconds of movement and takes eight seconds to recover. The on-foot walk/run switch does not change mounted speed. Press R to mount or dismount, and use the Mounts window to switch mounts.
 
-The mount banner can stay pinned above the scene. Riding continues across supported outdoor maps and ends when entering a restricted map.
+The mount banner can stay pinned above the scene. You can ride in outdoor areas and gauntlets, including gated and trail routes. Riding continues across supported maps and ends when entering a restricted map. Gauntlet gates and encounter requirements still apply while mounted.
 
 The quick spell bar supports a horizontal layout and twelve visible slots. Its orientation and position are saved with your interface layout. Spell and technique wheels leave the character visible in the centre and use translucent backgrounds.
