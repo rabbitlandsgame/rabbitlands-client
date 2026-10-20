@@ -2,6 +2,8 @@ extends Control
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
+const SeasonSky = preload("res://src/world/season_sky.gd")
+const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
 const LanternGuideScript = preload("res://src/ui/lantern_guide.gd")
 const WindowStackScript = preload("res://src/ui/window_stack.gd")
 const LanternSceneScript = preload("res://src/world/lantern_scene.gd")
@@ -3649,6 +3651,7 @@ func _on_reconnect_progress(attempt: int, total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation() -> void:
+	SeasonSurfaces.set_season({})
 	quest_trail.clear()
 	character_intro.cancel()
 	_clear_map_walk_target()
@@ -5091,6 +5094,8 @@ func _on_state_changed(path: StringName) -> void:
 				_reveal_chat_messages()
 		&"almanac":
 			_sync_hud_indicators()
+			_sync_season_surfaces()
+			_apply_day_night()
 		&"channels":
 			_sync_channel_tabs()
 		&"invasion_assistant":
@@ -5377,6 +5382,7 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 	# map outside the continent now that its scene has set its materials up.
 	# Continent regions and chunks are painted by the loader.
 	LookGround.paint_bound(world_loader.world_root, manifest)
+	_sync_season_surfaces()
 	# Look pass: on an interior every occluder fades as develop fades it.
 	LookFade.bind(manifest)
 	fallback_ground.hide()
@@ -5523,8 +5529,17 @@ func _hold_shadow_switch() -> void:
 ## camera's focus, under the weather the server says is falling (WeatherSky).
 func _lighting_manifest() -> WorldManifest:
 	var lighting := exterior_stream.lighting_manifest(camera_rig.focus)
+	lighting = SeasonSky.seasonal(lighting, AppState.almanac.get("season", {}) as Dictionary)
 	return WeatherSky.weathered_look(lighting, weather_layer.look()) \
 		if weather_layer != null else lighting
+
+## Bind seasonal scenery after map/appearance changes; month changes only
+## update shared material uniforms, so existing and newly streamed trees agree.
+func _sync_season_surfaces() -> void:
+	SeasonSurfaces.set_season(AppState.almanac.get("season", {}) as Dictionary)
+	for world: Dictionary in LookSwitch.worlds(world_loader.world_root,
+			world_loader.manifest, exterior_stream.residents):
+		SeasonSurfaces.apply(world.root as Node, world.manifest as WorldManifest)
 
 func _update_border_lighting() -> void:
 	var lighting := _lighting_manifest()
@@ -10175,6 +10190,9 @@ func _on_indicator_gui_input(event: InputEvent, letter_key: String) -> void:
 				AppState.append_local_message("Today: %s - %s" % [
 					str(AppState.almanac.get("name", "an ordinary day")),
 					str(AppState.almanac.get("description", ""))])
+				var season := SeasonSky.summary(AppState.almanac.get("season", {}) as Dictionary)
+				if not season.is_empty():
+					AppState.append_local_message(season)
 		"M":
 			_unseen_pm_count = 0
 			_sync_hud_indicators()
@@ -11590,6 +11608,7 @@ func _apply_look_switch() -> void:
 			world_loader.manifest, exterior_stream.residents):
 		surfaces += LookSwitch.sync(world.root as Node, world.manifest as WorldManifest,
 			bool(world.bound))
+		surfaces += SeasonSurfaces.apply(world.root as Node, world.manifest as WorldManifest, true)
 		roots += 1
 	# The runtime world objects are painted with their map, not as a root.
 	for raw_object: Variant in map_object_nodes.values():
@@ -11706,6 +11725,7 @@ func _reconcile_look() -> void:
 	for world: Dictionary in stale:
 		var surfaces := LookSwitch.sync(world.root as Node, world.manifest as WorldManifest,
 			bool(world.bound))
+		SeasonSurfaces.apply(world.root as Node, world.manifest as WorldManifest, true)
 		print("look_switch stage=reconciled root=%s look=%s surfaces=%d"
 			% [(world.root as Node).name, LookProfile.enabled(), surfaces])
 
@@ -14032,13 +14052,15 @@ func _paint_map_object_look(map_object: MapObject3D) -> int:
 	if manifest == null or not manifest.data.has("continentGeography") \
 			or not is_instance_valid(map_object):
 		return 0
+	# Seasonal stand-ins may be on an object even in Original mode.
+	var changed := LookSwitch.revert(map_object)
 	if LookProfile.full_painted():
 		var translation: Array = (manifest.data.continentGeography as Dictionary).get(
 			"translation", [0.0, 0.0, 0.0]) as Array
-		return LookFoliage.paint_object(map_object, LookGround.region_of(manifest),
+		changed += LookFoliage.paint_object(map_object, LookGround.region_of(manifest),
 			map_object.transform, Vector2(float(translation[0]), float(translation[2]))
 			if translation.size() == 3 else Vector2.ZERO)
-	return LookSwitch.revert(map_object)
+	return changed + SeasonSurfaces.apply(map_object, manifest, true)
 
 ## Promoted scenery: each harvest node whose package names a placed kit node
 ## (`MapObject3D.bound_node_name`) is bound to that node's mesh in the map's
@@ -14338,9 +14360,11 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()
+	_sync_season_surfaces.call_deferred()
 	_snap_all_actors_to_surface.call_deferred()
 
 func _on_chunk_surface_ready(_identity: String, _imported: Node3D) -> void:
+	_sync_season_surfaces.call_deferred()
 	_snap_all_actors_to_surface.call_deferred()
 	_snap_all_map_objects_to_surface.call_deferred()
 	_bind_promoted_scenery.call_deferred()

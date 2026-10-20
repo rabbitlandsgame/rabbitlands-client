@@ -36,6 +36,7 @@
 // nothing between look_fade_metres from the focus, so the bed's edge thins
 // out instead of ending in a line.
 shader_type spatial;
+uniform float rl_grass_season = -1.0;
 render_mode cull_disabled, depth_draw_opaque, diffuse_lambert;
 
 // The palettes, root and tip, one per slot. The length is
@@ -115,6 +116,11 @@ void vertex() {
 
 void fragment() {
 	ALBEDO = v_colour;
+	if (rl_grass_season > 2.5) {
+		ALBEDO *= vec3(1.18, 0.85, 0.55);
+	} else if (rl_grass_season > 0.5 && rl_grass_season < 1.5) {
+		ALBEDO *= vec3(1.02, 1.12, 0.91);
+	}
 	ROUGHNESS = 1.0;
 	SPECULAR = look_specular;
 	// Both faces take the tuft's up: the engine flips a back face's normal

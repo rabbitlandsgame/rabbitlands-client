@@ -49,6 +49,7 @@ extends Node3D
 ## main camera's gameplay layer only (the map cameras never see it).
 
 const SHADER := preload("res://src/world/look/grass_beds.gdshader")
+const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
 const NODE_NAME := "LookGrassBeds"
 
 ## WorldLoader.WORLD_COLLISION_LAYER, NAVIGATION_SURFACE_LAYER and
@@ -144,6 +145,7 @@ static func tend(parent: Node3D, active: Node3D, manifest: WorldManifest,
 		return
 	var beds := parent.get_node_or_null(NODE_NAME) as LookGrassBeds
 	if not LookProfile.full_painted() or not bool(LookProfile.quality_value("grass")) \
+			or (SeasonSurfaces.current_season() == 0 and SeasonSurfaces.snow_cover(manifest) > 0.1) \
 			or OS.get_environment(LookProfile.GRASS_DEBUG_VARIABLE) == "none":
 		if beds != null:
 			clear(parent)
@@ -315,6 +317,7 @@ func update(active: Node3D, manifest: WorldManifest, residents: Dictionary,
 			> LookProfile.GRASS_REFOCUS_METRES:
 		_plan(local_focus)
 	_material.set_shader_parameter(&"look_focus", focus)
+	_material.set_shader_parameter(&"rl_grass_season", float(SeasonSurfaces.current_season()))
 	_place(now)
 	if _dirty and (_queue.is_empty() or now >= _assembled_msec + ASSEMBLE_MSEC):
 		_assemble(now)
@@ -1049,6 +1052,8 @@ func _surface_of(collider: CollisionObject3D) -> Dictionary:
 ## deck with coverage) or is opaque, whether its vertex colour is its colour.
 static func _material_facts(node: MeshInstance3D) -> Dictionary:
 	var material := node.get_active_material(0)
+	while material != null and material.has_meta(SeasonSurfaces.SOURCE_META):
+		material = material.get_meta(SeasonSurfaces.SOURCE_META) as Material
 	var coloured: bool = (int(node.mesh.surface_get_format(0)) & Mesh.ARRAY_FORMAT_COLOR) != 0
 	if material is ShaderMaterial and material.has_meta(LookGround.PAINTED_META):
 		var painted := material as ShaderMaterial

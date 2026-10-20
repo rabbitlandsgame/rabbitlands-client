@@ -155,10 +155,13 @@ class Occluder extends RefCounted:
 	## with, kept for write_alpha. Null with the pass off, and for a material
 	## LookFade has no dithered copy of (it then fades as on develop).
 	func _look_dithered(material: Material) -> ShaderMaterial:
-		if not LookProfile.full_painted():
+		if not LookProfile.full_painted() and not (material != null \
+				and material.has_meta(&"rl_season_surface")):
 			return null
 		var dithered := LookFade.dither_copy(material, node)
 		if dithered != null:
+			if material.has_meta(&"rl_season_surface"):
+				dithered.set_meta(&"rl_season_resting", weakref(material))
 			_dithered.append(dithered)
 		return dithered
 
@@ -203,6 +206,11 @@ class Occluder extends RefCounted:
 			material.albedo_color = colour
 		# Look pass (not with the look off): the fade's progress opens the hole.
 		for material: ShaderMaterial in _dithered:
+			# A tree can stay faded while the real month rolls over.
+			if material.has_meta(&"rl_season_resting"):
+				var resting := (material.get_meta(&"rl_season_resting") as WeakRef).get_ref() as ShaderMaterial
+				if resting != null:
+					material.set_shader_parameter(&"rl_season", resting.get_shader_parameter(&"rl_season"))
 			LookFade.write(material, scale, fade)
 
 	## The batch holds this mesh's transform relative to its imported root, so collapsing that instance

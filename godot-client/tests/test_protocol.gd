@@ -44,6 +44,7 @@ func _init() -> void:
 		"actor_wardrobe_v1": EloriaProtocol.ServerMessage.ADD_NEW_ENHANCED_ACTOR,
 		"weather_state_v1": EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE,
 		"almanac_v1": EloriaProtocol.ServerMessage.ELORIA_ALMANAC_STATE,
+		"seasons_v1": EloriaProtocol.ServerMessage.ELORIA_ALMANAC_STATE,
 		"combat_hud_v1": EloriaProtocol.ServerMessage.ELORIA_COMBAT_STATE,
 		"inventory_names_v1": EloriaProtocol.ServerMessage.ELORIA_INVENTORY_NAMES,
 		"inventory_window_v1": EloriaProtocol.ServerMessage.ELORIA_INVENTORY_STATE,

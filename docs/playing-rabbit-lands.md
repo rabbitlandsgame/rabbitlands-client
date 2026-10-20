@@ -1,5 +1,22 @@
 # Playing Rabbit Lands
 
+## Seasons and the clock
+
+Each season lasts one real calendar month. Winter, spring, summer and autumn repeat every four months, giving three full seasonal years in one real year. Seasons change at midnight UTC on the first of the month, shared by everyone.
+
+| Season | Real months |
+| --- | --- |
+| Winter | January, May, September |
+| Spring | February, June, October |
+| Summer | March, July, November |
+| Autumn | April, August, December |
+
+Spring favours showers, summer favours clearer skies and warmer sunlight, autumn brings more fog and rain with amber light, and winter brings cooler light and more snow in temperate and mountain climates. Local climates still matter: deserts, tropical regions and volcanic lands keep their characteristic weather.
+
+Winter coats exposed ground and tree crowns with snow. Spring brings fresh greens, summer deeper greens, and autumn turns deciduous foliage gold, orange and rust red. Evergreens retain their green foliage. Tropical, desert and volcanic regions keep their local character. Snow cover follows the season and clears when winter ends.
+
+Use **#day** or click the clock to see the current season and when the next one begins, alongside the existing day or date information. The six-hour day/night cycle continues independently. Seasonal scenery works in all three appearance modes.
+
 ## Companions
 
 Open Summoning and choose **Behaviour** to direct your summons at any level, including level zero. The six choices control which targets a companion may attack. New companions assist against your opponent; a saved passive choice stays passive. Directions do not bypass a recipe's skill, Animal Nexus, ingredients, ether or food requirements.
