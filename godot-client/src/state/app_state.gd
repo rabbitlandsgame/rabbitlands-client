@@ -949,7 +949,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			match int(event.status):
 				4:
 					pending_spell_target = "actor"
-					spell_action = &"cast_channel_enter"
+					# A target prompt has no recipient/facing yet. The server
+					# starts its channel after the click and approach.
 				5:
 					pending_spell_target = "location"
 					spell_action = &"cast_channel_enter"
@@ -965,7 +966,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				last_spell_result["power"] = int(event.power)
 				presentation["power"] = int(event.power)
 			if event.has("visual_effect"): presentation["visual_effect"] = int(event.visual_effect)
-			actor_animation_requested.emit(presentation)
+			if not spell_action.is_empty(): actor_animation_requested.emit(presentation)
 			state_changed.emit(&"spells")
 		"missile":
 			# Aiming is state - the shooter is still drawing - and it lives on

@@ -3635,6 +3635,17 @@ func predict_turn(radians: float) -> void:
 func desired_facing_yaw() -> float:
 	return _target_yaw
 
+## The server has reached casting range and supplied the facing before the
+## channel starts. Finish the turn now so the channel never begins sideways.
+func face_for_spell(yaw: float) -> void:
+	if current_action == &"death": return
+	_predicted_turn_pending = false
+	_travel_yaw_active = false
+	_movement_coast_remaining = 0.0
+	_target_yaw = yaw
+	rotation.y = yaw
+	_wake()
+
 ## Abandons a predicted turn the server has not answered. A route ordered
 ## before the answer arrives supersedes it: the step commands that route
 ## broadcasts state the facing, and holding the prediction over them would keep

@@ -4013,6 +4013,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if popup_panel.visible:
 			# The popup is modal: it takes the cancel before anything under it.
 			_on_popup_dismiss_pressed()
+		elif not magic_selection.pending.is_empty() or not magic_selection.active_target_cast.is_empty():
+			magic_selection.cancel()
 		elif bool(AppState.autocast.get("active", false)):
 			# Escape stops repeat casting before it closes anything else.
 			Network.magic_request({"op": "cancel"})
@@ -4099,7 +4101,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 		var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 		if mouse_button.button_index == MOUSE_BUTTON_RIGHT:
 			if mouse_button.pressed:
-				if not magic_selection.pending.is_empty():
+				if not magic_selection.pending.is_empty() or not magic_selection.active_target_cast.is_empty():
 					magic_selection.cancel()
 				elif _has_carry():
 					_cancel_carry()
@@ -12088,6 +12090,11 @@ func _cast_spell_by_id(spell_id: int) -> void:
 	_begin_prepared_cast(spell_id, power)
 
 func _on_magic_state(data: Dictionary) -> void:
+	if data.get("kind") == "target_cast":
+		# Apply the preceding movement/turn actor snapshots first. A deferred
+		# turn must not replace the channel we are about to start.
+		_present_target_cast.call_deferred(data)
+		return
 	if data.get("kind") == "technique_effect":
 		_on_technique_effect(data)
 		return
@@ -12116,6 +12123,20 @@ func _on_magic_state(data: Dictionary) -> void:
 		effect.configure_timing(float(data.release_delay), float(data.get("flight_duration", 0.0)))
 	world_effects.append(effect)
 	world_effects = world_effects.filter(func(node: Variant) -> bool: return is_instance_valid(node))
+
+func _present_target_cast(data: Dictionary) -> void:
+	var caster := actor_nodes.get(int(data.get("actor_id", -1))) as ReplicatedActor3D
+	if not is_instance_valid(caster): return
+	if data.get("phase") == "channel":
+		var caster_adapter := _adapter_for_actor(AppState.actors.get(caster.actor_id, {}))
+		if caster_adapter == null: return
+		caster.face_for_spell(caster_adapter.rotation_to_godot(int(data.rotation)))
+		caster.set_combat_effects_enabled(_effects_enabled)
+		caster.play_action(&"cast_channel_enter")
+		if caster.combat_presentation != null:
+			caster.combat_presentation.set_spell_power(int(data.get("power", 1)))
+	elif data.get("phase") in ["approach", "cancelled"] and caster.current_action in [&"cast_channel_enter", &"cast_channel"]:
+		caster.play_action(&"cast_exit")
 
 func _on_technique_effect(data: Dictionary) -> void:
 	var key := str(data.get("key", ""))

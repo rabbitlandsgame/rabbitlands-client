@@ -2,6 +2,12 @@ extends SceneTree
 var failures := 0
 var requests: Array[Dictionary] = []
 
+class ChannelActor extends ReplicatedActor3D:
+	var channel_yaws: Array[float] = []
+	func play_action(action: StringName, _restart := false) -> void:
+		current_action = action
+		if action == &"cast_channel_enter": channel_yaws.append(rotation.y)
+
 func _init() -> void: call_deferred("run")
 func check(condition: bool, message: String) -> void:
 	if not condition:
@@ -134,6 +140,9 @@ func run() -> void:
 	var reply_animations: Array[Dictionary] = []
 	var record_animation := func(data: Dictionary): reply_animations.append(data)
 	app_state.actor_animation_requested.connect(record_animation)
+	main.call("_begin_prepared_cast", 68, 1)
+	check(reply_animations.is_empty(), "choosing a target spell waits for its recipient before channeling")
+	main.magic_selection.cancel()
 	for reply: PackedByteArray in [PackedByteArray([2, 0]), PackedByteArray([1, 68]),
 			PackedByteArray([2, 68]), PackedByteArray([4, 1]), PackedByteArray([5, 5])]:
 		main.call("_begin_prepared_cast", 1, 1)
@@ -163,6 +172,34 @@ func run() -> void:
 		check(app_state.pending_spell_target == {4: "actor", 5: "location", 2: ""}[status],
 			"server targeting still works without a locally armed cast")
 	app_state.actor_animation_requested.disconnect(record_animation)
+	var caster_fixture := ChannelActor.new()
+	caster_fixture.actor_id = 91
+	main.world_root.add_child(caster_fixture)
+	main.actor_nodes[91] = caster_fixture
+	app_state.actors[91] = {"actor_id": 91, "kind": 1, "health": 100, "alive": true}
+	var cast_state := {"kind": "target_cast", "phase": "channel", "id": 68, "actor_id": 91,
+		"target_id": 77, "power": 1, "rotation": 16384}
+	main.call("_on_magic_state", cast_state)
+	await process_frame
+	var expected_yaw: float = main.adapter.rotation_to_godot(16384)
+	check(caster_fixture.channel_yaws.size() == 1 and is_equal_approx(caster_fixture.channel_yaws[0], expected_yaw),
+		"the server's facing is applied before the channel animation starts")
+	check(is_equal_approx(caster_fixture.desired_facing_yaw(), expected_yaw), "channel facing remains the rendered target yaw")
+	cast_state.phase = "cancelled"
+	main.call("_on_magic_state", cast_state)
+	await process_frame
+	check(caster_fixture.current_action == &"cast_exit", "a cancelled pending cast exits its channel")
+	main.magic_selection.active_target_cast = {"id": 68, "power": 1, "target_id": 77}
+	main.game_view.show()
+	var escape := InputEventKey.new()
+	escape.physical_keycode = KEY_ESCAPE
+	escape.pressed = true
+	main.call("_unhandled_input", escape)
+	check(main.magic_selection.active_target_cast.is_empty() and requests.back().op == "cancel",
+		"Escape cancels a target cast that is already approaching or channeling")
+	main.actor_nodes.erase(91)
+	app_state.actors.erase(91)
+	caster_fixture.free()
 	var bar: Control = main.casting_bar
 	check(bar.buttons.size() == 12 and bar.visible_slot_count == 6, "six icons are shown by default while all twelve saved shortcuts remain available")
 	bar.buttons[1].spell_dropped.emit(69, 3)
