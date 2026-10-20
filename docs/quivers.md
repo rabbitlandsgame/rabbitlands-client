@@ -34,6 +34,10 @@ to Arcane. Saved quantities are preserved.
 All eight designs have separate male and female fits for each of the eight player
 races. Their cases and seated arrows follow the upper spine, while their straps
 deform with the torso.
+Basic Quiver's chest strap and buckle lie flat against the wearer. Thinner cases
+use an authored clearance fit while a cape is equipped and return to their
+normal back fit when the cape is removed. The Basic case keeps its accepted
+position, and Skirmisher keeps its smaller case size.
 
 Inventory icons use painted illustrations of the approved designs, with the
 same dark teal background and 50-pixel cells as other equipment.

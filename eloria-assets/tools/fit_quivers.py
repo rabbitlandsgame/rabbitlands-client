@@ -2,6 +2,8 @@
 
 The case and seated arrows are rigid spine equipment. The existing shoulder
 strap is reshaped around the wearer and inherits the body's own skin blend.
+Thin cases include an authored Cape_Clearance morph for the cape-on fit;
+their default geometry stays fitted to the body when the cape is removed.
 No geometry is generated and no retired equipment is selected.
 
 Prepare compact sources once with --prepare <original-model-directory>.
@@ -48,7 +50,8 @@ def surface_normals(points, faces):
     return normalise(result)[inverse]
 
 
-def write_mesh(path, surface, texture, rig=None, joints=None, weights=None):
+def write_mesh(path, surface, texture, rig=None, joints=None, weights=None,
+               cape_surface=None):
     glb = ea.EquipmentGLB(generator='Rabbit Lands imported Meshy quiver fitting')
     material = ce.textured_material(glb, 'Quiver painted base', texture,
                                     double_sided=True)
@@ -59,7 +62,19 @@ def write_mesh(path, surface, texture, rig=None, joints=None, weights=None):
     primitive = glb.primitive(surface.positions, surface.normals, surface.uvs,
                               surface.indices, material, joints=joints,
                               weights=weights, weight_floats=True)
+    if cape_surface is not None:
+        primitive['targets'] = [{
+            'POSITION': glb.accessor(np.asarray(
+                cape_surface.positions-surface.positions, dtype='float32'),
+                'VEC3', target=34962, bounds=True),
+            'NORMAL': glb.accessor(np.asarray(
+                cape_surface.normals-surface.normals, dtype='float32'),
+                'VEC3', target=34962),
+        }]
     glb.mesh('Quiver', [primitive], skin=0 if rig is not None else None)
+    if cape_surface is not None:
+        glb.doc['meshes'][-1].update(
+            weights=[0.0], extras={'targetNames': ['Cape_Clearance']})
     glb.write(path)
 
 
@@ -88,7 +103,7 @@ def body_samples(rig):
     return points, normals
 
 
-def fit(entry, source, rig):
+def fit(entry, source, rig, *, back_offset=0.0, case_tilt_degrees=0.0):
     surface, texture = ce.read_source(source)
     original = surface.positions.copy()
     bottom, top = np.array(entry['bottom']), np.array(entry['top'])
@@ -126,7 +141,19 @@ def fit(entry, source, rig):
     back = float(np.quantile(torso[:,2], .015))
     center = np.array([0., (shoulder_y+pelvis_y)*.5,
                        back-float(fixed[bag,2].max())-.012*stature])
+    center[2] -= back_offset
     fixed += center
+    if case_tilt_degrees:
+        angle=np.deg2rad(case_tilt_degrees)
+        rotation=np.array([[1.,0.,0.],[0.,np.cos(angle),-np.sin(angle)],
+                           [0.,np.sin(angle),np.cos(angle)]])
+        # Keep the opening at the shoulder while the rigid lower case tips
+        # out over a shorter body's flared cape. No case scaling or bending.
+        pivot=center+target_u*(length*.44*scale)
+        fixed=(fixed-pivot)@rotation.T+pivot
+        center=rotation@(center-pivot)+pivot
+        target_u=rotation@target_u
+        target_v=rotation@target_v
     width = float(np.quantile(torso[:,0], .98)-np.quantile(torso[:,0], .02))
     front = float(np.quantile(torso[:,2], .985))+.035*stature
     middle_z = float(np.median(torso[:,2]))
@@ -157,7 +184,19 @@ def fit(entry, source, rig):
     radial = normalise(radial)
     side = normalise(np.cross(tangent, radial))
     loop_depth = float(np.median(depth[blend > .8])) if (blend > .8).any() else 0.
-    strap = line+side*radial_offset[:,None]+radial*((depth-loop_depth)*scale)[:,None]
+    thickness_offset = (depth-loop_depth)*scale
+    roll = np.deg2rad(float(entry.get('chestStrapRollDegrees', 0.0)))
+    shoulder_blend = np.clip((t-.14)/.16, 0., 1.)
+    hip_blend = np.clip((.80-t)/.16, 0., 1.)
+    # Lay the chest panel flat without rolling the waist attachments or
+    # dragging the buckle's loose end down past its existing hip fit.
+    roll *= (shoulder_blend**2*(3.-2.*shoulder_blend)
+             * hip_blend**2*(3.-2.*hip_blend))
+    # Rotate the source cross-section, including its buckle, about the strap
+    # centreline. A case's facing does not establish its strap's broad face.
+    side_offset = radial_offset*np.cos(roll)-thickness_offset*np.sin(roll)
+    outside_offset = radial_offset*np.sin(roll)+thickness_offset*np.cos(roll)
+    strap = line+side*side_offset[:,None]+radial*outside_offset[:,None]
     fitted = fixed*(1.-blend[:,None])+strap*blend[:,None]
     tree = cKDTree(samples)
     _, nearest = tree.query(fitted)
@@ -193,6 +232,10 @@ def fit(entry, source, rig):
     return surface, texture, joints, weights, {
         'rigidVertices':int((blend==0).sum()),'strapVertices':int((blend>0).sum()),
         'scale':scale,'caseScale':case_scale,
+        'caseBackZ':float(np.quantile(fitted[bag,2], .02)),
+        'backOffset':float(back_offset),
+        'caseTiltDegrees':float(case_tilt_degrees),
+        'chestStrapRollDegrees':float(entry.get('chestStrapRollDegrees', 0.0)),
         'bounds':[fitted.min(0).tolist(),fitted.max(0).tolist()],
         'rigidBone':'spine_03','bodySha256':digest(NATIVE/'races'/f'{rig.source_slug}.glb')}
 
@@ -201,10 +244,30 @@ def build(out, assets, races):
     records=[]
     for race in races:
         rig=ea.load_rig(NATIVE/'races'/f'{race}.glb')
+        reference=next(a for a in json.loads(CATALOG.read_text())['assets']
+                       if a['id']=='rl-quiver-basic')
+        basic_fit=fit(reference,SOURCE/(reference['id']+'.glb'),rig)
+        reference_back=basic_fit[-1]['caseBackZ']
+        stature=float(rig.origin('Head')[1])/1.568490028858185
         for entry in assets:
-            surface,texture,joints,weights,report=fit(entry,SOURCE/(entry['id']+'.glb'),rig)
+            result=(basic_fit if entry['id']==reference['id'] else
+                    fit(entry,SOURCE/(entry['id']+'.glb'),rig))
+            surface,texture,joints,weights,report=result
+            # Thin cases need the same outer back line as the accepted Basic
+            # fit while a cape is worn. Author a second shape rather than
+            # making them float behind a character who has taken the cape off.
+            cape_offset=(0.0 if entry['id']==reference['id'] else max(
+                0.0, report['caseBackZ']-reference_back+.012*stature))
+            cape_tilt=(0.0 if entry['id']==reference['id'] else float(
+                json.loads(CATALOG.read_text()).get('capeTiltDegreesByBody',{}).get(race,0.0)))
+            cape_surface=(None if cape_offset==0.0 and cape_tilt==0.0 else
+                fit(entry,SOURCE/(entry['id']+'.glb'),rig,
+                    back_offset=cape_offset,case_tilt_degrees=cape_tilt)[0])
+            report['capeClearanceOffset']=cape_offset
+            report['capeCaseTiltDegrees']=cape_tilt
+            report['capeReference']='rl-quiver-basic'
             destination=out/'variants'/race/(entry['id']+'.glb')
-            write_mesh(destination,surface,texture,rig,joints,weights)
+            write_mesh(destination,surface,texture,rig,joints,weights,cape_surface)
             records.append(dict(report,id=entry['id'],race=race,path=str(destination),
                                 sha256=digest(destination),triangles=len(surface.indices)//3))
         print(f'Fitted {len(assets)} quivers to {race}',flush=True)
