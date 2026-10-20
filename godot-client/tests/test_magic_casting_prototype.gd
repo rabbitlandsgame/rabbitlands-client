@@ -129,6 +129,40 @@ func run() -> void:
 	main.call("_cast_spell_by_id", 1)
 	check(main.magic_selection.pending.power == 2, "book casting uses its own remembered power")
 	main.magic_selection.cancel()
+	# Replacing an armed spell sends cancel. Its reply can arrive after the
+	# next Fire Bolt is armed, as can a result from an earlier cast.
+	var reply_animations: Array[Dictionary] = []
+	var record_animation := func(data: Dictionary): reply_animations.append(data)
+	app_state.actor_animation_requested.connect(record_animation)
+	for reply: PackedByteArray in [PackedByteArray([2, 0]), PackedByteArray([1, 68]),
+			PackedByteArray([2, 68]), PackedByteArray([4, 1]), PackedByteArray([5, 5])]:
+		main.call("_begin_prepared_cast", 1, 1)
+		main.call("_begin_prepared_cast", 68, 1)
+		reply_animations.clear()
+		app_state.call("_on_packet", EloriaProtocol.ServerMessage.SPELL_CAST, reply)
+		check(app_state.pending_spell_target == "actor", "an older spell reply cannot disarm Fire Bolt targeting")
+		check(reply_animations.is_empty(), "an older spell reply cannot interrupt the new aiming pose")
+		check(main.call("_actor_click_action", 77, app_state.actors[77], false) == "spell",
+			"the Fire Bolt target click must cast instead of ordering a melee approach")
+		main.magic_selection.confirm_actor(77)
+		check(requests.back() == {"op": "cast", "id": 68, "power": 1, "target_id": 77},
+			"Fire Bolt still submits the clicked creature after an older reply")
+		app_state.call("_on_packet", EloriaProtocol.ServerMessage.SPELL_CAST, PackedByteArray([1, 68]))
+		check(app_state.pending_spell_target.is_empty() and not reply_animations.is_empty(),
+			"the submitted cast's result completes and animates normally")
+	for spell_id: int in [69, 5]:
+		main.call("_begin_prepared_cast", spell_id, 1)
+		app_state.call("_on_packet", EloriaProtocol.ServerMessage.SPELL_CAST, PackedByteArray([4, 1]))
+		check(app_state.pending_spell_target == "location", "an older actor prompt cannot replace ground aiming")
+		main.magic_selection.confirm_location(Vector2i(8, 9))
+		check(requests.back() == {"op": "cast", "id": spell_id, "power": 1, "x": 8, "y": 9},
+			"ground aiming retains its spell and clicked location")
+	main.magic_selection.cancel()
+	for status: int in [4, 5, 2]:
+		app_state.call("_on_packet", EloriaProtocol.ServerMessage.SPELL_CAST, PackedByteArray([status, 1]))
+		check(app_state.pending_spell_target == {4: "actor", 5: "location", 2: ""}[status],
+			"server targeting still works without a locally armed cast")
+	app_state.actor_animation_requested.disconnect(record_animation)
 	var bar: Control = main.casting_bar
 	check(bar.buttons.size() == 12 and bar.visible_slot_count == 6, "six icons are shown by default while all twelve saved shortcuts remain available")
 	bar.buttons[1].spell_dropped.emit(69, 3)
@@ -165,6 +199,8 @@ func run() -> void:
 	main.call("_input", quick_key)
 	main.call("_unhandled_input", quick_key)
 	check(not main.spell_wheel.visible and requests.size() == before + 1 and requests.back().id == 0, "Alt+1 casts the live quickbar in wheel mode")
+	# Let deferred HUD layout finish before freeing the application.
+	for frame in range(3): await process_frame
 	main.free()
 	await process_frame
 	await test_wheel(catalog)

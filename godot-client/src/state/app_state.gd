@@ -938,6 +938,13 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"inventory_cooldowns")
 		"spell_result":
 			last_spell_result = {"status": int(event.status), "spell_id": int(event.spell_id)}
+			# Local aiming has not submitted its cast yet, so this reply belongs
+			# to an earlier request (including cancel when replacing a spell).
+			# Keep its target and channel pose; otherwise the next click attacks.
+			if not Network.magic_pending.is_empty():
+				pending_spell_target = "actor" if Network.magic_scope == "target" else "location"
+				state_changed.emit(&"spells")
+				return
 			var spell_action: StringName = &""
 			match int(event.status):
 				4:
