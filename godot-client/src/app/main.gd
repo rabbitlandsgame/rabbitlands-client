@@ -825,6 +825,7 @@ var _indicator_labels: Dictionary = {}
 var _unseen_pm_count := 0
 var _fps_refresh_msec := 0
 var _hud_layout_list: ItemList
+var hud_workspace: Control
 var _hud_layout_visible: CheckButton
 var _hud_skill_selector: OptionButton
 var _floating_feedback_layer: Control
@@ -926,12 +927,19 @@ const INVENTORY_TOOL_LABELS := {
 const MINIMAP_MASK_SHADER := """
 shader_type canvas_item;
 uniform bool rounded = false;
+uniform int hud_palette = 0;
 void fragment() {
 	if (rounded) {
 		vec2 offset = UV - vec2(0.5);
 		if (dot(offset, offset) > 0.25) {
 			discard;
 		}
+	}
+	float luminance = dot(COLOR.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (hud_palette == 1) {
+		COLOR.rgb = mix(vec3(0.22, 0.15, 0.08), vec3(0.91, 0.81, 0.59), luminance);
+	} else if (hud_palette == 2) {
+		COLOR.rgb = mix(vec3(0.10, 0.13, 0.12), vec3(0.48, 0.51, 0.46), luminance);
 	}
 }
 """
@@ -1497,6 +1505,9 @@ func _ready() -> void:
 	_sync_channel_tabs()
 	_sync_stats()
 	_configure_window_stack()
+	hud_workspace = preload("res://src/ui/hud_workspace.gd").new()
+	game_view.add_child(hud_workspace)
+	hud_workspace.configure.call_deferred(self)
 	_start_client_diagnostics()
 
 func _start_client_diagnostics() -> void:
@@ -1712,7 +1723,8 @@ func _text_entry_active() -> bool:
 ## The new-character intro and the loading curtain both own the screen while
 ## they are up: the world takes no input and the exterior preloads wait.
 func _world_input_blocked() -> bool:
-	return character_intro.blocks_input() or arrival_curtain.blocks_input()
+	return character_intro.blocks_input() or arrival_curtain.blocks_input() \
+		or (hud_workspace != null and hud_workspace.is_open())
 
 func _update_keyboard_movement() -> void:
 	if _world_input_blocked():
@@ -3741,6 +3753,9 @@ func _clear_world_presentation() -> void:
 	selected_target.text = "Target: none"
 
 func _input(event: InputEvent) -> void:
+	if hud_workspace != null and hud_workspace.is_open():
+		hud_workspace.handle_input(event)
+		return
 	if arrival_curtain.blocks_input():
 		return
 	if _actor_hud_menu != null and _actor_hud_menu.visible:
@@ -8067,6 +8082,8 @@ func _save_hud_settings() -> void:
 	var error: Error = config.save(SETTINGS_PATH)
 	if error != OK:
 		push_warning("HUD settings save failed: " + error_string(error))
+	if hud_workspace != null:
+		hud_workspace.sync_settings()
 	if settings_window.is_open():
 		_refresh_unified_settings()
 
@@ -8378,6 +8395,8 @@ func _on_minimap_marker_scale_selected(id: int) -> void:
 
 func _on_minimap_shape_selected(id: int) -> void:
 	_minimap_shape = "round" if id == 1 else "square"
+	if hud_workspace != null and hud_workspace.manages_layout():
+		hud_workspace.change_part("minimap", "map_shape", _minimap_shape)
 	_apply_minimap_shape()
 	_sync_minimap_menu()
 	_save_hud_settings()
@@ -8650,11 +8669,14 @@ func _on_minimap_frame_gui_input(event: InputEvent) -> void:
 func _layout_minimap_cardinals() -> void:
 	if minimap_north == null:
 		return
+	var labels: Array[Label] = [minimap_north, minimap_east, minimap_south, minimap_west]
+	var modern: bool = is_instance_valid(hud_workspace) and not hud_workspace.model.working.legacy
+	for label: Label in labels: label.visible = not modern
+	if modern: return
 	var center: Vector2 = minimap_frame.size * 0.5
 	var radius: float = maxf(12.0, minf(minimap_frame.size.x,
 		minimap_frame.size.y) * 0.5 - 9.0)
 	var heading: float = map_camera.rotation.y
-	var labels: Array[Label] = [minimap_north, minimap_east, minimap_south, minimap_west]
 	for index: int in range(labels.size()):
 		var angle: float = -PI * 0.5 + float(index) * PI * 0.5 - heading
 		labels[index].position = center + Vector2(cos(angle), sin(angle)) * radius \
@@ -10913,6 +10935,9 @@ func _on_window_size_changed() -> void:
 
 ## Keep all action icons reachable as the bar gains windows or the UI scales.
 func _fit_hud_action_buttons() -> void:
+	if hud_workspace != null and hud_workspace.manages_layout():
+		hud_workspace.queue_layout()
+		return
 	var available_width := maxf(200, game_view.size.x - right_rail.size.x)
 	var meter_bars: Array[ProgressBar] = []
 	var meter_fixed := 0.0
@@ -11246,6 +11271,8 @@ func _save_hud_layout() -> void:
 	var error: Error = config.save(SETTINGS_PATH)
 	if error != OK:
 		push_warning("Unable to save lower HUD preferences: " + error_string(error))
+	if hud_workspace != null:
+		hud_workspace.sync_settings()
 
 ## Writes a stack count over a slot at the largest size that still fits it.
 static func _set_slot_quantity(label: Label, quantity: int) -> void:

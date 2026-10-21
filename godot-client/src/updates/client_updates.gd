@@ -17,6 +17,9 @@ var _last_error := ""
 var _lease := ""
 
 func _ready() -> void:
+	if get_node("/root/Network").offline_hud_preview:
+		set_process(false)
+		return
 	identity = Release.read_json("res://data/client_release.json")
 	if identity.get("platform", "source") == "source" or identity.get("public_key", "") == "":
 		set_process(false)

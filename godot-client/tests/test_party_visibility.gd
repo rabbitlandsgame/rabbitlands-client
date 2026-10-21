@@ -31,10 +31,13 @@ func _run() -> void:
 	var health: ProgressBar = windows.party_rows.get_child(0).get_node("Vitals/Health") as ProgressBar
 	_expect(windows.party_panel.visible and windows.party_header.text.contains("1 of 2")
 		and is_equal_approx(health.value, 119.0), "reopening shows the latest roster and health")
-	_expect(windows.close_top(), "the cancel cascade closes the party window")
+	_expect(not windows.close_top() and windows.party_panel.visible,
+		"the Escape cancel cascade leaves the party roster open")
 	_send_party(118)
 	await process_frame
-	_expect(not windows.party_panel.visible, "updates respect cancel-cascade dismissal")
+	_expect(windows.party_panel.visible, "health updates keep the Escape-protected roster visible")
+	windows.close_all()
+	_expect(not windows.party_panel.visible, "closing all windows for session cleanup still closes the roster")
 	windows.toggle_party()
 	windows.toggle_party()
 	_send_party(117)
