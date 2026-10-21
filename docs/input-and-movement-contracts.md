@@ -78,9 +78,18 @@ step so the body crosses the ground at one speed whenever its packet arrives.
   lateness, decays per step and is capped at `maximum_buffer_seconds`. A
   schedule ahead of the buffer is trimmed back at no more than
   `catch_up_factor` times the pace.
-- Facing comes from the burst's `facing_command`, the last command in one
-  socket read that named a direction (kept by `src/state/actor_reducer.gd`).
-  The last command is often the swing that followed the turn.
+- Facing comes from the burst's `facing_command`: of the commands reduced
+  before a frame presents the actor, the last one that named a direction
+  (kept by `src/state/actor_reducer.gd`). The last command is often the swing
+  that followed the turn.
+- A step's arrival time is when Main's world sync presents it
+  (`_movement_time_msec`), so it is quantised to the frame. `Network` reads the
+  socket twice a frame, first and again just before that sync, and each read
+  takes every waiting TLS record (`src/network/network_client.gd`); see
+  "Reading the game socket" in `docs/runtime-performance.md`. Feeding
+  sub-frame arrival times into this pacing would also shrink the jitter
+  allowance that today covers the next packet's own presentation delay, so it
+  needs a presentation-delay term and an `actor_facing.gd` run of its own.
 - Validate with `tests/integration/actor_facing.gd` under
   `--rendering-method gl_compatibility`. It checks facing and lag in all eight
   directions, one ground speed across step shapes, a jittered run, pauses

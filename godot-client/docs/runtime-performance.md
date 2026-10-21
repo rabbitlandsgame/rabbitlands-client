@@ -384,6 +384,86 @@ reading.
   batching that took a region from 9 237 draw calls to 335 does not apply to
   skinned bodies; whether it can be made to is the next rendering question.
 
+## Reading the game socket
+
+`Network` (`src/network/network_client.gd`) reads the game socket on the main
+thread. Until 2026-10-21 it read once per frame, and over TLS each read took a
+single TLS record: `StreamPeerTLS.poll()` decrypts one record and
+`get_available_bytes()` counts only its plaintext. The server writes one record
+per flush - every 50-ms tick, plus each immediate send such as the player's own
+step - so whenever it wrote more records a second than the client drew frames,
+the backlog grew for as long as that lasted. Plain TCP (`--dev-plain-tcp`)
+returns everything buffered at once and never showed it, which is why local
+play looked fine. Now:
+
+* each read polls and reads until the TLS layer has nothing left (at most
+  `MAXIMUM_RECORDS_PER_READ`, 64 records);
+* a second read (`LateRead`, a child with a very high `process_priority`) runs
+  after every other node's `_process` and before Main's deferred world sync, so
+  packets that arrive during the frame's physics and process work are
+  presented in that frame instead of the next. Both reads append to the one
+  receive buffer and dispatch from it in arrival order, on the main thread;
+  `Network.set_process(false)` stops both;
+* `StreamPeerTCP.set_no_delay(true)` on each connection's socket, before the
+  TLS handshake. TLS writes through that socket, so it covers both links.
+
+Measured with `tests/integration/socket_read_latency.py` (headless, loopback,
+the probe server writing the way the RL server writes: one record per 50-ms
+tick holding three frames, plus an "own step" record every 233 ms). Times are
+p50 / p95 / max milliseconds from the socket to `packet_received` (dispatch)
+and to the world sync that could first draw the packet (present); the
+own-step column is the spread of the interval the movement pacing measures
+between steady steps. Raw results:
+`docs/benchmarks/socket-reads-2026-10-21.json`.
+
+| Scenario | Dispatch before | Dispatch after | Present before | Present after | Own-step sd before / after |
+| --- | --- | --- | --- | --- | --- |
+| TLS, 21 FPS (frame cap) | 802 / 1500 / 1589, growing | 29 / 47 / 59 | 802 / 1500 / 1589 | 29 / 47 / 59 | 25.0 / 17.2 |
+| TLS, 29 FPS | 30 / 60 / 78 | 16 / 32 / 47 | 30 / 60 / 78 | 16 / 32 / 47 | 30.6 / 17.8 |
+| TLS, 29 FPS, two flushes a tick | 2649 / 5014 / 5265, growing | 16 / 32 / 48 | 2649 / 5014 / 5265 | 16 / 32 / 48 | 17.0 / 16.9 |
+| TLS, 60 FPS | 15 / 17 / 45 | 15 / 16 / 31 | 15 / 17 / 45 | 15 / 16 / 31 | 16.4 / 10.0 |
+| TLS, CPU-bound 25 FPS | 33 / 62 / 82 | 10 / 22 / 26 | 48 / 77 / 97 | 20 / 37 / 42 | 24.5 / 15.0 |
+| plain TCP, CPU-bound 25 FPS | 20 / 38 / 42 | 10 / 24 / 27 | 35 / 53 / 57 | 20 / 39 / 42 | 18.5 / 17.3 |
+
+"Growing": at 21 FPS the old client was 0.28 s behind on average over the
+first third of the ten-second run and 1.32 s over the last; with a second flush
+per tick at 29 FPS, 0.88 s and 4.40 s. The CPU-bound rows spend 4 ms in each
+physics tick, 15 ms in `_process` before the world sync and 15 ms after it
+(standing in for rendering, which headless skips): the late read halves the
+time to the world sync because the packets that land during physics and
+`_process` no longer wait a frame. The 60-FPS row is a sanity check only - its
+frames are phase-locked to the 50-ms tick, so it samples one phase. What is
+left is the frame itself: a packet still waits for the next main-thread read,
+up to a frame, and the own-step spread is that quantisation.
+
+TCP no-delay, against a server in WSL2 (a Linux stack reached through the
+Hyper-V switch; Windows loopback acknowledges at once, so Nagle never holds a
+frame there): the client wrote two frames back to back every 100 ms to a
+silent server. Before, the second frame waited for the first one's ACK - p50
+0.27 ms on that 0.3-ms link (TCP) and once 42 ms behind Linux's delayed ACK
+(TLS); after, the gap was under 0.12 ms every time in both. Over the internet
+that wait is a round trip, or the server's delayed-ACK timer.
+
+CPU: the Godot process used a median 1.16 s before and 1.13 s after over three
+20-second TLS runs at 60 FPS; the reads on an open link with nothing waiting
+cost 4-5 us a frame before and 7-10 us after (the late read's extra poll).
+
+Not done, and why. A Timer or the physics tick does not read between frames:
+Godot runs all of a frame's physics steps back to back at its start (median
+0.03 ms apart at 21 FPS) and a 5-ms Timer fired once per frame, never more.
+Only a thread reads while the main thread renders, and all it would buy is a
+sub-frame arrival time: packets would still reach game state at the next
+main-thread read. Movement pacing stamps a step's arrival at the world sync,
+and today's jitter allowance also covers the next packet's presentation delay,
+so feeding it sub-frame arrival times is a pacing change of its own
+(`docs/input-and-movement-contracts.md`, "Movement presentation").
+
+`tests/test_network_socket_reads.gd` guards this over a real loopback TLS
+session: thirteen waiting records (the last frame split across two) taken in
+one read and in order, no-delay set, the late read paused with
+`set_process(false)`, and a packet arriving mid-frame dispatched before that
+frame's deferred calls.
+
 ## Map textures: prepared once, uploaded VRAM-compressed
 
 Every content-addressed map image (the `externalResources` of a map package,
