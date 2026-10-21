@@ -56,7 +56,8 @@ THE THEME TABLE (THEMES): every section names one in `style`. A theme sets
   glow          the light of a prop marked `light` (colour, energy, range, height)
   surfaces      the runtime styling, written per section into underground-scenery.json `surfaces` by the
                 packager and applied by godot-client/src/world/underground_scenery.gd:
-                  floor {texture: a LookProfile class texture, tint}, rockLift (the face's albedo multiplier
+                  floor {texture: a LookProfile class texture, or 'authored' to keep the shell's own `floor`
+                  material, tint}, rockLift (the face's albedo multiplier
                   toward its wall rocks' colour, or null), water {deep, clear, glow} (cenote_water.gdshader)
   minimap       floor, edge and water colours on the minimap
 Adding a theme: add its entry here (and any new texture to TEXTURE_RECIPES), package its kit pieces in the
@@ -205,7 +206,9 @@ THEMES = {
         'wallRocks': (('glacier_block',2.2),('snowcap_boulder_1',2.0),('ice_shards',1.4),('snowy_boulder_2',1.6),
                       ('glacier_block',2.2),('ice_shards_2',.8)),
         'rockPalette': None, 'lampColour': [.62,.82,1], 'glow': ([.55,.85,1],1.1,9,1.0),
-        'surfaces': {'floor': {'texture': 'beach_sand', 'tint': [.80,.87,.94]}, 'rockLift': [1.12,1.18,1.28],
+        # the floor keeps its own packed-snow material (blue-white, with frost sparkle), lighter than the deeper
+        # blue of the glacier-ice faces behind it
+        'surfaces': {'floor': {'texture': 'authored', 'tint': [1.12,1.14,1.16]}, 'rockLift': [.78,.92,1.06],
                      'water': {'deep': [.05,.12,.18], 'clear': [.42,.62,.74], 'glow': [.04,.07,.10]}},
         'minimap': {'floor': (116,140,156), 'edge': (190,222,238), 'water': (120,190,220)},
     },
