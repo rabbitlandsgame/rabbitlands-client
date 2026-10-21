@@ -116,12 +116,13 @@ def test_five_storage_markers_match_the_published_tiles_and_preview_positions():
             assert marker["objectId"] == chest["objectId"] == 22
 
 
-def test_entrance_markers_match_the_authored_mines_and_barrow():
+def test_entrance_markers_match_the_authored_underground_doors():
     import frames
     sections = read("eloria-assets/maps/continent-v2/_continent_v2/content/underground.json")["sections"]
     expected = {s["entrance"]["map"]: s for s in sections}
     rows = read(tool.OUTPUT)["regions"]
-    assert sum(len(row["entranceMarkers"]) for row in rows) == 4
+    assert len(expected) == len(sections)
+    assert sum(len(row["entranceMarkers"]) for row in rows) == len(sections)
     for row in rows:
         markers = row["entranceMarkers"]
         assert len(markers) == (1 if row["serverMap"] in expected else 0)
