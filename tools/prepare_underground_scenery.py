@@ -13,6 +13,14 @@ theme styling, which underground_scenery.gd applies), plus the objects.json
 harvest entries the underground needs. A new cave's kit piece is a SELECTION row
 (region or kit, slug, 'height' or 'length', target metres); only pieces whose
 glTF generator is prepare_meshy_kit are accepted.
+
+Wall veins (pass 2, 2026-10-21): every node a section's `veins` names is
+presented set into its rock face, {placement: 'wall', yaw, inset, variant}
+from build_underground.vein_faces (a hand HARVEST_PRESENTATION entry for a vein
+node is refused), and WALL_SEAMS gives each ore label its wall seam art:
+objects.json `harvestables.wallVariants[label]`, models `rl_<label>_wall_<k>`
+in the label's mineral palette, never standing alone (MapObject3D stands them
+only on a wall node). A vein's nodes alternate through their label's seams.
 """
 from __future__ import annotations
 
@@ -207,6 +215,14 @@ SELECTION = {
     'resource_verdigris': ('lf-biomes','vein-scree-4','length',1.4),
     'resource_venom_bulb': ('lf-biomes','samphire-clump-1','height',.9),
     'resource_lichen': ('lf-biomes','lichen-stone-mat-3','length',1.5),
+    # pass 2 (owner 2026-10-21): wall seam art for the ores (WALL_SEAMS), chosen from Godot renders of reviewed kit
+    # pieces set into the Lantern Mine's wall (work-output/underground-pass2/platform/seams/); no new models.
+    'seam_boulder_3': ('lf-biomes','veined-boulder-3','height',1.15),
+    'seam_boulder_4': ('lf-biomes','veined-boulder-4','height',1.15),
+    'seam_boulder_5': ('lf-biomes','veined-boulder-5','height',1.15),
+    'seam_crystal_4': ('lf-biomes','crystal-growth-4','height',1.1),
+    'seam_crystal_5': ('lf-biomes','crystal-growth-5','height',1.2),
+    'seam_geode_3': ('lf-biomes','split-geode-3','height',1.1),
 }
 KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes'}
 
@@ -327,13 +343,59 @@ HARVEST_PRESENTATION = {
 }
 
 
+# Wall seam art for the ore labels (pass 2, 2026-10-21): label -> [(SELECTION asset, MineralAppearance palette), ...].
+# Chosen from renders of reviewed kit pieces set into the Lantern Mine's wall (work-output/underground-pass2/platform/
+# seams/); a vein alternates through its label's list. Organics (Moss, Toadstool, Lichen, Venom Bulb, Kelp, Shell,
+# Pearl, Resin, Sap) keep their own art and stay open.
+ROCK_SEAMS = ('seam_boulder_5', 'seam_boulder_3', 'seam_boulder_4')
+CRYSTAL_SEAMS = ('seam_crystal_5', 'seam_crystal_4')
+SEAM_PALETTES = {  # MineralAppearance {stone, mineral}: the floor ores' palettes where the label has one
+    'Coal': ('#25282b', '#171a1d'), 'Iron Ore': ('#777979', '#8d5d3c'), 'Copper': ('#777471', '#b87333'),
+    'Sulfur': ('#777468', '#d8b94c'), 'Slate': ('#5d656d', '#77818a'), 'Flint': ('#5a5852', '#34343a'),
+    'Clay': ('#7a6a58', '#b5835a'), 'Salt': ('#8c8a84', '#f2efe6'), 'Verdigris': ('#6b6258', '#3fae8a'),
+    'Crystal': ('#77748a', '#9b74d5'), 'Quartz': ('#8a8a8e', '#efeaf6'), 'Stormglass': ('#56606a', '#86c4e4'),
+    'Ember Crystal': ('#3e3836', '#ff7a2c'), 'Geode': ('#666572', '#b093d0'),
+}
+WALL_SEAMS = {label: [(asset, {'stone': stone, 'mineral': mineral})
+                      for asset in (('seam_geode_3', 'seam_crystal_5') if label == 'Geode' else
+                                    CRYSTAL_SEAMS if label in ('Crystal', 'Quartz', 'Stormglass', 'Ember Crystal')
+                                    else ROCK_SEAMS)]
+              for label, (stone, mineral) in SEAM_PALETTES.items()}
+
+
+def wall_presentation(plan, seams=None):
+    """{object id: {resource, placement 'wall', yaw, inset, variant}} for every vein node of the plan (veins and
+    build_underground.vein_faces); a vein's nodes alternate through their label's WALL_SEAMS."""
+    from build_underground import vein_faces
+    import underground_source as S
+    seams = WALL_SEAMS if seams is None else seams
+    result = {}
+    for section in plan['sections']:
+        faces = vein_faces(section)
+        resources = {oid: res for oid, res, _x, _y in section['nodes']}
+        for vein in S.veins(section):
+            count = max(1, len(seams.get(vein['resource'], [])))
+            for index, oid in enumerate(vein['nodes']):
+                face = faces[oid]
+                result[oid] = {'resource': resources[oid], 'placement': 'wall', 'variant': index % count,
+                               'yaw': face['yaw'], 'inset': face['inset']}
+    return result
+
+
 def harvest_presentation(plan):
-    """underground-scenery.json `harvestPresentation`: object id -> its resource and HARVEST_PRESENTATION entry."""
+    """underground-scenery.json `harvestPresentation`: object id -> its resource and HARVEST_PRESENTATION entry, and
+    every vein node's wall presentation (wall_presentation())."""
     nodes = {oid: res for section in plan['sections'] for oid, res, _x, _y in section['nodes']}
     unknown = sorted(set(HARVEST_PRESENTATION) - set(nodes))
     if unknown:
         raise ValueError(f'HARVEST_PRESENTATION names no underground node: {unknown}')
-    return {str(oid): {'resource': nodes[oid], **hint} for oid, hint in sorted(HARVEST_PRESENTATION.items())}
+    walls = wall_presentation(plan)
+    both = sorted(set(walls) & set(HARVEST_PRESENTATION))
+    if both:
+        raise ValueError(f'vein nodes are presented set into the wall; drop their HARVEST_PRESENTATION rows: {both}')
+    listed = {oid: {'resource': nodes[oid], **hint} for oid, hint in HARVEST_PRESENTATION.items()}
+    listed.update(walls)
+    return {str(oid): listed[oid] for oid in sorted(listed)}
 
 
 def sha(data):
@@ -488,12 +550,12 @@ def main():
     report.parent.mkdir(parents=True, exist_ok=True)
     write_json(report, {'schema': 'rabbitlands-reused-underground-scenery-v1', 'assets': records})
     plan_path = ROOT / 'eloria-assets/maps/continent-v2/_continent_v2/content/underground.json'
-    plan = json.loads(plan_path.read_text(encoding='utf-8'))
     placements = []
     # Every section's dressing is the builder's: the same list decides what the walk grid blocks, and the
     # builder's theme table decides each section's surfaces (underground_scenery.gd reads them as data).
     sys.path.insert(0, str(plan_path.parents[1]))
-    from build_underground import CELLS, dressing, surfaces
+    from build_underground import CELLS, dressing, load_design, surfaces
+    plan = load_design(plan_path)
     for section in plan['sections']:
         for item in dressing(section):
             placement = {'asset': item['asset'], 'position': [item['x'], item['height'], CELLS-item['y']],
@@ -561,6 +623,27 @@ def main():
             'standsAlone':False}
         harvest['variants'][label] = [identity]
     harvest['variants'] = dict(sorted(harvest['variants'].items()))
+    # pass 2: the ores' wall seams, stood only on a wall node (MapObject3D.is_wall_placed)
+    walls = {}
+    for label, seams in WALL_SEAMS.items():
+        own = harvest['models'][harvest['resources'][label]]
+        walls[label] = []
+        for index, (asset, palette) in enumerate(seams):
+            identity = 'rl_'+label.lower().replace(' ','_')+f'_wall_{index+1}'
+            harvest['models'][identity] = {'label':label,'kind':own['kind'],'tier':own['tier'],'reusedScenery':True,
+                'scene':config['assets'][asset],
+                **measure_glb(ROOT/'godot-client'/config['assets'][asset].removeprefix('res://')),
+                'resourcePalette':palette,
+                'source':'eloria-assets/source/world_objects/underground/reused-scenery.json',
+                'placement':'wall','standsAlone':False}
+            walls[label].append(identity)
+    for stale in [m for m, entry in harvest['models'].items() if entry.get('placement') == 'wall'
+                  and m not in {i for ids in walls.values() for i in ids}]:
+        del harvest['models'][stale]
+    if walls:
+        harvest['wallVariants'] = dict(sorted(walls.items()))
+    else:
+        harvest.pop('wallVariants', None)
     write_json(catalog_path, catalog)
     for record in records:
         print(record['id'], record['bounds'])

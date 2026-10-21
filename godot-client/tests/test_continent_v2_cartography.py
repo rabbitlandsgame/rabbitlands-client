@@ -117,23 +117,29 @@ def test_five_storage_markers_match_the_published_tiles_and_preview_positions():
 
 
 def test_entrance_markers_match_the_authored_underground_doors():
+    """One entrance marker per door of every underground section (a section may have several doors, on one map or
+    several: underground_source.doors), on the door's map, tile and object."""
     import frames
+    source = load("underground_source")
     sections = read("eloria-assets/maps/continent-v2/_continent_v2/content/underground.json")["sections"]
-    expected = {s["entrance"]["map"]: s for s in sections}
+    expected = {}
+    for section in sections:
+        for door in source.doors(section):
+            expected.setdefault(door["map"], []).append((section, door))
+    doors = sum(len(listed) for listed in expected.values())
+    assert doors >= len([s for s in sections if source.doors(s)])
     rows = read(tool.OUTPUT)["regions"]
-    assert len(expected) == len(sections)
-    assert sum(len(row["entranceMarkers"]) for row in rows) == len(sections)
+    assert sum(len(row["entranceMarkers"]) for row in rows) == doors
     for row in rows:
         markers = row["entranceMarkers"]
-        assert len(markers) == (1 if row["serverMap"] in expected else 0)
-        if markers:
-            section = expected[row["serverMap"]]
-            entrance = section["entrance"]
-            marker = markers[0]
+        listed = expected.get(row["serverMap"], [])
+        assert len(markers) == len(listed)
+        by_object = {marker["objectId"]: marker for marker in markers}
+        for section, door in listed:
+            marker = by_object[door["object"]]
             assert marker["label"] == section["name"]
-            assert marker["objectId"] == entrance["object"]
-            assert marker["serverTile"] == entrance["tile"]
-            assert list(frames.load(row["serverMap"], ROOT).tile(*marker["position"])) == entrance["tile"]
+            assert marker["serverTile"] == door["tile"]
+            assert list(frames.load(row["serverMap"], ROOT).tile(*marker["position"])) == door["tile"]
 
 
 def test_landfall_overview_places_all_components_in_its_own_image():

@@ -33,6 +33,7 @@ func _run() -> void:
 	_check_node_presentation(adapter, catalog)
 	_check_retired_label_fallback(adapter, catalog)
 	_check_underground_presentation(catalog)
+	_check_wall_placement(adapter, catalog)
 	_check_promoted_scenery(adapter, catalog)
 	_check_look_parity(adapter)
 	_check_crown_tint()
@@ -220,6 +221,15 @@ func _check_underground_presentation(catalog: Dictionary) -> void:
 		var alone := listed.any(func(model_id: Variant) -> bool:
 			return bool((harvest.models as Dictionary).get(str(model_id), {}).get("standsAlone", false)))
 		var hint: Dictionary = table.get(str(int(node.objectId)), {})
+		# A vein node (pass 2) is set into its wall: it states its seam, yaw and inset.
+		if str(hint.get("placement", "")) == "wall":
+			var seams: Array = (harvest.get("wallVariants", {}) as Dictionary).get(resource, [])
+			_expect(str(hint.get("resource", "")) == resource and hint.get("variant") is float
+				and int(hint.variant) >= 0 and (seams.is_empty() or int(hint.variant) < seams.size())
+				and hint.get("yaw") is float and hint.get("inset") is float,
+				"underground wall node %d (%s) states its seam, yaw and inset" % [int(node.objectId), resource])
+			stated += 1
+			continue
 		# A label whose own model is retired and whose variants need a stated
 		# footprint must be laid out; a label with its own model may be (Flint's
 		# seams face the room), and then states a valid variant too.
@@ -234,6 +244,50 @@ func _check_underground_presentation(catalog: Dictionary) -> void:
 	_expect(needed >= 7 and stated == table.size(),
 		"the table presents every underground node that needs it and names no other (%d needed, %d of %d stated)"
 		% [needed, stated, table.size()])
+
+# --- wall nodes (pass 2) ----------------------------------------------------------
+# A vein node (the underground's `veins`) is presented {placement: "wall", variant, yaw, inset}: it stands its
+# label's wall seam (harvestables.wallVariants), set `inset` metres back from its tile's centre against its facing,
+# and its pick and name go with it. A wall node of a label without wall seams keeps the label's own model there; a
+# node without the placement never stands a wall seam.
+
+func _check_wall_placement(adapter: CoordinateAdapter, catalog: Dictionary) -> void:
+	var harvest: Dictionary = catalog.harvestables
+	var walls: Dictionary = harvest.get("wallVariants", {})
+	for label: Variant in walls:
+		for model_id: Variant in walls[label]:
+			var entry: Dictionary = (harvest.models as Dictionary).get(str(model_id), {})
+			_expect(str(entry.get("label", "")) == str(label) and str(entry.get("placement", "")) == "wall"
+				and not bool(entry.get("standsAlone", true)) and entry.has("resourcePalette"),
+				"%s's wall seam %s is registered, wall-only and in its palette" % [label, model_id])
+	# the mechanism, on a registry of its own: Coal with one wall seam
+	var test_catalog: Dictionary = catalog.duplicate(true)
+	var models: Dictionary = test_catalog.harvestables.models
+	var own_id := str(test_catalog.harvestables.resources.get("Coal", ""))
+	var seam: Dictionary = (models.get(own_id, {}) as Dictionary).duplicate()
+	seam["placement"] = "wall"
+	seam["standsAlone"] = false
+	models["test_coal_wall"] = seam
+	test_catalog.harvestables["wallVariants"] = {"Coal": ["test_coal_wall"]}
+	var wall := _object(adapter, test_catalog, "Coal", 61,
+		{"placement": "wall", "variant": 0.0, "yaw": 90.0, "inset": 0.8})
+	var model := wall.get_node_or_null("Model") as Node3D
+	_expect(wall.is_wall_placed() and wall.model_id == "test_coal_wall" and model != null
+		and model.position.is_equal_approx(Vector3(-0.8, 0, 0))
+		and is_equal_approx(model.rotation.y, deg_to_rad(90.0)),
+		"a wall node stands its label's wall seam, set back into the face against its facing")
+	var pick := wall.get_node("PickShape") as CollisionShape3D
+	_expect(is_equal_approx(pick.position.x, -0.8) and is_equal_approx(pick.position.z, 0.0),
+		"and is picked where its seam stands")
+	var floor_node := _object(adapter, test_catalog, "Coal", 62, {"variant": 0.0, "yaw": 90.0})
+	_expect(not floor_node.is_wall_placed() and floor_node.model_id == own_id
+		and (floor_node.get_node("Model") as Node3D).position.is_zero_approx(),
+		"a node without the wall placement keeps the label's own model on its tile")
+	var bare := _object(adapter, catalog, "Toadstool", 63, {"placement": "wall", "variant": 0.0, "yaw": 0.0, "inset": 0.5})
+	_expect(bare.is_wall_placed() and not bare.model_id.begins_with("rl_toadstool_wall"),
+		"a wall node of a label without wall seams keeps its label's art")
+	for node: Node in [wall, floor_node, bare]:
+		node.free()
 
 # --- promoted scenery ---------------------------------------------------------
 

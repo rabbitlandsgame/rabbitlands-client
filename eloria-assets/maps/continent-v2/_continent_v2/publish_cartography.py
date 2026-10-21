@@ -59,6 +59,7 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 import ownership
+import underground_source as US
 
 DEFAULT_CHECKOUT = Path(__file__).resolve().parents[4]
 TOOL = "eloria-assets/maps/continent-v2/_continent_v2/publish_cartography.py"
@@ -175,11 +176,12 @@ def compose(checkout: Path = DEFAULT_CHECKOUT) -> dict:
                                 "position": [mark["position"][0], mark["position"][2]],
                                 "serverTile": mark["serverTile"], "objectId": mark["objectId"]}
                                for mark in manifest.get("interactives", []) if mark.get("type") == "storage"],
+            # every door of every underground section on this map (a section may have several: underground_source)
             "entranceMarkers": [{"label": section['name'],
-                                 "position": [section['entrance']['position'][0], section['entrance']['position'][2]],
-                                 "height": section['entrance']['position'][1],
-                                 "serverTile": section['entrance']['tile'], "objectId": section['entrance']['object']}
-                                for section in underground if section['entrance']['map'] == key],
+                                 "position": [door['position'][0], door['position'][2]],
+                                 "height": door['position'][1],
+                                 "serverTile": door['tile'], "objectId": door['object']}
+                                for section in underground for door in US.doors(section) if door['map'] == key],
         })
     data = {"schema": SCHEMA, "generator": TOOL,
             "note": ("The continent-v2 territories' tab maps, appended by the client after cartography.json's regions. "

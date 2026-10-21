@@ -11,6 +11,12 @@ const DAYLIGHT_SHAFT := preload("res://src/world/daylight_shaft.gdshader")
 ## (tools/prepare_underground_scenery.py). The underground package states no
 ## harvest presentation, so `Main.map_presentation_of` takes these in its
 ## place. Empty for any other map.
+##
+## Pass 2 (2026-10-21): a vein node's entry is a `wall` placement,
+## {resource, placement: "wall", variant, yaw, inset}: MapObject3D stands the
+## label's wall seam (objects.json harvestables.wallVariants) set into the rock
+## face, its +Z turned out of the rock by `yaw` and moved `inset` metres back
+## from the tile's centre to the face (build_underground.vein_faces).
 static func harvest_presentation(map_id: String) -> Dictionary:
 	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(CONFIG))
 	if data is not Dictionary or str((data as Dictionary).get("map", "")) != map_id:
@@ -125,7 +131,9 @@ static func _style_surfaces(world: Node3D, surfaces: Dictionary) -> void:
 			var lift: Variant = section_surfaces(id, "Build_", surfaces).get("rockLift")
 			if lift is Array and (lift as Array).size() >= 3:
 				var face := mesh.get_active_material(0) as StandardMaterial3D
-				if face != null:
+				# Only a textured face is lifted: an untextured one (a passage
+				# mouth's dark way on, pass 2) is its colour, and stays dark.
+				if face != null and face.albedo_texture != null:
 					face = face.duplicate() as StandardMaterial3D
 					face.albedo_color = _colour(lift, Color.WHITE)
 					mesh.material_override = face

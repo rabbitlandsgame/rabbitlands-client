@@ -1,7 +1,8 @@
 extends SceneTree
 ## Entrances remain discoverable before server objects arrive, in every map view.
 
-## Every cave door, from the underground's one source: map -> [name, x, y].
+## Every cave door, from the underground's one source: map -> [[name, x, y, object], ...]. A section has
+## several doors (`entrances`) or the old single `entrance` (underground_source.py), so a map may have several.
 const SOURCE := "res://../eloria-assets/maps/continent-v2/_continent_v2/content/underground.json"
 var EXPECTED := {}
 var failures := 0
@@ -18,11 +19,17 @@ func expect(ok: bool, message: String) -> void:
 func run() -> void:
 	root.size = Vector2i(1280, 800)
 	var plan: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SOURCE))
+	var doors := 0
 	for section: Dictionary in plan.sections:
-		var door: Dictionary = section.entrance
-		EXPECTED[str(door.map)] = [str(section.name), int(door.tile[0]), int(door.tile[1])]
-	expect(EXPECTED.size() == (plan.sections as Array).size() and EXPECTED.size() >= 4,
-		"Every cave has its own exterior map: " + str(EXPECTED.size()))
+		var listed: Array = section.get("entrances", [section.entrance] if section.has("entrance") else [])
+		for door: Dictionary in listed:
+			if not EXPECTED.has(str(door.map)):
+				EXPECTED[str(door.map)] = []
+			(EXPECTED[str(door.map)] as Array).append([str(section.name), int(door.tile[0]), int(door.tile[1]),
+				int(door.object)])
+			doors += 1
+	expect(doors >= (plan.sections as Array).size() / 2 and EXPECTED.size() >= 4,
+		"The caves' doors stand on the exterior maps: %d doors on %d maps" % [doors, EXPECTED.size()])
 	var args := OS.get_cmdline_user_args()
 	if args.size() == 2 and args[0] == "--captures":
 		captures = args[1]
@@ -42,28 +49,39 @@ func run() -> void:
 		state.current_map = mid
 		state.map_objects = {}
 		main._sync_map_objects()
+		var wanted_doors: Array = EXPECTED[mid]
+		var count := wanted_doors.size()
 		var records: Array = main._current_entrance_records()
-		expect(records.size() == 1, mid+" has one entrance")
-		if records.is_empty():
+		expect(records.size() == count, "%s has its %d entrances: %d" % [mid, count, records.size()])
+		if records.size() != count:
 			continue
-		var record: Dictionary = records[0]
-		var label: String = EXPECTED[mid][0]
-		var wanted := Vector2i(EXPECTED[mid][1], EXPECTED[mid][2])
-		expect(record.label == label and Vector2i(record.serverTile[0], record.serverTile[1]) == wanted, mid+" entrance name and coordinates")
+		var by_object := {}
+		for record: Dictionary in records:
+			by_object[int(record.objectId)] = record
+		var objects := {}
+		for door: Array in wanted_doors:
+			var record: Dictionary = by_object.get(int(door[3]), {})
+			var wanted := Vector2i(int(door[1]), int(door[2]))
+			expect(not record.is_empty() and record.label == door[0]
+				and Vector2i(record.serverTile[0], record.serverTile[1]) == wanted,
+				"%s entrance %d name and coordinates" % [mid, int(door[3])])
+			objects[int(door[3])] = {"object_id": door[3], "kind": EloriaProtocol.MAP_OBJECT_INTERACTIVE,
+				"x": wanted.x, "y": wanted.y, "label": "Portal", "detail": "Beyond it lies " + str(door[0]) + "."}
 		var marks: Array[Dictionary] = main._collect_minimap_marks()
 		var entrances := marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"entrance")
-		expect(entrances.size() == 1, "Entrance is on the minimap before server objects arrive")
-		state.map_objects = {int(record.objectId): {"object_id":record.objectId,
-			"kind":EloriaProtocol.MAP_OBJECT_INTERACTIVE, "x":wanted.x, "y":wanted.y,
-			"label":"Portal", "detail":"Beyond it lies "+label+"."}}
+		expect(entrances.size() == count, "Every entrance is on the minimap before server objects arrive")
+		state.map_objects = objects
 		main._sync_map_objects()
 		marks = main._collect_minimap_marks()
 		entrances = marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"entrance")
-		expect(entrances.size() == 1, "Server doorway does not duplicate the permanent entrance dot")
-		expect(marks.filter(func(mark: Dictionary) -> bool: return str(mark.get("glyph", "")) == "P").is_empty(), "Cave entrance uses the tan dot instead of P")
+		expect(entrances.size() == count, "Server doorways do not duplicate the permanent entrance dots")
+		expect(marks.filter(func(mark: Dictionary) -> bool: return str(mark.get("glyph", "")) == "P").is_empty(), "Cave entrances use the tan dot instead of P")
 		var waypoints: Array[Dictionary] = main._collect_map_waypoints()
 		var entrance_waypoints := waypoints.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"entrance")
-		expect(entrance_waypoints.size() == 1 and entrance_waypoints[0].label == label, "Live Tab map has the permanent entrance name")
+		var names := wanted_doors.map(func(door: Array) -> String: return str(door[0]))
+		expect(entrance_waypoints.size() == count and entrance_waypoints.all(
+			func(mark: Dictionary) -> bool: return names.has(str(mark.label))),
+			"Live Tab map has the permanent entrance names")
 		main.map_marker_overlay.set_live_marks(marks)
 		expect(main.map_marker_overlay._live_overlay._marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"entrance").is_empty(), "Full map draws each entrance once")
 		# Preview the door's region while standing on another map (Ringholm has a cave of its own).
@@ -71,16 +89,20 @@ func run() -> void:
 		main._preview_region(main._region_index_for_map(mid))
 		await process_frame
 		var overlay: Control = main._entrance_preview_overlay
-		expect(overlay._marks.size() == 1 and overlay._marks[0].label == label, "Region preview has the entrance name")
-		var point: Variant = overlay.mark_point(overlay._marks[0])
-		expect(point is Vector2, "Preview entrance lies on the image")
-		if point is Vector2:
-			expect(main._preview_tile_at(point) == wanted, "Preview dot projects to the real doorway tile")
+		expect(overlay._marks.size() == count, "Region preview has every entrance of " + mid)
+		for mark: Dictionary in overlay._marks:
+			var door_index := wanted_doors.find_custom(func(door: Array) -> bool: return int(door[3]) == int(mark.objectId))
+			expect(door_index >= 0 and mark.label == wanted_doors[door_index][0], "Region preview has the entrance name")
+			var point: Variant = overlay.mark_point(mark)
+			expect(point is Vector2, "Preview entrance lies on the image")
+			if point is Vector2 and door_index >= 0:
+				expect(main._preview_tile_at(point) == Vector2i(int(wanted_doors[door_index][1]),
+					int(wanted_doors[door_index][2])), "Preview dot projects to the real doorway tile")
 		await capture(mid+"-entrance-map.png")
 	state.current_map = "landfall"
 	main._configure_continent_overlay(main._active_continent_data())
-	expect(main._entrance_continent_overlay._marks.size() == EXPECTED.size(),
-		"Landfall overview labels every entrance: %d of %d" % [main._entrance_continent_overlay._marks.size(), EXPECTED.size()])
+	expect(main._entrance_continent_overlay._marks.size() == doors,
+		"Landfall overview labels every entrance: %d of %d" % [main._entrance_continent_overlay._marks.size(), doors])
 	main._show_continent_view()
 	await capture("landfall-entrances-overview.png")
 	print("Entrance map markers: ", failures, " failures")

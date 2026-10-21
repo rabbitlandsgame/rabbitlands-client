@@ -14138,7 +14138,8 @@ static func map_presentation_of(map_id: String, manifest: Dictionary,
 				or nodes.has(int(str(key))):
 			continue
 		var hint := {}
-		for field: String in ["variant", "yaw", "footprint"]:
+		# `placement` and `inset`: the underground's wall nodes (MapObject3D.is_wall_placed)
+		for field: String in ["variant", "yaw", "footprint", "placement", "inset"]:
 			if (authored[key] as Dictionary).has(field):
 				hint[field] = authored[key][field]
 		if not hint.is_empty():

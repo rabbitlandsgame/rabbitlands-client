@@ -64,6 +64,9 @@ const GAMEPLAY_LAYER := 2
 ## full map is that name (the rest of its sentence).
 const PORTAL_DESTINATION_PHRASE := "Beyond it lies "
 const BOAT_DESTINATION_PHRASE := "Bound for "
+## An underground passage's end names the section it leads into in these words
+## (underground.py): "A way leads on into <section>. <danger>."
+const PASSAGE_DESTINATION_PHRASE := "A way leads on into "
 ## The ring drawn under a node while the player is harvesting it, and under any
 ## object the registry could not place a model for.
 const RING_INNER_RADIUS := 0.62
@@ -95,6 +98,13 @@ var _map_authored: bool = false
 ## map's authored pick (`pick` {height, radius}). Empty for every package
 ## published before the harvest presentation, which keeps the random yaw and
 ## scale, one model per label, the 0.9 m pick and one map mark per node.
+##
+## A wall node (the underground's veins, pass 2: `placement` "wall") stands its
+## label's wall seam art (objects.json `harvestables.wallVariants[label]`,
+## picked by `variant`) set into the rock face: `yaw` turns its +Z out of the
+## rock and `inset` (metres) moves it from the tile's centre back along that
+## facing to the face (tools/prepare_underground_scenery.py writes both from
+## build_underground.vein_faces). Its pick and name go with it.
 var presentation: Dictionary = {}
 ## The harvest grouping this node belongs to, or "".
 var grouping: String = ""
@@ -109,6 +119,9 @@ var bound_node_name: String = ""
 ## The yaw the model stands at (the package's, or the seeded random one), so
 ## a footprint's pick box turns with it.
 var _model_yaw := 0.0
+## Where the model stands relative to the tile's centre: zero, except for a wall
+## node, whose model is set back into the rock face (`presentation.inset`).
+var _model_offset := Vector3.ZERO
 var _bound_body: WeakRef = null
 
 ## The smallest side a footprint pick box is given, so a thin hedge or a kelp
@@ -140,6 +153,10 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 
 func is_harvestable() -> bool:
 	return kind == EloriaProtocol.MAP_OBJECT_HARVEST
+
+## A harvest node set into a rock face (`presentation.placement` "wall").
+func is_wall_placed() -> bool:
+	return is_harvestable() and str(presentation.get("placement", "")) == "wall"
 
 ## A way off the map the server stated from its portal tiles. Nothing stands
 ## on the tile and nothing is clicked; the tiles do the work when a player
@@ -245,7 +262,7 @@ func destination() -> String:
 	if is_exit():
 		return label
 	if is_portal():
-		for phrase: String in [PORTAL_DESTINATION_PHRASE, BOAT_DESTINATION_PHRASE]:
+		for phrase: String in [PORTAL_DESTINATION_PHRASE, BOAT_DESTINATION_PHRASE, PASSAGE_DESTINATION_PHRASE]:
 			if detail.contains(phrase):
 				return detail.get_slice(phrase, 1).get_slice(". ", 0).trim_suffix(".").strip_edges()
 	return ""
@@ -340,6 +357,12 @@ func _catalog_entry(catalog: Dictionary) -> Dictionary:
 	var models: Dictionary = section.get("models", {}) as Dictionary
 	if is_harvestable():
 		var listed: Variant = (section.get("variants", {}) as Dictionary).get(label)
+		# A wall node chooses among its label's wall seam models instead; a label
+		# with none keeps its own art (and its usual variants) on the wall tile.
+		if is_wall_placed():
+			var walls: Variant = (section.get("wallVariants", {}) as Dictionary).get(label)
+			if walls is Array and not (walls as Array).is_empty():
+				listed = walls
 		# Only a node laid out for them stands the variants: a label's variants
 		# are patch models shaped for a stated footprint (a crop-row segment
 		# needs its row's yaw, a seam its face), so a node that states neither a
@@ -491,7 +514,7 @@ func _build_visual(catalog: Dictionary) -> void:
 		var title := Label3D.new()
 		title.name = "ResourceLabel"
 		title.text = label
-		title.position.y = maxf(.9,height+.15)
+		title.position = Vector3(_model_offset.x, maxf(.9,height+.15), _model_offset.z)
 		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		title.fixed_size = true
 		WORLD_LABEL_STYLE.apply(title,14,.0012953,5)
@@ -635,6 +658,11 @@ func _add_model(entry: Dictionary) -> float:
 	_model_yaw = deg_to_rad(float(presentation.yaw)) if _stated_number("yaw") else random_yaw
 	model.rotation.y = _model_yaw
 	model.scale = Vector3.ONE * (1.0 if not _footprint().is_empty() else random_scale)
+	# A wall node's model stands in the rock face, `inset` metres back from the
+	# tile's centre against its facing (the yaw's +Z points out of the rock).
+	if is_wall_placed() and _stated_number("inset"):
+		_model_offset = -Vector3(sin(_model_yaw), 0.0, cos(_model_yaw)) * float(presentation.inset)
+		model.position = _model_offset
 	return float(entry.get("height", 1.0)) * model.scale.y
 
 func _stated_number(key: String) -> bool:
@@ -708,7 +736,7 @@ func _add_pick_shape(height: float) -> void:
 		collision.shape = box
 		collision.rotation.y = deg_to_rad(float(presentation.yaw)) if _stated_number("yaw") \
 			else _model_yaw
-	collision.position.y = standing * 0.5
+	collision.position = Vector3(_model_offset.x, standing * 0.5, _model_offset.z)
 	add_child(collision)
 
 static func _external_path(path: String) -> String:

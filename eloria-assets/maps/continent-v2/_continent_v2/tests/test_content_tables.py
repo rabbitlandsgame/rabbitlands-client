@@ -23,6 +23,8 @@ V2 = Path(__file__).resolve().parents[2]
 CHECKOUT = V2.parents[2]
 sys.path.insert(0, str(CHECKOUT / "godot-client" / "tools"))
 import continent_v2_territories as T  # noqa: E402
+sys.path.insert(0, str(V2 / "_continent_v2"))
+import underground_source  # noqa: E402
 
 MAPS = tuple(e["id"] for e in json.loads((CHECKOUT / "godot-client/world_authoring/continent-v2/territories.json").read_text())["entries"])
 ID_PREFIX = {"sw_isle": "sw-spawn-", "tollholms": "th-spawn-", "gull_skerries": "gs-spawn-"}
@@ -267,8 +269,8 @@ def test_split_retains_exactly_three_authored_arrivals_and_unique_owned_marker_i
     # the North Wall farm (Landfall liveliness pass): three rows of Cotton, then two of Hearthroot
     additions |= {f"landfall--harvest-{object_id}-cotton" for object_id in range(2000, 2024)}
     additions |= {f"landfall--harvest-{object_id}-hearthroot" for object_id in range(2024, 2040)}
-    additions |= {section["entrance"]["marker"] for section in
-                  load(V2 / "_continent_v2/content/underground.json")["sections"]}
+    additions |= {door["marker"] for section in load(V2 / "_continent_v2/content/underground.json")["sections"]
+                  for door in underground_source.doors(section)}
     additions.add("landfall--npc-toolkeeper-rowan-hale")
     # the outer isles' people (Landfall liveliness pass)
     additions |= {"greenlight--npc-causeway-warden-edda-tine", "hearthcroft--npc-crofter-oyun-tarag",
@@ -287,9 +289,8 @@ def test_split_retains_exactly_three_authored_arrivals_and_unique_owned_marker_i
         assert entry["newMarkerId"] in markers[entry["newRegion"]]
     assert sum(m["kind"] == "spawn" for region in MAPS for m in markers[region].values()) == 3
     for region in MAPS:
-        entrances = {section["entrance"]["marker"] for section in
-                     load(V2 / "_continent_v2/content/underground.json")["sections"]
-                     if section["entrance"]["map"] == region}
+        entrances = {door["marker"] for section in load(V2 / "_continent_v2/content/underground.json")["sections"]
+                     for door in underground_source.doors(section) if door["map"] == region}
         assert all(rid.startswith(region+"--") or rid in entrances for rid in markers[region])
 
 

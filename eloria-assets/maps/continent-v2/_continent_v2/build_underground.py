@@ -12,15 +12,23 @@ a low rock face round every wall ring, pools with banks, daylight shafts); the r
 reviewed Meshy kit pieces that tools/prepare_underground_scenery.py packages and places from dressing(), which also
 decides what they block here.
 
-PLATFORM API (waves 2 and 3 build on this)
+PLATFORM API (waves 2 and 3 build on this; pass 2 added doors, passages, veins and the archetypes)
 ------------------------------------------
-The map frame: `map.cells` in the source (480 since the programme; the four first caves kept their tiles when it
-grew from 240). Server tile (x, y) is world (x, h, CELLS - y) (`world()`); nothing else may hardcode the size.
+The map frame: `map.cells` in the source (720 since pass 2, 2026-10-21; the caves kept their tiles when it grew from
+240 to 480 and again to 720, so world z moved by 240 m each time). Server tile (x, y) is world (x, h, CELLS - y)
+(`world()`); nothing else may hardcode the size.
+
+Load the source with load_design(): it checks the doors, passages and veins (underground_source.check) and gives
+every section `_ends` (the passage ends standing in it) and `_arrival` (its primary arrival), which dressing(),
+pools(), mouths() and masks() read. Keys starting with `_` are never written back (source_format.dump skips them).
 
 A section in the source holds:
-  id, name, danger, style (a THEMES key), entrance {map, marker, object, tile, position, returnTile} on ONE line
+  id, name, danger, style (a THEMES key),
+  its doors: `entrances` [{map, marker, object, tile, position, returnTile, arrival, exit, exitFacing?}, ...], one
+  door per line, or the old single door: entrance {map, marker, object, tile, position, returnTile} on ONE line
   (retarget_underground.py rewrites it by text), arrival [x, y], exit [x, y],
-  exitFacing [dx, dy]                  optional: the wall the way out is set into (default [0, -1])
+  exitFacing [dx, dy]                  optional: the wall the way out is set into (default [0, -1]).
+  See underground_source.py for both forms; a section a passage reaches may have no door.
   rooms [[x, y, rx, ry], ...]          room 0 is the safe entry chamber; the way out (exit) sits at its edge
   links [[a, b, width, [[x, y], ...]]]  passages between rooms, optionally winding through waypoints; links that
                                         close a loop leave rock pillars (holes in the outline): they are walled,
@@ -35,7 +43,9 @@ A section in the source holds:
                                        of wall rocks (doorways, set pieces against a wall); light = a glowing piece
                                        lit with the theme's `glow`; palette = MineralAppearance {stone, mineral}
   nodes [[objectId, resource, x, y], ...]   server harvest nodes (tile blocked; a 4-neighbour must be reached)
-  spawns [[creature, x, y, leash], ...]     server encounters (leash 1-8, >= leash + 20 tiles from the arrival)
+  veins [{resource, nodes: [objectId, ...]}, ...]   nodes set into the rock face (see VEINS below)
+  veinClearance                        optional margin (tiles) between a vein node and the nearest wall rock's edge (1.6)
+  spawns [[creature, x, y, leash], ...]     server encounters (leash 1-8, >= leash + 20 tiles from every arrival)
   ledges [{terrace: [x, y, rx, ry] | polygon: [[x, y], ...], height, ramps: [[x0, y0, x1, y1, width], ...]}]
                                        optional walkable terraces with ramps (the owner's experiment, 2026-10-20: the
                                        Rimewater Ice Caves only); see LEDGES below. Without it a section is flat at 0 m.
@@ -77,6 +87,34 @@ from ledge_heights(), so the client's walk surface and the server's climb agree.
 edge above the floor) gets a rock face, `Build_<section>_ledge<i>`, styled and sectioned like the walls but never cut
 away, and closes the half cells within LEDGE_CLEAR of it: the floor below and the terrace above meet only on a ramp,
 and a terrace stands higher than the 1 m climb. Props without a `height` and wall rocks stand on the ledge under them.
+
+DOORS (pass 2): every door's way out is a dark mouth in the wall at its `exit` (set into `exitFacing`), and every door
+is a portal pair: the manifest's portals and interactives carry one exit per door, `<section>-exit` for the first and
+`<section>-exit<N>` for the others, each with its own object id and return tile.
+
+PASSAGES (pass 2; underground_source.py has the source format): each end is a manifest portal on this map
+(`<section>-passage<P>-<end>`, destinationMap this map, destinationTile the other end's arrival). The builder draws
+its mouth in the rock face its `facing` points at (mouths(); default the nearest face), as `Build_<section>_mouth<k>`
+meshes: dark opening, rock jambs and lintel, styled and sectioned like the walls, solid, cut away with the wall they
+stand in (perimeter: by facing; pillar: by the pillar runs' rule, with a `centre`).
+  stairs   steps down a stairwell sunk into the floor in front of the face (the well is blocked on the walk grid)
+  crawl    a low hole at the foot of the face over a rubble sill
+  flooded  a pool against the face (it joins the section's water: pools()) under a low opening
+The end's tile must be walkable and stand clear of its mouth: a stairs or flooded mouth needs about 2.5 m from the
+tile's centre to the face (the builder says how far to move a tile that is too close).
+
+VEINS (pass 2): a section's `veins` name nodes set one tile into the rock (the node tile is blocked and a 4-neighbour
+is reached, as for any node). Wall rocks keep their half width (rock_reach()) plus `veinClearance` tiles off every vein
+node, and their half width plus 0.6 m off a passage mouth's opening; a vein node whose tile centre
+stands farther than VEIN_FACE_MAX metres from its rock face is refused (it would not read as part of the wall).
+vein_faces() gives each vein node the yaw that turns a model's +Z out of the rock and the inset from the tile centre
+to the face; tools/prepare_underground_scenery.py writes them into underground-scenery.json `harvestPresentation`
+as {placement: 'wall', yaw, inset, variant}, and the client stands the resource's wall seam art
+(objects.json harvestables.wallVariants) there, set into the face. underground_authoring.vein() picks a vein's tiles.
+
+SCALE (pass 2, P5): masks() works in each section's window (its outline and every prop's block), so the walk grid
+costs what the caves cover, not the map's area; outline() is cached per layout. underground_authoring.py holds the
+archetype helpers (pocket, strip tunnel, looped cavern, branching mine) for content scripts.
 """
 from __future__ import annotations
 import argparse
@@ -100,6 +138,8 @@ CHECKOUT = HERE.parents[3]
 TOOLKIT = CHECKOUT/'eloria-assets/maps/nymara-regions/_toolkit'
 sys.path.insert(0,str(TOOLKIT))
 from amberwood import gltf as G, mesh as M, materials as MAT, textures as T
+sys.path.insert(0,str(HERE))
+import underground_source as S
 
 SOURCE = HERE/'content/underground.json'
 # The map's frame, from the source: server tile (x, y) is world (x, h, CELLS - y).
@@ -322,6 +362,35 @@ def theme_of(section):
     return THEMES[section['style']]
 
 
+def annotate(design,strict=True):
+    """Check the source's doors, passages and veins and give every section `_ends` (the passage ends standing in it)
+    and `_arrival` (its primary arrival); returns the design. Idempotent: call it again after editing the ways in.
+    `strict` False is for authoring helpers only (underground_authoring.py), while a content script is still adding
+    a section's way in: a section nothing reaches yet takes its first room's centre as its arrival."""
+    if strict:
+        try:
+            S.check(design)
+        except S.SourceError as error:
+            raise SystemExit(f'underground source: {error}')
+    for section in design['sections']:
+        section['_ends']=S.passage_ends(design,section['id'])
+        found=S.arrivals(design,section)
+        section['_arrival']=list(found[0][2]) if found else [int(v) for v in section['rooms'][0][:2]]
+    return design
+
+
+def load_design(path=None):
+    """The source (content/underground.json, or `path`), checked and annotated (annotate())."""
+    return annotate(json.loads(Path(path or SOURCE).read_text(encoding='utf-8')))
+
+
+def _annotated(section):
+    if '_ends' not in section:
+        raise SystemExit(f'{section.get("id","?")}: load the source with build_underground.load_design() '
+                         '(the section is not annotated with its passage ends)')
+    return section
+
+
 def shafts_of(section):
     """The section's daylight shafts [[x, y, r], ...] (a legacy single `shaft` is one)."""
     if 'shafts' in section: return [list(s) for s in section['shafts']]
@@ -333,7 +402,18 @@ def wall_rocks(theme):
     return [rock if isinstance(rock,dict) else {'asset':rock[0],'proud':rock[1]} for rock in theme['wallRocks']]
 
 
+_OUTLINES={}
+
+
 def outline(section):
+    """The section's floor outline (one polygon; its holes are the rock pillars), cached per layout."""
+    key=json.dumps([section.get('id'),section['style'],section['rooms'],section['links']])
+    if key not in _OUTLINES:
+        _OUTLINES[key]=_outline(section)
+    return _OUTLINES[key]
+
+
+def _outline(section):
     rooms=[]
     shape=theme_of(section)['shape']
     for index,(x,y,rx,ry) in enumerate(section['rooms']):
@@ -386,10 +466,78 @@ def wavy_ellipse(x,y,rx,ry,phase=0.):
 
 
 def pools(section):
-    """The section's standing water: wavy ellipses [x, y, rx, ry], reaching under the walls they touch."""
+    """The section's standing water: wavy ellipses [x, y, rx, ry], reaching under the walls they touch, and the pools
+    of its flooded passage mouths (mouths())."""
     shapes=[wavy_ellipse(*pool[:4],phase=index*1.3) for index,pool in enumerate(section.get('pools',[]))]
+    shapes+=[mouth['pit'] for mouth in mouths(section) if mouth['art']=='flooded']
     if not shapes: return None
     return unary_union(shapes).intersection(outline(section).buffer(2.0))
+
+
+# Passage mouths (PASSAGES in the module docstring): the opening's width and top (metres above the floor), and the
+# depth of the stairwell or pool sunk in front of the face (None: none).
+MOUTHS={'stairs':{'width':2.4,'top':2.6,'pit':1.6,'bottom':-1.6},
+        'crawl':{'width':2.2,'top':1.35,'pit':None,'bottom':-.1},
+        'flooded':{'width':2.8,'top':1.1,'pit':1.8,'bottom':-1.9}}
+# Metres a mouth's pit keeps off its end tile's centre: the walk grid closes .4 m round a pit, and the end tile's own
+# half cells (.25 m from its centre) must stay open.
+MOUTH_TILE_CLEAR=.95
+_MOUTHS={}
+
+
+def mouths(section):
+    """The section's passage mouths, one per passage end in it (`_ends` order): {end, art, centre [x, y] (the end
+    tile's centre), facing [ux, uy] (unit, from the tile into the rock), face [x, y] (where that ray meets the rock
+    face), distance (metres from the centre to the face), pillar (the face is a rock pillar's), pit (the stairwell or
+    pool in front of the face, a Polygon in tile units, or None), depth (the pit's reach in front of the face)}."""
+    _annotated(section)
+    key=json.dumps([section['id'],section['style'],section['rooms'],section['links'],section['_ends']])
+    if key in _MOUTHS: return _MOUTHS[key]
+    shape=outline(section); rings=wall_rings(shape); result=[]
+    for end in section['_ends']:
+        where=f"{section['id']}: passage {end['passage']} end {end['end']} at {end['tile']}"
+        cx,cy=end['tile'][0]+.5,end['tile'][1]+.5; centre=Point(cx,cy)
+        if not shape.contains(centre):
+            raise SystemExit(f'{where}: the tile is not on the cave floor')
+        if section.get('ledges') and abs(float(ledge_heights(section,cx,cy)))>.05:
+            raise SystemExit(f'{where}: a passage mouth stands on the floor, not on a ledge')
+        if end['facing']:
+            ux,uy=end['facing']
+        else:
+            near=min((ring for ring,_ in rings),key=lambda ring: ring.distance(centre))
+            p=near.interpolate(near.project(centre)); ux,uy=p.x-cx,p.y-cy
+        length=math.hypot(ux,uy)
+        if length<1e-6: raise SystemExit(f'{where}: no facing')
+        ux,uy=ux/length,uy/length
+        ray=LineString([(cx,cy),(cx+ux*40,cy+uy*40)])
+        best=None
+        for ring,pillar in rings:
+            hit=ray.intersection(ring)
+            for part in getattr(hit,'geoms',[hit]):
+                if part.is_empty: continue
+                for hx,hy in part.coords:
+                    d=math.hypot(hx-cx,hy-cy)
+                    if best is None or d<best[0]: best=(d,hx,hy,pillar)
+        if best is None: raise SystemExit(f'{where}: its facing meets no rock face within 40 m')
+        distance,fx,fy,pillar=best
+        spec=MOUTHS[end['art']]; pit=None; depth=0.
+        if spec['pit']:
+            depth=min(spec['pit'],distance-MOUTH_TILE_CLEAR)
+            if depth<.6:
+                raise SystemExit(f"{where}: the tile's centre stands {distance:.1f} m from the face; a {end['art']} mouth "
+                                 f'needs {MOUTH_TILE_CLEAR+.6:.1f} m: move the tile a step out from the wall')
+            vx,vy=-uy,ux; w=spec['width']/2; a0,a1=distance-depth,distance+1.5
+            pit=Polygon([(cx+ux*a0+vx*w,cy+uy*a0+vy*w),(cx+ux*a1+vx*w,cy+uy*a1+vy*w),
+                         (cx+ux*a1-vx*w,cy+uy*a1-vy*w),(cx+ux*a0-vx*w,cy+uy*a0-vy*w)])
+        result.append({'end':end,'art':end['art'],'centre':[cx,cy],'facing':[ux,uy],'face':[fx,fy],
+                       'distance':distance,'pillar':pillar,'pit':pit,'depth':depth})
+    _MOUTHS[key]=result
+    return result
+
+
+def stairwells(section):
+    """The section's stairs mouths' wells (Polygons in tile units): no floor, closed on the walk grid."""
+    return [mouth['pit'] for mouth in mouths(section) if mouth['art']=='stairs']
 
 
 # Half cells closer than this (metres) to a ledge's drop are closed (see LEDGES in the module docstring).
@@ -474,6 +622,12 @@ def ledge_heights(section,x,y):
     return heights
 
 
+def rock_reach(rock,scale):
+    """About half a wall rock's width along the face (tiles): an aligned piece (a dyke, a frieze) is long, about 5 m;
+    any other is about as wide as it is deep (twice its proud half depth)."""
+    return 2.5*scale if rock.get('align') else rock['proud']*scale*1.2
+
+
 def dressing(section):
     """The section's reused scenery, as placements in tile units: the source's props, then rocks along every wall.
 
@@ -482,6 +636,7 @@ def dressing(section):
     near the player on a wall facing the camera it drops out (the manifest's cutaway `props`). A perimeter rock's
     outward points out of the cave, a pillar rock's out of its pillar.
     """
+    _annotated(section)
     theme=theme_of(section)
     items=[]
     ledged=bool(section.get('ledges'))  # props and wall rocks stand on the ledge under them
@@ -496,6 +651,11 @@ def dressing(section):
     if section.get('nodeClearance'):
         # harvest nodes against a wall stand in front of the low rock face, not inside a wall rock
         keep_out+=[(nx+.5,ny+.5,section['nodeClearance']) for _,_,nx,ny in section['nodes']]
+    # pass 2: a passage's mouth and a vein's face stay clear of wall rocks: no rock's own half width (rock_reach)
+    # comes within this margin of them, so the face reads round them however big the theme's rocks are
+    clear=[(*mouth['face'],MOUTHS[mouth['art']]['width']/2+.6) for mouth in mouths(section)]
+    veined=S.wall_nodes(section)
+    clear+=[(nx+.5,ny+.5,section.get('veinClearance',1.6)) for oid,_,nx,ny in section['nodes'] if oid in veined]
     rocks=wall_rocks(theme)
     step=section.get('wallRockSpacing',theme['spacing'])
     k0=0
@@ -513,6 +673,7 @@ def dressing(section):
             # Set the rock into the face so about a third of it stands proud of the wall.
             x,y=p.x+nx*proud*scale*.45,p.y+ny*proud*scale*.45
             if any(math.hypot(x-cx,y-cy)<r for cx,cy,r in keep_out): continue
+            if clear and any(math.hypot(x-cx,y-cy)<r+rock_reach(rock,scale) for cx,cy,r in clear): continue
             yaw=round(math.degrees(math.atan2(dy,dx)))%360 if rock.get('align') else k*137%360
             outward=[round(-nx,3),0,round(ny,3)] if pillar else [round(nx,3),0,round(-ny,3)]
             sunk=round(-.3+float(ledge_heights(section,p.x-nx*.3,p.y-ny*.3)),3) if ledged else -.3
@@ -521,6 +682,40 @@ def dressing(section):
                           **({'palette':theme['rockPalette']} if theme.get('rockPalette') else {})})
         k0+=count
     return items
+
+
+# A vein node's tile centre stands at most this far (metres) in front of its rock face; its seam model's origin is set
+# SEAM_SINK behind the face, so about half of it stands in the rock.
+VEIN_FACE_MAX=2.6
+SEAM_SINK=.3
+
+
+def vein_faces(section):
+    """{object id: {yaw, inset, distance, pillar, face}} for every vein node of the section (VEINS in the module
+    docstring): yaw (degrees about +Y, the client's frame) turns a model's +Z out of the rock into the room; inset
+    (metres) runs from the node's tile centre to SEAM_SINK behind the face, along -facing; distance is the tile centre's
+    distance in front of the face; face is the nearest face point [x, y] (tiles); pillar says whose face it is."""
+    shape=outline(section); rings=wall_rings(shape); veined=S.wall_nodes(section); result={}
+    for oid,_,nx,ny in section['nodes']:
+        if oid not in veined: continue
+        centre=Point(nx+.5,ny+.5)
+        ring,pillar=min(rings,key=lambda entry: entry[0].distance(centre))
+        along=ring.project(centre); p=ring.interpolate(along)
+        a=ring.interpolate(max(0.,along-.6)); b=ring.interpolate(min(ring.length,along+.6))
+        dx,dy=b.x-a.x,b.y-a.y; length=max(1e-9,math.hypot(dx,dy))
+        rx,ry=into_rock(ring,pillar,dx,dy,length)
+        distance=(centre.x-p.x)*-rx+(centre.y-p.y)*-ry
+        result[oid]={'yaw':round(math.degrees(math.atan2(-rx,ry))%360,1),'inset':round(distance+SEAM_SINK,3),
+                     'distance':round(distance,3),'pillar':pillar,'face':[round(p.x,2),round(p.y,2)]}
+    return result
+
+
+def check_veins(section):
+    """Refuse a vein node whose tile does not read as part of its rock face (VEIN_FACE_MAX)."""
+    for oid,face in vein_faces(section).items():
+        if face['distance']>VEIN_FACE_MAX:
+            raise SystemExit(f"{section['id']}: vein node {oid} stands {face['distance']:.1f} m in front of its rock "
+                             f'face (at most {VEIN_FACE_MAX} m): put it on the first rock tile behind the walkable edge')
 
 
 def section_bounds(section):
@@ -598,11 +793,63 @@ def ledge_geometry(section,add):
             run+=length
 
 
-def section_geometry(section,add,lights,chambers,wall_faces,pillars):
-    """A section's shell in its theme: floor and rock faces (perimeter and pillars), sunk pools with banks, shafts."""
+def _face(corners,toward,material):
+    """A quad facing `toward` (world), its UVs at the walls' 0.3 per metre."""
+    normal=np.cross(np.subtract(corners[1],corners[0]),np.subtract(corners[2],corners[0]))
+    return M.quad(corners if np.dot(normal,toward)>=0 else corners[::-1],uv_scale=.3,material=material)
+
+
+def mouth_geometry(section,add,mouth_walls):
+    """Every passage mouth of the section (mouths()), in the bucket `Build_<section>_mouth<k>`: the dark way on set a
+    hand's breadth in front of the face, rock jambs and a lintel standing proud of it, and per art a stairwell's
+    treads, a crawl's rubble sill or (the pool itself is pools()') nothing more. Records each bucket's cutaway rule."""
+    theme=theme_of(section); ident=section['id']
+    for k,mouth in enumerate(mouths(section)):
+        bucket=f'Build_{ident}_mouth{k}'
+        (cx,cy),(ux,uy)=mouth['centre'],mouth['facing']; vx,vy=-uy,ux
+        spec=MOUTHS[mouth['art']]; w=spec['width']/2; top=spec['top']; bottom=spec['bottom']
+        f=mouth['distance']-.12
+        def at(a,b,h): return world(cx+ux*a+vx*b,cy+uy*a+vy*b,h)
+        room=(-ux,0,uy); side=(-uy,0,-ux)  # world: back into the room, and toward +v
+        add(_face([at(f,-w,bottom),at(f,w,bottom),at(f,w,top),at(f,-w,top)],room,'exit_dark'),bucket)
+        def block(a0,a1,b0,b1,h0,h1,material):
+            add(_face([at(a0,b0,h1),at(a1,b0,h1),at(a1,b1,h1),at(a0,b1,h1)],(0,1,0),material),bucket)
+            add(_face([at(a0,b0,h0),at(a0,b1,h0),at(a0,b1,h1),at(a0,b0,h1)],room,material),bucket)
+            add(_face([at(a0,b1,h0),at(a1,b1,h0),at(a1,b1,h1),at(a0,b1,h1)],side,material),bucket)
+            add(_face([at(a0,b0,h0),at(a1,b0,h0),at(a1,b0,h1),at(a0,b0,h1)],tuple(-c for c in side),material),bucket)
+        jamb=.45
+        for sign in (-1,1):
+            b0,b1=sorted((sign*w,sign*(w+jamb)))
+            block(f-.5,f+.4,b0,b1,-.15,top+.1,theme['rock'])
+        block(f-.5,f+.4,-(w+jamb),w+jamb,top,top+.55,theme['rock'])
+        if mouth['art']=='crawl':
+            block(f-.9,f+.1,-w*.75,w*.75,-.1,.16,theme['bank'])
+        elif mouth['art']=='stairs':
+            # treads down the well from its lip to under the face, each riser facing the room
+            a0=mouth['distance']-mouth['depth']; steps=4; run=(mouth['distance']+.4-a0)/steps; rise=-bottom/(steps+.5)
+            for i in range(steps):
+                # the lower treads go down into the dark the way on leads into
+                a,b,h=a0+i*run,a0+(i+1)*run,-(i+1)*rise; tread=theme['bank'] if i<2 else 'exit_dark'
+                add(_face([at(a,-w,h),at(b,-w,h),at(b,w,h),at(a,w,h)],(0,1,0),tread),bucket)
+                add(_face([at(a,-w,-i*rise),at(a,w,-i*rise),at(a,w,h),at(a,-w,h)],room,tread),bucket)
+            for sign in (-1,1):
+                add(_face([at(a0,sign*w,0),at(mouth['distance']+.3,sign*w,0),at(mouth['distance']+.3,sign*w,bottom),
+                           at(a0,sign*w,bottom)],tuple(-sign*c for c in side),theme['rock']),bucket)
+        fx,fy=mouth['face']
+        if mouth['pillar']:
+            mouth_walls[bucket]={'outward':[round(ux,3),0,round(-uy,3)],'centre':[round(fx,2),round(CELLS-fy,2)]}
+        else:
+            mouth_walls[bucket]={'outward':FACE_OUT[facing_name(ux,uy)]}
+
+
+def section_geometry(section,add,lights,chambers,wall_faces,pillars,mouth_walls=None):
+    """A section's shell in its theme: floor and rock faces (perimeter and pillars), sunk pools with banks, shafts,
+    the ways out (doors) and the passage mouths."""
     theme=theme_of(section)
     ident=section['id']; poly=outline(section); water=pools(section)
     floor=poly.difference(water) if water is not None else poly
+    for well in stairwells(section):
+        floor=floor.difference(well)
     if section.get('ledges'):
         floor=floor.difference(ledge_parts(section)[1])
     for a,b,c in flat_triangles(floor,0):
@@ -694,16 +941,18 @@ def section_geometry(section,add,lights,chambers,wall_faces,pillars):
         lights.append({'id':f'{ident}-lamp-{lamp}','position':list(world(item['x'],item['y'],flame*item['scale']+lift)),
                        'color':colour,'energyHint':energy,'rangeHint':reach})
         lamp+=1
-    # The way out: a dark passage mouth; the arch over it is kit scenery.
-    x,y=section['exit']
-    if 'exitFacing' in section:
-        # set into the wall the exit faces ([dx, dy] from the exit tile into its passage), not toward -y
-        fx,fy=section['exitFacing']; cx,cy=x+fx*1.2,y+fy*1.2
-        add(M.quad([world(cx+fy*1.7,cy-fx*1.7,.01),world(cx-fy*1.7,cy+fx*1.7,.01),world(cx-fy*1.7,cy+fx*1.7,3.3),
-                    world(cx+fy*1.7,cy-fx*1.7,3.3)],material='exit_dark'),f'Props_{ident}')
-    else:
-        add(M.quad([world(x-1.7,y-1.2,.01),world(x+1.7,y-1.2,.01),world(x+1.7,y-1.2,3.3),world(x-1.7,y-1.2,3.3)],
-                   material='exit_dark'),f'Props_{ident}')
+    # The ways out: a dark passage mouth at every door's exit; the arch over it is kit scenery.
+    for door in S.doors(section):
+        x,y=door['exit']
+        if 'exitFacing' in door:
+            # set into the wall the exit faces ([dx, dy] from the exit tile into its passage), not toward -y
+            fx,fy=door['exitFacing']; cx,cy=x+fx*1.2,y+fy*1.2
+            add(M.quad([world(cx+fy*1.7,cy-fx*1.7,.01),world(cx-fy*1.7,cy+fx*1.7,.01),world(cx-fy*1.7,cy+fx*1.7,3.3),
+                        world(cx+fy*1.7,cy-fx*1.7,3.3)],material='exit_dark'),f'Props_{ident}')
+        else:
+            add(M.quad([world(x-1.7,y-1.2,.01),world(x+1.7,y-1.2,.01),world(x+1.7,y-1.2,3.3),world(x-1.7,y-1.2,3.3)],
+                       material='exit_dark'),f'Props_{ident}')
+    mouth_geometry(section,add,mouth_walls if mouth_walls is not None else {})
 
 
 def world(x,y,height=0):
@@ -714,10 +963,10 @@ def build_geometry(design, textures):
     builder=G.GltfBuilder(generator='Eloria Landfall underground builder; shared original interior kit')
     root=G.Node('Landfall_Underground')
     parts=defaultdict(list)
-    lights=[]; chambers=[]; hidden=[]; wall_faces={}; pillars={}
+    lights=[]; chambers=[]; hidden=[]; wall_faces={}; pillars={}; mouth_walls={}
     def add(piece,bucket): parts[(bucket,piece.material)].append(piece)
     for section in design['sections']:
-        section_geometry(section,add,lights,chambers,wall_faces,pillars)
+        section_geometry(section,add,lights,chambers,wall_faces,pillars,mouth_walls)
     used={m for _,m in parts}
     MAT.register_gltf_materials(builder,textures,only=used-{'exit_dark','light_shaft'})
     builder.add_material(G.Material('exit_dark',base_color=(.008,.009,.011,1),double_sided=True))
@@ -738,7 +987,10 @@ def build_geometry(design, textures):
             # Each wall names its cave, so the client keeps another cave's walls hidden (`sectioned`).
             section=max((s['id'] for s in design['sections'] if bucket.startswith(f"Build_{s['id']}_")),key=len)
             collision_nodes.append(name)
-            if bucket in pillars:
+            if bucket in mouth_walls:
+                # a passage mouth goes with the wall it is set into (mouth_geometry)
+                walls.append({'node':name,**mouth_walls[bucket],'section':section})
+            elif bucket in pillars:
                 entry=pillars[bucket]; n=entry['normal']/max(1e-9,np.linalg.norm(entry['normal']))
                 total=sum(w for _,_,w in entry['points'])
                 cx=sum(px*w for px,_,w in entry['points'])/total; cy=sum(py*w for _,py,w in entry['points'])/total
@@ -751,33 +1003,54 @@ def build_geometry(design, textures):
     return builder,lights,chambers,hidden,collision_nodes,bounds,walls
 
 
+def section_window(section,pad=2.5):
+    """The tile box (x0, y0, x1, y1) a section's walk grid can touch: its outline (its pools and mouth pits reach at
+    most 2.4 m past it) and every prop's block, padded by `pad` tiles."""
+    x0,y0,x1,y1=outline(section).buffer(pad).bounds
+    for item in dressing(section):
+        if item['block']>0:
+            reach=item['block']+pad
+            x0,y0=min(x0,item['x']-reach),min(y0,item['y']-reach)
+            x1,y1=max(x1,item['x']+reach),max(y1,item['y']+reach)
+    return x0,y0,x1,y1
+
+
 def masks(design,strict=True):
     """The walk grid: half-metre cells (`half`) and served tiles (`coarse`). `strict` refuses a large cut-off pocket;
-    a layout preview passes False to see it."""
+    a layout preview passes False to see it. Each section is worked in its own window (section_window()): every test
+    below is false outside it, so the grid is cell for cell the whole-map computation's at a fraction of the cost."""
     from shapely import contains_xy
+    if any('_ends' not in s for s in design['sections']): annotate(design)
     cells=design['map']['cells']; size=cells*2
-    x,y=np.meshgrid((np.arange(size)+.5)*.5,(np.arange(size)+.5)*.5)
     half=np.zeros((size,size),dtype=bool)
     for section in design['sections']:
-        theme=theme_of(section); shape=outline(section)
+        theme=theme_of(section); shape=outline(section); items=dressing(section)
+        wx0,wy0,wx1,wy1=section_window(section)
+        i0,j0=max(0,int(math.floor(wx0*2))),max(0,int(math.floor(wy0*2)))
+        i1,j1=min(size,int(math.ceil(wx1*2))+1),min(size,int(math.ceil(wy1*2))+1)
+        x,y=np.meshgrid((np.arange(i0,i1)+.5)*.5,(np.arange(j0,j1)+.5)*.5)
+        cell=half[j0:j1,i0:i1]  # a view: the window of the map's grid
         # Cell corners must fit on the authored floor. Blackspace has no geometry at all.
-        half |= contains_xy(shape.buffer(-.4),x,y)
+        cell |= contains_xy(shape.buffer(-.4),x,y)
         # The wall rocks stand proud of the face (every ring, pillars too): keep the theme's margin clear.
-        half &= ~(contains_xy(shape,x,y) & ~contains_xy(shape.buffer(-theme['margin']),x,y))
+        cell &= ~(contains_xy(shape,x,y) & ~contains_xy(shape.buffer(-theme['margin']),x,y))
         water=pools(section)
         if water is not None:
-            half &= ~contains_xy(water.buffer(.4),x,y)
-        for item in dressing(section):
+            cell &= ~contains_xy(water.buffer(.4),x,y)
+        for well in stairwells(section):
+            cell &= ~contains_xy(well.buffer(.4),x,y)
+        for item in items:
             if item['block']>0:
-                half &= ~((x-item['x'])**2+(y-item['y'])**2<item['block']**2)
+                cell &= ~((x-item['x'])**2+(y-item['y'])**2<item['block']**2)
         for _,_,nx,ny in section['nodes']:
             half[ny*2:ny*2+2,nx*2:nx*2+2]=False
         if section.get('ledges'):
             # A ledge's drops: no half cell within LEDGE_CLEAR of one, so below and above meet only on a ramp.
             from shapely import dwithin, points
             x0,y0,x1,y1=(int(v) for v in shape.buffer(1).bounds)
+            lx,ly=np.meshgrid((np.arange(x0*2,(x1+1)*2)+.5)*.5,(np.arange(y0*2,(y1+1)*2)+.5)*.5)
             window=(slice(y0*2,(y1+1)*2),slice(x0*2,(x1+1)*2))
-            half[window]&=~dwithin(ledge_parts(section)[2],points(x[window],y[window]),LEDGE_CLEAR)
+            half[window]&=~dwithin(ledge_parts(section)[2],points(lx,ly),LEDGE_CLEAR)
     coarse=half.reshape(cells,2,cells,2).all(axis=(1,3))
     # Props, pools and pillars can pinch off a scrap of floor, and publication refuses a stranded pocket: close
     # whatever the arrival cannot reach (the server's four-way steps on the coarse grid); refuse a large one.
@@ -786,7 +1059,7 @@ def masks(design,strict=True):
         x0,y0,x1,y1=(int(v) for v in outline(section).buffer(1).bounds)
         window=coarse[y0:y1+1,x0:x1+1]
         labels,_=ndimage.label(window)
-        ax,ay=section['arrival']
+        ax,ay=section['_arrival']
         stranded=window&(labels!=labels[ay-y0,ax-x0])
         if stranded.sum()>12 and strict:
             ys,xs=np.nonzero(stranded)
@@ -823,13 +1096,17 @@ def surfaces(design):
     return {s['id']:{'theme':s['style'],**theme_of(s)['surfaces']} for s in design['sections']}
 
 
-def build(server):
+def build(server,source=None,out=None,registry=True):
+    """Build the package from the source (or `source`, a JSON file in the same format) into
+    continent-v2/<map id>/client (or `out`). `registry` holds the build to the map's registry.json row; a scratch
+    build (the P5 scaling sections) passes False. Returns the build summary."""
     sys.path.insert(0,str(server)); from eloria import served_grid as SG
-    design=json.loads(SOURCE.read_text(encoding='utf-8')); ident=design['map']['id']; cells=design['map']['cells']
+    source=Path(source or SOURCE)
+    design=load_design(source); ident=design['map']['id']; cells=design['map']['cells']
     if cells!=CELLS: raise SystemExit('the source changed while building')
-    ids=[s['id'] for s in design['sections']]
-    if len(set(ids))!=len(ids): raise SystemExit('section ids must be unique')
-    out=HERE.parent/ident/'client';out.mkdir(parents=True,exist_ok=True)
+    for section in design['sections']:
+        check_veins(section)
+    out=Path(out or HERE.parent/ident/'client');out.mkdir(parents=True,exist_ok=True)
     needed={theme_of(s)[k] for s in design['sections'] for k in ('floor','rock','bed','bank')}|{'water_cenote'}
     textures={name:TEXTURE_RECIPES[name]() for name in sorted(needed)}
     builder,lights,chambers,hidden,collision_nodes,bounds,walls=build_geometry(design,textures)
@@ -843,17 +1120,28 @@ def build(server):
     coordinate={'metresPerTile':1.,'serverOrigin':[0,cells],'serverCells':[cells,cells],
                 'origin':[0,0,0],'walkingHeight':0.,'invertServerY':True,'serverStorageVersion':1,'serverTileMin':[0,0]}
     nodes=[];exits=[];spawns=[]
+    names={s['id']:s['name'] for s in design['sections']}
+    ends={(e['passage'],e['end']):e for p in S.passages(design) for e in p['ends']}
     for i,section in enumerate(design['sections']):
+        arrival=section['_arrival']
         spawns.append({'id':section['id'],'name':section['name'],'section':section['id'],'default':i==0,
-                       'position':list(world(*section['arrival'],.05)),'serverTile':section['arrival'],'rotationDegrees':180})
+                       'position':list(world(*arrival,.05)),'serverTile':arrival,'rotationDegrees':180})
         for oid,res,x,y in section['nodes']:
             ground=float(ledge_heights(section,x+.5,y+.5)) if section.get('ledges') else 0
             nodes.append({'id':f'{section["id"]}-{oid}','objectId':oid,'resource':res,'serverTile':[x,y],
                           'position':list(world(x+.5,y+.5,ground)),'section':section['id'],'authority':'server'})
-        exits.append({'id':f'{section["id"]}-exit','objectId':section['entrance']['object'],
-                      'role':'portal','position':list(world(*section['exit'])),'serverTile':section['exit'],
-                      'destinationMap':section['entrance']['map'],'destinationTile':section['entrance']['returnTile'],
-                      'label':f'Leave {section["name"]}'})
+        for door in S.doors(section):
+            exits.append({'id':f'{section["id"]}-exit'+(str(door['index']) if door['index'] else ''),
+                          'objectId':door['object'],'role':'portal','position':list(world(*door['exit'])),
+                          'serverTile':door['exit'],'destinationMap':door['map'],'destinationTile':door['returnTile'],
+                          'label':f'Leave {section["name"]}'})
+        # a passage end is a portal on this map, to the other end's arrival (underground_source.py)
+        for end in section['_ends']:
+            other=ends[(end['passage'],1-end['end'])]
+            exits.append({'id':f'{section["id"]}-passage{end["passage"]}-{end["end"]}','objectId':end['object'],
+                          'role':'portal','position':list(world(*end['tile'])),'serverTile':end['tile'],
+                          'destinationMap':ident,'destinationTile':other['arrival'],'section':section['id'],
+                          'destinationSection':other['section'],'label':f'On into {names[other["section"]]}'})
     pixels=3  # minimap pixels per tile
     manifest={'schemaVersion':'1.1.0','assetVersion':'1.0.0',
               'asset':{'id':ident,'name':design['map']['name'],'glb':'world.glb','units':'meters',
@@ -884,7 +1172,7 @@ def build(server):
               'sectioned':True,'sections':[section_bounds(s) for s in design['sections']],
               'minimap':{'file':'minimap.webp','image':'minimap.webp','northUp':True,'worldMin':[0,0],'worldMax':[cells,cells],
                          'imageSize':[cells*pixels,cells*pixels]},
-              'provenance':{'source':'_continent_v2/content/underground.json','sourceSha256':sha(SOURCE),
+              'provenance':{'source':'_continent_v2/content/underground.json','sourceSha256':sha(source),
                             'builder':'_continent_v2/build_underground.py','builderSha256':sha(__file__)}}
     write_json(out/'world.json',manifest)
     # Images go to the content-addressed pool, as every published map's do (eloria-assets/tools/shared_images.py).
@@ -913,15 +1201,23 @@ def build(server):
                 if line.geom_type=='LineString':
                     draw.line([(x*pixels,y*pixels) for x,y in line.coords],fill=colours['edge'],width=2)
         for _,res,x,y in section['nodes']: draw.ellipse((x*pixels-2,y*pixels-2,x*pixels+2,y*pixels+2),fill=(158,179,162))
-        x,y=section['exit'];draw.rectangle((x*pixels-4,y*pixels-4,x*pixels+4,y*pixels+4),fill=(232,185,94))
+        for door in S.doors(section):
+            x,y=door['exit'];draw.rectangle((x*pixels-4,y*pixels-4,x*pixels+4,y*pixels+4),fill=(232,185,94))
+        for end in section['_ends']:
+            x,y=end['tile'];draw.rectangle((x*pixels-4,y*pixels-4,x*pixels+4,y*pixels+4),fill=(120,196,232))
     image.save(out/'minimap.webp',lossless=True)
     # The procedural entrance models stay retired: each door's art is reused Meshy scenery (objects.json),
     # which this builder no longer writes; retarget_underground.py keeps those records' tiles and labels.
-    registry=json.loads((CHECKOUT/'godot-client/data/maps/registry.json').read_text(encoding='utf-8'))
-    if registry['maps'].get(ident,{}).get('coordinateTransform')!=coordinate:
-        raise SystemExit(f'registry.json has no {ident} row with this frame; publish it first')
-    print(json.dumps({'map':ident,'sections':len(design['sections']),'nodes':len(nodes),'monsters':sum(len(s['spawns']) for s in design['sections']),
-                      'walkableTiles':int(coarse.sum()),'glbBytes':(out/'world.glb').stat().st_size,'imagesShared':moved['moved']}))
+    summary={'map':ident,'sections':len(design['sections']),'nodes':len(nodes),'monsters':sum(len(s['spawns']) for s in design['sections']),
+             'doors':sum(len(S.doors(s)) for s in design['sections']),'passages':len(S.passages(design)),
+             'veinNodes':sum(len(S.wall_nodes(s)) for s in design['sections']),
+             'walkableTiles':int(coarse.sum()),'glbBytes':(out/'world.glb').stat().st_size,'imagesShared':moved['moved']}
+    if registry:
+        rows=json.loads((CHECKOUT/'godot-client/data/maps/registry.json').read_text(encoding='utf-8'))
+        if rows['maps'].get(ident,{}).get('coordinateTransform')!=coordinate:
+            raise SystemExit(f'registry.json has no {ident} row with this frame; publish it first')
+    print(json.dumps(summary))
+    return summary
 
 
 if __name__=='__main__':

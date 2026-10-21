@@ -26,9 +26,19 @@ extends RefCounted
 ## facing alone cannot say whether it is in the way. Its `outward` points out
 ## of the pillar, and it drops out by the props' rule (within the radius, facing
 ## the camera, on the camera's side), judged from its centre.
+##
+## Props and pillar runs are filed in a grid of PROP_CELL_METRES squares when
+## configured, and a step or a turn judges only those within reach of the
+## player and those it has hidden (pass 2, 2026-10-21: the underground grew to
+## caves of 16,000 tiles, and judging every rock of every cave on every step
+## cost milliseconds a frame while the camera turned). A refresh (entering a
+## section, or a forced update) still judges every pillar run, hiding the other
+## sections' ones.
 
 ## How far the focus must move before the props are judged again.
 const PROP_STEP_METRES := 0.75
+## The side of the grid squares props and pillar runs are filed in.
+const PROP_CELL_METRES := 16.0
 ## A hidden prop comes back only this much beyond the radius, so one standing
 ## on the edge does not flicker as the player shuffles.
 const PROP_HYSTERESIS_METRES := 2.0
@@ -37,6 +47,14 @@ var _always_hidden: Array[Node3D] = []
 var _walls: Array[Dictionary] = []
 var _props: Array[Dictionary] = []
 var _pillars: Array[Dictionary] = []
+## Grid square (Vector2i) -> the props / pillar runs standing in it.
+var _prop_cells: Dictionary = {}
+var _pillar_cells: Dictionary = {}
+## The props and pillar runs the props' rule hides now (a run hidden because it
+## stands in another section is not one: the next refresh judges it).
+var _hidden_props: Array = []
+var _hidden_pillars: Array = []
+var _stamp := 0
 var _threshold := 0.2
 var _prop_threshold := 0.5
 var _prop_radius := 12.0
@@ -110,10 +128,33 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 			var spatial := node as Node3D
 			_props.append({"node": spatial, "outward": outward.normalized(),
 				"position": spatial.global_position, "hidden": false})
+	_prop_cells = _cells_of(_props)
+	_pillar_cells = _cells_of(_pillars)
 	_last_yaw = INF
 	_last_section = ""
 	_last_focus = Vector3.INF
 	return _always_hidden.size() + _walls.size() + _props.size() + _pillars.size()
+
+## Files `entries` (props or pillar runs, each with a `position`) by grid square.
+static func _cells_of(entries: Array[Dictionary]) -> Dictionary:
+	var cells := {}
+	for entry: Dictionary in entries:
+		var at: Vector3 = entry.get("position")
+		var key := Vector2i(floori(at.x / PROP_CELL_METRES), floori(at.z / PROP_CELL_METRES))
+		if not cells.has(key):
+			cells[key] = []
+		(cells[key] as Array).append(entry)
+	return cells
+
+## What a step or a turn at `focus` judges: the entries filed within `reach` of
+## it, then the ones `hidden` now (an entry may come twice; judging is idempotent).
+static func _near(cells: Dictionary, hidden: Array, focus: Vector3, reach: float) -> Array:
+	var result: Array = []
+	for cx in range(floori((focus.x - reach) / PROP_CELL_METRES), floori((focus.x + reach) / PROP_CELL_METRES) + 1):
+		for cz in range(floori((focus.z - reach) / PROP_CELL_METRES), floori((focus.z + reach) / PROP_CELL_METRES) + 1):
+			result.append_array(cells.get(Vector2i(cx, cz), []) as Array)
+	result.append_array(hidden)
+	return result
 
 ## Restores everything this instance hid. Safe to call on a freed scene: a
 ## node is checked before it is cast, because casting a freed object to
@@ -134,6 +175,10 @@ func reset() -> void:
 	_walls.clear()
 	_props.clear()
 	_pillars.clear()
+	_prop_cells.clear()
+	_pillar_cells.clear()
+	_hidden_props.clear()
+	_hidden_pillars.clear()
 	_last_yaw = INF
 	_last_section = ""
 	_last_focus = Vector3.INF
@@ -191,7 +236,9 @@ func update(camera_yaw_degrees: float, force: bool = false, section: String = ""
 ## the player on the camera's side; it returns past the radius plus a margin.
 func _update_props(to_camera: Vector3, focus: Vector3) -> void:
 	var here := Vector2(focus.x, focus.z)
-	for prop: Dictionary in _props:
+	_stamp += 1
+	var still: Array = []
+	for prop: Dictionary in _near(_prop_cells, _hidden_props, focus, _prop_radius + PROP_HYSTERESIS_METRES):
 		var value: Variant = prop.get("node")
 		if not is_instance_valid(value):
 			continue
@@ -205,12 +252,24 @@ func _update_props(to_camera: Vector3, focus: Vector3) -> void:
 		if hide != bool(prop.get("hidden")):
 			prop["hidden"] = hide
 			(value as Node3D).visible = not hide
+		if hide and int(prop.get("stamp", -1)) != _stamp:
+			prop["stamp"] = _stamp
+			still.append(prop)
+	_hidden_props = still
 
 ## A pillar's face run: hidden in another section (as walls are), else by the
 ## props' rule from its centre. With no focus it stands.
 func _update_pillars(to_camera: Vector3, focus: Vector3, section: String, refresh: bool) -> void:
 	var here := Vector2(focus.x, focus.z) if focus.is_finite() else Vector2.INF
-	for pillar: Dictionary in _pillars:
+	# a refresh judges every run (hiding the other sections'); a step or a turn the ones near the player and the
+	# ones the props' rule hid
+	var runs: Array = _pillars
+	if not refresh:
+		runs = _near(_pillar_cells, _hidden_pillars, focus, _prop_radius + PROP_HYSTERESIS_METRES) \
+			if focus.is_finite() else _hidden_pillars
+	_stamp += 1
+	var still: Array = []
+	for pillar: Dictionary in runs:
 		var value: Variant = pillar.get("node")
 		if not is_instance_valid(value):
 			continue
@@ -230,6 +289,10 @@ func _update_pillars(to_camera: Vector3, focus: Vector3, section: String, refres
 		if refresh or hide != bool(pillar.get("hidden")) or node.visible == hide:
 			pillar["hidden"] = hide
 			node.visible = not hide
+		if hide and int(pillar.get("stamp", -1)) != _stamp:
+			pillar["stamp"] = _stamp
+			still.append(pillar)
+	_hidden_pillars = still
 
 static func _find(root: Node3D, node_name: String) -> Node3D:
 	if node_name.is_empty():
