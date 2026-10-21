@@ -183,6 +183,65 @@ THEMES = {
                      'water': {'deep': [.07,.03,.13], 'clear': [.22,.10,.36], 'glow': [.04,.01,.07]}},
         'minimap': {'floor': (66,52,82), 'edge': (150,116,178), 'water': (90,60,140)},
     },
+    # --- wave 2 themes ---
+    # A cellar: cut-stone vaults walled with dressed stone, barrels, crates and wine jars, flagstones underfoot
+    # (Brambleshaw Undercroft).
+    'cellar': {
+        'shape': 'boxes', 'floor': 'ashlar', 'rock': 'ashlar', 'bed': 'rubble_stone', 'bank': 'rubble_stone',
+        'wallHeight': 3.0, 'margin': 1.0, 'spacing': 2.8,
+        'wallRocks': ({'asset': 'stone_windbreak', 'proud': .5, 'align': True},('barrel_stack',.7),
+                      {'asset': 'stone_windbreak', 'proud': .5, 'align': True},('crate_stack',.8),
+                      {'asset': 'stone_windbreak', 'proud': .5, 'align': True},('terracotta_pots',.6)),
+        'rockPalette': None, 'lampColour': None, 'glow': ([1,.70,.40],.9,7,1.0),
+        'surfaces': {'floor': {'texture': 'flagstone', 'tint': [.64,.58,.50]}, 'rockLift': [1.5,1.4,1.25],
+                     'water': {'deep': [.03,.03,.02], 'clear': [.10,.09,.06], 'glow': [.0,.0,.0]}},
+        'minimap': {'floor': (92,80,64), 'edge': (150,136,110), 'water': (60,56,44)},
+    },
+    # A sea cave: wet sand and shingle, weed-hung coastal rocks, a sea-green tidal channel (Smugglers' Grotto).
+    'sea_cave': {
+        'shape': 'lobes', 'floor': 'verdant_wet_limestone', 'rock': 'cliff_rock', 'bed': 'verdant_mossy_stone',
+        'bank': 'verdant_wet_limestone', 'wallHeight': 4.4, 'margin': 1.0, 'spacing': 3.4,
+        'wallRocks': (('coastal_rock_1',2.2),('weed_rocks',1.5),('coastal_boulders_1',2.0),('beach_rocks',1.2),
+                      ('coastal_rock_2',2.0),('coastal_boulders_3',1.9)),
+        'rockPalette': None, 'lampColour': None, 'glow': ([.55,1,.85],1.0,8,1.0),
+        'surfaces': {'floor': {'texture': 'beach_sand', 'tint': [.55,.57,.52]}, 'rockLift': [1.45,1.55,1.5],
+                     'water': {'deep': [.02,.11,.09], 'clear': [.07,.30,.22], 'glow': [.0,.02,.015]}},
+        'minimap': {'floor': (78,84,80), 'edge': (140,150,146), 'water': (46,118,128)},
+    },
+    # Under the great oak: earthen halls walled with root masses and logs, glowing amber pools (the Resin Hollow).
+    'roots': {
+        'shape': 'lobes', 'floor': 'packed_earth', 'rock': 'packed_earth', 'bed': 'packed_earth',
+        'bank': 'packed_earth', 'wallHeight': 3.8, 'margin': .8, 'spacing': 2.8,
+        'wallRocks': (('bog_oak_stump',1.0),{'asset': 'mossy_log_2', 'proud': .9, 'align': True},('mossy_stump_1',.8),
+                      ('bog_oak_stump',1.0),{'asset': 'hollow_log', 'proud': .7, 'align': True},('mossy_boulder_3',1.2)),
+        'rockPalette': None, 'lampColour': None, 'glow': ([1,.64,.26],1.3,9,.6),
+        'surfaces': {'floor': {'texture': 'tilled_soil', 'tint': [.56,.44,.32]}, 'rockLift': [1.05,.85,.62],
+                     'water': {'deep': [.20,.07,.01], 'clear': [.55,.27,.04], 'glow': [.28,.12,.02]}},
+        'minimap': {'floor': (84,66,40), 'edge': (150,112,64), 'water': (176,112,34)},
+    },
+    # Lava tubes: basalt columns and veined boulders with ember ore, dark gravel, ember-lit vents (Basalt Tubes).
+    'basalt': {
+        'shape': 'lobes', 'floor': 'cliff_rock', 'rock': 'cliff_rock', 'bed': 'cliff_rock', 'bank': 'cliff_rock',
+        'wallHeight': 4.8, 'margin': 1.0, 'spacing': 3.4,
+        'wallRocks': (('basalt_columns_1',2.0),('veined_boulder_1',1.0),('basalt_columns_2',2.1),('veined_boulder_3',1.2),
+                      ('basalt_columns_3',2.0),('veined_boulder_5',1.3)),
+        'rockPalette': {'stone': '#4b484c', 'mineral': '#ff8030'}, 'lampColour': None,
+        'glow': ([1,.45,.16],1.4,9,.8),
+        'surfaces': {'floor': {'texture': 'coastal_gravel', 'tint': [.36,.35,.37]}, 'rockLift': [.9,.86,.9],
+                     'water': {'deep': [.10,.02,.0], 'clear': [.40,.10,.01], 'glow': [.45,.12,.02]}},
+        'minimap': {'floor': (60,58,60), 'edge': (112,108,114), 'water': (150,60,20)},
+    },
+    # Wind-carved sandstone: banded mesa faces and talus, sand underfoot, warm light (Saltwind Caves).
+    'sandstone': {
+        'shape': 'lobes', 'floor': 'packed_earth', 'rock': 'cliff_rock', 'bed': 'packed_earth',
+        'bank': 'packed_earth', 'wallHeight': 4.6, 'margin': 1.0, 'spacing': 3.4,
+        'wallRocks': ({'asset': 'mesa_face_1', 'proud': 1.1, 'align': True},('mesa_talus_1',1.0),('mesa_corner_1',1.9),
+                      {'asset': 'mesa_face_3', 'proud': 1.2, 'align': True},('mesa_corner_2',1.8),('mesa_talus_1',1.0)),
+        'rockPalette': None, 'lampColour': None, 'glow': ([1,.80,.55],1.0,8,1.0),
+        'surfaces': {'floor': {'texture': 'beach_sand', 'tint': [.78,.62,.46]}, 'rockLift': [2.2,1.5,1.05],
+                     'water': {'deep': [.06,.05,.03], 'clear': [.20,.17,.12], 'glow': [.0,.0,.0]}},
+        'minimap': {'floor': (120,96,66), 'edge': (190,156,112), 'water': (90,110,120)},
+    },
 }
 
 # The toolkit texture each shell material needs (seeds as materials.py / the first builder used them).

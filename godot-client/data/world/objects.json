@@ -1034,6 +1034,52 @@
         },
         "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
         "standsAlone": false
+      },
+      "rl_pearl_v1": {
+        "label": "Pearl",
+        "kind": "aquatic",
+        "tier": "rare",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_pearl.glb",
+        "vertices": 3532,
+        "triangles": 2999,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "816d1a7b0472241d90203e99e06dcc518a9b2fea8157936fdf870b5390d92d2c",
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
+      },
+      "rl_sap_v1": {
+        "label": "Sap",
+        "kind": "resin",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_sap.glb",
+        "vertices": 1911,
+        "triangles": 1486,
+        "alphaTested": false,
+        "height": 0.55,
+        "sha256": "2bca2a327f9fd9761bf95763703e6180b416edfae87fca4661f1e738e6ce3f0e",
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
+      },
+      "rl_ember_crystal_v1": {
+        "label": "Ember Crystal",
+        "kind": "crystal",
+        "tier": "rare",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_ember_crystal.glb",
+        "vertices": 1159,
+        "triangles": 600,
+        "alphaTested": false,
+        "height": 1.0,
+        "sha256": "ce7eeea722934a04ed839c9a7d4c284745cb3ab44f765fc1d981dd8f35e083f1",
+        "resourcePalette": {
+          "stone": "#3e3836",
+          "mineral": "#ff7a2c"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
       }
     },
     "resources": {
@@ -1098,6 +1144,9 @@
       "Cotton": [
         "cotton_row"
       ],
+      "Ember Crystal": [
+        "rl_ember_crystal_v1"
+      ],
       "Flint": [
         "flint_seam_a",
         "flint_seam_b",
@@ -1116,6 +1165,9 @@
       ],
       "Moss": [
         "rl_moss_v1"
+      ],
+      "Pearl": [
+        "rl_pearl_v1"
       ],
       "Quartz": [
         "quartz_seam_a",
@@ -1138,6 +1190,9 @@
       "Salt": [
         "salt_pan_a",
         "salt_pan_b"
+      ],
+      "Sap": [
+        "rl_sap_v1"
       ],
       "Shell": [
         "shell_drift_a",
@@ -1341,6 +1396,92 @@
       "height": 3.6,
       "radius": 1.6,
       "label": "The Amethyst Geode"
+    },
+    "59007": {
+      "entrance": true,
+      "exteriorTile": [
+        310,
+        132
+      ],
+      "scene": "res://assets/world/underground/ruined_chapel.glb",
+      "modelOffset": [
+        -2.0,
+        0.0,
+        -4.0
+      ],
+      "yaw": 90.0,
+      "visualHeight": 6.0,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "Brambleshaw Undercroft"
+    },
+    "59008": {
+      "entrance": true,
+      "exteriorTile": [
+        524,
+        308
+      ],
+      "scene": "res://assets/world/underground/cave_mouth.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -6.0
+      ],
+      "visualHeight": 5.2,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "Smugglers' Grotto"
+    },
+    "59009": {
+      "entrance": true,
+      "exteriorTile": [
+        195,
+        340
+      ],
+      "scene": "res://assets/world/underground/hollow_root.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -4.6
+      ],
+      "visualHeight": 3.5,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "The Resin Hollow"
+    },
+    "59010": {
+      "entrance": true,
+      "exteriorTile": [
+        276,
+        281
+      ],
+      "scene": "res://assets/world/underground/cave_mouth.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -6.0
+      ],
+      "visualHeight": 5.2,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "Ravenhead Basalt Tubes"
+    },
+    "59011": {
+      "entrance": true,
+      "exteriorTile": [
+        840,
+        444
+      ],
+      "scene": "res://assets/world/underground/cave_mouth.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -6.0
+      ],
+      "visualHeight": 5.2,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "Saltwind Caves"
     }
   }
 }

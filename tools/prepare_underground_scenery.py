@@ -117,6 +117,59 @@ SELECTION = {
     # Harvest art for resources whose own model was retired (variant models: only laid-out nodes stand them).
     'resource_moss': ('grey_moors','mossy-boulder-4','length',1.3),
     'resource_toadstool': ('lf-biomes','toadstool-ring-1','length',1.3),
+    # wave 2
+    # The Landfall underground programme (owner 2026-10-20), wave 2: the cellar, sea_cave, roots, basalt and sandstone
+    # themes, their set pieces and door art. Rendered and chosen from the reviewed kits; no new models.
+    'stone_windbreak': ('lf-biomes','stone-windbreak-1','length',5.0),
+    'terracotta_pots': ('lf-biomes','terracotta-pots-1','height',.9),
+    'cider_press': ('lf-biomes','cider-press-1','height',2.5),
+    'harvest_baskets': ('lf-biomes','harvest-baskets-1','length',.9),
+    'wooden_pail': ('lf-biomes','wooden-pail-1','height',.45),
+    'supply_chest': ('lf-biomes','supply-crate-2','length',1.1),
+    'trilithon': ('lf-biomes','trilithon-1','height',3.6),
+    'ruined_chapel': ('grey_moors','ruined-chapel-1','length',9.0),
+    'coastal_rock_1': ('crownwater','coastal-rock-1','length',4.4),
+    'coastal_rock_2': ('crownwater','coastal-rock-2','length',4.0),
+    'beach_rocks': ('crownwater','beach-rocks-1','height',1.9),
+    'weed_rocks': ('grey_moors','weed-rocks-1','height',1.8),
+    'sea_arch': ('crownwater','sea-stack-2','length',11.0),
+    'rowing_boat': ('lf-biomes','rowing-boat-1','length',4.0),
+    'beached_rowboat': ('grey_moors','beached-rowboat-1','length',4.0),
+    'lobster_pots': ('westhaven','lobster-pots-1','height',1.4),
+    'sunken_statue_head': ('crownwater','sunken-statue-head-1','height',2.6),
+    'rope_coils': ('crownwater','rope-coils-1','length',1.6),
+    'cargo_net': ('westhaven','cargo-net-pile-1','height',1.4),
+    'kelp_wrack': ('grey_moors','kelp-wrack-1','length',3.0),
+    'shell_scree': ('westhaven','shell-scree-1','length',1.6),
+    'driftwood': ('grey_moors','driftwood-1','length',4.0),
+    'anchor': ('westhaven','anchor-display-1','height',2.4),
+    'mooring_posts': ('crownwater','mooring-posts-1','height',1.4),
+    'lamp_buoy': ('crownwater','lamp-buoy-1','height',2.0),
+    'mossy_log_2': ('lf-biomes','mossy-log-2','length',5.0),
+    'hollow_root': ('amberwood','hollow-log-1','length',6.0),
+    'amber_drying_rack': ('lf-biomes','amber-drying-rack-1','length',2.2),
+    'mushroom_basket': ('lf-biomes','mushroom-basket-1','height',.6),
+    'resin_pine': ('lf-biomes','resin-tapped-pine-1','height',6.0),
+    'leaf_pile': ('lf-biomes','leaf-pile-1','length',2.0),
+    'autumn_fern': ('lf-biomes','autumn-fern-1','length',2.0),
+    'basalt_columns_1': ('lf-biomes','basalt-columns-1','height',4.6),
+    'basalt_columns_2': ('lf-biomes','basalt-columns-2','height',5.2),
+    'basalt_columns_3': ('lf-biomes','basalt-columns-3','height',4.2),
+    'ashen_brush': ('lf-biomes','ashen-brush-2','length',1.1),
+    'vein_scree_2': ('lf-biomes','vein-scree-2','length',2.6),
+    'mesa_face_1': ('lf-biomes','mesa-face-1','height',4.6),
+    'mesa_face_3': ('lf-biomes','mesa-face-3','height',4.6),
+    'mesa_corner_1': ('lf-biomes','mesa-corner-1','height',4.6),
+    'mesa_corner_2': ('lf-biomes','mesa-corner-2','height',4.6),
+    'mesa_hoodoo': ('lf-biomes','mesa-hoodoo-1','height',6.0),
+    'mesa_talus_1': ('lf-biomes','mesa-talus-1','length',2.6),
+    'salt_heap': ('lf-biomes','salt-heap-1','length',2.9),
+    'salt_mound': ('lf-biomes','salt-mound-1','length',4.0),
+    'shrine_cairn': ('lf-biomes','shrine-cairn-1','height',2.2),
+    # Harvest art for Pearl, Sap and Ember Crystal (laid-out variants only, as wave 1's Moss, Toadstool, Stormglass).
+    'resource_pearl': ('crownwater','oyster-baskets-1','height',.8),
+    'resource_sap': ('lf-biomes','wooden-pail-1','height',.55),
+    'resource_ember_crystal': ('lf-biomes','crystal-growth-3','height',1.0),
 }
 KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes'}
 
@@ -158,6 +211,53 @@ HARVEST_PRESENTATION = {
     1511: {'variant': 0, 'yaw': 270.0},   # Stormglass
     1512: {'variant': 0, 'yaw': 180.0},
     1513: {'variant': 0, 'yaw': 30.0},
+    # wave 2
+    # Wave 2 of the Landfall underground programme (owner 2026-10-20), as wave 1: seams, banks, strands, beds,
+    # pails and crystals face their open neighbours; Pearl, Sap and Ember Crystal have one variant each (their
+    # art is laid-out only; see `laid_out` in main()).
+    1601: {'variant': 1, 'yaw': 90.0},  # Clay, Brambleshaw Undercroft
+    1602: {'variant': 0, 'yaw': 0.0},
+    1603: {'variant': 1, 'yaw': 45.0},
+    1604: {'variant': 0, 'yaw': 0.0},   # Toadstool
+    1605: {'variant': 0, 'yaw': 90.0},
+    1606: {'variant': 0, 'yaw': 0.0},
+    1607: {'variant': 0, 'yaw': 270.0},  # Moss
+    1608: {'variant': 0, 'yaw': 315.0},
+    1609: {'variant': 0, 'yaw': 90.0},
+    1610: {'variant': 0, 'yaw': 270.0},  # Flint
+    1611: {'variant': 1, 'yaw': 180.0},
+    1612: {'variant': 0, 'yaw': 180.0},
+    1701: {'variant': 1, 'yaw': 0.0},   # Kelp, Smugglers' Grotto
+    1702: {'variant': 0, 'yaw': 0.0},
+    1703: {'variant': 1, 'yaw': 0.0},
+    1704: {'variant': 0, 'yaw': 180.0},  # Shell
+    1705: {'variant': 1, 'yaw': 90.0},
+    1706: {'variant': 0, 'yaw': 180.0},
+    1707: {'variant': 0, 'yaw': 0.0},   # Pearl
+    1708: {'variant': 0, 'yaw': 0.0},
+    1709: {'variant': 1, 'yaw': 315.0},  # Salt
+    1710: {'variant': 0, 'yaw': 180.0},
+    1711: {'variant': 1, 'yaw': 180.0},
+    1804: {'variant': 0, 'yaw': 135.0},  # Sap, The Resin Hollow
+    1805: {'variant': 0, 'yaw': 90.0},
+    1806: {'variant': 0, 'yaw': 0.0},
+    1807: {'variant': 0, 'yaw': 225.0},  # Toadstool
+    1808: {'variant': 0, 'yaw': 0.0},
+    1809: {'variant': 0, 'yaw': 315.0},
+    1810: {'variant': 0, 'yaw': 90.0},  # Moss
+    1811: {'variant': 0, 'yaw': 90.0},
+    1812: {'variant': 0, 'yaw': 180.0},
+    1904: {'variant': 0, 'yaw': 270.0},  # Ember Crystal, Ravenhead Basalt Tubes
+    1905: {'variant': 0, 'yaw': 180.0},
+    1906: {'variant': 0, 'yaw': 0.0},
+    1910: {'variant': 0, 'yaw': 135.0},  # Flint
+    1911: {'variant': 1, 'yaw': 135.0},
+    2001: {'variant': 1, 'yaw': 0.0},   # Salt, Saltwind Caves
+    2002: {'variant': 0, 'yaw': 180.0},
+    2003: {'variant': 1, 'yaw': 270.0},
+    2007: {'variant': 1, 'yaw': 0.0},   # Flint
+    2008: {'variant': 0, 'yaw': 180.0},
+    2009: {'variant': 1, 'yaw': 90.0},
 }
 
 
@@ -376,6 +476,9 @@ def main():
     laid_out = {
         'Moss': ('resource_moss', None), 'Toadstool': ('resource_toadstool', None),
         'Stormglass': ('crystal_cluster', {'stone': '#56606a', 'mineral': '#86c4e4'}),
+        # wave 2
+        'Pearl': ('resource_pearl', None), 'Sap': ('resource_sap', None),
+        'Ember Crystal': ('resource_ember_crystal', {'stone': '#3e3836', 'mineral': '#ff7a2c'}),
     }
     for label, (asset, palette) in laid_out.items():
         identity = 'rl_'+label.lower().replace(' ','_')+'_v1'

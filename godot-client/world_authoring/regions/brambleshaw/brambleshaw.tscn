@@ -27670,3 +27670,11 @@ extras = {
 "status": "NEW"
 }
 transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -45.980, 108.2473, 91.501)
+
+[node name="brambleshaw--undercroft-door" type="Marker3D" parent="RuntimePoints"]
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--undercroft-door"
+kind = "runtime_point"
+label = "Brambleshaw Undercroft"
+extras = {"role": "underground_entrance", "objectId": 59007, "section": "brambleshaw_undercroft", "authority": "server"}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.5, 78.3, 44.5)
