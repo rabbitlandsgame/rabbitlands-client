@@ -44,8 +44,20 @@ func run() -> void:
 		"res://data/actors/models.json"))["models"]
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
 		"res://data/actors/equipment.json"))
+	var review_fits := OS.get_environment("RL_QUIVER_REVIEW_FITS")
+	if not review_fits.is_empty():
+		for visual: int in range(1, 9):
+			var row: Dictionary = equipment["models"]["8:%d" % visual]
+			for variant: Dictionary in row["variants"].values():
+				variant["scene"] = review_fits.path_join("variants").path_join(
+					str(variant["authoredFor"])).path_join(
+					"rl-quiver-%s.glb" % ["basic", "hunter", "bodkin", "farshot",
+						"skirmisher", "ember", "frost", "arcane"][visual - 1])
 	var races: Array = equipment["bodyTemplates"].keys()
 	races.sort()
+	var review_races := OS.get_environment("RL_QUIVER_REVIEW_RACES")
+	if not review_races.is_empty():
+		races = Array(review_races.split(",", false))
 	for race: String in races:
 		var model: Dictionary = models[race]
 		var animations: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
@@ -74,11 +86,26 @@ func run() -> void:
 					continue
 				var mesh_node := node as MeshInstance3D
 				expect(mesh_node.skin != null and mesh_node.visible, label + " has a visible skin")
+				var cape_shape := mesh_node.find_blend_shape_by_name("Cape_Clearance")
+				if visual != 1:
+					expect(cape_shape >= 0, label + " carries its authored cape clearance")
+				if cape_shape >= 0:
+					expect(is_equal_approx(mesh_node.get_blend_shape_value(cape_shape), 1.0),
+						label + " selects the cape-on fit")
 				for bind: int in range(mesh_node.skin.get_bind_count()):
 					expect(actor.get_skeleton().find_bone(mesh_node.skin.get_bind_name(bind)) >= 0,
 						label + " keeps each joint name")
+			actor.apply_equipment_visuals({1: 106, 8: visual})
+			for node: Node in nodes:
+				if node is MeshInstance3D:
+					var mesh_node := node as MeshInstance3D
+					expect(actor._equipment_nodes[8].has(mesh_node), label + " retains its mesh when cape is removed")
+					var shape := mesh_node.find_blend_shape_by_name("Cape_Clearance")
+					if shape >= 0:
+						expect(is_zero_approx(mesh_node.get_blend_shape_value(shape)), label + " returns to its cape-off fit")
+			actor.apply_equipment_visuals({1: 106, 2: 105, 8: visual})
 			if not review_dir.is_empty() and race in ["luminous_male", "ssarathi_female"]:
-				actor.apply_equipment_visuals({0: 164, 3: 159, 4: 230, 5: 225, 6: 226, 8: visual})
+				actor.apply_equipment_visuals({0: 164, 2: 105, 3: 159, 4: 230, 5: 225, 6: 226, 8: visual})
 				await process_frame
 			for action: StringName in [&"idle", &"walk", &"ranged_attack"]:
 				actor.play_action(action, true)
@@ -86,6 +113,12 @@ func run() -> void:
 				for phase: float in [0.0, 0.25, 0.6]:
 					actor.animation_player.seek(phase, true)
 					actor.get_skeleton().force_update_all_bone_transforms()
+					for node: Node in nodes:
+						if node is MeshInstance3D:
+							var shape := (node as MeshInstance3D).find_blend_shape_by_name("Cape_Clearance")
+							if shape >= 0:
+								expect(is_equal_approx((node as MeshInstance3D).get_blend_shape_value(shape), 1.0),
+									label + " keeps cape clearance during " + action)
 					for bone: int in range(actor.get_skeleton().get_bone_count()):
 						expect(actor.get_skeleton().get_bone_global_pose(bone).is_finite(),
 							label + " retains finite animated bones")
