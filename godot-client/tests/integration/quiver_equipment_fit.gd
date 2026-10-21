@@ -74,6 +74,7 @@ func run() -> void:
 		for visual: int in range(1, 9):
 			var label := "%s quiver %d" % [race, visual]
 			actor.apply_equipment_visuals({1: 106, 2: 105, 8: visual})
+			check_chest_layers(actor, visual, label)
 			await process_frame
 			var nodes: Array = actor._equipment_nodes.get(8, [])
 			expect(not nodes.is_empty(), label + " creates its own equipment part")
@@ -133,6 +134,66 @@ func run() -> void:
 	NativeAnimationImporter.clear()
 	print("QUIVER_EQUIPMENT_FIT checks=", checks, " failures=", failures, " fits=", races.size() * 8)
 	quit(1 if failures else 0)
+
+
+func check_chest_layers(actor: ReplicatedActor3D, visual: int, label: String) -> void:
+	var nodes: Array = actor._equipment_nodes[8].duplicate()
+	var cached: Dictionary = {}
+	var originals: Dictionary = {}
+	for node: Node in nodes:
+		if node is MeshInstance3D:
+			var source: Mesh = node.get_meta("quiver_authored_mesh") as Mesh
+			originals[node] = hash(source.surface_get_arrays(0)[Mesh.ARRAY_VERTEX])
+	for armor: int in [0, 225, 200, 225]:
+		for cape: int in [0, 105]:
+			var outfit := {1: 106, 8: visual}
+			if armor: outfit[5] = armor
+			if cape: outfit[2] = cape
+			actor.apply_equipment_visuals(outfit)
+			for node: Node in nodes:
+				if not node is MeshInstance3D:
+					continue
+				var quiver := node as MeshInstance3D
+				expect(actor._equipment_nodes[8].has(quiver), label + " retains its quiver while changing clothing")
+				var source: Mesh = quiver.get_meta("quiver_authored_mesh") as Mesh
+				if armor == 0 and cape == 0:
+					expect(quiver.mesh == source, label + " restores its authored bare fit")
+				var key := "%d:%d:%d" % [armor, cape, node.get_instance_id()]
+				var signature: Array = []
+				for surface: int in range(quiver.mesh.get_surface_count()):
+					signature.append(hash(quiver.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]))
+				if cached.has(key):
+					expect(signature == cached[key], label + " restores its fit without accumulating offsets")
+				cached[key] = signature
+				var preserved := true
+				var finite := true
+				var cape_neutral := true
+				var largest_front_offset := 0.0
+				for surface: int in range(source.get_surface_count()):
+					var before: PackedVector3Array = source.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+					var after: PackedVector3Array = quiver.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+					for vertex: int in range(before.size()):
+						finite = finite and after[vertex].is_finite()
+						if before[vertex].z <= 0.0:
+							preserved = preserved and before[vertex].is_equal_approx(after[vertex])
+						else:
+							largest_front_offset = maxf(largest_front_offset, after[vertex].z - before[vertex].z)
+					if quiver.mesh is ArrayMesh and (quiver.mesh as ArrayMesh).blend_shape_mode == Mesh.BLEND_SHAPE_MODE_NORMALIZED:
+						for shape: Array in quiver.mesh.surface_get_blend_shape_arrays(surface):
+							var positions: PackedVector3Array = shape[Mesh.ARRAY_VERTEX]
+							for vertex: int in range(before.size()):
+								if before[vertex].z > 0.06:
+									cape_neutral = cape_neutral and after[vertex].is_equal_approx(positions[vertex])
+					expect(preserved, label + " preserves its rear case and attachments over clothing")
+					expect(finite, label + " keeps finite clothing clearance")
+					expect(cape_neutral, label + " keeps chest clearance when selecting the cape shape")
+				if armor:
+					expect(largest_front_offset > 0.00001, label + " lifts its chest strap over worn armor")
+	for node: Node in originals:
+		var source: Mesh = node.get_meta("quiver_authored_mesh") as Mesh
+		expect(hash(source.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]) == originals[node],
+			label + " leaves its shared authored mesh unchanged")
+	actor.apply_equipment_visuals({1: 106, 2: 105, 8: visual})
 
 
 func capture(actor: ReplicatedActor3D, race: String, visual: int, action: StringName) -> void:
