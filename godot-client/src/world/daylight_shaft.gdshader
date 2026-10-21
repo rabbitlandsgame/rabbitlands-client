@@ -1,7 +1,7 @@
 shader_type spatial;
 render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabled;
-// The Cenote Deeps' daylight through the sinkhole (underground_scenery.gd puts
-// it on Shaft_*): added light, soft at the column's edges and fading upward,
+// The underground's daylight through a sinkhole or burrow hole (underground_scenery.gd
+// puts it on Shaft_*): added light, soft at the column's edges and fading upward,
 // so it reads as sun in damp air rather than a glass cylinder.
 varying float height;
 

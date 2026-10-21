@@ -34,9 +34,13 @@ records; the rosette and paving generators remain disabled.
 
 One generator has run again since: the owner re-enabled
 `eloria-assets/maps/continent-v2/_continent_v2/build_underground.py` on
-2026-10-20 to rebuild the Cenote Deeps as a jungle cenote. It still refuses to
-run without `--owner-approved`, and it draws only the interior's rock shell,
-pools and light; the cave's art is reviewed Meshy kit scenery.
+2026-10-20 to rebuild the Cenote Deeps as a jungle cenote, and the same day
+for the Landfall underground programme (the shared underground grown to
+480 x 480 tiles, every cave drawn from the builder's theme table). It still
+refuses to run without `--owner-approved`, and it draws only the interior's
+rock shell, pools and light; the caves' art is reviewed Meshy kit scenery
+(`tools/prepare_underground_scenery.py`). The builder's docstring documents
+the source format, the theme table and the cutaway conventions.
 
 Procedural actor and equipment definitions are removed, including 158 actor
 model entries, 163 actor-type mappings, four equipment visuals and 710 obsolete

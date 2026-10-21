@@ -38198,3 +38198,10 @@ transform = Transform3D(-0.950651, 0, 0.0328971, 0, 0.95122, 0, -0.0328971, 0, -
 metadata/map_asset_id = "lf_biomes:kit-chalk-boulder-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-chalk-boulder-1.glb"
 
+[node name="warrenmead--old-warren-door" type="Marker3D" parent="RuntimePoints"]
+script = ExtResource("s0_marker")
+record_id = "warrenmead--old-warren-door"
+kind = "runtime_point"
+label = "The Old Warren"
+extras = {"role": "underground_entrance", "objectId": 59005, "section": "old_warren", "authority": "server"}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.5, 131.7, 12.5)

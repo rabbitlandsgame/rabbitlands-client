@@ -24,7 +24,8 @@ static func apply(manifest: WorldManifest, world: Node3D) -> int:
 	if world.has_node("UndergroundScenery"):
 		return 0
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(CONFIG))
-	_style_surfaces(world)
+	var surfaces: Variant = data.get("surfaces", {})
+	_style_surfaces(world, surfaces if surfaces is Dictionary else {})
 	var paths := PackedStringArray()
 	for placement: Dictionary in data.placements:
 		var source := str(data.assets[placement.asset])
@@ -62,7 +63,34 @@ static func apply(manifest: WorldManifest, world: Node3D) -> int:
 		count += 1
 	return count
 
-static func _style_surfaces(world: Node3D) -> void:
+## The styling of the section a shell mesh belongs to: `<prefix><section>_...`
+## (the builder names Walk_, Build_ and Water_ meshes by section), from the
+## config's `surfaces` (build_underground.THEMES via the packager). The longest
+## matching section id wins; an unknown section styles as an empty dictionary.
+static func section_surfaces(mesh_name: String, prefix: String, surfaces: Dictionary) -> Dictionary:
+	var best := ""
+	for section: Variant in surfaces:
+		var id := str(section)
+		if mesh_name.begins_with(prefix + id + "_") and id.length() > best.length():
+			best = id
+	if best.is_empty() or surfaces[best] is not Dictionary:
+		return {}
+	return surfaces[best]
+
+static func _colour(value: Variant, fallback: Color) -> Color:
+	if value is Array and (value as Array).size() >= 3:
+		var parts: Array = value
+		return Color(float(parts[0]), float(parts[1]), float(parts[2]))
+	return fallback
+
+static func _vector(colour: Color) -> Vector3:
+	return Vector3(colour.r, colour.g, colour.b)
+
+## Each section's shell is styled as its theme says (`surfaces`): its floor by
+## a class texture and tint, its rock face lifted toward its wall rocks'
+## colour, its pools in the shared water shader with the theme's tint, and its
+## daylight shafts as added light.
+static func _style_surfaces(world: Node3D, surfaces: Dictionary) -> void:
 	for mesh: MeshInstance3D in world.find_children("*", "MeshInstance3D", true, false):
 		var id := str(mesh.name)
 		# Replace the old crystal cones and untextured lamp stand-ins with the
@@ -73,6 +101,16 @@ static func _style_surfaces(world: Node3D) -> void:
 		if id.begins_with("Water_"):
 			var water := ShaderMaterial.new()
 			water.shader = CENOTE_WATER
+			var tint: Variant = section_surfaces(id, "Water_", surfaces).get("water")
+			if tint is Dictionary:
+				# Unset colours keep the shader's (the Cenote Deeps') defaults;
+				# the ripple highlight follows the clear colour unless stated.
+				var given: Dictionary = tint
+				for key: String in ["deep", "clear", "ripple", "glow"]:
+					if given.has(key):
+						water.set_shader_parameter(key + "_colour", _vector(_colour(given[key], Color.BLACK)))
+				if given.has("clear") and not given.has("ripple"):
+					water.set_shader_parameter("ripple_colour", _vector(_colour(given.clear, Color.BLACK)) * .075)
 			mesh.material_override = water
 			continue
 		if id.begins_with("Shaft_"):
@@ -80,29 +118,26 @@ static func _style_surfaces(world: Node3D) -> void:
 			shaft.shader = DAYLIGHT_SHAFT
 			mesh.material_override = shaft
 			continue
-		if id.begins_with("Build_spindle_cavern"):
-			# The cenote's rock face sits behind pale Meshy limestone crags:
-			# lift its dark cliff texture toward their cream so it reads as the
-			# same stone in shadow, not a black sheet.
-			var face := mesh.get_active_material(0) as StandardMaterial3D
-			if face != null:
-				face = face.duplicate() as StandardMaterial3D
-				face.albedo_color = Color(2.1, 2.0, 1.75)
-				mesh.material_override = face
+		if id.begins_with("Build_"):
+			# A cave's rock face sits behind its kit wall rocks: lift its dark
+			# cliff texture toward their colour so it reads as the same stone in
+			# shadow, not a black sheet (the Cenote Deeps: toward the crags' cream).
+			var lift: Variant = section_surfaces(id, "Build_", surfaces).get("rockLift")
+			if lift is Array and (lift as Array).size() >= 3:
+				var face := mesh.get_active_material(0) as StandardMaterial3D
+				if face != null:
+					face = face.duplicate() as StandardMaterial3D
+					face.albedo_color = _colour(lift, Color.WHITE)
+					mesh.material_override = face
 			continue
 		if not id.begins_with("Walk_"):
 			continue
-		var texture := "packed_earth"
-		var tint := Color(.65,.65,.65)
-		if id.contains("boarsend_barrow"): texture = "flagstone"
-		elif id.contains("spindle_cavern"):
-			# The Cenote Deeps: wet limestone gravel, greened by the moss.
-			texture = "coastal_gravel"
-			tint = Color(.58,.66,.54)
+		var ground: Variant = section_surfaces(id, "Walk_", surfaces).get("floor", {})
+		var floor_style: Dictionary = ground if ground is Dictionary else {}
 		var material := StandardMaterial3D.new()
 		# With mipmaps even where a fresh checkout imported the PNG without.
-		material.albedo_texture = LookGround.class_texture(texture)
-		material.albedo_color = tint
+		material.albedo_texture = LookGround.class_texture(str(floor_style.get("texture", "packed_earth")))
+		material.albedo_color = _colour(floor_style.get("tint"), Color(.65, .65, .65))
 		material.roughness = 1
 		material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 		mesh.material_override = material

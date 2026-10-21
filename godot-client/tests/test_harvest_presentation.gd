@@ -210,7 +210,8 @@ func _check_underground_presentation(catalog: Dictionary) -> void:
 	var package := _json("res://../eloria-assets/maps/continent-v2/landfall_insides/client/world.json")
 	var harvest: Dictionary = catalog.harvestables
 	var variants: Dictionary = harvest.get("variants", {})
-	var presented := 0
+	var needed := 0
+	var stated := 0
 	for value: Variant in package.get("harvestables", []):
 		var node := value as Dictionary
 		var resource := str(node.resource)
@@ -218,16 +219,21 @@ func _check_underground_presentation(catalog: Dictionary) -> void:
 		var listed: Array = variants.get(resource, [])
 		var alone := listed.any(func(model_id: Variant) -> bool:
 			return bool((harvest.models as Dictionary).get(str(model_id), {}).get("standsAlone", false)))
-		if not bool(own.get("retired", false)) or listed.is_empty() or alone:
-			continue
 		var hint: Dictionary = table.get(str(int(node.objectId)), {})
+		# A label whose own model is retired and whose variants need a stated
+		# footprint must be laid out; a label with its own model may be (Flint's
+		# seams face the room), and then states a valid variant too.
+		var must := bool(own.get("retired", false)) and not listed.is_empty() and not alone
+		if not must and hint.is_empty():
+			continue
 		_expect(str(hint.get("resource", "")) == resource and hint.get("variant") is float
 			and int(hint.variant) >= 0 and int(hint.variant) < listed.size() and hint.get("yaw") is float,
 			"underground %s node %d states its variant and yaw" % [resource, int(node.objectId)])
-		presented += 1
-	_expect(presented == 7 and table.size() == presented,
-		"the table presents exactly the underground's seven Quartz and Salt nodes (%d of %d)"
-		% [presented, table.size()])
+		needed += 1 if must else 0
+		stated += 1
+	_expect(needed >= 7 and stated == table.size(),
+		"the table presents every underground node that needs it and names no other (%d needed, %d of %d stated)"
+		% [needed, stated, table.size()])
 
 # --- promoted scenery ---------------------------------------------------------
 

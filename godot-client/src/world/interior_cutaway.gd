@@ -20,6 +20,12 @@ extends RefCounted
 ## `radiusMetres` of the player, so the floor around them opens up while the
 ## rest of the cave keeps its outline. Farther props stay, and the one that
 ## still covers the player is OccluderFade's.
+##
+## A wall entry with a `centre` [x, z] is a run of a rock pillar's face (a
+## looping cave's holes, build_underground.py): a pillar stands in the room, so
+## facing alone cannot say whether it is in the way. Its `outward` points out
+## of the pillar, and it drops out by the props' rule (within the radius, facing
+## the camera, on the camera's side), judged from its centre.
 
 ## How far the focus must move before the props are judged again.
 const PROP_STEP_METRES := 0.75
@@ -30,6 +36,7 @@ const PROP_HYSTERESIS_METRES := 2.0
 var _always_hidden: Array[Node3D] = []
 var _walls: Array[Dictionary] = []
 var _props: Array[Dictionary] = []
+var _pillars: Array[Dictionary] = []
 var _threshold := 0.2
 var _prop_threshold := 0.5
 var _prop_radius := 12.0
@@ -38,7 +45,7 @@ var _last_section := ""
 var _last_focus := Vector3.INF
 
 func is_active() -> bool:
-	return not _always_hidden.is_empty() or not _walls.is_empty() or not _props.is_empty()
+	return not _always_hidden.is_empty() or not _walls.is_empty() or not _props.is_empty() 		or not _pillars.is_empty()
 
 ## Reads the manifest's cutaway block and resolves it against the loaded scene.
 ## Returns the number of nodes it took control of.
@@ -78,6 +85,13 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 				outward = Vector3(float(parts[0]), 0.0, float(parts[2]))
 			if outward.length_squared() < 0.0001:
 				continue
+			var centre_value: Variant = entry.get("centre")
+			if centre_value is Array and (centre_value as Array).size() >= 2:
+				var centre: Array = centre_value as Array
+				_pillars.append({"node": node, "outward": outward.normalized(),
+					"section": str(entry.get("section", "")),
+					"position": Vector3(float(centre[0]), 0.0, float(centre[1])), "hidden": false})
+				continue
 			_walls.append({"node": node, "outward": outward.normalized(),
 				"section": str(entry.get("section", ""))})
 
@@ -99,7 +113,7 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 	_last_yaw = INF
 	_last_section = ""
 	_last_focus = Vector3.INF
-	return _always_hidden.size() + _walls.size() + _props.size()
+	return _always_hidden.size() + _walls.size() + _props.size() + _pillars.size()
 
 ## Restores everything this instance hid. Safe to call on a freed scene: a
 ## node is checked before it is cast, because casting a freed object to
@@ -112,13 +126,14 @@ func reset() -> void:
 		var value: Variant = wall.get("node")
 		if is_instance_valid(value):
 			(value as Node3D).visible = true
-	for prop: Dictionary in _props:
+	for prop: Dictionary in _props + _pillars:
 		var value: Variant = prop.get("node")
 		if is_instance_valid(value):
 			(value as Node3D).visible = true
 	_always_hidden.clear()
 	_walls.clear()
 	_props.clear()
+	_pillars.clear()
 	_last_yaw = INF
 	_last_section = ""
 	_last_focus = Vector3.INF
@@ -134,7 +149,7 @@ func reset() -> void:
 ## rig's focus); wall props are judged from it.
 func update(camera_yaw_degrees: float, force: bool = false, section: String = "",
 		focus: Vector3 = Vector3.INF) -> void:
-	if _walls.is_empty() and _always_hidden.is_empty() and _props.is_empty():
+	if _walls.is_empty() and _always_hidden.is_empty() and _props.is_empty() and _pillars.is_empty():
 		return
 	var entered := section != _last_section
 	var turned := not is_equal_approx(camera_yaw_degrees, _last_yaw)
@@ -166,6 +181,8 @@ func update(camera_yaw_degrees: float, force: bool = false, section: String = ""
 			# A wall whose outside faces the camera is between the camera and the
 			# room, so it is the one to drop.
 			node.visible = outward.dot(to_camera) <= _threshold
+	if not _pillars.is_empty() and (force or entered or turned or moved):
+		_update_pillars(to_camera, focus, section, force or entered)
 	if not _props.is_empty() and focus.is_finite():
 		_last_focus = focus
 		_update_props(to_camera, focus)
@@ -188,6 +205,31 @@ func _update_props(to_camera: Vector3, focus: Vector3) -> void:
 		if hide != bool(prop.get("hidden")):
 			prop["hidden"] = hide
 			(value as Node3D).visible = not hide
+
+## A pillar's face run: hidden in another section (as walls are), else by the
+## props' rule from its centre. With no focus it stands.
+func _update_pillars(to_camera: Vector3, focus: Vector3, section: String, refresh: bool) -> void:
+	var here := Vector2(focus.x, focus.z) if focus.is_finite() else Vector2.INF
+	for pillar: Dictionary in _pillars:
+		var value: Variant = pillar.get("node")
+		if not is_instance_valid(value):
+			continue
+		var node := value as Node3D
+		var own: String = pillar.get("section", "")
+		if not own.is_empty() and not section.is_empty() and own != section:
+			node.visible = false
+			pillar["hidden"] = true
+			continue
+		var hide := false
+		if here.is_finite():
+			var position: Vector3 = pillar.get("position")
+			var offset := Vector2(position.x, position.z) - here
+			var reach := _prop_radius + (PROP_HYSTERESIS_METRES if bool(pillar.get("hidden")) else 0.0)
+			var outward: Vector3 = pillar.get("outward")
+			hide = offset.length() < reach and outward.dot(to_camera) > _prop_threshold 				and offset.dot(Vector2(to_camera.x, to_camera.z)) > -3.0
+		if refresh or hide != bool(pillar.get("hidden")) or node.visible == hide:
+			pillar["hidden"] = hide
+			node.visible = not hide
 
 static func _find(root: Node3D, node_name: String) -> Node3D:
 	if node_name.is_empty():

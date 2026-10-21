@@ -3,6 +3,16 @@
 Reuses source geometry and UVs. Selected lantern faces remove the unused post;
 stone material variants use generated atlases. An outer transform sets gameplay
 size and aligns the physical passage or base with the floor.
+
+Writes godot-client/assets/world/underground/<name>.glb for every SELECTION row,
+eloria-assets/source/world_objects/underground/reused-scenery.json, and
+godot-client/data/world/underground-scenery.json: every section's placements
+(build_underground.dressing: the source's props and the theme's wall rocks),
+`harvestPresentation` and `surfaces` (build_underground.surfaces: each section's
+theme styling, which underground_scenery.gd applies), plus the objects.json
+harvest entries the underground needs. A new cave's kit piece is a SELECTION row
+(region or kit, slug, 'height' or 'length', target metres); only pieces whose
+glTF generator is prepare_meshy_kit are accepted.
 """
 from __future__ import annotations
 
@@ -53,12 +63,67 @@ SELECTION = {
     'split_geode': ('lf-biomes','split-geode-1','height',2.0),
     'toadstool_ring': ('lf-biomes','toadstool-ring-1','length',2.5),
     'mossy_log': ('lf-biomes','mossy-log-1','length',5.0),
+    # The Landfall underground programme (owner 2026-10-20), wave 1: the mine, barrow, warren and geode themes
+    # (build_underground.THEMES) and their set pieces. Rendered and chosen from the reviewed kits; no new models.
+    'veined_crag_1': ('lf-biomes','veined-crag-1','height',5.5),
+    'veined_crag_2': ('lf-biomes','veined-crag-2','height',6.2),
+    'veined_crag_4': ('lf-biomes','veined-crag-4','height',6.8),
+    'veined_boulder_1': ('lf-biomes','veined-boulder-1','height',2.0),
+    'veined_boulder_2': ('lf-biomes','veined-boulder-2','height',2.6),
+    'veined_boulder_3': ('lf-biomes','veined-boulder-3','height',2.4),
+    'veined_boulder_4': ('lf-biomes','veined-boulder-4','height',2.0),
+    'veined_boulder_5': ('lf-biomes','veined-boulder-5','height',2.8),
+    'vein_scree_1': ('lf-biomes','vein-scree-1','length',2.8),
+    'vein_scree_3': ('lf-biomes','vein-scree-3','length',3.2),
+    'ore_cart': ('lf-biomes','ore-cart-1','length',2.0),
+    'mine_headframe': ('lf-biomes','mine-headframe-1','height',6.0),
+    'supply_sledge': ('lf-biomes','supply-sledge-1','length',2.6),
+    'supply_crate': ('lf-biomes','supply-crate-1','height',1.0),
+    'crate_stack': ('four_gates','crate-stack-1','height',1.3),
+    'barrel_stack': ('four_gates','barrel-stack-1','height',1.2),
+    'tool_rack': ('lf-biomes','tool-rack-1','height',1.7),
+    'feed_sacks': ('lf-biomes','feed-sacks-1','length',1.3),
+    'iron_lantern': ('lf-biomes','lantern-post-1','height',2.6),
+    'drystone_dyke': ('grey_moors','drystone-dyke-1','length',5.0),
+    'coastal_boulders_1': ('lf-biomes','coastal-boulders-1','height',4.4),
+    'coastal_boulders_3': ('lf-biomes','coastal-boulders-3','height',3.6),
+    'moor_stone_1': ('lf-biomes','moor-standing-stone-1','height',3.2),
+    'moor_stone_2': ('lf-biomes','moor-standing-stone-2','height',2.6),
+    'moor_stone_3': ('lf-biomes','moor-standing-stone-3','height',1.8),
+    'giant_skeleton': ('grey_moors','giant-skeleton-1','length',9.0),
+    'grave_markers': ('lf-biomes','grave-markers-1','length',3.0),
+    'candle_stake': ('grey_moors','candle-stake-1','height',1.4),
+    'wisp_lantern': ('grey_moors','wisp-lantern-1','height',2.4),
+    'lichen_mat': ('grey_moors','lichen-stone-mat-2','length',2.0),
+    'bog_oak_stump': ('grey_moors','bog-oak-stump-1','length',3.0),
+    'mossy_stump_1': ('lf-biomes','mossy-stump-1','height',2.0),
+    'mossy_stump_2': ('lf-biomes','mossy-stump-2','height',1.4),
+    'hollow_log': ('amberwood','hollow-log-1','length',3.2),
+    'warren_mound': ('lf-biomes','warren-mound-1','length',5.0),
+    'warren_mound_2': ('lf-biomes','warren-mound-2','length',2.6),
+    'peat_barrow': ('grey_moors','peat-barrow-1','length',1.8),
+    'peat_stack': ('lf-biomes','peat-stack-1','height',1.5),
+    'amber_lantern': ('lf-biomes','amber-lantern-post-1','height',2.6),
+    'bracken': ('lf-biomes','bracken-patch-1','length',2.6),
+    'fallen_leaves': ('lf-biomes','fallen-leaves-1','length',3.0),
+    'great_amethyst_cluster': ('lf-biomes','great-amethyst-cluster-1','height',7.0),
+    'split_geode_2': ('lf-biomes','split-geode-2','height',2.4),
+    'split_geode_3': ('lf-biomes','split-geode-3','height',2.6),
+    'crystal_vent': ('lf-biomes','crystal-vent-1','length',2.8),
+    'crystal_vent_2': ('lf-biomes','crystal-vent-2','length',3.0),
+    'crystal_sluice': ('amethyst_barrens','crystal-sluice-1','length',2.4),
+    'crystal_growth_4': ('lf-biomes','crystal-growth-4','height',1.2),
+    'crystal_growth_5': ('lf-biomes','crystal-growth-5','height',.8),
+    # Harvest art for resources whose own model was retired (variant models: only laid-out nodes stand them).
+    'resource_moss': ('grey_moors','mossy-boulder-4','length',1.3),
+    'resource_toadstool': ('lf-biomes','toadstool-ring-1','length',1.3),
 }
 KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes'}
 
-# The underground's Quartz and Salt nodes, presented as a continent-v2 package
-# presents its nodes (harvest_presentation.py): `variant` indexes objects.json
-# harvestables.variants[label] (quartz_seam_a/b, salt_pan_a/b) and `yaw` is in
+# The underground's laid-out nodes (Quartz, Salt, Clay, Flint, Moss, Toadstool,
+# Stormglass), presented as a continent-v2 package presents its nodes
+# (harvest_presentation.py): `variant` indexes objects.json
+# harvestables.variants[label] (quartz_seam_a/b, salt_pan_a/b, ...) and `yaw` is in
 # degrees about +Y. build_underground.py (retired) writes no presentation into
 # the package, and seams and pans do not stand alone, so without this the
 # client draws these nodes as rings. The values are the art the 2026-10-19
@@ -72,6 +137,27 @@ HARVEST_PRESENTATION = {
     1204: {'variant': 0, 'yaw': 317.132},
     1301: {'variant': 1, 'yaw': 171.323},
     1302: {'variant': 0, 'yaw': 201.639},
+    # Wave 1 of the Landfall underground programme (owner 2026-10-20). Seams and banks face +Z, so each yaw turns
+    # the face toward the node's open neighbours on the builder's walk grid; variants alternate by object id. Moss,
+    # Toadstool and Stormglass have one variant each (their art is laid-out only; see `laid_out` in main()).
+    1401: {'variant': 1, 'yaw': 90.0},    # Clay, The Old Warren
+    1402: {'variant': 0, 'yaw': 135.0},
+    1403: {'variant': 1, 'yaw': 315.0},
+    1404: {'variant': 0, 'yaw': 225.0},   # Moss
+    1405: {'variant': 0, 'yaw': 0.0},
+    1406: {'variant': 0, 'yaw': 270.0},
+    1407: {'variant': 0, 'yaw': 45.0},    # Toadstool
+    1408: {'variant': 0, 'yaw': 165.0},
+    1409: {'variant': 0, 'yaw': 285.0},
+    1410: {'variant': 0, 'yaw': 135.0},   # Flint
+    1411: {'variant': 1, 'yaw': 0.0},
+    1412: {'variant': 0, 'yaw': 225.0},
+    1508: {'variant': 0, 'yaw': 225.0},   # Quartz, The Amethyst Geode
+    1509: {'variant': 1, 'yaw': 225.0},
+    1510: {'variant': 0, 'yaw': 270.0},
+    1511: {'variant': 0, 'yaw': 270.0},   # Stormglass
+    1512: {'variant': 0, 'yaw': 180.0},
+    1513: {'variant': 0, 'yaw': 30.0},
 }
 
 
@@ -238,47 +324,28 @@ def main():
     plan_path = ROOT / 'eloria-assets/maps/continent-v2/_continent_v2/content/underground.json'
     plan = json.loads(plan_path.read_text(encoding='utf-8'))
     placements = []
-    def place(asset, x, y, yaw=0, height=0):
-        placements.append({'asset': asset, 'position': [x, height, 240-y], 'yaw': yaw})
-    # The cenote's dressing is the builder's: the same list decides what the walk grid blocks.
+    # Every section's dressing is the builder's: the same list decides what the walk grid blocks, and the
+    # builder's theme table decides each section's surfaces (underground_scenery.gd reads them as data).
     sys.path.insert(0, str(plan_path.parents[1]))
-    from build_underground import dressing
+    from build_underground import CELLS, dressing, surfaces
     for section in plan['sections']:
-        if section['style'] == 'cenote':
-            for item in dressing(section):
-                place(item['asset'], item['x'], item['y'], item['yaw'], item['height'])
-                extra = {'scale': item['scale']} if item['scale'] != 1 else {}
-                if 'outward' in item:
-                    extra['outward'] = item['outward']
-                if 'palette' in item:
-                    extra['palette'] = item['palette']
-                placements[-1].update(extra)
-            continue
-        for x, y, rx, ry in section['rooms']:
-            place('wall_lantern', x-rx+.2, y, height=2.2)
-        if section['style'] == 'mine':
-            # Track ends stay in the broad main chamber, away from the
-            # collision kit's timber supports and every resource approach.
-            x, y, rx, ry = section['rooms'][1]
-            for distance in (-4.5, -1.5, 1.5, 4.5):
-                place('mine_rail', x, y+distance, 90)
-            place('mossy_rock', x+rx+1.2, y)
-        elif section['style'] == 'crystal':
-            for x, y, rx, ry in section['rooms'][1:]:
-                for index in range(5):
-                    angle = index*1.3
-                    # Match the existing blocked mineral patches exactly.
-                    place('crystal_cluster', x+rx*.82*np.cos(angle), y+ry*.82*np.sin(angle), index*73)
-        elif section['style'] == 'barrow':
-            # Room 1 is the barrow's hub: a passage leaves each of its four
-            # sides, and the east one is room 3's only way in. Wedge the rock
-            # diagonally into the north-east corner, where the wall margin of
-            # the served collision is already blocked under all of it.
-            x, y, rx, ry = section['rooms'][1]
-            place('mossy_rock', x+rx+.3, y-ry-.7, 45)
+        for item in dressing(section):
+            placement = {'asset': item['asset'], 'position': [item['x'], item['height'], CELLS-item['y']],
+                         'yaw': item['yaw']}
+            if item['scale'] != 1:
+                placement['scale'] = item['scale']
+            if 'outward' in item:
+                placement['outward'] = item['outward']
+            if 'palette' in item:
+                placement['palette'] = item['palette']
+            placements.append(placement)
+    unknown = sorted({p['asset'] for p in placements} - set(SELECTION))
+    if unknown:
+        raise ValueError(f'underground.json or the theme table places unpackaged assets: {unknown}')
     config = {'schemaVersion': 1, 'map': plan['map']['id'], 'sourcePlanSha256': sha(plan_path.read_bytes()),
               'assets': {record['id']: 'res://'+record['output'].split('godot-client/', 1)[1] for record in records},
               'harvestPresentation': harvest_presentation(plan),
+              'surfaces': surfaces(plan),
               'placements': placements}
     write_json(ROOT/'godot-client/data/world/underground-scenery.json', config)
     catalog_path = ROOT/'godot-client/data/world/objects.json'
@@ -304,6 +371,24 @@ def main():
             'resourcePalette':{'stone':'#'+stone,'mineral':'#'+vein},
             'source':'eloria-assets/source/world_objects/underground/reused-scenery.json','replaces':replaced}
         harvest['resources'][label] = identity
+    # Labels whose own model stays retired everywhere else get underground art as a variant only: a node stands it
+    # where a package (or this file's HARVEST_PRESENTATION) lays the node out, so every other map keeps its ring.
+    laid_out = {
+        'Moss': ('resource_moss', None), 'Toadstool': ('resource_toadstool', None),
+        'Stormglass': ('crystal_cluster', {'stone': '#56606a', 'mineral': '#86c4e4'}),
+    }
+    for label, (asset, palette) in laid_out.items():
+        identity = 'rl_'+label.lower().replace(' ','_')+'_v1'
+        own = harvest['models'][harvest['resources'][label]]
+        harvest['models'][identity] = {'label':label,'kind':own['kind'],'tier':own['tier'],'reusedScenery':True,
+            'scene':config['assets'][asset],
+            **measure_glb(ROOT/'godot-client'/config['assets'][asset].removeprefix('res://')),
+            **({'resourcePalette':palette} if palette else {}),
+            'source':'eloria-assets/source/world_objects/underground/reused-scenery.json',
+            # never on an undescribed node: the label's other maps keep their ring
+            'standsAlone':False}
+        harvest['variants'][label] = [identity]
+    harvest['variants'] = dict(sorted(harvest['variants'].items()))
     write_json(catalog_path, catalog)
     for record in records:
         print(record['id'], record['bounds'])

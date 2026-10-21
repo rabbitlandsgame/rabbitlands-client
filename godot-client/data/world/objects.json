@@ -988,6 +988,52 @@
         },
         "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
         "replaces": "resonant_crystal"
+      },
+      "rl_moss_v1": {
+        "label": "Moss",
+        "kind": "moss",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_moss.glb",
+        "vertices": 2073,
+        "triangles": 1348,
+        "alphaTested": false,
+        "height": 0.571,
+        "sha256": "13bb5f1fd7bac92767e84290cc85b9f139df7ac969d76b4c6c314911bf14c133",
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
+      },
+      "rl_toadstool_v1": {
+        "label": "Toadstool",
+        "kind": "fungus",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_toadstool.glb",
+        "vertices": 3222,
+        "triangles": 2164,
+        "alphaTested": false,
+        "height": 0.208,
+        "sha256": "92a79c7ee5731f5f8a112b2ad13e7ee240e245882a43e8ebe54aed2ef3acd628",
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
+      },
+      "rl_stormglass_v1": {
+        "label": "Stormglass",
+        "kind": "crystal",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/crystal_cluster.glb",
+        "vertices": 900,
+        "triangles": 470,
+        "alphaTested": false,
+        "height": 1.7,
+        "sha256": "b2d344872fb9d5109a93305fac74e5875747360b7ad7eb28b5bf8bb38db57fd4",
+        "resourcePalette": {
+          "stone": "#56606a",
+          "mineral": "#86c4e4"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
       }
     },
     "resources": {
@@ -1068,6 +1114,9 @@
         "lavender_clump_a",
         "lavender_clump_b"
       ],
+      "Moss": [
+        "rl_moss_v1"
+      ],
       "Quartz": [
         "quartz_seam_a",
         "quartz_seam_b"
@@ -1093,6 +1142,12 @@
       "Shell": [
         "shell_drift_a",
         "shell_drift_b"
+      ],
+      "Stormglass": [
+        "rl_stormglass_v1"
+      ],
+      "Toadstool": [
+        "rl_toadstool_v1"
       ],
       "Watercress": [
         "watercress_mat_a",
@@ -1252,6 +1307,40 @@
       "height": 3.6,
       "radius": 1.6,
       "label": "Boarsend Old Barrow"
+    },
+    "59005": {
+      "entrance": true,
+      "exteriorTile": [
+        317,
+        381
+      ],
+      "scene": "res://assets/world/underground/warren_mound.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -4.8
+      ],
+      "visualHeight": 1.4,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "The Old Warren"
+    },
+    "59006": {
+      "entrance": true,
+      "exteriorTile": [
+        469,
+        741
+      ],
+      "scene": "res://assets/world/underground/crystal_arch.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -3.0
+      ],
+      "visualHeight": 5.2,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "The Amethyst Geode"
     }
   }
 }

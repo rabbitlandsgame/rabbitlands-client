@@ -20,27 +20,27 @@
       "min": [
         12.290128930839295,
         -1.9,
-        16.043469787415034
+        168.89923302412228
       ],
       "max": [
-        211.0,
+        339.64916128803776,
         15.0,
-        215.8425079580377
+        457.7
       ]
     },
     "interiorClass": "insides",
     "parentRegion": "landfall",
-    "serverCells": 240
+    "serverCells": 480
   },
   "coordinateTransform": {
     "metresPerTile": 1.0,
     "serverOrigin": [
       0,
-      240
+      480
     ],
     "serverCells": [
-      240,
-      240
+      480,
+      480
     ],
     "origin": [
       0,
@@ -56,8 +56,8 @@
     ]
   },
   "serverCells": [
-    240,
-    240
+    480,
+    480
   ],
   "spawnPoints": [
     {
@@ -68,7 +68,7 @@
       "position": [
         55,
         0.05,
-        208
+        448
       ],
       "serverTile": [
         55,
@@ -84,7 +84,7 @@
       "position": [
         177,
         0.05,
-        208
+        448
       ],
       "serverTile": [
         177,
@@ -100,7 +100,7 @@
       "position": [
         55,
         0.05,
-        87
+        327
       ],
       "serverTile": [
         55,
@@ -116,11 +116,43 @@
       "position": [
         177,
         0.05,
-        87
+        327
       ],
       "serverTile": [
         177,
         153
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "old_warren",
+      "name": "The Old Warren",
+      "section": "old_warren",
+      "default": false,
+      "position": [
+        30,
+        0.05,
+        210
+      ],
+      "serverTile": [
+        30,
+        270
+      ],
+      "rotationDegrees": 180
+    },
+    {
+      "id": "amethyst_geode",
+      "name": "The Amethyst Geode",
+      "section": "amethyst_geode",
+      "default": false,
+      "position": [
+        260,
+        0.05,
+        279
+      ],
+      "serverTile": [
+        260,
+        201
       ],
       "rotationDegrees": 180
     }
@@ -132,7 +164,7 @@
       "position": [
         55,
         0,
-        208
+        448
       ],
       "radius": 8,
       "name": "Lantern Mine"
@@ -143,7 +175,7 @@
       "position": [
         55,
         0,
-        187
+        427
       ],
       "radius": 12,
       "name": "Lantern Mine"
@@ -154,7 +186,7 @@
       "position": [
         32,
         0,
-        180
+        420
       ],
       "radius": 9,
       "name": "Lantern Mine"
@@ -165,7 +197,7 @@
       "position": [
         80,
         0,
-        176
+        416
       ],
       "radius": 10,
       "name": "Lantern Mine"
@@ -176,7 +208,7 @@
       "position": [
         55,
         0,
-        155
+        395
       ],
       "radius": 8,
       "name": "Lantern Mine"
@@ -187,7 +219,7 @@
       "position": [
         177,
         0,
-        207
+        447
       ],
       "radius": 9,
       "name": "Pinebrow Deep Workings"
@@ -198,7 +230,7 @@
       "position": [
         177,
         0,
-        185
+        425
       ],
       "radius": 12,
       "name": "Pinebrow Deep Workings"
@@ -209,7 +241,7 @@
       "position": [
         153,
         0,
-        176
+        416
       ],
       "radius": 10,
       "name": "Pinebrow Deep Workings"
@@ -220,7 +252,7 @@
       "position": [
         199,
         0,
-        176
+        416
       ],
       "radius": 10,
       "name": "Pinebrow Deep Workings"
@@ -231,7 +263,7 @@
       "position": [
         177,
         0,
-        154
+        394
       ],
       "radius": 10,
       "name": "Pinebrow Deep Workings"
@@ -242,7 +274,7 @@
       "position": [
         55,
         0,
-        86
+        326
       ],
       "radius": 8,
       "name": "Cenote Deeps"
@@ -253,7 +285,7 @@
       "position": [
         62,
         0,
-        46
+        286
       ],
       "radius": 19,
       "name": "Cenote Deeps"
@@ -264,7 +296,7 @@
       "position": [
         24,
         0,
-        28
+        268
       ],
       "radius": 9,
       "name": "Cenote Deeps"
@@ -275,7 +307,7 @@
       "position": [
         96,
         0,
-        25
+        265
       ],
       "radius": 9,
       "name": "Cenote Deeps"
@@ -286,7 +318,7 @@
       "position": [
         89,
         0,
-        69
+        309
       ],
       "radius": 7,
       "name": "Cenote Deeps"
@@ -297,7 +329,7 @@
       "position": [
         177,
         0,
-        86
+        326
       ],
       "radius": 8,
       "name": "Boarsend Old Barrow"
@@ -308,7 +340,7 @@
       "position": [
         177,
         0,
-        62
+        302
       ],
       "radius": 9,
       "name": "Boarsend Old Barrow"
@@ -319,7 +351,7 @@
       "position": [
         153,
         0,
-        63
+        303
       ],
       "radius": 9,
       "name": "Boarsend Old Barrow"
@@ -330,7 +362,7 @@
       "position": [
         201,
         0,
-        58
+        298
       ],
       "radius": 10,
       "name": "Boarsend Old Barrow"
@@ -341,10 +373,197 @@
       "position": [
         177,
         0,
-        31
+        271
       ],
       "radius": 10,
       "name": "Boarsend Old Barrow"
+    },
+    {
+      "id": "old_warren-0",
+      "section": "old_warren",
+      "position": [
+        30,
+        0,
+        210
+      ],
+      "radius": 4,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-1",
+      "section": "old_warren",
+      "position": [
+        44,
+        0,
+        204
+      ],
+      "radius": 5,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-2",
+      "section": "old_warren",
+      "position": [
+        32,
+        0,
+        191
+      ],
+      "radius": 4,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-3",
+      "section": "old_warren",
+      "position": [
+        51,
+        0,
+        188
+      ],
+      "radius": 4,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-4",
+      "section": "old_warren",
+      "position": [
+        64,
+        0,
+        207
+      ],
+      "radius": 4,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-5",
+      "section": "old_warren",
+      "position": [
+        71,
+        0,
+        192
+      ],
+      "radius": 5,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-6",
+      "section": "old_warren",
+      "position": [
+        61,
+        0,
+        177
+      ],
+      "radius": 3,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-7",
+      "section": "old_warren",
+      "position": [
+        43,
+        0,
+        173
+      ],
+      "radius": 4,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-8",
+      "section": "old_warren",
+      "position": [
+        28,
+        0,
+        175
+      ],
+      "radius": 3,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-9",
+      "section": "old_warren",
+      "position": [
+        80,
+        0,
+        173
+      ],
+      "radius": 4,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "old_warren-10",
+      "section": "old_warren",
+      "position": [
+        83,
+        0,
+        208
+      ],
+      "radius": 3,
+      "name": "The Old Warren"
+    },
+    {
+      "id": "amethyst_geode-0",
+      "section": "amethyst_geode",
+      "position": [
+        260,
+        0,
+        279
+      ],
+      "radius": 5,
+      "name": "The Amethyst Geode"
+    },
+    {
+      "id": "amethyst_geode-1",
+      "section": "amethyst_geode",
+      "position": [
+        297,
+        0,
+        279
+      ],
+      "radius": 24,
+      "name": "The Amethyst Geode"
+    },
+    {
+      "id": "amethyst_geode-2",
+      "section": "amethyst_geode",
+      "position": [
+        330,
+        0,
+        302
+      ],
+      "radius": 7,
+      "name": "The Amethyst Geode"
+    },
+    {
+      "id": "amethyst_geode-3",
+      "section": "amethyst_geode",
+      "position": [
+        332,
+        0,
+        258
+      ],
+      "radius": 7,
+      "name": "The Amethyst Geode"
+    },
+    {
+      "id": "amethyst_geode-4",
+      "section": "amethyst_geode",
+      "position": [
+        297,
+        0,
+        248
+      ],
+      "radius": 6,
+      "name": "The Amethyst Geode"
+    },
+    {
+      "id": "amethyst_geode-5",
+      "section": "amethyst_geode",
+      "position": [
+        297,
+        0,
+        310
+      ],
+      "radius": 6,
+      "name": "The Amethyst Geode"
     }
   ],
   "harvestables": [
@@ -359,7 +578,7 @@
       "position": [
         29.5,
         0,
-        182.5
+        422.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -375,7 +594,7 @@
       "position": [
         35.5,
         0,
-        175.5
+        415.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -391,7 +610,7 @@
       "position": [
         47.5,
         0,
-        189.5
+        429.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -407,7 +626,7 @@
       "position": [
         62.5,
         0,
-        182.5
+        422.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -423,7 +642,7 @@
       "position": [
         50.5,
         0,
-        155.5
+        395.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -439,7 +658,7 @@
       "position": [
         59.5,
         0,
-        152.5
+        392.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -455,7 +674,7 @@
       "position": [
         77.5,
         0,
-        178.5
+        418.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -471,7 +690,7 @@
       "position": [
         83.5,
         0,
-        171.5
+        411.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -487,7 +706,7 @@
       "position": [
         80.5,
         0,
-        166.5
+        406.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -503,7 +722,7 @@
       "position": [
         35.5,
         0,
-        184.5
+        424.5
       ],
       "section": "lantern_mine",
       "authority": "server"
@@ -519,7 +738,7 @@
       "position": [
         173.5,
         0,
-        187.5
+        427.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -535,7 +754,7 @@
       "position": [
         182.5,
         0,
-        181.5
+        421.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -551,7 +770,7 @@
       "position": [
         149.5,
         0,
-        179.5
+        419.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -567,7 +786,7 @@
       "position": [
         157.5,
         0,
-        171.5
+        411.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -583,7 +802,7 @@
       "position": [
         150.5,
         0,
-        170.5
+        410.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -599,7 +818,7 @@
       "position": [
         195.5,
         0,
-        179.5
+        419.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -615,7 +834,7 @@
       "position": [
         203.5,
         0,
-        171.5
+        411.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -631,7 +850,7 @@
       "position": [
         168.5,
         0,
-        151.5
+        391.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -647,7 +866,7 @@
       "position": [
         185.5,
         0,
-        149.5
+        389.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -663,7 +882,7 @@
       "position": [
         181.5,
         0,
-        157.5
+        397.5
       ],
       "section": "pinebrow_workings",
       "authority": "server"
@@ -679,7 +898,7 @@
       "position": [
         86.5,
         0,
-        73.5
+        313.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -695,7 +914,7 @@
       "position": [
         60.5,
         0,
-        56.5
+        296.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -711,7 +930,7 @@
       "position": [
         15.5,
         0,
-        31.5
+        271.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -727,7 +946,7 @@
       "position": [
         32.5,
         0,
-        24.5
+        264.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -743,7 +962,7 @@
       "position": [
         33.5,
         0,
-        33.5
+        273.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -759,7 +978,7 @@
       "position": [
         95.5,
         0,
-        67.5
+        307.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -775,7 +994,7 @@
       "position": [
         91.5,
         0,
-        18.5
+        258.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -791,7 +1010,7 @@
       "position": [
         106.5,
         0,
-        22.5
+        262.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -807,7 +1026,7 @@
       "position": [
         102.5,
         0,
-        30.5
+        270.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -823,7 +1042,7 @@
       "position": [
         99.5,
         0,
-        18.5
+        258.5
       ],
       "section": "spindle_cavern",
       "authority": "server"
@@ -839,7 +1058,7 @@
       "position": [
         149.5,
         0,
-        59.5
+        299.5
       ],
       "section": "boarsend_barrow",
       "authority": "server"
@@ -855,9 +1074,409 @@
       "position": [
         204.5,
         0,
-        54.5
+        294.5
       ],
       "section": "boarsend_barrow",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1401",
+      "objectId": 1401,
+      "resource": "Clay",
+      "serverTile": [
+        28,
+        289
+      ],
+      "position": [
+        28.5,
+        0,
+        190.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1402",
+      "objectId": 1402,
+      "resource": "Clay",
+      "serverTile": [
+        41,
+        304
+      ],
+      "position": [
+        41.5,
+        0,
+        175.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1403",
+      "objectId": 1403,
+      "resource": "Clay",
+      "serverTile": [
+        83,
+        308
+      ],
+      "position": [
+        83.5,
+        0,
+        171.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1404",
+      "objectId": 1404,
+      "resource": "Moss",
+      "serverTile": [
+        47,
+        273
+      ],
+      "position": [
+        47.5,
+        0,
+        206.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1405",
+      "objectId": 1405,
+      "resource": "Moss",
+      "serverTile": [
+        61,
+        305
+      ],
+      "position": [
+        61.5,
+        0,
+        174.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1406",
+      "objectId": 1406,
+      "resource": "Moss",
+      "serverTile": [
+        86,
+        272
+      ],
+      "position": [
+        86.5,
+        0,
+        207.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1407",
+      "objectId": 1407,
+      "resource": "Toadstool",
+      "serverTile": [
+        52,
+        295
+      ],
+      "position": [
+        52.5,
+        0,
+        184.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1408",
+      "objectId": 1408,
+      "resource": "Toadstool",
+      "serverTile": [
+        66,
+        290
+      ],
+      "position": [
+        66.5,
+        0,
+        189.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1409",
+      "objectId": 1409,
+      "resource": "Toadstool",
+      "serverTile": [
+        25,
+        306
+      ],
+      "position": [
+        25.5,
+        0,
+        173.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1410",
+      "objectId": 1410,
+      "resource": "Flint",
+      "serverTile": [
+        60,
+        271
+      ],
+      "position": [
+        60.5,
+        0,
+        208.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1411",
+      "objectId": 1411,
+      "resource": "Flint",
+      "serverTile": [
+        75,
+        290
+      ],
+      "position": [
+        75.5,
+        0,
+        189.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "old_warren-1412",
+      "objectId": 1412,
+      "resource": "Flint",
+      "serverTile": [
+        81,
+        304
+      ],
+      "position": [
+        81.5,
+        0,
+        175.5
+      ],
+      "section": "old_warren",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1501",
+      "objectId": 1501,
+      "resource": "Crystal",
+      "serverTile": [
+        273,
+        192
+      ],
+      "position": [
+        273.5,
+        0,
+        287.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1502",
+      "objectId": 1502,
+      "resource": "Crystal",
+      "serverTile": [
+        288,
+        223
+      ],
+      "position": [
+        288.5,
+        0,
+        256.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1503",
+      "objectId": 1503,
+      "resource": "Crystal",
+      "serverTile": [
+        333,
+        183
+      ],
+      "position": [
+        333.5,
+        0,
+        296.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1504",
+      "objectId": 1504,
+      "resource": "Crystal",
+      "serverTile": [
+        290,
+        170
+      ],
+      "position": [
+        290.5,
+        0,
+        309.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1505",
+      "objectId": 1505,
+      "resource": "Geode",
+      "serverTile": [
+        288,
+        177
+      ],
+      "position": [
+        288.5,
+        0,
+        302.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1506",
+      "objectId": 1506,
+      "resource": "Geode",
+      "serverTile": [
+        304,
+        222
+      ],
+      "position": [
+        304.5,
+        0,
+        257.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1507",
+      "objectId": 1507,
+      "resource": "Geode",
+      "serverTile": [
+        303,
+        232
+      ],
+      "position": [
+        303.5,
+        0,
+        247.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1508",
+      "objectId": 1508,
+      "resource": "Quartz",
+      "serverTile": [
+        319,
+        192
+      ],
+      "position": [
+        319.5,
+        0,
+        287.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1509",
+      "objectId": 1509,
+      "resource": "Quartz",
+      "serverTile": [
+        335,
+        216
+      ],
+      "position": [
+        335.5,
+        0,
+        263.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1510",
+      "objectId": 1510,
+      "resource": "Quartz",
+      "serverTile": [
+        303,
+        170
+      ],
+      "position": [
+        303.5,
+        0,
+        309.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1511",
+      "objectId": 1511,
+      "resource": "Stormglass",
+      "serverTile": [
+        319,
+        209
+      ],
+      "position": [
+        319.5,
+        0,
+        270.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1512",
+      "objectId": 1512,
+      "resource": "Stormglass",
+      "serverTile": [
+        333,
+        172
+      ],
+      "position": [
+        333.5,
+        0,
+        307.5
+      ],
+      "section": "amethyst_geode",
+      "authority": "server"
+    },
+    {
+      "id": "amethyst_geode-1513",
+      "objectId": 1513,
+      "resource": "Stormglass",
+      "serverTile": [
+        338,
+        222
+      ],
+      "position": [
+        338.5,
+        0,
+        257.5
+      ],
+      "section": "amethyst_geode",
       "authority": "server"
     }
   ],
@@ -869,7 +1488,7 @@
       "position": [
         55,
         0,
-        214
+        454
       ],
       "serverTile": [
         55,
@@ -889,7 +1508,7 @@
       "position": [
         177,
         0,
-        214
+        454
       ],
       "serverTile": [
         177,
@@ -909,7 +1528,7 @@
       "position": [
         55,
         0,
-        93
+        333
       ],
       "serverTile": [
         55,
@@ -929,7 +1548,7 @@
       "position": [
         177,
         0,
-        93
+        333
       ],
       "serverTile": [
         177,
@@ -941,6 +1560,46 @@
         484
       ],
       "label": "Leave Boarsend Old Barrow"
+    },
+    {
+      "id": "old_warren-exit",
+      "objectId": 59005,
+      "role": "portal",
+      "position": [
+        26,
+        0,
+        212
+      ],
+      "serverTile": [
+        26,
+        268
+      ],
+      "destinationMap": "warrenmead",
+      "destinationTile": [
+        317,
+        376
+      ],
+      "label": "Leave The Old Warren"
+    },
+    {
+      "id": "amethyst_geode-exit",
+      "objectId": 59006,
+      "role": "portal",
+      "position": [
+        257,
+        0,
+        279
+      ],
+      "serverTile": [
+        257,
+        201
+      ],
+      "destinationMap": "saltsound",
+      "destinationTile": [
+        469,
+        736
+      ],
+      "label": "Leave The Amethyst Geode"
     }
   ],
   "interactives": [
@@ -951,7 +1610,7 @@
       "position": [
         55,
         0,
-        214
+        454
       ],
       "serverTile": [
         55,
@@ -971,7 +1630,7 @@
       "position": [
         177,
         0,
-        214
+        454
       ],
       "serverTile": [
         177,
@@ -991,7 +1650,7 @@
       "position": [
         55,
         0,
-        93
+        333
       ],
       "serverTile": [
         55,
@@ -1011,7 +1670,7 @@
       "position": [
         177,
         0,
-        93
+        333
       ],
       "serverTile": [
         177,
@@ -1023,6 +1682,46 @@
         484
       ],
       "label": "Leave Boarsend Old Barrow"
+    },
+    {
+      "id": "old_warren-exit",
+      "objectId": 59005,
+      "role": "portal",
+      "position": [
+        26,
+        0,
+        212
+      ],
+      "serverTile": [
+        26,
+        268
+      ],
+      "destinationMap": "warrenmead",
+      "destinationTile": [
+        317,
+        376
+      ],
+      "label": "Leave The Old Warren"
+    },
+    {
+      "id": "amethyst_geode-exit",
+      "objectId": 59006,
+      "role": "portal",
+      "position": [
+        257,
+        0,
+        279
+      ],
+      "serverTile": [
+        257,
+        201
+      ],
+      "destinationMap": "saltsound",
+      "destinationTile": [
+        469,
+        736
+      ],
+      "label": "Leave The Amethyst Geode"
     }
   ],
   "navigation": {
@@ -1035,28 +1734,80 @@
   "collision": {
     "binary": "collision.bin",
     "format": "EWCG-v2",
-    "width": 480,
-    "height": 480,
+    "width": 960,
+    "height": 960,
     "cellMetres": 0.5,
     "originMetres": [
       0,
-      240
+      480
     ],
     "heightEncoding": {
       "origin": -0.1,
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "e7ae6887f3ffc22d9e46d1de3b6088e2517ec43346c7dd1ed26396a88beb9a31",
+    "sha256": "962d9be9bb86581a2e03f53690d44bb61cbe10e39e8bf8109708bcb13d7bb866",
     "nodeNames": [
-      "Build_boarsend_barrow_east_rubble_stone",
-      "Build_boarsend_barrow_north_rubble_stone",
-      "Build_boarsend_barrow_south_rubble_stone",
-      "Build_boarsend_barrow_west_rubble_stone",
+      "Build_amethyst_geode_east_amethyst_storm_rock",
+      "Build_amethyst_geode_north_amethyst_storm_rock",
+      "Build_amethyst_geode_south_amethyst_storm_rock",
+      "Build_amethyst_geode_west_amethyst_storm_rock",
+      "Build_boarsend_barrow_east_grey_drystone",
+      "Build_boarsend_barrow_north_grey_drystone",
+      "Build_boarsend_barrow_south_grey_drystone",
+      "Build_boarsend_barrow_west_grey_drystone",
       "Build_lantern_mine_east_cliff_rock",
       "Build_lantern_mine_north_cliff_rock",
       "Build_lantern_mine_south_cliff_rock",
       "Build_lantern_mine_west_cliff_rock",
+      "Build_old_warren_east_packed_earth",
+      "Build_old_warren_north_packed_earth",
+      "Build_old_warren_pillar0_0_packed_earth",
+      "Build_old_warren_pillar0_1_packed_earth",
+      "Build_old_warren_pillar0_10_packed_earth",
+      "Build_old_warren_pillar0_11_packed_earth",
+      "Build_old_warren_pillar0_2_packed_earth",
+      "Build_old_warren_pillar0_3_packed_earth",
+      "Build_old_warren_pillar0_4_packed_earth",
+      "Build_old_warren_pillar0_5_packed_earth",
+      "Build_old_warren_pillar0_6_packed_earth",
+      "Build_old_warren_pillar0_7_packed_earth",
+      "Build_old_warren_pillar0_8_packed_earth",
+      "Build_old_warren_pillar0_9_packed_earth",
+      "Build_old_warren_pillar1_0_packed_earth",
+      "Build_old_warren_pillar1_1_packed_earth",
+      "Build_old_warren_pillar1_10_packed_earth",
+      "Build_old_warren_pillar1_11_packed_earth",
+      "Build_old_warren_pillar1_12_packed_earth",
+      "Build_old_warren_pillar1_13_packed_earth",
+      "Build_old_warren_pillar1_14_packed_earth",
+      "Build_old_warren_pillar1_15_packed_earth",
+      "Build_old_warren_pillar1_2_packed_earth",
+      "Build_old_warren_pillar1_3_packed_earth",
+      "Build_old_warren_pillar1_4_packed_earth",
+      "Build_old_warren_pillar1_5_packed_earth",
+      "Build_old_warren_pillar1_6_packed_earth",
+      "Build_old_warren_pillar1_7_packed_earth",
+      "Build_old_warren_pillar1_8_packed_earth",
+      "Build_old_warren_pillar1_9_packed_earth",
+      "Build_old_warren_pillar2_0_packed_earth",
+      "Build_old_warren_pillar2_1_packed_earth",
+      "Build_old_warren_pillar2_10_packed_earth",
+      "Build_old_warren_pillar2_11_packed_earth",
+      "Build_old_warren_pillar2_12_packed_earth",
+      "Build_old_warren_pillar2_13_packed_earth",
+      "Build_old_warren_pillar2_14_packed_earth",
+      "Build_old_warren_pillar2_15_packed_earth",
+      "Build_old_warren_pillar2_2_packed_earth",
+      "Build_old_warren_pillar2_3_packed_earth",
+      "Build_old_warren_pillar2_4_packed_earth",
+      "Build_old_warren_pillar2_5_packed_earth",
+      "Build_old_warren_pillar2_6_packed_earth",
+      "Build_old_warren_pillar2_7_packed_earth",
+      "Build_old_warren_pillar2_8_packed_earth",
+      "Build_old_warren_pillar2_9_packed_earth",
+      "Build_old_warren_south_packed_earth",
+      "Build_old_warren_west_packed_earth",
       "Build_pinebrow_workings_east_cliff_rock",
       "Build_pinebrow_workings_north_cliff_rock",
       "Build_pinebrow_workings_south_cliff_rock",
@@ -1069,12 +1820,12 @@
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "f45f0a51afe47401e10826c9f378a580b64ec5a95ceb6f3589954c1f45c78749",
+      "sha256": "9e4f9c623d8d5522652dc00dd37314f85d2f78cfb3a871135ad8a795831b2346",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
-      "width": 240,
-      "height": 240
+      "width": 480,
+      "height": 480
     }
   },
   "environment": {
@@ -1101,161 +1852,296 @@
   "lighting": {
     "markers": [
       {
+        "id": "lantern_mine-daylight",
+        "position": [
+          55,
+          9,
+          455.5
+        ],
+        "color": [
+          0.92,
+          0.96,
+          0.84
+        ],
+        "energyHint": 2.41,
+        "rangeHint": 17
+      },
+      {
         "id": "lantern_mine-lamp-0",
         "position": [
-          48.2,
-          2.6,
-          208
+          49.6,
+          2.1,
+          450.5
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "lantern_mine-lamp-1",
         "position": [
-          42.2,
-          2.6,
-          187
+          60.4,
+          2.1,
+          450.5
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "lantern_mine-lamp-2",
         "position": [
-          24.2,
-          2.6,
-          180
+          43,
+          2.1,
+          431
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "lantern_mine-lamp-3",
         "position": [
-          71.2,
-          2.6,
-          176
+          67.5,
+          2.1,
+          426
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "lantern_mine-lamp-4",
         "position": [
-          46.2,
-          2.6,
-          155
+          60,
+          2.1,
+          417.5
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-5",
+        "position": [
+          24.5,
+          2.1,
+          420
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-6",
+        "position": [
+          88,
+          2.1,
+          419
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-7",
+        "position": [
+          73,
+          2.1,
+          410
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-8",
+        "position": [
+          46.5,
+          2.1,
+          394
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-9",
+        "position": [
+          63.5,
+          2.1,
+          398
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "pinebrow_workings-lamp-0",
         "position": [
-          169.2,
-          2.6,
-          207
+          171.5,
+          2.1,
+          450
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "pinebrow_workings-lamp-1",
         "position": [
-          165.2,
-          2.6,
-          185
+          182.5,
+          2.1,
+          450
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "pinebrow_workings-lamp-2",
         "position": [
-          144.2,
-          2.6,
-          176
+          166,
+          2.1,
+          428
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "pinebrow_workings-lamp-3",
         "position": [
-          190.2,
-          2.6,
-          176
+          188,
+          2.1,
+          428
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "pinebrow_workings-lamp-4",
         "position": [
-          164.2,
-          2.6,
-          154
+          158,
+          2.1,
+          408
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.7,
+          0.4
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "pinebrow_workings-lamp-5",
+        "position": [
+          207,
+          2.1,
+          416
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "pinebrow_workings-lamp-6",
+        "position": [
+          165,
+          2.1,
+          396
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "pinebrow_workings-lamp-7",
+        "position": [
+          189,
+          2.1,
+          394
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
       },
       {
         "id": "spindle_cavern-daylight",
         "position": [
           63,
           9,
-          34
+          274
         ],
         "color": [
           0.92,
@@ -1270,7 +2156,7 @@
         "position": [
           50.5,
           2.3,
-          91.5
+          331.5
         ],
         "color": [
           1,
@@ -1285,7 +2171,7 @@
         "position": [
           43.4,
           1.6,
-          64.5
+          304.5
         ],
         "color": [
           0.55,
@@ -1300,7 +2186,7 @@
         "position": [
           46,
           2.3,
-          50
+          290
         ],
         "color": [
           1,
@@ -1315,7 +2201,7 @@
         "position": [
           80,
           2.3,
-          41
+          281
         ],
         "color": [
           1,
@@ -1330,7 +2216,7 @@
         "position": [
           31.5,
           1.4,
-          28
+          268
         ],
         "color": [
           1,
@@ -1345,7 +2231,7 @@
         "position": [
           24,
           1.4,
-          34.5
+          274.5
         ],
         "color": [
           1,
@@ -1360,7 +2246,7 @@
         "position": [
           101,
           1.0,
-          19
+          259
         ],
         "color": [
           0.42,
@@ -1375,7 +2261,7 @@
         "position": [
           89.5,
           1.1,
-          21
+          261
         ],
         "color": [
           0.42,
@@ -1390,7 +2276,7 @@
         "position": [
           88,
           1.6,
-          20.5
+          260.5
         ],
         "color": [
           0.55,
@@ -1405,7 +2291,7 @@
         "position": [
           83,
           2.3,
-          69
+          309
         ],
         "color": [
           1,
@@ -1418,90 +2304,638 @@
       {
         "id": "boarsend_barrow-lamp-0",
         "position": [
-          170.2,
-          2.6,
-          86
+          172,
+          1.35,
+          330
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.66,
+          0.34
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 0.9,
+        "rangeHint": 7
       },
       {
         "id": "boarsend_barrow-lamp-1",
         "position": [
-          169.2,
-          2.6,
-          62
+          182,
+          1.35,
+          330
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.66,
+          0.34
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 0.9,
+        "rangeHint": 7
       },
       {
         "id": "boarsend_barrow-lamp-2",
         "position": [
-          145.2,
-          2.6,
-          63
+          170.5,
+          1.35,
+          310.5
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.66,
+          0.34
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 0.9,
+        "rangeHint": 7
       },
       {
         "id": "boarsend_barrow-lamp-3",
         "position": [
-          192.2,
-          2.6,
-          58
+          183.5,
+          1.35,
+          310.5
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.66,
+          0.34
         ],
-        "energyHint": 1.8,
-        "rangeHint": 18
+        "energyHint": 0.9,
+        "rangeHint": 7
       },
       {
         "id": "boarsend_barrow-lamp-4",
         "position": [
-          165.2,
-          2.6,
-          31
+          170.5,
+          1.35,
+          293
         ],
         "color": [
           1,
-          0.65,
-          0.32
+          0.66,
+          0.34
         ],
-        "energyHint": 1.8,
+        "energyHint": 0.9,
+        "rangeHint": 7
+      },
+      {
+        "id": "boarsend_barrow-lamp-5",
+        "position": [
+          183.5,
+          1.35,
+          293
+        ],
+        "color": [
+          1,
+          0.66,
+          0.34
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7
+      },
+      {
+        "id": "boarsend_barrow-lamp-6",
+        "position": [
+          159,
+          1.9,
+          309
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 10
+      },
+      {
+        "id": "boarsend_barrow-lamp-7",
+        "position": [
+          208,
+          1.9,
+          305
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 10
+      },
+      {
+        "id": "boarsend_barrow-lamp-8",
+        "position": [
+          170.5,
+          1.35,
+          263.5
+        ],
+        "color": [
+          1,
+          0.66,
+          0.34
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7
+      },
+      {
+        "id": "boarsend_barrow-lamp-9",
+        "position": [
+          183.5,
+          1.35,
+          263.5
+        ],
+        "color": [
+          1,
+          0.66,
+          0.34
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7
+      },
+      {
+        "id": "boarsend_barrow-lamp-10",
+        "position": [
+          171.5,
+          1.35,
+          276.5
+        ],
+        "color": [
+          1,
+          0.66,
+          0.34
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7
+      },
+      {
+        "id": "boarsend_barrow-lamp-11",
+        "position": [
+          182.5,
+          1.35,
+          276.5
+        ],
+        "color": [
+          1,
+          0.66,
+          0.34
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 7
+      },
+      {
+        "id": "boarsend_barrow-lamp-12",
+        "position": [
+          166.5,
+          1.9,
+          263.5
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 10
+      },
+      {
+        "id": "boarsend_barrow-lamp-13",
+        "position": [
+          187.5,
+          1.9,
+          263.5
+        ],
+        "color": [
+          0.56,
+          0.82,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 10
+      },
+      {
+        "id": "old_warren-daylight",
+        "position": [
+          44,
+          9,
+          204
+        ],
+        "color": [
+          0.92,
+          0.96,
+          0.84
+        ],
+        "energyHint": 2.85,
+        "rangeHint": 19
+      },
+      {
+        "id": "old_warren-daylight-1",
+        "position": [
+          71,
+          9,
+          192
+        ],
+        "color": [
+          0.92,
+          0.96,
+          0.84
+        ],
+        "energyHint": 2.85,
+        "rangeHint": 19
+      },
+      {
+        "id": "old_warren-daylight-2",
+        "position": [
+          43,
+          9,
+          173
+        ],
+        "color": [
+          0.92,
+          0.96,
+          0.84
+        ],
+        "energyHint": 2.58,
         "rangeHint": 18
+      },
+      {
+        "id": "old_warren-lamp-0",
+        "position": [
+          33.8,
+          2.2,
+          212.39999999999998
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.5,
+        "rangeHint": 11
+      },
+      {
+        "id": "old_warren-lamp-1",
+        "position": [
+          39.6,
+          2.2,
+          206.60000000000002
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.5,
+        "rangeHint": 11
+      },
+      {
+        "id": "old_warren-lamp-2",
+        "position": [
+          54.4,
+          2.2,
+          190.60000000000002
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.5,
+        "rangeHint": 11
+      },
+      {
+        "id": "old_warren-lamp-3",
+        "position": [
+          66.6,
+          2.2,
+          195
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.5,
+        "rangeHint": 11
+      },
+      {
+        "id": "old_warren-lamp-4",
+        "position": [
+          75.6,
+          2.2,
+          195.39999999999998
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.5,
+        "rangeHint": 11
+      },
+      {
+        "id": "old_warren-lamp-5",
+        "position": [
+          47.4,
+          2.2,
+          170.8
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.5,
+        "rangeHint": 11
+      },
+      {
+        "id": "old_warren-lamp-6",
+        "position": [
+          76.2,
+          2.2,
+          175.8
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.5,
+        "rangeHint": 11
+      },
+      {
+        "id": "amethyst_geode-lamp-0",
+        "position": [
+          262.8,
+          2.1,
+          282.4
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "amethyst_geode-lamp-1",
+        "position": [
+          289.6,
+          1.0,
+          283
+        ],
+        "color": [
+          0.7,
+          0.45,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 9
+      },
+      {
+        "id": "amethyst_geode-lamp-2",
+        "position": [
+          304.6,
+          1.0,
+          274.8
+        ],
+        "color": [
+          0.7,
+          0.45,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 9
+      },
+      {
+        "id": "amethyst_geode-lamp-3",
+        "position": [
+          279.6,
+          2.1,
+          294
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "amethyst_geode-lamp-4",
+        "position": [
+          279.6,
+          2.1,
+          263.6
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "amethyst_geode-lamp-5",
+        "position": [
+          309.4,
+          2.1,
+          296.4
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "amethyst_geode-lamp-6",
+        "position": [
+          313,
+          2.1,
+          262.8
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "amethyst_geode-lamp-7",
+        "position": [
+          320,
+          2.1,
+          278.2
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "amethyst_geode-lamp-8",
+        "position": [
+          283.6,
+          1.0,
+          278.6
+        ],
+        "color": [
+          0.7,
+          0.45,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 9
+      },
+      {
+        "id": "amethyst_geode-lamp-9",
+        "position": [
+          311.2,
+          0.8,
+          278.4
+        ],
+        "color": [
+          0.7,
+          0.45,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 9
+      },
+      {
+        "id": "amethyst_geode-lamp-10",
+        "position": [
+          292,
+          2.1,
+          258
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "amethyst_geode-lamp-11",
+        "position": [
+          327,
+          0.8,
+          305.6
+        ],
+        "color": [
+          0.7,
+          0.45,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 9
+      },
+      {
+        "id": "amethyst_geode-lamp-12",
+        "position": [
+          328.4,
+          0.9,
+          254
+        ],
+        "color": [
+          0.7,
+          0.45,
+          1
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 9
+      },
+      {
+        "id": "amethyst_geode-lamp-13",
+        "position": [
+          292.6,
+          2.1,
+          247
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "amethyst_geode-lamp-14",
+        "position": [
+          301.6,
+          2.1,
+          311.4
+        ],
+        "color": [
+          0.74,
+          0.52,
+          1
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
       }
     ]
   },
   "cutaway": {
     "hideNodes": [
-      "Roof_boarsend_barrow_rubble_stone",
+      "Roof_amethyst_geode_amethyst_storm_rock",
+      "Roof_boarsend_barrow_grey_drystone",
       "Roof_lantern_mine_cliff_rock",
+      "Roof_old_warren_packed_earth",
       "Roof_pinebrow_workings_cliff_rock",
       "Roof_spindle_cavern_verdant_limestone_cliff"
     ],
     "walls": [
       {
-        "node": "Build_boarsend_barrow_east_rubble_stone",
+        "node": "Build_amethyst_geode_east_amethyst_storm_rock",
+        "outward": [
+          1,
+          0,
+          0
+        ],
+        "section": "amethyst_geode"
+      },
+      {
+        "node": "Build_amethyst_geode_north_amethyst_storm_rock",
+        "outward": [
+          0,
+          0,
+          1
+        ],
+        "section": "amethyst_geode"
+      },
+      {
+        "node": "Build_amethyst_geode_south_amethyst_storm_rock",
+        "outward": [
+          0,
+          0,
+          -1
+        ],
+        "section": "amethyst_geode"
+      },
+      {
+        "node": "Build_amethyst_geode_west_amethyst_storm_rock",
+        "outward": [
+          -1,
+          0,
+          0
+        ],
+        "section": "amethyst_geode"
+      },
+      {
+        "node": "Build_boarsend_barrow_east_grey_drystone",
         "outward": [
           1,
           0,
@@ -1510,7 +2944,7 @@
         "section": "boarsend_barrow"
       },
       {
-        "node": "Build_boarsend_barrow_north_rubble_stone",
+        "node": "Build_boarsend_barrow_north_grey_drystone",
         "outward": [
           0,
           0,
@@ -1519,7 +2953,7 @@
         "section": "boarsend_barrow"
       },
       {
-        "node": "Build_boarsend_barrow_south_rubble_stone",
+        "node": "Build_boarsend_barrow_south_grey_drystone",
         "outward": [
           0,
           0,
@@ -1528,7 +2962,7 @@
         "section": "boarsend_barrow"
       },
       {
-        "node": "Build_boarsend_barrow_west_rubble_stone",
+        "node": "Build_boarsend_barrow_west_grey_drystone",
         "outward": [
           -1,
           0,
@@ -1571,6 +3005,614 @@
           0
         ],
         "section": "lantern_mine"
+      },
+      {
+        "node": "Build_old_warren_east_packed_earth",
+        "outward": [
+          1,
+          0,
+          0
+        ],
+        "section": "old_warren"
+      },
+      {
+        "node": "Build_old_warren_north_packed_earth",
+        "outward": [
+          0,
+          0,
+          1
+        ],
+        "section": "old_warren"
+      },
+      {
+        "node": "Build_old_warren_pillar0_0_packed_earth",
+        "outward": [
+          -1.0,
+          0,
+          0.03
+        ],
+        "section": "old_warren",
+        "centre": [
+          56.09,
+          186.0
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_1_packed_earth",
+        "outward": [
+          -0.216,
+          0,
+          0.976
+        ],
+        "section": "old_warren",
+        "centre": [
+          61.05,
+          187.97
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_10_packed_earth",
+        "outward": [
+          -0.356,
+          0,
+          -0.934
+        ],
+        "section": "old_warren",
+        "centre": [
+          62.82,
+          179.5
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_11_packed_earth",
+        "outward": [
+          -0.739,
+          0,
+          -0.673
+        ],
+        "section": "old_warren",
+        "centre": [
+          58.51,
+          182.72
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_2_packed_earth",
+        "outward": [
+          0.308,
+          0,
+          0.951
+        ],
+        "section": "old_warren",
+        "centre": [
+          66.43,
+          188.84
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_3_packed_earth",
+        "outward": [
+          0.729,
+          0,
+          0.685
+        ],
+        "section": "old_warren",
+        "centre": [
+          67.06,
+          188.45
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_4_packed_earth",
+        "outward": [
+          0.428,
+          0,
+          0.904
+        ],
+        "section": "old_warren",
+        "centre": [
+          69.11,
+          187.49
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_5_packed_earth",
+        "outward": [
+          0.9,
+          0,
+          0.437
+        ],
+        "section": "old_warren",
+        "centre": [
+          73.1,
+          182.3
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_6_packed_earth",
+        "outward": [
+          0.983,
+          0,
+          -0.184
+        ],
+        "section": "old_warren",
+        "centre": [
+          75.14,
+          177.32
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_7_packed_earth",
+        "outward": [
+          -0.151,
+          0,
+          -0.989
+        ],
+        "section": "old_warren",
+        "centre": [
+          70.33,
+          177.1
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_8_packed_earth",
+        "outward": [
+          -0.484,
+          0,
+          -0.875
+        ],
+        "section": "old_warren",
+        "centre": [
+          65.41,
+          178.19
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar0_9_packed_earth",
+        "outward": [
+          -0.804,
+          0,
+          -0.594
+        ],
+        "section": "old_warren",
+        "centre": [
+          65.01,
+          178.53
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_0_packed_earth",
+        "outward": [
+          -0.954,
+          0,
+          0.3
+        ],
+        "section": "old_warren",
+        "centre": [
+          48.23,
+          200.55
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_1_packed_earth",
+        "outward": [
+          -0.698,
+          0,
+          0.716
+        ],
+        "section": "old_warren",
+        "centre": [
+          48.81,
+          201.55
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_10_packed_earth",
+        "outward": [
+          0.75,
+          0,
+          -0.662
+        ],
+        "section": "old_warren",
+        "centre": [
+          65.68,
+          193.62
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_11_packed_earth",
+        "outward": [
+          0.226,
+          0,
+          -0.974
+        ],
+        "section": "old_warren",
+        "centre": [
+          60.49,
+          191.95
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_12_packed_earth",
+        "outward": [
+          -0.286,
+          0,
+          -0.958
+        ],
+        "section": "old_warren",
+        "centre": [
+          54.96,
+          191.02
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_13_packed_earth",
+        "outward": [
+          -0.747,
+          0,
+          -0.664
+        ],
+        "section": "old_warren",
+        "centre": [
+          54.37,
+          191.35
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_14_packed_earth",
+        "outward": [
+          -0.282,
+          0,
+          -0.959
+        ],
+        "section": "old_warren",
+        "centre": [
+          52.85,
+          191.88
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_15_packed_earth",
+        "outward": [
+          -0.912,
+          0,
+          -0.411
+        ],
+        "section": "old_warren",
+        "centre": [
+          49.73,
+          195.91
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_2_packed_earth",
+        "outward": [
+          -0.784,
+          0,
+          0.62
+        ],
+        "section": "old_warren",
+        "centre": [
+          49.31,
+          202.13
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_3_packed_earth",
+        "outward": [
+          -0.168,
+          0,
+          0.986
+        ],
+        "section": "old_warren",
+        "centre": [
+          54.84,
+          203.6
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_4_packed_earth",
+        "outward": [
+          0.29,
+          0,
+          0.957
+        ],
+        "section": "old_warren",
+        "centre": [
+          60.59,
+          204.31
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_5_packed_earth",
+        "outward": [
+          0.756,
+          0,
+          0.655
+        ],
+        "section": "old_warren",
+        "centre": [
+          61.16,
+          203.98
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_6_packed_earth",
+        "outward": [
+          0.459,
+          0,
+          0.889
+        ],
+        "section": "old_warren",
+        "centre": [
+          62.51,
+          203.21
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_7_packed_earth",
+        "outward": [
+          0.901,
+          0,
+          0.435
+        ],
+        "section": "old_warren",
+        "centre": [
+          65.33,
+          199.41
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_8_packed_earth",
+        "outward": [
+          0.979,
+          0,
+          -0.204
+        ],
+        "section": "old_warren",
+        "centre": [
+          66.81,
+          195.28
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar1_9_packed_earth",
+        "outward": [
+          0.68,
+          0,
+          -0.733
+        ],
+        "section": "old_warren",
+        "centre": [
+          66.24,
+          194.21
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_0_packed_earth",
+        "outward": [
+          -0.461,
+          0,
+          -0.887
+        ],
+        "section": "old_warren",
+        "centre": [
+          31.43,
+          176.66
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_1_packed_earth",
+        "outward": [
+          -0.982,
+          0,
+          0.188
+        ],
+        "section": "old_warren",
+        "centre": [
+          31.73,
+          181.59
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_10_packed_earth",
+        "outward": [
+          0.253,
+          0,
+          0.967
+        ],
+        "section": "old_warren",
+        "centre": [
+          49.54,
+          184.32
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_11_packed_earth",
+        "outward": [
+          0.77,
+          0,
+          0.638
+        ],
+        "section": "old_warren",
+        "centre": [
+          54.31,
+          181.37
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_12_packed_earth",
+        "outward": [
+          0.937,
+          0,
+          -0.349
+        ],
+        "section": "old_warren",
+        "centre": [
+          56.02,
+          178.52
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_13_packed_earth",
+        "outward": [
+          0.24,
+          0,
+          -0.971
+        ],
+        "section": "old_warren",
+        "centre": [
+          51.55,
+          176.95
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_14_packed_earth",
+        "outward": [
+          -0.064,
+          0,
+          -0.998
+        ],
+        "section": "old_warren",
+        "centre": [
+          44.41,
+          176.64
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_15_packed_earth",
+        "outward": [
+          -0.017,
+          0,
+          -1.0
+        ],
+        "section": "old_warren",
+        "centre": [
+          36.74,
+          176.1
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_2_packed_earth",
+        "outward": [
+          -0.876,
+          0,
+          0.483
+        ],
+        "section": "old_warren",
+        "centre": [
+          33.02,
+          186.62
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_3_packed_earth",
+        "outward": [
+          -0.505,
+          0,
+          0.863
+        ],
+        "section": "old_warren",
+        "centre": [
+          34.1,
+          187.44
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_4_packed_earth",
+        "outward": [
+          -0.849,
+          0,
+          0.528
+        ],
+        "section": "old_warren",
+        "centre": [
+          37.63,
+          193.46
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_5_packed_earth",
+        "outward": [
+          0.023,
+          0,
+          1.0
+        ],
+        "section": "old_warren",
+        "centre": [
+          42.84,
+          198.58
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_6_packed_earth",
+        "outward": [
+          0.911,
+          0,
+          0.413
+        ],
+        "section": "old_warren",
+        "centre": [
+          45.72,
+          195.07
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_7_packed_earth",
+        "outward": [
+          0.963,
+          0,
+          -0.269
+        ],
+        "section": "old_warren",
+        "centre": [
+          47.06,
+          190.88
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_8_packed_earth",
+        "outward": [
+          0.668,
+          0,
+          -0.744
+        ],
+        "section": "old_warren",
+        "centre": [
+          46.42,
+          189.82
+        ]
+      },
+      {
+        "node": "Build_old_warren_pillar2_9_packed_earth",
+        "outward": [
+          0.991,
+          0,
+          0.134
+        ],
+        "section": "old_warren",
+        "centre": [
+          46.41,
+          187.35
+        ]
+      },
+      {
+        "node": "Build_old_warren_south_packed_earth",
+        "outward": [
+          0,
+          0,
+          -1
+        ],
+        "section": "old_warren"
+      },
+      {
+        "node": "Build_old_warren_west_packed_earth",
+        "outward": [
+          -1,
+          0,
+          0
+        ],
+        "section": "old_warren"
       },
       {
         "node": "Build_pinebrow_workings_east_cliff_rock",
@@ -1660,11 +3702,11 @@
       "bounds": {
         "min": [
           21.18,
-          145.15
+          385.15
         ],
         "max": [
           92.32,
-          217.84
+          457.84
         ]
       }
     },
@@ -1674,11 +3716,11 @@
       "bounds": {
         "min": [
           141.2,
-          142.19
+          382.19
         ],
         "max": [
           211.33,
-          217.82
+          457.82
         ]
       }
     },
@@ -1688,11 +3730,11 @@
       "bounds": {
         "min": [
           11.06,
-          14.04
+          254.04
         ],
         "max": [
           109.47,
-          97.02
+          337.02
         ]
       }
     },
@@ -1702,11 +3744,39 @@
       "bounds": {
         "min": [
           142.0,
-          19.0
+          259.0
         ],
         "max": [
           213.0,
-          97.0
+          337.0
+        ]
+      }
+    },
+    {
+      "id": "old_warren",
+      "name": "The Old Warren",
+      "bounds": {
+        "min": [
+          21.67,
+          166.9
+        ],
+        "max": [
+          88.89,
+          216.01
+        ]
+      }
+    },
+    {
+      "id": "amethyst_geode",
+      "name": "The Amethyst Geode",
+      "bounds": {
+        "min": [
+          252.72,
+          239.71
+        ],
+        "max": [
+          341.65,
+          318.26
         ]
       }
     }
@@ -1720,51 +3790,48 @@
       0
     ],
     "worldMax": [
-      240,
-      240
+      480,
+      480
     ],
     "imageSize": [
-      720,
-      720
+      1440,
+      1440
     ]
   },
   "provenance": {
     "source": "_continent_v2/content/underground.json",
-    "sourceSha256": "a73c5692e28d16a175c437803025ebfadac9284ec3ace7915384d546f22b699b",
+    "sourceSha256": "51850cae2404be39d129e3d1a5f4592d0572a62f53b035f3aec184cec4fb3dc4",
     "builder": "_continent_v2/build_underground.py",
-    "builderSha256": "7cb32ec783b081167bf73fa078c1cc53a743f2028586bab8022a361440e536ce"
+    "builderSha256": "f1b3b3fd1acc29ffe9eb1d1b866b3dc8a5abbe69d2ee0270cc7836c6db9bb41c"
   },
   "externalResources": {
-    "../../../_shared/images/1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44.png": "1d081298f165977ff2d99ff644947a7c1b6053edab80b38ed96c352e92ffea44",
-    "../../../_shared/images/220ac7d34c36a6e55506a8036556a86a0ee7ceabe4e3240d614b4a6d734099ef.png": "220ac7d34c36a6e55506a8036556a86a0ee7ceabe4e3240d614b4a6d734099ef",
+    "../../../_shared/images/12eb3e142a1a7e805478d02c2808a1ea3610ac674547606146016001a34adb22.png": "12eb3e142a1a7e805478d02c2808a1ea3610ac674547606146016001a34adb22",
     "../../../_shared/images/2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7.png": "2f56c9b1bedddd6ba8726a7b8521cf2d2bff0ca321536eb55950ece8fc6a39f7",
     "../../../_shared/images/322eb09281860c32499c35a7c2dcc4bcc84d13416c3213dbbfee1841daaa77a6.png": "322eb09281860c32499c35a7c2dcc4bcc84d13416c3213dbbfee1841daaa77a6",
-    "../../../_shared/images/34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c.png": "34bfe9afef5484824ff7d670ae779edda8e8ea9e86183c4c0c75de066583480c",
+    "../../../_shared/images/3464ce63473b7610fc29e9d176ea4e27987db3a433567112eb104b92483a14e9.png": "3464ce63473b7610fc29e9d176ea4e27987db3a433567112eb104b92483a14e9",
+    "../../../_shared/images/39a26501d8256a14d638854d63020ebfd266754aa5ea711d33f17ba6a69b8aac.png": "39a26501d8256a14d638854d63020ebfd266754aa5ea711d33f17ba6a69b8aac",
     "../../../_shared/images/3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288.png": "3c6d723b621fbc18f296c19362b666ff1803a213ab092a438d7dde7399dec288",
     "../../../_shared/images/42f74452831e8f736acbf0221cc10b2e07b7ad2268adb6acc7336736a5520063.png": "42f74452831e8f736acbf0221cc10b2e07b7ad2268adb6acc7336736a5520063",
-    "../../../_shared/images/5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571.png": "5339673c5854aa47af4231b81e4e71b4a7befc14f129b7a25c740fb6f5ecf571",
     "../../../_shared/images/562faaf3360b5f39b91d4439c81a3b348832607af0e4b85df9ce19d5f55820f6.png": "562faaf3360b5f39b91d4439c81a3b348832607af0e4b85df9ce19d5f55820f6",
     "../../../_shared/images/6a6cf111b54508d73215576348e0958e50ad721078be4876e39114c00e73e147.png": "6a6cf111b54508d73215576348e0958e50ad721078be4876e39114c00e73e147",
     "../../../_shared/images/793c424c6a722e623866579974fe7c62bbbe8b0ae603dfb9270d7dcae949db10.png": "793c424c6a722e623866579974fe7c62bbbe8b0ae603dfb9270d7dcae949db10",
+    "../../../_shared/images/79fd7cb66ad7799a40e24d22f249fe4593db608284208f69f6f58de3e93c1b28.png": "79fd7cb66ad7799a40e24d22f249fe4593db608284208f69f6f58de3e93c1b28",
     "../../../_shared/images/7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2.png": "7de3002e705e29e032805c3d4a9216297094b34e43c2c64aac4111c95fd4d3f2",
     "../../../_shared/images/7f0e68cbac42a1d868d9662429862c193fa6118374ce9bc657f3d3eb765fe44f.png": "7f0e68cbac42a1d868d9662429862c193fa6118374ce9bc657f3d3eb765fe44f",
     "../../../_shared/images/7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f.png": "7f430b432ca2158cf8401c80ecca563a6ba057435b0bc31f2f88b92add1c402f",
     "../../../_shared/images/841f43f2e7741c17750895270456ca41b793dfc5a6e03a6939e49ea7a0453755.png": "841f43f2e7741c17750895270456ca41b793dfc5a6e03a6939e49ea7a0453755",
-    "../../../_shared/images/843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68.png": "843382be4eda772daf6b622d49d8f700605171c95c22fdeddc1d4512134dab68",
-    "../../../_shared/images/8725ab2abeba897155f2cced69010a4c89f861f11f9576412b3371b2879702cb.png": "8725ab2abeba897155f2cced69010a4c89f861f11f9576412b3371b2879702cb",
+    "../../../_shared/images/962f4cd3b1ca9883a0f7dc6e150b9aa098e00140bc7788108f308abfe2ffccb0.png": "962f4cd3b1ca9883a0f7dc6e150b9aa098e00140bc7788108f308abfe2ffccb0",
     "../../../_shared/images/99e4f61d9f284a71c2321e4e3408ec2b5731e520abaa06cabd5ba87a1988431f.png": "99e4f61d9f284a71c2321e4e3408ec2b5731e520abaa06cabd5ba87a1988431f",
     "../../../_shared/images/9e5fca50c6ba13f86734b576a604f62e45ae7bade5148c3f989d01242918618b.png": "9e5fca50c6ba13f86734b576a604f62e45ae7bade5148c3f989d01242918618b",
+    "../../../_shared/images/9fc3cdd90397d333805c3a3da24f9826f722f04f1d0daa9cc5e30d844513cd6d.png": "9fc3cdd90397d333805c3a3da24f9826f722f04f1d0daa9cc5e30d844513cd6d",
     "../../../_shared/images/a33d96b77f2e043ae137e3f5c086a9613fdce2a17d7fb605edf390df7dd2b057.png": "a33d96b77f2e043ae137e3f5c086a9613fdce2a17d7fb605edf390df7dd2b057",
     "../../../_shared/images/a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392.png": "a3674d6d39229d54e189bda6aa49cfab8efe8a2b7ef34902282f50a99896e392",
-    "../../../_shared/images/a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c.png": "a58bcee53f47ac1441871efda0cbe0023f55771cbbd0ab783430391739669c6c",
-    "../../../_shared/images/ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b.png": "ab59855a4121a56093cf56b41b5461fd7cfa365951edab16f3204be26c52c09b",
-    "../../../_shared/images/af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2.png": "af2a3dc164769a1f70404a3f45e183d4be6bd92ad95fe870f571ec719af81cc2",
-    "../../../_shared/images/b305f06de05579a017a85e47470919cec5fac8ea3a08d779538075f19666157f.png": "b305f06de05579a017a85e47470919cec5fac8ea3a08d779538075f19666157f",
+    "../../../_shared/images/a4438bcd270713e02ccc7c9668af814db56c2443dfb20da6b24bc6f84f1b09c5.png": "a4438bcd270713e02ccc7c9668af814db56c2443dfb20da6b24bc6f84f1b09c5",
+    "../../../_shared/images/ab5881fb0f1107266d0692b9c22bb22d3fd692dffa94c058823a27a2dd937b35.png": "ab5881fb0f1107266d0692b9c22bb22d3fd692dffa94c058823a27a2dd937b35",
     "../../../_shared/images/c79489438a2dbbff5db832d7e36b80a8da856a8666338d627aa905f0a75fc222.png": "c79489438a2dbbff5db832d7e36b80a8da856a8666338d627aa905f0a75fc222",
-    "../../../_shared/images/c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77.png": "c9cc3c07bf21582b0ba5d730dff40cf6c58d977d2088f85c91e9f7cff11a7a77",
+    "../../../_shared/images/c7a5783de549df31ae6d34299e65553254f46b9ac19350dd079a3e9f179fcee4.png": "c7a5783de549df31ae6d34299e65553254f46b9ac19350dd079a3e9f179fcee4",
     "../../../_shared/images/d590bd60071ca66be6399f73689802e235cf693bf2b713f03037cdd03b03411d.png": "d590bd60071ca66be6399f73689802e235cf693bf2b713f03037cdd03b03411d",
     "../../../_shared/images/d65219808c8e928d1c1094be80b01083bed0e67730a1640397eff671f76d9303.png": "d65219808c8e928d1c1094be80b01083bed0e67730a1640397eff671f76d9303",
-    "../../../_shared/images/de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6.png": "de549e78a4cd49508503426a7cac3604f9e0afa22089ab86006bdde4be0dc4c6",
     "../../../_shared/images/deeca36a3f806527e02b3f8bc46283a4825f2c507e73e4338683cac66781a8a7.png": "deeca36a3f806527e02b3f8bc46283a4825f2c507e73e4338683cac66781a8a7",
     "../../../_shared/images/fa31835d6a1afdf66df0d5a8b73ea7c766cf1c6fdae7bb7865ddcf926c2f18ba.png": "fa31835d6a1afdf66df0d5a8b73ea7c766cf1c6fdae7bb7865ddcf926c2f18ba",
     "../../../_shared/images/fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c.png": "fdc104c8f52acf092f24da6bf467acca15f7dde32a85f3084ee5bdaa9f327b3c"

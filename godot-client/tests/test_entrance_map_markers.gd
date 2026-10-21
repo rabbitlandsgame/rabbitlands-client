@@ -1,12 +1,9 @@
 extends SceneTree
 ## Entrances remain discoverable before server objects arrive, in every map view.
 
-const EXPECTED := {
-	"landfall": ["Lantern Mine", 332, 86],
-	"pinebrow": ["Pinebrow Deep Workings", 537, 490],
-	"coilmere": ["Cenote Deeps", 230, 754],
-	"boarsend": ["Boarsend Old Barrow", 825, 489],
-}
+## Every cave door, from the underground's one source: map -> [name, x, y].
+const SOURCE := "res://../eloria-assets/maps/continent-v2/_continent_v2/content/underground.json"
+var EXPECTED := {}
 var failures := 0
 var captures := ""
 
@@ -20,6 +17,12 @@ func expect(ok: bool, message: String) -> void:
 
 func run() -> void:
 	root.size = Vector2i(1280, 800)
+	var plan: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SOURCE))
+	for section: Dictionary in plan.sections:
+		var door: Dictionary = section.entrance
+		EXPECTED[str(door.map)] = [str(section.name), int(door.tile[0]), int(door.tile[1])]
+	expect(EXPECTED.size() == (plan.sections as Array).size() and EXPECTED.size() >= 4,
+		"Every cave has its own exterior map: " + str(EXPECTED.size()))
 	var args := OS.get_cmdline_user_args()
 	if args.size() == 2 and args[0] == "--captures":
 		captures = args[1]
@@ -75,7 +78,8 @@ func run() -> void:
 		await capture(mid+"-entrance-map.png")
 	state.current_map = "landfall"
 	main._configure_continent_overlay(main._active_continent_data())
-	expect(main._entrance_continent_overlay._marks.size() == 4, "Landfall overview labels all four entrances")
+	expect(main._entrance_continent_overlay._marks.size() == EXPECTED.size(),
+		"Landfall overview labels every entrance: %d of %d" % [main._entrance_continent_overlay._marks.size(), EXPECTED.size()])
 	main._show_continent_view()
 	await capture("landfall-entrances-overview.png")
 	print("Entrance map markers: ", failures, " failures")
