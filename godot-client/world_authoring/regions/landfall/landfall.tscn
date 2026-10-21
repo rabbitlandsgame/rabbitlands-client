@@ -42293,3 +42293,11 @@ extras = {
 "zone": "farm"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -136.5, 121.5014, -125.5)
+
+[node name="landfall--old-warren-burrow" type="Marker3D" parent="RuntimePoints"]
+script = ExtResource("s0_marker")
+record_id = "landfall--old-warren-burrow"
+kind = "runtime_point"
+label = "The Old Warren"
+extras = {"role": "underground_entrance", "objectId": 59016, "section": "old_warren", "authority": "server"}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -225.5, 121.5, -55.5)

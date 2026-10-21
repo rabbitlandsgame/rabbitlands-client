@@ -43457,3 +43457,11 @@ transform = Transform3D(-0.322447, 0, 1.11258, 0, 1.15836, 0, -1.11258, 0, -0.32
 [node name="Content" parent="AuthoredAssets/a3_hearthcroft_Sagebrush 2 107" instance=ExtResource("a3_sagebrush_2")]
 metadata/map_asset_id = "lf_biomes:kit-sagebrush-2"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-sagebrush-2.glb"
+
+[node name="hearthcroft--old-well-door" type="Marker3D" parent="RuntimePoints"]
+script = ExtResource("s0_marker")
+record_id = "hearthcroft--old-well-door"
+kind = "runtime_point"
+label = "The Old Well"
+extras = {"role": "underground_entrance", "objectId": 59022, "section": "old_well", "authority": "server"}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -173.5, 75.8, 189.5)

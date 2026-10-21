@@ -335,6 +335,32 @@ THEMES = {
                      'water': {'deep': [.03,.08,.16], 'clear': [.35,.55,.80], 'glow': [.04,.08,.14]}},
         'minimap': {'floor': (74,76,92), 'edge': (160,166,196), 'water': (96,150,190)},
     },
+    # --- pass 2 wave A themes ---
+    # A culvert: a cut-stone race under the mill, walled with drystone and weed-hung boulders over wet flags, its
+    # water a cold river green (the Mill Race).
+    'culvert': {
+        'shape': 'boxes', 'floor': 'ashlar', 'rock': 'grey_drystone', 'bed': 'rubble_stone', 'bank': 'rubble_stone',
+        'wallHeight': 3.0, 'margin': 1.0, 'spacing': 3.0,
+        'wallRocks': ({'asset': 'drystone_dyke', 'proud': .6, 'align': True},('weed_rocks',1.5),('mossy_boulder_1',1.0),
+                      {'asset': 'drystone_dyke', 'proud': .6, 'align': True},('mossy_boulder_3',1.2),('weed_rocks',1.5)),
+        'rockPalette': None, 'lampColour': None, 'glow': ([1,.74,.44],.9,7,1.0),
+        'surfaces': {'floor': {'texture': 'flagstone', 'tint': [.52,.56,.52]}, 'rockLift': [1.3,1.38,1.32],
+                     'water': {'deep': [.02,.07,.06], 'clear': [.09,.22,.18], 'glow': [.0,.01,.01]}},
+        'minimap': {'floor': (70,76,70), 'edge': (126,134,120), 'water': (46,96,90)},
+    },
+    # A cistern: a round drystone well-bottom with a sump under the daylight of the well shaft, rubble underfoot
+    # (the Old Well).
+    'cistern': {
+        'shape': 'lobes', 'floor': 'rubble_stone', 'rock': 'grey_drystone', 'bed': 'rubble_stone',
+        'bank': 'rubble_stone', 'wallHeight': 4.2, 'margin': 1.0, 'spacing': 2.8,
+        'wallRocks': ({'asset': 'drystone_dyke', 'proud': .6, 'align': True},('mossy_boulder_1',1.0),
+                      ('moor_stone_3',1.0),{'asset': 'drystone_dyke', 'proud': .6, 'align': True},
+                      ('mossy_boulder_3',1.2),('mossy_boulder_2',1.3)),
+        'rockPalette': None, 'lampColour': None, 'glow': ([.72,1,.78],.9,7,1.0),
+        'surfaces': {'floor': {'texture': 'coastal_gravel', 'tint': [.55,.57,.54]}, 'rockLift': [1.35,1.38,1.34],
+                     'water': {'deep': [.02,.05,.06], 'clear': [.08,.17,.19], 'glow': [.0,.01,.01]}},
+        'minimap': {'floor': (72,74,72), 'edge': (128,132,124), 'water': (44,84,96)},
+    },
 }
 
 # The toolkit texture each shell material needs (seeds as materials.py / the first builder used them).

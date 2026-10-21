@@ -223,6 +223,14 @@ SELECTION = {
     'seam_crystal_4': ('lf-biomes','crystal-growth-4','height',1.1),
     'seam_crystal_5': ('lf-biomes','crystal-growth-5','height',1.2),
     'seam_geode_3': ('lf-biomes','split-geode-3','height',1.1),
+    # pass 2 wave A (owner 2026-10-21): door art for the Mill Race (the watermill over its race) and the Old Well (the
+    # croft's well head), and the culvert's sluice gates, plank walk and fish trap. Rendered and chosen from the
+    # reviewed kits (work-output/underground-pass2/wave-a/candidates/); no new models.
+    'watermill': ('amberwood','watermill-1','length',8.0),
+    'stone_well': ('four_gates','stone-well-1','height',3.2),
+    'timber_sluice_gate': ('lf-biomes','timber-sluice-gate-1','length',4.0),
+    'plank_jetty': ('sw_isle','sw-trestle-pier-span','length',4.5),
+    'fish_trap_basket': ('lf-biomes','fish-trap-basket-1','height',1.1),
 }
 KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes'}
 
@@ -241,23 +249,15 @@ HARVEST_PRESENTATION = {
     1202: {'variant': 0, 'yaw': 168.147},
     1203: {'variant': 1, 'yaw': 53.152},
     1204: {'variant': 0, 'yaw': 317.132},
-    1301: {'variant': 1, 'yaw': 171.323},
-    1302: {'variant': 0, 'yaw': 201.639},
     # Wave 1 of the Landfall underground programme (owner 2026-10-20). Seams and banks face +Z, so each yaw turns
     # the face toward the node's open neighbours on the builder's walk grid; variants alternate by object id. Moss,
     # Toadstool and Stormglass have one variant each (their art is laid-out only; see `laid_out` in main()).
-    1401: {'variant': 1, 'yaw': 90.0},    # Clay, The Old Warren
-    1402: {'variant': 0, 'yaw': 135.0},
-    1403: {'variant': 1, 'yaw': 315.0},
-    1404: {'variant': 0, 'yaw': 225.0},   # Moss
-    1405: {'variant': 0, 'yaw': 0.0},
-    1406: {'variant': 0, 'yaw': 270.0},
-    1407: {'variant': 0, 'yaw': 45.0},    # Toadstool
-    1408: {'variant': 0, 'yaw': 165.0},
-    1409: {'variant': 0, 'yaw': 285.0},
-    1410: {'variant': 0, 'yaw': 135.0},   # Flint
-    1411: {'variant': 1, 'yaw': 0.0},
-    1412: {'variant': 0, 'yaw': 225.0},
+    1404: {'variant': 0, 'yaw': 90.0},  # Moss, The Old Warren (regrown in pass 2 wave A)
+    1405: {'variant': 0, 'yaw': 180.0},
+    1406: {'variant': 0, 'yaw': 180.0},
+    1407: {'variant': 0, 'yaw': 180.0},  # Toadstool
+    1408: {'variant': 0, 'yaw': 0.0},
+    1409: {'variant': 0, 'yaw': 180.0},
     1508: {'variant': 0, 'yaw': 225.0},   # Quartz, The Amethyst Geode
     1509: {'variant': 1, 'yaw': 225.0},
     1510: {'variant': 0, 'yaw': 270.0},
@@ -268,18 +268,12 @@ HARVEST_PRESENTATION = {
     # Wave 2 of the Landfall underground programme (owner 2026-10-20), as wave 1: seams, banks, strands, beds,
     # pails and crystals face their open neighbours; Pearl, Sap and Ember Crystal have one variant each (their
     # art is laid-out only; see `laid_out` in main()).
-    1601: {'variant': 1, 'yaw': 90.0},  # Clay, Brambleshaw Undercroft
-    1602: {'variant': 0, 'yaw': 0.0},
-    1603: {'variant': 1, 'yaw': 45.0},
     1604: {'variant': 0, 'yaw': 0.0},   # Toadstool
     1605: {'variant': 0, 'yaw': 90.0},
     1606: {'variant': 0, 'yaw': 0.0},
     1607: {'variant': 0, 'yaw': 270.0},  # Moss
     1608: {'variant': 0, 'yaw': 315.0},
     1609: {'variant': 0, 'yaw': 90.0},
-    1610: {'variant': 0, 'yaw': 270.0},  # Flint
-    1611: {'variant': 1, 'yaw': 180.0},
-    1612: {'variant': 0, 'yaw': 180.0},
     1701: {'variant': 1, 'yaw': 0.0},   # Kelp, Smugglers' Grotto
     1702: {'variant': 0, 'yaw': 0.0},
     1703: {'variant': 1, 'yaw': 0.0},
@@ -340,6 +334,26 @@ HARVEST_PRESENTATION = {
     2309: {'variant': 1, 'yaw': 180.0},  # Quartz mirror_vaults
     2310: {'variant': 0, 'yaw': 0.0},  # Verdigris mirror_vaults
     2311: {'variant': 0, 'yaw': 180.0},  # Verdigris mirror_vaults
+    # pass 2 wave A (owner 2026-10-21): laid-out organics of the regrown Old Warren, the Deep Workings and the new
+    # pockets, facing their open neighbours (node_presentation.py's rule); the ore of wave A's caves is in wall veins.
+    3179: {'variant': 0, 'yaw': 0.0},  # Toadstool deep_workings
+    3180: {'variant': 0, 'yaw': 180.0},  # Toadstool deep_workings
+    3181: {'variant': 0, 'yaw': 0.0},  # Moss deep_workings
+    3182: {'variant': 0, 'yaw': 180.0},  # Moss deep_workings
+    3360: {'variant': 0, 'yaw': 180.0},  # Moss old_warren
+    3361: {'variant': 0, 'yaw': 0.0},  # Moss old_warren
+    3362: {'variant': 0, 'yaw': 180.0},  # Moss old_warren
+    3363: {'variant': 0, 'yaw': 270.0},  # Moss old_warren
+    3364: {'variant': 0, 'yaw': 180.0},  # Toadstool old_warren
+    3365: {'variant': 0, 'yaw': 180.0},  # Toadstool old_warren
+    3366: {'variant': 0, 'yaw': 180.0},  # Toadstool old_warren
+    3367: {'variant': 0, 'yaw': 90.0},  # Toadstool old_warren
+    3404: {'variant': 0, 'yaw': 270.0},  # Lichen heath_barrow
+    3405: {'variant': 0, 'yaw': 180.0},  # Lichen heath_barrow
+    3424: {'variant': 0, 'yaw': 270.0},  # Moss mill_race
+    3425: {'variant': 0, 'yaw': 180.0},  # Moss mill_race
+    3444: {'variant': 0, 'yaw': 180.0},  # Moss old_well
+    3445: {'variant': 0, 'yaw': 180.0},  # Toadstool old_well
 }
 
 
