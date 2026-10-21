@@ -1219,6 +1219,7 @@ func _ready() -> void:
 	extension_windows.combat_hud_preference_changed.connect(_save_hud_settings)
 	invasion_assistant_window = InvasionAssistantScript.new()
 	add_child(invasion_assistant_window)
+	invasion_assistant_window.configure_monitor_dock(_invasion_monitor_dock_rect)
 	invasion_assistant_window.configure_registry(map_registry)
 	invasion_assistant_window.coordinate_context = Network.coordinates
 	invasion_assistant_window.command_requested.connect(
@@ -1235,6 +1236,7 @@ func _ready() -> void:
 				and detail.get("worldMax") == tab_map.get("worldMax"):
 			tab_map["detail"] = detail
 	_region_polygons.clear()
+	invasion_assistant_window.configure_cartography(cartography_regions)
 	equipment_config = preload(
 		"res://src/actors/equipment_registry_snapshot_cache.gd").prepare(
 		_json("res://data/actors/equipment.json"))
@@ -1717,7 +1719,7 @@ func _update_keyboard_movement() -> void:
 		_stop_keyboard_movement()
 		return
 	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
-			or _text_entry_active() or dialogue_panel.visible or trade_panel.visible \
+			or _text_entry_active() or trade_panel.visible \
 			or storage_panel.visible or full_map.visible \
 			or console_panel.visible or settings_panel.visible or item_lists_panel.visible \
 			or (_actor_hud_menu != null and _actor_hud_menu.visible) \
@@ -2698,7 +2700,7 @@ func _configure_unified_settings() -> void:
 	settings_window._add_toggle(settings_window.page_body("Gameplay"),
 		"start_animated", "Animate login background", true)
 	settings_window._add_number(settings_window.page_body("HUD"),
-		"invasion_assistant_scale", "Invasion assistant scale",
+		"invasion_assistant_scale", "Invasion assistant size",
 		InvasionAssistantScript.MIN_SCALE, InvasionAssistantScript.MAX_SCALE, 1.0, 0.05)
 	_refresh_unified_settings.call_deferred()
 
@@ -3588,7 +3590,7 @@ func _on_login_succeeded() -> void:
 
 func _on_login_failed(message: String) -> void:
 	_end_arrival()
-	if character_intro.blocks_input():
+	if character_intro.is_active():
 		character_intro.cancel()
 		creation_panel.hide()
 		_set_login_screen_visible(true)
@@ -4102,7 +4104,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed \
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
 		camera_rig.handle_mouse_button(event as InputEventMouseButton)
-	if (not game_view.visible or full_map.visible or dialogue_panel.visible
+	if (not game_view.visible or full_map.visible
 			or trade_panel.visible or storage_panel.visible
 			or manufacturing_panel.visible):
 		# The world takes no clicks behind these windows, but a right click
@@ -4686,7 +4688,7 @@ func _local_actor_server_tile() -> Variant:
 	return adapter.godot_to_server((actor_value as Node3D).global_position)
 
 func _map_input_blocked() -> bool:
-	return (_world_input_blocked() or not game_view.visible or dialogue_panel.visible or trade_panel.visible
+	return (_world_input_blocked() or not game_view.visible or trade_panel.visible
 		or storage_panel.visible or manufacturing_panel.visible)
 
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
@@ -5269,7 +5271,7 @@ func _load_server_map() -> void:
 			AppState.current_map, normalized_map, map_registry.keys()])
 		return
 	var handoff := exterior_stream.take_ready(normalized_map, world_loader, camera_rig.focus)
-	if character_intro.blocks_input():
+	if character_intro.is_active():
 		if normalized_map == NewCharacterIntroScript.MAP and character_intro.pending:
 			var preloaded: Dictionary = character_intro.take_preload(normalized_map)
 			if not preloaded.is_empty():
@@ -6077,7 +6079,7 @@ func _update_local_actor_follow() -> void:
 	player_map_marker.visible = true
 
 func _update_character_intro(delta: float) -> void:
-	if not character_intro.blocks_input():
+	if not character_intro.is_active():
 		return
 	var guide_ready := false
 	var guide: Node3D
@@ -10946,6 +10948,13 @@ func _fit_hud_action_buttons() -> void:
 	# A prior minimum-width overflow can leave an anchored panel expanded left.
 	(%Quickbar as Control).offset_left = 0
 	(%Quickbar as Control).offset_right = -right_rail.size.x
+
+func _invasion_monitor_dock_rect() -> Rect2:
+	var area := viewport_container.get_global_rect()
+	area.end = Vector2(minf(area.end.x, right_rail.get_global_rect().position.x),
+		minf(area.end.y, (%Quickbar as Control).get_global_rect().position.y))
+	return area
+
 
 func _layout_full_map() -> void:
 	var area := viewport_container.get_rect()

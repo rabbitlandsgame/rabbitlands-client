@@ -464,7 +464,7 @@ func _refresh_grid() -> void:
 			if cell.get_meta("shown", []) != shown:
 				cell.set_meta("shown", shown)
 				_fill_cell(cell, entry, name,
-					"%s ×%d\nClick: carry to the backpack · Double-click: withdraw · Right-click: add to list"
+					"%s ×%d\nClick: carry to the backpack · Double-click: withdraw · Right-click: select"
 					% [name, int(entry.get("quantity", 0))])
 			_light_cell(cell, position == _selected_position)
 			_storage_cells[position] = cell
@@ -534,15 +534,12 @@ func _storage_cell_input(event: InputEvent, cell_index: int) -> void:
 	var cell: Button = storage_grid.get_child(cell_index) as Button
 	var position: int = int(cell.get_meta("storage_position", -1))
 	if mouse.button_index == MOUSE_BUTTON_RIGHT:
-		# Whatever is in hand goes back first; only an empty hand opens the
-		# list menu.
+		# Whatever is in hand goes back first; an empty hand selects the item
+		# and updates its description.
 		if bool(main.call("_has_carry")):
 			main.call("_cancel_carry")
 		elif position >= 0:
 			_select_storage(position)
-			show_lists()
-			add_menu.set_item_disabled(0, false)
-			_popup_add()
 		cell.accept_event()
 	elif (mouse.button_index == MOUSE_BUTTON_LEFT and mouse.double_click and position >= 0
 			and int(main.get("_carried_slot")) < 0):

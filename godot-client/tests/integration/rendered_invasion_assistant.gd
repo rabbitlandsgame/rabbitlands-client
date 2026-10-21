@@ -1,18 +1,8 @@
 extends SceneTree
-## Rendered evidence that the halved invasion assistant still shows its work.
-##
-## The window used to open at 1120x720 over a 1280x720 client, which left an
-## invasion master staging a wave they could not watch. It opens at 784x504
-## now, so the question this fixture exists to answer is whether the three
-## tabs still read at that size: the map list beside the tactical canvas and
-## its roster, the group builder with its composition list, and the monster
-## catalog beside a full stat block. Every payload below travels through the
-## real command 233 decoder, so a tab can only appear here if it is drawing
-## what the server sends.
+## Rendered evidence for the map-first builder, compact monitor and movement tools.
 
 const SCREEN_SIZE := Vector2i(1280, 720)
 const INVASION_ASSISTANT_STATE := 233
-const SETTINGS_PATH := "user://eloria_hud.cfg"
 
 var _artifacts := ""
 var _failures := 0
@@ -28,141 +18,98 @@ func _init() -> void:
 func _run() -> void:
 	_artifacts = OS.get_environment("ELORIA_ARTIFACT_DIR")
 	if _artifacts.is_empty():
-		_artifacts = ProjectSettings.globalize_path(
-			"res://test-artifacts/invasion-assistant")
-	_expect(DirAccess.make_dir_recursive_absolute(_artifacts) == OK,
-		"artifact directory is writable")
+		_artifacts = ProjectSettings.globalize_path("res://test-artifacts/invasion-assistant")
+	_expect(DirAccess.make_dir_recursive_absolute(_artifacts) == OK, "artifact directory is writable")
 	root.size = SCREEN_SIZE
-	# The window remembers the size it was left at, so a previous run of this
-	# fixture would otherwise decide what the first capture shows.
-	_forget_stored_size()
 	await _open_client()
-
-	# The index and one loaded map. Eleven maps and a roster of eight is the
-	# busy case: the sidebar, the canvas and the roster all have to hold real
-	# content at once for the capture to prove anything.
-	_send({"kind": "index", "selected_map": "four_gates",
-		"totals": {"players": 34, "invasions": 61, "active_groups": 3},
-		"maps": _index_maps()})
+	_send({"kind":"index", "selected_map":"four_gates", "totals":{"players":34,"invasions":61,"active_groups":3}, "maps":_index_maps()})
 	await _settle()
 	_assistant = _main.get("invasion_assistant_window") as Window
-	_expect(_assistant != null and _assistant.visible,
-		"the assistant is on screen")
-	_expect(_assistant.size == Vector2i(784, 504),
-		"the assistant covers about half the footprint it used to")
-	_expect(_assistant.size.x <= SCREEN_SIZE.x
-		and _assistant.size.y <= SCREEN_SIZE.y,
-		"the assistant fits the client it opens over")
-
+	_assistant.monitor_preferences_path = _artifacts.path_join("monitor-preferences.cfg")
+	_assistant.set_monitor_docked(true)
+	_assistant._preferred_scale = 1.0
+	_assistant._fit_to_viewport()
 	_send(_map_state())
-	await _settle()
-	_expect(_assistant.map_list.item_count == 11,
-		"every map in the index is listed")
-	_expect(_assistant.location_picker.item_count > 1,
-		"the loaded map's named locations are offered")
-	await _capture("invasion-assistant-maps.png",
-		"the maps tab at 784x504: eleven-map sidebar, legend, tactical canvas"
-			+ " with player and invader markers, and the live roster beside it")
-
 	_send(_groups_state())
-	await _settle()
-	_assistant.tabs.current_tab = 1
-	_assistant._on_group_selected(0)
-	await _settle()
-	_expect(_assistant.group_list.item_count == 4,
-		"the configured and live groups are listed")
-	_expect(_assistant.group_composition.item_count == 3,
-		"the selected group's composition is listed")
-	_expect(_assistant.group_detail.text.contains("none — spawns once"),
-		"a group built in the assistant states that it spawns once")
-	_expect(_assistant.group_maximum.value == 920,
-		"the largest wave remains editable without truncation")
-	_expect(_assistant.group_detail.text.contains("300 alive · 620 queued"),
-		"the live group reports its queued reinforcements")
-	await _capture("invasion-assistant-groups.png",
-		"the spawn-groups tab: group list, detail block - including the respawn"
-			+ " window, which reads none for a group built here - and the live"
-			+ " builder's eight fields, with the composition list one scroll below")
-
-	# The composition list is the shortest list in the window and the one
-	# most likely to have been squeezed to nothing by the halving, so it
-	# gets a capture of its own rather than a caption promising it exists.
-	var detail_column: Node = _assistant.group_composition.get_parent()
-	var detail_scroll := detail_column.get_parent() as ScrollContainer
-	_expect(detail_scroll != null, "the group detail column scrolls")
-	if detail_scroll != null:
-		detail_scroll.scroll_vertical = 10000
-	await _settle()
-	await _capture("invasion-assistant-composition.png",
-		"the foot of the group builder: three composition rows and the"
-			+ " remove control, still legible at the reduced font")
-
 	_send(_monsters_state())
+	_assistant._on_group_selected(0)
+	_assistant.tabs.current_tab = 0
 	await _settle()
+	_expect(_assistant.size == Vector2i(1100,620), "readable builder fits the game viewport")
+	_expect(_assistant.map_list.item_count == 11, "all server maps remain selectable")
+	_expect(_assistant.group_composition.item_count == 3, "composition is beside the map")
+	_expect(_assistant._map_texture("four_gates") != null, "published player Tab-map artwork is reused")
+	await _capture("invasion-assistant-builder.png", "Map-first builder with persistent composition and player cartography")
+	_assistant.inspector_tabs.current_tab = 1
+	_assistant.anchor_enabled.button_pressed = true
+	_assistant.anchor_x.value = 128
+	_assistant.anchor_y.value = 20
+	_assistant.anchor_radius.value = 16
+	_assistant._on_region_selected(Rect2i(110,4,37,33))
+	await _capture("invasion-assistant-movement.png", "Center and rectangular region preview in logical server coordinates")
+	_assistant.inspector_tabs.current_tab = 0
 	_assistant.tabs.current_tab = 2
 	_assistant._on_monster_selected(0)
-	await _settle()
-	_expect(_assistant.monster_list.item_count == 9,
-		"the invadable monsters are listed")
-	await _capture("invasion-assistant-monsters.png",
-		"the monsters tab: the catalog beside a full ten-line stat block and"
-			+ " the add-to-group row, six of the nine still marked * for a"
-			+ " stand-in model")
-
-	# Most of the shipped roster is still on a stand-in model, so a designer
-	# building an invasion that has to look finished wants the short list.
+	await _capture("invasion-assistant-creatures.png", "Creature catalog retains the selected group's composition")
 	_assistant.monster_updated_only.button_pressed = true
-	await _settle()
-	_expect(_assistant.monster_list.item_count == 3,
-		"the updated-models filter leaves only the reviewed creatures")
-	await _capture("invasion-assistant-monsters-updated.png",
-		"the same tab with Updated models only ticked: the six creatures"
-			+ " marked * are gone and three reviewed ones remain")
+	_expect(_assistant.monster_list.item_count == 3, "reviewed-model filter retains only reviewed creatures")
 	_assistant.monster_updated_only.button_pressed = false
+	_assistant.set_monitor_mode(true)
 	await _settle()
-
-	# The corner grip: the same handle the inventory panel carries. The pair of
-	# captures below is the whole argument for scaling the window rather than
-	# resizing its frame - the same eleven maps, the same canvas and the same
-	# roster are in both, drawn larger and smaller.
+	_expect(_assistant.size.x <= 390, "monitor leaves most of the game visible")
+	var dock_area: Rect2 = _main._invasion_monitor_dock_rect()
+	_expect(_assistant.position == Vector2i(dock_area.end.x - _assistant.size.x, dock_area.position.y)
+		and _assistant.size.y == int(dock_area.size.y), "monitor joins the actual right rail and bottom HUD")
+	_expect(_assistant.borderless, "docked monitor has no floating title-bar gap")
+	_expect(_assistant.monitor_clear.get_global_rect().end.y <= _assistant.size.y, "monitor controls stay reachable")
+	await _capture("invasion-assistant-monitor.png", "Monitor docked flush against the right HUD and bottom action bar")
+	_assistant.monitor_dock_button.pressed.emit()
+	_assistant._monitor_drag_offset = Vector2i(60, 14)
+	_assistant._drag_monitor_to(Vector2i(520, 34))
+	var floating_position: Vector2i = _assistant.position
+	await _capture("invasion-assistant-monitor-undocked.png", "Detached monitor with a draggable title and Dock right control")
+	_assistant.hide()
+	_assistant.show()
+	await _settle()
+	_expect(_assistant.position == floating_position, "reopened monitor keeps its floating position")
+	_assistant.set_monitor_docked(true)
+	await _settle()
+	var rail := _main.get_node("GameView/RightRail") as Control
+	var previous_rail_left := rail.offset_left
+	rail.offset_left -= 30
+	await _settle()
+	dock_area = _main._invasion_monitor_dock_rect()
+	_expect(_assistant.position.x + _assistant.size.x == int(dock_area.end.x),
+		"docked monitor follows a changed resource rail width")
+	rail.offset_left = previous_rail_left
+	root.size = Vector2i(960, 540)
+	await _settle()
+	dock_area = _main._invasion_monitor_dock_rect()
+	_expect(Rect2(_assistant.position, _assistant.size).is_equal_approx(
+		Rect2(dock_area.end.x - _assistant.size.x, dock_area.position.y, _assistant.size.x, dock_area.size.y)),
+		"small-screen dock stays attached to the live HUD")
+	await _capture("invasion-assistant-monitor-small.png", "Docked monitor on a smaller game window")
+	root.size = SCREEN_SIZE
+	await _settle()
+	_assistant.set_monitor_mode(false)
 	_assistant.tabs.current_tab = 0
-	_assistant.resize_to_scale(1.35)
-	await _settle()
-	_expect(_assistant.size.x > 1000, "the grip enlarges the window")
-	await _capture("invasion-assistant-enlarged.png",
-		"the maps tab dragged out to its largest scale on a 1280x720 client:"
-			+ " the same layout, drawn bigger")
-
 	_assistant.resize_to_scale(0.65)
+	_assistant._size_save_countdown = 0
 	await _settle()
-	_expect(_assistant.size == Vector2i(510, 328),
-		"the grip shrinks the window to its smallest scale")
-	_expect(absf(_assistant.get_visible_rect().size.x - 784.0) <= 2.0,
-		"the smallest window still lays its contents out across the full 784")
-	await _capture("invasion-assistant-smallest.png",
-		"the maps tab at its smallest scale, 510x328: the sidebar, the canvas"
-			+ " and the roster are all still there, just smaller")
-
-	_forget_stored_size()
+	_expect(not _assistant.map_sidebar.visible and _assistant.content_scale_factor == 1.0, "compact builder reflows without shrinking text")
+	await _capture("invasion-assistant-compact-builder.png", "Narrow builder collapses the map sidebar and preserves readable type")
+	_assistant.resize_to_scale(1.0)
+	_assistant._size_save_countdown = 0
+	root.size = Vector2i(960,540)
 	await _settle()
-
+	_expect(_assistant.size.x <= 960 and _assistant.size.y <= 540, "small viewport fits with scrollable workspace")
+	root.size = SCREEN_SIZE
+	await _settle()
 	_app_state.set("authenticated", false)
 	_main.queue_free()
 	await process_frame
-	print("rendered invasion assistant: ",
-		"PASS" if _failures == 0 else "FAIL (%d)" % _failures)
+	print("rendered invasion assistant: ", "PASS" if _failures == 0 else "FAIL (%d)" % _failures)
 	quit(_failures)
-
-
-func _forget_stored_size() -> void:
-	var config := ConfigFile.new()
-	if config.load(SETTINGS_PATH) != OK:
-		return
-	if not config.has_section_key(WindowPreferences.SECTION,
-			"invasion_assistant_scale"):
-		return
-	config.erase_section_key(WindowPreferences.SECTION, "invasion_assistant_scale")
-	config.save(SETTINGS_PATH)
 
 
 func _open_client() -> void:
@@ -299,8 +246,8 @@ func _settle() -> void:
 func _capture(name: String, description: String) -> void:
 	await process_frame
 	var image: Image = root.get_texture().get_image()
-	_expect(image != null and image.get_size() == SCREEN_SIZE,
-		"%s is a full %dx%d frame" % [name, SCREEN_SIZE.x, SCREEN_SIZE.y])
+	_expect(image != null and image.get_size() == root.size,
+		"%s is a full %dx%d frame" % [name, root.size.x, root.size.y])
 	if image == null:
 		return
 	_expect(_has_colour_variation(image),

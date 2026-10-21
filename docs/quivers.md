@@ -21,6 +21,9 @@ Farshot reduces distance loss after Perception; it does not extend maximum range
 
 Maximum range remains `6 + floor(Ranging / 10)` tiles. Normal legal shots keep
 their 80% accuracy floor before the penalties for being engaged in melee.
+Clicking a creature beyond that range makes your character approach until it is
+within bow range, then begin shooting. Walking elsewhere or choosing another
+target interrupts the approach.
 
 New Rangers start with one equipped Basic Quiver. Basic Quivers can be crafted;
 the quiver range is available from the existing bow suppliers. Older saved arrows
@@ -31,3 +34,13 @@ to Arcane. Saved quantities are preserved.
 All eight designs have separate male and female fits for each of the eight player
 races. Their cases and seated arrows follow the upper spine, while their straps
 deform with the torso.
+Chest straps use each design's measured ribbon shape and follow the wearer's
+shoulder, chest and waist. Changing chest armor refits the front strap over the
+worn piece; removing it restores the body fit. Cape changes preserve that chest
+fit while selecting the separate case clearance. Thinner cases
+use an authored clearance fit while a cape is equipped and return to their
+normal back fit when the cape is removed. The Basic case keeps its accepted
+position, and Skirmisher keeps its smaller case size.
+
+Inventory icons use painted illustrations of the approved designs, with the
+same dark teal background and 50-pixel cells as other equipment.

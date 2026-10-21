@@ -2,6 +2,7 @@ class_name InvasionMapCanvas
 extends Control
 
 signal coordinate_selected(tile: Vector2i)
+signal region_selected(region: Rect2i)
 
 const PAD := 16.0
 const GRID_COLOR := Color("324454")
@@ -10,7 +11,7 @@ const PORTAL_COLOR := Color("55cfee")
 const PLAYER_COLOR := Color("68e7ff")
 const INVASION_COLOR := Color("ff6b63")
 const BOSS_COLOR := Color("ffc94f")
-const MARKER_FONT_SIZE := 10
+const MARKER_FONT_SIZE := 12
 const MAX_LOCATION_LABELS := 6
 const CLUSTER_PIXELS := 28.0
 
@@ -21,10 +22,19 @@ var background: Texture2D
 var _hover_text := ""
 var _adapter: CoordinateAdapter
 var _world_rect := Rect2()
+var selection_mode := 0 # coordinates, centerpoint, rectangular region
+var movement: Dictionary = {}
+var zoom := 1.0
+var pan := Vector2.ZERO
+var _panning := false
+var _drawing_region := false
+var _region_start := Vector2i.ZERO
+var _region_end := Vector2i.ZERO
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(238, 188)
+	if custom_minimum_size == Vector2.ZERO:
+		custom_minimum_size = Vector2(238, 188)
 	mouse_default_cursor_shape = Control.CURSOR_CROSS
 	# A marker near the right edge draws its name past the canvas, where the
 	# roster is; unclipped, the two read as one smeared column.
@@ -52,14 +62,36 @@ func set_map_state(value: Dictionary, texture: Texture2D = null,
 			_adapter = CoordinateAdapter.new(projection.get("coordinateTransform", {}))
 	if previous_map != next_map or not coordinates_supported:
 		selected_tile = null
+		reset_view()
+		_drawing_region = false
 	_hover_text = ""
 	tooltip_text = "Click the tactical map to select teleport coordinates."
 	queue_redraw()
 
 
 func _map_rect() -> Rect2:
-	return Rect2(Vector2(PAD, PAD), Vector2(
-		maxf(1.0, size.x - PAD * 2.0), maxf(1.0, size.y - PAD * 2.0)))
+	var available := Vector2(maxf(1, size.x - PAD * 2), maxf(1, size.y - PAD * 2))
+	var source := background.get_size() if background != null else _bounds()
+	var fitted: Vector2 = source * minf(available.x / source.x, available.y / source.y)
+	return Rect2((size - fitted * zoom) * 0.5 + pan, fitted * zoom)
+
+
+func zoom_by(factor: float) -> void:
+	zoom = clampf(zoom * factor, 1.0, 8.0)
+	if is_equal_approx(zoom, 1.0):
+		pan = Vector2.ZERO
+	queue_redraw()
+
+
+func reset_view() -> void:
+	zoom = 1.0
+	pan = Vector2.ZERO
+	queue_redraw()
+
+
+func set_movement(value: Dictionary) -> void:
+	movement = value.duplicate(true)
+	queue_redraw()
 
 
 func _bounds() -> Vector2:
@@ -139,16 +171,17 @@ func _draw() -> void:
 	var rect := _map_rect()
 	draw_rect(Rect2(Vector2.ZERO, size), Color("101820"), true)
 	if background != null:
-		draw_texture_rect(background, rect, false, Color(1, 1, 1, 0.68))
+		draw_texture_rect(background, rect, false)
 	else:
 		draw_rect(rect, Color("182734"), true)
-	for step: int in range(1, 8):
-		var fraction := float(step) / 8.0
-		draw_line(Vector2(rect.position.x + rect.size.x * fraction, rect.position.y),
-			Vector2(rect.position.x + rect.size.x * fraction, rect.end.y), GRID_COLOR, 1.0)
-		draw_line(Vector2(rect.position.x, rect.position.y + rect.size.y * fraction),
-			Vector2(rect.end.x, rect.position.y + rect.size.y * fraction), GRID_COLOR, 1.0)
-	draw_rect(rect, Color("7392a6"), false, 2.0)
+		for step: int in range(1, 8):
+			var fraction := float(step) / 8.0
+			draw_line(Vector2(rect.position.x + rect.size.x * fraction, rect.position.y),
+				Vector2(rect.position.x + rect.size.x * fraction, rect.end.y), GRID_COLOR, 1.0)
+			draw_line(Vector2(rect.position.x, rect.position.y + rect.size.y * fraction),
+				Vector2(rect.end.x, rect.position.y + rect.size.y * fraction), GRID_COLOR, 1.0)
+	draw_rect(rect, Color("817052"), false, 1.0)
+	_draw_movement()
 
 	var font: Font = ThemeDB.fallback_font
 	_draw_creatures(font)
@@ -165,8 +198,11 @@ func _draw() -> void:
 		var point := _point(Vector2(float(player.get("x", 0)), float(player.get("y", 0))))
 		draw_circle(point, 4.5, PLAYER_COLOR)
 		draw_circle(point, 1.5, Color.WHITE)
-		draw_string(font, point + Vector2(6, 3), str(player.get("name", "Player")),
-			HORIZONTAL_ALIGNMENT_LEFT, -1.0, MARKER_FONT_SIZE, PLAYER_COLOR)
+		if zoom >= 1.5 and size.x >= 400:
+			draw_string_outline(font, point + Vector2(6, 3), str(player.get("name", "Player")),
+				HORIZONTAL_ALIGNMENT_LEFT, -1, MARKER_FONT_SIZE, 3, Color("101719"))
+			draw_string(font, point + Vector2(6, 3), str(player.get("name", "Player")),
+				HORIZONTAL_ALIGNMENT_LEFT, -1, MARKER_FONT_SIZE, PLAYER_COLOR)
 	if selected_tile is Vector2i:
 		var selected_point := _point(Vector2(selected_tile))
 		draw_circle(selected_point, 7.0, Color("f4ef7a"), false, 2.0)
@@ -207,13 +243,16 @@ func _draw_creatures(font: Font) -> void:
 			draw_string(font, cluster.position + Vector2(-width * 0.5, 3), text,
 				HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color.WHITE)
 		else:
-			draw_circle(cluster.position, 4.0, INVASION_COLOR)
+			var point: Vector2 = cluster.position
+			draw_colored_polygon(PackedVector2Array([point + Vector2(0,-5), point + Vector2(5,0),
+				point + Vector2(0,5), point + Vector2(-5,0)]), INVASION_COLOR)
 	for creature: Dictionary in state.get("creatures", []):
 		if not bool(creature.get("boss", false)):
 			continue
 		var point := _point(Vector2(float(creature.get("x", 0)), float(creature.get("y", 0))))
 		draw_colored_polygon(PackedVector2Array([point + Vector2(0, -5), point + Vector2(5, 0),
 			point + Vector2(0, 5), point + Vector2(-5, 0)]), BOSS_COLOR)
+		draw_line(point + Vector2(-5,-7), point + Vector2(5,-7), BOSS_COLOR, 3)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -221,14 +260,65 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton:
 		var button := event as InputEventMouseButton
-		if button.button_index == MOUSE_BUTTON_LEFT and button.pressed \
-				and _map_rect().has_point(button.position):
-			selected_tile = _tile(button.position)
-			coordinate_selected.emit(selected_tile)
+		if button.button_index == MOUSE_BUTTON_MIDDLE:
+			_panning = button.pressed
+			accept_event()
+		elif button.pressed and button.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+			zoom_by(1.25 if button.button_index == MOUSE_BUTTON_WHEEL_UP else 0.8)
+			accept_event()
+		elif button.button_index == MOUSE_BUTTON_LEFT:
+			if button.pressed and _map_rect().has_point(button.position):
+				selected_tile = _tile(button.position)
+				if selection_mode == 2:
+					_drawing_region = true
+					_region_start = selected_tile
+					_region_end = selected_tile
+				else:
+					coordinate_selected.emit(selected_tile)
+			elif not button.pressed and _drawing_region:
+				_drawing_region = false
+				_region_end = _tile(button.position)
+				var low := Vector2i(mini(_region_start.x, _region_end.x), mini(_region_start.y, _region_end.y))
+				var high := Vector2i(maxi(_region_start.x, _region_end.x), maxi(_region_start.y, _region_end.y))
+				region_selected.emit(Rect2i(low, high - low + Vector2i.ONE))
 			queue_redraw()
 			accept_event()
 	elif event is InputEventMouseMotion:
-		_update_hover((event as InputEventMouseMotion).position)
+		var motion := event as InputEventMouseMotion
+		if _panning:
+			pan += motion.relative
+			queue_redraw()
+		elif _drawing_region:
+			_region_end = _tile(motion.position)
+			queue_redraw()
+		else:
+			_update_hover(motion.position)
+
+
+func _draw_area(low: Vector2, high: Vector2, color: Color) -> void:
+	var a := _point(low)
+	var b := _point(high)
+	var box := Rect2(Vector2(minf(a.x,b.x), minf(a.y,b.y)), Vector2(absf(a.x-b.x), absf(a.y-b.y)))
+	draw_rect(box, Color(color, 0.14), true)
+	draw_rect(box, color, false, 2.0)
+
+
+func _draw_movement() -> void:
+	var region: Variant = movement.get("region")
+	if region is Dictionary:
+		_draw_area(Vector2(region.x0 - 0.5, region.y0 - 0.5),
+			Vector2(region.x1 + 0.5, region.y1 + 0.5), Color("67d4b8"))
+	var anchor: Variant = movement.get("anchor")
+	if anchor is Dictionary:
+		var radius := float(movement.get("radius", 18))
+		_draw_area(Vector2(anchor.x - radius, anchor.y - radius),
+			Vector2(anchor.x + radius, anchor.y + radius), Color("e5b96b"))
+		var point := _point(Vector2(anchor.x, anchor.y))
+		draw_circle(point, 8, Color("ffde89"), false, 2)
+		draw_line(point - Vector2(12,0), point + Vector2(12,0), Color("ffde89"), 2)
+		draw_line(point - Vector2(0,12), point + Vector2(0,12), Color("ffde89"), 2)
+	if _drawing_region:
+		_draw_area(Vector2(_region_start), Vector2(_region_end), Color("9cf6df"))
 
 
 func _update_hover(position: Vector2) -> void:

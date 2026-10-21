@@ -44,8 +44,20 @@ func run() -> void:
 		"res://data/actors/models.json"))["models"]
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
 		"res://data/actors/equipment.json"))
+	var review_fits := OS.get_environment("RL_QUIVER_REVIEW_FITS")
+	if not review_fits.is_empty():
+		for visual: int in range(1, 9):
+			var row: Dictionary = equipment["models"]["8:%d" % visual]
+			for variant: Dictionary in row["variants"].values():
+				variant["scene"] = review_fits.path_join("variants").path_join(
+					str(variant["authoredFor"])).path_join(
+					"rl-quiver-%s.glb" % ["basic", "hunter", "bodkin", "farshot",
+						"skirmisher", "ember", "frost", "arcane"][visual - 1])
 	var races: Array = equipment["bodyTemplates"].keys()
 	races.sort()
+	var review_races := OS.get_environment("RL_QUIVER_REVIEW_RACES")
+	if not review_races.is_empty():
+		races = Array(review_races.split(",", false))
 	for race: String in races:
 		var model: Dictionary = models[race]
 		var animations: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
@@ -62,6 +74,7 @@ func run() -> void:
 		for visual: int in range(1, 9):
 			var label := "%s quiver %d" % [race, visual]
 			actor.apply_equipment_visuals({1: 106, 2: 105, 8: visual})
+			check_chest_layers(actor, visual, label)
 			await process_frame
 			var nodes: Array = actor._equipment_nodes.get(8, [])
 			expect(not nodes.is_empty(), label + " creates its own equipment part")
@@ -74,11 +87,26 @@ func run() -> void:
 					continue
 				var mesh_node := node as MeshInstance3D
 				expect(mesh_node.skin != null and mesh_node.visible, label + " has a visible skin")
+				var cape_shape := mesh_node.find_blend_shape_by_name("Cape_Clearance")
+				if visual != 1:
+					expect(cape_shape >= 0, label + " carries its authored cape clearance")
+				if cape_shape >= 0:
+					expect(is_equal_approx(mesh_node.get_blend_shape_value(cape_shape), 1.0),
+						label + " selects the cape-on fit")
 				for bind: int in range(mesh_node.skin.get_bind_count()):
 					expect(actor.get_skeleton().find_bone(mesh_node.skin.get_bind_name(bind)) >= 0,
 						label + " keeps each joint name")
+			actor.apply_equipment_visuals({1: 106, 8: visual})
+			for node: Node in nodes:
+				if node is MeshInstance3D:
+					var mesh_node := node as MeshInstance3D
+					expect(actor._equipment_nodes[8].has(mesh_node), label + " retains its mesh when cape is removed")
+					var shape := mesh_node.find_blend_shape_by_name("Cape_Clearance")
+					if shape >= 0:
+						expect(is_zero_approx(mesh_node.get_blend_shape_value(shape)), label + " returns to its cape-off fit")
+			actor.apply_equipment_visuals({1: 106, 2: 105, 8: visual})
 			if not review_dir.is_empty() and race in ["luminous_male", "ssarathi_female"]:
-				actor.apply_equipment_visuals({0: 164, 3: 159, 4: 230, 5: 225, 6: 226, 8: visual})
+				actor.apply_equipment_visuals({0: 164, 2: 105, 3: 159, 4: 230, 5: 225, 6: 226, 8: visual})
 				await process_frame
 			for action: StringName in [&"idle", &"walk", &"ranged_attack"]:
 				actor.play_action(action, true)
@@ -86,6 +114,12 @@ func run() -> void:
 				for phase: float in [0.0, 0.25, 0.6]:
 					actor.animation_player.seek(phase, true)
 					actor.get_skeleton().force_update_all_bone_transforms()
+					for node: Node in nodes:
+						if node is MeshInstance3D:
+							var shape := (node as MeshInstance3D).find_blend_shape_by_name("Cape_Clearance")
+							if shape >= 0:
+								expect(is_equal_approx((node as MeshInstance3D).get_blend_shape_value(shape), 1.0),
+									label + " keeps cape clearance during " + action)
 					for bone: int in range(actor.get_skeleton().get_bone_count()):
 						expect(actor.get_skeleton().get_bone_global_pose(bone).is_finite(),
 							label + " retains finite animated bones")
@@ -100,6 +134,66 @@ func run() -> void:
 	NativeAnimationImporter.clear()
 	print("QUIVER_EQUIPMENT_FIT checks=", checks, " failures=", failures, " fits=", races.size() * 8)
 	quit(1 if failures else 0)
+
+
+func check_chest_layers(actor: ReplicatedActor3D, visual: int, label: String) -> void:
+	var nodes: Array = actor._equipment_nodes[8].duplicate()
+	var cached: Dictionary = {}
+	var originals: Dictionary = {}
+	for node: Node in nodes:
+		if node is MeshInstance3D:
+			var source: Mesh = node.get_meta("quiver_authored_mesh") as Mesh
+			originals[node] = hash(source.surface_get_arrays(0)[Mesh.ARRAY_VERTEX])
+	for armor: int in [0, 225, 200, 225]:
+		for cape: int in [0, 105]:
+			var outfit := {1: 106, 8: visual}
+			if armor: outfit[5] = armor
+			if cape: outfit[2] = cape
+			actor.apply_equipment_visuals(outfit)
+			for node: Node in nodes:
+				if not node is MeshInstance3D:
+					continue
+				var quiver := node as MeshInstance3D
+				expect(actor._equipment_nodes[8].has(quiver), label + " retains its quiver while changing clothing")
+				var source: Mesh = quiver.get_meta("quiver_authored_mesh") as Mesh
+				if armor == 0 and cape == 0:
+					expect(quiver.mesh == source, label + " restores its authored bare fit")
+				var key := "%d:%d:%d" % [armor, cape, node.get_instance_id()]
+				var signature: Array = []
+				for surface: int in range(quiver.mesh.get_surface_count()):
+					signature.append(hash(quiver.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]))
+				if cached.has(key):
+					expect(signature == cached[key], label + " restores its fit without accumulating offsets")
+				cached[key] = signature
+				var preserved := true
+				var finite := true
+				var cape_neutral := true
+				var largest_front_offset := 0.0
+				for surface: int in range(source.get_surface_count()):
+					var before: PackedVector3Array = source.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+					var after: PackedVector3Array = quiver.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+					for vertex: int in range(before.size()):
+						finite = finite and after[vertex].is_finite()
+						if before[vertex].z <= 0.0:
+							preserved = preserved and before[vertex].is_equal_approx(after[vertex])
+						else:
+							largest_front_offset = maxf(largest_front_offset, after[vertex].z - before[vertex].z)
+					if quiver.mesh is ArrayMesh and (quiver.mesh as ArrayMesh).blend_shape_mode == Mesh.BLEND_SHAPE_MODE_NORMALIZED:
+						for shape: Array in quiver.mesh.surface_get_blend_shape_arrays(surface):
+							var positions: PackedVector3Array = shape[Mesh.ARRAY_VERTEX]
+							for vertex: int in range(before.size()):
+								if before[vertex].z > 0.06:
+									cape_neutral = cape_neutral and after[vertex].is_equal_approx(positions[vertex])
+					expect(preserved, label + " preserves its rear case and attachments over clothing")
+					expect(finite, label + " keeps finite clothing clearance")
+					expect(cape_neutral, label + " keeps chest clearance when selecting the cape shape")
+				if armor:
+					expect(largest_front_offset > 0.00001, label + " lifts its chest strap over worn armor")
+	for node: Node in originals:
+		var source: Mesh = node.get_meta("quiver_authored_mesh") as Mesh
+		expect(hash(source.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]) == originals[node],
+			label + " leaves its shared authored mesh unchanged")
+	actor.apply_equipment_visuals({1: 106, 2: 105, 8: visual})
 
 
 func capture(actor: ReplicatedActor3D, race: String, visual: int, action: StringName) -> void:

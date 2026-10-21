@@ -128,6 +128,7 @@ import time
 import zipfile
 import client_release
 import release_storage
+import runner_source
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
 
@@ -143,6 +144,7 @@ ASSET_REF = re.compile(r"res://\.\./(eloria-assets/[^\"'\s]+)")
 # The installer's identity. Keep it fixed: Windows matches upgrades and the
 # uninstaller entry on it.
 INSTALLER_APP_ID = "{6B1E9F4C-3A52-4D8E-9C71-5E0B2F8A4D17}"
+INSTALLER_MUTEX = "RabbitLandsSetup-" + INSTALLER_APP_ID.strip("{}")
 
 # Folders and files inside a map package that the client never reads.
 MAP_EXCLUDED_DIRS = {"references", "captures", "godot-captures", "source",
@@ -1018,10 +1020,7 @@ def prepare_build_tree(build_dir: Path, sha: str) -> Path:
         build_dir.parent.mkdir(parents=True, exist_ok=True)
         if STORAGE:
             git("worktree", "add", "--detach", "--no-checkout", str(build_dir), sha)
-            git("sparse-checkout", "init", "--cone", cwd=build_dir)
-            git("sparse-checkout", "set", "godot-client", "eloria-assets/maps",
-                "eloria-assets/concepts", "eloria-assets/fonts", "eloria-assets/tools", cwd=build_dir)
-            git("checkout", "--detach", "--force", sha, cwd=build_dir)
+            runner_source.materialize(build_dir, sha, git, STORAGE)
         else:
             git("worktree", "add", "--detach", str(build_dir), sha)
     else:
@@ -2690,6 +2689,7 @@ DefaultDirName={{localappdata}}\\Programs\\RabbitLands
 DefaultGroupName=Rabbit Lands
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
+SetupMutex={INSTALLER_MUTEX}
 OutputDir={stage.parent}
 OutputBaseFilename={stage.name}-setup
 Compression=lzma2/fast
@@ -2751,6 +2751,7 @@ DefaultDirName={{localappdata}}\\Programs\\RabbitLands
 DefaultGroupName=Rabbit Lands
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
+SetupMutex={INSTALLER_MUTEX}
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir={stage.parent}
@@ -2781,16 +2782,51 @@ Type: filesandordirs; Name: "{{app}}\\.eloria-previous"
 Filename: "{{app}}\\RabbitLands-updater.exe"; Parameters: "{parameters}"; WorkingDir: "{{app}}\\app"; Description: "Start Rabbit Lands"; Flags: nowait postinstall skipifsilent
 
 [Code]
-var DownloadPage: TDownloadWizardPage;
+var
+  DownloadPage: TDownloadWizardPage;
+  InstallPage: TOutputProgressWizardPage;
+  InstallingPayload: Boolean;
+  InstallError: String;
 
 procedure InitializeWizard;
 begin
   DownloadPage := CreateDownloadPage('Downloading Rabbit Lands', 'Downloading and verifying the game files. An internet connection is required.', nil);
   DownloadPage.ShowBaseNameInsteadOfUrl := True;
+  InstallPage := CreateOutputProgressPage('Installing Rabbit Lands',
+    'Verifying and unpacking the downloaded game files.');
+end;
+
+procedure CancelButtonClick(CurPageID: Integer; var Cancel, Confirm: Boolean);
+begin
+  if InstallingPayload then begin
+    Cancel := False;
+    Confirm := False;
+  end;
+end;
+
+procedure InstallLog(const S: String; const Error, FirstLine: Boolean);
+var
+  Line, Message: String;
+  Separator, Percent: Integer;
+begin
+  Log(S);
+  if Pos('RL_ERROR|', S) = 1 then
+    InstallError := Copy(S, 10, Length(S));
+  if Pos('RL_PROGRESS|', S) <> 1 then Exit;
+  Line := Copy(S, 13, Length(S));
+  Separator := Pos('|', Line);
+  if Separator = 0 then Exit;
+  Percent := StrToIntDef(Copy(Line, 1, Separator - 1), -1);
+  if (Percent < 0) or (Percent > 100) then Exit;
+  Message := Copy(Line, Separator + 1, Length(Line));
+  InstallPage.SetText(Message, 'Please keep setup open until this step finishes.');
+  InstallPage.SetProgress(Percent, 100);
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
-var ResultCode: Integer;
+var
+  ResultCode: Integer;
+  CancelWasEnabled: Boolean;
 begin
   Result := '';
   DownloadPage.Clear;
@@ -2811,10 +2847,31 @@ begin
   if Result <> '' then Exit;
   ExtractTemporaryFile('{helper.name}');
   ResultCode := -1;
-  if not Exec(ExpandConstant('{{tmp}}\\{helper.name}'),
-    ExpandConstant('--headless --log-file "{{tmp}}\\RabbitLands-install.log" -- --root "{{app}}" --parts "{{tmp}}"'),
-    '', SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
-    Result := ExpandConstant('The game files could not be installed. See {{tmp}}\\RabbitLands-install.log for details.');
+  InstallError := '';
+  InstallingPayload := True;
+  CancelWasEnabled := WizardForm.CancelButton.Enabled;
+  InstallPage.SetText('Starting game file verification...', 'Please keep setup open until this step finishes.');
+  InstallPage.SetProgress(0, 100);
+  InstallPage.Show;
+  WizardForm.CancelButton.Enabled := False;
+  try
+    try
+      if not ExecAndLogOutput(ExpandConstant('{{tmp}}\\{helper.name}'),
+        ExpandConstant('--headless --log-file "{{tmp}}\\RabbitLands-install.log" -- --root "{{app}}" --parts "{{tmp}}"'),
+        '', SW_HIDE, ewWaitUntilTerminated, ResultCode, @InstallLog) or (ResultCode <> 0) then begin
+        if InstallError <> '' then
+          Result := InstallError
+        else
+          Result := ExpandConstant('The game files could not be installed. See {{tmp}}\\RabbitLands-install.log for details.');
+      end;
+    except
+      Result := GetExceptionMessage;
+    end;
+  finally
+    InstallPage.Hide;
+    InstallingPayload := False;
+    WizardForm.CancelButton.Enabled := CancelWasEnabled;
+  end;
 end;
 '''
 

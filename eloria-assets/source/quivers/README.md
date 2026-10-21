@@ -11,6 +11,13 @@ strap is fitted to the wearer at that size rather than scaling away from the bod
 The fitting tool reshapes existing strap vertices; it creates no replacement
 geometry. Base-color UVs and triangle indices are preserved. Cases and seated
 arrows are rigid on `spine_03`; straps inherit the current body's torso weights.
+The fitter measures the imported loop's centre and broad cross-section along
+its length, then lays the existing strap vertices over the shoulder and chest.
+It does not flatten the buckle's relief or change its UVs. The `Cape_Clearance`
+shape changes the rear fit while keeping the chest shape neutral. Runtime
+`quiver_strap_fit.gd` measures the worn armor and cape in the body's rebound rest
+space, shares the resulting fit per outfit, and restores the original mesh
+when those layers are removed.
 
 Build and install into a **new** stage using current public sources:
 

@@ -1,0 +1,805 @@
+{
+ "date": "2026-10-21",
+ "what": "Game-socket read latency before/after: every waiting TLS record per read, a second read before the world sync, TCP no-delay",
+ "before": "develop 6b34bba9 src/network/network_client.gd",
+ "after": "branch fix/p0-client-socket",
+ "engine": "Godot 4.7.2-stable, headless console build",
+ "machine": "dev laptop (Core Ultra 9 275HX, Windows 11); server and client on loopback except the nagle_* rows, whose server ran in WSL2 Ubuntu 24.04 reached at the VM's own address",
+ "tool": "godot-client/tests/integration/socket_read_latency.py (+ .gd)",
+ "server_pattern": "one write (= one TLS record) per 50-ms tick holding 3 frames, plus one immediate write every 233 ms ('own step'); *_two_flushes adds a second write per tick; nagle_* send nothing and the client writes two frames back to back every 100 ms",
+ "units": "ms after the packet reached the socket (smallest observed delay = 0); cpu_s = Godot process CPU seconds for the whole run; idle_read_usec_per_frame = read entry points on an open link with nothing waiting",
+ "duration_s": {
+  "latency": 10.0,
+  "cpu": 20.0
+ },
+ "latency": {
+  "tls_21fps": {
+   "before": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 5.39,
+    "dispatch_ms": {
+     "p50": 802.1,
+     "p95": 1499.5,
+     "max": 1588.5,
+     "mean": 800.0
+    },
+    "present_ms": {
+     "p50": 802.1,
+     "p95": 1499.5,
+     "max": 1588.5,
+     "mean": 800.1
+    },
+    "dispatch_mean_first_third_ms": 277.1,
+    "dispatch_mean_last_third_ms": 1322.5,
+    "own_step_interval_error_ms": {
+     "sd": 25.0,
+     "p95_abs": 63.1
+    },
+    "fps": 21.1,
+    "physics_tick_gap_ms": {
+     "p10": 0.002,
+     "p50": 0.035,
+     "p90": 47.6
+    },
+    "cpu_s": 1.047
+   },
+   "after": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 6.47,
+    "dispatch_ms": {
+     "p50": 29.3,
+     "p95": 47.2,
+     "max": 59.0,
+     "mean": 25.3
+    },
+    "present_ms": {
+     "p50": 29.3,
+     "p95": 47.2,
+     "max": 59.0,
+     "mean": 25.3
+    },
+    "dispatch_mean_first_third_ms": 26.6,
+    "dispatch_mean_last_third_ms": 25.3,
+    "own_step_interval_error_ms": {
+     "sd": 17.2,
+     "p95_abs": 42.5
+    },
+    "fps": 21.2,
+    "physics_tick_gap_ms": {
+     "p10": 0.002,
+     "p50": 0.031,
+     "p90": 47.6
+    },
+    "cpu_s": 0.859
+   }
+  },
+  "tls_29fps": {
+   "before": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 8.49,
+    "dispatch_ms": {
+     "p50": 30.4,
+     "p95": 60.0,
+     "max": 78.2,
+     "mean": 28.5
+    },
+    "present_ms": {
+     "p50": 30.4,
+     "p95": 60.0,
+     "max": 78.3,
+     "mean": 28.5
+    },
+    "dispatch_mean_first_third_ms": 26.1,
+    "dispatch_mean_last_third_ms": 30.3,
+    "own_step_interval_error_ms": {
+     "sd": 30.6,
+     "p95_abs": 60.6
+    },
+    "fps": 29.2,
+    "physics_tick_gap_ms": {
+     "p10": 0.027,
+     "p50": 0.073,
+     "p90": 34.5
+    },
+    "cpu_s": 0.859
+   },
+   "after": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 10.48,
+    "dispatch_ms": {
+     "p50": 16.0,
+     "p95": 32.0,
+     "max": 47.2,
+     "mean": 20.0
+    },
+    "present_ms": {
+     "p50": 16.0,
+     "p95": 32.0,
+     "max": 47.2,
+     "mean": 20.0
+    },
+    "dispatch_mean_first_third_ms": 19.3,
+    "dispatch_mean_last_third_ms": 20.8,
+    "own_step_interval_error_ms": {
+     "sd": 17.8,
+     "p95_abs": 31.8
+    },
+    "fps": 29.2,
+    "physics_tick_gap_ms": {
+     "p10": 0.03,
+     "p50": 0.086,
+     "p90": 34.5
+    },
+    "cpu_s": 1.047
+   }
+  },
+  "tls_29fps_two_flushes": {
+   "before": {
+    "packets": 843,
+    "sent": 843,
+    "writes": 443,
+    "idle_read_usec_per_frame": 4.06,
+    "dispatch_ms": {
+     "p50": 2649.2,
+     "p95": 5013.5,
+     "max": 5265.3,
+     "mean": 2639.5
+    },
+    "present_ms": {
+     "p50": 2649.2,
+     "p95": 5013.6,
+     "max": 5265.3,
+     "mean": 2639.5
+    },
+    "dispatch_mean_first_third_ms": 881.4,
+    "dispatch_mean_last_third_ms": 4397.4,
+    "own_step_interval_error_ms": {
+     "sd": 17.0,
+     "p95_abs": 153.8
+    },
+    "fps": 29.1,
+    "physics_tick_gap_ms": {
+     "p10": 0.028,
+     "p50": 0.076,
+     "p90": 34.5
+    },
+    "cpu_s": 1.141
+   },
+   "after": {
+    "packets": 843,
+    "sent": 843,
+    "writes": 443,
+    "idle_read_usec_per_frame": 7.23,
+    "dispatch_ms": {
+     "p50": 15.8,
+     "p95": 32.4,
+     "max": 47.5,
+     "mean": 17.5
+    },
+    "present_ms": {
+     "p50": 15.8,
+     "p95": 32.4,
+     "max": 47.5,
+     "mean": 17.5
+    },
+    "dispatch_mean_first_third_ms": 17.5,
+    "dispatch_mean_last_third_ms": 17.8,
+    "own_step_interval_error_ms": {
+     "sd": 16.9,
+     "p95_abs": 31.1
+    },
+    "fps": 29.1,
+    "physics_tick_gap_ms": {
+     "p10": 0.03,
+     "p50": 0.073,
+     "p90": 34.5
+    },
+    "cpu_s": 0.75
+   }
+  },
+  "tls_60fps": {
+   "before": {
+    "packets": 646,
+    "sent": 646,
+    "writes": 244,
+    "idle_read_usec_per_frame": 4.9,
+    "dispatch_ms": {
+     "p50": 15.2,
+     "p95": 16.7,
+     "max": 44.5,
+     "mean": 12.6
+    },
+    "present_ms": {
+     "p50": 15.2,
+     "p95": 16.8,
+     "max": 44.5,
+     "mean": 12.6
+    },
+    "dispatch_mean_first_third_ms": 11.4,
+    "dispatch_mean_last_third_ms": 13.1,
+    "own_step_interval_error_ms": {
+     "sd": 16.4,
+     "p95_abs": 30.1
+    },
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.053,
+     "p50": 15.742,
+     "p90": 16.7
+    },
+    "cpu_s": 1.0
+   },
+   "after": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 8.14,
+    "dispatch_ms": {
+     "p50": 15.3,
+     "p95": 16.3,
+     "max": 30.8,
+     "mean": 11.9
+    },
+    "present_ms": {
+     "p50": 15.3,
+     "p95": 16.3,
+     "max": 30.8,
+     "mean": 12.0
+    },
+    "dispatch_mean_first_third_ms": 10.2,
+    "dispatch_mean_last_third_ms": 13.3,
+    "own_step_interval_error_ms": {
+     "sd": 10.0,
+     "p95_abs": 17.1
+    },
+    "fps": 60.2,
+    "physics_tick_gap_ms": {
+     "p10": 15.105,
+     "p50": 15.761,
+     "p90": 16.7
+    },
+    "cpu_s": 0.953
+   }
+  },
+  "tls_busy_24fps": {
+   "before": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 5.01,
+    "dispatch_ms": {
+     "p50": 32.6,
+     "p95": 62.3,
+     "max": 81.5,
+     "mean": 33.2
+    },
+    "present_ms": {
+     "p50": 47.6,
+     "p95": 77.4,
+     "max": 96.6,
+     "mean": 48.2
+    },
+    "dispatch_mean_first_third_ms": 35.7,
+    "dispatch_mean_last_third_ms": 34.8,
+    "own_step_interval_error_ms": {
+     "sd": 24.5,
+     "p95_abs": 47.4
+    },
+    "fps": 25.0,
+    "physics_tick_gap_ms": {
+     "p10": 4.018,
+     "p50": 4.048,
+     "p90": 34.3
+    },
+    "cpu_s": 11.812
+   },
+   "after": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 7.67,
+    "dispatch_ms": {
+     "p50": 9.6,
+     "p95": 22.2,
+     "max": 26.4,
+     "mean": 10.3
+    },
+    "present_ms": {
+     "p50": 20.1,
+     "p95": 37.3,
+     "max": 41.5,
+     "mean": 20.1
+    },
+    "dispatch_mean_first_third_ms": 10.0,
+    "dispatch_mean_last_third_ms": 10.3,
+    "own_step_interval_error_ms": {
+     "sd": 15.0,
+     "p95_abs": 33.3
+    },
+    "fps": 25.0,
+    "physics_tick_gap_ms": {
+     "p10": 4.018,
+     "p50": 4.047,
+     "p90": 34.3
+    },
+    "cpu_s": 11.797
+   }
+  },
+  "tcp_busy_24fps": {
+   "before": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 4.07,
+    "dispatch_ms": {
+     "p50": 20.1,
+     "p95": 37.7,
+     "max": 41.5,
+     "mean": 20.2
+    },
+    "present_ms": {
+     "p50": 35.1,
+     "p95": 52.7,
+     "max": 56.6,
+     "mean": 35.2
+    },
+    "dispatch_mean_first_third_ms": 19.8,
+    "dispatch_mean_last_third_ms": 19.8,
+    "own_step_interval_error_ms": {
+     "sd": 18.5,
+     "p95_abs": 33.7
+    },
+    "fps": 25.1,
+    "physics_tick_gap_ms": {
+     "p10": 4.015,
+     "p50": 4.041,
+     "p90": 34.3
+    },
+    "cpu_s": 11.875
+   },
+   "after": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 6.26,
+    "dispatch_ms": {
+     "p50": 10.3,
+     "p95": 24.2,
+     "max": 26.9,
+     "mean": 10.8
+    },
+    "present_ms": {
+     "p50": 20.0,
+     "p95": 39.3,
+     "max": 42.0,
+     "mean": 20.4
+    },
+    "dispatch_mean_first_third_ms": 10.4,
+    "dispatch_mean_last_third_ms": 11.2,
+    "own_step_interval_error_ms": {
+     "sd": 17.3,
+     "p95_abs": 33.6
+    },
+    "fps": 25.1,
+    "physics_tick_gap_ms": {
+     "p10": 4.012,
+     "p50": 4.04,
+     "p90": 34.3
+    },
+    "cpu_s": 11.719
+   }
+  },
+  "timer": {
+   "before": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 5.22,
+    "dispatch_ms": {
+     "p50": 804.0,
+     "p95": 1505.2,
+     "max": 1583.7,
+     "mean": 799.6
+    },
+    "present_ms": {
+     "p50": 804.0,
+     "p95": 1505.2,
+     "max": 1583.7,
+     "mean": 799.6
+    },
+    "dispatch_mean_first_third_ms": 275.2,
+    "dispatch_mean_last_third_ms": 1323.4,
+    "own_step_interval_error_ms": {
+     "sd": 25.3,
+     "p95_abs": 63.8
+    },
+    "fps": 21.2,
+    "physics_tick_gap_ms": {
+     "p10": 0.002,
+     "p50": 0.035,
+     "p90": 47.6
+    },
+    "timer": {
+     "wait_ms": 5.0,
+     "fires_per_s": 21.2,
+     "most_in_one_frame": 1
+    },
+    "cpu_s": 0.906
+   },
+   "after": {
+    "packets": 643,
+    "sent": 643,
+    "writes": 243,
+    "idle_read_usec_per_frame": 6.83,
+    "dispatch_ms": {
+     "p50": 21.6,
+     "p95": 46.8,
+     "max": 47.7,
+     "mean": 23.3
+    },
+    "present_ms": {
+     "p50": 21.7,
+     "p95": 46.9,
+     "max": 47.7,
+     "mean": 23.3
+    },
+    "dispatch_mean_first_third_ms": 24.4,
+    "dispatch_mean_last_third_ms": 23.3,
+    "own_step_interval_error_ms": {
+     "sd": 16.9,
+     "p95_abs": 46.4
+    },
+    "fps": 21.2,
+    "physics_tick_gap_ms": {
+     "p10": 0.002,
+     "p50": 0.035,
+     "p90": 47.6
+    },
+    "timer": {
+     "wait_ms": 5.0,
+     "fires_per_s": 21.2,
+     "most_in_one_frame": 1
+    },
+    "cpu_s": 0.906
+   }
+  },
+  "nagle_tcp": {
+   "before": {
+    "packets": 1,
+    "sent": 1,
+    "writes": 1,
+    "idle_read_usec_per_frame": 4.14,
+    "dispatch_ms": {
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "mean": 0.0
+    },
+    "present_ms": {
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "mean": 0.0
+    },
+    "dispatch_mean_first_third_ms": 0.0,
+    "dispatch_mean_last_third_ms": 0.0,
+    "own_step_interval_error_ms": {},
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.087,
+     "p50": 15.813,
+     "p90": 16.7
+    },
+    "pair_gap_ms": {
+     "n": 101,
+     "p50": 0.27,
+     "p95": 0.49,
+     "max": 0.78
+    },
+    "cpu_s": 1.078
+   },
+   "after": {
+    "packets": 1,
+    "sent": 1,
+    "writes": 1,
+    "idle_read_usec_per_frame": 6.4,
+    "dispatch_ms": {
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "mean": 0.0
+    },
+    "present_ms": {
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "mean": 0.0
+    },
+    "dispatch_mean_first_third_ms": 0.0,
+    "dispatch_mean_last_third_ms": 0.0,
+    "own_step_interval_error_ms": {},
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.082,
+     "p50": 15.799,
+     "p90": 16.7
+    },
+    "pair_gap_ms": {
+     "n": 100,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.11
+    },
+    "cpu_s": 1.141
+   }
+  },
+  "nagle_tls": {
+   "before": {
+    "packets": 1,
+    "sent": 1,
+    "writes": 1,
+    "idle_read_usec_per_frame": 5.98,
+    "dispatch_ms": {
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "mean": 0.0
+    },
+    "present_ms": {
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "mean": 0.0
+    },
+    "dispatch_mean_first_third_ms": 0.0,
+    "dispatch_mean_last_third_ms": 0.0,
+    "own_step_interval_error_ms": {},
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.076,
+     "p50": 15.82,
+     "p90": 16.7
+    },
+    "pair_gap_ms": {
+     "n": 96,
+     "p50": 0.18,
+     "p95": 0.45,
+     "max": 42.03
+    },
+    "cpu_s": 1.172
+   },
+   "after": {
+    "packets": 1,
+    "sent": 1,
+    "writes": 1,
+    "idle_read_usec_per_frame": 6.96,
+    "dispatch_ms": {
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "mean": 0.0
+    },
+    "present_ms": {
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.0,
+     "mean": 0.0
+    },
+    "dispatch_mean_first_third_ms": 0.0,
+    "dispatch_mean_last_third_ms": 0.0,
+    "own_step_interval_error_ms": {},
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.084,
+     "p50": 15.792,
+     "p90": 16.7
+    },
+    "pair_gap_ms": {
+     "n": 98,
+     "p50": 0.0,
+     "p95": 0.0,
+     "max": 0.05
+    },
+    "cpu_s": 1.078
+   }
+  }
+ },
+ "cpu": {
+  "tls_60fps": {
+   "before.0": {
+    "packets": 1286,
+    "sent": 1286,
+    "writes": 486,
+    "idle_read_usec_per_frame": 4.71,
+    "dispatch_ms": {
+     "p50": 15.5,
+     "p95": 29.1,
+     "max": 45.9,
+     "mean": 14.5
+    },
+    "present_ms": {
+     "p50": 15.5,
+     "p95": 29.1,
+     "max": 45.9,
+     "mean": 14.5
+    },
+    "dispatch_mean_first_third_ms": 14.5,
+    "dispatch_mean_last_third_ms": 14.4,
+    "own_step_interval_error_ms": {
+     "sd": 16.3,
+     "p95_abs": 30.8
+    },
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.069,
+     "p50": 15.702,
+     "p90": 16.7
+    },
+    "cpu_s": 1.172
+   },
+   "before.1": {
+    "packets": 1286,
+    "sent": 1286,
+    "writes": 486,
+    "idle_read_usec_per_frame": 4.23,
+    "dispatch_ms": {
+     "p50": 15.2,
+     "p95": 16.5,
+     "max": 45.5,
+     "mean": 12.2
+    },
+    "present_ms": {
+     "p50": 15.2,
+     "p95": 16.6,
+     "max": 45.5,
+     "mean": 12.3
+    },
+    "dispatch_mean_first_third_ms": 11.7,
+    "dispatch_mean_last_third_ms": 12.3,
+    "own_step_interval_error_ms": {
+     "sd": 14.9,
+     "p95_abs": 29.7
+    },
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.045,
+     "p50": 15.679,
+     "p90": 16.7
+    },
+    "cpu_s": 1.156
+   },
+   "before.2": {
+    "packets": 1286,
+    "sent": 1286,
+    "writes": 486,
+    "idle_read_usec_per_frame": 4.73,
+    "dispatch_ms": {
+     "p50": 15.1,
+     "p95": 16.6,
+     "max": 31.8,
+     "mean": 11.5
+    },
+    "present_ms": {
+     "p50": 15.1,
+     "p95": 16.6,
+     "max": 31.9,
+     "mean": 11.6
+    },
+    "dispatch_mean_first_third_ms": 10.5,
+    "dispatch_mean_last_third_ms": 12.3,
+    "own_step_interval_error_ms": {
+     "sd": 10.9,
+     "p95_abs": 18.2
+    },
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.076,
+     "p50": 15.687,
+     "p90": 16.7
+    },
+    "cpu_s": 1.094
+   },
+   "after.0": {
+    "packets": 1286,
+    "sent": 1286,
+    "writes": 486,
+    "idle_read_usec_per_frame": 7.55,
+    "dispatch_ms": {
+     "p50": 15.2,
+     "p95": 16.2,
+     "max": 31.4,
+     "mean": 11.4
+    },
+    "present_ms": {
+     "p50": 15.2,
+     "p95": 16.2,
+     "max": 31.4,
+     "mean": 11.4
+    },
+    "dispatch_mean_first_third_ms": 11.3,
+    "dispatch_mean_last_third_ms": 10.6,
+    "own_step_interval_error_ms": {
+     "sd": 12.3,
+     "p95_abs": 24.1
+    },
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.088,
+     "p50": 15.661,
+     "p90": 16.7
+    },
+    "cpu_s": 1.062
+   },
+   "after.1": {
+    "packets": 1286,
+    "sent": 1286,
+    "writes": 486,
+    "idle_read_usec_per_frame": 8.79,
+    "dispatch_ms": {
+     "p50": 15.2,
+     "p95": 16.4,
+     "max": 32.5,
+     "mean": 11.0
+    },
+    "present_ms": {
+     "p50": 15.2,
+     "p95": 16.4,
+     "max": 32.5,
+     "mean": 11.0
+    },
+    "dispatch_mean_first_third_ms": 10.1,
+    "dispatch_mean_last_third_ms": 11.2,
+    "own_step_interval_error_ms": {
+     "sd": 10.2,
+     "p95_abs": 16.8
+    },
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.06,
+     "p50": 15.697,
+     "p90": 16.7
+    },
+    "cpu_s": 1.125
+   },
+   "after.2": {
+    "packets": 1286,
+    "sent": 1286,
+    "writes": 486,
+    "idle_read_usec_per_frame": 9.7,
+    "dispatch_ms": {
+     "p50": 15.1,
+     "p95": 16.3,
+     "max": 30.3,
+     "mean": 11.1
+    },
+    "present_ms": {
+     "p50": 15.2,
+     "p95": 16.3,
+     "max": 30.3,
+     "mean": 11.1
+    },
+    "dispatch_mean_first_third_ms": 10.9,
+    "dispatch_mean_last_third_ms": 10.8,
+    "own_step_interval_error_ms": {
+     "sd": 9.6,
+     "p95_abs": 16.7
+    },
+    "fps": 60.1,
+    "physics_tick_gap_ms": {
+     "p10": 15.033,
+     "p50": 15.674,
+     "p90": 16.7
+    },
+    "cpu_s": 1.562
+   }
+  }
+ }
+}

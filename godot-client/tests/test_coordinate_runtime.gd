@@ -201,6 +201,15 @@ func run() -> void:
 	expect(not admin_context.admin_bounds({"id": "negative-map", "coordinatesSupported": 1}).ok, "map support flag must be boolean")
 	expect(not admin_context.admin_bounds({"id": "negative-map", "coordinateRevision": "wrong"}).ok, "admin metadata revision must match expected descriptor")
 	expect(admin_context.admin_bounds({"id": "negative-map", "coordinateRevision": catalog["negative-map"].coordinateRevision, "coordinatesSupported": true}).ok, "matching supported admin metadata accepted")
+	var group_event := {"type": "invasion_assistant", "state": {"kind": "groups", "groups": [{"map_id": "negative-map",
+		"movement": {"anchor": {"x": -1, "y": -1}, "radius": 2, "region": {"x0": -2, "y0": -2, "x1": 0, "y1": 0}}}]}}
+	expect(admin_context.convert(group_event).ok, "group movement accepts signed logical coordinates in verified bounds")
+	var bad_group: Dictionary = group_event.duplicate(true)
+	bad_group.state.groups[0].movement.region.x1 = 100000
+	expect(not admin_context.convert(bad_group).ok, "group movement rejects a region outside its coordinate profile")
+	bad_group = group_event.duplicate(true)
+	bad_group.state.groups[0].movement.anchor.x = true
+	expect(not admin_context.convert(bad_group).ok, "group movement rejects boolean coordinates")
 	live.coordinates = admin_context
 	var admin_window = load("res://src/ui/invasion_assistant.gd").new()
 	admin_window.coordinate_context = admin_context

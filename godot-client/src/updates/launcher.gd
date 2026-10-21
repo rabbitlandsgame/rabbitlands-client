@@ -5,6 +5,7 @@ var _root := ""
 var _lock := ""
 var _worker: Thread
 var _owns_lock := false
+var _lock_guard: FileAccess
 var _game_pid := 0
 
 func _ready() -> void:
@@ -25,6 +26,12 @@ func _ready() -> void:
 	_owns_lock = true
 	if Release.save_json(_lock.path_join("owner.json"), {"pid": OS.get_process_id()}) != OK:
 		_fail("The game folder is not writable. Extract Rabbit Lands to a folder you own.")
+		return
+	# Keep a Windows file handle open so another process cannot reclaim this
+	# lock merely because Godot only recognizes its own child process IDs.
+	_lock_guard = FileAccess.open(_lock.path_join("owner.json"), FileAccess.READ_WRITE)
+	if _lock_guard == null or _record_owner() != OK:
+		_fail("The launcher lock cannot be held.")
 		return
 	var identity := Release.read_json("res://data/client_release.json")
 	_worker = Thread.new()
@@ -50,7 +57,7 @@ func _ready() -> void:
 		_fail("Rabbit Lands could not start. The previous game is in .eloria-previous.")
 		return
 	_game_pid = pid
-	Release.save_json(_lock.path_join("owner.json"), {"pid": OS.get_process_id(), "game_pid": pid})
+	_record_owner(pid)
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
 	while OS.is_process_running(pid):
@@ -59,8 +66,17 @@ func _ready() -> void:
 	_release_lock()
 	get_tree().quit()
 
+func _record_owner(game_pid := 0) -> Error:
+	_lock_guard.seek(0)
+	_lock_guard.store_string(JSON.stringify({"pid": OS.get_process_id(), "game_pid": game_pid, "guarded": true}))
+	_lock_guard.flush()
+	return _lock_guard.get_error()
+
 func _release_lock() -> void:
 	if _owns_lock and (_game_pid == 0 or not OS.is_process_running(_game_pid)):
+		if _lock_guard != null:
+			_lock_guard.close()
+			_lock_guard = null
 		Release.remove_tree(_lock)
 		_owns_lock = false
 

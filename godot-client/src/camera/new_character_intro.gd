@@ -144,8 +144,13 @@ func arm(viewport: SubViewport) -> void:
 	_caption.show()
 	_layer.show()
 
-func blocks_input() -> bool:
+func is_active() -> bool:
 	return pending or playing or greeting_phase != &""
+
+func blocks_input() -> bool:
+	# Once Nash starts talking, the player may leave while he returns to his
+	# post. Continue updating that presentation independently of the input lock.
+	return is_active() and greeting_phase not in [&"conversation", &"return"]
 
 func allows_dialogue() -> bool:
 	return greeting_phase == &"conversation" or greeting_phase == &"waiting_dialogue"
@@ -157,7 +162,7 @@ func dismiss_conversation() -> void:
 func update(delta: float, rig: IsometricCameraController, actor: Node3D,
 		grounded: bool, guide_ready: bool, guide: Node3D = null, guide_id := -1,
 		dialogue: Dictionary = {}) -> void:
-	if not blocks_input():
+	if not is_active():
 		return
 	if greeting_phase != &"":
 		_update_greeting(delta, actor, dialogue)
@@ -279,7 +284,7 @@ func _return_to_post() -> void:
 	greeting_phase = &"return"
 	_phase_elapsed = 0.0
 	if _layer != null:
-		_layer.show()
+		_layer.hide()
 	_end_conversation()
 
 func _end_conversation() -> void:

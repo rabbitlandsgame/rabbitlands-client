@@ -1,7 +1,6 @@
 extends SceneTree
 
 const AssistantScript := preload("res://src/ui/invasion_assistant.gd")
-const SETTINGS_PATH := "user://eloria_hud.cfg"
 
 var failures := 0
 
@@ -12,12 +11,14 @@ func _init() -> void:
 
 func _run() -> void:
 	root.size = Vector2i(1280, 720)
-	_forget_stored_size()
 	var assistant = AssistantScript.new()
+	var monitor_preferences := "res://test-artifacts/invasion-monitor-%d.cfg" % Time.get_ticks_usec()
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://test-artifacts"))
+	assistant.monitor_preferences_path = monitor_preferences
 	root.add_child(assistant)
-	# The assistant used to open at 1120x720 and swallow a 1280x720 client.
-	_expect(assistant.size == Vector2i(784, 504),
-		"the assistant opens at about half the footprint it used to claim")
+	assistant._preferred_scale = 1.0
+	assistant._fit_to_viewport()
+	_expect(assistant.size == Vector2i(1100, 620), "builder opens at a readable frame size")
 	var commands: Array[String] = []
 	assistant.command_requested.connect(func(command: String) -> void: commands.append(command))
 	var registry_file := FileAccess.open("res://data/maps/registry.json", FileAccess.READ)
@@ -86,56 +87,23 @@ func _run() -> void:
 	_expect(assistant.size.x <= root.size.x and assistant.size.y <= root.size.y,
 		"assistant stays within the viewport")
 
-	# Resizing from the corner grip, and the preference that outlives it.
-	root.size = Vector2i(1280, 720)
-	assistant._fit_to_viewport()
-	var full_extent: Vector2 = assistant.get_visible_rect().size
-	_expect(absf(full_extent.x - 784.0) <= 1.0 and absf(full_extent.y - 504.0) <= 1.0,
-		"the layout is 784x504 at its shipped scale")
-
-	# The point of scaling rather than resizing: a smaller window draws the
-	# same layout smaller. A frame that shrank without its contents would take
-	# the roster or the map sidebar off the edge instead.
-	assistant.resize_to_scale(0.1)
-	_expect(assistant.size.x < 784 and assistant.size.y < 504,
-		"the grip shrinks the window")
-	var shrunk: Vector2 = assistant.get_visible_rect().size
-	_expect(absf(shrunk.x - full_extent.x) <= 2.0
-		and absf(shrunk.y - full_extent.y) <= 2.0,
-		"a shrunken window lays its contents out across the same extent,"
-			+ " so the elements get smaller rather than cut off")
-	_expect(assistant.size.x >= roundi(784.0 * 0.65),
-		"the grip cannot shrink the assistant past its smallest scale")
-	assistant.resize_to_scale(9.0)
-	_expect(assistant.size.x <= root.size.x and assistant.size.y <= root.size.y,
-		"the grip cannot grow the assistant past the viewport")
-	var grown: Vector2 = assistant.get_visible_rect().size
-	_expect(absf(grown.x - full_extent.x) <= 2.0
-		and absf(grown.y - full_extent.y) <= 2.0,
-		"an enlarged window draws the same layout larger rather than"
-			+ " stretching it into more room than it has content for")
-
-	assistant.resize_to_scale(1.25)
-	_expect(assistant.size == Vector2i(980, 630), "the grip scales the window")
-	assistant._flush_size_preference()
-	root.size = Vector2i(640, 400)
-	assistant._fit_to_viewport()
-	_expect(assistant.size.x < 980
-		and is_equal_approx(assistant._preferred_scale, 1.25),
-		"a viewport too small for the chosen scale draws it smaller without"
-			+ " forgetting the choice")
-	root.size = Vector2i(1280, 720)
-	assistant._fit_to_viewport()
-	_expect(assistant.size == Vector2i(980, 630),
-		"the remembered scale comes back once the viewport can hold it")
-
-	# A window opened again - in this session or the next one - starts at the
-	# size the player left it at rather than at the shipped one.
-	var reopened = AssistantScript.new()
-	root.add_child(reopened)
-	_expect(reopened.size == Vector2i(980, 630),
-		"a freshly opened assistant restores the stored size preference")
-	reopened.queue_free()
+	# Frame resizing reflows panels while text remains at readable scale.
+	root.size = Vector2i(1280,720)
+	assistant.resize_to_scale(0.65)
+	_expect(assistant.content_scale_factor == 1.0, "resizing never shrinks type")
+	_expect(not assistant.map_sidebar.visible, "compact builder collapses map sidebar")
+	assistant.resize_to_scale(1.0)
+	_expect(assistant.map_sidebar.visible, "wide builder restores map sidebar")
+	assistant.set_monitor_mode(true)
+	_expect(assistant.size.x <= 390 and assistant.monitor_panel.visible,
+		"monitor is a compact panel leaving the game visible")
+	_expect(assistant.position.x + assistant.size.x <= root.size.x - int(WindowDrag.RESERVED_RIGHT_RAIL),
+		"monitor leaves the resource rail visible")
+	assistant.set_monitor_mode(false)
+	_expect(assistant.workspace.visible and not assistant.monitor_panel.visible, "builder returns with shared state")
+	assistant._size_save_countdown = 0.0
+	_check_monitor_docking(assistant, monitor_preferences)
+	assistant._size_save_countdown = 0.0
 
 	assistant.apply_update({"kind": "groups", "groups": [{
 		"name": "ashfall", "description": "Ashfall Ridge", "map_id": "ember",
@@ -281,24 +249,129 @@ func _run() -> void:
 	assistant.god_storage_button.pressed.emit()
 	_expect(commands[-1] == "#god_storage",
 		"header button opens the invasion-master god storage")
+	# New movement controls use logical coordinates and preserve draft edits
+	# across server refreshes, including while the compact monitor is open.
+	assistant.anchor_enabled.button_pressed = true
+	assistant.anchor_x.value = 80
+	assistant.anchor_y.value = 90
+	assistant.anchor_radius.value = 8
+	assistant._on_region_selected(Rect2i(70, 80, 21, 21))
+	assistant._save_movement()
+	_expect(commands[-1] == "#invasion_assistant group movement ashfall|80|90|8|70|80|90|100",
+		"center, radius and inclusive region corners are sent together")
+	assistant.apply_update({"kind": "groups", "groups": [large_group]})
+	_expect(assistant.region_enabled.button_pressed and assistant.anchor_x.value == 80,
+		"a live group refresh preserves unapplied movement edits")
+	assistant.group_description.text = "Unfinished draft"
+	assistant.group_description.text_changed.emit("Unfinished draft")
+	assistant.group_description.caret_column = 5
+	assistant.apply_update({"kind": "groups", "groups": [large_group]})
+	_expect(assistant.group_description.text == "Unfinished draft", "refresh preserves unsaved group settings")
+	_expect(assistant.group_description.caret_column == 5, "refresh does not move the draft's editing caret")
+	assistant._discard_draft()
+	_expect(not assistant._draft_dirty and not assistant._movement_dirty, "discard restores server values")
+	assistant.set_monitor_mode(true)
+	assistant._on_monitor_location(1)
+	assistant._move_monitor_anchor()
+	_expect(commands[-1] == "#invasion_assistant group anchor ashfall|16|72",
+		"a named monitor location moves the group's anchor using its exact coordinates")
+	assistant.set_monitor_mode(false)
+	commands.clear()
+	assistant._spawn_group()
+	_expect(commands.is_empty() and assistant.action_dialog.visible, "spawn requires reviewing the selected group")
+	assistant._confirm_action()
+	_expect(commands[-1] == "#invasion_assistant group activate ashfall", "confirmed review activates its captured group")
+	assistant.action_dialog.hide()
+	var canvas = assistant.map_canvas
+	canvas.zoom_by(1.25)
+	_expect(canvas._tile(canvas._point(Vector2(80,90))) == Vector2i(80,90), "zoom preserves logical map coordinates")
+	canvas.reset_view()
+	var regions: Array[Rect2i] = []
+	canvas.region_selected.connect(func(region: Rect2i) -> void: regions.append(region))
+	canvas.selection_mode = 2
+	var down := InputEventMouseButton.new()
+	down.button_index = MOUSE_BUTTON_LEFT
+	down.pressed = true
+	down.position = canvas._point(Vector2(90,100))
+	canvas._gui_input(down)
+	var up := InputEventMouseButton.new()
+	up.button_index = MOUSE_BUTTON_LEFT
+	up.position = canvas._point(Vector2(70,80))
+	canvas._gui_input(up)
+	_expect(regions == [Rect2i(70,80,21,21)], "drawing in either direction normalizes inclusive logical region corners")
 	assistant.queue_free()
-	_forget_stored_size()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(monitor_preferences))
 	if failures == 0:
 		print("invasion assistant tests passed")
 	quit(failures)
 
 
-## The preference is written to the real settings file, so the assertions
-## above have to start from a client that has never been resized.
-func _forget_stored_size() -> void:
-	var config := ConfigFile.new()
-	if config.load(SETTINGS_PATH) != OK:
-		return
-	if not config.has_section_key(WindowPreferences.SECTION,
-			"invasion_assistant_scale"):
-		return
-	config.erase_section_key(WindowPreferences.SECTION, "invasion_assistant_scale")
-	config.save(SETTINGS_PATH)
+func _check_monitor_docking(assistant: Window, preferences_path: String) -> void:
+	var hud := {"area": Rect2(24, 18, 1100, 660)}
+	assistant.configure_monitor_dock(func() -> Rect2: return hud.area)
+	assistant.set_monitor_mode(true)
+	_expect(assistant.monitor_docked and assistant.borderless,
+		"monitor defaults to a seamless HUD dock")
+	_expect(assistant.position == Vector2i(734, 18) and assistant.size == Vector2i(390, 660),
+		"dock follows the exact 3D viewport edge and full available height")
+	_expect(assistant.monitor_dock_button.text == "Undock", "docked monitor exposes Undock")
+	hud.area = Rect2(12, 10, 1050, 650)
+	assistant._process(0.0)
+	_expect(assistant.position == Vector2i(672, 10) and assistant.size.y == 650,
+		"visible dock follows HUD geometry changes without reopening")
+	assistant.monitor_dock_button.pressed.emit()
+	_expect(not assistant.monitor_docked and assistant.size == Vector2i(390, 620),
+		"Undock restores a compact floating frame")
+	var down := InputEventMouseButton.new()
+	down.button_index = MOUSE_BUTTON_LEFT
+	down.pressed = true
+	assistant.monitor_header.gui_input.emit(down)
+	_expect(assistant._monitor_dragging, "undocked header starts a drag")
+	assistant._monitor_drag_offset = Vector2i(40, 12)
+	assistant._drag_monitor_to(Vector2i(300, 35))
+	var floating_position: Vector2i = assistant.position
+	_expect(floating_position == Vector2i(260, 23), "header drag keeps the cursor's grab offset")
+	var up := InputEventMouseButton.new()
+	up.button_index = MOUSE_BUTTON_LEFT
+	assistant.monitor_header.gui_input.emit(up)
+	_expect(not assistant._monitor_dragging, "releasing header finishes and saves the drag")
+	assistant._fit_to_viewport()
+	assistant.hide()
+	assistant.show()
+	assistant.set_monitor_mode(false)
+	assistant.set_monitor_mode(true)
+	_expect(assistant.position == floating_position, "floating position survives reopen and builder switches")
+	assistant.apply_update(assistant.index_state.duplicate(true))
+	_expect(assistant.position == floating_position, "live snapshots do not move the floating monitor")
+	var restored = AssistantScript.new()
+	restored.monitor_preferences_path = preferences_path
+	root.add_child(restored)
+	restored.configure_monitor_dock(func() -> Rect2: return hud.area)
+	restored.set_monitor_mode(true)
+	_expect(not restored.monitor_docked and restored.position == floating_position,
+		"a new assistant restores the saved undocked position")
+	restored.queue_free()
+	assistant._drag_monitor_to(Vector2i(-1000, 9000))
+	_expect(assistant.position == Vector2i(12, 40), "floating drag stays reachable inside the HUD boundary")
+	assistant._drag_monitor_to(floating_position + assistant._monitor_drag_offset)
+	assistant.monitor_dock_button.pressed.emit()
+	_expect(assistant.monitor_docked and assistant.position == Vector2i(672, 10),
+		"Dock right reattaches to the current HUD boundary")
+	assistant.monitor_header.gui_input.emit(down)
+	_expect(not assistant._monitor_dragging, "docked header cannot accidentally drag away")
+	assistant.set_monitor_docked(false)
+	_expect(assistant.position == floating_position, "undocking again restores the last floating position")
+	root.size = Vector2i(960, 540)
+	assistant._fit_to_viewport()
+	_expect(root.get_visible_rect().encloses(Rect2(assistant.position, assistant.size)),
+		"smaller viewport keeps the floating monitor and header on screen")
+	root.size = Vector2i(1280, 720)
+	assistant._fit_to_viewport()
+	_expect(assistant.position == floating_position, "restoring viewport restores the preferred floating position")
+	assistant.set_monitor_docked(true)
+	assistant.set_monitor_mode(false)
+	_expect(not assistant.borderless and not assistant.monitor_dock_button.visible,
+		"full builder keeps its normal frame and controls")
 
 
 func _check_map_coordinates_and_labels(assistant: Window) -> void:
@@ -326,6 +399,7 @@ func _check_map_coordinates_and_labels(assistant: Window) -> void:
 		"coordinateTransform": {"metresPerTile": 2.0, "serverOrigin": [100, 90],
 			"origin": [10, 0, 20], "invertServerY": true}}
 	canvas.set_map_state(state, texture, projection)
+	rect = canvas._map_rect()
 	var tile := Vector2i(120, 110)
 	# Tile centre -> world (51, -21) -> image UV (151/400, 59/300).
 	var expected := rect.position + Vector2(151.0 / 400.0, 59.0 / 300.0) * rect.size

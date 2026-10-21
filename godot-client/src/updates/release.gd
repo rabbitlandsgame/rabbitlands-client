@@ -157,10 +157,16 @@ static func safe_path(path: Variant) -> bool:
 			return false
 	return true
 
-static func assemble(cache: String, release: Dictionary) -> String:
+static func report_progress(progress: Callable, phase: String, completed: int, total: int, detail := "") -> void:
+	if progress.is_valid():
+		progress.call(phase, completed, total, detail)
+
+static func assemble(cache: String, release: Dictionary, progress := Callable()) -> String:
 	var output := FileAccess.open(cache.path_join("release.zip.tmp"), FileAccess.WRITE)
 	if output == null:
 		return "There is not enough writable space for the update."
+	var completed := 0
+	report_progress(progress, "Preparing game files", 0, int(release.size))
 	for index in release.parts.size():
 		var part: Dictionary = release.parts[index]
 		var path := cache.path_join("part-%04d" % index)
@@ -168,21 +174,26 @@ static func assemble(cache: String, release: Dictionary) -> String:
 			return "An update download failed verification."
 		var input := FileAccess.open(path, FileAccess.READ)
 		while input.get_position() < input.get_length():
-			output.store_buffer(input.get_buffer(CHUNK_BYTES))
+			var bytes := input.get_buffer(CHUNK_BYTES)
+			output.store_buffer(bytes)
 			if output.get_error() != OK:
 				return "The update could not be saved. Check free disk space."
+			completed += bytes.size()
+			report_progress(progress, "Preparing game files", completed, int(release.size))
 		input.close()
 	output.flush()
 	output.close()
+	report_progress(progress, "Verifying prepared game files", 0, 1)
 	if not check_file(cache.path_join("release.zip.tmp"), int(release.size), release.sha256):
 		return "The complete update failed verification."
+	report_progress(progress, "Verifying prepared game files", 1, 1)
 	if DirAccess.rename_absolute(cache.path_join("release.zip.tmp"), cache.path_join("release.zip")) != OK:
 		return "The update could not be saved."
 	for index in release.parts.size():
 		DirAccess.remove_absolute(cache.path_join("part-%04d" % index))
 	return ""
 
-static func extract(archive: String, destination: String, release: Dictionary, identity: Dictionary) -> String:
+static func extract(archive: String, destination: String, release: Dictionary, identity: Dictionary, progress := Callable()) -> String:
 	var zip := ZIPReader.new()
 	if zip.open(archive) != OK:
 		return "The update archive cannot be opened."
@@ -196,6 +207,8 @@ static func extract(archive: String, destination: String, release: Dictionary, i
 		return "The update inventory is invalid."
 	var seen: Dictionary = {}
 	var total := 0
+	var completed := 0
+	report_progress(progress, "Unpacking game files", 0, int(release.unpacked_size), "0 of %d files" % inventory.size())
 	for index in inventory.size():
 		var entry: Variant = inventory[index]
 		if not entry is Dictionary or not safe_path(entry.get("path")) or not valid_hash(entry.get("sha256")):
@@ -227,9 +240,12 @@ static func extract(archive: String, destination: String, release: Dictionary, i
 				return "An update file cannot be written. Check free disk space."
 			remaining -= bytes.size()
 			chunk += 1
+			completed += bytes.size()
+			report_progress(progress, "Unpacking game files", completed, int(release.unpacked_size), "%d of %d files" % [index, inventory.size()])
 		file.close()
 		if not check_file(target, int(entry.size), entry.sha256):
 			return "An extracted update failed verification."
+		report_progress(progress, "Unpacking game files", completed, int(release.unpacked_size), "%d of %d files" % [index + 1, inventory.size()])
 	zip.close()
 	var descriptor := read_json(destination.path_join("app/client-release.json"))
 	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
@@ -258,7 +274,7 @@ static func recover(root: String) -> String:
 	DirAccess.remove_absolute(journal)
 	return ""
 
-static func install(root: String, identity: Dictionary, repair := false) -> String:
+static func install(root: String, identity: Dictionary, repair := false, progress := Callable()) -> String:
 	if update_owner(identity) != "github":
 		return "This installation is updated by its distribution service."
 	# Also protect games started directly, outside the restart launcher.
@@ -286,9 +302,11 @@ static func install(root: String, identity: Dictionary, repair := false) -> Stri
 	if not repair and contains_commit(current, release.commit):
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return ""
+	report_progress(progress, "Verifying game archive", 0, 1)
 	if not check_file(cache.path_join("release.zip"), int(release.size), release.sha256):
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return "The downloaded update failed verification. The installed game was kept."
+	report_progress(progress, "Verifying game archive", 1, 1)
 	var stage := root.path_join(".eloria-update-stage")
 	var backup := root.path_join(".eloria-previous")
 	for name: String in ROOTS:
@@ -296,10 +314,11 @@ static func install(root: String, identity: Dictionary, repair := false) -> Stri
 			return "The installed game folders are missing or are links. Extract a fresh client download."
 	if remove_tree(stage) != OK or DirAccess.make_dir_recursive_absolute(stage) != OK:
 		return "The update staging folder cannot be created."
-	var error := extract(cache.path_join("release.zip"), stage, release, identity)
+	var error := extract(cache.path_join("release.zip"), stage, release, identity, progress)
 	if error != "":
 		remove_tree(stage)
 		return error
+	report_progress(progress, "Installing verified game files", 0, ROOTS.size())
 	if remove_tree(backup) != OK or DirAccess.make_dir_recursive_absolute(backup) != OK:
 		return "The previous update backup cannot be replaced."
 	var journal := root.path_join(".eloria-update-journal.json")
@@ -309,6 +328,7 @@ static func install(root: String, identity: Dictionary, repair := false) -> Stri
 		if DirAccess.rename_absolute(root.path_join(name), backup.path_join(name)) != OK or DirAccess.rename_absolute(stage.path_join(name), root.path_join(name)) != OK:
 			var rollback := recover(root)
 			return "The update could not be installed; the previous game was restored." if rollback == "" else rollback
+		report_progress(progress, "Installing verified game files", ROOTS.find(name) + 1, ROOTS.size())
 	# Clear the journal before marking the download consumed. A crash before
 	# this point rolls the folders back together on the following launch.
 	if DirAccess.remove_absolute(journal) != OK:

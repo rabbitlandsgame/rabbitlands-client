@@ -139,6 +139,11 @@ func _send_release_identity() -> void:
 const HEARTBEAT_INTERVAL_MSEC := 25000
 ## Backoff for an unexpected drop. A deliberate disconnect never reconnects.
 const RECONNECT_DELAYS_MSEC: Array[int] = [1000, 2000, 4000, 8000, 15000]
+## The most TLS records one read takes off the socket (16 KiB of plaintext
+## each). Anything still waiting is left for the next read, later in the same
+## frame or early in the next; the bound only keeps a flooding peer from
+## holding the frame.
+const MAXIMUM_RECORDS_PER_READ := 64
 
 signal reconnect_progress(attempt: int, total: int, delay_msec: int)
 
@@ -152,6 +157,10 @@ var _reconnect_enabled := false
 var _reconnect_attempt := 0
 var _reconnect_at_msec := 0
 var _last_heartbeat_msec := 0
+## Whether this connection attempt's socket has TCP no-delay set. Every
+## connect opens a new socket, so it is set again for each one.
+var _no_delay_set := false
+var _late_read: Node
 
 ## Whether this session wraps the socket in TLS. The protocol is identical
 ## either way: only the bytes between this client and the socket change, so
@@ -183,6 +192,7 @@ func connect_to_server(host: String, port: int, secure := true,
 	_secure = secure
 	_trusted_certificate_path = trusted_certificate_path
 	_handshaking = false
+	_no_delay_set = false
 	_set_state("connecting")
 	var error := _peer.connect_to_host(host, port)
 	if error != OK:
@@ -477,6 +487,7 @@ func _process(_delta: float) -> void:
 		# A reconnect gets a fresh TLS session. Reusing the old one would try
 		# to resume a handshake against a socket that no longer exists.
 		_handshaking = false
+		_no_delay_set = false
 		if _secure:
 			_tls.disconnect_from_stream()
 		if _peer.connect_to_host(_host, _port) != OK:
@@ -493,6 +504,15 @@ func _process(_delta: float) -> void:
 			# The peer closed the socket without an error status.
 			_drop_connection("connection_closed")
 		return
+	# Send each small frame - a click, a step, a swing - the moment it is
+	# written. With Nagle's algorithm on, a frame written while the one before
+	# it was still unacknowledged waited for that ACK: a round trip, or the
+	# server's delayed-ACK timer. TLS writes through this same socket, so this
+	# covers the encrypted link too, and setting it before the handshake keeps
+	# the handshake's own small records from being held.
+	if not _no_delay_set:
+		_peer.set_no_delay(true)
+		_no_delay_set = true
 
 	# TCP is up. A secure session is not usable until the handshake finishes,
 	# so the opening frames wait behind it rather than being written in the
@@ -531,14 +551,69 @@ func _process(_delta: float) -> void:
 		send_frame(EloriaProtocol.encode(EloriaProtocol.ClientMessage.SEND_OPENING_SCREEN))
 		_set_state("connected")
 	_send_due_heartbeat()
+	_read_link()
+
+## The second read of each frame. Network is an autoload, so its _process runs
+## before the scene's; everything that arrived during the rest of the frame's
+## physics and process work used to wait for the next frame's read, and so
+## reached the screen a whole frame later. This child runs after every other
+## node's _process (process_priority), before Main's deferred world sync
+## presents the frame, so those packets are shown in the frame they arrived in.
+## Order is unchanged: both reads append to the one receive buffer on the main
+## thread and dispatch from it in arrival order.
+class LateRead extends Node:
+	var read: Callable
+	func _process(_delta: float) -> void:
+		read.call()
+
+func _ready() -> void:
+	_late_read = LateRead.new()
+	_late_read.name = "LateRead"
+	_late_read.read = _read_late
+	_late_read.process_priority = 1 << 30
+	add_child(_late_read, false, Node.INTERNAL_MODE_BACK)
+
+func _read_late() -> void:
+	# Connection changes stay with _process; this only reads a link that is
+	# already open. The next frame's _process sees any status this poll finds.
+	# set_process(false) on Network stops both reads, as it stopped the one.
+	if not is_processing() or _state != "connected" or not _link_ready():
+		return
+	if _secure:
+		_tls.poll()
+		if _tls.get_status() != StreamPeerTLS.STATUS_CONNECTED:
+			return
+	_read_link()
+
+## Takes everything waiting on the link and dispatches the complete packets.
+## StreamPeerTLS decrypts one TLS record per poll() and get_available_bytes()
+## counts only that record, so one read per frame took at most one record a
+## frame. The server writes a record per flush - every 50-ms tick, plus each
+## immediate send such as the player's own step - so whenever it wrote more
+## records a second than the client drew frames, the view fell further behind
+## every second: at 21 FPS it averaged 0.3 s behind over the first three
+## seconds and 1.3 s over the last three of ten (docs/runtime-performance.md,
+## "Reading the game socket"). Each record
+## read here is followed by another poll until the socket is empty. Plain TCP
+## already returned everything buffered in one read.
+func _read_link() -> void:
 	var link := _link()
-	var available := link.get_available_bytes()
-	if available > 0:
+	var received := false
+	for _record in MAXIMUM_RECORDS_PER_READ:
+		var available := link.get_available_bytes()
+		if available <= 0:
+			break
 		var result := link.get_data(available)
 		if result[0] != OK:
 			protocol_error.emit("socket_read_failed")
 			return
 		_rx.append_array(result[1])
+		received = true
+		if _secure:
+			_tls.poll()
+			if _tls.get_status() != StreamPeerTLS.STATUS_CONNECTED:
+				break
+	if received:
 		_drain_packets()
 
 func _drain_packets() -> void:
