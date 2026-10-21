@@ -1034,6 +1034,52 @@
         },
         "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
         "standsAlone": false
+      },
+      "rl_verdigris_v1": {
+        "label": "Verdigris",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_verdigris.glb",
+        "vertices": 1286,
+        "triangles": 638,
+        "alphaTested": false,
+        "height": 0.507,
+        "sha256": "ea190ec6e6dae162cfb4d490081407dcacbf7f57ac1027fda0e1ffffe01928ef",
+        "resourcePalette": {
+          "stone": "#6b6258",
+          "mineral": "#3fae8a"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
+      },
+      "rl_venom_bulb_v1": {
+        "label": "Venom Bulb",
+        "kind": "flora",
+        "tier": "rare",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_venom_bulb.glb",
+        "vertices": 2128,
+        "triangles": 931,
+        "alphaTested": false,
+        "height": 0.9,
+        "sha256": "204fc93fab62073cc3e6358c657a016b117515db941c59ed8fdd4c84c0b62c67",
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
+      },
+      "rl_lichen_v1": {
+        "label": "Lichen",
+        "kind": "flora",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_lichen.glb",
+        "vertices": 1136,
+        "triangles": 782,
+        "alphaTested": false,
+        "height": 0.272,
+        "sha256": "bd9fc668d49e1b320d6441ad3f4672c9c9478ffb793ec0328ca03861007c9570",
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "standsAlone": false
       }
     },
     "resources": {
@@ -1114,6 +1160,9 @@
         "lavender_clump_a",
         "lavender_clump_b"
       ],
+      "Lichen": [
+        "rl_lichen_v1"
+      ],
       "Moss": [
         "rl_moss_v1"
       ],
@@ -1148,6 +1197,12 @@
       ],
       "Toadstool": [
         "rl_toadstool_v1"
+      ],
+      "Venom Bulb": [
+        "rl_venom_bulb_v1"
+      ],
+      "Verdigris": [
+        "rl_verdigris_v1"
       ],
       "Watercress": [
         "watercress_mat_a",
@@ -1341,6 +1396,58 @@
       "height": 3.6,
       "radius": 1.6,
       "label": "The Amethyst Geode"
+    },
+    "59012": {
+      "entrance": true,
+      "exteriorTile": [
+        865,
+        700
+      ],
+      "scene": "res://assets/world/underground/icicle_arch.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -3.0
+      ],
+      "visualHeight": 5.2,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "Rimewater Ice Caves"
+    },
+    "59013": {
+      "entrance": true,
+      "exteriorTile": [
+        288,
+        755
+      ],
+      "scene": "res://assets/world/underground/serpent_arch.glb",
+      "modelOffset": [
+        0.0,
+        0.0,
+        -3.0
+      ],
+      "visualHeight": 5.2,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "Serpent Catacombs"
+    },
+    "59014": {
+      "entrance": true,
+      "exteriorTile": [
+        714,
+        754
+      ],
+      "scene": "res://assets/world/underground/sun_vault_door.glb",
+      "yaw": 90.0,
+      "modelOffset": [
+        -3.0,
+        0.0,
+        0.0
+      ],
+      "visualHeight": 5.2,
+      "height": 3.6,
+      "radius": 1.6,
+      "label": "Mirror Vaults"
     }
   }
 }
