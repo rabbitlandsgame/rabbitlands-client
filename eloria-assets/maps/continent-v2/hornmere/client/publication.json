@@ -2,24 +2,24 @@
  "region": "hornmere",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "8991ac658eeceb4d2c22ce608aef3f2184ea02d2b09577dec0986efb5d176afd",
-  "sceneSha256": "734a90ac9fd94a008b6704a1dcf66374bea31baa9b33e4a2488b579c967af6f2",
+  "sha256": "c8100da79efcc2c1a085a1383d0005772fceb7ffacc6b2192f0ecee6668d0e17",
+  "sceneSha256": "3edb0bf43336fbe0f766cb888121efc3b83f93ae51b3a11f98fbc60bcf1c8d43",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/hornmere/hornmere.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "55f27d19fe0a642f5d47c80cf72b87b3f38ee6b9d9312086083f95e47d22ba0a",
-  "collisionSha256": "3703a460ccb3323037925fd4165452bc2d334cf3d2582aba90c46a7f8542067c",
-  "servedGridSha256": "5f406853fade2961ba7f3f60b123de174d28caaf028ab6383e31b60190dc4d82",
-  "walkableCells": 812741,
-  "openTiles": 196158,
-  "sourceSnapshotSha256": "8991ac658eeceb4d2c22ce608aef3f2184ea02d2b09577dec0986efb5d176afd"
+  "sidecarSha256": "936d86b4c2c506303370247d0ff2a8f4b8a017c56ba55b6ec693d1c68919dd05",
+  "collisionSha256": "04a61264b2adf242d7212e6945394a8dbfebf6adf74c2ce3f50ced4722ab7385",
+  "servedGridSha256": "2199b8e0cf9ca94c0131f4f859abad3a83d317ff3a481be279d4ecdfaf5a5a45",
+  "walkableCells": 812573,
+  "openTiles": 196111,
+  "sourceSnapshotSha256": "c8100da79efcc2c1a085a1383d0005772fceb7ffacc6b2192f0ecee6668d0e17"
  },
  "chunks": 104,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 70817928,
-  "max": 2275500,
+  "total": 70814376,
+  "max": 2271040,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -67,7 +67,7 @@
   "03_03": 11.4,
   "03_04": 11.4,
   "03_05": 67.3,
-  "03_06": 61.5,
+  "03_06": 65.5,
   "03_07": 112.3,
   "03_08": 104.0,
   "03_09": 92.1,
@@ -85,7 +85,7 @@
   "04_08": 67.8,
   "04_09": 138.3,
   "04_10": 67.5,
-  "04_11": 67.9,
+  "04_11": 63.9,
   "04_12": 11.4,
   "04_13": 11.0,
   "05_01": 11.0,
@@ -106,8 +106,8 @@
   "06_03": 59.8,
   "06_04": 67.9,
   "06_05": 92.0,
-  "06_06": 126.6,
-  "06_07": 168.2,
+  "06_06": 126.7,
+  "06_07": 168.1,
   "06_08": 104.3,
   "06_09": 160.0,
   "06_10": 115.2,
@@ -116,7 +116,7 @@
   "06_13": 11.0,
   "07_01": 11.0,
   "07_02": 11.3,
-  "07_03": 23.6,
+  "07_03": 27.6,
   "07_04": 67.8,
   "07_05": 83.8,
   "07_06": 134.1,
@@ -129,19 +129,19 @@
   "07_13": 11.0
  },
  "timings": {
-  "snapshot_s": 1.1,
+  "snapshot_s": 0.8,
   "terrain_s": 0.2,
   "water_s": 0.0,
-  "overlays_s": 1.1,
+  "overlays_s": 1.0,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 125897280,
+  "surface_glb_bytes": 125897580,
   "walk_kit_nodes": 7,
   "library_s": 0.2,
   "harvest_nodes": 12,
-  "chunks_s": 2.3,
-  "space_passes_s": 4.4
+  "chunks_s": 2.5,
+  "space_passes_s": 4.5
  },
- "seconds": 18.5,
+ "seconds": 19.1,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 0,
@@ -157,14 +157,14 @@
   "algorithm": "whole-metre-budget-phase-v1",
   "phaseMetres": [
    37,
-   68
+   69
   ],
   "originMetres": [
    -986,
-   -955
+   -954
   ],
-  "maximumPlacements": 74,
-  "maximumTriangles": 138459,
+  "maximumPlacements": 73,
+  "maximumTriangles": 137869,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
