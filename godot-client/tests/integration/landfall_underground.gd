@@ -147,6 +147,15 @@ func run() -> void:
 		if not (section.get("pools", []) as Array).is_empty():
 			var water := loader.world_root.find_child("Water_" + str(section.id) + "_*", true, false) as MeshInstance3D
 			check(water != null and water.material_override is ShaderMaterial, "The pools draw their water: " + str(section.id))
+	# Walkable ledges (a section's `ledges`): the rendered walk surface climbs each ramp from the floor to its terrace.
+	for section: Dictionary in plan.sections:
+		for ledge: Dictionary in section.get("ledges", []):
+			for ramp: Array in ledge.get("ramps", []):
+				var foot := ground(space, Vector3(ramp[0], 0, cells - float(ramp[1])))
+				var top := ground(space, Vector3(ramp[2], 0, cells - float(ramp[3])))
+				check(not foot.is_empty() and not top.is_empty() and absf((foot.position as Vector3).y) < 0.05
+					and absf((top.position as Vector3).y - float(ledge.height)) < 0.05,
+					"A ledge's ramp climbs from the floor to its terrace: %s %s" % [section.id, ramp])
 	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/world/objects.json"))
 	var adapter := loader.manifest.coordinate_adapter()
 	# The client's presentation path for this map: the package states none, so

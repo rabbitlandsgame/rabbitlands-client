@@ -170,6 +170,43 @@ SELECTION = {
     'resource_pearl': ('crownwater','oyster-baskets-1','height',.8),
     'resource_sap': ('lf-biomes','wooden-pail-1','height',.55),
     'resource_ember_crystal': ('lf-biomes','crystal-growth-3','height',1.0),
+    # wave 3 (owner 2026-10-20): the ice, catacomb and vault themes (build_underground.THEMES), their set pieces and
+    # door art, and laid-out harvest art for Verdigris, Venom Bulb and Lichen. Rendered and chosen from the reviewed
+    # kits; no new models.
+    'icicle_arch': ('whitehorn_range','icicle-rock-arch-1','height',5.2),
+    'glacier_block': ('lf-biomes','glacier-block-1','height',3.4),
+    'ice_shards': ('lf-biomes','ice-shards-1','height',3.2),
+    'ice_shards_2': ('lf-biomes','ice-shards-2','height',1.8),
+    'snowcap_boulder_1': ('lf-biomes','snowcap-boulder-1','height',3.2),
+    'snowy_boulder_2': ('lf-biomes','snowy-boulder-2','height',2.8),
+    'frozen_waterfall': ('whitehorn_range','frozen-waterfall-1','height',8.0),
+    'icicle_fringe': ('lf-biomes','icicle-fringe-1','length',4.0),
+    'frozen_pond': ('whitehorn_range','frozen-pond-1','length',8.0),
+    'snow_drift': ('lf-biomes','snow-drift-1','length',5.0),
+    'snow_scree': ('lf-biomes','snow-scree-1','length',3.0),
+    'climbing_gear': ('lf-biomes','climbing-gear-basket-1','height',1.0),
+    'prospector_lean_to': ('lf-biomes','prospector-lean-to-1','length',3.0),
+    'temple_sanctum': ('lf-biomes','temple-sanctum-1','height',5.5),
+    'sun_vault_door': ('lf-biomes','sun-vault-door-1','height',5.2),
+    'serpent_gate_column': ('lf-biomes','serpent-gate-column-1','height',4.6),
+    'serpent_rubble': ('lf-biomes','serpent-ruin-5','height',2.6),
+    'serpent_column_ruin': ('lf-biomes','serpent-ruin-2','height',3.4),
+    'sun_stela': ('lf-biomes','sun-stela-1','height',3.0),
+    'clay_jars': ('manymouth_delta','clay-water-jars-1','height',1.1),
+    'giant_lens_stand': ('lf-biomes','giant-lens-stand-1','height',4.2),
+    'mirror_obelisk': ('lf-biomes','mirror-obelisk-1','height',4.6),
+    'sun_mirror': ('lf-biomes','sun-mirror-1','height',2.8),
+    'reflecting_pool': ('crownwater','reflecting-pool-1','length',6.0),
+    'mirror_basin': ('lf-biomes','mirror-basin-1','length',6.0),
+    'colonnade_arch': ('lf-biomes','ring-colonnade-1','height',4.4),
+    'obelisk_lamp': ('crownwater','obelisk-lamp-1','height',3.2),
+    'lens_tripod': ('lf-biomes','lens-tripod-1','height',1.6),
+    'lens_grinder': ('lf-biomes','lens-grinder-bench-1','height',1.3),
+    'lens_crate': ('lf-biomes','lens-crate-basket-1','height',.8),
+    'sundial_plinth': ('lf-biomes','sundial-plinth-1','height',1.3),
+    'resource_verdigris': ('lf-biomes','vein-scree-4','length',1.4),
+    'resource_venom_bulb': ('lf-biomes','samphire-clump-1','height',.9),
+    'resource_lichen': ('lf-biomes','lichen-stone-mat-3','length',1.5),
 }
 KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/prototypes'}
 
@@ -258,6 +295,35 @@ HARVEST_PRESENTATION = {
     2007: {'variant': 1, 'yaw': 0.0},   # Flint
     2008: {'variant': 0, 'yaw': 180.0},
     2009: {'variant': 1, 'yaw': 90.0},
+    # wave 3 (owner 2026-10-20): the Rimewater Ice Caves, the Serpent Catacombs and the Mirror Vaults, laid out the
+    # same way (node_presentation.py); Verdigris, Venom Bulb and Lichen have one laid-out variant each.
+    2108: {'variant': 0, 'yaw': 0.0},  # Quartz rimewater_ice_caves
+    2109: {'variant': 1, 'yaw': 0.0},  # Quartz rimewater_ice_caves
+    2110: {'variant': 0, 'yaw': 225.0},  # Quartz rimewater_ice_caves
+    2111: {'variant': 0, 'yaw': 45.0},  # Stormglass rimewater_ice_caves
+    2112: {'variant': 0, 'yaw': 0.0},  # Stormglass rimewater_ice_caves
+    2113: {'variant': 0, 'yaw': 315.0},  # Stormglass rimewater_ice_caves
+    2114: {'variant': 0, 'yaw': 180.0},  # Stormglass rimewater_ice_caves
+    2201: {'variant': 0, 'yaw': 90.0},  # Lichen serpent_catacombs
+    2202: {'variant': 0, 'yaw': 180.0},  # Lichen serpent_catacombs
+    2203: {'variant': 0, 'yaw': 180.0},  # Lichen serpent_catacombs
+    2204: {'variant': 0, 'yaw': 90.0},  # Lichen serpent_catacombs
+    2205: {'variant': 0, 'yaw': 0.0},  # Venom Bulb serpent_catacombs
+    2206: {'variant': 0, 'yaw': 270.0},  # Venom Bulb serpent_catacombs
+    2207: {'variant': 0, 'yaw': 0.0},  # Venom Bulb serpent_catacombs
+    2208: {'variant': 0, 'yaw': 0.0},  # Verdigris serpent_catacombs
+    2209: {'variant': 0, 'yaw': 0.0},  # Verdigris serpent_catacombs
+    2210: {'variant': 0, 'yaw': 90.0},  # Verdigris serpent_catacombs
+    2211: {'variant': 0, 'yaw': 270.0},  # Verdigris serpent_catacombs
+    2212: {'variant': 0, 'yaw': 180.0},  # Verdigris serpent_catacombs
+    2301: {'variant': 0, 'yaw': 0.0},  # Stormglass mirror_vaults
+    2302: {'variant': 0, 'yaw': 45.0},  # Stormglass mirror_vaults
+    2303: {'variant': 0, 'yaw': 270.0},  # Stormglass mirror_vaults
+    2307: {'variant': 1, 'yaw': 90.0},  # Quartz mirror_vaults
+    2308: {'variant': 0, 'yaw': 270.0},  # Quartz mirror_vaults
+    2309: {'variant': 1, 'yaw': 180.0},  # Quartz mirror_vaults
+    2310: {'variant': 0, 'yaw': 0.0},  # Verdigris mirror_vaults
+    2311: {'variant': 0, 'yaw': 180.0},  # Verdigris mirror_vaults
 }
 
 
@@ -479,6 +545,9 @@ def main():
         # wave 2
         'Pearl': ('resource_pearl', None), 'Sap': ('resource_sap', None),
         'Ember Crystal': ('resource_ember_crystal', {'stone': '#3e3836', 'mineral': '#ff7a2c'}),
+        # wave 3: verdigris crusts (the scree's veins in copper green), venom bulbs, lichen-crusted stones
+        'Verdigris': ('resource_verdigris', {'stone': '#6b6258', 'mineral': '#3fae8a'}),
+        'Venom Bulb': ('resource_venom_bulb', None), 'Lichen': ('resource_lichen', None),
     }
     for label, (asset, palette) in laid_out.items():
         identity = 'rl_'+label.lower().replace(' ','_')+'_v1'

@@ -134,6 +134,15 @@ static func _style_surfaces(world: Node3D, surfaces: Dictionary) -> void:
 			continue
 		var ground: Variant = section_surfaces(id, "Walk_", surfaces).get("floor", {})
 		var floor_style: Dictionary = ground if ground is Dictionary else {}
+		if str(floor_style.get("texture", "")) == "authored":
+			# The shell's own floor material (the theme's `floor`, e.g. the ice
+			# caves' packed snow), tinted: a floor no class texture stands in for.
+			var own := mesh.get_active_material(0) as StandardMaterial3D
+			if own != null:
+				own = own.duplicate() as StandardMaterial3D
+				own.albedo_color = _colour(floor_style.get("tint"), Color.WHITE)
+				mesh.material_override = own
+				continue
 		var material := StandardMaterial3D.new()
 		# With mipmaps even where a fresh checkout imported the PNG without.
 		material.albedo_texture = LookGround.class_texture(str(floor_style.get("texture", "packed_earth")))
