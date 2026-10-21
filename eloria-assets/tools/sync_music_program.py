@@ -10,6 +10,7 @@ def room_program(name: str) -> str | None:
     name = name.lower()
     for words, program in [
         (('tavern', 'inn', 'ferryman'), 'inn'),
+        (('sunken', 'undercity'), 'ancient_temple'),
         (('chapel', 'temple', 'basilica', 'sanctuary', 'sanctum', 'shrine'), 'temple'),
         (('snowline', 'shelter'), 'winter_home'),
         (('hall', 'castle'), 'castle'),
