@@ -335,6 +335,48 @@ THEMES = {
                      'water': {'deep': [.03,.08,.16], 'clear': [.35,.55,.80], 'glow': [.04,.08,.14]}},
         'minimap': {'floor': (74,76,92), 'edge': (160,166,196), 'water': (96,150,190)},
     },
+    # --- pass 2 wave C themes ---
+    # The Undercity: the buried streets of Suncoil's hidden ruined city under the Serpent Catacombs - cut-stone
+    # plazas and collapsed streets round ruined blocks, walled with serpent friezes, dressed stone, fallen columns and
+    # rubble, temple flagstones underfoot, jade lamp light.
+    'undercity': {
+        'shape': 'boxes', 'floor': 'verdant_terrace_stone', 'rock': 'verdant_limestone_cliff',
+        'bed': 'verdant_mossy_stone', 'bank': 'verdant_terrace_stone', 'wallHeight': 4.4, 'margin': 1.0,
+        'spacing': 3.2,
+        'wallRocks': ({'asset': 'serpent_frieze', 'proud': .5, 'align': True},('serpent_rubble',1.6),
+                      ('serpent_column_ruin',1.0),{'asset': 'stone_windbreak', 'proud': .5, 'align': True},
+                      ('serpent_obelisk',1.1),('serpent_pillar',1.2)),
+        'rockPalette': None, 'lampColour': None, 'glow': ([.55,1,.72],1.0,8,1.0),
+        'surfaces': {'floor': {'texture': 'flagstone', 'tint': [.56,.60,.50]}, 'rockLift': [1.3,1.4,1.25],
+                     'water': {'deep': [.02,.07,.05], 'clear': [.10,.22,.15], 'glow': [.01,.03,.02]}},
+        'minimap': {'floor': (80,80,60), 'edge': (164,158,118), 'water': (46,96,80)},
+    },
+    # The Sunken Sanctum: the flooded temple hall at the bottom of the Serpent Underways - drowned friezes, pillars
+    # and weed-hung stones over sea-green water, wet flagstones, sea-green lamp light.
+    'sunken': {
+        'shape': 'boxes', 'floor': 'verdant_wet_limestone', 'rock': 'verdant_limestone_cliff',
+        'bed': 'verdant_mossy_stone', 'bank': 'verdant_wet_limestone', 'wallHeight': 5.0, 'margin': 1.0,
+        'spacing': 3.0,
+        'wallRocks': ({'asset': 'serpent_frieze', 'proud': .5, 'align': True},('weed_rocks',1.5),
+                      ('serpent_pillar',1.2),{'asset': 'serpent_frieze', 'proud': .5, 'align': True},
+                      ('serpent_obelisk',1.1),('weed_rocks',1.5)),
+        'rockPalette': None, 'lampColour': [.5,1,.8], 'glow': ([.45,1,.8],1.1,9,1.0),
+        'surfaces': {'floor': {'texture': 'flagstone', 'tint': [.50,.58,.52]}, 'rockLift': [1.2,1.4,1.3],
+                     'water': {'deep': [.01,.09,.07], 'clear': [.06,.32,.24], 'glow': [.0,.03,.02]}},
+        'minimap': {'floor': (66,80,72), 'edge': (140,162,142), 'water': (40,120,110)},
+    },
+    # The Frozen Deep: the vast ice cavern under the Rimewater Ice Caves - the ice theme's glacier blocks, shards and
+    # snow-capped rock on taller faces round ice islands, frozen falls, a deeper blue light.
+    'deep_ice': {
+        'shape': 'lobes', 'floor': 'snow_pack', 'rock': 'glacier_ice', 'bed': 'glacier_ice', 'bank': 'snow_pack',
+        'wallHeight': 6.2, 'margin': 1.0, 'spacing': 3.0,
+        'wallRocks': (('glacier_block',2.2),('snowcap_boulder_1',2.0),('ice_shards',1.4),('glacier_block',2.2),
+                      ('snowy_boulder_2',1.6),('ice_shards_2',.8)),
+        'rockPalette': None, 'lampColour': [.52,.74,1], 'glow': ([.45,.76,1],1.2,10,1.0),
+        'surfaces': {'floor': {'texture': 'authored', 'tint': [1.02,1.07,1.14]}, 'rockLift': [.72,.88,1.05],
+                     'water': {'deep': [.03,.09,.16], 'clear': [.34,.56,.72], 'glow': [.03,.06,.10]}},
+        'minimap': {'floor': (104,128,150), 'edge': (180,214,236), 'water': (104,174,214)},
+    },
 }
 
 # The toolkit texture each shell material needs (seeds as materials.py / the first builder used them).
@@ -465,11 +507,14 @@ def wavy_ellipse(x,y,rx,ry,phase=0.):
                     for a in (i*math.tau/72 for i in range(72))])
 
 
-def pools(section):
+def pools(section,flooded=True):
     """The section's standing water: wavy ellipses [x, y, rx, ry], reaching under the walls they touch, and the pools
-    of its flooded passage mouths (mouths())."""
+    of its flooded passage mouths (mouths()). `flooded` False leaves the mouths' pools out: ledge_parts() clips the
+    terraces by the authored pools only, because mouths() asks ledge_heights() whether an end stands on a ledge (pass 2
+    wave C: a ledged section with a passage end recursed)."""
     shapes=[wavy_ellipse(*pool[:4],phase=index*1.3) for index,pool in enumerate(section.get('pools',[]))]
-    shapes+=[mouth['pit'] for mouth in mouths(section) if mouth['art']=='flooded']
+    if flooded:
+        shapes+=[mouth['pit'] for mouth in mouths(section) if mouth['art']=='flooded']
     if not shapes: return None
     return unary_union(shapes).intersection(outline(section).buffer(2.0))
 
@@ -559,7 +604,7 @@ def ledge_parts(section):
     pieces share excluded); edges the same drops as [(LineString, piece number)], each on the piece it bounds."""
     key=section['id']+json.dumps(section.get('ledges',[]),sort_keys=True)+json.dumps(section['rooms'])
     if key in _LEDGES: return _LEDGES[key]
-    shape=outline(section); water=pools(section)
+    shape=outline(section); water=pools(section,flooded=False)
     room=shape if water is None else shape.difference(water)
     pieces=[]; feet=[]
     for index,ledge in enumerate(section.get('ledges',[])):

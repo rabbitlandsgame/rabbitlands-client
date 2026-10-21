@@ -237,10 +237,6 @@ KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/p
 # stays seeded). A node moved in underground.json needs its own values.
 HARVEST_PRESENTATION = {
     1010: {'variant': 1, 'yaw': 226.336},
-    1201: {'variant': 0, 'yaw': 241.054},
-    1202: {'variant': 0, 'yaw': 168.147},
-    1203: {'variant': 1, 'yaw': 53.152},
-    1204: {'variant': 0, 'yaw': 317.132},
     1301: {'variant': 1, 'yaw': 171.323},
     1302: {'variant': 0, 'yaw': 201.639},
     # Wave 1 of the Landfall underground programme (owner 2026-10-20). Seams and banks face +Z, so each yaw turns
@@ -313,13 +309,6 @@ HARVEST_PRESENTATION = {
     2009: {'variant': 1, 'yaw': 90.0},
     # wave 3 (owner 2026-10-20): the Rimewater Ice Caves, the Serpent Catacombs and the Mirror Vaults, laid out the
     # same way (node_presentation.py); Verdigris, Venom Bulb and Lichen have one laid-out variant each.
-    2108: {'variant': 0, 'yaw': 0.0},  # Quartz rimewater_ice_caves
-    2109: {'variant': 1, 'yaw': 0.0},  # Quartz rimewater_ice_caves
-    2110: {'variant': 0, 'yaw': 225.0},  # Quartz rimewater_ice_caves
-    2111: {'variant': 0, 'yaw': 45.0},  # Stormglass rimewater_ice_caves
-    2112: {'variant': 0, 'yaw': 0.0},  # Stormglass rimewater_ice_caves
-    2113: {'variant': 0, 'yaw': 315.0},  # Stormglass rimewater_ice_caves
-    2114: {'variant': 0, 'yaw': 180.0},  # Stormglass rimewater_ice_caves
     2201: {'variant': 0, 'yaw': 90.0},  # Lichen serpent_catacombs
     2202: {'variant': 0, 'yaw': 180.0},  # Lichen serpent_catacombs
     2203: {'variant': 0, 'yaw': 180.0},  # Lichen serpent_catacombs
@@ -327,19 +316,54 @@ HARVEST_PRESENTATION = {
     2205: {'variant': 0, 'yaw': 0.0},  # Venom Bulb serpent_catacombs
     2206: {'variant': 0, 'yaw': 270.0},  # Venom Bulb serpent_catacombs
     2207: {'variant': 0, 'yaw': 0.0},  # Venom Bulb serpent_catacombs
-    2208: {'variant': 0, 'yaw': 0.0},  # Verdigris serpent_catacombs
-    2209: {'variant': 0, 'yaw': 0.0},  # Verdigris serpent_catacombs
-    2210: {'variant': 0, 'yaw': 90.0},  # Verdigris serpent_catacombs
-    2211: {'variant': 0, 'yaw': 270.0},  # Verdigris serpent_catacombs
-    2212: {'variant': 0, 'yaw': 180.0},  # Verdigris serpent_catacombs
-    2301: {'variant': 0, 'yaw': 0.0},  # Stormglass mirror_vaults
-    2302: {'variant': 0, 'yaw': 45.0},  # Stormglass mirror_vaults
-    2303: {'variant': 0, 'yaw': 270.0},  # Stormglass mirror_vaults
-    2307: {'variant': 1, 'yaw': 90.0},  # Quartz mirror_vaults
-    2308: {'variant': 0, 'yaw': 270.0},  # Quartz mirror_vaults
-    2309: {'variant': 1, 'yaw': 180.0},  # Quartz mirror_vaults
-    2310: {'variant': 0, 'yaw': 0.0},  # Verdigris mirror_vaults
-    2311: {'variant': 0, 'yaw': 180.0},  # Verdigris mirror_vaults
+    # pass 2 wave C
+    # Pass 2 wave C (owner 2026-10-21): the laid-out organics of the Undercity and the Sunken Sanctum, facing their
+    # open neighbours (Lichen and Venom Bulb have one laid-out variant each).
+    5257: {'variant': 0, 'yaw': 353.2},  # Lichen serpent_undercity
+    5258: {'variant': 0, 'yaw': 0.0},  # Lichen serpent_undercity
+    5259: {'variant': 0, 'yaw': 180.0},  # Lichen serpent_undercity
+    5260: {'variant': 0, 'yaw': 90.0},  # Lichen serpent_undercity
+    5261: {'variant': 0, 'yaw': 90.0},  # Lichen serpent_undercity
+    5262: {'variant': 0, 'yaw': 90.0},  # Lichen serpent_undercity
+    5263: {'variant': 0, 'yaw': 258.7},  # Lichen serpent_undercity
+    5264: {'variant': 0, 'yaw': 180.0},  # Lichen serpent_undercity
+    5265: {'variant': 0, 'yaw': 90.0},  # Lichen serpent_undercity
+    5266: {'variant': 0, 'yaw': 180.0},  # Lichen serpent_undercity
+    5267: {'variant': 0, 'yaw': 139.0},  # Lichen serpent_undercity
+    5268: {'variant': 0, 'yaw': 276.0},  # Lichen serpent_undercity
+    5269: {'variant': 0, 'yaw': 53.0},  # Lichen serpent_undercity
+    5270: {'variant': 0, 'yaw': 190.0},  # Lichen serpent_undercity
+    5271: {'variant': 0, 'yaw': 327.0},  # Lichen serpent_undercity
+    5272: {'variant': 0, 'yaw': 104.0},  # Lichen serpent_undercity
+    5273: {'variant': 0, 'yaw': 241.0},  # Lichen serpent_undercity
+    5274: {'variant': 0, 'yaw': 18.0},  # Lichen serpent_undercity
+    5275: {'variant': 0, 'yaw': 155.0},  # Lichen serpent_undercity
+    5276: {'variant': 0, 'yaw': 292.0},  # Lichen serpent_undercity
+    5277: {'variant': 0, 'yaw': 180.0},  # Venom Bulb serpent_undercity
+    5278: {'variant': 0, 'yaw': 260.3},  # Venom Bulb serpent_undercity
+    5279: {'variant': 0, 'yaw': 180.0},  # Venom Bulb serpent_undercity
+    5280: {'variant': 0, 'yaw': 90.0},  # Venom Bulb serpent_undercity
+    5281: {'variant': 0, 'yaw': 270.0},  # Venom Bulb serpent_undercity
+    5282: {'variant': 0, 'yaw': 180.0},  # Venom Bulb serpent_undercity
+    5283: {'variant': 0, 'yaw': 68.2},  # Venom Bulb serpent_undercity
+    5284: {'variant': 0, 'yaw': 339.6},  # Venom Bulb serpent_undercity
+    5285: {'variant': 0, 'yaw': 85.0},  # Venom Bulb serpent_undercity
+    5286: {'variant': 0, 'yaw': 222.0},  # Venom Bulb serpent_undercity
+    5287: {'variant': 0, 'yaw': 359.0},  # Venom Bulb serpent_undercity
+    5288: {'variant': 0, 'yaw': 136.0},  # Venom Bulb serpent_undercity
+    5289: {'variant': 0, 'yaw': 273.0},  # Venom Bulb serpent_undercity
+    5290: {'variant': 0, 'yaw': 50.0},  # Venom Bulb serpent_undercity
+    5291: {'variant': 0, 'yaw': 187.0},  # Venom Bulb serpent_undercity
+    5292: {'variant': 0, 'yaw': 324.0},  # Venom Bulb serpent_undercity
+    5297: {'variant': 0, 'yaw': 0.0},  # Venom Bulb sunken_sanctum
+    5298: {'variant': 0, 'yaw': 0.0},  # Venom Bulb sunken_sanctum
+    5299: {'variant': 0, 'yaw': 180.0},  # Venom Bulb sunken_sanctum
+    5300: {'variant': 0, 'yaw': 340.0},  # Venom Bulb sunken_sanctum
+    5301: {'variant': 0, 'yaw': 117.0},  # Venom Bulb sunken_sanctum
+    5302: {'variant': 0, 'yaw': 111.8},  # Lichen sunken_sanctum
+    5303: {'variant': 0, 'yaw': 270.0},  # Lichen sunken_sanctum
+    5304: {'variant': 0, 'yaw': 168.0},  # Lichen sunken_sanctum
+    5305: {'variant': 0, 'yaw': 305.0},  # Lichen sunken_sanctum
 }
 
 

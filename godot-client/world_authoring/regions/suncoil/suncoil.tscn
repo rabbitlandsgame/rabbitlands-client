@@ -134025,3 +134025,19 @@ kind = "runtime_point"
 label = "Serpent Catacombs"
 extras = {"role": "underground_entrance", "objectId": 59013, "section": "serpent_catacombs", "authority": "server"}
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -185.5, 55.05, 38.5)
+
+[node name="suncoil--undercity-chapel-door" type="Marker3D" parent="RuntimePoints"]
+script = ExtResource("marker")
+record_id = "suncoil--undercity-chapel-door"
+kind = "runtime_point"
+label = "The Undercity"
+extras = {"role": "underground_entrance", "objectId": 59035, "section": "serpent_undercity", "authority": "server"}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56.5, 55.0, -181.5)
+
+[node name="suncoil--undercity-sea-door" type="Marker3D" parent="RuntimePoints"]
+script = ExtResource("marker")
+record_id = "suncoil--undercity-sea-door"
+kind = "runtime_point"
+label = "The Undercity"
+extras = {"role": "underground_entrance", "objectId": 59036, "section": "serpent_undercity", "authority": "server"}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 259.5, 4.75, 129.5)
