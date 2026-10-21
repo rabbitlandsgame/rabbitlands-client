@@ -66,7 +66,8 @@ func run() -> void:
 		expect(entrance_waypoints.size() == 1 and entrance_waypoints[0].label == label, "Live Tab map has the permanent entrance name")
 		main.map_marker_overlay.set_live_marks(marks)
 		expect(main.map_marker_overlay._live_overlay._marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"entrance").is_empty(), "Full map draws each entrance once")
-		state.current_map = "ringholm"
+		# Preview the door's region while standing on another map (Ringholm has a cave of its own).
+		state.current_map = "ringholm" if mid != "ringholm" else "landfall"
 		main._preview_region(main._region_index_for_map(mid))
 		await process_frame
 		var overlay: Control = main._entrance_preview_overlay

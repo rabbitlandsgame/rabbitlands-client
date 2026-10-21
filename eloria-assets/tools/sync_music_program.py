@@ -16,7 +16,8 @@ def room_program(name: str) -> str | None:
         (('cottage', 'house', 'home', 'lodging'), 'home_day'),
         (('shop', 'store', 'forge', 'workshop'), 'shop'),
         (('archive', 'library', 'lens_vault'), 'library'),
-        (('barrow', 'crypt', 'tomb'), 'barrow'),
+        (('barrow', 'crypt', 'tomb', 'catacomb'), 'barrow'),
+        (('basalt', 'lava', 'magma'), 'fire_dungeon'),
         (('cenote', 'crystal', 'geode', 'vault', 'cistern', 'labyrinth'), 'mystic_cave'),
         (('mine', 'cave', 'cavern', 'undercroft', 'cellar', 'root', 'quarry'), 'cave'),
     ]:
