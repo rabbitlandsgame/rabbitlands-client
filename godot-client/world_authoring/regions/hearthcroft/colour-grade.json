@@ -9,12 +9,12 @@
  },
  "graded": {
   "path": "base-colors-graded.rgba8",
-  "sha256": "4e884951e3c5bf35a766d3566c4d01b2f9abab2d2d2ef7cf3178b5ca4bfafda6",
+  "sha256": "5e05088050b3ccd3fb10f54c99e2a76dcb5ef71295b7956834448b3cf5157d74",
   "changedVertices": 149360
  },
  "gradeOnly": null,
  "targets": {
-  "_about": "Regrade targets (display sRGB 0..1). ground/accent from the 2026-10-14 diversity proposal (judgement); rock = per-map rock tint (null = unchanged). displayReference = today's typical display colour of vegetated ground (minimap mean hue 65, sat .43, val .62). Ratios lin(target)/lin(reference) are applied to the base vertex colours. canopySmooth = how much of the Meshy painted-canopy speckle to low-pass away (0 keep, 1 remove) where trees are cleared. ecotone = neutral meadow margin that border zones shift toward, so two strong palettes meet through grassland rather than a muddy mix. A3 (2026-10-20): Saltsound, Ringholm, Hearthcroft, Twinbrook and Brambleshaw rethemed and the four isle maps added, approved plan https://claude.ai/artifact/H8SDxKVKQSikjpFNEzDcUi; display colours sampled from the Nymara theme minimaps. snow = above/full metres, colour, onRock share. Audit pass 2026-10-20 (owner: increase similarity to the Nymara inspirations): 'absolute' pulls a map toward its display targets by that share (the multiplicative grade alone left Ringholm olive and Saltsound khaki over their green Meshy base); Saltsound grey-lilac with violet scree, Ringholm ochre gold with pale mesas, the jungle isles darker, Hornmere tan rock (its snow stays above the 100 m citadel terrace), Whitepeak snow from 18 m (Whitehorn's snow line is 30 m). Whitepeak's snow colour is set above display white (1.3-1.38): in game the snow drew at about 0.62 of its target under the continent's ground paint, grey beside Whitehorn's white.",
+  "_about": "Regrade targets (display sRGB 0..1). ground/accent from the 2026-10-14 diversity proposal (judgement); rock = per-map rock tint (null = unchanged). displayReference = today's typical display colour of vegetated ground (minimap mean hue 65, sat .43, val .62). Ratios lin(target)/lin(reference) are applied to the base vertex colours. canopySmooth = how much of the Meshy painted-canopy speckle to low-pass away (0 keep, 1 remove) where trees are cleared. ecotone = neutral meadow margin that border zones shift toward, so two strong palettes meet through grassland rather than a muddy mix. A3 (2026-10-20): Saltsound, Ringholm, Hearthcroft, Twinbrook and Brambleshaw rethemed and the four isle maps added, approved plan https://claude.ai/artifact/H8SDxKVKQSikjpFNEzDcUi; display colours sampled from the Nymara theme minimaps. snow = above/full metres, colour, onRock share. Audit pass 2026-10-20 (owner: increase similarity to the Nymara inspirations): 'absolute' pulls a map toward its display targets by that share (the multiplicative grade alone left Ringholm olive and Saltsound khaki over their green Meshy base); Saltsound grey-lilac with violet scree, Ringholm ochre gold with pale mesas, the jungle isles darker, Hornmere tan rock (its snow stays above the 100 m citadel terrace), Whitepeak snow from 18 m (Whitehorn's snow line is 30 m). Whitepeak's snow colour is set above display white (1.3-1.38): in game the snow drew at about 0.62 of its target under the continent's ground paint, grey beside Whitehorn's white. Quality pass 2026-10-20: Ringholm a desert plain - sand-ochre ground, pale sand patches, sandstone rock, pull 0.85.",
   "displayReference": [
    0.59,
    0.62,
@@ -261,23 +261,23 @@
    "ringholm": {
     "biome": "sunmane steppe (golden grass, red mesas)",
     "ground": [
-     0.8,
-     0.64,
-     0.32
+     0.84,
+     0.68,
+     0.4
     ],
     "accent": [
-     0.88,
-     0.75,
-     0.44
+     0.92,
+     0.82,
+     0.58
     ],
-    "accentShare": 0.25,
+    "accentShare": 0.35,
     "rock": [
-     0.8,
-     0.71,
-     0.56
+     0.82,
+     0.62,
+     0.45
     ],
     "canopySmooth": 0.85,
-    "absolute": 0.7
+    "absolute": 0.85
    },
    "coilmere": {
     "biome": "verdant stair and drowned quarter (jungle, jade terraces)",

@@ -138,9 +138,6 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb" id="s0_62_hik3d"]
 
 
-[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-broadleaf-tree-a.glb" id="s0_59_ga6lp"]
-
-
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1.glb" id="s0_109_8ehyf"]
 
 
@@ -3952,66 +3949,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -147.979, 121.494, 47.931)
 metadata/map_asset_id = "sw_isle:kit-crown-fountain-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-crown-fountain-1.glb"
 
-[node name="s0_Sw Blossom Tree" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-blossom-tree-001"
-node_name = "Authored_sw_isle_kit_sw_blossom_tree_001"
-catalog_asset_id = "sw_isle:kit-sw-blossom-tree"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 slice 2 castle-town design",
-"townGroup": "plaza",
-"townPiece": "N17",
-"townStep": "3-plaza"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.3234108, 0, 0.83988416, 0, 0.9, 0, -0.83988416, 0, 0.3234108, -159.682, 121.494, 63.279)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Blossom Tree" instance=ExtResource("s0_42_eo54m")]
-metadata/map_asset_id = "sw_isle:kit-sw-blossom-tree"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-
-[node name="s0_Sw Blossom Tree2" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-blossom-tree-002"
-node_name = "Authored_sw_isle_kit_sw_blossom_tree_002"
-catalog_asset_id = "sw_isle:kit-sw-blossom-tree"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 slice 2 castle-town design",
-"townGroup": "plaza",
-"townPiece": "N17",
-"townStep": "3-plaza"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.6718699, 0, -0.5988246, 0, 0.9, 0, 0.5988246, 0, 0.6718699, -129.898, 121.494, 54.682)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Blossom Tree2" instance=ExtResource("s0_42_eo54m")]
-metadata/map_asset_id = "sw_isle:kit-sw-blossom-tree"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-
-[node name="s0_Sw Blossom Tree3" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-blossom-tree-003"
-node_name = "Authored_sw_isle_kit_sw_blossom_tree_003"
-catalog_asset_id = "sw_isle:kit-sw-blossom-tree"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 slice 2 castle-town design",
-"townGroup": "plaza",
-"townPiece": "N17",
-"townStep": "3-plaza"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.024501352, 0, 0.8996664, 0, 0.9, 0, -0.8996664, 0, -0.024501352, -140.381, 121.494, 12.952)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Blossom Tree3" instance=ExtResource("s0_42_eo54m")]
-metadata/map_asset_id = "sw_isle:kit-sw-blossom-tree"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-
 [node name="s0_Market Canopy 0" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-market-canopy-0-001"
@@ -5299,28 +5236,6 @@ transform = Transform3D(-1.135628, 0, 0.073438, 0, 1.138, 0, -0.073438, 0, -1.13
 metadata/map_asset_id = "sw_isle:kit-cypress-tree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-cypress-tree-1.glb"
 
-[node name="s0_Cypress Tree 27" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-cypress-tree-1-027"
-node_name = "Authored_sw_isle_kit_cypress_tree_1_027"
-catalog_asset_id = "sw_isle:kit-cypress-tree-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-cypress-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"natureDesign": "continent-v2 slice 2 nature design",
-"natureKey": "cypress",
-"natureLayer": "canopy",
-"naturePiece": "nature-cypress-0038",
-"natureStep": "1-forests",
-"natureZone": "gate-avenue"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.086726, 0, 1.209896, 0, 1.213, 0, -1.209896, 0, 0.086726, -136.78, 126.7632, -177.6)
-
-[node name="Content" parent="AuthoredAssets/s0_Cypress Tree 27" instance=ExtResource("s0_31_sfcck")]
-metadata/map_asset_id = "sw_isle:kit-cypress-tree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-cypress-tree-1.glb"
-
 [node name="s0_Cypress Tree 28" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-cypress-tree-1-028"
@@ -5914,28 +5829,6 @@ transform = Transform3D(0.784844, 0, 0.93534, 0, 1.221, 0, -0.93534, 0, 0.784844
 [node name="Content" parent="AuthoredAssets/s0_Cypress Tree 84" instance=ExtResource("s0_31_sfcck")]
 metadata/map_asset_id = "sw_isle:kit-cypress-tree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-cypress-tree-1.glb"
-
-[node name="s0_Fan Palm Tree 43" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-fan-palm-tree-1-043"
-node_name = "Authored_sw_isle_kit_fan_palm_tree_1_043"
-catalog_asset_id = "sw_isle:kit-fan-palm-tree-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-fan-palm-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"natureDesign": "continent-v2 slice 2 nature design",
-"natureKey": "fanpalm",
-"natureLayer": "canopy",
-"naturePiece": "nature-fanpalm-1189",
-"natureStep": "1-forests",
-"natureZone": "castle-apron"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.867882, 0, -0.302228, 0, 0.919, 0, 0.302228, 0, 0.867882, -28.38, 110.2355, 103.77)
-
-[node name="Content" parent="AuthoredAssets/s0_Fan Palm Tree 43" instance=ExtResource("s0_33_38284")]
-metadata/map_asset_id = "sw_isle:kit-fan-palm-tree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-fan-palm-tree-1.glb"
 
 [node name="s0_Olive Tree 87" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -6552,28 +6445,6 @@ transform = Transform3D(-1.103714, 0, -0.831708, 0, 1.382, 0, 0.831708, 0, -1.10
 metadata/map_asset_id = "sw_isle:kit-olive-tree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-1.glb"
 
-[node name="s0_Beach Palm Tree 203" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-beach-palm-tree-1-112"
-node_name = "Authored_sw_isle_kit_beach_palm_tree_1_112"
-catalog_asset_id = "sw_isle:kit-beach-palm-tree-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"natureDesign": "continent-v2 slice 2 nature design",
-"natureKey": "palm1",
-"natureLayer": "canopy",
-"naturePiece": "nature-palm1-2266",
-"natureStep": "1-forests",
-"natureZone": "castle-apron"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.145928, 0, 1.108435, 0, 1.118, 0, -1.108435, 0, -0.145928, -16.02, 110.4545, 118.19)
-
-[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 203" instance=ExtResource("s0_109_8ehyf")]
-metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1.glb"
-
 [node name="s0_Umbrella Pine Tree 166" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-umbrella-pine-tree-1-166"
@@ -6661,28 +6532,6 @@ transform = Transform3D(0.504212, 0, -0.940351, 0, 1.067, 0, 0.940351, 0, 0.5042
 [node name="Content" parent="AuthoredAssets/s0_Olive Tree 105" instance=ExtResource("s0_62_hik3d")]
 metadata/map_asset_id = "sw_isle:kit-olive-tree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb"
-
-[node name="s0_Sw Broadleaf Tree A1049" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-broadleaf-tree-a-1049"
-node_name = "Authored_sw_isle_kit_sw_broadleaf_tree_a_1049"
-catalog_asset_id = "sw_isle:kit-sw-broadleaf-tree-a"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-broadleaf-tree-a.glb"
-collision_role = "solid"
-metadata = {
-"natureDesign": "continent-v2 slice 2 nature design",
-"natureKey": "n15",
-"natureLayer": "canopy",
-"naturePiece": "nature-n15-2324",
-"natureStep": "1-forests",
-"natureZone": "castle-apron"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.903241, 0, 0.139829, 0, 0.914, 0, -0.139829, 0, -0.903241, -243.68, 119.4029, 35.61)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Broadleaf Tree A1049" instance=ExtResource("s0_59_ga6lp")]
-metadata/map_asset_id = "sw_isle:kit-sw-broadleaf-tree-a"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-broadleaf-tree-a.glb"
 
 [node name="s0_Beach Palm Tree 209" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -6903,28 +6752,6 @@ transform = Transform3D(0.740153, 0, 0.869677, 0, 1.142, 0, -0.869677, 0, 0.7401
 [node name="Content" parent="AuthoredAssets/s0_Cypress Tree 131" instance=ExtResource("s0_31_sfcck")]
 metadata/map_asset_id = "sw_isle:kit-cypress-tree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-cypress-tree-1.glb"
-
-[node name="s0_Beach Palm Tree 257" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-beach-palm-tree-1-130"
-node_name = "Authored_sw_isle_kit_beach_palm_tree_1_130"
-catalog_asset_id = "sw_isle:kit-beach-palm-tree-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"natureDesign": "continent-v2 slice 2 nature design",
-"natureKey": "palm1",
-"natureLayer": "canopy",
-"naturePiece": "nature-palm1-2726",
-"natureStep": "1-forests",
-"natureZone": "castle-apron"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.253046, 0, 1.132063, 0, 1.16, 0, -1.132063, 0, 0.253046, -55.26, 117.1398, 112.45)
-
-[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 257" instance=ExtResource("s0_109_8ehyf")]
-metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1.glb"
 
 [node name="s0_Beach Palm Tree 268" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -7233,28 +7060,6 @@ transform = Transform3D(0.915939, 0, -0.224976, 0, 0.943163, 0, 0.224976, 0, 0.9
 [node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 305" instance=ExtResource("s0_111_epmbh")]
 metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3.glb"
-
-[node name="s0_Olive Tree 114" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-olive-tree-2-051"
-node_name = "Authored_sw_isle_kit_olive_tree_2_051"
-catalog_asset_id = "sw_isle:kit-olive-tree-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb"
-collision_role = "solid"
-metadata = {
-"natureDesign": "continent-v2 slice 2 nature design",
-"natureKey": "olive2",
-"natureLayer": "canopy",
-"naturePiece": "nature-olive2-3211",
-"natureStep": "1-forests",
-"natureZone": "castle-apron"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.008746, 0, -0.714232, 0, 1.236, 0, 0.714232, 0, -1.008746, 31.88, 108.6159, 87.64)
-
-[node name="Content" parent="AuthoredAssets/s0_Olive Tree 114" instance=ExtResource("s0_62_hik3d")]
-metadata/map_asset_id = "sw_isle:kit-olive-tree-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb"
 
 [node name="s0_Beach Palm Tree 313" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -10036,27 +9841,6 @@ transform = Transform3D(0.676967, -0.111005, 1.234155, 0.192036, 1.398731, 0.020
 [node name="Content" parent="AuthoredAssets/s0_Undergrowth 804" instance=ExtResource("s0_115_wxyew")]
 metadata/map_asset_id = "sw_isle:kit-undergrowth-3"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-3.glb"
-
-[node name="s0_Tree Fern 60" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-tree-fern-2-021"
-node_name = "Authored_sw_isle_kit_tree_fern_2_021"
-catalog_asset_id = "sw_isle:kit-tree-fern-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-2.glb"
-metadata = {
-"natureDesign": "continent-v2 slice 2 nature design",
-"natureKey": "fern2",
-"natureLayer": "understorey",
-"naturePiece": "nature-fern2-7021",
-"natureStep": "2-understorey",
-"natureZone": "forest-floor"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.800722, 0, 0.641499, 0, 1.026, 0, -0.641499, 0, -0.800722, -81.02, 110.1317, 149.11)
-
-[node name="Content" parent="AuthoredAssets/s0_Tree Fern 60" instance=ExtResource("s0_121_tqgvb")]
-metadata/map_asset_id = "sw_isle:kit-tree-fern-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-2.glb"
 
 [node name="s0_Jungle Undergrowth 9" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -15649,24 +15433,6 @@ transform = Transform3D(-0.373537, 0, 1.127618, 0, 1.187877, 0, -1.127618, 0, -0
 metadata/map_asset_id = "sw_isle:kit-tree-fern-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-1.glb"
 
-[node name="s0_Tree Fern 133" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-tree-fern-2-065"
-node_name = "Authored_sw_isle_kit_tree_fern_2_065"
-catalog_asset_id = "sw_isle:kit-tree-fern-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-2.glb"
-metadata = {
-"polishLayer": "glade",
-"polishPiece": "glade-a-1664-1",
-"polishStep": "d1-forest"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.767438, 0, 0.900759, 0, 1.183354, 0, -0.900759, 0, 0.767438, 121.7019, 85.5467, 210.8556)
-
-[node name="Content" parent="AuthoredAssets/s0_Tree Fern 133" instance=ExtResource("s0_121_tqgvb")]
-metadata/map_asset_id = "sw_isle:kit-tree-fern-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-2.glb"
-
 [node name="s0_Flower Meadow 816" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-flower-meadow-4-160"
@@ -15756,24 +15522,6 @@ transform = Transform3D(0.613688, 0, -0.64072, 0, 0.887206, 0, 0.64072, 0, 0.613
 [node name="Content" parent="AuthoredAssets/s0_Undergrowth 1106" instance=ExtResource("s0_117_f0g1p")]
 metadata/map_asset_id = "sw_isle:kit-undergrowth-4"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-4.glb"
-
-[node name="s0_Tree Fern 176" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-tree-fern-2-087"
-node_name = "Authored_sw_isle_kit_tree_fern_2_087"
-catalog_asset_id = "sw_isle:kit-tree-fern-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-2.glb"
-metadata = {
-"polishLayer": "glade",
-"polishPiece": "glade--a-958-0",
-"polishStep": "d1-forest"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.461937, 0, -1.048466, 0, 1.145717, 0, 1.048466, 0, -0.461937, 110.7832, 86.0407, 205.6619)
-
-[node name="Content" parent="AuthoredAssets/s0_Tree Fern 176" instance=ExtResource("s0_121_tqgvb")]
-metadata/map_asset_id = "sw_isle:kit-tree-fern-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-2.glb"
 
 [node name="s0_Tree Fern 177" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -19261,26 +19009,6 @@ transform = Transform3D(0.96077913, 0, 0.27731466, 0, 1, 0, -0.27731466, 0, 0.96
 metadata/map_asset_id = "sw_isle:kit-stone-bench-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-bench-1.glb"
 
-[node name="s0_Sw Blossom Tree22" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-blossom-tree-022"
-node_name = "Authored_sw_isle_kit_sw_blossom_tree_022"
-catalog_asset_id = "sw_isle:kit-sw-blossom-tree"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "keep terrace",
-"townPiece": "kit-sw-blossom-tree",
-"townStep": "5-garden-b"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.7748151, 0, -0.0897862, 0, 0.78, 0, 0.0897862, 0, 0.7748151, -22.003, 122.794, -67.438)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Blossom Tree22" instance=ExtResource("s0_42_eo54m")]
-metadata/map_asset_id = "sw_isle:kit-sw-blossom-tree"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-
 [node name="s0_Lantern Post 11" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-lantern-post-1-011"
@@ -19320,26 +19048,6 @@ transform = Transform3D(-0.9607792, 0, -0.27731454, 0, 1, 0, 0.27731454, 0, -0.9
 [node name="Content" parent="AuthoredAssets/s0_Stone Bench 2" instance=ExtResource("s0_35_j0gv7")]
 metadata/map_asset_id = "sw_isle:kit-stone-bench-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-stone-bench-1.glb"
-
-[node name="s0_Sw Blossom Tree23" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-sw-blossom-tree-023"
-node_name = "Authored_sw_isle_kit_sw_blossom_tree_023"
-catalog_asset_id = "sw_isle:kit-sw-blossom-tree"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "keep terrace",
-"townPiece": "kit-sw-blossom-tree",
-"townStep": "5-garden-b"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.7012979, 0, 0.34143996, 0, 0.78, 0, -0.34143996, 0, 0.7012979, -7.38156, 122.75533, -15.90955)
-
-[node name="Content" parent="AuthoredAssets/s0_Sw Blossom Tree23" instance=ExtResource("s0_42_eo54m")]
-metadata/map_asset_id = "sw_isle:kit-sw-blossom-tree"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-sw-blossom-tree.glb"
 
 [node name="s0_Lantern Post 12" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -24380,26 +24088,6 @@ transform = Transform3D(0.44967663, 0, -0.7283728, 0, 0.856, 0, 0.7283728, 0, 0.
 metadata/map_asset_id = "sw_isle:kit-olive-tree-2"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb"
 
-[node name="s0_Olive Tree 176" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-olive-tree-2-095"
-node_name = "Authored_sw_isle_kit_olive_tree_2_095"
-catalog_asset_id = "sw_isle:kit-olive-tree-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "grove wood-north",
-"townPiece": "kit-olive-tree-2",
-"townStep": "5-garden-c"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.3313974, 0, 1.0446969, 0, 1.096, 0, -1.0446969, 0, 0.3313974, -58.133, 121.43955, -103.928)
-
-[node name="Content" parent="AuthoredAssets/s0_Olive Tree 176" instance=ExtResource("s0_62_hik3d")]
-metadata/map_asset_id = "sw_isle:kit-olive-tree-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb"
-
 [node name="s0_Tree Fern 254" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-tree-fern-1-138"
@@ -25718,26 +25406,6 @@ transform = Transform3D(-0.62747836, 0, 0.77349, 0, 0.996, 0, -0.77349, 0, -0.62
 metadata/map_asset_id = "sw_isle:kit-umbrella-pine-tree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-umbrella-pine-tree-1.glb"
 
-[node name="s0_Umbrella Pine Tree 609" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-umbrella-pine-tree-1-609"
-node_name = "Authored_sw_isle_kit_umbrella_pine_tree_1_609"
-catalog_asset_id = "sw_isle:kit-umbrella-pine-tree-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-umbrella-pine-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "grove grove-nne",
-"townPiece": "kit-umbrella-pine-tree-1",
-"townStep": "5-garden-c"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.34050128, 0, 1.0417652, 0, 1.096, 0, -1.0417652, 0, -0.34050128, 42.792, 121.494, -89.818)
-
-[node name="Content" parent="AuthoredAssets/s0_Umbrella Pine Tree 609" instance=ExtResource("s0_63_4dmdl")]
-metadata/map_asset_id = "sw_isle:kit-umbrella-pine-tree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-umbrella-pine-tree-1.glb"
-
 [node name="s0_Tree Fern 271" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-tree-fern-1-155"
@@ -26301,26 +25969,6 @@ transform = Transform3D(0.8222546, 0, 0.7968201, 0, 1.145, 0, -0.7968201, 0, 0.8
 [node name="Content" parent="AuthoredAssets/s0_Banyan Tree 11" instance=ExtResource("s0_107_l81vy")]
 metadata/map_asset_id = "sw_isle:kit-banyan-tree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-banyan-tree-1.glb"
-
-[node name="s0_Flame Tree 14" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-flame-tree-1-014"
-node_name = "Authored_sw_isle_kit_flame_tree_1_014"
-catalog_asset_id = "sw_isle:kit-flame-tree-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flame-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "grove grove-east",
-"townPiece": "kit-flame-tree-1",
-"townStep": "5-garden-c"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.0020955, 0, -0.58628124, 0, 1.161, 0, 0.58628124, 0, -1.0020955, 91.483, 121.44073, -42.618)
-
-[node name="Content" parent="AuthoredAssets/s0_Flame Tree 14" instance=ExtResource("s0_110_e14li")]
-metadata/map_asset_id = "sw_isle:kit-flame-tree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flame-tree-1.glb"
 
 [node name="s0_Tree Fern 277" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -27683,26 +27331,6 @@ transform = Transform3D(0.58510137, 0, 0.6165682, 0, 0.85, 0, -0.6165682, 0, 0.5
 [node name="Content" parent="AuthoredAssets/s0_Tree Fern 298" instance=ExtResource("s0_118_yiqt2")]
 metadata/map_asset_id = "sw_isle:kit-tree-fern-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-tree-fern-1.glb"
-
-[node name="s0_Olive Tree 178" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-olive-tree-2-097"
-node_name = "Authored_sw_isle_kit_olive_tree_2_097"
-catalog_asset_id = "sw_isle:kit-olive-tree-2"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb"
-collision_role = "solid"
-metadata = {
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "grove grove-orchard-edge",
-"townPiece": "kit-olive-tree-2",
-"townStep": "5-garden-c"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.82732075, 0, -0.31426963, 0, 0.885, 0, 0.31426963, 0, -0.82732075, 65.317, 121.494, -14.353)
-
-[node name="Content" parent="AuthoredAssets/s0_Olive Tree 178" instance=ExtResource("s0_62_hik3d")]
-metadata/map_asset_id = "sw_isle:kit-olive-tree-2"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-olive-tree-2.glb"
 
 [node name="s0_Tree Fern 299" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -34308,28 +33936,6 @@ transform = Transform3D(-0.263286, 0, 0.75861, 0, 0.803, 0, -0.75861, 0, -0.2632
 metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-1-clear"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1-clear.glb"
 
-[node name="s0_Beach Palm Tree 1 Clear14" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-beach-palm-tree-1-clear-014"
-node_name = "Authored_sw_isle_kit_beach_palm_tree_1_clear_014"
-catalog_asset_id = "sw_isle:kit-beach-palm-tree-1-clear"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1-clear.glb"
-collision_role = "solid"
-metadata = {
-"polishReplaced": "sw_isle:kit-fan-palm-tree-1 (sw_isle-kit-fan-palm-tree-1-168): lawn palm (beach palm without its sand-mound base) at the original palm sw_isle-kit-beach-palm-tree-1-330; the fan palm broke the triangle budget",
-"polishStep": "f1-lawn-palms",
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "grove wood-north",
-"townPiece": "kit-beach-palm-tree-1",
-"townStep": "5-garden-c"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.321579, 0, 1.033107, 0, 1.082, 0, -1.033107, 0, -0.321579, 6.444, 121.494, -89.77)
-
-[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 1 Clear14" instance=ExtResource("s0_138_qm6p1")]
-metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-1-clear"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-1-clear.glb"
-
 [node name="s0_Beach Palm Tree 1 Clear15" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-beach-palm-tree-1-clear-015"
@@ -36332,50 +35938,6 @@ transform = Transform3D(0.341678, 0, 0.938753, 0, 0.999, 0, -0.938753, 0, 0.3416
 metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-2-clear"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-2-clear.glb"
 
-[node name="s0_Beach Palm Tree 3 Clear9" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-beach-palm-tree-3-clear-009"
-node_name = "Authored_sw_isle_kit_beach_palm_tree_3_clear_009"
-catalog_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-collision_role = "solid"
-metadata = {
-"polishReplaced": "sw_isle:kit-fan-palm-tree-1 (sw_isle-kit-fan-palm-tree-1-260): lawn palm (beach palm without its sand-mound base) at the original palm sw_isle-kit-beach-palm-tree-3-266; the fan palm broke the triangle budget",
-"polishStep": "f1-lawn-palms",
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "keep terrace",
-"townPiece": "kit-beach-palm-tree-3",
-"townStep": "5-garden-b"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.008334, 0, -0.421795, 0, 1.093, 0, 0.421795, 0, 1.008334, -83.771, 122.5765, -50.65)
-
-[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 3 Clear9" instance=ExtResource("s0_140_biah1")]
-metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-
-[node name="s0_Beach Palm Tree 3 Clear10" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-beach-palm-tree-3-clear-010"
-node_name = "Authored_sw_isle_kit_beach_palm_tree_3_clear_010"
-catalog_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-collision_role = "solid"
-metadata = {
-"polishReplaced": "sw_isle:kit-fan-palm-tree-1 (sw_isle-kit-fan-palm-tree-1-261): lawn palm (beach palm without its sand-mound base) at the original palm sw_isle-kit-beach-palm-tree-3-267; the fan palm broke the triangle budget",
-"polishStep": "f1-lawn-palms",
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "keep terrace",
-"townPiece": "kit-beach-palm-tree-3",
-"townStep": "5-garden-b"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.356221, 0, -1.002598, 0, 1.064, 0, 1.002598, 0, -0.356221, -67.5339, 122.619705, 3.8601)
-
-[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 3 Clear10" instance=ExtResource("s0_140_biah1")]
-metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-
 [node name="s0_Beach Palm Tree 3 Clear11" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-beach-palm-tree-3-clear-011"
@@ -36417,28 +35979,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.739548, 0, -0.547237, 0, 0.92, 0, 0.547237, 0, -0.739548, -189.648, 121.384, -19.643)
 
 [node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 3 Clear12" instance=ExtResource("s0_140_biah1")]
-metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-
-[node name="s0_Beach Palm Tree 3 Clear13" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-beach-palm-tree-3-clear-013"
-node_name = "Authored_sw_isle_kit_beach_palm_tree_3_clear_013"
-catalog_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-collision_role = "solid"
-metadata = {
-"polishReplaced": "sw_isle:kit-fan-palm-tree-1 (sw_isle-kit-fan-palm-tree-1-264): lawn palm (beach palm without its sand-mound base) at the original palm sw_isle-kit-beach-palm-tree-3-270; the fan palm broke the triangle budget",
-"polishStep": "f1-lawn-palms",
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "allee gt-main-street",
-"townPiece": "kit-beach-palm-tree-3",
-"townStep": "5-garden-c"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.996628, 0, -0.470253, 0, 1.102, 0, 0.470253, 0, 0.996628, -184.623, 121.362, 1.096)
-
-[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 3 Clear13" instance=ExtResource("s0_140_biah1")]
 metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
 
@@ -37498,28 +37038,6 @@ transform = Transform3D(0.304307, 0, -0.999711, 0, 1.045, 0, 0.999711, 0, 0.3043
 metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
 
-[node name="s0_Beach Palm Tree 3 Clear62" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-beach-palm-tree-3-clear-062"
-node_name = "Authored_sw_isle_kit_beach_palm_tree_3_clear_062"
-catalog_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-collision_role = "solid"
-metadata = {
-"polishReplaced": "sw_isle:kit-fan-palm-tree-1 (sw_isle-kit-fan-palm-tree-1-313): lawn palm (beach palm without its sand-mound base) at the original palm sw_isle-kit-beach-palm-tree-3-319; the fan palm broke the triangle budget",
-"polishStep": "f1-lawn-palms",
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "grove grove-orchard-edge",
-"townPiece": "kit-beach-palm-tree-3",
-"townStep": "5-garden-c"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.123793, 0, -0.909615, 0, 0.918, 0, 0.909615, 0, -0.123793, 55.744, 121.384, -20.534)
-
-[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 3 Clear62" instance=ExtResource("s0_140_biah1")]
-metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-
 [node name="s0_Beach Palm Tree 3 Clear63" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-beach-palm-tree-3-clear-063"
@@ -38265,28 +37783,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(0.823004, 0, -0.256337, 0, 0.862, 0, 0.256337, 0, 0.823004, -155.25, 121.39101, -32.384)
 
 [node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 3 Clear96" instance=ExtResource("s0_140_biah1")]
-metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-
-[node name="s0_Beach Palm Tree 3 Clear97" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-beach-palm-tree-3-clear-097"
-node_name = "Authored_sw_isle_kit_beach_palm_tree_3_clear_097"
-catalog_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
-collision_role = "solid"
-metadata = {
-"polishReplaced": "sw_isle:kit-fan-palm-tree-1 (sw_isle-kit-fan-palm-tree-1-348): lawn palm (beach palm without its sand-mound base) at the original palm sw_isle-kit-beach-palm-tree-3-354; the fan palm broke the triangle budget",
-"polishStep": "f1-lawn-palms",
-"townDesign": "continent-v2 garden-town design v2 (2026-10-02)",
-"townGroup": "grove grove-west",
-"townPiece": "kit-beach-palm-tree-3",
-"townStep": "5-garden-c"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.140137, 0, 0.253598, 0, 1.168, 0, -0.253598, 0, -1.140137, -164.514, 121.354004, -34.895)
-
-[node name="Content" parent="AuthoredAssets/s0_Beach Palm Tree 3 Clear97" instance=ExtResource("s0_140_biah1")]
 metadata/map_asset_id = "sw_isle:kit-beach-palm-tree-3-clear"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-3-clear.glb"
 
@@ -40372,25 +39868,6 @@ transform = Transform3D(-0.869237, 0, 0.0312723, 0, 0.869799, 0, -0.0312723, 0, 
 metadata/map_asset_id = "lf_biomes:kit-olive-tree-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb"
 
-[node name="lv_landfall_Apple Tree 1 9" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-apple-tree-1-landfall-0009"
-node_name = "Authored_lf_biomes_kit_apple_tree_1_landfall_0009"
-catalog_asset_id = "lf_biomes:kit-apple-tree-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-apple-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"biomeMap": "landfall",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "tree-swap"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.372625, 0, 0.973592, 0, 1.04246, 0, -0.973592, 0, 0.372625, -97.160, 111.2744, 113.300)
-
-[node name="Content" parent="AuthoredAssets/lv_landfall_Apple Tree 1 9" instance=ExtResource("lv_apple_tree_1")]
-metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-apple-tree-1.glb"
-
 [node name="lv_landfall_Apple Tree 1 10" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-apple-tree-1-landfall-0010"
@@ -41471,25 +40948,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.764053, 0, 0.675198, 0, 1.01964, 0, -0.675198, 0, -0.764053, -87.820, 107.9504, 176.090)
 
 [node name="Content" parent="AuthoredAssets/lv_landfall_Olive Tree 1 37" instance=ExtResource("lv_olive_tree_1")]
-metadata/map_asset_id = "lf_biomes:kit-olive-tree-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb"
-
-[node name="lv_landfall_Olive Tree 1 38" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-olive-tree-1-landfall-0038"
-node_name = "Authored_lf_biomes_kit_olive_tree_1_landfall_0038"
-catalog_asset_id = "lf_biomes:kit-olive-tree-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"biomeMap": "landfall",
-"biomePass": "lv-2026-10-14",
-"biomeRule": "tree-swap"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.484993, 0, 0.744533, 0, 0.888565, 0, -0.744533, 0, 0.484993, -69.920, 106.7941, 176.720)
-
-[node name="Content" parent="AuthoredAssets/lv_landfall_Olive Tree 1 38" instance=ExtResource("lv_olive_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-olive-tree-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-olive-tree-1.glb"
 
