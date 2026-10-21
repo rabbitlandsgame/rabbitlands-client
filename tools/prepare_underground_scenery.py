@@ -258,12 +258,6 @@ HARVEST_PRESENTATION = {
     1410: {'variant': 0, 'yaw': 135.0},   # Flint
     1411: {'variant': 1, 'yaw': 0.0},
     1412: {'variant': 0, 'yaw': 225.0},
-    1508: {'variant': 0, 'yaw': 225.0},   # Quartz, The Amethyst Geode
-    1509: {'variant': 1, 'yaw': 225.0},
-    1510: {'variant': 0, 'yaw': 270.0},
-    1511: {'variant': 0, 'yaw': 270.0},   # Stormglass
-    1512: {'variant': 0, 'yaw': 180.0},
-    1513: {'variant': 0, 'yaw': 30.0},
     # wave 2
     # Wave 2 of the Landfall underground programme (owner 2026-10-20), as wave 1: seams, banks, strands, beds,
     # pails and crystals face their open neighbours; Pearl, Sap and Ember Crystal have one variant each (their
@@ -280,17 +274,6 @@ HARVEST_PRESENTATION = {
     1610: {'variant': 0, 'yaw': 270.0},  # Flint
     1611: {'variant': 1, 'yaw': 180.0},
     1612: {'variant': 0, 'yaw': 180.0},
-    1701: {'variant': 1, 'yaw': 0.0},   # Kelp, Smugglers' Grotto
-    1702: {'variant': 0, 'yaw': 0.0},
-    1703: {'variant': 1, 'yaw': 0.0},
-    1704: {'variant': 0, 'yaw': 180.0},  # Shell
-    1705: {'variant': 1, 'yaw': 90.0},
-    1706: {'variant': 0, 'yaw': 180.0},
-    1707: {'variant': 0, 'yaw': 0.0},   # Pearl
-    1708: {'variant': 0, 'yaw': 0.0},
-    1709: {'variant': 1, 'yaw': 315.0},  # Salt
-    1710: {'variant': 0, 'yaw': 180.0},
-    1711: {'variant': 1, 'yaw': 180.0},
     1804: {'variant': 0, 'yaw': 135.0},  # Sap, The Resin Hollow
     1805: {'variant': 0, 'yaw': 90.0},
     1806: {'variant': 0, 'yaw': 0.0},
@@ -300,17 +283,6 @@ HARVEST_PRESENTATION = {
     1810: {'variant': 0, 'yaw': 90.0},  # Moss
     1811: {'variant': 0, 'yaw': 90.0},
     1812: {'variant': 0, 'yaw': 180.0},
-    1904: {'variant': 0, 'yaw': 270.0},  # Ember Crystal, Ravenhead Basalt Tubes
-    1905: {'variant': 0, 'yaw': 180.0},
-    1906: {'variant': 0, 'yaw': 0.0},
-    1910: {'variant': 0, 'yaw': 135.0},  # Flint
-    1911: {'variant': 1, 'yaw': 135.0},
-    2001: {'variant': 1, 'yaw': 0.0},   # Salt, Saltwind Caves
-    2002: {'variant': 0, 'yaw': 180.0},
-    2003: {'variant': 1, 'yaw': 270.0},
-    2007: {'variant': 1, 'yaw': 0.0},   # Flint
-    2008: {'variant': 0, 'yaw': 180.0},
-    2009: {'variant': 1, 'yaw': 90.0},
     # wave 3 (owner 2026-10-20): the Rimewater Ice Caves, the Serpent Catacombs and the Mirror Vaults, laid out the
     # same way (node_presentation.py); Verdigris, Venom Bulb and Lichen have one laid-out variant each.
     2108: {'variant': 0, 'yaw': 0.0},  # Quartz rimewater_ice_caves
@@ -340,6 +312,24 @@ HARVEST_PRESENTATION = {
     2309: {'variant': 1, 'yaw': 180.0},  # Quartz mirror_vaults
     2310: {'variant': 0, 'yaw': 0.0},  # Verdigris mirror_vaults
     2311: {'variant': 0, 'yaw': 180.0},  # Verdigris mirror_vaults
+    # pass 2 wave B
+    4032: {'variant': 0, 'yaw': 144.0},  # Ember Crystal basalt_tubes
+    4033: {'variant': 0, 'yaw': 191.0},  # Ember Crystal basalt_tubes
+    4133: {'variant': 1, 'yaw': 211.0},  # Salt saltwind_caves
+    4134: {'variant': 0, 'yaw': 258.0},  # Salt saltwind_caves
+    4241: {'variant': 1, 'yaw': 247.0},  # Quartz amethyst_geode
+    4242: {'variant': 0, 'yaw': 294.0},  # Quartz amethyst_geode
+    4331: {'variant': 1, 'yaw': 157.0},  # Kelp smugglers_grotto
+    4332: {'variant': 0, 'yaw': 0.0},  # Kelp smugglers_grotto
+    4333: {'variant': 1, 'yaw': 0.0},  # Kelp smugglers_grotto
+    4334: {'variant': 0, 'yaw': 298.0},  # Kelp smugglers_grotto
+    4335: {'variant': 1, 'yaw': 345.0},  # Shell smugglers_grotto
+    4336: {'variant': 0, 'yaw': 32.0},  # Shell smugglers_grotto
+    4337: {'variant': 1, 'yaw': 270.0},  # Shell smugglers_grotto
+    4338: {'variant': 0, 'yaw': 126.0},  # Shell smugglers_grotto
+    4339: {'variant': 0, 'yaw': 0.0},  # Pearl smugglers_grotto
+    4340: {'variant': 0, 'yaw': 220.0},  # Pearl smugglers_grotto
+    4341: {'variant': 0, 'yaw': 267.0},  # Pearl smugglers_grotto
 }
 
 
