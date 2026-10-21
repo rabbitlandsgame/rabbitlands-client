@@ -16,6 +16,16 @@ var magic_pending: Dictionary = {}
 var magic_scope := ""
 var magic_token: Dictionary = {}
 var coordinate_registry_error := ""
+## One-way process-local sandbox guard. Preview launchers never open a game
+## socket, transmit actions or schedule reconnects, even via login shortcuts.
+var offline_hud_preview := false
+
+func block_for_hud_preview() -> void:
+	disconnect_from_server()
+	offline_hud_preview = true
+	_reconnect_enabled = false
+	_reconnect_at_msec = 0
+	set_process(false)
 
 func configure_coordinate_profiles(catalog: Variant, names: Variant = {}, registry_maps: Variant = {}) -> Dictionary:
 	var result: Dictionary
@@ -185,6 +195,7 @@ func _link() -> StreamPeer:
 
 func connect_to_server(host: String, port: int, secure := true,
 		trusted_certificate_path := "") -> Error:
+	if offline_hud_preview: return ERR_UNAVAILABLE
 	Diagnostics.record("connection_requested", {"host": host, "port": port, "tls": secure})
 	_reset_coordinate_session()
 	_host = host
@@ -287,6 +298,7 @@ func _drop_connection(reason: String) -> void:
 	_schedule_reconnect()
 
 func send_frame(frame: PackedByteArray, sensitive := false) -> Error:
+	if offline_hud_preview: return ERR_UNAVAILABLE
 	if not _link_ready():
 		return ERR_UNCONFIGURED
 	# hex_encode() allocates a string for every outgoing packet; print_debug is
@@ -480,6 +492,7 @@ func create_character(username: String, password: String, appearance: Dictionary
 		username, password, appearance, class_id), true)
 
 func _process(_delta: float) -> void:
+	if offline_hud_preview: return
 	if _reconnect_at_msec > 0 and Time.get_ticks_msec() >= _reconnect_at_msec:
 		_reset_coordinate_session()
 		_reconnect_at_msec = 0
@@ -567,6 +580,7 @@ class LateRead extends Node:
 		read.call()
 
 func _ready() -> void:
+	if OS.get_cmdline_user_args().has("--offline-hud-preview"): block_for_hud_preview()
 	_late_read = LateRead.new()
 	_late_read.name = "LateRead"
 	_late_read.read = _read_late

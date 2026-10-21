@@ -27,6 +27,11 @@ var window: Control
 var bottom_hud: Control
 ## Some HUD surfaces can be locked while their other controls remain usable.
 var enabled := true
+## A configurable HUD workspace can use the full screen; regular windows
+## retain the native rail and bottom-bar reservation.
+var reserved_right := RESERVED_RIGHT_RAIL
+var reserved_bottom := RESERVED_BOTTOM_BAR
+var edge_margin := EDGE_MARGIN
 
 var _dragging := false
 var _grab_offset := Vector2.ZERO
@@ -87,12 +92,12 @@ func clamp_into_view() -> void:
 		return
 	var bounds: Vector2 = window.get_viewport_rect().size
 	var size: Vector2 = window.size * window.scale
-	var bottom: float = bounds.y - RESERVED_BOTTOM_BAR
+	var bottom: float = bounds.y - reserved_bottom
 	if is_instance_valid(bottom_hud):
 		bottom = minf(bottom, bottom_hud.global_position.y)
 	var limit := Vector2(
-		maxf(EDGE_MARGIN, bounds.x - RESERVED_RIGHT_RAIL - size.x),
-		maxf(EDGE_MARGIN, bottom - size.y - EDGE_MARGIN))
+		maxf(edge_margin, bounds.x - reserved_right - size.x),
+		maxf(edge_margin, bottom - size.y - edge_margin))
 	window.global_position = Vector2(
-		clampf(window.global_position.x, EDGE_MARGIN, limit.x),
-		clampf(window.global_position.y, EDGE_MARGIN, limit.y))
+		clampf(window.global_position.x, edge_margin, limit.x),
+		clampf(window.global_position.y, edge_margin, limit.y))

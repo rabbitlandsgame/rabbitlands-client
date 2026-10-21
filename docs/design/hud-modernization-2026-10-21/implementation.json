@@ -1,0 +1,351 @@
+{
+  "date": "2026-10-21",
+  "product": "Rabbit Lands",
+  "settings_schema": 1,
+  "implementation": "Live Godot HUD controls with local presets and a transactional editor.",
+  "presets": [
+    {
+      "id": "current",
+      "concept": "Current HUD",
+      "features": [
+        "Original rail and native controls restored",
+        "First launch leaves the existing layout intact"
+      ]
+    },
+    {
+      "id": "heritage",
+      "concept": "01-heritage-polish.png",
+      "features": [
+        "Saved logo height and six-slot quick-bar heights retained; logo and paired quick columns fill the same 105-pixel width",
+        "Continuous full-height brass backdrop remains visible with statistics on or off; logo, quick access, statistics, research, clock and compass meet without spacer gaps",
+        "Saved dial/digital clock and separate compass, joined beneath a normal-size live research row",
+        "Status indicators at the right end of the menu; labelled, icon-coloured resource strip spans the menu and indicators",
+        "Floating conversation chat, independent system chat and framed overhead banner; minimap and party hidden by default; side statistics enabled"
+      ]
+    },
+    {
+      "id": "classic",
+      "concept": "02-refined-classic.png",
+      "features": [
+        "Two-row, three-column spell and item grids at the right",
+        "One separate compass and a digital clock form the final bottom-right column; their filled frames merge",
+        "The clock column, quick bars and resource/menu stack have matching 90px heights",
+        "Spells dock directly to the left of items, with both bottom edges aligned",
+        "Menu extends from the left screen edge to the spells, with all bottom edges aligned",
+        "Icon-labelled resource strip and menu share one framed background and outside border",
+        "Framed overhead character banner",
+        "Enabled floating party roster uses the tester's 220x271 top-left geometry with a six-pixel inset and detailed self view; chat follows below",
+        "Beveled brass panel borders and optional ornate circular map trim",
+        "Round brass minimap with ornate circular trim, map title and a north arrowhead outside the radius",
+        "Side statistics hidden by default; all player refinements previously on option 1 now belong to option 2"
+      ]
+    },
+    {
+      "id": "modular",
+      "concept": "03-modular-mmo.png",
+      "features": [
+        "Centered five-meter grid with the second row centered beneath the first",
+        "Compact floating roster, target card and two eight-slot quick-access rows",
+        "Independent horizontal or vertical hotbars",
+        "Target and tracked-objective surfaces",
+        "Experience, item bar, spell bar and resource grid form a connected stack"
+      ]
+    },
+    {
+      "id": "adventure",
+      "concept": "04-painterly-adventure.png",
+      "features": [
+        "Generated laurel border around the live health orb",
+        "Saved Ether/action left curves and food/load right curves with the customized sweep angles",
+        "Five spells and five items align to the lower circle edge and meet the framed XP strip",
+        "Enclosed corners receive continuous HUD backgrounds without internal border seams",
+        "Optional two-row quick access",
+        "Food and carried-load meters at the bottom corners",
+        "Saved 686.3817 by 40 XP strip at 0.95 scale, with background, border, icon, label and values",
+        "Saved right-side natural round minimap with beveled brass trim, map title and offset north arrow",
+        "Four utility icons meet the load-meter frame",
+        "Complete tester presentation saved at 17:29 on October 21 adopted as the factory default"
+      ]
+    },
+    {
+      "id": "minimal",
+      "concept": "05-minimal-modern.png",
+      "features": [
+        "Complete saved tester presentation from 17:52 on October 21 adopted as the factory default",
+        "Eight spells dock above eight bottom-docked items; both bars stay floating",
+        "Beveled brass borders around individual item icons echo the painted spell frames",
+        "Magic and technique icons default to full opacity even when unavailable; blocker tooltips and cooldown behavior remain intact",
+        "Detailed 244x239 party roster and saved enlarged logo",
+        "Saved slim heading ribbon and natural round minimap with a north arrow 18 local pixels outside the radius",
+        "Saved blue-grey objective panel, background opacity and beveled border",
+        "Standalone resource, food, load and XP strips hidden by default",
+        "Name-only character banner and both original chat feeds retained"
+      ]
+    }
+  ],
+  "editor": {
+    "tabs": [
+      "Layout",
+      "Look",
+      "Options",
+      "Dock"
+    ],
+    "movement": "Drag the title bar or use Move aside; position is retained across component changes and saved locally. Native window reservations are relaxed for configurable HUD surfaces.",
+    "resize": "Drag left/right or top/bottom handles to change width or height independently, or the corner to change both. Nearby visible-window and screen edges snap the dragged dimensions with cyan guides; Shift bypasses snapping and Layout provides a switch. One gesture is one Undo step. Grid reflow favors complete rows and preserves icon proportions. Fixed widgets expose separate axis scales; circular maps remain circular.",
+    "grids": "Shared geometry supports aspect-based reflow or explicit rows and columns, including 3x2. Menu, spells and items expose width/height, rows/columns and a reflow switch. Existing saved layouts without these fields remain compatible.",
+    "resource_icons": "Optional vector health, Ether, food, action, load and XP emblems. Enabled in the five concepts and independently selectable per resource strip.",
+    "selection": "Circle hit testing follows its ornament and actual curve shapes. Transparent corners do not intercept neighboring controls. All eight curves are selectable directly or through the compact Left/Right selector.",
+    "history": "Undo and Redo retain up to 40 editing steps. One drag is one step. Chat appearance is included in snapshots.",
+    "restore_default": "HUD settings and the editor expose Restore default for Current and options 1–5. It restores layout, visibility, colors and chat appearance while retaining custom presets, drafts, recipients and feeds. Undo and Cancel can recover edited layouts. Disabled for custom presets.",
+    "custom_presets": "Up to 24 named custom layouts. Save as new or Update, then Done & save. Cancel restores the opening snapshot.",
+    "visibility": "Each component and each original menu icon can be independently enabled or disabled.",
+    "colors": "Background, border and text per component; center fill and each curved meter have independent colors. Each resource has an editable bar color shared by its tinted emblem and live player summary.",
+    "frames": "Independent HUD background and border switches, including clock and compass. Gapless connected panels remove shared border segments on both sides; partial joins retain exposed outside edges. Native chat backdrop opacity and idle fade remain authoritative.",
+    "border_designs": "Plain, beveled and ornate HUD trim. Layered highlights, corner details and circular studs echo the concept's brass frame and follow the outside edges of docked panels.",
+    "compass_corners": "Transparent, filled when docked, or always filled. Filled compass panels participate in the same shared frame drawing as the clock. Automatic fill recognizes attached children and screen pins.",
+    "minimap_frames": "Match map, circle or rectangle. Circular frames clip the map and preserve round geometry through resizing, unequal saved axis scales and docking; the editor highlights their circular outline. Native map shape controls update matching frames.",
+    "resource_order": "Resource meters Options provides ordered visibility, earlier/later arrows and color controls. Disabled meters retain their order; the full order and palette persist in custom presets.",
+    "quick_counts": "Quick spell count (1–12) and quick item count (1–8) remain visible on every editor tab for the selected bar and update its existing live controls.",
+    "clock_modes": "Dial, digital, or both, using the original live clock widgets. Disabled clocks retain their chosen mode. Digital-only clocks remain enabled when saving.",
+    "party_summary": "Optional detailed self summary shows initials, leader status, health, Ether, food, action and load with live values and palette-matched icons. Include yourself controls the summary and native self row together; other party rows and actions remain native.",
+    "resource_circle": {
+      "center_assignable": true,
+      "arcs_per_side": 4,
+      "curve_geometry": "Each curve has an editable radius offset, thickness, start angle and sweep. Drag radially to adjust radius; drag its end handle to adjust thickness. Attached button rows trim the adjacent curves to avoid covering slots.",
+      "resources": [
+        "health",
+        "mana (Ether)",
+        "food",
+        "action",
+        "mount stamina",
+        "load"
+      ],
+      "borders": [
+        "plain",
+        "laurel",
+        "runic",
+        "crystal"
+      ],
+      "unmounted_stamina": "Unavailable, not fabricated."
+    },
+    "docking": {
+      "edges": [
+        "left",
+        "right",
+        "top",
+        "bottom"
+      ],
+      "spacing": true,
+      "seamless_circle_joins": true,
+      "shared_panel_frames": true,
+      "recursive_groups": true,
+      "cycle_rejection": true,
+      "viewport_group_fit": true,
+      "screen_edges": "Explicit side/corner pins and drag previews reach the actual game-window edge without a forced margin.",
+      "alignment": "Start, center, end or stretch; optional extension to the remaining screen edge. Connected sizes and offsets are resolved before placement.",
+      "interaction": "Drag a docked component to move its group; Alt-drag or Detach releases just that component. Nearby edges show a snap preview before dropping. Dock sockets follow each border's visible radius, including after resizing."
+    },
+    "chat": "Original conversation and system controls, histories, composer, destinations, drafts, logs, URLs, combined mode and shortcuts are retained.",
+    "other_controls": [
+      "Minimap square/round shape",
+      "Minimap natural/parchment/muted colors",
+      "Compass round/ribbon display",
+      "Resource labels, values, visibility and strip orientation",
+      "Character banner bars and numbers",
+      "Player card visibility and secondary values",
+      "Panel or floating frames, compact headers and optional spell badges",
+      "Independent food/load/XP strips, resource assignment, labels and values",
+      "Carried weight or native free-load display"
+    ],
+    "minimap_annotations": "Optional live map title above the map, all/north-only/hidden directions, letter or camera-relative north arrowhead, and -48 to 120 local-pixel spacing from the radius. An independent label-plaque switch uses the map HUD background/border toggles and palette. Native annotations return in Current HUD.",
+    "circle_connections": "Visible ornament sockets are used for both ends of a dock. A circle can attach to a meter on any of its four sides; backgrounds join below the ornament and only the shared panel-border segment is removed. Wide meters use a neck no wider than the circle. Existing bar-to-circle connections remain supported. Perpendicular panels that meet around the ornament fill their enclosed corners. Background patches are disjoint to retain the selected opacity; border clipping handles overlapping connectors as well as adjacent panels. Lone bars and disabled supporting backgrounds retain open shoulders.",
+    "party_escape": "Escape skips the persistent roster but still closes other extension windows. Explicit party close/toggle and session-wide cleanup retain their behavior.",
+    "blank_panel": "Selectable, movable, resizable empty HUD surface with the standard color, frame, opacity and docking controls. Optional full-screen height and automatic hiding while skill statistics are visible. Height dragging releases full-height fill. Gameplay clicks pass through it. The Heritage factory default keeps its full-height backdrop visible behind enabled statistics. Background exclusions avoid painting translucent panel backgrounds twice.",
+    "resource_fit": "Every enabled resource has measured space for its icon, label, value and bar. Narrow strips add rows; thin XP-strip dimensions expand when ordinary meters or labels are enabled. Bottom docks resolve after the fit, keeping all entries inside the viewport. Tall cells center the entire content group together.",
+    "frame_opacity": "Look exposes background and border opacity separately from RGB colors. Enabling an inherited zero-alpha frame or choosing a new frame color makes it visible. Old enabled panel backgrounds inherited from transparent XP strips migrate once; the frame_alpha_version marker preserves subsequently explicit zero opacity.",
+    "builtin_edits": "Each built-in retains its own modified layout while switching. Done & save persists all remembered options; Restore default resets only the selected built-in. Undo/Redo and Cancel include the remembered layouts. Older profiles migrate their current active working layout.",
+    "heritage_statistics": "Enabled by default. Stretch docking matches the research/clock/compass column width and fills all available height below quick access with no forced spacer. The logo and both quick bars share the same rail width. Shorter viewports reduce the statistics height without overlapping quick bars. The blank rail stays visible both with and without statistics; automatic hiding remains optional. Native item scrolling stays available without a reserved scrollbar gutter changing the docked width.",
+    "slot_borders": "Independent Match HUD, None, Beveled or Ornate icon borders on spells and items, with an editable trim color. Floating window frames can stay disabled. Node2D trim has no input handling or layout minimum size, and remains visible across empty, disabled and cooldown item states. Current HUD clears custom trim.",
+    "icon_opacity": "Main quick-slot icon opacity defaults to 1.0; unavailable magic/technique opacity is an optional multiplier that also defaults to 1.0. Look exposes both controls. Presentation changes never enable an item or bypass casting restrictions. Undo, reset and saved layouts retain these settings; missing fields in older profiles default to full visibility."
+  },
+  "art": {
+    "tool": "built-in image_gen",
+    "manifest": "borders-manifest.json",
+    "directory": "godot-client/assets/ui/hud-borders",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "alpha": "RGBA, transparent center and background verified"
+  },
+  "validation": {
+    "launcher": "test-hud-editor.bat (interactive offline sandbox); --check (headless HUD assertions)",
+    "offline_sandbox": "prototypes/hud_editor_preview.gd: zero to twelve fake party members, selected removal, clear/reset, offline and low-health states, roster visibility and preset controls. Game sockets, sends, reconnects and update downloads disabled before the main scene is created.",
+    "sandbox_smoke_result": "PASS: add/remove/clear/reset, real party rows and player summary, controls during editing and blocked connections/sends",
+    "hud_checks": 293,
+    "hud_result": "PASS",
+    "split_chat_hud": "PASS",
+    "quick_slot_shortcuts": {
+      "checks": 295,
+      "failures": 0
+    },
+    "render_script": "godot-client/tests/integration/rendered_hud_presets.gd",
+    "render_exit_code": 0,
+    "captures_directory": "godot-client/test-artifacts/hud-presets/rendered-heritage-rail",
+    "captures": [
+      "adventure-all-six-resources.png",
+      "adventure-narrow-six-colored-frame.png",
+      "adventure-party-12.png",
+      "adventure-two-rows.png",
+      "adventure-user-docking.png",
+      "adventure.png",
+      "arcs-crystal.png",
+      "arcs-laurel.png",
+      "arcs-runic.png",
+      "circle-to-meter-bottom.png",
+      "circle-to-meter-left.png",
+      "circle-to-meter-right.png",
+      "circle-to-meter-top.png",
+      "classic-circle-frame.png",
+      "classic-compass-transparent.png",
+      "classic-custom-palette.png",
+      "classic-editor-frames-off.png",
+      "classic-editor-resources.png",
+      "classic-ornate-joined-panels.png",
+      "classic-party-12.png",
+      "classic-party.png",
+      "classic-round-map-square-frame.png",
+      "classic-round-map.png",
+      "classic.png",
+      "current.png",
+      "editor-circle.png",
+      "editor-compass-frame.png",
+      "editor-curve.png",
+      "editor-icons.png",
+      "editor-map-frame.png",
+      "editor-resize-alignment.png",
+      "editor.png",
+      "heritage-editor-blank-rail.png",
+      "heritage-saved-reference.png",
+      "heritage-statistics-hidden.png",
+      "heritage-updated-default.png",
+      "heritage-updated-statistics.png",
+      "heritage.png",
+      "minimal-party-12.png",
+      "minimal.png",
+      "minimap-title-four-directions.png",
+      "minimap-title-north-arrow.png",
+      "modular-party-12.png",
+      "modular.png",
+      "adventure-saved-reference.png",
+      "adventure-updated-default.png",
+      "adventure-translucent-joins.png",
+      "adventure-open-shoulders.png",
+      "heritage-continuous-rail.png",
+      "heritage-continuous-rail-short.png",
+      "heritage-continuous-rail-tall.png",
+      "heritage-continuous-rail-translucent.png",
+      "heritage-continuous-rail-no-statistics.png",
+      "minimal-saved-reference.png",
+      "minimal-updated-default.png",
+      "minimal-unavailable-icons-opaque.png",
+      "minimal-optional-icon-fading.png"
+    ],
+    "reviewed_and_refined": [
+      "Empty objective frame removed when no quest is tracked",
+      "Party roster sizing and compact mode",
+      "Heritage rail overlaps",
+      "Resource-label spacing and original meter restoration",
+      "Movable editor stability while rebuilding options",
+      "Connected bar margins, visible circle sockets and viewport fitting",
+      "All five concepts compared against fresh production-control captures",
+      "Transparent medallion selection bounds and eight-curve picking",
+      "Group dragging, Alt-detach, edge snapping and center-preserving resize",
+      "Default restoration, Undo/Redo, Cancel and persistence",
+      "Separate chat and composer clearance after native window clamping",
+      "Experience strip below the orb rather than above its transparent canvas",
+      "Minimal hotbar badge spacing, parchment/muted maps and compact objectives",
+      "Single option-2 compass and intrinsic clock/skill sizing",
+      "Option-2 bottom-aligned menu/spells/items and a framed, stretched resource strip with no internal seam",
+      "Independent width/height handles and fixed-widget axis scales",
+      "Three-by-two and wider/taller aspect reflow, explicit row/column control and reachable slots",
+      "Screen side/corner docking, aligned/stretch joins and resize persistence",
+      "All four party-enabled concepts captured with twelve members",
+      "Interactive offline sandbox rendered with editor and sample-party controls",
+      "Resource ordering, hidden-resource position, bar palette and hue-replaced emblems",
+      "Independent background-only, border-only and floating panels; exposed border segments at partial joins",
+      "Detailed player summary, self visibility and party-leader status",
+      "Live dial/digital/both modes, digital-only saving and mode retention while disabled",
+      "Quick counts, frame settings, palette, ordering and player details survive saved settings",
+      "Updated standalone BAT verification passed with 246 HUD checks",
+      "Width/height and corner resize snapping, cyan guides, Shift bypass, Undo/Redo and aspect reflow",
+      "Option-2 tester party defaults and lower two-by-three grids aligned to the resource strip",
+      "Shared clock/compass frames with transparent, automatic and filled corner modes",
+      "Circle/rectangle map frames, native shape-menu synchronization and circular resize constraints",
+      "Plain, beveled and ornate HUD borders; prominent Look controls for map frames and compass fill",
+      "Option 1 recreated as Heritage Polish; prior tester refinements transferred to option 2",
+      "Round brass option-2 minimap selected by the user, with map title and north arrowhead",
+      "All/north-only/hidden direction modes, live rotation, radius offset, label plaques and setting persistence",
+      "Escape leaves the party roster open without breaking explicit dismissal or close-all session cleanup",
+      "Reciprocal circle-to-meter sockets and partial frame joins verified on all four sides",
+      "36 fresh rendered captures in Landfall, including all five defaults, twelve-member rosters, minimap annotations and reciprocal circle joins",
+      "Continuous Heritage rail, editable filler, larger aligned quick-access columns and bottom toolbar connection",
+      "Blank-panel selection, game-click pass-through, automatic visibility with side statistics and manual height resizing",
+      "All six resources visible in the bottom dock; two-column reflow on narrow strips and complete icon/text groups on tall panels",
+      "Old zero-alpha frame migration, visible background and border toggles, explicit opacity and working RGB color changes",
+      "Separate saved built-in edits survive switching and restarting; resetting and Undo retain other layouts",
+      "40 rendered Landfall captures, including the Heritage filler editor and six-resource wide/narrow colored-frame cases",
+      "Latest saved Heritage reference incorporated: enlarged logo, six-slot dimensions, dial/digital clock, heading compass, research row, status indicators and labelled resource strip; optional statistics constrained between the bars and lower instruments.",
+      "Option 1 now enables statistics by default, with a 105-pixel-wide column aligned to research/clock/compass and filling the space below quick access. Hidden statistics still reveal the filler."
+    ],
+    "limits": [
+      "Visual fixture uses representative offline state and actual game controls; a live multiplayer session was not exercised.",
+      "The OpenGL world-render fixture exits successfully but reports two texture allocations during renderer shutdown; no HUD script errors were reported in its final run."
+    ],
+    "party_visibility": "PASS: Escape protects the roster; explicit close/toggle, packet updates, invitations and session cleanup retain their behavior.",
+    "preview_location": "Landfall, using its published landfall--arrival server tile (130, 214), with real streamed terrain and map data.",
+    "capture_count": 57,
+    "heritage_reference_review": {
+      "source": "User-provided copied BAT shares the local tester profile; the active Heritage arrangement saved at 16:57 was inspected and preserved in ignored local QA artifacts.",
+      "captures": [
+        "heritage-saved-reference.png",
+        "heritage-updated-default.png",
+        "heritage-updated-statistics.png"
+      ],
+      "result": "PASS: saved logo and quick-bar proportions, lower instrument stack, labelled meters/indicators and short-viewport statistics."
+    },
+    "adventure_reference_review": {
+      "source": "Active option 4 in the local tester profile, saved at 17:29 on October 21; preserved in an ignored QA snapshot before changes.",
+      "captures": [
+        "adventure-saved-reference.png",
+        "adventure-updated-default.png",
+        "adventure-translucent-joins.png",
+        "adventure-open-shoulders.png"
+      ],
+      "result": "PASS: saved layout reproduced; both lower circle corners filled; translucent joins paint once; disabled supporting background retains open shoulders.",
+      "checks": "Four joining directions and four ornament designs; complete corner coverage, exposed border clipping, non-overlapping translucent patches and open shoulders when the supporting background is hidden."
+    },
+    "heritage_gap_review": {
+      "source": "Option-1 gap screenshot and the remembered Heritage layout from the tester profile saved at 17:42; the profile was preserved in an ignored QA snapshot.",
+      "captures": [
+        "heritage-continuous-rail.png",
+        "heritage-continuous-rail-short.png",
+        "heritage-continuous-rail-tall.png",
+        "heritage-continuous-rail-translucent.png",
+        "heritage-continuous-rail-no-statistics.png"
+      ],
+      "checks": "1440x900, 1280x720 and 1920x1080; matching rail widths, gapless vertical joins, complete single-layer background coverage, visible-statistics and hidden-statistics states.",
+      "result": "PASS: all 280 HUD assertions; fresh Landfall renders at three window sizes, translucent colors and hidden statistics. Matching widths and complete single-layer background coverage verified."
+    },
+    "minimal_reference_review": {
+      "source": "Active option-5 working layout in the tester profile saved at 17:52 on October 21, preserved in an ignored QA snapshot before edits.",
+      "captures": [
+        "minimal-saved-reference.png",
+        "minimal-updated-default.png",
+        "minimal-unavailable-icons-opaque.png",
+        "minimal-optional-icon-fading.png"
+      ],
+      "result": "PASS: saved layout reproduced, brass trim on all eight item slots, unavailable magic and technique artwork fully opaque by default, optional fading and style/color controls persist, Undo and factory reset verified, 295 shortcut checks passed."
+    }
+  }
+}

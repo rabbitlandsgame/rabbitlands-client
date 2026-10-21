@@ -1586,13 +1586,13 @@ func _run() -> void:
 	_expect(first_spell_slot.tooltip_text.contains("Heal"),
 		"owned castable spell tooltip names the spell: "
 			+ first_spell_slot.tooltip_text)
-	# One reagent short and the same slot goes dark, naming what is missing.
+	# Missing reagents retain full icon opacity and name what is missing.
 	app_state_inventory.set("inventory", {
 		1: {"image_id": 67, "quantity": 1, "slot": 1, "flags": 6}})
 	main.call("_sync_spells")
-	_expect(first_spell_slot.self_modulate.a < 1.0
+	_expect(first_spell_slot.self_modulate.a == 1.0
 			and first_spell_slot.tooltip_text.contains("Life Distillate"),
-		"a missing reagent dims the editable slot and is named: "
+		"a missing reagent keeps the editable icon fully visible and is named: "
 			+ first_spell_slot.tooltip_text)
 	app_state_inventory.set("inventory", {
 		0: {"image_id": 584, "quantity": 1, "slot": 0, "flags": 6},
@@ -1600,8 +1600,8 @@ func _run() -> void:
 	main.call("_sync_spells")
 	app_state_inventory.set("stats", {"magic": 0, "ether": 0})
 	main.call("_sync_spells")
-	_expect(first_spell_slot.self_modulate.a < 1.0 and first_spell_slot.tooltip_text.contains("Requires 5 mana"),
-		"an unaffordable spell is visibly dimmed with the exact availability reason")
+	_expect(first_spell_slot.self_modulate.a == 1.0 and first_spell_slot.tooltip_text.contains("Requires 5 mana"),
+		"an unaffordable spell stays fully visible with the exact availability reason")
 	for spell_index: int in range(1, 7):
 		_expect(InputMap.has_action("quick_spell_%d" % spell_index),
 			"spell quick slot %d has a centralized input action" % spell_index)

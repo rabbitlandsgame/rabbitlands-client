@@ -230,9 +230,10 @@ func has_open_window() -> bool:
 
 ## Closes the topmost open window. Returns true when something closed, so the
 ## cancel cascade in main.gd can stop there.
-func close_top() -> bool:
+func close_top(include_party := false) -> bool:
 	for panel: PanelContainer in _cascade():
-		if not panel.visible:
+		# The roster is persistent HUD; its close button and toggle still work.
+		if panel == party_panel and not include_party or not panel.visible:
 			continue
 		if panel == merchant_panel:
 			AppState.close_merchant()
@@ -246,7 +247,7 @@ func close_top() -> bool:
 	return false
 
 func close_all() -> void:
-	while close_top():
+	while close_top(true):
 		pass
 
 func toggle_quest_journal() -> void:

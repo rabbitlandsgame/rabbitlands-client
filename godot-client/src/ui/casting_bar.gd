@@ -7,6 +7,8 @@ signal layout_changed
 signal settings_requested
 const SpellButton := preload("res://src/ui/prepared_spell_button.gd")
 const TechniqueIcons := preload("res://src/ui/technique_icons.gd")
+const HudGrid := preload("res://src/ui/hud_grid_layout.gd")
+const SlotStyle := preload("res://src/ui/hud_quick_slot_style.gd")
 const SCOPE_BADGES := {"self": "Self", "target": "Target", "allies": "Allies", "burst": "Burst", "location": "Ground", "inventory": "Item", "destination": "Recall"}
 const CORNER_BADGES := {"self": "S", "target": "T", "allies": "A", "burst": "B", "location": "G", "inventory": "I", "destination": "R"}
 const SLOT_SIZE := 44.0
@@ -53,6 +55,10 @@ var _last_compact := false
 var _selected_actor := -2
 var _item_header_height := 0.0
 var _item_view_height := 0.0
+## An explicit workspace layout bypasses the original coupled right rail.
+## The same prepared buttons retain assignments, badges, menus and signals.
+var workspace_layout: Dictionary = {}
+var _workspace_signature: Array = []
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -236,6 +242,7 @@ func _build_settings() -> void:
 
 func set_expanded(expanded: bool) -> void:
 	var changed := panel.visible != expanded
+	if not workspace_layout.is_empty(): workspace_layout.enabled = expanded
 	panel.visible = expanded
 	launcher.visible = not expanded
 	if not expanded:
@@ -252,6 +259,10 @@ func set_docked(value: bool) -> void:
 	_finish_drag()
 	if not docked: _floating_position = panel.position
 	docked = value
+	if not workspace_layout.is_empty():
+		workspace_layout.anchor = "right" if value else "free"
+		workspace_layout.dock_target = "none"
+		workspace_layout.position = panel.position
 	if not docked:
 		# A menu detach keeps the bar beside the rail until it is dragged.
 		_floating_position = panel.position
@@ -264,6 +275,12 @@ func hud_layout() -> Dictionary:
 func set_horizontal(value: bool) -> void:
 	if horizontal == value: return
 	horizontal = value
+	if not workspace_layout.is_empty():
+		workspace_layout.orientation = "horizontal" if value else "vertical"
+		workspace_layout.columns = 0
+		workspace_layout.dimensions = Vector2.ZERO
+		workspace_layout.grid_mode = "fixed"
+		workspace_layout.erase("fit_columns")
 	_last_layout_size = Vector3(-1, -1, -1)
 	if horizontal:
 		docked = false
@@ -275,11 +292,15 @@ func set_visible_slot_count(count: int) -> void:
 	count = clampi(count, 1, buttons.size())
 	if visible_slot_count == count: return
 	visible_slot_count = count
+	if not workspace_layout.is_empty(): workspace_layout.slots = count
 	_scroll.scroll_vertical = 0
 	_layout()
 	layout_changed.emit()
 
 func restore_hud_layout(value: Dictionary) -> void:
+	_workspace_signature = []
+	for button: Button in buttons: SlotStyle.clear(button)
+	(_scroll.get_parent().get_child(0) as Control).show()
 	docked = bool(value.get("docked", true))
 	horizontal = bool(value.get("horizontal", false))
 	if horizontal: docked = false
@@ -291,6 +312,7 @@ func restore_hud_layout(value: Dictionary) -> void:
 	panel.visible = bool(value.get("expanded", true))
 	launcher.visible = not panel.visible
 	_layout()
+	refresh()
 
 func _refresh_dock_menu() -> void:
 	dock_menu.get_popup().set_item_text(0, "Detach from HUD" if docked else "Attach to HUD")
@@ -335,6 +357,10 @@ func _dock_bounds() -> Rect2:
 
 func _layout() -> void:
 	if panel == null or launcher == null: return
+	if not workspace_layout.is_empty():
+		_layout_workspace()
+		return
+	_workspace_signature = []
 	var compact := docked and _has_hud_dock()
 	var top := _dock_origin().y if docked else EDGE
 	var available := maxf(80, _dock_bounds().size.y if compact else _bottom_edge() - top)
@@ -362,6 +388,8 @@ func _layout() -> void:
 		var slot_height := icon_size + badge_height + 2
 		for index in range(buttons.size()):
 			var button := buttons[index]
+			button.size_flags_horizontal = Control.SIZE_FILL
+			button.size_flags_vertical = Control.SIZE_FILL
 			button.custom_minimum_size = Vector2(width, slot_height)
 			button.add_theme_constant_override("icon_max_width", int(icon_size))
 			button.add_theme_font_size_override("font_size", 10 if compact else 16)
@@ -370,15 +398,24 @@ func _layout() -> void:
 				style.content_margin_top = badge_height
 				button.add_theme_stylebox_override(state, style)
 			var cell: HBoxContainer = button.get_parent()
+			cell.size_flags_horizontal = Control.SIZE_FILL
+			cell.size_flags_vertical = Control.SIZE_FILL
 			cell.visible = index < visible_slot_count
 			cell.add_theme_constant_override("separation", 1 if compact else 2)
 			var key: Label = cell.get_node("Key")
 			key.visible = not compact
 			button.get_node("Shortcut").visible = compact
+			var shortcut: Label = button.get_node("Shortcut")
+			shortcut.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+			shortcut.offset_left = -6
+			shortcut.offset_right = 6
+			shortcut.offset_top = 1
+			shortcut.offset_bottom = 12
 			key.custom_minimum_size.x = 8 if compact else 12
 			key.add_theme_font_size_override("font_size", 8 if compact else 11)
 			for corner in ["Target", "Power"]:
 				var badge: Label = button.get_node(corner)
+				badge.visible = int(loadout.slots[index].id) >= 0
 				badge.add_theme_font_size_override("font_size", 8 if compact else 11)
 				badge.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT if corner == "Power" else Control.PRESET_TOP_LEFT)
 				badge.offset_left = (-13 if compact else -20) if corner == "Power" else 1
@@ -406,6 +443,114 @@ func _layout() -> void:
 		launch_position = Vector2(_dock_origin().x + panel.size.x - launcher.size.x, _local_position(dock_anchor).y)
 	launcher.position = launch_position.clamp(Vector2.ONE * EDGE, (size - launcher.size - Vector2.ONE * EDGE).max(Vector2.ONE * EDGE))
 	_layout_item_bar()
+
+func workspace_size(config: Dictionary) -> Vector2:
+	var factor := clampf(float(config.get("scale", 1.0)), 0.5, 2.0)
+	return workspace_geometry(config).size * factor
+
+func workspace_geometry(config: Dictionary) -> Dictionary:
+	var count := clampi(int(config.get("slots", 6)), 1, buttons.size())
+	var factor := clampf(float(config.get("scale", 1.0)), 0.5, 2.0)
+	var compact: bool = config.get("style") in ["heritage", "classic", "modular", "adventure", "minimal"]
+	var cell := Vector2(44 if compact else 58, 44 if not config.get("show_badges", true) else 56)
+	return HudGrid.measure(config, count, cell, Vector2(8, 8 if compact else 28), size / factor)
+
+func _layout_workspace() -> void:
+	var config := workspace_layout
+	var factor := clampf(float(config.get("scale", 1.0)), 0.5, 2.0)
+	var compact: bool = config.get("style") in ["heritage", "classic", "modular", "adventure", "minimal"]
+	var geometry := workspace_geometry(config)
+	var dimensions: Vector2 = geometry.size
+	var count := clampi(int(config.get("slots", 6)), 1, buttons.size())
+	var rows: int = geometry.rows
+	var columns: int = geometry.columns
+	_column.columns = columns
+	horizontal = config.get("orientation", "horizontal") == "horizontal"
+	visible_slot_count = count
+	orientation_picker.select(1 if horizontal else 0)
+	slot_count_picker.select(slot_count_picker.get_item_index(count))
+	panel.visible = bool(config.get("enabled", true))
+	launcher.hide()
+	panel.scale = Vector2.ONE * factor
+	var skin := str(config.get("style", "classic"))
+	docked = config.get("dock_target", "none") != "none" or config.get("anchor", "free") != "free"
+	var signature := [factor, dimensions, count, rows, columns, skin, config.get("background_color"), config.get("border_color"), config.get("text_color"), config.get("dock_target"), config.get("dock_side"), config.get("dock_gap"), config.get("show_badges", true), config.get("frame_style"), config.get("show_background", true), config.get("show_border", true), panel.has_node("_HudChrome"), config.get("slot_border_style"), config.get("slot_border_color"), config.get("icon_opacity"), config.get("unavailable_icon_opacity")]
+	if signature == _workspace_signature:
+		_position_workspace(config, factor)
+		return
+	_workspace_signature = signature
+	grip.tooltip_text = "Drag to move. Settings → HUD → Edit HUD changes position, rows and appearance."
+	var shell := _style(config.get("background_color", Color("261e13")), 4)
+	shell.border_color = config.get("border_color", Color("aa8d50"))
+	shell.set_corner_radius_all(0 if config.get("dock_target", "none") != "none" else 4)
+	if not config.get("show_background", config.get("frame_style") != "floating") or panel.has_node("_HudChrome"): shell.bg_color.a = 0
+	if not config.get("show_border", config.get("frame_style") != "floating") or panel.has_node("_HudChrome"): shell.set_border_width_all(0)
+	panel.add_theme_stylebox_override("panel", shell)
+	var body: VBoxContainer = _scroll.get_parent()
+	(body.get_child(0) as Control).visible = not compact
+	body.add_theme_constant_override("separation", 2)
+	_column.add_theme_constant_override("h_separation", 2)
+	_column.add_theme_constant_override("v_separation", 2)
+	wheel_button.hide()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_scroll.custom_minimum_size = Vector2(dimensions.x - 8, maxf(38, dimensions.y - (8 if compact else 28)))
+	for index: int in buttons.size():
+		var button: Button = buttons[index]
+		var cell: HBoxContainer = button.get_parent()
+		cell.visible = index < count
+		cell.add_theme_constant_override("separation", 2)
+		button.custom_minimum_size = Vector2(geometry.cell).floor()
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		button.add_theme_constant_override("icon_max_width", int(maxf(12, minf(geometry.cell.x - 6, geometry.cell.y - (20 if config.get("show_badges", true) else 6)))))
+		for state: String in SLOT_BACKGROUNDS:
+			var style := _style(SLOT_BACKGROUNDS[state], 2)
+			if state == "normal": style.bg_color = config.get("background_color", style.bg_color)
+			if state == "normal" and not config.get("show_background", true): style.bg_color.a = 0
+			style.border_color = config.get("border_color", style.border_color)
+			if not SlotStyle.native_border_visible(config): style.set_border_width_all(0)
+			style.content_margin_top = 16 if config.get("show_badges", true) else 2
+			button.add_theme_stylebox_override(state, style)
+		SlotStyle.apply(button, config)
+		var key: Label = cell.get_node("Key")
+		key.visible = not compact
+		key.custom_minimum_size.x = 12
+		key.add_theme_font_size_override("font_size", 10)
+		key.add_theme_color_override("font_color", config.get("text_color", Color.WHITE))
+		button.get_node("Shortcut").visible = compact
+		if compact:
+			var shortcut: Label = button.get_node("Shortcut")
+			shortcut.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+			shortcut.offset_left = -16
+			shortcut.offset_right = -2
+			shortcut.offset_top = -15
+			shortcut.offset_bottom = -1
+		(button.get_node("Shortcut") as Label).add_theme_color_override("font_color", config.get("text_color", Color.WHITE))
+		button.add_theme_color_override("font_color", config.get("text_color", Color.WHITE))
+		for corner: String in ["Target", "Power"]:
+			var badge: Label = button.get_node(corner)
+			badge.visible = bool(config.get("show_badges", true))
+			badge.add_theme_font_size_override("font_size", 10)
+			badge.add_theme_color_override("font_color", config.get("text_color", Color.WHITE))
+			badge.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT if corner == "Power" else Control.PRESET_TOP_LEFT)
+			badge.offset_left = -20 if corner == "Power" else 1
+			badge.offset_right = -1 if corner == "Power" else 15
+			badge.offset_top = 1
+			badge.offset_bottom = 17
+	_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.size = dimensions
+	panel.reset_size()
+	_position_workspace(config, factor)
+	refresh()
+
+func _position_workspace(config: Dictionary, factor: float) -> void:
+	var where: Variant = config.get("position", Vector2(12, 12))
+	if where is Vector2:
+		panel.position = where.clamp(Vector2.ZERO, (size - panel.size * factor).max(Vector2.ZERO))
 
 func _sync_item_slot_layout(width: float, height: float, icon_size: float) -> void:
 	if not is_instance_valid(item_slots): return
@@ -463,6 +608,11 @@ func _grip_input(event: InputEvent) -> void:
 		_drag_moved = true
 		docked = false
 		_floating_position = _clamp_position(_grab_panel + delta)
+		if not workspace_layout.is_empty():
+			workspace_layout.anchor = "free"
+			workspace_layout.dock_target = "none"
+			workspace_layout.position = (_grab_panel + delta).clamp(Vector2.ONE * EDGE,
+				(size - panel.size * panel.scale - Vector2.ONE * EDGE).max(Vector2.ONE * EDGE))
 		_layout()
 		grip.accept_event()
 
@@ -510,6 +660,9 @@ func refresh() -> void:
 		button.get_node("Power").text = str(int(slot.power)) if int(slot.id) >= 0 else ""
 		button.get_node("Target").visible = int(slot.id) >= 0
 		button.get_node("Power").visible = int(slot.id) >= 0
+		if not workspace_layout.is_empty() and not workspace_layout.get("show_badges", true):
+			button.get_node("Target").hide()
+			button.get_node("Power").hide()
 		var keys: Array[InputEvent] = InputMap.action_get_events("quick_spell_%d" % (index + 1))
 		var shortcut := keys[0].as_text() if not keys.is_empty() else "Unbound"
 		var key_label: Label = button.get_parent().get_node("Key")
@@ -525,8 +678,8 @@ func refresh() -> void:
 		var reasons: Array[String] = []
 		if int(slot.id) >= 0:
 			reasons = loadout.catalog.unavailable_reasons(int(slot.id), AppState.known_knowledge, AppState.stats, AppState.inventory)
-		# Dim only the button's art. Its child badges must remain legible.
-		button.self_modulate.a = 1.0 if reasons.is_empty() else 0.55
+		# Presentation opacity never changes availability or cast validation.
+		button.self_modulate.a = float(workspace_layout.get("icon_opacity", 1.0)) * (1.0 if reasons.is_empty() else float(workspace_layout.get("unavailable_icon_opacity", 1.0)))
 		if not reasons.is_empty(): button.tooltip_text += "\n" + reasons[0]
 
 ## Whether any technique slot is counting down, so `_process` keeps redrawing.
@@ -535,8 +688,8 @@ var _next_cooldown_refresh := 0
 
 ## A technique in a quick slot: its painted icon, its action-point cost in the
 ## top-right badge where a spell shows power, and its cooldown in seconds in
-## the top-left badge where a spell shows its target type. The art dims while
-## it cannot be used, as a spell's does.
+## the top-left badge where a spell shows its target type. Unavailable-art opacity
+## is configurable independently of the cooldown and blocker tooltips.
 func _refresh_technique_slot(index: int, button) -> void:
 	var key: String = button.technique
 	var row: Dictionary = {}
@@ -556,6 +709,9 @@ func _refresh_technique_slot(index: int, button) -> void:
 	target_badge.visible = waiting > 0.05
 	power_badge.text = str(cost) if cost > 0 else ""
 	power_badge.visible = cost > 0
+	if not workspace_layout.is_empty() and not workspace_layout.get("show_badges", true):
+		target_badge.hide()
+		power_badge.hide()
 	_technique_cooling = _technique_cooling or waiting > 0.05
 	var keys: Array[InputEvent] = InputMap.action_get_events("quick_spell_%d" % (index + 1))
 	var shortcut := keys[0].as_text() if not keys.is_empty() else "Unbound"
@@ -572,7 +728,7 @@ func _refresh_technique_slot(index: int, button) -> void:
 		str(row.get("name", key)), (" · %d AP" % cost) if cost > 0 else "", str(row.get("description", "")), shortcut]
 	if not reason.is_empty():
 		button.tooltip_text += "\n" + reason
-	button.self_modulate.a = 1.0 if reason.is_empty() else 0.55
+	button.self_modulate.a = float(workspace_layout.get("icon_opacity", 1.0)) * (1.0 if reason.is_empty() else float(workspace_layout.get("unavailable_icon_opacity", 1.0)))
 
 func _slot_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
