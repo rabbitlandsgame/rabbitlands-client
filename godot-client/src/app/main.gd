@@ -1219,6 +1219,7 @@ func _ready() -> void:
 	extension_windows.combat_hud_preference_changed.connect(_save_hud_settings)
 	invasion_assistant_window = InvasionAssistantScript.new()
 	add_child(invasion_assistant_window)
+	invasion_assistant_window.configure_monitor_dock(_invasion_monitor_dock_rect)
 	invasion_assistant_window.configure_registry(map_registry)
 	invasion_assistant_window.coordinate_context = Network.coordinates
 	invasion_assistant_window.command_requested.connect(
@@ -1235,6 +1236,7 @@ func _ready() -> void:
 				and detail.get("worldMax") == tab_map.get("worldMax"):
 			tab_map["detail"] = detail
 	_region_polygons.clear()
+	invasion_assistant_window.configure_cartography(cartography_regions)
 	equipment_config = preload(
 		"res://src/actors/equipment_registry_snapshot_cache.gd").prepare(
 		_json("res://data/actors/equipment.json"))
@@ -2698,7 +2700,7 @@ func _configure_unified_settings() -> void:
 	settings_window._add_toggle(settings_window.page_body("Gameplay"),
 		"start_animated", "Animate login background", true)
 	settings_window._add_number(settings_window.page_body("HUD"),
-		"invasion_assistant_scale", "Invasion assistant scale",
+		"invasion_assistant_scale", "Invasion assistant size",
 		InvasionAssistantScript.MIN_SCALE, InvasionAssistantScript.MAX_SCALE, 1.0, 0.05)
 	_refresh_unified_settings.call_deferred()
 
@@ -10946,6 +10948,13 @@ func _fit_hud_action_buttons() -> void:
 	# A prior minimum-width overflow can leave an anchored panel expanded left.
 	(%Quickbar as Control).offset_left = 0
 	(%Quickbar as Control).offset_right = -right_rail.size.x
+
+func _invasion_monitor_dock_rect() -> Rect2:
+	var area := viewport_container.get_global_rect()
+	area.end = Vector2(minf(area.end.x, right_rail.get_global_rect().position.x),
+		minf(area.end.y, (%Quickbar as Control).get_global_rect().position.y))
+	return area
+
 
 func _layout_full_map() -> void:
 	var area := viewport_container.get_rect()

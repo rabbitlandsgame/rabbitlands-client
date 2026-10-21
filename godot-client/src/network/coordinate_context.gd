@@ -216,6 +216,45 @@ func convert(event: Dictionary) -> Dictionary:
 					state.map["serverTileMin"] = bounds.minimum
 					state.map["width"] = bounds.cells[0]
 					state.map["height"] = bounds.cells[1]
+			elif state.get("kind") == "groups":
+				for group_value: Variant in state.get("groups", []):
+					if not group_value is Dictionary:
+						return Profile.failure("coordinate_admin_group")
+					var group: Dictionary = group_value
+					var metadata := group.duplicate()
+					metadata["id"] = group.get("map_id", "")
+					var bounds := admin_bounds(metadata)
+					if not bounds.ok:
+						if bounds.error != "coordinate_admin_unsupported_map":
+							return bounds
+						group["coordinatesSupported"] = false
+						group["movement"] = {}
+						continue
+					var movement: Variant = group.get("movement", {})
+					if not movement is Dictionary:
+						return Profile.failure("coordinate_admin_movement")
+					var radius: Variant = movement.get("radius", 18)
+					if not Profile.number(radius) or floor(float(radius)) != radius or radius < 1 or radius > 1000:
+						return Profile.failure("coordinate_admin_movement")
+					var points: Array = []
+					var anchor: Variant = movement.get("anchor")
+					var region: Variant = movement.get("region")
+					if anchor != null:
+						if not anchor is Dictionary:
+							return Profile.failure("coordinate_admin_movement")
+						points.append([anchor.get("x"), anchor.get("y")])
+					if region != null:
+						if not region is Dictionary:
+							return Profile.failure("coordinate_admin_movement")
+						points.append([region.get("x0"), region.get("y0")])
+						points.append([region.get("x1"), region.get("y1")])
+					var profile: Variant = Profile.from_registry(expected[bounds.mapId]).profile
+					for point: Array in points:
+						for value: Variant in point:
+							if not Profile.number(value) or floor(float(value)) != value or value < -2147483648 or value > 2147483647:
+								return Profile.failure("coordinate_admin_movement")
+						if not profile.to_wire(int(point[0]), int(point[1])).ok:
+							return Profile.failure("coordinate_admin_movement")
 		"actor_spawn":
 			var handle: int = int(result.get("map_handle", 0))
 			if not ready() or not handles.has(handle):
