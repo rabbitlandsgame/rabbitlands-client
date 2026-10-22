@@ -67,6 +67,7 @@ var _attributed: Dictionary = {}
 ## on a 60 Hz display; an uncapped one would thin it out and flatter p95.
 var _iteration_started_usec := -1
 var _last_iteration_usec := -1.0
+var _process_started_usec := -1
 var _process_ended_usec := -1
 var _draw_started_usec := -1
 var _last_phases: Dictionary = {}
@@ -164,7 +165,7 @@ func _run() -> void:
 		return
 	Engine.max_fps = _fps_cap
 	physics_frame.connect(_on_iteration_started)
-	process_frame.connect(_on_iteration_started)
+	process_frame.connect(_on_process_started)
 	# The last node to process marks where node processing ends and the
 	# deferred flush (Main's world sync, every skeleton's update: modifiers,
 	# skeleton_updated listeners, skins) begins. Nothing is drawn headless and
@@ -320,6 +321,7 @@ func _run_cell(spec: Dictionary) -> void:
 		"worldRenderGpuMilliseconds": [], "drawCalls": [], "liveEffects": [],
 		"packetsPerFrame": [], "packetDispatchMilliseconds": [], "sceneNodes": [], "engineProcessMilliseconds": [], "enginePhysicsMilliseconds": [],
 		"processPhaseMilliseconds": [], "flushPhaseMilliseconds": [], "drawPhaseMilliseconds": [],
+		"physicsPhaseMilliseconds": [], "mainProcessMilliseconds": [],
 		"halfRateStepMilliseconds": [], "combatPoseMilliseconds": [], "skeletonUpdates": []}
 	var sample_started := Time.get_ticks_msec()
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw)
@@ -568,6 +570,8 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
 		(raw["processPhaseMilliseconds"] as Array).append(_last_phases.get("process"))
 		(raw["flushPhaseMilliseconds"] as Array).append(_last_phases.get("flush"))
 		(raw["drawPhaseMilliseconds"] as Array).append(_last_phases.get("draw"))
+		(raw["physicsPhaseMilliseconds"] as Array).append(_last_phases.get("physics"))
+		(raw["mainProcessMilliseconds"] as Array).append(float(usec.get("main_process_inclusive", 0)) / 1000.0)
 		(raw["halfRateStepMilliseconds"] as Array).append(float(usec.get("half_rate_step", 0)) / 1000.0)
 		var calls: Dictionary = measured.get("calls", {}) as Dictionary
 		if _attribution:
@@ -579,6 +583,13 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
 func _on_iteration_started() -> void:
 	if _iteration_started_usec < 0:
 		_iteration_started_usec = Time.get_ticks_usec()
+
+
+## The idle step begins: what came before it in the iteration was physics.
+func _on_process_started() -> void:
+	_on_iteration_started()
+	if _process_started_usec < 0:
+		_process_started_usec = Time.get_ticks_usec()
 
 
 func _on_process_ended() -> void:
@@ -602,9 +613,11 @@ func _on_iteration_drawn() -> void:
 		if _process_ended_usec >= _iteration_started_usec:
 			var flush_end := _draw_started_usec if _draw_started_usec >= _process_ended_usec else now
 			_last_phases = {"process": float(_process_ended_usec - _iteration_started_usec) / 1000.0,
+				"physics": float(maxi(0, _process_started_usec - _iteration_started_usec)) / 1000.0,
 				"flush": float(flush_end - _process_ended_usec) / 1000.0,
 				"draw": float(now - flush_end) / 1000.0 if flush_end != now else null}
 	_iteration_started_usec = -1
+	_process_started_usec = -1
 	_process_ended_usec = -1
 	_draw_started_usec = -1
 

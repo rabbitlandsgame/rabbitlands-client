@@ -59,13 +59,11 @@ func _benchmark_add(label: StringName, started: int) -> void:
 
 
 func _process(delta: float) -> void:
-	if not benchmark_attribution_enabled:
-		super._process(delta)
-		return
 	var started := Time.get_ticks_usec()
 	super._process(delta)
-	_benchmark_values[&"process_delta_milliseconds"] = delta * 1000.0
 	_benchmark_add(&"main_process_inclusive", started)
+	if benchmark_attribution_enabled:
+		_benchmark_values[&"process_delta_milliseconds"] = delta * 1000.0
 
 
 ## Installs diagnostic observers only after a benchmark fixture is complete.
