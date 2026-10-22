@@ -33,6 +33,7 @@ func _run() -> void:
 	await _test_release()
 	await _test_body_cap()
 	await _test_paused_tier()
+	_test_rate_ranking()
 	await _test_bulk_removal()
 	print("crowd presentation tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
@@ -52,6 +53,17 @@ func _test_policy_parsing() -> void:
 	policy.call("configure", "-park")
 	_expect(policy.lazy and policy.gate and policy.effects and not policy.park,
 		"-name drops one part from the full set")
+	policy.call("configure", "")
+	_expect(policy.stagger and policy.quarter and policy.half_rate_bodies == policy.HALF_RATE_BODIES,
+		"the full set staggers the stepped bodies and has the quarter tier")
+	policy.call("configure", "-quarter", "", "half=8")
+	_expect(policy.stagger and not policy.quarter and policy.half_rate_bodies == 8,
+		"the quarter tier can be dropped alone, and the half-rate budget tuned")
+	policy.call("configure", "-gate")
+	_expect(not policy.stagger and not policy.quarter,
+		"staggering and the quarter tier go with the gate they refine")
+	policy.call("configure", "legacy")
+	_expect(not policy.stagger and not policy.quarter, "legacy has neither")
 
 
 func _test_effect_budget() -> void:
@@ -301,6 +313,48 @@ func _test_paused_tier() -> void:
 		== Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE,
 		"and a full-rate one hands them back to the engine's clock")
 	_expect(actor != null, "the player is present")
+
+
+## The sweep's ranking: the nearest `full_rate_bodies` animate at full rate,
+## the next `half_rate_bodies` at half, the rest every fourth frame; a body
+## past 45 m is never ranked above half rate.
+func _test_rate_ranking() -> void:
+	var bodies: Array[ReplicatedActor3D] = []
+	for value: Variant in _nodes().values():
+		var candidate := value as ReplicatedActor3D
+		if candidate != null and candidate.actor_id != LOCAL and not candidate.is_model_deferred() \
+				and candidate.animation_player != null and bodies.size() < 2:
+			bodies.append(candidate)
+	if not _expect(bodies.size() == 2, "two built remote bodies exist for the ranking check"):
+		return
+	var crowd: RefCounted = _main.get("crowd")
+	var saved := [crowd.get("full_rate_bodies"), crowd.get("half_rate_bodies"), crowd.get("quarter")]
+	crowd.set("full_rate_bodies", 1)
+	crowd.set("half_rate_bodies", 0)
+	crowd.set("quarter", true)
+	_main.call("_apply_crowd_full_rate", [[1.0, bodies[0], AnimationGate.Tier.FULL],
+		[2.0, bodies[1], AnimationGate.Tier.FULL]])
+	_expect(bodies[0].animation_tier() == AnimationGate.Tier.FULL
+		and bodies[1].animation_tier() == AnimationGate.Tier.QUARTER,
+		"past the full and half budgets a body is stepped at quarter rate")
+	_expect(bodies[1].get_skeleton().modifier_callback_mode_process
+		== Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL,
+		"a quarter-rate body steps its skeleton's modifiers with its player")
+	_main.call("_apply_crowd_full_rate", [[1.0, bodies[0], AnimationGate.Tier.HALF],
+		[2.0, bodies[1], AnimationGate.Tier.FULL]])
+	_expect(bodies[0].animation_tier() == AnimationGate.Tier.HALF,
+		"a body past 45 m is not ranked above half rate")
+	crowd.set("quarter", false)
+	_main.call("_apply_crowd_full_rate", [[1.0, bodies[0], AnimationGate.Tier.FULL],
+		[2.0, bodies[1], AnimationGate.Tier.FULL]])
+	_expect(bodies[1].animation_tier() == AnimationGate.Tier.HALF,
+		"without the quarter tier the rest are stepped at half rate")
+	crowd.set("full_rate_bodies", saved[0])
+	crowd.set("half_rate_bodies", saved[1])
+	crowd.set("quarter", saved[2])
+	var gate := _main.get("animation_gate") as AnimationGate
+	for body: ReplicatedActor3D in bodies:
+		body.set_animation_tier(AnimationGate.Tier.FULL, gate)
 
 
 func _test_bulk_removal() -> void:

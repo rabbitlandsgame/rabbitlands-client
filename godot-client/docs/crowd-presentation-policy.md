@@ -81,9 +81,20 @@ the gate part on:
   animate at full rate; the rest of those in view are stepped at half rate,
   which plays them at the same speed with half the updates, as bodies beyond
   45 m always were.
+- The half-rate bodies take turns (`stagger`): each joins the emptier of two
+  groups and the groups are stepped on alternate frames. Stepped all on the
+  same frame, every other frame carried every half-rate body's pose, skeleton
+  update and skinning, and the frame time see-sawed by that much.
+- With the quarter tier (`quarter`), only the next `HALF_RATE_BODIES` (16)
+  after the full-rate ones are stepped at half rate; every body ranked after
+  them - the far end of a crowd in view, ranked by distance from the camera
+  with the bodies beyond 45 m - is stepped every fourth frame, in four groups
+  that take turns the same way, at the same speed. A quarter-rate body's cape
+  hangs.
 - A clip that does not loop is still played out on a body the gate would
-  pause, but at half rate rather than full: in a fight the bodies behind the
-  camera strike every round, and each strike used to wake them to full rate.
+  pause, but at half rate rather than full (quarter rate with the quarter
+  tier): in a fight the bodies behind the camera strike every round, and each
+  strike used to wake them to full rate.
 - Cape cloth is simulated for at most `CLOTH_BODIES` (8) remote caped bodies,
   the nearest the camera; a simulating cape keeps its cloth until it falls
   `CLOTH_HYSTERESIS` (4) places past the limit. The others hang as every
@@ -130,12 +141,14 @@ against the client without it:
 | --- | --- |
 | empty or `all` | every part (the default) |
 | `legacy`, `off`, `0` | none: every actor built at spawn, no parking, no effect budget, the old gate |
-| `lazy,gate` | only the parts named (`lazy`, `gate`, `effects`, `park`) |
+| `lazy,gate` | only the parts named (`lazy`, `gate`, `effects`, `park`, `stagger`, `quarter`) |
 | `-park` | every part but the one named |
 
+`stagger` and `quarter` refine the gate and are off without it.
+
 `RABBITLANDS_CROWD_BODY_CAP` sets the body cap (default 0, off).
-`RABBITLANDS_CROWD_TUNING` overrides the full-rate and cloth budgets for a
-measurement (`full=24,cloth=4`). The per-frame loop changes are not
+`RABBITLANDS_CROWD_TUNING` overrides the full-rate, half-rate and cloth
+budgets for a measurement (`full=24,half=8,cloth=4`). The per-frame loop changes are not
 switchable: they change no behaviour.
 
 ## Benchmark
@@ -191,11 +204,21 @@ counted. `wallMilliseconds` keeps the frame-to-frame time with the sleep.
 Each cell reports `frameTime` (mean, p5, p50, p95, p99, max of the frame work),
 `fpsP5` (1000 / p95, the frame rate 95% of frames reach), `tickFrameMilliseconds`
 (frames that carried packets), the benchmark Main subclass's component timers,
-render CPU and GPU time and draw calls when windowed, memory before and after
+the frame split into three phases - physics and node processing up to the last
+node to process (`processPhaseMilliseconds`: Main, the animation players and
+the gate's stepping of the half-rate players, `halfRateStepMilliseconds`), the
+deferred flush up to the draw (`flushPhaseMilliseconds`: every skeleton's
+update with its modifiers, `skeleton_updated` listeners and skins, and Main's
+world sync) and the draw (`drawPhaseMilliseconds`, windowed) - the frame
+series in order (`frameSeries`), render CPU and GPU time and draw calls when
+windowed, memory before and after
 the crowd, how long the crowd took to be fully presented, and a census: bodies
 built and deferred, stand-ins, drawn and in-frustum actors, animation tiers,
 skeletons processing, live effects and the effect budget's admitted and skipped
 counts. Headless memory excludes GPU buffers; windowed runs add video memory.
+`RABBITLANDS_CROWD_BENCH_ATTRIBUTION=1` also times every body's combat cue
+(`update_pose`) and counts skeleton updates a frame; it adds a call to every
+skeleton update, so it is for attribution, not for comparing variants.
 
 Headless numbers are a scene-CPU proxy with no render work. Windowed numbers
 include rendering on the machine they ran on. Neither certifies another

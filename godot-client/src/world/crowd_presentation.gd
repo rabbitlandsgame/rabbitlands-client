@@ -55,15 +55,26 @@ const FULL_RATE_BODIES := 16
 ## so capes on the boundary do not settle and swing.
 const CLOTH_BODIES := 8
 const CLOTH_HYSTERESIS := 4
+## With the quarter tier on, the next this many bodies after the full-rate
+## ones are stepped at half rate; every body ranked after them - the farthest
+## of a crowd in view - is stepped every fourth frame, as is a clip that does
+## not loop played out off screen.
+const HALF_RATE_BODIES := 16
 
 var lazy := true
 var gate := true
 var effects := true
 var park := true
-## The full-rate and cloth budgets in use: the constants unless
-## RABBITLANDS_CROWD_TUNING (`full=24,cloth=8`) says otherwise, for measuring
-## other values without a rebuild.
+## The gate's stepped bodies take turns over the frames (AnimationGate.stagger)
+## rather than all being stepped on the same one.
+var stagger := true
+## The quarter-rate tier for the far end of a crowd (`HALF_RATE_BODIES`).
+var quarter := true
+## The full-rate, half-rate and cloth budgets in use: the constants unless
+## RABBITLANDS_CROWD_TUNING (`full=24,half=16,cloth=8`) says otherwise, for
+## measuring other values without a rebuild.
 var full_rate_bodies := FULL_RATE_BODIES
+var half_rate_bodies := HALF_RATE_BODIES
 var cloth_bodies := CLOTH_BODIES
 ## The most bodies built at once, not counting the player, their target or
 ## selection; 0 is no cap. The server's Phase 3C/4 caps decide what is sent;
@@ -86,7 +97,7 @@ var revivals := 0
 ## feature against the client without it.
 func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	var raw := features.strip_edges().to_lower()
-	var names := ["lazy", "gate", "effects", "park"]
+	var names := ["lazy", "gate", "effects", "park", "stagger", "quarter"]
 	var enabled := {}
 	if raw.is_empty() or raw == "all":
 		for name: String in names:
@@ -110,8 +121,12 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	gate = bool(enabled.get("gate", false))
 	effects = bool(enabled.get("effects", false))
 	park = bool(enabled.get("park", false))
+	# Both refine the gate and mean nothing without it.
+	stagger = gate and bool(enabled.get("stagger", false))
+	quarter = gate and bool(enabled.get("quarter", false))
 	body_cap = maxi(0, int(cap)) if cap.strip_edges().is_valid_int() else 0
 	full_rate_bodies = FULL_RATE_BODIES
+	half_rate_bodies = HALF_RATE_BODIES
 	cloth_bodies = CLOTH_BODIES
 	for part: String in tuning.split(",", false):
 		var pair := part.split("=")
@@ -119,11 +134,14 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 			continue
 		match pair[0].strip_edges():
 			"full": full_rate_bodies = maxi(0, int(pair[1]))
+			"half": half_rate_bodies = maxi(0, int(pair[1]))
 			"cloth": cloth_bodies = maxi(0, int(pair[1]))
 
 func describe() -> Dictionary:
 	return {"lazy": lazy, "gate": gate, "effects": effects, "park": park,
-		"bodyCap": body_cap, "fullRateBodies": full_rate_bodies, "clothBodies": cloth_bodies,
+		"stagger": stagger, "quarter": quarter,
+		"bodyCap": body_cap, "fullRateBodies": full_rate_bodies,
+		"halfRateBodies": half_rate_bodies, "clothBodies": cloth_bodies,
 		"builds": builds, "releases": releases,
 		"revivals": revivals, "parked": _parked.size()}
 

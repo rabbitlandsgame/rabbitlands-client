@@ -1169,6 +1169,9 @@ func _ready() -> void:
 		OS.get_environment("RABBITLANDS_CROWD_TUNING"))
 	effect_budget.enabled = crowd.effects
 	animation_gate.gate_skeletons = crowd.gate
+	animation_gate.stagger = crowd.stagger
+	animation_gate.one_shot_tier = (AnimationGate.Tier.QUARTER if crowd.quarter
+		else AnimationGate.Tier.HALF)
 	world_root.add_child(quest_trail)
 	add_child(character_intro)
 	add_child(arrival_curtain)
@@ -7551,11 +7554,15 @@ func _gate_classify(raw_id: Variant) -> void:
 	if crowd.gate and actor.wears_cape_cloth():
 		_gate_capes.append([_gate_camera_at.distance_squared_to(actor.global_position)
 			+ (1.0e9 if tier == AnimationGate.Tier.PAUSED else 0.0), actor])
-	if tier == AnimationGate.Tier.FULL and crowd.gate:
+	if crowd.gate and (tier == AnimationGate.Tier.FULL
+			or (tier == AnimationGate.Tier.HALF and crowd.quarter)):
 		# Settled when the sweep ends (`_apply_crowd_full_rate`); a body that
-		# has just come into view animates meanwhile.
-		_gate_full_rate.append([_gate_camera_at.distance_squared_to(actor.global_position), actor])
-		if actor.animation_tier() == AnimationGate.Tier.PAUSED:
+		# has just come into view animates meanwhile. Past 45 m a body is never
+		# stepped more often than every other frame.
+		_gate_full_rate.append([_gate_camera_at.distance_squared_to(actor.global_position),
+			actor, tier])
+		if actor.animation_tier() == AnimationGate.Tier.PAUSED \
+				or (tier == AnimationGate.Tier.HALF and actor.animation_tier() == AnimationGate.Tier.FULL):
 			actor.set_animation_tier(AnimationGate.Tier.HALF, animation_gate)
 		return
 	actor.set_animation_tier(tier, animation_gate)
@@ -7587,6 +7594,8 @@ func _finish_gate_sweep() -> void:
 ## stepped at half rate - every other frame, by the time both frames covered,
 ## so they move at the same speed - as bodies beyond 45 m always were. A clip
 ## that does not loop plays out at half rate there too (`set_animation_tier`).
+## With the quarter tier, bodies beyond 45 m are ranked too, and every body
+## after the next `HALF_RATE_BODIES` is stepped every fourth frame.
 func _apply_crowd_full_rate(full_rate: Array) -> void:
 	if full_rate.size() > crowd.full_rate_bodies:
 		full_rate.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
@@ -7595,8 +7604,12 @@ func _apply_crowd_full_rate(full_rate: Array) -> void:
 		# A body replaced during the sweep is not ranked; its successor is next time.
 		if not is_instance_valid(entry[1]):
 			continue
-		(entry[1] as ReplicatedActor3D).set_animation_tier(AnimationGate.Tier.FULL
-			if rank < crowd.full_rate_bodies else AnimationGate.Tier.HALF, animation_gate)
+		var tier := AnimationGate.Tier.HALF
+		if rank < crowd.full_rate_bodies and entry[2] == AnimationGate.Tier.FULL:
+			tier = AnimationGate.Tier.FULL
+		elif crowd.quarter and rank >= crowd.full_rate_bodies + crowd.half_rate_bodies:
+			tier = AnimationGate.Tier.QUARTER
+		(entry[1] as ReplicatedActor3D).set_animation_tier(tier, animation_gate)
 		rank += 1
 
 ## Cape cloth for the caped bodies nearest the camera only. The solver is the

@@ -2471,6 +2471,9 @@ func _refresh_cape_cloth_activity(reset_when_enabled: bool = false) -> void:
 		and _cape_cloth_allowed
 		and not is_instance_valid(_mount_visual)
 		and _animation_tier != AnimationGate.Tier.PAUSED
+		# Stepped every fourth frame, the solver's clamped step would leave
+		# the cloth trailing its body; it hangs instead.
+		and _animation_tier != AnimationGate.Tier.QUARTER
 		and ACTOR_RENDER_QUALITY.cape_enabled(
 			_render_quality, _render_quality_local_actor))
 	if enabled and reset_when_enabled and not _cape_cloth.active:
@@ -4119,7 +4122,8 @@ func is_drawn() -> bool:
 ## whatever the tier asks. Paused, the actor would be left caught mid-move and
 ## then seen finishing it when it came back into view. With the crowd gate on
 ## (`AnimationGate.gate_skeletons`) a body out of view plays it out at half
-## rate, which finishes it at the same speed: in a fight the bodies behind the
+## rate, or quarter with the crowd's quarter tier (`AnimationGate.one_shot_tier`),
+## which finishes it at the same speed: in a fight the bodies behind the
 ## camera strike every round, and each strike woke them to full rate.
 func set_animation_tier(tier: int, gate: AnimationGate) -> void:
 	if is_instance_valid(_mount_visual):
@@ -4127,8 +4131,10 @@ func set_animation_tier(tier: int, gate: AnimationGate) -> void:
 	if animation_player == null:
 		return
 	if tier != AnimationGate.Tier.FULL and _playing_one_shot():
-		tier = (AnimationGate.Tier.HALF if gate.gate_skeletons
-			else AnimationGate.Tier.FULL)
+		if not gate.gate_skeletons:
+			tier = AnimationGate.Tier.FULL
+		elif tier == AnimationGate.Tier.PAUSED:
+			tier = gate.one_shot_tier
 	if tier == _animation_tier:
 		return
 	_animation_tier = tier
