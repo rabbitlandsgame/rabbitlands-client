@@ -1,6 +1,7 @@
 extends "res://tests/integration/rendered_giant_spiders.gd"
 ## RL_GIANT_SPEC contains sizes exported from the current server definitions.
-## Two rows of four creatures, each photographed beside the same player body.
+## Groups of up to four creatures beside the same player body.
+## RL_GIANT_CAPTURE_PREFIX optionally names a separate comparison artifact.
 
 func _run() -> void:
 	_artifacts = OS.get_environment("ELORIA_ARTIFACT_DIR")
@@ -14,7 +15,9 @@ func _run() -> void:
 	var subjects: Array = JSON.parse_string(FileAccess.get_file_as_string(OS.get_environment("RL_GIANT_SPEC"))) as Array
 	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")) as Dictionary
 	var readings: Array = []
-	for batch: int in range(2):
+	var prefix := OS.get_environment("RL_GIANT_CAPTURE_PREFIX")
+	if prefix.is_empty(): prefix = "giant-creatures"
+	for batch: int in range(ceili(float(subjects.size()) / 4.0)):
 		var stage := Node3D.new()
 		root.add_child(stage)
 		_light(stage)
@@ -24,10 +27,11 @@ func _run() -> void:
 		camera.size = 16.0
 		stage.add_child(camera)
 		var group: Array = subjects.slice(batch * 4, batch * 4 + 4)
+		var creature_count := group.size()
 		group.append({"name": "Adventurer", "actor_type": 1, "scale": 1.0, "footprint": [1,1]})
 		for index: int in range(group.size()):
 			var spec: Dictionary = group[index] as Dictionary
-			var creature := index < 4
+			var creature := index < creature_count
 			var anchor := 3 + index * 5
 			var shape := Vector2i(int(spec["footprint"][0]), int(spec["footprint"][1]))
 			_draw_reserved_ground(stage, anchor, 0, shape)
@@ -70,7 +74,7 @@ func _run() -> void:
 		camera.position = Vector3(13.0,12.0,22.0)
 		camera.look_at(Vector3(13.0,1.0,0.0),Vector3.UP)
 		for frame: int in range(24): await process_frame
-		await _capture("giant-creatures-%d.png" % (batch+1),"current enlarged creatures beside a player")
+		await _capture("%s-%d.png" % [prefix,batch+1],"current enlarged creatures beside a player")
 		stage.queue_free()
 		for frame: int in range(3): await process_frame
 	var report := FileAccess.open(_artifacts.path_join("rendered-sizes.json"),FileAccess.WRITE)
