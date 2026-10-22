@@ -136,6 +136,7 @@ static func v1_row(row: Dictionary) -> Dictionary:
 	for field: String in ["summon_due", "combat_until", "endurance_at", "endurance_rate",
 			"endurance_max_ms"]:
 		shaped.erase(field)
+	shaped["schema_version"] = 1
 	shaped["step_us"] = int(row.step_us)
 	shaped["endurance_ms"] = clampi(int(row.endurance_ms), 0,
 		mini(int(row.endurance_max_ms), ENDURANCE_LIMIT_MS))

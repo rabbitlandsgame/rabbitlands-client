@@ -14,6 +14,7 @@ func _run() -> void:
 	_presence()
 	_server_time()
 	_mount_deltas()
+	_server_built()
 	print("interest protocol tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
 
@@ -100,6 +101,22 @@ func _mount_deltas() -> void:
 		"states": [_row(91, "mounted"), _row(91, "on_foot")]}).type == "invalid", "an actor twice is refused")
 	_expect(_deltas({"schema_version": 2, "map": "landfall", "full": false, "states": [],
 		"removed": [-1]}).type == "invalid", "a removal that is not an actor id is refused")
+
+## A delta built by the server's own `_delta_payload` and `_delta_row_json`
+## (eloria/live_mounts.py): one rider calling a pony, one rider gone.
+const SERVER_MOUNT_DELTA := "7b22736368656d615f76657273696f6e223a322c226d6170223a226c616e6466616c6c222c2266756c6c223a66616c73652c22737461746573223a5b7b22736368656d615f76657273696f6e223a322c226163746f725f6964223a39312c226d6f6465223a2273756d6d6f6e696e67222c2267616974223a226f6e5f666f6f74222c226d6f756e745f6964223a226d6f6f725f706f6e79222c2273656c65637465645f6d6f756e745f6964223a226d6f6f725f706f6e79222c22737465705f7573223a3133333333332c2263616e5f73756d6d6f6e223a66616c73652c22626c6f636b65645f726561736f6e223a22222c226d6170223a226c616e6466616c6c222c226f776e6572223a225772656e222c2273756d6d6f6e5f647565223a3132333435362c22636f6d6261745f756e74696c223a302c22656e647572616e63655f6d73223a363030302c22656e647572616e63655f6174223a3132303030302c22656e647572616e63655f72617465223a2d313030302c22656e647572616e63655f6d61785f6d73223a383030307d5d2c2272656d6f766564223a5b39335d7d"
+
+func _server_built() -> void:
+	var event: Dictionary = EloriaProtocol.decode_server(EloriaProtocol.ServerMessage.ELORIA_MOUNT_DELTAS,
+		_hex(SERVER_MOUNT_DELTA))
+	_expect(event.type == "mount_update" and (event.states as Dictionary).has(91)
+		and int((event.states as Dictionary)[91].summon_due) == 123456
+		and int(event.removed[0]) == 93, "a delta from the server's own builder decodes")
+	var table: Dictionary = {}
+	var deltas = preload("res://src/mounts/mount_delta_state.gd").new()
+	deltas.apply(event, table, "landfall", null, 0)
+	_expect(int(table[91].schema_version) == 1 and str(table[91].mode) == "summoning"
+		and int(table[91].endurance_ms) == 6000, "and is kept in the complete tables' shape")
 
 func _chat_text(frame: PackedByteArray) -> String:
 	return frame.slice(3, frame.size() - 1).get_string_from_utf8()
