@@ -150,8 +150,8 @@ def main() -> int:
     # lands on both sides of a comparison.
     for repeat in range(1, args.repeats + 1):
         # A variant that names several parts ("-stagger,-quarter") needs ";"
-        # between variants.
-        variants = args.variants.split(";" if ";" in args.variants else ",")
+        # between variants, or after it when it is the only one.
+        variants = [v for v in args.variants.split(";" if ";" in args.variants else ",") if v]
         if repeat % 2 == 0:
             variants.reverse()
         for variant in variants:
