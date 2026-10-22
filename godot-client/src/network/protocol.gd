@@ -56,7 +56,13 @@ enum ClientMessage {
 	# Use a combat technique: {"op": "use", "key", "target_id"}. Carries only
 	# an actor id, so it is never coordinate-framed. The state comes back on
 	# ELORIA_MAGIC_STATE as kind "techniques".
-	ELORIA_TECHNIQUE_REQUEST = 220
+	ELORIA_TECHNIQUE_REQUEST = 220,
+	# The keyboard direction held (keyboard_intent_v1): epoch, direction 0-7
+	# in the server's order (N, NE, E, SE, S, SW, W, NW) or 255 for a
+	# release, flags. A direction carries no coordinates, so it is never
+	# coordinate-framed; the epoch ties it to a map instead. The same number
+	# as ServerMessage.ELORIA_MOVE_INTENT, as 230/231 are shared.
+	ELORIA_MOVE_INTENT = 254
 }
 
 enum ServerMessage {
@@ -141,6 +147,10 @@ enum ServerMessage {
 	# one's actors carry in the stock "z" field of the actor packets (0 is the
 	# client's own map). The next free number of the downward run.
 	ELORIA_ADJACENT_MAPS = 214,
+	# Whether the server steps a held keyboard direction (keyboard_intent_v1),
+	# the epoch intents must carry (it changes with every map change) and the
+	# keep-alive and idle timings. 254 was the last free number.
+	ELORIA_MOVE_INTENT = 254,
 	ADD_ACTOR_ANIMATION = 89,
 	LOG_IN_OK = 250, LOG_IN_NOT_OK = 251,
 	CREATE_CHAR_OK = 252, CREATE_CHAR_NOT_OK = 253
@@ -232,6 +242,18 @@ static func version(protocol_major: int, protocol_minor: int,
 static func move_to(x: int, y: int, run := false) -> PackedByteArray:
 	return encode(ClientMessage.RUN_TO if run else ClientMessage.MOVE_TO,
 		PackedByteArray([x & 0xff, (x >> 8) & 0xff, y & 0xff, (y >> 8) & 0xff]))
+
+## The server's eight tile directions in the order ELORIA_MOVE_INTENT numbers them.
+const INTENT_DIRECTIONS: Array[Vector2i] = [Vector2i(0, 1), Vector2i(1, 1), Vector2i(1, 0),
+	Vector2i(1, -1), Vector2i(0, -1), Vector2i(-1, -1), Vector2i(-1, 0), Vector2i(-1, 1)]
+const INTENT_RELEASE := 255
+
+## A held keyboard direction (one of INTENT_DIRECTIONS) or Vector2i.ZERO for a
+## release. Flags bit 0: the run key is held.
+static func move_intent(epoch: int, direction: Vector2i, run := false) -> PackedByteArray:
+	var index: int = INTENT_DIRECTIONS.find(direction)
+	return encode(ClientMessage.ELORIA_MOVE_INTENT,
+		PackedByteArray([epoch & 0xff, INTENT_RELEASE if index < 0 else index, 1 if run else 0]))
 
 static func set_sitting(sitting: bool) -> PackedByteArray:
 	return encode(ClientMessage.SIT_DOWN, PackedByteArray([1 if sitting else 0]))
@@ -338,6 +360,9 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# reported with `#arrived <map>`; the server keeps it out of every fight
 	# until then (main.gd `_report_arrival`).
 	"arrival_ready_v1",
+	# Hold a keyboard direction instead of re-sending MOVE_TO every 360 ms:
+	# ELORIA_MOVE_INTENT both ways, used only once the server says it takes them.
+	"keyboard_intent_v1",
 ]
 
 ## `#clientcaps` is an ordinary chat command; the server parses it out of
@@ -1200,6 +1225,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_mail(payload)
 		ServerMessage.ELORIA_NAVIGATION_STATE:
 			return decode_navigation(payload)
+		ServerMessage.ELORIA_MOVE_INTENT:
+			return decode_move_intent(payload)
 		ServerMessage.ELORIA_SPECIAL_EVENT_STATE:
 			return decode_special_events(payload)
 		ServerMessage.ELORIA_MAP_OBJECTS:
@@ -2197,6 +2224,16 @@ static func decode_navigation(payload: PackedByteArray) -> Dictionary:
 	return {"type": "navigation", "active": int(payload[0]) != 0,
 		"x": u16(payload, 1), "y": u16(payload, 3), "distance": u16(payload, 5),
 		"map_id": (text.values as Array)[0], "label": (text.values as Array)[1]}
+
+## Command 254, version 1: whether the server steps held keyboard directions,
+## the epoch they must carry, and the keep-alive and idle timings.
+static func decode_move_intent(payload: PackedByteArray) -> Dictionary:
+	if payload.size() != 7:
+		return {"type": "invalid", "error": "move_intent_length"}
+	if payload[0] != 1:
+		return {"type": "invalid", "error": "move_intent_version"}
+	return {"type": "move_intent", "enabled": payload[1] != 0, "epoch": int(payload[2]),
+		"keepalive_msec": u16(payload, 3), "idle_msec": u16(payload, 5)}
 
 ## Command 232. Free text lines for the specialty-event panel, NUL delimited.
 static func decode_special_events(payload: PackedByteArray) -> Dictionary:
