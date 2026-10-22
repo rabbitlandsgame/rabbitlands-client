@@ -238,8 +238,28 @@ func _measure() -> void:
 	for tick: int in range(100):
 		deltas.refresh(table, 7, tick * 100)
 	var refresh_usec: float = float(Time.get_ticks_usec() - started) / 100.0
-	print("mount table, 200 riders: whole table %d us, one-rider delta %.1f us, own countdown restated %.1f us" % [
-		baseline_usec, delta_usec, refresh_usec])
+	# The packets themselves: today's complete table of 200 riders, which a
+	# crowded map sent every second, against a delta naming one rider.
+	var legacy_rows: Array = []
+	for index: int in range(200):
+		var legacy: Dictionary = MountDeltaState.v1_row(states[index])
+		legacy["schema_version"] = 1
+		legacy_rows.append(legacy)
+	var legacy_payload: PackedByteArray = JSON.stringify({"schema_version": 1, "map": "isle",
+		"states": legacy_rows}).to_utf8_buffer()
+	var delta_payload: PackedByteArray = JSON.stringify({"schema_version": 2, "map": "isle",
+		"full": false, "states": [states[7]], "removed": []}).to_utf8_buffer()
+	started = Time.get_ticks_usec()
+	for repeat: int in range(10):
+		EloriaProtocol.decode_server(EloriaProtocol.ServerMessage.ELORIA_MOUNT_STATES, legacy_payload)
+	var legacy_decode_usec: float = float(Time.get_ticks_usec() - started) / 10.0
+	started = Time.get_ticks_usec()
+	for repeat: int in range(100):
+		EloriaProtocol.decode_server(EloriaProtocol.ServerMessage.ELORIA_MOUNT_DELTAS, delta_payload)
+	var delta_decode_usec: float = float(Time.get_ticks_usec() - started) / 100.0
+	print("mount table, 200 riders: whole table %d us, one-rider delta %.1f us, own countdown restated %.1f us; decode: complete table (%d bytes) %.0f us, one-rider delta (%d bytes) %.0f us" % [
+		baseline_usec, delta_usec, refresh_usec, legacy_payload.size(), legacy_decode_usec,
+		delta_payload.size(), delta_decode_usec])
 
 func _expect(ok: bool, message: String) -> void:
 	if ok:
