@@ -38,7 +38,7 @@ var _refreshing := false
 var _before: Dictionary = {}
 var _custom_before: Dictionary = {}
 var _builtins_before: Dictionary = {}
-var _active_before := "current"
+var _active_before := Presets.DEFAULT_PRESET
 var _drag_part := ""
 var _drag_mouse := Vector2.ZERO
 var _drag_position := Vector2.ZERO
@@ -75,6 +75,13 @@ var undo_button: Button
 var redo_button: Button
 var reset_button: Button
 var settings_reset: Button
+var save_new_button: Button
+var update_custom_button: Button
+var delete_custom_button: Button
+var custom_count_label: Label
+var reset_component_button: Button
+var selection_summary: Label
+var _show_grid := false
 var _hover: Dictionary = {}
 var _drag_root := ""
 var _drag_started := false
@@ -201,13 +208,11 @@ func configure(owner_main: Control) -> void:
 		wrapper.hide()
 		containers[key] = wrapper
 	model.load_file(preferences_path)
-	if not model.loaded:
-		_capture_live(model.working)
 	_build_editor()
 	main.window_stack.register(panel, true)
 	_build_settings()
 	ready_to_layout = true
-	if model.loaded: apply_layout()
+	apply_layout()
 	get_viewport().size_changed.connect(queue_layout)
 	main.game_view.visibility_changed.connect(func() -> void:
 		if is_open() and not main.game_view.visible: cancel_edit())
@@ -310,7 +315,7 @@ func _build_settings() -> void:
 	settings_reset.name = "HudResetDefault"
 	row.add_child(settings_reset)
 	var hint := Label.new()
-	hint.text = "Start from a preset, then click HUD components to customize their layout and icons."
+	hint.text = "Choose a preset, edit its components, or save up to five custom designs."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_child(hint)
 	body.move_child(hint, 1)
@@ -352,9 +357,27 @@ func _build_editor() -> void:
 	editor_dragger.moved.connect(func(where: Vector2) -> void:
 		model.editor_position = where / main.game_view.size.max(Vector2.ONE))
 	var hint := Label.new()
-	hint.text = "Click curves to edit them. Alt-drag detaches. Ctrl+Z undoes."
+	hint.text = "Click a HUD part, then drag or resize. Drag this title to move the editor."
 	hint.add_theme_font_size_override("font_size", 12)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(hint)
+	var aids := HBoxContainer.new()
+	column.add_child(aids)
+	var grid := CheckBox.new()
+	grid.name = "HudEditorGrid"
+	grid.text = "Grid"
+	grid.tooltip_text = "Show a 20-pixel alignment grid and screen center guides."
+	grid.toggled.connect(func(value: bool) -> void: _show_grid = value; queue_redraw())
+	aids.add_child(grid)
+	var snap := CheckBox.new()
+	snap.name = "HudEditorSnap"
+	snap.text = "Snap edges"
+	snap.button_pressed = true
+	snap.tooltip_text = "Snap while docking or resizing. Hold Shift to bypass; Alt-drag detaches."
+	snap.toggled.connect(func(value: bool) -> void:
+		_snap_enabled = value
+		_resize_snap_enabled = value)
+	aids.add_child(snap)
 	preset_picker = OptionButton.new()
 	preset_picker.name = "EditorPresetPicker"
 	column.add_child(preset_picker)
@@ -377,17 +400,43 @@ func _build_editor() -> void:
 	preset_name.max_length = 48
 	preset_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	save_row.add_child(preset_name)
-	save_row.add_child(_button("Save as new", func() -> void: save_custom(false)))
-	save_row.add_child(_button("Update", func() -> void: save_custom(true)))
+	save_new_button = _button("Save as new", func() -> void: save_custom(false))
+	save_new_button.name = "SaveCustomHud"
+	save_row.add_child(save_new_button)
+	update_custom_button = _button("Update", func() -> void: save_custom(true))
+	update_custom_button.name = "UpdateCustomHud"
+	save_row.add_child(update_custom_button)
+	var custom_row := HBoxContainer.new()
+	column.add_child(custom_row)
+	custom_count_label = Label.new()
+	custom_count_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	custom_count_label.add_theme_font_size_override("font_size", 12)
+	custom_row.add_child(custom_count_label)
+	delete_custom_button = _button("Delete custom", delete_custom)
+	delete_custom_button.name = "DeleteCustomHud"
+	delete_custom_button.tooltip_text = "Delete the selected custom design. Undo or Cancel can recover it."
+	custom_row.add_child(delete_custom_button)
 	component_picker = OptionButton.new()
 	component_picker.name = "HudComponentPicker"
+	component_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	component_picker.fit_to_longest_item = false
 	for key: String in Presets.PARTS:
 		component_picker.add_item(Presets.PARTS[key])
 		component_picker.set_item_metadata(component_picker.item_count - 1, key)
 	for index: int in 8:
 		component_picker.add_item("  " + _arc_name(index))
 		component_picker.set_item_metadata(component_picker.item_count - 1, "arc_%d" % index)
-	column.add_child(component_picker)
+	var selection_row := HBoxContainer.new()
+	column.add_child(selection_row)
+	selection_row.add_child(component_picker)
+	reset_component_button = _button("Reset part", reset_component)
+	reset_component_button.name = "ResetHudComponent"
+	reset_component_button.tooltip_text = "Restore only this part (or selected curve) to its built-in appearance and position. Undo recovers it."
+	selection_row.add_child(reset_component_button)
+	selection_summary = Label.new()
+	selection_summary.add_theme_font_size_override("font_size", 12)
+	selection_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(selection_summary)
 	component_picker.item_selected.connect(func(index: int) -> void:
 		var key := str(component_picker.get_item_metadata(index))
 		if key.begins_with("arc_"): select_component("medallion", int(key.trim_prefix("arc_")))
@@ -446,19 +495,24 @@ func open_editor() -> void:
 	panel.move_to_front()
 	select_component(selected)
 	_center_editor()
-	message.text = "Preview · side handles resize width/height; Alt-drag detaches."
+	message.text = "Preview only · Done & save keeps edits; Cancel discards them.\nClick a HUD part, then use arrows for 1px moves (Shift: 10px)."
 	queue_redraw()
 
 func _center_editor() -> void:
 	if not is_open(): return
 	panel.custom_minimum_size.x = minf(370, maxf(300, size.x - 24))
 	panel.size.x = minf(400, size.x - 24)
+	var scroll: ScrollContainer = panel.find_child("ComponentOptionsScroll", true, false)
+	if scroll != null:
+		var fixed_height := panel.get_combined_minimum_size().y - scroll.custom_minimum_size.y
+		scroll.custom_minimum_size.y = clampf(size.y - fixed_height - 24, 80, 210)
 	panel.size.y = panel.get_combined_minimum_size().y
 	if not _editor_placed:
 		panel.reset_size()
 		panel.position = model.editor_position * main.game_view.size if model.editor_position.x >= 0 else (size - panel.size) * 0.5
 		_editor_placed = true
 	panel.position = panel.position.clamp(Vector2(6, 6), (size - panel.size - Vector2(6, 6)).max(Vector2(6, 6)))
+	model.editor_position = panel.position / main.game_view.size.max(Vector2.ONE)
 
 func choose_preset(id: String, factory_default := false) -> void:
 	_checkpoint("preset")
@@ -484,7 +538,7 @@ func _snapshot() -> Dictionary:
 func _checkpoint(tag: String) -> void:
 	if not is_open() or _restoring: return
 	var now := Time.get_ticks_msec()
-	if tag != "preset" and tag == _last_edit_tag and now - _last_edit_time < 400:
+	if tag not in ["preset", "save_custom", "delete_custom", "reset_component", "restore_default"] and tag == _last_edit_tag and now - _last_edit_time < 400:
 		_last_edit_time = now
 		return
 	_undo.append(_snapshot())
@@ -529,10 +583,6 @@ func reset_builtin() -> void:
 		if key == "system_chat": defaults.font_size = 14
 		defaults.merge(model.working.chat_windows.get(key, {}).get("options", {}), true)
 		model.working.chat_windows[key] = {"options":defaults}
-		if model.active == "current":
-			var rect: Rect2 = parts[key]._default_rect()
-			parts[key].position = rect.position
-			model.working.chat_windows[key].size = rect.size
 	apply_layout()
 	_refresh_pickers()
 	if is_open():
@@ -544,6 +594,57 @@ func _refresh_actions() -> void:
 	if redo_button != null: redo_button.disabled = _redo.is_empty()
 	if reset_button != null: reset_button.disabled = not Presets.BUILT_INS.has(model.active)
 	if settings_reset != null: settings_reset.disabled = not Presets.BUILT_INS.has(model.active)
+	if save_new_button != null:
+		save_new_button.disabled = model.custom.size() >= Presets.MAX_CUSTOM
+		save_new_button.tooltip_text = "Five designs saved. Update or delete a custom design to make room." if save_new_button.disabled else "Save this layout as a separate custom design."
+	if update_custom_button != null: update_custom_button.disabled = not model.custom.has(model.active)
+	if delete_custom_button != null: delete_custom_button.disabled = not model.custom.has(model.active)
+	if custom_count_label != null: custom_count_label.text = "Custom designs: %d / %d" % [model.custom.size(), Presets.MAX_CUSTOM]
+	_refresh_selection()
+
+func _refresh_selection() -> void:
+	if component_picker == null: return
+	for index: int in component_picker.item_count:
+		var key := str(component_picker.get_item_metadata(index))
+		var hidden: bool
+		var caption: String
+		if key.begins_with("arc_"):
+			var arc_index := int(key.trim_prefix("arc_"))
+			hidden = not model.working.parts.medallion.arcs[arc_index].enabled
+			caption = "  " + _arc_name(arc_index)
+		else:
+			hidden = not model.working.parts[key].enabled
+			caption = Presets.PARTS[key]
+		component_picker.set_item_text(index, caption + (" · hidden" if hidden else ""))
+	if selection_summary == null: return
+	var config: Dictionary = model.working.parts[selected]
+	var visible_part: bool = config.enabled
+	var caption: String = Presets.PARTS[selected]
+	if _selected_arc >= 0:
+		visible_part = visible_part and config.arcs[_selected_arc].enabled
+		caption = _arc_name(_selected_arc)
+	var dock := "Free position"
+	if config.dock_target != "none": dock = "Docked to " + str(Presets.PARTS[config.dock_target])
+	elif config.edge_dock != "none": dock = "Screen edge: " + str(config.edge_dock).replace("_", " ")
+	selection_summary.text = caption + (" · visible" if visible_part else " · hidden") + "\n" + dock
+
+func reset_component() -> void:
+	if not Presets.PARTS.has(selected): return
+	_checkpoint("reset_component")
+	var source: String = model.active if Presets.BUILT_INS.has(model.active) else model.working.parts[selected].style
+	var defaults := Presets.preset(source)
+	if selected == "medallion" and _selected_arc >= 0:
+		model.working.parts.medallion.arcs[_selected_arc] = defaults.parts.medallion.arcs[_selected_arc].duplicate(true)
+	else:
+		model.working.parts[selected] = defaults.parts[selected].duplicate(true)
+		if selected in ["chat", "system_chat"]:
+			var options: Dictionary = parts[selected].DEFAULT_OPTIONS.duplicate()
+			if selected == "system_chat": options.font_size = 14
+			options.merge(defaults.chat_windows.get(selected, {}).get("options", {}), true)
+			model.working.chat_windows[selected] = {"options":options}
+	apply_layout()
+	select_component(selected, _selected_arc)
+	message.text = "Selected part restored. Other components stay as you arranged them. Undo recovers your edit."
 
 func _move_editor_aside() -> void:
 	var rect := _selection_rect(selected)
@@ -562,6 +663,7 @@ func select_component(key: String, arc_index := -1) -> void:
 	if not Presets.PARTS.has(key): return
 	selected = key
 	_selected_arc = arc_index if key == "medallion" else -1
+	_refresh_selection()
 	if _selected_arc >= 0:
 		_detail_tabs.current_tab = 2
 		_detail_group = "Options"
@@ -607,12 +709,12 @@ func select_component(key: String, arc_index := -1) -> void:
 			_toggle("HUD background", config.show_background, func(value: bool) -> void: change_part(key, "show_background", value))
 			_toggle("HUD border", config.show_border, func(value: bool) -> void: change_part(key, "show_border", value))
 			if key != "nameplate": _choice("HUD border design", Presets.HUD_BORDERS, config.hud_border_style, func(value: String) -> void: change_part(key, "hud_border_style", value))
-		_toggle("Snap resize edges", _resize_snap_enabled, func(value: bool) -> void: _resize_snap_enabled = value)
 		var targets: Array = ["none"]
 		for other: String in Presets.PARTS:
 			if other != key and other != "nameplate" and (_root(other).is_visible_in_tree() or config.dock_target == other): targets.append(other)
 		_choice("Dock to", targets, config.dock_target, func(value: String) -> void:
 			change_part(key, "dock_target", value)
+			select_component(key)
 			message.text = "Drag to move the connected group. Alt-drag detaches this window.")
 		_choice("Dock edge", ["left", "right", "top", "bottom"], config.dock_side, func(value: String) -> void: change_part(key, "dock_side", value))
 		_choice("Dock alignment", ["start", "center", "end", "stretch"], config.dock_align, func(value: String) -> void: change_part(key, "dock_align", value))
@@ -621,7 +723,6 @@ func select_component(key: String, arc_index := -1) -> void:
 			if value == "none": change_part(key, "edge_dock", "none")
 			else: dock_component(key, "screen", value))
 		_number("Dock spacing", config.dock_gap, -16, 100, 1, func(value: float) -> void: change_part(key, "dock_gap", value))
-		_toggle("Dock snapping", _snap_enabled, func(value: bool) -> void: _snap_enabled = value)
 		if config.dock_target != "none":
 			var status := HBoxContainer.new()
 			status.set_meta("option_caption", "Dock status")
@@ -815,6 +916,9 @@ func _filter_details() -> void:
 func _toggle(caption: String, value: bool, callback: Callable) -> void:
 	var box := CheckBox.new()
 	box.text = caption
+	box.clip_text = true
+	box.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	box.tooltip_text = caption
 	box.set_meta("option_caption", caption)
 	box.button_pressed = value
 	box.add_theme_font_size_override("font_size", 12)
@@ -913,7 +1017,10 @@ func _choice(caption: String, values: Array, current: String, callback: Callable
 	choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	choice.add_theme_font_size_override("font_size", 12)
 	for value: String in values:
-		choice.add_item(str(Presets.PARTS.get(value, value.replace("_", " ").capitalize())) if caption == "Dock to" else value.replace("_", " ").capitalize())
+		var label := value.replace("_", " ").capitalize()
+		if caption == "Dock to": label = str(Presets.PARTS.get(value, label))
+		elif caption == "Appearance": label = Presets.BUILT_INS.get(value, label)
+		choice.add_item(label)
 	choice.select(maxi(0, values.find(current)))
 	choice.item_selected.connect(func(index: int) -> void: callback.call(values[index]))
 	row.add_child(choice)
@@ -1145,10 +1252,19 @@ func save_custom(replace: bool) -> void:
 	_capture_live(model.working)
 	var id := model.save_custom(preset_name.text, model.active if replace else "")
 	if id.is_empty():
-		message.text = "You have reached the limit of 24 custom presets. Update an existing one."
+		message.text = "Five custom designs are saved. Update one, or delete a custom design to make room."
 		return
 	_refresh_pickers()
 	message.text = "Custom preset prepared. Choose Done & save to keep it."
+
+func delete_custom() -> void:
+	if not model.custom.has(model.active): return
+	_checkpoint("delete_custom")
+	model.delete_custom(model.active)
+	apply_layout()
+	_refresh_pickers()
+	select_component(selected)
+	message.text = "Custom design deleted. Undo or Cancel recovers it; Done & save keeps the change."
 
 func _store() -> Error:
 	var error := model.save_file(preferences_path)
@@ -1996,6 +2112,7 @@ func _nudge(event: InputEventKey) -> void:
 		model.working.parts[key].position = (_root(key).position + delta) / main.game_view.size
 		model.working.legacy = false
 	apply_layout()
+	_refresh_selection()
 
 func _resize_window(key: String, delta: Vector2, bypass_snap: bool) -> void:
 	var config: Dictionary = model.working.parts[key]
@@ -2093,6 +2210,7 @@ func handle_input(event: InputEvent) -> bool:
 			if _resizing: select_component(selected, _selected_arc)
 			_resizing = false
 			_last_edit_tag = ""
+			_refresh_selection()
 			if handled: get_viewport().set_input_as_handled()
 			queue_redraw()
 			return handled
@@ -2180,6 +2298,11 @@ func _draw() -> void:
 	if not is_open(): return
 	var transform := get_global_transform().affine_inverse()
 	var gold := Color("e6bf73")
+	if _show_grid:
+		for x: int in range(0, ceili(size.x), 20): draw_line(Vector2(x, 0), Vector2(x, size.y), Color(0.75, 0.83, 0.88, 0.12))
+		for y: int in range(0, ceili(size.y), 20): draw_line(Vector2(0, y), Vector2(size.x, y), Color(0.75, 0.83, 0.88, 0.12))
+		draw_line(Vector2(size.x / 2, 0), Vector2(size.x / 2, size.y), Color(0.9, 0.75, 0.4, 0.5))
+		draw_line(Vector2(0, size.y / 2), Vector2(size.x, size.y / 2), Color(0.9, 0.75, 0.4, 0.5))
 	for key: String in Presets.PARTS:
 		var control := _root(key)
 		if control == null or not control.is_visible_in_tree(): continue

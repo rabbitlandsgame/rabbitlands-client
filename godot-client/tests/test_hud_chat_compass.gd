@@ -68,7 +68,7 @@ func run() -> void:
 	main.game_view.show()
 	var workspace: Control = main.hud_workspace
 	var chat: Control = main.chat_hud
-	for id: String in ["current", "heritage", "classic", "modular", "adventure", "minimal"]:
+	for id: String in ["heritage", "classic", "modular", "adventure", "minimal"]:
 		workspace.choose_preset(id, true)
 		workspace.change_part("chat", "enabled", false)
 		chat.input.text = ""
@@ -108,12 +108,12 @@ func run() -> void:
 	main._current_map_display_name = "Landfall"
 	state.active_channels.assign([42, 0, 0])
 	state.active_channel_index = 0
-	for id: String in ["current", "heritage", "classic", "modular", "adventure", "minimal"]:
+	for id: String in ["heritage", "classic", "modular", "adventure", "minimal"]:
 		workspace.choose_preset(id, true)
 		if id in ["modular", "adventure"]: workspace.change_part("compass", "enabled", true)
 		root.gui_release_focus()
 		await frames()
-		var compass: Control = main.compass_face if id == "current" else workspace.modern_compass
+		var compass: Control = workspace.modern_compass
 		network.outgoing.clear()
 		var before: int = state.chat_lines.size()
 		await click(compass)
@@ -181,8 +181,8 @@ func run() -> void:
 	workspace.cancel_edit()
 	workspace.choose_preset("current", true)
 	await frames()
-	expect(not workspace.clock_art.visible and main.clock_face.self_modulate.a == 1 and main.clock_hand.visible,
-		"Current restores the original dial and synchronized hand")
+	expect(workspace.clock_art.visible and main.clock_face.self_modulate.a == 0 and not main.clock_hand.visible,
+		"retired current selection retains the modern synchronized Classic dial")
 	main.actor_nodes.erase(99)
 	actor.queue_free()
 	main.queue_free()

@@ -406,5 +406,51 @@
     "compass": "Native, round and ribbon compasses print cached map/tile coordinates locally on click. Shift-click uses the selected composer destination, including local, party, guild, joined numeric channels and private recipients. Ctrl-click retains active numeric channel compatibility. Missing coordinates, invalid destinations and send failures report locally; editing cannot share.",
     "quick_grid": "Flush slot edges and Slot spacing controls persist independently for spell and item grids.",
     "minimap_gameplay_drag": "Grab the visible round rim or square edge during gameplay. Both image and frame events use the same drag handler and scaled pointer coordinates. Dragging detaches the preset anchor/dock, updates its position during relayout, and saves on release. The map can be moved repeatedly and retains its position after switching presets; zoom, right-click menus, center map controls and editor gestures keep their handlers."
+  },
+  "editor_release_20261022": {
+    "default": "Classic (heritage ID)",
+    "presets": [
+      "Classic",
+      "Compact",
+      "Modular",
+      "Adventure",
+      "Minimal"
+    ],
+    "custom_limit": 5,
+    "legacy": "retired choice migrates to Classic; existing modern layouts preserved",
+    "usability": [
+      "hidden component labels",
+      "selected visibility and dock summary",
+      "component and individual curve reset with undo",
+      "shared grid/snapping toolbar",
+      "small-window scrolling and placement",
+      "distinct undo steps for custom creation/deletion",
+      "long checkbox labels remain within the inspector and retain full tooltips"
+    ],
+    "alignment": "Adventure uses a centered anchor for its circle/quick-bar docking root; center and centered docks verified at 1440x900, 1920x1080 and 800x600",
+    "manual_capture": "Classic remains selected during individual interface edits; no Adventure preset switch; UI walkthrough plays at 2x, local offline sample state",
+    "validation": {
+      "new_custom_designs": {
+        "checks": 29,
+        "failures": 0
+      },
+      "chat_compass": {
+        "checks": 49,
+        "failures": 0
+      },
+      "gameplay_minimap_drag": {
+        "checks": 28,
+        "failures": 0
+      },
+      "preset_alignment": {
+        "checks": 45,
+        "failures": 0
+      },
+      "manual_rebuild": {
+        "result": "PASS using the production inspector controls",
+        "built_in_switches_during_editing": 0
+      },
+      "source_validation": "HUD-only staged source overlay on HEAD, independent of unrelated local application edits; shared runtime assets and import cache"
+    }
   }
 }
