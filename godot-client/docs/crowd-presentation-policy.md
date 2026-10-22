@@ -105,8 +105,8 @@ the gate part on:
   per-body cost of an equipped crowd.
 - The gate's walk over every actor is spread over `GATE_SWEEP_SLICES` (6)
   frames; the decisions that need the whole crowd (full-rate ranks, the cloth
-  budget, build ranks, releases, the overhead declutter) are taken when a sweep
-  ends. A fixture that sets `_animation_gate_refresh_msec` to 0 still gets one
+  budget, build ranks, releases) are taken when a sweep ends, and the overhead
+  declutter, which walks the crowd again, on the frame after. A fixture that sets `_animation_gate_refresh_msec` to 0 still gets one
   whole sweep at once.
 
 **Live effects.** `live_effect_budget.gd` bounds the short-lived combat visuals

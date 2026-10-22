@@ -786,6 +786,10 @@ var _animation_gate_refresh_msec := 0
 ## has got, what it measures from, and what it has gathered for its end.
 var _gate_sweep_active := false
 var _gate_sweep_whole := false
+## Whether a sliced sweep left the overhead declutter for the next frame, and
+## the target it keeps visible (`_finish_gate_sweep`).
+var _declutter_due := false
+var _declutter_due_target := -1
 var _gate_sweep_ids: Array = []
 var _gate_sweep_index := 0
 var _gate_now := 0
@@ -7457,6 +7461,9 @@ func _update_occluder_fade(delta: float) -> void:
 ## more so when it fell on a frame that also carried a burst of server steps.
 func _update_animation_gate(delta: float) -> void:
 	animation_gate.advance(delta)
+	if _declutter_due:
+		_declutter_due = false
+		_declutter_actor_overheads(_declutter_due_target)
 	var now: int = Time.get_ticks_msec()
 	if not _gate_sweep_active:
 		if now < _animation_gate_refresh_msec:
@@ -7585,7 +7592,15 @@ func _finish_gate_sweep() -> void:
 					_gate_releases.append(pair)
 		crowd.set_candidates(_gate_build_candidates)
 		_release_bodies(_gate_releases)
-	_declutter_actor_overheads(_gate_fighting)
+	# The declutter walks the whole crowd again, so a sliced sweep leaves it to
+	# the next frame rather than add it to the frame that already carries the
+	# sweep's crowd-wide decisions. A whole walk (a fixture, the old gate)
+	# declutters at once.
+	if _gate_sweep_whole:
+		_declutter_actor_overheads(_gate_fighting)
+	else:
+		_declutter_due = true
+		_declutter_due_target = _gate_fighting
 	_gate_full_rate = []
 	_gate_capes = []
 
