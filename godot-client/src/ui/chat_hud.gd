@@ -332,7 +332,7 @@ func _default_rect() -> Rect2:
 func apply_options() -> void:
 	($Frame/Layout/Header/Title as Label).text = "System" if feed_role == "system" else ("Chat + System" if bool(options.get("combined", false)) else "Chat")
 	options.font_size = clampi(int(options.get("font_size", 16)), 10, 28)
-	options.background_opacity = clampf(float(options.get("background_opacity", 0.30)), 0.0, 0.8)
+	options.background_opacity = clampf(float(options.get("background_opacity", 0.30)), 0.0, 1.0)
 	options.line_spacing = clampi(int(options.get("line_spacing", 2)), 0, 12)
 	options.idle_fade = clampi(int(options.get("idle_fade", 0)), 0, 120)
 	output.add_theme_font_size_override("normal_font_size", int(options.font_size))

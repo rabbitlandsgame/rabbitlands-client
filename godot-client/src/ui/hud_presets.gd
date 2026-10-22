@@ -209,7 +209,30 @@ static func preset(id: String) -> Dictionary:
 		value.parts.load_meter.position = Vector2(0.004688, 0.9275)
 		value.parts.load_meter.dock_target = "none"
 		value.parts.load_meter.edge_dock = "bottom_left"
+	_unify_chat_opacity(value)
 	return value
+
+static func set_chat_opacity(value: Dictionary, key: String, opacity: float) -> void:
+	var amount := _number(opacity, 0.3, 0, 1)
+	var window: Dictionary = value.chat_windows.get(key, {})
+	var options: Dictionary = window.get("options", {})
+	options.background_opacity = amount
+	window.options = options
+	value.chat_windows[key] = window
+	value.parts[key].background_color.a = amount
+	value.chat_opacity_version = 1
+
+static func _unify_chat_opacity(value: Dictionary) -> void:
+	var migrating := int(value.get("chat_opacity_version", 0)) < 1
+	for key: String in ["chat", "system_chat"]:
+		var color: Color = value.parts[key].background_color
+		var options: Dictionary = value.chat_windows.get(key, {}).get("options", {})
+		var fallback: float = (0.3 if key == "chat" else 0.25) if migrating else color.a
+		var opacity := _number(options.get("background_opacity"), fallback, 0, 0.8 if migrating else 1.0)
+		# Previous layouts multiplied these two independent alpha values.
+		# Fold them together once, preserving their existing appearance.
+		if migrating: opacity *= color.a
+		set_chat_opacity(value, key, opacity)
 
 static func _preset_recipe(id: String) -> Dictionary:
 	var value := {"version": VERSION, "frame_alpha_version": 1, "legacy": id == "current", "parts": {},
@@ -774,6 +797,8 @@ static func normalise(raw: Variant) -> Dictionary:
 					if options.get(field) is float or options.get(field) is int:
 						saved.options[field] = _number(options[field], 0, 0, 120)
 			result.chat_windows[key] = saved
+	result.chat_opacity_version = raw.get("chat_opacity_version", 0)
+	_unify_chat_opacity(result)
 	return result
 
 func load_file(path: String) -> void:

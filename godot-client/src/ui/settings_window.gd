@@ -465,7 +465,7 @@ func _build_chat() -> void:
 		_add_toggle(page, prefix + "visible", "Show this window", true)
 		_add_toggle(page, prefix + "locked", "Lock position and size", false)
 		_add_number(page, prefix + "font_size", "Text size", 10, 28, 16 if prefix == "chat_" else 14)
-		_add_number(page, prefix + "background_opacity", "Soft-fade opacity (0 = transparent)", 0, 0.8, 0.30 if prefix == "chat_" else 0.25, 0.05)
+		_add_number(page, prefix + "background_opacity", "Background opacity (100 = solid)", 0, 100, 30 if prefix == "chat_" else 25, 1, 100)
 		_add_number(page, prefix + "line_spacing", "Line spacing", 0, 12, 2)
 		_add_number(page, prefix + "idle_fade", "Dim after idle seconds (0 = never)", 0, 120, 0)
 		_add_button(page, prefix + "reset_layout", "Reset position and size")
@@ -901,7 +901,7 @@ func _add_slider(page: VBoxContainer, key: String, label: String,
 	row.add_child(reading)
 
 func _add_number(page: VBoxContainer, key: String, label: String,
-		minimum: float, maximum: float, value: float, step := 1.0) -> void:
+		minimum: float, maximum: float, value: float, step := 1.0, display_multiplier := 1.0) -> void:
 	var row := HBoxContainer.new()
 	page.add_child(row)
 	var caption := Label.new()
@@ -914,9 +914,11 @@ func _add_number(page: VBoxContainer, key: String, label: String,
 	number.max_value = maximum
 	number.step = step
 	number.value = value
+	number.set_meta("display_multiplier", display_multiplier)
+	if display_multiplier == 100: number.suffix = "%"
 	number.custom_minimum_size.x = 160.0
 	number.value_changed.connect(func(changed: float) -> void:
-		setting_changed.emit(page.name, key, changed))
+		setting_changed.emit(page.name, key, changed / display_multiplier))
 	row.add_child(number)
 
 func add_choice(section: String, key: String, label: String,
@@ -999,7 +1001,7 @@ func restore_value(key: String, value: Variant) -> void:
 	elif control is BaseButton:
 		(control as BaseButton).set_pressed_no_signal(bool(value))
 	elif control is Range:
-		(control as Range).set_value_no_signal(float(value))
+		(control as Range).set_value_no_signal(float(value) * float(control.get_meta("display_multiplier", 1.0)))
 		var reading := panel.find_child(key + "_value", true, false) as Label
 		if reading != null:
 			reading.text = "%d%%" % roundi(float(value) * 100.0) if key.begins_with("audio_") else "%.3f" % float(value)

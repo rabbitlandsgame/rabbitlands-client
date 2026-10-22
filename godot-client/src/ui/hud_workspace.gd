@@ -223,9 +223,14 @@ func configure(owner_main: Control) -> void:
 	for key: String in ["chat", "system_chat"]:
 		var surface: PanelContainer = parts[key]
 		surface.dragger.moved.connect(func(_where: Vector2) -> void: _remember_moved(key))
-		surface.configuration_changed.connect(func(_option: String, _value: Variant) -> void:
+		surface.configuration_changed.connect(func(option: String, _value: Variant) -> void:
 			if not _applying and not is_open():
 				_capture_live(model.working)
+				if option == "background_opacity":
+					if surface.options.background_opacity > 0:
+						model.working.parts[key].show_background = true
+						model.working.parts[key].frame_style = "panel"
+					apply_layout()
 				_store())
 	_refresh_pickers()
 
@@ -847,11 +852,6 @@ func select_component(key: String, arc_index := -1) -> void:
 				surface.options.font_size = int(value)
 				surface.apply_options()
 				_capture_chat(model.working, key))
-		_number("Backdrop opacity", surface.options.background_opacity, 0, 0.8, 0.05, func(value: float) -> void:
-				_checkpoint("chat_opacity:" + key)
-				surface.options.background_opacity = value
-				surface.apply_options()
-				_capture_chat(model.working, key))
 		_toggle("Lock window", bool(surface.options.locked), func(value: bool) -> void:
 				_checkpoint("chat_lock:" + key)
 				surface.options.locked = value
@@ -1032,6 +1032,7 @@ func _number(caption: String, value: float, low: float, high: float, step: float
 	spin.max_value = high
 	spin.step = step
 	spin.value = value
+	if caption.ends_with("opacity"): spin.suffix = "%"
 	spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spin.value_changed.connect(callback)
 	row.add_child(spin)
@@ -1064,14 +1065,32 @@ func change_part(key: String, field: String, value: Variant) -> void:
 		config.frame_style = "panel" if config.show_background or config.show_border else "floating"
 	if field in ["frame_style", "show_background", "show_border"]:
 		var config: Dictionary = model.working.parts[key]
-		if config.show_background and config.background_color.a == 0: config.background_color.a = 0.93
+		if config.show_background and config.background_color.a == 0 and key not in ["chat", "system_chat"]: config.background_color.a = 0.93
 		if config.show_border and config.border_color.a == 0: config.border_color.a = 1.0
+	if key in ["chat", "system_chat"] and field == "background_color":
+		Presets.set_chat_opacity(model.working, key, model.working.parts[key].background_color.a)
+		if model.working.parts[key].background_color.a > 0:
+			model.working.parts[key].show_background = true
+			model.working.parts[key].frame_style = "panel"
 	if field == "center_resource": model.working.parts.medallion.center_color = Presets.RESOURCE_COLORS[value]
 	if field != "enabled" or key in ["medallion", "player_card", "food_meter", "load_meter", "xp_meter"] and value == true: model.working.legacy = false
 	model.working = Presets.normalise(model.working)
 	apply_layout()
 	_refresh_actions()
+	if key in ["chat", "system_chat"]: _refresh_chat_opacity_controls(key)
 	if is_open(): message.text = "Done & save keeps changes for this option. Save as new creates a separate preset."
+
+func _refresh_chat_opacity_controls(key: String) -> void:
+	if selected != key or not is_open(): return
+	for row: Control in details.get_children():
+		var caption: String = row.get_meta("option_caption", "")
+		if caption == "Background opacity":
+			(row.get_child(1) as SpinBox).set_value_no_signal(model.working.parts[key].background_color.a * 100)
+		elif caption == "Window color":
+			var picker: ColorPickerButton = row.get_child(1)
+			picker.set_block_signals(true)
+			picker.color = model.working.parts[key].background_color
+			picker.set_block_signals(false)
 
 func _resource_options() -> void:
 	var hint := Label.new()
@@ -1132,7 +1151,7 @@ func change_frame_color(key: String, field: String, color: Color) -> void:
 	# Old floating XP strips saved a zero-alpha color. Selecting a new RGB
 	# color on an enabled frame should produce a visible change. Opacity has
 	# its own explicit control, including zero for intentional transparency.
-	if enabled and color.a == 0 and config[field].a == 0:
+	if enabled and color.a == 0 and config[field].a == 0 and key not in ["chat", "system_chat"]:
 		color.a = 0.93 if field == "background_color" else 1.0
 	change_part(key, field, color)
 
@@ -1177,6 +1196,7 @@ func _capture_chat(value: Dictionary, key: String) -> void:
 	var surface: PanelContainer = parts[key]
 	value.chat_windows[key] = {"size": surface.size, "options": surface.options.duplicate(true)}
 	value.parts[key].dimensions = surface.size
+	Presets.set_chat_opacity(value, key, surface.options.background_opacity)
 
 func _capture_live(value: Dictionary) -> void:
 	for key: String in ["chat", "system_chat"]:
@@ -1389,6 +1409,7 @@ func apply_layout() -> void:
 		if saved.has("options"): surface.options.merge(saved.options, true)
 		surface.options.visible = bool(model.working.parts[key].enabled)
 		surface.apply_options()
+		Presets.set_chat_opacity(model.working, key, surface.options.background_opacity)
 		if saved.has("size"): surface.resize_window(saved.size)
 		elif model.working.parts[key].dimensions != Vector2.ZERO: surface.resize_window(model.working.parts[key].dimensions)
 	var party_size: Vector2 = model.working.parts.party.dimensions
@@ -1494,7 +1515,7 @@ func _style_part(key: String) -> void:
 	if key in ["chat", "system_chat"]:
 		var surface: PanelContainer = parts[key]
 		var backdrop: Color = config.background_color
-		if not config.show_background: backdrop.a = 0
+		backdrop.a = 1.0 if config.show_background else 0.0
 		(surface._fade.material as ShaderMaterial).set_shader_parameter("backdrop_color", backdrop)
 		box.bg_color.a = 0
 		surface.add_theme_stylebox_override("panel", box)

@@ -119,7 +119,7 @@ func _run() -> void:
 	_expect(system.size.is_equal_approx(old_size + Vector2(55, -15)), "the system window also resizes through its real grip")
 	(main.settings_window.panel.find_child("chat_font_size", true, false) as SpinBox).value = 19
 	(main.settings_window.panel.find_child("system_chat_font_size", true, false) as SpinBox).value = 13
-	(main.settings_window.panel.find_child("system_chat_background_opacity", true, false) as SpinBox).value = 0.45
+	(main.settings_window.panel.find_child("system_chat_background_opacity", true, false) as SpinBox).value = 45
 	(main.settings_window.panel.find_child("chat_line_spacing", true, false) as SpinBox).value = 4
 	main.call("_on_client_setting_changed", "Chat", "chat_locked", true)
 	_expect(chat.output.get_theme_font_size("normal_font_size") == 19
