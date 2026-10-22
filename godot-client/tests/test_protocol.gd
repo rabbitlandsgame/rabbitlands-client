@@ -975,9 +975,11 @@ func _init() -> void:
 		"res://data/animations/luminous.json", FileAccess.READ)
 	var animation_data: Dictionary = JSON.parse_string(animation_file.get_as_text()) as Dictionary
 	var transition_resolver := AnimationResolver.new(animation_data)
-	_expect(is_equal_approx(transition_resolver.playback_speed_for_action(&"sit"), 2.0)
-		and is_equal_approx(transition_resolver.playback_speed_for_action(&"stand"), 2.0),
-		"sit and stand transitions play at twice speed")
+	_expect(is_equal_approx(transition_resolver.playback_speed_for_action(&"sit"), 0.5)
+		and is_equal_approx(transition_resolver.playback_speed_for_action(&"seated_idle"), 0.25),
+		"sitting and seated idle play four times slower than their original speeds")
+	_expect(is_equal_approx(transition_resolver.playback_speed_for_action(&"stand"), 2.0),
+		"standing up still plays at twice speed")
 	# Actions the server holds an actor in must cycle for as long as they hold
 	# it: a one-shot walk plays through and freezes mid-stride until the next
 	# step packet restarts it. glTF cannot carry a loop flag, so the action
