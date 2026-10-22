@@ -7613,21 +7613,40 @@ func _apply_crowd_full_rate(full_rate: Array) -> void:
 		rank += 1
 
 ## Cape cloth for the caped bodies nearest the camera only. The solver is the
-## largest per-body cost of an equipped crowd (about 0.2 ms a cape a frame on
-## the development laptop), so past `CLOTH_BODIES` a cape hangs as every
-## non-local cape already does below High quality. One that is simulating keeps
-## its cloth until it falls `CLOTH_HYSTERESIS` places past the limit.
+## largest per-body cost of an equipped crowd (about 0.2 ms a cape a frame
+## headless on the development laptop, nearer 0.4 ms rendered), so past
+## `CLOTH_BODIES` a cape hangs as every non-local cape already does below High
+## quality. At most `CLOTH_BODIES` simulate; one that is simulating counts as
+## `CLOTH_HYSTERESIS` places nearer than it is, so it keeps its cloth until a
+## cape that many places nearer needs the room or it falls that far past the
+## limit, and capes on the boundary do not take turns as the crowd mills. (The
+## hysteresis once let a simulating cape stay without counting against the
+## limit, and a milling crowd settled at twelve.)
 func _apply_cloth_budget(capes: Array) -> void:
-	if capes.size() > crowd.cloth_bodies:
-		capes.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	var rank: int = 0
+	if capes.size() <= crowd.cloth_bodies:
+		for entry: Array in capes:
+			if is_instance_valid(entry[1]):
+				(entry[1] as ReplicatedActor3D).set_cape_cloth_allowed(true)
+		return
+	capes.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var bodies: Array[ReplicatedActor3D] = []
+	var claims: Array = []
 	for entry: Array in capes:
 		if not is_instance_valid(entry[1]):
 			continue
 		var actor := entry[1] as ReplicatedActor3D
-		actor.set_cape_cloth_allowed(rank < crowd.cloth_bodies or (actor.cape_cloth_allowed()
-			and rank < crowd.cloth_bodies + crowd.CLOTH_HYSTERESIS))
-		rank += 1
+		var rank: int = bodies.size()
+		var keeping: int = crowd.CLOTH_HYSTERESIS if actor.cape_cloth_allowed() else 0
+		bodies.append(actor)
+		if rank < crowd.cloth_bodies + keeping:
+			claims.append([rank - keeping, rank])
+	claims.sort_custom(func(a: Array, b: Array) -> bool:
+		return a[0] < b[0] if a[0] != b[0] else a[1] < b[1])
+	var allowed: Dictionary = {}
+	for claim: Array in claims.slice(0, crowd.cloth_bodies):
+		allowed[int(claim[1])] = true
+	for rank: int in bodies.size():
+		bodies[rank].set_cape_cloth_allowed(allowed.has(rank))
 
 ## Gives up the bodies `_update_animation_gate` found far out of range for long
 ## enough, or past the body cap's distance by more than its hysteresis,

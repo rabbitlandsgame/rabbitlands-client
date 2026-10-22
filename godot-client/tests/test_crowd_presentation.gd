@@ -34,6 +34,7 @@ func _run() -> void:
 	await _test_body_cap()
 	await _test_paused_tier()
 	_test_rate_ranking()
+	_test_cloth_budget()
 	await _test_bulk_removal()
 	print("crowd presentation tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
@@ -355,6 +356,45 @@ func _test_rate_ranking() -> void:
 	var gate := _main.get("animation_gate") as AnimationGate
 	for body: ReplicatedActor3D in bodies:
 		body.set_animation_tier(AnimationGate.Tier.FULL, gate)
+
+
+## The cloth budget is a hard limit: a simulating cape counts as
+## CLOTH_HYSTERESIS places nearer than it is, but never adds a place.
+func _test_cloth_budget() -> void:
+	var bodies: Array[ReplicatedActor3D] = []
+	for value: Variant in _nodes().values():
+		var candidate := value as ReplicatedActor3D
+		if candidate != null and candidate.actor_id != LOCAL and not candidate.is_model_deferred() \
+				and bodies.size() < 3:
+			bodies.append(candidate)
+	if not _expect(bodies.size() == 3, "three built remote bodies exist for the cloth check"):
+		return
+	var crowd: RefCounted = _main.get("crowd")
+	var saved: int = crowd.get("cloth_bodies")
+	crowd.set("cloth_bodies", 1)
+	for body: ReplicatedActor3D in bodies:
+		body.set_cape_cloth_allowed(false)
+	var allowed := func() -> Array:
+		return bodies.map(func(body: ReplicatedActor3D) -> bool: return body.cape_cloth_allowed())
+	_main.call("_apply_cloth_budget", [[1.0, bodies[0]], [2.0, bodies[1]], [3.0, bodies[2]]])
+	_expect(allowed.call() == [true, false, false], "the nearest cape gets the one place")
+	_main.call("_apply_cloth_budget", [[1.0, bodies[1]], [2.0, bodies[0]], [3.0, bodies[2]]])
+	_expect(allowed.call() == [true, false, false],
+		"a simulating cape keeps its place when another comes a little nearer")
+	# The third body stands in for four capes between them.
+	_main.call("_apply_cloth_budget", [[1.0, bodies[1]], [2.0, bodies[2]], [3.0, bodies[2]],
+		[4.0, bodies[2]], [5.0, bodies[2]], [6.0, bodies[0]]])
+	_expect(allowed.call() == [false, true, false],
+		"and gives it up once it falls the hysteresis behind")
+	crowd.set("cloth_bodies", 2)
+	_main.call("_apply_cloth_budget", [[1.0, bodies[2]], [2.0, bodies[0]], [3.0, bodies[1]]])
+	var simulating := 0
+	for flag: bool in allowed.call():
+		simulating += int(flag)
+	_expect(simulating == 2, "never more capes than the budget (%d)" % simulating)
+	crowd.set("cloth_bodies", saved)
+	for body: ReplicatedActor3D in bodies:
+		body.set_cape_cloth_allowed(true)
 
 
 func _test_bulk_removal() -> void:
