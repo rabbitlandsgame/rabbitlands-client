@@ -26,6 +26,7 @@ var tack: Node3D
 var bridle_paths: Array[PackedVector3Array] = []
 var hind_legs := HindLegPose.new()
 var locomotion: RefCounted
+var banner_head_height := 0.0
 
 func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony",
 		visual_profile: Dictionary = {}) -> Array[String]:
@@ -90,6 +91,18 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 		player_anim.get_animation("Fighting_Idle"), actor.get_node("NativeModel") as Node3D)
 	if not errors.is_empty():
 		return errors
+	# Anchor the banner to the neutral seat height, independent of saddle bob
+	# and pitch during animation. Retain the current rider's body dimensions.
+	var seat_point: Vector3
+	if profile.has("seatPositionNative"):
+		var point: Array = profile.seatPositionNative
+		seat_point = Vector3(float(point[0]), float(point[1]), float(point[2]))
+	else:
+		var seat_offset: Array = profile.seatOffsetNative
+		seat_point = pony.get_skeleton().get_bone_global_rest(saddle) * Vector3(
+			float(seat_offset[0]), float(seat_offset[1]), float(seat_offset[2]))
+	banner_head_height = actor.head_height() + actor.to_local(
+		pony.get_skeleton().to_global(seat_point)).y - pose.baseline_pelvis.y
 	upper.configure(actor)
 	for modifier: Node in actor.get_skeleton().find_children("*", "SkeletonModifier3D", true, false):
 		modifiers[modifier] = (modifier as SkeletonModifier3D).active

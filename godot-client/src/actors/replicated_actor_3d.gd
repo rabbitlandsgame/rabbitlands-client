@@ -1675,17 +1675,24 @@ func _apply_model_scale() -> void:
 
 ## The top of the body as drawn, above this actor's foot point: the authored
 ## bounds through both model scales, or the fallback nameplate height less its
-## clearance when no native body loaded. main.gd hangs your own banner from it.
+## clearance when no native body loaded.
 func head_height() -> float:
 	if is_instance_valid(_native_model) and _native_body_bounds.size.y > 0.0:
 		return (_native_model.transform * _native_body_bounds).end.y
 	return (NAMEPLATE_HEIGHT - NAMEPLATE_CLEARANCE) * server_scale
 
+## Mounted banners follow the actor at a fixed seat-relative height, while
+## the visible rider continues to follow the mount's animated saddle.
+func banner_head_height() -> float:
+	if is_instance_valid(_mount_visual):
+		return float(_mount_visual.get("banner_head_height"))
+	return head_height()
+
 ## Keep the overhead furniture above the model as it grows.
 func _lift_overhead(factor: float) -> void:
 	var height: float = NAMEPLATE_HEIGHT * factor
 	if is_instance_valid(_native_model) and _native_body_bounds.size.y > 0.0:
-		height = head_height() + NAMEPLATE_CLEARANCE
+		height = banner_head_height() + NAMEPLATE_CLEARANCE
 	# One height for the lot: the bar, the numbers and the bubble sit above or
 	# below the name inside the block rather than at world heights of their
 	# own, so the gaps between them hold their size along with the text.

@@ -11245,10 +11245,11 @@ func _update_actor_resource_overlay() -> void:
 ## Just over an actor's head, where your own banner and the experience that
 ## floats up out of it are hung: from the top of the body rather than a fixed
 ## height over the feet, which left a head's height of empty air above a
-## human-sized player.
+## human-sized player. Mounted actors use a fixed height above the seat so
+## the banner does not bounce with the rider's animation.
 func _above_head(actor_node: Node3D) -> Vector3:
-	var head: float = (float(actor_node.call("head_height"))
-		if actor_node.has_method("head_height") else 2.8 - BANNER_HEAD_CLEARANCE)
+	var head: float = (float(actor_node.call("banner_head_height"))
+		if actor_node.has_method("banner_head_height") else 2.8 - BANNER_HEAD_CLEARANCE)
 	return actor_node.global_position + Vector3(0.0, head + BANNER_HEAD_CLEARANCE, 0.0)
 
 func _sync_local_status_icons() -> void:
