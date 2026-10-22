@@ -1113,6 +1113,10 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			trade = _empty_trade_state()
 			state_changed.emit(&"trade")
 		"storage_categories":
+			# An empty category list closes storage when its source is out of reach.
+			if (event.categories as Array).is_empty():
+				close_storage()
+				return
 			storage["open"] = true
 			storage["categories"] = (event.categories as Array).duplicate(true)
 			storage["text"] = ""

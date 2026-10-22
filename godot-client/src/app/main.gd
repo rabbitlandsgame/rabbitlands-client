@@ -1820,7 +1820,7 @@ func _update_keyboard_movement() -> void:
 		return
 	if (spell_wheel != null and spell_wheel.visible) or (technique_ring != null and technique_ring.visible) \
 			or _text_entry_active() or trade_panel.visible \
-			or storage_panel.visible or full_map.visible \
+			or full_map.visible \
 			or console_panel.visible or settings_panel.visible or item_lists_panel.visible \
 			or (_actor_hud_menu != null and _actor_hud_menu.visible) \
 			or Input.is_key_pressed(KEY_ALT) or Input.is_key_pressed(KEY_CTRL):
@@ -4253,7 +4253,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 			and event.button_index == MOUSE_BUTTON_MIDDLE:
 		camera_rig.handle_mouse_button(event as InputEventMouseButton)
 	if (not game_view.visible or full_map.visible
-			or trade_panel.visible or storage_panel.visible
+			or trade_panel.visible
 			or manufacturing_panel.visible):
 		# The world takes no clicks behind these windows, but a right click
 		# on it still puts back whatever is in hand, as it does everywhere.
@@ -4894,7 +4894,7 @@ func _local_actor_server_tile() -> Variant:
 
 func _map_input_blocked() -> bool:
 	return (_world_input_blocked() or not game_view.visible or trade_panel.visible
-		or storage_panel.visible or manufacturing_panel.visible)
+		or manufacturing_panel.visible)
 
 func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		map_render_viewport: SubViewport, camera: Camera3D, source: String) -> void:
@@ -14267,7 +14267,6 @@ func _sync_storage() -> void:
 			classic_storage.refresh()
 		return
 	stats_panel.hide()
-	full_map.hide()
 	trade_panel.hide()
 	manufacturing_panel.hide()
 	storage_categories.clear()

@@ -88,6 +88,8 @@ Storage opens in the compact classic layout. Right-click its title to choose
 **Docked bank**, which moves storage and inventory together; the choice is
 remembered. The inventory's blue quantity shortcuts also control storage
 withdrawals and deposits. Double-click a stored item to withdraw it.
+You can walk with storage open by clicking the world, Tab map or minimap.
+Storage closes automatically when you reach eight tiles from its keeper or chest.
 
 Use the first eight backpack slots from the item quick bar with **1–8** or
 **Ctrl+1–8**. Hover a slot to see its active shortcuts, quantity and cooldown.
