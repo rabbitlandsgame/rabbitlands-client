@@ -68,6 +68,7 @@ static func _rider(actor_id: int, mode: String, map_name: String, owner: String)
 func _run() -> void:
 	var state: Node = root.get_node("AppState")
 	_state_checks(state)
+	_rider_checks(state)
 	await _main_checks(state)
 	print("interest state tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
@@ -193,6 +194,95 @@ func _measure_stamping(state: Node) -> void:
 	for actor_id: int in range(4000, 4100):
 		removed.append_array(_u16(actor_id))
 	state.call("_on_packet", Op.REMOVE_ACTOR, removed)
+
+static func _v1_table(map_name: String, rows: Array) -> PackedByteArray:
+	var states: Array = []
+	for row: Array in rows:
+		var mounted: bool = row[1] == "mounted"
+		states.append({"schema_version": 1, "actor_id": row[0], "mode": row[1],
+			"gait": "cruise" if mounted else "on_foot", "mount_id": "moor_pony" if mounted else "",
+			"selected_mount_id": "moor_pony", "step_us": 133333, "endurance_ms": 8000,
+			"summon_remaining_ms": 0, "combat_remaining_ms": 0, "can_summon": false,
+			"blocked_reason": "", "map": map_name, "owner": row[2]})
+	return JSON.stringify({"schema_version": 1, "map": map_name, "states": states}).to_utf8_buffer()
+
+## Riders and whole tables as protocol v2 sends them (draft 2 of the spec).
+func _rider_checks(state: Node) -> void:
+	state.call("_on_packet", Op.CHANGE_MAP, "isle".to_ascii_buffer() + PackedByteArray([0]))
+	state.set("local_actor_id", 77)
+	state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(4001, 30, 30, 1, "Dee"))
+	state.call("_on_packet", Op.ELORIA_MOUNT_STATES, _v1_table("isle", [[4001, "mounted", "Dee"]]))
+	_expect(not (state.call("mount_state_for_actor", 4001) as Dictionary).is_empty(), "a rider from a complete table")
+	# Without player interest a removal means gone, as it always has.
+	state.call("_on_packet", Op.REMOVE_ACTOR, _u16(4001))
+	state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(4001, 30, 30, 1, "Dee"))
+	_expect((state.call("mount_state_for_actor", 4001) as Dictionary).is_empty(),
+		"without interest a removed rider comes back with no row until a table says so")
+	state.call("_on_packet", Op.ELORIA_MOUNT_STATES, _v1_table("isle", [[4001, "mounted", "Dee"]]))
+	# Interest starts: the server removes who it will not show, then sends presence.
+	state.call("_on_packet", Op.REMOVE_ACTOR, _u16(4001))
+	state.call("_on_packet", Op.ELORIA_PRESENCE, _presence([[4001, 140, 30]]))
+	state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(4001, 100, 30, 1, "Dee"))
+	_expect(not (state.call("mount_state_for_actor", 4001) as Dictionary).is_empty(),
+		"with complete tables and interest a rider walking back into view is still mounted")
+	state.call("_on_packet", Op.REMOVE_ACTOR, _u16(4001))
+	state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(4001, 100, 30, 1, "Dee"))
+	_expect(not (state.call("mount_state_for_actor", 4001) as Dictionary).is_empty(),
+		"and again after the cap swaps them out and back")
+	state.call("_on_packet", Op.REMOVE_ACTOR, _u16(4001))
+	state.call("_on_packet", Op.ELORIA_MOUNT_STATES, _v1_table("isle", []))
+	state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(4001, 100, 30, 1, "Dee"))
+	_expect((state.call("mount_state_for_actor", 4001) as Dictionary).is_empty(),
+		"but a newer table that no longer lists them wins")
+	state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(4002, 101, 30, 1, "Eve"))
+	state.call("_on_packet", Op.ELORIA_MOUNT_STATES, _v1_table("isle", [[4002, "mounted", "Eve"]]))
+	state.call("_on_packet", Op.REMOVE_ACTOR, _u16(4002))
+	state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(4002, 101, 30, 1, "Fay"))
+	_expect(not (state.get("actor_mounts") as Dictionary).has(4002) and (state.call("mount_state_for_actor", 4002) as Dictionary).is_empty(),
+		"a reused id is not given another player's row")
+
+	# An introduction, then what the actor packet does not carry.
+	state.call("take_changed_actors")
+	state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(5001, 40, 40, 1, "Gil"))
+	state.call("_on_packet", Op.ADD_ACTOR_COMMAND, _step(5001, 13))
+	state.call("_on_packet", Op.SEND_BUFFS, _u16(5001) + PackedByteArray([0, 4, 0, 0]))
+	var gil: Dictionary = (state.get("actors") as Dictionary)[5001]
+	_expect(bool(gil.get("sitting", false)) and int(gil.get("buffs", 0)) == EloriaProtocol.ACTOR_BUFF_DOUBLE_SPEED,
+		"an introduction followed by CMD_SIT_DOWN and SEND_BUFFS sits and hastes the actor")
+	_expect(not gil.has(ServerTimePacing.STEP_KEY), "sitting down is not a step")
+
+	# A whole delta table over three frames, closed by the next other packet.
+	var emitted: Array[StringName] = []
+	var record := func(path: StringName) -> void: emitted.append(path)
+	state.connect("state_changed", record)
+	for actor_id: int in [6001, 6002, 6003]:
+		state.call("_on_packet", Op.ADD_NEW_ACTOR, _actor_payload(actor_id, 50, 50, 1, "R%d" % actor_id))
+	state.call("_on_packet", Op.ELORIA_MOUNT_DELTAS, _mount_deltas("isle", true, [
+		_rider(6001, "mounted", "isle", "R6001"), _rider(6002, "mounted", "isle", "R6002"),
+		_rider(6003, "mounted", "isle", "R6003")]))
+	state.call("_on_packet", Op.ELORIA_SERVER_TIME, _stamp(7000))
+	state.call("_on_packet", Op.ELORIA_MOUNT_DELTAS, _mount_deltas("isle", true, [
+		_rider(6001, "mounted", "isle", "R6001")]))
+	_expect((state.get("actor_mounts") as Dictionary).has(6002) and (state.get("actor_mounts") as Dictionary).has(6003), "after a whole table's first frame the others keep their rows")
+	state.call("_on_packet", Op.ELORIA_MOUNT_DELTAS, _mount_deltas("isle", false, [
+		_rider(6002, "mounted", "isle", "R6002")]))
+	_expect((state.get("actor_mounts") as Dictionary).has(6003) and bool((state.get("mount_deltas") as RefCounted).call("full_open")),
+		"its next frame continues it")
+	emitted.clear()
+	state.call("_on_packet", Op.ELORIA_SERVER_TIME, _stamp(7050))
+	_expect(not (state.get("actor_mounts") as Dictionary).has(6003) and (state.get("actor_mounts") as Dictionary).has(6001) and (state.get("actor_mounts") as Dictionary).has(6002),
+		"the next other packet completes it, and only the rider it left out loses the row")
+	_expect(emitted.has(&"mount_deltas") and (state.get("mount_deltas") as RefCounted).call(
+		"presentation_ids", {}) == [6003], "and only that rider's mount is re-read")
+	state.call("_on_packet", Op.ELORIA_MOUNT_DELTAS, _mount_deltas("isle", true, [
+		_rider(6001, "mounted", "isle", "R6001")]))
+	var deltas: RefCounted = state.get("mount_deltas")
+	deltas.set("_full_opened_msec", Time.get_ticks_msec() - 2000)
+	state.call("_process", 0.0)
+	_expect(not bool(deltas.call("full_open")) and not (state.get("actor_mounts") as Dictionary).has(6002),
+		"a whole table with nothing after it is completed after a short wait")
+	state.disconnect("state_changed", record)
+	state.call("_on_connection_state_changed", "disconnected")
 
 func _main_checks(state: Node) -> void:
 	var scene: Resource = load("res://src/app/main.tscn")

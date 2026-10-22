@@ -14,6 +14,10 @@ const PLAYER_ACTOR_KINDS: Array[int] = [1, 3, 4]
 ## How often the player's own calling, combat lock and gallop endurance are
 ## restated between riding deltas: as often as the complete tables sent them.
 const MOUNT_COUNTDOWN_MSEC := 100
+## A whole riding table spread over several frames is closed at the first
+## packet that is not part of it, or this long after it began if nothing else
+## arrives (mount_delta_state.gd).
+const MOUNT_TABLE_CLOSE_MSEC := 500
 
 signal state_changed(path: StringName)
 signal login_succeeded
@@ -224,6 +228,14 @@ var _frame_stamp_read_msec := 0
 ## one pass keep the time of the first of them.
 var _presentation_pass := 0
 var _mount_countdown_msec := 0
+## Riding rows of players the server stopped showing (REMOVE_ACTOR). With
+## player interest that means out of view rather than gone, and a client on
+## complete riding tables is not sent the row again when the rider comes back
+## into view, so it is put back then (`_restore_unseen_mount`). Without
+## interest a removal means gone and nothing is ever put back. A complete
+## table, a whole delta table, a removal by delta, a change of map and
+## KILL_ALL_ACTORS each supersede what is kept here.
+var _unseen_mount_rows: Dictionary = {}
 
 ## The footprint of an actor type, defaulting to a single tile.
 func mark_actor_changed(actor_id: int) -> void:
@@ -273,19 +285,52 @@ func _settle_mount_handoff(actor_id: int) -> void:
 			or (handoff.confirmed and row.get("map", "") == actor.get("map", ""))):
 		_mount_handoffs.erase(actor_id)
 
-## An ELORIA_MOUNT_DELTAS update (mount_delta_state.gd). A whole table
-## confirms every rider carried across a seam the way a complete table does; a
-## delta confirms the riders it names. Presentation re-binds only the actors
+## An ELORIA_MOUNT_DELTAS update (mount_delta_state.gd). It confirms the
+## riders carried across a seam that it names; a whole table confirms the rest
+## when it closes (`_close_mount_table`). Presentation re-binds only the actors
 ## the update touched (`&"mount_deltas"`).
 func _apply_mount_update(event: Dictionary) -> void:
+	if bool(event.get("full", false)):
+		_close_mount_table()
 	if not mount_deltas.apply(event, actor_mounts, current_map, server_clock,
 			Time.get_ticks_msec()):
 		return
+	if bool(event.get("full", false)):
+		_unseen_mount_rows.clear()
+	for raw_removed: Variant in event.get("removed", []) as Array:
+		_unseen_mount_rows.erase(int(raw_removed))
 	for actor_id: int in _mount_handoffs.keys():
-		if mount_deltas.whole_table or mount_deltas.changed_ids.has(actor_id):
+		if mount_deltas.changed_ids.has(actor_id):
 			_mount_handoffs[actor_id]["confirmed"] = true
 			_settle_mount_handoff(actor_id)
 	state_changed.emit(&"mount_deltas")
+
+## The whole riding table that was arriving is complete: the rows it did not
+## restate go, and the riders carried across a seam that it did not name are
+## settled, as a complete table settles them.
+func _close_mount_table() -> void:
+	if not mount_deltas.full_open():
+		return
+	var gone: Array = mount_deltas.close_full(actor_mounts)
+	for actor_id: int in _mount_handoffs.keys():
+		_mount_handoffs[actor_id]["confirmed"] = true
+		_settle_mount_handoff(actor_id)
+	if not gone.is_empty():
+		state_changed.emit(&"mount_deltas")
+
+## A rider the server shows again after a removal gets back the riding row it
+## had, when this client is on player interest and nothing newer replaced it.
+func _restore_unseen_mount(actor_id: int) -> void:
+	var kept: Variant = _unseen_mount_rows.get(actor_id)
+	if kept == null:
+		return
+	_unseen_mount_rows.erase(actor_id)
+	if not presence.active or actor_mounts.has(actor_id):
+		return
+	var row: Dictionary = kept as Dictionary
+	var actor: Dictionary = actors.get(actor_id, {}) as Dictionary
+	if str(row.get("owner", "")).to_lower() == str(actor.get("name", "")).to_lower():
+		actor_mounts[actor_id] = row
 
 ## A frame the server stamped with its clock: the clock learns from it, and
 ## the steps read with it are timed by it (server_time_pacing.gd).
@@ -328,9 +373,14 @@ func _stamp_native_steps(payload: PackedByteArray) -> void:
 		server_clock.playout_delay_msec(now) / 1000.0, _presentation_pass,
 		local_actor_id)
 
-## Players leaving full replication keep a dot where they were last drawn
+## Players leaving full replication keep their riding row for their return
+## (`_unseen_mount_rows`) and, with presence, a dot where they were last drawn
 ## until the next presence rows place them (presence_state.gd `hand_over`).
-func _hand_over_presence(actor_ids: Array) -> void:
+func _hand_over_removed(actor_ids: Array) -> void:
+	for raw_id: Variant in actor_ids:
+		var row: Variant = actor_mounts.get(int(raw_id))
+		if row != null:
+			_unseen_mount_rows[int(raw_id)] = row
 	if not presence.active:
 		return
 	var now: int = Time.get_ticks_msec()
@@ -501,6 +551,8 @@ var invasion_assistant: Dictionary = {"open": false}
 ## table restated them. One lookup a tick with nothing riding.
 func _process(_delta: float) -> void:
 	var now: int = Time.get_ticks_msec()
+	if mount_deltas.full_open() and now - mount_deltas.full_opened_msec() > MOUNT_TABLE_CLOSE_MSEC:
+		_close_mount_table()
 	if now < _mount_countdown_msec:
 		return
 	_mount_countdown_msec = now + MOUNT_COUNTDOWN_MSEC
@@ -618,6 +670,7 @@ func _on_connection_state_changed(value: String) -> void:
 		actor_mounts.clear()
 		_mount_handoffs.clear()
 		mount_deltas.reset()
+		_unseen_mount_rows.clear()
 		presence.reset()
 		server_clock.reset()
 		_frame_stamps_seen = false
@@ -689,6 +742,10 @@ func _queue_map_marker_removal(marker_id: int) -> void:
 			state_changed.emit(&"map_markers"), CONNECT_ONE_SHOT)
 
 func _on_packet(command: int, payload: PackedByteArray) -> void:
+	# A whole riding table spread over frames ends at the first packet that is
+	# not one of them (mount_delta_state.gd).
+	if command != EloriaProtocol.ServerMessage.ELORIA_MOUNT_DELTAS and mount_deltas.full_open():
+		_close_mount_table()
 	var boundary: Dictionary = Network.coordinates.before_packet(command, EloriaProtocol.ServerMessage.CHANGE_MAP)
 	if not boundary.ok:
 		Network.fail_coordinate_context(boundary.error)
@@ -760,6 +817,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			current_map = event.map_name
 			_begin_mount_handoff()
 			presence.clear_map(current_map)
+			_unseen_mount_rows.clear()
 			# The new map's objects arrive in their own packet; anything held
 			# for the old map is stale the moment the change lands.
 			map_objects.clear()
@@ -799,11 +857,12 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			if not Network.coordinates.selected:
 				event["map"] = str(adjacent_maps.get(map_handle, current_map)) if map_handle > 0 else current_map
 			actors[event.actor_id] = event
+			_restore_unseen_mount(int(event.actor_id))
 			_settle_mount_handoff(int(event.actor_id))
 			mark_actor_changed(int(event.actor_id))
 			state_changed.emit(&"actors")
 		"remove_actor":
-			_hand_over_presence(event.actor_ids)
+			_hand_over_removed(event.actor_ids)
 			for removed_actor_value: Variant in event.actor_ids:
 				var removed_actor_id: int = int(removed_actor_value)
 				actors.erase(removed_actor_id)
@@ -823,6 +882,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			actor_occupations.clear()
 			actor_mounts.clear()
 			_mount_handoffs.clear()
+			_unseen_mount_rows.clear()
 			quest_offer_actors.clear()
 			state_changed.emit(&"actors")
 		"actor_commands":
@@ -1381,6 +1441,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"mount_states":
 			if str(event.map) == current_map:
 				actor_mounts = (event.states as Dictionary).duplicate(true)
+				_unseen_mount_rows.clear()
 				for actor_id: int in _mount_handoffs.keys():
 					_mount_handoffs[actor_id]["confirmed"] = true
 					_settle_mount_handoff(actor_id)

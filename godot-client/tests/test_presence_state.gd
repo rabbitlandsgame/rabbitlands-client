@@ -87,12 +87,14 @@ func _check_mount_deltas() -> void:
 	_expect(deltas.apply({"map": "isle", "full": true,
 		"states": {1: _delta_row(1, "mounted"), 2: _delta_row(2, "on_foot")}}, table, "isle", null, 0),
 		"a whole table is taken")
-	_expect(table.size() == 2 and deltas.whole_table, "and states the whole table")
+	_expect(table.size() == 2 and deltas.full_open(), "and stays open for any frames that follow it")
 	_expect(int(table[1].endurance_ms) == 8000 and int(table[1].summon_remaining_ms) == 0
 		and not table[1].has("summon_due") and not table[1].has("endurance_rate"),
 		"a row is kept in the complete tables' shape")
-	_expect(deltas.presentation_ids({1: 0, 2: 0, 3: 0}).size() == 3,
-		"after a whole table every actor's mount is re-read")
+	var named: Array = deltas.presentation_ids({1: 0, 2: 0, 3: 0})
+	named.sort()
+	_expect(named == [1, 2], "a whole table re-binds the riders it names, not every actor (%s)" % str(named))
+	_expect(deltas.close_full(table).is_empty() and not deltas.full_open(), "it closes with nothing to drop")
 	_expect(deltas.apply({"map": "isle", "full": false, "states": {2: _delta_row(2, "mounted")},
 		"removed": [1]}, table, "isle", null, 0), "a delta applies")
 	_expect(not table.has(1) and str(table[2].mode) == "mounted",
@@ -105,8 +107,33 @@ func _check_mount_deltas() -> void:
 	_expect(deltas.apply({"map": "cove", "full": false, "states": {5: _delta_row(5, "mounted")}},
 		table, "cove", null, 0) and table.has(2) and table.has(5),
 		"across a seam the rows carried over stay and the new map's deltas add to them")
-	_expect(deltas.apply({"map": "cove", "full": true, "states": {}}, table, "cove", null, 0)
-		and table.is_empty(), "the new map's whole table replaces it")
+	deltas.apply({"map": "cove", "full": true, "states": {}}, table, "cove", null, 0)
+	_expect(table.has(2) and table.has(5), "an empty whole table empties nothing until it is complete")
+	var gone: Array = deltas.close_full(table)
+	gone.sort()
+	_expect(table.is_empty() and gone == [2, 5], "and then drops every row it did not restate")
+	_check_split_whole_table()
+
+## A whole table too big for one frame: three frames, only the first `full`.
+## Nobody the table names is ever without a row between its frames, and only
+## the row it never restates goes, once it is complete.
+func _check_split_whole_table() -> void:
+	var deltas = MountDeltaState.new()
+	var table: Dictionary = {}
+	deltas.apply({"map": "isle", "full": true, "states": {7: _delta_row(7, "on_foot"),
+		8: _delta_row(8, "on_foot"), 9: _delta_row(9, "mounted")}}, table, "isle", null, 0)
+	deltas.close_full(table)
+	deltas.apply({"map": "isle", "full": true, "states": {7: _delta_row(7, "mounted")}}, table, "isle", null, 0)
+	_expect(table.has(8) and table.has(9) and str(table[7].mode) == "mounted",
+		"after the first frame the riders of the later frames keep their rows")
+	deltas.apply({"map": "isle", "full": false, "states": {8: _delta_row(8, "mounted")}}, table, "isle", null, 0)
+	_expect(deltas.full_open() and table.has(9) and str(table[8].mode) == "mounted",
+		"a following frame without `full` continues the table")
+	deltas.apply({"map": "isle", "full": false, "states": {10: _delta_row(10, "mounted")}}, table, "isle", null, 0)
+	var gone: Array = deltas.close_full(table)
+	_expect(gone == [9] and table.has(7) and table.has(8) and table.has(10) and not table.has(9),
+		"once complete, only the row the table left out is dropped (%s)" % str(gone))
+	_expect(deltas.presentation_ids({}) == [9], "and only that rider's mount is re-read")
 
 func _check_mount_deadlines() -> void:
 	var clock = ServerClock.new()
