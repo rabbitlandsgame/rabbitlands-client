@@ -4,12 +4,15 @@ const Chrome := preload("res://src/ui/hud_panel_chrome.gd")
 var source: Control
 var config: Dictionary = {}
 var _angle := INF
+var _native_face_flags := -1
 
 func _ready() -> void:
 	(get_parent() as Control).resized.connect(queue_redraw)
 
 func configure(owner_main: Control, appearance: Dictionary, legacy: bool) -> void:
 	source = owner_main
+	if _native_face_flags < 0: _native_face_flags = source.clock_face.size_flags_vertical
+	source.clock_face.size_flags_vertical = _native_face_flags if legacy else Control.SIZE_EXPAND_FILL
 	config = appearance.duplicate(true)
 	visible = not legacy
 	source.clock_face.self_modulate.a = 1.0 if legacy else 0.0

@@ -1104,7 +1104,7 @@ func _capture_positions() -> void:
 func _normal_position(control: Control) -> Vector2:
 	return ((main.game_view.get_global_transform().affine_inverse() * control.global_position) / main.game_view.size.max(Vector2.ONE)).clamp(Vector2.ZERO, Vector2.ONE)
 
-func _remember_moved(key: String) -> void:
+func _remember_moved(key: String, persist := true) -> void:
 	if _applying or not model.loaded and bool(model.working.legacy): return
 	model.working.parts[key].anchor = "free"
 	model.working.parts[key].dock_target = "none"
@@ -1113,6 +1113,9 @@ func _remember_moved(key: String) -> void:
 	model.working.parts[key].offset = Vector2.ZERO
 	if key in ["chat", "system_chat"]: _capture_chat(model.working, key)
 	elif key in ["party", "minimap"]: model.working.parts[key].dimensions = parts[key].size
+	if not persist:
+		_update_chrome()
+		return
 	queue_layout()
 	if not is_open(): _store()
 
@@ -1364,6 +1367,7 @@ func _style_part(key: String) -> void:
 	var box := HudChrome.box(config.background_color, config.border_color, 5)
 	box.set_corner_radius_all(7 if config.style == "adventure" else 2)
 	if key in ["spells", "items"] and config.flush_slots: box.set_content_margin_all(0)
+	if key == "clock" and config.style == "heritage": box.set_content_margin_all(3)
 	if not config.show_background: box.bg_color.a = 0
 	if not config.show_border: box.set_border_width_all(0)
 	if key != "nameplate":

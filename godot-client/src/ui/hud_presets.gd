@@ -60,22 +60,22 @@ static func preset(id: String) -> Dictionary:
 		value.parts.rail_panel.enabled = true
 		value.parts.rail_panel.full_height = true
 		value.parts.rail_panel.hide_with_stats = false
-		value.parts.rail_panel.dimensions = Vector2(92, 400)
+		value.parts.rail_panel.dimensions = Vector2(84, 400)
 		value.parts.rail_panel.edge_dock = "top_right"
 		value.parts.rail_panel.hud_border_style = "beveled"
 		# Match the player's saved Heritage arrangement with responsive docks.
 		value.parts.compass.enabled = true
 		value.parts.compass.scale = 0.5
-		value.parts.compass.dimensions = Vector2(184, 129)
+		value.parts.compass.dimensions = Vector2(168, 168)
 		value.parts.compass.edge_dock = "bottom_right"
 		value.parts.compass.show_labels = false
 		_place(value, "compass", "bottom_right", Vector2.ZERO)
 		value.parts.clock.clock_mode = "both"
-		value.parts.clock.dimensions = Vector2(92, 96)
+		value.parts.clock.dimensions = Vector2(84, 136)
 		value.parts.clock.scale = 1.0
 		_dock(value, "clock", "compass", "top", "stretch")
 		value.parts.research.enabled = true
-		value.parts.research.dimensions = Vector2(92, 28)
+		value.parts.research.dimensions = Vector2(84, 28)
 		_dock(value, "research", "clock", "top", "stretch")
 		value.parts.skills.scale = 0.7
 		value.parts.skills.axis_scale = Vector2(1.964945, 1.873677)
@@ -87,13 +87,13 @@ static func preset(id: String) -> Dictionary:
 			value.parts[key].scale = 1.0
 			value.parts[key].flush_slots = true
 			value.parts[key].slot_gap = 0.0
-			value.parts[key].dimensions = Vector2(46, 276)
+			value.parts[key].dimensions = Vector2(42, 252)
 			value.parts[key].slot_border_style = "beveled"
 		_dock(value, "items", "logo", "bottom", "end")
 		_dock(value, "spells", "items", "left", "end")
 		value.parts.logo.scale = 1.0
 		value.parts.logo.axis_scale = Vector2.ONE
-		value.parts.logo.dimensions = Vector2(92, 88)
+		value.parts.logo.dimensions = Vector2(84, 68)
 		value.parts.logo.edge_dock = "top_right"
 		value.parts.status.enabled = true
 		value.parts.status.scale = 0.8
