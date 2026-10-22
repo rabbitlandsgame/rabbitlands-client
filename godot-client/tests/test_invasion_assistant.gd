@@ -230,13 +230,14 @@ func _run() -> void:
 	_expect(assistant.monster_list.item_count == 3,
 		"clearing the filter brings the whole catalog back")
 	assistant._on_monster_selected(0)
-	assistant.monster_quantity.value = 3
+	assistant.monster_quantity.value = 500
 	assistant._add_monster_to_group()
-	_expect(commands[-1] == "#invasion_assistant group add ashfall|ash_wyrm|3|80|90|normal",
+	_expect(commands[-1] == "#invasion_assistant group add ashfall|ash_wyrm|500|80|90|normal",
 		"selected monster can be added to a selected live group")
 	assistant._spawn_monster_here()
-	_expect(commands[-1] == "#invasion_assistant monster spawn ash_wyrm|3|normal",
+	_expect(commands[-1] == "#invasion_assistant monster spawn ash_wyrm|500|normal",
 		"selected monster can be quick-spawned at the invasion master's location")
+	assistant.monster_quantity.value = 3
 	assistant.monster_miniboss.button_pressed = true
 	assistant._add_monster_to_group()
 	_expect(commands[-1].ends_with("|miniboss"), "miniboss rank is preserved in group composition")

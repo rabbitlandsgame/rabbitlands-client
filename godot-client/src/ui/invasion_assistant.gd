@@ -1006,7 +1006,7 @@ func _build_monsters_tab() -> void:
 	page.add_child(builder_row)
 	monster_quantity = _spin(builder_row, "Qty", 1)
 	monster_quantity.min_value = 1
-	monster_quantity.max_value = 100
+	monster_quantity.max_value = 500
 	monster_quantity.value_changed.connect(func(_value: float) -> void: _update_monster_actions())
 	monster_miniboss = CheckBox.new()
 	monster_miniboss.text = "Miniboss (+10–30% stats)"
