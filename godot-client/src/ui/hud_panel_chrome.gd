@@ -4,6 +4,7 @@ extends Node2D
 var config: Dictionary = {}
 var neighbours: Array[Rect2] = []
 var background_exclusions: Array[Rect2] = []
+var external_border := false
 var shape := "rectangle"
 var circle_inset := 1.5
 
@@ -70,48 +71,53 @@ func _draw() -> void:
 		return
 	if config.show_background:
 		for patch: Rect2 in background_patches(): draw_rect(patch, config.background_color)
-	if not config.show_border: return
-	var global_rect := control.get_global_rect()
+	if not config.show_border or external_border: return
 	var inverse := control.get_global_transform().affine_inverse()
+	var adjacent: Array[Rect2] = []
+	for other: Rect2 in neighbours: adjacent.append(inverse * other)
+	draw_rect_border(self, rect, adjacent, config)
+
+static func draw_rect_border(canvas: CanvasItem, rect: Rect2, adjacent: Array[Rect2], appearance: Dictionary) -> void:
+	if not appearance.show_border: return
+	var design: String = appearance.get("hud_border_style", "plain")
+	var edge: Color = appearance.border_color
 	for side: int in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
-		for segment: Vector2 in edge_segments(global_rect, side, neighbours):
+		for segment: Vector2 in edge_segments(rect, side, adjacent):
 			var a: Vector2
 			var b: Vector2
 			if side in [SIDE_TOP, SIDE_BOTTOM]:
-				var y := global_rect.position.y if side == SIDE_TOP else global_rect.end.y
+				var y := rect.position.y if side == SIDE_TOP else rect.end.y
 				a = Vector2(segment.x, y)
 				b = Vector2(segment.y, y)
 			else:
-				var x := global_rect.position.x if side == SIDE_LEFT else global_rect.end.x
+				var x := rect.position.x if side == SIDE_LEFT else rect.end.x
 				a = Vector2(x, segment.x)
 				b = Vector2(x, segment.y)
-			var start := inverse * a
-			var finish := inverse * b
-			var edge: Color = config.border_color
-			if design == "plain": draw_line(start, finish, edge, 1)
-			else:
-				var inward: Vector2 = {SIDE_LEFT:Vector2.RIGHT, SIDE_RIGHT:Vector2.LEFT, SIDE_TOP:Vector2.DOWN, SIDE_BOTTOM:Vector2.UP}[side]
-				draw_line(start + inward, finish + inward, edge.darkened(0.6), 3)
-				draw_line(start + inward, finish + inward, edge.lightened(0.35) if side in [SIDE_TOP, SIDE_LEFT] else edge.darkened(0.25), 1)
-				draw_line(start + inward * 3, finish + inward * 3, edge.darkened(0.4), 1)
+			# A continuous outside stroke closes the little mitre gaps at L joins.
+			canvas.draw_line(a, b, edge, 1)
+			if design == "plain": continue
+			var inward: Vector2 = {SIDE_LEFT:Vector2.RIGHT, SIDE_RIGHT:Vector2.LEFT, SIDE_TOP:Vector2.DOWN, SIDE_BOTTOM:Vector2.UP}[side]
+			canvas.draw_line(a + inward, b + inward, edge.darkened(0.6), 3)
+			canvas.draw_line(a + inward, b + inward, edge.lightened(0.35) if side in [SIDE_TOP, SIDE_LEFT] else edge.darkened(0.25), 1)
+			canvas.draw_line(a + inward * 3, b + inward * 3, edge.darkened(0.4), 1)
 	if design == "ornate":
 		for corner: Vector2 in [Vector2.ZERO, Vector2(1, 0), Vector2(0, 1), Vector2.ONE]:
-			var global_corner := global_rect.position + global_rect.size * corner
+			var point := rect.position + rect.size * corner
 			var horizontal := SIDE_TOP if corner.y == 0 else SIDE_BOTTOM
 			var vertical := SIDE_LEFT if corner.x == 0 else SIDE_RIGHT
-			if not _exposed_corner(global_rect, horizontal, global_corner.x) or not _exposed_corner(global_rect, vertical, global_corner.y): continue
-			var point := rect.position + rect.size * corner
+			var exposed := true
+			for side: int in [horizontal, vertical]:
+				var found := false
+				var value := point.x if side == horizontal else point.y
+				for segment: Vector2 in edge_segments(rect, side, adjacent):
+					if value >= segment.x - 0.1 and value <= segment.y + 0.1: found = true
+				exposed = exposed and found
+			if not exposed: continue
 			var inward := Vector2.ONE - corner * 2
-			var edge: Color = config.border_color
-			draw_line(point + Vector2(inward.x * 3, inward.y * 12), point + inward * 3, edge.lightened(0.35), 2, true)
-			draw_line(point + inward * 3, point + Vector2(inward.x * 12, inward.y * 3), edge.lightened(0.35), 2, true)
-			draw_circle(point + inward * 6, 2.5, edge.darkened(0.45))
-			draw_circle(point + inward * 6, 1.3, edge.lightened(0.45))
-
-func _exposed_corner(rect: Rect2, side: int, value: float) -> bool:
-	for segment: Vector2 in edge_segments(rect, side, neighbours):
-		if value >= segment.x - 0.1 and value <= segment.y + 0.1: return true
-	return false
+			canvas.draw_line(point + Vector2(inward.x * 3, inward.y * 12), point + inward * 3, edge.lightened(0.35), 2, true)
+			canvas.draw_line(point + inward * 3, point + Vector2(inward.x * 12, inward.y * 3), edge.lightened(0.35), 2, true)
+			canvas.draw_circle(point + inward * 6, 2.5, edge.darkened(0.45))
+			canvas.draw_circle(point + inward * 6, 1.3, edge.lightened(0.45))
 
 static func draw_circle_border(canvas: CanvasItem, center: Vector2, radius: float, color: Color, design: String) -> void:
 	if design == "plain":

@@ -472,14 +472,27 @@ func _revised_defaults_and_minimap(workspace: Control) -> void:
 		and main.clock_face.visible and main.clock_text.visible and workspace.modern_compass.visible,
 		"option 1 retains the player's dial/digital clock and separate compass stack")
 	var heritage: Dictionary = workspace.model.working.parts
-	_expect(is_equal_approx(heritage.logo.axis_scale.y, 3.194787)
-		and heritage.spells.dimensions.is_equal_approx(Vector2(86, 402))
-		and is_equal_approx(heritage.items.dimensions.y, 402.6667),
-		"option 1 retains the saved logo height and six-slot quick-bar proportions")
+	_expect(heritage.spells.dimensions.is_equal_approx(heritage.items.dimensions)
+		and heritage.spells.flush_slots and heritage.items.flush_slots
+		and heritage.spells.slot_gap == 0 and heritage.items.slot_gap == 0,
+		"option 1 uses matching flush six-slot quick columns")
 	_expect(heritage.clock.dock_target == "compass" and heritage.research.dock_target == "clock"
-		and heritage.research.dimensions == Vector2(105, 28) and heritage.status.enabled
+		and heritage.research.dimensions == Vector2(84, 28) and heritage.status.enabled
 		and heritage.resources.show_icons and heritage.resources.show_labels,
 		"saved Heritage research, indicators and resource labels use responsive dock connections")
+	var spell: Button = main.casting_bar.buttons[0]
+	var item: Button = main.quick_slot_buttons[0]
+	_expect(spell.get_global_rect().size.distance_to(item.get_global_rect().size) < 1
+		and absf(spell.get_global_rect().size.x - 42) < 1,
+		"Heritage spell and item buttons are equal 42-pixel squares")
+	_expect(workspace.clock_art.visible and main.clock_face.self_modulate.a == 0
+		and not main.clock_hand.visible and main.clock_face.get_global_rect().size.y >= 62,
+		"Heritage uses a brass dial at least as large as the original legacy clock")
+	var face: Rect2 = main.clock_face.get_global_rect()
+	var compass: Rect2 = workspace.modern_compass.get_global_rect()
+	var dial_diameter: float = minf(face.size.x, face.size.y) - 4 * main.clock_face.get_global_transform().get_scale().x
+	_expect(absf(dial_diameter / (minf(compass.size.x, compass.size.y) * 0.92) - 1) < 0.1,
+		"Heritage clock dial and compass have matching visible diameters")
 	_expect(workspace._root("skills").visible and not workspace.model.working.parts.party.enabled,
 		"Heritage shows side statistics by default while keeping the party roster hidden")
 	var default_stats: Rect2 = workspace._visual_rect("skills")
@@ -698,6 +711,10 @@ func _heritage_rail_continuity(workspace: Control) -> void:
 		_expect(absf(logo.end.y - items.position.y) < 1 and absf(stats.position.y - items.end.y) < 1
 			and absf(stats.end.y - workspace._root("research").get_global_rect().position.y) < 1,
 			"the upper rail has no gaps between logo, quick access and statistics at " + str(viewport))
+		var clock_chrome: Node2D = workspace._root("clock").get_node("_HudChrome")
+		_expect(clock_chrome.external_border and not clock_chrome.neighbours.is_empty()
+			and workspace._frame_group("skills") == workspace._frame_group("rail_panel"),
+			"rail instruments and statistics share a uniform connected border at " + str(viewport))
 		var layers: Array[Rect2] = []
 		for key: String in ["logo", "spells", "items", "skills", "research", "clock", "compass"]:
 			layers.append(workspace._root(key).get_global_rect())

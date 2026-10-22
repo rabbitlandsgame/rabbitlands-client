@@ -400,6 +400,9 @@ func finish_typing() -> void:
 		_temporarily_open = false
 		apply_options()
 
+func is_temporarily_open() -> bool:
+	return _temporarily_open
+
 func dismiss() -> void:
 	set_option("visible", false)
 	input.release_focus()

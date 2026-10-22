@@ -3,7 +3,7 @@ extends RefCounted
 ## the area reflows cells; artwork keeps its aspect ratio inside each cell.
 static func measure(config: Dictionary, count: int, cell: Vector2, padding: Vector2, limit: Vector2) -> Dictionary:
 	count = maxi(1, count)
-	var gap := 2.0
+	var gap := float(config.get("slot_gap", 2.0))
 	var requested: Vector2 = config.get("dimensions", Vector2.ZERO)
 	var columns := int(config.get("columns", 0))
 	if config.get("grid_mode", "fixed") == "aspect" and requested.x > 0 and requested.y > 0:

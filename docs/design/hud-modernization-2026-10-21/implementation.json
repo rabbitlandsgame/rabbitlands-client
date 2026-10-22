@@ -16,9 +16,9 @@
       "id": "heritage",
       "concept": "01-heritage-polish.png",
       "features": [
-        "Saved logo height and six-slot quick-bar heights retained; logo and paired quick columns fill the same 105-pixel width",
+        "Compact centered 84x68 RL logo; matching six-slot quick columns use flush 42-pixel squares without gaps in a narrower 84-pixel rail",
         "Continuous full-height brass backdrop remains visible with statistics on or off; logo, quick access, statistics, research, clock and compass meet without spacer gaps",
-        "Saved dial/digital clock and separate compass, joined beneath a normal-size live research row",
+        "Larger brass six-hour clock dial closely matches the round compass diameter; a taller 136-pixel clock panel and 84-pixel compass shorten the live statistics pane while keeping connected backgrounds continuous",
         "Status indicators at the right end of the menu; labelled, icon-coloured resource strip spans the menu and indicators",
         "Floating conversation chat, independent system chat and framed overhead banner; minimap and party hidden by default; side statistics enabled"
       ]
@@ -100,13 +100,13 @@
     "custom_presets": "Up to 24 named custom layouts. Save as new or Update, then Done & save. Cancel restores the opening snapshot.",
     "visibility": "Each component and each original menu icon can be independently enabled or disabled.",
     "colors": "Background, border and text per component; center fill and each curved meter have independent colors. Each resource has an editable bar color shared by its tinted emblem and live player summary.",
-    "frames": "Independent HUD background and border switches, including clock and compass. Gapless connected panels remove shared border segments on both sides; partial joins retain exposed outside edges. Native chat backdrop opacity and idle fade remain authoritative.",
+    "frames": "Independent HUD background and border switches, including clock and compass. Gapless connected panels remove shared border segments on both sides; partial joins retain exposed outside edges. Native chat backdrop opacity and idle fade remain authoritative. Rectangular outlines share one canvas with consistent stroke widths across scaled controls. Panels contained in the blank rail join its border group; exposed L-shaped outside edges remain continuous.",
     "border_designs": "Plain, beveled and ornate HUD trim. Layered highlights, corner details and circular studs echo the concept's brass frame and follow the outside edges of docked panels.",
     "compass_corners": "Transparent, filled when docked, or always filled. Filled compass panels participate in the same shared frame drawing as the clock. Automatic fill recognizes attached children and screen pins.",
     "minimap_frames": "Match map, circle or rectangle. Circular frames clip the map and preserve round geometry through resizing, unequal saved axis scales and docking; the editor highlights their circular outline. Native map shape controls update matching frames.",
     "resource_order": "Resource meters Options provides ordered visibility, earlier/later arrows and color controls. Disabled meters retain their order; the full order and palette persist in custom presets.",
     "quick_counts": "Quick spell count (1–12) and quick item count (1–8) remain visible on every editor tab for the selected bar and update its existing live controls.",
-    "clock_modes": "Dial, digital, or both, using the original live clock widgets. Disabled clocks retain their chosen mode. Digital-only clocks remain enabled when saving.",
+    "clock_modes": "Dial, digital, or both, retaining the original synchronized game-time source and native visibility/click controls. Modern presets draw a brass six-hour day/night face; Current restores the original artwork and hand.",
     "party_summary": "Optional detailed self summary shows initials, leader status, health, Ether, food, action and load with live values and palette-matched icons. Include yourself controls the summary and native self row together; other party rows and actions remain native.",
     "resource_circle": {
       "center_assignable": true,
@@ -164,7 +164,7 @@
     "resource_fit": "Every enabled resource has measured space for its icon, label, value and bar. Narrow strips add rows; thin XP-strip dimensions expand when ordinary meters or labels are enabled. Bottom docks resolve after the fit, keeping all entries inside the viewport. Tall cells center the entire content group together.",
     "frame_opacity": "Look exposes background and border opacity separately from RGB colors. Enabling an inherited zero-alpha frame or choosing a new frame color makes it visible. Old enabled panel backgrounds inherited from transparent XP strips migrate once; the frame_alpha_version marker preserves subsequently explicit zero opacity.",
     "builtin_edits": "Each built-in retains its own modified layout while switching. Done & save persists all remembered options; Restore default resets only the selected built-in. Undo/Redo and Cancel include the remembered layouts. Older profiles migrate their current active working layout.",
-    "heritage_statistics": "Enabled by default. Stretch docking matches the research/clock/compass column width and fills all available height below quick access with no forced spacer. The logo and both quick bars share the same rail width. Shorter viewports reduce the statistics height without overlapping quick bars. The blank rail stays visible both with and without statistics; automatic hiding remains optional. Native item scrolling stays available without a reserved scrollbar gutter changing the docked width.",
+    "heritage_statistics": "Enabled by default. Statistics fit the 84-pixel rail between quick access and the larger lower instruments: 232 local pixels high at the standard 1280x800 HUD canvas, about 16 pixels shorter than the prior default. Height adapts to the viewport; the blank backdrop remains visible with statistics on or off.",
     "slot_borders": "Independent Match HUD, None, Beveled or Ornate icon borders on spells and items, with an editable trim color. Floating window frames can stay disabled. Node2D trim has no input handling or layout minimum size, and remains visible across empty, disabled and cooldown item states. Current HUD clears custom trim.",
     "icon_opacity": "Main quick-slot icon opacity defaults to 1.0; unavailable magic/technique opacity is an optional multiplier that also defaults to 1.0. Look exposes both controls. Presentation changes never enable an item or bypass casting restrictions. Undo, reset and saved layouts retain these settings; missing fields in older profiles default to full visibility."
   },
@@ -182,7 +182,7 @@
     "launcher": "test-hud-editor.bat (interactive offline sandbox); --check (headless HUD assertions)",
     "offline_sandbox": "prototypes/hud_editor_preview.gd: zero to twelve fake party members, selected removal, clear/reset, offline and low-health states, roster visibility and preset controls. Game sockets, sends, reconnects and update downloads disabled before the main scene is created.",
     "sandbox_smoke_result": "PASS: add/remove/clear/reset, real party rows and player summary, controls during editing and blocked connections/sends",
-    "hud_checks": 293,
+    "hud_checks": 299,
     "hud_result": "PASS",
     "split_chat_hud": "PASS",
     "quick_slot_shortcuts": {
@@ -346,6 +346,65 @@
         "minimal-optional-icon-fading.png"
       ],
       "result": "PASS: saved layout reproduced, brass trim on all eight item slots, unavailable magic and technique artwork fully opaque by default, optional fading and style/color controls persist, Undo and factory reset verified, 295 shortcut checks passed."
+    },
+    "chat_compass_clock": {
+      "script": "godot-client/tests/test_hud_chat_compass.gd",
+      "checks": 56,
+      "failures": 0,
+      "transport": "Captured protocol frames only; process-local offline guard blocks connections.",
+      "coverage": "Real T/F6 key events, all six HUDs, hidden chat and drafts, native/round/ribbon mouse clicks, destination routing, missing position, send failure, editor interception, synchronized brass dial, original clock click and Current artwork restoration."
+    },
+    "heritage_clock_and_frame_review": {
+      "result": "PASS: 298 HUD checks, 56 chat/compass/clock checks, 295 quick-slot shortcut checks; Landfall renders at 1440x900, 1280x720 and 1920x1080, with translucent and hidden-statistics variants. Option 4 circle joins rendered again with shared border drawing.",
+      "default_width_px": 92,
+      "quick_slot_size_px": 46,
+      "clock_minimum_dial_px": 62,
+      "known_render_shutdown_warning": "Existing GL texture shutdown leaks remain in the standalone renderer; all render runs exit 0.",
+      "logo_panel_px": [
+        92,
+        88
+      ],
+      "logo_review": "PASS: tighter centered logo, docked quick bars move up by about 15.5 local pixels; Landfall renders at standard, short and tall window sizes. Existing HUD integration checks rerun."
+    },
+    "heritage_slim_rail_review": {
+      "width_px": 84,
+      "logo_panel_px": [
+        84,
+        68
+      ],
+      "quick_slot_px": 42,
+      "clock_panel_px": [
+        84,
+        136
+      ],
+      "compass_panel_px": [
+        84,
+        84
+      ],
+      "visible_clock_diameter_px": 74,
+      "visible_compass_diameter_px": 77.28,
+      "standard_statistics_height_px": 232,
+      "result": "PASS: HUD assertions and Landfall renders at standard, short and tall window sizes, plus translucent and hidden-statistics variants.",
+      "hud_checks": 299
+    },
+    "minimap_gameplay_drag": {
+      "script": "godot-client/tests/test_minimap_gameplay_drag.gd",
+      "result": "PASS: real GUI rim drags during gameplay, repeated moves, smaller scale, rectangular frame following during drag, forced relayout, saved position and preset switching, zoom/menu preservation, viewport bounds and Current HUD compatibility.",
+      "checks": 27,
+      "failures": 0
+    },
+    "historical_world_input_baseline": {
+      "script": "godot-client/tests/test_world_input.gd",
+      "result": "Existing test assumptions fail and stop at the removed Banners/Options path on line 668. The same error list occurs on prior commit 04fcdd40 and on the updated working tree. Both stalled test processes were stopped; unrelated historical assertions were not changed.",
+      "baseline_errors": 11,
+      "working_errors": 11,
+      "same_errors": true
     }
+  },
+  "interactions": {
+    "chat_hotkey": "T or a custom binding temporarily opens hidden chat in every design, retains drafts and recipients, and restores the hidden preference when empty typing finishes.",
+    "compass": "Native, round and ribbon compasses print cached map/tile coordinates locally on click. Shift-click uses the selected composer destination, including local, party, guild, joined numeric channels and private recipients. Ctrl-click retains active numeric channel compatibility. Missing coordinates, invalid destinations and send failures report locally; editing cannot share.",
+    "quick_grid": "Flush slot edges and Slot spacing controls persist independently for spell and item grids.",
+    "minimap_gameplay_drag": "Grab the visible round rim or square edge during gameplay. Both image and frame events use the same drag handler and scaled pointer coordinates. Dragging detaches the preset anchor/dock, updates its position during relayout, and saves on release. The map can be moved repeatedly and retains its position after switching presets; zoom, right-click menus, center map controls and editor gestures keep their handlers."
   }
 }

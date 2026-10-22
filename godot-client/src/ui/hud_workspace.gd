@@ -12,6 +12,8 @@ const HudChrome := preload("res://src/ui/compact_hud_style.gd")
 const PanelChrome := preload("res://src/ui/hud_panel_chrome.gd")
 const ResizeSnap := preload("res://src/ui/hud_resize_snap.gd")
 const MinimapLabels := preload("res://src/ui/hud_minimap_labels.gd")
+const ClockFace := preload("res://src/ui/hud_clock_face.gd")
+const FrameOverlay := preload("res://src/ui/hud_frame_overlay.gd")
 const SWITCHES := {"skills": "side_stats", "clock": "analog_clock", "status": "indicators",
 	"timer": "hud_timer", "research": "knowledge_bar", "fps": "show_fps"}
 var model := Presets.new()
@@ -85,9 +87,20 @@ var input_exclusions: Array[Control] = []
 var _intrinsic_sizes: Array = []
 var _chrome: Dictionary = {}
 var party_summary: Control
+var clock_art: Node2D
+var frame_overlay: Node2D
+var _logo_texture: Texture2D
+var _centered_logo_texture: AtlasTexture
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
+	_logo_texture = main.hud_logo.texture
+	if _logo_texture != null:
+		var image := _logo_texture.get_image()
+		if image != null and not image.is_empty():
+			_centered_logo_texture = AtlasTexture.new()
+			_centered_logo_texture.atlas = _logo_texture
+			_centered_logo_texture.region = _logo_ink_rect(image)
 	name = "HudWorkspace"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -167,7 +180,15 @@ func configure(owner_main: Control) -> void:
 	modern_compass = Compass.new()
 	modern_compass.name = "HeadingCompass"
 	main.game_view.add_child(modern_compass)
+	modern_compass.gui_input.connect(main._on_compass_gui_input.bind(modern_compass))
 	modern_compass.hide()
+	clock_art = ClockFace.new()
+	clock_art.name = "BrassClockFace"
+	main.clock_face.add_child(clock_art)
+	frame_overlay = FrameOverlay.new()
+	frame_overlay.name = "ConnectedHudFrames"
+	frame_overlay.z_index = 21
+	main.game_view.add_child(frame_overlay)
 	modern_resources = ResourceStrip.new()
 	modern_resources.name = "ResourceStrip"
 	main.game_view.add_child(modern_resources)
@@ -213,7 +234,9 @@ func _process(_delta: float) -> void:
 	if not ready_to_layout: return
 	# Server updates may show these again; a presentation switch stays in force.
 	for key: String in Presets.PARTS:
-		if not model.working.parts[key].enabled: _root(key).hide()
+		if not model.working.parts[key].enabled:
+			if key == "chat" and parts.chat.is_temporarily_open(): continue
+			_root(key).hide()
 	if not bool(model.working.legacy):
 		parts.rail_panel.visible = model.working.parts.rail_panel.enabled and not (model.working.parts.rail_panel.hide_with_stats and _root("skills").is_visible_in_tree())
 		var sizes: Array = []
@@ -238,6 +261,23 @@ func _process(_delta: float) -> void:
 		for row: Node in main.extension_windows.party_rows.get_children():
 			if row is Control: row.visible = (model.working.parts.party.show_self and not model.working.parts.party.show_player_details) or str(row.name) != "Member" + self_name
 		party_summary.visible = model.working.parts.party.show_player_details and model.working.parts.party.show_self and not main.extension_windows.get("_party_collapsed")
+
+static func _logo_ink_rect(image: Image) -> Rect2i:
+	# Ignore nearly invisible export residue around the mark when centering it.
+	# The source texture remains unchanged; the atlas only adjusts its framing.
+	var pixels := image.duplicate() as Image
+	pixels.convert(Image.FORMAT_RGBA8)
+	var bytes := pixels.get_data()
+	var dimensions := pixels.get_size()
+	var first := dimensions
+	var last := Vector2i.ZERO
+	for y: int in dimensions.y:
+		for x: int in dimensions.x:
+			if bytes[(y * dimensions.x + x) * 4 + 3] < 8: continue
+			first = first.min(Vector2i(x, y))
+			last = last.max(Vector2i(x + 1, y + 1))
+	if last.x <= first.x or last.y <= first.y: return Rect2i(Vector2i.ZERO, dimensions)
+	return Rect2i(first, last - first).grow(2).intersection(Rect2i(Vector2i.ZERO, dimensions))
 
 func _root(key: String) -> Control:
 	if key == "target" and not bool(model.working.legacy): return target_card
@@ -556,6 +596,8 @@ func select_component(key: String, arc_index := -1) -> void:
 			color.a = value / 100
 			change_part(key, "border_color", color))
 		if key in ["spells", "items"]:
+			_toggle("Flush slot edges", config.flush_slots, func(value: bool) -> void: change_part(key, "flush_slots", value))
+			_number("Slot spacing", config.slot_gap, 0, 12, 1, func(value: float) -> void: change_part(key, "slot_gap", value))
 			_choice("Slot border", ["match_hud", "none", "beveled", "ornate"], config.slot_border_style, func(value: String) -> void: change_part(key, "slot_border_style", value))
 			_color("Slot border color", config.slot_border_color, func(value: Color) -> void: change_part(key, "slot_border_color", value))
 			_number("Icon opacity", config.icon_opacity * 100, 0, 100, 1, func(value: float) -> void: change_part(key, "icon_opacity", value / 100))
@@ -762,7 +804,7 @@ func _filter_details() -> void:
 		elif caption in ["Appearance", "Window frame", "HUD background", "HUD border", "HUD border design", "Window color", "Border color", "Text color", "Resource color", "Map shape", "Minimap frame", "Map colors", "Load display", "Compass display", "Outside compass circle", "Show area name", "Show resource labels", "Show resource values", "Show resource icons"]: group = "Look"
 		elif caption.begins_with("Dock"): group = "Dock"
 		if caption in ["Map name above minimap", "Map directions", "North marker", "Direction distance from radius", "Map label HUD background / border"]: group = "Look"
-		if caption in ["Background opacity", "Border opacity", "Slot border", "Slot border color", "Icon opacity", "Unavailable icon opacity"]: group = "Look"
+		if caption in ["Background opacity", "Border opacity", "Slot border", "Slot border color", "Icon opacity", "Unavailable icon opacity", "Flush slot edges", "Slot spacing"]: group = "Look"
 		if caption == "Fill screen height": group = "Layout"
 		child.visible = group == _detail_group or caption in ["Circle parts", "Dock status", "Show curve"] or caption == "Show " + Presets.PARTS[selected]
 		if caption in ["Quick spell count", "Quick item count"]: child.show()
@@ -1062,7 +1104,7 @@ func _capture_positions() -> void:
 func _normal_position(control: Control) -> Vector2:
 	return ((main.game_view.get_global_transform().affine_inverse() * control.global_position) / main.game_view.size.max(Vector2.ONE)).clamp(Vector2.ZERO, Vector2.ONE)
 
-func _remember_moved(key: String) -> void:
+func _remember_moved(key: String, persist := true) -> void:
 	if _applying or not model.loaded and bool(model.working.legacy): return
 	model.working.parts[key].anchor = "free"
 	model.working.parts[key].dock_target = "none"
@@ -1071,6 +1113,9 @@ func _remember_moved(key: String) -> void:
 	model.working.parts[key].offset = Vector2.ZERO
 	if key in ["chat", "system_chat"]: _capture_chat(model.working, key)
 	elif key in ["party", "minimap"]: model.working.parts[key].dimensions = parts[key].size
+	if not persist:
+		_update_chrome()
+		return
 	queue_layout()
 	if not is_open(): _store()
 
@@ -1158,6 +1203,8 @@ func apply_layout() -> void:
 	if not ready_to_layout: return
 	_applying = true
 	var legacy := bool(model.working.legacy)
+	frame_overlay.visible = not legacy
+	main.hud_logo.texture = _centered_logo_texture if not legacy and model.working.parts.logo.style == "heritage" and _centered_logo_texture != null else _logo_texture
 	for key: String in ["chat", "system_chat", "party", "minimap", "objectives"]:
 		var dragger := parts[key].get_node_or_null("WindowDrag") as WindowDrag
 		if dragger != null:
@@ -1198,6 +1245,7 @@ func apply_layout() -> void:
 	main._hud_element_options.analog_clock = clock.enabled and clock.clock_mode != "digital"
 	main._hud_element_options.digital_clock = clock.enabled and clock.clock_mode != "dial"
 	main._apply_hud_element_options()
+	clock_art.configure(main, model.working.parts.clock, legacy)
 	for field: String in model.working.banner_options:
 		if main._banner_option_boxes.has(field): main._banner_option_boxes[field].set_pressed_no_signal(model.working.banner_options[field])
 	main._apply_banner_options()
@@ -1318,6 +1366,8 @@ func _style_part(key: String) -> void:
 	var config: Dictionary = model.working.parts[key]
 	var box := HudChrome.box(config.background_color, config.border_color, 5)
 	box.set_corner_radius_all(7 if config.style == "adventure" else 2)
+	if key in ["spells", "items"] and config.flush_slots: box.set_content_margin_all(0)
+	if key == "clock" and config.style == "heritage": box.set_content_margin_all(3)
 	if not config.show_background: box.bg_color.a = 0
 	if not config.show_border: box.set_border_width_all(0)
 	if key != "nameplate":
@@ -1387,8 +1437,8 @@ func _layout_items(override_size := Vector2.ZERO) -> void:
 	if override_size != Vector2.ZERO: config.dimensions = override_size / float(config.scale)
 	var grid: GridContainer = main.quick_slot_container
 	var count := int(config.slots)
-	grid.add_theme_constant_override("h_separation", 2)
-	grid.add_theme_constant_override("v_separation", 2)
+	grid.add_theme_constant_override("h_separation", roundi(config.slot_gap))
+	grid.add_theme_constant_override("v_separation", roundi(config.slot_gap))
 	var scroll: ScrollContainer = parts.items
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	# The grid already fits every slot to this area. An automatic scrollbar
@@ -1447,7 +1497,7 @@ func layout_hud() -> void:
 		control.scale = config.axis_scale * float(config.scale)
 		if key not in ["utilities", "chat", "system_chat", "party", "items", "minimap", "compass", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]: control.reset_size()
 		var dimensions := control.size
-		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "party", "minimap", "compass", "clock", "research", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]:
+		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "party", "minimap", "compass", "clock", "research", "logo", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]:
 			dimensions = config.dimensions
 		elif key == "medallion": dimensions = Vector2(240, 200)
 		if key == "rail_panel":
@@ -1501,6 +1551,8 @@ func _ensure_chrome(key: String) -> void:
 
 func _update_chrome() -> void:
 	_ensure_chrome("spells")
+	frame_overlay.panels.clear()
+	var canvas_inverse: Transform2D = main.game_view.get_global_transform().affine_inverse()
 	for key: String in _chrome:
 		var chrome: PanelChrome = _chrome[key]
 		var config: Dictionary = model.working.parts[key]
@@ -1509,6 +1561,7 @@ func _update_chrome() -> void:
 		chrome.background_exclusions.clear()
 		chrome.show()
 		chrome.shape = _frame_shape_for(key)
+		chrome.external_border = chrome.shape == "rectangle"
 		chrome.circle_inset = minf(_root(key).size.x, _root(key).size.y) * 0.04 if key == "compass" else 1.5
 		if key in ["chat", "system_chat"]: chrome.config.show_background = false # Native chat owns its idle fade.
 		if key == "rail_panel":
@@ -1520,7 +1573,7 @@ func _update_chrome() -> void:
 					chrome.background_exclusions.append(_root(other).get_global_rect())
 		if config.show_background and config.show_border and chrome.shape == "rectangle":
 			for other: String in _chrome:
-				if other == key or _dock_root(other) != _dock_root(key) or not _root(other).is_visible_in_tree(): continue
+				if other == key or _frame_group(other) != _frame_group(key) or not _root(other).is_visible_in_tree(): continue
 				var adjacent: Dictionary = model.working.parts[other]
 				if adjacent.show_background and adjacent.show_border and _frame_shape_for(other) == "rectangle": chrome.neighbours.append(_root(other).get_global_rect())
 			for link: Dictionary in _medallion_links():
@@ -1528,7 +1581,19 @@ func _update_chrome() -> void:
 				if _dock_root(link.key) == _dock_root(key) and linked.show_background and linked.show_border:
 					chrome.neighbours.append(main.game_view.get_global_transform() * link.rect)
 		chrome.queue_redraw()
+		if chrome.external_border and config.show_border and _root(key).is_visible_in_tree():
+			var adjacent: Array[Rect2] = []
+			for rect: Rect2 in chrome.neighbours: adjacent.append(canvas_inverse * rect)
+			frame_overlay.panels.append({"rect":canvas_inverse * _root(key).get_global_rect(), "neighbours":adjacent, "config":config.duplicate(true)})
 		if key == "compass": _root(key).queue_redraw()
+	frame_overlay.queue_redraw()
+
+func _frame_group(key: String) -> String:
+	var rail := _root("rail_panel")
+	var appearance: Dictionary = model.working.parts.rail_panel
+	if rail.is_visible_in_tree() and appearance.show_background and appearance.show_border:
+		if rail.get_global_rect().grow(0.5).encloses(_root(key).get_global_rect()): return _dock_root("rail_panel")
+	return _dock_root(key)
 
 func _frame_shape_for(key: String) -> String:
 	var config: Dictionary = model.working.parts[key]
@@ -1742,7 +1807,12 @@ func _resize_layout_part(key: String, screen_size: Vector2) -> void:
 				var vertical: bool = model.working.parts[key].dock_side in ["left", "right"]
 				var diameter := screen_size.y if vertical else screen_size.x
 				_root(key).size = Vector2.ONE * diameter / _root(key).scale
-			else: _root(key).size = screen_size / _root(key).scale
+			else:
+				var control := _root(key)
+				control.size = screen_size / control.scale
+				# Native panels can impose a minimum size. Fit their rendered extent
+				# as well, so a narrow dock never pushes the entire group sideways.
+				control.scale = screen_size / control.size.max(Vector2.ONE)
 
 func _apply_screen_dock(key: String) -> void:
 	var edge: String = model.working.parts[key].edge_dock

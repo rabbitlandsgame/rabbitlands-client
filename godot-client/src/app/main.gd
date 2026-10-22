@@ -4452,6 +4452,8 @@ func _reveal_chat_messages() -> void:
 		system_chat_hud.reveal_message(_formatted_chat_line(line), _chat_line_colour(line))
 
 func _on_minimap_gui_input(event: InputEvent) -> void:
+	if _handle_minimap_drag(event):
+		return
 	if event is InputEventMouseButton:
 		var wheel: InputEventMouseButton = event as InputEventMouseButton
 		if wheel.pressed and (wheel.button_index == MOUSE_BUTTON_WHEEL_UP
@@ -4653,21 +4655,31 @@ func _on_full_map_mouse_exited() -> void:
 	if map_image.visible:
 		map_coordinates.text = "Coordinates: —"
 
-func _on_compass_gui_input(event: InputEvent) -> void:
+func _on_compass_gui_input(event: InputEvent, surface: Control = null) -> void:
 	if not event is InputEventMouseButton:
 		return
 	var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 	if not mouse_button.pressed or mouse_button.button_index != MOUSE_BUTTON_LEFT:
 		return
-	if mouse_button.ctrl_pressed:
-		var tile_value: Variant = _local_actor_server_tile()
-		if not tile_value is Vector2i:
-			AppState.append_local_message("Your position is not available yet.")
-			compass_face.accept_event()
-			return
-		var tile: Vector2i = tile_value as Vector2i
-		var location: String = "%s (%d, %d)" % [
-			_current_map_display_name, tile.x, tile.y]
+	if _world_input_blocked():
+		return
+	var clicked: Control = compass_face if surface == null else surface
+	var tile_value: Variant = _local_actor_server_tile()
+	if not tile_value is Vector2i:
+		AppState.append_local_message("Your position is not available yet.")
+		clicked.accept_event()
+		return
+	var tile: Vector2i = tile_value as Vector2i
+	var location: String = "%s (%d, %d)" % [_current_map_display_name, tile.x, tile.y]
+	if mouse_button.shift_pressed:
+		var message := _chat_message_for_tab("My Position: " + location)
+		if message.is_empty():
+			AppState.append_local_message("Select a chat destination before sharing your position.")
+		else:
+			var share_error: Error = Network.send_private_message(message.substr(1)) if message.begins_with("/") else Network.send_chat(message)
+			if share_error != OK:
+				AppState.append_local_message("Could not share your position: " + error_string(share_error))
+	elif mouse_button.ctrl_pressed:
 		if AppState.active_channel_number() <= 0:
 			AppState.append_local_message(
 				"Join or select a numeric channel before sharing your position.")
@@ -4677,11 +4689,8 @@ func _on_compass_gui_input(event: InputEvent) -> void:
 				AppState.append_local_message(
 					"Could not share your position: " + error_string(share_error))
 	else:
-		var locate_error: Error = Network.locate_me()
-		if locate_error != OK:
-			AppState.append_local_message(
-				"Could not request your location: " + error_string(locate_error))
-	compass_face.accept_event()
+		AppState.append_local_message("My Position: " + location)
+	clicked.accept_event()
 
 func _on_clock_gui_input(event: InputEvent) -> void:
 	if not event is InputEventMouseButton:
@@ -8635,6 +8644,8 @@ static func _minimap_actor_type(dto: Dictionary) -> StringName:
 	return &"player" if kind in [1, 3, 4] else &"npc"
 
 func _on_minimap_frame_gui_input(event: InputEvent) -> void:
+	if _handle_minimap_drag(event):
+		return
 	if event is InputEventMouseButton:
 		var mouse: InputEventMouseButton = event as InputEventMouseButton
 		if mouse.button_index == MOUSE_BUTTON_RIGHT and mouse.pressed:
@@ -8642,29 +8653,45 @@ func _on_minimap_frame_gui_input(event: InputEvent) -> void:
 			_minimap_menu.popup()
 			minimap_frame.accept_event()
 			return
-		if mouse.button_index == MOUSE_BUTTON_LEFT:
-			if mouse.pressed:
-				var drag_border: float = _minimap_border * _minimap_scale
-				var inner := Rect2(Vector2.ONE * drag_border,
-					minimap_frame.size - Vector2.ONE * drag_border * 2.0)
-				if not inner.has_point(mouse.position):
-					_minimap_dragging = true
-					_minimap_drag_offset = get_viewport().get_mouse_position() - minimap_frame.position
-					minimap_frame.accept_event()
+
+func _handle_minimap_drag(event: InputEvent) -> bool:
+	if _world_input_blocked() or not event is InputEventMouse:
+		return false
+	var mouse := event as InputEventMouse
+	var modern: bool = hud_workspace != null and hud_workspace.manages_layout()
+	var at := minimap_frame.get_global_transform().affine_inverse() * mouse.global_position
+	var pointer := game_view.get_global_transform().affine_inverse() * mouse.global_position
+	if event is InputEventMouseButton:
+		var click := event as InputEventMouseButton
+		if click.button_index != MOUSE_BUTTON_LEFT: return false
+		if click.pressed:
+			var display_scale := minimap_frame.get_global_transform().get_scale().abs()
+			var border := maxf(10.0 / maxf(0.01, minf(display_scale.x, display_scale.y)), _minimap_border * _minimap_scale)
+			var on_border: bool
+			if _minimap_shape == "round":
+				var radius := minf(minimap_frame.size.x, minimap_frame.size.y) * 0.5
+				var distance := at.distance_to(minimap_frame.size * 0.5)
+				on_border = distance >= radius - border and distance <= radius + 1
 			else:
-				if _minimap_dragging:
-					_minimap_dragging = false
-					_save_hud_settings()
-					minimap_frame.accept_event()
+				on_border = not Rect2(Vector2.ONE * border, minimap_frame.size - Vector2.ONE * border * 2).has_point(at)
+			if not on_border: return false
+			_minimap_dragging = true
+			_minimap_drag_offset = pointer - minimap_frame.position
+			if modern: hud_workspace._remember_moved("minimap", false)
+		elif _minimap_dragging:
+			_minimap_dragging = false
+			if modern: hud_workspace._remember_moved("minimap")
+			else: _save_hud_settings()
+		else: return false
 	elif event is InputEventMouseMotion and _minimap_dragging:
-		var target_position: Vector2 = (get_viewport().get_mouse_position()
-			- _minimap_drag_offset)
-		var maximum: Vector2 = (game_view.size - Vector2(WindowDrag.RESERVED_RIGHT_RAIL,
-			WindowDrag.RESERVED_BOTTOM_BAR) - minimap_frame.size).max(Vector2.ZERO)
-		minimap_frame.position = Vector2(
-			clampf(target_position.x, 0.0, maximum.x),
-			clampf(target_position.y, 30.0, maximum.y))
-		minimap_frame.accept_event()
+		var minimum := Vector2(6, 6) if modern else Vector2(0, 30)
+		var reserved := Vector2(6, 6) if modern else Vector2(WindowDrag.RESERVED_RIGHT_RAIL, WindowDrag.RESERVED_BOTTOM_BAR)
+		var maximum := (game_view.size - reserved - minimap_frame.size * minimap_frame.scale).max(minimum)
+		minimap_frame.position = (pointer - _minimap_drag_offset).clamp(minimum, maximum)
+		if modern: hud_workspace._remember_moved("minimap", false)
+	else: return false
+	minimap_frame.accept_event()
+	return true
 
 func _layout_minimap_cardinals() -> void:
 	if minimap_north == null:
