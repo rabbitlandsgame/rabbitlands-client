@@ -29,6 +29,12 @@ extends SceneTree
 ## - RABBITLANDS_CROWD_BENCH_SAMPLE_MSEC / _WARMUP_MSEC / _CADENCE_MSEC.
 ## - RABBITLANDS_CROWD_BENCH_OUT: report path (default user://).
 ## - RABBITLANDS_CROWD_PRESENTATION / RABBITLANDS_CROWD_BODY_CAP: read by Main.
+## - RABBITLANDS_CROWD_BENCH_PRESENCE: send ELORIA_PRESENCE once a second with
+##   this many players beyond the area of interest (82-139 tiles away, each
+##   walking a tile a second around the player), as a server with player
+##   interest does. Default 0: none.
+## - RABBITLANDS_CROWD_BENCH_SERVER_TIME=1: open every tick with an
+##   ELORIA_SERVER_TIME stamp, so remote steps are paced by server time.
 
 const BENCHMARK_MAIN_PATH := "res://tests/integration/crowd_benchmark_main.tscn"
 const MODELS := "res://data/actors/models.json"
@@ -62,6 +68,10 @@ var _fps_cap := 60
 var _iteration_started_usec := -1
 var _last_iteration_usec := -1.0
 var _frame_marker: Node
+## Protocol v2 inputs (RABBITLANDS_CROWD_BENCH_PRESENCE / _SERVER_TIME).
+var _presence_dots := 0
+var _presence_every := 20
+var _server_time := false
 
 func _init() -> void:
 	call_deferred("_run")
@@ -102,6 +112,8 @@ func _run() -> void:
 	root.size = Vector2i(1280, 720)
 	var profile := _env("RABBITLANDS_CROWD_BENCH_CELLS", "phase4")
 	var cells := cells_for(profile)
+	_presence_dots = _env_int("RABBITLANDS_CROWD_BENCH_PRESENCE", 0, 0)
+	_server_time = OS.get_environment("RABBITLANDS_CROWD_BENCH_SERVER_TIME").strip_edges() == "1"
 	_report = {
 		"schemaVersion": SCHEMA,
 		"benchmark": "crowd_presentation",
@@ -121,6 +133,8 @@ func _run() -> void:
 		"graphicsQuality": LookProfile.quality_name(LookProfile.quality()),
 		"diagnostics": OS.get_environment("RABBITLANDS_CROWD_BENCH_DIAG"),
 		"bodyCap": OS.get_environment("RABBITLANDS_CROWD_BODY_CAP"),
+		"presenceDots": _presence_dots,
+		"serverTime": _server_time,
 		"measurement": {
 			"sampleMilliseconds": _env_int("RABBITLANDS_CROWD_BENCH_SAMPLE_MSEC", 6000, 500),
 			"warmupMilliseconds": _env_int("RABBITLANDS_CROWD_BENCH_WARMUP_MSEC", 2000, 100),
@@ -566,6 +580,15 @@ static func _driver_mode() -> String:
 
 
 func _drive_tick(plan: Dictionary, tick: int) -> void:
+	var cadence := int((_report["measurement"] as Dictionary)["cadenceMilliseconds"])
+	if _server_time:
+		var stamp := PackedByteArray()
+		stamp.resize(4)
+		stamp.encode_u32(0, tick * cadence)
+		_send_packet(EloriaProtocol.ServerMessage.ELORIA_SERVER_TIME, stamp)
+	if _presence_dots > 0 and tick % maxi(1, 1000 / cadence) == 0:
+		_send_packet(EloriaProtocol.ServerMessage.ELORIA_PRESENCE,
+			_presence_payload(float(tick * cadence) / 1000.0))
 	var moving: Array[int] = plan["moving"]
 	var fighting: Array[int] = plan["fighting"]
 	var live := _driver_mode() == "live"
@@ -594,6 +617,23 @@ func _drive_tick(plan: Dictionary, tick: int) -> void:
 	for index: int in range(fighting.size()):
 		everyone.append(index)
 	_drive_combat(fighting, everyone, tick)
+
+
+## One ELORIA_PRESENCE snapshot: `_presence_dots` players on rings 82-139
+## tiles from the player, each walking a tile a second around it, with a few
+## near actors held back by a cap of 160 ("+12 nearby").
+func _presence_payload(seconds: float) -> PackedByteArray:
+	var payload := PackedByteArray([1, 1, 80, 88])
+	for value: int in [160, 7, 5, _presence_dots]:
+		_append_u16(payload, value)
+	for index: int in range(_presence_dots):
+		var radius: float = 82.0 + float((index * 37) % 58)
+		var angle: float = TAU * float(index) / float(_presence_dots) + seconds / radius
+		_append_u16(payload, 40000 + index)
+		_append_u16(payload, clampi(_centre.x + roundi(cos(angle) * radius), 0, 2047))
+		_append_u16(payload, clampi(_centre.y + roundi(sin(angle) * radius), 0, 2047))
+		payload.append(0)
+	return payload
 
 
 ## The fighters at `due` (indexes into `fighting`) act on their neighbour.
@@ -715,6 +755,17 @@ func _census() -> Dictionary:
 			# A paused body's model subtree is disabled (feature clients only).
 			if not actor.has_method("model_processing") or bool(actor.call("model_processing")):
 				out["skeletonsProcessing"] += 1
+	# What the protocol v2 inputs left behind: presence dots, "+N nearby", and
+	# rows carrying a server-time step stamp.
+	var presence: Variant = _app_state.get("presence")
+	if presence is RefCounted:
+		out["presenceDots"] = int((presence as RefCounted).call("dot_count"))
+		out["nearbyHidden"] = int((presence as RefCounted).get("nearby_hidden"))
+	var stamped := 0
+	for record: Variant in (_app_state.get("actors") as Dictionary).values():
+		if record is Dictionary and (record as Dictionary).has("step_local_msec"):
+			stamped += 1
+	out["stampedRows"] = stamped
 	return out
 
 

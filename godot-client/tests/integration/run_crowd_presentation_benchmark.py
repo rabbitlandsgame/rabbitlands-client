@@ -89,6 +89,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     env["RABBITLANDS_CROWD_BENCH_DRIVER"] = args.driver
     env["RABBITLANDS_CROWD_TUNING"] = args.tuning
     env["RABBITLANDS_CROWD_BENCH_MINIMAP"] = {"show": "1", "hide": "0"}.get(args.minimap, "")
+    env["RABBITLANDS_CROWD_BENCH_PRESENCE"] = str(args.presence)
+    env["RABBITLANDS_CROWD_BENCH_SERVER_TIME"] = "1" if args.server_time else ""
     command = [args.godot, "--path", str(CLIENT), "--audio-driver", "Dummy",
                "--log-file", str(log)]
     if args.mode == "headless":
@@ -133,6 +135,10 @@ def main() -> int:
     parser.add_argument("--minimap", default="saved", choices=["saved", "show", "hide"],
                         help="minimap during the run (its marks are timed as mapViewports)")
     parser.add_argument("--tuning", default="", help="full=N,cloth=N budgets (RABBITLANDS_CROWD_TUNING)")
+    parser.add_argument("--presence", type=int, default=0,
+                        help="players beyond the area of interest sent as presence dots once a second")
+    parser.add_argument("--server-time", action="store_true",
+                        help="stamp every tick with ELORIA_SERVER_TIME (server-time pacing)")
     parser.add_argument("--diagnostics", default="",
                         help="attribution only: no_animation,no_overhead,no_ground")
     parser.add_argument("--repeats", type=int, default=1)
