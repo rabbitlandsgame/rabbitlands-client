@@ -348,12 +348,14 @@ It does not mean the underlying combat action should be simulated.
 
 No ordinary-invasion A/D admission cap, automatic matchmaking, shared reward
 guarantee or public boss timer was established by this audit. Do not invent them
-in dialogue. Gauntlets have their own entry, scaling, gates and reward lifecycle;
+in dialogue. Gauntlets have their own entry, native-creature selection, gates and reward lifecycle;
 territory raids have opt-in teams and capture/effects; specialty events can wrap
 invasions in timed objectives. Those are adjacent modes, suitable for later
 chapters rather than silently treated as universal invasion rules here.
 
 ## Facilitator track: stage it, play it, verify it
+
+The creature catalog's **Miniboss (+10–30% stats)** option promotes any ordinary species when adding it to a group or quick spawning. It rolls stronger A/D, health, damage, armor and combat attributes. Boss-only species are excluded. Bosses and minibosses also have higher chances of carrying weapons and armor. Gauntlets choose suitably leveled native creatures, prefer the map's theme, and increase leader bonuses with the selected challenge.
 
 An optional **15–20 minute local rehearsal** teaches invasion masters the tools
 and gives designers control over playtest cases. It uses a dedicated local

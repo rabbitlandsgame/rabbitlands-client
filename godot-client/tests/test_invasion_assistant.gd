@@ -232,11 +232,21 @@ func _run() -> void:
 	assistant._on_monster_selected(0)
 	assistant.monster_quantity.value = 3
 	assistant._add_monster_to_group()
-	_expect(commands[-1] == "#invasion_assistant group add ashfall|ash_wyrm|3|80|90",
+	_expect(commands[-1] == "#invasion_assistant group add ashfall|ash_wyrm|3|80|90|normal",
 		"selected monster can be added to a selected live group")
 	assistant._spawn_monster_here()
-	_expect(commands[-1] == "#invasion_assistant monster spawn ash_wyrm|3",
+	_expect(commands[-1] == "#invasion_assistant monster spawn ash_wyrm|3|normal",
 		"selected monster can be quick-spawned at the invasion master's location")
+	assistant.monster_miniboss.button_pressed = true
+	assistant._add_monster_to_group()
+	_expect(commands[-1].ends_with("|miniboss"), "miniboss rank is preserved in group composition")
+	assistant._spawn_monster_here()
+	_expect(commands[-1] == "#invasion_assistant monster spawn ash_wyrm|3|miniboss",
+		"quick spawn requests a rolled miniboss")
+	assistant.selected_monster["can_be_miniboss"] = false
+	assistant._update_monster_actions()
+	_expect(assistant.monster_miniboss.disabled and not assistant.monster_miniboss.button_pressed,
+		"boss species cannot be promoted to minibosses")
 	commands.clear()
 	assistant.tabs.current_tab = 0
 	assistant.show()

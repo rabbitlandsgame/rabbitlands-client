@@ -70,6 +70,7 @@ var monster_updated_only: CheckBox
 var monster_list: ItemList
 var monster_detail: RichTextLabel
 var monster_quantity: SpinBox
+var monster_miniboss: CheckBox
 var monster_group: OptionButton
 var monster_add_to_group: Button
 var monster_create_group: Button
@@ -700,8 +701,8 @@ func _review_delete_group() -> void:
 func _review_quick_spawn() -> void:
 	if selected_monster.is_empty():
 		return
-	_review_action("Quick spawn at your character", "Spawn creatures", "Spawn %d %s at your current server location?" % [int(monster_quantity.value), selected_monster.get("name", "creatures")],
-		"#invasion_assistant monster spawn %s|%d" % [selected_monster.get("type", ""), int(monster_quantity.value)])
+	_review_action("Quick spawn at your character", "Spawn creatures", "Spawn %d %s (%s) at your current server location?" % [int(monster_quantity.value), selected_monster.get("name", "creatures"), _monster_rank()],
+		"#invasion_assistant monster spawn %s|%d|%s" % [selected_monster.get("type", ""), int(monster_quantity.value), _monster_rank()])
 
 
 func _is_last_page(update: Dictionary) -> bool:
@@ -1007,6 +1008,11 @@ func _build_monsters_tab() -> void:
 	monster_quantity.min_value = 1
 	monster_quantity.max_value = 100
 	monster_quantity.value_changed.connect(func(_value: float) -> void: _update_monster_actions())
+	monster_miniboss = CheckBox.new()
+	monster_miniboss.text = "Miniboss (+10–30% stats)"
+	monster_miniboss.tooltip_text = "Roll a stronger unnamed version of this creature. Boss species are excluded."
+	monster_miniboss.toggled.connect(func(_pressed: bool) -> void: _update_monster_actions())
+	page.add_child(monster_miniboss)
 	monster_group = _picker(builder_row)
 	monster_group.item_selected.connect(func(index: int) -> void:
 		_select_group_name(str(monster_group.get_item_metadata(index).get("name", "")))
@@ -1361,7 +1367,7 @@ func _rebuild_roster() -> void:
 		lines.append("[color=#8296a3]None[/color]")
 	for raw_creature: Variant in creatures:
 		var creature := raw_creature as Dictionary
-		var marker := "[color=#ffc94f]◆[/color]" if bool(creature.get("boss", false)) else "[color=#ff6b63]◆[/color]"
+		var marker := "[color=#ffc94f]◆[/color]" if bool(creature.get("boss", false)) or bool(creature.get("miniboss", false)) else "[color=#ff6b63]◆[/color]"
 		lines.append("%s %s\n   %s · %d/%d HP · [%d,%d]" % [marker,
 			creature.get("name", "Invader"), creature.get("tier", "Unknown"),
 			creature.get("health", 0), creature.get("max_health", 0),
@@ -1657,9 +1663,9 @@ func _remove_group_monster() -> void:
 	if selected.is_empty() or selected_group.is_empty():
 		return
 	var entry := group_composition.get_item_metadata(selected[0]) as Dictionary
-	command_requested.emit("#invasion_assistant group remove %s|%s|%d" % [
+	command_requested.emit("#invasion_assistant group remove %s|%s|%d|%s" % [
 		_clean_field(str(selected_group.get("name", ""))),
-		entry.get("type", ""), int(group_remove_quantity.value)])
+		entry.get("type", ""), int(group_remove_quantity.value), "miniboss" if bool(entry.get("miniboss", false)) else "normal"])
 	status.text = "Updating group composition…"
 
 
@@ -1740,6 +1746,9 @@ func _update_monster_actions() -> void:
 	if monster_add_to_group == null:
 		return
 	var has_monster := not selected_monster.is_empty()
+	monster_miniboss.disabled = not has_monster or not bool(selected_monster.get("can_be_miniboss", true))
+	if monster_miniboss.disabled:
+		monster_miniboss.set_pressed_no_signal(false)
 	monster_spawn_here.disabled = not has_monster
 	monster_add_to_group.disabled = true
 	monster_add_to_group.text = "Select a group and spawn location"
@@ -1750,7 +1759,12 @@ func _update_monster_actions() -> void:
 			monster_add_to_group.disabled = false
 			monster_add_to_group.text = "Add %d at [%d, %d]" % [int(monster_quantity.value),location.x,location.y]
 			monster_add_to_group.tooltip_text = "%s → %s on %s" % [selected_monster.get("name",""), group.get("name",""),group.get("map_name","")]
-	monster_spawn_here.text = "Quick spawn %d at my character…" % int(monster_quantity.value)
+	var spawn_label := "minibosses" if _monster_rank() == "miniboss" else "creatures"
+	monster_spawn_here.text = "Quick spawn %d %s at my character…" % [int(monster_quantity.value), spawn_label]
+
+
+func _monster_rank() -> String:
+	return "miniboss" if monster_miniboss != null and monster_miniboss.button_pressed else "normal"
 
 
 func _add_monster_to_group() -> void:
@@ -1761,9 +1775,9 @@ func _add_monster_to_group() -> void:
 	if not location is Vector2i:
 		status.text = "Coordinates unavailable: this map has no verified spawn location."
 		return
-	command_requested.emit("#invasion_assistant group add %s|%s|%d|%d|%d" % [
+	command_requested.emit("#invasion_assistant group add %s|%s|%d|%d|%d|%s" % [
 		_clean_field(str(group.get("name", ""))), selected_monster.get("type", ""),
-		int(monster_quantity.value), location.x, location.y])
+		int(monster_quantity.value), location.x, location.y, _monster_rank()])
 	status.text = "Adding %d %s to %s at [%d, %d]…" % [int(monster_quantity.value),
 		selected_monster.get("name", "monster"), group.get("name", "group"),
 		location.x, location.y]
@@ -1772,8 +1786,8 @@ func _add_monster_to_group() -> void:
 func _spawn_monster_here() -> void:
 	if selected_monster.is_empty():
 		return
-	command_requested.emit("#invasion_assistant monster spawn %s|%d" % [
-		selected_monster.get("type", ""), int(monster_quantity.value)])
+	command_requested.emit("#invasion_assistant monster spawn %s|%d|%s" % [
+		selected_monster.get("type", ""), int(monster_quantity.value), _monster_rank()])
 	status.text = "Spawning %d %s at your live server location…" % [
 		int(monster_quantity.value), selected_monster.get("name", "monster")]
 
