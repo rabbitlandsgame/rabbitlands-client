@@ -5,6 +5,8 @@ sculpts, with decorative asset roots moved by the same triangle-sampled delta.
 The hillside's narrow imported ledge is feathered into its gentle surroundings.
 No shoreline, shared authority vertex, path, water, or gameplay marker is edited.
 One content-table gecko spawn moves one metre onto a clear approach ring.
+A later reviewed earthwork may re-grade part of a repair (SUPERSEDED); its
+corridor then keeps the earthwork's sculpt.
 
     python godot-client/tools/repair_continent_v2_pits.py --check
     python godot-client/tools/repair_continent_v2_pits.py --apply --report FILE
@@ -44,9 +46,31 @@ SPAWN_RELOCATION = {
     "beforeLocal": [87.5, -179.5], "afterLocal": [87.5, -178.5],
 }
 REPAIRED_REGIONS = set(SITES) | {HILL_REPAIR["region"]}
+# Later reviewed earthworks over part of a repair, continent metres: vertices within reachMetres of the line carry
+# the earthwork's sculpt instead of the repair's. Owner 2026-10-21: road R29-3 runs down into the gully east of
+# Landfall's castle, where the (1247, 7199) repair had filled its graded corridor; the corridor is graded to the
+# road's own ribbon again.
+SUPERSEDED = {
+    "landfall": [{"name": "R29-3 gully road", "reachMetres": 10,
+                  "line": [(1261.5, 7157.8), (1268.5, 7162.1), (1276.9, 7169.0), (1282.3, 7173.8), (1288.1, 7179.1)]}],
+}
 FIRST = np.array([299, 6163])
 SHAPE = (1259, 1446)
 BUFFER_CELLS = 6
+
+
+def superseded(t) -> np.ndarray:
+    """The territory's vertices a later earthwork re-grades (SUPERSEDED), on its own grid."""
+    xs, zs = t.vertex_xz()
+    gx, gz = np.meshgrid(xs, zs)
+    out = np.zeros(gx.shape, bool)
+    for work in SUPERSEDED.get(t.id, []):
+        line = np.asarray(work["line"], float)
+        for (x0, z0), (x1, z1) in zip(line, line[1:]):
+            dx, dz = x1 - x0, z1 - z0
+            tt = np.clip(((gx - x0) * dx + (gz - z0) * dz) / (dx * dx + dz * dz), 0, 1)
+            out |= np.hypot(gx - x0 - tt * dx, gz - z0 - tt * dz) <= work["reachMetres"]
+    return out
 
 
 def _overlap(lattice):
@@ -294,10 +318,14 @@ def main():
         window = lattice.window(t)
         expected = to_lattice(fixed - base, lattice, np.float32(0))[window].copy()
         expected[~authorities[[v.id for v in ts].index(t.id)][window]] = 0
+        later = superseded(t) & (expected != 0)
+        expected[later] = 0
         path, content, installed, shifted = prepare_scene(t, expected, base, fixed)
         edits.append((path, content))
         summary[t.id] = {"vertices": int(np.count_nonzero(expected)),
                          "installed": installed, "groundedAssets": shifted}
+        if later.any():
+            summary[t.id]["supersededVertices"] = int(later.sum())
     # Keep the gecko's full approach ring clear beside the restored hillside.
     spawn = SPAWN_RELOCATION
     spawn_path = T.CHECKOUT / "eloria-assets/maps/continent-v2" / spawn["region"] / "content/spawns.json"
