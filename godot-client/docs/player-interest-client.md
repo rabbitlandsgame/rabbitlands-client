@@ -38,8 +38,17 @@ The minimap and the full map draw presence dots as player marks a size
 smaller than marks with a body, through the same overlay and the same
 "players" marker switch. With only the minimap open, dots beyond the corner of
 its view are skipped before any mark is made, and the marks are reused rather
-than rebuilt, so 500 distant players cost well under a tenth of a millisecond
-per minimap refresh.
+than rebuilt, so collecting 500 distant players' marks costs well under a
+tenth of a millisecond per minimap refresh.
+
+Drawing them is the larger part. The overlay used to build each dot's ring and
+fill point by point with a sine and a cosine, which for 300 extra dots added
+about 2 ms to the average frame. It now places one precomputed circle by a
+transform and sends each run of dots to the renderer in one triangle-array
+draw, ring then fill per dot in mark order, so the picture is unchanged (300
+overlapping dots drawn both ways differ in one pixel of 102,400) and a redraw
+of 460 dots takes about 0.35 ms instead of about 3 ms. This also speeds up the
+minimap for a legacy client holding every player of a busy map.
 
 ## The actor cap and "+N nearby"
 
@@ -114,6 +123,26 @@ On the development machine a complete table of 200 riders is 55 KB and takes
 about 4.4 ms to decode, and a crowded map sent one every second; a delta
 naming one rider is under 0.4 KB and takes about 0.04 ms, and restating the
 player's own countdowns costs under 2 microseconds a tick.
+
+## Measured in the crowd benchmark
+
+`tests/integration/run_crowd_presentation_benchmark.py --presence 300
+--server-time` adds 300 presence dots walking 82-139 tiles around the player
+and a server-time stamp on every tick to the crowd cells. On the development
+laptop (Forward+, windowed, minimap shown, two interleaved runs each, on a
+machine shared with other work), with the batched minimap drawing:
+
+| Cell | Frame mean, without / with | Frame p95, without / with |
+| --- | --- | --- |
+| s3-market-160 | 19.9, 19.6 / 18.3, 17.4 ms | 25.8, 27.3 / 25.7, 25.3 ms |
+| s2-invasion-160 | 14.5, 14.1 / 13.9, 14.2 ms | 22.7, 23.0 / 25.0, 25.0 ms |
+| aoi-160 | 11.9, 10.9 / 11.9, 12.3 ms | 18.8, 18.4 / 20.6, 20.7 ms |
+| empty | 6.0, 5.3 / 6.0, 5.3 ms | 10.5, 9.9 / 11.9, 11.1 ms |
+
+The means are within run-to-run noise; the p95 rises by 1-2 ms in three
+cells, where the once-a-second presence snapshot (decoding and placing 300
+rows) and the extra minimap redraw fall on the same frames. With the old
+per-polygon drawing the same inputs cost 1-10 ms more on the mean.
 
 ## Tests
 
