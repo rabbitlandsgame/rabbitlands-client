@@ -16,7 +16,8 @@ Examples:
       --mode headless --variants all,legacy --cells phase4
   python tests/integration/run_crowd_presentation_benchmark.py --godot <Godot.exe> \
       --mode windowed --renderer forward_plus --variants all --cells s3-market-160
-  python tests/integration/run_crowd_presentation_benchmark.py --godot <Godot.exe>       --replay <recording>.rlrec --replay-start-ms 30000 --sample-ms 40000 --out-dir <ignored dir>
+  python tests/integration/run_crowd_presentation_benchmark.py --godot <Godot.exe> \
+      --replay <recording>.rlrec --replay-start-ms 30000 --sample-ms 40000 --out-dir <ignored dir>
 
 Windowed runs use the GPU: run one at a time on a shared machine.
 """
