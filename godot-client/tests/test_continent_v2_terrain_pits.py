@@ -52,7 +52,7 @@ def test_saved_sculpts_repair_all_nine_sites_without_changing_frozen_bases(repai
         assert not errors
         expected = delta[window]
         own = T.authority(t, lattice)[window]
-        expected = np.where(own, expected, 0)
+        expected = np.where(own & ~R.superseded(t), expected, 0)
         touched = expected != 0
         np.testing.assert_array_equal(sculpt[touched], expected[touched], err_msg=t.id)
 
@@ -87,7 +87,7 @@ def test_replaying_the_repair_does_not_move_scenery_twice(repaired):
             continue
         window = lattice.window(t)
         delta = R.to_lattice(fixed - base, lattice, np.float32(0))
-        expected = np.where(T.authority(t, lattice)[window], delta[window], 0)
+        expected = np.where(T.authority(t, lattice)[window] & ~R.superseded(t), delta[window], 0)
         path, content, installed, moved = R.prepare_scene(t, expected, base, fixed)
         assert installed and not moved
         assert content == path.read_text(encoding="utf-8")
@@ -107,6 +107,35 @@ def test_saltsound_hillside_approach_stays_within_the_normal_walking_grade(repai
     # Smoothing never moves the shore or makes cliffs globally climbable.
     np.testing.assert_array_equal(fixed[base <= 2], base[base <= 2])
     assert CE.MAX_GRADE == .65
+
+
+def test_superseded_road_corridor_is_walkable_and_meets_its_ribbon(repaired):
+    from types import SimpleNamespace
+    sys.path.insert(0, str(ROOT / "eloria-assets/maps/nymara-regions/_continent"))
+    import collision_export as CE
+    base, fixed, _, _, territories, _ = repaired
+    work, = R.SUPERSEDED["landfall"]
+    t = next(t for t in territories if t.id == "landfall")
+    sculpt, errors = T.sculpt_deltas(t)
+    assert not errors
+    # The road's centre line, a metre either side of it, every half metre.
+    line = np.asarray(work["line"], float)
+    points = np.concatenate([a + (b - a) * np.linspace(0, 1, int(np.hypot(*(b - a)) / .5) + 1)[:, None]
+                             for a, b in zip(line, line[1:])])
+    direction = np.gradient(points, axis=0)
+    across = np.c_[-direction[:, 1], direction[:, 0]] / np.hypot(*direction.T)[:, None]
+    x, z = (points[:, None, :] + across[:, None, :] * np.array([-1., 0., 1.])[None, :, None]).transpose(2, 0, 1)
+    # The repair alone left the centre line on a cross-slope too steep to walk.
+    repaired_only = SimpleNamespace(height=fixed, x0=R.FIRST[0], z0=R.FIRST[1], cell=2.)
+    assert CE.terrain_grade(repaired_only, x, z).max() > CE.MAX_GRADE
+    ground = SimpleNamespace(height=t.heights + sculpt, x0=t.first_vertex[0], z0=t.first_vertex[1], cell=T.CELL)
+    assert CE.terrain_grade(ground, x, z).max() < CE.MAX_GRADE
+    # Down the centre the ground sits just under the base's graded corridor, which carries the road ribbon's
+    # heights; the repair's fill had buried the ribbon by up to 1.5 m.
+    shift = t.first_vertex - R.FIRST
+    under = np.array([R.sample(base, *p) - R.sample(t.heights + sculpt, *(p - shift)) for p in points])
+    assert min(R.sample(base, *p) - R.sample(fixed, *p) for p in points) < -1.4
+    assert -.1 < under.min() and under.max() < .5
 
 
 def test_published_terrain_triangles_match_the_repaired_editor_ground(repaired):
