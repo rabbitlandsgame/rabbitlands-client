@@ -329,6 +329,27 @@ func _sync_overhead_health() -> void:
 	_benchmark_add(&"overhead", started)
 
 
+## The per-pass overhead answers (crowd presentation), timed with the full one.
+func _sync_overhead_health_for(ids: Array) -> void:
+	if not benchmark_overhead_enabled:
+		return
+	var started := Time.get_ticks_usec()
+	super._sync_overhead_health_for(ids)
+	_benchmark_add(&"overhead", started)
+
+
+func _update_model_builds() -> void:
+	var started := Time.get_ticks_usec()
+	super._update_model_builds()
+	_benchmark_add(&"model_builds", started)
+
+
+func _update_map_viewports() -> void:
+	var started := Time.get_ticks_usec()
+	super._update_map_viewports()
+	_benchmark_add(&"map_viewports", started)
+
+
 func _update_animation_gate(delta: float) -> void:
 	var refresh_before := _animation_gate_refresh_msec
 	var started := Time.get_ticks_usec()

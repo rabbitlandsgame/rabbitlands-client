@@ -639,14 +639,28 @@ func _spawn_all(count: int) -> Dictionary:
 	var nodes := _main.get("actor_nodes") as Dictionary
 	var passes := 0
 	var deadline := Time.get_ticks_msec() + MAX_SPAWN_MSEC
-	while nodes.size() < count and Time.get_ticks_msec() < deadline:
+	# Every actor starts at the fixture's centre tile, inside the crowd
+	# presentation's build radius, so the spawn is complete only once the
+	# bodies queued behind the per-pass budget have been built as well.
+	while (nodes.size() < count or _deferred_bodies(nodes) > 0) \
+			and Time.get_ticks_msec() < deadline:
 		_main.call("_sync_world", _app_state.call("take_changed_actors"))
 		passes += 1
 		await process_frame
 		nodes = _main.get("actor_nodes") as Dictionary
-	_expect(nodes.size() == count,
-		"spawn completes before timeout (%d of %d)" % [nodes.size(), count])
+	_expect(nodes.size() == count and _deferred_bodies(nodes) == 0,
+		"spawn completes before timeout (%d of %d, %d bodies queued)" % [
+			nodes.size(), count, _deferred_bodies(nodes)])
 	return {"passes": passes, "spawned": nodes.size(), "timeoutMilliseconds": MAX_SPAWN_MSEC}
+
+
+func _deferred_bodies(nodes: Dictionary) -> int:
+	var deferred := 0
+	for value: Variant in nodes.values():
+		if is_instance_valid(value) and (value as Node).has_method("is_model_deferred") \
+				and bool((value as Node).call("is_model_deferred")):
+			deferred += 1
+	return deferred
 
 
 func _apply_feature_switches(nodes: Dictionary, features: String) -> void:

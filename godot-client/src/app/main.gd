@@ -73,6 +73,8 @@ var _dev_plain_tcp := false
 const InteriorCutawayScript := preload("res://src/world/interior_cutaway.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
+const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
+const LiveEffectBudgetScript := preload("res://src/world/live_effect_budget.gd")
 const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
 const InvasionAssistantScript := preload("res://src/ui/invasion_assistant.gd")
 const ExtensionWindowsScript := preload("res://src/ui/extension_windows.gd")
@@ -356,6 +358,7 @@ var minimap_marker_overlay: Control
 ## Short-lived world effects the server announced. Kept only so a test can see
 ## what is on screen; each one frees itself when it finishes.
 var world_effects: Array = []
+var _world_effects_compact_at := 32
 ## The glitter around the player while they harvest; null when they are not.
 var harvest_sparkle: HarvestSparkle3D
 ## The sky and the fires the server placed on this map.
@@ -405,6 +408,10 @@ var _trailer_capture_enabled := false
 var _trailer_capture_level := 0
 var _trailer_capture_layer: CanvasLayer
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
+## The player's crowd settings (Graphics): how many other actors are drawn with
+## a body at once, and how many of the nearest other capes sway at High.
+var _crowd_bodies := SettingsWindowScript.CROWD_BODIES_DEFAULT
+var _swaying_capes := SettingsWindowScript.SWAYING_CAPES_DEFAULT
 var _fps_limit := 0
 var _player_notes := ""
 ## True while the loaded package lets the hour drive its environment. An
@@ -781,6 +788,45 @@ var _neighbour_adapters: Dictionary = {}
 ## Decides which actors animate this frame, and how often; see AnimationGate.
 var animation_gate: AnimationGate = AnimationGate.new()
 var _animation_gate_refresh_msec := 0
+## One walk of the animation gate over the actors, spread across the frames of
+## a refresh period (`_update_animation_gate`): the ids it walks, how far it
+## has got, what it measures from, and what it has gathered for its end.
+var _gate_sweep_active := false
+var _gate_sweep_whole := false
+var _gate_sweep_ids: Array = []
+var _gate_sweep_index := 0
+var _gate_now := 0
+var _gate_local: Node3D
+var _gate_here := Vector3.ZERO
+var _gate_fighting := -1
+var _gate_reference := Vector3.ZERO
+var _gate_camera_at := Vector3.ZERO
+var _gate_build_candidates: Array = []
+var _gate_releases: Array = []
+var _gate_built := 0
+var _gate_ranked: Array = []
+var _gate_built_ranked: Array = []
+var _gate_full_rate: Array = []
+var _gate_capes: Array = []
+## Which actors get a body, and which removed ones are kept for a return; see
+## crowd_presentation.gd. `effect_budget` bounds the combat visuals alive at
+## once. Both read RABBITLANDS_CROWD_PRESENTATION, which benchmarks use to turn
+## each part off.
+var crowd = CrowdPresentationScript.new()
+var effect_budget = LiveEffectBudgetScript.new()
+## Which actor the selection ring and the overhead target were last given to,
+## so a pass only touches the actors whose answer changed.
+var _selection_ring_actor := -1
+var _overhead_target_actor := -1
+## Built bodies (not deferred), recounted on every gate pass and kept up to
+## date in between by the passes that build or remove one; the body cap reads it.
+var _built_bodies := 0
+## How far the body cap reaches this pass: the distance of the cap-th nearest
+## actor in range, INF with no cap or fewer actors than it.
+var _body_cap_distance := INF
+## Counts nodes AppState removed in bulk (KILL_ALL_ACTORS, a dropped
+## connection) since the last pass; see `_sync_world`.
+var _actor_roster_generation_seen := -1
 ## The statistics window's built parts fall behind the stats packets while
 ## it is hidden; they are rebuilt when it is next shown.
 var _stats_window_stale := true
@@ -1059,6 +1105,10 @@ const DAY_NIGHT_REFRESH_MSEC := 500
 ## second: the camera and the actors both move smoothly, so that set changes
 ## far more slowly than the frame rate does.
 const ANIMATION_GATE_REFRESH_MSEC := 100
+## The animation gate's walk over the actors is spread over this many frames.
+## At 60 FPS that is the refresh period; at a lower frame rate a sweep takes
+## longer, which still never leaves an actor unclassified for long.
+const GATE_SWEEP_SLICES := 6
 ## How far from the player another actor is still drawn in the world. Past
 ## this its body and its name come off the viewport and only its map dot is
 ## left, so it still marks the minimap and the full map. The isometric rig
@@ -1121,6 +1171,11 @@ const EXPERIENCE_SKILLS: Array[String] = [
 	"ranging", "overall"]
 
 func _ready() -> void:
+	crowd.configure(OS.get_environment("RABBITLANDS_CROWD_PRESENTATION"),
+		OS.get_environment("RABBITLANDS_CROWD_BODY_CAP"),
+		OS.get_environment("RABBITLANDS_CROWD_TUNING"))
+	effect_budget.enabled = crowd.effects
+	animation_gate.gate_skeletons = crowd.gate
 	world_root.add_child(quest_trail)
 	add_child(character_intro)
 	add_child(arrival_curtain)
@@ -1649,6 +1704,7 @@ func _process(delta: float) -> void:
 				weather_layer.mistiness() if weather_layer != null else 0.0, gloom,
 				world_environment.environment.fog_light_color, delta, _effects_enabled)
 		_update_animation_gate(delta)
+		_update_model_builds()
 		# Rain is everywhere, so only the box the player is standing in is
 		# drawn. Left at the world origin it fell a hundred metres away from
 		# whoever was watching it.
@@ -2805,6 +2861,7 @@ func _refresh_unified_settings() -> void:
 	equipment_side.select(1 if _equipment_side == "right" else 0)
 	settings_window.restore_fps_limit(_fps_limit)
 	settings_window.restore_name_distance(_name_distance_metres)
+	settings_window.restore_crowd_settings(_crowd_bodies, _swaying_capes)
 	settings_window.restore_look(LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.restore_quality(LookProfile.player_quality(), LookProfile.quality_forced())
 	casting_bar.refresh()
@@ -3721,6 +3778,8 @@ func _clear_world_presentation() -> void:
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
 	actor_nodes.clear()
+	crowd.clear()
+	_built_bodies = 0
 	for raw_bag_node: Variant in ground_bag_nodes.values():
 		if is_instance_valid(raw_bag_node):
 			(raw_bag_node as Node).queue_free()
@@ -4411,9 +4470,11 @@ func _overhead_health_for(actor_id: int, dto: Dictionary,
 		return true
 	return _minimap_actor_type(dto) != &"npc"
 
-## Hands every actor its answer to those questions.
+## Hands every actor its answer to those questions. A pass over the actors one
+## frame changed uses `_sync_overhead_health_for` instead.
 func _sync_overhead_health() -> void:
 	var target_id: int = _combat_target_actor_id()
+	_overhead_target_actor = target_id
 	for id: Variant in actor_nodes:
 		var node_value: Variant = actor_nodes[id]
 		if not (node_value is ReplicatedActor3D) or not is_instance_valid(
@@ -5260,8 +5321,9 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_selection()
 		&"combat_state":
 			# Which actor wears the overhead bar changes with the fight, not
-			# with the actor packets, so it is re-read here as well.
-			_sync_overhead_health()
+			# with the actor packets, so it is re-read here as well: only the
+			# old and the new target can have changed.
+			_sync_overhead_health_for([])
 			_sync_manufacturing()
 		&"npc_dialogue":
 			_sync_dialogue()
@@ -5387,6 +5449,8 @@ func _load_server_map() -> void:
 	# the ones on the map left as its neighbours, and _rebase_streamed_world
 	# has carried the nodes into the new frame. Any other change of map
 	# empties the table, as the server's KILL_ALL_ACTORS empties AppState's.
+	# Bodies parked for a return belong to the map being left either way.
+	crowd.clear()
 	for actor_id: Variant in actor_nodes.keys():
 		if _continuous_map_handoff or int(actor_id) == _retained_traveller:
 			continue
@@ -5932,52 +5996,25 @@ func _sync_world(changed: Variant = null) -> void:
 			_snap_all_actors_to_surface.call_deferred()
 			_snap_all_map_objects_to_surface.call_deferred()
 	map_label.text = "Map: " + (AppState.current_map if not AppState.current_map.is_empty() else "loading")
-	for id: Variant in actor_nodes.keys():
-		if AppState.actors.has(id):
-			continue
-		if int(id) == _retained_traveller and Time.get_ticks_msec() < _retained_until:
-			continue
-		# An entry can already be dangling: anything that frees an actor node
-		# without going through this map leaves the dictionary holding a freed
-		# object, and calling queue_free() on that crashes the engine rather
-		# than raising. Guarding here is what makes a map change safe while
-		# actors are still being torn down.
-		# Casting first is not safe: `as Node` on a freed object raises and
-		# aborts the whole function, so the entry would never be erased.
-		var stale_actor: Variant = actor_nodes[id]
-		if is_instance_valid(stale_actor):
-			(stale_actor as Node).queue_free()
-		actor_nodes.erase(id)
-		_actor_surface_samples.erase(id)
-		_grounded_actors.erase(id)
-		# Otherwise a recycled actor id inherits the last health of whoever
-		# held it before, and the next update floats a change nobody took.
-		_actor_health_seen.erase(id)
-	var spawned: int = 0
+	_remove_stale_actor_nodes(changed)
 	var visit: Array = (AppState.actors.keys() if changed == null
 		else (changed as Dictionary).keys())
+	var arriving: Dictionary = {}
 	for id: Variant in visit:
 		if not AppState.actors.has(id):
 			# Marked and gone again inside the same frame.
 			continue
 		if actor_nodes.has(id):
 			_present_actor(id)
-		elif spawned < ACTOR_SPAWN_BUDGET or int(id) == AppState.local_actor_id:
-			_spawn_actor(id)
-			spawned += 1
 		else:
-			_spawn_backlog = true
+			arriving[id] = true
 	# Anything still without a node - left from an earlier pass's budget, or
 	# never in the change set - is built too, within the same budget.
-	if changed != null and actor_nodes.size() < AppState.actors.size():
+	if changed != null and actor_nodes.size() + arriving.size() < AppState.actors.size():
 		for id: Variant in AppState.actors:
-			if actor_nodes.has(id):
-				continue
-			if spawned >= ACTOR_SPAWN_BUDGET:
-				_spawn_backlog = true
-				break
-			_spawn_actor(id)
-			spawned += 1
+			if not actor_nodes.has(id):
+				arriving[id] = true
+	_spawn_arrivals(arriving.keys())
 	actor_label.text = "Actors: %d" % AppState.actors.size()
 	if AppState.local_actor_id >= 0 and actor_nodes.has(AppState.local_actor_id) and AppState.actors.has(AppState.local_actor_id):
 		_update_local_actor_follow()
@@ -6002,7 +6039,155 @@ func _sync_world(changed: Variant = null) -> void:
 			_set_overhead_meter(overhead_health_row, current_health,
 				maximum_health, "health")
 			_layout_actor_resource_overlay()
-	_sync_overhead_health()
+	if changed == null:
+		_sync_overhead_health()
+	else:
+		_sync_overhead_health_for(visit + arriving.keys())
+
+## Takes away the nodes of actors AppState no longer has. A pass with a change
+## set looks only at those ids - REMOVE_ACTOR marks what it removes - and walks
+## every node only when there is no change set, when AppState emptied the table
+## in bulk, or when there are more nodes than records. Walking every node on
+## every changed frame was one of the costs that grew with the crowd.
+##
+## A body the server takes away is parked rather than freed when it can be
+## (crowd_presentation.gd), so the same actor stepping back into view wears it
+## again instead of being rebuilt.
+func _remove_stale_actor_nodes(changed: Variant) -> void:
+	var generation: int = AppState.actor_roster_generation
+	var full: bool = (changed == null or generation != _actor_roster_generation_seen
+		or actor_nodes.size() > AppState.actors.size())
+	_actor_roster_generation_seen = generation
+	var candidates: Array = actor_nodes.keys() if full else (changed as Dictionary).keys()
+	if not full and _retained_traveller >= 0:
+		candidates.append(_retained_traveller)
+	var now: int = Time.get_ticks_msec()
+	for id: Variant in candidates:
+		if not actor_nodes.has(id) or AppState.actors.has(id):
+			continue
+		if int(id) == _retained_traveller and now < _retained_until:
+			continue
+		# An entry can already be dangling: anything that frees an actor node
+		# without going through this map leaves the dictionary holding a freed
+		# object, and calling queue_free() on that crashes the engine rather
+		# than raising. Guarding here is what makes a map change safe while
+		# actors are still being torn down.
+		# Casting first is not safe: `as Node` on a freed object raises and
+		# aborts the whole function, so the entry would never be erased.
+		var stale_actor: Variant = actor_nodes[id]
+		if is_instance_valid(stale_actor):
+			var stale_node := stale_actor as ReplicatedActor3D
+			if stale_node != null and not stale_node.is_model_deferred():
+				_built_bodies = maxi(0, _built_bodies - 1)
+			var parked: bool = (stale_node != null and int(id) != AppState.local_actor_id
+				and not stale_node.is_model_deferred()
+				and crowd.park_node(int(id), stale_node,
+					str(stale_node.get_meta(&"identity_key", "")), now))
+			if not parked:
+				(stale_actor as Node).queue_free()
+		actor_nodes.erase(id)
+		crowd.forget(int(id))
+		_actor_surface_samples.erase(id)
+		_grounded_actors.erase(id)
+		# Otherwise a recycled actor id inherits the last health of whoever
+		# held it before, and the next update floats a change nobody took.
+		_actor_health_seen.erase(id)
+	crowd.expire_parked(now)
+
+## Gives each arriving actor a node. The player's own is always built at once.
+## With lazy bodies (crowd_presentation.gd) the nearest arrivals inside the
+## build radius are built, ACTOR_SPAWN_BUDGET of them a pass, and every other
+## arrival gets a deferred node now - its map dot, and a stand-in if it is in
+## view - whose body `_update_model_builds` builds nearest first. Without them
+## the rest simply wait for a later pass, as they always did.
+func _spawn_arrivals(arriving: Array) -> void:
+	if arriving.is_empty():
+		return
+	if not crowd.lazy:
+		var spawned: int = 0
+		for id: Variant in arriving:
+			if spawned < ACTOR_SPAWN_BUDGET or int(id) == AppState.local_actor_id:
+				_spawn_actor(id)
+				spawned += 1
+			else:
+				_spawn_backlog = true
+		return
+	var reference: Vector3 = _crowd_reference_point()
+	var ranked: Array = []
+	for id: Variant in arriving:
+		if int(id) == AppState.local_actor_id:
+			_spawn_actor(id)
+			continue
+		ranked.append([_record_distance(AppState.actors[id] as Dictionary, reference), id])
+	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var built: int = 0
+	var deferred: int = 0
+	for pair: Array in ranked:
+		var id: Variant = pair[1]
+		if built < ACTOR_SPAWN_BUDGET and float(pair[0]) <= crowd.BUILD_RADIUS_METRES \
+				and _body_cap_allows(int(id), float(pair[0])):
+			_spawn_actor(id)
+			built += 1
+		elif deferred < crowd.DEFERRED_SPAWNS_PER_PASS:
+			_spawn_actor(id, false)
+			deferred += 1
+		else:
+			_spawn_backlog = true
+
+## Where crowd distances are measured from: the player's body, else the tile
+## their record names, else the camera's focus.
+func _crowd_reference_point() -> Vector3:
+	var local_value: Variant = actor_nodes.get(AppState.local_actor_id)
+	if is_instance_valid(local_value):
+		return (local_value as Node3D).global_position
+	var record: Dictionary = AppState.actors.get(AppState.local_actor_id, {}) as Dictionary
+	if not record.is_empty() and adapter != null:
+		return adapter.tile_center(int(record.get("x", 0)), int(record.get("y", 0)))
+	return camera_rig.focus if camera_rig != null else Vector3.ZERO
+
+## The ground distance from `reference` to the tile an actor record names, or
+## INF when its map is not placed yet.
+func _record_distance(dto: Dictionary, reference: Vector3) -> float:
+	var actor_adapter: CoordinateAdapter = _adapter_for_actor(dto)
+	if actor_adapter == null:
+		return INF
+	var at: Vector3 = actor_adapter.tile_center(int(dto.get("x", 0)), int(dto.get("y", 0)))
+	return Vector2(at.x - reference.x, at.z - reference.z).length()
+
+## Whether an actor this far away may have a body under the optional body cap:
+## inside the cap's distance (`_update_animation_gate`). The player, their
+## target and their selection always may.
+func _body_cap_allows(id: int, distance: float) -> bool:
+	if crowd.body_cap <= 0 or _crowd_priority_actor(id):
+		return true
+	return distance <= _body_cap_distance
+
+func _crowd_priority_actor(id: int) -> bool:
+	return id == AppState.local_actor_id or id == AppState.selected_actor_id \
+		or id == _combat_target_actor_id()
+
+## `_sync_overhead_health` for the actors one pass touched. Their own answers
+## change only with their records; everyone else's only when the target does,
+## which takes the bar off the old target and puts it on the new one.
+func _sync_overhead_health_for(ids: Array) -> void:
+	var target_id: int = _combat_target_actor_id()
+	if target_id != _overhead_target_actor:
+		var previous: int = _overhead_target_actor
+		_overhead_target_actor = target_id
+		_apply_overhead_health(previous, target_id)
+		_apply_overhead_health(target_id, target_id)
+	for id: Variant in ids:
+		_apply_overhead_health(int(id), target_id)
+
+func _apply_overhead_health(id: int, target_id: int) -> void:
+	var node_value: Variant = actor_nodes.get(id)
+	if not (node_value is ReplicatedActor3D) or not is_instance_valid(
+			node_value as ReplicatedActor3D):
+		return
+	var actor := node_value as ReplicatedActor3D
+	actor.set_combat_target(id == target_id)
+	actor.set_health_visible(_overhead_health_for(id,
+		AppState.actors.get(id, {}) as Dictionary, target_id))
 
 ## Applies an actor's current AppState record to the node it already has.
 func _present_actor(id: Variant) -> void:
@@ -6019,27 +6204,44 @@ func _present_actor(id: Variant) -> void:
 	existing_actor.apply_vitals(int(dto.get("health", 0)),
 		int(dto.get("max_health", 0)))
 	existing_actor.set_nameplate_visible(_nameplate_visible_for(int(id)))
-	_place_actor_on_surface(existing_actor, false, actor_adapter.fallback_height())
+	# A deferred actor out of draw range shows nothing to stand on the ground:
+	# its map dot needs only the tile. Its body is put on the ground when built.
+	if not existing_actor.is_model_deferred() or existing_actor.is_drawn():
+		_place_actor_on_surface(existing_actor, false, actor_adapter.fallback_height())
 
-## Builds the node for an actor that has none yet.
-func _spawn_actor(id: Variant) -> void:
+## Builds the node for an actor that has none yet, or - given `previous` - in
+## place of the node it has: `build` false makes a deferred node without a body
+## (crowd_presentation.gd). A replacement carries on the old node's motion.
+func _spawn_actor(id: Variant, build := true,
+		previous: ReplicatedActor3D = null) -> void:
 	var dto: Dictionary = _presentation_dto(AppState.actors[id])
 	var actor_adapter: CoordinateAdapter = _adapter_for_actor(dto)
 	if actor_adapter == null:
 		# Its map is a neighbour that is not resident yet: built on a later pass.
 		_spawn_backlog = true
 		return
+	var identity: String = CrowdPresentationScript.identity_key(dto)
+	if previous == null:
+		var parked := crowd.take_parked(int(id), identity) as ReplicatedActor3D
+		if parked != null:
+			_revive_actor(id, parked, dto, actor_adapter)
+			return
 	var node := ReplicatedActor3D.new()
 	node.name = "Actor_%d" % id
+	node.set_meta(&"identity_key", identity)
 	world_root.add_child(node)
 	actor_nodes[id] = node
 	var model_id := _model_for_actor(dto)
 	var model_config: Dictionary = models.get(model_id, {}) as Dictionary
 	var errors := node.configure(dto, actor_adapter, model_config,
-		_animation_for_model(model_config), equipment_config)
+		_animation_for_model(model_config), equipment_config,
+		build or int(id) == AppState.local_actor_id or not crowd.lazy)
+	if not node.is_model_deferred():
+		_built_bodies += 1
 	node.apply_render_quality(LookProfile.quality(), int(id) == AppState.local_actor_id)
 	if not errors.is_empty():
 		push_warning("Actor %d: %s" % [id, "; ".join(errors)])
+	node.adopt_command_memory_from(previous)
 	node.apply_server_state(dto, actor_adapter, true)
 	_fit_lantern_map_marker(node, "MapDot")
 	node.set_combat_effects_enabled(_effects_enabled)
@@ -6050,11 +6252,90 @@ func _spawn_actor(id: Variant) -> void:
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
 	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
+	node.adopt_presentation_from(previous)
+	node.set_selected(int(id) == AppState.selected_actor_id)
 	if int(id) == AppState.local_actor_id:
 		# Built behind the curtain, shown once its ground is resident.
 		node.visible = not _arrival_pending()
 		_arrival_unreported = true
 		_sync_harvest_sparkle()
+	elif crowd.lazy:
+		# Drawn or not from the start, rather than from the next gate pass: a
+		# deferred actor far off would otherwise show its stand-in and its name
+		# for up to a tenth of a second.
+		node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
+			<= ACTOR_DRAW_DISTANCE_METRES)
+
+## Puts a parked body back for the actor it was parked for: the same steps a
+## new node takes, on a node that already has its model.
+func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
+		actor_adapter: CoordinateAdapter) -> void:
+	actor_nodes[id] = node
+	_built_bodies += 1
+	node.apply_server_state(dto, actor_adapter, true)
+	node.apply_vitals(int(dto.get("health", 0)), int(dto.get("max_health", 0)))
+	node.set_nameplate_visible(_nameplate_visible_for(int(id)))
+	node.set_title(str(AppState.actor_titles.get(int(id), "")))
+	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
+	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
+	_apply_actor_mount(id)
+	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
+	node.set_selected(int(id) == AppState.selected_actor_id)
+	node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
+		<= ACTOR_DRAW_DISTANCE_METRES)
+
+## Builds the bodies of deferred actors that have come within range, nearest
+## first: the candidates are ranked on each gate pass, and this builds as many
+## a frame as `CrowdPresentation.BUILDS_PER_FRAME` and its time budget allow.
+## Each is a new node in the deferred one's place, carrying on its motion.
+func _update_model_builds() -> void:
+	if not crowd.lazy or crowd.pending_candidates() == 0:
+		return
+	var started: int = Time.get_ticks_usec()
+	var built: int = 0
+	while built < crowd.BUILDS_PER_FRAME \
+			and Time.get_ticks_usec() - started < crowd.BUILD_BUDGET_USEC:
+		var id: int = crowd.next_candidate()
+		if id < 0:
+			break
+		var node_value: Variant = actor_nodes.get(id)
+		if not is_instance_valid(node_value) or not AppState.actors.has(id):
+			continue
+		var deferred := node_value as ReplicatedActor3D
+		if deferred == null or not deferred.is_model_deferred():
+			continue
+		var reference: Vector3 = _crowd_reference_point()
+		if not _body_cap_allows(id, Vector2(deferred.global_position.x - reference.x,
+				deferred.global_position.z - reference.z).length()):
+			continue
+		_replace_actor_node(id, true)
+		crowd.builds += 1
+		built += 1
+
+## Swaps an actor's node for a new one with (`build`) or without its body. The
+## old node is hidden at once and freed at the end of the frame, so nothing
+## holding it this frame finds it gone mid-call.
+func _replace_actor_node(id: int, build: bool) -> void:
+	# Validity before the cast: `as` on a freed node raises.
+	var previous_value: Variant = actor_nodes.get(id)
+	if not is_instance_valid(previous_value):
+		return
+	var previous := previous_value as ReplicatedActor3D
+	if previous == null:
+		return
+	actor_nodes.erase(id)
+	_spawn_actor(id, build, previous)
+	if not actor_nodes.has(id):
+		# The map it stands on is not placed now: keep the old node instead.
+		actor_nodes[id] = previous
+		return
+	if not previous.is_model_deferred():
+		_built_bodies = maxi(0, _built_bodies - 1)
+	previous.visible = false
+	previous.collision_layer = 0
+	previous.process_mode = Node.PROCESS_MODE_DISABLED
+	previous.queue_free()
+	_apply_overhead_health(id, _overhead_target_actor)
 
 ## Bind mount presentation to the current player identity and map, including
 ## state received before a visible actor's model finished loading.
@@ -7207,41 +7488,193 @@ func _update_occluder_fade(delta: float) -> void:
 ## map. The half-rate players are stepped from here every frame; who is in
 ## which tier is re-read on a slower clock. The local player is never gated:
 ## the camera is looking at them by definition.
+##
+## The re-read walks every actor, so it is spread over `GATE_SWEEP_SLICES`
+## frames instead of done in one: at 300 actors the whole walk was a 2-3 ms
+## frame ten times a second, which a 60 Hz frame's 95th percentile sees, the
+## more so when it fell on a frame that also carried a burst of server steps.
 func _update_animation_gate(delta: float) -> void:
 	animation_gate.advance(delta)
 	var now: int = Time.get_ticks_msec()
-	if now < _animation_gate_refresh_msec:
-		return
-	_animation_gate_refresh_msec = now + ANIMATION_GATE_REFRESH_MSEC
+	if not _gate_sweep_active:
+		if now < _animation_gate_refresh_msec:
+			return
+		# A clock at 0 is a fixture asking for the whole walk now; the old gate
+		# (crowd presentation off) always walks everyone in one frame.
+		var whole: bool = _animation_gate_refresh_msec <= 0 or not crowd.gate
+		_animation_gate_refresh_msec = now + ANIMATION_GATE_REFRESH_MSEC
+		_begin_gate_sweep(now, whole)
 	animation_gate.begin(gameplay_camera)
-	# Where "far away" is measured from: the player, not the camera, so that
-	# swinging or zooming the rig does not make bodies come and go around them.
+	var total: int = _gate_sweep_ids.size()
+	var stop: int = total if _gate_sweep_whole else mini(total,
+		_gate_sweep_index + ceili(float(total) / float(GATE_SWEEP_SLICES)))
+	while _gate_sweep_index < stop:
+		_gate_classify(_gate_sweep_ids[_gate_sweep_index])
+		_gate_sweep_index += 1
+	if _gate_sweep_index >= total:
+		_finish_gate_sweep()
+
+## Starts one walk over the actors. Where "far away" is measured from is the
+## player, not the camera, so that swinging or zooming the rig does not make
+## bodies come and go around them; it and the camera are read once a sweep.
+func _begin_gate_sweep(now: int, whole: bool) -> void:
+	_gate_sweep_active = true
+	_gate_sweep_whole = whole
+	_gate_sweep_ids = actor_nodes.keys()
+	_gate_sweep_index = 0
+	_gate_now = now
 	var local_value: Variant = actor_nodes.get(AppState.local_actor_id)
-	var local_node: Node3D = local_value as Node3D if is_instance_valid(local_value) else null
-	var here: Vector3 = local_node.global_position if local_node != null else Vector3.ZERO
-	var fighting: int = _combat_target_actor_id()
-	for raw_id: Variant in actor_nodes:
-		var actor_value: Variant = actor_nodes[raw_id]
-		if not is_instance_valid(actor_value):
-			continue
-		var actor: ReplicatedActor3D = actor_value as ReplicatedActor3D
-		if actor == null or not actor.is_inside_tree():
-			continue
-		var tier: AnimationGate.Tier = AnimationGate.Tier.FULL
-		if int(raw_id) == AppState.local_actor_id:
-			actor.set_drawn(true)
+	_gate_local = local_value as Node3D if is_instance_valid(local_value) else null
+	_gate_here = _gate_local.global_position if _gate_local != null else Vector3.ZERO
+	_gate_fighting = _combat_target_actor_id()
+	_gate_reference = _gate_here if _gate_local != null else _crowd_reference_point()
+	_gate_camera_at = (gameplay_camera.global_position
+		if gameplay_camera != null and gameplay_camera.is_inside_tree() else _gate_here)
+	_gate_build_candidates = []
+	_gate_releases = []
+	_gate_built = 0
+	_gate_ranked = []
+	_gate_built_ranked = []
+	_gate_full_rate = []
+	_gate_capes = []
+
+## One actor's part of the sweep: its tier, whether it is drawn, its name's
+## fade, and - for the crowd presentation - its build rank or release.
+func _gate_classify(raw_id: Variant) -> void:
+	var actor_value: Variant = actor_nodes.get(raw_id)
+	if not is_instance_valid(actor_value):
+		return
+	var actor: ReplicatedActor3D = actor_value as ReplicatedActor3D
+	if actor == null or not actor.is_inside_tree():
+		return
+	if int(raw_id) == AppState.local_actor_id:
+		actor.set_drawn(true)
+		_gate_built += 1
+		actor.set_animation_tier(AnimationGate.Tier.FULL, animation_gate)
+		return
+	var tier: AnimationGate.Tier = animation_gate.classify(actor.global_position + Vector3.UP,
+		actor.view_radius())
+	var distance: float = (0.0 if _gate_local == null
+		else _gate_here.distance_to(actor.global_position))
+	var drawn: bool = distance <= ACTOR_DRAW_DISTANCE_METRES
+	actor.set_drawn(drawn)
+	# A body too far away to be drawn has nothing to show for being animated;
+	# the frustum alone left those in view of the camera at full or half rate.
+	if not drawn and crowd.gate:
+		tier = AnimationGate.Tier.PAUSED
+	# Whoever the player is fighting keeps their name and bar at any range: a
+	# shot lined up from across a field still needs both.
+	actor.set_overhead_fade(1.0 if int(raw_id) == _gate_fighting
+		else nameplate_fade(distance, _name_distance_metres))
+	if crowd.lazy:
+		var ground: float = Vector2(actor.global_position.x - _gate_reference.x,
+			actor.global_position.z - _gate_reference.z).length()
+		var priority: bool = _crowd_priority_actor(int(raw_id))
+		if actor.is_model_deferred():
+			# Past the body cap only the map dot is left (crowd_presentation.gd).
+			actor.set_crowd_hidden(not priority and ground > _body_cap_distance)
+			if ground <= crowd.BUILD_RADIUS_METRES and not actor.corpse_faded():
+				_gate_build_candidates.append([ground, int(raw_id)])
+				if not priority:
+					_gate_ranked.append(ground)
 		else:
-			tier = animation_gate.classify(actor.global_position + Vector3.UP,
-				actor.view_radius())
-			var distance: float = (0.0 if local_node == null
-				else here.distance_to(actor.global_position))
-			actor.set_drawn(distance <= ACTOR_DRAW_DISTANCE_METRES)
-			# Whoever the player is fighting keeps their name and bar at any
-			# range: a shot lined up from across a field still needs both.
-			actor.set_overhead_fade(1.0 if int(raw_id) == fighting
-				else nameplate_fade(distance, _name_distance_metres))
-		actor.set_animation_tier(tier, animation_gate)
-	_declutter_actor_overheads(fighting)
+			_gate_built += 1
+			if not priority:
+				_gate_ranked.append(ground)
+				_gate_built_ranked.append([ground, int(raw_id)])
+			if crowd.release_due(int(raw_id), ground > crowd.RELEASE_RADIUS_METRES
+					and not priority, _gate_now):
+				_gate_releases.append([ground, int(raw_id)])
+	else:
+		_gate_built += 1
+	# Paused bodies rank behind every other: a strike can still wake one for its
+	# clip (`set_animation_tier`), and its cape with it.
+	if crowd.gate and actor.wears_cape_cloth():
+		_gate_capes.append([_gate_camera_at.distance_squared_to(actor.global_position)
+			+ (1.0e9 if tier == AnimationGate.Tier.PAUSED else 0.0), actor])
+	if tier == AnimationGate.Tier.FULL and crowd.gate:
+		# Settled when the sweep ends (`_apply_crowd_full_rate`); a body that
+		# has just come into view animates meanwhile.
+		_gate_full_rate.append([_gate_camera_at.distance_squared_to(actor.global_position), actor])
+		if actor.animation_tier() == AnimationGate.Tier.PAUSED:
+			actor.set_animation_tier(AnimationGate.Tier.HALF, animation_gate)
+		return
+	actor.set_animation_tier(tier, animation_gate)
+
+## What needs the whole crowd: full-rate ranks, the cloth budget, the body
+## count and cap, the build ranks, releases, and the overhead declutter.
+func _finish_gate_sweep() -> void:
+	_gate_sweep_active = false
+	_gate_sweep_ids = []
+	_apply_crowd_full_rate(_gate_full_rate)
+	_apply_cloth_budget(_gate_capes)
+	_built_bodies = _gate_built
+	if crowd.lazy:
+		_body_cap_distance = INF
+		if crowd.body_cap > 0 and _gate_ranked.size() > crowd.body_cap:
+			_gate_ranked.sort()
+			_body_cap_distance = float(_gate_ranked[crowd.body_cap - 1])
+			for pair: Array in _gate_built_ranked:
+				if float(pair[0]) > _body_cap_distance + crowd.BODY_CAP_HYSTERESIS_METRES:
+					_gate_releases.append(pair)
+		crowd.set_candidates(_gate_build_candidates)
+		_release_bodies(_gate_releases)
+	_declutter_actor_overheads(_gate_fighting)
+	_gate_full_rate = []
+	_gate_capes = []
+
+## Full-rate animation for the bodies nearest the camera only. In a crowd of
+## more than `FULL_RATE_BODIES` animated bodies in view, the farther ones are
+## stepped at half rate - every other frame, by the time both frames covered,
+## so they move at the same speed - as bodies beyond 45 m always were. A clip
+## that does not loop plays out at half rate there too (`set_animation_tier`).
+func _apply_crowd_full_rate(full_rate: Array) -> void:
+	if full_rate.size() > crowd.full_rate_bodies:
+		full_rate.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var rank: int = 0
+	for entry: Array in full_rate:
+		# A body replaced during the sweep is not ranked; its successor is next time.
+		if not is_instance_valid(entry[1]):
+			continue
+		(entry[1] as ReplicatedActor3D).set_animation_tier(AnimationGate.Tier.FULL
+			if rank < crowd.full_rate_bodies else AnimationGate.Tier.HALF, animation_gate)
+		rank += 1
+
+## Cape cloth for the caped bodies nearest the camera only. The solver is the
+## largest per-body cost of an equipped crowd (about 0.2 ms a cape a frame on
+## the development laptop), so past `CLOTH_BODIES` a cape hangs as every
+## non-local cape already does below High quality. One that is simulating keeps
+## its cloth until it falls `CLOTH_HYSTERESIS` places past the limit.
+func _apply_cloth_budget(capes: Array) -> void:
+	if capes.size() > crowd.cloth_bodies:
+		capes.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var rank: int = 0
+	for entry: Array in capes:
+		if not is_instance_valid(entry[1]):
+			continue
+		var actor := entry[1] as ReplicatedActor3D
+		actor.set_cape_cloth_allowed(rank < crowd.cloth_bodies or (actor.cape_cloth_allowed()
+			and rank < crowd.cloth_bodies + crowd.CLOTH_HYSTERESIS))
+		rank += 1
+
+## Gives up the bodies `_update_animation_gate` found far out of range for long
+## enough, or past the body cap's distance by more than its hysteresis,
+## farthest first and a few a pass: each becomes a deferred node again.
+func _release_bodies(releases: Array) -> void:
+	if releases.is_empty():
+		return
+	releases.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
+	var done: Dictionary = {}
+	for pair: Array in releases:
+		if done.size() >= crowd.RELEASES_PER_PASS:
+			break
+		var id: int = int(pair[1])
+		if done.has(id) or not actor_nodes.has(id):
+			continue
+		done[id] = true
+		_replace_actor_node(id, false)
+		crowd.forget(id)
+		crowd.releases += 1
 
 ## Keep the target and nearby characters readable as crowds enter the view.
 ## Bodies and interaction targets remain independent of overhead visibility.
@@ -7296,12 +7729,11 @@ func _declutter_actor_overheads(target_id: int) -> void:
 ## close do not draw one's occupation through the other's name.
 static func overhead_block_rect(screen: Vector2, actor_name: String,
 		occupation: String = "", negative_status_count: int = 0) -> Rect2:
-	var width := maxf(110.0, ThemeDB.fallback_font.get_string_size(
-		actor_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0)
+	var width := maxf(110.0, _overhead_text_width(actor_name, 12) + 12.0)
 	var height := 38.0
 	if not occupation.is_empty():
-		width = maxf(width, ThemeDB.fallback_font.get_string_size("<%s>" % occupation,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, ReplicatedActor3D.OCCUPATION_FONT_SIZE).x + 12.0)
+		width = maxf(width, _overhead_text_width("<%s>" % occupation,
+			ReplicatedActor3D.OCCUPATION_FONT_SIZE) + 12.0)
 		height += ReplicatedActor3D.OCCUPATION_DROP
 	var top := 12.0
 	if negative_status_count > 0:
@@ -7310,6 +7742,21 @@ static func overhead_block_rect(screen: Vector2, actor_name: String,
 		top = rise + ReplicatedActor3D.NEGATIVE_STATUS_SIZE * 0.5 + 2.0 + StatusEffectIcons.extra_height(negative_status_count)
 		height += top - 12.0
 	return Rect2(screen - Vector2(width * 0.5, top), Vector2(width, height))
+
+## Text widths for the overhead blocks, by size and text. The declutter pass
+## measured every name in view with the font ten times a second; a crowd's
+## names do not change between passes. Emptied when it grows past a few
+## thousand entries, so a long session cannot grow it without bound.
+static var _overhead_text_widths: Dictionary = {}
+
+static func _overhead_text_width(text: String, font_size: int) -> float:
+	var key := "%d|%s" % [font_size, text]
+	if not _overhead_text_widths.has(key):
+		if _overhead_text_widths.size() >= 4096:
+			_overhead_text_widths.clear()
+		_overhead_text_widths[key] = ThemeDB.fallback_font.get_string_size(
+			text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	return float(_overhead_text_widths[key])
 
 ## How much of an actor's overhead block shows at this distance from the
 ## player: all of it up to `NAME_FADE_METRES` short of the name distance,
@@ -7934,6 +8381,9 @@ func _load_hud_settings() -> void:
 			config.get_value("graphics", "nameplates", true))
 		_set_name_distance(config.get_value(
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
+		_set_crowd_settings(config.get_value("graphics", "crowd_bodies",
+			SettingsWindowScript.CROWD_BODIES_DEFAULT), config.get_value(
+			"graphics", "swaying_capes", SettingsWindowScript.SWAYING_CAPES_DEFAULT))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
 		# keys.ini holds the bindings now. The settings file's old copy is read
@@ -7988,6 +8438,7 @@ func _load_hud_settings() -> void:
 	settings_window.call("restore_toggle", "combat_hud",
 		bool(extension_windows.get("combat_hud_enabled")))
 	settings_window.call("restore_name_distance", _name_distance_metres)
+	settings_window.call("restore_crowd_settings", _crowd_bodies, _swaying_capes)
 	for option_key: String in _hud_element_options:
 		settings_window.call("restore_toggle", option_key,
 			bool(_hud_element_options[option_key]))
@@ -8067,6 +8518,8 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "particles", _effects_enabled)
 	config.set_value("graphics", "nameplates", _nameplates_enabled)
 	config.set_value("graphics", "name_distance", _name_distance_metres)
+	config.set_value("graphics", "crowd_bodies", _crowd_bodies)
+	config.set_value("graphics", "swaying_capes", _swaying_capes)
 	config.set_value("graphics", "fps_limit", _fps_limit)
 	TargetMarkerStyle.write(config, _target_marker_style)
 	# The player's own choices, not what ELORIA_LOOK or ELORIA_LOOK_QUALITY
@@ -10663,12 +11116,13 @@ func _on_missile_fired(shot: Dictionary) -> void:
 		int(shot.get("target_actor_id", -1)))
 	if not from_value is Vector3 or not to_value is Vector3:
 		return
+	if not _admit_effect(&"missile", [int(shot.get("source_actor_id", -1)),
+			int(shot.get("target_actor_id", -1))]):
+		return
 	var missile := MissileFlight3D.new()
 	world_root.add_child(missile)
 	missile.configure(from_value as Vector3, to_value as Vector3, release_origin)
-	world_effects.append(missile)
-	world_effects = world_effects.filter(func(node: Variant) -> bool:
-		return is_instance_valid(node))
+	_track_effect(missile, &"missile")
 
 ## Objects the server put into this map after it loaded. Everything the client
 ## knew about a map used to arrive with the map, so nothing could change while
@@ -10698,16 +11152,16 @@ func _sync_placed_objects() -> void:
 func _on_teleport_seen(teleport: Dictionary) -> void:
 	if not _effects_enabled:
 		return
+	var at: Vector3 = adapter.tile_center(int(teleport.get("x", 0)),
+		int(teleport.get("y", 0)))
+	if not _admit_effect(&"spell", [], at):
+		return
 	var effect := WorldEffect3D.new()
 	world_root.add_child(effect)
 	# 1 is the beneficial class, which rises; 0 falls. Arriving rises out of
 	# the ground and leaving sinks into it.
-	effect.configure(1 if bool(teleport.get("arriving", true)) else 0,
-		adapter.tile_center(int(teleport.get("x", 0)),
-			int(teleport.get("y", 0))))
-	world_effects.append(effect)
-	world_effects = world_effects.filter(func(node: Variant) -> bool:
-		return is_instance_valid(node))
+	effect.configure(1 if bool(teleport.get("arriving", true)) else 0, at)
+	_track_effect(effect, &"spell")
 
 ## The sky the server said is over this map. Nothing here decides anything:
 ## what is falling and how hard is on the wire, because two players standing
@@ -10783,12 +11237,12 @@ func _on_ground_missile_fired(shot: Dictionary) -> void:
 		return
 	var landing: Vector3 = adapter.tile_center(
 		int(shot.get("x", 0)), int(shot.get("y", 0)))
+	if not _admit_effect(&"missile", [int(shot.get("source_actor_id", -1))]):
+		return
 	var missile := MissileFlight3D.new()
 	world_root.add_child(missile)
 	missile.configure(from_value as Vector3, landing, release_origin, true)
-	world_effects.append(missile)
-	world_effects = world_effects.filter(func(node: Variant) -> bool:
-		return is_instance_valid(node))
+	_track_effect(missile, &"missile")
 
 ## Draws what the server said just happened, where it happened.
 ##
@@ -10808,6 +11262,9 @@ func _on_special_effect_requested(effect: Dictionary) -> void:
 	var target_value: Variant = _actor_effect_position(int(effect.get("target_id", -1)))
 	if not _effects_enabled:
 		return
+	if not _admit_effect(&"spell", [int(effect.get("actor_id", -1)),
+			int(effect.get("target_id", -1))]):
+		return
 	var world_effect := WorldEffect3D.new()
 	world_root.add_child(world_effect)
 	world_effect.configure(int(effect.get("effect", -1)),
@@ -10816,9 +11273,7 @@ func _on_special_effect_requested(effect: Dictionary) -> void:
 		actor_nodes.get(int(effect.get("target_id", -1))) as Node3D)
 	if effect.has("release_delay"):
 		world_effect.configure_timing(float(effect.release_delay), float(effect.get("flight_duration", 0.0)))
-	world_effects.append(world_effect)
-	world_effects = world_effects.filter(func(node: Variant) -> bool:
-		return is_instance_valid(node))
+	_track_effect(world_effect, &"spell")
 
 ## The server asked an actor to play a named action. An action this client has
 ## no clip for plays nothing: `play_action` looks the name up in the animation
@@ -10846,6 +11301,44 @@ func _actor_effect_position(actor_id: int) -> Variant:
 	if not is_instance_valid(node):
 		return null
 	return (node as Node3D).global_position
+
+## Whether a combat visual of `kind` between these actors, or at `at`, is drawn
+## (live_effect_budget.gd). One involving the player, their target or their
+## selection always is. One whose actors are all beyond the draw distance is
+## not, since none of their bodies is drawn there either; the rest are drawn
+## while the budget has room.
+func _admit_effect(kind: StringName, actor_ids: Array, at := Vector3.INF) -> bool:
+	if not crowd.effects:
+		return true
+	var priority := false
+	var seen := false
+	for raw_id: Variant in actor_ids:
+		var id: int = int(raw_id)
+		if id < 0:
+			continue
+		priority = priority or _crowd_priority_actor(id)
+		var node: Variant = actor_nodes.get(id)
+		seen = seen or (is_instance_valid(node) and (node as ReplicatedActor3D).is_drawn())
+	if at.is_finite():
+		# Across the ground only: a tile's centre carries the map's flat
+		# fallback height, not the terrain's.
+		var reference: Vector3 = _crowd_reference_point()
+		seen = seen or Vector2(at.x - reference.x, at.z - reference.z).length() \
+			<= ACTOR_DRAW_DISTANCE_METRES
+	if not priority and not seen:
+		return false
+	return effect_budget.admit(kind, priority)
+
+## Keeps a combat visual in `world_effects` and counts it against the budget.
+## The list is compacted when it has doubled rather than filtered on every
+## append, which walked every live effect for each new one.
+func _track_effect(node: Node, kind: StringName) -> void:
+	effect_budget.track(node, kind)
+	world_effects.append(node)
+	if world_effects.size() > _world_effects_compact_at:
+		world_effects = world_effects.filter(func(effect: Variant) -> bool:
+			return is_instance_valid(effect))
+		_world_effects_compact_at = world_effects.size() * 2 + 32
 
 func _on_floating_feedback_requested(feedback: Dictionary) -> void:
 	# Gains that land together (a skill plus the overall total, or several stats
@@ -11937,6 +12430,19 @@ func _set_name_distance(value: Variant) -> void:
 		SettingsWindowScript.NAME_DISTANCE_MAX)
 	_animation_gate_refresh_msec = 0
 
+## The player's crowd settings, clamped to the sliders' ranges and handed to
+## the crowd presentation, which keeps any value the environment forces for a
+## benchmark. The next gate sweep applies them.
+func _set_crowd_settings(bodies: Variant, capes: Variant) -> void:
+	_crowd_bodies = clampi(int(bodies) if bodies is int or bodies is float
+		else SettingsWindowScript.CROWD_BODIES_DEFAULT,
+		SettingsWindowScript.CROWD_BODIES_MIN, SettingsWindowScript.CROWD_BODIES_MAX)
+	_swaying_capes = clampi(int(capes) if capes is int or capes is float
+		else SettingsWindowScript.SWAYING_CAPES_DEFAULT,
+		SettingsWindowScript.SWAYING_CAPES_MIN, SettingsWindowScript.SWAYING_CAPES_MAX)
+	crowd.set_player_budgets(_crowd_bodies, _swaying_capes)
+	_animation_gate_refresh_msec = 0
+
 ## Preferences apply locally. Only the target-mode and autogather buttons
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
@@ -12077,6 +12583,10 @@ func _on_client_setting_changed(section: String, key: String,
 			_apply_banner_options()
 		"name_distance":
 			_set_name_distance(value)
+		"crowd_bodies":
+			_set_crowd_settings(value, _swaying_capes)
+		"swaying_capes":
+			_set_crowd_settings(_crowd_bodies, value)
 		"combat_hud":
 			extension_windows.call("set_combat_hud_enabled", bool(value))
 		"rotation_sensitivity":
@@ -12301,9 +12811,10 @@ func _on_magic_state(data: Dictionary) -> void:
 		source.set_spell_variant(int(data.effect))
 		source.play_action(SpellPresentation.action_for_effect(int(data.effect)), true)
 	if not _effects_enabled: return
+	var origin: Vector3 = adapter.tile_center(int(data.x), int(data.y))
+	if not _admit_effect(&"spell", [int(data.get("actor_id", -1))], origin): return
 	var effect := WorldEffect3D.new()
 	world_root.add_child(effect)
-	var origin: Vector3 = adapter.tile_center(int(data.x), int(data.y))
 	var sampled: Variant = _navigation_ray_position(origin + Vector3(0, 200, 0), Vector3.DOWN)
 	if sampled is Vector3: origin.y = sampled.y
 	if is_instance_valid(source) and data.has("release_delay"):
@@ -12314,8 +12825,7 @@ func _on_magic_state(data: Dictionary) -> void:
 	effect.configure_area(float(data.get("radius", 4.0)) * adapter.metres_per_tile, str(data.get("scope", "burst")))
 	if data.has("release_delay"):
 		effect.configure_timing(float(data.release_delay), float(data.get("flight_duration", 0.0)))
-	world_effects.append(effect)
-	world_effects = world_effects.filter(func(node: Variant) -> bool: return is_instance_valid(node))
+	_track_effect(effect, &"spell")
 
 func _present_target_cast(data: Dictionary) -> void:
 	var caster := actor_nodes.get(int(data.get("actor_id", -1))) as ReplicatedActor3D
@@ -12347,13 +12857,18 @@ func _on_technique_effect(data: Dictionary) -> void:
 	else:
 		if key == "charge" and phase in ["land", "strike"]: source.end_charge_leap()
 		source.play_technique(key, phase)
-	if not _effects_enabled or get_tree().get_nodes_in_group("technique_visual_effects").size() >= 48: return
+	if not _effects_enabled: return
+	# The live-effect budget replaces the old 48-node ceiling, which asked the
+	# scene tree for the whole group on every technique.
+	if crowd.effects:
+		if not _admit_effect(&"technique", [int(data.get("actor_id", -1)),
+				int(data.get("target_id", -1))]): return
+	elif get_tree().get_nodes_in_group("technique_visual_effects").size() >= 48: return
 	var target := actor_nodes.get(int(data.get("target_id", -1))) as Node3D
 	var effect = preload("res://src/world/technique_effect_3d.gd").new()
 	world_root.add_child(effect)
 	effect.configure(key, phase, source, target, bool(data.get("hit", false)))
-	world_effects.append(effect)
-	world_effects = world_effects.filter(func(node: Variant) -> bool: return is_instance_valid(node))
+	_track_effect(effect, &"technique")
 
 func _charge_leap_route(source: ReplicatedActor3D, value: Variant) -> PackedVector3Array:
 	var route := PackedVector3Array()
@@ -12628,6 +13143,11 @@ func _is_player_actor(actor_id: int) -> bool:
 func _spawn_health_change_label(actor: ReplicatedActor3D, delta: int) -> void:
 	if not game_view.visible or not is_instance_valid(actor):
 		return
+	var priority: bool = _crowd_priority_actor(actor.actor_id)
+	# A body too far away to be drawn floats no number either, and past the
+	# live-effect budget only the player's own fight still does.
+	if crowd.effects and not priority and not actor.is_drawn():
+		return
 	var now := Time.get_ticks_msec()
 	for active: Label in _active_floating_labels:
 		if is_instance_valid(active) and int(active.get_meta("feedback_actor", -1)) == actor.actor_id \
@@ -12645,6 +13165,8 @@ func _spawn_health_change_label(actor: ReplicatedActor3D, delta: int) -> void:
 		viewport_scale = viewport_container.size / Vector2(main_viewport.size)
 	var screen_position: Vector2 = (viewport_container.position
 		+ viewport_position * viewport_scale)
+	if not effect_budget.admit(&"number", priority):
+		return
 	var label: Label = Label.new()
 	label.set_meta("feedback_actor", actor.actor_id)
 	label.set_meta("feedback_sign", signi(delta))
@@ -12658,6 +13180,7 @@ func _spawn_health_change_label(actor: ReplicatedActor3D, delta: int) -> void:
 	label.add_theme_color_override("font_color",
 		Color(0.42, 0.94, 0.45, 1.0) if delta > 0 else Color(0.96, 0.36, 0.30, 1.0))
 	_floating_feedback_layer.add_child(label)
+	effect_budget.track(label, &"number")
 	label.reset_size()
 	label.position = Vector2(screen_position.x - label.size.x * 0.5,
 		_floating_feedback_row(screen_position.y, screen_position.y))
@@ -13761,11 +14284,17 @@ func _sync_selection() -> void:
 	# Never disabled: with nobody selected it arms trade mode instead.
 	trade_button.tooltip_text = ("Request or accept trade with the selected player; both players must be within four tiles"
 		if can_trade else "Arm trade, then click a player to request or accept a trade; both players must be within four tiles")
-	for raw_id: Variant in actor_nodes.keys():
-		var id: int = int(raw_id)
-		var actor: ReplicatedActor3D = actor_nodes.get(id) as ReplicatedActor3D
-		if is_instance_valid(actor):
-			actor.set_selected(id == AppState.selected_actor_id)
+	# Only the actor losing the ring and the one gaining it change; a node built
+	# later is given its answer when it is built. This ran over every actor after
+	# every changed frame.
+	if _selection_ring_actor != AppState.selected_actor_id:
+		var previous: Variant = actor_nodes.get(_selection_ring_actor)
+		if is_instance_valid(previous):
+			(previous as ReplicatedActor3D).set_selected(false)
+		_selection_ring_actor = AppState.selected_actor_id
+	var selected: Variant = actor_nodes.get(AppState.selected_actor_id)
+	if is_instance_valid(selected):
+		(selected as ReplicatedActor3D).set_selected(true)
 
 ## What a left click on this actor does, in the terms the cursor table decides
 ## in. Its own function because the pointer and the click have to agree, and
