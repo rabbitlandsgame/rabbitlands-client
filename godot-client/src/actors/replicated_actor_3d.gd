@@ -4148,6 +4148,21 @@ func set_animation_tier(tier: int, gate: AnimationGate) -> void:
 func animation_tier() -> int:
 	return _animation_tier
 
+## A parked body (crowd_presentation.gd) is hidden while it waits to be worn
+## again, so nothing of it animates, whatever clip it was in: paused here, it
+## leaves the gate's stepped groups, which otherwise went on posing, solving and
+## skinning it every second or fourth frame for as long as it was parked.
+func pause_for_parking(gate: AnimationGate) -> void:
+	if is_instance_valid(_mount_visual) or animation_player == null:
+		return
+	_animation_tier = AnimationGate.Tier.PAUSED
+	gate.apply(animation_player, AnimationGate.Tier.PAUSED, _native_skeleton)
+	if gate.gate_skeletons:
+		_set_model_processing(false)
+	if _weapon_carry != null:
+		_weapon_carry.call("update_activity")
+	_refresh_cape_cloth_activity()
+
 ## A paused body has nothing to pose: its player is stopped and its cloth is
 ## asleep. Its skeleton still processed its modifiers and updated every frame,
 ## though, so a crowd paid skeleton work for every body off screen (the engine

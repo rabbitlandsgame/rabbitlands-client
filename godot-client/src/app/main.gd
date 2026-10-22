@@ -6049,7 +6049,9 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 				and not stale_node.is_model_deferred()
 				and crowd.park_node(int(id), stale_node,
 					str(stale_node.get_meta(&"identity_key", "")), now))
-			if not parked:
+			if parked:
+				stale_node.pause_for_parking(animation_gate)
+			else:
 				(stale_actor as Node).queue_free()
 		actor_nodes.erase(id)
 		crowd.forget(int(id))
@@ -6249,6 +6251,10 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	node.set_selected(int(id) == AppState.selected_actor_id)
 	node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 		<= ACTOR_DRAW_DISTANCE_METRES)
+	# Paused while parked; it animates meanwhile, as a body coming into view
+	# does, until the gate's next sweep gives it its tier.
+	node.set_animation_tier(AnimationGate.Tier.HALF if crowd.gate
+		else AnimationGate.Tier.FULL, animation_gate)
 
 ## Builds the bodies of deferred actors that have come within range, nearest
 ## first: the candidates are ranked on each gate pass, and this builds as many

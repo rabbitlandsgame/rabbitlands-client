@@ -30,6 +30,7 @@ func _run() -> void:
 	await _set_up()
 	await _test_lazy_bodies()
 	await _test_parking()
+	await _test_parked_body_paused()
 	await _test_release()
 	await _test_body_cap()
 	await _test_paused_tier()
@@ -233,6 +234,37 @@ func _test_parking() -> void:
 	_put([other])
 	await _sync()
 	_expect(_nodes().get(101) != before, "a recycled id with a different actor is built afresh")
+
+
+## A parked body leaves the gate's stepped groups and is stepped no more; a
+## revived one animates again.
+func _test_parked_body_paused() -> void:
+	var gate := _main.get("animation_gate") as AnimationGate
+	var body: ReplicatedActor3D = null
+	var body_id := -1
+	for raw_id: Variant in _nodes():
+		var candidate := _nodes()[raw_id] as ReplicatedActor3D
+		if candidate != null and int(raw_id) != LOCAL and not candidate.is_model_deferred() \
+				and candidate.animation_player != null:
+			body = candidate
+			body_id = int(raw_id)
+			break
+	if not _expect(body != null, "a built remote body exists for the parked-body check"):
+		return
+	body.set_animation_tier(AnimationGate.Tier.QUARTER, gate)
+	var stepped_before := gate.quarter_rate_count()
+	var record: Dictionary = (_app_state.get("actors") as Dictionary)[body_id]
+	_app_state.call("_on_packet", EloriaProtocol.ServerMessage.REMOVE_ACTOR,
+		PackedByteArray([body_id & 0xff, (body_id >> 8) & 0xff]))
+	await _sync()
+	_expect(gate.quarter_rate_count() == stepped_before - 1
+		and body.animation_tier() == AnimationGate.Tier.PAUSED
+		and not body.animation_player.active,
+		"a parked body is paused and no longer stepped by the gate")
+	_put([record])
+	await _sync()
+	_expect(_nodes().get(body_id) == body and body.animation_tier() != AnimationGate.Tier.PAUSED
+		and body.animation_player.active, "the revived body animates again")
 
 
 func _test_release() -> void:
