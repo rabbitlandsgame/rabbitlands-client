@@ -1796,7 +1796,9 @@ func _update_keyboard_movement() -> void:
 ## direction is sent when it changes, when the server changes the epoch (a map
 ## change) and as a keep-alive, instead of a MOVE_TO every 360 ms.
 func _update_keyboard_intent(direction: Vector2i, run: bool, now: int) -> void:
-	if _keyboard_moving and _keyboard_intent_epoch == Network.move_intent_epoch 			and direction == _keyboard_direction and run == _keyboard_running 			and now < _keyboard_refresh_msec:
+	if _keyboard_moving and _keyboard_intent_epoch == Network.move_intent_epoch \
+			and direction == _keyboard_direction and run == _keyboard_running \
+			and now < _keyboard_refresh_msec:
 		return
 	exterior_stream.pending_walk.clear()
 	var error: Error = Network.move_intent(direction, run)
