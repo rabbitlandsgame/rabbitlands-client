@@ -41,7 +41,7 @@ func wants_banner() -> bool:
 	return visible
 
 func _changed(section: StringName) -> void:
-	if section in [&"mount_states", &"map", &"authentication", &"local_actor"]:
+	if section in [&"mount_states", &"mount_deltas", &"mount_countdowns", &"map", &"authentication", &"local_actor"]:
 		_refresh()
 
 func _refresh() -> void:

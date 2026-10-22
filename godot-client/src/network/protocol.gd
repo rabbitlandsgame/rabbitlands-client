@@ -12,6 +12,7 @@ const MAX_PAYLOAD := 65532
 # Reserved raw codecs only; do not advertise before runtime integration.
 const MAP_STORAGE_COORDS_CAPABILITY := "map_storage_coords_v1"
 const CoordinateTransport = preload("res://src/network/coordinate_transport.gd")
+const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 
 ## The guild packet's permissions field: what the server says this reader may
 ## do. They live here, with the packet they arrive in, and the rank each power
@@ -126,6 +127,10 @@ enum ServerMessage {
 	ELORIA_ACTOR_OCCUPATIONS = 210,
 	ELORIA_MOUNT_STATES = 198,
 	ELORIA_QUEST_OFFERS = 199,
+	# Player interest (interest_protocol.gd), continuing the run down from the
+	# riding table: the dots of the players beyond the area of interest, the
+	# server's clock for the packets that follow it, and riding-table deltas.
+	ELORIA_PRESENCE = 197, ELORIA_SERVER_TIME = 196, ELORIA_MOUNT_DELTAS = 195,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -259,6 +264,12 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"signed_ashore_v1",
 	"actor16_v1",
 	"adjacent_actors_v1",
+	# Players within 80 tiles as actors, the rest as ELORIA_PRESENCE dots, and
+	# a cap on the actors shown, which the client lowers with the
+	# `actor_cap:<N>` token `client_capabilities` adds (interest_protocol.gd).
+	"player_interest_v1",
+	# ELORIA_SERVER_TIME stamps; remote steps are paced by when they happened.
+	"server_time_v1",
 	"almanac_v1",
 	"seasons_v1",
 	"combat_hud_v1",
@@ -289,6 +300,9 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"crystalback_mount_v1",
 	"rabbit_mount_v1",
 	"raptor_mount_v1",
+	# ELORIA_MOUNT_DELTAS: changed riders only, countdowns as server-time
+	# deadlines (mount_delta_state.gd).
+	"mount_deltas_v1",
 	"quest_offers_v1",
 	"actor_footprints_v1",
 	"actor_wardrobe_v1",
@@ -327,9 +341,13 @@ const CLIENT_CAPABILITIES: Array[String] = [
 ]
 
 ## `#clientcaps` is an ordinary chat command; the server parses it out of
-## RAW_TEXT and stores the set on the session.
-static func client_capabilities() -> PackedByteArray:
-	return chat("#clientcaps " + ",".join(PackedStringArray(CLIENT_CAPABILITIES)))
+## RAW_TEXT and stores the set on the session. A positive `actor_cap` adds the
+## player's cap as a value token after the list, which stays a list of names.
+static func client_capabilities(actor_cap := 0) -> PackedByteArray:
+	var declared := PackedStringArray(CLIENT_CAPABILITIES)
+	if actor_cap > 0:
+		declared.append(InterestProtocol.actor_cap_token(actor_cap))
+	return chat("#clientcaps " + ",".join(declared))
 
 ## Ask the server to use a combat technique. The server checks everything -
 ## manual, level, gear, cooldown, action points - and answers in chat and with
@@ -1121,6 +1139,12 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_actor_occupations(payload)
 		ServerMessage.ELORIA_MOUNT_STATES:
 			return preload("res://src/mounts/mount_protocol.gd").decode(payload)
+		ServerMessage.ELORIA_MOUNT_DELTAS:
+			return InterestProtocol.decode_mount_deltas(payload)
+		ServerMessage.ELORIA_PRESENCE:
+			return InterestProtocol.decode_presence(payload)
+		ServerMessage.ELORIA_SERVER_TIME:
+			return InterestProtocol.decode_server_time(payload)
 		ServerMessage.ELORIA_QUEST_OFFERS:
 			if payload.size() < 2 or payload.size() != 2 + u16(payload) * 2:
 				return {"type": "invalid", "error": "quest_offers_length"}

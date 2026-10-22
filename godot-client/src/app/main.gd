@@ -80,6 +80,8 @@ const MapViewScript := preload("res://src/world/map_view.gd")
 const MapMarkerOverlayScript := preload("res://src/ui/map_marker_overlay.gd")
 const ContinentMapScript := preload("res://src/ui/continent_map.gd")
 const MinimapMarkerOverlayScript := preload("res://src/ui/minimap_marker_overlay.gd")
+const NearbyIndicatorScript := preload("res://src/ui/nearby_indicator.gd")
+const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 const PlayerInfoPanelScript := preload("res://src/ui/player_info_panel.gd")
 const AudioDirectorScript := preload("res://src/audio/audio_director.gd")
 const AudioMix := preload("res://src/audio/audio_mix.gd")
@@ -405,6 +407,16 @@ var _trailer_capture_enabled := false
 var _trailer_capture_level := 0
 var _trailer_capture_layer: CanvasLayer
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
+## How many players and creatures this client asks the server for at once
+## (interest_protocol.gd); saved with the graphics settings.
+var _actor_cap := InterestProtocol.ACTOR_CAP_DEFAULT
+## "+N nearby" at the foot of the minimap (nearby_indicator.gd).
+var nearby_indicator: Label
+## A distant player's dot from the presence rows is drawn a size down from a
+## dot with a body under it: it is where they were up to a second ago.
+const PRESENCE_DOT_RADIUS := 3.0
+var _presence_tiles := PackedVector2Array()
+var _presence_mark_pool: Array[Dictionary] = []
 var _fps_limit := 0
 var _player_notes := ""
 ## True while the loaded package lets the hour drive its environment. An
@@ -1175,6 +1187,8 @@ func _ready() -> void:
 	minimap.add_child(minimap_marker_overlay)
 	minimap_marker_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	minimap_marker_overlay.configure(map_camera, map_viewport.size)
+	nearby_indicator = NearbyIndicatorScript.new()
+	minimap.add_child(nearby_indicator)
 	audio_director = AudioDirectorScript.new()
 	audio_director.surface_at_tile = _footstep_surface_at
 	add_child(audio_director)
@@ -2769,6 +2783,7 @@ func _refresh_unified_settings() -> void:
 	equipment_side.select(1 if _equipment_side == "right" else 0)
 	settings_window.restore_fps_limit(_fps_limit)
 	settings_window.restore_name_distance(_name_distance_metres)
+	settings_window.restore_value("actor_cap", _actor_cap)
 	settings_window.restore_look(LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.restore_quality(LookProfile.player_quality(), LookProfile.quality_forced())
 	casting_bar.refresh()
@@ -3570,6 +3585,8 @@ func _on_login_succeeded() -> void:
 	var capabilities_error: Error = Network.send_client_capabilities()
 	if capabilities_error != OK:
 		push_warning("#clientcaps failed: " + error_string(capabilities_error))
+	# A new session has said nothing yet about what it holds back.
+	nearby_indicator.show_count(0)
 	if _resync_after_reconnect:
 		# This session follows a dropped connection, so nothing that arrived
 		# before the drop can be trusted. Ask for the three authoritative
@@ -5196,6 +5213,11 @@ func _on_state_changed(path: StringName) -> void:
 		&"mount_states":
 			for mount_actor_id: Variant in actor_nodes:
 				_apply_actor_mount(mount_actor_id)
+		&"mount_deltas":
+			for mount_actor_id: Variant in AppState.mount_deltas.presentation_ids(actor_nodes):
+				_apply_actor_mount(mount_actor_id)
+		&"presence":
+			nearby_indicator.show_count(AppState.presence.nearby_hidden)
 		&"experience_state":
 			_sync_stats()
 		&"worn_slots", &"degraded_items":
@@ -7898,6 +7920,8 @@ func _load_hud_settings() -> void:
 			config.get_value("graphics", "nameplates", true))
 		_set_name_distance(config.get_value(
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
+		_set_actor_cap(config.get_value(
+			"graphics", "actor_cap", InterestProtocol.ACTOR_CAP_DEFAULT))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
 		# keys.ini holds the bindings now. The settings file's old copy is read
@@ -7952,6 +7976,7 @@ func _load_hud_settings() -> void:
 	settings_window.call("restore_toggle", "combat_hud",
 		bool(extension_windows.get("combat_hud_enabled")))
 	settings_window.call("restore_name_distance", _name_distance_metres)
+	settings_window.restore_value("actor_cap", _actor_cap)
 	for option_key: String in _hud_element_options:
 		settings_window.call("restore_toggle", option_key,
 			bool(_hud_element_options[option_key]))
@@ -8031,6 +8056,7 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "particles", _effects_enabled)
 	config.set_value("graphics", "nameplates", _nameplates_enabled)
 	config.set_value("graphics", "name_distance", _name_distance_metres)
+	config.set_value("graphics", "actor_cap", _actor_cap)
 	config.set_value("graphics", "fps_limit", _fps_limit)
 	TargetMarkerStyle.write(config, _target_marker_style)
 	# The player's own choices, not what ELORIA_LOOK or ELORIA_LOOK_QUALITY
@@ -8531,6 +8557,43 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 	marks.append_array(_current_service_marks())
 	marks.append_array(_harvest_grouping_marks())
 	marks.append_array(quest_trail.map_marks())
+	marks.append_array(_presence_marks())
+	return marks
+
+## Players beyond the area of interest, from the server's once-a-second
+## presence rows (presence_state.gd): a player's mark without a body under it.
+## Players with a body are skipped there; they have their own mark above.
+##
+## Presence dots are all beyond the area of interest, so while only the
+## minimap is open most of them are off it: those beyond the corner of its view
+## are skipped before any mark is made. The marks themselves are kept and
+## moved rather than made afresh for every refresh.
+func _presence_marks() -> Array[Dictionary]:
+	var marks: Array[Dictionary] = []
+	if AppState.presence.dot_count() == 0:
+		return marks
+	var centre := Vector2.ZERO
+	var reach := INF
+	var own: Dictionary = AppState.actors.get(AppState.local_actor_id, {}) as Dictionary
+	if not full_map.visible and not own.is_empty():
+		centre = Vector2(float(own.get("x", 0)), float(own.get("y", 0)))
+		# Half the view's height to a corner is 0.71 of it; the rest is margin.
+		reach = map_camera.size * 0.75 / maxf(adapter.metres_per_tile, 0.01)
+	AppState.presence.tiles(Time.get_ticks_msec(), AppState.actors, _presence_tiles,
+		centre, reach)
+	while _presence_mark_pool.size() < _presence_tiles.size():
+		_presence_mark_pool.append({"position": Vector3.ZERO, "type": &"player",
+			"colour": ReplicatedActor3D.MAP_DOT_COLOUR, "radius": PRESENCE_DOT_RADIUS})
+	# The adapter is affine, so one tile's centre and its two steps place
+	# every dot without a call per dot.
+	var origin: Vector3 = adapter.server_to_godot(0.5, 0.5)
+	var step_x: Vector3 = adapter.server_to_godot(1.5, 0.5) - origin
+	var step_y: Vector3 = adapter.server_to_godot(0.5, 1.5) - origin
+	for index: int in range(_presence_tiles.size()):
+		var tile: Vector2 = _presence_tiles[index]
+		var mark: Dictionary = _presence_mark_pool[index]
+		mark["position"] = origin + step_x * tile.x + step_y * tile.y
+		marks.append(mark)
 	return marks
 
 func _current_service_records() -> Array:
@@ -11901,6 +11964,12 @@ func _set_name_distance(value: Variant) -> void:
 		SettingsWindowScript.NAME_DISTANCE_MAX)
 	_animation_gate_refresh_msec = 0
 
+## The actor cap is announced to the server with the capabilities at login
+## (network_client.gd `declared_actor_cap`).
+func _set_actor_cap(value: Variant) -> void:
+	_actor_cap = InterestProtocol.clamp_actor_cap(value)
+	Network.declared_actor_cap = _actor_cap
+
 ## Preferences apply locally. Only the target-mode and autogather buttons
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
@@ -12041,6 +12110,8 @@ func _on_client_setting_changed(section: String, key: String,
 			_apply_banner_options()
 		"name_distance":
 			_set_name_distance(value)
+		"actor_cap":
+			_set_actor_cap(value)
 		"combat_hud":
 			extension_windows.call("set_combat_hud_enabled", bool(value))
 		"rotation_sensitivity":

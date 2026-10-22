@@ -14,6 +14,7 @@ extends Control
 ## autoload singletons are registered, and this reads `AppState` directly.
 
 const AudioMix := preload("res://src/audio/audio_mix.gd")
+const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 const PANEL_SIZE := Vector2(960.0, 520.0)
 ## Nothing may cover the fixed resource rail down the right-hand edge.
 const RESERVED_RIGHT_RAIL := 96.0
@@ -474,6 +475,7 @@ func _build_graphics() -> void:
 	_add_toggle(page, "particles", tr("ELORIA_SETTINGS_PARTICLES"), true)
 	_add_toggle(page, "nameplates", tr("ELORIA_SETTINGS_NAMEPLATES"), true)
 	_add_name_distance_row(page)
+	_add_actor_cap_row(page)
 	# The combat box can also be dismissed from its own right-click menu, so
 	# this is the way back once a player has done that.
 	_add_map_cache_row(page)
@@ -599,6 +601,18 @@ func restore_name_distance(metres: float) -> void:
 
 func _show_name_distance(metres: float) -> void:
 	name_distance_value.text = "%d m" % roundi(metres)
+
+## How many players and creatures the server is asked to send at once. A
+## number rather than a slider: it is a count the player picks, in tens, and
+## the hint says what the server does with it.
+func _add_actor_cap_row(page: VBoxContainer) -> void:
+	_add_number(page, "actor_cap", tr("ELORIA_SETTINGS_ACTOR_CAP"),
+		InterestProtocol.ACTOR_CAP_MINIMUM, InterestProtocol.ACTOR_CAP_MAXIMUM,
+		InterestProtocol.ACTOR_CAP_DEFAULT, InterestProtocol.ACTOR_CAP_STEP)
+	var row := page.get_child(page.get_child_count() - 1) as Control
+	row.tooltip_text = tr("ELORIA_SETTINGS_ACTOR_CAP_HINT")
+	for child: Node in row.get_children():
+		(child as Control).tooltip_text = row.tooltip_text
 
 ## The map cache: a switch, what it is costing, and a way to be rid of it.
 ##

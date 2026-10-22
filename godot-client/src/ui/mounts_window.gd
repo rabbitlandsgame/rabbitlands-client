@@ -274,7 +274,7 @@ func _state() -> Dictionary:
 	return AppState.actor_mounts.get(AppState.local_actor_id, {})
 
 func _changed(section: StringName) -> void:
-	if section in [&"mount_states", &"map", &"local_actor", &"authentication"]:
+	if section in [&"mount_states", &"mount_deltas", &"mount_countdowns", &"map", &"local_actor", &"authentication"]:
 		if not AppState.authenticated:
 			close()
 		sync()

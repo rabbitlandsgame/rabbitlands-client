@@ -70,6 +70,9 @@ func _init() -> void:
 		"actor_occupations_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACTOR_OCCUPATIONS,
 		"adjacent_actors_v1": EloriaProtocol.ServerMessage.ELORIA_ADJACENT_MAPS,
+		"player_interest_v1": EloriaProtocol.ServerMessage.ELORIA_PRESENCE,
+		"server_time_v1": EloriaProtocol.ServerMessage.ELORIA_SERVER_TIME,
+		"mount_deltas_v1": EloriaProtocol.ServerMessage.ELORIA_MOUNT_DELTAS,
 		"actor_footprints_v1":
 			EloriaProtocol.ServerMessage.ELORIA_ACTOR_FOOTPRINTS,
 		"attribute_state_v1":
@@ -160,6 +163,13 @@ func _init() -> void:
 		EloriaProtocol.ServerMessage.ELORIA_ACTOR_OCCUPATIONS:
 			"01005b00" + "47726f76652d4b6565706572" + "00",
 		EloriaProtocol.ServerMessage.ELORIA_QUEST_OFFERS: "01005b00",
+		# One distant player at (100, 200), with three players and two
+		# creatures near by held back by a cap of 160.
+		EloriaProtocol.ServerMessage.ELORIA_PRESENCE:
+			"01015058a000030002000100" + "5b006400c80000",
+		EloriaProtocol.ServerMessage.ELORIA_SERVER_TIME: "e8030000",
+		EloriaProtocol.ServerMessage.ELORIA_MOUNT_DELTAS:
+			'{"schema_version":2,"map":"landfall","full":true,"states":[],"removed":[]}'.to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.ELORIA_EXPERIENCE_STATE: "0000",
 		# No creature larger than one tile in this profile: a real
 		# answer, and the one an unchanged content pack still gives.

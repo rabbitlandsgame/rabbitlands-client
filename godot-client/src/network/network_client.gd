@@ -343,8 +343,12 @@ func set_sitting(sitting: bool) -> Error:
 func turn(left: bool) -> Error:
 	return send_frame(EloriaProtocol.turn(left))
 
+## How many players and creatures this client asks for at once, announced
+## with the capabilities (interest_protocol.gd). Main sets it from the setting.
+var declared_actor_cap: int = preload("res://src/network/interest_protocol.gd").ACTOR_CAP_DEFAULT
+
 func send_client_capabilities() -> Error:
-	return send_frame(EloriaProtocol.client_capabilities())
+	return send_frame(EloriaProtocol.client_capabilities(declared_actor_cap))
 
 func send_chat(text: String) -> Error:
 	return send_frame(EloriaProtocol.chat(text))
