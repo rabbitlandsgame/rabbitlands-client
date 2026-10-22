@@ -57,9 +57,11 @@ A parked body's animation is paused, so the gate does not go on stepping it
 while it waits; a revived one animates at half rate until the gate's next
 sweep gives it its tier.
 
-**Body cap (optional, off by default).** With `body_cap` above zero, only the
-nearest `body_cap` actors in range have bodies, not counting the player, their
-target and their selection. The cap's distance is that of the cap-th nearest
+**Body cap (a player setting, 160 by default).** Graphics > "Characters drawn in
+a crowd" (40-300) sets `body_cap`: only the nearest `body_cap` actors in range
+have bodies, not counting the player, their target and their selection. The
+default is the Phase 4 server cap, so once that cap is live the client draws
+everything the server sends. The cap's distance is that of the cap-th nearest
 actor in range; deferred actors inside it are built, and a body is given up
 only once it is `BODY_CAP_HYSTERESIS_METRES` (8 m) farther out than that, so an
 actor on the boundary does not flip as the crowd mills. Past the cap an actor
@@ -98,14 +100,15 @@ the gate part on:
   pause, but at half rate rather than full (quarter rate with the quarter
   tier): in a fight the bodies behind the camera strike every round, and each
   strike used to wake them to full rate.
-- Cape cloth is simulated for at most `CLOTH_BODIES` (8) remote caped bodies,
-  the nearest the camera. A simulating cape claims its place as if it were
-  `CLOTH_HYSTERESIS` (4) places nearer than it is, so it keeps its cloth until
-  a cape that much nearer needs the place or it falls that far past the limit,
-  and capes on the boundary do not take turns as a crowd mills; the limit
-  itself is never exceeded. The others hang as every non-local cape already
-  does at Medium and Low graphics quality. The solver is the largest single
-  per-body cost of an equipped crowd.
+- Cape cloth is simulated for at most `CLOTH_BODIES` (8; Graphics > "Swaying
+  capes in a crowd", 0-32) remote caped bodies, the nearest the camera. A
+  simulating cape claims its place as if it were `CLOTH_HYSTERESIS` (4) places
+  nearer than it is, so it keeps its cloth until a cape that much nearer needs
+  the place or it falls that far past the limit, and capes on the boundary do
+  not take turns as a crowd mills; the limit itself is never exceeded. The
+  others hang as every non-local cape already does at Medium and Low graphics
+  quality. The solver was the largest single per-body cost of an equipped
+  crowd.
 - The gate's walk over every actor is spread over `GATE_SWEEP_SLICES` (6)
   frames; the decisions that need the whole crowd (full-rate ranks, the cloth
   budget, build ranks, releases) are taken when a sweep ends, and the overhead
@@ -152,9 +155,12 @@ against the client without it:
 
 `stagger` and `quarter` refine the gate and are off without it.
 
-`RABBITLANDS_CROWD_BODY_CAP` sets the body cap (default 0, off).
-`RABBITLANDS_CROWD_TUNING` overrides the full-rate, half-rate and cloth
-budgets for a measurement (`full=24,half=8,cloth=4`). The per-frame loop changes are not
+`RABBITLANDS_CROWD_BODY_CAP` forces the body cap for a session (0 turns it off)
+and `RABBITLANDS_CROWD_TUNING` the full-rate, half-rate and cloth budgets
+(`full=24,half=8,cloth=4`); either takes precedence over the player's settings,
+which are kept but not applied. The benchmark launcher's `--body-cap` and
+`--tuning` set them; left unset, a run uses the player defaults (160
+characters, 8 capes). The per-frame loop changes are not
 switchable: they change no behaviour.
 
 ## Benchmark
@@ -204,6 +210,31 @@ sets the graphics quality through `ELORIA_LOOK_QUALITY`. `--diagnostics
 no_animation,no_overhead,no_ground` freezes every AnimationPlayer, hides the
 overhead blocks or skips the ground rays, for attribution only.
 
+`--replay <recording>.rlrec` (driver `replay`) measures a real session instead
+of a synthetic crowd. The game server can record every connection's frames
+(format RLREC1: a magic line, a JSON header line, then records of kind,
+monotonic nanoseconds and length); the replay takes one connection, makes Main
+that player (its `YOU_ARE`) on the map it stood on at the start offset, applies
+everything recorded before `--replay-start-ms` (default 30000 ms after
+`YOU_ARE`) a second of recorded time per frame, without the login answers or
+that time's effects, animations, numbers and sounds, and waits until the crowd
+is presented. From the start offset every outbound frame reaches AppState in
+the first frame after its recorded time, as a socket read would deliver it, for
+the warmup and then the sample. The replay's one cell, `replay-<map>`, reports
+the same fields plus what the recording did during the sample (frames
+delivered, spawns, removals, map changes) and the crowd AppState knew each
+frame (`actorRecords`, `actorNodes`); it fails if the player changes map during
+the sample or the recording ends before it. Its memory delta runs from the map
+alone to the presented crowd, so it includes the first load of every model the
+recording shows. Recordings hold what players said and did: keep them, and
+reports made from them, outside this repository.
+
+```sh
+python tests/integration/run_crowd_presentation_benchmark.py --godot <Godot.exe> \
+    --mode headless --variants all,legacy --replay <recording>.rlrec \
+    --replay-start-ms 30000 --warmup-ms 5000 --sample-ms 60000 --out-dir <private dir>
+```
+
 The frame rate is capped at 60 (`RABBITLANDS_CROWD_BENCH_FPS_CAP`), as a 60 Hz
 display caps it, so the share of frames that carry a packet tick is what it is
 in play; an uncapped headless loop thins those frames out and flatters p95. A
@@ -244,5 +275,6 @@ band layouts describe the client before this policy.
 
 `tests/test_crowd_presentation.gd` covers the policy switches, the effect
 budget, deferred and built arrivals, nearest-first builds, building on
-approach, parking and revival, giving a far body up, the body cap, the paused
-tier stopping a skeleton and bulk removal.
+approach, parking and revival, giving a far body up, the body cap, the two
+player settings and their ranges, the paused and half-rate tiers and bulk
+removal.

@@ -1,5 +1,20 @@
 extends Node
 
+const ServerClockScript := preload("res://src/network/server_clock.gd")
+const ServerTimePacing := preload("res://src/actors/server_time_pacing.gd")
+const PresenceStateScript := preload("res://src/state/presence_state.gd")
+const MountDeltaStateScript := preload("res://src/mounts/mount_delta_state.gd")
+## A stamp times the steps read within this long of it. Every write a
+## stamping server makes opens with a stamp, so a step read later than a few
+## frames after the last one came from a send that carried none.
+const FRAME_STAMP_VALID_MSEC := 250
+## EL's HUMAN, COMPUTER_CONTROLLED_HUMAN and PKABLE_HUMAN: the actor kinds that
+## are players (main.gd `_minimap_actor_type`).
+const PLAYER_ACTOR_KINDS: Array[int] = [1, 3, 4]
+## How often the player's own calling, combat lock and gallop endurance are
+## restated between riding deltas: as often as the complete tables sent them.
+const MOUNT_COUNTDOWN_MSEC := 100
+
 signal state_changed(path: StringName)
 signal login_succeeded
 signal login_failed(message: String)
@@ -193,6 +208,22 @@ var experience64: Dictionary = {}
 ## so without this a two-by-two creature would be drawn half a tile off the
 ## ground the server has reserved for it.
 var actor_footprints: Dictionary = {}
+## The server's clock, learned from stamped frames (Phase 4). Unsynced, and
+## unused, until a server that stamps its frames sends the first one.
+var server_clock = ServerClockScript.new()
+## Players beyond the area of interest as map dots, and the "+N nearby" count.
+var presence = PresenceStateScript.new()
+## The riding table kept by deltas; see mount_delta_state.gd.
+var mount_deltas = MountDeltaStateScript.new()
+## Whether this connection has had a stamped frame, the local time the steps
+## of the newest one were taken at, and when it was read.
+var _frame_stamps_seen := false
+var _frame_step_local_msec := 0
+var _frame_stamp_read_msec := 0
+## Counts presentation passes (`take_changed_actors`), so the steps folded into
+## one pass keep the time of the first of them.
+var _presentation_pass := 0
+var _mount_countdown_msec := 0
 
 ## The footprint of an actor type, defaulting to a single tile.
 func mark_actor_changed(actor_id: int) -> void:
@@ -204,6 +235,7 @@ func mark_all_actors_changed() -> void:
 
 ## The changed set, emptied for the next frame.
 func take_changed_actors() -> Dictionary:
+	_presentation_pass += 1
 	var taken: Dictionary = changed_actors
 	changed_actors = {}
 	return taken
@@ -240,6 +272,77 @@ func _settle_mount_handoff(actor_id: int) -> void:
 			or str(actor.get("name", "")).to_lower() != handoff.owner
 			or (handoff.confirmed and row.get("map", "") == actor.get("map", ""))):
 		_mount_handoffs.erase(actor_id)
+
+## An ELORIA_MOUNT_DELTAS update (mount_delta_state.gd). A whole table
+## confirms every rider carried across a seam the way a complete table does; a
+## delta confirms the riders it names. Presentation re-binds only the actors
+## the update touched (`&"mount_deltas"`).
+func _apply_mount_update(event: Dictionary) -> void:
+	if not mount_deltas.apply(event, actor_mounts, current_map, server_clock,
+			Time.get_ticks_msec()):
+		return
+	for actor_id: int in _mount_handoffs.keys():
+		if mount_deltas.whole_table or mount_deltas.changed_ids.has(actor_id):
+			_mount_handoffs[actor_id]["confirmed"] = true
+			_settle_mount_handoff(actor_id)
+	state_changed.emit(&"mount_deltas")
+
+## A frame the server stamped with its clock: the clock learns from it, and
+## the steps read with it are timed by it (server_time_pacing.gd).
+func _observe_frame_time(stamp: int) -> void:
+	var now: int = Time.get_ticks_msec()
+	server_clock.observe(stamp, now)
+	_frame_stamps_seen = true
+	_frame_step_local_msec = server_clock.to_local_msec(stamp)
+	_frame_stamp_read_msec = now
+
+## The time an actor's step was taken, put on its row for the actor's pacing.
+## Every step either carries the time of the stamp it came with or carries
+## none: an actor's row keeps its keys from packet to packet, so a step that
+## came without a current stamp - a send the server left unstamped, or stamps
+## that stopped - must not be timed by the last one, long past. A connection
+## that has never had a stamp leaves every actor on arrival-time pacing, and
+## the player's own actor stays on it too: its steps answer its own input.
+func _stamp_step(actor_id: int, actor_command: int) -> void:
+	if not ServerTimePacing.is_step_command(actor_command):
+		return
+	var actor: Dictionary = actors[actor_id]
+	var now: int = Time.get_ticks_msec()
+	if (_frame_stamps_seen and actor_id != local_actor_id
+			and now - _frame_stamp_read_msec <= FRAME_STAMP_VALID_MSEC):
+		ServerTimePacing.stamp(actor, _frame_step_local_msec,
+			server_clock.playout_delay_msec(now) / 1000.0, _presentation_pass)
+	elif actor.has(ServerTimePacing.STEP_KEY):
+		ServerTimePacing.unstamp(actor)
+
+## The same for the native reducer's path. A row can only hold a stamp on a
+## connection that has had one (a dropped connection clears both), so there is
+## nothing to take off before the first.
+func _stamp_native_steps(payload: PackedByteArray) -> void:
+	if not _frame_stamps_seen:
+		return
+	var now: int = Time.get_ticks_msec()
+	var current: bool = now - _frame_stamp_read_msec <= FRAME_STAMP_VALID_MSEC
+	ServerTimePacing.stamp_payload(actors, payload,
+		_frame_step_local_msec if current else -1,
+		server_clock.playout_delay_msec(now) / 1000.0, _presentation_pass,
+		local_actor_id)
+
+## Players leaving full replication keep a dot where they were last drawn
+## until the next presence rows place them (presence_state.gd `hand_over`).
+func _hand_over_presence(actor_ids: Array) -> void:
+	if not presence.active:
+		return
+	var now: int = Time.get_ticks_msec()
+	for raw_id: Variant in actor_ids:
+		var actor_id: int = int(raw_id)
+		var actor: Dictionary = actors.get(actor_id, {}) as Dictionary
+		if (actor.is_empty() or actor_id == local_actor_id
+				or int(actor.get("kind", 0)) not in PLAYER_ACTOR_KINDS
+				or str(actor.get("map", current_map)) != current_map):
+			continue
+		presence.hand_over(actor_id, Vector2i(int(actor.get("x", 0)),
+			int(actor.get("y", 0))), now)
 
 func footprint_for_actor_type(actor_type: int) -> Vector2i:
 	var size: Variant = actor_footprints.get(actor_type)
@@ -392,6 +495,18 @@ var recent_protocol_errors: Array[Dictionary] = []
 var last_clock_sync_msec := 0
 var invasion_assistant: Dictionary = {"open": false}
 
+## A riding delta states the player's own countdowns as deadlines and is not
+## resent while they run, so they are counted down here; `&"mount_countdowns"`
+## tells the banner and the mounts window, as `&"mount_states"` did when every
+## table restated them. One lookup a tick with nothing riding.
+func _process(_delta: float) -> void:
+	var now: int = Time.get_ticks_msec()
+	if now < _mount_countdown_msec:
+		return
+	_mount_countdown_msec = now + MOUNT_COUNTDOWN_MSEC
+	if mount_deltas.refresh(actor_mounts, local_actor_id, now):
+		state_changed.emit(&"mount_countdowns")
+
 func _ready() -> void:
 	_initialize_native_crowd_reducer()
 	Network.connection_state_changed.connect(_on_connection_state_changed)
@@ -429,6 +544,7 @@ func _try_native_actor_commands(command: int,
 		"changed_ids", PackedInt32Array()) as PackedInt32Array
 	for actor_id: int in native_changed_ids:
 		mark_actor_changed(actor_id)
+	_stamp_native_steps(payload)
 	state_changed.emit(&"actors")
 	return true
 
@@ -501,6 +617,10 @@ func _on_connection_state_changed(value: String) -> void:
 		actor_occupations.clear()
 		actor_mounts.clear()
 		_mount_handoffs.clear()
+		mount_deltas.reset()
+		presence.reset()
+		server_clock.reset()
+		_frame_stamps_seen = false
 		quest_offer_actors.clear()
 		experience64.clear()
 		# Per profile rather than per character, but a different server may
@@ -639,6 +759,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"change_map":
 			current_map = event.map_name
 			_begin_mount_handoff()
+			presence.clear_map(current_map)
 			# The new map's objects arrive in their own packet; anything held
 			# for the old map is stale the moment the change lands.
 			map_objects.clear()
@@ -682,6 +803,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			mark_actor_changed(int(event.actor_id))
 			state_changed.emit(&"actors")
 		"remove_actor":
+			_hand_over_presence(event.actor_ids)
 			for removed_actor_value: Variant in event.actor_ids:
 				var removed_actor_id: int = int(removed_actor_value)
 				actors.erase(removed_actor_id)
@@ -711,6 +833,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 					var actor_command: int = int(command_event.get("command", 0))
 					var actor: Dictionary = actors[actor_id]
 					actors[actor_id] = ActorReducer.apply_command(actor, actor_command)
+					_stamp_step(actor_id, actor_command)
 					if actor_id == local_actor_id and actor_command == 19:
 						combat_state = _empty_combat_state()
 						state_changed.emit(&"combat_state")
@@ -1262,6 +1385,16 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 					_mount_handoffs[actor_id]["confirmed"] = true
 					_settle_mount_handoff(actor_id)
 				state_changed.emit(&"mount_states")
+		"mount_update":
+			_apply_mount_update(event)
+		"server_time":
+			_observe_frame_time(int(event.server_ms))
+		"presence":
+			# Always the map the client stands on: a change of map clears the
+			# dots, and the new map's snapshot follows it.
+			presence.apply_snapshot(current_map, event.ids, event.tiles, Time.get_ticks_msec())
+			presence.set_header(int(event.cap), int(event.nearby_hidden))
+			state_changed.emit(&"presence")
 		"actor_occupations":
 			# An empty row is honoured the way an empty title is: it takes the
 			# line off rather than leaving the last one standing.
@@ -1386,6 +1519,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			for raw_message: Variant in event.messages:
 				mail.append((raw_message as Dictionary).duplicate(true))
 			state_changed.emit(&"mail")
+		"move_intent":
+			Network.apply_move_intent_state(event)
+			state_changed.emit(&"move_intent")
 		"navigation":
 			navigation = {"active": bool(event.active), "x": int(event.x),
 				"y": int(event.y), "distance": int(event.distance),

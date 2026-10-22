@@ -33,6 +33,7 @@ func _run() -> void:
 	await _test_parked_body_paused()
 	await _test_release()
 	await _test_body_cap()
+	_test_player_settings()
 	await _test_paused_tier()
 	_test_rate_ranking()
 	_test_cloth_budget()
@@ -44,8 +45,16 @@ func _run() -> void:
 func _test_policy_parsing() -> void:
 	var policy: RefCounted = CROWD.new()
 	policy.call("configure", "")
-	_expect(policy.lazy and policy.gate and policy.effects and policy.park and policy.body_cap == 0,
-		"an empty setting is the full crowd presentation, no body cap")
+	_expect(policy.lazy and policy.gate and policy.effects and policy.park
+		and policy.body_cap == CROWD.BODY_CAP_DEFAULT and policy.cloth_bodies == CROWD.CLOTH_BODIES,
+		"an empty setting is the full crowd presentation, with the default cap and cloth budget")
+	policy.call("set_player_budgets", 90, 3)
+	_expect(policy.body_cap == 90 and policy.cloth_bodies == 3,
+		"the player's crowd settings set the cap and the cloth budget")
+	policy.call("configure", "", "0", "cloth=12")
+	policy.call("set_player_budgets", 90, 3)
+	_expect(policy.body_cap == 0 and policy.cloth_bodies == 12,
+		"a benchmark's environment keeps its own cap (0 = off) and cloth budget over the player's")
 	policy.call("configure", "legacy")
 	_expect(not policy.lazy and not policy.gate and not policy.effects and not policy.park,
 		"legacy switches every part off")
@@ -316,6 +325,25 @@ func _test_body_cap() -> void:
 	for pass_index: int in range(6):
 		await _gate_and_build()
 	_expect(not is_instance_valid(far) or not far.crowd_hidden(), "without the cap it is shown again")
+
+
+## The two Graphics settings reach the crowd presentation, within their ranges.
+func _test_player_settings() -> void:
+	var crowd: RefCounted = _main.get("crowd")
+	var panel := (_main.get("settings_window") as Control).get("panel") as Control
+	var bodies := panel.find_child("crowd_bodies", true, false) as HSlider
+	var capes := panel.find_child("swaying_capes", true, false) as HSlider
+	_expect(bodies != null and capes != null and int(bodies.value) == 160 and int(capes.value) == 8,
+		"Graphics offers both crowd settings, at 160 characters and 8 capes by default (%s, %s)" % [
+			str(bodies.value) if bodies != null else "missing", str(capes.value) if capes != null else "missing"])
+	_main.call("_set_crowd_settings", 120, 4)
+	_expect(int(crowd.get("body_cap")) == 120 and int(crowd.get("cloth_bodies")) == 4,
+		"a changed setting reaches the crowd presentation")
+	_main.call("_set_crowd_settings", 5, 99)
+	_expect(int(crowd.get("body_cap")) == 40 and int(crowd.get("cloth_bodies")) == 32,
+		"settings are held to their sliders' ranges")
+	_main.call("_set_crowd_settings", 160, 8)
+	crowd.set("body_cap", 0)
 
 
 func _test_paused_tier() -> void:

@@ -82,6 +82,8 @@ const MapViewScript := preload("res://src/world/map_view.gd")
 const MapMarkerOverlayScript := preload("res://src/ui/map_marker_overlay.gd")
 const ContinentMapScript := preload("res://src/ui/continent_map.gd")
 const MinimapMarkerOverlayScript := preload("res://src/ui/minimap_marker_overlay.gd")
+const NearbyIndicatorScript := preload("res://src/ui/nearby_indicator.gd")
+const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 const PlayerInfoPanelScript := preload("res://src/ui/player_info_panel.gd")
 const AudioDirectorScript := preload("res://src/audio/audio_director.gd")
 const AudioMix := preload("res://src/audio/audio_mix.gd")
@@ -408,6 +410,21 @@ var _trailer_capture_enabled := false
 var _trailer_capture_level := 0
 var _trailer_capture_layer: CanvasLayer
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
+## The player's crowd settings (Graphics): how many other actors are drawn with
+## a body at once, and how many of the nearest other capes sway at High.
+var _crowd_bodies := SettingsWindowScript.CROWD_BODIES_DEFAULT
+var _swaying_capes := SettingsWindowScript.SWAYING_CAPES_DEFAULT
+## "+N nearby" in the lower corner of the minimap (nearby_indicator.gd).
+var nearby_indicator: Label
+## A distant player's dot from the presence rows is drawn a size down from a
+## dot with a body under it: it is where they were up to a second ago.
+const PRESENCE_DOT_RADIUS := 3.0
+## How long the crowd setting must rest before a changed actor cap is
+## re-declared to the server, and which change is the latest.
+const ACTOR_CAP_REDECLARE_SECONDS := 2.0
+var _actor_cap_declaration := 0
+var _presence_tiles := PackedVector2Array()
+var _presence_mark_pool: Array[Dictionary] = []
 var _fps_limit := 0
 var _player_notes := ""
 ## True while the loaded package lets the hour drive its environment. An
@@ -670,6 +687,9 @@ var _keyboard_running := false
 var _keyboard_direction := Vector2i.ZERO
 var _keyboard_goal_tile := Vector2i(-99999, -99999)
 var _keyboard_refresh_msec := 0
+## The intent epoch the held direction was last sent under, or -1 when the
+## keyboard is walking by MOVE_TO (or not at all).
+var _keyboard_intent_epoch := -1
 var _ground_bag_get_all_requested_msec := -1
 var _ground_bag_get_all_bag_id := -1
 ## The inventory slot riding on the cursor in walk mode, or -1. Eternal Lands
@@ -1233,6 +1253,8 @@ func _ready() -> void:
 	minimap.add_child(minimap_marker_overlay)
 	minimap_marker_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	minimap_marker_overlay.configure(map_camera, map_viewport.size)
+	nearby_indicator = NearbyIndicatorScript.new()
+	minimap.add_child(nearby_indicator)
 	audio_director = AudioDirectorScript.new()
 	audio_director.surface_at_tile = _footstep_surface_at
 	add_child(audio_director)
@@ -1826,6 +1848,9 @@ func _update_keyboard_movement() -> void:
 	var origin := Vector2i(int(dto.get("x", 0)), int(dto.get("y", 0)))
 	var now: int = Time.get_ticks_msec()
 	var run: bool = Input.is_key_pressed(KEY_SHIFT)
+	if Network.move_intent_enabled:
+		_update_keyboard_intent(direction, run, now)
+		return
 	var close_to_goal: bool = maxi(absi(_keyboard_goal_tile.x - origin.x),
 		absi(_keyboard_goal_tile.y - origin.y)) <= 1
 	if _keyboard_moving and direction == _keyboard_direction and run == _keyboard_running \
@@ -1842,6 +1867,28 @@ func _update_keyboard_movement() -> void:
 		_keyboard_refresh_msec = now + KEYBOARD_REFRESH_MSEC
 	else:
 		push_warning("keyboard MOVE_TO failed: " + error_string(error))
+		_keyboard_moving = false
+
+## Held-direction walking (keyboard_intent_v1, once the server takes it): the
+## server steps the player at its own pace while a direction is held, so the
+## direction is sent when it changes, when the server changes the epoch (a map
+## change) and as a keep-alive, instead of a MOVE_TO every 360 ms.
+func _update_keyboard_intent(direction: Vector2i, run: bool, now: int) -> void:
+	if _keyboard_moving and _keyboard_intent_epoch == Network.move_intent_epoch \
+			and direction == _keyboard_direction and run == _keyboard_running \
+			and now < _keyboard_refresh_msec:
+		return
+	exterior_stream.pending_walk.clear()
+	var error: Error = Network.move_intent(direction, run)
+	if error == OK:
+		_keyboard_moving = true
+		_keyboard_running = run
+		_keyboard_direction = direction
+		_keyboard_goal_tile = Vector2i(-99999, -99999)
+		_keyboard_intent_epoch = Network.move_intent_epoch
+		_keyboard_refresh_msec = now + Network.move_intent_keepalive_msec
+	else:
+		push_warning("keyboard intent failed: " + error_string(error))
 		_keyboard_moving = false
 
 func _movement_axes_for_actions(north_pressed: bool, south_pressed: bool,
@@ -1875,6 +1922,13 @@ func _camera_relative_tile_direction(forward_input: int, right_input: int) -> Ve
 func _stop_keyboard_movement() -> void:
 	if not _keyboard_moving:
 		return
+	if _keyboard_intent_epoch >= 0:
+		# A release: the server stops the player where it has them.
+		var released: Error = Network.move_intent(Vector2i.ZERO)
+		if released != OK and released != ERR_UNAVAILABLE:
+			push_warning("keyboard release failed: " + error_string(released))
+		_clear_keyboard_movement_tracking()
+		return
 	var actor_value: Variant = AppState.actors.get(AppState.local_actor_id)
 	if actor_value is Dictionary:
 		var dto: Dictionary = actor_value as Dictionary
@@ -1890,6 +1944,7 @@ func _clear_keyboard_movement_tracking() -> void:
 	_keyboard_direction = Vector2i.ZERO
 	_keyboard_goal_tile = Vector2i(-99999, -99999)
 	_keyboard_refresh_msec = 0
+	_keyboard_intent_epoch = -1
 
 func _clear_local_turn_prediction() -> void:
 	var actor_value: Variant = actor_nodes.get(AppState.local_actor_id)
@@ -2828,6 +2883,7 @@ func _refresh_unified_settings() -> void:
 	equipment_side.select(1 if _equipment_side == "right" else 0)
 	settings_window.restore_fps_limit(_fps_limit)
 	settings_window.restore_name_distance(_name_distance_metres)
+	settings_window.restore_crowd_settings(_crowd_bodies, _swaying_capes)
 	settings_window.restore_look(LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.restore_quality(LookProfile.player_quality(), LookProfile.quality_forced())
 	casting_bar.refresh()
@@ -3629,6 +3685,8 @@ func _on_login_succeeded() -> void:
 	var capabilities_error: Error = Network.send_client_capabilities()
 	if capabilities_error != OK:
 		push_warning("#clientcaps failed: " + error_string(capabilities_error))
+	# A new session has said nothing yet about what it holds back.
+	nearby_indicator.show_count(0)
 	if _resync_after_reconnect:
 		# This session follows a dropped connection, so nothing that arrived
 		# before the drop can be trusted. Ask for the three authoritative
@@ -5259,6 +5317,11 @@ func _on_state_changed(path: StringName) -> void:
 		&"mount_states":
 			for mount_actor_id: Variant in actor_nodes:
 				_apply_actor_mount(mount_actor_id)
+		&"mount_deltas":
+			for mount_actor_id: Variant in AppState.mount_deltas.presentation_ids(actor_nodes):
+				_apply_actor_mount(mount_actor_id)
+		&"presence":
+			nearby_indicator.show_count(AppState.presence.nearby_hidden)
 		&"experience_state":
 			_sync_stats()
 		&"worn_slots", &"degraded_items":
@@ -8393,6 +8456,9 @@ func _load_hud_settings() -> void:
 			config.get_value("graphics", "nameplates", true))
 		_set_name_distance(config.get_value(
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
+		_set_crowd_settings(config.get_value("graphics", "crowd_bodies",
+			SettingsWindowScript.CROWD_BODIES_DEFAULT), config.get_value(
+			"graphics", "swaying_capes", SettingsWindowScript.SWAYING_CAPES_DEFAULT))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
 		# keys.ini holds the bindings now. The settings file's old copy is read
@@ -8447,6 +8513,7 @@ func _load_hud_settings() -> void:
 	settings_window.call("restore_toggle", "combat_hud",
 		bool(extension_windows.get("combat_hud_enabled")))
 	settings_window.call("restore_name_distance", _name_distance_metres)
+	settings_window.call("restore_crowd_settings", _crowd_bodies, _swaying_capes)
 	for option_key: String in _hud_element_options:
 		settings_window.call("restore_toggle", option_key,
 			bool(_hud_element_options[option_key]))
@@ -8526,6 +8593,8 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "particles", _effects_enabled)
 	config.set_value("graphics", "nameplates", _nameplates_enabled)
 	config.set_value("graphics", "name_distance", _name_distance_metres)
+	config.set_value("graphics", "crowd_bodies", _crowd_bodies)
+	config.set_value("graphics", "swaying_capes", _swaying_capes)
 	config.set_value("graphics", "fps_limit", _fps_limit)
 	TargetMarkerStyle.write(config, _target_marker_style)
 	# The player's own choices, not what ELORIA_LOOK or ELORIA_LOOK_QUALITY
@@ -9026,6 +9095,43 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 	marks.append_array(_current_service_marks())
 	marks.append_array(_harvest_grouping_marks())
 	marks.append_array(quest_trail.map_marks())
+	marks.append_array(_presence_marks())
+	return marks
+
+## Players beyond the area of interest, from the server's once-a-second
+## presence rows (presence_state.gd): a player's mark without a body under it.
+## Players with a body are skipped there; they have their own mark above.
+##
+## Presence dots are all beyond the area of interest, so while only the
+## minimap is open most of them are off it: those beyond the corner of its view
+## are skipped before any mark is made. The marks themselves are kept and
+## moved rather than made afresh for every refresh.
+func _presence_marks() -> Array[Dictionary]:
+	var marks: Array[Dictionary] = []
+	if AppState.presence.dot_count() == 0:
+		return marks
+	var centre := Vector2.ZERO
+	var reach := INF
+	var own: Dictionary = AppState.actors.get(AppState.local_actor_id, {}) as Dictionary
+	if not full_map.visible and not own.is_empty():
+		centre = Vector2(float(own.get("x", 0)), float(own.get("y", 0)))
+		# Half the view's height to a corner is 0.71 of it; the rest is margin.
+		reach = map_camera.size * 0.75 / maxf(adapter.metres_per_tile, 0.01)
+	AppState.presence.tiles(Time.get_ticks_msec(), AppState.actors, _presence_tiles,
+		centre, reach)
+	while _presence_mark_pool.size() < _presence_tiles.size():
+		_presence_mark_pool.append({"position": Vector3.ZERO, "type": &"player",
+			"colour": ReplicatedActor3D.MAP_DOT_COLOUR, "radius": PRESENCE_DOT_RADIUS})
+	# The adapter is affine, so one tile's centre and its two steps place
+	# every dot without a call per dot.
+	var origin: Vector3 = adapter.server_to_godot(0.5, 0.5)
+	var step_x: Vector3 = adapter.server_to_godot(1.5, 0.5) - origin
+	var step_y: Vector3 = adapter.server_to_godot(0.5, 1.5) - origin
+	for index: int in range(_presence_tiles.size()):
+		var tile: Vector2 = _presence_tiles[index]
+		var mark: Dictionary = _presence_mark_pool[index]
+		mark["position"] = origin + step_x * tile.x + step_y * tile.y
+		marks.append(mark)
 	return marks
 
 func _current_service_records() -> Array:
@@ -12436,6 +12542,42 @@ func _set_name_distance(value: Variant) -> void:
 		SettingsWindowScript.NAME_DISTANCE_MAX)
 	_animation_gate_refresh_msec = 0
 
+## The player's crowd settings, clamped to the sliders' ranges and handed to
+## the crowd presentation, which keeps any value the environment forces for a
+## benchmark. The next gate sweep applies them.
+func _set_crowd_settings(bodies: Variant, capes: Variant) -> void:
+	_crowd_bodies = clampi(int(bodies) if bodies is int or bodies is float
+		else SettingsWindowScript.CROWD_BODIES_DEFAULT,
+		SettingsWindowScript.CROWD_BODIES_MIN, SettingsWindowScript.CROWD_BODIES_MAX)
+	_swaying_capes = clampi(int(capes) if capes is int or capes is float
+		else SettingsWindowScript.SWAYING_CAPES_DEFAULT,
+		SettingsWindowScript.SWAYING_CAPES_MIN, SettingsWindowScript.SWAYING_CAPES_MAX)
+	crowd.set_player_budgets(_crowd_bodies, _swaying_capes)
+	_animation_gate_refresh_msec = 0
+	_sync_declared_actor_cap()
+
+## The actor cap this client declares to the server (`actor_cap:<N>` in
+## `#clientcaps`) follows the crowd setting: the server is asked for no more
+## players and creatures than are drawn with a body, and never more than the
+## protocol's 160 (interest_protocol.gd `declared_actor_cap`). At the
+## setting's default of 160 the declaration is 160, which is what a client
+## that declares nothing gets.
+func _sync_declared_actor_cap() -> void:
+	var cap: int = InterestProtocol.declared_actor_cap(_crowd_bodies)
+	if cap == int(Network.declared_actor_cap):
+		return
+	Network.declared_actor_cap = cap
+	if not AppState.authenticated:
+		return
+	# In a session the server retunes the cap from a repeated `#clientcaps`,
+	# which also restates what the capabilities gate and counts against the
+	# server's resync allowance, so it goes once the slider has come to rest.
+	_actor_cap_declaration += 1
+	var declaration: int = _actor_cap_declaration
+	get_tree().create_timer(ACTOR_CAP_REDECLARE_SECONDS).timeout.connect(func() -> void:
+		if declaration == _actor_cap_declaration and AppState.authenticated:
+			Network.send_client_capabilities())
+
 ## Preferences apply locally. Only the target-mode and autogather buttons
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
@@ -12576,6 +12718,10 @@ func _on_client_setting_changed(section: String, key: String,
 			_apply_banner_options()
 		"name_distance":
 			_set_name_distance(value)
+		"crowd_bodies":
+			_set_crowd_settings(value, _swaying_capes)
+		"swaying_capes":
+			_set_crowd_settings(_crowd_bodies, value)
 		"combat_hud":
 			extension_windows.call("set_combat_hud_enabled", bool(value))
 		"rotation_sensitivity":
