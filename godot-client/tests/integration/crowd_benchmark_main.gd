@@ -378,6 +378,20 @@ func _update_animation_gate(delta: float) -> void:
 	_benchmark_add(&"animation_gate", started)
 
 
+## The crowd-wide work at the end of a gate sweep, and the overhead declutter
+## inside it, timed apart from the sweep's per-actor slices.
+func _finish_gate_sweep() -> void:
+	var started := Time.get_ticks_usec()
+	super._finish_gate_sweep()
+	_benchmark_add(&"gate_sweep_end", started)
+
+
+func _declutter_actor_overheads(target_id: int) -> void:
+	var started := Time.get_ticks_usec()
+	super._declutter_actor_overheads(target_id)
+	_benchmark_add(&"declutter", started)
+
+
 func _benchmark_freeze_actor(actor: ReplicatedActor3D) -> void:
 	if actor != null and is_instance_valid(actor.animation_player):
 		actor.animation_player.active = false

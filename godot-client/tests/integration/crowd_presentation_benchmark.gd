@@ -322,6 +322,7 @@ func _run_cell(spec: Dictionary) -> void:
 		"packetsPerFrame": [], "packetDispatchMilliseconds": [], "sceneNodes": [], "engineProcessMilliseconds": [], "enginePhysicsMilliseconds": [],
 		"processPhaseMilliseconds": [], "flushPhaseMilliseconds": [], "drawPhaseMilliseconds": [],
 		"physicsPhaseMilliseconds": [], "mainProcessMilliseconds": [],
+		"gateSweepEndMilliseconds": [], "declutterMilliseconds": [],
 		"halfRateStepMilliseconds": [], "combatPoseMilliseconds": [], "skeletonUpdates": []}
 	var sample_started := Time.get_ticks_msec()
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw)
@@ -572,6 +573,8 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
 		(raw["drawPhaseMilliseconds"] as Array).append(_last_phases.get("draw"))
 		(raw["physicsPhaseMilliseconds"] as Array).append(_last_phases.get("physics"))
 		(raw["mainProcessMilliseconds"] as Array).append(float(usec.get("main_process_inclusive", 0)) / 1000.0)
+		(raw["gateSweepEndMilliseconds"] as Array).append(float(usec.get("gate_sweep_end", 0)) / 1000.0)
+		(raw["declutterMilliseconds"] as Array).append(float(usec.get("declutter", 0)) / 1000.0)
 		(raw["halfRateStepMilliseconds"] as Array).append(float(usec.get("half_rate_step", 0)) / 1000.0)
 		var calls: Dictionary = measured.get("calls", {}) as Dictionary
 		if _attribution:
