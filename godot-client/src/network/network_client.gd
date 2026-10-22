@@ -16,6 +16,12 @@ var magic_pending: Dictionary = {}
 var magic_scope := ""
 var magic_token: Dictionary = {}
 var coordinate_registry_error := ""
+## Held-direction keyboard walking (keyboard_intent_v1). Off until the server
+## says, after the capability declaration, that it steps held directions;
+## until then, and on every new connection, the keyboard sends MOVE_TO.
+var move_intent_enabled := false
+var move_intent_epoch := 0
+var move_intent_keepalive_msec := 1000
 ## One-way process-local sandbox guard. Preview launchers never open a game
 ## socket, transmit actions or schedule reconnects, even via login shortcuts.
 var offline_hud_preview := false
@@ -70,6 +76,8 @@ func clear_coordinate_intents() -> void:
 	coordinate_intents_invalidated.emit()
 
 func _reset_coordinate_session() -> void:
+	move_intent_enabled = false
+	move_intent_epoch = 0
 	coordinates.reset()
 	clear_coordinate_intents()
 	coordinate_route_cancelled.emit()
@@ -324,6 +332,19 @@ func move_to(tile: Vector2i, run := false) -> Error:
 	if error == OK:
 		movement_requested.emit(tile)
 	return error
+
+## The server's ELORIA_MOVE_INTENT state (protocol.decode_move_intent).
+func apply_move_intent_state(event: Dictionary) -> void:
+	move_intent_enabled = bool(event.get("enabled", false))
+	move_intent_epoch = int(event.get("epoch", 0))
+	move_intent_keepalive_msec = clampi(int(event.get("keepalive_msec", 1000)), 200, 5000)
+
+## Hold `direction` (one of the eight tile steps in server space), or release
+## with Vector2i.ZERO. The server steps the player at its own pace.
+func move_intent(direction: Vector2i, run := false) -> Error:
+	if not move_intent_enabled:
+		return ERR_UNAVAILABLE
+	return send_frame(EloriaProtocol.move_intent(move_intent_epoch, direction, run))
 
 func _send_point(command: int, tile: Vector2i) -> Error:
 	if not coordinates.ready():

@@ -55,20 +55,30 @@ const FULL_RATE_BODIES := 16
 ## so capes on the boundary do not settle and swing.
 const CLOTH_BODIES := 8
 const CLOTH_HYSTERESIS := 4
+## The body cap a player has not changed: the Phase 4 server cap, so the
+## client draws no fewer than the server will send once that cap is live.
+const BODY_CAP_DEFAULT := 160
 
 var lazy := true
 var gate := true
 var effects := true
 var park := true
-## The full-rate and cloth budgets in use: the constants unless
-## RABBITLANDS_CROWD_TUNING (`full=24,cloth=8`) says otherwise, for measuring
-## other values without a rebuild.
+## The full-rate and cloth budgets in use: the constants, the player's
+## "Swaying capes in a crowd" setting for the cloth, unless
+## RABBITLANDS_CROWD_TUNING (`full=24,cloth=8`) says otherwise for a
+## measurement.
 var full_rate_bodies := FULL_RATE_BODIES
 var cloth_bodies := CLOTH_BODIES
 ## The most bodies built at once, not counting the player, their target or
-## selection; 0 is no cap. The server's Phase 3C/4 caps decide what is sent;
-## this decides what is drawn of it.
-var body_cap := 0
+## selection; 0 is no cap. The player's "Characters drawn in a crowd" setting,
+## 160 until they change it, unless RABBITLANDS_CROWD_BODY_CAP decides (0 there
+## turns the cap off). The server's Phase 3C/4 caps decide what is sent; this
+## decides what is drawn of it.
+var body_cap := BODY_CAP_DEFAULT
+## Whether the environment set the cap or the cloth budget for this session,
+## in which case the player's settings are kept but not applied.
+var body_cap_forced := false
+var cloth_forced := false
 
 var _candidates: Array[int] = []
 var _cursor := 0
@@ -110,16 +120,28 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	gate = bool(enabled.get("gate", false))
 	effects = bool(enabled.get("effects", false))
 	park = bool(enabled.get("park", false))
-	body_cap = maxi(0, int(cap)) if cap.strip_edges().is_valid_int() else 0
+	body_cap_forced = cap.strip_edges().is_valid_int()
+	body_cap = maxi(0, int(cap)) if body_cap_forced else BODY_CAP_DEFAULT
 	full_rate_bodies = FULL_RATE_BODIES
 	cloth_bodies = CLOTH_BODIES
+	cloth_forced = false
 	for part: String in tuning.split(",", false):
 		var pair := part.split("=")
 		if pair.size() != 2 or not pair[1].strip_edges().is_valid_int():
 			continue
 		match pair[0].strip_edges():
 			"full": full_rate_bodies = maxi(0, int(pair[1]))
-			"cloth": cloth_bodies = maxi(0, int(pair[1]))
+			"cloth":
+				cloth_bodies = maxi(0, int(pair[1]))
+				cloth_forced = true
+
+## The player's two crowd settings (settings_window.gd, Graphics). Either is
+## ignored while the environment sets it for the session.
+func set_player_budgets(bodies: int, capes: int) -> void:
+	if not body_cap_forced:
+		body_cap = maxi(0, bodies)
+	if not cloth_forced:
+		cloth_bodies = maxi(0, capes)
 
 func describe() -> Dictionary:
 	return {"lazy": lazy, "gate": gate, "effects": effects, "park": park,

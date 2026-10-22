@@ -54,9 +54,11 @@ stepping out of the view radius and back, or crossing an interest-cap boundary,
 is not rebuilt. A recycled id carrying someone else is built afresh. Every
 other spawn field is reapplied to a revived body. Map changes clear the parking.
 
-**Body cap (optional, off by default).** With `body_cap` above zero, only the
-nearest `body_cap` actors in range have bodies, not counting the player, their
-target and their selection. The cap's distance is that of the cap-th nearest
+**Body cap (a player setting, 160 by default).** Graphics > "Characters drawn in
+a crowd" (40-300) sets `body_cap`: only the nearest `body_cap` actors in range
+have bodies, not counting the player, their target and their selection. The
+default is the Phase 4 server cap, so once that cap is live the client draws
+everything the server sends. The cap's distance is that of the cap-th nearest
 actor in range; deferred actors inside it are built, and a body is given up
 only once it is `BODY_CAP_HYSTERESIS_METRES` (8 m) farther out than that, so an
 actor on the boundary does not flip as the crowd mills. Past the cap an actor
@@ -84,7 +86,8 @@ the gate part on:
 - A clip that does not loop is still played out on a body the gate would
   pause, but at half rate rather than full: in a fight the bodies behind the
   camera strike every round, and each strike used to wake them to full rate.
-- Cape cloth is simulated for at most `CLOTH_BODIES` (8) remote caped bodies,
+- Cape cloth is simulated for at most `CLOTH_BODIES` (8; Graphics > "Swaying
+  capes in a crowd", 0-32) remote caped bodies,
   the nearest the camera; a simulating cape keeps its cloth until it falls
   `CLOTH_HYSTERESIS` (4) places past the limit. The others hang as every
   non-local cape already does at Medium and Low graphics quality. The solver
@@ -133,9 +136,11 @@ against the client without it:
 | `lazy,gate` | only the parts named (`lazy`, `gate`, `effects`, `park`) |
 | `-park` | every part but the one named |
 
-`RABBITLANDS_CROWD_BODY_CAP` sets the body cap (default 0, off).
-`RABBITLANDS_CROWD_TUNING` overrides the full-rate and cloth budgets for a
-measurement (`full=24,cloth=4`). The per-frame loop changes are not
+`RABBITLANDS_CROWD_BODY_CAP` forces the body cap for a session (0 turns it off)
+and `RABBITLANDS_CROWD_TUNING` the full-rate and cloth budgets
+(`full=24,cloth=4`); either takes precedence over the player's settings, which
+are kept but not applied. The benchmark launcher's `--body-cap` and `--tuning`
+set them; left unset, a run uses the player defaults (160 characters, 8 capes). The per-frame loop changes are not
 switchable: they change no behaviour.
 
 ## Benchmark
@@ -235,5 +240,6 @@ band layouts describe the client before this policy.
 
 `tests/test_crowd_presentation.gd` covers the policy switches, the effect
 budget, deferred and built arrivals, nearest-first builds, building on
-approach, parking and revival, giving a far body up, the body cap, the paused
-tier stopping a skeleton and bulk removal.
+approach, parking and revival, giving a far body up, the body cap, the two
+player settings and their ranges, the paused and half-rate tiers and bulk
+removal.

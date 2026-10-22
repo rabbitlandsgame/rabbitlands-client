@@ -1623,6 +1623,13 @@ func set_server_scale(value: float) -> void:
 ## not be drawn in giant letters. Their heights do follow, below, or they
 ## would end up inside its head.
 func _apply_model_scale() -> void:
+	# Legibility is based on the final authored size. A tiny source model
+	# promoted to a giant must not keep its small-creature display boost.
+	if _native_body_bounds.size != Vector3.ZERO:
+		var body_size: Vector3 = _native_body_bounds.size * _import_scale * server_scale
+		var longest: float = maxf(body_size.x, maxf(body_size.y, body_size.z))
+		_small_creature_scale = (maxf(SMALL_CREATURE_SCALE, SMALL_CREATURE_MIN_SIZE / longest)
+			if _is_creature and longest > 0.0 and longest < SMALL_CREATURE_MAX_SIZE else 1.0)
 	var total: float = _import_scale * _small_creature_scale * server_scale
 	for node_name: String in ["NativeModel", "MissingModelFallback"]:
 		var model := get_node_or_null(node_name) as Node3D
@@ -4430,16 +4437,10 @@ func _apply_import_adapter(config: Dictionary) -> void:
 	# The protocol position is a foot point. Normalize the imported visual at
 	# its root without flattening or rewriting the glTF hierarchy/skeleton.
 	var bounds: AABB = _native_visual_bounds(model)
-	var body_size: Vector3 = bounds.size * _import_scale
-	var longest_side: float = maxf(body_size.x, maxf(body_size.y, body_size.z))
-	_small_creature_scale = (maxf(SMALL_CREATURE_SCALE,
-		SMALL_CREATURE_MIN_SIZE / longest_side)
-		if _is_creature and longest_side > 0.0
-		and longest_side < SMALL_CREATURE_MAX_SIZE else 1.0)
-	_apply_model_scale()
+	_native_body_bounds = bounds
 	if bounds.size.y > 0.0:
 		model.position.y = -bounds.position.y
-	_native_body_bounds = bounds
+	_apply_model_scale()
 	_lift_overhead(server_scale)
 
 func _validate_native_visual() -> String:
