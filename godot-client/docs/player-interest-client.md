@@ -32,7 +32,16 @@ rider moves smoothly across the map instead of jumping; a dot that moved
 farther than walking could take it (24 tiles) is placed at once. When a
 player walks out of the area the server removes the actor; the client keeps a
 dot where the actor stood until the next snapshot places it, so the mark does
-not blink at the edge of the area.
+not blink at the edge of the area. The same holds when the actor cap swaps a
+player out (the server re-ranks about 1.25 times a second, keeps a newly
+shown player at least about 2.4 s and swaps at most two at a time).
+
+A removed rider's riding row is kept too. A client on complete riding tables
+is sent the row of every rider on its map, shown or not, and the table is not
+sent again when a rider walks back into view, so a kept row is put back when
+the server introduces that player again, as long as the client is on player
+interest, the name matches and no newer table has replaced it. Without
+interest a removal still means the player is gone, and nothing is put back.
 
 The minimap and the full map draw presence dots as player marks a size
 smaller than marks with a body, through the same overlay and the same
@@ -64,10 +73,11 @@ most the protocol takes. At the setting's default of 160 the declaration is
 `InterestProtocol.declared_actor_cap`.
 
 The cap is declared at login. When the player changes the setting during a
-session, the client declares the new cap once the slider has rested for two
-seconds; the server retunes from a repeated `#clientcaps`, which also
-restates what the capabilities gate, so it is not sent on every step of the
-slider.
+session, the client sends `#actorcap <N>` once the slider has rested for half
+a second. That command changes only the cap (a second `#clientcaps` would
+restate every capability's one-time state), and only a server running player
+interest takes it, so it is sent only after such a server has sent presence;
+any other server hears the new cap at the next login.
 
 When the cap holds actors back, the presence header says how many, and a
 small "+N nearby" label in the lower-left corner of the minimap says so too.
@@ -83,7 +93,8 @@ the worst recent lateness behind the newest tile (`apply_server_state` in
 step and the burst behind it as a faster one.
 
 With server time, the server stamps the packets it writes with the time each
-event happened. `ServerClock` keeps the smallest `arrival - stamp` seen over
+event happened; other players' steps travel in its 20 Hz flush and carry the
+flush's time, up to 50 ms after the step. `ServerClock` keeps the smallest `arrival - stamp` seen over
 the last sixteen seconds as the offset between the two clocks, so
 `stamp + offset` is when a packet would have arrived on an unloaded link. How
 far real arrivals land above that is the link's jitter; the playout delay is
@@ -98,11 +109,13 @@ keeps; a row without them is timed by arrival as before. The player's own
 steps stay on arrival timing.
 
 `tests/test_server_time_pacing.gd` drives one remote actor over a simulated
-link (frames every 50 ms, 40 ms plus up to 150 ms of jitter, read at 60 Hz)
-both ways. On the development machine: walking, the speed on the ground
-varies by 0.5% instead of 7% and the body trails the server by about 140 ms
-less; running, 0.5% instead of 12%, with no stop-start where arrival timing
-stopped once.
+link (steps stamped with the 50-ms flush that carries them, 40 ms plus up to
+150 ms of jitter, read at 60 Hz) both ways. On the development machine:
+walking, the speed on the ground varies by 0.5% instead of 7% and the body
+trails the server by about 140 ms less; running, 0.5% instead of 12%, with no
+stop-start where arrival timing stopped once; a hastened run (100-ms steps,
+so a stamp can be half a step late), 0.5% instead of 20%, with no stop-start
+where arrival timing stopped three times.
 
 ## Riding-table deltas
 
@@ -110,12 +123,18 @@ Without deltas, each `ELORIA_MOUNT_STATES` packet is the whole riding table of
 the map, and it restates every rider's countdowns once a second. With them,
 `ELORIA_MOUNT_DELTAS` carries the whole table after a teleport, a resync or the
 capability starting, and otherwise only the riders whose row changed and the
-actors whose row went away. Countdowns arrive as times on the server's clock:
+actors whose row went away. A whole table too big for one frame comes as
+several frames in a row with only the first marked `full`; the client upserts
+each frame and drops the rows the table did not restate only once it is
+complete, at the first packet that is not part of it (or half a second after
+it began, if nothing follows), so no rider loses a row between its frames. Countdowns arrive as times on the server's clock:
 when a calling completes, when the riding combat lock ends, and the gallop
 endurance at a moment with the rate it is changing at. `MountDeltaState` turns
 each row into the shape the complete tables have, so everything that reads
 `AppState.actor_mounts` is unchanged, and only the actors a delta named have
-their mounts re-bound. The player's own calling and endurance are restated ten
+their mounts re-bound. A delta row also states the gallop's maximum
+(`endurance_max_ms`, 8 s today); the client keeps it on the row and clamps to
+it rather than to 8 s, and the mount banner and the stamina meter read it. The player's own calling and endurance are restated ten
 times a second between packets (`AppState._process`), as the complete tables
 used to restate them.
 

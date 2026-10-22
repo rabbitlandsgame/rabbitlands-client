@@ -59,7 +59,10 @@ func _refresh() -> void:
 			if galloping:
 				details.append("%.1fs left" % seconds)
 			else:
-				details.append("Gallop ready" if seconds >= 8.0 else "Gallop %.1fs" % seconds)
+				# A riding delta states the gallop's own maximum; a complete
+				# table does not, and its gallop holds 8 s.
+				var full: float = float(state.get("endurance_max_ms", 8000)) / 1000.0
+				details.append("Gallop ready" if seconds >= full else "Gallop %.1fs" % seconds)
 	var text := " · ".join(details)
 	var shown := AppState.authenticated and bool(options.show_banner) and not text.is_empty()
 	var changed := status.text != text or visible != shown

@@ -32,9 +32,12 @@ func _run() -> void:
 		quit(failures)
 		return
 	_check_stamped_then_unstamped()
-	for spec: Array in [["walk", 22, 600], ["run", 32, 200]]:
-		var stamped: Dictionary = _simulate(spec[1], spec[2], true)
-		var arrival: Dictionary = _simulate(spec[1], spec[2], false)
+	# The server stamps other players' steps with the time of the 20-Hz flush
+	# that carries them, up to 50 ms after the step: half of a hastened run's
+	# 100-ms step.
+	for spec: Array in [["walk", 22, 600, false], ["run", 32, 200, false], ["hastened run", 32, 100, true]]:
+		var stamped: Dictionary = _simulate(spec[1], spec[2], true, spec[3])
+		var arrival: Dictionary = _simulate(spec[1], spec[2], false, spec[3])
 		print("%s, 50-ms frames, 40 ms + up to 150 ms jitter: server time stalls %d (%.0f ms), speed CV %.3f, lag %.0f ms; arrival time stalls %d (%.0f ms), speed CV %.3f, lag %.0f ms" % [
 			spec[0], stamped.stalls, stamped.stall_msec, stamped.cv, stamped.lag_msec,
 			arrival.stalls, arrival.stall_msec, arrival.cv, arrival.lag_msec])
@@ -201,14 +204,16 @@ func _check_stamped_then_unstamped() -> void:
 ## who has been logged in a while.
 ## Returns stop-starts, how far the speed on the ground varies, and how far
 ## the body lags the server.
-func _simulate(command: int, pace_msec: int, stamped: bool) -> Dictionary:
+func _simulate(command: int, pace_msec: int, stamped: bool, hastened := false) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 2026
 	var clock = ServerClock.new()
 	var actor := TimedActor.new()
 	root.add_child(actor)
 	actor.clock_msec = 0
-	actor.apply_server_state({"x": 0, "y": 0, "rotation": 0, "command": command}, adapter, true)
+	var buffs: int = EloriaProtocol.ACTOR_BUFF_DOUBLE_SPEED if hastened else 0
+	actor.apply_server_state({"x": 0, "y": 0, "rotation": 0, "command": command, "buffs": buffs},
+		adapter, true)
 	var steps := 40
 	var frame_msec := 50
 	var start: int = 3000 + 17
@@ -237,7 +242,7 @@ func _simulate(command: int, pace_msec: int, stamped: bool) -> Dictionary:
 	var stalled := false
 	var lag_total := 0.0
 	var lag_count := 0
-	var dto: Dictionary = {"x": 0, "y": 0, "rotation": 0, "command": command}
+	var dto: Dictionary = {"x": 0, "y": 0, "rotation": 0, "command": command, "buffs": buffs}
 	var pass_id := 0
 	for now: int in range(0, end_msec, tick):
 		actor.clock_msec = now

@@ -59,6 +59,12 @@ static func declared_actor_cap(crowd_bodies: int) -> int:
 static func actor_cap_token(cap: int) -> String:
 	return ACTOR_CAP_TOKEN % clamp_actor_cap(cap)
 
+## The command that changes the declared cap during a session. Unlike a second
+## `#clientcaps` it restates nothing else; only a server with player interest
+## takes it, so it is sent only to one (main.gd `_sync_declared_actor_cap`).
+static func actor_cap_command(cap: int) -> String:
+	return "#actorcap %d" % clamp_actor_cap(cap)
+
 ## ELORIA_PRESENCE: the map's players this client is not shown as actors, and
 ## how many near ones the cap holds back. Bytes after the known fields, and
 ## flag bits this client does not know, are ignored.
@@ -118,6 +124,9 @@ static func decode_mount_deltas(payload: PackedByteArray) -> Dictionary:
 		var shaped: Dictionary = MountDeltaState.v1_row(row)
 		if shaped.is_empty():
 			return {"type": "invalid", "error": "mount_deltas_timing"}
+		# The row's own maximum is authoritative and may pass the complete
+		# tables' 8 s; the rest of the row is checked as they are.
+		shaped["endurance_ms"] = mini(int(shaped.endurance_ms), MountDeltaState.ENDURANCE_LIMIT_MS)
 		shaped["kind"] = "mount_preview"
 		shaped["schema_version"] = 1
 		shaped["epoch"] = 0

@@ -28,7 +28,9 @@ static func read(resource: String) -> Dictionary:
 			var mount: Dictionary = AppState.mount_state_for_actor(AppState.local_actor_id)
 			available = mount.get("mode", "on_foot") == "mounted"
 			value = float(mount.get("endurance_ms", 0)) / 1000.0
-			maximum = 8.0 # Full gallop endurance, as in the existing mount control.
+			# Full gallop endurance: the row's own maximum when a riding delta
+			# states one, else the 8 s a complete table's gallop holds.
+			maximum = float(mount.get("endurance_max_ms", 8000)) / 1000.0
 	return {"value":value, "maximum":maxf(1, maximum), "available":available,
 		"ratio":clampf(value / maxf(1, maximum), 0, 1) if available else 0.0, "label":LABELS.get(resource, "Resource")}
 
