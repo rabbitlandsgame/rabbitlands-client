@@ -6,6 +6,149 @@ const MAX_MANIFEST_BYTES := 1024 * 1024
 const ROOTS := ["app", "eloria-assets"]
 const DISTRIBUTION_SCHEMA := 1
 
+# Godot's ZIPReader uses 32-bit minizip seek/tell callbacks on Windows,
+# even in a 64-bit export. Read our bounded ZIP entries through FileAccess
+# instead, preserving the existing signed ZIP/ZIP64 payload format.
+class PayloadArchive extends RefCounted:
+	const MAX_ENTRY_BYTES := 16 * 1024 * 1024
+	const MAX_DIRECTORY_BYTES := 64 * 1024 * 1024
+	var _file: FileAccess
+	var _entries: Dictionary = {}
+	var _directory_offset := 0
+
+	func close() -> void:
+		if _file != null:
+			_file.close()
+			_file = null
+		_entries.clear()
+
+	func open(path: String) -> Error:
+		close()
+		_file = FileAccess.open(path, FileAccess.READ)
+		if _file == null:
+			return ERR_CANT_OPEN
+		if not _read_directory():
+			close()
+			return ERR_FILE_CORRUPT
+		return OK
+
+	func _read_directory() -> bool:
+		var length := _file.get_length()
+		if length < 22:
+			return false
+		var tail_size := mini(length, 65535 + 22)
+		_file.seek(length - tail_size)
+		var tail := _file.get_buffer(tail_size)
+		var end := tail.size() - 22
+		while end >= 0:
+			if tail.decode_u32(end) == 0x06054b50 and end + 22 + tail.decode_u16(end + 20) == tail.size():
+				break
+			end -= 1
+		if end < 0 or tail.decode_u16(end + 4) != 0 or tail.decode_u16(end + 6) != 0 or tail.decode_u16(end + 8) != tail.decode_u16(end + 10):
+			return false
+		var count := int(tail.decode_u16(end + 10))
+		var directory_size := int(tail.decode_u32(end + 12))
+		_directory_offset = tail.decode_u32(end + 16)
+		var directory_end := length - tail_size + end
+		if count == 0xffff or directory_size == 0xffffffff or _directory_offset == 0xffffffff:
+			if directory_end < 20:
+				return false
+			_file.seek(directory_end - 20)
+			var locator := _file.get_buffer(20)
+			if locator.size() != 20 or locator.decode_u32(0) != 0x07064b50 or locator.decode_u32(4) != 0 or locator.decode_u32(16) != 1:
+				return false
+			var offset := int(locator.decode_u64(8))
+			if offset < 0 or offset > directory_end - 20 - 56:
+				return false
+			_file.seek(offset)
+			var record := _file.get_buffer(56)
+			if record.size() != 56 or record.decode_u32(0) != 0x06064b50 or record.decode_u64(4) != 44 or record.decode_u32(16) != 0 or record.decode_u32(20) != 0 or record.decode_u64(24) != record.decode_u64(32):
+				return false
+			count = record.decode_u64(32)
+			directory_size = record.decode_u64(40)
+			_directory_offset = record.decode_u64(48)
+			directory_end = offset
+		if count <= 0 or count > 250000 or directory_size < 46 or directory_size > MAX_DIRECTORY_BYTES or _directory_offset < 0 or _directory_offset > directory_end - directory_size:
+			return false
+		_file.seek(_directory_offset)
+		var directory := _file.get_buffer(directory_size)
+		if directory.size() != directory_size:
+			return false
+		var position := 0
+		for index in count:
+			if position > directory.size() - 46 or directory.decode_u32(position) != 0x02014b50:
+				return false
+			var header := directory.slice(position, position + 46)
+			var name_size := int(header.decode_u16(28))
+			var extra_size := int(header.decode_u16(30))
+			var next := position + 46 + name_size + extra_size + header.decode_u16(32)
+			if name_size == 0 or next > directory.size() or header.decode_u16(34) != 0:
+				return false
+			var name := directory.slice(position + 46, position + 46 + name_size).get_string_from_utf8()
+			var packed := int(header.decode_u32(20))
+			var unpacked := int(header.decode_u32(24))
+			var offset := int(header.decode_u32(42))
+			var extra := directory.slice(position + 46 + name_size, position + 46 + name_size + extra_size)
+			var field := 0
+			while field + 4 <= extra.size():
+				var field_end := field + 4 + extra.decode_u16(field + 2)
+				if field_end > extra.size():
+					return false
+				if extra.decode_u16(field) == 1:
+					var cursor := field + 4
+					if unpacked == 0xffffffff:
+						if cursor + 8 > field_end:
+							return false
+						unpacked = extra.decode_u64(cursor)
+						cursor += 8
+					if packed == 0xffffffff:
+						if cursor + 8 > field_end:
+							return false
+						packed = extra.decode_u64(cursor)
+						cursor += 8
+					if offset == 0xffffffff:
+						if cursor + 8 > field_end:
+							return false
+						offset = extra.decode_u64(cursor)
+				field = field_end
+			var method := int(header.decode_u16(10))
+			var flags := int(header.decode_u16(8))
+			if _entries.has(name) or method not in [0, 8] or flags & ~0x080e or offset < 0 or offset > _directory_offset - 30 or packed < 0 or packed > MAX_ENTRY_BYTES + 65536 or unpacked < 0 or unpacked > MAX_ENTRY_BYTES:
+				return false
+			_entries[name] = {"offset": offset, "packed": packed, "unpacked": unpacked,
+				"method": method, "flags": flags, "crc": header.decode_u32(16)}
+			position = next
+		return position == directory.size()
+
+	func read_file(name: String) -> PackedByteArray:
+		if _file == null or not _entries.has(name):
+			return PackedByteArray()
+		var entry: Dictionary = _entries[name]
+		_file.seek(entry.offset)
+		var header := _file.get_buffer(30)
+		if header.size() != 30 or header.decode_u32(0) != 0x04034b50 or header.decode_u16(6) != entry.flags or header.decode_u16(8) != entry.method:
+			return PackedByteArray()
+		var name_size := int(header.decode_u16(26))
+		var data_offset := int(entry.offset) + 30 + name_size + header.decode_u16(28)
+		if data_offset > _directory_offset - int(entry.packed) or _file.get_buffer(name_size).get_string_from_utf8() != name:
+			return PackedByteArray()
+		_file.seek(data_offset)
+		var bytes := _file.get_buffer(entry.packed)
+		if bytes.size() != entry.packed:
+			return PackedByteArray()
+		if entry.method == 0:
+			return bytes if bytes.size() == entry.unpacked else PackedByteArray()
+		# ZIP stores raw DEFLATE. A gzip wrapper lets Godot's bounded native
+		# decompressor validate its CRC and length without a Python dependency.
+		var gzip := PackedByteArray([31, 139, 8, 0, 0, 0, 0, 0, 0, 3])
+		gzip.append_array(bytes)
+		var footer := PackedByteArray()
+		footer.resize(8)
+		footer.encode_u32(0, entry.crc)
+		footer.encode_u32(4, entry.unpacked)
+		gzip.append_array(footer)
+		return gzip.decompress(entry.unpacked, FileAccess.COMPRESSION_GZIP)
+
 static func update_owner(identity: Dictionary) -> String:
 	# Missing field is a pre-channel GitHub installation. Never infer this from
 	# launch arguments, environment variables, or whether Steam is running.
@@ -194,7 +337,7 @@ static func assemble(cache: String, release: Dictionary, progress := Callable())
 	return ""
 
 static func extract(archive: String, destination: String, release: Dictionary, identity: Dictionary, progress := Callable()) -> String:
-	var zip := ZIPReader.new()
+	var zip := PayloadArchive.new()
 	if zip.open(archive) != OK:
 		return "The update archive cannot be opened."
 	# An inventory is signed indirectly by the archive checksum. Each large

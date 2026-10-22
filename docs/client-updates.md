@@ -244,7 +244,12 @@ in the existing user directory.
 These first updates replace the full game payload, not just changed assets.
 Keep enough free space for the download, staged game and previous version.
 Archive entries are divided into 8 MiB chunks so a large PCK does not require
-loading the entire file into RAM. The initial restart bootstrap is stable and
+loading the entire file into RAM. The payload reader uses 64-bit file offsets
+for ZIP64 archives, including downloads larger than 4 GiB on Windows. Installers
+and launchers built before this fix can report "The update archive cannot be
+opened" after verifying a large download; those installations need a rebuilt
+setup executable containing the corrected helper and restart launcher.
+The initial restart bootstrap is stable and
 keeps the original trust key; a change to the bootstrap or signing trust root
 requires an initial installer upgrade.
 

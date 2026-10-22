@@ -7,9 +7,11 @@ import os
 from pathlib import Path
 import subprocess
 import shutil
+import struct
 import sys
 import time
 import threading
+import zipfile
 from types import SimpleNamespace
 
 import pytest
@@ -119,6 +121,102 @@ def test_online_install_fresh_repair_and_corrupt_download_preserves_game(tmp_pat
     code, output = run()
     assert code == 1 and "signature" in output, output
     assert lock.exists() and game.read_bytes() == expected
+
+
+def sparse_file(path):
+    """Cross real archive offsets without allocating several GB of test data."""
+    handle = path.open("w+b")
+    if os.name == "nt":
+        import ctypes
+        import msvcrt
+        from ctypes import wintypes
+        control = ctypes.WinDLL("kernel32", use_last_error=True).DeviceIoControl
+        control.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPVOID,
+                            wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD,
+                            ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
+        control.restype = wintypes.BOOL
+        returned = wintypes.DWORD()
+        assert control(msvcrt.get_osfhandle(handle.fileno()), 0x900C4,
+                       None, 0, None, 0, ctypes.byref(returned), None)
+    return handle
+
+
+def extract_fixture(fixture, archive, tmp_path):
+    script = fixture.project / "extract.gd"
+    script.write_text('extends SceneTree\n'
+        'const Release = preload("res://src/updates/release.gd")\n'
+        'func _initialize() -> void:\n'
+        '\tvar args := OS.get_cmdline_user_args()\n'
+        '\tvar request := Release.read_json(args[0])\n'
+        '\tvar error := Release.extract(request.archive, request.destination, request.release, request.identity)\n'
+        '\tprint("EXTRACT_RESULT|", error)\n'
+        '\tquit(0 if error == "" else 1)\n')
+    destination = tmp_path / "extracted"
+    request = tmp_path / "extract.json"
+    request.write_text(json.dumps({"archive": str(archive), "destination": str(destination),
+                                   "release": fixture.payload, "identity": fixture.identity}))
+    result = subprocess.run([str(fixture.godot), "--headless", "--path", str(fixture.project),
+                             "--script", str(script), "--", str(request)],
+                            env=fixture.env, capture_output=True, text=True, timeout=30)
+    assert "SCRIPT ERROR" not in result.stdout + result.stderr, result.stdout + result.stderr
+    return result, destination
+
+
+@pytest.mark.parametrize("offset", [0, 2**31 + 4096, 2**32 + 4096])
+@pytest.mark.parametrize("method", [zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED])
+def test_payload_reader_extracts_across_windows_seek_and_zip64_boundaries(tmp_path, offset, method):
+    fixture = online_fixture(tmp_path)
+    archive = tmp_path / "large.zip"
+    original = fixture.parts / "fixture.zip"
+    with zipfile.ZipFile(original) as source, sparse_file(archive) as output:
+        with zipfile.ZipFile(output, "w", method, allowZip64=True) as target:
+            for index, name in enumerate(source.namelist()):
+                if index == 1 and offset:
+                    target.start_dir = offset
+                # Also exercise ZIP64 local headers with small bounded entries.
+                with target.open(name, "w", force_zip64=True) as entry:
+                    entry.write(source.read(name))
+    with zipfile.ZipFile(archive) as check:
+        assert check.read("inventory.json")
+        assert check.getinfo("inventory.json").header_offset >= offset
+    result, destination = extract_fixture(fixture, archive, tmp_path)
+    assert result.returncode == 0, result.stdout + result.stderr
+    for path in fixture.stage.rglob("*"):
+        if path.is_file():
+            assert (destination / path.relative_to(fixture.stage)).read_bytes() == path.read_bytes()
+
+
+@pytest.mark.parametrize("damage", ["directory_bounds", "entry_size", "encrypted", "method",
+                                    "zip64_locator", "duplicate", "local_header", "compressed_data"])
+def test_payload_reader_rejects_malformed_archives(tmp_path, damage):
+    fixture = online_fixture(tmp_path)
+    archive = fixture.parts / "fixture.zip"
+    data = bytearray(archive.read_bytes())
+    with zipfile.ZipFile(archive) as source:
+        central = source.start_dir
+        first = source.infolist()[0]
+    if damage == "directory_bounds":
+        struct.pack_into("<I", data, len(data) - 22 + 12, 0x7fffffff)
+    elif damage == "entry_size":
+        struct.pack_into("<I", data, central + 24, 17 * 1024**2)
+    elif damage == "encrypted":
+        struct.pack_into("<H", data, central + 8, 1)
+    elif damage == "method":
+        struct.pack_into("<H", data, central + 10, 99)
+    elif damage == "zip64_locator":
+        struct.pack_into("<I", data, len(data) - 22 + 16, 0xffffffff)
+    elif damage == "duplicate":
+        second = central + 46 + len(first.filename.encode()) + len(first.extra) + len(first.comment)
+        data[second + 46:second + 46 + len(first.filename)] = first.filename.encode()
+    elif damage == "local_header":
+        data[first.header_offset] = 0
+    elif damage == "compressed_data":
+        start = first.header_offset + 30 + len(first.filename.encode()) + len(first.extra)
+        data[start:start + first.compress_size] = bytes(first.compress_size)
+    archive.write_bytes(data)
+    result, _destination = extract_fixture(fixture, archive, tmp_path)
+    assert result.returncode == 1 and "EXTRACT_RESULT|" in result.stdout, result.stdout + result.stderr
+    assert not (tmp_path / "installed/app/RabbitLands.exe").exists()
 
 
 @pytest.mark.parametrize("finish", ["complete", "crash"])
