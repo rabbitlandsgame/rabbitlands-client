@@ -485,6 +485,8 @@ func _build_graphics() -> void:
 	_add_toggle(page, "shadows", tr("ELORIA_SETTINGS_SHADOWS"), true)
 	_add_toggle(page, "particles", tr("ELORIA_SETTINGS_PARTICLES"), true)
 	_add_toggle(page, "nameplates", tr("ELORIA_SETTINGS_NAMEPLATES"), true)
+	_add_toggle(page, "cape_emblems", tr("ELORIA_SETTINGS_CAPE_EMBLEMS"), true)
+	(page.find_child("cape_emblems", true, false) as CheckBox).tooltip_text = tr("ELORIA_SETTINGS_CAPE_EMBLEMS_HINT")
 	_add_name_distance_row(page)
 	_add_count_row(page, "crowd_bodies", tr("ELORIA_SETTINGS_CROWD_BODIES"),
 		tr("ELORIA_SETTINGS_CROWD_BODIES_HINT"), CROWD_BODIES_MIN, CROWD_BODIES_MAX, 10,

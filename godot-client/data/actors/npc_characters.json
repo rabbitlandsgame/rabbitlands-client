@@ -2,6 +2,29 @@
   "schemaVersion": 1,
   "description": "Named NPC biographies and story-led clothes. NPC kind and actor type must match; never used for players.",
   "npcs": {
+      "mara vell": {
+        "name": "Mara Vell",
+        "actorType": 305,
+        "model": "luminous_female",
+        "homeRegion": "landfall",
+        "role": "shop",
+        "outfit": "cape_seller",
+        "backstory": "Mara stitched travelling cloaks for the boats before opening a cape stall beside the tool shop.",
+        "appearanceStory": "A teal standard-bearer cape displays her embroidery; close-fitting work clothes leave her hands free.",
+      "dialogueTopics": ["choosing_a_cape", "caring_for_embroidery"],
+        "appearance": {
+          "skin": 4,
+          "hair": 264,
+          "eyes": 2,
+          "shirt": 4,
+          "pants": 9,
+          "boots": 0,
+          "head": 0
+        },
+        "equipmentVisuals": {
+          "2": 149
+        }
+      },
     "rowan hale": {
       "name": "Rowan Hale",
       "actorType": 302,

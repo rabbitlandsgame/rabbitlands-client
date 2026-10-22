@@ -85,8 +85,10 @@ def test_landfall_services_keep_their_authored_merchant_posts():
     import frames
     row = next(row for row in read(tool.OUTPUT)["regions"] if row["serverMap"] == "landfall")
     by_name = {mark["name"]: mark for mark in row["serviceMarkers"]}
-    assert set(by_name) == {"Rowan Hale", "Bettany Orl"}
+    assert set(by_name) == {"Rowan Hale", "Bettany Orl", "Mara Vell"}
     assert by_name["Rowan Hale"]["category"] == "general_store"
+    assert by_name["Mara Vell"]["category"] == "general_store"
+    assert by_name["Mara Vell"]["serverTile"] == [117, 212]
     assert by_name["Bettany Orl"]["category"] == "tavern"
     frame = frames.load("landfall", ROOT)
     for marker in by_name.values():

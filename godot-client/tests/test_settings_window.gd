@@ -47,6 +47,21 @@ func _run() -> void:
 		and not rect.intersects(resource_rail.get_global_rect()),
 		"it fits 1280x720 clear of the resource rail: %s" % rect)
 	_test_fps_limit(main, window)
+	var emblems := preload("res://src/actors/cape_emblems.gd")
+	var cape_toggle := panel.find_child("cape_emblems", true, false) as CheckBox
+	_expect(cape_toggle != null, "Graphics has a cape emblem preference")
+	if cape_toggle != null:
+		cape_toggle.button_pressed = false
+		await process_frame
+		var cape_settings := ConfigFile.new()
+		cape_settings.load(SETTINGS_PATH)
+		_expect(not emblems.enabled and not bool(cape_settings.get_value(
+			"graphics", "cape_emblems", true)), "the emblem preference applies and saves")
+		emblems.set_enabled(true)
+		main.call("_load_hud_settings")
+		_expect(not emblems.enabled and not cape_toggle.button_pressed,
+			"the saved emblem preference restores")
+		cape_toggle.button_pressed = true
 	await _test_look_and_quality(main, window, panel, resource_rail)
 	await _test_unified_settings(main, window, panel)
 

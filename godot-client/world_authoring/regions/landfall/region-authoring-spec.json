@@ -1,67 +1,67 @@
 {
- "schema": "eloria-region-authoring-spec-v1",
- "regionId": "landfall",
- "label": "Landfall",
- "adapter": "continent-v2-meshy-v1",
- "paths": {
-  "scene": "godot-client/world_authoring/regions/landfall/landfall.tscn",
-  "manifest": "eloria-assets/maps/continent-v2/landfall/world.json",
-  "snapshot": "eloria-assets/maps/continent-v2/landfall/authoring/continent-authoring.json"
- },
- "inputs": {
-  "baseHeights": "godot-client/world_authoring/regions/landfall/base-heights.f32le",
-  "baseColors": "godot-client/world_authoring/regions/landfall/base-colors.rgba8"
- },
- "continentTranslation": [
-  1127.0,
-  0.0,
-  7357.0
- ],
- "server": {
-  "origin": [
-   282,
-   248
-  ],
-  "cells": [
-   564,
-   564
-  ],
-  "collisionOriginMetres": [
-   -282.0,
-   248.0
-  ]
- },
- "terrain": {
-  "origin": [
-   -338.0,
-   -304.0
-  ],
-  "cellMetres": 2.0,
-  "vertices": [
-   339,
-   305
-  ]
- },
- "authority": {
-  "ownedRouteIds": [],
-  "requiredRouteIds": [],
-  "ownedPlanFeatureIds": [],
-  "ownedFerryConnectionIds": []
- },
- "gameplay": {
-  "runtimeBindingCount": 0,
-  "runtimePointCount": 10,
-  "existingMarkerBindingCount": 0,
-  "authoredMarkerCount": 103
- },
- "continentV2": {
-  "planPath": "eloria-assets/maps/continent-v2/_continent_v2/continent-v2-plan.json",
-  "vertical": {
-   "A": 259.0078328433769,
-   "u0": 259.0078328433769,
-   "peakMetres": 350.0,
-   "gainAtSea": 1.0
+  "schema": "eloria-region-authoring-spec-v1",
+  "regionId": "landfall",
+  "label": "Landfall",
+  "adapter": "continent-v2-meshy-v1",
+  "paths": {
+    "scene": "godot-client/world_authoring/regions/landfall/landfall.tscn",
+    "manifest": "eloria-assets/maps/continent-v2/landfall/world.json",
+    "snapshot": "eloria-assets/maps/continent-v2/landfall/authoring/continent-authoring.json"
   },
-  "planSha256": "7700440a3540e2dc7fbaf30e12538b18e872aea336347433f4abd9381fe1b75a"
- }
+  "inputs": {
+    "baseHeights": "godot-client/world_authoring/regions/landfall/base-heights.f32le",
+    "baseColors": "godot-client/world_authoring/regions/landfall/base-colors.rgba8"
+  },
+  "continentTranslation": [
+    1127.0,
+    0.0,
+    7357.0
+  ],
+  "server": {
+    "origin": [
+      282,
+      248
+    ],
+    "cells": [
+      564,
+      564
+    ],
+    "collisionOriginMetres": [
+      -282.0,
+      248.0
+    ]
+  },
+  "terrain": {
+    "origin": [
+      -338.0,
+      -304.0
+    ],
+    "cellMetres": 2.0,
+    "vertices": [
+      339,
+      305
+    ]
+  },
+  "authority": {
+    "ownedRouteIds": [],
+    "requiredRouteIds": [],
+    "ownedPlanFeatureIds": [],
+    "ownedFerryConnectionIds": []
+  },
+  "gameplay": {
+    "runtimeBindingCount": 0,
+    "runtimePointCount": 10,
+    "existingMarkerBindingCount": 0,
+    "authoredMarkerCount": 104
+  },
+  "continentV2": {
+    "planPath": "eloria-assets/maps/continent-v2/_continent_v2/continent-v2-plan.json",
+    "vertical": {
+      "A": 259.0078328433769,
+      "u0": 259.0078328433769,
+      "peakMetres": 350.0,
+      "gainAtSea": 1.0
+    },
+    "planSha256": "7700440a3540e2dc7fbaf30e12538b18e872aea336347433f4abd9381fe1b75a"
+  }
 }

@@ -250,7 +250,7 @@
      "servedGridSha256": "a5f59d809fda712579eb3b93e7fbb4cf6a902993dd3091ceb6f2f332f1283de8"
     },
     "landfall": {
-     "snapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
+     "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
      "servedGridSha256": "f240f97793bacc17816fec061420f91bf2eadb6f3103bba0e6b82389cbdfcfd8"
     },
     "pinebrow": {
@@ -307,7 +307,27 @@
    "openTiles": 318497,
    "sha256": "275706f48038e4f05c533bf85272f0eacff9639d88531695e34afbc217e46604"
   },
-  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them"
+  "note": "kit solids carry no client collision (the wrappers that name them are not meshes); the served grid blocks them",
+  "npcMetadataAmendments": [
+   {
+    "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py",
+    "region": "landfall",
+    "baseSnapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
+    "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
+    "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
+    "unchangedContentSha256": "131cffcd5d55ef3d4e54ed1b532d39d3b373381e0de7dde8c43d7aaa2006aa4c",
+    "addedNpcMarkers": [
+     "landfall--npc-cape-seller-mara-vell"
+    ],
+    "preserved": [
+     "geometry",
+     "terrain",
+     "paths",
+     "collision.bin",
+     "served-grid.escg.gz"
+    ]
+   }
+  ]
  },
  "navigation": {
   "surfaceNodePrefixes": [

@@ -26,7 +26,12 @@ def test_person_is_authored_and_loadable(key, person):
         piece = EQUIPMENT['models'][f'{part}:{visual}']
         assert (CLIENT / piece['scene'].removeprefix('res://')).is_file()
         if piece.get('attach') == 'skinned':
-            assert piece.get('fitProfile') == 'canonical'
+            # The shared imported cape retains its existing runtime rig fit.
+            if piece.get('skinRegion') == 'cape':
+                assert piece['scene'] == 'res://assets/actors/native/equipment/generic_cape.glb'
+                assert piece.get('fitProfile') == 'legacy'
+            else:
+                assert piece.get('fitProfile') == 'canonical'
 
 
 def test_every_person_has_an_unambiguous_wire_identity():
@@ -42,7 +47,7 @@ def test_every_person_has_an_unambiguous_wire_identity():
 
 def test_cast_has_individual_stories_and_wardrobes():
     people = list(CAST['npcs'].values())
-    assert len(people) == 259
+    assert len(people) == 260
     assert len({person['backstory'] for person in people}) == len(people)
     assert len({person['outfit'] for person in people}) >= 35
     for region in {p['homeRegion'] for p in people}:

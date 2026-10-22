@@ -96,6 +96,7 @@ const MountsWindowScript := preload("res://src/ui/mounts_window.gd")
 const BannerDisplayMenuScript := preload("res://src/ui/banner_display_menu.gd")
 const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
+const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
 const ChatHudScript := preload("res://src/ui/chat_hud.gd")
 const ChatMessages := preload("res://src/ui/chat_messages.gd")
@@ -2857,6 +2858,7 @@ func _refresh_unified_settings() -> void:
 		"storage_docked": classic_storage.docked, "selected_quantity": _selected_quantity_box,
 		"spell_bar_docked": casting_bar.docked, "spell_bar_expanded": casting_bar.panel.visible,
 		"shadows": _shadows_enabled, "particles": _effects_enabled,
+		"cape_emblems": CapeEmblems.enabled,
 		"nameplates": _nameplates_enabled, "rotation_sensitivity": camera_rig.rotation_sensitivity,
 		"start_backdrop": start_screen_backdrop.selected_id,
 		"start_animated": start_screen_backdrop.animation_enabled,
@@ -8523,6 +8525,7 @@ func _load_hud_settings() -> void:
 			_encyclopedia_bookmarks = (stored_bookmarks as Array).duplicate(true)
 		_shadows_enabled = bool(config.get_value("graphics", "shadows", true))
 		_effects_enabled = bool(config.get_value("graphics", "particles", true))
+		CapeEmblems.set_enabled(bool(config.get_value("graphics", "cape_emblems", true)))
 		_nameplates_enabled = bool(
 			config.get_value("graphics", "nameplates", true))
 		_set_name_distance(config.get_value(
@@ -8586,6 +8589,7 @@ func _load_hud_settings() -> void:
 		bool(extension_windows.get("combat_hud_enabled")))
 	settings_window.call("restore_name_distance", _name_distance_metres)
 	settings_window.call("restore_crowd_settings", _crowd_bodies, _swaying_capes)
+	settings_window.call("restore_toggle", "cape_emblems", CapeEmblems.enabled)
 	for option_key: String in _hud_element_options:
 		settings_window.call("restore_toggle", option_key,
 			bool(_hud_element_options[option_key]))
@@ -8663,6 +8667,7 @@ func _save_hud_settings() -> void:
 	config.set_value("encyclopedia", "bookmarks", _encyclopedia_bookmarks)
 	config.set_value("graphics", "shadows", _shadows_enabled)
 	config.set_value("graphics", "particles", _effects_enabled)
+	config.set_value("graphics", "cape_emblems", CapeEmblems.enabled)
 	config.set_value("graphics", "nameplates", _nameplates_enabled)
 	config.set_value("graphics", "name_distance", _name_distance_metres)
 	config.set_value("graphics", "crowd_bodies", _crowd_bodies)
@@ -12817,6 +12822,8 @@ func _on_client_setting_changed(section: String, key: String,
 			# The rain's drops follow the switch at once; the sky keeps its
 			# weather either way.
 			_sync_weather()
+		"cape_emblems":
+			CapeEmblems.set_enabled(bool(value))
 		"nameplates":
 			_nameplates_enabled = bool(value)
 			_apply_banner_options()

@@ -254,8 +254,8 @@
     ]
    },
    "bake": {
-    "snapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
-    "sceneSha256": "dd59ce43b5b2ac133181af988c0170857aece08a4cfa27e2009b8a6049cc6d71"
+    "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
+    "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce"
    },
    "package": {
     "collisionSha256": "934ef1fbba1580e4d35c4408b0debd15a548b7d9d42fca5f9a09f2b7a432fd20",
@@ -268,12 +268,12 @@
    "rows": {
     "spawns": 60,
     "nodes": 80,
-    "npcs": 3,
+    "npcs": 4,
     "homeNpcs": 4,
     "interactives": 2,
     "laneDepartures": 1192
    },
-   "npcPosts": 7,
+   "npcPosts": 8,
    "servedReachTiles": 173375
   },
   "pinebrow": {
@@ -670,7 +670,7 @@
  "inputs": {
   "crossingsSha256": "30eb2e9d09de9edd5b1aa0c448fe8c21a05efd2554a194219139aecb2d724dac",
   "contentTables": {
-   "eloria-assets/maps/continent-v2/_continent_v2/content/server-rows.json": "da7bc8f39dedb685a18ee23c3fbbe6a3f36fce8a04e108063d0935d73dd5b646",
+   "eloria-assets/maps/continent-v2/_continent_v2/content/server-rows.json": "5085bc028a1b3d7f2d323d8878cf793533df225906ef0974aa99f08b5b9319ea",
    "eloria-assets/maps/continent-v2/_continent_v2/content/server-tables.json": "46be5845cf57cc6b787cf7485bab516c083a18ba5f396a77721b3b9b6c726ac4",
    "eloria-assets/maps/continent-v2/_continent_v2/content/questlines.txt": "a739e3c0558914ef54c3d41413b675658578466e3a2830e08e4229eab4795efd",
    "eloria-assets/maps/continent-v2/boarsend/content/spawns.json": "a71b73d9ce005c8ef29e513e4af87f418a8bebb0ad56d4e3e81fd8d624946086",
@@ -1077,7 +1077,7 @@
    "maps.txt": "222a6f1e5057d94d3b8afaef48a80fa91ad963a6c66ef865422a203e8adf0131",
    "spawns.txt": "2d42196ee1fa8080d98fa75bc803db10274fa5128ce68d2e3fb7ace2bb394b3d",
    "harvesting.txt": "136d7206328274e3b7586ce187bb238d444f7e1fa55d0bb60bb12ffd85251e6f",
-   "npcs.txt": "3636fbb6a1945d1831a9133d452a31de30583296c808d2d19d6f11c285c0ace1",
+   "npcs.txt": "3ca92429e2ac28047d34bb3a13c8e7cf997562b560b6469ecd5c65de19bef3e7",
    "interactives.txt": "d3f78c1b88be8ad20ae67a59d90cbfbcc065225538dc02574c25d5b738aa47d2",
    "exterior_connections.json": "805a49705bdbc26e9b8052384b23aa1689d05415a990d1c74f1496973cff334e",
    "questlines.txt": "e83753a62ce00f9a103a694db3269e488f6e00d66633b91c706b6dd0a0248054",
@@ -1911,5 +1911,30 @@
    },
    "walkableTiles": 53091
   }
- }
+ },
+ "npcMetadataAmendments": [
+  {
+   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py",
+   "region": "landfall",
+   "baseSnapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
+   "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
+   "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
+   "unchangedContentSha256": "131cffcd5d55ef3d4e54ed1b532d39d3b373381e0de7dde8c43d7aaa2006aa4c",
+   "addedNpcMarkers": [
+    "landfall--npc-cape-seller-mara-vell"
+   ],
+   "preserved": [
+    "geometry",
+    "terrain",
+    "paths",
+    "collision.bin",
+    "served-grid.escg.gz"
+   ],
+   "scope": "added NPC rows only",
+   "servedGridSha256": "f240f97793bacc17816fec061420f91bf2eadb6f3103bba0e6b82389cbdfcfd8",
+   "npcTableSha256": "3ca92429e2ac28047d34bb3a13c8e7cf997562b560b6469ecd5c65de19bef3e7",
+   "approachRings": "all open and reached",
+   "otherReachableTilesLost": 0
+  }
+ ]
 }

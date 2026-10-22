@@ -172,14 +172,14 @@ def test_npc_entries_name_their_marker_and_keep_a_body_of_its_race(rows, markers
             body = entry["actorType"]
             assert isinstance(body, int), rid
             if "actorType" in marker["extras"]:
-                # a re-homed Four Gates person keeps the body players know
-                assert entry["group"] == "re-homed" and body == marker["extras"]["actorType"], rid
+                # A named body may be fixed directly, including a new shopkeeper.
+                assert body == marker["extras"]["actorType"], rid
             else:
                 low, high = marker["extras"]["actorTypeBlock"]
                 assert entry["group"] == "new" and low <= body <= high, rid
     sw = {rid: e for m in MAPS for rid,e in rows["maps"][m]["npcs"].items()}
-    assert Counter(e["group"] for e in sw.values()) == {"new": 12, "re-homed": 5}
-    assert sorted(e["actorType"] for e in sw.values() if e["group"] == "new") == [302, 315, 323, 332, 338, 342, 348, 358, 360, 363, 375, 376]
+    assert Counter(e["group"] for e in sw.values()) == {"new": 13, "re-homed": 5}
+    assert sorted(e["actorType"] for e in sw.values() if e["group"] == "new") == [302, 305, 315, 323, 332, 338, 342, 348, 358, 360, 363, 375, 376]
     assert sorted(e["actorType"] for e in sw.values() if e["group"] == "re-homed") == [303, 307, 308, 310, 312]
 
 
@@ -272,6 +272,7 @@ def test_split_retains_exactly_three_authored_arrivals_and_unique_owned_marker_i
     additions |= {door["marker"] for section in load(V2 / "_continent_v2/content/underground.json")["sections"]
                   for door in underground_source.doors(section)}
     additions.add("landfall--npc-toolkeeper-rowan-hale")
+    additions.add("landfall--npc-cape-seller-mara-vell")
     # the outer isles' people (Landfall liveliness pass)
     additions |= {"greenlight--npc-causeway-warden-edda-tine", "hearthcroft--npc-crofter-oyun-tarag",
                   "tollholm--npc-toll-keeper-tobin-ware", "boarsend--npc-swineherd-gil-mast",

@@ -38936,6 +38936,27 @@ extras = {
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -164.5, 121.494, 31.5)
 
+[node name="landfall--npc-cape-seller-mara-vell" type="Marker3D" parent="Gameplay/NpcMarkers"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "landfall--npc-cape-seller-mara-vell"
+kind = "npc_marker"
+label = "Mara Vell"
+facing = Vector3(1, 0, 0)
+extras = {
+"actorType": 305,
+"authority": "server",
+"mapCategory": "general_store",
+"mapLabel": "Mara's Capes",
+"name": "Mara Vell",
+"occupation": "Cape Seller",
+"post": "npc_cape_seller_mara_vell",
+"race": "luminous",
+"role": "shop",
+"status": "NEW"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -164.5, 121.494, 35.5)
+
 [node name="landfall--npc-gate-warden-ilyon" type="Marker3D" parent="Gameplay/NpcMarkers"]
 gizmo_extents = 0.8
 script = ExtResource("s0_marker")

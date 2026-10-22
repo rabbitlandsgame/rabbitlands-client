@@ -4,6 +4,7 @@ extends CharacterBody3D
 const REBOUND_SKIN_POOL := preload("res://src/actors/rebound_skin_pool.gd")
 const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
 const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd")
+const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const QUIVER_STRAP_FIT := preload("res://src/actors/quiver_strap_fit.gd")
@@ -2416,6 +2417,9 @@ func _create_equipment_part(part: int, visual_id: int, allow_fallback: bool) -> 
 		_equipment_nodes[part] = created
 		_apply_equipment_hides(part, part_config, model_config)
 	if part == CAPE_PART:
+		for node: Node in created:
+			if node is MeshInstance3D:
+				CapeEmblems.apply(node as MeshInstance3D, str(model_config.get("emblem", "")))
 		_set_cape_cloth_active(not created.is_empty())
 
 ## The scene of the torso piece this actor is wearing, or "" when the chest is
