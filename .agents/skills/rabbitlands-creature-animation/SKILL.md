@@ -44,3 +44,5 @@ The six approved Ogre/Troll/Giant sets, including target-specific clothing and r
 For the approved Highland Orc and Coal Kobold motions, including native grip, descending scratch and relaxed spare-arm framing, see `docs/orc-kobold-motion.md` and [native humanoid motion](references/native-humanoid-motion.md).
 
 For Crystal Cave and Nightweave Spider fitting, read [native spider motion](references/native-spider-motion.md). It covers sharp-tip support, rigid armored sections, alternating tripods, target-specific leg curls and runtime attachment mapping.
+
+For native scorpion pilots, read [native scorpion motion](references/native-scorpion-motion.md). It covers pincer versus walking roles, actual tip controls, rigid lower legs, length-preserving stings and separate posterior body support.

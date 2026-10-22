@@ -1,0 +1,133 @@
+{
+  "passed": true,
+  "scope": "Seven installed slots: off-grid native bone, morph and surface witnesses; complete sharp-tip contacts, mirrored touchdown advances, native segment lengths, floor clearance, supported death and held/loop endpoints. No flat paw metric is applied to pointed claws.",
+  "actors": {
+    "amethyst_scorpion": {
+      "sha256": "29d33e489be741986fcb050d23328bb478bf4ca30244bb435bf252f908c6d9d4",
+      "clips": {
+        "Death_A": {
+          "witness_bone_error": 0.0,
+          "witness_morph_error": 0.0,
+          "witness_surface_error": 0.0,
+          "minimum_floor_over_height": 0.0011384899371456336,
+          "native_length_error_over_height": 1.3718341826914739e-08,
+          "complete_blade_rigid_error_over_height": 8.005149409559185e-16
+        },
+        "Fighting_Idle": {
+          "witness_bone_error": 0.0,
+          "witness_morph_error": 0.0,
+          "witness_surface_error": 0.0,
+          "minimum_floor_over_height": 0.0009998706170976067,
+          "native_length_error_over_height": 1.3718341630992625e-08,
+          "complete_blade_rigid_error_over_height": 3.9758460271372796e-16
+        },
+        "Hit_Chest": {
+          "witness_bone_error": 0.0,
+          "witness_morph_error": 0.0,
+          "witness_surface_error": 0.0,
+          "minimum_floor_over_height": 0.0009998486538159062,
+          "native_length_error_over_height": 1.3718341826914739e-08,
+          "complete_blade_rigid_error_over_height": 4.571515975268954e-16
+        },
+        "Idle_A": {
+          "witness_bone_error": 0.0,
+          "witness_morph_error": 0.0,
+          "witness_surface_error": 0.0,
+          "minimum_floor_over_height": 0.0009998495825159317,
+          "native_length_error_over_height": 1.3718341696299995e-08,
+          "complete_blade_rigid_error_over_height": 3.972492297289388e-16
+        },
+        "Jog": {
+          "witness_bone_error": 0.0,
+          "witness_morph_error": 0.0,
+          "witness_surface_error": 0.0,
+          "minimum_floor_over_height": 0.0009996422748922726,
+          "native_length_error_over_height": 1.3718341826914739e-08,
+          "complete_blade_rigid_error_over_height": 4.571515975268954e-16
+        },
+        "Sword_Attack": {
+          "witness_bone_error": 0.0,
+          "witness_morph_error": 0.0,
+          "witness_surface_error": 0.0,
+          "minimum_floor_over_height": 0.000999810619497291,
+          "native_length_error_over_height": 1.3718341761607367e-08,
+          "complete_blade_rigid_error_over_height": 3.973330995134116e-16
+        },
+        "Walk": {
+          "witness_bone_error": 0.0,
+          "witness_morph_error": 0.0,
+          "witness_surface_error": 0.0,
+          "minimum_floor_over_height": 0.000999831276972997,
+          "native_length_error_over_height": 1.3718341826914739e-08,
+          "complete_blade_rigid_error_over_height": 4.571515975268954e-16
+        }
+      },
+      "contacts": {
+        "Walk": {
+          "minimum_supporting_legs": 3,
+          "minimum_support_margin_over_height": 0.08042315816324344,
+          "maximum_tip_height_error": 1.507796483354515e-07,
+          "maximum_stance_speed_error": 2.0063130940622942e-05,
+          "mirrored_advances": {
+            "fore": {
+              "world_tip_advances": [
+                0.15714306191222643,
+                0.15714265237348793,
+                0.15714306191222638
+              ],
+              "balance": 0.9999973938477873
+            },
+            "mid": {
+              "world_tip_advances": [
+                0.15714306300812533,
+                0.157142651277589,
+                0.15714306300812536
+              ],
+              "balance": 0.9999973799000192
+            },
+            "hind": {
+              "world_tip_advances": [
+                0.15714308388139953,
+                0.1571426304043148,
+                0.15714308388139958
+              ],
+              "balance": 0.9999971142408971
+            }
+          }
+        },
+        "Jog": {
+          "minimum_supporting_legs": 3,
+          "minimum_support_margin_over_height": 0.045547662656954147,
+          "maximum_tip_height_error": 3.7692159151649085e-07,
+          "maximum_stance_speed_error": 0.00040906537370431165,
+          "mirrored_advances": {
+            "fore": {
+              "world_tip_advances": [
+                0.27868873397549215,
+                0.2786883152048358,
+                0.2786887339754922
+              ],
+              "balance": 0.9999984973534795
+            },
+            "mid": {
+              "world_tip_advances": [
+                0.2786887172273406,
+                0.2786883319529873,
+                0.2786887172273407
+              ],
+              "balance": 0.9999986175459229
+            },
+            "hind": {
+              "world_tip_advances": [
+                0.2786887825361763,
+                0.27868826664415164,
+                0.27868878253617624
+              ],
+              "balance": 0.9999981488597426
+            }
+          }
+        }
+      }
+    }
+  }
+}
