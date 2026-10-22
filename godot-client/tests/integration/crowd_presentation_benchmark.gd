@@ -16,17 +16,28 @@ extends SceneTree
 ## Headless runs report scene CPU; windowed runs, with vsync off and no frame
 ## cap, report the rendered frame time and the renderer's own timers.
 ##
-## The crowd is synthetic: actor records and real server packet shapes fed
-## through AppState, as the network would, at a fixed cadence (100 ms steps,
-## 400 ms combat exchanges). Run it through run_crowd_presentation_benchmark.py,
-## which isolates user data and records the machine. Environment:
+## The `live` and `stress` crowds are synthetic: actor records and real server
+## packet shapes fed through AppState, as the network would, at a fixed cadence.
+## The `replay` driver plays one connection of a server session recording
+## (the server's eloria/session_recorder.py, format RLREC1) instead: Main
+## becomes that player (YOU_ARE) on its map (CHANGE_MAP), everything the server
+## sent before the start offset is applied fast, and from there every outbound
+## frame reaches AppState at its recorded time, as the socket would have
+## delivered it. Recordings hold player data: keep them out of this repository.
+## Run it through run_crowd_presentation_benchmark.py, which isolates user data
+## and records the machine. Environment:
 ##
 ## - RABBITLANDS_CROWD_BENCH_CELLS: comma list of cell ids, or `phase4` (default),
-##   `quick` or `all`; see `cells_for`.
-## - RABBITLANDS_CROWD_BENCH_MAP: map id (default four_gates; `none` for no map).
+##   `quick` or `all`; see `cells_for`. A replay runs its one cell.
+## - RABBITLANDS_CROWD_BENCH_MAP: map id (default four_gates, or the recording's
+##   map for a replay; `none` for no map).
 ## - RABBITLANDS_CROWD_BENCH_CENTRE: `x,y` server tile the player stands on
 ##   (default: the map's own centre, or the hot spot for landfall and twinbrook).
 ## - RABBITLANDS_CROWD_BENCH_SAMPLE_MSEC / _WARMUP_MSEC / _CADENCE_MSEC.
+## - RABBITLANDS_CROWD_BENCH_DRIVER: `live` (default), `stress` or `replay`.
+## - RABBITLANDS_CROWD_BENCH_REPLAY: the .rlrec file a replay plays.
+## - RABBITLANDS_CROWD_BENCH_REPLAY_START_MSEC: where the replay's warmup starts,
+##   in ms after the recording's YOU_ARE (default 30000).
 ## - RABBITLANDS_CROWD_BENCH_OUT: report path (default user://).
 ## - RABBITLANDS_CROWD_PRESENTATION / RABBITLANDS_CROWD_BODY_CAP: read by Main.
 
@@ -43,6 +54,25 @@ const MIN_SAMPLE_FRAMES := 60
 ## market (the mean of the isle's NPC posts, as the server's S3 preset takes it)
 ## and a Twinbrook invasion wave's authored centre (S2).
 const HOT_SPOTS := {"landfall": Vector2i(122, 225), "twinbrook": Vector2i(675, 186)}
+const REPLAY_MAGIC := "RLREC1\n"
+## A recording record: kind (1 byte), monotonic nanoseconds (u64), length (u32).
+const REPLAY_RECORD_HEADER := 13
+const REPLAY_DEFAULT_START_MSEC := 30000
+## Frames the replay's fast prologue never applies. The setup has already
+## logged Main in, and effects, animations and numbers from before the start
+## would be long gone by then in play; applying them all at once would only
+## leave a burst of effect nodes behind.
+const REPLAY_LOGIN_FRAMES := [EloriaProtocol.ServerMessage.LOG_IN_OK,
+	EloriaProtocol.ServerMessage.LOG_IN_NOT_OK, EloriaProtocol.ServerMessage.CREATE_CHAR_OK,
+	EloriaProtocol.ServerMessage.CREATE_CHAR_NOT_OK]
+const REPLAY_TRANSIENT_FRAMES := [EloriaProtocol.ServerMessage.SEND_SPECIAL_EFFECT,
+	EloriaProtocol.ServerMessage.ADD_ACTOR_ANIMATION, EloriaProtocol.ServerMessage.GET_ACTOR_DAMAGE,
+	EloriaProtocol.ServerMessage.GET_ACTOR_HEAL, EloriaProtocol.ServerMessage.MISSILE_AIM_A_AT_B,
+	EloriaProtocol.ServerMessage.MISSILE_AIM_A_AT_XYZ, EloriaProtocol.ServerMessage.MISSILE_FIRE_A_TO_B,
+	EloriaProtocol.ServerMessage.MISSILE_FIRE_A_TO_XYZ, EloriaProtocol.ServerMessage.PLAY_SOUND,
+	EloriaProtocol.ServerMessage.THUNDER]
+## Recorded time the prologue applies per frame, so Main presents it in steps.
+const REPLAY_PROLOGUE_STEP_NSEC := 1000000000
 
 var _failures := 0
 var _headless := false
@@ -62,6 +92,23 @@ var _fps_cap := 60
 var _iteration_started_usec := -1
 var _last_iteration_usec := -1.0
 var _frame_marker: Node
+## The player Main presents: FIRST_ACTOR_ID for a synthetic crowd, the
+## recording's YOU_ARE for a replay.
+var _local_id := FIRST_ACTOR_ID
+## The replay: the file's bytes and, for each outbound frame in order, its
+## offset, length and recorded time. `_replay_origin_ns` is the recorded time
+## the warmup starts at, `_replay_index` the next frame to deliver.
+var _replay_bytes := PackedByteArray()
+var _replay_offsets := PackedInt64Array()
+var _replay_sizes := PackedInt32Array()
+var _replay_times := PackedInt64Array()
+var _replay_index := 0
+var _replay_origin_ns := 0
+var _replay_you_are_ns := 0
+var _replay_started_usec := 0
+var _replay_map := ""
+var _replay_spawn := Vector2i(-1, -1)
+var _replay_stats: Dictionary = {}
 
 func _init() -> void:
 	call_deferred("_run")
@@ -100,8 +147,9 @@ func _run() -> void:
 	if not _headless:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	root.size = Vector2i(1280, 720)
-	var profile := _env("RABBITLANDS_CROWD_BENCH_CELLS", "phase4")
-	var cells := cells_for(profile)
+	var replay := _driver_mode() == "replay"
+	var profile := "replay" if replay else _env("RABBITLANDS_CROWD_BENCH_CELLS", "phase4")
+	var cells := [] if replay else cells_for(profile)
 	_report = {
 		"schemaVersion": SCHEMA,
 		"benchmark": "crowd_presentation",
@@ -125,13 +173,9 @@ func _run() -> void:
 			"sampleMilliseconds": _env_int("RABBITLANDS_CROWD_BENCH_SAMPLE_MSEC", 6000, 500),
 			"warmupMilliseconds": _env_int("RABBITLANDS_CROWD_BENCH_WARMUP_MSEC", 2000, 100),
 			"driver": _driver_mode(),
-			"cadenceMilliseconds": _env_int("RABBITLANDS_CROWD_BENCH_CADENCE_MSEC",
+			"cadenceMilliseconds": null if replay else _env_int("RABBITLANDS_CROWD_BENCH_CADENCE_MSEC",
 				50 if _driver_mode() == "live" else 100, 25),
-			"driverDescription": ("live: 50 ms server ticks; each mover steps every 600 ms (a "
-				+ "walk) and each fighter acts every 2 s (a combat round), staggered across "
-				+ "the crowd" if _driver_mode() == "live" else
-				"stress: every mover steps every 100 ms and every fighter acts every 400 ms, "
-				+ "all on the same tick (the earlier crowd study's driver)"),
+			"driverDescription": _driver_description(),
 			"vsync": "disabled" if not _headless else "n/a",
 			"fpsCap": _env_int("RABBITLANDS_CROWD_BENCH_FPS_CAP", 60, 0),
 			"frameMetric": ("frame work: first physics step (or process) to frame_post_draw "
@@ -144,9 +188,16 @@ func _run() -> void:
 		"failures": [],
 		"unixTime": int(Time.get_unix_time_from_system()),
 	}
-	_creatures = _creature_actor_types()
+	if replay:
+		var recording := _load_replay(OS.get_environment("RABBITLANDS_CROWD_BENCH_REPLAY").strip_edges())
+		_report["replay"] = recording
+		if bool(recording.get("ok", false)):
+			cells.append({"id": "replay-%s" % _replay_map, "count": 0, "shape": "replay",
+				"activity": "recorded"})
+	else:
+		_creatures = _creature_actor_types()
 	if not _expect(not cells.is_empty(), "profile %s selects at least one cell" % profile) \
-			or not _expect(not _creatures.is_empty(), "creature models resolve"):
+			or not _expect(replay or not _creatures.is_empty(), "creature models resolve"):
 		_finish()
 		return
 	await _set_up_main()
@@ -174,7 +225,10 @@ func _run() -> void:
 		RenderingServer.frame_post_draw.connect(_on_iteration_drawn)
 	_report["crowdPolicy"] = (_main.get("crowd") as RefCounted).call("describe") \
 		if _main.get("crowd") != null else {"available": false}
-	await _prewarm()
+	# A replay warms nothing: what the recording shows is built in its prologue,
+	# and a model first seen during the sample costs what it costs in play.
+	if not replay:
+		await _prewarm()
 	for cell: Dictionary in cells:
 		await _run_cell(cell)
 	await _tear_down_main()
@@ -196,7 +250,8 @@ func _set_up_main() -> void:
 	(_main.get("login_panel") as Control).hide()
 	(_main.get("creation_panel") as Control).hide()
 	(_main.get("game_view") as Control).show()
-	var map_id := _env("RABBITLANDS_CROWD_BENCH_MAP", "four_gates")
+	var map_id := _env("RABBITLANDS_CROWD_BENCH_MAP", _replay_map if not _replay_map.is_empty()
+		else "four_gates")
 	_report["map"] = map_id
 	if map_id != "none":
 		_app_state.set("current_map", map_id)
@@ -211,6 +266,9 @@ func _set_up_main() -> void:
 	if centre_text.contains(","):
 		var parts := centre_text.split(",")
 		_centre = Vector2i(int(parts[0]), int(parts[1]))
+	elif _replay_spawn.x >= 0:
+		# Where the recorded player last arrived before the start.
+		_centre = _replay_spawn
 	elif HOT_SPOTS.has(map_id):
 		_centre = HOT_SPOTS[map_id]
 	else:
@@ -238,8 +296,10 @@ func _set_up_main() -> void:
 			RenderingServer.viewport_set_measure_render_time(world_viewport.get_viewport_rid(), true)
 	# The player stands on the centre tile for the map's own readiness wait, so
 	# the streamed ground around the crowd is resident before any cell starts.
-	_app_state.set("local_actor_id", FIRST_ACTOR_ID)
-	_app_state.set("actors", {FIRST_ACTOR_ID: _record(0, true, _centre, {})})
+	var standing := _record(0, true, _centre, {})
+	standing["actor_id"] = _local_id
+	_app_state.set("local_actor_id", _local_id)
+	_app_state.set("actors", {_local_id: standing})
 	_app_state.call("mark_all_actors_changed")
 	_main.call("_sync_world", _app_state.call("take_changed_actors"))
 	_report["worldReadiness"] = await _wait_for_world_readiness("initial map", 1500)
@@ -265,19 +325,27 @@ func _prewarm() -> void:
 
 
 func _run_cell(spec: Dictionary) -> void:
+	var replay := str(spec["shape"]) == "replay"
 	var count := int(spec["count"])
-	var shape := str(spec["shape"])
-	var records := _make_records(count, shape)
+	var records: Dictionary = {} if replay else _make_records(count, str(spec["shape"]))
 	_app_state.set("selected_actor_id", -1)
 	var before := _memory_sample()
-	_app_state.set("local_actor_id", FIRST_ACTOR_ID)
-	_app_state.set("actors", records)
-	_app_state.call("mark_all_actors_changed")
-	var spawn := await _spawn_and_build(count)
+	var spawn: Dictionary
+	if replay:
+		spawn = await _replay_prologue()
+		count = (_app_state.get("actors") as Dictionary).size()
+		spec["count"] = count
+	else:
+		_app_state.set("local_actor_id", FIRST_ACTOR_ID)
+		_app_state.set("actors", records)
+		_app_state.call("mark_all_actors_changed")
+		spawn = await _spawn_and_build(count)
 	var readiness := await _wait_for_world_readiness(str(spec["id"]), 300)
 	var census_before := _census()
 	var spawned_memory := _memory_sample()
-	var active := _active_ids(records, str(spec["activity"]))
+	var active: Array[int] = []
+	if not replay:
+		active = _active_ids(records, str(spec["activity"]))
 	var plan := _plan(active, str(spec["activity"]))
 	# Attribution diagnostics, never an acceptance configuration: the benchmark
 	# Main subclass freezes every AnimationPlayer, hides the overhead block or
@@ -286,7 +354,10 @@ func _run_cell(spec: Dictionary) -> void:
 	_main.set("benchmark_animation_enabled", not diagnostics.has("no_animation"))
 	_main.set("benchmark_overhead_enabled", not diagnostics.has("no_overhead"))
 	_main.set("benchmark_ground_enabled", not diagnostics.has("no_ground"))
-	await _prime(plan)
+	if replay:
+		_replay_begin()
+	else:
+		await _prime(plan)
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["warmupMilliseconds"]), null)
 	var raw := {"frameMilliseconds": [], "wallMilliseconds": [], "tickFrameMilliseconds": [],
 		"syncWorldMilliseconds": [], "presentMilliseconds": [],
@@ -294,8 +365,18 @@ func _run_cell(spec: Dictionary) -> void:
 		"modelBuildMilliseconds": [], "mapViewportsMilliseconds": [], "rootRenderCpuMilliseconds": [],
 		"rootRenderGpuMilliseconds": [], "worldRenderCpuMilliseconds": [],
 		"worldRenderGpuMilliseconds": [], "drawCalls": [], "liveEffects": [],
-		"packetsPerFrame": [], "packetDispatchMilliseconds": [], "sceneNodes": [], "engineProcessMilliseconds": [], "enginePhysicsMilliseconds": []}
+		"packetsPerFrame": [], "packetDispatchMilliseconds": [], "sceneNodes": [], "engineProcessMilliseconds": [], "enginePhysicsMilliseconds": [],
+		"actorRecords": [], "actorNodes": []}
 	var sample_started := Time.get_ticks_msec()
+	var window_started := _replay_stats.duplicate(true)
+	if replay:
+		# The sample's own slowest frames and largest apply times.
+		_replay_stats["slowest"] = []
+		var commands := _replay_stats["commands"] as Dictionary
+		for command: int in commands:
+			var row: PackedInt64Array = commands[command]
+			row[3] = 0
+			commands[command] = row
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw)
 	var elapsed := Time.get_ticks_msec() - sample_started
 	var census_after := _census()
@@ -303,7 +384,11 @@ func _run_cell(spec: Dictionary) -> void:
 		if _main.get("effect_budget") != null else {}
 	var crowd: Dictionary = (_main.get("crowd") as RefCounted).call("describe") \
 		if _main.get("crowd") != null else {}
-	_app_state.set("actors", {FIRST_ACTOR_ID: _record(0, true, _centre, FULL_KIT_A)})
+	var remaining: Dictionary = {FIRST_ACTOR_ID: _record(0, true, _centre, FULL_KIT_A)}
+	if replay:
+		var actors := _app_state.get("actors") as Dictionary
+		remaining = {_local_id: actors[_local_id]} if actors.has(_local_id) else {}
+	_app_state.set("actors", remaining)
 	_main.call("_sync_world")
 	await _settle_frames(12)
 	var after := _memory_sample()
@@ -323,8 +408,11 @@ func _run_cell(spec: Dictionary) -> void:
 	result["fpsMean"] = _round(1000.0 / float((frame_summary as Dictionary)["mean"])) \
 		if frame_summary is Dictionary and float((frame_summary as Dictionary)["mean"]) > 0.0 else null
 	result["summary"] = summary
-	result["plan"] = {"active": active.size(), "moving": (plan["moving"] as Array).size(),
-		"fighting": (plan["fighting"] as Array).size()}
+	if replay:
+		result["replayWindow"] = _replay_window(window_started, elapsed)
+	else:
+		result["plan"] = {"active": active.size(), "moving": (plan["moving"] as Array).size(),
+			"fighting": (plan["fighting"] as Array).size()}
 	result["packetsPerSecond"] = _round(_sum(raw["packetsPerFrame"] as Array) * 1000.0 / maxf(1.0, elapsed))
 	result["spawn"] = spawn
 	result["readiness"] = readiness
@@ -433,7 +521,7 @@ func _waiting_bodies() -> int:
 		return 0
 	var radius := float(((crowd as RefCounted).get_script() as Script) \
 		.get_script_constant_map().get("BUILD_RADIUS_METRES", 88.0))
-	var local := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
+	var local := (_main.get("actor_nodes") as Dictionary).get(_local_id) as Node3D
 	if local == null:
 		return 0
 	var waiting := 0
@@ -487,8 +575,12 @@ func _prime(plan: Dictionary) -> void:
 ## exchange every fourth tick in four roles - a spell between neighbours, a
 ## drawn bow, and two melee strikes - and each exchange costs its target a
 ## little health, so health bars and floating numbers move as they do in play.
+## A replay instead delivers every recorded frame that has fallen due, and ends
+## early when the recording does.
 func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
-	var cadence := int((_report["measurement"] as Dictionary)["cadenceMilliseconds"])
+	var replay := not _replay_times.is_empty()
+	var cadence_value: Variant = (_report["measurement"] as Dictionary)["cadenceMilliseconds"]
+	var cadence := int(cadence_value) if cadence_value != null else 0
 	var started := Time.get_ticks_msec()
 	var next_tick := started
 	var tick := 0
@@ -497,13 +589,18 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
 			or (raw != null and (raw["frameMilliseconds"] as Array).size() < MIN_SAMPLE_FRAMES):
 		if Time.get_ticks_msec() - started >= hard_limit:
 			break
+		if replay and _replay_index >= _replay_times.size():
+			_replay_stats["exhausted"] = true
+			break
 		if raw != null:
 			_main.call("benchmark_reset_frame")
 		_driver_packets = 0
 		_driver_usec = 0
 		var frame_started := Time.get_ticks_usec()
 		var now := Time.get_ticks_msec()
-		while now >= next_tick:
+		if replay:
+			_replay_due()
+		while not replay and now >= next_tick:
 			_drive_tick(plan, tick)
 			tick += 1
 			next_tick += cadence
@@ -534,6 +631,9 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
 		# skeletons, deferred calls) and physics steps.
 		(raw["engineProcessMilliseconds"] as Array).append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
 		(raw["enginePhysicsMilliseconds"] as Array).append(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0)
+		# The crowd this frame: what AppState knows and the nodes Main presents.
+		(raw["actorRecords"] as Array).append((_app_state.get("actors") as Dictionary).size())
+		(raw["actorNodes"] as Array).append((_main.get("actor_nodes") as Dictionary).size())
 		_append_render_sample(raw)
 
 
@@ -559,10 +659,246 @@ func _next_drawn_frame() -> float:
 
 
 ## The driver: `live` (default) paces the crowd as the game does, `stress` as
-## the earlier crowd study did (RABBITLANDS_CROWD_BENCH_DRIVER).
+## the earlier crowd study did, `replay` plays a session recording
+## (RABBITLANDS_CROWD_BENCH_DRIVER).
 static func _driver_mode() -> String:
-	return "stress" if OS.get_environment("RABBITLANDS_CROWD_BENCH_DRIVER").strip_edges() \
-		== "stress" else "live"
+	var wanted := OS.get_environment("RABBITLANDS_CROWD_BENCH_DRIVER").strip_edges()
+	return wanted if wanted in ["stress", "replay"] else "live"
+
+
+static func _driver_description() -> String:
+	match _driver_mode():
+		"replay":
+			return ("replay: one connection of a server session recording (RLREC1). Everything "
+				+ "recorded before the start offset is applied in 1-s steps of recorded time, "
+				+ "without the login answers or that time's effects, animations, numbers and "
+				+ "sounds; from the start every outbound frame reaches AppState in the first "
+				+ "frame after its recorded time")
+		"stress":
+			return ("stress: every mover steps every 100 ms and every fighter acts every 400 ms, "
+				+ "all on the same tick (the earlier crowd study's driver)")
+	return ("live: 50 ms server ticks; each mover steps every 600 ms (a walk) and each fighter "
+		+ "acts every 2 s (a combat round), staggered across the crowd")
+
+
+## Reads a session recording (the server's eloria/session_recorder.py): the
+## outbound frames, the player it was (YOU_ARE), and the map and tile it stood
+## on at the start offset. Inbound frames are what that player sent; a replay
+## has no use for them.
+func _load_replay(path: String) -> Dictionary:
+	var out := {"ok": false, "file": path.get_file()}
+	if not _expect(not path.is_empty() and FileAccess.file_exists(path),
+			"replay recording exists (RABBITLANDS_CROWD_BENCH_REPLAY=%s)" % path):
+		return out
+	_replay_bytes = FileAccess.get_file_as_bytes(path)
+	var magic := REPLAY_MAGIC.to_ascii_buffer()
+	var header_end := _replay_bytes.find(10, magic.size())
+	if not _expect(_replay_bytes.slice(0, magic.size()) == magic and header_end > 0,
+			"replay file is an RLREC1 session recording"):
+		return out
+	var header: Variant = JSON.parse_string(
+		_replay_bytes.slice(magic.size(), header_end).get_string_from_utf8())
+	var start_msec := _env_int("RABBITLANDS_CROWD_BENCH_REPLAY_START_MSEC", REPLAY_DEFAULT_START_MSEC, 0)
+	var you_are := -1
+	var maps: Array = []
+	var inbound := 0
+	var truncated := false
+	var offset := header_end + 1
+	while offset + REPLAY_RECORD_HEADER <= _replay_bytes.size():
+		var kind := _replay_bytes[offset]
+		var nsec := _replay_bytes.decode_u64(offset + 1)
+		var length := _replay_bytes.decode_u32(offset + 9)
+		var at := offset + REPLAY_RECORD_HEADER
+		offset = at + length
+		if offset > _replay_bytes.size() or kind == "T".unicode_at(0):
+			truncated = true
+			break
+		if kind == "I".unicode_at(0):
+			inbound += 1
+		if (kind != "O".unicode_at(0) and kind != "o".unicode_at(0)) or length < 3:
+			continue
+		_replay_offsets.append(at)
+		_replay_sizes.append(length)
+		_replay_times.append(nsec)
+		var command := _replay_bytes[at]
+		if command == EloriaProtocol.ServerMessage.YOU_ARE and you_are < 0 and length >= 5:
+			you_are = _replay_bytes.decode_u16(at + 3)
+			_replay_you_are_ns = nsec
+			_replay_origin_ns = nsec + start_msec * 1000000
+		elif command == EloriaProtocol.ServerMessage.CHANGE_MAP:
+			var event := EloriaProtocol.decode_server(command, _replay_bytes.slice(at + 3, at + length))
+			maps.append([nsec, str(event.get("map_name", ""))])
+		elif you_are >= 0 and nsec <= _replay_origin_ns and length >= 9 and command in [
+				EloriaProtocol.ServerMessage.ADD_NEW_ACTOR, EloriaProtocol.ServerMessage.ADD_NEW_ENHANCED_ACTOR,
+				EloriaProtocol.ServerMessage.ADD_NEW_ACTOR_EXTENDED] \
+				and _replay_bytes.decode_u16(at + 3) == you_are:
+			_replay_spawn = Vector2i(_replay_bytes.decode_u16(at + 5) & 0x7ff,
+				_replay_bytes.decode_u16(at + 7) & 0x7ff)
+	if not _expect(you_are >= 0, "replay recording holds a YOU_ARE") \
+			or not _expect(_replay_origin_ns < _replay_times[-1],
+				"replay start (%d ms after YOU_ARE) is inside the recording" % start_msec):
+		_replay_times.clear()
+		return out
+	_local_id = you_are
+	var changes: Array = []
+	for entry: Array in maps:
+		if int(entry[0]) <= _replay_origin_ns:
+			_replay_map = str(entry[1])
+		changes.append([_round(float(int(entry[0]) - _replay_you_are_ns) / 1e6), entry[1]])
+	_expect(not _replay_map.is_empty(), "replay recording names a map before its start")
+	out.merge({"ok": not _replay_map.is_empty(),
+		"header": {"version": (header as Dictionary).get("version") if header is Dictionary else null,
+			"tls": (header as Dictionary).get("tls") if header is Dictionary else null,
+			"gateway": (header as Dictionary).get("gateway") if header is Dictionary else null},
+		"outboundFrames": _replay_times.size(), "inboundFrames": inbound, "truncated": truncated,
+		"recordedSeconds": _round(float(_replay_times[-1] - _replay_times[0]) / 1e9),
+		"youAreMilliseconds": _round(float(_replay_you_are_ns - _replay_times[0]) / 1e6),
+		"startMilliseconds": start_msec, "localActorId": you_are, "map": _replay_map,
+		"spawnTile": [_replay_spawn.x, _replay_spawn.y],
+		"mapChangesMillisecondsAfterYouAre": changes,
+		"secondsAfterStart": _round(float(_replay_times[-1] - _replay_origin_ns) / 1e9)}, true)
+	return out
+
+
+## Applies everything recorded before the start offset, a second of recorded
+## time per frame, then waits until Main presents the crowd: every actor has a
+## node, nothing in build range waits for its body, and that holds for ten
+## frames. The recording's clock stands still meanwhile.
+func _replay_prologue() -> Dictionary:
+	var started := Time.get_ticks_usec()
+	_app_state.set("actors", {})
+	_main.call("_sync_world")
+	var applied := 0
+	var skipped := 0
+	var frames := 0
+	var cursor := _replay_times[0]
+	while _replay_index < _replay_times.size() and _replay_times[_replay_index] < _replay_origin_ns:
+		cursor = mini(cursor + REPLAY_PROLOGUE_STEP_NSEC, _replay_origin_ns)
+		while _replay_index < _replay_times.size() and _replay_times[_replay_index] < cursor:
+			var at := _replay_offsets[_replay_index]
+			var command := _replay_bytes[at]
+			if command in REPLAY_LOGIN_FRAMES or command in REPLAY_TRANSIENT_FRAMES:
+				skipped += 1
+			else:
+				_app_state.call("_on_packet", command,
+					_replay_bytes.slice(at + 3, at + _replay_sizes[_replay_index]))
+				applied += 1
+			_replay_index += 1
+		_main.call("_sync_world", _app_state.call("take_changed_actors"))
+		frames += 1
+		await process_frame
+	var applied_msec := _round(float(Time.get_ticks_usec() - started) / 1000.0)
+	var deadline := Time.get_ticks_msec() + MAX_SPAWN_MSEC
+	var steady := 0
+	var nodes := -1
+	while Time.get_ticks_msec() < deadline and steady < 10:
+		_main.call("_sync_world", _app_state.call("take_changed_actors"))
+		await process_frame
+		var now_nodes := (_main.get("actor_nodes") as Dictionary).size()
+		steady = steady + 1 if now_nodes == nodes and _waiting_bodies() == 0 else 0
+		nodes = now_nodes
+	var actors := _app_state.get("actors") as Dictionary
+	_expect(int(_app_state.get("local_actor_id")) == _local_id and actors.has(_local_id),
+		"the recorded player (%d) stands in its own view after the prologue" % _local_id)
+	_expect(steady >= 10, "the replayed crowd is presented before the timeout (%d nodes, %d bodies waiting)"
+		% [nodes, _waiting_bodies()])
+	return {"prologueFramesApplied": applied, "prologueFramesSkipped": skipped,
+		"prologueEngineFrames": frames, "prologueMilliseconds": applied_msec,
+		"presentedMilliseconds": _round(float(Time.get_ticks_usec() - started) / 1000.0),
+		"actorRecords": actors.size(), "actorNodes": nodes}
+
+
+## Starts the recording's clock: from here a frame recorded `t` after the start
+## offset is due `t` after this call.
+func _replay_begin() -> void:
+	_replay_started_usec = Time.get_ticks_usec()
+	_replay_stats = {"delivered": 0, "spawns": 0, "removals": 0, "clears": 0, "mapChanges": 0,
+		"recordedNs": _replay_origin_ns, "exhausted": false, "commands": {}, "slowest": []}
+
+
+## Delivers every frame whose recorded time has passed, as one socket read
+## would after a long frame: a burst, in order.
+func _replay_due() -> void:
+	var due := _replay_origin_ns + (Time.get_ticks_usec() - _replay_started_usec) * 1000
+	_replay_stats["recordedNs"] = due
+	while _replay_index < _replay_times.size() and _replay_times[_replay_index] <= due:
+		var at := _replay_offsets[_replay_index]
+		var size := _replay_sizes[_replay_index]
+		var command := _replay_bytes[at]
+		_replay_index += 1
+		if command in REPLAY_LOGIN_FRAMES:
+			continue
+		if command in [EloriaProtocol.ServerMessage.ADD_NEW_ACTOR,
+				EloriaProtocol.ServerMessage.ADD_NEW_ENHANCED_ACTOR,
+				EloriaProtocol.ServerMessage.ADD_NEW_ACTOR_EXTENDED]:
+			_replay_stats["spawns"] += 1
+		elif command == EloriaProtocol.ServerMessage.REMOVE_ACTOR:
+			_replay_stats["removals"] += (size - 3) / 2
+		elif command == EloriaProtocol.ServerMessage.KILL_ALL_ACTORS:
+			_replay_stats["clears"] += 1
+		elif command == EloriaProtocol.ServerMessage.CHANGE_MAP:
+			_replay_stats["mapChanges"] += 1
+		_replay_stats["delivered"] += 1
+		var started := Time.get_ticks_usec()
+		_send_packet(command, _replay_bytes.slice(at + 3, at + size))
+		# What each kind of frame costs to apply: AppState's reducer and every
+		# handler its signals reach synchronously (Main's included).
+		var spent := Time.get_ticks_usec() - started
+		var commands := _replay_stats["commands"] as Dictionary
+		var row: PackedInt64Array = commands.get(command, PackedInt64Array([0, 0, 0, 0]))
+		row[0] += 1
+		row[1] += size
+		row[2] += spent
+		row[3] = maxi(row[3], spent)
+		commands[command] = row
+		var slowest := _replay_stats["slowest"] as Array
+		if slowest.size() < 5 or spent > int((slowest[-1] as Array)[1]):
+			slowest.append([command, spent, _replay_times[_replay_index - 1], size])
+			slowest.sort_custom(func(a: Array, b: Array) -> bool: return int(a[1]) > int(b[1]))
+			slowest.resize(mini(slowest.size(), 5))
+
+
+static func _command_name(command: int) -> String:
+	var name: Variant = EloriaProtocol.ServerMessage.find_key(command)
+	return str(name) if name != null else str(command)
+
+
+## What the recording did during the sample that began at `started`.
+func _replay_window(started: Dictionary, elapsed_msec: int) -> Dictionary:
+	var out := {}
+	for key: String in ["delivered", "spawns", "removals", "clears", "mapChanges"]:
+		out[key] = int(_replay_stats.get(key, 0)) - int(started.get(key, 0))
+	out["fromMillisecondsAfterYouAre"] = _round(
+		float(int(started.get("recordedNs", 0)) - _replay_you_are_ns) / 1e6)
+	out["toMillisecondsAfterYouAre"] = _round(
+		float(int(_replay_stats.get("recordedNs", 0)) - _replay_you_are_ns) / 1e6)
+	out["exhausted"] = bool(_replay_stats.get("exhausted", false))
+	out["framesPerSecond"] = _round(float(out["delivered"]) * 1000.0 / maxf(1.0, elapsed_msec))
+	# Per kind of frame during the sample, costliest first: frames, bytes,
+	# total and largest apply time.
+	var before := started.get("commands", {}) as Dictionary
+	var rows: Array = []
+	for command: int in _replay_stats.get("commands", {}) as Dictionary:
+		var now: PackedInt64Array = (_replay_stats["commands"] as Dictionary)[command]
+		var then: PackedInt64Array = before.get(command, PackedInt64Array([0, 0, 0, 0]))
+		if now[0] > then[0]:
+			rows.append({"command": _command_name(command), "frames": now[0] - then[0],
+				"bytes": now[1] - then[1], "applyMilliseconds": _round(float(now[2] - then[2]) / 1000.0),
+				"largestApplyMilliseconds": _round(float(now[3]) / 1000.0)})
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a["applyMilliseconds"]) > float(b["applyMilliseconds"]))
+	out["byCommand"] = rows
+	var slowest: Array = []
+	for entry: Array in _replay_stats.get("slowest", []) as Array:
+		if int(entry[2]) >= int(started.get("recordedNs", 0)):
+			slowest.append({"command": _command_name(int(entry[0])),
+				"applyMilliseconds": _round(float(entry[1]) / 1000.0),
+				"recordedMillisecondsAfterYouAre": _round(float(int(entry[2]) - _replay_you_are_ns) / 1e6),
+				"bytes": entry[3]})
+	out["slowestFrames"] = slowest
+	_expect(int(out["mapChanges"]) == 0, "the replayed player stays on one map during the sample")
+	_expect(not bool(out["exhausted"]), "the recording outlasts the sample")
+	return out
 
 
 func _drive_tick(plan: Dictionary, tick: int) -> void:
@@ -670,7 +1006,7 @@ func _append_render_sample(raw: Dictionary) -> void:
 func _census() -> Dictionary:
 	var camera := _main.get("gameplay_camera") as Camera3D
 	var nodes := _main.get("actor_nodes") as Dictionary
-	var local := nodes.get(FIRST_ACTOR_ID) as Node3D
+	var local := nodes.get(_local_id) as Node3D
 	var out := {"nodes": nodes.size(), "builtBodies": 0, "deferred": 0, "standIns": 0,
 		"drawn": 0, "inFrustumAndDrawn": 0, "tierFull": 0, "tierHalf": 0, "tierPaused": 0,
 		"skeletons": 0, "skeletonsProcessing": 0, "beyondDrawDistance": 0, "crowdHidden": 0,
@@ -704,7 +1040,7 @@ func _census() -> Dictionary:
 		if actor.has_method("cape_cloth_active") and bool(actor.call("cape_cloth_active")):
 			out["capeClothActive"] += 1
 			var why := "tier%d-allowed%s-local%s" % [actor.animation_tier(),
-				str(actor.call("cape_cloth_allowed")), str(actor.actor_id == FIRST_ACTOR_ID)]
+				str(actor.call("cape_cloth_allowed")), str(actor.actor_id == _local_id)]
 			out[why] = int(out.get(why, 0)) + 1
 		var skeleton := actor.get_skeleton()
 		if skeleton != null:
@@ -798,6 +1134,7 @@ func _memory_sample() -> Dictionary:
 	return {
 		"staticBytes": OS.get_static_memory_usage(),
 		"objects": int(Performance.get_monitor(Performance.OBJECT_COUNT)),
+		"cachedModels": GlbSceneCache.cached_scene_count(),
 		"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
 		"videoBytes": null if _headless else int(RenderingServer.get_rendering_info(
 			RenderingServer.RENDERING_INFO_VIDEO_MEM_USED)),
