@@ -1722,6 +1722,29 @@ theme_override_font_sizes/font_size = 11
 text = "0/0"
 horizontal_alignment = 1
 
+[node name="LoadRow" type="HBoxContainer" parent="GameView/ActorResourceOverlay/Rows"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+tooltip_text = "Load: carried weight / capacity"
+theme_override_constants/separation = 5
+
+[node name="Bar" type="ProgressBar" parent="GameView/ActorResourceOverlay/Rows/LoadRow"]
+custom_minimum_size = Vector2(56, 7)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+
+[node name="Number" type="Label" parent="GameView/ActorResourceOverlay/Rows/LoadRow"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7686, 0.6118, 0.4471, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
+text = "0/0"
+horizontal_alignment = 1
+
 [node name="BannerControls" type="VBoxContainer" parent="GameView" unique_id=80465671]
 unique_name_in_owner = true
 visible = false
@@ -1787,6 +1810,18 @@ unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 text = "Show Action Point Numbers"
+
+[node name="ShowLoadBar" type="CheckBox" parent="GameView/BannerControls/Options"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Show carried weight as a share of capacity"
+text = "Show Load Bar"
+
+[node name="ShowLoadNumbers" type="CheckBox" parent="GameView/BannerControls/Options"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Show carried weight / capacity"
+text = "Show Load Numbers"
 
 [node name="InstanceMode" type="CheckBox" parent="GameView/BannerControls/Options" unique_id=1810000010]
 unique_name_in_owner = true

@@ -642,6 +642,7 @@ func reset_component() -> void:
 		model.working.parts.medallion.arcs[_selected_arc] = defaults.parts.medallion.arcs[_selected_arc].duplicate(true)
 	else:
 		model.working.parts[selected] = defaults.parts[selected].duplicate(true)
+		if selected == "nameplate": model.working.banner_colors = defaults.banner_colors.duplicate(true)
 		if selected in ["chat", "system_chat"]:
 			var options: Dictionary = parts[selected].DEFAULT_OPTIONS.duplicate()
 			if selected == "system_chat": options.font_size = 14
@@ -693,7 +694,8 @@ func select_component(key: String, arc_index := -1) -> void:
 					change_part(key, "axis_scale", axes))
 		_color("Window color", config.background_color, func(value: Color) -> void: change_frame_color(key, "background_color", value))
 		_color("Border color", config.border_color, func(value: Color) -> void: change_frame_color(key, "border_color", value))
-		_color("Text color", config.text_color, func(value: Color) -> void: change_part(key, "text_color", value))
+		if key != "nameplate":
+			_color("Text color", config.text_color, func(value: Color) -> void: change_part(key, "text_color", value))
 		_number("Background opacity", config.background_color.a * 100, 0, 100, 1, func(value: float) -> void:
 			var color: Color = model.working.parts[key].background_color
 			color.a = value / 100
@@ -801,6 +803,15 @@ func select_component(key: String, arc_index := -1) -> void:
 				_checkpoint("banner:" + field)
 				model.working.banner_options[field] = value
 				apply_layout())
+		var colors := preload("res://src/ui/banner_color_controls.gd").new()
+		colors.name = "BannerColors"
+		colors.set_meta("option_caption", "Banner colors")
+		details.add_child(colors)
+		colors.sync_colors(model.working.banner_colors, model.working.resource_colors)
+		colors.color_changed.connect(change_banner_color)
+		colors.sync_changed.connect(set_banner_color_sync)
+		colors.sync_all_changed.connect(func(enabled: bool) -> void: set_banner_color_sync("all", enabled))
+		colors.reset_requested.connect(reset_banner_colors)
 	if key in ["spells", "items", "utilities", "resources"]:
 		_choice("Orientation", ["horizontal", "vertical"], str(config.orientation), func(value: String) -> void: change_part(key, "orientation", value))
 		if key == "resources":
@@ -886,6 +897,7 @@ func select_component(key: String, arc_index := -1) -> void:
 	if key == "minimap": first.append_array(["Minimap frame", "Map shape", "Map colors", "Map name above minimap", "Map directions", "North marker", "Direction distance from radius", "Map label HUD background / border"])
 	if key == "compass": first.append_array(["Compass display", "Outside compass circle"])
 	if key == "clock": first.append("Clock display")
+	if key == "nameplate": first.append("Banner colors")
 	first.append_array(["HUD background", "HUD border", "HUD border design"])
 	var insertion := 0
 	for caption: String in first:
@@ -907,6 +919,7 @@ func _filter_details() -> void:
 		if caption in ["Map name above minimap", "Map directions", "North marker", "Direction distance from radius", "Map label HUD background / border"]: group = "Look"
 		if caption in ["Background opacity", "Border opacity", "Slot border", "Slot border color", "Icon opacity", "Unavailable icon opacity", "Flush slot edges", "Slot spacing"]: group = "Look"
 		if caption == "Fill screen height": group = "Layout"
+		if caption == "Banner colors": group = "Look"
 		child.visible = group == _detail_group or caption in ["Circle parts", "Dock status", "Show curve"] or caption == "Show " + Presets.PARTS[selected]
 		if caption in ["Quick spell count", "Quick item count"]: child.show()
 		# This surface follows a world actor rather than a screen anchor.
@@ -1144,6 +1157,31 @@ func change_resource_color(meter: String, color: Color) -> void:
 	model.working.resource_colors[meter] = color
 	model.working.legacy = false
 	apply_layout()
+
+func change_banner_color(item: String, color: Color) -> void:
+	if not Presets.BannerColors.LABELS.has(item): return
+	_checkpoint("banner_color:" + item)
+	model.working.banner_colors.colors[item] = color
+	model.working.banner_colors.synced[item] = false
+	_banner_colors_changed()
+
+func set_banner_color_sync(item: String, enabled: bool) -> void:
+	if item != "all" and not Presets.BannerColors.RESOURCES.has(item): return
+	_checkpoint("banner_color_sync:" + item)
+	for resource: String in Presets.BannerColors.RESOURCES:
+		if item == "all" or resource == item:
+			model.working.banner_colors.synced[resource] = enabled
+	_banner_colors_changed()
+
+func reset_banner_colors() -> void:
+	_checkpoint("banner_colors_reset")
+	model.working.banner_colors = Presets.BannerColors.normalise({})
+	_banner_colors_changed()
+
+func _banner_colors_changed() -> void:
+	model.working.banner_colors = Presets.BannerColors.normalise(model.working.banner_colors)
+	apply_layout()
+	sync_settings()
 
 func change_frame_color(key: String, field: String, color: Color) -> void:
 	var config: Dictionary = model.working.parts[key]
@@ -1479,6 +1517,12 @@ func apply_layout() -> void:
 		var palette: String = "natural" if legacy else model.working.parts.minimap.map_palette
 		main._minimap_mask_material.set_shader_parameter("hud_palette", ["natural", "parchment", "muted"].find(palette))
 	_applying = false
+	# Per-item colors take precedence over the banner's general text tint.
+	main._apply_banner_colors()
+	main._sync_banner_color_controls()
+	var banner_controls := details.get_node_or_null("BannerColors")
+	if banner_controls != null:
+		banner_controls.sync_colors(model.working.banner_colors, model.working.resource_colors)
 	layout_hud()
 	queue_layout()
 

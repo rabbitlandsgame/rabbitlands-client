@@ -6,6 +6,8 @@ The floating **Local HUD sandbox** box selects Classic, Compact, Modular, Advent
 
 Use **Add member**, **Remove selected**, **Clear party** and **Reset samples** to test zero to twelve sample members. Select a member to toggle their offline appearance or cycle their health, including the low-health state. These controls remain usable while the HUD editor is open. **Show party roster in this preset** reveals the roster even when a preset normally hides it.
 
+The character banner also offers optional **Load** bars and carried-weight/capacity values. Right-click it and open **Colors**, use **Settings → Banners → Player banner colors**, or select **Character banner → Look** in the HUD editor. Each resource can use an independent color or **Match** its resource window; **Match all** links every resource, while **Independent** restores the saved individual colors. The name has its own color, and mount status can follow mount stamina. **Reset colors** restores the original banner colors and resource ramps. These choices are saved per HUD preset.
+
 ## Resizing and docking
 
 - Drag a selected window's left/right handle to change its width, its top/bottom handle to change its height, or its corner to change both. The resource circle stays round.

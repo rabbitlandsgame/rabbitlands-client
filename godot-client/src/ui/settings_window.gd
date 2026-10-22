@@ -377,6 +377,7 @@ func _build() -> void:
 	_build_chat()
 	_new_page("Minimap", "Minimap")
 	_new_page("Banners", "Banners")
+	_add_banner_color_controls()
 	_add_creature_banner_controls()
 	_add_target_marker_controls()
 	_build_graphics()
@@ -711,6 +712,26 @@ func _refresh_map_cache() -> void:
 func _build_camera() -> void:
 	var page := _new_page("Camera", tr("ELORIA_SETTINGS_CAMERA"))
 	_add_slider(page, "rotation_sensitivity", tr("ELORIA_SETTINGS_ROTATION"), 0.05, 1.0, 0.25)
+
+func _add_banner_color_controls() -> void:
+	var page := page_body("Banners")
+	var heading := Label.new()
+	heading.text = "Player banner colors"
+	heading.add_theme_font_size_override("font_size", 18)
+	page.add_child(heading)
+	var controls := preload("res://src/ui/banner_color_controls.gd").new()
+	controls.name = "BannerColors"
+	page.add_child(controls)
+	controls.color_changed.connect(func(item: String, color: Color) -> void:
+		setting_changed.emit("Banners", "banner_color_" + item, color))
+	controls.sync_changed.connect(func(item: String, enabled: bool) -> void:
+		setting_changed.emit("Banners", "banner_color_sync_" + item, enabled))
+	controls.sync_all_changed.connect(func(enabled: bool) -> void:
+		setting_changed.emit("Banners", "banner_color_sync_all", enabled))
+	controls.reset_requested.connect(func() -> void: setting_changed.emit("Banners", "banner_colors_reset", true))
+
+func restore_banner_colors(options: Dictionary, resources: Dictionary) -> void:
+	panel.find_child("BannerColors", true, false).sync_colors(options, resources)
 
 func _add_creature_banner_controls() -> void:
 	var options := preload("res://src/ui/creature_banner_settings.gd")

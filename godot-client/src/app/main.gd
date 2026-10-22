@@ -188,6 +188,7 @@ var map_light_root: Node3D
 @onready var overhead_ether_row: HBoxContainer = %EtherRow
 @onready var overhead_food_row: HBoxContainer = %FoodRow
 @onready var overhead_action_row: HBoxContainer = %ActionRow
+@onready var overhead_load_row: HBoxContainer = %LoadRow
 @onready var stats_panel: Control = %StatsPanel
 @onready var stats_text: RichTextLabel = %StatsText
 @onready var stats_tabs: TabContainer = %StatsTabs
@@ -903,6 +904,7 @@ var _last_skill_experience_msec := -100000
 var _banner_option_boxes: Dictionary = {}
 var _banner_background_style: StyleBoxFlat
 const CreatureBannerSettings := preload("res://src/ui/creature_banner_settings.gd")
+const BannerColors := preload("res://src/ui/banner_colors.gd")
 var _creature_banner_options := CreatureBannerSettings.defaults()
 const MountControls := preload("res://src/mounts/mount_controls.gd")
 var mount_status := MountControls.new()
@@ -931,6 +933,7 @@ const BANNER_OPTION_NODES := {
 	"ether_bar": "ShowEtherBar", "ether_numbers": "ShowEtherNumbers",
 	"food_bar": "ShowFoodBar", "food_numbers": "ShowFoodNumbers",
 	"action_bar": "ShowActionBar", "action_numbers": "ShowActionNumbers",
+	"load_bar": "ShowLoadBar", "load_numbers": "ShowLoadNumbers",
 	"instance_mode": "InstanceMode", "speech_bubbles": "SpeechBubbles",
 	"banner_background": "BannerBackground", "sit_lock": "SitLock",
 	"ranging_lock": "RangingLock", "menu_disabled": "DisableMenu"}
@@ -941,6 +944,7 @@ const BANNER_OPTION_DEFAULTS := {
 	"ether_bar": true, "ether_numbers": true,
 	"food_bar": true, "food_numbers": true,
 	"action_bar": true, "action_numbers": true,
+	"load_bar": false, "load_numbers": false,
 	"instance_mode": false, "speech_bubbles": false,
 	"banner_background": false, "sit_lock": false,
 	"ranging_lock": false, "menu_disabled": false}
@@ -951,7 +955,8 @@ const BANNER_ROWS := [
 	["HealthRow", "health_bar", "health_numbers", "health"],
 	["EtherRow", "ether_bar", "ether_numbers", "ether"],
 	["FoodRow", "food_bar", "food_numbers", "food"],
-	["ActionRow", "action_bar", "action_numbers", "action"]]
+	["ActionRow", "action_bar", "action_numbers", "action"],
+	["LoadRow", "load_bar", "load_numbers", "load"]]
 
 const BANNER_BAR_MIN_WIDTH := 46.0
 ## client_serv.h: BOW_LONG through BOW_CROSS are the ranged weapon visuals, and
@@ -4301,6 +4306,13 @@ func _configure_banner_menu() -> void:
 			(_banner_option_boxes[key] as CheckBox).button_pressed = value)
 	_actor_hud_menu.mounts_requested.connect(func() -> void: mounts_window.call("open"))
 	_actor_hud_menu.settings_requested.connect(func() -> void: settings_window.open_tab("Banners"))
+	_actor_hud_menu.color_changed.connect(func(item: String, color: Color) -> void:
+		hud_workspace.change_banner_color(item, color))
+	_actor_hud_menu.color_sync_changed.connect(func(item: String, enabled: bool) -> void:
+		hud_workspace.set_banner_color_sync(item, enabled))
+	_actor_hud_menu.color_sync_all_changed.connect(func(enabled: bool) -> void:
+		hud_workspace.set_banner_color_sync("all", enabled))
+	_actor_hud_menu.colors_reset_requested.connect(func() -> void: hud_workspace.reset_banner_colors())
 	_connect_banner_context_inputs(actor_resource_overlay, "Character")
 
 func _connect_banner_context_inputs(control: Control, section: String) -> void:
@@ -4326,6 +4338,32 @@ func _sync_banner_context_menu() -> void:
 	for key: String in BANNER_OPTION_NODES:
 		character[key] = _banner_option(key)
 	_actor_hud_menu.sync_options(character, _mount_banner_options)
+	_sync_banner_color_controls()
+
+func _banner_item_color(item: String, fallback: Color) -> Color:
+	if hud_workspace == null:
+		return fallback
+	return BannerColors.resolve(item, hud_workspace.model.working.get("banner_colors", {}),
+		hud_workspace.model.working.resource_colors, fallback)
+
+func _sync_banner_color_controls() -> void:
+	if hud_workspace == null:
+		return
+	var options: Dictionary = hud_workspace.model.working.get("banner_colors", {})
+	var resources: Dictionary = hud_workspace.model.working.resource_colors
+	_actor_hud_menu.color_controls.sync_colors(options, resources)
+	settings_window.restore_banner_colors(options, resources)
+
+func _apply_banner_colors() -> void:
+	for row_spec: Array in BANNER_ROWS:
+		var row := _banner_row(str(row_spec[0]))
+		var bar := row.get_node("Bar") as ProgressBar
+		var item := str(row_spec[3])
+		_paint_banner_row(row, _banner_item_color(item, _banner_colour(item, bar.value / maxf(1, bar.max_value))))
+	var dto: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	overhead_player_name.add_theme_color_override("font_color", _banner_item_color("name",
+		EloriaProtocol.el_text_colour(int(dto.get("name_colour", 0)))))
+	mount_status.status.add_theme_color_override("font_color", _banner_item_color("mount", Color.WHITE))
 
 func _set_mount_banner_option(key: String, value: bool) -> void:
 	if not _mount_banner_options.has(key):
@@ -4370,6 +4408,7 @@ func _apply_banner_options() -> void:
 		(row.get_node("Number") as Label).visible = show_numbers
 		row.visible = show_bar or show_numbers
 	_apply_banner_background()
+	_apply_banner_colors()
 	for id: Variant in actor_nodes:
 		var node_value: Variant = actor_nodes[id]
 		if node_value is ReplicatedActor3D and is_instance_valid(node_value as ReplicatedActor3D):
@@ -6075,7 +6114,7 @@ func _sync_world(changed: Variant = null) -> void:
 		# local actor - so this banner is the only place your own name colour
 		# can show. Demigod mode is the one that turns it green.
 		overhead_player_name.add_theme_color_override("font_color",
-			EloriaProtocol.el_text_colour(int(local_dto.get("name_colour", 0))))
+			_banner_item_color("name", EloriaProtocol.el_text_colour(int(local_dto.get("name_colour", 0)))))
 		var current_health := int(local_dto.get("health", 0))
 		var maximum_health := maxi(1, int(local_dto.get("max_health", 1)))
 		if AppState.stats.is_empty():
@@ -9575,6 +9614,7 @@ func _sync_stats() -> void:
 	_set_overhead_meter(overhead_ether_row, ether, max_ether, "ether")
 	_set_overhead_meter(overhead_food_row, food, max_food, "food")
 	_set_overhead_meter(overhead_action_row, action, max_action, "action")
+	_set_overhead_meter(overhead_load_row, carried, capacity, "load")
 	_layout_actor_resource_overlay()
 	if inventory_load != null:
 		inventory_load.text = "Load: %d / %d" % [int(stats.get("carried", 0)),
@@ -11092,7 +11132,7 @@ static func _set_meter(bar: ProgressBar, label: Label, value: int,
 	label.tooltip_text = described
 	bar.tooltip_text = described
 
-static func _set_overhead_meter(row: HBoxContainer, value: int, maximum: int,
+func _set_overhead_meter(row: HBoxContainer, value: int, maximum: int,
 		colour_kind: String) -> void:
 	var bar: ProgressBar = row.get_node("Bar") as ProgressBar
 	var label: Label = row.get_node("Number") as Label
@@ -11100,8 +11140,13 @@ static func _set_overhead_meter(row: HBoxContainer, value: int, maximum: int,
 	bar.max_value = safe_maximum
 	bar.value = clampi(value, 0, safe_maximum)
 	label.text = "%d/%d" % [value, maximum]
-	var colour: Color = _banner_colour(colour_kind,
-		float(value) / float(safe_maximum))
+	var colour: Color = _banner_item_color(colour_kind, _banner_colour(colour_kind,
+		float(value) / float(safe_maximum)))
+	_paint_banner_row(row, colour)
+
+static func _paint_banner_row(row: HBoxContainer, colour: Color) -> void:
+	var bar := row.get_node("Bar") as ProgressBar
+	var label := row.get_node("Number") as Label
 	var fill: StyleBoxFlat = bar.get_theme_stylebox("fill") as StyleBoxFlat
 	if fill != null:
 		fill.bg_color = colour
@@ -11122,6 +11167,8 @@ static func _banner_colour(kind: String, percent: float) -> Color:
 			return Color(0.7, 0.7, 1.0).lerp(Color(0.4, 0.4, 1.0), fraction)
 		"food":
 			return Color(1.0, 0.5, 0.0).lerp(Color(1.0, 1.0, 0.0), fraction)
+		"load":
+			return Color("c49c72")
 	return Color(1.0, 0.55, 0.9).lerp(Color(0.73, 0.28, 0.86), fraction)
 
 func _update_legacy_clock_and_compass() -> void:
@@ -12613,6 +12660,14 @@ func _sync_declared_actor_cap() -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if section == "Banners" and key.begins_with("banner_color"):
+		if key == "banner_colors_reset":
+			hud_workspace.reset_banner_colors()
+		elif key.begins_with("banner_color_sync_"):
+			hud_workspace.set_banner_color_sync(key.trim_prefix("banner_color_sync_"), bool(value))
+		else:
+			hud_workspace.change_banner_color(key.trim_prefix("banner_color_"), value)
+		return
 	if section == "Banners" and key.begins_with("creature_banner_"):
 		for mode: String in CreatureBannerSettings.MODES:
 			var prefix := "creature_banner_" + mode + "_"

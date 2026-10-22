@@ -24,7 +24,8 @@ const RESOURCE_COLORS := {"health": Color("65b873"), "mana": Color("5ba6ed"),
 	"food": Color("e6b85b"), "action": Color("b69ae5"), "mount_stamina": Color("67c8bf"), "load": Color("c49c72"), "experience": Color("c5b989")}
 const BORDERS := ["plain", "laurel", "runic", "crystal"]
 const HUD_BORDERS := ["plain", "beveled", "ornate"]
-const BANNER_FIELDS := ["show_names", "health_bar", "health_numbers", "ether_bar", "ether_numbers", "food_bar", "food_numbers", "action_bar", "action_numbers", "banner_background"]
+const BANNER_FIELDS := ["show_names", "health_bar", "health_numbers", "ether_bar", "ether_numbers", "food_bar", "food_numbers", "action_bar", "action_numbers", "load_bar", "load_numbers", "banner_background"]
+const BannerColors := preload("res://src/ui/banner_colors.gd")
 var editor_position := Vector2(-1, -1)
 var active := DEFAULT_PRESET
 var working: Dictionary = preset(DEFAULT_PRESET)
@@ -236,9 +237,9 @@ static func _unify_chat_opacity(value: Dictionary) -> void:
 
 static func _preset_recipe(id: String) -> Dictionary:
 	var value := {"version": VERSION, "frame_alpha_version": 1, "legacy": id == "current", "parts": {},
-		"icons": {}, "meters": {}, "meter_order": [], "resource_colors": RESOURCE_COLORS.duplicate(), "chat_windows": {}, "native_spell_bar": {}, "banner_options": {}}
+		"icons": {}, "meters": {}, "meter_order": [], "resource_colors": RESOURCE_COLORS.duplicate(), "chat_windows": {}, "native_spell_bar": {}, "banner_options": {}, "banner_colors": BannerColors.normalise({})}
 	for field: String in BANNER_FIELDS:
-		value.banner_options[field] = field != "banner_background" and (id != "minimal" or field == "show_names")
+		value.banner_options[field] = field not in ["banner_background", "load_bar", "load_numbers"] and (id != "minimal" or field == "show_names")
 	for key: String in PARTS:
 		value.parts[key] = {"enabled": key != "medallion", "anchor": "original",
 			"offset": Vector2.ZERO, "position": Vector2(0.5, 0.5), "scale": 1.0, "axis_scale":Vector2.ONE,
@@ -650,7 +651,7 @@ static func normalise(raw: Variant) -> Dictionary:
 	if not raw is Dictionary or int(raw.get("version", 0)) != VERSION: return preset(DEFAULT_PRESET)
 	if raw.get("legacy", false) == true:
 		var migrated := preset(DEFAULT_PRESET)
-		for field: String in ["chat_windows", "banner_options", "icons", "resource_colors"]:
+		for field: String in ["chat_windows", "banner_options", "banner_colors", "icons", "resource_colors"]:
 			if raw.has(field): migrated[field] = raw[field]
 		raw = migrated
 	var result := _preset_recipe("current")
@@ -761,6 +762,7 @@ static func normalise(raw: Variant) -> Dictionary:
 				if key is String and key.length() < 80 and flags[key] is bool:
 					result[field][key] = flags[key]
 	var colors: Variant = raw.get("resource_colors", {})
+	result.banner_colors = BannerColors.normalise(raw.get("banner_colors", {}))
 	if colors is Dictionary:
 		for key: String in RESOURCE_COLORS:
 			if colors.get(key) is Color:
