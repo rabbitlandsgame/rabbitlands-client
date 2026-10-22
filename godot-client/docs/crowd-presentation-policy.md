@@ -180,6 +180,31 @@ sets the graphics quality through `ELORIA_LOOK_QUALITY`. `--diagnostics
 no_animation,no_overhead,no_ground` freezes every AnimationPlayer, hides the
 overhead blocks or skips the ground rays, for attribution only.
 
+`--replay <recording>.rlrec` (driver `replay`) measures a real session instead
+of a synthetic crowd. The game server can record every connection's frames
+(format RLREC1: a magic line, a JSON header line, then records of kind,
+monotonic nanoseconds and length); the replay takes one connection, makes Main
+that player (its `YOU_ARE`) on the map it stood on at the start offset, applies
+everything recorded before `--replay-start-ms` (default 30000 ms after
+`YOU_ARE`) a second of recorded time per frame, without the login answers or
+that time's effects, animations, numbers and sounds, and waits until the crowd
+is presented. From the start offset every outbound frame reaches AppState in
+the first frame after its recorded time, as a socket read would deliver it, for
+the warmup and then the sample. The replay's one cell, `replay-<map>`, reports
+the same fields plus what the recording did during the sample (frames
+delivered, spawns, removals, map changes) and the crowd AppState knew each
+frame (`actorRecords`, `actorNodes`); it fails if the player changes map during
+the sample or the recording ends before it. Its memory delta runs from the map
+alone to the presented crowd, so it includes the first load of every model the
+recording shows. Recordings hold what players said and did: keep them, and
+reports made from them, outside this repository.
+
+```sh
+python tests/integration/run_crowd_presentation_benchmark.py --godot <Godot.exe> \
+    --mode headless --variants all,legacy --replay <recording>.rlrec \
+    --replay-start-ms 30000 --warmup-ms 5000 --sample-ms 60000 --out-dir <private dir>
+```
+
 The frame rate is capped at 60 (`RABBITLANDS_CROWD_BENCH_FPS_CAP`), as a 60 Hz
 display caps it, so the share of frames that carry a packet tick is what it is
 in play; an uncapped headless loop thins those frames out and flatters p95. A
