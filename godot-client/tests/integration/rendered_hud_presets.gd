@@ -10,7 +10,7 @@ func _init() -> void:
 
 func _run() -> void:
 	root.get_node("Network").block_for_hud_preview()
-	create_timer(120).timeout.connect(func() -> void: quit(99))
+	create_timer(600 if OS.get_cmdline_user_args().has("--hud-public-guide") else 120).timeout.connect(func() -> void: quit(99))
 	root.size = Vector2i(1440, 900)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(FOLDER))
 	var settings := FOLDER.path_join("render.cfg")
@@ -41,6 +41,13 @@ func _run() -> void:
 	print("LAND FALL PREVIEW: Landfall published arrival loaded")
 	app.actors[100] = {"actor_id":100,"x":preview_state.SPAWN.x + 2,"y":preview_state.SPAWN.y,"rotation":0,"actor_type":1,"kind":1,"name":"Rowan","health":90,"max_health":150,"ether":40,"max_ether":60,"alive":true,"sitting":false,"map":preview_state.MAP_ID}
 	app.selected_actor_id = 100
+	if OS.get_cmdline_user_args().has("--hud-public-guide"):
+		var guide := preload("res://tests/integration/hud_guide_capture.gd").new()
+		root.add_child(guide)
+		await guide.capture(main)
+		guide.queue_free()
+		await _shutdown()
+		return
 	if OS.get_cmdline_user_args().has("--minimal-reference-review"):
 		var saved_reference := ConfigFile.new()
 		if saved_reference.load("res://test-artifacts/hud-presets/user-minimal-reference-1752.cfg") == OK:

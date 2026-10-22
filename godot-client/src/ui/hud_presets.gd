@@ -3,9 +3,10 @@ extends RefCounted
 ## server state deliberately belong to their existing owners.
 const SECTION := "hud_presets"
 const VERSION := 1
-const BUILT_INS := {"current": "Current HUD", "heritage": "Heritage Polish · option 1",
-	"classic": "Refined Classic · option 2", "modular": "Modular MMO · option 3",
-	"adventure": "Painterly Adventure · option 4", "minimal": "Minimal Modern · option 5"}
+const DEFAULT_PRESET := "heritage"
+const MAX_CUSTOM := 5
+const BUILT_INS := {"heritage": "Classic", "classic": "Compact", "modular": "Modular",
+	"adventure": "Adventure", "minimal": "Minimal"}
 const PARTS := {"rail_panel": "Blank HUD panel", "utilities": "Menu icons", "resources": "Resource meters",
 	"spells": "Quick spells / techniques", "items": "Quick items",
 	"medallion": "Resource circle", "chat": "Conversation window",
@@ -17,7 +18,7 @@ const PARTS := {"rail_panel": "Blank HUD panel", "utilities": "Menu icons", "res
 	"player_card": "Player card", "food_meter": "Food meter", "load_meter": "Load meter", "xp_meter": "Experience meter"}
 const ANCHORS := ["original", "top_left", "top_center", "top_right", "left",
 	"right", "bottom_left", "bottom_center", "bottom_right", "free"]
-const STYLES := ["current", "heritage", "classic", "modular", "adventure", "minimal"]
+const STYLES := ["heritage", "classic", "modular", "adventure", "minimal"]
 const RESOURCES := ["health", "mana", "food", "action", "mount_stamina", "load"]
 const RESOURCE_COLORS := {"health": Color("65b873"), "mana": Color("5ba6ed"),
 	"food": Color("e6b85b"), "action": Color("b69ae5"), "mount_stamina": Color("67c8bf"), "load": Color("c49c72"), "experience": Color("c5b989")}
@@ -25,13 +26,16 @@ const BORDERS := ["plain", "laurel", "runic", "crystal"]
 const HUD_BORDERS := ["plain", "beveled", "ornate"]
 const BANNER_FIELDS := ["show_names", "health_bar", "health_numbers", "ether_bar", "ether_numbers", "food_bar", "food_numbers", "action_bar", "action_numbers", "banner_background"]
 var editor_position := Vector2(-1, -1)
-var active := "current"
-var working: Dictionary = preset("current")
+var active := DEFAULT_PRESET
+var working: Dictionary = preset(DEFAULT_PRESET)
 var custom: Dictionary = {}
+## Preserve older profiles' excess designs without exposing more than five slots.
+var archived_custom: Dictionary = {}
 var builtin_overrides: Dictionary = {}
 var loaded := false
 
 static func preset(id: String) -> Dictionary:
+	if id == "current" or not BUILT_INS.has(id): id = DEFAULT_PRESET
 	# Option 2 carries the player-refined Heritage layout. Option 1 keeps the
 	# original concept's narrow right rail and full-width lower toolbar.
 	var value := _preset_recipe("heritage" if id == "classic" else id)
@@ -122,8 +126,11 @@ static func preset(id: String) -> Dictionary:
 		value.parts.items.dock_align = "end"
 		value.parts.utilities.dock_gap = -1.0
 		value.meter_order = ["health", "mana", "action", "food", "load", "experience"]
-		value.parts.resources.anchor = "free"
-		value.parts.resources.position = Vector2(0.23252, 0.942408)
+		# The strip is the docking root for the circle and both quick bars.
+		# Anchor its center rather than retaining a screen-specific drag position.
+		value.parts.resources.anchor = "bottom_center"
+		value.parts.resources.position = Vector2.ZERO
+		value.parts.resources.offset = Vector2.ZERO
 		value.parts.resources.scale = 0.95
 		value.parts.resources.dimensions = Vector2(686.3817, 40)
 		value.parts.resources.extend_to_edge = true
@@ -617,9 +624,14 @@ static func _number(value: Variant, fallback: float, low: float, high: float) ->
 	return clampf(float(value), low, high) if is_finite(float(value)) else fallback
 
 static func normalise(raw: Variant) -> Dictionary:
-	var result := preset("current")
-	if not raw is Dictionary or int(raw.get("version", 0)) != VERSION: return result
-	result.legacy = raw.get("legacy", false) == true
+	if not raw is Dictionary or int(raw.get("version", 0)) != VERSION: return preset(DEFAULT_PRESET)
+	if raw.get("legacy", false) == true:
+		var migrated := preset(DEFAULT_PRESET)
+		for field: String in ["chat_windows", "banner_options", "icons", "resource_colors"]:
+			if raw.has(field): migrated[field] = raw[field]
+		raw = migrated
+	var result := _preset_recipe("current")
+	result.legacy = false
 	if not raw.has("banner_options"): result.banner_options = {}
 	var parts: Variant = raw.get("parts", {})
 	if parts is Dictionary:
@@ -629,7 +641,7 @@ static func normalise(raw: Variant) -> Dictionary:
 			var part: Dictionary = result.parts[key]
 			part.enabled = input.get("enabled", part.enabled) == true
 			part.anchor = input.get("anchor", "original") if input.get("anchor", "original") in ANCHORS else "original"
-			part.style = input.get("style", "current") if input.get("style", "current") in STYLES else "current"
+			part.style = input.get("style", DEFAULT_PRESET) if input.get("style", DEFAULT_PRESET) in STYLES else DEFAULT_PRESET
 			part.orientation = "vertical" if input.get("orientation") == "vertical" else "horizontal"
 			part.rows = int(_number(input.get("rows"), 1, 1, 32 if key == "utilities" else (12 if key == "spells" else 8)))
 			part.columns = int(_number(input.get("columns"), 0, 0, 32 if key == "utilities" else (12 if key == "spells" else 8)))
@@ -770,16 +782,31 @@ func load_file(path: String) -> void:
 	var raw: Variant = config.get_value(SECTION, "working")
 	if not raw is Dictionary or raw.get("version") != VERSION: return
 	working = normalise(raw)
+	custom.clear()
+	archived_custom.clear()
+	builtin_overrides.clear()
+	active = str(config.get_value(SECTION, "active", DEFAULT_PRESET))
 	var entries: Variant = config.get_value(SECTION, "custom", {})
 	if entries is Dictionary:
-		for key: Variant in entries:
-			if custom.size() >= 24: break
+		var keys: Array = entries.keys()
+		if entries.has(active):
+			keys.erase(active)
+			keys.push_front(active)
+		for key: Variant in keys:
+			if custom.size() + archived_custom.size() >= 24: break
 			if not key is String or not key.begins_with("custom_") or not entries[key] is Dictionary: continue
 			var entry: Dictionary = entries[key]
 			if not entry.get("layout") is Dictionary or entry.layout.get("version") != VERSION: continue
-			custom[key] = {"name": str(entry.get("name", "My HUD")).strip_edges().left(48), "layout": normalise(entry.layout)}
-	active = str(config.get_value(SECTION, "active", "current"))
-	if not BUILT_INS.has(active) and not custom.has(active): active = "current"
+			var design := {"name": str(entry.get("name", "My HUD")).strip_edges().left(48), "layout": normalise(entry.layout)}
+			if custom.size() < MAX_CUSTOM: custom[key] = design
+			else: archived_custom[key] = design
+	var archive: Variant = config.get_value(SECTION, "archived_custom", {})
+	if archive is Dictionary:
+		for key: Variant in archive:
+			if archived_custom.size() >= 24: break
+			if key is String and key.begins_with("custom_") and not custom.has(key) and archive[key] is Dictionary:
+				archived_custom[key] = archive[key].duplicate(true)
+	if not BUILT_INS.has(active) and not custom.has(active): active = DEFAULT_PRESET
 	var saved: Variant = config.get_value(SECTION, "builtin_overrides", {})
 	if saved is Dictionary:
 		for id: String in BUILT_INS:
@@ -794,6 +821,7 @@ func save_file(path: String) -> Error:
 	config.load(path)
 	config.set_value(SECTION, "working", normalise(working))
 	config.set_value(SECTION, "custom", custom)
+	config.set_value(SECTION, "archived_custom", archived_custom)
 	config.set_value(SECTION, "active", active)
 	if BUILT_INS.has(active): builtin_overrides[active] = normalise(working)
 	config.set_value(SECTION, "builtin_overrides", builtin_overrides)
@@ -801,15 +829,22 @@ func save_file(path: String) -> Error:
 	return config.save(path)
 
 func select(id: String, factory_default := false) -> void:
+	if id == "current": id = DEFAULT_PRESET
 	if BUILT_INS.has(id): working = preset(id) if factory_default or not builtin_overrides.has(id) else normalise(builtin_overrides[id])
 	elif custom.has(id): working = normalise(custom[id].layout)
 	else: return
 	active = id
 
 func save_custom(label: String, replace_id := "") -> String:
-	if custom.size() >= 24 and not custom.has(replace_id): return ""
+	if custom.size() >= MAX_CUSTOM and not custom.has(replace_id): return ""
 	var id := replace_id if custom.has(replace_id) else "custom_%d_%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()]
 	var title := label.strip_edges().left(48)
 	custom[id] = {"name": title if not title.is_empty() else "My HUD", "layout": normalise(working)}
 	active = id
 	return id
+
+func delete_custom(id: String) -> bool:
+	if not custom.has(id): return false
+	custom.erase(id)
+	if active == id: select(DEFAULT_PRESET)
+	return true

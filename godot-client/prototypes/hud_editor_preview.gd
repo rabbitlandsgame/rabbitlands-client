@@ -28,7 +28,7 @@ func _run() -> void:
 	if not smoke:
 		main._load_server_map()
 		main._sync_world()
-	if not main.hud_workspace.model.loaded: main.hud_workspace.choose_preset("classic")
+	if not main.hud_workspace.model.loaded: main.hud_workspace.choose_preset(main.hud_workspace.Presets.DEFAULT_PRESET)
 	var layer := CanvasLayer.new()
 	layer.layer = 1000
 	root.add_child(layer)

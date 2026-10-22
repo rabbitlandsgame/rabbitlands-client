@@ -569,8 +569,8 @@ func _revised_defaults_and_minimap(workspace: Control) -> void:
 	main.map_camera.rotation.y = heading
 	workspace.choose_preset("current", true)
 	main._layout_minimap_cardinals()
-	_expect(main.minimap_north.visible and main.minimap_east.visible and not labels.visible,
-		"Current HUD restores its native direction labels")
+	_expect(not main.minimap_north.visible and not main.minimap_east.visible and workspace.model.active == "heritage",
+		"the retired current preset resolves to Classic without native direction duplicates")
 	workspace._restore_snapshot(snapshot)
 	await _frames()
 
@@ -810,8 +810,8 @@ func _minimal_saved_layout_and_slots(workspace: Control) -> void:
 	workspace.change_part("spells", "slot_border_style", "ornate")
 	workspace.choose_preset("current", true)
 	await _frames()
-	_expect(not trim.visible and not spell.get_node("_HudSlotTrim").visible and spell.self_modulate.a == 1,
-		"Current HUD clears custom slot trims and retains full default icon visibility")
+	_expect(trim.visible and trim.config.hud_border_style == "beveled" and spell.self_modulate.a == 1,
+		"Classic restores its brass slot trim and full icon visibility")
 	app.stats = saved_stats
 	app.inventory = saved_inventory
 	app.techniques = saved_techniques
@@ -929,10 +929,10 @@ func _run() -> void:
 	cyclic.parts.medallion.dock_target = "spells"
 	var acyclic := Presets.normalise(cyclic)
 	_expect(acyclic.parts.medallion.dock_target == "none" or acyclic.parts.spells.dock_target == "none", "indirect docking cycles are rejected")
-	_expect(Presets.BUILT_INS.size() == 6 and Presets.BUILT_INS.has("heritage") and Presets.BUILT_INS.has("minimal"), "all five concepts and the current HUD have presets")
+	_expect(Presets.BUILT_INS.size() == 5 and Presets.BUILT_INS.has("heritage") and Presets.BUILT_INS.has("minimal"), "five named HUD presets replace the retired legacy choice")
 	await _create()
 	var workspace: Control = main.hud_workspace
-	_expect(workspace.ready_to_layout and not workspace.manages_layout(), "first launch preserves the exact current HUD")
+	_expect(workspace.ready_to_layout and workspace.manages_layout() and workspace.model.active == "heritage", "first launch applies the Classic preset")
 	_expect(main.settings_window.panel.find_child("HudEditorButton", true, false) != null, "HUD settings expose the editor")
 	var chat: PanelContainer = main.chat_hud
 	var system: PanelContainer = main.system_chat_hud
@@ -1154,18 +1154,18 @@ func _run() -> void:
 	_expect(workspace.panel.position.distance_to(workspace.model.editor_position * main.game_view.size) < 2, "editor position survives reopening the client")
 	workspace.choose_preset("current", true)
 	await _frames()
-	_expect(main.bottom_meters.get_parent() == main.get_node("GameView/Quickbar/QuickRows")
-		and main.quick_slot_container.columns == 1 and main.right_rail.visible,
-		"Current HUD restores the original bottom row and right rail")
-	_expect(main.overhead_health_row.visible and main.ether_bottom_text.visible and main.food_bottom_text.visible,
-		"Current HUD restores overhead bars and original meter numbers")
+	_expect(workspace.model.active == "heritage" and not workspace.model.working.legacy
+		and main.quick_slot_container.columns == 1 and not main.right_rail.visible,
+		"retired legacy selection resolves to the modern Classic rail")
+	_expect(workspace.clock_art.visible and workspace.modern_resources.visible,
+		"Classic retains modern clocks and resource meters")
 	_expect(main._minimap_mask_material.get_shader_parameter("hud_palette") == 0
-		and main.chat_hud.dragger.reserved_right == WindowDrag.RESERVED_RIGHT_RAIL,
-		"Current HUD restores native map colors and window boundaries")
+		and main.chat_hud.dragger.reserved_right == 6,
+		"Classic retains natural map colors and movable window boundaries")
 	workspace.change_part("items", "enabled", false)
 	workspace.reset_builtin()
-	_expect(workspace.model.working.legacy and main.get_node("GameView/ItemQuickbar").visible,
-		"Restore default also resets the original Current HUD")
+	_expect(not workspace.model.working.legacy and main.get_node("GameView/ItemQuickbar").visible,
+		"Restore default resets Classic after a retired preset alias")
 	workspace.cancel_edit()
 	main.queue_free()
 	await _frames()
