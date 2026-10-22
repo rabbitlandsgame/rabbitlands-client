@@ -410,7 +410,7 @@ var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
 ## How many players and creatures this client asks the server for at once
 ## (interest_protocol.gd); saved with the graphics settings.
 var _actor_cap := InterestProtocol.ACTOR_CAP_DEFAULT
-## "+N nearby" at the foot of the minimap (nearby_indicator.gd).
+## "+N nearby" in the lower corner of the minimap (nearby_indicator.gd).
 var nearby_indicator: Label
 ## A distant player's dot from the presence rows is drawn a size down from a
 ## dot with a body under it: it is where they were up to a second ago.

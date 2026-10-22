@@ -52,7 +52,7 @@ after the capability names. The setting is saved with the graphics settings
 and takes effect at the next login.
 
 When the cap holds actors back, the presence header says how many, and a
-small "+N nearby" label at the foot of the minimap says so too. It is hidden
+small "+N nearby" label in the lower-left corner of the minimap says so too. It is hidden
 at zero, which is always on a server or a map that never reaches the cap.
 
 ## Remote movement timed by the server's clock

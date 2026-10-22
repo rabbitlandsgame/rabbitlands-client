@@ -5,9 +5,9 @@ extends Label
 ## The cap keeps a crowded market or a dense invasion within what the client
 ## can draw; the nearest actors, the player's target, attackers, party and
 ## selection are always sent. What the cap leaves out would otherwise simply
-## not be there, so this says that it is. It sits at the foot of the minimap,
-## where a player already looks to see who is about, and is hidden at zero -
-## which is always, on a server or a map that never reaches the cap.
+## not be there, so this says that it is. It sits in the lower corner of the
+## minimap, where a player already looks to see who is about, and is hidden at
+## zero - which is always, on a server or a map that never reaches the cap.
 
 const FONT_SIZE := 12
 const OUTLINE_SIZE := 4
@@ -18,7 +18,7 @@ var count := 0
 
 func _ready() -> void:
 	name = "NearbyIndicator"
-	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	# A tooltip needs the pointer; PASS hands the press on to the minimap so
 	# dragging and its right-click menu still work over the label.
@@ -27,10 +27,13 @@ func _ready() -> void:
 	add_theme_constant_override("outline_size", OUTLINE_SIZE)
 	add_theme_color_override("font_color", COLOUR)
 	add_theme_color_override("font_outline_color", OUTLINE_COLOUR)
-	set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	grow_horizontal = Control.GROW_DIRECTION_BOTH
+	# The bottom-left corner: the compass letters take the middle of each
+	# edge of the classic frame.
+	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	grow_horizontal = Control.GROW_DIRECTION_END
 	grow_vertical = Control.GROW_DIRECTION_BEGIN
-	offset_bottom = -4.0
+	offset_left = 4.0
+	offset_bottom = -2.0
 	show_count(count)
 
 func show_count(hidden_nearby: int) -> void:
