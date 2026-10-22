@@ -88,6 +88,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     env["RABBITLANDS_CROWD_BENCH_DIAG"] = args.diagnostics
     env["RABBITLANDS_CROWD_BENCH_DRIVER"] = args.driver
     env["RABBITLANDS_CROWD_TUNING"] = args.tuning
+    env["RABBITLANDS_CROWD_BENCH_MINIMAP"] = {"show": "1", "hide": "0"}.get(args.minimap, "")
     command = [args.godot, "--path", str(CLIENT), "--audio-driver", "Dummy",
                "--log-file", str(log)]
     if args.mode == "headless":
@@ -128,6 +129,8 @@ def main() -> int:
     parser.add_argument("--driver", default="live", choices=["live", "stress"],
                         help="live: game cadence (600 ms steps, 2 s rounds, staggered); "
                              "stress: the earlier study's 100 ms steps and 400 ms rounds in lockstep")
+    parser.add_argument("--minimap", default="saved", choices=["saved", "show", "hide"],
+                        help="minimap during the run (its marks are timed as mapViewports)")
     parser.add_argument("--tuning", default="", help="full=N,cloth=N budgets (RABBITLANDS_CROWD_TUNING)")
     parser.add_argument("--diagnostics", default="",
                         help="attribution only: no_animation,no_overhead,no_ground")

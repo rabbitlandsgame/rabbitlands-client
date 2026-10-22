@@ -216,6 +216,15 @@ func _set_up_main() -> void:
 	else:
 		_centre = Vector2i(roundi(_adapter.server_origin.x), roundi(_adapter.server_origin.y))
 	_report["centreTile"] = [_centre.x, _centre.y]
+	# The minimap is part of what a crowd costs once its marks are drawn
+	# (`mapViewportsMilliseconds`); RABBITLANDS_CROWD_BENCH_MINIMAP=1 shows it,
+	# =0 hides it, unset leaves the saved HUD setting.
+	var minimap := _main.get("minimap_frame") as Control
+	var wanted_minimap := OS.get_environment("RABBITLANDS_CROWD_BENCH_MINIMAP").strip_edges()
+	if minimap != null and wanted_minimap in ["0", "1"] \
+			and minimap.visible != (wanted_minimap == "1"):
+		_main.call("_toggle_minimap")
+	_report["minimapVisible"] = minimap != null and minimap.visible
 	var rig := _main.get("camera_rig") as Node3D
 	rig.set("distance", 26.0)
 	rig.set("pitch_degrees", -60.0)
