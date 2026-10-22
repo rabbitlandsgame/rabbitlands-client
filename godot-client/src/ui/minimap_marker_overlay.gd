@@ -36,6 +36,11 @@ const OUTLINE_COLOUR := Color(0.04, 0.04, 0.05, 0.9)
 ## Circles are drawn as polygons rather than with `draw_circle`, so the outline
 ## and the fill are the same shape at these radii.
 const CIRCLE_SEGMENTS := 16
+## That polygon round the unit circle, worked out once rather than with a sine
+## and a cosine per point of every dot of every redraw, and the triangle fan
+## that fills one circle, repeated for as many as a redraw has needed.
+static var _unit_circle: PackedVector2Array = _make_unit_circle()
+static var _fan := PackedInt32Array()
 ## A glyph mark - a portal's P, an exit's X - is drawn this many times the
 ## dot radius tall, and no smaller than a letter can be read at.
 const GLYPH_SCALE := 2.8
@@ -51,6 +56,16 @@ var _round := false
 ## The region boundaries in metres of the current map (see map_marker_overlay).
 var _boundaries: Array[Dictionary] = []
 const BOUNDARY_COLOUR := Color(1.0, 1.0, 1.0, 0.7)
+## Dots in a row are gathered into one draw: each dot's ring and then its fill,
+## in mark order, so a dot's ring still lies over the dot beneath it exactly as
+## when every circle was its own draw. A map with a crowd on it - or, with
+## player interest, the dots of everyone beyond it - drew hundreds of
+## polygons a redraw; this is one call (`_flush_dots`).
+var _dot_points := PackedVector2Array()
+var _dot_colours := PackedColorArray()
+var _dot_circles := 0
+## A circle's worth of one colour, per colour.
+var _circle_colours: Dictionary = {}
 
 func configure(camera: Camera3D, viewport_size: Vector2i) -> void:
 	_camera = camera
@@ -160,13 +175,17 @@ func _draw() -> void:
 		var radius: float = mark_radius(mark)
 		var glyph: String = str(mark.get("glyph", ""))
 		if type == &"entrance":
+			_flush_dots()
 			EntranceOverlayScript.draw_marker(self, point, str(mark.get("label", "Entrance")), 11, radius)
 		elif not glyph.is_empty():
+			_flush_dots()
 			_draw_glyph(point, radius, colour, glyph)
 		elif type == &"marker":
+			_flush_dots()
 			_draw_pin(point, radius, colour)
 		else:
-			_draw_dot(point, radius, colour)
+			_queue_dot(point, radius, colour)
+	_flush_dots()
 
 ## A letter rather than a shape, the way the legend writes it, outlined in
 ## the same dark ring the dots carry so it reads on parkland and on roof.
@@ -182,9 +201,45 @@ func _draw_glyph(point: Vector2, radius: float, colour: Color, glyph: String) ->
 		maxi(2, roundi(OUTLINE_WIDTH * 2.0)), OUTLINE_COLOUR)
 	draw_string(font, baseline, glyph, HORIZONTAL_ALIGNMENT_LEFT, -1, size, colour)
 
-func _draw_dot(point: Vector2, radius: float, colour: Color) -> void:
-	draw_colored_polygon(_circle(point, radius + OUTLINE_WIDTH), OUTLINE_COLOUR)
-	draw_colored_polygon(_circle(point, radius), colour)
+func _queue_dot(point: Vector2, radius: float, colour: Color) -> void:
+	_dot_points.append_array(_circle(point, radius + OUTLINE_WIDTH))
+	_dot_colours.append_array(_colours_of(OUTLINE_COLOUR))
+	_dot_points.append_array(_circle(point, radius))
+	_dot_colours.append_array(_colours_of(colour))
+	_dot_circles += 2
+
+## Draws the dots gathered since the last flush, in one call.
+func _flush_dots() -> void:
+	if _dot_circles == 0:
+		return
+	var triangles: int = CIRCLE_SEGMENTS - 2
+	var needed: int = _dot_circles * triangles * 3
+	if _fan.size() < needed:
+		var circles: int = _dot_circles * 2
+		_fan.resize(circles * triangles * 3)
+		var at := 0
+		for circle: int in range(circles):
+			var first: int = circle * CIRCLE_SEGMENTS
+			for step: int in range(triangles):
+				_fan[at] = first
+				_fan[at + 1] = first + step + 1
+				_fan[at + 2] = first + step + 2
+				at += 3
+	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(),
+		_fan.slice(0, needed), _dot_points, _dot_colours)
+	_dot_points.clear()
+	_dot_colours.clear()
+	_dot_circles = 0
+
+func _colours_of(colour: Color) -> PackedColorArray:
+	var colours: Variant = _circle_colours.get(colour)
+	if colours == null:
+		var filled := PackedColorArray()
+		filled.resize(CIRCLE_SEGMENTS)
+		filled.fill(colour)
+		_circle_colours[colour] = filled
+		colours = filled
+	return colours as PackedColorArray
 
 ## The server's own markers are diamonds on the full map, and they stay
 ## diamonds here: a waypoint the server placed is not the same kind of thing as
@@ -194,10 +249,13 @@ func _draw_pin(point: Vector2, radius: float, colour: Color) -> void:
 	draw_colored_polygon(_diamond(point, radius), colour)
 
 func _circle(point: Vector2, radius: float) -> PackedVector2Array:
+	return Transform2D(0.0, Vector2(radius, radius), 0.0, point) * _unit_circle
+
+static func _make_unit_circle() -> PackedVector2Array:
 	var points := PackedVector2Array()
 	for step: int in range(CIRCLE_SEGMENTS):
 		var angle: float = TAU * float(step) / float(CIRCLE_SEGMENTS)
-		points.append(point + Vector2(cos(angle), sin(angle)) * radius)
+		points.append(Vector2(cos(angle), sin(angle)))
 	return points
 
 func _diamond(point: Vector2, radius: float) -> PackedVector2Array:
