@@ -96,10 +96,13 @@ the gate part on:
   tier): in a fight the bodies behind the camera strike every round, and each
   strike used to wake them to full rate.
 - Cape cloth is simulated for at most `CLOTH_BODIES` (8) remote caped bodies,
-  the nearest the camera; a simulating cape keeps its cloth until it falls
-  `CLOTH_HYSTERESIS` (4) places past the limit. The others hang as every
-  non-local cape already does at Medium and Low graphics quality. The solver
-  was the largest single per-body cost of an equipped crowd.
+  the nearest the camera. A simulating cape claims its place as if it were
+  `CLOTH_HYSTERESIS` (4) places nearer than it is, so it keeps its cloth until
+  a cape that much nearer needs the place or it falls that far past the limit,
+  and capes on the boundary do not take turns as a crowd mills; the limit
+  itself is never exceeded. The others hang as every non-local cape already
+  does at Medium and Low graphics quality. The solver is the largest single
+  per-body cost of an equipped crowd.
 - The gate's walk over every actor is spread over `GATE_SWEEP_SLICES` (6)
   frames; the decisions that need the whole crowd (full-rate ranks, the cloth
   budget, build ranks, releases, the overhead declutter) are taken when a sweep
