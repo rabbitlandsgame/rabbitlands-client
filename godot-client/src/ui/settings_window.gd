@@ -24,6 +24,16 @@ const FPS_LIMITS: Array[int] = [0, 30, 60, 75, 90, 120, 144, 165, 240, 360]
 const NAME_DISTANCE_MIN := 10.0
 const NAME_DISTANCE_MAX := 80.0
 const NAME_DISTANCE_DEFAULT := 30.0
+## How many other players and creatures are drawn with a body at once
+## (crowd_presentation.gd `body_cap`), and how many of the nearest other capes
+## sway at High quality (`cloth_bodies`). The defaults are the crowd
+## presentation's own: the Phase 4 server cap and its cloth budget.
+const CROWD_BODIES_MIN := 40
+const CROWD_BODIES_MAX := 300
+const CROWD_BODIES_DEFAULT := 160
+const SWAYING_CAPES_MIN := 0
+const SWAYING_CAPES_MAX := 32
+const SWAYING_CAPES_DEFAULT := 8
 
 ## Preloaded rather than reached by its global class name, for the same reason
 ## this script declares none: the global class cache is a build artifact, and
@@ -474,6 +484,12 @@ func _build_graphics() -> void:
 	_add_toggle(page, "particles", tr("ELORIA_SETTINGS_PARTICLES"), true)
 	_add_toggle(page, "nameplates", tr("ELORIA_SETTINGS_NAMEPLATES"), true)
 	_add_name_distance_row(page)
+	_add_count_row(page, "crowd_bodies", tr("ELORIA_SETTINGS_CROWD_BODIES"),
+		tr("ELORIA_SETTINGS_CROWD_BODIES_HINT"), CROWD_BODIES_MIN, CROWD_BODIES_MAX, 10,
+		CROWD_BODIES_DEFAULT)
+	_add_count_row(page, "swaying_capes", tr("ELORIA_SETTINGS_SWAYING_CAPES"),
+		tr("ELORIA_SETTINGS_SWAYING_CAPES_HINT"), SWAYING_CAPES_MIN, SWAYING_CAPES_MAX, 1,
+		SWAYING_CAPES_DEFAULT)
 	# The combat box can also be dismissed from its own right-click menu, so
 	# this is the way back once a player has done that.
 	_add_map_cache_row(page)
@@ -599,6 +615,43 @@ func restore_name_distance(metres: float) -> void:
 
 func _show_name_distance(metres: float) -> void:
 	name_distance_value.text = "%d m" % roundi(metres)
+
+## A whole-number slider with its count beside it, for the crowd settings.
+func _add_count_row(page: VBoxContainer, key: String, label: String, hint: String,
+		minimum: int, maximum: int, step: int, value: int) -> void:
+	var row := HBoxContainer.new()
+	page.add_child(row)
+	var caption := Label.new()
+	caption.text = label
+	caption.custom_minimum_size = Vector2(200.0, 0.0)
+	row.add_child(caption)
+	var slider := HSlider.new()
+	slider.name = key
+	slider.min_value = minimum
+	slider.max_value = maximum
+	slider.step = step
+	slider.value = value
+	slider.custom_minimum_size = Vector2(220.0, 0.0)
+	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	slider.tooltip_text = hint
+	var reading := Label.new()
+	reading.name = key + "_count"
+	reading.text = str(value)
+	slider.value_changed.connect(func(moved: float) -> void:
+		reading.text = str(roundi(moved))
+		setting_changed.emit(page.name, key, roundi(moved)))
+	row.add_child(slider)
+	row.add_child(reading)
+
+## Shows the player's crowd settings without re-emitting them.
+func restore_crowd_settings(bodies: int, capes: int) -> void:
+	for pair: Array in [["crowd_bodies", bodies], ["swaying_capes", capes]]:
+		var slider := panel.find_child(str(pair[0]), true, false) as HSlider
+		var reading := panel.find_child(str(pair[0]) + "_count", true, false) as Label
+		if slider != null:
+			slider.set_value_no_signal(int(pair[1]))
+		if reading != null:
+			reading.text = str(int(pair[1]))
 
 ## The map cache: a switch, what it is costing, and a way to be rid of it.
 ##

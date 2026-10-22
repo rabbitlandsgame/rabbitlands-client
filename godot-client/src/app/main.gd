@@ -408,6 +408,10 @@ var _trailer_capture_enabled := false
 var _trailer_capture_level := 0
 var _trailer_capture_layer: CanvasLayer
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
+## The player's crowd settings (Graphics): how many other actors are drawn with
+## a body at once, and how many of the nearest other capes sway at High.
+var _crowd_bodies := SettingsWindowScript.CROWD_BODIES_DEFAULT
+var _swaying_capes := SettingsWindowScript.SWAYING_CAPES_DEFAULT
 var _fps_limit := 0
 var _player_notes := ""
 ## True while the loaded package lets the hour drive its environment. An
@@ -2821,6 +2825,7 @@ func _refresh_unified_settings() -> void:
 	equipment_side.select(1 if _equipment_side == "right" else 0)
 	settings_window.restore_fps_limit(_fps_limit)
 	settings_window.restore_name_distance(_name_distance_metres)
+	settings_window.restore_crowd_settings(_crowd_bodies, _swaying_capes)
 	settings_window.restore_look(LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.restore_quality(LookProfile.player_quality(), LookProfile.quality_forced())
 	casting_bar.refresh()
@@ -8340,6 +8345,9 @@ func _load_hud_settings() -> void:
 			config.get_value("graphics", "nameplates", true))
 		_set_name_distance(config.get_value(
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
+		_set_crowd_settings(config.get_value("graphics", "crowd_bodies",
+			SettingsWindowScript.CROWD_BODIES_DEFAULT), config.get_value(
+			"graphics", "swaying_capes", SettingsWindowScript.SWAYING_CAPES_DEFAULT))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
 		# keys.ini holds the bindings now. The settings file's old copy is read
@@ -8394,6 +8402,7 @@ func _load_hud_settings() -> void:
 	settings_window.call("restore_toggle", "combat_hud",
 		bool(extension_windows.get("combat_hud_enabled")))
 	settings_window.call("restore_name_distance", _name_distance_metres)
+	settings_window.call("restore_crowd_settings", _crowd_bodies, _swaying_capes)
 	for option_key: String in _hud_element_options:
 		settings_window.call("restore_toggle", option_key,
 			bool(_hud_element_options[option_key]))
@@ -8473,6 +8482,8 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "particles", _effects_enabled)
 	config.set_value("graphics", "nameplates", _nameplates_enabled)
 	config.set_value("graphics", "name_distance", _name_distance_metres)
+	config.set_value("graphics", "crowd_bodies", _crowd_bodies)
+	config.set_value("graphics", "swaying_capes", _swaying_capes)
 	config.set_value("graphics", "fps_limit", _fps_limit)
 	TargetMarkerStyle.write(config, _target_marker_style)
 	# The player's own choices, not what ELORIA_LOOK or ELORIA_LOOK_QUALITY
@@ -12383,6 +12394,19 @@ func _set_name_distance(value: Variant) -> void:
 		SettingsWindowScript.NAME_DISTANCE_MAX)
 	_animation_gate_refresh_msec = 0
 
+## The player's crowd settings, clamped to the sliders' ranges and handed to
+## the crowd presentation, which keeps any value the environment forces for a
+## benchmark. The next gate sweep applies them.
+func _set_crowd_settings(bodies: Variant, capes: Variant) -> void:
+	_crowd_bodies = clampi(int(bodies) if bodies is int or bodies is float
+		else SettingsWindowScript.CROWD_BODIES_DEFAULT,
+		SettingsWindowScript.CROWD_BODIES_MIN, SettingsWindowScript.CROWD_BODIES_MAX)
+	_swaying_capes = clampi(int(capes) if capes is int or capes is float
+		else SettingsWindowScript.SWAYING_CAPES_DEFAULT,
+		SettingsWindowScript.SWAYING_CAPES_MIN, SettingsWindowScript.SWAYING_CAPES_MAX)
+	crowd.set_player_budgets(_crowd_bodies, _swaying_capes)
+	_animation_gate_refresh_msec = 0
+
 ## Preferences apply locally. Only the target-mode and autogather buttons
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
@@ -12523,6 +12547,10 @@ func _on_client_setting_changed(section: String, key: String,
 			_apply_banner_options()
 		"name_distance":
 			_set_name_distance(value)
+		"crowd_bodies":
+			_set_crowd_settings(value, _swaying_capes)
+		"swaying_capes":
+			_set_crowd_settings(_crowd_bodies, value)
 		"combat_hud":
 			extension_windows.call("set_combat_hud_enabled", bool(value))
 		"rotation_sensitivity":

@@ -73,7 +73,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         "APPDATA": str(user_root),
         "XDG_DATA_HOME": str(user_root),
         "RABBITLANDS_CROWD_PRESENTATION": "" if variant == "all" else variant,
-        "RABBITLANDS_CROWD_BODY_CAP": str(args.body_cap or ""),
+        "RABBITLANDS_CROWD_BODY_CAP": "" if args.body_cap is None else str(args.body_cap),
         "RABBITLANDS_CROWD_BENCH_CELLS": args.cells,
         "RABBITLANDS_CROWD_BENCH_MAP": args.map,
         "RABBITLANDS_CROWD_BENCH_SAMPLE_MSEC": str(args.sample_ms),
@@ -125,7 +125,8 @@ def main() -> int:
     parser.add_argument("--cells", default="phase4")
     parser.add_argument("--variants", default="all,legacy",
                         help="comma list of RABBITLANDS_CROWD_PRESENTATION values; 'all' is the default client")
-    parser.add_argument("--body-cap", type=int, default=0)
+    parser.add_argument("--body-cap", type=int, default=None,
+                        help="force the body cap for the run (0 = off); unset = the player setting, 160 by default")
     parser.add_argument("--driver", default="live", choices=["live", "stress"],
                         help="live: game cadence (600 ms steps, 2 s rounds, staggered); "
                              "stress: the earlier study's 100 ms steps and 400 ms rounds in lockstep")
