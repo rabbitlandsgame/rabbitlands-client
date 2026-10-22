@@ -239,15 +239,34 @@ func _main_checks(state: Node) -> void:
 	_expect(true, "re-binding the changed mounts with no bodies built is harmless")
 
 	var settings: Node = main.get("settings_window")
-	var spin: Node = (settings.get("panel") as Node).find_child("actor_cap", true, false)
-	_expect(spin is SpinBox and is_equal_approx((spin as SpinBox).max_value, 160.0),
-		"the graphics settings offer the actor cap up to 160")
-	main.call("_on_client_setting_changed", "Graphics", "actor_cap", 87.0)
-	_expect(int(main.get("_actor_cap")) == 90 and int(root.get_node("Network").get("declared_actor_cap")) == 90,
-		"a chosen cap is kept on its step and announced through the network client")
+	var slider: Node = (settings.get("panel") as Node).find_child("crowd_bodies", true, false)
+	_expect(slider is HSlider and (settings.get("panel") as Node).find_child("actor_cap", true, false) == null,
+		"the cap is the crowd setting, with no second setting of its own")
+	var network: Node = root.get_node("Network")
+	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies", 100)
+	_expect(int(network.get("declared_actor_cap")) == 100,
+		"a crowd setting of 100 declares a cap of 100")
+	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies", 250)
+	_expect(int(network.get("declared_actor_cap")) == 160, "and one of 250 declares the most, 160")
+	var line: String = EloriaProtocol.client_capabilities(int(network.get("declared_actor_cap"))).slice(3).get_string_from_utf8()
+	_expect(line.contains("actor_cap:160"), "which is what the capability line carries")
+	var before: int = int(main.get("_actor_cap_declaration"))
+	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies", 120)
+	_expect(int(main.get("_actor_cap_declaration")) == before,
+		"before login a change is only remembered for the declaration at login")
+	state.set("authenticated", true)
+	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies", 110)
+	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies", 100)
+	state.set("authenticated", false)
+	_expect(int(main.get("_actor_cap_declaration")) == before + 2,
+		"in a session each change restarts the wait, so a slider being dragged is declared once")
 	var saved := ConfigFile.new()
 	saved.load(main.SETTINGS_PATH)
-	_expect(int(saved.get_value("graphics", "actor_cap", -1)) == 90, "and saved with the graphics settings")
+	_expect(int(saved.get_value("graphics", "crowd_bodies", -1)) == 100,
+		"the setting is saved as the crowd setting")
+	# Put the player's setting back: later tests in the same user folder read it.
+	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies",
+		main.SettingsWindowScript.CROWD_BODIES_DEFAULT)
 	main.queue_free()
 	await process_frame
 

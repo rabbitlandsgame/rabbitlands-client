@@ -155,12 +155,17 @@ func _check_indicator() -> void:
 	indicator.queue_free()
 
 func _check_actor_cap() -> void:
-	_expect(InterestProtocol.clamp_actor_cap(160) == 160, "the cap is at most 160")
-	_expect(InterestProtocol.clamp_actor_cap(500) == 160, "a larger stored cap is brought down")
-	_expect(InterestProtocol.clamp_actor_cap(3) == InterestProtocol.ACTOR_CAP_MINIMUM, "and a tiny one up")
-	_expect(InterestProtocol.clamp_actor_cap(87) == 90, "to the setting's step")
+	_expect(InterestProtocol.clamp_actor_cap(160) == 160, "a cap is at most 160")
+	_expect(InterestProtocol.clamp_actor_cap(500) == 160, "a larger one is brought down")
+	_expect(InterestProtocol.clamp_actor_cap(3) == InterestProtocol.ACTOR_CAP_MINIMUM,
+		"and a tiny one up to the server's floor")
 	_expect(InterestProtocol.clamp_actor_cap("lots") == InterestProtocol.ACTOR_CAP_DEFAULT,
-		"a stored value that is not a number is the default")
+		"a value that is not a number is the default")
+	_expect(InterestProtocol.declared_actor_cap(160) == 160,
+		"the crowd setting's default declares 160, as declaring nothing would")
+	_expect(InterestProtocol.declared_actor_cap(300) == 160 and InterestProtocol.declared_actor_cap(90) == 90
+		and InterestProtocol.declared_actor_cap(40) == 40,
+		"the declared cap follows the crowd setting up to 160")
 
 ## What a presence update and a minimap read cost with 500 players beyond the
 ## area, the most one shard holds. Printed, not gated: the numbers are for the

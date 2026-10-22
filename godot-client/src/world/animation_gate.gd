@@ -26,8 +26,13 @@ const HALF_RATE_METRES := 45.0
 
 var _planes: Array[Plane] = []
 var _camera_position := Vector3.ZERO
-## The players in the half-rate tier, as a set.
+## The players in the half-rate tier, each with the skeleton whose modifiers
+## (cape cloth, weapon carry) are stepped with it, or null.
 var _half: Dictionary = {}
+## Whether a body's skeleton follows its tier too: modifiers stepped with a
+## half-rate player, and a paused body's model subtree disabled. Main turns it
+## off with the rest of the crowd presentation's gate (crowd_presentation.gd).
+var gate_skeletons := true
 var _half_delta := 0.0
 var _half_turn := false
 
@@ -59,7 +64,12 @@ func classify(anchor: Vector3, radius: float) -> Tier:
 ## FULL hands the player back to the engine's idle processing, which is what an
 ## AnimationPlayer runs on by default; HALF takes it manual and steps it from
 ## `advance`; PAUSED stops it, and a later FULL resumes it where it stopped.
-func apply(player: AnimationPlayer, tier: Tier) -> void:
+##
+## Given the body's `skeleton`, its modifiers follow the same clock: stepped
+## with the player at half rate, on the engine's idle clock otherwise. A
+## half-rate body otherwise still solved its cape cloth and re-posed its
+## skeleton every frame for a pose that changed every other one.
+func apply(player: AnimationPlayer, tier: Tier, skeleton: Skeleton3D = null) -> void:
 	if player == null:
 		return
 	match tier:
@@ -70,11 +80,15 @@ func apply(player: AnimationPlayer, tier: Tier) -> void:
 		Tier.HALF:
 			player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 			player.active = true
-			_half[player] = true
+			_half[player] = skeleton
 		Tier.PAUSED:
 			_half.erase(player)
 			player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
 			player.active = false
+	if skeleton != null and gate_skeletons:
+		skeleton.modifier_callback_mode_process = (
+			Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL if tier == Tier.HALF
+			else Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE)
 
 ## Steps the half-rate players. Call once per frame with that frame's delta:
 ## every second call advances them by the time both frames covered.
@@ -95,6 +109,9 @@ func advance(delta: float) -> void:
 		var player: AnimationPlayer = value as AnimationPlayer
 		if player.active and player.is_inside_tree():
 			player.advance(step)
+			var skeleton: Variant = _half[value]
+			if is_instance_valid(skeleton) and (skeleton as Skeleton3D).is_inside_tree():
+				(skeleton as Skeleton3D).advance(step)
 	for value: Variant in gone:
 		_half.erase(value)
 
@@ -104,6 +121,10 @@ func reset() -> void:
 		if is_instance_valid(value):
 			(value as AnimationPlayer).callback_mode_process = (
 				AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE)
+		var skeleton: Variant = _half[value]
+		if is_instance_valid(skeleton):
+			(skeleton as Skeleton3D).modifier_callback_mode_process = (
+				Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE)
 	_half.clear()
 	_half_delta = 0.0
 	_half_turn = false

@@ -21,13 +21,11 @@ const MOUNT_DELTAS_CAPABILITY := "mount_deltas_v1"
 ## The cap travels as a value token in the same capability list.
 const ACTOR_CAP_TOKEN := "actor_cap:%d"
 
-## The most actors a client may ask for, players and creatures together, and
-## the least the setting goes down to (the server accepts 16 and up). NPCs,
-## the player's target, attackers, party and trade partner are sent whatever
-## the cap.
+## The range the server takes a declared cap in, players and creatures
+## together. NPCs, the player's target, attackers, party and trade partner are
+## sent whatever the cap. A client that declares none gets the maximum.
 const ACTOR_CAP_MAXIMUM := 160
-const ACTOR_CAP_MINIMUM := 40
-const ACTOR_CAP_STEP := 10
+const ACTOR_CAP_MINIMUM := 16
 const ACTOR_CAP_DEFAULT := ACTOR_CAP_MAXIMUM
 
 const PRESENCE_VERSION := 1
@@ -43,10 +41,19 @@ const MOUNT_DELTAS_MAXIMUM_ROWS := 256
 const MountDeltaState := preload("res://src/mounts/mount_delta_state.gd")
 const MountState := preload("res://src/mounts/mount_preview_state.gd")
 
-## A stored or typed cap, within the range and on the setting's step.
+## A cap within the range the server takes; anything not a number is the
+## default.
 static func clamp_actor_cap(value: Variant) -> int:
 	var number: int = int(value) if typeof(value) in [TYPE_INT, TYPE_FLOAT] else ACTOR_CAP_DEFAULT
-	return clampi(snappedi(number, ACTOR_CAP_STEP), ACTOR_CAP_MINIMUM, ACTOR_CAP_MAXIMUM)
+	return clampi(number, ACTOR_CAP_MINIMUM, ACTOR_CAP_MAXIMUM)
+
+## The cap this client declares for the player's "Characters drawn in a
+## crowd" setting: no more actors asked of the server than are drawn with a
+## body, within the protocol's range. The setting's default (160) declares
+## 160, the same as declaring nothing. The one place the rule lives, so it can
+## change in one line if the cap should stop following the setting.
+static func declared_actor_cap(crowd_bodies: int) -> int:
+	return clamp_actor_cap(crowd_bodies)
 
 ## The capability token that states `cap`.
 static func actor_cap_token(cap: int) -> String:

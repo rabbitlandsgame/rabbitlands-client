@@ -46,14 +46,24 @@ per minimap refresh.
 The server may cap how many players and creatures a client is shown at once,
 nearest first, always keeping the player's target, attackers, party and
 trade partner, and ranking players who can attack the player above
-creatures. The client asks for its own cap with the graphics setting **Most
-players and creatures shown** (40-160, default 160), sent as `actor_cap:<N>`
-after the capability names. The setting is saved with the graphics settings
-and takes effect at the next login.
+creatures. The client declares its own cap as `actor_cap:<N>` after the
+capability names. It follows the graphics setting **Characters drawn in a
+crowd** (`docs/crowd-presentation-policy.md`): the server is asked for no
+more actors than the client draws with a body, and never more than 160, the
+most the protocol takes. At the setting's default of 160 the declaration is
+160, the same as declaring nothing. The rule is one function,
+`InterestProtocol.declared_actor_cap`.
+
+The cap is declared at login. When the player changes the setting during a
+session, the client declares the new cap once the slider has rested for two
+seconds; the server retunes from a repeated `#clientcaps`, which also
+restates what the capabilities gate, so it is not sent on every step of the
+slider.
 
 When the cap holds actors back, the presence header says how many, and a
-small "+N nearby" label in the lower-left corner of the minimap says so too. It is hidden
-at zero, which is always on a server or a map that never reaches the cap.
+small "+N nearby" label in the lower-left corner of the minimap says so too.
+It is hidden at zero, which is always on a server or a map that never reaches
+the cap.
 
 ## Remote movement timed by the server's clock
 

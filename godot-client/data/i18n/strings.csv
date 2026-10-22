@@ -24,6 +24,10 @@ ELORIA_SETTINGS_PARTICLES,Spell and world effects
 ELORIA_SETTINGS_NAMEPLATES,Names above other players
 ELORIA_SETTINGS_NAME_DISTANCE,Name distance
 ELORIA_SETTINGS_NAME_DISTANCE_HINT,"How far away names, titles and health bars still show. Whoever you are fighting keeps theirs at any range."
+ELORIA_SETTINGS_CROWD_BODIES,Characters drawn in a crowd
+ELORIA_SETTINGS_CROWD_BODIES_HINT,"The most other players and creatures drawn at once. Past it, the farthest show only as map dots until they come nearer. Your target and selection are always drawn. Lower it if big crowds are slow."
+ELORIA_SETTINGS_SWAYING_CAPES,Swaying capes in a crowd
+ELORIA_SETTINGS_SWAYING_CAPES_HINT,"At High quality, how many of the nearest other players' capes move with their stride and the wind. The rest hang still, as every other cape does at Medium and Low. Your own cape always moves."
 ELORIA_SETTINGS_COMBAT_HUD,Combat box while fighting
 ELORIA_SETTINGS_MAP_CACHE,Keep built maps on disk
 ELORIA_SETTINGS_MAP_CACHE_CLEAR,Clear map cache
@@ -47,7 +51,5 @@ ELORIA_QUEST_NONE,No active quests.
 ELORIA_QUEST_READY,Ready to turn in.
 ELORIA_SCREENSHOT_SAVED,Screenshot saved to {path}
 ELORIA_SCREENSHOT_FAILED,Screenshot could not be saved: {reason}
-ELORIA_SETTINGS_ACTOR_CAP,Most players and creatures shown
-ELORIA_SETTINGS_ACTOR_CAP_HINT,"How many players and creatures the server sends you at once in a crowd. A lower number helps a slower computer in busy markets and invasions; the nearest ones, your target, whoever is attacking you and your party are always shown. Takes effect at your next login on servers that support it."
 ELORIA_NEARBY_HIDDEN,+{count} nearby
-ELORIA_NEARBY_HIDDEN_HINT,"More players and creatures are nearby than are shown. The nearest ones, your target, whoever is attacking you and your party are always shown; the setting Most players and creatures shown raises or lowers the limit."
+ELORIA_NEARBY_HIDDEN_HINT,"More players and creatures are nearby than the server is sending. The nearest ones, your target, whoever is attacking you and your party are always shown. The setting Characters drawn in a crowd (Graphics) sets how many you are sent, up to 160, from your next login or a moment after you change it."
