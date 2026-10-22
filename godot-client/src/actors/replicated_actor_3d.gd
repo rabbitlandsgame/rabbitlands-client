@@ -2030,13 +2030,16 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 	if dto.has("command") and resolver != null:
 		var action := _movement_aware_action(
 			_paced_travel_action(resolver.action_for_command(actor_command, _in_combat)), target_changed)
-		# Health/equipment/aim updates restate the last command. They must not
-		# interrupt a cast or restart a swing. A new command or movement may.
+		# Health/equipment/aim updates restate the last command. Replaying it
+		# can repeat a completed sit/stand transition or interrupt an emote.
+		# Only a new command, movement or combat change may change the action;
+		# records without command sequences retain their legacy behavior.
 		var transient := current_action in [&"cast", &"cast_channel_enter", &"cast_channel",
 			&"cast_aggressive", &"cast_defensive", &"heal", &"cast_exit", &"ranged_draw",
 			&"ranged_hold", &"ranged_attack", &"attack_primary", &"attack_secondary", &"pain"]
 		var stale_strike := command_sequence >= 0 and not fresh_command and action in [&"attack_primary", &"pain"]
-		if not stale_strike and (fresh_command or target_changed or not transient or action == &"death"):
+		if not stale_strike and (fresh_command or target_changed
+				or (not transient and (combat_changed or command_sequence < 0)) or action == &"death"):
 			if action == &"attack_primary" and fresh_command and resolver.action_to_clip.has("attack_secondary"):
 				action = &"attack_primary" if _swing_index % 2 == 0 else &"attack_secondary"
 				_swing_index += 1
