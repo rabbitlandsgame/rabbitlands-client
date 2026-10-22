@@ -146,8 +146,8 @@ func _run() -> void:
 		nodes[id] = actor
 		state.get("actors")[id] = dto
 	main.call("_declutter_actor_overheads", 902)
-	expect(not nodes[902].get("_overhead_crowded") and nodes[901].get("_overhead_crowded")
-		and nodes[903].get("_overhead_crowded"), "combat target retains its banner when crowd banners overlap")
+	expect(not nodes[902].get("_overhead_crowded") and not nodes[901].get("_overhead_crowded")
+		and not nodes[903].get("_overhead_crowded"), "overlapping creature banners remain visible alongside the combat target")
 	main.call("_spawn_health_change_label", nodes[902], -5)
 	main.call("_spawn_health_change_label", nodes[902], -7)
 	var damage_rows := 0

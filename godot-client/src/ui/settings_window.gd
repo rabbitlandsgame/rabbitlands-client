@@ -377,6 +377,7 @@ func _build() -> void:
 	_build_chat()
 	_new_page("Minimap", "Minimap")
 	_new_page("Banners", "Banners")
+	_add_creature_banner_controls()
 	_add_target_marker_controls()
 	_build_graphics()
 	_build_camera()
@@ -710,6 +711,39 @@ func _refresh_map_cache() -> void:
 func _build_camera() -> void:
 	var page := _new_page("Camera", tr("ELORIA_SETTINGS_CAMERA"))
 	_add_slider(page, "rotation_sensitivity", tr("ELORIA_SETTINGS_ROTATION"), 0.05, 1.0, 0.25)
+
+func _add_creature_banner_controls() -> void:
+	var options := preload("res://src/ui/creature_banner_settings.gd")
+	var page := page_body("Banners")
+	var heading := Label.new()
+	heading.text = "Creature banners"
+	heading.add_theme_font_size_override("font_size", 18)
+	page.add_child(heading)
+	var hint := Label.new()
+	hint.text = "Choose what appears over creatures, including summons and invasion creatures. Instance mode has its own choices. The name-distance setting still applies."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(hint)
+	var grid := GridContainer.new()
+	grid.name = "CreatureBannerControls"
+	grid.add_theme_constant_override("h_separation", 28)
+	page.add_child(grid)
+	page.resized.connect(func() -> void: grid.columns = 2 if page.size.x >= 600 else 1)
+	var defaults: Dictionary = options.defaults()
+	for mode: String in options.MODES:
+		var group := VBoxContainer.new()
+		group.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(group)
+		var caption := Label.new()
+		caption.text = "Normal play" if mode == "normal" else "Instance mode"
+		group.add_child(caption)
+		for option: String in options.OPTION_LABELS:
+			var box := CheckBox.new()
+			var key: String = options.setting_key(mode, option)
+			box.name = key
+			box.text = options.OPTION_LABELS[option]
+			box.button_pressed = defaults[mode][option]
+			box.toggled.connect(func(value: bool) -> void: setting_changed.emit("Banners", key, value))
+			group.add_child(box)
 
 func _add_target_marker_controls() -> void:
 	var page := page_body("Banners")

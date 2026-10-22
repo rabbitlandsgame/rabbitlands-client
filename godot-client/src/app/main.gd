@@ -902,6 +902,8 @@ var _last_skill_experience_msec := -100000
 ## Persisted banner key -> the checkbox shared with the main settings window.
 var _banner_option_boxes: Dictionary = {}
 var _banner_background_style: StyleBoxFlat
+const CreatureBannerSettings := preload("res://src/ui/creature_banner_settings.gd")
+var _creature_banner_options := CreatureBannerSettings.defaults()
 const MountControls := preload("res://src/mounts/mount_controls.gd")
 var mount_status := MountControls.new()
 var _mount_banner_options: Dictionary = MountControls.default_options()
@@ -2856,6 +2858,9 @@ func _refresh_unified_settings() -> void:
 		values["target_" + key] = _target_marker_style[key]
 	for key: String in _mount_banner_options:
 		values["mount_banner_" + key] = _mount_banner_options[key]
+	for mode: String in CreatureBannerSettings.MODES:
+		for option: String in CreatureBannerSettings.OPTION_LABELS:
+			values[CreatureBannerSettings.setting_key(mode, option)] = _creature_banner_options[mode][option]
 	for option: String in chat_hud.options:
 		values["chat_" + option] = chat_hud.options[option]
 	if system_chat_hud != null:
@@ -4354,7 +4359,7 @@ func _on_banner_menu_enabled_toggled(pressed: bool) -> void:
 ## Called for every switch on the banner menu because EL's options are not
 ## independent of one another: a row disappears once both its bar and its
 ## numbers are off, the panel is only as tall as the rows left standing, and
-## instance mode overrides what other actors show regardless of "Show Names".
+## instance mode selects its own creature preferences and hides other players.
 func _apply_banner_options() -> void:
 	overhead_player_name.visible = _banner_option("show_names")
 	for row_spec: Array in BANNER_ROWS:
@@ -4369,11 +4374,21 @@ func _apply_banner_options() -> void:
 		var node_value: Variant = actor_nodes[id]
 		if node_value is ReplicatedActor3D and is_instance_valid(node_value as ReplicatedActor3D):
 			var actor: ReplicatedActor3D = node_value as ReplicatedActor3D
-			actor.set_nameplate_visible(_nameplate_visible_for(int(id)))
+			_apply_actor_banner_options(int(id), actor)
 			if not _banner_option("speech_bubbles"):
 				actor.clear_speech_bubble()
 	_layout_actor_resource_overlay()
 	_update_actor_resource_overlay()
+	_animation_gate_refresh_msec = 0
+
+func _creature_banner_profile() -> Dictionary:
+	return _creature_banner_options["instance" if _banner_option("instance_mode") else "normal"]
+
+func _apply_actor_banner_options(id: int, actor: ReplicatedActor3D) -> void:
+	actor.set_nameplate_visible(_nameplate_visible_for(id))
+	var dto: Dictionary = AppState.actors.get(id, {})
+	actor.set_banner_parts(_creature_banner_profile() \
+		if int(dto.get("kind", 0)) == ReplicatedActor3D.CREATURE_ACTOR_KIND else {})
 
 ## EL draws a flat black rectangle behind the banner when the alpha background
 ## is on (actors.c) and nothing at all when it is off, so the switch swaps the
@@ -4451,14 +4466,16 @@ func _range_weapon_equipped() -> bool:
 func _banner_row(row_name: String) -> HBoxContainer:
 	return actor_resource_overlay.get_node("Rows/" + row_name) as HBoxContainer
 
-## Every visible actor except you, and only while instance mode is off - EL
-## blanks other actors' banners in instance mode so a crowded fight stays
-## readable (im_other_player_view_names and friends all default off).
+## Creature banners use their own normal/instance choices. Other actors keep
+## the character name switch and instance display's existing suppression.
 func _nameplate_visible_for(actor_id: int) -> bool:
 	if actor_id == AppState.local_actor_id:
 		return false
 	if not _nameplates_enabled or _trailer_capture_level >= 2:
 		return false
+	var dto: Dictionary = AppState.actors.get(actor_id, {})
+	if int(dto.get("kind", 0)) == ReplicatedActor3D.CREATURE_ACTOR_KIND:
+		return bool(_creature_banner_profile().visible)
 	if _banner_option("instance_mode"):
 		return false
 	return _banner_option("show_names")
@@ -6234,7 +6251,7 @@ func _present_actor(id: Variant) -> void:
 		int(dto.get("max_health", 0)), existing_actor)
 	existing_actor.apply_vitals(int(dto.get("health", 0)),
 		int(dto.get("max_health", 0)))
-	existing_actor.set_nameplate_visible(_nameplate_visible_for(int(id)))
+	_apply_actor_banner_options(int(id), existing_actor)
 	# A deferred actor out of draw range shows nothing to stand on the ground:
 	# its map dot needs only the tile. Its body is put on the ground when built.
 	if not existing_actor.is_model_deferred() or existing_actor.is_drawn():
@@ -6277,7 +6294,7 @@ func _spawn_actor(id: Variant, build := true,
 	_fit_lantern_map_marker(node, "MapDot")
 	node.set_combat_effects_enabled(_effects_enabled)
 	node.set_target_marker_style(_target_marker_style)
-	node.set_nameplate_visible(_nameplate_visible_for(int(id)))
+	_apply_actor_banner_options(int(id), node)
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
@@ -6305,7 +6322,7 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	_built_bodies += 1
 	node.apply_server_state(dto, actor_adapter, true)
 	node.apply_vitals(int(dto.get("health", 0)), int(dto.get("max_health", 0)))
-	node.set_nameplate_visible(_nameplate_visible_for(int(id)))
+	_apply_actor_banner_options(int(id), node)
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
@@ -7751,7 +7768,9 @@ func _release_bodies(releases: Array) -> void:
 		crowd.forget(id)
 		crowd.releases += 1
 
-## Keep the target and nearby characters readable as crowds enter the view.
+## Keep player banners readable without making creatures hide one another.
+## A creature yields only to visible player banners; the combat target stays
+## readable even there. NPC and player banners retain their overlap filtering.
 ## Bodies and interaction targets remain independent of overhead visibility.
 func _declutter_actor_overheads(target_id: int) -> void:
 	var candidates: Array[Dictionary] = []
@@ -7767,12 +7786,14 @@ func _declutter_actor_overheads(target_id: int) -> void:
 			actor.set_overhead_crowded(true)
 			continue
 		var dto: Dictionary = AppState.actors.get(raw_id, {})
-		var priority := 0 if int(raw_id) == target_id else (2 if _minimap_actor_type(dto) in [&"creature", &"invasion"] else 1)
+		var actor_type := _minimap_actor_type(dto)
+		var priority := 0 if int(raw_id) == target_id else (2 if actor_type in [&"creature", &"invasion"] else 1)
 		var screen := gameplay_camera.unproject_position(point)
 		if not Rect2(Vector2.ZERO, Vector2(main_viewport.size)).grow(80).has_point(screen):
 			actor.set_overhead_crowded(true)
 			continue
 		candidates.append({"actor": actor, "id": int(raw_id), "priority": priority,
+			"type": actor_type,
 			"distance": actor.global_position.distance_squared_to(camera_rig.focus),
 			"rect": overhead_block_rect(screen, str(dto.get("name", "")),
 				actor.occupation(), actor.status_effect_count())})
@@ -7781,21 +7802,28 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		if a.distance != b.distance: return a.distance < b.distance
 		return a.id < b.id)
 	var occupied: Array[Rect2] = []
+	var player_occupied: Array[Rect2] = []
 	if actor_resource_overlay.visible:
 		var scale_to_view := Vector2(main_viewport.size) / viewport_container.size
 		var own := actor_resource_overlay.get_global_rect()
-		occupied.append(Rect2((own.position - viewport_container.global_position) * scale_to_view,
-			own.size * scale_to_view))
+		var own_rect := Rect2((own.position - viewport_container.global_position) * scale_to_view,
+			own.size * scale_to_view)
+		occupied.append(own_rect)
+		player_occupied.append(own_rect)
 	for candidate: Dictionary in candidates:
 		var crowded := false
+		var creature: bool = candidate.type in [&"creature", &"invasion"]
+		var obstacles: Array[Rect2] = player_occupied if creature else occupied
 		if candidate.id != target_id:
-			for previous: Rect2 in occupied:
+			for previous: Rect2 in obstacles:
 				if previous.grow(3).intersects(candidate.rect):
 					crowded = true
 					break
 		(candidate.actor as ReplicatedActor3D).set_overhead_crowded(crowded)
-		if not crowded:
+		if not crowded and not creature:
 			occupied.append(candidate.rect)
+			if candidate.type == &"player" and (candidate.actor as ReplicatedActor3D)._overhead_shown():
+				player_occupied.append(candidate.rect)
 
 ## The screen space an actor's overhead block claims when names are
 ## decluttered: the name, and the health row under it, round `screen`. An
@@ -8494,6 +8522,7 @@ func _load_hud_settings() -> void:
 		for key: String in _mount_banner_options:
 			_mount_banner_options[key] = bool(config.get_value("mount_banner", key, true))
 	mount_status.set_options(_mount_banner_options)
+	_creature_banner_options = CreatureBannerSettings.read(config)
 	_target_marker_style = TargetMarkerStyle.read(config)
 	_apply_target_marker_style()
 	_apply_fps_limit(config.get_value("graphics", "fps_limit", 0))
@@ -8652,6 +8681,7 @@ func _save_hud_settings() -> void:
 		config.set_value("banner", banner_key, _banner_option(banner_key))
 	for key: String in _mount_banner_options:
 		config.set_value("mount_banner", key, _mount_banner_options[key])
+	CreatureBannerSettings.write(config, _creature_banner_options)
 	var error: Error = config.save(SETTINGS_PATH)
 	if error != OK:
 		push_warning("HUD settings save failed: " + error_string(error))
@@ -12583,6 +12613,20 @@ func _sync_declared_actor_cap() -> void:
 ## send commands owned by the server.
 func _on_client_setting_changed(section: String, key: String,
 		value: Variant) -> void:
+	if section == "Banners" and key.begins_with("creature_banner_"):
+		for mode: String in CreatureBannerSettings.MODES:
+			var prefix := "creature_banner_" + mode + "_"
+			if not key.begins_with(prefix):
+				continue
+			var option := key.trim_prefix(prefix)
+			if not CreatureBannerSettings.OPTION_LABELS.has(option):
+				return
+			_creature_banner_options[mode][option] = bool(value)
+			_apply_banner_options()
+			_refresh_unified_settings()
+			_save_hud_settings()
+			return
+		return
 	if section == "Banners" and key.begins_with("target_"):
 		if key == "target_markers_reset":
 			_target_marker_style = TargetMarkerStyle.defaults()

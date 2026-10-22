@@ -320,6 +320,11 @@ var _health_label: Label3D
 var _health_current := -1
 var _health_maximum := -1
 var _overhead_visible := true
+var _banner_names := true
+var _banner_health_bar := true
+var _banner_health_numbers := true
+var _banner_status_icons := true
+var _banner_background := true
 ## How much of the name, title and health bar shows, from 0 to 1. The block is
 ## drawn at a fixed screen size, so distance alone never made a far name any
 ## less legible than a near one; main.gd fades it out past the player's name
@@ -1156,7 +1161,7 @@ func _layout_status_effects() -> void:
 	if not is_instance_valid(_status_icons):
 		return
 	var rise := NEGATIVE_STATUS_RISE
-	if is_instance_valid(_title_line) and not _title_line.text.is_empty():
+	if _banner_names and is_instance_valid(_title_line) and not _title_line.text.is_empty():
 		rise += TITLE_RISE
 	for index: int in range(_status_icons.get_child_count()):
 		var icon := _status_icons.get_child(index) as MeshInstance3D
@@ -1170,7 +1175,7 @@ func _layout_status_effects() -> void:
 func _refresh_status_effects() -> void:
 	if not is_instance_valid(_status_icons):
 		return
-	_status_icons.visible = _overhead_shown() and status_effect_count() > 0
+	_status_icons.visible = _overhead_shown() and _banner_status_icons and status_effect_count() > 0
 	for child: Node in _status_icons.get_children():
 		_fade_quad(child as MeshInstance3D, 1.0)
 
@@ -1247,7 +1252,9 @@ func _layout_overhead() -> void:
 	var raster: float = float(WORLD_LABEL_STYLE.RASTER_SCALE)
 	var name_width: float = _nameplate.font.get_string_size(_nameplate.text,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, _nameplate.font_size).x / raster
-	var occupied: bool = _has_occupation()
+	if not _banner_names:
+		name_width = 0.0
+	var occupied: bool = _banner_names and _has_occupation()
 	if occupied:
 		name_width = maxf(name_width, _occupation_line.font.get_string_size(
 			_occupation_line.text, HORIZONTAL_ALIGNMENT_LEFT, -1,
@@ -1260,9 +1267,11 @@ func _layout_overhead() -> void:
 	var full_pair := "%d/%d" % [_health_maximum, _health_maximum]
 	number_width = maxf(number_width, _health_label.font.get_string_size(full_pair,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, _health_label.font_size).x / raster)
-	var row_width: float = HEALTH_BAR_WIDTH + HEALTH_NUMBER_GAP + number_width
-	var bar_center: float = -(HEALTH_NUMBER_GAP + number_width) * 0.5
-	_health_label.offset = Vector2((HEALTH_BAR_WIDTH + HEALTH_NUMBER_GAP) * 0.5,
+	var row_width: float = (HEALTH_BAR_WIDTH if _banner_health_bar else 0.0) \
+		+ (number_width if _banner_health_numbers else 0.0) \
+		+ (HEALTH_NUMBER_GAP if _banner_health_bar and _banner_health_numbers else 0.0)
+	var bar_center: float = -(HEALTH_NUMBER_GAP + number_width) * 0.5 if _banner_health_numbers else 0.0
+	_health_label.offset = Vector2((HEALTH_BAR_WIDTH + HEALTH_NUMBER_GAP) * 0.5 if _banner_health_bar else 0.0,
 		-(drop - HEALTH_BAR_DROP + HEALTH_LABEL_DROP)) * raster
 	var background := _health_bar_background.mesh as QuadMesh
 	background.center_offset.x = bar_center * OVERHEAD_PIXEL
@@ -1273,7 +1282,8 @@ func _layout_overhead() -> void:
 	fill.center_offset.y = -drop * OVERHEAD_PIXEL
 	if is_instance_valid(_overhead_background):
 		var quad := _overhead_background.mesh as QuadMesh
-		var has_health: bool = _health_shown and _health_maximum > 0
+		var has_health: bool = _health_shown and _health_maximum > 0 \
+			and (_banner_health_bar or _banner_health_numbers)
 		var bottom: float = (drop + 8.0 if has_health
 			else 10.0 + (OCCUPATION_DROP if occupied else 0.0))
 		quad.size = Vector2(maxf(name_width, row_width if has_health else 0.0)
@@ -1360,27 +1370,25 @@ func set_health_visible(enabled: bool) -> void:
 	_layout_overhead()
 	_refresh_overhead_health()
 
-## The bar, its backing and its numbers all appear together, and only when the
-## nameplate is showing at all, the server has given this actor a maximum, and
-## this actor is one of the ones that wears a bar. The fill has the one extra
-## condition: a corpse at zero health keeps its empty frame rather than a
-## sliver of colour.
+## The bar and values have separate display switches. Both still obey the
+## banner's visibility, range, crowd filtering and authoritative health.
 func _refresh_overhead_health() -> void:
 	_refresh_status_effects()
 	var showing: bool = (_overhead_shown() and _health_shown
 		and _health_maximum > 0)
 	if is_instance_valid(_health_bar_background):
-		_health_bar_background.visible = showing
+		_health_bar_background.visible = showing and _banner_health_bar
 		_fade_quad(_health_bar_background, HEALTH_BAR_BACKING.a)
 	if is_instance_valid(_health_bar_fill):
-		_health_bar_fill.visible = showing and _health_current > 0
+		_health_bar_fill.visible = showing and _banner_health_bar and _health_current > 0
 		# `apply_vitals` repaints the fill opaque, and calls this straight after.
 		_fade_quad(_health_bar_fill, 1.0)
 	if is_instance_valid(_health_label):
-		_health_label.visible = showing
+		_health_label.visible = showing and _banner_health_numbers
 		_fade_label(_health_label)
 	if is_instance_valid(_overhead_background):
-		_overhead_background.visible = _overhead_shown()
+		_overhead_background.visible = _overhead_shown() and _banner_background \
+			and (_banner_names or (showing and (_banner_health_bar or _banner_health_numbers)))
 		_fade_quad(_overhead_background, OVERHEAD_BACKING.a)
 
 ## Whether the overhead block is drawn at all: the banner options allow it,
@@ -1418,6 +1426,27 @@ func set_nameplate_visible(enabled: bool) -> void:
 	_overhead_visible = enabled
 	_refresh_overhead()
 
+## Select the contents independently of the banner's overall visibility. The
+## defaults preserve player/NPC banners and actors configured without Main.
+func set_banner_parts(options: Dictionary) -> void:
+	var names := bool(options.get("names", true))
+	var health_bar := bool(options.get("health_bar", true))
+	var health_numbers := bool(options.get("health_numbers", true))
+	var status_icons := bool(options.get("status_icons", true))
+	var background := bool(options.get("background", true))
+	if names == _banner_names and health_bar == _banner_health_bar \
+			and health_numbers == _banner_health_numbers and status_icons == _banner_status_icons \
+			and background == _banner_background:
+		return
+	_banner_names = names
+	_banner_health_bar = health_bar
+	_banner_health_numbers = health_numbers
+	_banner_status_icons = status_icons
+	_banner_background = background
+	_layout_overhead()
+	_layout_status_effects()
+	_refresh_overhead()
+
 ## Fades the name, title and health bar together: 1 draws them as they are,
 ## 0 hides them. main.gd works it out from how far this actor is from the
 ## player. The speech bubble is not part of it - what somebody said is worth
@@ -1438,13 +1467,13 @@ func _refresh_overhead() -> void:
 		_quest_marker.visible = _drawn and not _crowd_hidden and _overhead_fade > 0.0 \
 			and not _quest_marker.text.is_empty()
 	if is_instance_valid(_nameplate):
-		_nameplate.visible = _overhead_shown()
+		_nameplate.visible = _overhead_shown() and _banner_names
 		_fade_label(_nameplate)
 	if is_instance_valid(_title_line):
-		_title_line.visible = _overhead_shown() and not _title_line.text.is_empty()
+		_title_line.visible = _overhead_shown() and _banner_names and not _title_line.text.is_empty()
 		_fade_label(_title_line)
 	if is_instance_valid(_occupation_line):
-		_occupation_line.visible = _overhead_shown() and _has_occupation()
+		_occupation_line.visible = _overhead_shown() and _banner_names and _has_occupation()
 		_fade_label(_occupation_line)
 	_refresh_overhead_health()
 
@@ -1485,7 +1514,7 @@ func set_title(title: String) -> void:
 		_title_line = label
 	_title_line.text = title
 	_layout_status_effects()
-	_title_line.visible = _overhead_shown()
+	_title_line.visible = _overhead_shown() and _banner_names
 	_fade_label(_title_line)
 
 ## What this NPC does, drawn as "<Grove-Keeper>" on a line of its own under the
@@ -1568,7 +1597,7 @@ func _has_occupation() -> bool:
 ## How far below the name the health bar and its numbers sit: a line further
 ## down when an occupation is drawn between them.
 func health_drop() -> float:
-	return HEALTH_BAR_DROP + (OCCUPATION_DROP if _has_occupation() else 0.0)
+	return HEALTH_BAR_DROP + (OCCUPATION_DROP if _has_occupation() else 0.0) if _banner_names else 0.0
 
 ## Eternal Lands repeats local chat over the speaker's head while "Show Speech
 ## Bubbles" is on (text.c check_chat_text_to_overtext), sitting above the

@@ -54,6 +54,20 @@ only the drawing changes, while footprint, picking and gameplay stay stable.
 The tentative circle retains the former `square_*` preference keys so existing
 player size, thickness and color choices continue to load.
 
+Settings → Banners → Creature banners has separate **Normal play** and
+**Instance mode** choices. Each has a visibility switch and independent
+switches for names, health bars, health values, status effect icons and the
+banner background. These apply to ordinary creatures, summons and invasion
+creatures. Normal play starts with all parts enabled; instance mode starts
+with creature banners hidden. The character banner's Instance Mode switch
+selects which set applies, and leaving it restores the normal choices.
+Preferences apply immediately, survive actor updates and save locally under
+`[creature_banners]`. The Graphics name-distance setting still controls range.
+Creature banners can overlap each other and NPC banners, while visible player
+banners retain their space. The active combat target keeps its existing
+exception to overlap hiding; explicit visibility and content choices still
+apply to it.
+
 Creature imports specify `visualBacksetMetres` in gameplay metres after import
 scaling, before runtime small-creature enlargement and server actor scale.
 The 2026-10-19 expansion applies measured setbacks to 76 pronounced projections
