@@ -168,6 +168,15 @@ func _check_mount_deadlines() -> void:
 	deltas.apply({"map": "isle", "full": false, "states": {6: refill}}, table, "isle", clock, 50000)
 	deltas.refresh(table, 6, 53000)
 	_expect(int(table[6].endurance_ms) == 8000, "a refill stops at the most the gallop holds")
+	var longer := _delta_row(8, "mounted")
+	longer["endurance_ms"] = 11000
+	longer["endurance_at"] = 10000
+	longer["endurance_rate"] = 1000
+	longer["endurance_max_ms"] = 12000
+	deltas.apply({"map": "isle", "full": false, "states": {8: longer}}, table, "isle", clock, 50000)
+	_expect(int(table[8].endurance_ms) == 11000, "a gallop longer than 8 s keeps its level")
+	deltas.refresh(table, 8, 55000)
+	_expect(int(table[8].endurance_ms) == 12000, "and refills to its own maximum, not to 8 s")
 	table.erase(6)
 	_expect(not deltas.refresh(table, 6, 53100), "a row gone from the table is no longer counted")
 

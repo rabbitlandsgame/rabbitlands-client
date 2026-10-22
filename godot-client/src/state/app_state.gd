@@ -883,6 +883,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			actor_mounts.clear()
 			_mount_handoffs.clear()
 			_unseen_mount_rows.clear()
+			# A relocation: the dots go with the actors, and the server's next
+			# presence follows its introductions.
+			presence.clear_map(current_map)
 			quest_offer_actors.clear()
 			state_changed.emit(&"actors")
 		"actor_commands":

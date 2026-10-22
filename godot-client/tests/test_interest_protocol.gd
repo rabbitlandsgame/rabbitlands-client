@@ -30,6 +30,10 @@ func _capabilities() -> void:
 		"and never asks for more than 160")
 	_expect(not _chat_text(EloriaProtocol.client_capabilities()).contains("actor_cap"),
 		"without a cap the line is the list alone")
+	_expect(InterestProtocol.actor_cap_command(100) == "#actorcap 100"
+		and InterestProtocol.actor_cap_command(500) == "#actorcap 160"
+		and InterestProtocol.actor_cap_command(3) == "#actorcap 16",
+		"a cap changed in a session goes as #actorcap, within the server's range")
 	for value: int in [Ids.PRESENCE, Ids.SERVER_TIME, Ids.MOUNT_DELTAS]:
 		_expect(EloriaProtocol.ServerMessage.values().count(value) == 1,
 			"command %d is used once in the server run" % value)
@@ -101,6 +105,16 @@ func _mount_deltas() -> void:
 		"states": [_row(91, "mounted"), _row(91, "on_foot")]}).type == "invalid", "an actor twice is refused")
 	_expect(_deltas({"schema_version": 2, "map": "landfall", "full": false, "states": [],
 		"removed": [-1]}).type == "invalid", "a removal that is not an actor id is refused")
+	var longer := _row(94, "mounted")
+	longer["endurance_max_ms"] = 12000
+	longer["endurance_ms"] = 10000
+	var long_gallop: Dictionary = _deltas({"schema_version": 2, "map": "landfall", "full": false,
+		"states": [longer]})
+	_expect(long_gallop.type == "mount_update", "a row whose own maximum is past 8 s is not refused")
+	var table: Dictionary = {}
+	preload("res://src/mounts/mount_delta_state.gd").new().apply(long_gallop, table, "landfall", null, 0)
+	_expect(int(table[94].endurance_ms) == 10000 and int(table[94].endurance_max_ms) == 12000,
+		"and keeps its endurance and maximum")
 
 ## A delta built by the server's own `_delta_payload` and `_delta_row_json`
 ## (eloria/live_mounts.py): one rider calling a pony, one rider gone.

@@ -7,6 +7,7 @@ extends SceneTree
 
 const Op := EloriaProtocol.ServerMessage
 const ServerTimePacing := preload("res://src/actors/server_time_pacing.gd")
+const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 
 var failures := 0
 
@@ -139,6 +140,9 @@ func _state_checks(state: Node) -> void:
 	state.call("_on_packet", Op.REMOVE_ACTOR, _u16(1000) + _u16(1001))
 	_expect(presence.has_dot(1000) and not presence.has_dot(1001),
 		"with presence, a player leaving the area keeps a dot and a creature does not")
+	state.call("_on_packet", Op.KILL_ALL_ACTORS, PackedByteArray())
+	_expect(presence.dot_count() == 0 and presence.active, "KILL_ALL_ACTORS clears the dots")
+	state.call("_on_packet", Op.ELORIA_PRESENCE, _presence([[2000, 300, 300]]))
 	state.call("_on_packet", Op.CHANGE_MAP, "cove".to_ascii_buffer() + PackedByteArray([0]))
 	_expect(presence.dot_count() == 0 and presence.map == "cove", "a change of map clears the dots")
 
@@ -345,11 +349,20 @@ func _main_checks(state: Node) -> void:
 	_expect(int(main.get("_actor_cap_declaration")) == before,
 		"before login a change is only remembered for the declaration at login")
 	state.set("authenticated", true)
+	var presence_kept: bool = bool(presence.active)
+	presence.active = false
+	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies", 130)
+	_expect(int(main.get("_actor_cap_declaration")) == before,
+		"a server that has sent no presence is not sent #actorcap; it hears the cap at the next login")
+	presence.active = true
 	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies", 110)
 	main.call("_on_client_setting_changed", "Graphics", "crowd_bodies", 100)
-	state.set("authenticated", false)
 	_expect(int(main.get("_actor_cap_declaration")) == before + 2,
-		"in a session each change restarts the wait, so a slider being dragged is declared once")
+		"on a player-interest server each change restarts the wait, so a slider being dragged is declared once")
+	_expect(InterestProtocol.actor_cap_command(int(network.get("declared_actor_cap"))) == "#actorcap 100",
+		"as #actorcap with the cap the setting gives")
+	state.set("authenticated", false)
+	presence.active = presence_kept
 	var saved := ConfigFile.new()
 	saved.load(main.SETTINGS_PATH)
 	_expect(int(saved.get_value("graphics", "crowd_bodies", -1)) == 100,

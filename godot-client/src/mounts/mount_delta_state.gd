@@ -36,6 +36,9 @@ const TIME_FIELDS: Array[String] = ["step_us", "summon_due", "combat_until",
 const STRING_FIELDS: Array[String] = ["mode", "gait", "mount_id", "selected_mount_id",
 	"blocked_reason", "map", "owner"]
 ## The complete tables' bounds on the countdowns (mount_preview_state.gd).
+## A delta row's own `endurance_max_ms` is the gallop's real maximum and is
+## kept on the row; 8 s is only the maximum a row without one is taken to have,
+## and the bound the complete tables' check is run against.
 const ENDURANCE_LIMIT_MS := 8000
 const SUMMON_LIMIT_MS := 1500
 const COMBAT_LIMIT_MS := 10000
@@ -83,7 +86,7 @@ func apply(update: Dictionary, table: Dictionary, current_map: String,
 		var actor_id: int = int(raw_id)
 		var row: Dictionary = states[raw_id] as Dictionary
 		var timing: Array = [-1, -1, now_msec, int(row.get("endurance_ms", 0)), 0,
-			int(row.get("endurance_max_ms", ENDURANCE_LIMIT_MS))]
+			maxi(0, int(row.get("endurance_max_ms", ENDURANCE_LIMIT_MS)))]
 		if synced:
 			if int(row.get("summon_due", 0)) != 0:
 				timing[0] = int(clock.call("to_local_msec", int(row.summon_due)))
@@ -160,8 +163,9 @@ func refresh(table: Dictionary, actor_id: int, now_msec: int) -> bool:
 		row.get("endurance_ms")]
 
 ## A delta row in the shape of a complete table's row, its countdowns as
-## stated (calling and combat lock at zero, endurance at its stated level), or
-## an empty dictionary when a field is missing or of the wrong type.
+## stated (calling and combat lock at zero, endurance at its stated level,
+## within the row's own maximum, which the row keeps as `endurance_max_ms`),
+## or an empty dictionary when a field is missing or of the wrong type.
 static func v1_row(row: Dictionary) -> Dictionary:
 	for field: String in STRING_FIELDS:
 		if not row.get(field) is String:
@@ -173,13 +177,12 @@ static func v1_row(row: Dictionary) -> Dictionary:
 	if typeof(row.get("can_summon")) != TYPE_BOOL:
 		return {}
 	var shaped: Dictionary = row.duplicate(true)
-	for field: String in ["summon_due", "combat_until", "endurance_at", "endurance_rate",
-			"endurance_max_ms"]:
+	for field: String in ["summon_due", "combat_until", "endurance_at", "endurance_rate"]:
 		shaped.erase(field)
 	shaped["schema_version"] = 1
 	shaped["step_us"] = int(row.step_us)
-	shaped["endurance_ms"] = clampi(int(row.endurance_ms), 0,
-		mini(int(row.endurance_max_ms), ENDURANCE_LIMIT_MS))
+	shaped["endurance_max_ms"] = maxi(0, int(row.endurance_max_ms))
+	shaped["endurance_ms"] = clampi(int(row.endurance_ms), 0, int(shaped.endurance_max_ms))
 	shaped["summon_remaining_ms"] = 0
 	shaped["combat_remaining_ms"] = 0
 	return shaped
@@ -195,4 +198,4 @@ static func _restate(row: Dictionary, timing: Array, now_msec: int) -> void:
 
 static func _endurance(timing: Array, now_msec: int) -> int:
 	var level: float = float(timing[3]) + float(timing[4]) * float(now_msec - int(timing[2])) / 1000.0
-	return clampi(roundi(level), 0, mini(int(timing[5]), ENDURANCE_LIMIT_MS))
+	return clampi(roundi(level), 0, int(timing[5]))

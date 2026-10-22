@@ -421,7 +421,7 @@ var nearby_indicator: Label
 const PRESENCE_DOT_RADIUS := 3.0
 ## How long the crowd setting must rest before a changed actor cap is
 ## re-declared to the server, and which change is the latest.
-const ACTOR_CAP_REDECLARE_SECONDS := 2.0
+const ACTOR_CAP_REDECLARE_SECONDS := 0.5
 var _actor_cap_declaration := 0
 var _presence_tiles := PackedVector2Array()
 var _presence_mark_pool: Array[Dictionary] = []
@@ -12514,16 +12514,17 @@ func _sync_declared_actor_cap() -> void:
 	if cap == int(Network.declared_actor_cap):
 		return
 	Network.declared_actor_cap = cap
-	if not AppState.authenticated:
+	# In a session the cap changes with `#actorcap`, which only a server
+	# running player interest takes (it has sent presence); any other server
+	# is told at the next login. It goes once the slider has come to rest.
+	if not AppState.authenticated or not AppState.presence.active:
 		return
-	# In a session the server retunes the cap from a repeated `#clientcaps`,
-	# which also restates what the capabilities gate and counts against the
-	# server's resync allowance, so it goes once the slider has come to rest.
 	_actor_cap_declaration += 1
 	var declaration: int = _actor_cap_declaration
 	get_tree().create_timer(ACTOR_CAP_REDECLARE_SECONDS).timeout.connect(func() -> void:
-		if declaration == _actor_cap_declaration and AppState.authenticated:
-			Network.send_client_capabilities())
+		if (declaration == _actor_cap_declaration and AppState.authenticated
+				and AppState.presence.active):
+			Network.send_chat(InterestProtocol.actor_cap_command(int(Network.declared_actor_cap))))
 
 ## Preferences apply locally. Only the target-mode and autogather buttons
 ## send commands owned by the server.

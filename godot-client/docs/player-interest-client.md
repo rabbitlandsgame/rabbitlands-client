@@ -73,10 +73,11 @@ most the protocol takes. At the setting's default of 160 the declaration is
 `InterestProtocol.declared_actor_cap`.
 
 The cap is declared at login. When the player changes the setting during a
-session, the client declares the new cap once the slider has rested for two
-seconds; the server retunes from a repeated `#clientcaps`, which also
-restates what the capabilities gate, so it is not sent on every step of the
-slider.
+session, the client sends `#actorcap <N>` once the slider has rested for half
+a second. That command changes only the cap (a second `#clientcaps` would
+restate every capability's one-time state), and only a server running player
+interest takes it, so it is sent only after such a server has sent presence;
+any other server hears the new cap at the next login.
 
 When the cap holds actors back, the presence header says how many, and a
 small "+N nearby" label in the lower-left corner of the minimap says so too.
@@ -131,7 +132,9 @@ when a calling completes, when the riding combat lock ends, and the gallop
 endurance at a moment with the rate it is changing at. `MountDeltaState` turns
 each row into the shape the complete tables have, so everything that reads
 `AppState.actor_mounts` is unchanged, and only the actors a delta named have
-their mounts re-bound. The player's own calling and endurance are restated ten
+their mounts re-bound. A delta row also states the gallop's maximum
+(`endurance_max_ms`, 8 s today); the client keeps it on the row and clamps to
+it rather than to 8 s, and the mount banner and the stamina meter read it. The player's own calling and endurance are restated ten
 times a second between packets (`AppState._process`), as the complete tables
 used to restate them.
 
