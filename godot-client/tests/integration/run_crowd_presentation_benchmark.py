@@ -137,12 +137,12 @@ def main() -> int:
     parser.add_argument("--variants", default="all,legacy",
                         help="comma list of RABBITLANDS_CROWD_PRESENTATION values; 'all' is the default client")
     parser.add_argument("--body-cap", type=int, default=0)
-    parser.add_argument("--driver", default="live", choices=["live", "stress", "replay"],
+    parser.add_argument("--driver", default="live", choices=["live", "stress"],
                         help="live: game cadence (600 ms steps, 2 s rounds, staggered); "
-                             "stress: the earlier study's 100 ms steps and 400 ms rounds in lockstep; "
-                             "replay: a session recording (--replay)")
+                             "stress: the earlier study's 100 ms steps and 400 ms rounds in lockstep")
     parser.add_argument("--replay", default="",
-                        help="session recording (.rlrec) to replay; implies --driver replay")
+                        help="session recording (.rlrec) to replay instead of a synthetic crowd "
+                             "(the `replay` driver)")
     parser.add_argument("--replay-start-ms", type=int, default=30000,
                         help="where the replay's warmup starts, in ms after the recording's YOU_ARE")
     parser.add_argument("--minimap", default="saved", choices=["saved", "show", "hide"],
@@ -160,8 +160,6 @@ def main() -> int:
     args = parser.parse_args()
     if args.replay:
         args.driver = "replay"
-    elif args.driver == "replay":
-        parser.error("--driver replay needs --replay <recording>.rlrec")
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     runs = []
