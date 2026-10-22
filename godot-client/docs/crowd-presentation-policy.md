@@ -53,6 +53,9 @@ comes back under its id in that time, it wears the parked body again: an actor
 stepping out of the view radius and back, or crossing an interest-cap boundary,
 is not rebuilt. A recycled id carrying someone else is built afresh. Every
 other spawn field is reapplied to a revived body. Map changes clear the parking.
+A parked body's animation is paused, so the gate does not go on stepping it
+while it waits; a revived one animates at half rate until the gate's next
+sweep gives it its tier.
 
 **Body cap (optional, off by default).** With `body_cap` above zero, only the
 nearest `body_cap` actors in range have bodies, not counting the player, their
