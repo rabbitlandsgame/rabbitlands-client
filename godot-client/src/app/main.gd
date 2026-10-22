@@ -4653,21 +4653,31 @@ func _on_full_map_mouse_exited() -> void:
 	if map_image.visible:
 		map_coordinates.text = "Coordinates: —"
 
-func _on_compass_gui_input(event: InputEvent) -> void:
+func _on_compass_gui_input(event: InputEvent, surface: Control = null) -> void:
 	if not event is InputEventMouseButton:
 		return
 	var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 	if not mouse_button.pressed or mouse_button.button_index != MOUSE_BUTTON_LEFT:
 		return
-	if mouse_button.ctrl_pressed:
-		var tile_value: Variant = _local_actor_server_tile()
-		if not tile_value is Vector2i:
-			AppState.append_local_message("Your position is not available yet.")
-			compass_face.accept_event()
-			return
-		var tile: Vector2i = tile_value as Vector2i
-		var location: String = "%s (%d, %d)" % [
-			_current_map_display_name, tile.x, tile.y]
+	if _world_input_blocked():
+		return
+	var clicked: Control = compass_face if surface == null else surface
+	var tile_value: Variant = _local_actor_server_tile()
+	if not tile_value is Vector2i:
+		AppState.append_local_message("Your position is not available yet.")
+		clicked.accept_event()
+		return
+	var tile: Vector2i = tile_value as Vector2i
+	var location: String = "%s (%d, %d)" % [_current_map_display_name, tile.x, tile.y]
+	if mouse_button.shift_pressed:
+		var message := _chat_message_for_tab("My Position: " + location)
+		if message.is_empty():
+			AppState.append_local_message("Select a chat destination before sharing your position.")
+		else:
+			var share_error: Error = Network.send_private_message(message.substr(1)) if message.begins_with("/") else Network.send_chat(message)
+			if share_error != OK:
+				AppState.append_local_message("Could not share your position: " + error_string(share_error))
+	elif mouse_button.ctrl_pressed:
 		if AppState.active_channel_number() <= 0:
 			AppState.append_local_message(
 				"Join or select a numeric channel before sharing your position.")
@@ -4677,11 +4687,8 @@ func _on_compass_gui_input(event: InputEvent) -> void:
 				AppState.append_local_message(
 					"Could not share your position: " + error_string(share_error))
 	else:
-		var locate_error: Error = Network.locate_me()
-		if locate_error != OK:
-			AppState.append_local_message(
-				"Could not request your location: " + error_string(locate_error))
-	compass_face.accept_event()
+		AppState.append_local_message("My Position: " + location)
+	clicked.accept_event()
 
 func _on_clock_gui_input(event: InputEvent) -> void:
 	if not event is InputEventMouseButton:

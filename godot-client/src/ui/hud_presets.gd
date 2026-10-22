@@ -60,22 +60,22 @@ static func preset(id: String) -> Dictionary:
 		value.parts.rail_panel.enabled = true
 		value.parts.rail_panel.full_height = true
 		value.parts.rail_panel.hide_with_stats = false
-		value.parts.rail_panel.dimensions = Vector2(105, 400)
+		value.parts.rail_panel.dimensions = Vector2(92, 400)
 		value.parts.rail_panel.edge_dock = "top_right"
 		value.parts.rail_panel.hud_border_style = "beveled"
 		# Match the player's saved Heritage arrangement with responsive docks.
 		value.parts.compass.enabled = true
 		value.parts.compass.scale = 0.5
-		value.parts.compass.dimensions = Vector2(210, 129)
+		value.parts.compass.dimensions = Vector2(184, 129)
 		value.parts.compass.edge_dock = "bottom_right"
 		value.parts.compass.show_labels = false
 		_place(value, "compass", "bottom_right", Vector2.ZERO)
 		value.parts.clock.clock_mode = "both"
-		value.parts.clock.dimensions = Vector2(155.0553, 102.7408)
-		value.parts.clock.scale = 0.6
+		value.parts.clock.dimensions = Vector2(92, 96)
+		value.parts.clock.scale = 1.0
 		_dock(value, "clock", "compass", "top", "stretch")
 		value.parts.research.enabled = true
-		value.parts.research.dimensions = Vector2(105, 28)
+		value.parts.research.dimensions = Vector2(92, 28)
 		_dock(value, "research", "clock", "top", "stretch")
 		value.parts.skills.scale = 0.7
 		value.parts.skills.axis_scale = Vector2(1.964945, 1.873677)
@@ -84,14 +84,16 @@ static func preset(id: String) -> Dictionary:
 			value.parts[key].orientation = "vertical"
 			value.parts[key].rows = 6
 			value.parts[key].columns = 1
-			value.parts[key].scale = 0.65
-		value.parts.spells.dimensions = Vector2(86, 402)
-		# The pair fills the 105-pixel rail; icon proportions stay unchanged.
-		value.parts.items.dimensions = Vector2(105 / 0.65 - 86, 402.6667)
+			value.parts[key].scale = 1.0
+			value.parts[key].flush_slots = true
+			value.parts[key].slot_gap = 0.0
+			value.parts[key].dimensions = Vector2(46, 276)
+			value.parts[key].slot_border_style = "beveled"
 		_dock(value, "items", "logo", "bottom", "end")
 		_dock(value, "spells", "items", "left", "end")
-		value.parts.logo.scale = 0.6
-		value.parts.logo.axis_scale = Vector2(105 / (72 * 0.6), 3.194787)
+		value.parts.logo.scale = 1.0
+		value.parts.logo.axis_scale = Vector2.ONE
+		value.parts.logo.dimensions = Vector2(92, 88)
 		value.parts.logo.edge_dock = "top_right"
 		value.parts.status.enabled = true
 		value.parts.status.scale = 0.8
@@ -219,6 +221,7 @@ static func _preset_recipe(id: String) -> Dictionary:
 			"frame_style": "panel", "show_background": true, "show_border": true, "clock_mode": "both",
 			"hud_border_style": "plain", "frame_shape": "match_map", "compass_corners": "fill_when_docked",
 			"slot_border_style": "match_hud", "slot_border_color": Color("aa8d50"), "icon_opacity": 1.0, "unavailable_icon_opacity": 1.0,
+			"flush_slots": false, "slot_gap": 2.0,
 			"map_title": false, "map_directions": "all", "direction_offset": -9.0, "north_marker": "letter", "map_label_frame": false,
 			"full_height": false, "hide_with_stats": false,
 			"meter_keys": [], "show_secondary": true, "show_self": true, "show_player_details": false, "show_badges": true}
@@ -658,6 +661,8 @@ static func normalise(raw: Variant) -> Dictionary:
 			part.slot_border_style = input.get("slot_border_style", "match_hud") if input.get("slot_border_style") in ["match_hud", "none", "beveled", "ornate"] else "match_hud"
 			part.icon_opacity = _number(input.get("icon_opacity"), 1.0, 0, 1)
 			part.unavailable_icon_opacity = _number(input.get("unavailable_icon_opacity"), 1.0, 0, 1)
+			part.flush_slots = input.get("flush_slots", false) == true
+			part.slot_gap = _number(input.get("slot_gap"), 2.0, 0, 12)
 			part.frame_shape = input.get("frame_shape", "match_map") if input.get("frame_shape") in ["match_map", "circle", "rectangle"] else "match_map"
 			part.compass_corners = input.get("compass_corners", "fill_when_docked") if input.get("compass_corners", "fill_when_docked") in ["transparent", "fill_when_docked", "filled"] else "fill_when_docked"
 			part.show_secondary = input.get("show_secondary", true) == true

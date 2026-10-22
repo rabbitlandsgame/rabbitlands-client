@@ -453,7 +453,8 @@ func workspace_geometry(config: Dictionary) -> Dictionary:
 	var factor := clampf(float(config.get("scale", 1.0)), 0.5, 2.0)
 	var compact: bool = config.get("style") in ["heritage", "classic", "modular", "adventure", "minimal"]
 	var cell := Vector2(44 if compact else 58, 44 if not config.get("show_badges", true) else 56)
-	return HudGrid.measure(config, count, cell, Vector2(8, 8 if compact else 28), size / factor)
+	var padding := Vector2.ZERO if config.get("flush_slots", false) else Vector2(8, 8 if compact else 28)
+	return HudGrid.measure(config, count, cell, padding, size / factor)
 
 func _layout_workspace() -> void:
 	var config := workspace_layout
@@ -474,13 +475,14 @@ func _layout_workspace() -> void:
 	panel.scale = Vector2.ONE * factor
 	var skin := str(config.get("style", "classic"))
 	docked = config.get("dock_target", "none") != "none" or config.get("anchor", "free") != "free"
-	var signature := [factor, dimensions, count, rows, columns, skin, config.get("background_color"), config.get("border_color"), config.get("text_color"), config.get("dock_target"), config.get("dock_side"), config.get("dock_gap"), config.get("show_badges", true), config.get("frame_style"), config.get("show_background", true), config.get("show_border", true), panel.has_node("_HudChrome"), config.get("slot_border_style"), config.get("slot_border_color"), config.get("icon_opacity"), config.get("unavailable_icon_opacity")]
+	var signature := [factor, dimensions, count, rows, columns, skin, config.get("background_color"), config.get("border_color"), config.get("text_color"), config.get("dock_target"), config.get("dock_side"), config.get("dock_gap"), config.get("show_badges", true), config.get("frame_style"), config.get("show_background", true), config.get("show_border", true), panel.has_node("_HudChrome"), config.get("slot_border_style"), config.get("slot_border_color"), config.get("icon_opacity"), config.get("unavailable_icon_opacity"), config.get("flush_slots"), config.get("slot_gap")]
 	if signature == _workspace_signature:
 		_position_workspace(config, factor)
 		return
 	_workspace_signature = signature
 	grip.tooltip_text = "Drag to move. Settings → HUD → Edit HUD changes position, rows and appearance."
-	var shell := _style(config.get("background_color", Color("261e13")), 4)
+	var flush: bool = config.get("flush_slots", false)
+	var shell := _style(config.get("background_color", Color("261e13")), 0 if flush else 4)
 	shell.border_color = config.get("border_color", Color("aa8d50"))
 	shell.set_corner_radius_all(0 if config.get("dock_target", "none") != "none" else 4)
 	if not config.get("show_background", config.get("frame_style") != "floating") or panel.has_node("_HudChrome"): shell.bg_color.a = 0
@@ -488,31 +490,31 @@ func _layout_workspace() -> void:
 	panel.add_theme_stylebox_override("panel", shell)
 	var body: VBoxContainer = _scroll.get_parent()
 	(body.get_child(0) as Control).visible = not compact
-	body.add_theme_constant_override("separation", 2)
-	_column.add_theme_constant_override("h_separation", 2)
-	_column.add_theme_constant_override("v_separation", 2)
+	body.add_theme_constant_override("separation", 0 if flush else 2)
+	_column.add_theme_constant_override("h_separation", roundi(geometry.gap))
+	_column.add_theme_constant_override("v_separation", roundi(geometry.gap))
 	wheel_button.hide()
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	_scroll.custom_minimum_size = Vector2(dimensions.x - 8, maxf(38, dimensions.y - (8 if compact else 28)))
+	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER if flush else ScrollContainer.SCROLL_MODE_AUTO
+	_scroll.custom_minimum_size = dimensions if flush else Vector2(dimensions.x - 8, maxf(38, dimensions.y - (8 if compact else 28)))
 	for index: int in buttons.size():
 		var button: Button = buttons[index]
 		var cell: HBoxContainer = button.get_parent()
 		cell.visible = index < count
-		cell.add_theme_constant_override("separation", 2)
+		cell.add_theme_constant_override("separation", 0 if flush else 2)
 		button.custom_minimum_size = Vector2(geometry.cell).floor()
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cell.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		button.add_theme_constant_override("icon_max_width", int(maxf(12, minf(geometry.cell.x - 6, geometry.cell.y - (20 if config.get("show_badges", true) else 6)))))
+		button.add_theme_constant_override("icon_max_width", int(maxf(12, minf(geometry.cell.x - 6, geometry.cell.y - (20 if config.get("show_badges", true) and not flush else 6)))))
 		for state: String in SLOT_BACKGROUNDS:
 			var style := _style(SLOT_BACKGROUNDS[state], 2)
 			if state == "normal": style.bg_color = config.get("background_color", style.bg_color)
 			if state == "normal" and not config.get("show_background", true): style.bg_color.a = 0
 			style.border_color = config.get("border_color", style.border_color)
 			if not SlotStyle.native_border_visible(config): style.set_border_width_all(0)
-			style.content_margin_top = 16 if config.get("show_badges", true) else 2
+			style.content_margin_top = 16 if config.get("show_badges", true) and not flush else 2
 			button.add_theme_stylebox_override(state, style)
 		SlotStyle.apply(button, config)
 		var key: Label = cell.get_node("Key")

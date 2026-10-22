@@ -8,7 +8,9 @@ var _last_area := ""
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(84, 56)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	tooltip_text = "Click for your coordinates; Shift+click shares them to your current chat destination. Ctrl+click shares to the active numeric channel."
 	resized.connect(queue_redraw)
 
 func configure(owner_main: Control, value: Dictionary) -> void:
@@ -16,6 +18,12 @@ func configure(owner_main: Control, value: Dictionary) -> void:
 	config = value.duplicate(true)
 	size = Vector2(380, 58) if config.compass_mode == "ribbon" else Vector2(112, 112)
 	queue_redraw()
+
+func _has_point(point: Vector2) -> bool:
+	if config.is_empty(): return false
+	if config.compass_mode == "round" and has_node("_HudChrome") and get_node("_HudChrome").shape == "circle":
+		return point.distance_to(size * 0.5) <= minf(size.x, size.y) * 0.46
+	return Rect2(Vector2.ZERO, size).has_point(point)
 
 func _process(_delta: float) -> void:
 	if source == null: return
