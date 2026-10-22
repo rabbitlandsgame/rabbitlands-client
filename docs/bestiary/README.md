@@ -31,6 +31,11 @@ Stag Beetle, Praying Mantis, Giant Centipede, Manymouth Crab and Giant Antlion.
 Both Attack and Defense are between 125 and 175. Size comparisons beside a
 player are `giant-creatures-20261022-1.png` and `giant-creatures-20261022-2.png`.
 
+Amethyst Scorpion is enlarged to about 4.5 m long and 4.1 m tall with its
+raised tail. It stays passive at 185/180 A/D and 1,200 health, between Giant
+Centipede and Cave Spider. `giant-scorpion-20261022.png` compares all three
+with a player at their transmitted in-game sizes.
+
 Rebuild from the client root with the sibling server checkout available:
 
 ```powershell
