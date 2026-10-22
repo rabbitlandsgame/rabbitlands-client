@@ -170,7 +170,12 @@ python tests/integration/run_crowd_presentation_benchmark.py --godot <Godot.exe>
 
 Pass the Godot executable itself, not the console wrapper, so the CPU affinity
 reaches the process that does the work. Windowed runs use the GPU; on a shared
-machine run one at a time.
+machine run one at a time. A variant that is itself a list of parts is
+separated from the next by `;`, and ends with one when it is the only variant
+(`--variants="-stagger,-quarter;all"`, `--variants="-stagger,-quarter;"`); pass
+it with `=`, since it starts with a dash. On a hybrid processor, check which
+logical processors are performance cores before choosing `--affinity`: they
+need not be the first ones.
 
 | Cell | Crowd |
 | --- | --- |
