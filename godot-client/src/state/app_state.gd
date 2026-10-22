@@ -292,21 +292,27 @@ func _observe_frame_time(stamp: int) -> void:
 	_frame_stamp_read_msec = now
 
 ## The time an actor's step was taken, put on its row for the actor's pacing.
-## Nothing happens on a connection that has never had a stamp, so a server
-## without stamped frames leaves every actor on arrival-time pacing. The
-## player's own actor stays on it too: its steps answer its own input.
+## Every step either carries the time of the stamp it came with or carries
+## none: an actor's row keeps its keys from packet to packet, so a step that
+## came without a current stamp - a send the server left unstamped, or stamps
+## that stopped - must not be timed by the last one, long past. A connection
+## that has never had a stamp leaves every actor on arrival-time pacing, and
+## the player's own actor stays on it too: its steps answer its own input.
 func _stamp_step(actor_id: int, actor_command: int) -> void:
-	if (not _frame_stamps_seen or actor_id == local_actor_id
-			or not ServerTimePacing.is_step_command(actor_command)):
+	if not ServerTimePacing.is_step_command(actor_command):
 		return
-	var now: int = Time.get_ticks_msec()
 	var actor: Dictionary = actors[actor_id]
-	if now - _frame_stamp_read_msec <= FRAME_STAMP_VALID_MSEC:
+	var now: int = Time.get_ticks_msec()
+	if (_frame_stamps_seen and actor_id != local_actor_id
+			and now - _frame_stamp_read_msec <= FRAME_STAMP_VALID_MSEC):
 		ServerTimePacing.stamp(actor, _frame_step_local_msec,
 			server_clock.playout_delay_msec(now) / 1000.0, _presentation_pass)
-	else:
+	elif actor.has(ServerTimePacing.STEP_KEY):
 		ServerTimePacing.unstamp(actor)
 
+## The same for the native reducer's path. A row can only hold a stamp on a
+## connection that has had one (a dropped connection clears both), so there is
+## nothing to take off before the first.
 func _stamp_native_steps(payload: PackedByteArray) -> void:
 	if not _frame_stamps_seen:
 		return

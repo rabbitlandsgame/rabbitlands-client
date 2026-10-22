@@ -31,6 +31,7 @@ func _run() -> void:
 		print("server time pacing tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 		quit(failures)
 		return
+	_check_stamped_then_unstamped()
 	for spec: Array in [["walk", 22, 600], ["run", 32, 200]]:
 		var stamped: Dictionary = _simulate(spec[1], spec[2], true)
 		var arrival: Dictionary = _simulate(spec[1], spec[2], false)
@@ -150,6 +151,47 @@ func _check_due() -> void:
 	var trimmed: float = ServerTimePacing.due_seconds(11.8, late, 0.6, 0.05)
 	_expect(is_equal_approx(trimmed, late + 0.6 / ServerTimePacing.CATCH_UP),
 		"a schedule ahead of its bound is trimmed at the catch-up rate")
+
+## Walkers whose steps arrive stamped, then pause, then take one more step
+## that comes without a stamp. AppState takes the old stamp off such a step,
+## so it is timed by its arrival, a full step long. Left on, the stamp from
+## before the pause would make the step due long ago and hurry it across.
+func _check_stamped_then_unstamped() -> void:
+	var durations: Array[float] = []
+	for keep_old_stamp: bool in [false, true]:
+		var actor := TimedActor.new()
+		root.add_child(actor)
+		actor.clock_msec = 10000
+		actor.apply_server_state({"x": 0, "y": 0, "rotation": 0, "command": 22}, adapter, true)
+		var dto: Dictionary = {"x": 0, "y": 0, "rotation": 0, "command": 22}
+		var stamped_segment := 0.0
+		for step: int in range(1, 6):
+			actor.clock_msec = 10000 + step * 600 + 70
+			dto = dto.duplicate()
+			dto["x"] = step
+			ServerTimePacing.stamp(dto, 10000 + step * 600, 0.05, step)
+			actor.apply_server_state(dto, adapter)
+			stamped_segment = actor._segment_duration
+			for tick: int in range(37):
+				actor._physics_process(0.016)
+		if not keep_old_stamp:
+			_expect(stamped_segment > 0.5 and stamped_segment < 0.8,
+				"stamped walking steps take about a step each (%.3f s)" % stamped_segment)
+		# Three seconds standing, then one more step.
+		actor.clock_msec = 10000 + 5 * 600 + 3000
+		for tick: int in range(30):
+			actor._physics_process(0.1)
+		dto = dto.duplicate()
+		dto["x"] = 6
+		if not keep_old_stamp:
+			ServerTimePacing.unstamp(dto)
+		actor.apply_server_state(dto, adapter)
+		durations.append(actor._segment_duration)
+		actor.queue_free()
+	_expect(durations[0] > 0.4,
+		"a step that comes without a stamp is timed by its arrival (%.3f s)" % durations[0])
+	_expect(durations[1] < 0.3,
+		"where the stamp from before the pause would have hurried it (%.3f s)" % durations[1])
 
 ## One remote actor walking 40 steps along x, the server stepping it every
 ## `pace_msec` (with the first step 17 ms into a frame, so the steps fall

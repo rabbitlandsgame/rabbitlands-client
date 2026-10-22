@@ -14,6 +14,7 @@ const COMBAT_TARGET_MARKER := preload("res://src/actors/combat_target_marker_3d.
 const CREATURE_DISSOLVE := preload("res://src/actors/creature_dissolve.gd")
 const CREATURE_DISSOLVE_DELAY_SECONDS := 2.0
 const TARGET_MARKER_STYLE := preload("res://src/actors/target_marker_style.gd")
+const ServerTimePacing := preload("res://src/actors/server_time_pacing.gd")
 var _target_marker_style := TARGET_MARKER_STYLE.defaults()
 
 @export var walk_presentation_speed := 6.0
@@ -1841,7 +1842,11 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		_snap_pending = false
 		_travel_yaw_active = false
 	elif target_changed:
-		var now_msec: int = _movement_time_msec()
+		# A step the server stamped with its own clock is timed by when it was
+		# taken (server_time_pacing.gd); any other by when it arrived.
+		var clock_msec: int = _movement_time_msec()
+		var stamped: bool = dto.has(ServerTimePacing.STEP_KEY)
+		var now_msec: int = int(dto[ServerTimePacing.STEP_KEY]) if stamped else clock_msec
 		var now: float = float(now_msec) / 1000.0
 		# How much ground the server covered, in tiles. A diagonal step is 1.41
 		# of them and a folded burst several, so timing the update against it
@@ -1938,15 +1943,21 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		# the speed on the ground. Restarting each step from the body's
 		# position at the arrival margin, as this used to, made a late packet
 		# a stop and the early one behind it a sprint.
-		var due: float = scheduled_arrival(now, _schedule_due, cadence,
-			cadence * arrival_margin + _jitter_allowance, catch_up_factor)
+		var due: float
+		if stamped:
+			due = ServerTimePacing.due_seconds(now, _schedule_due, cadence,
+				float(dto.get(ServerTimePacing.PLAYOUT_KEY, 0.0)))
+		else:
+			due = scheduled_arrival(now, _schedule_due, cadence,
+				cadence * arrival_margin + _jitter_allowance, catch_up_factor)
 		# A server-confirmed fast mount can cross a tile faster than the
 		# ordinary segment floor. Keep its short steps on the supplied cadence.
 		var segment_floor := minf(minimum_segment_duration, cadence) if is_instance_valid(_mount_visual) else minimum_segment_duration
-		_segment_duration = clampf(maxf(due - now,
+		var clock_now: float = float(clock_msec) / 1000.0
+		_segment_duration = clampf(maxf(due - clock_now,
 			global_position.distance_to(server_target) / maxf(_presentation_speed, 0.001)),
 			segment_floor, maximum_segment_duration + maximum_buffer_seconds)
-		_schedule_due = now + _segment_duration
+		_schedule_due = clock_now + _segment_duration
 		_travel_yaw = travel_yaw(_segment_start, server_target, _target_yaw)
 		_travel_yaw_active = true
 	_wake()

@@ -107,11 +107,26 @@ func _state_checks(state: Node) -> void:
 		"the player's own steps stay on arrival pacing")
 	state.call("_on_packet", Op.ADD_ACTOR_COMMAND, _step(1001, 40))
 	_expect(not (actors[1001] as Dictionary).has(ServerTimePacing.STEP_KEY), "a turn is not a step")
+	# A stamped step, then a step that comes without a current stamp: the
+	# row keeps its keys from packet to packet, so the old stamp must go.
+	state.call("take_changed_actors")
+	state.call("_on_packet", Op.ADD_ACTOR_COMMAND, _step(1000))
+	_expect((actors[1000] as Dictionary).has(ServerTimePacing.STEP_KEY), "a stamped step")
 	state.set("_frame_stamp_read_msec", Time.get_ticks_msec() - 1000)
 	state.call("take_changed_actors")
 	state.call("_on_packet", Op.ADD_ACTOR_COMMAND, _step(1000))
+	_expect(not (actors[1000] as Dictionary).has(ServerTimePacing.STEP_KEY)
+		and not (actors[1000] as Dictionary).has(ServerTimePacing.PLAYOUT_KEY),
+		"then a step long after the last stamp carries no server time at all")
+	var stamped_before: Dictionary = (actors[1000] as Dictionary).duplicate()
+	stamped_before[ServerTimePacing.STEP_KEY] = 1
+	stamped_before[ServerTimePacing.PLAYOUT_KEY] = 0.05
+	actors[1000] = stamped_before
+	state.set("_frame_stamps_seen", false)
+	state.call("_on_packet", Op.ADD_ACTOR_COMMAND, _step(1000))
 	_expect(not (actors[1000] as Dictionary).has(ServerTimePacing.STEP_KEY),
-		"a step long after the last stamp is not given that stamp's time")
+		"and a stamp on a row is taken off by any unstamped step, stamps or not")
+	state.set("_frame_stamps_seen", true)
 
 	var presence = state.get("presence")
 	state.call("_on_packet", Op.REMOVE_ACTOR, _u16(1001))
