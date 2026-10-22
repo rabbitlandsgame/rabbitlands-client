@@ -95,7 +95,8 @@ func _init() -> void:
 		"continent_v2_maps_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
 		# No packet of its own either: what the client does after a change of
 		# map is answer it with `#arrived` once its character stands loaded.
-		"arrival_ready_v1": EloriaProtocol.ServerMessage.CHANGE_MAP}
+		"arrival_ready_v1": EloriaProtocol.ServerMessage.CHANGE_MAP,
+		"keyboard_intent_v1": EloriaProtocol.ServerMessage.ELORIA_MOVE_INTENT}
 	var capability_probes: Dictionary = {
 		EloriaProtocol.ServerMessage.ELORIA_WEATHER_STATE: "01" + "00000000000a00" + "01555a28374000" + "c800" + "0a" + "heavy_rain".to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.SEND_MAP_MARKER: "ea010c03e1012e2f6d6170732f666f75725f67617465732e656c6d00526565642062616e6b0060ea",
@@ -103,6 +104,7 @@ func _init() -> void:
 		EloriaProtocol.ServerMessage.ELORIA_ADJACENT_MAPS: "010100" + "whitehorn_range".to_utf8_buffer().hex_encode() + "00",
 		EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE: '{"kind":"recall","id":9,"entries":[]}'.to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.SEND_SPECIAL_EFFECT: "025b004d0005",
+		EloriaProtocol.ServerMessage.ELORIA_MOVE_INTENT: "010103e803b80b",
 		EloriaProtocol.ServerMessage.ELORIA_COMBAT_STATE:
 			"016600120014001e002c00050052656564686f726e205374616700",
 		EloriaProtocol.ServerMessage.ELORIA_INVENTORY_STATE:
@@ -228,6 +230,21 @@ func _init() -> void:
 			if capability == "spell_ring_v1":
 				_expect(probe.type == "lantern_tutorial" and probe.state.ring_training,
 					"ring training survives its tutorial packet")
+	# Held keyboard directions (keyboard_intent_v1): the server's direction
+	# order, 255 for a release, the epoch the server last sent.
+	_expect(EloriaProtocol.move_intent(3, Vector2i(1, -1), true)
+		== PackedByteArray([254, 4, 0, 3, 3, 1]), "a held south-east is direction 3, run set")
+	_expect(EloriaProtocol.move_intent(4, Vector2i.ZERO)
+		== PackedByteArray([254, 4, 0, 4, 255, 0]), "a release is direction 255")
+	var intent_state: Dictionary = EloriaProtocol.decode_server(
+		EloriaProtocol.ServerMessage.ELORIA_MOVE_INTENT, _hex("010103e803b80b"))
+	_expect(intent_state.type == "move_intent" and bool(intent_state.enabled)
+		and int(intent_state.epoch) == 3 and int(intent_state.keepalive_msec) == 1000
+		and int(intent_state.idle_msec) == 3000, "the intent state decodes")
+	_expect(EloriaProtocol.decode_server(EloriaProtocol.ServerMessage.ELORIA_MOVE_INTENT,
+		_hex("020103e803b80b")).type == "invalid", "another intent state version is refused")
+	_expect(EloriaProtocol.decode_server(EloriaProtocol.ServerMessage.ELORIA_MOVE_INTENT,
+		_hex("010103e803")).type == "invalid", "a short intent state is refused")
 	# The advertised map capability covers every active partition package.
 	var map_catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
 		"res://world_authoring/continent-v2/territories.json")) as Dictionary

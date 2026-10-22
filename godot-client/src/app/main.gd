@@ -674,6 +674,9 @@ var _keyboard_running := false
 var _keyboard_direction := Vector2i.ZERO
 var _keyboard_goal_tile := Vector2i(-99999, -99999)
 var _keyboard_refresh_msec := 0
+## The intent epoch the held direction was last sent under, or -1 when the
+## keyboard is walking by MOVE_TO (or not at all).
+var _keyboard_intent_epoch := -1
 var _ground_bag_get_all_requested_msec := -1
 var _ground_bag_get_all_bag_id := -1
 ## The inventory slot riding on the cursor in walk mode, or -1. Eternal Lands
@@ -1823,6 +1826,9 @@ func _update_keyboard_movement() -> void:
 	var origin := Vector2i(int(dto.get("x", 0)), int(dto.get("y", 0)))
 	var now: int = Time.get_ticks_msec()
 	var run: bool = Input.is_key_pressed(KEY_SHIFT)
+	if Network.move_intent_enabled:
+		_update_keyboard_intent(direction, run, now)
+		return
 	var close_to_goal: bool = maxi(absi(_keyboard_goal_tile.x - origin.x),
 		absi(_keyboard_goal_tile.y - origin.y)) <= 1
 	if _keyboard_moving and direction == _keyboard_direction and run == _keyboard_running \
@@ -1839,6 +1845,28 @@ func _update_keyboard_movement() -> void:
 		_keyboard_refresh_msec = now + KEYBOARD_REFRESH_MSEC
 	else:
 		push_warning("keyboard MOVE_TO failed: " + error_string(error))
+		_keyboard_moving = false
+
+## Held-direction walking (keyboard_intent_v1, once the server takes it): the
+## server steps the player at its own pace while a direction is held, so the
+## direction is sent when it changes, when the server changes the epoch (a map
+## change) and as a keep-alive, instead of a MOVE_TO every 360 ms.
+func _update_keyboard_intent(direction: Vector2i, run: bool, now: int) -> void:
+	if _keyboard_moving and _keyboard_intent_epoch == Network.move_intent_epoch \
+			and direction == _keyboard_direction and run == _keyboard_running \
+			and now < _keyboard_refresh_msec:
+		return
+	exterior_stream.pending_walk.clear()
+	var error: Error = Network.move_intent(direction, run)
+	if error == OK:
+		_keyboard_moving = true
+		_keyboard_running = run
+		_keyboard_direction = direction
+		_keyboard_goal_tile = Vector2i(-99999, -99999)
+		_keyboard_intent_epoch = Network.move_intent_epoch
+		_keyboard_refresh_msec = now + Network.move_intent_keepalive_msec
+	else:
+		push_warning("keyboard intent failed: " + error_string(error))
 		_keyboard_moving = false
 
 func _movement_axes_for_actions(north_pressed: bool, south_pressed: bool,
@@ -1872,6 +1900,13 @@ func _camera_relative_tile_direction(forward_input: int, right_input: int) -> Ve
 func _stop_keyboard_movement() -> void:
 	if not _keyboard_moving:
 		return
+	if _keyboard_intent_epoch >= 0:
+		# A release: the server stops the player where it has them.
+		var released: Error = Network.move_intent(Vector2i.ZERO)
+		if released != OK and released != ERR_UNAVAILABLE:
+			push_warning("keyboard release failed: " + error_string(released))
+		_clear_keyboard_movement_tracking()
+		return
 	var actor_value: Variant = AppState.actors.get(AppState.local_actor_id)
 	if actor_value is Dictionary:
 		var dto: Dictionary = actor_value as Dictionary
@@ -1887,6 +1922,7 @@ func _clear_keyboard_movement_tracking() -> void:
 	_keyboard_direction = Vector2i.ZERO
 	_keyboard_goal_tile = Vector2i(-99999, -99999)
 	_keyboard_refresh_msec = 0
+	_keyboard_intent_epoch = -1
 
 func _clear_local_turn_prediction() -> void:
 	var actor_value: Variant = actor_nodes.get(AppState.local_actor_id)

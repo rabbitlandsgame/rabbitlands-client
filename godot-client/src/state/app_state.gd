@@ -1386,6 +1386,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			for raw_message: Variant in event.messages:
 				mail.append((raw_message as Dictionary).duplicate(true))
 			state_changed.emit(&"mail")
+		"move_intent":
+			Network.apply_move_intent_state(event)
+			state_changed.emit(&"move_intent")
 		"navigation":
 			navigation = {"active": bool(event.active), "x": int(event.x),
 				"y": int(event.y), "distance": int(event.distance),
