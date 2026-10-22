@@ -31,6 +31,7 @@ extends SceneTree
 ## - RABBITLANDS_CROWD_PRESENTATION / RABBITLANDS_CROWD_BODY_CAP: read by Main.
 
 const BENCHMARK_MAIN_PATH := "res://tests/integration/crowd_benchmark_main.tscn"
+const TIERS := AnimationGate.Tier
 const MODELS := "res://data/actors/models.json"
 const FIRST_ACTOR_ID := 14000
 const FULL_KIT_A := {0: 114, 1: 106, 2: 0, 3: 117, 4: 171, 5: 184, 6: 192}
@@ -55,12 +56,20 @@ var _centre := Vector2i.ZERO
 var _driver_packets := 0
 var _driver_usec := 0
 var _fps_cap := 60
+## RABBITLANDS_CROWD_BENCH_ATTRIBUTION=1: every body's update_pose is timed and
+## its skeleton updates counted (crowd_benchmark_main.gd), which adds a call
+## per skeleton update; for attribution, not for a comparison.
+var _attribution := false
+var _attributed: Dictionary = {}
 ## Frame work: from the first physics step (or the process step) of an engine
 ## iteration to the end of its draw, so the frame cap's sleep is not counted.
 ## A capped run keeps the share of frames that carry a packet tick what it is
 ## on a 60 Hz display; an uncapped one would thin it out and flatter p95.
 var _iteration_started_usec := -1
 var _last_iteration_usec := -1.0
+var _process_ended_usec := -1
+var _draw_started_usec := -1
+var _last_phases: Dictionary = {}
 var _frame_marker: Node
 
 func _init() -> void:
@@ -156,21 +165,26 @@ func _run() -> void:
 	Engine.max_fps = _fps_cap
 	physics_frame.connect(_on_iteration_started)
 	process_frame.connect(_on_iteration_started)
+	# The last node to process marks where node processing ends and the
+	# deferred flush (Main's world sync, every skeleton's update: modifiers,
+	# skeleton_updated listeners, skins) begins. Nothing is drawn headless and
+	# frame_post_draw never fires: there the frame ends at a deferred call the
+	# marker queues, which runs after Main's own deferred world sync.
+	var marker_script := GDScript.new()
+	marker_script.source_code = ("extends Node\nsignal processed\nsignal process_ended\n"
+		+ "func _process(_delta: float) -> void:\n"
+		+ "\tprocess_ended.emit()\n"
+		+ "\tcall_deferred(\"emit_signal\", \"processed\")\n")
+	marker_script.reload()
+	_frame_marker = Node.new()
+	_frame_marker.set_script(marker_script)
+	_frame_marker.process_priority = 1 << 30
+	root.add_child(_frame_marker)
+	_frame_marker.connect("process_ended", _on_process_ended)
 	if _headless:
-		# Nothing is drawn headless and frame_post_draw never fires: the frame
-		# ends at a deferred call the last node to process queues, which runs
-		# after Main's own deferred world sync.
-		var marker_script := GDScript.new()
-		marker_script.source_code = ("extends Node\nsignal processed\n"
-			+ "func _process(_delta: float) -> void:\n"
-			+ "\tcall_deferred(\"emit_signal\", \"processed\")\n")
-		marker_script.reload()
-		_frame_marker = Node.new()
-		_frame_marker.set_script(marker_script)
-		_frame_marker.process_priority = 1 << 30
-		root.add_child(_frame_marker)
 		_frame_marker.connect("processed", _on_iteration_drawn)
 	else:
+		RenderingServer.frame_pre_draw.connect(_on_draw_started)
 		RenderingServer.frame_post_draw.connect(_on_iteration_drawn)
 	_report["crowdPolicy"] = (_main.get("crowd") as RefCounted).call("describe") \
 		if _main.get("crowd") != null else {"available": false}
@@ -286,6 +300,16 @@ func _run_cell(spec: Dictionary) -> void:
 	_main.set("benchmark_animation_enabled", not diagnostics.has("no_animation"))
 	_main.set("benchmark_overhead_enabled", not diagnostics.has("no_overhead"))
 	_main.set("benchmark_ground_enabled", not diagnostics.has("no_ground"))
+	_attribution = OS.get_environment("RABBITLANDS_CROWD_BENCH_ATTRIBUTION").strip_edges() == "1"
+	if _attribution:
+		# Bodies kept from an earlier cell (the player) are timed already.
+		var fresh: Dictionary = {}
+		var nodes := _main.get("actor_nodes") as Dictionary
+		for id: Variant in nodes:
+			if is_instance_valid(nodes[id]) and not _attributed.has((nodes[id] as Object).get_instance_id()):
+				fresh[id] = nodes[id]
+				_attributed[(nodes[id] as Object).get_instance_id()] = true
+		_report["attribution%s" % str(spec["id"])] = _main.call("benchmark_attach_attribution", fresh)
 	await _prime(plan)
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["warmupMilliseconds"]), null)
 	var raw := {"frameMilliseconds": [], "wallMilliseconds": [], "tickFrameMilliseconds": [],
@@ -294,7 +318,9 @@ func _run_cell(spec: Dictionary) -> void:
 		"modelBuildMilliseconds": [], "mapViewportsMilliseconds": [], "rootRenderCpuMilliseconds": [],
 		"rootRenderGpuMilliseconds": [], "worldRenderCpuMilliseconds": [],
 		"worldRenderGpuMilliseconds": [], "drawCalls": [], "liveEffects": [],
-		"packetsPerFrame": [], "packetDispatchMilliseconds": [], "sceneNodes": [], "engineProcessMilliseconds": [], "enginePhysicsMilliseconds": []}
+		"packetsPerFrame": [], "packetDispatchMilliseconds": [], "sceneNodes": [], "engineProcessMilliseconds": [], "enginePhysicsMilliseconds": [],
+		"processPhaseMilliseconds": [], "flushPhaseMilliseconds": [], "drawPhaseMilliseconds": [],
+		"halfRateStepMilliseconds": [], "combatPoseMilliseconds": [], "skeletonUpdates": []}
 	var sample_started := Time.get_ticks_msec()
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw)
 	var elapsed := Time.get_ticks_msec() - sample_started
@@ -318,6 +344,11 @@ func _run_cell(spec: Dictionary) -> void:
 	result["frames"] = frames
 	result["sampleMilliseconds"] = elapsed
 	result["frameTime"] = frame_summary
+	# In order, so a pattern across frames (a step every other frame) shows.
+	var series: Array = []
+	for value: Variant in raw["frameMilliseconds"] as Array:
+		series.append(_round(float(value)))
+	result["frameSeries"] = series
 	result["fpsP5"] = _round(1000.0 / float((frame_summary as Dictionary)["p95"])) \
 		if frame_summary is Dictionary and float((frame_summary as Dictionary)["p95"]) > 0.0 else null
 	result["fpsMean"] = _round(1000.0 / float((frame_summary as Dictionary)["mean"])) \
@@ -534,6 +565,14 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant) -> void:
 		# skeletons, deferred calls) and physics steps.
 		(raw["engineProcessMilliseconds"] as Array).append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
 		(raw["enginePhysicsMilliseconds"] as Array).append(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0)
+		(raw["processPhaseMilliseconds"] as Array).append(_last_phases.get("process"))
+		(raw["flushPhaseMilliseconds"] as Array).append(_last_phases.get("flush"))
+		(raw["drawPhaseMilliseconds"] as Array).append(_last_phases.get("draw"))
+		(raw["halfRateStepMilliseconds"] as Array).append(float(usec.get("half_rate_step", 0)) / 1000.0)
+		var calls: Dictionary = measured.get("calls", {}) as Dictionary
+		if _attribution:
+			(raw["combatPoseMilliseconds"] as Array).append(float(usec.get("combat_pose_from_skeleton", 0)) / 1000.0)
+			(raw["skeletonUpdates"] as Array).append(int(calls.get("skeleton_updated", 0)))
 		_append_render_sample(raw)
 
 
@@ -542,16 +581,38 @@ func _on_iteration_started() -> void:
 		_iteration_started_usec = Time.get_ticks_usec()
 
 
+func _on_process_ended() -> void:
+	if _iteration_started_usec >= 0 and _process_ended_usec < 0:
+		_process_ended_usec = Time.get_ticks_usec()
+
+
+func _on_draw_started() -> void:
+	if _iteration_started_usec >= 0 and _draw_started_usec < 0:
+		_draw_started_usec = Time.get_ticks_usec()
+
+
 func _on_iteration_drawn() -> void:
+	var now := Time.get_ticks_usec()
+	_last_phases = {}
 	if _iteration_started_usec >= 0:
-		_last_iteration_usec = float(Time.get_ticks_usec() - _iteration_started_usec)
+		_last_iteration_usec = float(now - _iteration_started_usec)
+		# Physics and node processing (Main, the animation players, the
+		# half-rate steps); the deferred flush up to the draw (skeleton updates
+		# and their listeners, Main's world sync); the draw itself.
+		if _process_ended_usec >= _iteration_started_usec:
+			var flush_end := _draw_started_usec if _draw_started_usec >= _process_ended_usec else now
+			_last_phases = {"process": float(_process_ended_usec - _iteration_started_usec) / 1000.0,
+				"flush": float(flush_end - _process_ended_usec) / 1000.0,
+				"draw": float(now - flush_end) / 1000.0 if flush_end != now else null}
 	_iteration_started_usec = -1
+	_process_ended_usec = -1
+	_draw_started_usec = -1
 
 
 ## Waits for the end of this frame and returns its work in milliseconds.
 func _next_drawn_frame() -> float:
 	_last_iteration_usec = -1.0
-	if _frame_marker != null:
+	if _headless:
 		await Signal(_frame_marker, &"processed")
 	else:
 		await RenderingServer.frame_post_draw
@@ -676,6 +737,9 @@ func _census() -> Dictionary:
 		"skeletons": 0, "skeletonsProcessing": 0, "beyondDrawDistance": 0, "crowdHidden": 0,
 		"capeClothActive": 0, "capeSolversActive": 0}
 	var planes: Array[Plane] = camera.get_frustum() if camera != null else []
+	# The quarter tier by name, so the census also runs against a client
+	# without it.
+	var quarter: int = int(TIERS.get("QUARTER", -1))
 	for value: Variant in nodes.values():
 		var actor := value as ReplicatedActor3D
 		if actor == null:
@@ -697,10 +761,15 @@ func _census() -> Dictionary:
 			out["inFrustumAndDrawn"] += int(inside)
 		if local != null and local.global_position.distance_to(actor.global_position) > 80.0:
 			out["beyondDrawDistance"] += 1
-		match actor.animation_tier():
-			AnimationGate.Tier.FULL: out["tierFull"] += 1
-			AnimationGate.Tier.HALF: out["tierHalf"] += 1
-			_: out["tierPaused"] += 1
+		var tier := actor.animation_tier()
+		if tier == AnimationGate.Tier.FULL:
+			out["tierFull"] += 1
+		elif tier == AnimationGate.Tier.HALF:
+			out["tierHalf"] += 1
+		elif tier == quarter:
+			out["tierQuarter"] = int(out.get("tierQuarter", 0)) + 1
+		else:
+			out["tierPaused"] += 1
 		if actor.has_method("cape_cloth_active") and bool(actor.call("cape_cloth_active")):
 			out["capeClothActive"] += 1
 			var why := "tier%d-allowed%s-local%s" % [actor.animation_tier(),
@@ -715,6 +784,10 @@ func _census() -> Dictionary:
 			# A paused body's model subtree is disabled (feature clients only).
 			if not actor.has_method("model_processing") or bool(actor.call("model_processing")):
 				out["skeletonsProcessing"] += 1
+	var gate := _main.get("animation_gate") as AnimationGate
+	if gate != null and gate.has_method("group_sizes"):
+		out["halfGroups"] = gate.call("group_sizes", AnimationGate.Tier.HALF)
+		out["quarterGroups"] = gate.call("group_sizes", quarter)
 	return out
 
 

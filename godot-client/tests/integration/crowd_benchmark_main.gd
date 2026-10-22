@@ -14,6 +14,25 @@ var _benchmark_max_skeleton_updates_per_actor := 0
 var _benchmark_attribution_attachment: Dictionary = {}
 
 
+## The gate with its half-rate stepping timed: the players and skeleton
+## modifiers it advances every other frame, all on the same frame.
+class TimedAnimationGate:
+	extends AnimationGate
+	var owner_main: Node
+
+	func advance(delta: float) -> void:
+		var started := Time.get_ticks_usec()
+		super.advance(delta)
+		if owner_main != null:
+			owner_main.call("_benchmark_add", &"half_rate_step", started)
+
+
+func _init() -> void:
+	var timed := TimedAnimationGate.new()
+	timed.owner_main = self
+	animation_gate = timed
+
+
 func benchmark_reset_frame() -> void:
 	_benchmark_usec.clear()
 	_benchmark_calls.clear()

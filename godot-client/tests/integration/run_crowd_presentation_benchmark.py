@@ -124,7 +124,8 @@ def main() -> int:
                         help="graphics quality (ELORIA_LOOK_QUALITY); default: the client's own")
     parser.add_argument("--cells", default="phase4")
     parser.add_argument("--variants", default="all,legacy",
-                        help="comma list of RABBITLANDS_CROWD_PRESENTATION values; 'all' is the default client")
+                        help="comma list of RABBITLANDS_CROWD_PRESENTATION values ('all' is the default "
+                             "client), or a semicolon list when a value is itself a comma list")
     parser.add_argument("--body-cap", type=int, default=0)
     parser.add_argument("--driver", default="live", choices=["live", "stress"],
                         help="live: game cadence (600 ms steps, 2 s rounds, staggered); "
@@ -148,7 +149,9 @@ def main() -> int:
     # Variants alternate within each repeat, so slow drift on a shared machine
     # lands on both sides of a comparison.
     for repeat in range(1, args.repeats + 1):
-        variants = args.variants.split(",")
+        # A variant that names several parts ("-stagger,-quarter") needs ";"
+        # between variants.
+        variants = args.variants.split(";" if ";" in args.variants else ",")
         if repeat % 2 == 0:
             variants.reverse()
         for variant in variants:
