@@ -8,6 +8,8 @@ Use **Add member**, **Remove selected**, **Clear party** and **Reset samples** t
 
 The character banner also offers optional **Load** bars and carried-weight/capacity values. Right-click it and open **Colors**, use **Settings → Banners → Player banner colors**, or select **Character banner → Look** in the HUD editor. Each resource can use an independent color or **Match** its resource window; **Match all** links every resource, while **Independent** restores the saved individual colors. The name has its own color, and mount status can follow mount stamina. **Reset colors** restores the original banner colors and resource ramps. These choices are saved per HUD preset.
 
+**Tab map** and **console** fill the game window in every preset, including custom designs. HUD controls and both chat windows stay above these views. Opening, switching or closing them keeps the HUD's saved positions and sizes. Window resizing and UI scaling update both views automatically. The console's URLs, Protocol and Close buttons sit beside its title, clear of the right HUD rail.
+
 ## Resizing and docking
 
 - Drag a selected window's left/right handle to change its width, its top/bottom handle to change its height, or its corner to change both. The resource circle stays round.

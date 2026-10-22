@@ -11,6 +11,8 @@ const MODAL_Z := 300
 var surface: Control
 var _windows: Array[Control] = []
 var _modals: Array[Control] = []
+var _full_window_views: Array[Control] = []
+var _world_surface: Control
 var _decorations: Dictionary = {}
 var _overlays: Dictionary = {}
 var _visibility: Dictionary = {}
@@ -34,8 +36,18 @@ func register(window: Control, modal := false) -> void:
 	_visibility[window] = window.visible
 	window.visibility_changed.connect(_on_visibility_changed.bind(window))
 	window.tree_entered.connect(func(): _sync_layers.call_deferred())
-	window.move_to_front()
+	if window not in _full_window_views:
+		window.move_to_front()
 	_sync_layers()
+
+## The map and console cover the world without covering the player's HUD.
+## Keep their GUI order below the HUD too; z_index alone cannot route clicks.
+func register_full_window_view(window: Control, world_surface: Control) -> void:
+	if window == null or window in _full_window_views:
+		return
+	_world_surface = world_surface
+	_full_window_views.append(window)
+	register(window)
 
 func decorate(window: Control, decorations: Array) -> void:
 	_decorations[window] = decorations
@@ -60,6 +72,9 @@ static func activate(window: Control) -> void:
 		if ancestor is Control and ancestor in stack._windows:
 			target = ancestor as Control
 		ancestor = ancestor.get_parent()
+	if target in stack._full_window_views:
+		stack._raise_modals()
+		return
 	target.move_to_front()
 	stack._sync_layers()
 	stack._raise_modals()
@@ -85,7 +100,8 @@ func handle_pointer(event: InputEvent) -> void:
 	var children := surface.get_children()
 	children.reverse()
 	for child: Node in children:
-		if child is Control and child in _windows and (child as Control).is_visible_in_tree() \
+		if child is Control and child in _windows and child not in _full_window_views \
+				and (child as Control).is_visible_in_tree() \
 				and (child as Control).get_global_rect().has_point(event.position):
 			activate(child as Control)
 			return
@@ -101,6 +117,9 @@ func _sync_layers() -> void:
 			continue
 		var window := child as Control
 		window.z_as_relative = false
+		if window in _full_window_views:
+			window.z_index = 0
+			continue
 		window.z_index = (MODAL_Z if window in _modals else WINDOW_Z) + rank * 4
 		for index: int in (_decorations.get(window, []) as Array).size():
 			var raw_decoration: Variant = _decorations[window][index]
@@ -139,6 +158,13 @@ func _raise_modals() -> void:
 			or surface.is_queued_for_deletion():
 		return
 	_modal_update_pending = true
+	if is_instance_valid(_world_surface) and _world_surface.get_parent() == surface:
+		var next_index := _world_surface.get_index() + 1
+		for view: Control in _full_window_views:
+			if is_instance_valid(view) and view.get_parent() == surface:
+				if view.get_index() != next_index:
+					surface.move_child(view, next_index)
+				next_index += 1
 	for modal: Control in _modals:
 		if is_instance_valid(modal) and modal.is_visible_in_tree():
 			modal.move_to_front()

@@ -2559,6 +2559,11 @@ func _build_chat_surfaces() -> void:
 	urls_button.tooltip_text = "Links seen this session; F2 opens the latest"
 	urls_button.pressed.connect(func() -> void: reference_window.call("open_urls"))
 	var log_header := content.get_node("Header")
+	# Keep actions beside the title, clear of HUD rails at the right edge.
+	var log_title: Label = log_header.get_node("Title")
+	log_title.text = "CHAT LOG · ~ to close"
+	log_title.tooltip_text = "Full session history. Press ~ to close."
+	log_title.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	log_header.add_child(urls_button)
 	log_header.move_child(urls_button, 1)
 	content.add_child(chat_log_tabs)
@@ -2620,7 +2625,6 @@ func _toggle_full_map() -> void:
 	full_map.show()
 	if bool(AppState.lantern_tutorial.get("active",false)):
 		Network.tutorial_ui(1)
-	full_map.move_to_front()
 	_request_map_redraw()
 	_sync_map_viewport_activity()
 
@@ -2641,8 +2645,8 @@ func _toggle_console() -> void:
 	_on_console_diagnostics_toggled(false)
 	_sync_console()
 	_sync_diagnostics()
+	_layout_full_window_views()
 	console_panel.show()
-	console_panel.move_to_front()
 	chat_hud.input.release_focus()
 
 ## The console panel shows either the session message history or the protocol
@@ -8267,7 +8271,7 @@ func _on_continent_button_pressed() -> void:
 func _show_current_map_view() -> void:
 	_full_map_cursor_inside = false
 	map_cursor_coordinates.hide()
-	_layout_full_map()
+	_layout_full_window_views()
 	_cancel_full_map_drag()
 	_full_map_panned = false
 	_update_full_map_focus()
@@ -9389,15 +9393,18 @@ func _configure_window_stack() -> void:
 	window_stack.name = "WindowStack"
 	game_view.add_child(window_stack)
 	window_stack.configure(game_view)
+	_layout_full_window_views()
+	window_stack.register_full_window_view(full_map, viewport_container)
+	window_stack.register_full_window_view(console_panel, viewport_container)
 	# Reminder cards are HUD surfaces below all windows, including for input.
 	game_view.move_child(lantern_guide, viewport_container.get_index() + 1)
 	var tracker: Control = extension_windows.get("tracked_quest")
 	tracker.reparent(game_view)
 	tracker.z_index = 8
 	game_view.move_child(tracker, lantern_guide.get_index() + 1)
-	for panel: Control in [full_map, stats_panel, inventory_panel, dialogue_panel,
+	for panel: Control in [stats_panel, inventory_panel, dialogue_panel,
 			trade_panel, storage_panel, ground_bag_panel, manufacturing_panel,
-			item_lists_panel, console_panel, reading_panel, chat_hud, system_chat_hud]:
+			item_lists_panel, reading_panel, chat_hud, system_chat_hud]:
 		window_stack.register(panel)
 	for controller: Control in [spells_window, summoning_window, emotes_window,
 			ranging_window, mounts_window, guild_window, settings_window,
@@ -11663,7 +11670,7 @@ func _floating_feedback_row(preferred_y: float, lowest_y: float) -> float:
 
 func _on_window_size_changed() -> void:
 	_fit_hud_action_buttons.call_deferred()
-	_layout_full_map()
+	_layout_full_window_views()
 	# Match the render viewport to the actual drawable area so resizing changes
 	# camera aspect instead of stretching a fixed 16:9 render target. The
 	# container reports canvas units, which the content-scale system multiplies
@@ -11726,14 +11733,11 @@ func _invasion_monitor_dock_rect() -> Rect2:
 	return area
 
 
-func _layout_full_map() -> void:
-	var area := viewport_container.get_rect()
-	area.end = Vector2(minf(area.end.x, right_rail.position.x),
-		minf(area.end.y, (%Quickbar as Control).position.y))
-	full_map.offset_left = area.position.x - full_map.anchor_left * game_view.size.x
-	full_map.offset_top = area.position.y - full_map.anchor_top * game_view.size.y
-	full_map.offset_right = area.end.x - full_map.anchor_right * game_view.size.x
-	full_map.offset_bottom = area.end.y - full_map.anchor_bottom * game_view.size.y
+func _layout_full_window_views() -> void:
+	# These views fill the client canvas. HUD parts can move to any edge or
+	# float over them without changing their bounds or leaving legacy gaps.
+	for view: Control in [full_map, console_panel]:
+		view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func _sync_hud_button_states(force := false) -> void:
 	if _hud_icon_regions.is_empty():
