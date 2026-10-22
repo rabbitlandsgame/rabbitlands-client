@@ -88,8 +88,12 @@ func update_pose() -> void:
 		_power_action = action
 	if action not in [&"cast", &"cast_channel_enter", &"cast_channel", &"cast_aggressive", &"cast_defensive", &"heal"]:
 		spell_power = 1
-	var brightness := SpellPresentation.power_intensity(spell_power)
-	_material.albedo_color = Color(1.0, 1.0, 1.0, brightness)
+	# Set only when it changes: update_pose runs on every skeleton update, and
+	# setting a material parameter queues the material's uniforms for upload
+	# whether or not the value changed.
+	var brightness := Color(1.0, 1.0, 1.0, SpellPresentation.power_intensity(spell_power))
+	if _material.albedo_color != brightness:
+		_material.albedo_color = brightness
 	var has_cue := action in [&"cast", &"cast_channel_enter", &"cast_channel", &"cast_aggressive",
 		&"cast_defensive", &"heal", &"attack_primary", &"attack_secondary", &"ranged_draw", &"ranged_hold", &"ranged_attack"]
 	if not has_cue and (not _equipped_bow or mounted):
@@ -99,7 +103,7 @@ func update_pose() -> void:
 				bow.hide()
 			actor.set_hand_props_visible(false)
 		if action != _last_action:
-			_mesh.clear_surfaces()
+			_clear_effects()
 			_trail.clear()
 			if bow != null:
 				bow.hide()
@@ -112,8 +116,10 @@ func update_pose() -> void:
 		_trail.clear()
 	_last_action = action
 	_last_time = time
-	var left := hand_position(_hand_l)
-	var right := hand_position(_hand_r)
+	# The hands are read only for a cue: a bow carried at ease follows the
+	# fist's grip frame alone.
+	var left := hand_position(_hand_l) if has_cue else Vector3.ZERO
+	var right := hand_position(_hand_r) if has_cue else Vector3.ZERO
 	var drawing := action in [&"ranged_draw", &"ranged_hold"]
 	var ranging := drawing or action == &"ranged_attack"
 	if ranging and _equipped_bow:
@@ -126,14 +132,14 @@ func update_pose() -> void:
 		bow.set_idle_fit(false)
 		var skeleton_size := actor.get_skeleton().global_basis.get_scale().y
 		var size := actor.rig_fit_scale() * skeleton_size
-		var grip := carried_bow_grip()
-		bow.pose(left if ranging else grip.origin, right,
-			actor.global_basis.y.normalized(), -actor.global_basis.z.normalized(),
-			drawing, time if action == &"ranged_attack" else -1.0, size, skeleton_size)
-		if not ranging:
-			bow.global_basis = grip.basis.orthonormalized().scaled(Vector3.ONE * size)
+		if ranging:
+			bow.pose(left, right,
+				actor.global_basis.y.normalized(), -actor.global_basis.z.normalized(),
+				drawing, time if action == &"ranged_attack" else -1.0, size, skeleton_size)
+		else:
+			bow.carry(carried_bow_grip(), size, skeleton_size)
 	actor.set_hand_props_visible(not mounted and (not ranging or not _equipped_bow))
-	_mesh.clear_surfaces()
+	_clear_effects()
 	if not effects_enabled or not actor.is_visible_in_tree():
 		return
 	var casting := action in [&"cast", &"cast_channel_enter", &"cast_channel", &"cast_aggressive", &"cast_defensive", &"heal"]
@@ -210,3 +216,9 @@ func update_pose() -> void:
 	if action == &"ranged_attack" and time < 0.15:
 		CombatEffectMesh.spark(_mesh, l, 0.08*(1.0-time/0.15), Color(0.94,0.78,0.43,0.7))
 	_mesh.surface_end()
+
+## Clearing an empty mesh still tells the renderer its mesh changed, and every
+## instance of it is updated again: the cue mesh is cleared only when drawn.
+func _clear_effects() -> void:
+	if _mesh.get_surface_count() > 0:
+		_mesh.clear_surfaces()

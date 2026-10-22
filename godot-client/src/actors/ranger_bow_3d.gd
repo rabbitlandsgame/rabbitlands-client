@@ -30,6 +30,11 @@ var _local_geometry_valid := false
 var _last_draw_point := Vector3.ZERO
 var _last_flex := 0.0
 var _asset_fit := Transform3D.IDENTITY
+## The nocked arrow's place as last set (`_brace`): a transform set to the
+## same value still moves the arrow's instances in the renderer.
+var _arrow_placed := false
+var _arrow_point := Vector3.ZERO
+var _arrow_scale := Vector3.ONE
 
 func _init() -> void:
 	name = "RangerBow"
@@ -111,6 +116,19 @@ func pose(grip: Vector3, draw_hand: Vector3, up: Vector3, forward: Vector3,
 	# Damped string recoil immediately after release, then a quiet braced string.
 	if release_time >= 0.0:
 		draw_point.z += sin(release_time * 95.0) * exp(-release_time * 24.0) * 0.055
+	_brace(draw_point, is_drawing, size, arrow_size)
+
+## The bow carried at ease in a closed fist whose frame is `grip`: braced,
+## with no arrow nocked. What `pose` does when not drawing or releasing, less
+## the aiming frame the carry replaces.
+func carry(grip: Transform3D, size: float, arrow_size := 1.0) -> void:
+	global_transform = Transform3D(grip.basis.orthonormalized().scaled(Vector3.ONE * size),
+		grip.origin)
+	_brace(Vector3(0, 0, _tip_z), false, size, arrow_size)
+
+## Bends the limbs and strings the bow to `draw_point`, and nocks the arrow
+## there while drawing.
+func _brace(draw_point: Vector3, is_drawing: bool, size: float, arrow_size: float) -> void:
 	var flex := clampf((draw_point.z-_tip_z)*0.18, -0.025, 0.11)
 	if _upper_limbs.is_empty() and _lower_limbs.is_empty(): flex = 0.0
 	if not _local_geometry_valid or draw_point != _last_draw_point or flex != _last_flex:
@@ -133,11 +151,16 @@ func pose(grip: Vector3, draw_hand: Vector3, up: Vector3, forward: Vector3,
 	if arrow != null:
 		# Shared animation positions preserve draw length across race proportions.
 		# Fit the bow to stature, and the arrow to the animated skeleton's units.
-		arrow.scale = Vector3.ONE * arrow_size / maxf(size, 0.01)
+		var arrow_scale := Vector3.ONE * arrow_size / maxf(size, 0.01)
 		arrow.visible = is_drawing
-		arrow.position = draw_point
-		# Nock stays at the fingers; the broadhead extends beyond the arrow rest.
-		arrow.rotation = Vector3.ZERO
+		if not _arrow_placed or arrow_scale != _arrow_scale or draw_point != _arrow_point:
+			arrow.scale = arrow_scale
+			arrow.position = draw_point
+			# Nock stays at the fingers; the broadhead extends beyond the arrow rest.
+			arrow.rotation = Vector3.ZERO
+			_arrow_placed = true
+			_arrow_scale = arrow_scale
+			_arrow_point = draw_point
 
 func nock_position() -> Vector3:
 	return arrow.global_position if arrow != null else global_transform * _last_draw_point
