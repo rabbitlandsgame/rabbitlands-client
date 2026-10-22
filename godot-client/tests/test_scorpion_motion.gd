@@ -27,7 +27,7 @@ func _run() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--report="): report_path = argument.trim_prefix("--report=")
 		if argument.begins_with("--actor="): selected = argument.trim_prefix("--actor=")
-	check(manifest.actors.size() == 1, "one approved native scorpion")
+	check(manifest.actors.size() == 1, "one selected native scorpion")
 	var actors: Dictionary = {}
 	for name: String in manifest.actors:
 		if not selected.is_empty() and selected != name: continue
@@ -35,7 +35,7 @@ func _run() -> void:
 		actors[name] = _audit_actor(name, witness, registry)
 		check(actors[name].get("clips", []).size() == witness.clips.size(), name + " every native slot evaluated")
 	check(not actors.is_empty(), "selected actors exist")
-	var report := {"passed":failures.is_empty(),"failures":failures,"actors":actors,"engine":Engine.get_version_info(),"scope":"Approved Amethyst Scorpion, installed registry/maps, independent off-grid surfaces, normals and bones, loops, one-shot holds, action switches and RESET; seven slots."}
+	var report := {"passed":failures.is_empty(),"failures":failures,"actors":actors,"engine":Engine.get_version_info(),"scope":"Published Amethyst Scorpion, installed registry/maps, independent off-grid surfaces, normals and bones, loops, one-shot holds, action switches and RESET; seven slots."}
 	FileAccess.open(report_path,FileAccess.WRITE).store_string(JSON.stringify(report,"\t"))
 	print("SCORPION_FAMILY_GODOT ","PASS" if failures.is_empty() else "FAIL"," actors=",actors.size()," failures=",failures.size())
 	quit(0 if failures.is_empty() else 1)
