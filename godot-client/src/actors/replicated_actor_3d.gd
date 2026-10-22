@@ -339,12 +339,28 @@ var _silhouette: OccludedSilhouette
 ## paused body has to put it to sleep too and wake it with the body.
 var _animation_tier: int = AnimationGate.Tier.FULL
 var _cape_cloth_worn := false
+var _cape_cloth_allowed := true
 ## The resolved graphics quality and whether this is the player's own actor.
 ## Main supplies both after configure; keeping them here makes appearance and
 ## equipment created later inherit the same policy without rebuilding either
 ## resource cache.
 var _render_quality: int = ACTOR_RENDER_QUALITY.QUALITY_DEFAULT
 var _render_quality_local_actor := false
+## Configured without its body: identity, picking, the overhead block, the map
+## dot and every protocol state are here, but no model, skeleton, animation or
+## equipment. Main builds a full actor in this one's place once it comes near
+## enough to be drawn (`Main._update_model_builds`), so an actor the server
+## sends from across the map costs a handful of nodes until then. A crowd at the
+## edge of view is still drawn meanwhile: `_stand_in` is a plain shape where the
+## body will be, shown only inside the draw distance.
+var _model_deferred := false
+var _stand_in: MeshInstance3D
+## Past the client's optional body cap: only the map dot is left - no stand-in,
+## overhead block or picking - which is what the server's own cap does to an
+## actor it no longer sends.
+var _crowd_hidden := false
+static var _stand_in_mesh: CapsuleMesh
+static var _stand_in_material: StandardMaterial3D
 
 # Visual layer 2. The gameplay camera renders layers 1 and 2; the full-map
 # camera renders layers 1 and 3, and the minimap camera renders layer 1 alone.
@@ -479,7 +495,7 @@ const RING_SEGMENT_METRES := 0.5
 
 func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		model_config: Dictionary, animation_config: Dictionary,
-		equipment_config: Dictionary = {}) -> Array[String]:
+		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
 	actor_id = int(dto.actor_id)
 	_is_creature = int(dto.get("kind", 0)) == CREATURE_ACTOR_KIND
 	_small_creature_scale = 1.0
@@ -541,6 +557,10 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		# Keep identity, picking, nameplate and protocol state without drawing
 		# either the archived model or a replacement placeholder body.
 		set_meta("retired_model", true)
+		return []
+	if not build_model:
+		_model_deferred = true
+		_add_stand_in()
 		return []
 	var source_path := _external_path(str(model_config.get("scene", "")))
 	var errors := _load_native_scene(source_path)
@@ -1296,7 +1316,7 @@ func _overhead_material(colour: Color, priority: int) -> StandardMaterial3D:
 func apply_vitals(current: int, maximum: int) -> void:
 	# Bodies remain visible while fading, but must not intercept a living target.
 	# Fallen players keep their pick layer for targeted healing and revival.
-	collision_layer = 0 if _is_creature and current <= 0 else 2
+	collision_layer = 0 if (_is_creature and current <= 0) or _crowd_hidden else 2
 	if current == _health_current and maximum == _health_maximum:
 		return
 	_health_current = current
@@ -1368,7 +1388,7 @@ func _refresh_overhead_health() -> void:
 ## switched back on while the actor is out of range would float over nothing.
 func _overhead_shown() -> bool:
 	return _overhead_visible and not _overhead_crowded and _overhead_fade > 0.0 and _drawn \
-		and not (_is_creature and _health_current == 0)
+		and not _crowd_hidden and not (_is_creature and _health_current == 0)
 
 func set_overhead_crowded(crowded: bool) -> void:
 	if _overhead_crowded == crowded:
@@ -1390,6 +1410,10 @@ static func _health_colour(ratio: float) -> Color:
 		clampf(fraction / 1.25 * 2.0, 0.0, 1.0), 0.0)
 
 func set_nameplate_visible(enabled: bool) -> void:
+	# Main restates this with every packet; every other input to the overhead
+	# block refreshes it itself, so an unchanged answer has nothing to redo.
+	if enabled == _overhead_visible:
+		return
 	_overhead_visible = enabled
 	_refresh_overhead()
 
@@ -1410,7 +1434,8 @@ func overhead_fade() -> float:
 func _refresh_overhead() -> void:
 	if is_instance_valid(_quest_marker):
 		# Quest offers remain visible when nameplates are disabled or crowded.
-		_quest_marker.visible = _drawn and _overhead_fade > 0.0 and not _quest_marker.text.is_empty()
+		_quest_marker.visible = _drawn and not _crowd_hidden and _overhead_fade > 0.0 \
+			and not _quest_marker.text.is_empty()
 	if is_instance_valid(_nameplate):
 		_nameplate.visible = _overhead_shown()
 		_fade_label(_nameplate)
@@ -1607,6 +1632,7 @@ func _apply_model_scale() -> void:
 			# picking capsule and ground markers retain their server positions.
 			model.position.z = maxf(0.0, float((_model_config.get("import", {}) as Dictionary).get(
 				"visualBacksetMetres", 0.0))) * _small_creature_scale * server_scale
+	_size_stand_in()
 	_lift_overhead(server_scale)
 
 ## The top of the body as drawn, above this actor's foot point: the authored
@@ -1660,6 +1686,7 @@ func _resize_selection() -> void:
 			_target_marker_style.square_color)
 		_selection_ring.mesh = _selection_ring_flat
 		_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
+	_size_stand_in()
 	_sync_combat_target_marker()
 
 ## Tentative and confirmed target circles share footprint sizing, borders
@@ -1982,7 +2009,7 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 func _sync_death_presentation(dto: Dictionary) -> void:
 	if not dto.has("health"):
 		return
-	collision_layer = 0 if _is_creature and (int(dto.health) <= 0 or not bool(dto.get("alive", true))) else 2
+	collision_layer = 0 if _crowd_hidden or (_is_creature and (int(dto.health) <= 0 or not bool(dto.get("alive", true)))) else 2
 	if int(dto.health) > 0 and bool(dto.get("alive", true)):
 		if current_action == &"death":
 			current_action = &"idle"
@@ -1997,6 +2024,7 @@ func _sync_death_presentation(dto: Dictionary) -> void:
 				_corpse_geometry.clear()
 			_set_corpse_transparency(0.0)
 			play_action(&"idle", true)
+			_refresh_stand_in()
 		return
 	var snapshot: Dictionary = dto.get("death_presentation", {})
 	_death_animation_seconds = float(snapshot.get("animation_seconds", 0.0))
@@ -2110,6 +2138,10 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 	# that matches in full does nothing but walk the model's meshes again in
 	# `_refresh_wardrobe_cover`, which reads only state this function writes.
 	# The first pass always runs, so nothing an actor is built with is skipped.
+	# A deferred actor has nothing to dress: its replacement is built from the
+	# record as it stands then, wardrobe included.
+	if _model_deferred:
+		return
 	if _equipment_applied and _equipment_matches(visuals, fallback_parts):
 		return
 	_equipment_applied = true
@@ -2406,15 +2438,37 @@ func _set_cape_cloth_active(enabled: bool) -> void:
 		_tell_cloth_what_is_worn()
 	_refresh_cape_cloth_activity(true)
 
-## Cape cloth is enabled only when all three owners agree: equipment says a
-## cape is worn, the animation gate has not paused this actor, and the actor
-## quality permits cloth for this local/non-local role. Re-enabling after a
+## Whether this body may simulate its cape at all: in a crowd Main allows it
+## for the bodies nearest the camera only (crowd_presentation.gd
+## `CLOTH_BODIES`); the rest hang as every non-local cape does below High.
+func set_cape_cloth_allowed(allowed: bool) -> void:
+	if allowed == _cape_cloth_allowed:
+		return
+	_cape_cloth_allowed = allowed
+	# A cape that slept while its body walked on starts again from rest.
+	_refresh_cape_cloth_activity(true)
+
+func cape_cloth_allowed() -> bool:
+	return _cape_cloth_allowed
+
+## Whether a cape that can simulate is worn: what the cloth budget ranks.
+func wears_cape_cloth() -> bool:
+	return _cape_cloth != null and _cape_cloth_worn
+
+func cape_cloth_active() -> bool:
+	return _cape_cloth != null and _cape_cloth.active
+
+## Cape cloth is enabled only when all four owners agree: equipment says a
+## cape is worn, the crowd's cloth budget allows this body, the animation gate
+## has not paused this actor, and the actor quality permits cloth for this
+## local/non-local role. Re-enabling after a
 ## quality change resets stale solver points; animation-tier wakes preserve the
 ## previous behavior and resume them where they slept.
 func _refresh_cape_cloth_activity(reset_when_enabled: bool = false) -> void:
 	if _cape_cloth == null:
 		return
 	var enabled := (_cape_cloth_worn
+		and _cape_cloth_allowed
 		and not is_instance_valid(_mount_visual)
 		and _animation_tier != AnimationGate.Tier.PAUSED
 		and ACTOR_RENDER_QUALITY.cape_enabled(
@@ -2746,6 +2800,10 @@ func get_skeleton() -> Skeleton3D:
 	return _native_skeleton
 
 func set_mount_state(state: Dictionary, models: Dictionary) -> void:
+	if _model_deferred:
+		# Kept for the record only; the built actor seats its own rider.
+		mount_state = state.duplicate(true)
+		return
 	var was_mounted := is_instance_valid(_mount_visual)
 	var mount_id := str(state.get("mount_id", ""))
 	var riding: bool = state.get("mode") == "mounted" and preload("res://src/mounts/mount_profiles.gd").supports(mount_id)
@@ -3437,6 +3495,7 @@ func play_action(action: StringName, restart := false) -> void:
 		_death_finished = true
 		_death_elapsed = 0.0
 		set_process(true)
+		_refresh_stand_in()
 		return
 	if _cinematic_active and action != _cinematic_action:
 		return
@@ -4035,6 +4094,7 @@ func set_drawn(enabled: bool) -> void:
 		# may have faded, or the banner options changed, in the meantime.
 		_refresh_overhead()
 		_sync_combat_target_marker()
+		_refresh_stand_in()
 		return
 	# Swept on every call rather than only on the way out. An actor out of range
 	# still takes packets: it can change what it is wearing, or lose the model it
@@ -4042,10 +4102,11 @@ func set_drawn(enabled: bool) -> void:
 	_drawn = false
 	for child: Node in get_children():
 		var node := child as Node3D
-		if node == null or node.name == MAP_DOT_NODE or not node.visible:
+		if node == null or node.name == MAP_DOT_NODE or node == _stand_in or not node.visible:
 			continue
 		node.visible = false
 		_hidden_by_range.append(node)
+	_refresh_stand_in()
 
 
 func is_drawn() -> bool:
@@ -4054,26 +4115,170 @@ func is_drawn() -> bool:
 
 ## Puts this actor's animation in one of the gate's tiers; see AnimationGate.
 ##
-## A clip that does not loop - sitting down, standing up - is played out at
-## full rate whatever the tier asks. Paused, the actor would be left caught
-## mid-move and then seen finishing it when it came back into view.
+## A clip that does not loop - sitting down, standing up - is played out
+## whatever the tier asks. Paused, the actor would be left caught mid-move and
+## then seen finishing it when it came back into view. With the crowd gate on
+## (`AnimationGate.gate_skeletons`) a body out of view plays it out at half
+## rate, which finishes it at the same speed: in a fight the bodies behind the
+## camera strike every round, and each strike woke them to full rate.
 func set_animation_tier(tier: int, gate: AnimationGate) -> void:
 	if is_instance_valid(_mount_visual):
 		return
 	if animation_player == null:
 		return
 	if tier != AnimationGate.Tier.FULL and _playing_one_shot():
-		tier = AnimationGate.Tier.FULL
+		tier = (AnimationGate.Tier.HALF if gate.gate_skeletons
+			else AnimationGate.Tier.FULL)
 	if tier == _animation_tier:
 		return
 	_animation_tier = tier
-	gate.apply(animation_player, tier)
+	gate.apply(animation_player, tier, _native_skeleton)
+	if gate.gate_skeletons:
+		_set_model_processing(tier != AnimationGate.Tier.PAUSED)
 	if _weapon_carry != null:
 		_weapon_carry.call("update_activity")
 	_refresh_cape_cloth_activity()
 
 func animation_tier() -> int:
 	return _animation_tier
+
+## A paused body has nothing to pose: its player is stopped and its cloth is
+## asleep. Its skeleton still processed its modifiers and updated every frame,
+## though, so a crowd paid skeleton work for every body off screen (the engine
+## profile counted 300 skeleton updates a frame with 150 actors in view).
+## Disabling the model's subtree stops that until the body is woken.
+func _set_model_processing(enabled: bool) -> void:
+	if is_instance_valid(_native_model):
+		_native_model.process_mode = (Node.PROCESS_MODE_INHERIT if enabled
+			else Node.PROCESS_MODE_DISABLED)
+
+func model_processing() -> bool:
+	return not is_instance_valid(_native_model) \
+		or _native_model.process_mode != Node.PROCESS_MODE_DISABLED
+
+## Whether this actor still waits for its body; see `_model_deferred`.
+func is_model_deferred() -> bool:
+	return _model_deferred
+
+## A plain capsule where a deferred actor's body will be, so a crowd walking
+## into view is not empty ground for the frames it takes to build. One mesh and
+## one material are shared by every stand-in; it casts no shadow and is drawn
+## by the gameplay camera only.
+func _add_stand_in() -> void:
+	if _stand_in_mesh == null:
+		_stand_in_mesh = CapsuleMesh.new()
+		_stand_in_mesh.radius = 0.3
+		_stand_in_mesh.height = 1.6
+		_stand_in_mesh.radial_segments = 8
+		_stand_in_mesh.rings = 2
+		_stand_in_material = StandardMaterial3D.new()
+		_stand_in_material.albedo_color = Color(0.34, 0.31, 0.28)
+		_stand_in_material.roughness = 1.0
+		_stand_in_mesh.material = _stand_in_material
+	_stand_in = MeshInstance3D.new()
+	_stand_in.name = "StandIn"
+	_stand_in.mesh = _stand_in_mesh
+	_stand_in.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_stand_in.layers = GAMEPLAY_ONLY_VISUAL_LAYER
+	add_child(_stand_in)
+	_size_stand_in()
+	_refresh_stand_in()
+
+## The stand-in shows while this actor is drawn, alive and not over the body cap.
+func _refresh_stand_in() -> void:
+	if is_instance_valid(_stand_in):
+		_stand_in.visible = _drawn and not _crowd_hidden and current_action != &"death"
+
+func stand_in_visible() -> bool:
+	return is_instance_valid(_stand_in) and _stand_in.visible
+
+## See `_crowd_hidden`.
+func set_crowd_hidden(hidden: bool) -> void:
+	if hidden == _crowd_hidden:
+		return
+	_crowd_hidden = hidden
+	collision_layer = 0 if hidden else (0 if _is_creature and _health_current == 0 else 2)
+	_refresh_stand_in()
+	_refresh_overhead()
+
+func crowd_hidden() -> bool:
+	return _crowd_hidden
+
+func _size_stand_in() -> void:
+	if not is_instance_valid(_stand_in):
+		return
+	var span: float = float(maxi(footprint.x, footprint.y)) * _metres_per_tile
+	var height: float = (0.8 if _is_creature else 1.0) * server_scale
+	_stand_in.scale = Vector3(span, height, span)
+	_stand_in.position.y = 0.8 * height
+
+## Whether this is a corpse that has already faded out of sight, which no body
+## needs to be built for.
+func corpse_faded() -> bool:
+	if current_action != &"death" or not (_corpse_temporary or _is_creature):
+		return false
+	var hold := (CREATURE_DISSOLVE_DELAY_SECONDS if _is_creature and _corpse_temporary
+		else _corpse_hold_seconds)
+	return _death_elapsed >= _death_duration() + hold + _corpse_fade_seconds
+
+## What the server has told a node this one replaces about its last command,
+## taken before this one applies the same record: a swing already shown by the
+## replaced body, or not shown because it had none, is not started again by
+## the body that takes over. Call between `configure` and `apply_server_state`.
+func adopt_command_memory_from(previous: ReplicatedActor3D) -> void:
+	if previous == null or not is_instance_valid(previous) or previous == self:
+		return
+	_last_command_sequence = previous._last_command_sequence
+	_in_combat = previous._in_combat
+	_swing_index = previous._swing_index
+
+## Carries a replaced node's motion into this one: the body Main builds in a
+## deferred actor's place, or the deferred actor that replaces a body gone far
+## out of range, carries on with the step it is on and the pace it has learned
+## instead of snapping to the tile and relearning the server's cadence. A death
+## keeps its time, so a corpse coming into view is not seen dying again. Call
+## after this node has applied the same record and been put on the ground.
+func adopt_presentation_from(previous: ReplicatedActor3D) -> void:
+	if previous == null or not is_instance_valid(previous) or previous == self:
+		return
+	if current_action == &"death" and previous.current_action == &"death":
+		_death_elapsed = maxf(_death_elapsed, previous._death_elapsed)
+		if animation_player != null and resolver != null:
+			var clip := resolver.clip_for_action(&"death")
+			if animation_player.has_animation(clip):
+				animation_player.seek(minf(_death_elapsed * animation_player.speed_scale,
+					animation_player.get_animation(clip).length), true)
+		_update_corpse_pose()
+		global_position = server_target
+		return
+	if _charge_leap != null or _cinematic_active or previous._charge_leap != null \
+			or previous._cinematic_active:
+		return
+	global_position = previous.global_position
+	rotation.y = previous.rotation.y
+	_target_yaw = previous._target_yaw
+	_segment_start = previous._segment_start
+	_segment_elapsed = previous._segment_elapsed
+	_segment_duration = previous._segment_duration
+	_schedule_due = previous._schedule_due
+	_last_movement_update_msec = previous._last_movement_update_msec
+	_smoothed_server_interval = previous._smoothed_server_interval
+	_pace_histories = previous._pace_histories.duplicate(true)
+	_unconfirmed_paces = previous._unconfirmed_paces.duplicate()
+	_unconfirmed_gait = previous._unconfirmed_gait
+	_previous_step_gait = previous._previous_step_gait
+	_previous_step_tiles = previous._previous_step_tiles
+	_jitter_allowance = previous._jitter_allowance
+	_travel_yaw_active = previous._travel_yaw_active
+	_travel_yaw = previous._travel_yaw
+	_movement_coast_remaining = previous._movement_coast_remaining
+	_presentation_speed = previous._presentation_speed
+	_snap_pending = false
+	_settled = false
+	set_physics_process(true)
+	if (_segment_duration > 0.0 or _movement_coast_remaining > 0.0) \
+			and current_action in [&"idle", &"combat_idle", &"turn"]:
+		play_action(_paced_travel_action(&"run" if _previous_step_gait & 1 else &"walk"))
 
 func _playing_one_shot() -> bool:
 	if not animation_player.is_playing():

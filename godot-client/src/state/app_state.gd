@@ -74,8 +74,13 @@ var _native_crowd_reducer: Object
 ## The ids of actors written since the presentation last read them. Every
 ## site that writes `actors` records the id here and `take_changed_actors`
 ## hands the set over, so a frame with one moving creature costs one actor's
-## worth of presentation work rather than the whole map's.
+## worth of presentation work rather than the whole map's. REMOVE_ACTOR marks
+## the ids it takes away too, so their nodes go without a walk of the table.
 var changed_actors: Dictionary = {}
+## Bumped whenever the actor table is emptied in bulk (KILL_ALL_ACTORS, a lost
+## connection) rather than actor by actor: the one case in which presentation
+## has to walk every node to find the ones left over.
+var actor_roster_generation := 0
 var inventory: Dictionary = {}
 ## Slot to the name the server calls what is in it, for the same positions
 ## `inventory` uses. Kept apart from the entries rather than merged into
@@ -450,6 +455,7 @@ func _on_connection_state_changed(value: String) -> void:
 		authenticated = false
 		local_actor_id = -1
 		actors.clear()
+		actor_roster_generation += 1
 		inventory.clear()
 		inventory_text = ""
 		inventory_cooldowns.clear()
@@ -679,6 +685,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			for removed_actor_value: Variant in event.actor_ids:
 				var removed_actor_id: int = int(removed_actor_value)
 				actors.erase(removed_actor_id)
+				mark_actor_changed(removed_actor_id)
 				actor_occupations.erase(removed_actor_id)
 				actor_mounts.erase(removed_actor_id)
 				_mount_handoffs.erase(removed_actor_id)
@@ -690,6 +697,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"clear_actors":
 			Network.coordinate_route_cancelled.emit()
 			actors.clear()
+			actor_roster_generation += 1
 			actor_occupations.clear()
 			actor_mounts.clear()
 			_mount_handoffs.clear()
