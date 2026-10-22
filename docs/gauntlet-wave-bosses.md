@@ -2,7 +2,9 @@
 
 Development behavior pending server release.
 
-An ordinary gauntlet wave can arrive with an extra leader. Most leaders are a stronger version of the wave's main creature; occasionally a stronger named boss appears instead. Final courts keep their authored bosses.
+Each gauntlet map has one route definition for every party level and challenge. Its three copies let separate parties run it simultaneously. Encounters choose creatures with suitable native Attack/Defense, preferring the map's theme, and retain their normal species stats.
+
+An ordinary wave can arrive with an extra leader. Most leaders are a stronger version of the wave's main creature; occasionally a stronger named boss appears instead. Courts choose a suitable boss from their retained encounter patterns. Higher challenges increase rolled boss and miniboss bonuses.
 
 On trail roads, creatures emerging from channels walk towards the bowl's center, then wander around it. They still attack players who come close along the way. Idle creatures gather around their living leader once inside the bowl, and keep the arena's movement boundaries.
 
