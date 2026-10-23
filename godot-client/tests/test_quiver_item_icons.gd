@@ -14,11 +14,11 @@ func _run() -> void:
 	var atlas = ItemAtlasScript.new()
 	atlas.configure(config)
 	var button := Button.new()
-	for image_id: int in range(599, 607):
+	for image_id: int in range(599, 617):
 		var source: Dictionary = atlas.icon_source(image_id)
-		_expect(not source.is_empty(), "quiver %d has a registered icon" % image_id)
+		_expect(not source.is_empty(), "equipment %d has a registered icon" % image_id)
 		var texture: Texture2D = atlas.icon_for(image_id)
-		_expect(texture != null, "quiver %d has an imported texture" % image_id)
+		_expect(texture != null, "equipment %d has an imported texture" % image_id)
 		if texture == null or source.is_empty():
 			continue
 		button.icon = texture
@@ -29,11 +29,11 @@ func _run() -> void:
 		actual.convert(Image.FORMAT_RGBA8)
 		expected.convert(Image.FORMAT_RGBA8)
 		_expect(actual.get_size() == Vector2i(50, 50),
-			"quiver %d fills its 50px icon region" % image_id)
+			"equipment %d fills its 50px icon region" % image_id)
 		_expect(actual.get_data() == expected.get_data(),
-			"quiver %d uses the current painted PNG; refresh its texture import if this fails" % image_id)
+			"equipment %d uses the current painted PNG; refresh its texture import if this fails" % image_id)
 	button.free()
-	print("quiver inventory texture tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
+	print("painted equipment inventory texture tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
 
 func _expect(value: bool, label: String) -> void:
