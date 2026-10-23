@@ -5,6 +5,7 @@ from pathlib import Path
 import re
 
 import build_release as release
+import shared_release_assets as shared
 from runner_release import authorize
 
 
@@ -17,7 +18,11 @@ def finalize(receipts: list[Path], out: Path) -> str:
         raise ValueError("Both platform receipts must use the same update format.")
     if not re.fullmatch(r"[0-9a-f]{40}", sha):
         raise ValueError("Runner commit must be a full public commit ID.")
-    rows, stages = {}, {}
+    rows, stages, shared_rows, helpers = {}, {}, {}, {}
+    pooled = data[0].get("shared_storage") == 1
+    if any((item.get("shared_storage") == 1) != pooled for item in data):
+        raise ValueError("Both platforms must use the same asset storage.")
+    pool_id = data[0].get("shared_release_id") if pooled else None
     for item in data:
         if (item.get("schema") != 1 or item["repository"] != release.REPOSITORY
                 or item["commit"] != sha or item["release_id"] != release_id):
@@ -28,6 +33,14 @@ def finalize(receipts: list[Path], out: Path) -> str:
             raise ValueError("Unexpected runner stage name.")
         stages[platform] = stage
         packaged = item.get("update_schema", 1) == 2
+        if pooled:
+            if not packaged or item.get("shared_release_id") != pool_id or not isinstance(pool_id, int) or pool_id <= 0:
+                raise ValueError("Platform receipts use different shared downloads.")
+            for name, row in shared.receipt_assets(item).items():
+                if name in shared_rows and shared_rows[name] != row:
+                    raise ValueError("Shared platform checksums disagree.")
+                shared_rows[name] = row
+            helpers[platform] = item["shared_helpers"]
         allowed = re.compile(re.escape(stage) + (
             r"(?:-windows\.json|-setup\.exe|-(?:updater|uninstall)\.exe|\.pkg\.[a-z0-9-]+\.zip\.\d{3,}|\.update\.zip\.\d{3,})" if platform == "windows" else
             r"(?:-linux\.json|-download\.sh|-(?:updater|uninstall)\.x86_64|\.pkg\.[a-z0-9-]+\.zip\.\d{3,}|\.update\.zip\.\d{3,}|\.tar\.gz\.\d{3,})"))
@@ -39,18 +52,24 @@ def finalize(receipts: list[Path], out: Path) -> str:
                 raise ValueError("Invalid, duplicated or unexpected runner download.")
             rows[row["name"]] = row
             names.add(row["name"])
-        required = {f"{stage}-{platform}.json", f"{stage}.pkg.client.zip.001" if packaged else f"{stage}.update.zip.001",
+        required = {f"{stage}-{platform}.json",
                     f"{stage}-setup.exe" if platform == "windows" else f"{stage}-download.sh"}
-        if packaged:
+        if not pooled:
+            required.add(f"{stage}.pkg.client.zip.001" if packaged else f"{stage}.update.zip.001")
+        if packaged and not pooled:
             extension = "exe" if platform == "windows" else "x86_64"
             required.update({f"RabbitLands-{platform}.json", f"{stage}.pkg.engine.zip.001",
                              f"{stage}-updater.{extension}", f"{stage}-uninstall.{extension}"})
-        if platform == "linux":
+        if packaged:
+            required.add(f"RabbitLands-{platform}.json")
+        if platform == "linux" and not pooled:
             required.add(f"{stage}.tar.gz.001")
         if not required <= names:
             raise ValueError("A runner receipt is missing required downloads.")
     if len(rows) + 1 > 1000:
         raise ValueError("Too many release assets.")
+    if len(shared_rows) > 1000:
+        raise ValueError("Too many shared release assets.")
     authorize()
     if release.gh("api", f"repos/{release.REPOSITORY}/commits/{sha}", "--jq", ".sha") != sha:
         raise ValueError("Runner source commit is not public.")
@@ -60,6 +79,11 @@ def finalize(receipts: list[Path], out: Path) -> str:
     remote = {asset["name"]: asset for asset in release.github_assets(release_id)}
     if any(not release.asset_matches(remote.get(name, {}), row) for name, row in rows.items()):
         raise ValueError("A runner download is missing or failed checksum verification; keeping previous files.")
+    if pooled:
+        shared.validate_release(json.loads(release.gh("api", f"repos/{release.REPOSITORY}/releases/{pool_id}")))
+        remote_pool = {a["name"]: a for a in release.github_assets(pool_id)}
+        if any(not release.asset_matches(remote_pool.get(name, {}), row) for name, row in shared_rows.items()):
+            raise ValueError("A shared download failed checksum verification; keeping previous files.")
     tag = f"client-{sha}"
     refs = json.loads(release.gh("api", f"repos/{release.REPOSITORY}/git/matching-refs/tags/{tag}"))
     for ref in refs:
@@ -71,7 +95,7 @@ def finalize(receipts: list[Path], out: Path) -> str:
                 raise ValueError("The release tag points to another source commit.")
     out.mkdir(parents=True, exist_ok=False)
     sums = out / "SHA256SUMS"
-    sums.write_text("".join(f"{row['sha256']}  {name}\n" for name, row in sorted(rows.items())), encoding="ascii")
+    sums.write_text("".join(f"{row['sha256']}  {name}\n" for name, row in sorted((rows | shared_rows).items())), encoding="ascii")
     checksum = {"size": sums.stat().st_size, "sha256": release.client_release.digest(sums)}
     release.upload_asset(draft["tag_name"], release_id, sums, checksum, remote.get(sums.name, {}))
     rows[sums.name] = {"name": sums.name, **checksum}
@@ -80,6 +104,10 @@ def finalize(receipts: list[Path], out: Path) -> str:
     remote = {asset["name"]: asset for asset in actual}
     if any(not release.asset_matches(remote.get(name, {}), row) for name, row in rows.items()):
         raise ValueError("Final checksum verification failed; keeping previous files.")
+    if pooled:
+        remote_pool = {a["name"]: a for a in release.github_assets(pool_id)}
+        if any(not release.asset_matches(remote_pool.get(name, {}), row) for name, row in shared_rows.items()):
+            raise ValueError("Final shared checksum verification failed; keeping previous files.")
     base = f"https://github.com/{release.REPOSITORY}/releases/download/{tag}"
     windows, linux = stages["windows"], stages["linux"]
     notes = out / "RELEASE-NOTES.md"
@@ -117,6 +145,28 @@ the platform's `*-updater` executable from this release into their game folder
 and running it once. Fresh Windows installations still need just the setup file.
 See [installation instructions](https://github.com/{release.REPOSITORY}/wiki/Access-and-Installation).
 ''', encoding="utf-8", newline="\n")
+    if pooled:
+        text = notes.read_text()
+        start, end = text.index("```sh"), text.index("Neither platform needs")
+        text = text[:start] + f'''```sh
+sh ./{linux}-download.sh
+~/Games/RabbitLands/RabbitLands-updater.x86_64
+```
+
+The helper needs `curl` and `sha256sum`. It verifies the native updater, which
+downloads the required game packages. Pass another parent folder as its first
+argument. Existing installations reuse their matching packages.
+
+''' + text[end:]
+        text = text.replace("the platform's `*-updater` executable from this release into their game folder",
+            "the platform's updater linked below into their game folder")
+        text += "\n## Standalone helpers\n\n"
+        for platform, names in helpers.items():
+            text += "\n" + platform.title() + ": " + ", ".join(
+                f"[{kind}]({shared.base(release.REPOSITORY)}/{name})" for kind, name in names.items()) + ".\n"
+        text = text.replace("`.pkg.*.zip.###` packages", "checksum-named ZIP packages")
+        text += "\nSupporting package files live in one shared downloads release. Only changed checksums are uploaded; the latest playable release is still the only retained game version.\n"
+        notes.write_text(text, encoding="utf-8", newline="\n")
     release.gh("release", "edit", draft["tag_name"], "--repo", release.REPOSITORY, "--draft", "--tag", tag,
                "--target", sha, "--title", f"Rabbit Lands {sha[:9]}", "--notes-file", str(notes))
     for asset in actual:
@@ -131,7 +181,8 @@ See [installation instructions](https://github.com/{release.REPOSITORY}/wiki/Acc
     release.write_json(out / "client_updates.json", {"schema": 1, "required_commit": sha, "enforce": True,
         "manifests": {platform: f"{base}/{stage}-{platform}.json" for platform, stage in stages.items()}})
     release.write_json(out / "runner-release.json", {"schema": 1, "commit": sha, "release_id": release_id,
-        "assets": list(rows.values())})
+        "assets": list(rows.values()), "shared_assets": list(shared_rows.values()), "shared_release_id": pool_id,
+        "transfer": {key: sum(i.get("transfer", {}).get(key, 0) for i in data) for key in ("uploaded_bytes", "reused_bytes")}})
     url = json.loads(release.gh("api", f"repos/{release.REPOSITORY}/releases/{release_id}"))["html_url"]
     print(f"Draft verified: {url}")
     return url

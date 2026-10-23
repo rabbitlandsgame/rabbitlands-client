@@ -2948,9 +2948,10 @@ def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
     if payload["commit"] != metadata["commit"] or payload["platform"] != "windows":
         raise PackageError("The online installer manifest does not match the staged client.")
     base = f"https://github.com/{metadata['repository']}/releases/download/client-{metadata['commit']}/"
+    import shared_release_assets as shared
     for part in payload["parts"]:
-        name = part["url"].removeprefix(base)
-        if not part["url"].startswith(base) or Path(name).name != name:
+        name = part["url"].rsplit("/", 1)[-1]
+        if (not part["url"].startswith(base) and not shared.matches(part, metadata["repository"])) or Path(name).name != name:
             raise PackageError("Unexpected online installer download URL.")
         path = stage.parent / name
         if STORAGE and STORAGE.part_matches(name, part):
@@ -3009,6 +3010,7 @@ def _main(argv=None, storage=None) -> int:
     parser.add_argument("--update-public-key", type=Path, default=CLIENT / "data/update_public.pem")
     parser.add_argument("--github-repository", default="rabbitlandsgame/rabbitlands-client", help="public GitHub release repository (OWNER/REPO)")
     parser.add_argument("--release-build", action="store_true", help="mark an official release; normal local builds require manual updates")
+    parser.add_argument("--shared-release-assets", action="store_true", help="reuse checksum-named packages in the shared downloads release")
     options = parser.parse_args(argv)
 
     started = time.time()
@@ -3152,6 +3154,7 @@ def _main(argv=None, storage=None) -> int:
         if updating:
             outputs.extend(client_release.publish_artifacts(stage, metadata, options.update_signing_key,
                                                             godot, project, run_godot, logs,
+                shared=options.shared_release_assets,
                 **({"accept_part": storage.accept_part, "budget": storage.budget} if storage else {})))
         if not options.no_zip:
             if options.platform == "macos":

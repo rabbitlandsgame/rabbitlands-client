@@ -185,7 +185,8 @@ def test_real_download_skips_unchanged_packages_repairs_and_removes_obsolete_fil
     actor = f["installed"] / "app/assets/actors/native/creatures/rabbit.glb"
     actor.write_bytes(b"damaged actor")
     assert f["run"]()[0] == 0
-    assert len(f["downloads"]) == 1 and ".pkg.actors-" in f["downloads"][0]
+    actor_package = next(p for p in f["payload"]["packages"] if p["id"].startswith("actors-"))
+    assert f["downloads"] == ["/" + actor_package["parts"][0]["url"].rsplit("/", 1)[1]]
     assert actor.read_bytes() == b"old rabbit"
 
 
@@ -254,14 +255,22 @@ def test_bootstrap_can_upgrade_before_reading_a_future_game_format(fixture):
     assert f["run"]("bootstrap-verify", payload)[0] == 1
 
 
-def test_publication_signs_package_inventory_and_collects_all_installer_assets(fixture):
+@pytest.mark.parametrize("shared", [False, True])
+@pytest.mark.parametrize("platform", ["windows", "linux"])
+def test_publication_signs_package_inventory_and_collects_all_installer_assets(fixture, shared, platform):
     import build_release
     f = fixture
-    stage = f["tmp_path"] / "RabbitLands-Windows-20261024-bbbbbbbbb"
+    stage = f["tmp_path"] / f"RabbitLands-{platform.title()}-20261024-bbbbbbbbb"
     shutil.copytree(f["stage"], stage)
+    metadata = json.loads((stage / "app/client-release.json").read_text())
+    metadata["platform"] = platform
+    (stage / "app/client-release.json").write_text(json.dumps(metadata))
+    if platform == "linux":
+        (stage / "app/RabbitLands.exe").rename(stage / "app/RabbitLands.x86_64")
     (stage / package_client.MARKER).write_text("b" * 40)
     for kind in ("updater", "uninstall"):
-        (stage / f"RabbitLands-{kind}.exe").write_bytes(b"test native bootstrap")
+        extension = "exe" if platform == "windows" else "x86_64"
+        (stage / f"RabbitLands-{kind}.{extension}").write_bytes(b"test native bootstrap")
     logs = f["tmp_path"] / "publication-logs"
     shutil.copytree(f["project"], logs / "updater-project")
     private = f["tmp_path"] / "test-only-private.pem"
@@ -273,22 +282,28 @@ def test_publication_signs_package_inventory_and_collects_all_installer_assets(f
         log.write_text(result.stdout + result.stderr)
         assert result.returncode == 0 and "SCRIPT ERROR" not in log.read_text(), log.read_text()
 
-    metadata = json.loads((stage / "app/client-release.json").read_text())
-    outputs = client_release.publish_artifacts(stage, metadata, private, f["godot"], CLIENT, run_godot, logs)
-    manifest_path = stage.parent / f"{stage.name}-windows.json"
+    outputs = client_release.publish_artifacts(stage, metadata, private, f["godot"], CLIENT, run_godot, logs, shared=shared)
+    manifest_path = stage.parent / f"{stage.name}-{platform}.json"
     envelope = json.loads(manifest_path.read_text())
     payload = json.loads(base64.b64decode(envelope["payload"]))
     assert payload["schema"] == 2 and payload["bootstrap_schema"] == 1
-    assert (stage.parent / "RabbitLands-windows.json").read_bytes() == manifest_path.read_bytes()
+    assert (stage.parent / f"RabbitLands-{platform}.json").read_bytes() == manifest_path.read_bytes()
     setup = stage.parent / f"{stage.name}-setup.exe"
     setup.write_bytes(b"test setup")
     receipt = {"schema": 1, "mode": "online", "commit": metadata["commit"], "manifest": manifest_path.name,
         "parts": [{"name": p["url"].rsplit("/", 1)[1], "size": p["size"], "sha256": p["sha256"]} for p in payload["parts"]]}
     (stage.parent / f"{stage.name}-setup-downloads.json").write_text(json.dumps(receipt))
-    assets, policy, actual_stage = build_release.platform_assets(stage.parent, metadata["commit"], "windows")
+    if platform == "linux" and not shared:
+        (stage.parent / f"{stage.name}.tar.gz").write_bytes(b"portable archive fixture")
+    assets, policy, actual_stage = build_release.platform_assets(stage.parent, metadata["commit"], platform)
     assert actual_stage == stage
     assert {p.name for p in outputs if p.suffix != ".txt" and "server-policy" not in p.name} <= {p.name for p in assets}
-    assert setup in assets and all(p.is_file() for p in assets)
+    assert all(p.is_file() for p in assets)
+    if platform == "windows":
+        assert setup in assets
+    elif shared:
+        assert any(p.name.endswith("-download.sh") for p in assets)
+        assert not any(".tar.gz" in p.name for p in assets)
 
 
 def export_test_updater(f, version, platform="windows"):
@@ -330,7 +345,8 @@ def export_test_updater(f, version, platform="windows"):
     return stage / ("RabbitLands-updater.exe" if platform == "windows" else "RabbitLands-updater.x86_64")
 
 
-def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture):
+@pytest.mark.parametrize("shared", [False, True])
+def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture, shared):
     if os.name != "nt":
         pytest.skip("This check exercises Windows executable locking and its native uninstaller.")
     f = fixture
@@ -343,12 +359,21 @@ def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture):
         shutil.copyfile(new, path)
         row.update(size=path.stat().st_size, sha256=client_release.digest(path))
         shutil.copyfile(old, f["installed"] / f"RabbitLands-{kind}.exe")
-    (f["tmp_path"] / "RabbitLands-windows.json").write_text(json.dumps(signed(payload, f["key"])))
+    if shared:
+        from test_shared_release_assets import shared_payload
+        payload = shared_payload({**f, "payload": payload})
+        payload["launch_args"] = ["--server=draft.example", "--port=2002"]
+    envelope = signed(payload, f["key"])
+    (f["tmp_path"] / "RabbitLands-windows.json").write_text(json.dumps({} if shared else envelope))
+    pinned = f["tmp_path"] / "pinned-installer.json"
+    pinned.write_text(json.dumps(envelope))
     log = f["tmp_path"] / "native-updater.log"
     with log.open("w") as output:
         process = subprocess.Popen([str(f["installed"] / "RabbitLands-updater.exe"), "--headless",
-            "--", "--root", str(f["installed"]), "--update-only"], env=f["env"], stdout=output, stderr=subprocess.STDOUT)
+            "--", "--root", str(f["installed"]), "--update-only",
+            *(["--install-manifest", str(pinned)] if shared else [])], env=f["env"], stdout=output, stderr=subprocess.STDOUT)
     assert process.wait(timeout=30) == 0, log.read_text()
+    pinned.unlink() # A shell installer's temporary files disappear at this handoff.
     deadline = time.monotonic() + 40
     while True:
         descriptor = json.loads((f["installed"] / "app/client-release.json").read_text())
@@ -360,9 +385,15 @@ def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture):
         time.sleep(0.1)
     for kind in ("updater", "uninstall"):
         assert client_release.digest(f["installed"] / f"RabbitLands-{kind}.exe") == client_release.digest(new)
-    assert sum("-updater.exe" in name for name in f["downloads"]) == 1
-    assert sum(".pkg.client.zip." in name for name in f["downloads"]) == 1
-    assert not any(".pkg.engine." in name or ".pkg.map-" in name for name in f["downloads"])
+    updater_download = "/" + payload["updater"]["url"].rsplit("/", 1)[1]
+    client_part = next(p for p in payload["packages"] if p["id"] == "client")["parts"][0]
+    client_download = "/" + client_part["url"].rsplit("/", 1)[1]
+    assert f["downloads"].count(updater_download) == 1
+    assert f["downloads"].count(client_download) == 1
+    assert set(f["downloads"]) <= {"/RabbitLands-windows.json", updater_download, client_download}
+    if shared:
+        assert "/RabbitLands-windows.json" not in f["downloads"], "Pinned draft install looked up the public release"
+        assert json.loads((f["installed"] / "launcher-defaults.json").read_text())["args"] == payload["launch_args"]
     settings = f["tmp_path"] / "userdata/player-settings.cfg"
     settings.parent.mkdir(exist_ok=True)
     settings.write_text("keep my settings")
@@ -461,7 +492,8 @@ def test_inno_single_file_setup_uses_packages_for_fresh_install_and_repair(fixtu
     assert not f["downloads"], "Setup repair downloaded unchanged packages."
     (installed / "app/assets/actors/native/creatures/rabbit.glb").write_bytes(b"damage")
     install()
-    assert len(f["downloads"]) == 1 and ".pkg.actors-" in f["downloads"][0]
+    actor = next(p for p in f["payload"]["packages"] if p["id"].startswith("actors-"))
+    assert f["downloads"] == ["/" + actor["parts"][0]["url"].rsplit("/", 1)[1]]
 
 
 def test_downloaded_updater_launches_game_with_loose_assets(fixture):

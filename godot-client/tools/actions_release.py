@@ -14,6 +14,7 @@ import build_release as release
 import package_client as package
 import runner_release
 import setup_runner_tools
+import shared_release_assets
 
 SECRET = "CLIENT_UPDATE_SIGNING_KEY"
 
@@ -63,6 +64,7 @@ def prepare() -> tuple[str, int]:
             or draft["author"]["login"] not in (release.ACCOUNT, "github-actions[bot]")):
         raise ValueError("The draft must belong to the Rabbit Lands account or this repository's workflow.")
     release_id = draft["id"]
+    shared_release_assets.ensure(sha)
     with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
         output.write(f"commit={sha}\nrelease_id={release_id}\n")
     summary = os.environ.get("GITHUB_STEP_SUMMARY")

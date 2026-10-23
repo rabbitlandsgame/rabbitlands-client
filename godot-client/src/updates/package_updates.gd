@@ -3,6 +3,12 @@ extends RefCounted
 const Release = preload("res://src/updates/release.gd")
 
 static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
+	if release.has("launch_args"):
+		if not release.launch_args is Array or release.launch_args.size() > 32:
+			return {"error": "The game launch defaults are invalid."}
+		for argument: Variant in release.launch_args:
+			if not argument is String or argument.length() > 4096:
+				return {"error": "The game launch defaults are invalid."}
 	if release.get("repository") != identity.get("repository") or not release.get("version") is String or "/" in release.version or "\\" in release.version:
 		return {"error": "The package release identity is invalid."}
 	if not release.get("packages") is Array or release.packages.is_empty() or release.packages.size() > 850:
@@ -35,7 +41,7 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 		for index in package.parts.size():
 			var part: Variant = package.parts[index]
 			var url := base + "%s.pkg.%s.zip.%03d" % [release.version, package.id, index + 1]
-			if not part is Dictionary or part.get("url") != url or not Release.valid_hash(part.get("sha256")) or not Release.positive_integer(part.get("size"), 256 * 1024 * 1024):
+			if not part is Dictionary or (part.get("url") != url and not Release.shared_download(part, identity.repository)) or not Release.valid_hash(part.get("sha256")) or not Release.positive_integer(part.get("size"), 256 * 1024 * 1024):
 				return {"error": "A package download is invalid."}
 			packed += int(part.size)
 			parts.append(part)
@@ -47,7 +53,7 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 	var extension := "exe" if identity.platform == "windows" else "x86_64"
 	for kind: String in ["updater", "uninstall"]:
 		var helper: Variant = release.get(kind)
-		if not helper is Dictionary or helper.get("url") != base + release.version + "-" + kind + "." + extension or not Release.valid_hash(helper.get("sha256")) or not Release.positive_integer(helper.get("size"), 512 * 1024 * 1024):
+		if not helper is Dictionary or (helper.get("url") != base + release.version + "-" + kind + "." + extension and not Release.shared_download(helper, identity.repository, kind, extension)) or not Release.valid_hash(helper.get("sha256")) or not Release.positive_integer(helper.get("size"), 512 * 1024 * 1024):
 			return {"error": "The updater or uninstaller download is invalid."}
 	if count > 100000 or total != release.get("size") or unpacked != release.get("unpacked_size") or count != release.get("file_count") or parts != release.get("parts") or not Release.valid_hash(release.get("sha256")):
 		return {"error": "The package totals do not agree."}

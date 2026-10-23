@@ -10,6 +10,7 @@ import re
 import tempfile
 
 import build_release as release
+import shared_release_assets as shared
 from runner_release import authorize
 
 
@@ -30,20 +31,16 @@ def prune(tag):
         row = {"size": sums.stat().st_size, "sha256": release.client_release.digest(sums)}
         if not release.asset_matches(assets.get("SHA256SUMS", {}), row):
             raise ValueError("The published checksum inventory failed verification.")
-        expected = {}
-        for line in sums.read_text(encoding="ascii").splitlines():
-            match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9_.-]+)", line)
-            if not match or match[2] in expected:
-                raise ValueError("Invalid published checksum inventory.")
-            expected[match[2]] = match[1]
-    if set(assets) != set(expected) | {"SHA256SUMS"} or not all(
-        assets[name].get("state") == "uploaded" and assets[name].get("digest") == "sha256:" + digest
-        for name, digest in expected.items()):
-        raise ValueError("Published assets do not match the verified checksum inventory.")
+        expected = shared.checksum_inventory(sums.read_text(encoding="ascii"))
+    pooled = []
+    if any(shared.is_name(name) for name in expected):
+        pool = shared.ensure()
+        pooled = release.github_assets(pool["id"])
+    shared.verify_inventory(expected, list(assets.values()), pooled)
     names = set(expected)
     if not all(any(name.endswith(suffix) for name in names) for suffix in
                ("-setup.exe", "-download.sh", "-windows.json", "-linux.json")) or not any(
-                   name.endswith(".update.zip.001") or ".pkg.client.zip.001" in name for name in names):
+                   name.endswith(".update.zip.001") or ".pkg.client.zip.001" in name or (shared.is_name(name) and shared.NAME.fullmatch(name)[1] == "pkg") for name in names):
         raise ValueError("The published release is missing a required platform download.")
     removed = []
     for other in release.github_releases():
@@ -52,6 +49,7 @@ def prune(tag):
                 and other.get("published_at", "") < current["published_at"]):
             release.gh("release", "delete", other["tag_name"], "--repo", release.REPOSITORY, "--yes")
             removed.append(other["tag_name"])
+    shared.collect_unused(release.github_releases(), current["id"], expected)
     return removed
 
 

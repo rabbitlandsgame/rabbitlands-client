@@ -25,6 +25,7 @@ def context(tmp_path, monkeypatch):
         monkeypatch.setenv(name, value)
     monkeypatch.setattr(actions.package, "git", lambda *args: SHA)
     monkeypatch.setattr(actions.runner_release, "authorize", lambda: None)
+    monkeypatch.setattr(actions.shared_release_assets, "ensure", lambda sha: {"id": 789})
 
 
 def test_existing_draft_is_selected_without_changing_previous_downloads(tmp_path, monkeypatch):

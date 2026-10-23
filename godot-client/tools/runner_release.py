@@ -7,6 +7,7 @@ The two platforms run in separate jobs; finalize their small receipts together.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 from pathlib import Path
@@ -15,8 +16,8 @@ import sys
 
 import build_release as release
 import client_release
+import shared_release_assets as shared
 import package_client as package
-from linux_download_helper import download_script
 from release_storage import DiskBudget
 
 
@@ -47,20 +48,39 @@ class GitHubSink:
             raise ValueError("Runner uploads require the project's existing draft release.")
         self.tag = draft["tag_name"]
         self.previous = {asset["name"]: asset for asset in release.github_assets(release_id)}
+        self.pool = None
+        self.shared_previous = {}
+        self.uploaded_bytes = self.reused_bytes = 0
 
     def accept(self, path: Path, row: dict) -> None:
         if path.stat().st_size != row["size"] or client_release.digest(path) != row["sha256"]:
             raise ValueError("A runner download changed before upload.")
-        actual = release.upload_asset_api(self.release_id, path, row, self.previous.get(path.name, {}))
+        pooled = shared.is_name(path.name)
+        if pooled and shared.NAME.fullmatch(path.name)[2] != row["sha256"]:
+            raise ValueError("Shared download name and checksum disagree.")
+        if pooled and self.pool is None:
+            self.pool = shared.ensure()
+            self.shared_previous = {a["name"]: a for a in release.github_assets(self.pool["id"])}
+        previous = self.shared_previous if pooled else self.previous
+        old = previous.get(path.name, {})
+        reused = release.asset_matches(old, row)
+        actual = release.upload_asset_api(self.pool["id"] if pooled else self.release_id, path, row, old,
+                                          **({"immutable": True} if pooled else {}))
         if not release.asset_matches(actual, row):
             raise ValueError(f"GitHub did not verify {path.name}; retaining the local part.")
-        self.previous[path.name] = actual
+        previous[path.name] = actual
+        if reused:
+            self.reused_bytes += row["size"]
+            package.log(f"Reusing verified download {path.name}")
+        else:
+            self.uploaded_bytes += row["size"]
 
 
 class RunnerStorage:
     def __init__(self, root: Path, budget: DiskBudget, sink):
         self.root, self.budget, self.sink = root.resolve(), budget, sink
         self.rows = {}
+        self.shared_rows = {}
         self.linux_archive = None
         self.source = None
         self.actor_plans = {}
@@ -75,14 +95,17 @@ class RunnerStorage:
         if path.is_symlink() or not path.resolve().is_relative_to(self.root):
             raise ValueError("Runner asset is outside its disposable output directory.")
         row = {"name": path.name, "size": part["size"], "sha256": part["sha256"]}
-        if path.name in self.rows:
+        rows = self.shared_rows if shared.matches(part, release.REPOSITORY) else self.rows
+        if path.name in rows:
+            if rows[path.name] == row and rows is self.shared_rows:
+                return
             raise ValueError("Duplicate runner asset name.")
         self.sink.accept(path, row)
-        self.rows[path.name] = row
-        release.write_json(self.root / "spooled-assets.json", {"assets": list(self.rows.values())})
+        rows[path.name] = row
+        release.write_json(self.root / "spooled-assets.json", {"assets": list(self.rows.values()), "shared_assets": list(self.shared_rows.values())})
 
     def part_matches(self, name, part):
-        return self.rows.get(name) == {"name": name, "size": part["size"], "sha256": part["sha256"]}
+        return (self.rows.get(name) or self.shared_rows.get(name)) == {"name": name, "size": part["size"], "sha256": part["sha256"]}
 
     def clear_cache(self, path):
         path = path.resolve()
@@ -157,7 +180,7 @@ def build(options) -> Path:
     source = root / "source"
     storage.source = source / "godot-client"
     output = root / "downloads"
-    args = ["--platform", options.platform, "--ref", sha, "--release-build", "--no-fetch", "--godot", str(options.godot),
+    args = ["--platform", options.platform, "--ref", sha, "--release-build", "--shared-release-assets", "--no-zip", "--no-fetch", "--godot", str(options.godot),
             "--build-dir", str(source), "--out", str(output), "--vram-cache", str(root / "vram-cache"),
             "--update-signing-key", str(key), "--update-public-key", str(storage.source / "data/update_public.pem"),
             "--server", options.server]
@@ -178,15 +201,15 @@ def build(options) -> Path:
     if identity["commit"] != sha or identity["platform"] != options.platform:
         raise ValueError("Runner identity differs from the selected commit.")
     manifest = output / f"{stage.name}-{options.platform}.json"
+    envelope = json.loads(manifest.read_text())
+    payload = json.loads(base64.b64decode(envelope["payload"], validate=True))
     small = [manifest, output / f"RabbitLands-{options.platform}.json"]
     if options.platform == "windows":
         small.append(output / f"{stage.name}-setup.exe")
     else:
-        archive = storage.linux_archive
         helper = output / f"{stage.name}-download.sh"
-        base = f"https://github.com/{release.REPOSITORY}/releases/download/client-{sha}"
-        parts = [{"path": part["url"].rsplit("/", 1)[1], "sha256": part["sha256"]} for part in archive["parts"]]
-        helper.write_text(download_script(stage.name, sha, base, archive["sha256"], parts), encoding="utf-8", newline="\n")
+        from linux_download_helper import bootstrap_script
+        helper.write_text(bootstrap_script(payload["updater"], envelope), encoding="utf-8", newline="\n")
         small.append(helper)
     for path in small:
         storage.accept_part(path, {"size": path.stat().st_size, "sha256": client_release.digest(path)})
@@ -195,7 +218,12 @@ def build(options) -> Path:
     receipt = root / f"{options.platform}-runner.json"
     release.write_json(receipt, {"schema": 1, "repository": release.REPOSITORY, "commit": sha,
         "platform": options.platform, "release_id": options.draft_release_id, "stage": stage.name,
-        "update_schema": 2, "assets": list(storage.rows.values()), "disk": budget.report()})
+        "update_schema": 2, "shared_storage": 1, "shared_release_id": storage.sink.pool["id"],
+        "shared_assets": list(storage.shared_rows.values()),
+        "shared_packages": {p["id"]: [i["url"].rsplit("/", 1)[1] for i in p["parts"]] for p in payload["packages"]},
+        "shared_helpers": {kind: payload[kind]["url"].rsplit("/", 1)[1] for kind in ("updater", "uninstall")},
+        "transfer": {"uploaded_bytes": storage.sink.uploaded_bytes, "reused_bytes": storage.sink.reused_bytes},
+        "assets": list(storage.rows.values()), "disk": budget.report()})
     # Keep the tiny receipt/logs. Only this invocation's fresh worktree and stage are removed.
     storage.cleanup(stage, sha)
     storage.check("workspace released")

@@ -28,6 +28,56 @@ built. Publishing the verified replacement triggers **Retire previous published
 client**, which checks the public asset inventory before removing older published
 compiled releases. It leaves any in-progress replacement draft alone.
 
+## Reusing uploaded downloads
+
+Both the Actions runner and the local combined release build use one permanent
+`client-assets` **prerelease** for supporting downloads. It is never marked
+latest. The ordinary `client-<commit>` release still contains the Windows setup,
+Linux installation helper, signed manifests and checksum inventory. Its release
+notes link to standalone updater/uninstaller downloads in the shared release.
+There is still one retained playable release, with a replacement draft while
+building. The shared release is a file store, not compiled version history.
+
+Package parts have names `RabbitLands-pkg-<SHA256>.zip.part`; helper names include
+their kind, complete SHA-256 and platform extension. Their bytes and URLs stay
+the same across build dates and client commits when their contents stay the
+same. Common Windows/Linux packages can share a single upload. ZIP timestamps,
+file ordering and package membership remain deterministic.
+
+Before each upload, the build compares the local SHA-256 and size with GitHub's
+recorded digest, size and completed-upload state. An exact match is reused
+without an upload, rename or delete. Changed bytes get a new checksum name.
+An unexpected completed file with a conflicting checksum stops the build.
+Concurrent platform jobs wait for an identical in-flight upload instead of
+deleting one another's reservation. An interrupted starter reservation older
+than six hours can be retired and retried; active uploads are preserved.
+
+Finalization rereads and verifies **every referenced file** in both releases
+before changing the draft tag or pruning previous draft files. `SHA256SUMS`
+covers files in both locations. Uploaded and reused byte totals are included
+in the runner receipts. The first build using shared storage must upload its
+newly named files once; later builds upload only new checksums for packages and
+helpers. Per-build manifests and Windows setup change with the build identity.
+
+Publishing still requires the usual manual review. After verifying the public
+replacement, the cleanup workflow retires older compiled releases and removes
+shared files no longer referenced by the current build. It postpones shared
+cleanup whenever any client draft exists, including unfinished builds whose
+inventories are not yet ready. Failed builds leave the working release intact.
+The cleanup job loads its tools from the published client tag, so its format
+matches that release. Promote this workflow change to the default branch before
+publishing the first shared-storage build.
+
+Linux installation now downloads and verifies the native updater, which installs
+the same independent packages used for updates. Its signed manifest is embedded
+in the shell installer, so a draft installs its own build even while a different
+release is public. The updater retains the verified manifest across its own
+replacement and preserves the build's server defaults. No second full-game tar archive
+is built or uploaded by release orchestration. Run the installed
+`~/Games/RabbitLands/RabbitLands-updater.x86_64` to play again. A different parent
+folder can be passed to the downloaded shell helper. Explicit standalone local
+packaging can still create a portable archive when requested.
+
 ## Enable and run the workflow
 
 One-time maintainer setup:
@@ -53,8 +103,8 @@ After activation:
 - **Progress:** the run has a draft preparation job, separate Windows and Linux
   jobs, and final verification. The summary links to the release downloads.
 - **Result:** review the current [draft release](https://github.com/rabbitlandsgame/rabbitlands-client/releases).
-  Publication remains manual; the online installer's public download URLs require
-  publication before installation can be tested end to end.
+  Publication remains manual. Shared supporting files are available during the
+  build, so the downloaded draft installers can be tested before publication.
 
 The workflow reuses the project's existing client draft or creates one when
 needed. Previously published downloads remain available while a new commit
@@ -103,7 +153,7 @@ Space is saved by:
   DDS scratch, preserving all shared-image cutoff checks in the same batch.
 - Removing the main import cache after the exported pack is verified, and
   removing the temporary graphics cache after its staged files are verified.
-- Writing each deterministic package ZIP and gzip/tar bytes into bounded parts, without
+- Writing each deterministic package ZIP into bounded parts, without
   first making a full archive and then copying it into parts.
 - Keeping package inventories in the signed manifest rather than retaining
   previous complete builds. Package hashes depend on contents, not a build date.
@@ -116,8 +166,8 @@ Space is saved by:
 - Keeping only receipts and logs after a successful build. No second platform's
   full stage, payloads or caches accumulate on the same runner.
 
-ZIP and tar data are streamed with bounded memory. The Linux tar contains normal
-files and executable launchers, even though its staging files use hard links.
+ZIP data is streamed with bounded memory. Release builds avoid the duplicate
+Linux tar entirely; standalone portable tar exports still use executable modes.
 
 ### Local validation
 

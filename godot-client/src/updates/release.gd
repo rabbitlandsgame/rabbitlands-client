@@ -217,6 +217,9 @@ static func valid_hash(value: Variant) -> bool:
 			return false
 	return true
 
+static func shared_download(row: Dictionary, repository: String, kind := "pkg", extension := "zip.part") -> bool:
+	return valid_hash(row.get("sha256")) and row.get("url") == "https://github.com/%s/releases/download/client-assets/RabbitLands-%s-%s.%s" % [repository, kind, row.sha256, extension]
+
 static func verify_envelope(envelope: Dictionary, identity: Dictionary) -> Dictionary:
 	if update_owner(identity) != "github":
 		return {"error": "This installation is updated by its distribution service."}
