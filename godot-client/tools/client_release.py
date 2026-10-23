@@ -26,7 +26,7 @@ def digest(path: Path) -> str:
 
 
 def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
-             repository: str, distribution: str = "github") -> dict:
+             repository: str, distribution: str = "github", *, release_build: bool = False) -> dict:
     if distribution not in {"github", "steam", "standalone"}:
         raise ValueError("unsupported client distribution")
     if not re.fullmatch(r"[0-9a-f]{40}", sha):
@@ -44,7 +44,7 @@ def identity(repo: Path, sha: str, platform: str, public_key: Path | None,
         raise ValueError("update-public-key must contain a public RSA key only")
     return {"schema": 1, "commit": sha, "platform": platform,
             "ancestors": ancestors, "public_key": pem, "repository": repository,
-            "distribution": distribution}
+            "distribution": distribution, "release_build": release_build}
 
 
 def build_payload(stage: Path, output: Path | BinaryIO) -> tuple[int, int]:
@@ -149,6 +149,7 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
     import asset_packages
     packages = asset_packages.build(stage, base, accept_part=accept_part, budget=budget)
     release = {"schema": 2, "bootstrap_schema": 1, "repository": metadata["repository"], "commit": commit,
+               "ancestors": metadata["ancestors"],
                "platform": platform, "version": stage.name,
                "size": sum(p["size"] for p in packages),
                "unpacked_size": sum(p["unpacked_size"] for p in packages),

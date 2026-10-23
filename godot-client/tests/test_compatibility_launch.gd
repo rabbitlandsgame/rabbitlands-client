@@ -18,8 +18,8 @@ func _run() -> void:
 		_expect(args.find("--log-file") < separator and args.find("--verbose") < separator,
 			"diagnostic engine flags precede the user-argument separator")
 		_expect(args.slice(separator + 1) == PackedStringArray(
-			["--server=play.example.org", "--port=2000", "--port=2001"]),
-			"launcher flags are consumed, game arguments survive")
+			["--server=play.example.org", "--port=2000", flag, "--port=2001"]),
+			"launch mode and game arguments survive for an updater restart")
 		if flag != "--client-debug":
 			_expect(args.find("--rendering-method") < separator and "gl_compatibility" in args
 				and "opengl3" in args, "compatibility forces OpenGL before engine startup")

@@ -11,7 +11,8 @@ func fetch(url: String, path := "", limit := Release.MAX_MANIFEST_BYTES) -> Dict
 	_request.body_size_limit = limit
 	_request.download_file = path
 	add_child(_request)
-	var error := _request.request(url, ["Accept: application/octet-stream", "Cache-Control: no-cache"])
+	var accept := "application/vnd.github+json" if url.begins_with("https://api.github.com/") else "application/octet-stream"
+	var error := _request.request(url, ["Accept: " + accept, "Cache-Control: no-cache", "User-Agent: RabbitLands-Client"])
 	if error != OK:
 		_request.queue_free()
 		_request = null
