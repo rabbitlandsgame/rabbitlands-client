@@ -15,7 +15,8 @@
     "Revision 2: smooth and tuck the malformed whisker clumps into a closed muzzle; repair their baked colour/normal islands including filter padding",
     "Revision 2: rigidly attach the complete lips, chin and cheeks to the skull, protecting original anatomical witnesses from foreleg motion",
     "Revision 2: uncurl the physical tail behind the rump, preserving its proximal attachment, guide segment lengths, cross-section offsets and unrelated body surface",
-    "Losslessly drop unreachable source buffers without changing any animation keys"
+    "Losslessly drop unreachable source buffers without changing any animation keys",
+    "Revision 3: reduce the outward bend at the tail base; protect the 17 original attachment seam vertices and blend the adjacent tube rings toward a straighter posterior rest. Preserve the reviewed mouth, rider fit and inherited gait motion."
   ],
   "contract": {
     "kind": "mount-only asset, not a combat creature",
@@ -39,9 +40,9 @@
   "renderCheck": "res://tests/integration/rendered_giant_rat_mount.gd",
   "publication": "Draft helper injects the model/profile only into the offline review. Existing mount catalogue, server ownership and live assets remain unchanged.",
   "freshImportCheck": "blender --background --factory-startup --python eloria-assets/source/mounts/giant_rat/verify_import.py",
-  "revision": 2,
+  "revision": 3,
   "repairRegions": "repair-regions-v2.json",
-  "repairWitnesses": "repair-witnesses-v2.json",
+  "repairWitnesses": "repair-witnesses-v3.json",
   "replayDependencies": [
     "NumPy",
     "Pillow"

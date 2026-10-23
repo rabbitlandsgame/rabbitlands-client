@@ -1,9 +1,10 @@
-"""Version 2: local muzzle cleanup and a posterior rest fit of the imported tail.
+"""Imported muzzle cleanup and version 3 of the posterior tail rest fit.
 
 The source and its topology/UVs stay immutable. Reviewed original vertex IDs,
 including coincident UV seams, delimit both repairs independently of skin weights.
 """
 import io
+import heapq
 from collections import deque
 import numpy as np
 from PIL import Image, ImageDraw
@@ -28,8 +29,9 @@ def curve(points):
     return np.column_stack([np.interp(s,distance,parts[:,i]) for i in range(3)]),s
 
 def new_tail_points():
-    # Match every inherited guide segment's length; trail down behind the rump.
-    x=[.10,-.43,-.60,-.55,-.40,-.22,-.08];y=[.45,.17,.20,.22,.23,.24,.28]
+    # Match every inherited guide segment's length and leave the rump directly
+    # rearward, with only a small relaxed deviation at the end of the tail.
+    x=[.10,-.20,-.20,-.20,-.19,-.17,-.13];y=[.45,.17,.20,.22,.23,.24,.28]
     result=[OLD_TAIL[0].copy()]
     for i,length in enumerate(np.linalg.norm(np.diff(OLD_TAIL,axis=0),axis=1)):
         dx=x[i+1]-x[i];dy=y[i+1]-y[i]
@@ -79,6 +81,22 @@ def repair(points,normals,indices,regions):
     offsets=np.einsum('nji,nj->ni',old_frames[nearest],source-old[nearest])
     target=new[nearest]+np.einsum('nij,nj->ni',new_frames[nearest],offsets)
     blend=smooth(0,.30,s[nearest])
+    # The imported tail is fused along a broad patch of the rump. Protect that
+    # physical seam, then approach the new rest through the adjacent tube rings.
+    # A nearest-guide blend alone pulls its left edge into a triangular web.
+    tail_mask=np.zeros(len(unique),bool);tail_mask[inverse[ids]]=True
+    distance=np.full(len(unique),np.inf);pending=[]
+    for vertex in np.flatnonzero(tail_mask):
+        if any(not tail_mask[other] for other in neighbors[vertex]):
+            distance[vertex]=0.;heapq.heappush(pending,(0.,vertex))
+    while pending:
+        length,vertex=heapq.heappop(pending)
+        if length>distance[vertex]:continue
+        for other in neighbors[vertex]:
+            if not tail_mask[other]:continue
+            candidate=length+np.linalg.norm(points[first[vertex]]-points[first[other]])
+            if candidate<distance[other]:distance[other]=candidate;heapq.heappush(pending,(candidate,other))
+    blend*=smooth(0,.25,distance[inverse[ids]])
     result[ids]+=blend[:,None]*(target-source)
     local_normals=np.einsum('nji,nj->ni',old_frames[nearest],normals[ids])
     rotated=np.einsum('nij,nj->ni',new_frames[nearest],local_normals)
@@ -91,6 +109,8 @@ def repair(points,normals,indices,regions):
         'mouthEditedVertices':int(np.count_nonzero(np.linalg.norm(result[mouth]-points[mouth],axis=1)>.000001)),
         'tailVertices':len(ids),'unchangedOutsideRepairVertices':int(outside.sum()),
         'maximumOutsideRepairDisplacementMetres':float(np.max(np.linalg.norm(result[outside]-points[outside],axis=1))),
+        'protectedTailAttachmentVertices':int(np.count_nonzero(distance[tail_mask]==0)),
+        'tailGuideMaximumLateralOffsetMetres':float(np.max(np.abs(new_tail_points()[:,0]))),
         'tailGuideLengthMetres':float(s[-1]),'fittedTailGuideLengthMetres':float(ns[-1]),
         'tailGuideSegmentLengthDifferenceMetres':float(np.max(abs(np.linalg.norm(np.diff(OLD_TAIL,axis=0),axis=1)-np.linalg.norm(np.diff(new_tail_points(),axis=0),axis=1))))}
 

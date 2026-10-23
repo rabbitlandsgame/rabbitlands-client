@@ -22,7 +22,7 @@ func check(value: bool, message: String) -> void:
 		if failures <= 8: push_error(message)
 
 func run() -> void:
-	var witnesses: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://../eloria-assets/source/mounts/giant_rat/repair-witnesses-v2.json"))
+	var witnesses: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://../eloria-assets/source/mounts/giant_rat/repair-witnesses-v3.json"))
 	var face_keys := {}
 	var tail_keys := {}
 	for p: Array in witnesses.facePoints: face_keys[point_key(Vector3(p[0],p[1],p[2]))] = true

@@ -134,7 +134,7 @@ def main():
         witnesses={'sourceSha256':regions['sourceSha256'],
             'facePoints':np.unique(fitted[regions['faceVertexIds']].astype('<f4'),axis=0).tolist(),
             'distalTailPoints':np.unique(fitted[regions['distalTailVertexIds']].astype('<f4'),axis=0).tolist()}
-        (HERE/'repair-witnesses-v2.json').write_text(json.dumps(witnesses,separators=(',',':'))+'\n',newline='\n')
+        (HERE/'repair-witnesses-v3.json').write_text(json.dumps(witnesses,separators=(',',':'))+'\n',newline='\n')
         repair_report['repaintedTexels']=repair_mouth_maps(doc,blob,accessor(doc,blob,primitive['attributes']['TEXCOORD_0']),indices,points,regions)
         primitive['attributes']['POSITION']=append(doc,blob,fitted,'VEC3',target=34962)
         primitive['attributes']['NORMAL']=append(doc,blob,fitted_normals,'VEC3',target=34962)
@@ -232,7 +232,7 @@ def main():
                 animation['samplers'].append({'input':time_accessor,'output':append(doc,blob,values,kind),'interpolation':'LINEAR'})
                 animation['channels'].append({'sampler':len(animation['samplers'])-1,'target':{'node':joint,'path':path}})
         doc['animations'].append(animation)
-    doc['asset']['generator']='Rabbit Lands imported Giant Rat mount draft v2'
+    doc['asset']['generator']='Rabbit Lands imported Giant Rat mount draft v3'
     doc['extras']={'mountOnly':True,'source':'existing Meshy Dock Rat','sourceSha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'rootMotion':'in_place'}
     doc['buffers']=[{'byteLength':len(blob)}]
     # Discard unused source buffers; preserve every animation key exactly.
@@ -245,7 +245,7 @@ def main():
     encoded=json.dumps(doc,separators=(',',':')).encode();encoded+=b' '* (-len(encoded)%4);blob.extend(b'\0'*(-len(blob)%4))
     output=struct.pack('<III',0x46546c67,2,28+len(encoded)+len(blob))+struct.pack('<II',len(encoded),0x4e4f534a)+encoded+struct.pack('<II',len(blob),0x004e4942)+blob
     OUTPUT.parent.mkdir(parents=True,exist_ok=True);OUTPUT.write_bytes(output)
-    report={'draft':True,'revision':2,'sourceSha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'outputSha256':hashlib.sha256(output).hexdigest(),'joints':len(names),'triangles':4000,'clips':[(a['name'],doc['accessors'][a['samplers'][0]['input']]['max'][0]) for a in doc['animations']],'maximumIKReachErrorMetres':ik_error,'mountOnly':True,'surfaceRepair':repair_report,'losslessPacking':packing,'notes':'Local muzzle/texture cleanup, rigid facial ownership and a posterior tail rest fit; original topology/UVs and unrelated source surface retained. Creature combat slots are deliberately absent.'}
+    report={'draft':True,'revision':3,'sourceSha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'outputSha256':hashlib.sha256(output).hexdigest(),'joints':len(names),'triangles':4000,'clips':[(a['name'],doc['accessors'][a['samplers'][0]['input']]['max'][0]) for a in doc['animations']],'maximumIKReachErrorMetres':ik_error,'mountOnly':True,'surfaceRepair':repair_report,'losslessPacking':packing,'notes':'Straighter tail departure from the rump; accepted muzzle repair, topology/UVs and unrelated body motion retained. Creature combat slots are deliberately absent.'}
     (HERE/'build-report.json').write_text(json.dumps(report,indent=2)+'\n',newline='\n')
     (HERE/'sole-witnesses.json').write_text(json.dumps(sole_witnesses,separators=(',',':'))+'\n',newline='\n')
     print(json.dumps(report))
