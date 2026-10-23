@@ -6,6 +6,7 @@ import re
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import benchmark_package
@@ -67,6 +68,40 @@ class BenchmarkPackageTests(unittest.TestCase):
             self.assertIn('enabled=PackedStringArray()', settings)
             self.assertIn("tests/*,", package_client.EXPORT_PRESETS)
 
+    def test_route_snapshot_helper_survives_export_without_exporting_its_test(self):
+        helper = "tests/integration/benchmark_route_content.gd"
+        fixture = "tests/integration/test_benchmark_route_content.gd"
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "data").mkdir()
+            for name in benchmark_package.WORKLOAD_FILES | {helper, fixture}:
+                path = project / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fixture", encoding="utf-8")
+            (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS, encoding="utf-8")
+            (project / "project.godot").write_text(
+                '[application]\nrun/main_scene="res://src/app/main.tscn"\n', encoding="utf-8")
+            benchmark_package.prepare_export(project)
+            self.assertTrue((project / helper).is_file())
+            self.assertFalse((project / fixture).exists())
+
+    def test_mounted_census_helper_survives_export_without_exporting_its_test(self):
+        helper = "tests/integration/benchmark_mounted_census.gd"
+        fixture = "tests/test_benchmark_mounted_census.gd"
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "data").mkdir()
+            for name in benchmark_package.WORKLOAD_FILES | {helper, fixture}:
+                path = project / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fixture", encoding="utf-8")
+            (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS, encoding="utf-8")
+            (project / "project.godot").write_text(
+                '[application]\nrun/main_scene="res://src/app/main.tscn"\n', encoding="utf-8")
+            benchmark_package.prepare_export(project)
+            self.assertTrue((project / helper).is_file())
+            self.assertFalse((project / fixture).exists())
+
     def test_loop_settings_preserve_unrelated_sections_and_are_idempotent(self):
         original = ('[application]\nconfig/name="Fixture"\n'
                     'run/main_scene="res://src/app/main.tscn"\n\n'
@@ -113,9 +148,12 @@ class BenchmarkPackageTests(unittest.TestCase):
             (stage / "app").mkdir()
             (stage / "app/RabbitLands.pck").write_bytes(b"packed")
             (stage / "loose.glb").write_bytes(b"actor")
-            manifest = benchmark_package.write_manifest(stage, "a" * 40)
-            original = manifest.read_bytes()
-            benchmark_package.write_manifest(stage, "a" * 40)
+            # This test isolates the complete-artifact manifest contract; the
+            # dedicated closure tests exercise real fake-PCK byte verification.
+            with mock.patch.object(benchmark_package, "build_asset_closure", return_value={"fixture": True}):
+                manifest = benchmark_package.write_manifest(stage, "a" * 40)
+                original = manifest.read_bytes()
+                benchmark_package.write_manifest(stage, "a" * 40)
             self.assertEqual(manifest.read_bytes(), original)
             rows = {r["path"]: r for r in json.loads(original)["artifacts"]}
             self.assertEqual(set(rows), {"app/RabbitLands.pck", "loose.glb"})

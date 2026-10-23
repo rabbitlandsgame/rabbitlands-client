@@ -6,6 +6,7 @@ Identity capture runs outside timed engine samples and records its exact scope.
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import math
 import os
@@ -493,6 +494,21 @@ def hash_files(files: list[Path], base: Path) -> dict:
             "fileCount": len(entries), "bytes": sum(e["bytes"] for e in entries)}
 
 
+def verified_exported_asset_closure(stage: Path, declared: dict) -> dict:
+    # Load the shared tool by exact path; no packager import, sys.path mutation,
+    # engine start or circular dependency is needed by the benchmark runner.
+    helper = Path(__file__).resolve().parents[2] / "tools/benchmark_asset_closure.py"
+    spec = importlib.util.spec_from_file_location("rabbitlands_benchmark_asset_closure", helper)
+    if spec is None or spec.loader is None:
+        raise EvidenceError("asset closure verification helper is unavailable")
+    module = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(module)
+        return module.verify_asset_closure(stage, declared)
+    except (OSError, ValueError) as error:
+        raise EvidenceError("exported asset closure verification failed: " + str(error)) from error
+
+
 def manifest_identity(path: Path) -> dict:
     """Verify a local artifact manifest. References stay inside its directory."""
     data = read_json(path)
@@ -548,14 +564,22 @@ def manifest_identity(path: Path) -> dict:
     for total_key in ("bytes", "totalBytes"):
         if total_key in data and _integer(data[total_key], total_key) != identity["bytes"]:
             raise EvidenceError("artifact total byte count differs from manifest")
-    return {"manifestSha256": sha256_file(path), "scope": data.get("scope", "explicit artifacts"),
-            "contentComplete": complete, "contentHash": aggregate.hexdigest(), **identity}
+    result = {"manifestSha256": sha256_file(path), "scope": data.get("scope", "explicit artifacts"),
+              "contentComplete": complete, "contentHash": aggregate.hexdigest(), **identity}
+    if "assetClosure" in data:
+        if not complete:
+            raise EvidenceError("asset closure requires a complete staged package manifest")
+        result["assetClosure"] = verified_exported_asset_closure(path.parent, data["assetClosure"])
+    return result
 
 
 def source_files(client: Path) -> list[Path]:
     binaries = {".dll", ".so", ".dylib"}
     suffixes = {".gd", ".uid", ".gdshader", ".tscn", ".tres", ".py", ".rs", ".cpp", ".h", ".hpp", ".gdextension", ".toml", ".lock"} | binaries
     files = [client / "project.godot"]
+    closure_helper = client / "tools/benchmark_asset_closure.py"
+    if closure_helper.is_file():
+        files.append(closure_helper)
     for folder in ("src", "tests/integration", "native"):
         root = client / folder
         if root.is_dir():

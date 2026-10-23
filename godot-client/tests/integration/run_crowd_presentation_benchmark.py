@@ -188,16 +188,24 @@ def identity(args) -> dict:
                             text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     result["sourceRevision"] = {"commit": commit.stdout.strip() if commit.returncode == 0 else None,
                                 "dirty": bool(status.stdout.strip()) if status.returncode == 0 else None}
+    if args.package_manifest:
+        result["package"] = manifest_identity(args.package_manifest)
     if args.asset_manifest:
         result["assets"] = manifest_identity(args.asset_manifest)
     elif args.executable_mode == "exported" and args.package_manifest:
-        result["assets"] = {"scope": "package artifacts; source asset closure not claimed"}
+        result["assets"] = result["package"].get("assetClosure", {
+            "schemaVersion": 1, "status": "unsupported",
+            "scope": "package artifacts; asset closure not claimed", "assetClosureHash": None,
+            "unknowns": ["legacy package has no verified asset closure"]})
+        if result["assets"].get("status") == "complete":
+            app = (args.package_manifest.parent / "app").resolve()
+            if args.godot.resolve().parent != app or (args.main_pack is not None
+                    and args.main_pack.resolve() != app / "RabbitLands.pck"):
+                raise EvidenceError("verified asset closure does not cover this executable/main-pack location")
     else:
         result["assets"] = {"scope": "all Godot assets/data and selected map/chunk external dependencies",
                             "mapIds": maps, "importCacheIncluded": False,
                             **hash_files(asset_files(args.project_path, maps), args.project_path.parent)}
-    if args.package_manifest:
-        result["package"] = manifest_identity(args.package_manifest)
     if args.main_pack:
         result["mainPack"] = {"path": str(args.main_pack), "sha256": sha256_file(args.main_pack)}
     if args.replay:

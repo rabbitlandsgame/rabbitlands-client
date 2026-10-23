@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 import re
 
+from benchmark_asset_closure import build_asset_closure
+
 PROFILE = "client-performance-v1"
 MAIN_LOOP_CLASS = "RabbitLandsCrowdBenchmarkLoop"
 MAIN_ENTRY_SCENE = "res://tests/integration/crowd_benchmark_entry.tscn"
@@ -17,6 +19,8 @@ WORKLOAD_FILES = frozenset({
     "tests/integration/crowd_benchmark_main.gd",
     "tests/integration/crowd_benchmark_main.tscn",
     "tests/integration/performance_workloads.gd",
+    "tests/integration/benchmark_route_content.gd",
+    "tests/integration/benchmark_mounted_census.gd",
 })
 
 
@@ -105,6 +109,7 @@ def write_manifest(stage: Path, commit: str) -> Path:
     document = {"schemaVersion": 1, "executionKind": "exported-local-benchmark",
                 "benchmarkProfile": PROFILE, "sourceCommit": commit,
                 "contentHash": aggregate.hexdigest(), "contentComplete": True,
-                "scope": "all staged files except this identity manifest", "artifacts": artifacts}
+                "scope": "all staged files except this identity manifest", "artifacts": artifacts,
+                "assetClosure": build_asset_closure(stage)}
     destination.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
     return destination

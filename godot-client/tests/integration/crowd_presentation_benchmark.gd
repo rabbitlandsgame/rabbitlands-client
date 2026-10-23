@@ -59,6 +59,8 @@ const FULL_KIT_A := {0: 114, 1: 106, 2: 0, 3: 117, 4: 171, 5: 184, 6: 192}
 const FULL_KIT_B := {0: 164, 1: 111, 2: 1, 3: 109, 4: 172, 5: 185, 6: 193}
 const SCHEMA := 1
 const Workloads := preload("res://tests/integration/performance_workloads.gd")
+const RouteContent := preload("res://tests/integration/benchmark_route_content.gd")
+const MountedCensus := preload("res://tests/integration/benchmark_mounted_census.gd")
 const MAX_SPAWN_MSEC := 240000
 const MAX_READINESS_MSEC := 60000
 const MIN_SAMPLE_FRAMES := 60
@@ -447,7 +449,7 @@ func _run_cell(spec: Dictionary) -> void:
 		_app_state.call("mark_all_actors_changed")
 		spawn = await _spawn_and_build(count)
 	var readiness := await _wait_for_world_readiness(str(spec["id"]), 300)
-	var census_before := _census()
+	var census_before := _census("afterSpawn")
 	if str(spec.shape) == "mounted":
 		_expect(int(census_before.mountedActors) == int(spec.mountedCount),
 			"mixed-mounted fixture builds all %d mounted actors" % int(spec.mountedCount))
@@ -502,7 +504,7 @@ func _run_cell(spec: Dictionary) -> void:
 			commands[command] = row
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw)
 	var elapsed := Time.get_ticks_msec() - sample_started
-	var census_after := _census()
+	var census_after := _census("afterSample")
 	var sampled_runtime := _main.call("benchmark_runtime_snapshot") as Dictionary
 	var budget: Dictionary = (_main.get("effect_budget") as RefCounted).call("describe") \
 		if _main.get("effect_budget") != null else {}
@@ -1212,7 +1214,7 @@ func _append_render_sample(raw: Dictionary) -> void:
 
 
 ## What the crowd looks like to the presentation right now.
-func _census() -> Dictionary:
+func _census(boundary := "unspecified") -> Dictionary:
 	var camera := _main.get("gameplay_camera") as Camera3D
 	var nodes := _main.get("actor_nodes") as Dictionary
 	var local := nodes.get(_local_id) as Node3D
@@ -1222,6 +1224,8 @@ func _census() -> Dictionary:
 		"capeClothActive": 0, "capeSolversActive": 0, "mountedActors": 0,
 		"mountSkeletons": 0, "mountedVisualsProcessing": 0,
 		"mountedWornCapes": 0, "ambientAnimals": 0}
+	var mounted_presentation := MountedCensus.begin(boundary)
+	out["mountedPresentation"] = mounted_presentation
 	var planes: Array[Plane] = camera.get_frustum() if camera != null else []
 	# The quarter tier by name, so the census also runs against a client
 	# without it.
@@ -1231,6 +1235,7 @@ func _census() -> Dictionary:
 		if actor == null:
 			continue
 		if is_instance_valid(actor._mount_visual):
+			MountedCensus.include_visual(mounted_presentation, actor._mount_visual)
 			out["mountedActors"] += 1
 			out["mountSkeletons"] += actor._mount_visual.find_children("*", "Skeleton3D", true, false).size()
 			out["mountedVisualsProcessing"] += int(actor._mount_visual.is_processing())
@@ -1415,7 +1420,7 @@ func _run_traversal_cell(spec: Dictionary) -> void:
 		func(leg: Dictionary) -> bool: return bool(leg.get("success", false)))
 	_route_primed = success
 	var readiness := await _wait_for_world_readiness(str(spec.id) + " final", 300)
-	var census := _census()
+	var census := _census("afterRouteFinalReadiness")
 	var result := spec.duplicate(true)
 	result.merge({"status": "complete" if success else "failed", "frames": _route_frame_series.size(),
 		"sampleMilliseconds": elapsed, "frameSeries": _route_frame_series.duplicate(),
@@ -1425,6 +1430,8 @@ func _run_traversal_cell(spec: Dictionary) -> void:
 		"census": {"afterSpawn": census.duplicate(true), "afterSample": census},
 		"route": {"kind": "synthetic_client_streaming", "legs": legs,
 			"sources": ["southern-streaming-walk.json", "southern-region-routes.json"],
+			"boundaryContentSchema": 1,
+			"boundaryCaptureTiming": "synchronous capture cost is reported; remains in route frame/wall samples; transition milliseconds ends before arrival capture",
 			"serverNavigationCertified": false, "unmeasuredPrimer": primer,
 			"cacheCondition": ("repeat in this process" if str(spec.visit) == "warm" else "first route pass in this process")
 				+ "; OS caches uncontrolled; preceding crowd cells can share assets"},
@@ -1439,23 +1446,35 @@ func _traverse_southern_route() -> Array[Dictionary]:
 	_app_state.set("actor_mounts", {})
 	_app_state.set("selected_actor_id", -1)
 	for leg: Dictionary in Workloads.southern_route():
+		var leg_start := RouteContent.clock()
 		var start_readiness: Dictionary = await _route_place(str(leg.map), Workloads.tile(leg.start), true)
 		if not bool(start_readiness.get("ready", false)):
 			results.append({"id": leg.id, "success": false, "startReadiness": start_readiness})
 			break
+		var start_content := RouteContent.capture(_main)
 		await _route_walk_to(Workloads.tile(leg.approach))
 		var actor := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
 		var old_identity := actor.get_instance_id() if is_instance_valid(actor) else -1
 		var began := Time.get_ticks_msec()
 		var frames_before := _route_frame_series.size()
+		var transition_start := RouteContent.clock()
 		var arrival: Dictionary = await _route_place(str(leg.destination), Workloads.tile(leg.arrival),
 			str(leg.kind) != "border")
+		# Preserve transition duration before the new boundary capture work.
+		var transition_msec := Time.get_ticks_msec() - began
+		var transition_end := RouteContent.clock()
+		var arrival_content := RouteContent.capture(_main)
+		var leg_end := RouteContent.clock()
 		var arrived_actor := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
 		var handoff := (_main.get("exterior_stream") as ExteriorRegionStream).last_handoff
 		var success := bool(arrival.get("ready", false)) \
 			and str(_app_state.get("current_map")) == str(leg.destination) and is_instance_valid(arrived_actor)
 		results.append({"id": leg.id, "kind": leg.kind, "from": leg.map, "to": leg.destination,
-			"success": success, "milliseconds": Time.get_ticks_msec() - began,
+			"success": success, "milliseconds": transition_msec,
+			"startReadiness": start_readiness,
+			"clock": {"legStart": leg_start, "transitionStart": transition_start,
+				"transitionEnd": transition_end, "legEnd": leg_end},
+			"content": {"start": start_content, "arrival": arrival_content},
 			"sampledFrames": _route_frame_series.size() - frames_before, "readiness": arrival,
 			"travellerRetained": is_instance_valid(arrived_actor) and arrived_actor.get_instance_id() == old_identity,
 			"continuousHandoff": str(handoff.get("from", "")) == str(leg.map) \
