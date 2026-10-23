@@ -1,93 +1,149 @@
 extends Node
 const Release = preload("res://src/updates/release.gd")
+const Packages = preload("res://src/updates/package_updates.gd")
+const Download = preload("res://src/updates/package_download.gd")
+const Bootstrap = preload("res://src/updates/bootstrap.gd")
+const Transport = preload("res://src/updates/update_transport.gd")
+const Uninstall = preload("res://src/updates/uninstall.gd")
 const LaunchOptions = preload("res://src/updates/launch_options.gd")
 var _root := ""
-var _lock := ""
-var _worker: Thread
-var _owns_lock := false
-var _lock_guard: FileAccess
+var _guard := Bootstrap.new()
+var _transport
 var _game_pid := 0
 
 func _ready() -> void:
-	_root = OS.get_executable_path().get_base_dir()
-	_lock = _root.path_join(".eloria-launcher-lock")
-	# Atomic directory creation prevents two launchers installing simultaneously.
-	if DirAccess.make_dir_absolute(_lock) != OK:
-		var owner := Release.read_json(_lock.path_join("owner.json"))
-		if owner.is_empty() and Time.get_unix_time_from_system() - FileAccess.get_modified_time(_lock) < 60:
-			_fail("Rabbit Lands' launcher is starting. Try again in a moment.")
-			return
-		if OS.is_process_running(int(owner.get("pid", 0))) or OS.is_process_running(int(owner.get("game_pid", 0))):
-			_fail("Rabbit Lands is already running, or its launcher is still starting.")
-			return
-		if Release.remove_tree(_lock) != OK or DirAccess.make_dir_absolute(_lock) != OK:
-			_fail("The launcher lock cannot be opened.")
-			return
-	_owns_lock = true
-	if Release.save_json(_lock.path_join("owner.json"), {"pid": OS.get_process_id()}) != OK:
-		_fail("The game folder is not writable. Extract Rabbit Lands to a folder you own.")
+	_transport = _new_transport()
+	add_child(_transport)
+	var args := OS.get_cmdline_user_args()
+	if args.size() == 3 and args[0] == "--handoff":
+		await _handoff(args[1], args[2])
 		return
-	# Keep a Windows file handle open so another process cannot reclaim this
-	# lock merely because Godot only recognizes its own child process IDs.
-	_lock_guard = FileAccess.open(_lock.path_join("owner.json"), FileAccess.READ_WRITE)
-	if _lock_guard == null or _record_owner() != OK:
-		_fail("The launcher lock cannot be held.")
+	_root = Bootstrap.default_root()
+	var root_index := args.find("--root")
+	if root_index >= 0:
+		if root_index + 1 >= args.size():
+			_fail("The installation folder argument is missing.")
+			return
+		_root = args[root_index + 1].simplify_path()
+		args.remove_at(root_index + 1)
+		args.remove_at(root_index)
+	if OS.get_executable_path().get_file().contains("-uninstall") or "--uninstall" in args:
+		await Uninstall.run(self, _root, "--confirm" in args)
 		return
-	var identity := Release.read_json("res://data/client_release.json")
-	_worker = Thread.new()
-	if _worker.start(func() -> String: return Release.install(_root, identity)) != OK:
-		_fail("The update installer could not start.")
-		return
-	while _worker.is_alive():
-		await get_tree().process_frame
-	var error: String = _worker.wait_to_finish()
-	_worker = null
+	var error := Bootstrap.root_error(_root, true)
+	if error == "":
+		error = _guard.acquire(_root)
 	if error != "":
 		_fail(error)
 		return
-	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
-	var user_args := OS.get_cmdline_user_args()
-	var defaults := PackedStringArray(Release.read_json(_root.path_join("launcher-defaults.json")).get("args", []))
-	LaunchOptions.apply_environment(user_args)
-	var args := LaunchOptions.game_arguments(user_args, defaults, _root,
-		DisplayServer.get_name() == "headless")
-	OS.set_environment("ELORIA_INSTALL_ROOT", _root)
-	var pid := OS.create_process(_root.path_join("app/" + binary), args)
-	if pid <= 0:
-		_fail("Rabbit Lands could not start. The previous game is in .eloria-previous.")
+	var identity := Bootstrap.trust()
+	Release.save_json(_root.path_join(".rabbitlands-install.json"), {"schema": 1, "repository": identity.repository, "platform": identity.platform})
+	error = await _transport.worker(func() -> String: return Release.install(_root, identity))
+	if error != "":
+		_fail(error)
 		return
-	_game_pid = pid
-	_record_owner(pid)
+	_progress("Checking for game and updater updates", 0, 1)
+	var url := "https://github.com/%s/releases/latest/download/RabbitLands-%s.json" % [identity.repository, identity.platform]
+	var fetched: Dictionary = await _transport.fetch(url)
+	if not fetched.has("error"):
+		var parsed: Variant = JSON.parse_string(fetched.body.get_string_from_utf8())
+		var envelope: Dictionary = parsed if parsed is Dictionary else {}
+		var release := Bootstrap.verify(envelope, identity)
+		if release.has("error"):
+			_fail(release.error)
+			return
+		var matched: Variant = await _transport.worker(func() -> bool: return Bootstrap.helpers_match(_root, release, identity))
+		if matched != true:
+			_progress("Updating the updater", 0, 1)
+			error = await Bootstrap.prepare_helpers(_root, release, _transport.fetch, _transport.worker)
+			if error == "":
+				error = Bootstrap.start_handoff(_root, envelope, args)
+			if error != "":
+				_fail(error)
+				return
+			_guard.release_lock()
+			get_tree().quit()
+			return
+		release = Release.verify_manifest(envelope, identity)
+		if release.has("error") or release.get("schema") != 2:
+			_fail(str(release.get("error", "The game package format is unsupported.")))
+			return
+		error = await Download.prepare(_root, release, _transport.fetch, _transport.worker, _progress)
+		if error == "":
+			error = await _transport.worker(func() -> String: return Packages.install(_root, release, identity, _progress))
+		if error != "":
+			_fail(error)
+			return
+	elif not FileAccess.file_exists(_root.path_join("app/client-release.json")) or "--update-only" in args:
+		_fail(fetched.error)
+		return
+	if "--update-only" in args:
+		_guard.release_lock()
+		get_tree().quit()
+		return
+	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
+	var defaults := PackedStringArray(Release.read_json(_root.path_join("launcher-defaults.json")).get("args", []))
+	LaunchOptions.apply_environment(args)
+	var game_args := LaunchOptions.game_arguments(args, defaults, _root, DisplayServer.get_name() == "headless")
+	OS.set_environment("ELORIA_INSTALL_ROOT", _root)
+	_game_pid = OS.create_process(_root.path_join("app/" + binary), game_args)
+	if _game_pid <= 0:
+		_fail("Rabbit Lands could not start. Run its installer to repair this installation.")
+		return
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
-	while OS.is_process_running(pid):
+	while OS.is_process_running(_game_pid):
 		await get_tree().create_timer(1.0).timeout
 	_game_pid = 0
-	_release_lock()
+	_guard.release_lock()
 	get_tree().quit()
 
-func _record_owner(game_pid := 0) -> Error:
-	_lock_guard.seek(0)
-	_lock_guard.store_string(JSON.stringify({"pid": OS.get_process_id(), "game_pid": game_pid, "guarded": true}))
-	_lock_guard.flush()
-	return _lock_guard.get_error()
+func _handoff(root: String, manifest: String) -> void:
+	var error := Bootstrap.root_error(root)
+	var request := Release.read_json(manifest)
+	var release := Bootstrap.verify(request.get("envelope", {}), Bootstrap.trust())
+	if error != "" or release.has("error") or manifest != Release.cache_for(root).path_join("bootstrap-manifest.json"):
+		_fail(error if error != "" else "The updater handover failed verification.")
+		return
+	for attempt in 120:
+		error = _guard.acquire(root)
+		if error == "":
+			break
+		await get_tree().create_timer(0.5).timeout
+	if error == "":
+		for attempt in 120:
+			error = Bootstrap.promote_helpers(root, release, Bootstrap.trust())
+			if error == "" or not "still running" in error:
+				break
+			await get_tree().create_timer(0.5).timeout
+	if error == "":
+		_guard.release_lock()
+		var next_args := PackedStringArray(["--", "--root", root])
+		next_args.append_array(PackedStringArray(request.get("args", [])))
+		if OS.create_process(root.path_join(Bootstrap.helper_name("updater", Bootstrap.trust())), next_args) <= 0:
+			error = "The updated updater could not start. Run it again from the game folder."
+	if error != "":
+		_fail(error)
+	else:
+		get_tree().quit()
 
-func _release_lock() -> void:
-	if _owns_lock and (_game_pid == 0 or not OS.is_process_running(_game_pid)):
-		if _lock_guard != null:
-			_lock_guard.close()
-			_lock_guard = null
-		Release.remove_tree(_lock)
-		_owns_lock = false
+func _new_transport() -> Node:
+	return Transport.new()
+
+func _progress(phase: String, completed: int, total: int, detail := "") -> void:
+	var text := phase + (": " + detail if detail != "" else "")
+	if total > 1:
+		text += " (%d%%)" % int(100.0 * completed / total)
+	get_node("Status").set_deferred("text", text)
+	print("RL_PROGRESS|%d|%s" % [int(100.0 * completed / maxi(1, total)), text])
 
 func _fail(message: String) -> void:
-	_release_lock()
+	_guard.release_lock()
 	push_error(message)
 	if DisplayServer.get_name() != "headless":
 		OS.alert(message, "Rabbit Lands update")
 	get_tree().quit(1)
 
 func _exit_tree() -> void:
-	if _worker != null:
-		_worker.wait_to_finish()
-	_release_lock()
+	if _game_pid == 0:
+		_guard.release_lock()

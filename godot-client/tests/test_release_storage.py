@@ -164,7 +164,7 @@ def test_sink_requires_github_recorded_digest_before_disposal(tmp_path, monkeypa
     draft = {"draft": True, "author": {"login": "rabbitlandsgame"}, "tag_name": "current"}
     monkeypatch.setattr(build_release, "gh", lambda *args: json.dumps(draft))
     monkeypatch.setattr(build_release, "github_assets", lambda release_id: [])
-    monkeypatch.setattr(build_release, "upload_asset", lambda *args: None)
+    monkeypatch.setattr(build_release, "upload_asset_api", lambda *args: {})
     path = tmp_path / "part"
     path.write_bytes(b"part")
     row = {"name": "part", "size": 4, "sha256": client_release.digest(path)}
@@ -172,6 +172,44 @@ def test_sink_requires_github_recorded_digest_before_disposal(tmp_path, monkeypa
     with pytest.raises(ValueError, match="retaining"):
         sink.accept(path, row)
     assert path.read_bytes() == b"part"
+
+
+def test_direct_upload_streams_once_and_checks_github_digest(tmp_path, monkeypatch):
+    import build_release
+    import io
+    from contextlib import contextmanager
+    path = tmp_path / "package.zip.001"
+    path.write_bytes(b"package bytes" * 1024)
+    row = {"size": path.stat().st_size, "sha256": client_release.digest(path)}
+    calls = []
+    monkeypatch.setenv("GH_TOKEN", "test-only-token")
+    monkeypatch.setattr(build_release, "github_assets", lambda _: pytest.fail("No per-upload release listing is needed."))
+
+    @contextmanager
+    def upload(request, timeout):
+        calls.append(request.full_url)
+        assert request.full_url == "https://uploads.github.com/repos/rabbitlandsgame/rabbitlands-client/releases/123/assets?name=package.zip.001"
+        assert int(request.get_header("Content-length")) == row["size"]
+        assert hasattr(request.data, "read") and request.data.read() == path.read_bytes()
+        yield io.BytesIO(json.dumps({"id": 42, "name": path.name, "state": "uploaded",
+                                    "size": row["size"], "digest": "sha256:" + row["sha256"]}).encode())
+
+    monkeypatch.setattr(build_release.urllib.request, "urlopen", upload)
+    assert build_release.upload_asset_api(123, path, row, {})["id"] == 42
+    assert len(calls) == 1 and path.is_file()
+
+
+def test_direct_upload_recovers_acknowledgement_lost_after_github_stored_bytes(tmp_path, monkeypatch):
+    import build_release
+    path = tmp_path / "package.zip.001"
+    path.write_bytes(b"package")
+    row = {"size": path.stat().st_size, "sha256": client_release.digest(path)}
+    actual = {"id": 42, "name": path.name, "state": "uploaded", "size": row["size"], "digest": "sha256:" + row["sha256"]}
+    monkeypatch.setenv("GH_TOKEN", "test-only-token")
+    monkeypatch.setattr(build_release.urllib.request, "urlopen", lambda *a, **k: (_ for _ in ()).throw(build_release.urllib.error.URLError("connection lost")))
+    monkeypatch.setattr(build_release, "github_assets", lambda _: [actual])
+    assert build_release.upload_asset_api(123, path, row, {}) == actual
+    assert path.is_file()
 
 
 def test_disposable_worktree_cleanup_handles_long_windows_paths(tmp_path, monkeypatch):

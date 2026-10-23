@@ -17,6 +17,9 @@ import shutil
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 
 import client_release
 import package_client
@@ -102,12 +105,24 @@ def platform_assets(folder: Path, sha: str, platform: str) -> tuple[list[Path], 
         raise ValueError("An update payload must have at least one part.")
     for part in payload["parts"]:
         name = part["url"].removeprefix(base)
-        if not part["url"].startswith(base) or not re.fullmatch(re.escape(stage.name) + r"\.update\.zip\.\d{3,}", name):
+        suffix = r"\.pkg\.[a-z0-9-]+\.zip\.\d{3,}" if payload.get("schema") == 2 else r"\.update\.zip\.\d{3,}"
+        if not part["url"].startswith(base) or not re.fullmatch(re.escape(stage.name) + suffix, name):
             raise ValueError("Unexpected update asset URL.")
         path = folder / name
         if path.stat().st_size != part["size"] or client_release.digest(path) != part["sha256"]:
             raise ValueError(f"Update part verification failed: {name}")
         assets.append(path)
+    if payload.get("schema") == 2:
+        alias = folder / f"RabbitLands-{platform}.json"
+        if alias.read_bytes() != manifest.read_bytes():
+            raise ValueError("The latest-update alias differs from the signed manifest.")
+        assets.append(alias)
+        for kind in ("updater", "uninstall"):
+            row = payload[kind]
+            path = folder / row["url"].removeprefix(base)
+            if not row["url"].startswith(base) or path.parent != folder or not path.is_file() or path.stat().st_size != row["size"] or client_release.digest(path) != row["sha256"]:
+                raise ValueError("A bootstrap executable failed verification.")
+            assets.append(path)
     policy = json.loads((folder / f"{stage.name}-server-policy.json").read_text(encoding="utf-8"))
     if policy != {"schema": 1, "required_commit": sha, "enforce": True,
                   "manifests": {platform: base + manifest.name}}:
@@ -192,8 +207,12 @@ Godot editor. Use the supplied compatibility or safe-mode launcher if needed.
 file with `sha256sum <filename>` against its entry before extracting. On
 Windows use `Get-FileHash <filename> -Algorithm SHA256` in PowerShell.
 
-The platform JSON manifests and `.update.zip.###` files are for the game's
-signed automatic updater. Initial installations use the downloads above.
+The platform JSON manifests and `.pkg.*.zip.###` files are for the game's
+signed updater, which downloads only changed packages and updates itself.
+The separately downloadable `*-updater` executable can migrate an older install;
+place it in the game folder and run it. Run `RabbitLands-uninstall` to remove
+the installation while keeping player settings. Initial Windows installations
+still use just the setup executable above.
 See [installation instructions](https://github.com/{REPOSITORY}/wiki/Access-and-Installation).
 """
 
@@ -289,6 +308,48 @@ def upload_asset(tag: str, release_id: int, path: Path, row: dict, old: dict) ->
                 raise
             print(f"Connection interrupted; retrying {path.name} ({attempt + 2}/5).", flush=True)
             time.sleep(min(2**attempt, 8))
+
+
+def upload_asset_api(release_id: int, path: Path, row: dict, old: dict) -> dict:
+    """Stream one runner asset; verify the upload response without listing N pages.
+
+    Hundreds of independent packages must not trigger a whole-release scan per
+    upload. Finalization still re-reads and verifies the complete remote inventory.
+    """
+    if asset_matches(old, row):
+        return old
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if not token:
+        token = gh("auth", "token", "--hostname", "github.com")
+    url = f"https://uploads.github.com/repos/{REPOSITORY}/releases/{int(release_id)}/assets?name=" + urllib.parse.quote(path.name, safe="-._")
+    for attempt in range(5):
+        if old:
+            gh("api", "--method", "DELETE", f"repos/{REPOSITORY}/releases/assets/{int(old['id'])}")
+            old = {}
+        try:
+            print(f"Uploading {path.name} ({row['size']} bytes)", flush=True)
+            with path.open("rb") as stream:
+                request = urllib.request.Request(url, data=stream, method="POST", headers={
+                    "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
+                    "Content-Type": "application/octet-stream", "Content-Length": str(row["size"]),
+                    "User-Agent": "Rabbit-Lands-release", "X-GitHub-Api-Version": "2022-11-28"})
+                with urllib.request.urlopen(request, timeout=3600) as response:
+                    actual = json.loads(response.read(1024 * 1024))
+            if actual.get("name") != path.name or not asset_matches(actual, row):
+                raise ValueError(f"GitHub did not verify {path.name}; retaining the local part.")
+            return actual
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as error:
+            if isinstance(error, urllib.error.HTTPError) and error.code not in (408, 409, 422, 429, 500, 502, 503, 504):
+                raise ValueError(f"GitHub upload failed for {path.name} (HTTP {error.code}).") from None
+            # Recover a completed upload after a lost response, or remove its
+            # interrupted starter reservation before retrying the same filename.
+            old = next((asset for asset in github_assets(release_id) if asset["name"] == path.name), {})
+            if asset_matches(old, row):
+                return old
+            if attempt == 4:
+                raise ValueError(f"GitHub upload failed for {path.name}; retaining the local part.") from None
+            time.sleep(min(2**attempt, 8))
+    raise ValueError("GitHub upload did not complete.")
 
 
 def upload(bundle: Path, publish: bool = False) -> None:

@@ -30,11 +30,11 @@ def main() -> None:
     root.mkdir(parents=True, exist_ok=True)
     scripts = root / "src/updates"
     scripts.mkdir(parents=True, exist_ok=True)
-    for name in ("release.gd", "client_updates.gd"):
+    for name in ("release.gd", "client_updates.gd", "package_updates.gd", "package_download.gd"):
         shutil.copyfile(SOURCE / "src/updates" / name, scripts / name)
     (root / "data").mkdir(exist_ok=True)
     (root / "data/client_release.json").write_text('{"platform":"source"}')
-    (root / "network_stub.gd").write_text("extends Node\nsignal packet_received(command, payload)\nsignal connection_state_changed(state)\n")
+    (root / "network_stub.gd").write_text("extends Node\nvar offline_hud_preview := false\nsignal packet_received(command, payload)\nsignal connection_state_changed(state)\n")
     (root / "app_state_stub.gd").write_text("extends Node\nfunc append_local_message(message, _channel):\n\tprint(message)\n")
     (root / "project.godot").write_text('config_version=5\n[autoload]\nNetwork="*res://network_stub.gd"\nAppState="*res://app_state_stub.gd"\n')
     env = dict(os.environ, APPDATA=str(root / "appdata"), LOCALAPPDATA=str(root / "appdata"),
