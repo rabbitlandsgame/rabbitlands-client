@@ -1340,7 +1340,7 @@ func _ready() -> void:
 	leaderboards_window = LeaderboardsWindowScript.new()
 	game_view.add_child(leaderboards_window)
 	leaderboards_window.call("configure", Network.send_chat, model_registry, equipment_config)
-	%LeaderboardsButton.icon = _external_texture("res://assets/ui/leaderboards/menu-icon-v1.png")
+	%LeaderboardsButton.icon = _external_texture("res://assets/ui/menu-icons/leaderboard.png")
 	%LeaderboardsButton.expand_icon = true
 	%LeaderboardsButton.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	%LeaderboardsButton.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -16126,7 +16126,7 @@ func _apply_eloria_art() -> void:
 	_apply_rabbitlands_branding()
 	_hud_active_atlas = _external_texture("res://assets/ui/eloria_gamebuttons.png")
 	_hud_inactive_atlas = _external_texture("res://assets/ui/eloria_gamebuttons_inactive.png")
-	%MountsButton.icon = _external_texture("res://assets/ui/mounts.svg")
+	%MountsButton.icon = _external_texture("res://assets/ui/menu-icons/mounts.png")
 	if _hud_active_atlas != null:
 		# The Godot HUD atlas uses one canonical row-major icon order.  Keeping
 		# these regions contiguous makes the art easy to audit and prevents the
