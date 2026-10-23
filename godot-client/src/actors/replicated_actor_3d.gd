@@ -2085,6 +2085,7 @@ func _sync_death_presentation(dto: Dictionary) -> void:
 	if int(dto.health) > 0 and bool(dto.get("alive", true)):
 		if current_action == &"death":
 			current_action = &"idle"
+			_sync_selection_marker()
 			_death_finished = false
 			_death_elapsed = 0.0
 			_death_animation_seconds = 0.0
@@ -3553,8 +3554,6 @@ func end_charge_leap() -> void:
 	_wake()
 
 func play_action(action: StringName, restart := false) -> void:
-	if action == &"death":
-		set_combat_target(false)
 	if _charge_leap != null:
 		if action in [&"walk", &"run", &"idle", &"combat_idle", &"turn"]: return
 		if action in [&"death", &"pain"]: end_charge_leap()
@@ -3570,6 +3569,7 @@ func play_action(action: StringName, restart := false) -> void:
 			or not resolver.action_to_clip.has("death") \
 			or not animation_player.has_animation(resolver.clip_for_action(&"death"))):
 		current_action = &"death"
+		set_combat_target(false)
 		_death_finished = true
 		_death_elapsed = 0.0
 		set_process(true)
@@ -3592,6 +3592,7 @@ func play_action(action: StringName, restart := false) -> void:
 		return
 	current_action = action
 	if action == &"death":
+		set_combat_target(false)
 		_death_finished = false
 		_death_elapsed = 0.0
 		set_process(true)
@@ -3874,7 +3875,8 @@ func set_selected(value: bool) -> void:
 
 func _sync_selection_marker() -> void:
 	if _selection_ring != null:
-		_selection_ring.visible = _selected and not _combat_target and _drawn
+		# Combat cleanup must not replace the attack circle with a corpse's selection circle.
+		_selection_ring.visible = _selected and not _combat_target and _drawn and current_action != &"death"
 		_level_selection_ring()
 
 func set_target_marker_style(appearance: Dictionary) -> void:
