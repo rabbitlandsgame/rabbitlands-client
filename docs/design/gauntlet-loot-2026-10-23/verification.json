@@ -1,33 +1,69 @@
 {
   "feature": "Party loot ledger, rare payments and NPC buybacks",
   "date": "2026-10-23",
-  "status": "Implemented locally; no deployment or release performed",
+  "status": "Merged and pushed to develop; no deployment or release performed",
   "selected_concept": "../gauntlet-loot-2026-10-22/01-party-ledger.png",
-  "rendered_preview": "party-ledger-implemented.png",
-  "preview_sha256": "42222674f7245ac0dcbdb2dfe38b44f7a73e0e36746bbf0fefb452444afe9c15",
+  "rendered_preview": "party-ledger-refined.png",
+  "preview_sha256": "7e4d3df994604f0df5ba43287ab328204d66abdbc681bd1e078b23c4995a9d1d",
   "preview_data": "Illustrative party members and quantities; rendered by the real ledger Control in Godot",
-  "artwork": "Existing game item atlas, real runtime character portrait bakes, retained Amberwood backdrop for the preview, scalable native bronze frames",
+  "artwork": "Existing game item atlas and real runtime character portrait bakes, with native scalable metalwork, teal surface gradients and themed dialogs. Amberwood backdrop is used only for the preview.",
   "new_generated_art_assets": false,
   "visual_iterations": [
     "Initial ledger with four-column allocation table and storage preview",
     "Compact rows, delivery cards and resize behavior for smaller windows",
-    "Gold valuation and server-priced NPC controls, derived gold rows and buyer approval"
+    "Gold valuation and server-priced NPC controls, derived gold rows and buyer approval",
+    "Ornate bronze frame, inked teal surfaces, stronger serif hierarchy and cyan rare selection",
+    "Aligned item columns, larger icon plates and party portrait chips beside shared allocations",
+    "Portrait-led delivery cards, storage readiness badges and an emphasized confirmation footer",
+    "Compact item counts for smaller viewports and bounded, themed gold/NPC dialogs"
   ],
   "server_validation": {
-    "suite": ["tests/test_gauntlet_loot.py", "tests/test_gauntlets.py", "tests/test_gauntlet_reconnect.py", "tests/test_trail_gauntlet.py"],
+    "suite": [
+      "tests/test_gauntlet_loot.py",
+      "tests/test_gauntlets.py",
+      "tests/test_gauntlet_reconnect.py",
+      "tests/test_trail_gauntlet.py"
+    ],
     "passed": 49,
-    "coverage": ["escrow and party rare announcements", "cache ownership", "offline delivery and restart recovery", "atomic rollback and duplicate requests", "tracked equipment", "buyer payments and equal rebates", "approval revocation and plan invalidation", "NPC prices, partial sales, fractional bundles and cancelled sales"]
+    "coverage": [
+      "escrow and party rare announcements",
+      "cache ownership",
+      "offline delivery and restart recovery",
+      "atomic rollback and duplicate requests",
+      "tracked equipment",
+      "buyer payments and equal rebates",
+      "approval revocation and plan invalidation",
+      "NPC prices, partial sales, fractional bundles and cancelled sales"
+    ]
   },
   "client_validation": {
     "ui_suite": "godot-client/tests/test_gauntlet_loot.gd",
-    "ui_checks_passed": 22,
+    "ui_checks_passed": 24,
     "game_integration_suite": "godot-client/tests/test_gauntlet_loot_integration.gd",
     "game_integration": "PASS: real packet dispatch, shared window registration, input blocking and close/reopen lifecycle",
-    "visually_inspected_sizes": ["1024x640", "1280x720", "1600x1000"]
+    "visually_inspected_sizes": [
+      "1024x640",
+      "1280x720",
+      "1600x900",
+      "1600x1000"
+    ],
+    "dialog_regression": "Price and NPC helper text receives a width before its first minimum-size calculation; both dialogs keep their confirmation controls visible."
   },
   "known_unrelated_check": {
     "suite": "godot-client/tests/test_window_stack.gd",
     "failure": "mixing keeps the independent quest reminder behind gameplay windows",
     "control": "The same failure reproduces with the loot panel removed from window registration and the main window surface"
-  }
+  },
+  "baseline_merges": {
+    "client": "eafa8394a83df46b382e81887949e428debc2daa",
+    "server": "ddf2e36a8bbea9ce8f80397b02223a203f3bb9dd"
+  },
+  "refined_previews": [
+    "party-ledger-refined.png",
+    "party-ledger-refined-simple.png",
+    "party-ledger-refined-1280.png",
+    "party-ledger-refined-1024.png",
+    "rare-value-dialog.png",
+    "npc-sale-dialog.png"
+  ]
 }
