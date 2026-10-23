@@ -19,6 +19,17 @@ const GATE_REFRESH_SECONDS := 0.15
 ## The sphere an animal is tested against the frustum with, before its own
 ## scale: the largest of them is a horse, two and a half metres nose to tail.
 const VIEW_RADIUS := 3.0
+const QUALITY := preload("res://src/actors/actor_render_quality.gd")
+const ARCHIVED_MODELS := preload("res://src/actors/archived_model_policy.gd")
+const SCENE_CACHE := preload("res://src/actors/glb_scene_cache.gd")
+const CREATIONS_PER_PASS := [2, 3, 4]
+const CREATION_BUDGET_USEC := 1500
+const SCAN_ATTEMPTS_PER_PASS := 32
+## One allowance across active/resident populations and physics catch-up steps.
+static var _creation_frame := -1
+static var _frame_creations := 0
+static var _frame_attempts := 0
+static var _frame_creation_started := 0
 
 var _scenes: Dictionary = {}
 var _spawned: Array[Node3D] = []
@@ -33,6 +44,16 @@ var _sample_chunks: Dictionary = {}
 var _pending_cells: Dictionary = {}
 var _streamed_catalog: Dictionary = {}
 var _streamed_space: PhysicsDirectSpaceState3D
+var _quality := QUALITY.QUALITY_DEFAULT
+var _legacy_samples: Array[Dictionary] = []
+var _legacy_cursor := 0
+var _legacy_catalog: Dictionary = {}
+var _legacy_space: PhysicsDirectSpaceState3D
+var _spawn_scan_active := false
+var _spawn_scan_again := false
+var _spawn_scan_cursor := 0
+var _creation_passes := 0
+var _creation_max_usec := 0
 
 func populate(manifest: WorldManifest, space: PhysicsDirectSpaceState3D,
 		chunk_stream: ContinentChunkStream = null) -> int:
@@ -45,16 +66,13 @@ func populate(manifest: WorldManifest, space: PhysicsDirectSpaceState3D,
 	var groups: Variant = (declared as Dictionary).get("groups", [])
 	if groups is not Array:
 		return 0
-	var catalog := _load_catalog()
-	var spawned := 0
+	_legacy_catalog = _load_catalog()
+	_legacy_space = space
+	_quality = QUALITY.normalized_quality(LookProfile.quality())
 	for raw_group: Variant in groups as Array:
 		if raw_group is not Dictionary:
 			continue
 		var group: Dictionary = raw_group as Dictionary
-		var scene: PackedScene = _scene_for(str(group.get("model", "")), catalog)
-		if scene == null:
-			push_warning("ambient population: unknown model " + str(group.get("model", "")))
-			continue
 		var centre: Vector3 = _vector(group.get("center", [0, 0, 0]))
 		var radius: float = float(group.get("radius", 6.0))
 		var count: int = int(group.get("count", 1))
@@ -63,23 +81,18 @@ func populate(manifest: WorldManifest, space: PhysicsDirectSpaceState3D,
 		var rng := RandomNumberGenerator.new()
 		rng.seed = int(group.get("seed", 1))
 		for index in count:
-			var instance: Node3D = scene.instantiate() as Node3D
-			if instance == null:
-				continue
 			var angle := rng.randf() * TAU
 			var reach := radius * sqrt(rng.randf())
 			var position := Vector3(centre.x + cos(angle) * reach, centre.y,
 				centre.z + sin(angle) * reach)
-			add_child(instance)
-			instance.scale = Vector3.ONE * scale * rng.randf_range(0.94, 1.06)
-			instance.rotation.y = rng.randf() * TAU
-			instance.global_position = _grounded(position, space)
-			var player: AnimationPlayer = _play(instance, animation, rng.randf() * 4.0)
-			if player != null:
-				_animated.append([instance, player])
-			_spawned.append(instance)
-			spawned += 1
-	return spawned
+			_legacy_samples.append({"model": str(group.get("model", "")), "position": position,
+				"scale": scale * rng.randf_range(0.94, 1.06), "rotation": rng.randf() * TAU,
+				"animation": animation, "offset": rng.randf() * 4.0})
+	_spawn_legacy_pending()
+	set_physics_process(pending_creation_count() > 0)
+	# The return remains the count actually built now. Larger declarations
+	# continue in bounded passes; callers can inspect pending_creation_count().
+	return _spawned.size()
 
 func clear() -> void:
 	if is_instance_valid(_streamed):
@@ -92,13 +105,28 @@ func clear() -> void:
 	_pending_cells.clear()
 	_streamed_catalog.clear()
 	_streamed_space = null
+	_legacy_samples.clear()
+	_legacy_cursor = 0
+	_legacy_catalog.clear()
+	_legacy_space = null
+	_spawn_scan_active = false
+	_spawn_scan_again = false
+	_spawn_scan_cursor = 0
+	_creation_passes = 0
+	_creation_max_usec = 0
 	set_physics_process(false)
+	# Quiesce only the animals being discarded. Forgetting the gate cannot
+	# cancel work that was already queued, and must not restore idle callbacks.
+	for node: Variant in _spawned:
+		if is_instance_valid(node):
+			(node as Node3D).process_mode = Node.PROCESS_MODE_DISABLED
+	_gate.reset(false)
 	for node: Variant in _spawned:
 		if is_instance_valid(node):
 			node.queue_free()
 	_spawned.clear()
-	_gate.reset()
 	_animated.clear()
+	_gate_countdown = 0.0
 
 func _populate_streamed(manifest: WorldManifest, space: PhysicsDirectSpaceState3D,
 		chunk_stream: ContinentChunkStream) -> int:
@@ -106,6 +134,7 @@ func _populate_streamed(manifest: WorldManifest, space: PhysicsDirectSpaceState3
 		return _spawned.size() # Adoption keeps the same animals and animation phases.
 	clear()
 	_streamed = chunk_stream
+	_quality = QUALITY.normalized_quality(LookProfile.quality())
 	_streamed_space = space
 	_streamed_catalog = _load_catalog()
 	_streamed.cell_ready.connect(_on_cell_ready)
@@ -148,8 +177,17 @@ func _on_cell_retiring(identity: String, _imported: Node3D) -> void:
 			_sample_chunks.erase(sample_id)
 	# The chunk owns these nodes and frees them in its bounded retirement pass.
 	# Do not independently queue_free descendants while that traversal owns them.
-	_animated = _animated.filter(func(pair: Array) -> bool: return pair[0] not in removed)
-	_gate.reset()
+	for node: Variant in removed:
+		if is_instance_valid(node):
+			(node as Node3D).process_mode = Node.PROCESS_MODE_DISABLED
+	var survivors: Array[Array] = []
+	for pair: Array in _animated:
+		if pair[0] in removed:
+			_gate.discard(pair[1])
+		else:
+			survivors.append(pair)
+	_animated = survivors
+	_gate_countdown = 0.0
 	var used_models: Dictionary = {}
 	for sample_id: int in _sample_nodes:
 		used_models[str(_streamed_samples[sample_id].model)] = true
@@ -158,21 +196,32 @@ func _on_cell_retiring(identity: String, _imported: Node3D) -> void:
 			_scenes.erase(model)
 
 func _physics_process(_delta: float) -> void:
-	if not is_instance_valid(_streamed) or _streamed_space == null:
-		set_physics_process(false)
-		return
+	if _legacy_cursor < _legacy_samples.size():
+		_spawn_legacy_pending()
 	var ready := false
 	for identity: String in _pending_cells.keys():
 		if Engine.get_physics_frames() >= int(_pending_cells[identity]):
 			_pending_cells.erase(identity)
 			ready = true
 	if ready:
+		if _spawn_scan_active:
+			_spawn_scan_again = true
+		else:
+			_spawn_scan_active = true
+			_spawn_scan_cursor = 0
+	if _spawn_scan_active:
 		_spawn_ready_samples()
-	if _pending_cells.is_empty():
+	if pending_creation_count() == 0:
 		set_physics_process(false)
 
 func _spawn_ready_samples() -> void:
-	for sample: Dictionary in _streamed_samples:
+	if not is_instance_valid(_streamed) or _streamed_space == null:
+		_spawn_scan_active = false
+		return
+	var began := Time.get_ticks_usec()
+	while _spawn_scan_cursor < _streamed_samples.size() and _claim_creation_attempt():
+		var sample := _streamed_samples[_spawn_scan_cursor]
+		_spawn_scan_cursor += 1
 		var identity := int(sample.id)
 		if _sample_nodes.has(identity):
 			continue
@@ -201,19 +250,98 @@ func _spawn_ready_samples() -> void:
 		instance.scale = Vector3.ONE * float(sample.scale)
 		instance.rotation.y = float(sample.rotation)
 		instance.global_position = hit.position
+		QUALITY.apply_actor(instance, _quality)
 		var player := _play(instance, str(sample.animation), float(sample.offset))
 		if player != null:
-			_animated.append([instance, player])
+			_track_animated(instance, player)
 		_spawned.append(instance)
 		_sample_nodes[identity] = instance
 		_sample_chunks[identity] = cell_id
+		_frame_creations += 1
+	_note_creation_pass(began)
+	if _spawn_scan_cursor >= _streamed_samples.size():
+		_spawn_scan_active = _spawn_scan_again
+		_spawn_scan_again = false
+		_spawn_scan_cursor = 0
 
-## Scenery animals are the same skeleton and skinning work as an actor, and a
-## steppe declares a hundred of them, most of them behind the camera at any
-## moment. The gate pauses the ones the camera cannot see and halves the rest
-## beyond its near band; see AnimationGate. The half-rate players are stepped
-## every frame from here, the tiers re-read on a slower clock.
+func _spawn_legacy_pending() -> void:
+	var began := Time.get_ticks_usec()
+	while _legacy_cursor < _legacy_samples.size() and _claim_creation_attempt():
+		var sample := _legacy_samples[_legacy_cursor]
+		_legacy_cursor += 1
+		var scene := _scene_for(str(sample.model), _legacy_catalog)
+		if scene == null:
+			continue
+		var instance := scene.instantiate() as Node3D
+		if instance == null:
+			continue
+		add_child(instance)
+		instance.scale = Vector3.ONE * float(sample.scale)
+		instance.rotation.y = float(sample.rotation)
+		instance.global_position = _grounded(sample.position as Vector3, _legacy_space)
+		QUALITY.apply_actor(instance, _quality)
+		var player := _play(instance, str(sample.animation), float(sample.offset))
+		if player != null:
+			_track_animated(instance, player)
+		_spawned.append(instance)
+		_frame_creations += 1
+	_note_creation_pass(began)
+	if _legacy_cursor >= _legacy_samples.size():
+		_legacy_samples.clear()
+		_legacy_cursor = 0
+		_legacy_catalog.clear()
+		_legacy_space = null
+
+func _claim_creation_attempt() -> bool:
+	var frame := Engine.get_process_frames()
+	if frame != _creation_frame:
+		_creation_frame = frame
+		_frame_creations = 0
+		_frame_attempts = 0
+		_frame_creation_started = Time.get_ticks_usec()
+	if _frame_creations >= int(CREATIONS_PER_PASS[_quality]) or _frame_attempts >= SCAN_ATTEMPTS_PER_PASS \
+			or (_frame_attempts > 0 and Time.get_ticks_usec() - _frame_creation_started >= CREATION_BUDGET_USEC):
+		return false
+	_frame_attempts += 1
+	return true
+
+func _note_creation_pass(began: int) -> void:
+	_creation_passes += 1
+	_creation_max_usec = maxi(_creation_max_usec, Time.get_ticks_usec() - began)
+
+func pending_creation_count() -> int:
+	return maxi(0, _legacy_samples.size() - _legacy_cursor) + _pending_cells.size() \
+		+ (maxi(1, _streamed_samples.size() - _spawn_scan_cursor) if _spawn_scan_active else 0)
+
+func creation_status() -> Dictionary:
+	return {"pending": pending_creation_count(), "spawned": _spawned.size(),
+		"passes": _creation_passes, "maximumPassMicroseconds": _creation_max_usec,
+		"quality": QUALITY.quality_name(_quality)}
+
+func _track_animated(animal: Node3D, player: AnimationPlayer) -> void:
+	var skeleton := animal as Skeleton3D
+	if skeleton == null:
+		var skeletons := animal.find_children("*", "Skeleton3D", true, false)
+		if not skeletons.is_empty():
+			skeleton = skeletons[0] as Skeleton3D
+	_animated.append([animal, player, skeleton])
+	_gate_countdown = 0.0
+
+func apply_render_quality(level: int) -> void:
+	_quality = QUALITY.normalized_quality(level)
+	for animal: Node3D in _spawned:
+		if is_instance_valid(animal):
+			QUALITY.apply_actor(animal, _quality)
+	_gate_countdown = 0.0
+
+## Declared scenery animals use a separate animation allowance from replicated
+## actors. No populated authored herd is currently approved by the catalog.
+## If content is declared later, offscreen model subtrees sleep; visible bodies
+## use quality-specific full/half caps, with the rest at quarter rate. The gate
+## consumes elapsed time every frame and ranks bodies on a slower clock.
 func _process(delta: float) -> void:
+	if _quality != LookProfile.quality():
+		apply_render_quality(LookProfile.quality())
 	if _animated.is_empty():
 		return
 	_gate.advance(delta)
@@ -221,15 +349,38 @@ func _process(delta: float) -> void:
 	if _gate_countdown > 0.0:
 		return
 	_gate_countdown = GATE_REFRESH_SECONDS
-	_gate.begin(get_viewport().get_camera_3d() if is_inside_tree() else null)
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	_gate.begin(camera)
+	var ranked: Array = []
 	for pair: Array in _animated:
 		var animal_value: Variant = pair[0]
 		var player_value: Variant = pair[1]
 		if not is_instance_valid(animal_value) or not is_instance_valid(player_value):
 			continue
 		var animal: Node3D = animal_value as Node3D
-		_gate.apply(player_value as AnimationPlayer, _gate.classify(
-			animal.global_position + Vector3.UP, VIEW_RADIUS * maxf(animal.scale.y, 0.1)))
+		var tier := _gate.classify(animal.global_position + Vector3.UP,
+			VIEW_RADIUS * maxf(animal.global_basis.get_scale().y, 0.1))
+		if tier == AnimationGate.Tier.PAUSED:
+			_apply_animal_tier(pair, tier)
+		else:
+			ranked.append([camera.global_position.distance_squared_to(animal.global_position) if camera != null else 0.0,
+				pair, tier])
+	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var full_budget: int = [8, 12, 16][_quality]
+	var half_budget: int = [8, 12, 16][_quality]
+	for index: int in ranked.size():
+		var entry := ranked[index] as Array
+		var tier := AnimationGate.Tier.HALF
+		if camera == null or (index < full_budget and int(entry[2]) == AnimationGate.Tier.FULL):
+			tier = AnimationGate.Tier.FULL
+		elif index >= full_budget + half_budget:
+			tier = AnimationGate.Tier.QUARTER
+		_apply_animal_tier(entry[1] as Array, tier)
+
+func _apply_animal_tier(pair: Array, tier: int) -> void:
+	var animal := pair[0] as Node3D
+	animal.process_mode = Node.PROCESS_MODE_DISABLED if tier == AnimationGate.Tier.PAUSED else Node.PROCESS_MODE_INHERIT
+	_gate.apply(pair[1] as AnimationPlayer, tier, pair[2] as Skeleton3D)
 
 func _grounded(position: Vector3, space: PhysicsDirectSpaceState3D) -> Vector3:
 	if space == null:
@@ -255,7 +406,22 @@ func _play(instance: Node3D, animation: String, offset: float) -> AnimationPlaye
 	if not player.has_animation(animation):
 		return null
 	var clip := player.get_animation(animation)
-	clip.loop_mode = Animation.LOOP_LINEAR
+	if clip.loop_mode != Animation.LOOP_LINEAR:
+		# Packed scenes share libraries and animations with actors and other
+		# populations. Replace a shallow library copy and only this clip; never
+		# mutate the cache-owned resources while making scenery animation loop.
+		var separator := animation.find("/")
+		var library_name := animation.substr(0, separator) if separator >= 0 else ""
+		var clip_name := animation.substr(separator + 1) if separator >= 0 else animation
+		var source_library := player.get_animation_library(library_name)
+		var library := source_library.duplicate() as AnimationLibrary
+		var private_clip := clip.duplicate() as Animation
+		private_clip.loop_mode = Animation.LOOP_LINEAR
+		library.remove_animation(clip_name)
+		library.add_animation(clip_name, private_clip)
+		player.remove_animation_library(library_name)
+		player.add_animation_library(library_name, library)
+		clip = private_clip
 	player.play(animation)
 	# Offset each animal so a herd does not breathe in lockstep.
 	player.seek(fmod(offset, maxf(clip.length, 0.1)), true)
@@ -274,19 +440,25 @@ func _load_catalog() -> Dictionary:
 func _scene_for(model: String, catalog: Dictionary) -> PackedScene:
 	if model.is_empty():
 		return null
-	if _scenes.has(model):
-		return _scenes[model] as PackedScene
 	var entry: Variant = catalog.get(model)
 	if entry is not Dictionary:
 		return null
 	var path: String = str((entry as Dictionary).get("scene", ""))
-	if path.is_empty() or not ResourceLoader.exists(path):
+	if path.is_empty() or ARCHIVED_MODELS.is_retired_path(path):
 		return null
-	# Godot imports a .glb as a PackedScene, which is what the actor runtime
-	# already loads these models as.
-	var packed: PackedScene = load(path) as PackedScene
+	if _scenes.has(model):
+		return _scenes[model] as PackedScene
+	var packed: PackedScene
+	var extension := path.get_extension().to_lower()
+	if extension == "glb" or extension == "gltf":
+		# Shipping native assets are loose files, without imported PCK remaps.
+		# Share actor parsing, imported-scene preference and retired filtering.
+		# Both creation callers claim their soft budget before reaching here.
+		packed = SCENE_CACHE.packed_scene(path)
+	elif ResourceLoader.exists(path, "PackedScene"):
+		packed = ResourceLoader.load(path, "PackedScene", ResourceLoader.CACHE_MODE_REUSE) as PackedScene
 	if packed == null:
-		push_warning("ambient population: %s did not import as a PackedScene" % path)
+		push_warning("ambient population: %s could not load as a PackedScene" % path)
 		return null
 	_scenes[model] = packed
 	return packed

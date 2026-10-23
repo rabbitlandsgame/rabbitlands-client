@@ -788,6 +788,18 @@ var _local_placement_logged := false
 ## Set when `_sync_world` ran out of spawn budget with actors still to
 ## build; the next frame picks them up.
 var _spawn_backlog := false
+## Full body creation has one count/time allowance per rendered process frame,
+## shared by initial arrivals and later deferred-body promotion. Placeholder
+## creation and parked-body reuse retain their own existing behavior.
+var _actor_creation_frame := -1
+var _actor_creation_count := 0
+var _actor_creation_spent_usec := 0
+var _actor_creation_priority_seen: Dictionary = {}
+var _actor_creation_overrun_seen := false
+## Bounded scalar diagnostics, never a per-actor or per-frame history.
+var _actor_creation_totals: Dictionary = {"builds": 0, "priorityBypasses": 0,
+	"atomicOverruns": 0, "framesOverBudget": 0, "maximumAtomicUsec": 0,
+	"maximumFrameUsec": 0, "maximumBuildsInFrame": 0}
 ## The local character's arrival while its ground streams in behind the
 ## curtain: {position, started, ready}. Empty when none is pending.
 var _arrival: Dictionary = {}
@@ -1662,6 +1674,8 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"container_size": str(viewport_container.size),
 		"viewport_update_mode": main_viewport.render_target_update_mode,
 		"render_scale": _render_scale,
+		"actor_creation_budget": actor_creation_budget_snapshot(),
+		"ambient_creation_pending": ambient_creation_pending_count(),
 		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
 		"map_texture_preference": _map_texture_quality,
 		"crowd_body_cap": crowd.body_cap,
@@ -5972,10 +5986,14 @@ func _populate_ambient_life(manifest: WorldManifest) -> void:
 		ambient_population = AmbientPopulation.new()
 		ambient_population.name = "AmbientPopulation"
 		world_root.add_child(ambient_population)
+	var population := ambient_population
+	population.apply_render_quality(LookProfile.quality())
 	await get_tree().physics_frame
-	if gameplay_world == null or world_loader.manifest != manifest:
+	if not is_instance_valid(population) or ambient_population != population \
+			or gameplay_world == null or world_loader.manifest != manifest:
 		return
-	var spawned: int = ambient_population.populate(manifest,
+	population.apply_render_quality(LookProfile.quality())
+	var spawned: int = population.populate(manifest,
 		gameplay_world.direct_space_state, chunk_stream)
 	if spawned > 0:
 		print_debug("ambient_population map=", AppState.current_map, " spawned=", spawned)
@@ -6167,7 +6185,7 @@ func _prefetch_respawn() -> void:
 ## AppState has written since the last pass - only those actors are visited;
 ## without it every actor is, which is what a map load and the fixtures need.
 ## An actor with no node yet is built either way, at most ACTOR_SPAWN_BUDGET
-## of them per pass; the rest are picked up on the following frames.
+## of them per process frame, within the shared elapsed allowance.
 func _sync_world(changed: Variant = null) -> void:
 	# A whole map waiting for the curtain, or a character whose ground is still
 	# streaming in: nothing is placed on ground that is not there yet.
@@ -6305,39 +6323,90 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 
 ## Gives each arriving actor a node. The player's own is always built at once.
 ## With lazy bodies (crowd_presentation.gd) the nearest arrivals inside the
-## build radius are built, ACTOR_SPAWN_BUDGET of them a pass, and every other
+## build radius share the per-process-frame count/time allowance, and every other
 ## arrival gets a deferred node now - its map dot, and a stand-in if it is in
 ## view - whose body `_update_model_builds` builds nearest first. Without them
 ## the rest simply wait for a later pass, as they always did.
+func _actor_creation_begin_frame(process_frame: int = -1) -> void:
+	var frame := Engine.get_process_frames() if process_frame < 0 else process_frame
+	if frame == _actor_creation_frame:
+		return
+	_actor_creation_frame = frame
+	_actor_creation_count = 0
+	_actor_creation_spent_usec = 0
+	_actor_creation_priority_seen.clear()
+	_actor_creation_overrun_seen = false
+
+func _actor_creation_may_start(id: int, process_frame: int = -1) -> bool:
+	_actor_creation_begin_frame(process_frame)
+	if _actor_creation_count < ACTOR_SPAWN_BUDGET \
+			and _actor_creation_spent_usec < crowd.BUILD_BUDGET_USEC:
+		return true
+	# At most three distinct critical ids in a frame, each admitted once beyond
+	# the ordinary allowance. Rapid target/selection changes cannot grow this.
+	return id >= 0 and _crowd_priority_actor(id) and _actor_creation_priority_seen.size() < 3 \
+		and not _actor_creation_priority_seen.has(id)
+
+func _record_actor_creation(id: int, elapsed_usec: int, process_frame: int = -1) -> void:
+	_actor_creation_begin_frame(process_frame)
+	var cost := maxi(0, elapsed_usec)
+	var priority := id >= 0 and _crowd_priority_actor(id)
+	if priority:
+		if _actor_creation_count >= ACTOR_SPAWN_BUDGET \
+				or _actor_creation_spent_usec >= crowd.BUILD_BUDGET_USEC:
+			_actor_creation_totals.priorityBypasses += 1
+		_actor_creation_priority_seen[id] = true
+	_actor_creation_count += 1
+	_actor_creation_spent_usec += cost
+	_actor_creation_totals.builds += 1
+	_actor_creation_totals.maximumAtomicUsec = maxi(_actor_creation_totals.maximumAtomicUsec, cost)
+	_actor_creation_totals.maximumFrameUsec = maxi(_actor_creation_totals.maximumFrameUsec, _actor_creation_spent_usec)
+	_actor_creation_totals.maximumBuildsInFrame = maxi(_actor_creation_totals.maximumBuildsInFrame, _actor_creation_count)
+	if cost > crowd.BUILD_BUDGET_USEC:
+		_actor_creation_totals.atomicOverruns += 1
+	if _actor_creation_spent_usec > crowd.BUILD_BUDGET_USEC and not _actor_creation_overrun_seen:
+		_actor_creation_totals.framesOverBudget += 1
+		_actor_creation_overrun_seen = true
+
+func actor_creation_budget_snapshot(process_frame: int = -1) -> Dictionary:
+	_actor_creation_begin_frame(process_frame)
+	return {"processFrame": _actor_creation_frame, "bodiesThisFrame": _actor_creation_count,
+		"microsecondsThisFrame": _actor_creation_spent_usec,
+		"bodyLimit": ACTOR_SPAWN_BUDGET, "microsecondLimit": crowd.BUILD_BUDGET_USEC,
+		"totals": _actor_creation_totals.duplicate()}
+
+func _actor_arrival_priority(id: int) -> int:
+	if id == AppState.local_actor_id:
+		return 0
+	if id == AppState.selected_actor_id:
+		return 1
+	if id == _combat_target_actor_id():
+		return 2
+	return 3
+
 func _spawn_arrivals(arriving: Array) -> void:
 	if arriving.is_empty():
 		return
-	if not crowd.lazy:
-		var spawned: int = 0
-		for id: Variant in arriving:
-			if spawned < ACTOR_SPAWN_BUDGET or int(id) == AppState.local_actor_id:
-				_spawn_actor(id)
-				spawned += 1
-			else:
-				_spawn_backlog = true
-		return
-	var reference: Vector3 = _crowd_reference_point()
+	var reference := _crowd_reference_point()
 	var ranked: Array = []
-	for id: Variant in arriving:
-		if int(id) == AppState.local_actor_id:
-			_spawn_actor(id)
+	for index: int in arriving.size():
+		var id: int = int(arriving[index])
+		if not AppState.actors.has(id) or actor_nodes.has(id):
 			continue
-		ranked.append([_record_distance(AppState.actors[id] as Dictionary, reference), id])
-	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	var built: int = 0
-	var deferred: int = 0
+		var distance := _record_distance(AppState.actors[id] as Dictionary, reference)
+		ranked.append([_actor_arrival_priority(id), distance if crowd.lazy else float(index), id, distance])
+	ranked.sort_custom(func(a: Array, b: Array) -> bool:
+		if a[0] != b[0]: return a[0] < b[0]
+		if a[1] != b[1]: return a[1] < b[1]
+		return a[2] < b[2])
+	var deferred := 0
 	for pair: Array in ranked:
-		var id: Variant = pair[1]
-		if built < ACTOR_SPAWN_BUDGET and float(pair[0]) <= crowd.BUILD_RADIUS_METRES \
-				and _body_cap_allows(int(id), float(pair[0])):
+		var id: int = int(pair[2])
+		var wants_body: bool = not crowd.lazy or _crowd_priority_actor(id) \
+			or (float(pair[3]) <= crowd.BUILD_RADIUS_METRES and _body_cap_allows(id, float(pair[3])))
+		if wants_body and _actor_creation_may_start(id):
 			_spawn_actor(id)
-			built += 1
-		elif deferred < crowd.DEFERRED_SPAWNS_PER_PASS:
+		elif crowd.lazy and deferred < crowd.DEFERRED_SPAWNS_PER_PASS:
 			_spawn_actor(id, false)
 			deferred += 1
 		else:
@@ -6422,19 +6491,24 @@ func _present_actor(id: Variant) -> void:
 ## place of the node it has: `build` false makes a deferred node without a body
 ## (crowd_presentation.gd). A replacement carries on the old node's motion.
 func _spawn_actor(id: Variant, build := true,
-		previous: ReplicatedActor3D = null) -> void:
+		previous: ReplicatedActor3D = null) -> bool:
 	var dto: Dictionary = _presentation_dto(AppState.actors[id])
 	var actor_adapter: CoordinateAdapter = _adapter_for_actor(dto)
 	if actor_adapter == null:
 		# Its map is a neighbour that is not resident yet: built on a later pass.
 		_spawn_backlog = true
-		return
+		return false
 	var identity: String = CrowdPresentationScript.identity_key(dto)
 	if previous == null:
 		var parked := crowd.take_parked(int(id), identity) as ReplicatedActor3D
 		if parked != null:
 			_revive_actor(id, parked, dto, actor_adapter)
-			return
+			return true
+	var creates_body: bool = build or int(id) == AppState.local_actor_id or not crowd.lazy
+	if creates_body and not _actor_creation_may_start(int(id)):
+		_spawn_backlog = true
+		return false
+	var creation_started := Time.get_ticks_usec()
 	var node := ReplicatedActor3D.new()
 	node.name = "Actor_%d" % id
 	node.set_meta(&"identity_key", identity)
@@ -6474,6 +6548,9 @@ func _spawn_actor(id: Variant, build := true,
 		# for up to a tenth of a second.
 		node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 			<= ACTOR_DRAW_DISTANCE_METRES)
+	if creates_body:
+		_record_actor_creation(int(id), Time.get_ticks_usec() - creation_started)
+	return true
 
 ## Puts a parked body back for the actor it was parked for: the same steps a
 ## new node takes, on a node that already has its model.
@@ -6487,6 +6564,9 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
+	# Parked bodies were absent from live quality changes. Reconcile before
+	# mount/tack attachment so every returned visual inherits current policy.
+	node.apply_render_quality(LookProfile.quality(), int(id) == AppState.local_actor_id)
 	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.set_selected(int(id) == AppState.selected_actor_id)
@@ -6499,15 +6579,28 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 
 ## Builds the bodies of deferred actors that have come within range, nearest
 ## first: the candidates are ranked on each gate pass, and this builds as many
-## a frame as `CrowdPresentation.BUILDS_PER_FRAME` and its time budget allow.
+## a process frame as the arrival-shared count/time allowance permits.
 ## Each is a new node in the deferred one's place, carrying on its motion.
 func _update_model_builds() -> void:
-	if not crowd.lazy or crowd.pending_candidates() == 0:
+	if not crowd.lazy:
 		return
-	var started: int = Time.get_ticks_usec()
-	var built: int = 0
-	while built < crowd.BUILDS_PER_FRAME \
-			and Time.get_ticks_usec() - started < crowd.BUILD_BUDGET_USEC:
+	# Critical bodies must not wait behind a stale distance-ranked candidate queue.
+	var priority_ids := [AppState.local_actor_id, AppState.selected_actor_id, _combat_target_actor_id()]
+	var seen: Dictionary = {}
+	for raw_id: int in priority_ids:
+		if raw_id < 0 or seen.has(raw_id) or not AppState.actors.has(raw_id):
+			continue
+		seen[raw_id] = true
+		var value: Variant = actor_nodes.get(raw_id)
+		if is_instance_valid(value) and value is ReplicatedActor3D \
+				and (value as ReplicatedActor3D).is_model_deferred() and _actor_creation_may_start(raw_id):
+			if _replace_actor_node(raw_id, true):
+				crowd.builds += 1
+	_actor_creation_begin_frame()
+	var started := Time.get_ticks_usec()
+	var remaining := maxi(0, crowd.BUILD_BUDGET_USEC - _actor_creation_spent_usec)
+	while crowd.pending_candidates() > 0 and _actor_creation_may_start(-1) \
+			and Time.get_ticks_usec() - started < remaining:
 		var id: int = crowd.next_candidate()
 		if id < 0:
 			break
@@ -6521,27 +6614,26 @@ func _update_model_builds() -> void:
 		if not _body_cap_allows(id, Vector2(deferred.global_position.x - reference.x,
 				deferred.global_position.z - reference.z).length()):
 			continue
-		_replace_actor_node(id, true)
-		crowd.builds += 1
-		built += 1
+		if _replace_actor_node(id, true):
+			crowd.builds += 1
 
 ## Swaps an actor's node for a new one with (`build`) or without its body. The
 ## old node is hidden at once and freed at the end of the frame, so nothing
 ## holding it this frame finds it gone mid-call.
-func _replace_actor_node(id: int, build: bool) -> void:
+func _replace_actor_node(id: int, build: bool) -> bool:
 	# Validity before the cast: `as` on a freed node raises.
 	var previous_value: Variant = actor_nodes.get(id)
 	if not is_instance_valid(previous_value):
-		return
+		return false
 	var previous := previous_value as ReplicatedActor3D
 	if previous == null:
-		return
+		return false
 	actor_nodes.erase(id)
 	_spawn_actor(id, build, previous)
 	if not actor_nodes.has(id):
 		# The map it stands on is not placed now: keep the old node instead.
 		actor_nodes[id] = previous
-		return
+		return false
 	if not previous.is_model_deferred():
 		_built_bodies = maxi(0, _built_bodies - 1)
 	previous.visible = false
@@ -6549,6 +6641,7 @@ func _replace_actor_node(id: int, build: bool) -> void:
 	previous.process_mode = Node.PROCESS_MODE_DISABLED
 	previous.queue_free()
 	_apply_overhead_health(id, _overhead_target_actor)
+	return true
 
 ## Bind mount presentation to the current player identity and map, including
 ## state received before a visible actor's model finished loading.
@@ -12655,6 +12748,7 @@ func _apply_graphics_quality() -> void:
 	if weather_layer != null:
 		weather_layer.set_effects_enabled(_effects_enabled)
 	_apply_actor_render_quality()
+	_apply_ambient_render_quality()
 	_apply_day_night()
 	_apply_login_backdrop_quality()
 	_update_border_lighting()
@@ -12709,6 +12803,38 @@ func _apply_actor_render_quality() -> void:
 				level, int(raw_id) == AppState.local_actor_id)
 	if is_instance_valid(preview_actor):
 		preview_actor.apply_render_quality(level, true)
+
+## Active and retained territory populations have the same quality immediately.
+## Population-local quality polling still covers a population attaching later.
+func _ambient_life_populations() -> Array[AmbientPopulation]:
+	var populations: Array[AmbientPopulation] = []
+	if is_instance_valid(ambient_population) and not ambient_population.is_queued_for_deletion():
+		populations.append(ambient_population)
+	var roots: Array[Node] = []
+	if is_instance_valid(world_root):
+		roots.append(world_root)
+	if world_loader != null and is_instance_valid(world_loader.world_root):
+		roots.append(world_loader.world_root)
+	for resident: Dictionary in exterior_stream.residents.values():
+		var resident_root := resident.get("root") as Node
+		if is_instance_valid(resident_root):
+			roots.append(resident_root)
+	for resident_root: Node in roots:
+		var population := resident_root.get_node_or_null("AmbientPopulation") as AmbientPopulation
+		if is_instance_valid(population) and not population.is_queued_for_deletion() and population not in populations:
+			populations.append(population)
+	return populations
+
+func _apply_ambient_render_quality(level: int = -1) -> void:
+	var quality := LookProfile.quality() if level < 0 else level
+	for population: AmbientPopulation in _ambient_life_populations():
+		population.apply_render_quality(quality)
+
+func ambient_creation_pending_count() -> int:
+	var pending := 0
+	for population: AmbientPopulation in _ambient_life_populations():
+		pending += population.pending_creation_count()
+	return pending
 
 ## Puts develop's environment for the bound map back, from the copy taken as
 ## it was bound, paints its sky again if the look is on, and lets the hour and
@@ -15547,6 +15673,7 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()
+	_apply_ambient_render_quality()
 	_queue_surface_followup(&"season", _sync_season_surfaces)
 	_queue_surface_followup(&"actor_ground", _snap_all_actors_to_surface)
 

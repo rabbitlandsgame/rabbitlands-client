@@ -71,8 +71,10 @@ static func install_prepared(scenes: Dictionary) -> void:
 		if not _scenes.has(path):
 			_scenes[path] = scenes[path]
 
-## Returns a fresh instance of `path`, or null when the file cannot be imported.
-static func instantiate(path: String) -> Node3D:
+## Returns the shared scene for `path`, or null when unavailable. Treat this
+## scene and its subresources as immutable. Like instantiate(), call only on the
+## main thread; worker preparation retains its separate build/publication path.
+static func packed_scene(path: String) -> PackedScene:
 	if ArchivedModelPolicy.is_retired_path(path):
 		return null
 	path = _canonical_path(path)
@@ -90,6 +92,13 @@ static func instantiate(path: String) -> Node3D:
 		_scenes[path] = packed
 	else:
 		_lookup_hits += 1
+	return packed
+
+## Returns a fresh instance of `path`, or null when the file cannot be imported.
+static func instantiate(path: String) -> Node3D:
+	var packed := packed_scene(path)
+	if packed == null:
+		return null
 	var instantiate_began := Time.get_ticks_usec()
 	var instance := packed.instantiate() as Node3D
 	_record_operation(&"scene_instantiate", instantiate_began)

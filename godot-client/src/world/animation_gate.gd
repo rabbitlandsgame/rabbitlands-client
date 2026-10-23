@@ -138,6 +138,12 @@ func _join(player: AnimationPlayer, tier: Tier, skeleton: Skeleton3D) -> void:
 	_group_of[player] = chosen
 
 func _leave(player: Object) -> void:
+	discard(player)
+
+## Forget one departing player without changing callbacks, survivor membership,
+## or group clocks. Variant also accepts an expired dictionary key without a
+## cast to a freed Node. This does not cancel work queued before departure.
+func discard(player: Variant) -> void:
 	var current: int = int(_group_of.get(player, -1))
 	if current < 0:
 		return
