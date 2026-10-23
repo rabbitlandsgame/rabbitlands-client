@@ -75,6 +75,31 @@ builds, tests and other benchmark jobs during a comparison. Use matched content
 and settings, repeat runs in alternating order, and label shared-host results
 as screening. A fast development machine does not qualify low-end hardware.
 
+## Crowd and scenery presentation
+
+Mounts inherit their rider's quality and use one clock for mount, rider, tack,
+reins and cloth. Half/quarter-rate updates accumulate skipped time; offscreen
+one-shot actions finish without posing the whole mount. Local, selected and
+combat-target riders retain priority. Parking sleeps both model subtrees, and
+revival reconciles current quality before restoring mount presentation. A worn
+cape still needs quality, distance/tier and crowd allowance; remote Medium/Low
+capes sleep, while the local cape remains available.
+
+New and deferred actor bodies share one allowance per process frame: four
+bodies and a soft 6 ms elapsed stop, with at most three distinct critical actor
+exceptions. Ambient creation has its own shared allowance across populations:
+Low/Medium/High allow two/three/four successful creations, at most 32 attempts,
+and a soft 1.5 ms elapsed stop. One indivisible load can exceed either stop;
+these independent allowances are not a combined frame-time guarantee.
+
+Ambient meshes follow quality and animated scenery uses skeleton gating with
+full/half-rate allowances of 8/8, 12/12 and 16/16 at Low, Medium and High, per
+population. Those caps are separate from replicated actors. Retirement forgets
+only departing animation members, preserving survivors' clocks; full clears
+discard membership without reactivating retiring callbacks. Readiness includes
+queued ambient creation. Synthetic fixtures cover these paths; authored-herd
+performance remains pending approved populated content.
+
 ## Historical measurements
 
 Notes on the runtime cost of the Godot client and the mechanisms that keep it
@@ -623,6 +648,17 @@ Compatibility under xvfb) `tests/integration/rendered_vram_textures.gd`, which
 checks the formats the GPU really holds and draws the fixture both ways.
 
 ## Checking a change
+
+Local benchmark exports also record an asset-only identity from actual PCK
+payload bytes and all loose assets, with explicit code/metadata exclusions.
+The runner verifies it before and after each process. This allows different
+client code to be compared with the same assets; it does not allow the runtime
+loader to skip verification. Route boundary snapshots record selected and
+resident content and their capture cost. Full-route frame/wall samples include
+that diagnostic cost; transition timing ends before the arrival snapshot.
+Mounted snapshots distinguish available joint scheduling counters from the
+legacy path and record actual mount quality. Their counters cover each visual's
+lifetime through the boundary, including warmup, rather than only the sample.
 
 `tests/test_runtime_performance.gd` guards the viewport scheduling, the surface
 sample cache, the in-place packet decode, the shared icons, the actor change

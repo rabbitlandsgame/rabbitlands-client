@@ -94,14 +94,20 @@ func benchmark_readiness_snapshot() -> Dictionary:
 	var ambient_pending := 0
 	if is_instance_valid(ambient_population):
 		ambient_pending = (ambient_population.get("_pending_cells") as Dictionary).size()
+	var ambient_creation_pending := ambient_pending
+	if has_method("ambient_creation_pending_count"):
+		ambient_creation_pending = int(call("ambient_creation_pending_count"))
+	elif is_instance_valid(ambient_population) and ambient_population.has_method("pending_creation_count"):
+		ambient_creation_pending = int(ambient_population.call("pending_creation_count"))
 	var followup := {"pending": 0, "available": false}
 	if has_method("surface_work_snapshot"):
 		followup = call("surface_work_snapshot") as Dictionary
-	ready = ready and ambient_pending == 0 and int(followup.get("pending", 0)) == 0 \
+	ready = ready and ambient_creation_pending == 0 and int(followup.get("pending", 0)) == 0 \
 		and ContinentChunkStream.orphans_pending() == 0
 	return {"ready": ready, "loadedMap": loaded_server_map, "chunks": chunk_states,
 		"actorGroundingPending": _actor_surface_snap_pending,
-		"ambientPendingCells": ambient_pending, "surfaceFollowups": followup,
+		"ambientPendingCells": ambient_pending, "ambientPendingCreation": ambient_creation_pending,
+		"surfaceFollowups": followup,
 		"orphanImports": ContinentChunkStream.orphans_pending(),
 		"exteriorIdle": exterior_stream.is_idle()}
 

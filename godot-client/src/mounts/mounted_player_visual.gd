@@ -27,6 +27,19 @@ var bridle_paths: Array[PackedVector3Array] = []
 var hind_legs := HindLegPose.new()
 var locomotion: RefCounted
 var banner_head_height := 0.0
+var _requested_tier := AnimationGate.Tier.FULL
+var _effective_tier := AnimationGate.Tier.FULL
+var _one_shot_tier := AnimationGate.Tier.HALF
+var _gating_enabled := true
+var _stagger_enabled := true
+var _pending_delta := 0.0
+var _sample_tick := 0
+var _parked := false
+var _cloth_was_enabled := false
+var _rider_modifier_process := Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE
+var _pose_steps := 0
+var _stepped_seconds := 0.0
+var _presentation_view_radius := 0.0
 
 func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony",
 		visual_profile: Dictionary = {}) -> Array[String]:
@@ -54,6 +67,7 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 	pony.set_physics_process(false)
 	pony.set_process(false)
 	pony.animation_player.pause()
+	pony.animation_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	for child: Node in pony.get_children():
 		if child is Node3D and child.name != "NativeModel":
 			(child as Node3D).hide()
@@ -116,11 +130,123 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 	actor.set_hand_props_visible(false)
 	add_child(reins)
 	reins.configure(profile.reins)
+	_rider_modifier_process = actor.get_skeleton().modifier_callback_mode_process
+	actor.get_skeleton().modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	pony.get_skeleton().modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	apply_render_quality(actor.render_quality(), actor.render_quality_is_local())
+	_capture_presentation_view_radius()
 	return []
 
-func _process(delta: float) -> void:
-	if not actor.is_drawn() or not visible:
+## Main tests a sphere centred one metre above the rider's ground position.
+## Capture the approved mount's imported bounds once, including its visual
+## offset/scale and raised rider banner, so visible extremities do not freeze
+## when a human-only sphere falls outside the frustum. No per-frame mesh walk.
+func _capture_presentation_view_radius() -> void:
+	_presentation_view_radius = maxf(pony.view_radius() + pony.position.length(), banner_head_height + 0.6)
+	var model := pony.get_node_or_null("NativeModel") as Node3D
+	if model == null:
 		return
+	var bounds: AABB = (pony.transform * model.transform) * pony._native_body_bounds
+	for corner: int in 8:
+		_presentation_view_radius = maxf(_presentation_view_radius,
+			bounds.get_endpoint(corner).distance_to(Vector3.UP) + 0.5)
+
+func presentation_view_radius() -> float:
+	return _presentation_view_radius
+
+func apply_render_quality(level: int, is_local_actor := false) -> void:
+	if is_instance_valid(pony):
+		pony.apply_render_quality(level, is_local_actor)
+	ActorRenderQuality.apply_actor(self, level)
+	refresh_cloth_permission(true)
+
+func set_animation_tier(tier: int, one_shot_tier := AnimationGate.Tier.HALF,
+		gating_enabled := true, stagger_enabled := true) -> void:
+	_requested_tier = tier
+	_one_shot_tier = one_shot_tier
+	_gating_enabled = gating_enabled
+	_stagger_enabled = stagger_enabled
+	_parked = false
+	_update_effective_tier(true)
+
+func _has_one_shot() -> bool:
+	if upper.action.is_empty():
+		return false
+	var clip := upper.clips.get(upper.action) as Animation
+	return bool(upper.get("_returning")) or (clip != null and clip.loop_mode == Animation.LOOP_NONE)
+
+func _update_effective_tier(force := false) -> void:
+	var tier := _requested_tier if _gating_enabled else AnimationGate.Tier.FULL
+	if _parked:
+		tier = AnimationGate.Tier.PAUSED
+	elif actor.mounted_presentation_priority():
+		tier = AnimationGate.Tier.FULL
+	elif tier == AnimationGate.Tier.PAUSED and _has_one_shot():
+		tier = _one_shot_tier
+	if not force and tier == _effective_tier:
+		return
+	var was_paused := _effective_tier == AnimationGate.Tier.PAUSED
+	_effective_tier = tier
+	if was_paused or tier == AnimationGate.Tier.PAUSED:
+		_pending_delta = 0.0
+	actor._set_mounted_animation_tier(tier)
+	pony._set_model_processing(tier != AnimationGate.Tier.PAUSED)
+	actor.get_skeleton().modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	pony.get_skeleton().modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	set_process(tier != AnimationGate.Tier.PAUSED)
+	refresh_cloth_permission(true)
+
+func pause_for_parking() -> void:
+	_parked = true
+	_pending_delta = 0.0
+	_update_effective_tier(true)
+
+func cape_simulation_enabled() -> bool:
+	return not _parked and is_instance_valid(actor) and actor.is_drawn() \
+		and is_visible_in_tree() and actor.cape_cloth_should_simulate()
+
+func refresh_cloth_permission(reset_when_enabled := true) -> void:
+	var enabled := cape_simulation_enabled()
+	if enabled and reset_when_enabled and not _cloth_was_enabled:
+		actor._cape_cloth.call("reset")
+	_cloth_was_enabled = enabled
+
+func scheduling_stats() -> Dictionary:
+	return {"requestedTier": _requested_tier, "tier": _effective_tier,
+		"poseSteps": _pose_steps, "steppedSeconds": _stepped_seconds,
+		"pendingSeconds": _pending_delta, "parked": _parked, "staggered": _stagger_enabled,
+		"cloth": cape_simulation_enabled()}
+
+func _process(delta: float) -> void:
+	if _parked or not is_instance_valid(actor):
+		return
+	_update_effective_tier()
+	if _effective_tier == AnimationGate.Tier.PAUSED:
+		return
+	_pending_delta += maxf(0.0, delta)
+	_sample_tick += 1
+	var stride := 2 if _effective_tier == AnimationGate.Tier.HALF else (
+		4 if _effective_tier == AnimationGate.Tier.QUARTER else 1)
+	var phase := actor.actor_id if _stagger_enabled else 0
+	if (_sample_tick + phase) % stride != 0:
+		return
+	var step := _pending_delta
+	_pending_delta = 0.0
+	# Offscreen one-shots finish on their clock, but an invisible arrival or
+	# out-of-range body needs no mount/rein/cloth pose computation.
+	var frustum_paused := _gating_enabled and _requested_tier == AnimationGate.Tier.PAUSED \
+		and not actor.mounted_presentation_priority()
+	if frustum_paused or not actor.is_drawn() or not is_visible_in_tree():
+		if _has_one_shot():
+			upper.advance(step)
+		_update_effective_tier()
+		return
+	_step_visual(step)
+	_pose_steps += 1
+	_stepped_seconds += step
+	_update_effective_tier()
+
+func _step_visual(delta: float) -> void:
 	upper.advance(delta)
 	var moving := upper.ground_action in [&"walk", &"run"] or actor.current_action in [&"walk", &"run"] or actor._segment_duration > 0.0
 	var next := "idle"
@@ -169,7 +295,8 @@ func _process(delta: float) -> void:
 		profile.pelvisLeanDegrees = float(profile[lean_key])
 	pose.fit(seat, action, elapsed, duration)
 	upper.apply()
-	if actor._cape_cloth != null and actor._cape_cloth_worn:
+	refresh_cloth_permission(true)
+	if cape_simulation_enabled():
 		# Pose the body first, then cloth, once. The ordinary automatic modifier
 		# remains paused so it cannot overwrite this mounted pass afterward.
 		cape_surface.update(delta, action)
@@ -200,8 +327,12 @@ func _process(delta: float) -> void:
 
 func play_action(next: StringName, restart := false) -> void:
 	upper.request(next, restart)
+	_update_effective_tier()
 
 func restore() -> void:
+	_parked = true
+	set_process(false)
+	_pending_delta = 0.0
 	if actor._cape_cloth != null:
 		actor._cape_cloth.call("set_mount_surface", null)
 	if pose.skeleton != null:
@@ -209,6 +340,8 @@ func restore() -> void:
 	for modifier: Node in modifiers:
 		if is_instance_valid(modifier):
 			(modifier as SkeletonModifier3D).active = bool(modifiers[modifier])
+	if actor.get_skeleton() != null:
+		actor.get_skeleton().modifier_callback_mode_process = _rider_modifier_process
 	actor.set_hand_props_visible(true)
 	actor._refresh_cape_cloth_activity(true)
 	actor._lift_overhead(actor.server_scale)

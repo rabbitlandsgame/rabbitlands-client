@@ -1,6 +1,10 @@
 extends SceneTree
 
 var failures := 0
+
+class FixturePopulation extends AmbientPopulation:
+	func _load_catalog() -> Dictionary:
+		return {"fixture": {"scene": "user://chunk-ambient-test/animal.tscn"}}
 const SCRATCH := "user://chunk-ambient-test"
 
 func _init() -> void:
@@ -34,9 +38,18 @@ func _cell(stream: ContinentChunkStream, identity: String, x: float, layer := 8)
 	stream.cell_ready.emit(identity,cell)
 	return cell
 
-func _settle() -> void:
-	for index: int in 4:
+func _settle(population: AmbientPopulation, label: String) -> bool:
+	# Collision registration needs a physics boundary; creation is bounded per
+	# rendered process frame. Physics catch-up alone cannot renew that budget,
+	# and a cold model load can consume a whole pass after the first animal.
+	for index: int in 120:
 		await physics_frame
+		await process_frame
+		if population.pending_creation_count() == 0:
+			return true
+	_expect(false, "%s completes its bounded creation queue: %s" % [
+		label, str(population.creation_status())])
+	return false
 
 func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(SCRATCH)
@@ -55,7 +68,7 @@ func _run() -> void:
 	var stream := ContinentChunkStream.new()
 	stream.position = Vector3(80,4,-50)
 	stage.add_child(stream)
-	var population := AmbientPopulation.new()
+	var population := FixturePopulation.new()
 	stream.add_child(population)
 	var manifest := WorldManifest.new()
 	manifest.data = {"ambientPopulation":{"groups":[
@@ -64,11 +77,17 @@ func _run() -> void:
 	var space := stage.get_world_3d().direct_space_state
 	population.populate(manifest,space,stream)
 	population._streamed_catalog = {"fixture":{"scene":SCRATCH.path_join("animal.tscn")}}
-	await _settle()
+	if not (await _settle(population, "cold territory")):
+		stage.free()
+		quit(1)
+		return
 	_expect(population._spawned.is_empty() and population._scenes.is_empty(),
 		"cold territory creates neither floating animals nor resident model resources")
 	var west := _cell(stream,"west",0)
-	await _settle()
+	if not (await _settle(population, "west terrain")):
+		stage.free()
+		quit(1)
+		return
 	_expect(population._spawned.size() == 2, "only the newly loaded terrain's wildlife instantiates")
 	for node: Node3D in population._spawned:
 		_expect(node.get_parent() == west and is_equal_approx(node.global_position.y,6.0),
@@ -83,16 +102,26 @@ func _run() -> void:
 		stream._drain_retired()
 	_expect(not is_instance_valid(old), "bounded chunk retirement frees its actual wildlife descendants")
 	var east := _cell(stream,"east",600,16)
-	await _settle()
+	if not (await _settle(population, "east preview terrain")):
+		stage.free()
+		quit(1)
+		return
 	_expect(population._spawned.size() == 2 and population._spawned[0].get_parent() == east,
 		"later preview-layer terrain grounds and owns only its nearby wildlife")
 	_expect(is_equal_approx(population._spawned[0].global_position.x,680.0),
 		"neighbor scenery remains in the same shared world frame")
-	var legacy := AmbientPopulation.new()
+	var legacy := FixturePopulation.new()
 	stage.add_child(legacy)
 	legacy._scenes["fixture"] = packed
-	_expect(legacy.populate(manifest,space) == 4 and legacy._spawned[0].get_parent() == legacy,
-		"legacy unchunked maps retain their existing complete population behavior")
+	var initial := legacy.populate(manifest,space)
+	_expect(initial <= 4, "legacy unchunked creation obeys its first-pass count allowance")
+	if not (await _settle(legacy, "legacy unchunked population")):
+		stage.free()
+		quit(1)
+		return
+	_expect(legacy.pending_creation_count() == 0 and legacy._spawned.size() == 4
+		and legacy._spawned[0].get_parent() == legacy,
+		"legacy unchunked maps complete their declared population through bounded passes")
 	stage.free()
 	await process_frame
 	print("chunk ambient population tests: ", "PASS" if failures == 0 else "FAIL")

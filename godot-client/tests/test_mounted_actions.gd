@@ -132,9 +132,23 @@ func run() -> void:
 		expect(actor.animation_player.is_playing(), "mounted death starts the full death clip")
 		actor.play_action(&"idle")
 		expect(actor.current_action == &"death", "late riding commands cannot cancel death")
-		actor.free()
-		baseline.free()
+		await _retire_fixtures([actor, baseline])
 	print("MOUNTED_ACTION_CHECKS ", checks, " failures=", failures, " max_lower_error=", max_lower_error)
+	ReplicatedActor3D.clear_wardrobe_texture_cache()
 	NativeAnimationImporter.clear()
 	GlbSceneCache.clear()
+	await _drain()
 	quit(1 if failures else 0)
+
+func _retire_fixtures(actors: Array[ReplicatedActor3D]) -> void:
+	for actor: ReplicatedActor3D in actors:
+		actor.process_mode = Node.PROCESS_MODE_DISABLED
+	await _drain()
+	for actor: ReplicatedActor3D in actors:
+		actor.queue_free()
+	await _drain()
+
+func _drain() -> void:
+	await physics_frame
+	await process_frame
+	await process_frame

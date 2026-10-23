@@ -268,8 +268,12 @@ func _check_main_wiring() -> void:
 	_expect(source.contains(
 		"node.apply_render_quality(LookProfile.quality(), int(id) == AppState.local_actor_id)"),
 		"new world actors receive quality with local identity")
-	_expect(source.contains("func _apply_actor_render_quality() -> void:")
-		and source.contains("_apply_actor_render_quality()\n\t_apply_day_night()"),
+	var graphics_start := source.find("func _apply_graphics_quality() -> void:")
+	var graphics_end := source.find("\nfunc ", graphics_start + 1)
+	var graphics_body := source.substr(graphics_start, graphics_end - graphics_start)
+	_expect(graphics_start >= 0 and graphics_end > graphics_start
+		and source.contains("func _apply_actor_render_quality() -> void:")
+		and graphics_body.contains("\t_apply_actor_render_quality()"),
 		"a live graphics-quality change updates existing actors")
 	_expect(source.contains("&\"local_actor\":")
 		and source.contains("&\"local_actor\":\n")

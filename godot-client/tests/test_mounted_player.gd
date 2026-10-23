@@ -23,7 +23,7 @@ func run() -> void:
 			"shirt": 0, "pants": 0, "boots": 0, "head": 0}, "equipment_visuals": {}}, CoordinateAdapter.new(), config, mapping)
 		expect(errors.is_empty(), body + " actual character loads " + str(errors))
 		if not errors.is_empty():
-			actor.free()
+			await _retire_fixtures([actor])
 			continue
 		actor.rotation.y = 1.1
 		var authoritative := actor.global_transform
@@ -61,6 +61,23 @@ func run() -> void:
 			expect(not is_instance_valid(actor._mount_visual), "dismount removes pony")
 			expect(native.transform.is_equal_approx(original), "dismount restores exact native root")
 			expect(actor.animation_player.is_playing(), "normal animation resumes")
-		actor.free()
+		await _retire_fixtures([actor])
+	ReplicatedActor3D.clear_wardrobe_texture_cache()
+	NativeAnimationImporter.clear()
+	GlbSceneCache.clear()
+	await _drain()
 	print("MOUNTED_PLAYER_CHECKS ", checks, " failures=", failures)
 	quit(1 if failures else 0)
+
+func _retire_fixtures(actors: Array[ReplicatedActor3D]) -> void:
+	for actor: ReplicatedActor3D in actors:
+		actor.process_mode = Node.PROCESS_MODE_DISABLED
+	await _drain()
+	for actor: ReplicatedActor3D in actors:
+		actor.queue_free()
+	await _drain()
+
+func _drain() -> void:
+	await physics_frame
+	await process_frame
+	await process_frame
