@@ -1302,6 +1302,12 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_selected_icon.texture = _named_icon(int(entry.get("image_id", 0)), item_name)
 	var quantity_limit: int = int(entry.get("quantity", 0))
 	if managing:
+		if bool(entry.get("party_owned", false)):
+			market_selection.text = "Party-owned listing"
+			market_totals.text = "Manage withdrawal votes from Gauntlet loot → Party exchange."
+			market_renew.disabled = true
+			market_cancel.disabled = true
+			return
 		market_selection.text = "%s  ×%d    ·    %s gc each\nExpires in %s." % [item_name,
 			quantity_limit, _market_number(int(entry.get("unit_price", 0))),
 			_market_time_left(int(entry.get("seconds_left", 0))).trim_suffix(" left")]
@@ -1511,6 +1517,8 @@ func _on_market_collect() -> void:
 
 ## How long a listing has left, in the largest unit that is not zero.
 func _market_time_left(seconds: int) -> String:
+	if seconds == 0xFFFFFFFF:
+		return "Party vote required"
 	if seconds >= 2 * 86400:
 		return "%d days left" % (seconds / 86400)
 	if seconds >= 86400:

@@ -1,5 +1,5 @@
 {
-  "feature": "Party loot ledger, rare payments and NPC buybacks",
+  "feature": "Party loot ledger, rare payments, NPC buybacks and party-owned exchange voting",
   "date": "2026-10-23",
   "status": "Merged and pushed to develop; no deployment or release performed",
   "selected_concept": "../gauntlet-loot-2026-10-22/01-party-ledger.png",
@@ -47,7 +47,8 @@
       "1600x900",
       "1600x1000"
     ],
-    "dialog_regression": "Price and NPC helper text receives a width before its first minimum-size calculation; both dialogs keep their confirmation controls visible."
+    "dialog_regression": "Price and NPC helper text receives a width before its first minimum-size calculation; both dialogs keep their confirmation controls visible.",
+    "party_exchange_ui_checks_passed": 17
   },
   "known_unrelated_check": {
     "suite": "godot-client/tests/test_window_stack.gd",
@@ -65,5 +66,47 @@
     "party-ledger-refined-1024.png",
     "rare-value-dialog.png",
     "npc-sale-dialog.png"
-  ]
+  ],
+  "party_exchange": {
+    "status": "Implemented and verified; no deployment or release performed",
+    "previews": [
+      "party-exchange.png",
+      "party-exchange-1024.png",
+      "party-exchange-listing-dialog.png",
+      "party-exchange-staging.png"
+    ],
+    "preview_sha256": {
+      "party-exchange.png": "334bd26d9ae1b7a05c5216bea261a02c46bf5ad7bd10fc9656188c27cbcd740b",
+      "party-exchange-1024.png": "3ded773072e876ef71de0b1215ec36f682a505fa794e1a444ea239c28bb49ac4",
+      "party-exchange-listing-dialog.png": "d286a82a183709c8748606dd5fe708d703fc2386f42ff28f8e3ed30a6bccb604",
+      "party-exchange-staging.png": "f49e80fee35ecc7fc71f8c7d6e2c756a37e1f7c7f5d7f4960948082cfa40af88"
+    },
+    "fixture_source": "Server-generated snapshots with fictional accounts and quantities",
+    "ui_suite": "godot-client/tests/test_party_exchange.gd",
+    "ui_checks_passed": 17,
+    "server_suite": "tests/test_party_exchange.py",
+    "server_tests_passed": 15,
+    "combined_server_checks_passed_before_upstream_merge": 96,
+    "rules": [
+      "Immutable original player roster",
+      "Whole-coin per-item asking price",
+      "Equal storage proceeds including offline members",
+      "Fair cumulative rounding for partial sales",
+      "Only original members can request withdrawal or vote",
+      "Yes, No and Abstain persist independently",
+      "At least one Yes and no No are required",
+      "All responses can approve early; otherwise missing votes are ignored at 14 days",
+      "No automatic listing expiry or ordinary cancellation",
+      "Approved withdrawals return the unsold remainder to shared escrow",
+      "Tracked identities survive withdrawal, relisting and delivery"
+    ],
+    "regressions": [
+      "Atomic sale, credit and withdrawal receipts",
+      "Restart and offline recovery",
+      "Rejected, amended and stale votes",
+      "Sale while voting",
+      "Storage-credit retry without double payment",
+      "Passive updates never replace an editor for another run"
+    ]
+  }
 }

@@ -1812,7 +1812,9 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 		for key: String in ["sell_quantity", "available_quantity", "npc_gold", "sale_proceeds"]:
 			if not _loot_integer(row.get(key)):
 				return {"type": "invalid", "error": "gauntlet_loot_sale"}
-		if not _loot_integer(row.get("npc_bundle"), 1) or int(row.available_quantity) + int(row.sell_quantity) != int(row.quantity):
+		if not _loot_integer(row.get("exchange_quantity", 0)) or not _loot_integer(row.get("exchange_price", 0)):
+			return {"type": "invalid", "error": "gauntlet_loot_exchange_quantity"}
+		if not _loot_integer(row.get("npc_bundle"), 1) or int(row.available_quantity) + int(row.sell_quantity) + int(row.get("exchange_quantity", 0)) != int(row.quantity):
 			return {"type": "invalid", "error": "gauntlet_loot_sale_quantity"}
 		if not _loot_integer(row.get("quantity"), 1) or not _loot_integer(row.get("image_id"), -1):
 			return {"type": "invalid", "error": "gauntlet_loot_quantity"}
@@ -1823,6 +1825,45 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 			allocated += int(row.allocations[recipient])
 		if allocated > int(row.available_quantity) or not row.owner.is_empty() and not names.has(row.owner):
 			return {"type": "invalid", "error": "gauntlet_loot_overallocation"}
+	if state.has("exchange_enabled"):
+		if not state.exchange_enabled is bool or not state.get("exchange") is Array or state.exchange.size() > 24:
+			return {"type": "invalid", "error": "party_exchange_shape"}
+		for key: String in ["exchange_total", "exchange_page", "exchange_pages", "ledger_page", "ledger_pages", "exchange_plan_types", "exchange_plan_quantity", "exchange_plan_gold"]:
+			if not _loot_integer(state.get(key)):
+				return {"type": "invalid", "error": "party_exchange_page"}
+		if int(state.exchange_pages) < 1 or int(state.exchange_page) >= int(state.exchange_pages) or int(state.ledger_pages) < 1 or int(state.ledger_page) >= int(state.ledger_pages):
+			return {"type": "invalid", "error": "party_exchange_page_range"}
+		if not state.get("ledgers") is Array or state.ledgers.size() > 24:
+			return {"type": "invalid", "error": "party_exchange_ledgers"}
+		for ledger: Variant in state.ledgers:
+			if not ledger is Dictionary or not ledger.get("run_id") is String or not ledger.get("route") is String or ledger.get("phase") not in ["active", "complete", "ended", "sent"]:
+				return {"type": "invalid", "error": "party_exchange_ledger"}
+		var listing_ids: Array[int] = []
+		for listing: Variant in state.exchange:
+			if not listing is Dictionary:
+				return {"type": "invalid", "error": "party_exchange_listing"}
+			for key: String in ["listing_id", "quantity", "original_quantity", "price_gold", "gold_sold", "request_id", "deadline"]:
+				if not _loot_integer(listing.get(key)):
+					return {"type": "invalid", "error": "party_exchange_number"}
+			if int(listing.listing_id) < 1 or listing_ids.has(int(listing.listing_id)) or not _loot_integer(listing.get("image_id"), -1) or not listing.get("name") is String or not listing.get("withdrawal_run_id") is String:
+				return {"type": "invalid", "error": "party_exchange_fields"}
+			listing_ids.append(int(listing.listing_id))
+			if int(listing.original_quantity) < 1 or int(listing.price_gold) < 1 or int(listing.quantity) > int(listing.original_quantity):
+				return {"type": "invalid", "error": "party_exchange_quantity"}
+			if listing.get("state") not in ["active", "sold", "withdrawn"] or listing.get("vote_state") not in ["none", "open", "approved", "rejected", "sold"] or listing.get("own_vote") not in ["none", "yes", "no", "abstain"]:
+				return {"type": "invalid", "error": "party_exchange_status"}
+			if not listing.get("votes") is Array or listing.votes.size() != names.size() or not listing.get("payouts") is Array or listing.payouts.size() > names.size():
+				return {"type": "invalid", "error": "party_exchange_roster"}
+			var voters: Array[String] = []
+			for voter: Variant in listing.votes:
+				if not voter is Dictionary or not voter.get("username") is String or not names.has(voter.username) or voters.has(voter.username) or not voter.get("name") is String or voter.get("vote") not in ["none", "yes", "no", "abstain"]:
+					return {"type": "invalid", "error": "party_exchange_vote"}
+				voters.append(voter.username)
+			var payees: Array[String] = []
+			for payout: Variant in listing.payouts:
+				if not payout is Dictionary or not payout.get("username") is String or not names.has(payout.username) or payees.has(payout.username) or not _loot_integer(payout.get("gold")) or not _loot_integer(payout.get("pending_gold")):
+					return {"type": "invalid", "error": "party_exchange_payout"}
+				payees.append(payout.username)
 	return {"type": "gauntlet_loot", "data": state}
 
 static func _loot_integer(value: Variant, minimum := 0) -> bool:
@@ -2084,6 +2125,7 @@ static func decode_marketplace(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "marketplace_flags"}
 	for listing: Dictionary in listings:
 		listing["own"] = (int(payload[offset]) & 1) != 0
+		listing["party_owned"] = (int(payload[offset]) & 2) != 0
 		offset += 1
 	var return_count: int = u16(payload, offset)
 	offset += 2

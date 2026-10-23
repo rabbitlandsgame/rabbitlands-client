@@ -58,6 +58,29 @@ var _price_revision := -1
 var _sale_revision := -1
 var _selected_row := ""
 var _row_panels: Dictionary = {}
+var exchange_dialog: ConfirmationDialog
+var exchange_amount: SpinBox
+var exchange_price: SpinBox
+var _exchange_row: Dictionary = {}
+var _exchange_revision := -1
+var _tabs: HBoxContainer
+var _exchange_view: VBoxContainer
+var _exchange_cards: VBoxContainer
+var _exchange_tab: Button
+var _distribution_tab: Button
+var _run_picker: OptionButton
+var _run_previous: Button
+var _run_next: Button
+var _exchange_pager: Label
+var _exchange_heading: Label
+var _exchange_previous: Button
+var _exchange_next: Button
+var _show_exchange := false
+var _editor_run := ""
+var _price_run := ""
+var _sale_run := ""
+var _exchange_run := ""
+var _confirmation_run := ""
 
 func _ready() -> void:
 	name = "GauntletLootLayer"
@@ -156,7 +179,7 @@ func _build() -> void:
 	panel.resized.connect(func() -> void: panel.queue_redraw())
 	panel.visibility_changed.connect(func() -> void:
 		portraits.set_active(panel.visible)
-		reopen.visible = not panel.visible and not _state.is_empty() and (_state.get("phase", "") != "sent" or bool(_state.get("other_pending", false))))
+		reopen.visible = not panel.visible and not _state.is_empty() and (_state.get("phase", "") != "sent" or int(_state.get("exchange_total", 0)) > 0 or bool(_state.get("other_pending", false))))
 	_content = VBoxContainer.new()
 	_content.add_theme_constant_override("separation", 7)
 	panel.add_child(_content)
@@ -175,6 +198,27 @@ func _build() -> void:
 	route.add_theme_font_override("font", Art.title_font())
 	hint = _label(_content, "All creature drops held until completion.", 13, MUTED)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_tabs = HBoxContainer.new()
+	_content.add_child(_tabs)
+	_tabs.hide()
+	_distribution_tab = _button(_tabs, "Distribute loot", func() -> void: _show_exchange = false; _render())
+	_exchange_tab = _button(_tabs, "Party exchange", func() -> void: _show_exchange = true; _render())
+	var tab_spacer := Control.new()
+	tab_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_tabs.add_child(tab_spacer)
+	_run_previous = _button(_tabs, "‹", func() -> void: _ledger_page(-1))
+	_run_picker = OptionButton.new()
+	_run_picker.custom_minimum_size.x = 220
+	_run_picker.fit_to_longest_item = false
+	_run_picker.clip_text = true
+	_run_picker.add_theme_stylebox_override("normal", style(BRONZE, Color("0b191b"), 5))
+	_run_picker.add_theme_color_override("font_color", GOLD)
+	_tabs.add_child(_run_picker)
+	_run_picker.item_selected.connect(func(index: int) -> void:
+		var run_id: Variant = _run_picker.get_item_metadata(index)
+		if run_id is String and not run_id.is_empty():
+			_request("open", {"run_id": run_id, "ledger_page": int(_state.get("ledger_page", 0))}))
+	_run_next = _button(_tabs, "›", func() -> void: _ledger_page(1))
 	_columns = HBoxContainer.new()
 	_columns.add_theme_constant_override("separation", 12)
 	_columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -205,7 +249,7 @@ func _build() -> void:
 	recipient_header.size_flags_stretch_ratio = 1.15
 	recipient_header.custom_minimum_size.x = 135
 	_label(header, "Quantity", 13, TEXT).custom_minimum_size.x = 64
-	_label(header, "Value / NPC", 12, TEXT).custom_minimum_size.x = 126
+	_label(header, "Value / sell", 12, TEXT).custom_minimum_size.x = 126
 	header_box.draw.connect(func() -> void: LedgerArt.columns(header_box, header, BRONZE))
 	header.sort_children.connect(func() -> void: header_box.queue_redraw())
 	var scroll := ScrollContainer.new()
@@ -243,6 +287,31 @@ func _build() -> void:
 	deliveries.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	deliveries.add_theme_constant_override("separation", 8)
 	delivery_scroll.add_child(deliveries)
+	_exchange_view = VBoxContainer.new()
+	_exchange_view.add_theme_constant_override("separation", 8)
+	_exchange_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_content.add_child(_exchange_view)
+	_exchange_view.hide()
+	_exchange_heading = _label(_exchange_view, "Owned by the original gauntlet team", 19, GOLD)
+	_exchange_heading.add_theme_font_override("font", Art.title_font())
+	var exchange_rules := _label(_exchange_view, "Sale proceeds go equally to the original members' storage. To withdraw an item, request a vote. Every No blocks withdrawal; abstentions do not. Unanswered votes are ignored after 14 days.", 13, MUTED)
+	exchange_rules.size.x = 800
+	exchange_rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var exchange_scroll := ScrollContainer.new()
+	exchange_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	exchange_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_exchange_view.add_child(exchange_scroll)
+	_exchange_cards = VBoxContainer.new()
+	_exchange_cards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_exchange_cards.add_theme_constant_override("separation", 10)
+	exchange_scroll.add_child(_exchange_cards)
+	var exchange_pages := HBoxContainer.new()
+	_exchange_view.add_child(exchange_pages)
+	_exchange_previous = _button(exchange_pages, "‹ Previous", func() -> void: _exchange_page(-1))
+	_exchange_pager = _label(exchange_pages, "", 12, MUTED)
+	_exchange_pager.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_exchange_pager.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_exchange_next = _button(exchange_pages, "Next ›", func() -> void: _exchange_page(1))
 	status = _label(_content, "", 13, MUTED)
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_rule(_content)
@@ -270,7 +339,8 @@ func _build() -> void:
 	confirmation = ConfirmationDialog.new()
 	confirmation.title = "Send gauntlet loot to storage"
 	confirmation.ok_button_text = "Send to storage"
-	confirmation.confirmed.connect(func() -> void: _request("send", {}, _confirm_revision))
+	_wrap_dialog_label(confirmation.get_label(), 440)
+	confirmation.confirmed.connect(func() -> void: _request("send", {"run_id": _confirmation_run}, _confirm_revision))
 	add_child(confirmation)
 	price_dialog = ConfirmationDialog.new()
 	price_dialog.title = "Rare item value"
@@ -285,7 +355,7 @@ func _build() -> void:
 	_wrap_dialog_label(_label(price_body, "The recipient pays from storage. Everyone shares the payment, including the buyer.", 12, MUTED), 400)
 	price_dialog.confirmed.connect(func() -> void:
 		price_amount.apply()
-		_request("price", {"row_id": _priced_row.id, "price_gold": int(price_amount.value)}, _price_revision))
+		_request("price", {"run_id": _price_run, "row_id": _priced_row.id, "price_gold": int(price_amount.value)}, _price_revision))
 	sale_dialog = ConfirmationDialog.new()
 	sale_dialog.title = "Sell unwanted loot to the NPC"
 	sale_dialog.ok_button_text = "Stage NPC sale"
@@ -299,8 +369,30 @@ func _build() -> void:
 	_wrap_dialog_label(_label(sale_body, "The server sets this price. Proceeds are shared equally.\n0 cancels the sale. Items are sold only when the final delivery is confirmed.", 12, MUTED), 420)
 	sale_dialog.confirmed.connect(func() -> void:
 		sale_amount.apply()
-		_request("sell", {"row_id": _sold_row.id, "quantity": int(sale_amount.value)}, _sale_revision))
-	for dialog: ConfirmationDialog in [editor, confirmation, price_dialog, sale_dialog]:
+		_request("sell", {"run_id": _sale_run, "row_id": _sold_row.id, "quantity": int(sale_amount.value)}, _sale_revision))
+	exchange_dialog = ConfirmationDialog.new()
+	exchange_dialog.title = "List drops on the exchange"
+	exchange_dialog.ok_button_text = "Stage party listing"
+	add_child(exchange_dialog)
+	var exchange_body := VBoxContainer.new()
+	exchange_dialog.add_child(exchange_body)
+	_label(exchange_body, "Quantity · 0 cancels the staged listing", 13, GOLD)
+	exchange_amount = SpinBox.new()
+	exchange_amount.step = 1
+	exchange_body.add_child(exchange_amount)
+	_label(exchange_body, "Gold Coins per item", 13, GOLD)
+	exchange_price = SpinBox.new()
+	exchange_price.step = 1
+	exchange_price.min_value = 1
+	exchange_price.max_value = 2000000000
+	exchange_body.add_child(exchange_price)
+	exchange_amount.value_changed.connect(func(value: float) -> void: exchange_price.max_value = floori(2000000000.0 / maxf(1, value)))
+	_wrap_dialog_label(_label(exchange_body, "The original team shares sale proceeds equally. Listings remain until sold or withdrawn by a party vote. They are posted only when you confirm distribution.", 12, MUTED), 420)
+	exchange_dialog.confirmed.connect(func() -> void:
+		exchange_amount.apply()
+		exchange_price.apply()
+		_request("exchange", {"run_id": _exchange_run, "row_id": _exchange_row.id, "quantity": int(exchange_amount.value), "unit_price": int(exchange_price.value)}, _exchange_revision))
+	for dialog: ConfirmationDialog in [editor, confirmation, price_dialog, sale_dialog, exchange_dialog]:
 		_style_dialog(dialog)
 	panel.hide()
 	_layout()
@@ -357,22 +449,33 @@ func _on_state_changed(path: StringName) -> void:
 		confirmation.hide()
 		price_dialog.hide()
 		sale_dialog.hide()
+		exchange_dialog.hide()
 		portraits.clear()
 
 func apply_snapshot(state: Dictionary) -> void:
 	if state.is_empty(): return
 	var changed_run := str(_state.get("run_id", "")) != str(state.run_id)
+	if changed_run and not _state.is_empty() and panel.visible and not state.open:
+		for key: String in ["ledgers", "ledger_page", "ledger_pages"]:
+			if state.has(key): _state[key] = state[key].duplicate(true) if state[key] is Array else state[key]
+		_state["other_pending"] = true
+		_render_exchange()
+		if _pending_since == 0: status.text = "Another gauntlet ledger was updated. Choose its run above to review loot or votes."
+		return
 	if changed_run: _selected_row = ""
-	if int(state.revision) != int(_state.get("revision", -1)):
+	if changed_run or state.phase == "sent" and _state.get("phase", "") != "sent":
+		_show_exchange = state.phase == "sent" and int(state.get("exchange_total", 0)) > 0
+	if changed_run or int(state.revision) != int(_state.get("revision", -1)):
 		editor.hide()
 		confirmation.hide()
 		price_dialog.hide()
 		sale_dialog.hide()
+		exchange_dialog.hide()
 	_state = state.duplicate(true)
 	_pending_since = 0
 	set_process(false)
-	reopen.visible = not panel.visible and (state.phase != "sent" or bool(state.get("other_pending", false)))
-	reopen.text = "More reserved loot" if state.phase == "sent" else "Gauntlet loot (%d)" % int(state.total)
+	reopen.visible = not panel.visible and (state.phase != "sent" or int(state.get("exchange_total", 0)) > 0 or bool(state.get("other_pending", false)))
+	reopen.text = "Party exchange (%d)" % int(state.exchange_total) if int(state.get("exchange_total", 0)) > 0 and state.phase == "sent" else ("More reserved loot" if state.phase == "sent" else "Gauntlet loot (%d)" % int(state.total))
 	if not str(state.announcement).is_empty():
 		var key := "%s:%d" % [state.run_id, int(state.announcement_id)]
 		announcement_text.text = "RARE FOUND: %s   ·   Party notified · Held for distribution" % state.announcement
@@ -402,6 +505,12 @@ func _editable() -> bool:
 	return bool(_state.get("is_leader", false)) and _state.get("phase", "") in ["complete", "ended"] and _pending_since == 0
 
 func _render() -> void:
+	if not bool(_state.get("exchange_enabled", false)): _show_exchange = false
+	_tabs.visible = bool(_state.get("exchange_enabled", false))
+	_columns.visible = not _show_exchange
+	_exchange_view.visible = _show_exchange
+	hint.visible = not _show_exchange or not _compact_view
+	_exchange_heading.visible = not _compact_view
 	heading.text = "GAUNTLET COMPLETE" if _state.phase == "complete" else ("LOOT DELIVERED" if _state.phase == "sent" else ("GAUNTLET IN PROGRESS" if _state.phase == "active" else "GAUNTLET ENDED"))
 	route.text = str(_state.route)
 	hint.text = "All creature drops held until completion. Personal cache rewards stay with their owner."
@@ -422,6 +531,11 @@ func _render() -> void:
 	clear_button.disabled = not _editable()
 	send_button.disabled = not _editable() or not bool(_state.can_send)
 	send_button.text = "DELIVERED TO STORAGE" if _state.phase == "sent" else "CONFIRM & SEND TO STORAGE"
+	for row: Dictionary in _state.rows:
+		if int(row.get("exchange_quantity", 0)) > 0:
+			send_button.text = "DISTRIBUTION CONFIRMED" if _state.phase == "sent" else "CONFIRM DISTRIBUTION"
+			break
+	send_button.visible = not _show_exchange
 	approve_button.hide()
 	for member: Dictionary in _state.members:
 		if member.self and int(member.charge_gold) > 0 and _state.phase in ["complete", "ended"]:
@@ -445,6 +559,12 @@ func _render() -> void:
 			break
 		if not bool(member.payment_approved):
 			status.text = "%s must approve the %d GC storage payment. Rare payments and NPC proceeds are split across everyone." % [member.name, int(member.charge_gold)]
+	_render_exchange()
+	if _show_exchange:
+		heading.text = "PARTY EXCHANGE"
+		hint.text = "The original gauntlet team keeps ownership, even after the party changes."
+		status.text = "Listings stay available during a vote. Approved withdrawals return the remaining items to shared escrow."
+		approve_button.hide()
 
 func _icon(parent: Node, image_id: int, side := 38) -> TextureRect:
 	var icon := TextureRect.new()
@@ -497,7 +617,7 @@ func _item_row(row: Dictionary) -> void:
 	var surround := PanelContainer.new()
 	surround.set_meta("rare", row.rare)
 	surround.add_theme_stylebox_override("panel", _row_style(bool(row.rare), str(row.id) == _selected_row))
-	surround.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	surround.size_flags_vertical = Control.SIZE_EXPAND_FILL if _state.rows.size() >= 6 else Control.SIZE_FILL
 	_row_panels[str(row.id)] = surround
 	table.add_child(surround)
 	_surface(surround, 0.2)
@@ -537,6 +657,7 @@ func _item_row(row: Dictionary) -> void:
 	if not str(row.owner).is_empty(): _label(item_text, "Personal cache", 10, MUTED)
 	if row.source == "compensation": _label(item_text, "Gold Coins · shared equally", 10, MUTED)
 	if int(row.sell_quantity) > 0: _label(item_text, "NPC: %d → %d GC" % [int(row.sell_quantity), int(row.sale_proceeds)], 10, GREEN)
+	if int(row.get("exchange_quantity", 0)) > 0: _label(item_text, "Exchange: %d × %d GC" % [int(row.exchange_quantity), int(row.exchange_price)], 10, CYAN)
 	var total := _label(line, str(int(row.quantity)), 16, GOLD)
 	total.add_theme_font_override("font", Art.title_font())
 	total.custom_minimum_size.x = 46
@@ -577,6 +698,7 @@ func _item_row(row: Dictionary) -> void:
 		for i: int in range(_state.members.size()):
 			if row.allocations.has(str(_state.members[i].username)): recipient.select(i + 2)
 	if int(row.sell_quantity) == int(row.quantity): recipient.set_item_text(0, "NPC buyback · staged")
+	if int(row.get("exchange_quantity", 0)) == int(row.quantity): recipient.set_item_text(0, "Exchange listing · staged")
 	recipient.disabled = not _editable() or bool(row.locked) or int(row.available_quantity) == 0
 	recipient.item_selected.connect(func(index: int) -> void:
 		_select_row(str(row.id))
@@ -604,12 +726,13 @@ func _item_row(row: Dictionary) -> void:
 				var face := _portrait_box(allocation_controls, member, Vector2(32, 38))
 				allocation_controls.move_child(face, 0)
 	else:
-		var summary := _label(allocation_box, ", ".join(amounts) if not amounts.is_empty() else ("Staged for NPC sale" if int(row.sell_quantity) > 0 else "Choose a recipient"), 10, MUTED)
+		var summary := _label(allocation_box, ", ".join(amounts) if not amounts.is_empty() else ("Staged for exchange" if int(row.get("exchange_quantity", 0)) > 0 else ("Staged for NPC sale" if int(row.sell_quantity) > 0 else "Choose a recipient")), 10, MUTED)
 		summary.visible = not _compact_view
 		summary.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		summary.tooltip_text = ", ".join(amounts)
 	var quantity_text := "—"
 	if int(row.sell_quantity) == int(row.quantity): quantity_text = "NPC sale"
+	if int(row.get("exchange_quantity", 0)) == int(row.quantity): quantity_text = "Exchange"
 	if quantities.size() == 1: quantity_text = str(quantities[0])
 	elif quantities.size() > 1:
 		quantity_text = "%d each" % quantities[0] if quantities.min() == quantities.max() else "%d split" % int(row.quantity)
@@ -628,11 +751,8 @@ func _item_row(row: Dictionary) -> void:
 		value_button.custom_minimum_size.x = 66
 		value_button.tooltip_text = "%d Gold Coins per item. Paid from storage and shared equally, including the buyer." % int(row.price_gold)
 		value_button.disabled = not _editable() or int(row.available_quantity) == 0
-	if not bool(row.locked) and int(row.npc_gold) > 0:
-		var npc_button := _button(price_cell, "NPC · %d GC" % int(row.sale_proceeds) if int(row.sell_quantity) == int(row.quantity) else "NPC", func() -> void: _edit_sale(row))
-		npc_button.add_theme_font_size_override("font_size", 12)
-		npc_button.tooltip_text = "Sell unwanted items: %d GC per %d item(s). Server price." % [int(row.npc_gold), int(row.npc_bundle)]
-		npc_button.disabled = not _editable()
+	if not bool(row.locked) and (int(row.npc_gold) > 0 or bool(row.get("exchange_allowed", false))):
+		_sale_menu(price_cell, row)
 	elif not row.rare:
 		_label(price_cell, "Reserved" if not str(row.owner).is_empty() else "—", 11, MUTED)
 
@@ -709,7 +829,7 @@ func _portrait_ready(key: String, texture: Texture2D) -> void:
 				if child != target: child.queue_free()
 
 func _open() -> void:
-	_request("open", {"page": int(_state.get("page", 0))}, -1, _state.get("phase", "") != "sent")
+	_request("open", {"page": int(_state.get("page", 0)), "exchange_page": int(_state.get("exchange_page", 0)), "ledger_page": int(_state.get("ledger_page", 0))}, -1, _state.get("phase", "") != "sent" or int(_state.get("exchange_total", 0)) > 0)
 
 func close() -> void:
 	panel.hide()
@@ -718,6 +838,7 @@ func close() -> void:
 	confirmation.hide()
 	price_dialog.hide()
 	sale_dialog.hide()
+	exchange_dialog.hide()
 
 func _page(direction: int) -> void:
 	_request("open", {"page": int(_state.page) + direction})
@@ -748,6 +869,7 @@ func _process(_delta: float) -> void:
 
 func _edit_item(row: Dictionary) -> void:
 	_editing = row.duplicate(true)
+	_editor_run = str(_state.run_id)
 	_edit_revision = int(_state.revision)
 	editor_fields.clear()
 	var old := editor.get_node_or_null("AllocationFields")
@@ -790,11 +912,12 @@ func _apply_editor() -> void:
 		var field: SpinBox = editor_fields[username]
 		field.apply()
 		allocation[username] = int(field.value)
-	_request("allocate", {"row_id": _editing.id, "allocations": allocation}, _edit_revision)
+	_request("allocate", {"run_id": _editor_run, "row_id": _editing.id, "allocations": allocation}, _edit_revision)
 
 func _confirm_send() -> void:
 	if not _editable() or not bool(_state.can_send): return
 	_confirm_revision = int(_state.revision)
+	_confirmation_run = str(_state.run_id)
 	confirmation.dialog_text = "Send all %d allocated item types directly to the %d party members' personal storage?\n\nReview the storage preview before confirming. This delivery can only happen once." % [int(_state.total), _state.members.size()]
 	for member: Dictionary in _state.members:
 		if int(member.charge_gold) > 0:
@@ -803,10 +926,13 @@ func _confirm_send() -> void:
 	var npc_total := 0
 	for member: Dictionary in _state.members: npc_total += int(member.sale_share_gold)
 	if npc_total > 0: confirmation.dialog_text += "\nStaged NPC sales add %d GC, split equally across the party." % npc_total
+	if int(_state.get("exchange_plan_types", 0)) > 0:
+		confirmation.dialog_text += "\nExchange: %d item types, %d items, at the selected prices (%d GC total asking value). Future sale proceeds are shared with the original team." % [int(_state.exchange_plan_types), int(_state.exchange_plan_quantity), int(_state.exchange_plan_gold)]
 	confirmation.popup_centered(Vector2i(480, 180))
 
 func _edit_price(row: Dictionary) -> void:
 	_priced_row = row.duplicate(true)
+	_price_run = str(_state.run_id)
 	_price_revision = int(_state.revision)
 	price_dialog.title = "Rare value · " + str(row.name)
 	price_amount.max_value = floori(2000000000.0 / int(row.quantity))
@@ -815,12 +941,137 @@ func _edit_price(row: Dictionary) -> void:
 
 func _edit_sale(row: Dictionary) -> void:
 	_sold_row = row.duplicate(true)
+	_sale_run = str(_state.run_id)
 	_sale_revision = int(_state.revision)
 	sale_description.text = "%s · %d available\nNPC price: %d Gold Coins per %d item(s)" % [row.name, int(row.quantity), int(row.npc_gold), int(row.npc_bundle)]
-	sale_amount.max_value = int(row.quantity) - int(row.quantity) % int(row.npc_bundle)
+	var available := int(row.quantity) - int(row.get("exchange_quantity", 0))
+	sale_amount.max_value = available - available % int(row.npc_bundle)
 	sale_amount.step = int(row.npc_bundle)
 	sale_amount.value = int(row.sell_quantity) if int(row.sell_quantity) > 0 else int(sale_amount.max_value)
 	sale_dialog.popup_centered(Vector2i(480, 230))
+
+func _sale_menu(parent: Node, row: Dictionary) -> void:
+	var sell := MenuButton.new()
+	sell.flat = false
+	sell.text = "Exchange" if int(row.get("exchange_quantity", 0)) > 0 else ("NPC · %d GC" % int(row.sale_proceeds) if int(row.sell_quantity) == int(row.quantity) else "Sell…")
+	sell.add_theme_font_size_override("font_size", 12)
+	sell.add_theme_color_override("font_color", GOLD)
+	sell.add_theme_stylebox_override("normal", style(BRONZE, Color("0b191b"), 7))
+	sell.add_theme_stylebox_override("hover", style(CYAN, Color("173038"), 7))
+	sell.add_theme_stylebox_override("pressed", style(CYAN, Color("102228"), 7))
+	sell.custom_minimum_size.y = 34
+	sell.disabled = not _editable()
+	parent.add_child(sell)
+	var menu := sell.get_popup()
+	if int(row.npc_gold) > 0: menu.add_item("NPC buyback · %d GC / %d item(s)" % [int(row.npc_gold), int(row.npc_bundle)], 0)
+	if bool(row.get("exchange_allowed", false)): menu.add_item("List on party exchange…", 1)
+	menu.id_pressed.connect(func(id: int) -> void:
+		if id == 0: _edit_sale(row)
+		elif id == 1: _edit_exchange(row))
+	sell.tooltip_text = "Choose an NPC buyback or a party-owned exchange listing. Sales are staged until final confirmation."
+
+func _edit_exchange(row: Dictionary) -> void:
+	_exchange_row = row.duplicate(true)
+	_exchange_run = str(_state.run_id)
+	_exchange_revision = int(_state.revision)
+	exchange_dialog.title = "Party exchange · " + str(row.name)
+	exchange_amount.max_value = int(row.quantity) - int(row.sell_quantity)
+	exchange_amount.value = int(row.get("exchange_quantity", 0)) if int(row.get("exchange_quantity", 0)) > 0 else int(exchange_amount.max_value)
+	exchange_price.value = maxi(1, int(row.get("exchange_price", 0)) if int(row.get("exchange_price", 0)) > 0 else int(row.price_gold))
+	exchange_dialog.popup_centered(Vector2i(480, 300))
+
+func _ledger_page(direction: int) -> void:
+	_request("open", {"ledger_page": int(_state.get("ledger_page", 0)) + direction, "exchange_page": int(_state.get("exchange_page", 0))})
+
+func _exchange_page(direction: int) -> void:
+	_request("open", {"exchange_page": int(_state.get("exchange_page", 0)) + direction, "ledger_page": int(_state.get("ledger_page", 0))})
+
+func _render_exchange() -> void:
+	_exchange_tab.text = "Party exchange (%d)" % int(_state.get("exchange_total", 0))
+	_distribution_tab.disabled = _pending_since > 0
+	_exchange_tab.disabled = _pending_since > 0
+	_distribution_tab.add_theme_stylebox_override("normal", style(BRONZE if _show_exchange else CYAN, Color("0b191b") if _show_exchange else Color("123137"), 9))
+	_exchange_tab.add_theme_stylebox_override("normal", style(CYAN if _show_exchange else BRONZE, Color("123137") if _show_exchange else Color("0b191b"), 9))
+	_run_picker.clear()
+	_run_picker.add_item("Choose a gauntlet run…")
+	_run_picker.set_item_disabled(0, true)
+	var ledgers: Array = _state.get("ledgers", [])
+	for entry: Dictionary in ledgers:
+		var index := _run_picker.item_count
+		_run_picker.add_item("%s · %s" % [entry.route, str(entry.phase).capitalize()])
+		_run_picker.set_item_metadata(index, str(entry.run_id))
+		if entry.run_id == _state.run_id: _run_picker.select(index)
+	_run_picker.visible = ledgers.size() > 1 or int(_state.get("ledger_pages", 1)) > 1
+	_run_picker.disabled = _pending_since > 0
+	_run_previous.visible = int(_state.get("ledger_pages", 1)) > 1
+	_run_next.visible = _run_previous.visible
+	_run_previous.disabled = int(_state.get("ledger_page", 0)) == 0 or _pending_since > 0
+	_run_next.disabled = int(_state.get("ledger_page", 0)) + 1 >= int(_state.get("ledger_pages", 1)) or _pending_since > 0
+	_clear(_exchange_cards)
+	for listing: Dictionary in _state.get("exchange", []): _exchange_card(listing)
+	if _exchange_cards.get_child_count() == 0:
+		_exchange_wrap(_label(_exchange_cards, "No party listings for this run. Choose Sell… on a shared drop to stage an exchange listing.", 14, MUTED))
+	_exchange_pager.text = "%d listings · Page %d / %d" % [int(_state.get("exchange_total", 0)), int(_state.get("exchange_page", 0)) + 1, int(_state.get("exchange_pages", 1))]
+	_exchange_previous.disabled = int(_state.get("exchange_page", 0)) == 0 or _pending_since > 0
+	_exchange_next.disabled = int(_state.get("exchange_page", 0)) + 1 >= int(_state.get("exchange_pages", 1)) or _pending_since > 0
+	_exchange_previous.visible = int(_state.get("exchange_pages", 1)) > 1
+	_exchange_next.visible = _exchange_previous.visible
+
+func _exchange_wrap(label: Label) -> void:
+	label.size.x = 700
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+func _exchange_card(listing: Dictionary) -> void:
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override("panel", style(Color("34575b"), Color("071417"), 8 if _compact_view else 12))
+	_exchange_cards.add_child(card)
+	_surface(card, 0.3)
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 8)
+	card.add_child(body)
+	var title := HBoxContainer.new()
+	title.add_theme_constant_override("separation", 10)
+	body.add_child(title)
+	_icon(title, int(listing.image_id), 44)
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_child(text)
+	var item_name := _label(text, str(listing.name), 20, GOLD)
+	item_name.add_theme_font_override("font", Art.title_font())
+	item_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var details := _label(text, "Listing #%d · %d remaining · %d GC each · %s" % [int(listing.listing_id), int(listing.quantity), int(listing.price_gold), str(listing.state).capitalize()], 13, TEXT)
+	details.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if listing.state == "active" and listing.vote_state != "open":
+		var withdraw := _button(title, "Request withdrawal", func() -> void: _request("request_withdrawal", {"listing_id": int(listing.listing_id)}))
+		withdraw.disabled = _pending_since > 0
+	if not str(listing.withdrawal_run_id).is_empty():
+		_button(title, "Open returned loot", func() -> void: _request("open", {"run_id": str(listing.withdrawal_run_id)})).disabled = _pending_since > 0
+	var payouts: Array[String] = []
+	for payout: Dictionary in listing.payouts:
+		payouts.append("%s: %d GC%s" % [_member_name(str(payout.username)), int(payout.gold), " (%d pending)" % int(payout.pending_gold) if int(payout.pending_gold) > 0 else ""])
+	var proceeds := _label(body, "%d GC sold · %s" % [int(listing.gold_sold), ", ".join(payouts)] if not payouts.is_empty() else "Sale proceeds will be shared equally with the original team.", 12, CYAN)
+	_exchange_wrap(proceeds)
+	if listing.vote_state != "none":
+		_rule(body)
+		var veto := false
+		var votes: Array[String] = []
+		for voter: Dictionary in listing.votes:
+			votes.append("%s: %s" % [voter.name, "No response" if voter.vote == "none" else str(voter.vote).capitalize()])
+			if voter.vote == "no": veto = true
+		var summary := "Withdrawal %s" % str(listing.vote_state).capitalize()
+		if listing.vote_state == "open":
+			var deadline := Time.get_datetime_string_from_unix_time(int(listing.deadline)).replace("T", " ")
+			summary = ("A No vote blocks withdrawal." if veto else "Withdrawal vote is open.") + " Closes " + deadline + " UTC."
+		_exchange_wrap(_label(body, summary, 14, Color("ed9475") if veto else GOLD))
+		_exchange_wrap(_label(body, " · ".join(votes), 12, MUTED))
+		if listing.vote_state == "open" and listing.state == "active":
+			var choices := HBoxContainer.new()
+			body.add_child(choices)
+			for choice: String in ["yes", "no", "abstain"]:
+				var vote := _button(choices, choice.capitalize() + (" ✓" if listing.own_vote == choice else ""), func() -> void: _request("vote_withdrawal", {"listing_id": int(listing.listing_id), "request_id": int(listing.request_id), "vote": choice}), listing.own_vote == choice)
+				vote.custom_minimum_size.x = 110
+				vote.disabled = _pending_since > 0
+			_exchange_wrap(_label(body, "Votes can be updated until this request resolves. Any No prevents withdrawal; abstentions do not count against it.", 11, MUTED))
 
 func _approve_payment() -> void:
 	for member: Dictionary in _state.members:

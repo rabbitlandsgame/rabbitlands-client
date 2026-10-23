@@ -1,0 +1,293 @@
+{
+  "version": 1,
+  "open": true,
+  "run_id": "fixture-party-exchange",
+  "revision": 5,
+  "route": "The Resin Road",
+  "phase": "sent",
+  "reason": "Run ended early. Earned creature loot is reserved.",
+  "rows": [
+    {
+      "id": "0",
+      "name": "Wolf Fur",
+      "quantity": 20,
+      "rare": false,
+      "owner": "",
+      "allocations": {
+        "alder": 4,
+        "mira": 3,
+        "rook": 3
+      },
+      "price_gold": 0,
+      "sell_quantity": 0,
+      "sale_gold": 0,
+      "sale_bundle": 1,
+      "exchange_quantity": 10,
+      "exchange_price": 5,
+      "exchange_listing_id": 1,
+      "locked": false,
+      "source": "creature",
+      "available_quantity": 10,
+      "exchange_allowed": true,
+      "npc_gold": 1,
+      "npc_bundle": 1,
+      "sale_proceeds": 0,
+      "image_id": 13
+    },
+    {
+      "id": "1",
+      "name": "Portal Shard",
+      "quantity": 1,
+      "rare": true,
+      "owner": "",
+      "allocations": {},
+      "price_gold": 0,
+      "sell_quantity": 0,
+      "sale_gold": 0,
+      "sale_bundle": 1,
+      "exchange_quantity": 1,
+      "exchange_price": 800,
+      "exchange_listing_id": 2,
+      "locked": false,
+      "source": "creature",
+      "available_quantity": 0,
+      "exchange_allowed": true,
+      "npc_gold": 1,
+      "npc_bundle": 1,
+      "sale_proceeds": 0,
+      "image_id": 55
+    }
+  ],
+  "members": [
+    {
+      "username": "alder",
+      "name": "alder",
+      "portrait": {
+        "actor_type": 1,
+        "appearance": {
+          "skin": 1,
+          "hair": 0,
+          "shirt": 0,
+          "pants": 0,
+          "boots": 0,
+          "head": 0,
+          "eyes": 0
+        },
+        "equipment_visuals": {
+          "0": 114,
+          "1": 106,
+          "3": 134,
+          "5": 209,
+          "4": 220,
+          "6": 249,
+          "2": 105
+        }
+      },
+      "online": true,
+      "self": true,
+      "preview": [
+        {
+          "name": "Wolf Fur",
+          "quantity": 4,
+          "image_id": 13
+        }
+      ],
+      "more": 0,
+      "charge_gold": 0,
+      "rebate_gold": 0,
+      "sale_share_gold": 0,
+      "payment_approved": true,
+      "payment_ready": true
+    },
+    {
+      "username": "mira",
+      "name": "mira",
+      "portrait": {
+        "actor_type": 1,
+        "appearance": {
+          "skin": 1,
+          "hair": 0,
+          "shirt": 0,
+          "pants": 0,
+          "boots": 0,
+          "head": 0,
+          "eyes": 0
+        },
+        "equipment_visuals": {
+          "0": 114,
+          "1": 106,
+          "3": 134,
+          "5": 209,
+          "4": 220,
+          "6": 249,
+          "2": 105
+        }
+      },
+      "online": true,
+      "self": false,
+      "preview": [
+        {
+          "name": "Wolf Fur",
+          "quantity": 3,
+          "image_id": 13
+        }
+      ],
+      "more": 0,
+      "charge_gold": 0,
+      "rebate_gold": 0,
+      "sale_share_gold": 0,
+      "payment_approved": true,
+      "payment_ready": true
+    },
+    {
+      "username": "rook",
+      "name": "rook",
+      "portrait": {
+        "actor_type": 1,
+        "appearance": {
+          "skin": 1,
+          "hair": 0,
+          "shirt": 0,
+          "pants": 0,
+          "boots": 0,
+          "head": 0,
+          "eyes": 0
+        },
+        "equipment_visuals": {
+          "0": 114,
+          "1": 106,
+          "3": 134,
+          "5": 209,
+          "4": 220,
+          "6": 249,
+          "2": 105
+        }
+      },
+      "online": true,
+      "self": false,
+      "preview": [
+        {
+          "name": "Wolf Fur",
+          "quantity": 3,
+          "image_id": 13
+        }
+      ],
+      "more": 0,
+      "charge_gold": 0,
+      "rebate_gold": 0,
+      "sale_share_gold": 0,
+      "payment_approved": true,
+      "payment_ready": true
+    }
+  ],
+  "is_leader": true,
+  "leader": "alder",
+  "can_send": false,
+  "assigned": 2,
+  "total": 2,
+  "page": 0,
+  "pages": 1,
+  "exchange": [
+    {
+      "listing_id": 2,
+      "name": "Portal Shard",
+      "image_id": 55,
+      "quantity": 1,
+      "original_quantity": 1,
+      "price_gold": 800,
+      "state": "active",
+      "gold_sold": 0,
+      "withdrawal_run_id": "",
+      "request_id": 1,
+      "vote_state": "open",
+      "deadline": 1793966400,
+      "own_vote": "yes",
+      "votes": [
+        {
+          "username": "alder",
+          "name": "alder",
+          "vote": "yes"
+        },
+        {
+          "username": "mira",
+          "name": "mira",
+          "vote": "no"
+        },
+        {
+          "username": "rook",
+          "name": "rook",
+          "vote": "none"
+        }
+      ],
+      "payouts": []
+    },
+    {
+      "listing_id": 1,
+      "name": "Wolf Fur",
+      "image_id": 13,
+      "quantity": 9,
+      "original_quantity": 10,
+      "price_gold": 5,
+      "state": "active",
+      "gold_sold": 5,
+      "withdrawal_run_id": "",
+      "request_id": 0,
+      "vote_state": "none",
+      "deadline": 0,
+      "own_vote": "none",
+      "votes": [
+        {
+          "username": "alder",
+          "name": "alder",
+          "vote": "none"
+        },
+        {
+          "username": "mira",
+          "name": "mira",
+          "vote": "none"
+        },
+        {
+          "username": "rook",
+          "name": "rook",
+          "vote": "none"
+        }
+      ],
+      "payouts": [
+        {
+          "username": "alder",
+          "gold": 2,
+          "pending_gold": 0
+        },
+        {
+          "username": "mira",
+          "gold": 2,
+          "pending_gold": 0
+        },
+        {
+          "username": "rook",
+          "gold": 1,
+          "pending_gold": 0
+        }
+      ]
+    }
+  ],
+  "exchange_total": 2,
+  "exchange_page": 0,
+  "exchange_pages": 1,
+  "exchange_enabled": true,
+  "exchange_plan_types": 2,
+  "exchange_plan_quantity": 11,
+  "exchange_plan_gold": 850,
+  "ledgers": [
+    {
+      "run_id": "fixture-party-exchange",
+      "route": "The Resin Road",
+      "phase": "sent"
+    }
+  ],
+  "ledger_page": 0,
+  "ledger_pages": 1,
+  "other_pending": false,
+  "announcement": "1 Portal Shard",
+  "announcement_id": 1
+}
