@@ -27,6 +27,15 @@ func _run() -> void:
 		quit(failures)
 		return
 	await process_frame
+	# These assertions cover the original extension-window presentation. Keep
+	# HUD presets from restyling its parchment or hiding objectives and party.
+	var workspace: Control = main.get("hud_workspace")
+	workspace.set_process(false)
+	workspace.model.working.legacy = true
+	workspace.model.working.parts.objectives.enabled = true
+	workspace.model.working.parts.party.enabled = true
+	workspace.apply_layout()
+	await process_frame
 
 	# Nothing is on screen until the server sends something.
 	_expect(not windows.has_open_window(),

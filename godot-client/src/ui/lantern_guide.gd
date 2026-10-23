@@ -1,6 +1,9 @@
 extends Control
 ## This overlay teaches the existing UI. It cannot perform gameplay actions
-## or locally advance a quest; its only request is the server's skip prompt.
+## or locally advance a quest. Tracking changes only its presentation; skipping
+## or leaving still requires the server's existing prompt.
+
+signal tracking_changed()
 
 var main: Control
 var card: PanelContainer
@@ -10,7 +13,9 @@ var chapter: Label
 var collapse: Button
 var skip: Button
 var help: Button
+var untrack: Button
 var state: Dictionary = {}
+var _untracked_quests: Dictionary = {}
 var highlighted: Control
 var compact := false
 var docked := false
@@ -59,6 +64,12 @@ func configure(owner_ui: Control) -> void:
 	collapse.text = "Less"
 	collapse.pressed.connect(func(): compact = not compact; _refresh())
 	buttons.add_child(collapse)
+	untrack = Button.new()
+	untrack.name = "UntrackQuest"
+	untrack.text = "Untrack"
+	untrack.tooltip_text = "Hide this quest window. Keep your progress and choose Track in Quests to show it again."
+	untrack.pressed.connect(func(): set_quest_tracked(false))
+	buttons.add_child(untrack)
 	skip = Button.new()
 	skip.name = "SkipTutorial"
 	skip.text = "Skip tutorial…"
@@ -73,13 +84,51 @@ func configure(owner_ui: Control) -> void:
 func apply_state(value: Dictionary) -> void:
 	state = value.duplicate(true)
 	_refresh()
+	tracking_changed.emit()
+
+## Guide payload titles describe the current step; the journal uses the quest's
+## stable title. Keep the player's choice across objective and chapter updates.
+func quest_title() -> String:
+	if not bool(state.get("active", false)):
+		return ""
+	match str(state.get("tutorial", "")):
+		"signed_ashore": return "Signed Ashore"
+		"watchpost": return "Help for the Watchpost"
+		"borrowed_sky": return "The Borrowed Sky"
+		"second_bell": return "The Second Bell"
+		"followup", "field_dispatch": return str(state.get("adventure", state.get("title", "")))
+	return "The Last Lantern"
+
+func is_quest_tracked() -> bool:
+	var title := quest_title()
+	if str(state.get("tutorial", "")) == "field_dispatch":
+		return not title.is_empty()
+	return not title.is_empty() and not _untracked_quests.has(title)
+
+func set_quest_tracked(tracked: bool) -> void:
+	var title := quest_title()
+	if title.is_empty():
+		return
+	if str(state.get("tutorial", "")) == "field_dispatch":
+		# Dispatch tracking is saved by the server and also controls its marker.
+		var error := Network.send_chat("#quests track " + title if tracked else "#quests untrack")
+		if error != OK:
+			AppState.append_local_message("Could not update quest tracking. Reconnect and try again.")
+		return
+	if tracked:
+		_untracked_quests.erase(title)
+	else:
+		_untracked_quests[title] = true
+	_refresh()
+	tracking_changed.emit()
 
 func _refresh() -> void:
-	visible = AppState.authenticated and bool(state.get("active", false))
+	visible = AppState.authenticated and is_quest_tracked()
 	card.visible = visible
 	if not visible: return
 	var road := str(state.get("tutorial", "")) == "followup"
 	var field := str(state.get("tutorial", "")) == "field_dispatch"
+	skip.visible = not field
 	var sky := str(state.get("tutorial", "")) == "borrowed_sky"
 	var second_bell := str(state.get("tutorial", "")) == "second_bell"
 	# Signed Ashore is guided by Nash, so the card offers "Ask Nash";
@@ -91,8 +140,6 @@ func _refresh() -> void:
 	skip.text = "Leave tutorial…" if second_bell or sky or road else "Skip tutorial…"
 	if field:
 		help.text = "Quest help"
-		skip.text = "Stop tracking"
-		skip.tooltip_text = "Keep your progress. Open Quests and choose Track to resume this dispatch."
 	chapter.text = ("HELP FOR THE WATCHPOST" if watchpost else str(state.get("adventure", "PRACTICE")).to_upper() if road else "THE BORROWED SKY" if sky else "THE SECOND BELL" if second_bell else str(state.get("chapter", "SIGNED ASHORE")) if signed_ashore else "THE LAST LANTERN") + "  ·  %d / %d" % [int(state.get("stage", 1)), int(state.get("total", 28))]
 	heading.text = str(state.get("title", ""))
 	if field:

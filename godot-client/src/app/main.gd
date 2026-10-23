@@ -1311,7 +1311,7 @@ func _ready() -> void:
 	active_buff_bar.configure(spell_catalog)
 	extension_windows = ExtensionWindowsScript.new()
 	game_view.add_child(extension_windows)
-	extension_windows.configure(item_atlas)
+	extension_windows.configure(item_atlas, lantern_guide)
 	extension_windows.combat_hud_preference_changed.connect(_save_hud_settings)
 	invasion_assistant_window = InvasionAssistantScript.new()
 	add_child(invasion_assistant_window)
