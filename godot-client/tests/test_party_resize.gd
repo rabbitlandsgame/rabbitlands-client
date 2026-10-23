@@ -10,6 +10,7 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	root.get_node("Network").block_for_hud_preview()
 	root.size = Vector2i(1280, 720)
 	DirAccess.make_dir_recursive_absolute(settings_path.get_base_dir())
 	var config := ConfigFile.new()
@@ -19,8 +20,15 @@ func _run() -> void:
 	main.get_node("GameView/ChatWindow").set("preferences_path", settings_path)
 	root.add_child(main)
 	main.get_node("LoginPanel").hide()
+	main.get_node("LoginBackground").hide()
 	main.get_node("GameView").show()
 	root.content_scale_factor = 1.0
+	await _settle()
+	# Exercise the native roster independently of the default preset's hidden
+	# party and detailed player card. Modern HUD integration has its own test.
+	main.hud_workspace.model.working = main.hud_workspace.Presets._preset_recipe("current")
+	main.hud_workspace.apply_layout()
+	await _settle()
 	windows = main.get("extension_windows")
 	windows.set("preferences_path", settings_path)
 	windows.set("_party_numbers", false)

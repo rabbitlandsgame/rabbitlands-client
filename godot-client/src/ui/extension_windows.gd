@@ -21,6 +21,8 @@ const PANEL_SIZE := Vector2(560.0, 380.0)
 const PARTY_WIDTH := 244.0
 const PARTY_MINIMUM := Vector2(144, 108)
 const PARTY_NAMES_WIDTH := 216.0
+
+signal party_layout_saved
 const PARTY_HEALTH := Color("479947")
 const PARTY_LOW_HEALTH := Color("b74935")
 const PARTY_ETHER := Color("4287ac")
@@ -198,6 +200,8 @@ var _party_expanded_size := Vector2(PARTY_WIDTH, 0)
 var _party_resizing := false
 var _party_resize_mouse := Vector2.ZERO
 var _party_resize_size := Vector2.ZERO
+var _party_layout_queued := false
+var _party_controls_visible := true
 var preferences_path := WindowPreferences.SETTINGS_PATH
 var achievements_panel: PanelContainer
 var achievements_header: Label
@@ -1747,23 +1751,27 @@ func _layout_party() -> void:
 	var count := (AppState.party.get("members", []) as Array).size()
 	var bounds := get_viewport_rect().size
 	var dragger := party_panel.get_node("WindowDrag") as WindowDrag
-	var bottom := bounds.y - WindowDrag.RESERVED_BOTTOM_BAR
+	var bottom := bounds.y - dragger.reserved_bottom
 	if is_instance_valid(dragger.bottom_hud):
 		bottom = minf(bottom, dragger.bottom_hud.global_position.y)
-	var maximum := Vector2(maxf(PARTY_MINIMUM.x, bounds.x - 108), maxf(PARTY_MINIMUM.y, bottom - 12))
+	var scale := party_panel.get_global_transform().get_scale().abs().max(Vector2.ONE * 0.01)
+	var maximum := (Vector2(bounds.x - dragger.reserved_right - dragger.edge_margin,
+		bottom - dragger.edge_margin * 2) / scale).max(PARTY_MINIMUM)
 	_party_expanded_size.x = clampf(_party_expanded_size.x, PARTY_MINIMUM.x, maximum.x)
 	var compact := _party_expanded_size.x < PARTY_NAMES_WIDTH
 	party_header.text = "Party" if compact and count > 0 else party_header.tooltip_text
 	var row_height := 36.0
 	for row: Node in party_rows.get_children():
 		(row.get_node("Vitals/Identity") as Control).visible = not compact
-		row_height = maxf(row_height, (row as Control).get_combined_minimum_size().y)
+		if (row as Control).visible:
+			row_height = maxf(row_height, (row as Control).get_combined_minimum_size().y)
 	party_scroll.visible = not _party_collapsed and count > 0
 	party_scroll.custom_minimum_size.y = row_height
 	var body := _window_body(party_panel)
-	(body.get_node("PartyActions") as Control).visible = not _party_collapsed
+	(body.get_node("PartyActions") as Control).visible = _party_controls_visible and not _party_collapsed
 	party_leave_button.visible = count > 0
 	party_leave_button.text = "Leave" if compact else "Leave party"
+	party_add_bot.text = "+" if compact else "Add bot"
 	(body.get_node("PartyActions/PartyHint") as Control).visible = not compact
 	party_status.visible = not _party_collapsed and not party_status.text.is_empty()
 	party_collapse.text = "▸" if _party_collapsed else "▾"
@@ -1814,7 +1822,13 @@ func _on_party_option(id: int) -> void:
 	_save_party_layout()
 
 func _queue_party_layout() -> void:
-	_layout_party.call_deferred()
+	if _party_layout_queued: return
+	_party_layout_queued = true
+	get_tree().process_frame.connect(_flush_party_layout, CONNECT_ONE_SHOT)
+
+func _flush_party_layout() -> void:
+	_party_layout_queued = false
+	_layout_party()
 
 func _toggle_party_collapsed() -> void:
 	_party_collapsed = not _party_collapsed
@@ -1824,6 +1838,7 @@ func _toggle_party_collapsed() -> void:
 func _save_party_layout() -> void:
 	WindowPreferences.store_layout("party_hud", Rect2(party_panel.position, _party_expanded_size), _party_collapsed, preferences_path,
 		{"numbers": _party_numbers, "custom_size": _party_custom_size})
+	party_layout_saved.emit()
 
 ## The catalogue, one category at a time, with a bar on every line.
 ##
@@ -2318,6 +2333,7 @@ func _build() -> void:
 	party_status.add_theme_font_size_override("font_size", 11)
 	party_body.add_child(party_status)
 	party_body.move_child(party_actions, party_body.get_child_count() - 1)
+	party_panel.minimum_size_changed.connect(_queue_party_layout)
 	get_viewport().size_changed.connect(_queue_party_layout)
 	if is_instance_valid(party_dragger.bottom_hud):
 		party_dragger.bottom_hud.resized.connect(_queue_party_layout)
