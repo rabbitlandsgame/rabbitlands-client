@@ -203,6 +203,39 @@ def test_shared_storage_is_a_prerelease_and_is_never_latest(monkeypatch):
         shared.validate_release({**POOL, "draft": True})
 
 
+def test_new_shared_release_retries_listing_delay_without_recreating_it(monkeypatch):
+    calls, delays, lookups = [], [], []
+    sequence = iter([None, None, None, {**POOL, "author": {"login": "github-actions[bot]"}}])
+
+    def lookup(tag):
+        lookups.append(tag)
+        return next(sequence)
+
+    monkeypatch.setattr(release, "github_release", lookup)
+    monkeypatch.setattr(release, "gh", lambda *args: calls.append(args))
+    monkeypatch.setattr(shared.time, "sleep", delays.append)
+    assert shared.ensure("a" * 40)["id"] == POOL["id"]
+    assert len(calls) == 1 and calls[0][:3] == ("release", "create", shared.TAG)
+    assert lookups == [shared.TAG] * 4
+    assert delays == [1, 2]
+
+
+def test_new_shared_release_listing_timeout_keeps_one_destination(monkeypatch):
+    calls, lookups = [], []
+
+    def lookup(tag):
+        lookups.append(tag)
+        return None
+
+    monkeypatch.setattr(release, "github_release", lookup)
+    monkeypatch.setattr(release, "gh", lambda *args: calls.append(args))
+    monkeypatch.setattr(shared.time, "sleep", lambda delay: None)
+    with pytest.raises(ValueError, match="published prerelease"):
+        shared.ensure("a" * 40)
+    assert len(calls) == 1
+    assert lookups == [shared.TAG] * 6
+
+
 def test_linux_helper_downloads_only_the_updater_and_has_no_archive(tmp_path):
     row = {"url": shared.base(release.REPOSITORY) + "/" + shared.name("a" * 64, "updater", "x86_64"), "sha256": "a" * 64}
     script = bootstrap_script(row)

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import time
 
 TAG = "client-assets"
 NAME = re.compile(r"RabbitLands-(pkg|updater|uninstall)-([0-9a-f]{64})\.(zip\.part|exe|x86_64)")
@@ -48,7 +49,14 @@ def ensure(sha: str | None = None) -> dict:
         release.gh("release", "create", TAG, "--repo", release.REPOSITORY, "--target", sha,
                    "--prerelease", "--latest=false", "--title", "Rabbit Lands shared downloads",
                    "--notes", "Supporting files used by Rabbit Lands installers. To play, download the installer from the latest game release. This storage release is reused; it does not preserve older game versions.")
-        existing = release.github_release(TAG)
+        # A newly published release may briefly be absent from the listing.
+        # Re-read the same tag without creating another storage destination.
+        for delay in (0, 1, 2, 4, 8):
+            if delay:
+                time.sleep(delay)
+            existing = release.github_release(TAG)
+            if existing is not None:
+                break
     return validate_release(existing)
 
 
