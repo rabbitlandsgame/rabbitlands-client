@@ -3736,6 +3736,7 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	mouse_cursors.release()
 	occluder_fade.reset()
 	ReplicatedActor3D.clear_wardrobe_texture_cache()
 	NativeAnimationImporter.clear()
@@ -12680,22 +12681,27 @@ func _rebind_look_environment() -> void:
 	_apply_day_night()
 	_update_border_lighting()
 
-## Keeps a copy of develop's environment as the binder built it, with its Sky
-## taken apart (`_unlooked_sky`) so the copy costs no radiance maps. The Sky the
-## deep copy made is released before any frame is drawn, so the renderer never
-## allocates for it.
+## Keeps an independent environment snapshot without constructing a temporary
+## Sky. GLES3 keeps new skies on a renderer dirty list until its next update;
+## cloning then discarding a Sky before that update can orphan its radiance.
 func _keep_unlooked_environment(environment: Environment) -> void:
-	_unlooked_environment = environment.duplicate(true) as Environment
+	var sky: Sky = environment.sky
+	# A shallow copy initially shares Sky. Detach it from the copy before
+	# deep-copying the remaining resources; never change the live environment.
+	var without_sky := environment.duplicate(false) as Environment
+	without_sky.sky = null
+	_unlooked_environment = without_sky.duplicate(true) as Environment
 	_unlooked_sky = {}
-	var sky: Sky = _unlooked_environment.sky
 	if sky == null:
 		return
+	var kept_material: Material = null
+	if sky.sky_material != null:
+		kept_material = sky.sky_material.duplicate(true) as Material
 	_unlooked_sky = {
-		"material": sky.sky_material,
+		"material": kept_material,
 		"radiance_size": sky.radiance_size,
 		"process_mode": sky.process_mode,
 	}
-	_unlooked_environment.sky = null
 
 ## A fresh environment from develop's copy, with a new Sky assembled from the
 ## kept parts. The material is copied again because the hour recolours a

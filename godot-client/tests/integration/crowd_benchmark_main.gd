@@ -31,6 +31,7 @@ func benchmark_runtime_snapshot() -> Dictionary:
 	var flight_stats := preload("res://src/world/spell_flight_3d.gd").native_presentation_stats()
 	var impact_stats := preload("res://src/world/world_effect_3d.gd").native_presentation_stats()
 	return {
+		"clientDiagnostics": benchmark_resource_diagnostics(),
 		"effectiveSettings": {"quality": LookProfile.quality_name(LookProfile.quality()),
 			"appearance": LookProfile.mode_name(LookProfile.mode()), "bodyCap": crowd.body_cap,
 			"renderScale": main_viewport.scaling_3d_scale,
@@ -46,6 +47,21 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"preparedContent": {"active": false, "status": "not_implemented"},
 			"mapSceneCache": {"enabled": MapSceneCache.is_enabled(), "status": str(world_loader.cache_status)}},
 	}
+
+
+# Keep positions, connection/authentication fields and replay actor data out of
+# benchmark metadata. This is taken outside sampling, never in a per-frame timer.
+func benchmark_resource_diagnostics() -> Dictionary:
+	var snapshot := client_diagnostic_snapshot()
+	var result: Dictionary = {}
+	for key: String in ["surface_work", "loader_work", "streaming_work",
+			"resource_retention", "map_cache_enabled", "map_cache_status",
+			"map_load_phases_us", "chunks_resident", "chunk_resident_bytes",
+			"chunk_revision", "vram_mode", "vram_formats", "static_memory_bytes",
+			"video_memory_bytes"]:
+		if snapshot.has(key):
+			result[key] = snapshot[key]
+	return result
 
 
 func benchmark_readiness_snapshot() -> Dictionary:

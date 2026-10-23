@@ -3,6 +3,16 @@ extends SceneTree
 ## answers the way the legacy client's check_cursor_change does for every
 ## interaction this client carries.
 
+class CursorSpy:
+	extends MouseCursors
+	var calls: Array[Dictionary] = []
+
+	func _set_custom_cursor(texture: Texture2D, shape: int,
+			hotspot: Vector2 = Vector2.ZERO) -> void:
+		# Record ownership operations without installing a platform cursor or
+		# retaining the texture that the release test expects to drop.
+		calls.append({"installed": texture != null, "shape": shape, "hotspot": hotspot})
+
 var failures: int = 0
 
 func _init() -> void:
@@ -10,6 +20,7 @@ func _init() -> void:
 
 func _run() -> void:
 	_check_library()
+	_check_release_ownership()
 	_check_decision_table()
 	await _check_wiring()
 	if failures == 0:
@@ -36,6 +47,53 @@ func _check_library() -> void:
 			and hotspot.x < 32.0 and hotspot.y < 32.0,
 			"cursor %d hotspot sits inside its 32x32 glyph" % cursor_id)
 	_expect(cursors.current() == -1, "no cursor is applied before apply()")
+
+func _loaded_spy() -> CursorSpy:
+	var cursors := CursorSpy.new()
+	for cursor_id: int in range(MouseCursors.CURSOR_COUNT):
+		cursors._textures.append(ImageTexture.new())
+		cursors._hotspots.append(Vector2.ZERO)
+		cursors._names.append(str(cursor_id))
+	return cursors
+
+func _check_release_ownership() -> void:
+	var first := _loaded_spy()
+	var second := _loaded_spy()
+	first.apply(MouseCursors.ARROW)
+	first.install_text_caret()
+	second.apply(MouseCursors.ARROW)
+	first.release()
+	_expect(first.calls.size() == 3 and first.calls[2] == {
+		"installed": false, "shape": Input.CURSOR_IBEAM, "hotspot": Vector2.ZERO},
+		"release resets only the platform slot this manager still owns")
+	_expect(not first.loaded() and first.current() == -1,
+		"release drops glyphs and resets the selected cursor")
+	first.release()
+	_expect(first.calls.size() == 3, "repeated release is harmless")
+	_expect(second._owns_slot(Input.CURSOR_ARROW),
+		"an old manager does not unregister a newer manager's arrow")
+	var third := _loaded_spy()
+	third.apply(MouseCursors.ATTACK)
+	second.apply(MouseCursors.ARROW)
+	_expect(second.calls.size() == 2 and second._owns_slot(Input.CURSOR_ARROW),
+		"the same cursor id reclaims an arrow taken by another manager")
+	third.release()
+	_expect(third.calls.size() == 1,
+		"a displaced manager cannot clear the reclaimed arrow")
+	second.release()
+	_expect(second.calls.size() == 3 and not second.calls[2].installed,
+		"the current owner releases its platform reference")
+	var reconfigured := _loaded_spy()
+	reconfigured.apply(MouseCursors.ARROW)
+	reconfigured.install_text_caret()
+	_expect(reconfigured.configure("res://assets/ui/cursors/cursors.json"),
+		"a previously installed cursor library can be reconfigured")
+	_expect(reconfigured.calls.size() == 4 and not reconfigured.calls[2].installed
+		and not reconfigured.calls[3].installed,
+		"reconfiguration releases both owned platform slots first")
+	_expect(reconfigured.loaded() and reconfigured.current() == -1,
+		"reconfiguration loads fresh glyphs without selecting one")
+	reconfigured.release()
 
 func _check_decision_table() -> void:
 	# Away from the world - a window, the HUD, the login screen - the pointer
@@ -145,6 +203,8 @@ func _check_wiring() -> void:
 		"before login the pointer context is empty, which the table answers with the arrow")
 	main.queue_free()
 	await process_frame
+	_expect(not cursors.loaded() and cursors.current() == -1,
+		"Main releases platform cursors before leaving the tree")
 
 func _choice(context: Dictionary, wanted: int, label: String) -> void:
 	var got: int = MouseCursors.choose(context)

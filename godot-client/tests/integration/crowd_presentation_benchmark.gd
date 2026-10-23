@@ -1353,6 +1353,7 @@ func _record_effective_runtime() -> void:
 	var runtime := _main.call("benchmark_runtime_snapshot") as Dictionary
 	_report["effectiveSettings"] = runtime.get("effectiveSettings", {})
 	_report["activeBackends"] = runtime.get("activeBackends", {})
+	_report["clientDiagnostics"] = runtime.get("clientDiagnostics", {})
 	_report["viewport"] = [root.size.x, root.size.y]
 
 
