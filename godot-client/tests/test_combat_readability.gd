@@ -174,11 +174,39 @@ func target_checks(main: Node, player: ReplicatedActor3D, wolf: ReplicatedActor3
 	main.call("_sync_overhead_health")
 	expect(marked(other) and not marked(wolf), "clearing ranged aim restores the melee target")
 	other.play_action(&"death", true)
+	expect(not marked(other) and not other.get_node("SelectionRing").visible,
+		"death immediately removes both circles while the body remains")
+	expect(other.visible and not other.corpse_faded(), "removing target circles preserves the lingering corpse")
 	main.call("_sync_overhead_health")
+	main.call("_sync_selection")
 	expect(not marked(other), "death clears the cue even before delayed combat cleanup")
+	expect(not other.get_node("SelectionRing").visible, "stale combat and selection updates cannot mark the corpse")
+	other.set_drawn(false)
+	other.set_drawn(true)
+	expect(not marked(other) and not other.get_node("SelectionRing").visible,
+		"returning a corpse to draw range keeps both circles hidden")
 	state.set("combat_state", {"active": false, "target_id": -1})
 	main.call("_on_state_changed", &"combat_state")
 	expect(not marked(other) and not marked(wolf), "combat end clears both cues")
+	expect(not other.get_node("SelectionRing").visible, "combat cleanup cannot restore a corpse's tentative circle")
+	var deferred := ReplicatedActor3D.new()
+	other.get_parent().add_child(deferred)
+	expect(deferred.configure({"actor_id": 4, "kind": ReplicatedActor3D.CREATURE_ACTOR_KIND,
+		"x": 0, "y": 0, "rotation": 0, "health": 100, "max_health": 100},
+		adapter, {}, {}, {}, false).is_empty(), "deferred target configures without an animation player")
+	deferred.set_selected(true)
+	deferred.set_combat_target(true)
+	deferred.apply_server_state({"x": 0, "y": 0, "rotation": 0, "health": 0, "alive": false}, adapter)
+	expect(not marked(deferred) and not deferred.get_node("SelectionRing").visible,
+		"a death snapshot clears both circles even without a death animation")
+	deferred.set_selected(true)
+	deferred.set_combat_target(true)
+	expect(not marked(deferred) and not deferred.get_node("SelectionRing").visible,
+		"deferred corpses also ignore delayed target updates")
+	deferred.apply_server_state({"x": 0, "y": 0, "rotation": 0, "health": 100, "alive": true}, adapter)
+	expect(deferred.get_node("SelectionRing").visible and not marked(deferred),
+		"authoritative revival restores selection without restoring the old attack circle")
+	deferred.free()
 
 func bone_rotations(actor: ReplicatedActor3D) -> Array[Quaternion]:
 	var values: Array[Quaternion] = []
