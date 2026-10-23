@@ -51,6 +51,7 @@ const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
 const BINDABLE := {
 	"Movement": ["move_north", "move_south", "move_west", "move_east",
 		"turn_left", "turn_right"],
+	"Camera": ["camera_rotate_left", "camera_rotate_right", "camera_tilt_up", "camera_tilt_down"],
 	"Windows": ["toggle_inventory", "toggle_map", "toggle_minimap",
 		"toggle_console", "toggle_encyclopedia", "chat_focus",
 		"toggle_spells", "toggle_summoning", "toggle_manufacture",
@@ -733,6 +734,16 @@ func _refresh_map_cache() -> void:
 func _build_camera() -> void:
 	var page := _new_page("Camera", tr("ELORIA_SETTINGS_CAMERA"))
 	_add_slider(page, "rotation_sensitivity", tr("ELORIA_SETTINGS_ROTATION"), 0.05, 1.0, 0.25)
+	_add_number(page, "keyboard_speed", "Keyboard camera speed",
+		IsometricCameraController.KEYBOARD_SPEED_MIN, IsometricCameraController.KEYBOARD_SPEED_MAX,
+		IsometricCameraController.KEYBOARD_SPEED_DEFAULT, 5.0)
+	var speed := page.find_child("keyboard_speed", true, false) as SpinBox
+	speed.suffix = "°/s"
+	speed.tooltip_text = "Rotation and tilt speed while holding a camera key."
+	var hint := Label.new()
+	hint.text = "Hold Left/Right to rotate around your player and Up/Down to tilt the view. Change these keys in Controls > Camera."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(hint)
 
 func _add_banner_color_controls() -> void:
 	var page := page_body("Banners")

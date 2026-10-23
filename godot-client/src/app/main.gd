@@ -1767,6 +1767,7 @@ func _process(delta: float) -> void:
 		_update_map_viewports()
 		_update_local_actor_follow()
 		_update_character_intro(delta)
+		_update_keyboard_camera(delta)
 		_update_attached_map_markers()
 		var trail_actor: Variant = actor_nodes.get(AppState.local_actor_id)
 		if is_instance_valid(trail_actor):
@@ -1882,6 +1883,24 @@ func _text_entry_active() -> bool:
 func _world_input_blocked() -> bool:
 	return character_intro.blocks_input() or arrival_curtain.blocks_input() \
 		or (hud_workspace != null and hud_workspace.is_open())
+
+const CAMERA_ACTIONS := ["camera_rotate_left", "camera_rotate_right", "camera_tilt_up", "camera_tilt_down"]
+
+func _keyboard_camera_allowed() -> bool:
+	return _ring_allowed() and get_viewport().gui_get_focus_owner() == null \
+		and not (spell_wheel != null and spell_wheel.visible) \
+		and not (technique_ring != null and technique_ring.visible) \
+		and not (leaderboards_window != null and leaderboards_window.is_open()) \
+		and not (_actor_hud_menu != null and _actor_hud_menu.visible)
+
+func _update_keyboard_camera(delta: float) -> void:
+	if not _keyboard_camera_allowed():
+		return
+	# Exact modifiers let a rebound Ctrl/Alt/Shift key coexist with its bare key.
+	var axes := Vector2(
+		float(Input.is_action_pressed("camera_rotate_right", true)) - float(Input.is_action_pressed("camera_rotate_left", true)),
+		float(Input.is_action_pressed("camera_tilt_up", true)) - float(Input.is_action_pressed("camera_tilt_down", true)))
+	camera_rig.handle_keyboard(axes, delta)
 
 func _update_keyboard_movement() -> void:
 	if _world_input_blocked():
@@ -2939,6 +2958,7 @@ func _refresh_unified_settings() -> void:
 		"nameplates": _nameplates_enabled, "rotation_sensitivity": camera_rig.rotation_sensitivity,
 		"render_scale": _render_scale, "map_texture_quality": _map_texture_quality,
 		"renderer": _renderer_preference, "decorative_grass": GraphicsOptions.decorative_grass,
+		"keyboard_speed": camera_rig.keyboard_speed,
 		"start_backdrop": start_screen_backdrop.selected_id,
 		"start_animated": start_screen_backdrop.animation_enabled,
 		"invasion_assistant_scale": invasion_assistant_window._preferred_scale,
@@ -4053,6 +4073,13 @@ func _input(event: InputEvent) -> void:
 		if spell_wheel.visible: return
 	if window_stack != null:
 		window_stack.handle_pointer(event)
+	# Camera arrows belong to the world before GUI navigation can focus a button.
+	# Consume repeats too; motion itself is sampled once per frame below.
+	if event is InputEventKey and _keyboard_camera_allowed():
+		for action: String in CAMERA_ACTIONS:
+			if event.is_action(action, true):
+				get_viewport().set_input_as_handled()
+				return
 	if event is InputEventKey and (event as InputEventKey).echo:
 		return
 	_track_attack_modifier(event)
@@ -4111,6 +4138,8 @@ func _notification(what: int) -> void:
 		_cancel_full_map_drag()
 		if is_instance_valid(camera_rig):
 			camera_rig.cancel_rotation()
+		for action: String in CAMERA_ACTIONS:
+			Input.action_release(action)
 
 ## Bindings that have to beat a focused HUD control, which is why they are
 ## resolved here instead of in _unhandled_input().
@@ -8759,6 +8788,8 @@ func _load_hud_settings() -> void:
 			"graphics", "swaying_capes", SettingsWindowScript.SWAYING_CAPES_DEFAULT))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
+		camera_rig.keyboard_speed = float(config.get_value(
+			"camera", "keyboard_speed", IsometricCameraController.KEYBOARD_SPEED_DEFAULT))
 		# keys.ini holds the bindings now. The settings file's old copy is read
 		# only when there is no keys.ini yet, to carry a player's keys over.
 		var stored_bindings: Variant = config.get_value("controls", "bindings", {})
@@ -8922,6 +8953,7 @@ func _save_hud_settings() -> void:
 	config.set_value("hud", "spell_quickbar", casting_bar.hud_layout())
 	config.set_value("camera", "rotation_sensitivity",
 		float(camera_rig.rotation_sensitivity))
+	config.set_value("camera", "keyboard_speed", camera_rig.keyboard_speed)
 	config.set_value("console", "marks", console_commands.marks)
 	config.set_value("console", "ignored", console_commands.ignored)
 	config.set_value("console", "filters", console_commands.filters)
@@ -13162,6 +13194,8 @@ func _on_client_setting_changed(section: String, key: String,
 			extension_windows.call("set_combat_hud_enabled", bool(value))
 		"rotation_sensitivity":
 			camera_rig.rotation_sensitivity = float(value)
+		"keyboard_speed":
+			camera_rig.keyboard_speed = float(value)
 		"target_mode_strong":
 			Network.send_chat("#targetmode strong")
 		"target_mode_weak":
